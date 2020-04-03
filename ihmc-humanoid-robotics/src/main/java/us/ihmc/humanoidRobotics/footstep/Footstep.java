@@ -514,42 +514,42 @@ public class Footstep implements Settable<Footstep>
 
    public void getAnklePose(FramePose3D poseToPack, RigidBodyTransform transformFromAnkleToSole)
    {
-      tempTransform.setRotation(footstepPose.getOrientation());
-      tempTransform.setTranslation(footstepPose.getPosition());
+      tempTransform.getRotation().set(footstepPose.getOrientation());
+      tempTransform.getTranslation().set(footstepPose.getPosition());
       tempTransform.multiply(transformFromAnkleToSole);
       poseToPack.setIncludingFrame(footstepPose.getReferenceFrame(), tempTransform);
    }
 
    public void getAnklePosition(FramePoint3D positionToPack, RigidBodyTransform transformFromAnkleToSole)
    {
-      tempTransform.setRotation(footstepPose.getOrientation());
-      tempTransform.setTranslation(footstepPose.getPosition());
+      tempTransform.getRotation().set(footstepPose.getOrientation());
+      tempTransform.getTranslation().set(footstepPose.getPosition());
       tempTransform.multiply(transformFromAnkleToSole);
-      positionToPack.setIncludingFrame(footstepPose.getReferenceFrame(), tempTransform.getTranslationVector());
+      positionToPack.setIncludingFrame(footstepPose.getReferenceFrame(), tempTransform.getTranslation());
    }
 
    public void getAnklePosition2d(FramePoint2D position2dToPack, RigidBodyTransform transformFromAnkleToSole)
    {
-      tempTransform.setRotation(footstepPose.getOrientation());
-      tempTransform.setTranslation(footstepPose.getPosition());
+      tempTransform.getRotation().set(footstepPose.getOrientation());
+      tempTransform.getTranslation().set(footstepPose.getPosition());
       tempTransform.multiply(transformFromAnkleToSole);
-      double x = tempTransform.getTranslationVector().getX();
-      double y = tempTransform.getTranslationVector().getY();
+      double x = tempTransform.getTranslation().getX();
+      double y = tempTransform.getTranslation().getY();
       position2dToPack.setIncludingFrame(footstepPose.getReferenceFrame(), x, y);
    }
 
    public void getAnkleOrientation(FrameQuaternion orientationToPack, RigidBodyTransform transformFromAnkleToSole)
    {
-      tempTransform.setRotation(footstepPose.getOrientation());
-      tempTransform.setTranslation(footstepPose.getPosition());
+      tempTransform.getRotation().set(footstepPose.getOrientation());
+      tempTransform.getTranslation().set(footstepPose.getPosition());
       tempTransform.multiply(transformFromAnkleToSole);
-      orientationToPack.setIncludingFrame(footstepPose.getReferenceFrame(), tempTransform.getRotationMatrix());
+      orientationToPack.setIncludingFrame(footstepPose.getReferenceFrame(), tempTransform.getRotation());
    }
 
    public void setFromAnklePose(FramePose3DReadOnly anklePose, RigidBodyTransform transformFromAnkleToSole)
    {
-      tempTransform.setRotation(anklePose.getOrientation());
-      tempTransform.setTranslation(anklePose.getPosition());
+      tempTransform.getRotation().set(anklePose.getOrientation());
+      tempTransform.getTranslation().set(anklePose.getPosition());
       tempTransform.multiplyInvertOther(transformFromAnkleToSole);
       footstepPose.setIncludingFrame(anklePose.getReferenceFrame(), tempTransform);
    }

@@ -217,9 +217,9 @@ public class FiducialDetectorFromCameraImages
       synchronized (expectedFiducialSizeChangedConch)
       {
 
-         cameraRigidTransform.setRotation(cameraOrientationInWorldXForward);
+         cameraRigidTransform.getRotation().set(cameraOrientationInWorldXForward);
          cameraRigidPosition.set(cameraPositionInWorld);
-         cameraRigidTransform.setTranslation(cameraRigidPosition);
+         cameraRigidTransform.getTranslation().set(cameraRigidPosition);
 
          cameraReferenceFrame.update();
          detectorReferenceFrame.update();

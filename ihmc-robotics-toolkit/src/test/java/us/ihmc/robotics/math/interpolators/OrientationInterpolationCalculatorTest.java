@@ -58,12 +58,12 @@ public class OrientationInterpolationCalculatorTest
 
          Matrix3D interpolatedOrientationMatrixDot = new Matrix3D();
          RigidBodyTransform transformationAtDt = new RigidBodyTransform();
-         transformationAtDt.setRotation(interpolatedOrientationDt);
+         transformationAtDt.getRotation().set(interpolatedOrientationDt);
          transformationAtDt.getRotation(interpolatedOrientationMatrixDot);
          RotationMatrix interpolatedOrientation0Matrix = new RotationMatrix();
          RigidBodyTransform transformationAt0 = new RigidBodyTransform();
-         transformationAt0.setRotation(interpolatedOrientation0);
-         transformationAt0.getRotation(interpolatedOrientation0Matrix);
+         transformationAt0.getRotation().set(interpolatedOrientation0);
+         interpolatedOrientation0Matrix.set(transformationAt0.getRotation());
          interpolatedOrientationMatrixDot.sub(interpolatedOrientation0Matrix);
          interpolatedOrientationMatrixDot.scale(1.0 / dt);
 

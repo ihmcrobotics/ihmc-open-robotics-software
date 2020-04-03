@@ -266,7 +266,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       RobotQuadrant smallSideQuadrant = RobotQuadrant.getQuadrant(bigEnd, smallSide);
 
       double nominalYaw = getNominalYawForStance(contactState, solePositions);
-      nominalOrientation.setToYawQuaternion(nominalYaw);
+      nominalOrientation.setToYawOrientation(nominalYaw);
 
       smallSideContact.setIncludingFrame(solePositions.get(smallSideQuadrant));
       smallEndContact.setIncludingFrame(solePositions.get(smallEndQuadrant));
@@ -348,7 +348,7 @@ public class QuadrupedPiecewiseConstantCopTrajectory
       double averageLength = 0.0;
       double averageWidth = 0.0;
       double nominalYaw = getNominalYawForStance(contactState, solePositions);
-      nominalOrientation.setToYawQuaternion(nominalYaw);
+      nominalOrientation.setToYawOrientation(nominalYaw);
 
       for (int i = 0; i < nextSteps.size(); i++)
       {

@@ -194,8 +194,8 @@ public class NewPelvisPoseHistoryCorrectionTest
 
    private void putPelvisWaypointInTransformBuffer(RigidBodyTransform pelvisTransformInWorldFrame, long timeStamp, Vector3D translation, Quaternion rotation)
    {
-      pelvisTransformInWorldFrame.setTranslation(translation);
-      pelvisTransformInWorldFrame.setRotation(rotation);
+      pelvisTransformInWorldFrame.getTranslation().set(translation);
+      pelvisTransformInWorldFrame.getRotation().set(rotation);
       pelvisWaypointsTransformPoseBufferInWorldFrame.put(pelvisTransformInWorldFrame, timeStamp);
    }
 
@@ -231,8 +231,8 @@ public class NewPelvisPoseHistoryCorrectionTest
       pelvisWaypointsTransformPoseBufferInWorldFrame.findTransform(timeStamp, pelvisTransformAtSpecificTimeStamp);
       pelvisTransformAtSpecificTimeStamp_Translation.set(pelvisTransformAtSpecificTimeStamp.getTransform3D());
       pelvisTransformAtSpecificTimeStamp_Rotation.set(pelvisTransformAtSpecificTimeStamp_Translation);
-      pelvisTransformAtSpecificTimeStamp_Translation.setRotationToZero();
-      pelvisTransformAtSpecificTimeStamp_Rotation.setTranslationToZero();
+      pelvisTransformAtSpecificTimeStamp_Translation.getRotation().setToZero();
+      pelvisTransformAtSpecificTimeStamp_Rotation.getTranslation().setToZero();
 
       smallOffsetsTransform_Translation.setTranslationAndIdentityRotation(translationOffset);
       smallOffsetsTransform_Rotation.setRotationAndZeroTranslation(rotationOffset);
@@ -286,9 +286,9 @@ public class NewPelvisPoseHistoryCorrectionTest
          sixDofPelvisJoint.setJointConfiguration(pelvisTimeStampedTransform3D.getTransform3D());
          sixDofPelvisJoint.updateFramesRecursively();
          pelvisBeforeCorrection_Translation.set(pelvisTimeStampedTransform3D.getTransform3D());
-         pelvisBeforeCorrection_Translation.setRotationToZero();
+         pelvisBeforeCorrection_Translation.getRotation().setToZero();
          pelvisBeforeCorrection_Rotation.set(pelvisTimeStampedTransform3D.getTransform3D());
-         pelvisBeforeCorrection_Rotation.setTranslationToZero();
+         pelvisBeforeCorrection_Rotation.getTranslation().setToZero();
 
          pelvisCorrector.doControl(timeStamp);
          sixDofPelvisJoint.getJointConfiguration(pelvisAfterCorrection);
@@ -313,7 +313,7 @@ public class NewPelvisPoseHistoryCorrectionTest
                icpOffsetsTransformPoseBuffer.findTransform(timeStamp - 2000, temporaryTimeStampedTransform);
 
                RigidBodyTransform temporaryTransform = new RigidBodyTransform(temporaryTimeStampedTransform.getTransform3D());
-               temporaryTransform.setRotationToZero(); //here we can do that because rotation correction is deactivated by default. This will need to be updated if we activate rotation correction
+               temporaryTransform.getRotation().setToZero(); //here we can do that because rotation correction is deactivated by default. This will need to be updated if we activate rotation correction
 
                pelvisExpectedCorrection.setIdentity();
                pelvisExpectedCorrection.multiply(pelvisBeforeCorrection_Translation);

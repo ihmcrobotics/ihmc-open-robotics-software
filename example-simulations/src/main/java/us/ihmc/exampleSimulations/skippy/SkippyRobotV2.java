@@ -104,7 +104,7 @@ public class SkippyRobotV2 extends Robot
       jointMap.put(SkippyJoint.HIP_PITCH, idHipJoint);
 
       RigidBodyTransform legToFoot = new RigidBodyTransform();
-      legToFoot.setTranslation(0.0, 0.0, -LEG_LENGTH / 2.0);
+      legToFoot.getTranslation().set(0.0, 0.0, -LEG_LENGTH / 2.0);
       footReferenceFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("footFrame", leg.getBodyFixedFrame(), legToFoot);
 
       RevoluteJoint idShoulderJoint = new RevoluteJoint("idShoulderJoint", torso, new Vector3D(0.0, 0.0, TORSO_LENGTH / 2.0), new Vector3D(0.0, 1.0, 0.0));
@@ -115,11 +115,11 @@ public class SkippyRobotV2 extends Robot
 
       //One end effector at each shoulder extremity
       RigidBodyTransform leftShoulder = new RigidBodyTransform();
-      leftShoulder.setTranslation(-SHOULDER_LENGTH / 2.0, 0.0, 0.0);
+      leftShoulder.getTranslation().set(-SHOULDER_LENGTH / 2.0, 0.0, 0.0);
       leftShoulderFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("leftShoulderFrame", shoulder.getBodyFixedFrame(), leftShoulder);
 
       RigidBodyTransform rightShoulder = new RigidBodyTransform();
-      rightShoulder.setTranslation(SHOULDER_LENGTH / 2.0, 0.0, 0.0);
+      rightShoulder.getTranslation().set(SHOULDER_LENGTH / 2.0, 0.0, 0.0);
       rightShoulderFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("rightShoulderFrame", shoulder.getBodyFixedFrame(), rightShoulder);
 
       // --- scs robot ---
@@ -251,7 +251,7 @@ public class SkippyRobotV2 extends Robot
       // update root joint position
       RigidBodyTransform rootJointTransform = new RigidBodyTransform();
       scsRootJoint.getTransformToWorld(rootJointTransform);
-      rootJointTransform.normalizeRotationPart();
+      rootJointTransform.getRotation().normalize();
       rootJoint.setJointConfiguration(rootJointTransform);
 
       // update root joint velocity

@@ -207,9 +207,9 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
       {
          DenseMatrix64F pixelToNorm = computePixelToNorm(bufferedImage);
 
-         cameraRigidTransform.setRotation(cameraOrientationInWorldXForward);
+         cameraRigidTransform.getRotation().set(cameraOrientationInWorldXForward);
          cameraRigidPosition.set(cameraPositionInWorld);
-         cameraRigidTransform.setTranslation(cameraRigidPosition);
+         cameraRigidTransform.getTranslation().set(cameraRigidPosition);
 
          cameraReferenceFrame.update();
          detectorReferenceFrame.update();

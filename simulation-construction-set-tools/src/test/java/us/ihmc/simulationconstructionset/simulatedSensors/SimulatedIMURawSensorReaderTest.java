@@ -65,8 +65,8 @@ public class SimulatedIMURawSensorReaderTest
    @BeforeEach
    public void setUp() throws Exception
    {
-      transformIMUToJoint.setRotation(jointToIMURotation);
-      transformIMUToJoint.setTranslation(jointToIMUOffset);
+      transformIMUToJoint.getRotation().set(jointToIMURotation);
+      transformIMUToJoint.getTranslation().set(jointToIMUOffset);
       transformJointToIMU.setAndInvert(transformIMUToJoint);
 
       imuFrame = fullRobotModel.createOffsetFrame(fullRobotModel.getBodyLink().getParentJoint(), transformIMUToJoint, "imuFrame");
@@ -144,8 +144,8 @@ public class SimulatedIMURawSensorReaderTest
    {
       RotationMatrix randomTransformBodyToWorldMatrix = new RotationMatrix();
       RotationMatrix transformIMUToJointMatrix = new RotationMatrix();
-      randomTransformBodyToWorld.getRotation(randomTransformBodyToWorldMatrix);
-      transformIMUToJoint.getRotation(transformIMUToJointMatrix);
+      randomTransformBodyToWorldMatrix.set(randomTransformBodyToWorld.getRotation());
+      transformIMUToJointMatrix.set(transformIMUToJoint.getRotation());
 
       expectedIMUOrientation.set(randomTransformBodyToWorldMatrix);
       expectedIMUOrientation.multiply(transformIMUToJointMatrix);

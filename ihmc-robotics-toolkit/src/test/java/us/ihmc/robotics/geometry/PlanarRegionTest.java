@@ -84,7 +84,7 @@ public class PlanarRegionTest
       polygonsRegion2.add(polygon22);
 
       RigidBodyTransform transform2 = new RigidBodyTransform();
-      transform2.setTranslation(0.5, 0.0, 0.0);
+      transform2.getTranslation().set(0.5, 0.0, 0.0);
       transform2.appendYawRotation(-Math.PI / 4.0);
       transform2.appendRollRotation(Math.PI / 2.0);
       PlanarRegion region2 = new PlanarRegion(transform2, polygonsRegion2);
@@ -558,7 +558,7 @@ public class PlanarRegionTest
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotationEulerAndZeroTranslation(0.1, 0.2, 0.3);
-      transform.setTranslation(1.2, 3.4, 5.6);
+      transform.getTranslation().set(1.2, 3.4, 5.6);
 
       ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
       convexPolygon.addVertex(0.2, 0.2);
@@ -578,7 +578,7 @@ public class PlanarRegionTest
 
       RigidBodyTransform snappingTransform = new RigidBodyTransform();
       snappingTransform.setRotationEulerAndZeroTranslation(0.1, 0.2, 0.3);
-      snappingTransform.setTranslation(1.2, 3.4, 5.6);
+      snappingTransform.getTranslation().set(1.2, 3.4, 5.6);
 
       double intersectionArea = planarRegion.getPolygonIntersectionAreaWhenSnapped(polygonToSnap, snappingTransform);
       assertEquals(0.04, intersectionArea, 1e-7);
@@ -811,7 +811,7 @@ public class PlanarRegionTest
 
       assertEquals(0.0, planeZGivenXY, 1e-7);
 
-      transformToWorld.setTranslation(1.0, 2.0, 3.0);
+      transformToWorld.getTranslation().set(1.0, 2.0, 3.0);
       planarRegion = new PlanarRegion(transformToWorld, polygonList);
       planeZGivenXY = planarRegion.getPlaneZGivenXY(xWorld, yWorld);
 

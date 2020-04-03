@@ -274,7 +274,7 @@ public class FootstepNodeCheckerTest
       // too high step
       FootstepNode node1 = new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT);
       RigidBodyTransform snapTransform1 = new RigidBodyTransform();
-      snapTransform1.setTranslationZ(parameters.getMaximumStepZ() + 1.0e-10);
+      snapTransform1.getTranslation().setZ(parameters.getMaximumStepZ() + 1.0e-10);
       snapper.addSnapData(node0, new FootstepNodeSnapData(snapTransform0));
       snapper.addSnapData(node1, new FootstepNodeSnapData(snapTransform1));
       Assert.assertFalse(checker.isNodeValid(node0, node1));
@@ -283,7 +283,7 @@ public class FootstepNodeCheckerTest
       // if we add different step-up vs step-down heights this will need to be adjusted
       FootstepNode node2 = new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT);
       RigidBodyTransform snapTransform2 = new RigidBodyTransform();
-      snapTransform2.setTranslationZ(-parameters.getMaximumStepZ() - 1.0e-10);
+      snapTransform2.getTranslation().setZ(-parameters.getMaximumStepZ() - 1.0e-10);
       snapper.addSnapData(node2, new FootstepNodeSnapData(snapTransform2));
       Assert.assertFalse(checker.isNodeValid(node0, node2));
 
@@ -365,9 +365,9 @@ public class FootstepNodeCheckerTest
       RigidBodyTransform t2 = new RigidBodyTransform();
       RigidBodyTransform t3 = new RigidBodyTransform();
 
-      t1.setTranslation(0.0, 0.0, 0.102);
-      t2.setTranslation(0.0, 0.0, 0.193);
-      t3.setTranslation(0.0, 0.0, 0.193);
+      t1.getTranslation().set(0.0, 0.0, 0.102);
+      t2.getTranslation().set(0.0, 0.0, 0.193);
+      t3.getTranslation().set(0.0, 0.0, 0.193);
 
       snapper.addSnapData(node1, new FootstepNodeSnapData(t1, footPolygons.get(RobotSide.LEFT)));
       snapper.addSnapData(node2, new FootstepNodeSnapData(t2, footPolygons.get(RobotSide.RIGHT)));
@@ -522,7 +522,7 @@ public class FootstepNodeCheckerTest
          QuaternionReadOnly orientation3DReadOnly = EuclidCoreRandomTools.nextQuaternion(random);
 
          transformToWorld.setIdentity();
-         transformToWorld.setRotation(orientation3DReadOnly);
+         transformToWorld.getRotation().set(orientation3DReadOnly);
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
          snapper.setPlanarRegions(planarRegionsList);

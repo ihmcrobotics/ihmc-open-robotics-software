@@ -185,7 +185,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       RotationMatrix rotationMatrix = new RotationMatrix(steeringWheelPoseInWorld.getOrientation());
       steeringWheelLinkGraphics.rotate(rotationMatrix);
       RigidBodyTransform rotationTransform = new RigidBodyTransform();
-      rotationTransform.setRotation(rotationMatrix);
+      rotationTransform.getRotation().set(rotationMatrix);
 
       //Creating the physical link for the simulation
       steeringWheelLink = new Link("steerinWheelLink");
@@ -218,7 +218,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       for (int i = 0; i < 3; i++)
       {
          quat.setYawPitchRoll(0.0, Math.PI / 2.0, i * 2.0 * Math.PI / 4.0 + Math.PI / 2.0);
-         transform.setRotation(quat);
+         transform.getRotation().set(quat);
          invertTransform.set(transform);
          invertTransform.invert();
 

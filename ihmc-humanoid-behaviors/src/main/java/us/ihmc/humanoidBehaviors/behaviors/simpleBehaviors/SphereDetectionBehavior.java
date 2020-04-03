@@ -224,7 +224,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
             PrintTools.debug(DEBUG, this, "------Found Soccer Ball radius" + sphereParams.getRadius() + " center " + sphereParams.getCenter());
 
             RigidBodyTransform t = new RigidBodyTransform();
-            t.setTranslation(sphereParams.getCenter().x, sphereParams.getCenter().y, sphereParams.getCenter().z);
+            t.getTranslation().set(sphereParams.getCenter().x, sphereParams.getCenter().y, sphereParams.getCenter().z);
          }
 
       }

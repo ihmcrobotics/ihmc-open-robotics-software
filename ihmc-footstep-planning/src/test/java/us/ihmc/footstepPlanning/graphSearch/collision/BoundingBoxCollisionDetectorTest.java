@@ -271,7 +271,7 @@ public class BoundingBoxCollisionDetectorTest
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       transformToWorld.setTranslationAndIdentityRotation(x, y, z);
-      transformToWorld.setRotationYaw(yaw);
+      transformToWorld.getRotation().setToYawOrientation(yaw);
       return new PlanarRegionsList(new PlanarRegion(transformToWorld, Arrays.asList(unitSquare)));
    }
 }

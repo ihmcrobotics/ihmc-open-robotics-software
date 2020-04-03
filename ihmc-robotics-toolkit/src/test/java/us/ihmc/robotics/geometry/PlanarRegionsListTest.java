@@ -48,7 +48,7 @@ public class PlanarRegionsListTest
       RigidBodyTransform region1Transform = new RigidBodyTransform();
       RigidBodyTransform region2Transform = new RigidBodyTransform();
 
-      region2Transform.setTranslation(0.0, 0.0, 1.0);
+      region2Transform.getTranslation().set(0.0, 0.0, 1.0);
 
       PlanarRegion planarRegion1 = new PlanarRegion(region1Transform, region1ConvexPolygons);
       PlanarRegion planarRegion2 = new PlanarRegion(region2Transform, region2ConvexPolygons);

@@ -345,7 +345,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       Point3D stepPosition = new Point3D(stepLength, footstepY, 0.0);
       Quaternion stepOrientation = new Quaternion();
       transform.transform(stepPosition);
-      transform.getRotation(stepOrientation);
+      stepOrientation.set(transform.getRotation());
       FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, stepPosition, stepOrientation);
       footsteps.getFootstepDataList().add().set(footstepData);
 

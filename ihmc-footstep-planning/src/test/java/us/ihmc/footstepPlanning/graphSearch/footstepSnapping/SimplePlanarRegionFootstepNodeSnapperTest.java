@@ -74,7 +74,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       FootstepNodeTools.getNodeTransform(nodeToSnap, nodeTransform);
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      transformToWorld.setTranslationZ(-1.0);
+      transformToWorld.getTranslation().setZ(-1.0);
 
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
@@ -87,7 +87,7 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       FootstepNodeTools.getNodeTransform(nodeToSnap, nodeTransform);
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      transformToWorld.setRotation(new AxisAngle(0.0, 1.0, 0.0, 0.25 * Math.PI));
+      transformToWorld.getRotation().set(new AxisAngle(0.0, 1.0, 0.0, 0.25 * Math.PI));
 
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
@@ -100,8 +100,8 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       FootstepNodeTools.getNodeTransform(nodeToSnap, nodeTransform);
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      transformToWorld.setRotation(new AxisAngle(0.0, 1.0, 0.0, 0.25 * Math.PI));
-      transformToWorld.setTranslationZ(-1.0);
+      transformToWorld.getRotation().set(new AxisAngle(0.0, 1.0, 0.0, 0.25 * Math.PI));
+      transformToWorld.getTranslation().setZ(-1.0);
 
       doAFullFootholdTest(transformToWorld, nodeToSnap);
    }
@@ -114,8 +114,8 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
       FootstepNodeTools.getNodeTransform(nodeToSnap, nodeTransform);
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      transformToWorld.setRotation(new AxisAngle(0.0, 1.0, 0.0, 0.25 * Math.PI));
-      transformToWorld.setTranslationZ(-1.0);
+      transformToWorld.getRotation().set(new AxisAngle(0.0, 1.0, 0.0, 0.25 * Math.PI));
+      transformToWorld.getTranslation().setZ(-1.0);
 
       ConvexPolygon2D partialFootholdPolygon = new ConvexPolygon2D(footPolygons.get(RobotSide.LEFT));
       partialFootholdPolygon.scale(0.5);
@@ -151,8 +151,8 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
          RigidBodyTransform regionToWorld = new RigidBodyTransform(nodeToWorldTransform);
          double xRotation = EuclidCoreRandomTools.nextDouble(random, 0.15 * Math.PI);
          double yRotation = EuclidCoreRandomTools.nextDouble(random, 0.15 * Math.PI);
-         regionToWorld.setRotationEuler(xRotation, yRotation, 0.0);
-         regionToWorld.setTranslationZ(EuclidCoreRandomTools.nextDouble(random, 2.0));
+         regionToWorld.getRotation().setEuler(xRotation, yRotation, 0.0);
+         regionToWorld.getTranslation().setZ(EuclidCoreRandomTools.nextDouble(random, 2.0));
 
          doAFullFootholdTest(regionToWorld, node);
       }

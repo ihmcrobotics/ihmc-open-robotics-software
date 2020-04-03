@@ -37,6 +37,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -48,7 +49,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
@@ -306,8 +306,8 @@ public class MessageTools
       message.getDesiredOrientationInWorld().set(desiredOrientation);
       RigidBodyTransform transformToBodyFixedFrame = new RigidBodyTransform();
       controlFrame.getTransformToDesiredFrame(transformToBodyFixedFrame, endEffector.getBodyFixedFrame());
-      message.getControlFramePositionInEndEffector().set(transformToBodyFixedFrame.getTranslationVector());
-      message.getControlFrameOrientationInEndEffector().set(transformToBodyFixedFrame.getRotationMatrix());
+      message.getControlFramePositionInEndEffector().set(transformToBodyFixedFrame.getTranslation());
+      message.getControlFrameOrientationInEndEffector().set(transformToBodyFixedFrame.getRotation());
       return message;
    }
 
@@ -761,7 +761,7 @@ public class MessageTools
    public static long toFrameId(ReferenceFrame referenceFrame)
    {
       if (referenceFrame == null)
-         return NameBasedHashCodeTools.NULL_HASHCODE;
+         return EuclidHashCodeTools.NULL_HASHCODE;
       else
          return referenceFrame.hashCode();
    }

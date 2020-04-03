@@ -66,7 +66,7 @@ public class MidFrameZUpFrame extends ReferenceFrame
       vectorBetweenFrames2d.normalize();
       transform3D.setRotationYawAndZeroTranslation(Math.PI / 2.0 + Math.atan2(vectorBetweenFrames2d.getY(), vectorBetweenFrames2d.getX()));
 
-      transform3D.setTranslation(parentToMidpointVector3d);
+      transform3D.getTranslation().set(parentToMidpointVector3d);
 
       transformToParent.set(transform3D);
    }

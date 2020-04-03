@@ -207,7 +207,7 @@ public class SkippyRobot extends Robot
 
          RigidBodyTransform transform = new RigidBodyTransform();
          transform.setRotationEulerAndZeroTranslation(/*0.0*/Math.PI / 7.0 - 2.0 * Math.PI / 8.0, -initialBodySidewaysLean, initialYawIfSkippy);
-         transform.setTranslation(new Vector3D(0.0, 0.0, /*2.0*/2.0-0.15975+0.0032));
+         transform.getTranslation().set(new Vector3D(0.0, 0.0, /*2.0*/2.0-0.15975+0.0032));
          rootJointIfSkippy.setRotationAndTranslation(transform);
 
          shoulderJoint = new PinJoint("shoulderJoint", new Vector3D(0.0, 0.0, TORSO_LENGTH / 2), this, Axis.Y);
@@ -479,7 +479,7 @@ public class SkippyRobot extends Robot
    {
       if (robotType == RobotType.TIPPY)
       {
-         transform.setTranslation(new Vector3D(bodyPoint.getPositionPoint()));
+         transform.getTranslation().set(new Vector3D(bodyPoint.getPositionPoint()));
       }
 
       else if (robotType == RobotType.SKIPPY)
@@ -490,14 +490,14 @@ public class SkippyRobot extends Robot
          Vector3D translation = new Vector3D();
          transform.getTranslation(translation);
          Vector3D rotationEuler = new Vector3D();
-         transform.getRotationEuler(rotationEuler);
+         transform.getRotation().getEuler(rotationEuler);
          rotationEuler.setX(0.0);
          rotationEuler.setY(0.0);
          //         rotationEuler.setZ(0.0);
          yaw.set(rotationEuler.getZ());
 
          transform.setRotationEulerAndZeroTranslation(rotationEuler);
-         transform.setTranslation(translation);
+         transform.getTranslation().set(translation);
       }
 
       this.bodyZUpFrame.setTransformAndUpdate(transform);

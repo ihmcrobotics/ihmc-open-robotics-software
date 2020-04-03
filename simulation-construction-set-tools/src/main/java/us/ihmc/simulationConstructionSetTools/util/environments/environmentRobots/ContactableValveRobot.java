@@ -127,7 +127,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       RotationMatrix rotationMatrix = new RotationMatrix(valvePoseInWorld.getOrientation());
       valveLinkGraphics.rotate(rotationMatrix);
       RigidBodyTransform rotationTransform = new RigidBodyTransform();
-      rotationTransform.setRotation(rotationMatrix);
+      rotationTransform.getRotation().set(rotationMatrix);
 
       //Creating the physical link for the simulation
       valveLink = new Link("valveLink");
@@ -143,7 +143,7 @@ public class ContactableValveRobot extends ContactablePinJointRobot implements S
       RigidBodyTransform transform = new RigidBodyTransform();
       RigidBodyTransform invertTransform = new RigidBodyTransform();
 
-      transform.setRotationYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
+      transform.getRotation().setYawPitchRoll(0.0, Math.PI / 2.0, 0.0);
       invertTransform.set(transform);
       invertTransform.invert();
 

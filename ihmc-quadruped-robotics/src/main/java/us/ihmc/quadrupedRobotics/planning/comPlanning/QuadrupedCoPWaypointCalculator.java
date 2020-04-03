@@ -110,7 +110,7 @@ public class QuadrupedCoPWaypointCalculator implements CoPWaypointCalculator<Qua
       RobotQuadrant smallSideQuadrant = RobotQuadrant.getQuadrant(bigEnd, smallSide);
 
       double nominalYaw = getNominalYawForStance(contactState, solePositions);
-      nominalOrientation.setToYawQuaternion(nominalYaw);
+      nominalOrientation.setToYawOrientation(nominalYaw);
 
       smallSideContact.setIncludingFrame(solePositions.get(smallSideQuadrant));
       smallEndContact.setIncludingFrame(solePositions.get(smallEndQuadrant));

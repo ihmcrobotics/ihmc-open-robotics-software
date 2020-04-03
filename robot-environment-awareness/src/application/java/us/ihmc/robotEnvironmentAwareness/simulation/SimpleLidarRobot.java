@@ -42,7 +42,7 @@ public class SimpleLidarRobot extends Robot
       link.setLinkGraphics(linkGraphics);
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setTranslation(new Vector3D(radius + 0.001, 0.0, height / 2.0));
+      transform.getTranslation().set(new Vector3D(radius + 0.001, 0.0, height / 2.0));
       lidarScanParameters = new LidarScanParameters(720, -Math.PI / 2.0f, Math.PI / 2.0f, 0f, 0.1f, 30.0f, 0f);
       LidarSensorDescription lidarSensorDescription = new LidarSensorDescription("lidar", transform);
       lidarSensorDescription.setPointsPerSweep(lidarScanParameters.getPointsPerSweep());

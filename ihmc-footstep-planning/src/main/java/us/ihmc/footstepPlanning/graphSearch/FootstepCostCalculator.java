@@ -50,7 +50,7 @@ public class FootstepCostCalculator
 
       FootstepNodeTools.getSnappedNodeTransform(stanceNode, snapper.getSnapData(stanceNode).getSnapTransform(), stanceNodeTransform);
       FootstepNodeTools.getSnappedNodeTransform(candidateNode, snapper.getSnapData(candidateNode).getSnapTransform(), candidateNodeTransform);
-      idealStepTransform.setTranslation(idealStep.getX(), idealStep.getY(), stanceNodeTransform.getTranslationZ());
+      idealStepTransform.getTranslation().set(idealStep.getX(), idealStep.getY(), stanceNodeTransform.getTranslationZ());
       idealStepTransform.getRotation().setToYawOrientation(idealStep.getYaw());
 
       // calculate offset from ideal in a z-up frame

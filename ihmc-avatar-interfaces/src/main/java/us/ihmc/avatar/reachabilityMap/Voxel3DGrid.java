@@ -222,8 +222,8 @@ public class Voxel3DGrid implements ReferenceFrameHolder
 
       RigidBodyTransform coneTransform = new RigidBodyTransform();
 
-      coneTransform.setRotation(coneRotation);
-      coneTransform.setTranslation(voxelLocation);
+      coneTransform.getRotation().set(coneRotation);
+      coneTransform.getTranslation().set(voxelLocation);
    }
 
    @Override

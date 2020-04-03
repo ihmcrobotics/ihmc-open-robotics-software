@@ -387,7 +387,7 @@ public class YoIMUMahonyFilter implements ProcessingYoVariable
             }
          }
       }
-      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(accelerationCurrentDirectionWorld, accelerationDesiredDirectionWorld, axisAngleOffset);
+      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(accelerationCurrentDirectionWorld, accelerationDesiredDirectionWorld, axisAngleOffset);
       errorToPack.set(axisAngleOffset);
 
       return true;

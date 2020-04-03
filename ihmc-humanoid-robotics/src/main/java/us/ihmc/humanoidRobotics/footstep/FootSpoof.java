@@ -47,7 +47,7 @@ public class FootSpoof implements ContactablePlaneBody
                     double coefficientOfFriction)
    {
       RigidBodyTransform transformToAnkle = new RigidBodyTransform();
-      transformToAnkle.setTranslation(new Vector3D(-xToAnkle, -yToAnkle, -zToAnkle));
+      transformToAnkle.getTranslation().set(new Vector3D(-xToAnkle, -yToAnkle, -zToAnkle));
 
 //    if(FootstepUtilsTest.DEBUG_TESTS)
 //       System.out.println("FootSpoof: making transform from plane to ankle equal to "+transformToAnkle);
@@ -74,7 +74,7 @@ public class FootSpoof implements ContactablePlaneBody
                     double coefficientOfFriction)
    {
       RigidBodyTransform transformToAnkle = new RigidBodyTransform();
-      transformToAnkle.setTranslation(new Vector3D(-xToAnkle, -yToAnkle, -zToAnkle));
+      transformToAnkle.getTranslation().set(new Vector3D(-xToAnkle, -yToAnkle, -zToAnkle));
 
 //    if(FootstepUtilsTest.DEBUG_TESTS)
 //       System.out.println("FootSpoof: making transform from plane to ankle equal to "+transformToAnkle);

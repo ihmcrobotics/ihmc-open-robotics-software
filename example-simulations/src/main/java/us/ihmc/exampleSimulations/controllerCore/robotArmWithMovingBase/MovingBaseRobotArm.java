@@ -104,7 +104,7 @@ public class MovingBaseRobotArm extends Robot
 
    private final RigidBodyTransform controlFrameTransform = new RigidBodyTransform(new AxisAngle(), new Vector3D(0.0, 0.0, 0.4));
    private final ReferenceFrame handControlFrame;
-   private final KinematicPoint controlFrameTracker = new KinematicPoint("controlFrameTracker", controlFrameTransform.getTranslationVector(), this);
+   private final KinematicPoint controlFrameTracker = new KinematicPoint("controlFrameTracker", controlFrameTransform.getTranslation(), this);
    private final YoDouble dummyAlpha = new YoDouble("dummy", new YoVariableRegistry("dummy"));
    private final FilteredVelocityYoFrameVector controlFrameLinearAcceleration;
    private final FilteredVelocityYoFrameVector controlFrameAngularAcceleration;

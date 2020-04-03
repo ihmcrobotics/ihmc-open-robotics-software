@@ -241,8 +241,8 @@ public class JavaFXArmController
          }
          else
          {
-            Point3D desiredPosition = new Point3D(sideDependentKeyFramePoses.get(robotSide).get(0).getTranslationVector());
-            Quaternion desiredOrientation = new Quaternion(sideDependentKeyFramePoses.get(robotSide).get(0).getRotationMatrix());
+            Point3D desiredPosition = new Point3D(sideDependentKeyFramePoses.get(robotSide).get(0).getTranslation());
+            Quaternion desiredOrientation = new Quaternion(sideDependentKeyFramePoses.get(robotSide).get(0).getRotation());
             desiredOrientation.appendYawRotation(appendingYawOrientationValue);
 
             LogTools.info("desiredPosition " + desiredPosition);
@@ -442,8 +442,8 @@ public class JavaFXArmController
                objectToVisualize.set(controlTransform);
             double lengthOfFrame = lengthOfkeyFrameReferenceFrame;
 
-            Tuple3DBasics translation = new Point3D(objectToVisualize.getTranslationVector());
-            Quaternion orientation = new Quaternion(objectToVisualize.getRotationMatrix());
+            Tuple3DBasics translation = new Point3D(objectToVisualize.getTranslation());
+            Quaternion orientation = new Quaternion(objectToVisualize.getRotation());
 
             JavaFXCoordinateSystem controlCoordinateSystem = new JavaFXCoordinateSystem(lengthOfFrame);
             Affine controlTransform = JavaFXTools.createAffineFromQuaternionAndTuple(new Quaternion(orientation), translation);

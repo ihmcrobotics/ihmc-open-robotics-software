@@ -201,7 +201,7 @@ public class RosTools
       pelvisTransform.getTranslation(point);
 
       us.ihmc.euclid.tuple4D.Quaternion rotation = new us.ihmc.euclid.tuple4D.Quaternion();
-      pelvisTransform.getRotation(rotation);
+      rotation.set(pelvisTransform.getRotation());
       
       packEuclidTuple3DAndQuaternionToGeometry_msgsPose(point, rotation, pose);
    }

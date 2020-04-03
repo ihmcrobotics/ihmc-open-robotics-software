@@ -272,7 +272,7 @@ public class PointCloudTools
                      transformToWorld.getTranslation(translation);
                      
                      Quaternion quat = new Quaternion();
-                     transformToWorld.getRotation(quat);
+                     quat.set(transformToWorld.getRotation());
                      
                      bw.write("RBT," + translation + ", " + quat);
                      bw.write(System.getProperty("line.separator"));

@@ -146,8 +146,8 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       rotFull.multiply(targetRotation);
 
       RigidBodyTransform targetToEE = new RigidBodyTransform();
-      targetToEE.setTranslation(tran);
-      targetToEE.setRotation(rotFull);
+      targetToEE.getTranslation().set(tran);
+      targetToEE.getRotation().set(rotFull);
 
       return targetToEE;
    }

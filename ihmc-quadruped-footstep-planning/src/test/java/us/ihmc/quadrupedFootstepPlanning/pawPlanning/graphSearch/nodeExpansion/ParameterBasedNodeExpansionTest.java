@@ -125,7 +125,7 @@ public class ParameterBasedNodeExpansionTest
 
       FramePose3D poseInWorld = new FramePose3D();
       poseInWorld.getPosition().set(1.1, -0.5, 0.0);
-      poseInWorld.getOrientation().setToYawQuaternion(Math.PI / 4.0);
+      poseInWorld.getOrientation().setToYawOrientation(Math.PI / 4.0);
       centerFrame.setPoseAndUpdate(poseInWorld);
 
       frontLeft.changeFrame(ReferenceFrame.getWorldFrame());

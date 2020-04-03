@@ -256,7 +256,7 @@ public class PlanarRegionPawSnapTools
       RotationMatrix rotationMatrix = new RotationMatrix();
       rotationMatrix.setColumns(xAxis, yAxis, surfaceNormal);
       RigidBodyTransform transformToReturn = new RigidBodyTransform();
-      transformToReturn.setRotation(rotationMatrix);
+      transformToReturn.getRotation().set(rotationMatrix);
       return transformToReturn;
    }
 
@@ -272,6 +272,6 @@ public class PlanarRegionPawSnapTools
       newTranslation.scale(-1.0);
       newTranslation.add(xTranslated, yTranslated, z);
 
-      transformToReturn.setTranslation(newTranslation);
+      transformToReturn.getTranslation().set(newTranslation);
    }
 }

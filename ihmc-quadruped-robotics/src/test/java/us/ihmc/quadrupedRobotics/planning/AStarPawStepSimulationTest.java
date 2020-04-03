@@ -145,7 +145,7 @@ public abstract class AStarPawStepSimulationTest implements QuadrupedMultiRobotT
                                                                         variables.getBodyEstimateRoll());
 
       planningRequestPacket.getGoalPositionInWorld().set(plannerInput.getGoalPosition());
-      planningRequestPacket.getGoalOrientationInWorld().setToYawQuaternion(plannerInput.getGoalYaw());
+      planningRequestPacket.getGoalOrientationInWorld().setToYawOrientation(plannerInput.getGoalYaw());
       planningRequestPacket.setRequestedPawPlannerType(PawStepPlannerType.A_STAR.toByte());
       planningRequestPacket.getPlanarRegionsListMessage().set(planarRegionsListMessage);
       planningRequestPacket.setTimeout(plannerInput.getQuadrupedTimeout());

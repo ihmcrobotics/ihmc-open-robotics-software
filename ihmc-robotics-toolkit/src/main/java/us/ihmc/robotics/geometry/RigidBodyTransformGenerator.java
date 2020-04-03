@@ -139,7 +139,7 @@ public class RigidBodyTransformGenerator
    public void translateThenRotateEuler(Vector3D translationVector, Vector3D eulerAngles)
    {
       tempTransform.setRotationEulerAndZeroTranslation(eulerAngles);
-      tempTransform.setTranslation(translationVector);
+      tempTransform.getTranslation().set(translationVector);
       transform.set(transform);
       transform.multiply(tempTransform);
    }

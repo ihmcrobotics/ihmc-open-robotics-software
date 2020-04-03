@@ -71,8 +71,8 @@ public class MocapRigidBody extends QuaternionPose
    public void packPose(RigidBodyTransform pose)
    {
       tempQuaternion.set(qx, qy, qz, qw);
-      pose.setRotation(tempQuaternion);
-      pose.setTranslation(xPosition, yPosition, zPosition);
+      pose.getRotation().set(tempQuaternion);
+      pose.getTranslation().set((double) xPosition, (double) yPosition, (double) zPosition);
    }
 }
 

@@ -189,7 +189,7 @@ public class PelvisKinematicsBasedLinearStateCalculator
             {
                transformToParent.setIdentity();
                copOffset.set(copFilteredInFootFrame);
-               transformToParent.setTranslation(copOffset);
+               transformToParent.getTranslation().set(copOffset);
             }
          };
          copFrames.put(foot, copFrame);

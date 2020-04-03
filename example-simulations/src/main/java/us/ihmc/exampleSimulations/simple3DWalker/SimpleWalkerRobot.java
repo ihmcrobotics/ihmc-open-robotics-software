@@ -107,7 +107,7 @@ public class SimpleWalkerRobot extends Robot
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             bodyJoint.getRotationToWorld(bodyRotation);
-            transformToParent.setRotation(bodyRotation);
+            transformToParent.getRotation().set(bodyRotation);
          }
       };
       bodyZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), bodyFrame,"bodyZUpFrame");

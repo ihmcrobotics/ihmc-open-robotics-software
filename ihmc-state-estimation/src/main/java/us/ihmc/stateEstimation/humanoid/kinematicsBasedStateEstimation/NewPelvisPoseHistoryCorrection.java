@@ -10,6 +10,7 @@ import us.ihmc.euclid.rotationConversion.YawPitchRollConversion;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -61,7 +62,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
    private final YoDouble totalErrorTranslation_X;
    private final YoDouble totalErrorTranslation_Y;
    private final YoDouble totalErrorTranslation_Z;
-   private final double[] totalErrorYawPitchRoll = new double[3];
+   private final YawPitchRoll totalErrorYawPitchRoll = new YawPitchRoll();
    private final YoDouble totalErrorRotation_Yaw;
    private final YoDouble totalErrorRotation_Pitch;
    private final YoDouble totalErrorRotation_Roll;
@@ -207,7 +208,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       localizationTranslation.set(iterativeClosestPointInWorldFramePose.getPosition());
 
       localizationOrientation.setIncludingFrame(iterativeClosestPointInWorldFramePose.getOrientation());
-      correctedPelvisOrientation.setIncludingFrame(worldFrame, correctedPelvisTransformInWorldFrame.getRotationMatrix());
+      correctedPelvisOrientation.setIncludingFrame(worldFrame, correctedPelvisTransformInWorldFrame.getRotation());
 
       errorBetweenCorrectedAndLocalizationTransform_Rotation.difference(correctedPelvisOrientation, localizationOrientation);
       errorBetweenCorrectedAndLocalizationQuaternion_Rotation.set(errorBetweenCorrectedAndLocalizationTransform_Rotation);
@@ -217,8 +218,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       ////// for SCS feedback
       yoCorrectedPelvisPoseInWorldFrame.set(correctedPelvisPoseInWorldFrame);
       //////
-      errorBetweenCorrectedAndLocalizationTransform.setTranslation(errorBetweenCorrectedAndLocalizationTransform_Translation);
-      errorBetweenCorrectedAndLocalizationTransform.setRotation(errorBetweenCorrectedAndLocalizationQuaternion_Rotation);
+      errorBetweenCorrectedAndLocalizationTransform.getTranslation().set(errorBetweenCorrectedAndLocalizationTransform_Translation);
+      errorBetweenCorrectedAndLocalizationTransform.getRotation().set(errorBetweenCorrectedAndLocalizationQuaternion_Rotation);
 
       rootJoint.setJointConfiguration(correctedPelvisTransformInWorldFrame);
    }
@@ -263,7 +264,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
             tempTransform.invert();
             tempTransform.multiply(localizationPose);
             tempTransform.getTranslation(tempTranslation);
-            tempTransform.getRotation(tempRotation);
+            tempRotation.set(tempTransform.getRotation());
 
             // If we are in the deadband just return
 
@@ -305,11 +306,11 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
       totalErrorTranslation_X.set(totalErrorTranslation.getX());
       totalErrorTranslation_Y.set(totalErrorTranslation.getY());
       totalErrorTranslation_Z.set(totalErrorTranslation.getZ());
-      totalErrorBetweenPelvisAndLocalizationTransform.getRotation(totalErrorRotation);
+      totalErrorRotation.set(totalErrorBetweenPelvisAndLocalizationTransform.getRotation());
       YawPitchRollConversion.convertQuaternionToYawPitchRoll(totalErrorRotation, totalErrorYawPitchRoll);
-      totalErrorRotation_Yaw.set(totalErrorYawPitchRoll[0]);
-      totalErrorRotation_Pitch.set(totalErrorYawPitchRoll[1]);
-      totalErrorRotation_Roll.set(totalErrorYawPitchRoll[2]);
+      totalErrorRotation_Yaw.set(totalErrorYawPitchRoll.getYaw());
+      totalErrorRotation_Pitch.set(totalErrorYawPitchRoll.getPitch());
+      totalErrorRotation_Roll.set(totalErrorYawPitchRoll.getRoll());
       /////
 
       if (correctedPelvisPoseErrorTooBigChecker.checkIfErrorIsTooBig(correctedPelvisPoseInWorldFrame, iterativeClosestPointInWorldFramePose, true))

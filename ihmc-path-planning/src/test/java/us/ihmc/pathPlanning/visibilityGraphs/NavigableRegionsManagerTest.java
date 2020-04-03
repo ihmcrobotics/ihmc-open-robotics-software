@@ -821,9 +821,9 @@ public class NavigableRegionsManagerTest
       Quaternion startOrientation = new Quaternion();
       Quaternion goalOrientation = new Quaternion();
       if (dataSet.getPlannerInput().hasStartOrientation())
-         startOrientation.setToYawQuaternion(dataSet.getPlannerInput().getStartYaw());
+         startOrientation.setToYawOrientation(dataSet.getPlannerInput().getStartYaw());
       if (dataSet.getPlannerInput().hasGoalOrientation())
-         goalOrientation.setToYawQuaternion(dataSet.getPlannerInput().getGoalYaw());
+         goalOrientation.setToYawOrientation(dataSet.getPlannerInput().getGoalYaw());
 
       PathOrientationCalculator orientationCalculator = new PathOrientationCalculator(parameters);
 

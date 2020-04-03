@@ -48,13 +48,13 @@ public class PlanarRegionPolygonSnapperTest
       assertTrue(polygonSnappingTransform.epsilonEquals(identityTransform, 1e-7));
 
       planarRegionTransformToWorld = new RigidBodyTransform();
-      planarRegionTransformToWorld.setTranslation(1.2, 3.4, 7.6);
+      planarRegionTransformToWorld.getTranslation().set(1.2, 3.4, 7.6);
 
       planarRegionToSnapTo = new PlanarRegion(planarRegionTransformToWorld, planarRegionConvexPolygons);
       polygonSnappingTransform = PlanarRegionPolygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegionToSnapTo, highestVertexInWorld);
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
-      expectedTransform.setTranslation(0.0, 0.0, 7.6);
+      expectedTransform.getTranslation().set(0.0, 0.0, 7.6);
       assertTrue(polygonSnappingTransform.epsilonEquals(expectedTransform, 1e-7));
    }
 
@@ -78,7 +78,7 @@ public class PlanarRegionPolygonSnapperTest
       planarRegionConvexPolygons.add(planarRegionPolygon);
 
       RigidBodyTransform planarRegionTransformToWorld = new RigidBodyTransform();
-      planarRegionTransformToWorld.setTranslation(1.2, 3.4, 7.6);
+      planarRegionTransformToWorld.getTranslation().set(1.2, 3.4, 7.6);
       double roll = 0.0;
       double pitch = Math.PI / 3.0;
       double yaw = 0.0;
@@ -126,7 +126,7 @@ public class PlanarRegionPolygonSnapperTest
       planarRegionConvexPolygons.add(planarRegionPolygon);
 
       RigidBodyTransform planarRegionTransformToWorld = new RigidBodyTransform();
-      planarRegionTransformToWorld.setTranslation(1.2, 3.4, 7.6);
+      planarRegionTransformToWorld.getTranslation().set(1.2, 3.4, 7.6);
       double roll = 0.0;
       double pitch = Math.PI / 3.0;
       double yaw = 0.2;

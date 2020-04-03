@@ -450,7 +450,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       centroidTransform.appendTranslation(location.getX(), location.getY(), 0.0);
       RegularPolygon potholePolygon = new RegularPolygon(centerToPoints, POINTS_PER_POTHOLE);
 
-      PotholePlanarRegionProvider potholePlanarRegionProvider = new PotholePlanarRegionProvider(potholePolygon, centroidTransform.getTranslationVector(),
+      PotholePlanarRegionProvider potholePlanarRegionProvider = new PotholePlanarRegionProvider(potholePolygon, centroidTransform.getTranslation(),
                                                                                                 depthToCentroid);
       List<PlanarRegion> potholePlanarRegions = potholePlanarRegionProvider.getPlanarRegions();
       for (int i = 0; i < potholePlanarRegions.size(); i++)
@@ -497,7 +497,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
          centroidTransform.appendTranslation(location.getX(), location.getY(), 0.0);
          RegularPolygon potholePolygon = new RegularPolygon(centerToPoints, POINTS_PER_POTHOLE);
 
-         PotholePlanarRegionProvider potholePlanarRegionProvider = new PotholePlanarRegionProvider(potholePolygon, centroidTransform.getTranslationVector(),
+         PotholePlanarRegionProvider potholePlanarRegionProvider = new PotholePlanarRegionProvider(potholePolygon, centroidTransform.getTranslation(),
                                                                                                    depthToCentroid);
          List<PlanarRegion> potholePlanarRegions = potholePlanarRegionProvider.getPlanarRegions();
          for (int j = 0; j < potholePlanarRegions.size(); j++)

@@ -421,8 +421,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       ReferenceFrame footFixedFrame = fullRobotModel.getFoot(robotSide).getBodyFixedFrame();
 
       RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
-      controlFrameTransform.setRotationEuler(Math.PI / 4.0, 0.0, Math.PI / 2.0);
-      controlFrameTransform.setTranslation(-0.2, 0.2, -0.1);
+      controlFrameTransform.getRotation().setEuler(Math.PI / 4.0, 0.0, Math.PI / 2.0);
+      controlFrameTransform.getTranslation().set(-0.2, 0.2, -0.1);
       ReferenceFrame controlFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("ControlFrame", footFixedFrame, controlFrameTransform);
 
       RigidBodyTransform controlFrameToWorldFrame = controlFrame.getTransformToWorldFrame();

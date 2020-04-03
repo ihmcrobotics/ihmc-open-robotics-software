@@ -590,7 +590,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       SideDependentList<FramePose3D> feetPoses = new SideDependentList<>();
       Quaternion startOrientation = new Quaternion();
       if (dataSet.getPlannerInput().hasStartOrientation())
-         startOrientation.setToYawQuaternion(dataSet.getPlannerInput().getStartYaw());
+         startOrientation.setToYawOrientation(dataSet.getPlannerInput().getStartYaw());
       PoseReferenceFrame startFrame = new PoseReferenceFrame("startFrame", ReferenceFrame.getWorldFrame());
       startFrame.setPositionAndUpdate(new FramePoint3D(ReferenceFrame.getWorldFrame(), dataSet.getPlannerInput().getStartPosition()));
       startFrame.setOrientationAndUpdate(startOrientation);

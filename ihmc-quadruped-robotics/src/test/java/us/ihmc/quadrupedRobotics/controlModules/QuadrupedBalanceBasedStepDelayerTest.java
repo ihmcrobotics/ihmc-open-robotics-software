@@ -53,7 +53,7 @@ public class QuadrupedBalanceBasedStepDelayerTest
       for (RobotQuadrant robotQuadrant : RobotQuadrant.values)
       {
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setTranslation(0.5 * robotQuadrant.getEnd().negateIfHindEnd(stanceLength) , 0.5 * robotQuadrant.getSide().negateIfRightSide(stanceWidth), 0.0);
+         transform.getTranslation().set(0.5 * robotQuadrant.getEnd().negateIfHindEnd(stanceLength), 0.5 * robotQuadrant.getSide().negateIfRightSide(stanceWidth), 0.0);
          MovingReferenceFrame soleFrame = MovingReferenceFrame.constructFrameFixedInParent(robotQuadrant.getShortName() + "SoleFrame", ReferenceFrame.getWorldFrame(), transform);
 
          soleFrames.put(robotQuadrant, soleFrame);
