@@ -75,9 +75,9 @@ public class UserPelvisOrientationManager implements PelvisOrientationControlSta
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      orientationController.onExit();
+      orientationController.onExit(timeInState);
    }
 
    public FrameQuaternionReadOnly getDesiredOrientation()
