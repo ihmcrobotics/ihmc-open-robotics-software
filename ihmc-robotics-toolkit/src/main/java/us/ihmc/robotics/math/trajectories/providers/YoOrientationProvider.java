@@ -16,6 +16,6 @@ public class YoOrientationProvider implements OrientationProvider
 
    public void getOrientation(FrameQuaternion orientationToPack)
    {
-      frameOrientation.getFrameOrientationIncludingFrame(orientationToPack);
+      orientationToPack.setIncludingFrame(frameOrientation);
    }
 }

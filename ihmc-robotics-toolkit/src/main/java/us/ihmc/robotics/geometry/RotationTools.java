@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionBasics;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.euclid.yawPitchRoll.interfaces.YawPitchRollReadOnly;
 
 public class RotationTools
 {
@@ -305,7 +306,7 @@ public class RotationTools
    public static void convertTransformToClosestYawPitchRoll(RigidBodyTransform transform, double[] yawPitchRollRef, double[] yawPitchRollToPack)
    {
       RotationMatrix rotationMatrix = rotationMatrixForYawPitchRollConvertor.get();
-      transform.getRotation(rotationMatrix);
+      rotationMatrix.set(transform.getRotation());
       convertMatrixToClosestYawPitchRoll(rotationMatrix, yawPitchRollRef, yawPitchRollToPack);
    }
 
@@ -621,15 +622,15 @@ public class RotationTools
     *           yaw-pitch-roll angles.
     * @return the value of the rate of change of the yaw angle.
     */
-   public static double computeYawRate(double[] yawPitchRoll, Vector3DReadOnly angularVelocity, boolean isVelocityInLocalCoordinates)
+   public static double computeYawRate(YawPitchRollReadOnly yawPitchRoll, Vector3DReadOnly angularVelocity, boolean isVelocityInLocalCoordinates)
    {
       double wx = angularVelocity.getX();
       double wy = angularVelocity.getY();
       double wz = angularVelocity.getZ();
    
-      double yaw = yawPitchRoll[0];
-      double pitch = yawPitchRoll[1];
-      double roll = yawPitchRoll[2];
+      double yaw = yawPitchRoll.getYaw();
+      double pitch = yawPitchRoll.getPitch();
+      double roll = yawPitchRoll.getRoll();
    
       if (isVelocityInLocalCoordinates)
          return (Math.sin(roll) * wy + Math.cos(roll) * wz) / Math.cos(pitch);

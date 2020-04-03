@@ -44,7 +44,7 @@ public class SteppingStonesEnvironment implements CommonAvatarEnvironmentInterfa
       double yaw = Math.toRadians(45.0);
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setTranslation(0.5, 0.5, blockFaceHeight);
+      transform.getTranslation().set(0.5, 0.5, blockFaceHeight);
       transform.appendYawRotation(yaw);
       transform.invert();
       baseBlockFrame = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("baseFrame", ReferenceFrame.getWorldFrame(), transform);

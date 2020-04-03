@@ -73,7 +73,7 @@ public class CenterOfMassReferenceFrameTest
 
       RotationMatrix rotation = new RotationMatrix();
       RigidBodyTransform transform = centerOfMassReferenceFrame.getTransformToDesiredFrame(elevator.getBodyFixedFrame());
-      transform.getRotation(rotation);
+      rotation.set(transform.getRotation());
       RotationMatrix idenitity = new RotationMatrix();
       idenitity.setIdentity();
       EuclidCoreTestTools.assertMatrix3DEquals("", idenitity, rotation, 1e-12);

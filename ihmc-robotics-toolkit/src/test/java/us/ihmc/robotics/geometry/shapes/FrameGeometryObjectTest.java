@@ -280,7 +280,7 @@ public abstract class FrameGeometryObjectTest<F extends FrameGeometryObject<F, G
       try
       {
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setRotationRoll(1.0);
+         transform.getRotation().setToRollOrientation(1.0);
          createRandomFrameGeometryObject(random, ReferenceFrame.getWorldFrame()).applyTransform(transform);
       }
       catch (NotAMatrix2DException e)
@@ -315,7 +315,7 @@ public abstract class FrameGeometryObjectTest<F extends FrameGeometryObject<F, G
       try
       {
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setRotationRoll(1.0);
+         transform.getRotation().setToRollOrientation(1.0);
          createRandomFrameGeometryObject(random, ReferenceFrame.getWorldFrame()).applyTransform(transform);
       }
       catch (NotAMatrix2DException e)

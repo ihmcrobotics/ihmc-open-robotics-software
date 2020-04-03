@@ -47,8 +47,8 @@ public class RosMocapPublisher implements MocapRigidbodiesListener, Runnable
          for (MocapRigidBody rigidBody : listOfRigidbodies)
          {
             RigidBodyTransform tmpTransform = new RigidBodyTransform();
-            tmpTransform.setTranslation(rigidBody.xPosition,rigidBody.yPosition,rigidBody.zPosition);
-            tmpTransform.setRotation(new Quaternion(rigidBody.qx, rigidBody.qy, rigidBody.qz, rigidBody.qw));           
+            tmpTransform.getTranslation().set((double) rigidBody.xPosition, (double) rigidBody.yPosition, (double) rigidBody.zPosition);
+            tmpTransform.getRotation().set(new Quaternion(rigidBody.qx, rigidBody.qy, rigidBody.qz, rigidBody.qw));           
             tfPublisher.publish(tmpTransform, mainNode.getCurrentTime().totalNsecs(), "/mocap_world", "mocap/rigidBody"+rigidBody.getId());
          }
 

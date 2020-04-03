@@ -217,7 +217,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          //         transform.setTranslation(0.01, -0.01, 0.01);
          //         transform.setTranslation(0.02, -0.02, 0.0);
          //         transform.setTranslation(0.02, -0.02, 0.02);
-         transform.setRotationYaw(0.025);
+         transform.getRotation().setToYawOrientation(0.025);
 
          boolean sendingSlamCorrection = false;
          publishPoseUpdateForStateEstimator(transform, sendingSlamCorrection);

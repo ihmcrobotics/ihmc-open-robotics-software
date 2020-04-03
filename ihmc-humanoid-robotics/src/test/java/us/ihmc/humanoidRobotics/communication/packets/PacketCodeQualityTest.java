@@ -40,13 +40,13 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.idl.IDLSequence;
 
 public class PacketCodeQualityTest
@@ -63,7 +63,7 @@ public class PacketCodeQualityTest
    public void testFrameInformationDefaultValues()
    {
       FrameInformation frameInformation = new FrameInformation();
-      assertEquals(NameBasedHashCodeTools.DEFAULT_HASHCODE, frameInformation.getDataReferenceFrameId());
+      assertEquals(EuclidHashCodeTools.DEFAULT_HASHCODE, frameInformation.getDataReferenceFrameId());
       assertEquals(ReferenceFrame.getWorldFrame().hashCode(), frameInformation.getTrajectoryReferenceFrameId());
       assertEquals(ReferenceFrame.getWorldFrame().hashCode(), FrameInformation.WORLD_FRAME);
    }

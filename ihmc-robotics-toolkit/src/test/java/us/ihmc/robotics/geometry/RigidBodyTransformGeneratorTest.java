@@ -24,20 +24,20 @@ public class RigidBodyTransformGeneratorTest
 
       generator.translate(1.0, 2.0, 3.0);
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
-      expectedTransform.setTranslation(1.0, 2.0, 3.0);
+      expectedTransform.getTranslation().set(1.0, 2.0, 3.0);
       generator.getRigidyBodyTransform(transform);
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
 
       generator.translate(4.0, 5.0, 6.0);
       expectedTransform = new RigidBodyTransform();
-      expectedTransform.setTranslation(5.0, 7.0, 9.0);
+      expectedTransform.getTranslation().set(5.0, 7.0, 9.0);
       generator.getRigidyBodyTransform(transform);
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
 
       generator.identity();
       generator.translate(new Vector3D(-3.0, 9.0, 11.0));
       expectedTransform = new RigidBodyTransform();
-      expectedTransform.setTranslation(-3.0, 9.0, 11.0);
+      expectedTransform.getTranslation().set(-3.0, 9.0, 11.0);
       generator.getRigidyBodyTransform(transform);
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
 
@@ -78,7 +78,7 @@ public class RigidBodyTransformGeneratorTest
       generator.rotateEuler(new Vector3D(0.67, 0.89, 0.34));
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
       expectedTransform.setRotationEulerAndZeroTranslation(0.67, 0.89, 0.34);
-      expectedTransform.setTranslation(3.3, 4.4, 5.5);
+      expectedTransform.getTranslation().set(3.3, 4.4, 5.5);
       RigidBodyTransform transform = generator.getRigidBodyTransformCopy();
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
    }
@@ -90,7 +90,7 @@ public class RigidBodyTransformGeneratorTest
 
       generator.translate(1.0, 0.0, 0.0);
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
-      expectedTransform.setTranslation(1.0, 0.0, 0.0);
+      expectedTransform.getTranslation().set(1.0, 0.0, 0.0);
       RigidBodyTransform transform = generator.getRigidBodyTransformCopy();
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
 
@@ -98,7 +98,7 @@ public class RigidBodyTransformGeneratorTest
       generator.translate(2.0, 0.0, 0.0);
       expectedTransform = new RigidBodyTransform();
       expectedTransform.setRotationEulerAndZeroTranslation(0.0, -Math.PI / 2.0, 0.0);
-      expectedTransform.setTranslation(1.0, 0.0, 2.0);
+      expectedTransform.getTranslation().set(1.0, 0.0, 2.0);
       transform = generator.getRigidBodyTransformCopy();
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
 
@@ -106,7 +106,7 @@ public class RigidBodyTransformGeneratorTest
       generator.translate(3.0, 0.0, 0.0);
       expectedTransform = new RigidBodyTransform();
       expectedTransform.setRotationEulerAndZeroTranslation(-Math.PI / 2.0, 0.0, Math.PI / 2.0);
-      expectedTransform.setTranslation(1.0, 3.0, 2.0);
+      expectedTransform.getTranslation().set(1.0, 3.0, 2.0);
       transform = generator.getRigidBodyTransformCopy();
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
 
@@ -114,8 +114,8 @@ public class RigidBodyTransformGeneratorTest
       generator.translateThenRotateEuler(new Vector3D(1.0, 0.0, 0.0), new Vector3D(0.0, -Math.PI / 2.0, 0.0));
 
       RigidBodyTransform translateThenRotate = new RigidBodyTransform();
-      translateThenRotate.setRotationEuler(0.0, -0.0, Math.PI / 2.0);
-      translateThenRotate.setTranslation(2.0, 0.0, 0.0);
+      translateThenRotate.getRotation().setEuler(0.0, -0.0, Math.PI / 2.0);
+      translateThenRotate.getTranslation().set(2.0, 0.0, 0.0);
       generator.translateThenRotate(translateThenRotate);
 
       generator.translateThenRotateEuler(new Vector3D(3.0, 0.0, 0.0), new Vector3D(0.0, 0.0, 0.0));

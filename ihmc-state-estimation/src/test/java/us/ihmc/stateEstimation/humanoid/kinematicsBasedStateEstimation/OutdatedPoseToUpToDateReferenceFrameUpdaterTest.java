@@ -131,7 +131,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          RigidBodyTransform totalError = new RigidBodyTransform();
          outdatedPoseToUpToDateReferenceFrameUpdater.getTotalErrorTransform(totalError);
          Quaternion calculatedRotationError = new Quaternion();
-         totalError.getRotation(calculatedRotationError);
+         calculatedRotationError.set(totalError.getRotation());
          Quaternion actualError = orientationOffsets[i];
          
          assertTrue(calculatedRotationError.epsilonEquals(actualError, 1e-4));
@@ -194,7 +194,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          Vector3D actualTranslationError = translationOffsets[i];
          
          Quaternion calculatedRotationError = new Quaternion();
-         totalError.getRotation(calculatedRotationError);
+         calculatedRotationError.set(totalError.getRotation());
          Quaternion actualRotationError = orientationOffsets[i];
          
          assertTrue(calculatedTranslationError.epsilonEquals(actualTranslationError, 1e-4));
@@ -590,8 +590,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
       
       RigidBodyTransform upToDateTransformInPast_Translation = new RigidBodyTransform(upToDateTimeStampedTransformInPast.getTransform3D());
       RigidBodyTransform upToDateTransformInPast_Rotation = new RigidBodyTransform(upToDateTransformInPast_Translation);
-      upToDateTransformInPast_Translation.setRotationToZero();
-      upToDateTransformInPast_Rotation.setTranslationToZero();
+      upToDateTransformInPast_Translation.getRotation().setToZero();
+      upToDateTransformInPast_Rotation.getTranslation().setToZero();
       
       RigidBodyTransform offsetRotationTransform = new RigidBodyTransform(orientationOffset, new Vector3D());
       RigidBodyTransform offsetTranslationTransform = new RigidBodyTransform(new Quaternion(), translationOffset);
@@ -608,8 +608,8 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
    private RigidBodyTransform generateRandomUpToDateTransforms(Random random)
    {
       RigidBodyTransform upToDateTransform = new RigidBodyTransform();
-      upToDateTransform.setTranslation(RandomGeometry.nextVector3D(random));
-      upToDateTransform.setRotation(RandomGeometry.nextQuaternion(random));
+      upToDateTransform.getTranslation().set(RandomGeometry.nextVector3D(random));
+      upToDateTransform.getRotation().set(RandomGeometry.nextQuaternion(random));
       return upToDateTransform;
    }
 

@@ -385,7 +385,7 @@ public class DoorParameterCalculator extends AbstractObjectParameterCalculator<D
       {
          RigidBodyTransform vertexInWorld = new RigidBodyTransform(pcaTransform);
          vertexInWorld.appendTranslation(xInPCA, yInPCA, 0.0);
-         doorVerticesInPCA.put(vertexName, new Point3D(vertexInWorld.getTranslationVector()));
+         doorVerticesInPCA.put(vertexName, new Point3D(vertexInWorld.getTranslation()));
       }
 
       private double area()

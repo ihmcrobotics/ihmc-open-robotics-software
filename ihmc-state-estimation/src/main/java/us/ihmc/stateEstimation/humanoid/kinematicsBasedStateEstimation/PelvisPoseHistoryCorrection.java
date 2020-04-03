@@ -339,7 +339,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    private void updateRotationalMaxVelocityClip()
    {
       interpolatedRotationCorrectionFrame.getTransformToDesiredFrame(errorBetweenCurrentPositionAndCorrected, worldFrame);
-      errorBetweenCurrentPositionAndCorrected.getRotation(angleToTravelAxis4d);
+      angleToTravelAxis4d.set(errorBetweenCurrentPositionAndCorrected.getRotation());
       angleToTravel.set(angleToTravelAxis4d.getAngle());
       maxRotationAlpha.set((estimatorDT * maxRotationVelocityClip.getDoubleValue() / angleToTravel.getDoubleValue())
             + previousRotationClippedAlphaValue.getDoubleValue());
@@ -408,7 +408,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       localizationPose.getTranslation(localizationTranslationInPast);
       newLocalizationTranslationFrame.setAndUpdate(localizationTranslationInPast);
 
-      localizationPose.getRotation(localizationRotationInPast);
+      localizationRotationInPast.set(localizationPose.getRotation());
       newLocalizationRotationFrame.setAndUpdate(localizationRotationInPast);
 
       stateEstimatorPelvisPoseBuffer.findTransform(timeStamp, seTimeStampedPose);
@@ -417,7 +417,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       sePose.getTranslation(seTranslationInPast);
       pelvisStateAtLocalizationTimeTranslationFrame.setAndUpdate(seTranslationInPast);
 
-      sePose.getRotation(seRotationInPast);
+      seRotationInPast.set(sePose.getRotation());
       pelvisStateAtLocalizationTimeRotationFrame.setAndUpdate(seRotationInPast);
 
       newLocalizationTranslationFrame.getTransformToDesiredFrame(translationErrorInPastTransform, pelvisStateAtLocalizationTimeTranslationFrame);
@@ -437,16 +437,16 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       RigidBodyTransform pelvisPose = new RigidBodyTransform();
 
       Quaternion rotation = new Quaternion();
-      pelvisPose.getRotation(rotation);
+      rotation.set(pelvisPose.getRotation());
       rotation.setYawPitchRoll(manualRotationOffsetInRadZ.getDoubleValue(), manualRotationOffsetInRadY.getDoubleValue(), manualRotationOffsetInRadX.getDoubleValue());
-      pelvisPose.setRotation(rotation);
+      pelvisPose.getRotation().set(rotation);
 
       Vector3D translation = new Vector3D();
       pelvisPose.getTranslation(translation);
       translation.setX(manualTranslationOffsetX.getDoubleValue());
       translation.setY(manualTranslationOffsetY.getDoubleValue());
       translation.setZ(manualTranslationOffsetZ.getDoubleValue());
-      pelvisPose.setTranslation(translation);
+      pelvisPose.getTranslation().set(translation);
 
       TimeStampedTransform3D manualTimeStampedTransform3D = new TimeStampedTransform3D(pelvisPose, stateEstimatorPelvisPoseBuffer.getNewestTimestamp());
       addNewExternalPose(manualTimeStampedTransform3D);

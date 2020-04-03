@@ -393,7 +393,7 @@ public class SwingState extends AbstractFootControlState
       toeContactPoint.setIncludingFrame(toeContactPoint2d, 0.0);
       toeContactPoint.changeFrame(footFrame);
 
-      transformFromToeToAnkle.setTranslation(toeContactPoint);
+      transformFromToeToAnkle.getTranslation().set(toeContactPoint);
       return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() + "ToeFrame", footFrame,
                                                                                transformFromToeToAnkle);
    }

@@ -259,8 +259,8 @@ public class ReachabilitySphereMapVisualizers
 
       // Transform the cone head to  the parent frame, in this case world.
       RigidBodyTransform coneTransform = new RigidBodyTransform();
-      coneTransform.setRotation(rotationMatrix);
-      coneTransform.setTranslation(sphereOrigin.getX(), sphereOrigin.getY(), sphereOrigin.getZ());
+      coneTransform.getRotation().set(rotationMatrix);
+      coneTransform.getTranslation().set(sphereOrigin.getX(), sphereOrigin.getY(), sphereOrigin.getZ());
 
       // Build the cone
       double smallestDotProduct = Double.POSITIVE_INFINITY;

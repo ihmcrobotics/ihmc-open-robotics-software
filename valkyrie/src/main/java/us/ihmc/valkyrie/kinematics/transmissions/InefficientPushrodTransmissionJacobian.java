@@ -114,11 +114,11 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
       
       RigidBodyTransform transformFromActuatorSlide5FrameToBoneFrame = new RigidBodyTransform();      
       transformFromActuatorSlide5FrameToBoneFrame.setRotationPitchAndZeroTranslation(-actuatorSlider5PitchRotation);
-      transformFromActuatorSlide5FrameToBoneFrame.setTranslation(new Vector3D(rod5PointInBoneFrame));
+      transformFromActuatorSlide5FrameToBoneFrame.getTranslation().set(new Vector3D(rod5PointInBoneFrame));
       
       RigidBodyTransform transformFromActuatorSlide6FrameToBoneFrame = new RigidBodyTransform();      
       transformFromActuatorSlide6FrameToBoneFrame.setRotationPitchAndZeroTranslation(-actuatorSlider6PitchRotation);
-      transformFromActuatorSlide6FrameToBoneFrame.setTranslation(new Vector3D(rod6PointInBoneFrame));
+      transformFromActuatorSlide6FrameToBoneFrame.getTranslation().set(new Vector3D(rod6PointInBoneFrame));
 
       actuator5SlideFrame.setTransformAndUpdate(transformFromActuatorSlide5FrameToBoneFrame);
       actuator6SlideFrame.setTransformAndUpdate(transformFromActuatorSlide6FrameToBoneFrame);

@@ -458,10 +458,10 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       //copy Translation and Rotation
       RigidBodyTransform transform = new RigidBodyTransform();
       Vector3D_F64 T = targetToCamera.T;
-      transform.setTranslation(new Vector3D(T.x, T.y, T.z));
+      transform.getTranslation().set(new Vector3D(T.x, T.y, T.z));
 
       RotationMatrix matrix3d = new RotationMatrix(targetToCamera.getR());
-      transform.setRotation(matrix3d);
+      transform.getRotation().set(matrix3d);
       mEntry.put(TARGET_TO_CAMERA_KEY, transform);
 
       //load image

@@ -145,8 +145,8 @@ public class ValkyrieEODObstacleCourseEnvironment implements CommonAvatarEnviron
       RigidBodyTransform frontWheel = new RigidBodyTransform();
       RigidBodyTransform rearWheel = new RigidBodyTransform();
 
-      frontWheel.setTranslation(doorLocation.getX() + dummyVanWheelDistance / 2, doorLocation.getY() + dummyVanWidth / 2, dummyVanWheelRadius);
-      rearWheel.setTranslation(doorLocation.getX() - dummyVanWheelDistance / 2, doorLocation.getY() + dummyVanWidth / 2, dummyVanWheelRadius);
+      frontWheel.getTranslation().set(doorLocation.getX() + dummyVanWheelDistance / 2, doorLocation.getY() + dummyVanWidth / 2, dummyVanWheelRadius);
+      rearWheel.getTranslation().set(doorLocation.getX() - dummyVanWheelDistance / 2, doorLocation.getY() + dummyVanWidth / 2, dummyVanWheelRadius);
 
       frontWheel.appendRollRotation(Math.PI / 2);
       rearWheel.appendRollRotation(Math.PI / 2);
@@ -181,8 +181,8 @@ public class ValkyrieEODObstacleCourseEnvironment implements CommonAvatarEnviron
       RigidBodyTransform frontWheel = new RigidBodyTransform();
       RigidBodyTransform rearWheel = new RigidBodyTransform();
 
-      frontWheel.setTranslation(doorLocation.getX() + vesselCartLength * 0.25, doorLocation.getY(), vesselCartWheelRadius);
-      rearWheel.setTranslation(doorLocation.getX() - vesselCartLength * 0.25, doorLocation.getY(), vesselCartWheelRadius);
+      frontWheel.getTranslation().set(doorLocation.getX() + vesselCartLength * 0.25, doorLocation.getY(), vesselCartWheelRadius);
+      rearWheel.getTranslation().set(doorLocation.getX() - vesselCartLength * 0.25, doorLocation.getY(), vesselCartWheelRadius);
 
       frontWheel.appendRollRotation(Math.PI / 2);
       rearWheel.appendRollRotation(Math.PI / 2);
@@ -201,7 +201,7 @@ public class ValkyrieEODObstacleCourseEnvironment implements CommonAvatarEnviron
 
    public Vector3DReadOnly getDoorKnobGraspingPoint()
    {
-      return knob.getTranslationVector();
+      return knob.getTranslation();
    }
 
    @Override

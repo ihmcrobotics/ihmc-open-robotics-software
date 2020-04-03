@@ -930,7 +930,7 @@ public class GeometryTools
       alignAxisWithThis.checkReferenceFrameMatch(point.getReferenceFrame());
    
       AxisAngle rotationToDesired = new AxisAngle();
-      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(axisToAlign, alignAxisWithThis, rotationToDesired);
+      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(axisToAlign, alignAxisWithThis, rotationToDesired);
    
       RigidBodyTransform transformToDesired = new RigidBodyTransform(rotationToDesired, point);
    

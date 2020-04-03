@@ -180,7 +180,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
          {
             localTranslation.set(circleOrigin);
             localRotationAxis.set(rotationAxis);
-            EuclidGeometryTools.axisAngleFromZUpToVector3D(localRotationAxis, localAxisAngle);
+            EuclidGeometryTools.orientation3DFromZUpToVector3D(localRotationAxis, localAxisAngle);
             transformToParent.set(localAxisAngle, localTranslation);
          }
       };

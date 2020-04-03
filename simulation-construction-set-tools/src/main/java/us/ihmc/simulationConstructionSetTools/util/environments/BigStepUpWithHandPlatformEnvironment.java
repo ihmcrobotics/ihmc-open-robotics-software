@@ -54,11 +54,11 @@ public class BigStepUpWithHandPlatformEnvironment implements CommonAvatarEnviron
       double yCenter = 0.4;
       
       RigidBodyTransform location = new RigidBodyTransform();
-      location.setTranslation(new Vector3D(xCenter, -yCenter, height/2.0));
+      location.getTranslation().set(new Vector3D(xCenter, -yCenter, height/2.0));
       combinedTerrainObject.addCylinder(location, height, radius, appearance);
       
       location = new RigidBodyTransform();
-      location.setTranslation(new Vector3D(xCenter, yCenter, height/2.0));
+      location.getTranslation().set(new Vector3D(xCenter, yCenter, height/2.0));
       combinedTerrainObject.addCylinder(location, height, radius, appearance);
       
       return combinedTerrainObject;

@@ -24,7 +24,7 @@ public class MocapToPelvisFrameConverter
    {
       Vector3D marker2PositionInPelvisFrame = new Vector3D(markerPlateOriginInPelvisFrame);
       marker2PositionInPelvisFrame.add(plateOriginToMarker2InPelvisFrame);
-      pelvisToMarker2Transform.setTranslation(marker2PositionInPelvisFrame);
+      pelvisToMarker2Transform.getTranslation().set(marker2PositionInPelvisFrame);
       pelvisToMarker2Transform.invert();      
    }
 

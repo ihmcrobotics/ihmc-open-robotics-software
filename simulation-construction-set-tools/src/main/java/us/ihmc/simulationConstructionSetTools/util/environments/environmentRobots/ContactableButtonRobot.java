@@ -133,7 +133,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       // Create the Graphics
       buttonLinkGraphics = new Graphics3DObject();
       RotationMatrix rotationMatrix = new RotationMatrix();
-      rootJointTransform.getRotation(rotationMatrix);
+      rotationMatrix.set(rootJointTransform.getRotation());
 
       buttonLinkGraphics.rotate(rotationMatrix);
       buttonLinkGraphics.addCylinder(buttonThickness / 2.0, buttonRadius, YoAppearance.Red());
@@ -150,7 +150,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       Vector3D caseOffset = new Vector3D(buttonPushVector);
       caseOffset.scale(buttonThickness);
       caseOffset.add(buttonOffset);
-      rootJointTransform.getRotation(rotationMatrix);
+      rotationMatrix.set(rootJointTransform.getRotation());
 
       caseLinkGraphics = new Graphics3DObject();
       caseLinkGraphics.translate(caseOffset);

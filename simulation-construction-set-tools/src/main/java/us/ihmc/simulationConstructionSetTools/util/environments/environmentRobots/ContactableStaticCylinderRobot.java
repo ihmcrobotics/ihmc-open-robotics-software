@@ -61,7 +61,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       RotationMatrix rotation = new RotationMatrix();
       Vector3D offset = new Vector3D();
       cylinderTransform.getTranslation(offset);
-      cylinderTransform.getRotation(rotation);
+      rotation.set(cylinderTransform.getRotation());
       
       FramePoint3D cylinderCenter = new FramePoint3D(new TransformReferenceFrame("cylinderCenter", ReferenceFrame.getWorldFrame(), cylinderTransform), 0.0, 0.0, cylinderHeight / 2.0 );
       cylinderCenter.changeFrame(ReferenceFrame.getWorldFrame());
@@ -69,7 +69,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       
       Vector3D axis = new Vector3D(0.0, 0.0, 1.0);
       RigidBodyTransform rotationTransform = new RigidBodyTransform();
-      rotationTransform.setRotation(rotation);
+      rotationTransform.getRotation().set(rotation);
       rotationTransform.transform(axis);
       
       nullJoint = new RigidJoint(name + "NullJoint", offset, this);

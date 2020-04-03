@@ -83,7 +83,7 @@ public class SpringFlamingoRobotDescription extends RobotDescription
       plane.addCameraSensor(robotCam);
 
       RigidBodyTransform imuTransform = new RigidBodyTransform();
-      imuTransform.setTranslation(new Vector3D(0.0, 0.0, 0.2));
+      imuTransform.getTranslation().set(new Vector3D(0.0, 0.0, 0.2));
       IMUSensorDescription imuMount = new IMUSensorDescription("FlamingoIMU", imuTransform);
       plane.addIMUSensor(imuMount);
 

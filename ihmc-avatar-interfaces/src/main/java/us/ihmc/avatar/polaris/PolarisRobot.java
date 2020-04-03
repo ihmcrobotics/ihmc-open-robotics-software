@@ -126,10 +126,10 @@ public class PolarisRobot extends Robot
    
    static
    {
-      wheelToCarTransform.setTranslation(wheelToCarX, wheelToCarY, wheelToCarZ);
+      wheelToCarTransform.getTranslation().set(wheelToCarX, wheelToCarY, wheelToCarZ);
       RotationMatrix rotation = new RotationMatrix();
       rotation.setToPitchOrientation(Math.toRadians(steeringWheelPitchInDegrees));
-      wheelToCarTransform.setRotation(rotation);
+      wheelToCarTransform.getRotation().set(rotation);
       
       carToWheelTransform.set(wheelToCarTransform);
       carToWheelTransform.invert();

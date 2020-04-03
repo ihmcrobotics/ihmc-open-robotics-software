@@ -460,7 +460,7 @@ public class PlanarRegionConstraintProvider
       footstepNormal.set(0.0, 0.0, 1.0);
       footstepPose.getOrientation().transform(footstepNormal);
       activePlanarRegion.getNormal(planarRegionNormal);
-      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(footstepNormal, planarRegionNormal, rotation);
+      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(footstepNormal, planarRegionNormal, rotation);
 
       // get the height
       footstepXYPosition.changeFrameAndProjectToXYPlane(worldFrame);

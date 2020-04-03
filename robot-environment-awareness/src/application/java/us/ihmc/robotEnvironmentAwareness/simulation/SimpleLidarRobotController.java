@@ -76,7 +76,7 @@ public class SimpleLidarRobotController implements RobotController
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
-            lidarYawPitchRoll.getQuaternion(localQuaternion);
+            localQuaternion.set(lidarYawPitchRoll);
             rootJoint.setQuaternion(localQuaternion);
          }
       });

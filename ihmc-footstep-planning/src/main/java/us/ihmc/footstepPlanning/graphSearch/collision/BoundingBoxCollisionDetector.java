@@ -84,7 +84,7 @@ public class BoundingBoxCollisionDetector
                {
                   tempPoint1.set(collisionResult.getPointOnA());
                   tempTransform.setTranslationAndIdentityRotation(bodyPoseX, bodyPoseY, bodyPoseZ);
-                  tempTransform.setRotationYaw(bodyPoseYaw);
+                  tempTransform.getRotation().setToYawOrientation(bodyPoseYaw);
                   tempTransform.invert();
                   tempTransform.transform(tempPoint1);
 
@@ -127,8 +127,8 @@ public class BoundingBoxCollisionDetector
    
    private void setBoundingBoxPosition()
    {
-      bodyBox.getPose().setTranslation(bodyPoseX, bodyPoseY, bodyPoseZ + 0.5 * boxHeight);
-      bodyBox.getPose().setRotationYawPitchRoll(bodyPoseYaw, 0.0, 0.0);
+      bodyBox.getPose().getTranslation().set(bodyPoseX, bodyPoseY, bodyPoseZ + 0.5 * boxHeight);
+      bodyBox.getPose().getRotation().setYawPitchRoll(bodyPoseYaw, 0.0, 0.0);
    }
 
    private void setDimensionsToLowerBound()

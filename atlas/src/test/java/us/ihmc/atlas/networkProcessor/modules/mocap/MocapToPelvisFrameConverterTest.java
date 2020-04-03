@@ -103,7 +103,7 @@ public class MocapToPelvisFrameConverterTest
       RigidBodyTransform pelvisToMocapTransform = new RigidBodyTransform();
       pelvisFrame.getTransformToDesiredFrame(pelvisToMocapTransform, mocapFrame);
       Quaternion pelvisToMocapRotation = new Quaternion();
-      pelvisToMocapTransform.getRotation(pelvisToMocapRotation);
+      pelvisToMocapRotation.set(pelvisToMocapTransform.getRotation());
 
       ArrayList<MocapMarker> mocapMarkers = new ArrayList<MocapMarker>();
       mocapMarkers.add(new MocapMarker(1, new Vector3D(), 0.024f));

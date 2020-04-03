@@ -179,7 +179,7 @@ public class OpenCVChessboardPoseEstimator
       Point3D translation = new Point3D();
       transform.getTranslation(translation);
       AxisAngle axisAngle = new AxisAngle();
-      transform.getRotation(axisAngle);
+      axisAngle.set(transform.getRotation());
       Vector3D rotVector = new Vector3D(axisAngle.getX(), axisAngle.getY(), axisAngle.getZ());
       rotVector.normalize();
       rotVector.scale(axisAngle.getAngle());

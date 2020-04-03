@@ -79,7 +79,7 @@ public class IHMCMocapDataClient extends MocapDataClient
          r.getTranslation(position);
 
          Quaternion rotation = new Quaternion();
-         r.getRotation(rotation);
+         rotation.set(r.getRotation());
 
          convertedListOfMocapRigidBodies.add(new MocapRigidBody(mocapRigidBody.getId(), position, rotation, mocapRigidBody.getListOfAssociatedMarkers(),
                  mocapRigidBody.dataValid));

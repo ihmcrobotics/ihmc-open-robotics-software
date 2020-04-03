@@ -70,12 +70,12 @@ public class TransformToolsTest
    {
       Vector3D vectorA1 = new Vector3D(-1.0, -2.0, -3.0);
       RigidBodyTransform transformFromWorldToA1 = new RigidBodyTransform();
-      transformFromWorldToA1.setTranslation(vectorA1);
+      transformFromWorldToA1.getTranslation().set(vectorA1);
 
       Vector3D vectorA2 = new Vector3D(vectorA1);
       vectorA2.negate();
       RigidBodyTransform transformFromWorldToA2 = new RigidBodyTransform();
-      transformFromWorldToA2.setTranslation(vectorA2);
+      transformFromWorldToA2.getTranslation().set(vectorA2);
 
       ReferenceFrame a1 = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("a1", ReferenceFrame.getWorldFrame(), transformFromWorldToA1);
       ReferenceFrame a2 = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("a2", ReferenceFrame.getWorldFrame(), transformFromWorldToA2);

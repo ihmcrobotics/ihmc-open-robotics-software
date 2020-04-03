@@ -269,7 +269,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
       // transform line and compute intersections with default foot polygon
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotationYawAndZeroTranslation(angle);
-      transform.setTranslation(lineOrigin.getX(), lineOrigin.getY(), 0.0);
+      transform.getTranslation().set(lineOrigin.getX(), lineOrigin.getY(), 0.0);
 
       Line2D line = new Line2D(new Point2D(0.0, 0.0), new Vector2D(1.0, 0.0));
       line.applyTransform(transform);

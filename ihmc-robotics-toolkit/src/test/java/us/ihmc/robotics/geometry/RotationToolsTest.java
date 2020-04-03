@@ -1,21 +1,22 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Vector4D;
-import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.geometry.RotationTools.AxisAngleComparisonMode;
 import us.ihmc.robotics.math.QuaternionCalculus;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -269,14 +270,13 @@ public class RotationToolsTest
          double yaw = (random.nextDouble() - 0.5) * 2.0 * pi;
          double pitch = (random.nextDouble() - 0.5) * 0.5 * pi;
          double roll = (random.nextDouble() - 0.5) * 2.0 * pi;
-         double[] yawPitchRoll = {yaw, pitch, roll};
+         YawPitchRoll yawPitchRoll = new YawPitchRoll(yaw, pitch, roll);
 
          q.setYawPitchRoll(yaw, pitch, roll);
-         double[] yawPitchRollBack = new double[3];
-         q.getYawPitchRoll(yawPitchRollBack);
+         YawPitchRoll yawPitchRollBack = new YawPitchRoll(q);
 
          double epsilon = 1e-8;
-         localAssertArrayEquals(yawPitchRoll, yawPitchRollBack, epsilon);
+         EuclidCoreTestTools.assertYawPitchRollEquals(yawPitchRoll, yawPitchRollBack, epsilon);
       }
    }
 
@@ -389,14 +389,6 @@ public class RotationToolsTest
 
             assertTrue(expectedAngularVelocity.epsilonEquals(actualAngularVelocity, 1.0e-7));
          }
-      }
-   }
-
-   private void localAssertArrayEquals(double[] expected, double[] actual, double epsilon)
-   {
-      for (int i = 0; i < expected.length; i++)
-      {
-         assertEquals(expected[i], actual[i], epsilon);
       }
    }
 

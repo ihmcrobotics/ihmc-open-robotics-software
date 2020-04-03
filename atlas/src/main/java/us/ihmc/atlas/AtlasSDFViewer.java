@@ -202,7 +202,7 @@ public class AtlasSDFViewer
          Capsule3DReadOnly capsule = (Capsule3DReadOnly) shape;
          RigidBodyTransform transform = new RigidBodyTransform();
          EuclidGeometryTools.orientation3DFromZUpToVector3D(capsule.getAxis(), transform.getRotation());
-         transform.setTranslation(capsule.getPosition());
+         transform.getTranslation().set(capsule.getPosition());
          graphics.transform(transform);
          graphics.addCapsule(capsule.getRadius(),
                              capsule.getLength() + 2.0 * capsule.getRadius(), // the 2nd term is removed internally.

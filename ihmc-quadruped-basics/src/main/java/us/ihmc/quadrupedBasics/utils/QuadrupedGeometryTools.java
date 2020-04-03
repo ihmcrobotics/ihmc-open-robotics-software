@@ -60,7 +60,7 @@ public class QuadrupedGeometryTools
       ellipsoidToPack.checkReferenceFrameMatch(referenceFrames.getHipPitchFrame(robotQuadrant));
       
       RigidBodyTransform ellipsoidTransform = new RigidBodyTransform();
-      ellipsoidTransform.setTranslation(0.0, 0.0, -hipPitchHeight);
+      ellipsoidTransform.getTranslation().set(0.0, 0.0, -hipPitchHeight);
       ellipsoidToPack.applyTransform(ellipsoidTransform);
       ellipsoidToPack.getRadii().setX(maxStepDistance);
       ellipsoidToPack.getRadii().setY(maxStepDistance);

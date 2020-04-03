@@ -252,7 +252,7 @@ public class PolygonWiggler
       fullTransform.multiply(toOriginTransform);
 
       RotationMatrix rotationMatrix = new RotationMatrix();
-      rotationTransform.getRotation(rotationMatrix);
+      rotationMatrix.set(rotationTransform.getRotation());
       rotationMatrix.transpose();
       rotationMatrix.transform(translation);
       RigidBodyTransform translationTransform = new RigidBodyTransform();

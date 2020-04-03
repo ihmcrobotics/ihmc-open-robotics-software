@@ -33,7 +33,7 @@ public class UserDesiredChestOrientationControllerCommandGenerator
          {
             if (userDoChestOrientation.getBooleanValue())
             {
-               userDesiredChestOrientation.getFrameOrientationIncludingFrame(frameOrientation);
+               frameOrientation.setIncludingFrame(userDesiredChestOrientation);
 
                ChestTrajectoryCommand chestTrajectoryControllerCommand = new ChestTrajectoryCommand();
                chestTrajectoryControllerCommand.getSO3Trajectory().addTrajectoryPoint(userDesiredChestTrajectoryTime.getDoubleValue(), frameOrientation, new Vector3D());
