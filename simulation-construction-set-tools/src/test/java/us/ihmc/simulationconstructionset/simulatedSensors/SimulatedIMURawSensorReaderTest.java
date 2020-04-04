@@ -380,7 +380,7 @@ public class SimulatedIMURawSensorReaderTest
       public FrameVector3D getReferenceFrameTransInWorldFrame(ReferenceFrame frame)
       {
          Vector3D trans = new Vector3D();
-         frame.getTransformToDesiredFrame(worldFrame).getTranslation(trans);
+         trans.set(frame.getTransformToDesiredFrame(worldFrame).getTranslation());
          FrameVector3D ret = new FrameVector3D(worldFrame, trans);
          return ret;
       }

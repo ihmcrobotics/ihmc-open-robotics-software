@@ -1,6 +1,8 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -13,7 +15,11 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.*;
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line3D;
+import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -944,7 +950,7 @@ public class PlanarRegionTest
          supportDirection.scale(EuclidCoreRandomTools.nextDouble(random, 0.1, 10.0));
 
          Line3D line = new Line3D();
-         line.setDirection(orthogonalDirection);
+         line.getDirection().set(orthogonalDirection);
          line.translate(20.0 * supportDirectionInPlane.getX(), 20.0 * supportDirectionInPlane.getY(), 20.0 * supportDirectionInPlane.getZ());
 
          expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(line::distance)).get();

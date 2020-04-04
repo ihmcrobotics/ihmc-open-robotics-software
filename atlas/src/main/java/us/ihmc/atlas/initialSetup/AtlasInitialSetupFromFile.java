@@ -114,7 +114,7 @@ public class AtlasInitialSetupFromFile implements DRCRobotInitialSetup<HumanoidF
    @Override
    public void getOffset(Vector3D offsetToPack)
    {
-      pelvisPoseInWorld.getTranslation(offsetToPack);
+      offsetToPack.set(pelvisPoseInWorld.getTranslation());
    }
 
    @Override

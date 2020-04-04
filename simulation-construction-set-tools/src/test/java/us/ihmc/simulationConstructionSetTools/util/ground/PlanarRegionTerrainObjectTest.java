@@ -211,7 +211,7 @@ public class PlanarRegionTerrainObjectTest
          PlanarRegionTerrainObject terrainObject = new PlanarRegionTerrainObject(planarRegion, DEFAULT_ALLOWABLE_PENETRATION_THICKNESS);
 
          planarRegion.getTransformToWorld(transformToWorld);
-         transformToWorld.getTranslation(translation);
+         translation.set(transformToWorld.getTranslation());
          planarRegion.getNormal(planarRegionSurfaceNormal);
 
          if (planarRegion.isPointOnOrSlightlyBelow(randomPoint, DEFAULT_ALLOWABLE_PENETRATION_THICKNESS))

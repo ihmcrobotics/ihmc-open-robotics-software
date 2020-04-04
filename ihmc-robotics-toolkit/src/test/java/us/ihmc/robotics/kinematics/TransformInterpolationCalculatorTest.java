@@ -73,18 +73,18 @@ public class TransformInterpolationCalculatorTest
       RigidBodyTransform t3 =  new RigidBodyTransform();
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, 0.0);
       Vector3D interpolatedVector = new Vector3D();
-      t3.getTranslation(interpolatedVector);
+      interpolatedVector.set(t3.getTranslation());
       assertTrue(vector1.epsilonEquals(interpolatedVector, 1e-8));
 
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, 1.0);
       interpolatedVector = new Vector3D();
-      t3.getTranslation(interpolatedVector);
+      interpolatedVector.set(t3.getTranslation());
       assertTrue(vector2.epsilonEquals(interpolatedVector, 1e-8));
 
       double alpha = 0.25;
       transformInterpolationCalculator.computeInterpolation(t1, t2, t3, alpha);
       interpolatedVector = new Vector3D();
-      t3.getTranslation(interpolatedVector);
+      interpolatedVector.set(t3.getTranslation());
 
       Vector3D expectedVector = new Vector3D();
       expectedVector.scaleAdd((1- alpha), vector1, expectedVector);

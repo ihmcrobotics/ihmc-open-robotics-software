@@ -129,7 +129,7 @@ public class PelvisPoseNoiseGenerator
       pelvisRotation.multiply(rotationError);
       pelvisPose.getRotation().set(pelvisRotation);
       
-      pelvisPose.getTranslation(pelvisTranslation);
+      pelvisTranslation.set(pelvisPose.getTranslation());
       pelvisTranslation.add(translationError);
       pelvisPose.getTranslation().set(pelvisTranslation);
       
@@ -141,7 +141,7 @@ public class PelvisPoseNoiseGenerator
 
    private void updateBeforeYoVariables()
    {
-      pelvisPose.getTranslation(pelvisTranslation);
+      pelvisTranslation.set(pelvisPose.getTranslation());
       nonProcessedRootJointPosition.set(pelvisTranslation);
       
       rot.set(pelvisPose.getRotation());
@@ -161,7 +161,7 @@ public class PelvisPoseNoiseGenerator
       error_y.set(translationError.getY());  
       error_z.set(translationError.getZ()); 
       
-      pelvisPose.getTranslation(pelvisTranslation);
+      pelvisTranslation.set(pelvisPose.getTranslation());
       processedRootJointPosition.set(pelvisTranslation);
       
       rot.set(pelvisPose.getRotation());

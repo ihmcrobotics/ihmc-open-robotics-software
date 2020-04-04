@@ -92,7 +92,7 @@ public class Line2DStatisticsCalculator
       numberOfSamples.increment();
 
       headingMean.set(totalHeadingValue / numberOfSamples.getIntegerValue());
-      meanLine.setDirection(Math.cos(headingMean.getDoubleValue()), Math.sin(headingMean.getDoubleValue()));
+      meanLine.getDirection().set(Math.cos(headingMean.getDoubleValue()), Math.sin(headingMean.getDoubleValue()));
 
       meanLine.orthogonalProjection(incomingPosition, previousPositionMean);
       meanLine.getPoint().interpolate(previousPositionMean, incomingPosition, 1.0 / numberOfSamples.getIntegerValue());

@@ -170,9 +170,9 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       secondYawPitchRoll.set(secondTransform.getRotation());
 
       Vector3D firstOffset = new Vector3D();
-      firstTransform.getTranslation(firstOffset);
+      firstOffset.set(firstTransform.getTranslation());
       Vector3D secondOffset = new Vector3D();
-      secondTransform.getTranslation(secondOffset);
+      secondOffset.set(secondTransform.getTranslation());
 
       Vector3D fusedOffset = new Vector3D();
       fusedOffset.add(firstOffset, secondOffset);

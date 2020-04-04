@@ -325,7 +325,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
    private void updateTranslationalMaxVelocityClip()
    {
       interpolatedTranslationCorrectionFrame.getTransformToDesiredFrame(errorBetweenCurrentPositionAndCorrected, worldFrame);
-      errorBetweenCurrentPositionAndCorrected.getTranslation(distanceToTravelVector);
+      distanceToTravelVector.set(errorBetweenCurrentPositionAndCorrected.getTranslation());
       distanceToTravel.set(distanceToTravelVector.length());
       maxTranslationAlpha.set((estimatorDT * maxTranslationVelocityClip.getDoubleValue() / distanceToTravel.getDoubleValue())
             + previousTranslationClippedAlphaValue.getDoubleValue());
@@ -405,7 +405,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       long timeStamp = timestampedlocalizationPose.getTimeStamp();
       RigidBodyTransform localizationPose = timestampedlocalizationPose.getTransform3D();
 
-      localizationPose.getTranslation(localizationTranslationInPast);
+      localizationTranslationInPast.set(localizationPose.getTranslation());
       newLocalizationTranslationFrame.setAndUpdate(localizationTranslationInPast);
 
       localizationRotationInPast.set(localizationPose.getRotation());
@@ -414,7 +414,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       stateEstimatorPelvisPoseBuffer.findTransform(timeStamp, seTimeStampedPose);
       RigidBodyTransform sePose = seTimeStampedPose.getTransform3D();
 
-      sePose.getTranslation(seTranslationInPast);
+      seTranslationInPast.set(sePose.getTranslation());
       pelvisStateAtLocalizationTimeTranslationFrame.setAndUpdate(seTranslationInPast);
 
       seRotationInPast.set(sePose.getRotation());
@@ -442,7 +442,7 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       pelvisPose.getRotation().set(rotation);
 
       Vector3D translation = new Vector3D();
-      pelvisPose.getTranslation(translation);
+      translation.set(pelvisPose.getTranslation());
       translation.setX(manualTranslationOffsetX.getDoubleValue());
       translation.setY(manualTranslationOffsetY.getDoubleValue());
       translation.setZ(manualTranslationOffsetZ.getDoubleValue());
@@ -462,11 +462,11 @@ public class PelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrectionI
       totalTranslationErrorFrame.get(totalTranslationError);
       totalError.set(totalRotationError, totalTranslationError);
       
-      errorBetweenCurrentPositionAndCorrected.getTranslation(translationalResidualError);
+      translationalResidualError.set(errorBetweenCurrentPositionAndCorrected.getTranslation());
       
       double absoluteResidualError = translationalResidualError.length();
       
-      totalError.getTranslation(translationalTotalError);
+      translationalTotalError.set(totalError.getTranslation());
       
       double absoluteTotalError = translationalTotalError.length();
 

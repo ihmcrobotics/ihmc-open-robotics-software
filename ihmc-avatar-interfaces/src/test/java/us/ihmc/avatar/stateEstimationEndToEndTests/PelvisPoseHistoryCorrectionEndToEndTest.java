@@ -622,7 +622,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       for (int i = 0; i < targets.length; i++)
       {
          success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getEstimatorDT() * 10);
-         targets[i].getTranslation(targetTranslation);
+         targetTranslation.set(targets[i].getTranslation());
          targetQuat.set(targets[i].getRotation());
 
          YawPitchRollConversion.convertQuaternionToYawPitchRoll(targetQuat, yawPitchRoll);
@@ -694,7 +694,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       for (int i = 0; i < targets.length; i++)
       {
          success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getEstimatorDT() * 10);
-         targets[i].getTranslation(targetTranslation);
+         targetTranslation.set(targets[i].getTranslation());
          targetQuat.set(targets[i].getRotation());
 
          YawPitchRollConversion.convertQuaternionToYawPitchRoll(targetQuat, yawPitchRoll);
