@@ -165,8 +165,8 @@ public class GroundPlaneEstimator
       groundPlaneFramePoint.set(groundPlanePoint);
       groundPlaneOrientation.setYawPitchRoll(0.0, getPitch(), getRoll());
 
-      groundPlanePose.setPosition(groundPlaneFramePoint);
-      groundPlanePose.setOrientation(groundPlaneOrientation);
+      groundPlanePose.getPosition().set(groundPlaneFramePoint);
+      groundPlanePose.getOrientation().set(groundPlaneOrientation);
       groundPlaneFrame.setPoseAndUpdate(groundPlanePose);
    }
 

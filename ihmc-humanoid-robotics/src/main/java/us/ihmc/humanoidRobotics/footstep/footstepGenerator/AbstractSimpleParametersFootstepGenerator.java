@@ -10,10 +10,10 @@ import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.CompositeOverheadPath;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.overheadPath.OverheadPath;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public abstract class AbstractSimpleParametersFootstepGenerator extends AbstractFootstepGenerator
 {
@@ -211,7 +211,7 @@ public abstract class AbstractSimpleParametersFootstepGenerator extends Abstract
       double footHeading = planningPose.getYaw();
       footstepPosition2d = offsetFootstepFromPath(currentFootstepSide, footstepPosition2d, footHeading, stepWidth / 2);
       FramePose2D footstepPose2d = new FramePose2D(planningPose);
-      footstepPose2d.setPosition(footstepPosition2d);
+      footstepPose2d.getPosition().set(footstepPosition2d);
 
       return createFootstep(currentFootstepSide, footstepPose2d);
    }

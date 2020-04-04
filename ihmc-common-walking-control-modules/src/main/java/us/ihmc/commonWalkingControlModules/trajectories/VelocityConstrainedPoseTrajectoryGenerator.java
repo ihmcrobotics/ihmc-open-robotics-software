@@ -694,8 +694,8 @@ public class VelocityConstrainedPoseTrajectoryGenerator implements PoseTrajector
    public void getPose(FramePose3D framePoseToPack)
    {
       framePoseToPack.changeFrame(currentPosition.getReferenceFrame());
-      framePoseToPack.setPosition(currentPosition);
-      framePoseToPack.setOrientation(currentOrientation);
+      framePoseToPack.getPosition().set(currentPosition);
+      framePoseToPack.getOrientation().set(currentOrientation);
    }
 
    @Override

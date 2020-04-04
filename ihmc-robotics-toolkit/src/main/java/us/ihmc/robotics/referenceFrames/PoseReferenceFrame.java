@@ -10,11 +10,14 @@ import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 
 public class PoseReferenceFrame extends ReferenceFrame
@@ -105,7 +108,7 @@ public class PoseReferenceFrame extends ReferenceFrame
    public void setPositionAndUpdate(FramePoint3DReadOnly framePoint)
    {
       framePoint.checkReferenceFrameMatch(getParent());
-      originPose.setPosition(framePoint);
+      originPose.getPosition().set(framePoint);
       this.update();
    }
 
@@ -124,14 +127,14 @@ public class PoseReferenceFrame extends ReferenceFrame
    public void setOrientationAndUpdate(FrameOrientation3DReadOnly frameOrientation)
    {
       frameOrientation.checkReferenceFrameMatch(getParent());
-      originPose.setOrientation(frameOrientation);
+      originPose.getOrientation().set(frameOrientation);
       this.update();
    }
    
    public void setXYFromPosition2dAndUpdate(FramePoint2DReadOnly position2d)
    {
       position2d.checkReferenceFrameMatch(getParent());
-      originPose.setPosition(position2d);
+      originPose.getPosition().set(position2d);
       this.update();
    }
 

@@ -433,7 +433,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       else
       {
          tangentialCircleFramePose.setToZero(currentPosition.getReferenceFrame());
-         tangentialCircleFramePose.setPosition(currentPosition);
+         tangentialCircleFramePose.getPosition().set(currentPosition);
       }
 
       tangentialCircleFramePose.changeFrame(circleFrame);

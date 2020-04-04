@@ -27,7 +27,6 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -469,7 +468,7 @@ public class PlanarRegionConstraintProvider
       // change the foot pose to be correct
       footstepPose.prependRotation(rotation);
 
-      footstepPose.setPosition(footstepXYPosition);
+      footstepPose.getPosition().set(footstepXYPosition);
       footstepPose.setZ(zPosition);
 
       boolean wasAdjusted = false;
