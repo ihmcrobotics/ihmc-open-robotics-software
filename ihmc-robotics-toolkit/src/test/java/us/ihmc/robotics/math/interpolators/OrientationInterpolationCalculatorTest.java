@@ -1,14 +1,13 @@
 package us.ihmc.robotics.math.interpolators;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -59,7 +58,7 @@ public class OrientationInterpolationCalculatorTest
          Matrix3D interpolatedOrientationMatrixDot = new Matrix3D();
          RigidBodyTransform transformationAtDt = new RigidBodyTransform();
          transformationAtDt.getRotation().set(interpolatedOrientationDt);
-         transformationAtDt.getRotation(interpolatedOrientationMatrixDot);
+         interpolatedOrientationMatrixDot.set(transformationAtDt.getRotation());
          RotationMatrix interpolatedOrientation0Matrix = new RotationMatrix();
          RigidBodyTransform transformationAt0 = new RigidBodyTransform();
          transformationAt0.getRotation().set(interpolatedOrientation0);

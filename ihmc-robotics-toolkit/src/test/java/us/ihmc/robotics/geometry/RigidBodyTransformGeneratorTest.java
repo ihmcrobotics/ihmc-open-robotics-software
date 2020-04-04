@@ -7,7 +7,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
@@ -42,19 +42,19 @@ public class RigidBodyTransformGeneratorTest
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
 
       generator.identity();
-      generator.rotate(1.7, Axis.Z);
+      generator.rotate(1.7, Axis3D.Z);
       expectedTransform = new RigidBodyTransform();
       expectedTransform.setRotationEulerAndZeroTranslation(0.0, 0.0, 1.7);
       generator.getRigidyBodyTransform(transform);
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
 
-      generator.rotate(1.3, Axis.Y);
+      generator.rotate(1.3, Axis3D.Y);
       expectedTransform = new RigidBodyTransform();
       expectedTransform.setRotationEulerAndZeroTranslation(0.0, 1.3, 1.7);
       generator.getRigidyBodyTransform(transform);
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
 
-      generator.rotate(0.2, Axis.X);
+      generator.rotate(0.2, Axis3D.X);
       expectedTransform = new RigidBodyTransform();
       expectedTransform.setRotationEulerAndZeroTranslation(0.2, 1.3, 1.7);
       generator.getRigidyBodyTransform(transform);
@@ -94,7 +94,7 @@ public class RigidBodyTransformGeneratorTest
       RigidBodyTransform transform = generator.getRigidBodyTransformCopy();
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
 
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.translate(2.0, 0.0, 0.0);
       expectedTransform = new RigidBodyTransform();
       expectedTransform.setRotationEulerAndZeroTranslation(0.0, -Math.PI / 2.0, 0.0);
@@ -102,7 +102,7 @@ public class RigidBodyTransformGeneratorTest
       transform = generator.getRigidBodyTransformCopy();
       assertTrue(transform.epsilonEquals(expectedTransform, 1e-10));
 
-      generator.rotate(Math.PI / 2.0, Axis.Z);
+      generator.rotate(Math.PI / 2.0, Axis3D.Z);
       generator.translate(3.0, 0.0, 0.0);
       expectedTransform = new RigidBodyTransform();
       expectedTransform.setRotationEulerAndZeroTranslation(-Math.PI / 2.0, 0.0, Math.PI / 2.0);

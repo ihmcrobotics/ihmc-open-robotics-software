@@ -1,15 +1,13 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -46,7 +44,7 @@ public class YoSpline3DTest
       cubic.compute(3.0);
       FramePoint3D actual = cubic.getPositionCopy();
       
-      for (Axis axis : Axis.values())
+      for (Axis3D axis : Axis3D.values())
       {
          assertEquals(expected.getElement(axis.ordinal()), actual.getElement(axis.ordinal()), EPSILON);
       }
@@ -74,7 +72,7 @@ public class YoSpline3DTest
 	   quintic.compute(0.5);
 	   FramePoint3D actual = quintic.getPositionCopy();
 	      
-	   for (Axis axis : Axis.values())
+	   for (Axis3D axis : Axis3D.values())
 	   {
 	      assertEquals(expected.getElement(axis.ordinal()), actual.getElement(axis.ordinal()), EPSILON);
 	   }   

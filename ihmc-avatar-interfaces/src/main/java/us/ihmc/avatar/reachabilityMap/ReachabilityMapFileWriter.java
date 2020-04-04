@@ -23,6 +23,7 @@ import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.Sphe
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -227,7 +228,7 @@ public class ReachabilityMapFileWriter
 
       RigidBodyTransform transformToParent = new RigidBodyTransform();
       framePose.get(transformToParent);
-      ReferenceFrame gridFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("blop", ReferenceFrame.getWorldFrame(), transformToParent);
+      ReferenceFrame gridFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("blop", ReferenceFrame.getWorldFrame(), transformToParent);
       SphereVoxelShape sphereVoxelShape = new SphereVoxelShape(gridFrame, 0.1, 10, 12, SphereVoxelType.graspOrigin);
       Voxel3DGrid voxel3dGrid = new Voxel3DGrid(gridFrame, sphereVoxelShape, 10, 0.1);
       RobotArm robot = new RobotArm();

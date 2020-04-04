@@ -12,7 +12,7 @@ import java.util.stream.IntStream;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -144,7 +144,7 @@ public class ExternalWrenchEstimator implements RobotController
          String nameSuffix;
          if (i < 6 && hasFloatingBase)
          {
-            nameSuffix = (i < 3 ? "Ang" : "Lin") + Axis.values[i % 3];
+            nameSuffix = (i < 3 ? "Ang" : "Lin") + Axis3D.values[i % 3];
          }
          else
          {

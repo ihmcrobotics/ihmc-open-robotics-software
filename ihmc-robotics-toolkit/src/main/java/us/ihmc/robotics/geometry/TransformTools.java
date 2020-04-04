@@ -1,6 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -56,7 +56,7 @@ public class TransformTools
       return transform;
    }
 
-   public static void appendRotation(RigidBodyTransform transformToModify, double angle, Axis axis)
+   public static void appendRotation(RigidBodyTransform transformToModify, double angle, Axis3D axis)
    {
       switch (axis)
       {
@@ -74,7 +74,7 @@ public class TransformTools
       }
    }
 
-   public static void appendRotation(AffineTransform transformToModify, double angle, Axis axis)
+   public static void appendRotation(AffineTransform transformToModify, double angle, Axis3D axis)
    {
       switch (axis)
       {

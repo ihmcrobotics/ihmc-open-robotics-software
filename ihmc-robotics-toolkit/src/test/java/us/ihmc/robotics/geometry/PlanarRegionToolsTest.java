@@ -1,6 +1,18 @@
 package us.ihmc.robotics.geometry;
 
+import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDouble;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertNull;
+import static us.ihmc.robotics.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.BoundingBox2D;
@@ -23,14 +35,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-
-import java.util.*;
-
-import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDouble;
-import static us.ihmc.euclid.tools.EuclidCoreRandomTools.randomizeAxisAngle;
-import static us.ihmc.robotics.Assert.*;
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public class PlanarRegionToolsTest
 {
@@ -208,7 +212,7 @@ public class PlanarRegionToolsTest
          Point2DReadOnly[] convexPolygon2DArray = convexPolygon2D.subList(0, hullSize).toArray(new Point2DReadOnly[convexPolygon2D.size()]);
 
          Point2D centroid = new Point2D();
-         EuclidGeometryPolygonTools.computeConvexPolyong2DArea(convexPolygon2D, hullSize, clockwiseOrdered, centroid);
+         EuclidGeometryPolygonTools.computeConvexPolygon2DArea(convexPolygon2D, hullSize, clockwiseOrdered, centroid);
          int vertexIndex = random.nextInt(hullSize);
          int nextVertexIndex = EuclidGeometryPolygonTools.next(vertexIndex, hullSize);
          Point2DReadOnly vertex = convexPolygon2D.get(vertexIndex);

@@ -1,6 +1,9 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -20,7 +23,6 @@ import java.util.TreeSet;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Disabled;
@@ -29,15 +31,22 @@ import org.reflections.Reflections;
 
 import com.google.common.base.CaseFormat;
 
+import controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket;
+import controller_msgs.msg.dds.FootstepNodeDataMessage;
+import controller_msgs.msg.dds.FootstepPlannerStatusMessage;
+import controller_msgs.msg.dds.FrameInformation;
+import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
+import controller_msgs.msg.dds.SnapFootstepPacket;
+import controller_msgs.msg.dds.VideoPacket;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.Packet;
-import us.ihmc.euclid.geometry.Orientation2D;
 import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.euclid.orientation.Orientation2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;

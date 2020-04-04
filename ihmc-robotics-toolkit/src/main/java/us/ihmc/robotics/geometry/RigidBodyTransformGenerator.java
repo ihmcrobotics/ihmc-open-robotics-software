@@ -1,6 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -76,7 +76,7 @@ public class RigidBodyTransformGenerator
       transform.multiply(tempTransform);
    }
 
-   public void rotate(double rotationAngle, Axis axis)
+   public void rotate(double rotationAngle, Axis3D axis)
    {
       switch (axis)
       {

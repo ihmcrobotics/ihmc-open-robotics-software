@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.Matrix3D;
@@ -77,7 +77,7 @@ public class LinkHollowCylinder extends Link
 
       comOffset.set(parentJointOffsetFromCoM);
 
-      Matrix3D moiInCylinderFrame = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, length, Axis.Z);
+      Matrix3D moiInCylinderFrame = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, length, Axis3D.Z);
 
       Boolean computeMoiInWorldInternally = false;
 

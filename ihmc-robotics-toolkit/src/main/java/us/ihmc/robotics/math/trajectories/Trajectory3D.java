@@ -6,7 +6,7 @@ import java.util.List;
 import org.ejml.data.DenseMatrix64F;
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -240,7 +240,7 @@ public class Trajectory3D
       return integralResult;
    }
 
-   public Trajectory getTrajectory(Axis axis)
+   public Trajectory getTrajectory(Axis3D axis)
    {
       return getTrajectory(axis.ordinal());
    }
@@ -331,7 +331,7 @@ public class Trajectory3D
       }
    }
 
-   public double getInitialTime(Axis dir)
+   public double getInitialTime(Axis3D dir)
    {
       return getTrajectory(dir).getInitialTime();
    }
@@ -341,7 +341,7 @@ public class Trajectory3D
       return getTrajectory(index).getInitialTime();
    }
 
-   public double getFinalTime(Axis dir)
+   public double getFinalTime(Axis3D dir)
    {
       return getTrajectory(dir).getFinalTime();
    }
@@ -377,7 +377,7 @@ public class Trajectory3D
          return -1;
    }
 
-   public int getNumberOfCoefficients(Axis dir)
+   public int getNumberOfCoefficients(Axis3D dir)
    {
       return getTrajectory(dir).getNumberOfCoefficients();
    }
@@ -506,7 +506,7 @@ public class Trajectory3D
 
    public void setLinear(double t0, double tFinal, Point3DReadOnly z0, Point3DReadOnly zf)
    {
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
       {
          int index = axis.ordinal();
          getTrajectory(index).setLinear(t0, tFinal, z0.getElement(index), zf.getElement(index));
@@ -696,7 +696,7 @@ public class Trajectory3D
                                                              Vector3DReadOnly zdd0, Vector3DReadOnly zdIntermediate, Vector3DReadOnly zddIntermediate,
                                                              Point3DReadOnly zFinal, Vector3DReadOnly zdFinal)
    {
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
       {
          int index = axis.ordinal();
          getTrajectory(index).setSexticUsingWaypointVelocityAndAcceleration(t0, tIntermediate, tFinal, z0.getElement(index), zd0.getElement(index),
@@ -708,7 +708,7 @@ public class Trajectory3D
 
    public void reshape(int numberOfCoefficientsRequired)
    {
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
       {
          getTrajectory(axis).reshape(numberOfCoefficientsRequired);
       }
@@ -716,7 +716,7 @@ public class Trajectory3D
 
    public void setConstraintRow(int row, double time, Tuple3DReadOnly value, int derivativeOrder)
    {
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
       {
          int index = axis.ordinal();
          getTrajectory(index).setConstraintRow(row, time, value.getElement(index), derivativeOrder);
@@ -725,7 +725,7 @@ public class Trajectory3D
 
    public void solveForCoefficients()
    {
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
       {
          getTrajectory(axis).solveForCoefficients();
       }
@@ -733,7 +733,7 @@ public class Trajectory3D
 
    public void setCoefficientVariables()
    {
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
       {
          getTrajectory(axis).setCoefficientVariables();
       }

@@ -17,6 +17,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -142,7 +143,7 @@ public class ReachabilityMapFileLoader
       RigidBodyTransform transformToParentFrame = new RigidBodyTransform(transformToParentFrameAsDenseMatrix);
       ReferenceFrame parentFrame = searchParentFrameInCommonRobotFrames(parentFrameName, referenceFrames, rootBody);
 
-      ReferenceFrame gridFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(gridFrameName, parentFrame, transformToParentFrame);
+      ReferenceFrame gridFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(gridFrameName, parentFrame, transformToParentFrame);
       return gridFrame;
    }
 

@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.recursivePendulum;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.simulationconstructionset.Link;
@@ -49,7 +49,7 @@ public class RecursivePendulumRobot extends Robot
 
    private PinJoint joint_n(int joint_num, double yOffset, double zOffset)
    {
-      PinJoint ret = new PinJoint("joint" + joint_num, new Vector3D(0.0, yOffset, zOffset), this, Axis.Y);
+      PinJoint ret = new PinJoint("joint" + joint_num, new Vector3D(0.0, yOffset, zOffset), this, Axis3D.Y);
       ret.setInitialState(Math.random() - 0.5, 0.0);
 
       return ret;

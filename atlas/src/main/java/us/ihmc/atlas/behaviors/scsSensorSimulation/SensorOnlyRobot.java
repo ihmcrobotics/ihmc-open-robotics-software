@@ -1,6 +1,6 @@
 package us.ihmc.atlas.behaviors.scsSensorSimulation;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -22,7 +22,7 @@ public class SensorOnlyRobot extends Robot
       double height = 0.2;
       double radius = 0.05;
 
-      gimbalJoint = new GimbalJoint("gimbalZ", "gimbalX", "gimbalY", new Vector3D(0.0, 0.0, 1.0), this, Axis.Z, Axis.X, Axis.Y);
+      gimbalJoint = new GimbalJoint("gimbalZ", "gimbalX", "gimbalY", new Vector3D(0.0, 0.0, 1.0), this, Axis3D.Z, Axis3D.X, Axis3D.Y);
       Link link = new Link("lidar");
       link.setMassAndRadiiOfGyration(1.0, radius, radius, radius);
       Graphics3DObject linkGraphics = new Graphics3DObject();

@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.exampleContact;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -41,15 +41,15 @@ public class PushStickRobot extends Robot
       
       this.setGravity(0.0);
       
-      xJoint = new SliderJoint("pushStickX", new Vector3D(), this, Axis.X);
+      xJoint = new SliderJoint("pushStickX", new Vector3D(), this, Axis3D.X);
       Link xLink = new Link("xLink");
       xJoint.setLink(xLink);
       
-      yJoint = new SliderJoint("pushStickY", new Vector3D(), this, Axis.Y);
+      yJoint = new SliderJoint("pushStickY", new Vector3D(), this, Axis3D.Y);
       Link yLink = new Link("yLink");
       yJoint.setLink(yLink);
 
-      zJoint = new SliderJoint("pushStickZ", new Vector3D(), this, Axis.Z);
+      zJoint = new SliderJoint("pushStickZ", new Vector3D(), this, Axis3D.Z);
       Link zLink = new Link("zLink");
       zLink.setMass(100.0);
       zLink.setMomentOfInertia(10.0, 10.0, 10.0);
@@ -58,15 +58,15 @@ public class PushStickRobot extends Robot
       zLink.setLinkGraphics(zLinkLinkGraphics);
       zJoint.setLink(zLink);
       
-      yawJoint = new PinJoint("pushStickYaw", new Vector3D(), this, Axis.Z);
+      yawJoint = new PinJoint("pushStickYaw", new Vector3D(), this, Axis3D.Z);
       Link yawLink = new Link("yawLink");
       yawJoint.setLink(yawLink);
       
-      pitchJoint = new PinJoint("pushStickPitch", new Vector3D(), this, Axis.Y);
+      pitchJoint = new PinJoint("pushStickPitch", new Vector3D(), this, Axis3D.Y);
       Link pitchLink = new Link("pitchLink");
       pitchJoint.setLink(pitchLink);
       
-      pushJoint = new SliderJoint("pushStickPush", new Vector3D(), this, Axis.X);
+      pushJoint = new SliderJoint("pushStickPush", new Vector3D(), this, Axis3D.X);
       
       Link link = new Link("pushStick");
       
@@ -75,7 +75,7 @@ public class PushStickRobot extends Robot
       link.setMomentOfInertia(Ixx, Iyy, Izz);
             
       Graphics3DObject linkGraphics = new Graphics3DObject();
-      linkGraphics.rotate(Math.PI/2.0, Axis.Y);
+      linkGraphics.rotate(Math.PI/2.0, Axis3D.Y);
       linkGraphics.translate(0.0, 0.0, -LENGTH);
       linkGraphics.addCylinder(LENGTH, RADIUS);
       

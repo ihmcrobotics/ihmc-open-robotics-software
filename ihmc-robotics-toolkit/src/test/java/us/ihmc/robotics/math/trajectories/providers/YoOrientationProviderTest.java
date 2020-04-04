@@ -27,7 +27,7 @@ public class YoOrientationProviderTest
    @BeforeEach
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootFrame");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootFrame");
       registry = new YoVariableRegistry("yoVariableRegistry");
       yoFrameOrientation = new YoFrameYawPitchRoll(namePrefix, referenceFrame, registry);
       frameOrientationToPack = new FrameQuaternion();

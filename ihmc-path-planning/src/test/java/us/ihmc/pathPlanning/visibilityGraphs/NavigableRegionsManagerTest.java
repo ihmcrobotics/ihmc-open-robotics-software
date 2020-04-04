@@ -26,6 +26,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -1060,7 +1061,7 @@ public class NavigableRegionsManagerTest
          Point3D walkerPosition3D = new Point3D(walkerShapeWorld.getPosition());
 
          Plane3D plane = planarRegion.getPlane();
-         Point3D closestPoint = plane.orthogonalProjectionCopy(walkerPosition3D);
+         Point3DBasics closestPoint = plane.orthogonalProjectionCopy(walkerPosition3D);
 
          if (!walkerShapeWorld.isPointInside(closestPoint))
             continue; // Not even close to the region plane, let's keep going.

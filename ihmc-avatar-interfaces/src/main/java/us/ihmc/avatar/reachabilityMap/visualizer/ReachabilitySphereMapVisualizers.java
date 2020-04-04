@@ -6,7 +6,7 @@ import java.util.Random;
 
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -291,7 +291,7 @@ public class ReachabilitySphereMapVisualizers
       Graphics3DObject coneGraphic = new Graphics3DObject();
       coneGraphic.transform(coneTransform);
       coneGraphic.translate(0.0, 0.0, coneHeight);
-      coneGraphic.rotate(Math.PI, Axis.Y);
+      coneGraphic.rotate(Math.PI, Axis3D.Y);
       coneGraphic.addCone(coneHeight, coneBaseRadius, YoAppearance.DarkGreen());
       scs.addStaticLinkGraphics(coneGraphic);
    }

@@ -2,7 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.pawSnapping;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -407,7 +407,7 @@ public class SimplePlanarRegionPawNodeSnapperTest
       double squareWidth = 2.0 * extraSquareWidth + 2.0 * (squareCellPlanarHalfWidth * PawNode.gridSizeXY) / Math.cos(rollAngle);
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.rotate(rollAngle, Axis.X);
+      generator.rotate(rollAngle, Axis3D.X);
       generator.addRectangle(squareWidth, squareWidth);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
@@ -464,7 +464,7 @@ public class SimplePlanarRegionPawNodeSnapperTest
       double squareWidth = 2.0 * extraSquareWidth + 2.0 * (squareCellPlanarHalfWidth * PawNode.gridSizeXY) / Math.cos(pitchAngle);
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.rotate(pitchAngle, Axis.Y);
+      generator.rotate(pitchAngle, Axis3D.Y);
       generator.addRectangle(squareWidth, squareWidth);
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 

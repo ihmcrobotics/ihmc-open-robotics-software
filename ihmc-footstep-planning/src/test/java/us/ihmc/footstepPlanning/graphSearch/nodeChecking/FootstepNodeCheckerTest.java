@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -56,7 +56,7 @@ public class FootstepNodeCheckerTest
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.translate(-0.5, 0.5, 0.5);
-      generator.rotate(Math.PI / 2.0, Axis.Y);
+      generator.rotate(Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 2.0);
       PlanarRegionsList planarRegions = generator.getPlanarRegionsList();
 
@@ -135,7 +135,7 @@ public class FootstepNodeCheckerTest
       generator.translate(0.0, 0.0, 0.001);
       generator.addRectangle(1.0, 1.0);
       generator.translate(0.0, 0.0, bodyGroundClearance);
-      generator.rotate(Math.PI / 2.0, Axis.X);
+      generator.rotate(Math.PI / 2.0, Axis3D.X);
       generator.addRectangle(1.0, bodyGroundClearance);
       PlanarRegionsList planarRegions = generator.getPlanarRegionsList();
 

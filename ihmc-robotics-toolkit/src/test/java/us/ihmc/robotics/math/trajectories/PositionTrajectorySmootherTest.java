@@ -39,7 +39,7 @@ public class PositionTrajectorySmootherTest
    public void setUp()
    {
       parentRegistry = new YoVariableRegistry("parentRegistryTEST");
-      referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootNameTEST");
       position = new FramePoint3D(referenceFrame, xValue, yValue, zValue);
       positionProvider = new ConstantPositionProvider(position);
       positionTrajectoryInput = new ConstantPositionTrajectoryGenerator(namePrefix, referenceFrame, positionProvider, finalTime, parentRegistry);

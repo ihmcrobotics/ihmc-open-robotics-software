@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import javax.xml.bind.JAXBException;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
@@ -57,8 +58,7 @@ public class DRCVehicleSDFLoader extends DRCWorld
       scs.addStaticLinkGraphics(drcVehicleSDFLoader.loadDRCVehicle(false));
 
       RigidBodyTransform vehicleToWorldTransform = new RigidBodyTransform();
-      ReferenceFrame vehicleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("vehicle", ReferenceFrame.getWorldFrame(),
-            vehicleToWorldTransform);
+      ReferenceFrame vehicleFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("vehicle", ReferenceFrame.getWorldFrame(), vehicleToWorldTransform);
       VehicleModelObjects vehicleModelObjects = new VehicleModelObjects();
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
       YoVariableRegistry registry = scs.getRootRegistry();

@@ -2,7 +2,7 @@ package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobo
 
 import java.util.ArrayList;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameCylinder3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -66,7 +66,7 @@ public class ContactableCylinderRobot extends ContactableRobot
       link.setMass(mass);
       link.setComOffset(new Vector3D(0.0, 0.0, height / 3.0));
 
-      Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, height, Axis.Z);
+      Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, height, Axis3D.Z);
       link.setMomentOfInertia(inertia);
 
       linkGraphics = new Graphics3DObject();

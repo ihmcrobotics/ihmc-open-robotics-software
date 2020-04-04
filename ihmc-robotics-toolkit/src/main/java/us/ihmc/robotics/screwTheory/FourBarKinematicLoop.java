@@ -7,7 +7,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -89,7 +89,7 @@ public class FourBarKinematicLoop
       FrameVector3D masterJointAxis = new FrameVector3D(masterJointA.getJointAxis());
       masterJointAxis.changeFrame(masterJointA.getFrameBeforeJoint());
       frameBeforeFourBarWithZAlongJointAxis = GeometryTools
-            .constructReferenceFrameFromPointAndAxis(name + "FrameWithZAlongJointAxis", new FramePoint3D(masterJointA.getFrameBeforeJoint()), Axis.Z,
+            .constructReferenceFrameFromPointAndAxis(name + "FrameWithZAlongJointAxis", new FramePoint3D(masterJointA.getFrameBeforeJoint()), Axis3D.Z,
                   masterJointAxis);
 
       FrameVector3D masterAxis = new FrameVector3D(masterJointA.getJointAxis());

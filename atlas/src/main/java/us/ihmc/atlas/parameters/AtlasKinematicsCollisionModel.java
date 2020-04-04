@@ -3,7 +3,7 @@ package us.ihmc.atlas.parameters;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -57,7 +57,7 @@ public class AtlasKinematicsCollisionModel implements RobotCollisionModel
          // Covers the whole multisense.
          Capsule3D headShapeMultisense = new Capsule3D(0.08, 0.115);
          headShapeMultisense.getPosition().set(0.03, 0.0, 0.03);
-         headShapeMultisense.setAxis(Axis.Z);
+         headShapeMultisense.setAxis(Axis3D.Z);
          collidables.add(new Collidable(head, collisionMask, collisionGroup, headShapeMultisense, headFrame));
 
          // Torso ---------------------------------------------------------------------
@@ -67,37 +67,37 @@ public class AtlasKinematicsCollisionModel implements RobotCollisionModel
          // Cover the head guards that are part of the torso actually.
          Capsule3D headguardShapeFront = new Capsule3D(0.25, 0.11);
          headguardShapeFront.getPosition().set(0.0, 0.0, 0.0);
-         headguardShapeFront.setAxis(Axis.Y);
+         headguardShapeFront.setAxis(Axis3D.Y);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, headguardShapeFront, beforeNeckFrame));
 
          // Sideway capsule covering the shoulders and "pecs"-part
          Capsule3D torsoShapeFrontShoulder = new Capsule3D(0.2, 0.2);
          torsoShapeFrontShoulder.getPosition().set(0.14, 0.0, 0.415);
-         torsoShapeFrontShoulder.getAxis().set(Axis.Y);
+         torsoShapeFrontShoulder.getAxis().set(Axis3D.Y);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeFrontShoulder, torsoFrame));
          // Capsule along the forward axis covering the top part of the "abdomen".
          Capsule3D torsoShapeCenter = new Capsule3D(0.25, 0.2);
          torsoShapeCenter.getPosition().set(-0.015, 0.0, 0.265);
-         torsoShapeCenter.setAxis(Axis.X);
+         torsoShapeCenter.setAxis(Axis3D.X);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeCenter, torsoFrame));
          // Capsule along the forward axis covering the bottom part of the "abdomen" and of the chest.
          Capsule3D torsoShapeBottomCenter = new Capsule3D(0.25, 0.2);
          torsoShapeBottomCenter.getPosition().set(-0.045, 0.0, 0.115);
-         torsoShapeBottomCenter.setAxis(Axis.X);
+         torsoShapeBottomCenter.setAxis(Axis3D.X);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeBottomCenter, torsoFrame));
          // Capsule along the forward axis covering the bottom left corner of the chest.
          for (RobotSide robotSide : RobotSide.values)
          {
             Capsule3D torsoShapeBottomSideCorner = new Capsule3D(0.25, 0.1);
             torsoShapeBottomSideCorner.getPosition().set(-0.115, robotSide.negateIfRightSide(0.1), 0.067);
-            torsoShapeBottomSideCorner.setAxis(Axis.X);
+            torsoShapeBottomSideCorner.setAxis(Axis3D.X);
             collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeBottomSideCorner, torsoFrame));
          }
 
          // Pelvis ---------------------------------------------------------------------
          MovingReferenceFrame pelvisFrame = pelvis.getParentJoint().getFrameAfterJoint();
          Capsule3D pelvisShape = new Capsule3D(0.05, 0.22);
-         pelvisShape.setAxis(Axis.Z);
+         pelvisShape.setAxis(Axis3D.Z);
          pelvisShape.getPosition().set(0.012, 0.0, 0.037);
          collidables.add(new Collidable(pelvis, collisionMask, collisionGroup, pelvisShape, pelvisFrame));
 
@@ -110,7 +110,7 @@ public class AtlasKinematicsCollisionModel implements RobotCollisionModel
 
             Capsule3D thighShapeTop = new Capsule3D(0.1, 0.09);
             thighShapeTop.getPosition().set(0.0, 0.0, -0.1);
-            thighShapeTop.setAxis(Axis.Z);
+            thighShapeTop.setAxis(Axis3D.Z);
             collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShapeTop, thighFrame));
 
             Capsule3D thighShapeBottom = new Capsule3D(0.15, 0.085);
@@ -120,7 +120,7 @@ public class AtlasKinematicsCollisionModel implements RobotCollisionModel
 
             Capsule3D thighShapeBack = new Capsule3D(0.15, 0.085);
             thighShapeBack.getPosition().set(-0.05, 0.0, -0.15);
-            thighShapeBack.setAxis(Axis.Z);
+            thighShapeBack.setAxis(Axis3D.Z);
             collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShapeBack, thighFrame));
 
             JointBasics shinPitchJoint = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), multiBodySystem);
@@ -143,7 +143,7 @@ public class AtlasKinematicsCollisionModel implements RobotCollisionModel
          ReferenceFrame handFrame = hand.getParentJoint().getFrameAfterJoint();
          Capsule3D handShapeKnob = new Capsule3D(0.07, 0.06);
          handShapeKnob.getPosition().set(0.0, robotSide.negateIfRightSide(0.1), 0.0);
-         handShapeKnob.setAxis(Axis.Y);
+         handShapeKnob.setAxis(Axis3D.Y);
          collidables.add(new Collidable(hand, collisionMask, collisionGroup, handShapeKnob, handFrame));
 
          JointBasics elbowJoint = RobotCollisionModel.findJoint(jointMap.getArmJointName(robotSide, ArmJointName.ELBOW_ROLL), multiBodySystem);
@@ -151,7 +151,7 @@ public class AtlasKinematicsCollisionModel implements RobotCollisionModel
          ReferenceFrame elbowFrame = elbowJoint.getFrameAfterJoint();
          Capsule3D forearmShape = new Capsule3D(0.31, 0.1);
          forearmShape.getPosition().set(-0.01, robotSide.negateIfRightSide(0.12), -0.01);
-         forearmShape.setAxis(Axis.Y);
+         forearmShape.setAxis(Axis3D.Y);
          collidables.add(new Collidable(forearm, collisionMask, collisionGroup, forearmShape, elbowFrame));
       }
 

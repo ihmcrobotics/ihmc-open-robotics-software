@@ -2,7 +2,7 @@ package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobo
 
 import java.util.ArrayList;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.*;
@@ -125,7 +125,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
 
       Point3D translation = new Point3D(xHandle, yHandle, distanceFromWheel);
 
-      FrameCylinder3D spinnerHandleCylinder = new FrameCylinder3D(steeringWheelFrame, translation, Axis.Z, handleLength, handleRadius);
+      FrameCylinder3D spinnerHandleCylinder = new FrameCylinder3D(steeringWheelFrame, translation, Axis3D.Z, handleLength, handleRadius);
       spokesCylinders.add(spinnerHandleCylinder);
 
       steeringWheelLinkGraphics.translate(translation);
@@ -145,8 +145,8 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       double heightAboveWheel = 0.1;
 
       FramePose3D crossBar = new FramePose3D(steeringWheelFrame);
-      GeometryTools.rotatePoseAboutAxis(steeringWheelFrame, Axis.X, Math.PI / 2.0, crossBar);
-      GeometryTools.rotatePoseAboutAxis(steeringWheelFrame, Axis.Z, Math.PI / 2.0, crossBar);
+      GeometryTools.rotatePoseAboutAxis(steeringWheelFrame, Axis3D.X, Math.PI / 2.0, crossBar);
+      GeometryTools.rotatePoseAboutAxis(steeringWheelFrame, Axis3D.Z, Math.PI / 2.0, crossBar);
       crossBar.setPosition(new Vector3D(-height / 2.0, 0.0, heightAboveWheel));
 
       RigidBodyTransform transform = new RigidBodyTransform();

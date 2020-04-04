@@ -1,6 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.simulation;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -34,7 +34,7 @@ public class SimpleLidarRobot extends Robot
       rootJoint.setDynamic(false);
       addRootJoint(rootJoint);
 
-      lidarJoint = new PinJoint("lidarJoint", new Vector3D(), this, Axis.X);
+      lidarJoint = new PinJoint("lidarJoint", new Vector3D(), this, Axis3D.X);
       
       Link link = new Link("lidar");
       link.setMassAndRadiiOfGyration(1.0, radius, radius, radius);

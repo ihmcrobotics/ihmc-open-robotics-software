@@ -18,6 +18,7 @@ import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -256,7 +257,7 @@ public abstract class AvatarICPOptimizationPushRecoveryTestSetup
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.appendYawRotation(0.5);
-      ReferenceFrame referenceFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("yawing", ReferenceFrame.getWorldFrame(), transform);
+      ReferenceFrame referenceFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("yawing", ReferenceFrame.getWorldFrame(), transform);
 
       double scale = getSizeScale();
 
