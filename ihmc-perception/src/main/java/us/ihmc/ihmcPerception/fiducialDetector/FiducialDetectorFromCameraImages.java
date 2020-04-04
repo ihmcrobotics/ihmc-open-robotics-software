@@ -224,8 +224,8 @@ public class FiducialDetectorFromCameraImages
          cameraReferenceFrame.update();
          detectorReferenceFrame.update();
 
-         cameraPose.setOrientation(cameraOrientationInWorldXForward);
-         cameraPose.setPosition(cameraPositionInWorld);
+         cameraPose.getOrientation().set(cameraOrientationInWorldXForward);
+         cameraPose.getPosition().set(cameraPositionInWorld);
 
          GrayF32 grayImage = ConvertBufferedImage.convertFrom(bufferedImage, true, ImageType.single(GrayF32.class));
 
@@ -264,8 +264,8 @@ public class FiducialDetectorFromCameraImages
             tempFiducialRotationQuat.set(fiducialRotationMatrix);
 
             tempFiducialDetectorFrame.setToZero(detectorReferenceFrame);
-            tempFiducialDetectorFrame.setOrientation(tempFiducialRotationQuat);
-            tempFiducialDetectorFrame.setPosition(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
+            tempFiducialDetectorFrame.getOrientation().set(tempFiducialRotationQuat);
+            tempFiducialDetectorFrame.getPosition().set(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
             tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
 
             locatedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);

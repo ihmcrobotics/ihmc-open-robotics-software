@@ -98,7 +98,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       x = 0.0;
       y = -debrisLength / 2.0 * Math.sin(debrisRoll);
       z = supportHeight / 2.0;
-      firstSupportPose.setPosition(x, y, z);
+      firstSupportPose.getPosition().set(x, y, z);
       firstSupportPose.changeFrame(constructionWorldFrame);
       RigidBodyTransform firstSupportTransform = new RigidBodyTransform();
       firstSupportPose.get(firstSupportTransform);
@@ -111,7 +111,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       x = 0.0;
       y = debrisLength / 2.0 * Math.sin(debrisRoll);
       z = supportHeight / 2.0;
-      secondSupportPose.setPosition(x, y, z);
+      secondSupportPose.getPosition().set(x, y, z);
       secondSupportPose.changeFrame(constructionWorldFrame);
       RigidBodyTransform secondSupportTransform = new RigidBodyTransform();
       secondSupportPose.get(secondSupportTransform);
@@ -141,7 +141,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
       double y = 0.0;
       double z = supportHeight / 2.0;
       
-      supportPose.setPosition(x, y, z);
+      supportPose.getPosition().set(x, y, z);
       supportPose.changeFrame(constructionWorldFrame);
     
       RigidBodyTransform supportTransform = new RigidBodyTransform();

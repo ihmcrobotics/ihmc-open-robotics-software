@@ -112,7 +112,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
       {
          id++;
          Pose3D t = new Pose3D();
-         t.setPosition(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
+         t.getPosition().set(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
          detectedObjectPublisher.publish(HumanoidMessageTools.createDetectedObjectPacket(t, 4));
       }
 

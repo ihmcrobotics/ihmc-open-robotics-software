@@ -262,7 +262,7 @@ public class PatrolBehavior implements BehaviorInterface
 
    private static PlanTravelDistance decidePlanType(Pose3DReadOnly start, Pose3DReadOnly goal)
    {
-      return start.getPositionDistance(goal) < PlanTravelDistance.CLOSE_PLAN_RADIUS ? PlanTravelDistance.CLOSE : PlanTravelDistance.FAR;
+      return start.getPosition().distance(goal.getPosition()) < PlanTravelDistance.CLOSE_PLAN_RADIUS ? PlanTravelDistance.CLOSE : PlanTravelDistance.FAR;
    }
 
    private void doPlanStateAction(double timeInState)
@@ -359,7 +359,7 @@ public class PatrolBehavior implements BehaviorInterface
 
       FootstepDataMessage footstep = footstepPlan.getFootstepDataList().get(footstepPlan.getFootstepDataList().size() - 1);
 
-      double distance = midFeetZUpPose.getPositionDistance(footstep.getLocation());
+      double distance = midFeetZUpPose.getPosition().distance(footstep.getLocation());
 
       return distance < PlanTravelDistance.CLOSE_PLAN_RADIUS ? PlanTravelDistance.CLOSE : PlanTravelDistance.FAR;
    }

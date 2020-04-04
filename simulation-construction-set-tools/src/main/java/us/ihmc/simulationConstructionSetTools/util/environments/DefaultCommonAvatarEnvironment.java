@@ -956,8 +956,8 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
                cinderBlockOrientation.multiply(pitchRollMatrix);
 
                FramePose3D cinderBlockPose = new FramePose3D(ReferenceFrame.getWorldFrame());
-               cinderBlockPose.setPosition(rotatedPoint[0], rotatedPoint[1], z);
-               cinderBlockPose.setOrientation(cinderBlockOrientation);
+               cinderBlockPose.getPosition().set(rotatedPoint[0], rotatedPoint[1], z);
+               cinderBlockPose.getOrientation().set(cinderBlockOrientation);
 
                rowCinderBlockLocations.add(cinderBlockPose);
             }

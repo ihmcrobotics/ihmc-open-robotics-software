@@ -613,7 +613,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
       double yaw = RandomNumbers.nextDouble(random, Math.PI / 20.0);
       double pitch = RandomNumbers.nextDouble(random, Math.PI / 20.0);
       double roll = RandomNumbers.nextDouble(random, Math.PI / 20.0);
-      rootJoint.getJointPose().setOrientationYawPitchRoll(yaw, pitch, roll);
+      rootJoint.getJointPose().getOrientation().setYawPitchRoll(yaw, pitch, roll);
 
       ArrayList<OneDoFJointBasics> oneDoFJoints = new ArrayList<OneDoFJointBasics>();
       fullRobotModel.getOneDoFJoints(oneDoFJoints);

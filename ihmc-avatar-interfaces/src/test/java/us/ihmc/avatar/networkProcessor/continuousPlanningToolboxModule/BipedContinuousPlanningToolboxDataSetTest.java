@@ -34,7 +34,6 @@ import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -63,6 +62,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
@@ -720,8 +720,8 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
             footstepStatusPublisher.publish(statusMessage);
             FramePose3D footPose = new FramePose3D();
-            footPose.setPosition(currentStep.getLocation());
-            footPose.setOrientation(currentStep.getOrientation());
+            footPose.getPosition().set(currentStep.getLocation());
+            footPose.getOrientation().set(currentStep.getOrientation());
             feetPoses.put(RobotSide.fromByte(currentStep.getRobotSide()), footPose);
          }
 

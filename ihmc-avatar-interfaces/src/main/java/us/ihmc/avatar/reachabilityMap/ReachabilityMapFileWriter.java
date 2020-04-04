@@ -222,8 +222,8 @@ public class ReachabilityMapFileWriter
    public static void main(String[] args) throws IOException
    {
       FramePose3D framePose = new FramePose3D();
-      framePose.setOrientationYawPitchRoll(1.0, 0.8, -1.1);
-      framePose.setPosition(3.1, 0.1, 1.0);
+      framePose.getOrientation().setYawPitchRoll(1.0, 0.8, -1.1);
+      framePose.getPosition().set(3.1, 0.1, 1.0);
       System.out.println(framePose.getOrientation());
 
       RigidBodyTransform transformToParent = new RigidBodyTransform();

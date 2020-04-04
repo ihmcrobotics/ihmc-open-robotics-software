@@ -307,7 +307,7 @@ public class AtlasCorridorNavigationTest
          FramePose3D goalPose = new FramePose3D();
          goalPose.setX(finalPose.getX());
          goalPose.setY(finalPose.getY());
-         goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0); // TODO: use initial yaw?
+         goalPose.getOrientation().setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0); // TODO: use initial yaw?
 
          // TODO: Figure out how to best effort plan with footstep snapping
          // Use BodyPathBasedAStarPlanner instead of manual?
@@ -412,7 +412,7 @@ public class AtlasCorridorNavigationTest
             latestHumanoidRobotState = robot.pollHumanoidRobotState();
             robotPose.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
             robotPose.changeFrame(ReferenceFrame.getWorldFrame());
-            if (!waypointsToHit.isEmpty() && robotPose.getPositionDistance(waypointsToHit.peekFirst()) < 1.0)
+            if (!waypointsToHit.isEmpty() && robotPose.getPosition().distance(waypointsToHit.peekFirst().getPosition()) < 1.0)
             {
                LogTools.info("Robot position: x: {}, y: {}", robotPose.getPosition().getX(), robotPose.getPosition().getY());
                LogTools.info("Waypoint {} reached: x: {}, y: {}",

@@ -56,7 +56,7 @@ public class HumanoidControllerWarumupTools
          footPose.setX(0.1);
          footPose.changeFrame(ReferenceFrame.getWorldFrame());
          double yaw = footPose.getYaw();
-         footPose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
+         footPose.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
          footPose.setZ(z);
          step.getLocation().set(footPose.getPosition());
          step.getOrientation().set(footPose.getOrientation());

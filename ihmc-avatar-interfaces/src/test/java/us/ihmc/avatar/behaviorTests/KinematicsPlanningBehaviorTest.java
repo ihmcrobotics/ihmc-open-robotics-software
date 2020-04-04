@@ -158,10 +158,10 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
 
       Pose3D finalPose = new Pose3D(sdfFullRobotModel.getHand(robotSide).getBodyFixedFrame().getTransformToWorldFrame());
 
-      double positionDistance = desiredFramePose.getPositionDistance(finalPose);
+      double positionDistance = desiredFramePose.getPosition().distance(finalPose.getPosition());
       assertEquals("Hand too far from doorknob", 0.0, positionDistance, 0.011);
-      double orientationDistance = Math.abs(desiredFramePose.getPositionDistance(finalPose));
-      double orientationDistanceRotation = Math.abs(desiredFramePose.getOrientationDistance(finalPose) - Math.PI * 2);
+      double orientationDistance = Math.abs(desiredFramePose.getPosition().distance(finalPose.getPosition()));
+      double orientationDistanceRotation = Math.abs(desiredFramePose.getOrientation().distance(finalPose.getOrientation()) - Math.PI * 2);
       assertTrue("orientation Distance: " + orientationDistance, orientationDistance < 0.1 || orientationDistanceRotation < 0.1);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -238,10 +238,10 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
 
       Pose3D finalPose = new Pose3D(sdfFullRobotModel.getHand(robotSide).getBodyFixedFrame().getTransformToWorldFrame());
 
-      double positionDistance = desiredFramePose.getPositionDistance(finalPose);
+      double positionDistance = desiredFramePose.getPosition().distance(finalPose.getPosition());
       assertEquals("Hand too far from doorknob", 0.0, positionDistance, 0.011);
-      double orientationDistance = Math.abs(desiredFramePose.getPositionDistance(finalPose));
-      double orientationDistanceRotation = Math.abs(desiredFramePose.getOrientationDistance(finalPose) - Math.PI * 2);
+      double orientationDistance = Math.abs(desiredFramePose.getPosition().distance(finalPose.getPosition()));
+      double orientationDistanceRotation = Math.abs(desiredFramePose.getOrientation().distance(finalPose.getOrientation()) - Math.PI * 2);
       assertTrue("orientation Distance: " + orientationDistance, orientationDistance < 0.1 || orientationDistanceRotation < 0.1);
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -249,7 +249,7 @@ public abstract class KinematicsPlanningBehaviorTest implements MultiRobotTestIn
 
    private void defineDesiredFramePoseToDoorKnob(ValkyrieEODObstacleCourseEnvironment envrionment)
    {
-      desiredFramePose.setPosition(envrionment.getDoorKnobGraspingPoint());
+      desiredFramePose.getPosition().set(envrionment.getDoorKnobGraspingPoint());
       desiredFramePose.appendYawRotation(Math.PI);
       desiredFramePose.appendPitchRotation(0.5 * Math.PI);
       desiredFramePose.appendYawRotation(-0.2 * Math.PI);

@@ -158,7 +158,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       startingFrame.setOrientationAndUpdate(new Quaternion(startingLocation.getYaw(), 0.0, 0.0));
 
       FramePose3D goalPose = new FramePose3D(startingFrame);
-      goalPose.setPosition(1.0, 0.0, -height);
+      goalPose.getPosition().set(1.0, 0.0, -height);
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepPlanningRequestPacket request = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), blockEnvironment.getPlanarRegionsList(), goalPose, footstepPlannerParameters);
@@ -192,7 +192,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0);
 
       FramePose3D goalPose = new FramePose3D();
-      goalPose.setPosition(2.0, 0.0, 0.0);
+      goalPose.getPosition().set(2.0, 0.0, 0.0);
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepPlanningRequestPacket requestPacket = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), environment.getPlanarRegionsList(), goalPose, footstepPlannerParameters);

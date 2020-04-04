@@ -26,8 +26,8 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
    public static final ArrayList<Double> JOINT_Qs = new ArrayList<>(31);
    static
    {
-      PELVIS_POSE.setPosition(0.0, 0.0, 0.9286147465454951);
-      PELVIS_POSE.setOrientation(0.0, 0.0, 0.841, 0.540); // not sure about these two values
+      PELVIS_POSE.getPosition().set(0.0, 0.0, 0.9286147465454951);
+      PELVIS_POSE.getOrientation().set(0.0, 0.0, 0.841, 0.540); // not sure about these two values
 
       JOINT_Qs.add(+0.0             );
       JOINT_Qs.add(+0.0             );

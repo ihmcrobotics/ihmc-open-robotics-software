@@ -92,13 +92,13 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void setPositionWithoutChecksAndUpdate(Point3DReadOnly position)
    {
-      originPose.setPosition(position);
+      originPose.getPosition().set(position);
       this.update();
    }
 
    public void setPositionWithoutChecksAndUpdate(double x, double y, double z)
    {
-      originPose.setPosition(x, y, z);
+      originPose.getPosition().set(x, y, z);
       this.update();
    }
 
@@ -111,13 +111,13 @@ public class PoseReferenceFrame extends ReferenceFrame
 
    public void setOrientationAndUpdate(Orientation3DReadOnly orientation3D)
    {
-      originPose.setOrientation(orientation3D);
+      originPose.getOrientation().set(orientation3D);
       this.update();
    }
 
    public void setOrientationAndUpdate(double qx, double qy, double qz, double qs)
    {
-      originPose.setOrientation(qx, qy, qz, qs);
+      originPose.getOrientation().set(qx, qy, qz, qs);
       update();
    }
 

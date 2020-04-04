@@ -125,8 +125,8 @@ public class FootPathRunnerController implements RobotController
          double pitch = theta;
          double roll = 0.0;
 
-         desiredFootInBodyFrame.setPosition(x, y, z);
-         desiredFootInBodyFrame.setOrientationYawPitchRoll(0.0, pitch, roll);
+         desiredFootInBodyFrame.getPosition().set(x, y, z);
+         desiredFootInBodyFrame.getOrientation().setYawPitchRoll(0.0, pitch, roll);
       }
       else
       {
@@ -142,8 +142,8 @@ public class FootPathRunnerController implements RobotController
          double pitch = theta;
          double roll = 0.0;
 
-         desiredFootInBodyFrame.setPosition(x, y, z);
-         desiredFootInBodyFrame.setOrientationYawPitchRoll(0.0, pitch, roll);
+         desiredFootInBodyFrame.getPosition().set(x, y, z);
+         desiredFootInBodyFrame.getOrientation().setYawPitchRoll(0.0, pitch, roll);
       }
       return desiredFootInBodyFrame;
    }

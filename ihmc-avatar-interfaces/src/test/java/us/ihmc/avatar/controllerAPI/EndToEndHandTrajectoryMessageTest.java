@@ -37,6 +37,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
+import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -238,7 +239,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
       {
          HandTrajectoryMessage handTrajectoryMessage = new HandTrajectoryMessage();
          handTrajectoryMessage.setRobotSide(robotSide.toByte());
-         handTrajectoryMessage.getSe3Trajectory().getControlFramePose().setPosition(new Point3D(0.0, 0.0, 0.0));
+         handTrajectoryMessage.getSe3Trajectory().getControlFramePose().getPosition().set(new Point3D(0.0, 0.0, 0.0));
          handTrajectoryMessage.getSe3Trajectory().setUseCustomControlFrame(true);
          handTrajectoryMessage.getSe3Trajectory().getTaskspaceTrajectoryPoints().add()
                               .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, position, orientation, new Vector3D(), new Vector3D()));
@@ -264,8 +265,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          handTrajectoryMessage.getSe3Trajectory().setUseCustomControlFrame(true);
          Point3D framePosition = EuclidCoreRandomTools.nextPoint3D(random, -0.1, 0.1);
          Quaternion frameOrientation = EuclidCoreRandomTools.nextQuaternion(random, Math.toRadians(20.0));
-         handTrajectoryMessage.getSe3Trajectory().getControlFramePose().setPosition(framePosition);
-         handTrajectoryMessage.getSe3Trajectory().getControlFramePose().setOrientation(frameOrientation);
+         handTrajectoryMessage.getSe3Trajectory().getControlFramePose().getPosition().set(framePosition);
+         handTrajectoryMessage.getSe3Trajectory().getControlFramePose().getOrientation().set((Orientation3DReadOnly) frameOrientation);
 
          ReferenceFrame handBodyFrame = fullRobotModel.getHand(robotSide).getBodyFixedFrame();
          FrameVector3D frameFramePosition = new FrameVector3D(handBodyFrame, framePosition);
@@ -1406,8 +1407,8 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          FramePose3D currentPose = new FramePose3D(hand.getBodyFixedFrame());
          currentPose.changeFrame(worldFrame);
          EuclidGeometryTestTools.assertPose3DGeometricallyEquals("Poor tracking for side: " + robotSide + " position: "
-               + currentPose.getPositionDistance(controllerDesiredPose) + ", orientation: "
-               + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientationDistance(controllerDesiredPose))), controllerDesiredPose, currentPose, 0.1);
+               + currentPose.getPosition().distance(controllerDesiredPose.getPosition()) + ", orientation: "
+               + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientation().distance(controllerDesiredPose.getOrientation()))), controllerDesiredPose, currentPose, 0.1);
       }
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue() + 1.5);
@@ -1430,9 +1431,9 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
          FramePose3D currentPose = new FramePose3D(hand.getBodyFixedFrame());
          currentPose.changeFrame(worldFrame);
          EuclidCoreTestTools.assertTuple3DEquals("Poor position tracking for side: " + robotSide + " error: "
-               + currentPose.getPositionDistance(controllerDesiredPose), controllerDesiredPose.getPosition(), currentPose.getPosition(), 3.0e-2);
+               + currentPose.getPosition().distance(controllerDesiredPose.getPosition()), controllerDesiredPose.getPosition(), currentPose.getPosition(), 3.0e-2);
          EuclidCoreTestTools.assertQuaternionGeometricallyEquals("Poor orientation tracking for side: " + robotSide + " error: "
-               + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientationDistance(controllerDesiredPose))),
+               + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientation().distance(controllerDesiredPose.getOrientation()))),
                                                                  controllerDesiredPose.getOrientation(),
                                                                  currentPose.getOrientation(),
                                                                  0.3);

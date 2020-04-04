@@ -457,8 +457,8 @@ public class RemoteFootstepPlannerUIMessagingTest
       {
 
          Pose2D goalPose = new Pose2D();
-         goalPose.setPosition(EuclidCoreRandomTools.nextPoint2D(random));
-         goalPose.setOrientation(EuclidCoreRandomTools.nextQuaternion(random));
+         goalPose.getPosition().set(EuclidCoreRandomTools.nextPoint2D(random));
+         goalPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
          FootstepDataListMessage footstepDataListMessage = nextFootstepDataListMessage(random);
          int sequenceId = RandomNumbers.nextInt(random, 0, 100);
@@ -469,8 +469,8 @@ public class RemoteFootstepPlannerUIMessagingTest
          for (int i = 2; i < RandomNumbers.nextInt(random, 2, 100); i++)
          {
             Pose3D pose = new Pose3D();
-            pose.setPosition(EuclidCoreRandomTools.nextPoint3D(random, 100.0));
-            pose.setOrientation(EuclidCoreRandomTools.nextQuaternion(random, 100.0));
+            pose.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random, 100.0));
+            pose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random, 100.0));
             bodyPath.add(pose);
          }
          Point3D lowLevelGoalPosition = EuclidCoreRandomTools.nextPoint3D(random, 100.0);

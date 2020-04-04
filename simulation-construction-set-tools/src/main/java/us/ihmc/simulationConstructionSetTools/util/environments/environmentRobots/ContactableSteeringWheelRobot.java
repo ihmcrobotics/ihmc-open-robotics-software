@@ -61,8 +61,8 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
    public static ContactableSteeringWheelRobot createPolarisSteeringWheel(double x, double y, double z, double yaw, double pitch)
    {
       FramePose3D steeringWheelPoseInWorld = new FramePose3D(worldFrame);
-      steeringWheelPoseInWorld.setPosition(x, y, z);
-      steeringWheelPoseInWorld.setOrientationYawPitchRoll(yaw, pitch, 0.0);
+      steeringWheelPoseInWorld.getPosition().set(x, y, z);
+      steeringWheelPoseInWorld.getOrientation().setYawPitchRoll(yaw, pitch, 0.0);
       double steeringWheelRadius = 0.175;
       double steerigColunmLength = 0.20;
       double steeringWheelThickness = 0.03;
@@ -147,7 +147,7 @@ public class ContactableSteeringWheelRobot extends ContactablePinJointRobot
       FramePose3D crossBar = new FramePose3D(steeringWheelFrame);
       GeometryTools.rotatePoseAboutAxis(steeringWheelFrame, Axis3D.X, Math.PI / 2.0, crossBar);
       GeometryTools.rotatePoseAboutAxis(steeringWheelFrame, Axis3D.Z, Math.PI / 2.0, crossBar);
-      crossBar.setPosition(new Vector3D(-height / 2.0, 0.0, heightAboveWheel));
+      crossBar.getPosition().set(new Vector3D(-height / 2.0, 0.0, heightAboveWheel));
 
       RigidBodyTransform transform = new RigidBodyTransform();
       crossBar.get(transform);
