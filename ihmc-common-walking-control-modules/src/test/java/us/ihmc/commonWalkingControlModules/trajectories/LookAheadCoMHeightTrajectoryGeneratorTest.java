@@ -88,7 +88,6 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       YoEnum<RobotSide> supportLegFrameSide = new YoEnum<RobotSide>("supportLegFrameSide", registry, RobotSide.class);
 
       SimulationTestingParameters testingParameters = SimulationTestingParameters.createFromSystemProperties();
-      testingParameters.setKeepSCSUp(true);
       testingParameters.setDataBufferSize(2048);
 
       Robot robot = new Robot("Dummy");
@@ -329,7 +328,6 @@ public class LookAheadCoMHeightTrajectoryGeneratorTest
       YoEnum<RobotSide> supportLegFrameSide = new YoEnum<RobotSide>("supportLegFrameSide", registry, RobotSide.class);
 
       SimulationTestingParameters testingParameters = SimulationTestingParameters.createFromSystemProperties();
-      testingParameters.setKeepSCSUp(true);
       testingParameters.setDataBufferSize(2048);
 
       Robot robot = new Robot("Dummy");

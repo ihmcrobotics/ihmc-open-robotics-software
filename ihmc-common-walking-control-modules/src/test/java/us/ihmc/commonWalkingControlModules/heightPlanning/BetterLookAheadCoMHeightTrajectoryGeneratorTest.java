@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.heightPlanning;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.heightPlanning.BetterLookAheadCoMHeightTrajectoryGenerator;
@@ -18,6 +19,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
@@ -25,7 +27,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
 {
-   private static final boolean visualize = true;
+   private static  boolean visualize = false;
    private static final double minimumHeight = 0.75;
    private static double nominalHeight = 0.8;
    private static final double maximumHeight = 0.95;
