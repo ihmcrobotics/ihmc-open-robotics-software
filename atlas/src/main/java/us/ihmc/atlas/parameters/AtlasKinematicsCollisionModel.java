@@ -6,8 +6,6 @@ import java.util.List;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
@@ -91,7 +89,7 @@ public class AtlasKinematicsCollisionModel implements RobotCollisionModel
          {
             Capsule3D torsoShapeBottomSideCorner = new Capsule3D(0.25, 0.1);
             torsoShapeBottomSideCorner.getPosition().set(-0.115, robotSide.negateIfRightSide(0.1), 0.067);
-            torsoShapeBottomSideCorner.getAxis().set((Vector3DReadOnly) Axis3D.X);
+            torsoShapeBottomSideCorner.getAxis().set(Axis3D.X);
             collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeBottomSideCorner, torsoFrame));
          }
 
@@ -116,7 +114,7 @@ public class AtlasKinematicsCollisionModel implements RobotCollisionModel
 
             Capsule3D thighShapeBottom = new Capsule3D(0.15, 0.085);
             thighShapeBottom.getPosition().set(-0.018, 0.0, -0.25);
-            thighShapeBottom.getAxis().set(new Vector3D(0.22, 0.0, 1.0));
+            thighShapeBottom.getAxis().set(0.22, 0.0, 1.0);
             collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighShapeBottom, thighFrame));
 
             Capsule3D thighShapeBack = new Capsule3D(0.15, 0.085);
@@ -130,7 +128,7 @@ public class AtlasKinematicsCollisionModel implements RobotCollisionModel
 
             Capsule3D shinShape = new Capsule3D(0.3, 0.08);
             shinShape.getPosition().set(0.015, 0.0, -0.2);
-            shinShape.getAxis().set(new Vector3D(0.1, 0.0, 1.0));
+            shinShape.getAxis().set(0.1, 0.0, 1.0);
             collidables.add(new Collidable(shin, collisionMask, collisionGroup, shinShape, shinFrame));
          }
       }
