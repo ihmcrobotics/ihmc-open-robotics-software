@@ -87,7 +87,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    private final SplinedHeightTrajectory splinedHeightTrajectory;
 
-
    public BetterLookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround,
                                                       double nominalHeightAboveGround,
                                                       double maximumHeightAboveGround,
@@ -222,6 +221,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       {
          tempFramePoint.setIncludingFrame(transferToAndNextFootstepsData.getCoMAtEndOfState());
          tempFramePoint.changeFrame(frameOfLastFootstep);
+         tempFramePoint.addZ(nominalHeightAboveGround.getDoubleValue());
          doubleSupportPercentageIn.set(EuclidGeometryTools.percentageAlongLineSegment3D(tempFramePoint, startCoMPosition, middleCoMPosition));
       }
       else
@@ -268,8 +268,9 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       double startX = startCoMPosition.getX();
       double endX = endCoMPosition.getX();
 
-      double percentIn = MathTools.clamp(doubleSupportPercentageIn.getDoubleValue(), 0.0, 1.0);
-      percentIn = Math.max(percentIn, nominalDoubleSupportPercentageIn.getDoubleValue());
+      double percentIn = MathTools.clamp(doubleSupportPercentageIn.getDoubleValue(),
+                                         nominalDoubleSupportPercentageIn.getManualScalingMin(),
+                                         1.0 - nominalDoubleSupportPercentageIn.getDoubleValue());
 
       double firstAlpha, secondAlpha, thirdAlpha;
       if (isInTransfer)
@@ -301,7 +302,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       thirdMidpoint.setXY(thirdMidpointX, midstanceWidth);
       endWaypoint.setXY(endX, midstanceWidth);
 
-
       double startMinHeight = findWaypointHeight(minimumHeight, 0.0, startX, startGroundHeight);
       double startMaxHeight = findWaypointHeight(maximumHeight, 0.0, startX, startGroundHeight);
       double firstMinHeight = findWaypointHeight(minimumHeight, 0.0, firstMidpointX, startGroundHeight);
@@ -311,7 +311,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       double exchangeToMinHeight = findWaypointHeight(minimumHeight, endX, secondMidpointX, endGroundHeight);
       double exchangeFromMaxHeight = findWaypointHeight(maximumHeight, 0.0, secondMidpointX, startGroundHeight);
       double exchangeToMaxHeight = findWaypointHeight(maximumHeight, endX, secondMidpointX, endGroundHeight);
-      // FIXME this second waypoint needs to be rethought
       double secondMinHeight = Math.min(Math.max(exchangeFromMinHeight, exchangeToMinHeight), Math.min(exchangeFromMaxHeight, exchangeToMaxHeight));
       double secondMaxHeight = Math.min(exchangeFromMaxHeight, exchangeToMaxHeight);
       double thirdMinHeight = findWaypointHeight(minimumHeight, endX, thirdMidpointX, endGroundHeight);
@@ -369,6 +368,8 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                                                          comHeightPartialDerivativesDataToPack.getComHeight() + offsetHeightAboveGround.getDoubleValue());
 
       this.splineQuery.set(point.getX());
+      if (point.containsNaN())
+         throw new RuntimeException("what");
       this.desiredCoMHeight.set(point.getY());
    }
 
