@@ -514,7 +514,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
          ArrayList<Joint> joint = robot[0].getRootJoints();
          joint.get(0).getTransformToWorld(ret);
          ret.transform(cameraPosition);
-         ret.getTranslation(cameraFix);
+         cameraFix.set(ret.getTranslation());
 
          CameraConfiguration cameraConfiguration = new CameraConfiguration("testCamera");
          cameraConfiguration.setCameraFix(cameraFix);

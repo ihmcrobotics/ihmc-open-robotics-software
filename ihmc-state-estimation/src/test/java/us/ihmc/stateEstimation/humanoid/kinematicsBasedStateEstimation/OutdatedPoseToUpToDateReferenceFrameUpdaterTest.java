@@ -190,7 +190,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          outdatedPoseToUpToDateReferenceFrameUpdater.getTotalErrorTransform(totalError);
          
          Point3D calculatedTranslationError = new Point3D();
-         totalError.getTranslation(calculatedTranslationError);
+         calculatedTranslationError.set(totalError.getTranslation());
          Vector3D actualTranslationError = translationOffsets[i];
          
          Quaternion calculatedRotationError = new Quaternion();
@@ -253,7 +253,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdaterTest
          RigidBodyTransform totalError = new RigidBodyTransform();
          outdatedPoseToUpToDateReferenceFrameUpdater.getTotalErrorTransform(totalError);
          Point3D calculatedTranslationError = new Point3D();
-         totalError.getTranslation(calculatedTranslationError);
+         calculatedTranslationError.set(totalError.getTranslation());
          Vector3D actualError = translationOffsets[i];
          
          assertTrue(calculatedTranslationError.epsilonEquals(actualError, 1e-4));

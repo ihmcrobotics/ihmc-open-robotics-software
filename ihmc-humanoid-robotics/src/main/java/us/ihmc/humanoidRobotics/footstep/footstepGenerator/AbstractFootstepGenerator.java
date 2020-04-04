@@ -134,7 +134,7 @@ public abstract class AbstractFootstepGenerator implements FootstepGenerator
       ReferenceFrame soleFrame = soleFrames.get(side);
       Vector3D translation = new Vector3D();
       Quaternion rotation = new Quaternion();
-      soleFrame.getTransformToWorldFrame().getTranslation(translation);
+      translation.set(soleFrame.getTransformToWorldFrame().getTranslation());
       rotation.set(soleFrame.getTransformToWorldFrame().getRotation());
 
       FramePose2D solePose2d = new FramePose2D(soleFrame, new Point2D(translation.getX(), translation.getY()), rotation.getYaw());

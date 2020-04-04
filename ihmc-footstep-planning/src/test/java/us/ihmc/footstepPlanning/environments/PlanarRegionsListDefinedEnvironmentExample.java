@@ -50,7 +50,7 @@ public class PlanarRegionsListDefinedEnvironmentExample
             RigidBodyTransform transformToWorld = new RigidBodyTransform();
             Point3D translation = new Point3D();
             planarRegion.getTransformToWorld(transformToWorld);
-            transformToWorld.getTranslation(translation);
+            translation.set(transformToWorld.getTranslation());
             planarRegionPointInWorld.set(translation);
 
             Vector3D normal = new Vector3D();
@@ -81,7 +81,7 @@ public class PlanarRegionsListDefinedEnvironmentExample
             double ly = boundingBox3dInWorld.getMaxY() - boundingBox3dInWorld.getMinY();
             double lz = boundingBox3dInWorld.getMaxZ() - boundingBox3dInWorld.getMinZ();
 
-            transformToWorld.getTranslation(translation);
+            translation.set(transformToWorld.getTranslation());
             translation.setZ(translation.getZ() - (lz / 2.0));
             boundingBoxVisualization.translate(translation);
             boundingBoxVisualization.addCube(lx, ly, lz, YoAppearance.RGBColor(1.0, 0, 0, 0.5));

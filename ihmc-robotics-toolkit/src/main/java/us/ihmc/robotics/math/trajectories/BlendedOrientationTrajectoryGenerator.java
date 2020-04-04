@@ -170,7 +170,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
       angularAcceleration.changeFrame(trajectoryFrame);
 
       tempTransform.getRotation().set(orientation);
-      tempTransform.getRotation(rotationMatrix);
+      tempTransform.getRotation().get(rotationMatrix);
       MatrixTools.vectorToSkewSymmetricMatrix(relativeConstraintAngularVelocityOffsetSkewSymmetricMatrix, angularVelocity);
       CommonOps.mult(relativeConstraintAngularVelocityOffsetSkewSymmetricMatrix, rotationMatrix, rotationMatrixDerivative);
 

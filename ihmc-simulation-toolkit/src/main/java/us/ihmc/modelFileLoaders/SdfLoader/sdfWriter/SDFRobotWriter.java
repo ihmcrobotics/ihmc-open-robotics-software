@@ -366,7 +366,7 @@ public abstract class SDFRobotWriter
    private String getPoseFromTransform3D(RigidBodyTransform scsJointOffset)
    {
       Vector3D translation = new Vector3D();
-      scsJointOffset.getTranslation(translation);
+      translation.set(scsJointOffset.getTranslation());
       RotationMatrix rotation = new RotationMatrix();
       rotation.set(scsJointOffset.getRotation());
       Vector3D eulerAngles = new Vector3D();

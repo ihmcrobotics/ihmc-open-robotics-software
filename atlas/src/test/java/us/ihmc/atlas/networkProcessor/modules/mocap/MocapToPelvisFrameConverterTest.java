@@ -95,7 +95,7 @@ public class MocapToPelvisFrameConverterTest
    {
       RigidBodyTransform pelvisToMarker2Transform = MocapToPelvisFrameConverter.getPelvisToMarker2Transform();
       Vector3D pelvisToMarker2Translation = new Vector3D();
-      pelvisToMarker2Transform.getTranslation(pelvisToMarker2Translation);
+      pelvisToMarker2Translation.set(pelvisToMarker2Transform.getTranslation());
       pelvisToMarker2Translation.negate();
       FramePoint3D markerPoint2 = new FramePoint3D(pelvisFrame, pelvisToMarker2Translation);
       markerPoint2.changeFrame(mocapFrame);

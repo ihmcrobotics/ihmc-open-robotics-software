@@ -909,7 +909,7 @@ public class PlanarRegion implements SupportingVertexHolder
     */
    public void getPointInRegion(Point3DBasics pointToPack)
    {
-      fromLocalToWorldTransform.getTranslation(pointToPack);
+      pointToPack.set(fromLocalToWorldTransform.getTranslation());
    }
 
    /**

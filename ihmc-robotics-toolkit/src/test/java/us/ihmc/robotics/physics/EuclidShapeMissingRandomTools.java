@@ -55,7 +55,7 @@ public class EuclidShapeMissingRandomTools
    public static Box3D nextBox3D(Random random, Tuple3DReadOnly position, double minSize, double maxSize)
    {
       RigidBodyTransform pose = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      pose.setTranslation(position);
+      pose.getTranslation().set(position);
       return new Box3D(pose,
                        EuclidCoreRandomTools.nextDouble(random, minSize, maxSize),
                        EuclidCoreRandomTools.nextDouble(random, minSize, maxSize),
@@ -186,7 +186,7 @@ public class EuclidShapeMissingRandomTools
    public static Ellipsoid3D nextEllipsoid3D(Random random, Tuple3DReadOnly position, double minRadius, double maxRadius)
    {
       RigidBodyTransform pose = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-      pose.setTranslation(position);
+      pose.getTranslation().set(position);
       return new Ellipsoid3D(pose,
                              EuclidCoreRandomTools.nextDouble(random, minRadius, maxRadius),
                              EuclidCoreRandomTools.nextDouble(random, minRadius, maxRadius),

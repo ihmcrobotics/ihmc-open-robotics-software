@@ -218,7 +218,7 @@ public class NumericalInverseKinematicsCalculator implements InverseKinematicsCa
       errorRotationVector.scale(errorAxisAngle.getAngle());
       errorRotationVector.scale(0.2);
       
-      errorTransform.getTranslation(errorTranslationVector);
+      errorTranslationVector.set(errorTransform.getTranslation());
       
       errorRotationVector.get(0, 0, spatialError);
       errorTranslationVector.get(3, 0, spatialError);

@@ -488,7 +488,7 @@ public class SkippyRobot extends Robot
 
          // Change to ZUp by getting rid of x and y rotation.
          Vector3D translation = new Vector3D();
-         transform.getTranslation(translation);
+         translation.set(transform.getTranslation());
          Vector3D rotationEuler = new Vector3D();
          transform.getRotation().getEuler(rotationEuler);
          rotationEuler.setX(0.0);

@@ -105,7 +105,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
 
       // Transform the button axis with the rootTransform
       buttonOffset = new Vector3D();
-      rootJointTransform.getTranslation(buttonOffset);
+      buttonOffset.set(rootJointTransform.getTranslation());
 
       // Create the buttonSliderJoint
       buttonSliderJoint = new SliderJoint("buttonSliderJoint", buttonOffset, this, buttonPushVector);

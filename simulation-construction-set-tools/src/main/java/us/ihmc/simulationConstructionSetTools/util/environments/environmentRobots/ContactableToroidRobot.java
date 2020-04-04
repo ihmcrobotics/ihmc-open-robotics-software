@@ -73,7 +73,7 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
       
       RotationMatrix rotation = new RotationMatrix();
       Vector3D offset = new Vector3D();
-      pinJointTransform.getTranslation(offset);
+      offset.set(pinJointTransform.getTranslation());
       rotation.set(pinJointTransform.getRotation());
       
       Vector3D axis = new Vector3D(0.0, 0.0, 1.0);

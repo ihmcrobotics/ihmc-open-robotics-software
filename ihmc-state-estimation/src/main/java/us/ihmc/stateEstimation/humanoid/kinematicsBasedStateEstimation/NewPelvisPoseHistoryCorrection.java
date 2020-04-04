@@ -204,7 +204,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
 
       correctedPelvisPoseInWorldFrame.get(correctedPelvisTransformInWorldFrame);
 
-      correctedPelvisTransformInWorldFrame.getTranslation(correctedPelvisTranslation);
+      correctedPelvisTranslation.set(correctedPelvisTransformInWorldFrame.getTranslation());
       localizationTranslation.set(iterativeClosestPointInWorldFramePose.getPosition());
 
       localizationOrientation.setIncludingFrame(iterativeClosestPointInWorldFramePose.getOrientation());
@@ -263,7 +263,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
             tempTransform.set(stateEstimatorPose);
             tempTransform.invert();
             tempTransform.multiply(localizationPose);
-            tempTransform.getTranslation(tempTranslation);
+            tempTranslation.set(tempTransform.getTranslation());
             tempRotation.set(tempTransform.getRotation());
 
             // If we are in the deadband just return
@@ -302,7 +302,7 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
 
       ////for SCS feedback
       yoIterativeClosestPointPoseInWorldFrame.set(iterativeClosestPointInWorldFramePose);
-      totalErrorBetweenPelvisAndLocalizationTransform.getTranslation(totalErrorTranslation);
+      totalErrorTranslation.set(totalErrorBetweenPelvisAndLocalizationTransform.getTranslation());
       totalErrorTranslation_X.set(totalErrorTranslation.getX());
       totalErrorTranslation_Y.set(totalErrorTranslation.getY());
       totalErrorTranslation_Z.set(totalErrorTranslation.getZ());
@@ -347,8 +347,8 @@ public class NewPelvisPoseHistoryCorrection implements PelvisPoseHistoryCorrecti
 
    private void sendCorrectionUpdatePacket()
    {
-      errorBetweenCorrectedAndLocalizationTransform.getTranslation(translationalResidualError);
-      totalErrorBetweenPelvisAndLocalizationTransform.getTranslation(translationalTotalError);
+      translationalResidualError.set(errorBetweenCorrectedAndLocalizationTransform.getTranslation());
+      translationalTotalError.set(totalErrorBetweenPelvisAndLocalizationTransform.getTranslation());
 
       double absoluteResidualError = translationalResidualError.length();
       double absoluteTotalError = translationalTotalError.length();

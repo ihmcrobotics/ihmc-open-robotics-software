@@ -202,7 +202,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       Vector3D pelvisTranslation = new Vector3D();
       YawPitchRoll yawPitchRoll = new YawPitchRoll();
 
-      pelvisTransform.getTranslation(pelvisTranslation);
+      pelvisTranslation.set(pelvisTransform.getTranslation());
 
       Quaternion pelvisRotation = new Quaternion();
       pelvisRotation.set(pelvisTransform.getRotation());
@@ -275,7 +275,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       pelvisFrameFromMocap.getTransformToDesiredFrame(driftTransform, pelvisFrameFromRobotConfigurationDataPacket);
       
       Vector3D driftTranslation = new Vector3D();
-      driftTransform.getTranslation(driftTranslation);
+      driftTranslation.set(driftTransform.getTranslation());
       
       Quaternion driftRotation = new Quaternion();
       driftRotation.set(driftTransform.getRotation());

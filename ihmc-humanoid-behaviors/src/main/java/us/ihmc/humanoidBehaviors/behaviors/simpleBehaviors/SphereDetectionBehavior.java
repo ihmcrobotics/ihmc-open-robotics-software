@@ -184,7 +184,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
       }
 
       // sort large to small
-      humanoidReferenceFrames.getChestFrame().getTransformToWorldFrame().getTranslation(chestPosition);
+      chestPosition.set(humanoidReferenceFrames.getChestFrame().getTransformToWorldFrame().getTranslation());
 
       final List<Shape> spheres = findSpheres.getFound();
       Collections.sort(spheres, new Comparator<Shape>()

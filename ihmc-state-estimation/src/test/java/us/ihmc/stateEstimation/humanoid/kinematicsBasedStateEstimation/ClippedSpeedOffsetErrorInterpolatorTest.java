@@ -250,7 +250,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       referenceFrameToBeCorrectedWaypointsTransformPoseBufferInWorldFrame.findTransform(0, temporaryTimeStampedTransform);
       referenceFrameToBeCorrectedTransform = temporaryTimeStampedTransform.getTransform3D();
-      referenceFrameToBeCorrectedTransform.getTranslation(referenceFrameToBeCorrectedTransform_Translation);
+      referenceFrameToBeCorrectedTransform_Translation.set(referenceFrameToBeCorrectedTransform.getTranslation());
       referenceFrameToBeCorrectedTransform_Rotation.set(referenceFrameToBeCorrectedTransform.getRotation());
       referenceFrameToBeCorrected.update();
 
@@ -342,7 +342,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       referenceFrameToBeCorrectedWaypointsTransformPoseBufferInWorldFrame.findTransform(0, temporaryTimeStampedTransform);
       referenceFrameToBeCorrectedTransform = temporaryTimeStampedTransform.getTransform3D();
-      referenceFrameToBeCorrectedTransform.getTranslation(referenceFrameToBeCorrectedTransform_Translation);
+      referenceFrameToBeCorrectedTransform_Translation.set(referenceFrameToBeCorrectedTransform.getTranslation());
       referenceFrameToBeCorrectedTransform_Rotation.set(referenceFrameToBeCorrectedTransform.getRotation());
       referenceFrameToBeCorrected.update();
 
@@ -426,7 +426,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       referenceFrameToBeCorrectedWaypointsTransformPoseBufferInWorldFrame.findTransform(0, temporaryTimeStampedTransform);
       referenceFrameToBeCorrectedTransform = temporaryTimeStampedTransform.getTransform3D();
-      referenceFrameToBeCorrectedTransform.getTranslation(referenceFrameToBeCorrectedTransform_Translation);
+      referenceFrameToBeCorrectedTransform_Translation.set(referenceFrameToBeCorrectedTransform.getTranslation());
       referenceFrameToBeCorrectedTransform_Rotation.set(referenceFrameToBeCorrectedTransform.getRotation());
       referenceFrameToBeCorrected.update();
 
@@ -577,7 +577,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       {
          referenceFrameToBeCorrectedWaypointsTransformPoseBufferInWorldFrame.findTransform(0, temporaryTimeStampedTransform);
          referenceFrameToBeCorrectedTransform = temporaryTimeStampedTransform.getTransform3D();
-         referenceFrameToBeCorrectedTransform.getTranslation(referenceFrameToBeCorrectedTransform_Translation);
+         referenceFrameToBeCorrectedTransform_Translation.set(referenceFrameToBeCorrectedTransform.getTranslation());
          referenceFrameToBeCorrectedTransform_Rotation.set(referenceFrameToBeCorrectedTransform.getRotation());
          referenceFrameToBeCorrected.update();
 
@@ -621,7 +621,7 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
          }
 
          ////////////////update startPose for asserts////
-         referenceFrameToBeCorrectedTransform.getTranslation(referenceFrameToBeCorrectedTransform_Translation);
+         referenceFrameToBeCorrectedTransform_Translation.set(referenceFrameToBeCorrectedTransform.getTranslation());
          referenceFrameToBeCorrectedTransform_Rotation.set(referenceFrameToBeCorrectedTransform.getRotation());
 
          startPoseTransform.setIdentity();

@@ -49,7 +49,7 @@ public class PlanarRegionsListCutTool
       Vector2D planeNormal2D = new Vector2D(planeNormal3D);
       planeNormal2D.normalize();
 
-      cuttingLine2D.setDirection(planeNormal2D.getY(), -planeNormal2D.getX()); // make sure left side of line is plane normal
+      cuttingLine2D.getDirection().set(planeNormal2D.getY(), -planeNormal2D.getX()); // make sure left side of line is plane normal
 
       ConcaveHull concaveHull = new ConcaveHull(); // TODO make this one line
       for (Point2D point2D : region.getConcaveHull())

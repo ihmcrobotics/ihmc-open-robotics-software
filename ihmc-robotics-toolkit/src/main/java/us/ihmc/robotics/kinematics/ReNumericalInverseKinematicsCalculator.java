@@ -175,7 +175,7 @@ public class ReNumericalInverseKinematicsCalculator implements InverseKinematics
       errorRotationVector.set(axis);
       errorRotationVector.scale(errorAxisAngle.getAngle());
 
-      errorTransform.getTranslation(errorTranslationVector);
+      errorTranslationVector.set(errorTransform.getTranslation());
       
       errorRotationVector.get(0, error);
       errorTranslationVector.get(3, error);

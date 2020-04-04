@@ -357,7 +357,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       updatedStartOffsetTransform.multiply(startOffsetTransform_Rotation);
       updatedStartOffsetTransform.multiply(stateEstimatorTransform_Rotation);
 
-      updatedStartOffsetTransform.getTranslation(updatedStartOffset_Translation);
+      updatedStartOffset_Translation.set(updatedStartOffsetTransform.getTranslation());
       updatedStartOffset_Rotation_quat.set(updatedStartOffsetTransform.getRotation());
 
       updatedGoalOffsetTransform.setIdentity();
@@ -366,7 +366,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       updatedGoalOffsetTransform.multiply(goalOffsetTransform_Rotation);
       updatedGoalOffsetTransform.multiply(stateEstimatorTransform_Rotation);
 
-      updatedGoalOffsetTransform.getTranslation(updatedGoalOffset_Translation);
+      updatedGoalOffset_Translation.set(updatedGoalOffsetTransform.getTranslation());
       updatedGoalOffset_Rotation_quat.set(updatedGoalOffsetTransform.getRotation());
 
       //interpolation here
