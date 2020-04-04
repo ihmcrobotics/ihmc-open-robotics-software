@@ -5,7 +5,7 @@ import java.util.List;
 
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
@@ -79,7 +79,7 @@ public class AtlasSimulationCollisionModel implements RobotCollisionModel
 
          Capsule3D chestFrontHighShape = new Capsule3D(0.3, 0.15);
          chestFrontHighShape.getPosition().set(0.147, 0.0, 0.418);
-         chestFrontHighShape.getAxis().set(Axis.Y);
+         chestFrontHighShape.getAxis().set(Axis3D.Y);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, chestFrontHighShape, torsoFrame));
 
          Box3D chestTopBackShape = new Box3D(0.5, 0.35, 0.18);
@@ -88,7 +88,7 @@ public class AtlasSimulationCollisionModel implements RobotCollisionModel
 
          Capsule3D chestHeadGuardShape = new Capsule3D(0.3, 0.08);
          chestHeadGuardShape.getPosition().set(0.267, 0.0, 0.623);
-         chestHeadGuardShape.getAxis().set(Axis.Y);
+         chestHeadGuardShape.getAxis().set(Axis3D.Y);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, chestHeadGuardShape, torsoFrame));
 
          Box3D chestTopShape = new Box3D(0.3, 0.35, 0.15);
@@ -102,7 +102,7 @@ public class AtlasSimulationCollisionModel implements RobotCollisionModel
 
          Capsule3D pelvisShape = new Capsule3D(0.05, 0.2);
          pelvisShape.getPosition().set(0.012, 0.0, 0.037);
-         pelvisShape.getAxis().set(Axis.Z);
+         pelvisShape.getAxis().set(Axis3D.Z);
          collidables.add(new Collidable(pelvis, collisionMask, collisionGroup, pelvisShape, pelvisFrame));
       }
 
@@ -115,7 +115,7 @@ public class AtlasSimulationCollisionModel implements RobotCollisionModel
 
             Capsule3D thighTopShape = new Capsule3D(0.1, 0.09);
             thighTopShape.getPosition().set(0.0, 0.0, -0.1);
-            thighTopShape.getAxis().set(Axis.Z);
+            thighTopShape.getAxis().set(Axis3D.Z);
             collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighTopShape, hipPitchFrame));
 
             Capsule3D thighFrontShape = new Capsule3D(0.15, 0.085);
@@ -125,7 +125,7 @@ public class AtlasSimulationCollisionModel implements RobotCollisionModel
 
             Capsule3D thighBackShape = new Capsule3D(0.15, 0.085);
             thighBackShape.getPosition().set(-0.05, 0.0, -0.15);
-            thighBackShape.getAxis().set(Axis.Z);
+            thighBackShape.getAxis().set(Axis3D.Z);
             collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighBackShape, hipPitchFrame));
          }
 
@@ -173,7 +173,7 @@ public class AtlasSimulationCollisionModel implements RobotCollisionModel
 
             Capsule3D upperArmShape = new Capsule3D(0.27, 0.07);
             upperArmShape.getPosition().set(-0.005, robotSide.negateIfRightSide(0.15), -0.01);
-            upperArmShape.getAxis().set(Axis.Y);
+            upperArmShape.getAxis().set(Axis3D.Y);
             collidables.add(new Collidable(upperArm, collisionMask, collisionGroup, upperArmShape, shoulderRollFrame));
          }
 
@@ -184,7 +184,7 @@ public class AtlasSimulationCollisionModel implements RobotCollisionModel
 
             Capsule3D forearmShape = new Capsule3D(0.27, 0.07);
             forearmShape.getPosition().set(-0.005, robotSide.negateIfRightSide(0.15), -0.01);
-            forearmShape.getAxis().set(Axis.Y);
+            forearmShape.getAxis().set(Axis3D.Y);
             collidables.add(new Collidable(forearm, collisionMask, collisionGroup, forearmShape, elbowFrame));
          }
 
