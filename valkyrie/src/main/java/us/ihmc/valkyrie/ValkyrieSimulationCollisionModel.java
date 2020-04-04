@@ -164,17 +164,17 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
             MovingReferenceFrame thighFrame = thigh.getParentJoint().getFrameAfterJoint();
             Capsule3D thighUpperShape = new Capsule3D(0.2, 0.1);
             thighUpperShape.getPosition().set(0.0195, robotSide.negateIfRightSide(0.086), -0.093);
-            thighUpperShape.setAxis(new Vector3D(-0.15, robotSide.negateIfRightSide(-0.05), 1.0));
+            thighUpperShape.getAxis().set(new Vector3D(-0.15, robotSide.negateIfRightSide(-0.05), 1.0));
             collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighUpperShape, thighFrame));
 
             Capsule3D thighFrontShape = new Capsule3D(0.15, 0.095);
             thighFrontShape.getPosition().set(0.0424, robotSide.negateIfRightSide(0.081), -0.258);
-            thighFrontShape.setAxis(new Vector3D(0.1, 0.0, 1.0));
+            thighFrontShape.getAxis().set(new Vector3D(0.1, 0.0, 1.0));
             collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighFrontShape, thighFrame));
 
             Capsule3D thighLowerShape = new Capsule3D(0.25, 0.09);
             thighLowerShape.getPosition().set(0.017, robotSide.negateIfRightSide(0.091), -0.288);
-            thighLowerShape.setAxis(new Vector3D(0.1, robotSide.negateIfRightSide(0.05), 1.0));
+            thighLowerShape.getAxis().set(new Vector3D(0.1, robotSide.negateIfRightSide(0.05), 1.0));
             collidables.add(new Collidable(thigh, collisionMask, collisionGroup, thighLowerShape, thighFrame));
          }
 
@@ -183,7 +183,7 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
             MovingReferenceFrame shinFrame = shin.getParentJoint().getFrameAfterJoint();
             Capsule3D shinShape = new Capsule3D(0.3, 0.08);
             shinShape.getPosition().set(0.008, 0.0, -0.189);
-            shinShape.setAxis(new Vector3D(0.1, 0.0, 1.0));
+            shinShape.getAxis().set(new Vector3D(0.1, 0.0, 1.0));
             collidables.add(new Collidable(shin, collisionMask, collisionGroup, shinShape, shinFrame));
          }
 
