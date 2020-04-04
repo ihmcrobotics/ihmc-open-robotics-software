@@ -1,15 +1,13 @@
 package us.ihmc.robotics.geometry.shapes;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -17,6 +15,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.HullFace;
 import us.ihmc.robotics.geometry.QuickHull3dWrapper;
 
@@ -160,7 +159,7 @@ public class QuickHull3DWrapperTest
       for (HullFace face : faces)
       {
          face.getPlane(facePlane);
-         facePlane.getNormal(planeNormal);
+         planeNormal.set(facePlane.getNormal());
 
          if (planeNormal.epsilonEquals(new Vector3D(0, 0, 1), 1e-14))
          {

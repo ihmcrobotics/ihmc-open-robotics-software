@@ -57,7 +57,7 @@ public class GroundPlaneEstimatorTest
 
       groundPlaneEstimator.compute(pointListA);
       groundPlaneEstimator.getPlane(plane3dA);
-      Vector3D normalA = plane3dA.getNormalCopy();
+      Vector3D normalA = new Vector3D(plane3dA.getNormal());
 
       List<FramePoint3D> pointListB = new ArrayList<FramePoint3D>();
       Plane3D plane3dB = new Plane3D();
@@ -68,7 +68,7 @@ public class GroundPlaneEstimatorTest
 
       groundPlaneEstimator.compute(pointListB);
       groundPlaneEstimator.getPlane(plane3dB);
-      Vector3D normalB = plane3dB.getNormalCopy();
+      Vector3D normalB = new Vector3D(plane3dB.getNormal());
 
       assertTrue(normalA.epsilonEquals(normalB, 1e-7));
    }

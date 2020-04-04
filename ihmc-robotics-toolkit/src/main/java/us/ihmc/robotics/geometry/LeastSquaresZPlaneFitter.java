@@ -66,7 +66,7 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
 
       double centerZ = planeToPack.getZOnPlane(center.getX(), center.getY());
       Point3D planePoint = new Point3D(center.getX(), center.getY(), centerZ);
-      planeToPack.setPoint(planePoint);
+      planeToPack.getPoint().set(planePoint);
       return squareError;
    }
    
@@ -138,8 +138,8 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
          return Double.POSITIVE_INFINITY;
       }
       
-      planeToPack.setPoint(xSolution, ySolution, zSolution);
-      planeToPack.setNormal(coefficients.get(0), coefficients.get(1), 1.0);
+      planeToPack.getPoint().set(xSolution, ySolution, zSolution);
+      planeToPack.getNormal().set(coefficients.get(0), coefficients.get(1), 1.0);
 
       double squaredError = 0;
       double A = coefficients.get(0);

@@ -84,8 +84,8 @@ public class HullFace
       }
 
       faceCenter.scale(1.0 / numPoints);
-      plane.setPoint(faceCenter);
-      plane.setNormal(planeNormal);
+      plane.getPoint().set(faceCenter);
+      plane.getNormal().set(planeNormal);
    }
 
    public double getSlopeAngle()
@@ -169,7 +169,7 @@ public class HullFace
       xVec.sub(averagePoint);
       xVec.normalize();
 
-      Vector3D zVec = plane.getNormalCopy();
+      Vector3D zVec = new Vector3D(plane.getNormal());
       Vector3D yVec = new Vector3D();
       yVec.cross(zVec, xVec);
       yVec.normalize();
