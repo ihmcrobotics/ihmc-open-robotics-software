@@ -60,13 +60,13 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
 
          Capsule3D torsoShapeBottom = new Capsule3D(0.1, 0.12);
          torsoShapeBottom.getPosition().set(-0.006, 0.0, 0.103);
-         torsoShapeBottom.setAxis(Axis3D.Y);
+         torsoShapeBottom.getAxis().set(Axis3D.Y);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeBottom, torsoFrame));
 
          RigidBodyBasics pelvis = RobotCollisionModel.findRigidBody(jointMap.getPelvisName(), multiBodySystem);
          MovingReferenceFrame pelvisFrame = pelvis.getParentJoint().getFrameAfterJoint();
          Capsule3D pelvisShapeTop = new Capsule3D(0.15, 0.1);
-         pelvisShapeTop.setAxis(Axis3D.Y);
+         pelvisShapeTop.getAxis().set(Axis3D.Y);
          pelvisShapeTop.getPosition().set(0.0, 0.0, -0.08);
          collidables.add(new Collidable(pelvis, collisionMask, collisionGroup, pelvisShapeTop, pelvisFrame));
          Capsule3D pelvisShapeBottom = new Capsule3D(0.125, 0.14);
@@ -110,7 +110,7 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
             MovingReferenceFrame forearmFrame = forearm.getParentJoint().getFrameAfterJoint();
             Capsule3D forearmShape = new Capsule3D(0.21, 0.08);
             forearmShape.getPosition().set(0.005, robotSide.negateIfRightSide(0.11), 0.0);
-            forearmShape.setAxis(Axis3D.Y);
+            forearmShape.getAxis().set(Axis3D.Y);
             collidables.add(new Collidable(forearm, collisionMask, collisionGroup, forearmShape, forearmFrame));
          }
          else
@@ -134,18 +134,18 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
          MovingReferenceFrame upperLegFrame = upperLeg.getParentJoint().getFrameAfterJoint();
          Capsule3D upperLegShapeTop = new Capsule3D(0.25, 0.1);
          upperLegShapeTop.getPosition().set(0.032, robotSide.negateIfRightSide(0.091), -0.108);
-         upperLegShapeTop.setAxis(new Vector3D(-0.139, robotSide.negateIfLeftSide(0.1), 0.99));
+         upperLegShapeTop.getAxis().set(new Vector3D(-0.139, robotSide.negateIfLeftSide(0.1), 0.99));
          collidables.add(new Collidable(upperLeg, collisionMask, collisionGroup, upperLegShapeTop, upperLegFrame));
          Capsule3D upperLegShapeBottom = new Capsule3D(0.20, 0.105);
          upperLegShapeBottom.getPosition().set(0.027, robotSide.negateIfRightSide(0.081), -0.308);
-         upperLegShapeBottom.setAxis(new Vector3D(0.208, robotSide.negateIfRightSide(0.1), 0.978));
+         upperLegShapeBottom.getAxis().set(new Vector3D(0.208, robotSide.negateIfRightSide(0.1), 0.978));
          collidables.add(new Collidable(upperLeg, collisionMask, collisionGroup, upperLegShapeBottom, upperLegFrame));
 
          RigidBodyBasics lowerLeg = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.KNEE_PITCH), multiBodySystem).getSuccessor();
          MovingReferenceFrame lowerLegFrame = lowerLeg.getParentJoint().getFrameAfterJoint();
          Capsule3D lowerLegShape = new Capsule3D(0.23, 0.11);
          lowerLegShape.getPosition().set(-0.012, 0.0, -0.189);
-         lowerLegShape.setAxis(new Vector3D(0.08, 0.0, 1.0));
+         lowerLegShape.getAxis().set(new Vector3D(0.08, 0.0, 1.0));
          collidables.add(new Collidable(lowerLeg, collisionMask, collisionGroup, lowerLegShape, lowerLegFrame));
       }
 
