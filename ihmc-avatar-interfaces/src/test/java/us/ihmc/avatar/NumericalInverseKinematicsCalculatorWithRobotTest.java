@@ -328,8 +328,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    {
       FramePose3D handPose = new FramePose3D(worldFrame);
 
-      handPose.setOrientation(desiredOrientation);
-      handPose.setPosition(desiredPosition);
+      handPose.getOrientation().set(desiredOrientation);
+      handPose.getPosition().set(desiredPosition);
       handPose.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
 
       RigidBodyTransform transform = new RigidBodyTransform();

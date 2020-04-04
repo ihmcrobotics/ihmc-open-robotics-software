@@ -659,7 +659,7 @@ public class SpatialFeedbackControlCommand implements FeedbackControlCommand<Spa
       RigidBodyBasics endEffector = spatialAccelerationCommand.getEndEffector();
       position.checkReferenceFrameMatch(endEffector.getBodyFixedFrame());
       controlFramePoseInEndEffectorFrame.setToZero(endEffector.getBodyFixedFrame());
-      controlFramePoseInEndEffectorFrame.setPosition(position);
+      controlFramePoseInEndEffectorFrame.getPosition().set(position);
    }
 
    /**

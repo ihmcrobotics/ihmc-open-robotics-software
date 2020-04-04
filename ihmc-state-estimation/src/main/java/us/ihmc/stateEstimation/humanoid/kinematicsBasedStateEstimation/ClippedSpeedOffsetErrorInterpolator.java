@@ -438,7 +438,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       startOffsetErrorReferenceFrame_Translation.setPoseAndUpdate(startOffsetErrorPose_Translation);
 
       startOffsetErrorPose_Rotation.setToZero(worldFrame);
-      startOffsetErrorPose_Rotation.setOrientation(updatedStartOffset_Rotation);
+      startOffsetErrorPose_Rotation.getOrientation().set(updatedStartOffset_Rotation);
       startOffsetErrorReferenceFrame_Rotation.setPoseAndUpdate(startOffsetErrorPose_Rotation);
 
       goalOffsetFramePoint_Translation.changeFrame(worldFrame);

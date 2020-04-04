@@ -92,7 +92,7 @@ public class FootstepCostCalculatorTest
          randomStepPose.getOrientation().set(new Quaternion(randomNode.getYaw(), randomStepPitch, randomStepRoll));
 
          FramePose3D stanceFootZUpPose = new FramePose3D();
-         stanceFootZUpPose.setPosition(stanceFoot.getPosition());
+         stanceFootZUpPose.getPosition().set(stanceFoot.getPosition());
          stanceFootZUpPose.getOrientation().setYawPitchRoll(stanceNode.getYaw(), 0.0, 0.0);
          PoseReferenceFrame stanceFootZUpFrame = new PoseReferenceFrame("stanceNodeFrame", stanceFootZUpPose);
 

@@ -617,7 +617,7 @@ public class ContinuousStepGenerator implements Updatable
             }
             else
             {
-               adjustedPose.setOrientation(footstepPose.getOrientation());
+               adjustedPose.getOrientation().set(footstepPose.getOrientation());
             }
             return adjustedPose;
          }
