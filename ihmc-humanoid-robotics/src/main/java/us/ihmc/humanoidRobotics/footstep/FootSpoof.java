@@ -9,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -56,7 +57,7 @@ public class FootSpoof implements ContactablePlaneBody
       this.shin = new RigidBody(name, shinFrame);
       this.ankle = new RevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3D(0.0, 1.0, 0.0));
       this.foot = new RigidBody(name, ankle, new Matrix3D(), 1.0, new RigidBodyTransform());
-      soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
+      soleFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
 
       for (Point2D contactPointInSoleFrame : contactPoints2dInSoleFrame)
       {
@@ -83,7 +84,7 @@ public class FootSpoof implements ContactablePlaneBody
       this.shin = new RigidBody(name, shinFrame);
       this.ankle = new RevoluteJoint(name + "Ankle", shin, new RigidBodyTransform(), new Vector3D(0.0, 1.0, 0.0));
       this.foot = new RigidBody(name, ankle, new Matrix3D(), 1.0, new RigidBodyTransform());
-      soleFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
+      soleFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(name + "soleFrame", ankle.getFrameAfterJoint(), transformToAnkle);
       FramePoint3D point1 = new FramePoint3D(soleFrame, new Point3D(footForward, footHalfWidth, 0.0));
       FramePoint3D point2 = new FramePoint3D(soleFrame, new Point3D(footForward, -footHalfWidth, 0.0));
       FramePoint3D point3 = new FramePoint3D(soleFrame, new Point3D(-footBack, -footHalfWidth, 0.0));

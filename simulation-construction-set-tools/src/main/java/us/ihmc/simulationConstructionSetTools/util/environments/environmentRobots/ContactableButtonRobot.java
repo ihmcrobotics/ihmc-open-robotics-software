@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameCylinder3D;
@@ -117,7 +117,7 @@ public class ContactableButtonRobot extends ContactableSliderJointRobot {
       buttonLink = new Link("buttonLink");
       buttonLink.setMass(buttonMass);
 
-      Matrix3D buttonInertiaMatrix = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(buttonMass, buttonRadius, buttonThickness, Axis.X);
+      Matrix3D buttonInertiaMatrix = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(buttonMass, buttonRadius, buttonThickness, Axis3D.X);
       buttonLink.setMomentOfInertia(buttonInertiaMatrix);
 
       Vector3D buttonComOffset = new Vector3D();

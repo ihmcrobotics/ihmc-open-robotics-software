@@ -6,6 +6,7 @@ import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -187,9 +188,7 @@ public class FusedIMUSensor implements IMUSensorReadOnly
       fusedQuaternion.set(fusedYawPitchRoll);
 
       RigidBodyTransform fusedTransform = new RigidBodyTransform(fusedQuaternion, fusedOffset);
-      ReferenceFrame fusedMeasurementFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(sensorName + "Frame",
-                                                                                                              firstMeasurementFrame.getParent(),
-                                                                                                              fusedTransform);
+      ReferenceFrame fusedMeasurementFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(sensorName + "Frame", firstMeasurementFrame.getParent(), fusedTransform);
 
       return fusedMeasurementFrame;
    }

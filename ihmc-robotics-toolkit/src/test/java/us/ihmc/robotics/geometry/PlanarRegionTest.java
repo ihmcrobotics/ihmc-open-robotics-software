@@ -12,7 +12,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -620,7 +620,7 @@ public class PlanarRegionTest
          Quaternion orientation = RandomGeometry.nextQuaternion(random, Math.toRadians(45.0));
          Vector3D translation = RandomGeometry.nextVector3D(random, 10.0);
          RigidBodyTransform regionTransform = new RigidBodyTransform(orientation, translation);
-         ReferenceFrame localFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("local", worldFrame, regionTransform);
+         ReferenceFrame localFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("local", worldFrame, regionTransform);
          PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
 
          assertEquals("Wrong number of convex polygons in the region.", 3, planarRegion.getNumberOfConvexPolygons());
@@ -899,37 +899,37 @@ public class PlanarRegionTest
          Vector3D supportDirection = new Vector3D();
 
          // Trivial case #1: supportingVector = +X
-         supportDirection.set(Axis.X);
+         supportDirection.set(Axis3D.X);
          expectedSupportVertex = convexHullVertices.stream().max(Comparator.comparingDouble(Point3D::getX)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
          assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
 
          // Trivial case #2: supportingVector = -X
-         supportDirection.setAndNegate(Axis.X);
+         supportDirection.setAndNegate(Axis3D.X);
          expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(Point3D::getX)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
          assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
 
          // Trivial case #1: supportingVector = +Y
-         supportDirection.set(Axis.Y);
+         supportDirection.set(Axis3D.Y);
          expectedSupportVertex = convexHullVertices.stream().max(Comparator.comparingDouble(Point3D::getY)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
          assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
 
          // Trivial case #2: supportingVector = -Y
-         supportDirection.setAndNegate(Axis.Y);
+         supportDirection.setAndNegate(Axis3D.Y);
          expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(Point3D::getY)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
          assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
 
          // Trivial case #1: supportingVector = +Z
-         supportDirection.set(Axis.Z);
+         supportDirection.set(Axis3D.Z);
          expectedSupportVertex = convexHullVertices.stream().max(Comparator.comparingDouble(Point3D::getZ)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
          assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
 
          // Trivial case #2: supportingVector = -Z
-         supportDirection.setAndNegate(Axis.Z);
+         supportDirection.setAndNegate(Axis3D.Z);
          expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(Point3D::getZ)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
          assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));

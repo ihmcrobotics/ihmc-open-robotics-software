@@ -5,7 +5,7 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixFeatures;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 
 /**
  * {@code DenseMatrixVector3D} represents a 3D vector holding onto three independent matrices for
@@ -153,7 +153,7 @@ public class DenseMatrixVector3D
     * @param axis either X, Y, or Z.
     * @return the corresponding matrix.
     */
-   public DenseMatrix64F getMatrix(Axis axis)
+   public DenseMatrix64F getMatrix(Axis3D axis)
    {
       return matrixArray[axis.ordinal()];
    }

@@ -327,7 +327,7 @@ public class RotationTools
       m00 = m00 / magnitude;
       m10 = m10 / magnitude;
 
-      transform.setRotation(m00, -m10, 0.0, m10, m00, 0.0, 0.0, 0.0, 1.0);
+      transform.getRotation().set(m00, -m10, 0.0, m10, m00, 0.0, 0.0, 0.0, 1.0);
    }
 
    private static final ThreadLocal<Vector3D> angularVelocityForIntegrator = new ThreadLocal<Vector3D>()

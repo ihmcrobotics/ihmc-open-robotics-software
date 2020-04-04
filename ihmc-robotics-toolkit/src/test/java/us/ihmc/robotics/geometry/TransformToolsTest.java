@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -36,7 +36,7 @@ public class TransformToolsTest
    {
       RigidBodyTransform transform = new RigidBodyTransform();
 
-      TransformTools.appendRotation(transform, Math.PI / 4, Axis.X);
+      TransformTools.appendRotation(transform, Math.PI / 4, Axis3D.X);
 
       RigidBodyTransform transform2 = new RigidBodyTransform();
 
@@ -46,7 +46,7 @@ public class TransformToolsTest
 
       transform = new RigidBodyTransform();
 
-      TransformTools.appendRotation(transform, 3 * Math.PI / 4, Axis.Y);
+      TransformTools.appendRotation(transform, 3 * Math.PI / 4, Axis3D.Y);
 
       transform2 = new RigidBodyTransform();
 
@@ -56,7 +56,7 @@ public class TransformToolsTest
 
       transform = new RigidBodyTransform();
 
-      TransformTools.appendRotation(transform, -Math.PI / 2, Axis.Z);
+      TransformTools.appendRotation(transform, -Math.PI / 2, Axis3D.Z);
 
       transform2 = new RigidBodyTransform();
 
@@ -77,8 +77,8 @@ public class TransformToolsTest
       RigidBodyTransform transformFromWorldToA2 = new RigidBodyTransform();
       transformFromWorldToA2.getTranslation().set(vectorA2);
 
-      ReferenceFrame a1 = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("a1", ReferenceFrame.getWorldFrame(), transformFromWorldToA1);
-      ReferenceFrame a2 = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("a2", ReferenceFrame.getWorldFrame(), transformFromWorldToA2);
+      ReferenceFrame a1 = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("a1", ReferenceFrame.getWorldFrame(), transformFromWorldToA1);
+      ReferenceFrame a2 = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("a2", ReferenceFrame.getWorldFrame(), transformFromWorldToA2);
 
       RigidBodyTransform transformA2toA1 = TransformTools.getTransformFromA2toA1(transformFromWorldToA1, transformFromWorldToA2);
 
@@ -109,8 +109,8 @@ public class TransformToolsTest
       this.createRandomTransformationMatrix(matrix, random);
       RigidBodyTransform transformFromWorldToA2 = new RigidBodyTransform(matrix);
 
-      ReferenceFrame a1 = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("a1", ReferenceFrame.getWorldFrame(), transformFromWorldToA1);
-      ReferenceFrame a2 = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("a2", ReferenceFrame.getWorldFrame(), transformFromWorldToA2);
+      ReferenceFrame a1 = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("a1", ReferenceFrame.getWorldFrame(), transformFromWorldToA1);
+      ReferenceFrame a2 = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("a2", ReferenceFrame.getWorldFrame(), transformFromWorldToA2);
 
       RigidBodyTransform transformA2toA1 = TransformTools.getTransformFromA2toA1(transformFromWorldToA1, transformFromWorldToA2);
 

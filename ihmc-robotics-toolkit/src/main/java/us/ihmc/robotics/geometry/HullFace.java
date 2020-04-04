@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 
 /**
  * @author agrabertilton
@@ -152,8 +153,8 @@ public class HullFace
          return;
       }
 
-      List<Point3D> projectedPoints = new ArrayList<>();
-      Point3D projectedPoint;
+      List<Point3DBasics> projectedPoints = new ArrayList<>();
+      Point3DBasics projectedPoint;
       Point3D averagePoint = new Point3D();
       for (Point3D point3d : facePoints)
       {
@@ -179,7 +180,7 @@ public class HullFace
 
       rotationMatrix.transpose();
       polygonToPack.clear();
-      for (Point3D point : projectedPoints)
+      for (Point3DBasics point : projectedPoints)
       {
          point.sub(averagePoint);
          rotationMatrix.transform(point);

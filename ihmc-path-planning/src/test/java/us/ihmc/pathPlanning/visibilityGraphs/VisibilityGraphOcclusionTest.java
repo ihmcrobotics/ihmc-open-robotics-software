@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -22,6 +22,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
@@ -239,7 +240,7 @@ public class VisibilityGraphOcclusionTest
          Point3D walkerPosition3D = new Point3D(walkerShapeWorld.getPosition());
 
          Plane3D plane = planarRegion.getPlane();
-         Point3D closestPoint = plane.orthogonalProjectionCopy(walkerPosition3D);
+         Point3DBasics closestPoint = plane.orthogonalProjectionCopy(walkerPosition3D);
 
          if (!walkerShapeWorld.isPointInside(closestPoint))
             continue; // Not even close to the region plane, let's keep going.
@@ -310,7 +311,7 @@ public class VisibilityGraphOcclusionTest
       generator.addRectangle(2.0, 4.0);
 
       generator.translate(1.0, -1.0, 0.5);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
 
       generator.addRectangle(0.9, 1.9);
 
@@ -330,7 +331,7 @@ public class VisibilityGraphOcclusionTest
       generator.addRectangle(2.0, 4.0);
 
       generator.translate(2.0, 0.0, 1.0);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
 
       generator.addRectangle(0.2, 0.5);
 
@@ -345,7 +346,7 @@ public class VisibilityGraphOcclusionTest
       generator.addRectangle(2.0, 4.0);
 
       generator.translate(2.0, 0.0, 1.0);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
 
       generator.addRectangle(0.05, 0.05);
 
@@ -360,7 +361,7 @@ public class VisibilityGraphOcclusionTest
       generator.addRectangle(2.0, 4.0);
 
       generator.translate(2.0, 0.0, 0.5);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
 
       generator.addRectangle(1.0, 0.6);
 

@@ -3,9 +3,10 @@ package us.ihmc.simulationConstructionSetTools.util.environments;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -26,7 +27,7 @@ import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 
 public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInterface
 {
-   private final ReferenceFrame constructionWorldFrame = ReferenceFrame.constructARootFrame("constructionFrame");
+   private final ReferenceFrame constructionWorldFrame = ReferenceFrameTools.constructARootFrame("constructionFrame");
 
    private final CombinedTerrainObject3D combinedTerrainObject;
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
@@ -85,7 +86,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
 
       RigidBodyTransform debrisTransform = new RigidBodyTransform();
       debrisPose.get(debrisTransform );
-      TransformTools.appendRotation(debrisTransform, -debrisRoll, Axis.X);
+      TransformTools.appendRotation(debrisTransform, -debrisRoll, Axis3D.X);
       debrisPose.set(debrisTransform);
       debrisPose.setZ(0.0);
       PoseReferenceFrame debrisReferenceFrame = new PoseReferenceFrame("debrisReferenceFrame", debrisPose);
@@ -129,7 +130,7 @@ public class IndustrialDebrisEnvironment implements CommonAvatarEnvironmentInter
 
       RigidBodyTransform debrisTransform = new RigidBodyTransform();
       debrisPose.get(debrisTransform );
-      TransformTools.appendRotation(debrisTransform, -debrisPitch, Axis.Y);
+      TransformTools.appendRotation(debrisTransform, -debrisPitch, Axis3D.Y);
       debrisPose.set(debrisTransform);
       debrisPose.setZ(0.0);
       PoseReferenceFrame debrisReferenceFrame = new PoseReferenceFrame("debrisReferenceFrame", debrisPose);

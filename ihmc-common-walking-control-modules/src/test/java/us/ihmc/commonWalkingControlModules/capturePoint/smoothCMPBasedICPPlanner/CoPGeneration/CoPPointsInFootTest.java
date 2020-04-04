@@ -177,12 +177,11 @@ public class CoPPointsInFootTest
       copPointsInFoot.setFeetLocation(new FramePoint3D(worldFrame, 0.2, 0.1, 0.1), new FramePoint3D(worldFrame, 0.2, -0.1, 0.1));
       copPointsInFoot.addWaypoint(CoPPointName.MIDFOOT_COP, 0.2, new FramePoint3D(worldFrame, 0.2, 0.15, 0.1));
       copPointsInFoot.addWaypoint(CoPPointName.ENTRY_COP, 0.8, new FramePoint3D(worldFrame, 0.15, -0.05, 0.11));
-      ReferenceFrame newFrameToRegister = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("RandomFrameToRegister", worldFrame,
-                                                                                                         new RigidBodyTransform(new Quaternion(),
-                                                                                                                                new FrameVector3D(worldFrame,
-                                                                                                                                                  newFrameOriginX,
-                                                                                                                                                  newFrameOriginY,
-                                                                                                                                                  newFrameOriginZ)));
+      ReferenceFrame newFrameToRegister = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("RandomFrameToRegister", worldFrame, new RigidBodyTransform(new Quaternion(),
+        new FrameVector3D(worldFrame,
+                          newFrameOriginX,
+                          newFrameOriginY,
+                          newFrameOriginZ)));
       copPointsInFoot.changeFrame(newFrameToRegister);
       FramePoint3D tempFramePoint = new FramePoint3D();
       copPointsInFoot.getSupportFootLocation(tempFramePoint);

@@ -1,6 +1,6 @@
 package us.ihmc.avatar.polaris;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -69,7 +69,7 @@ public class PolarisRobot extends Robot
 
       polarisLink.setMass(1.0);
       polarisLink.setComOffset(new Vector3D());
-      Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(1.0, 1.0, 1.0, Axis.Z);
+      Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(1.0, 1.0, 1.0, Axis3D.Z);
       polarisLink.setMomentOfInertia(inertia);
 
       floatingJoint = new FloatingJoint(name + "Base", name, new Vector3D(), this);

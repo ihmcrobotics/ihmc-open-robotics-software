@@ -3,7 +3,7 @@ package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobo
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -119,7 +119,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    private void createDoor(Vector3D positionInWorld)
    {
       // creating the pinJoint, i.e. door hinge
-      doorHingePinJoint = new PinJoint("doorHingePinJoint", positionInWorld, this, Axis.Z);
+      doorHingePinJoint = new PinJoint("doorHingePinJoint", positionInWorld, this, Axis3D.Z);
       
       // door link
       doorLink = new Link("doorLink");
@@ -135,7 +135,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    private void createHandle()
    {
       // create handle
-      handlePinJoint = new PinJoint("handlePinJoint", new Vector3D(handleOffset.getX(), 0.0, handleOffset.getY()), this, Axis.Y);
+      handlePinJoint = new PinJoint("handlePinJoint", new Vector3D(handleOffset.getX(), 0.0, handleOffset.getY()), this, Axis3D.Y);
       
       // handle link
       handleLink = new Link("handleHorizontalLink");

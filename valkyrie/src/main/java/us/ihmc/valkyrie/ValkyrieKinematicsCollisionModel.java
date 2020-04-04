@@ -3,7 +3,7 @@ package us.ihmc.valkyrie;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -55,18 +55,18 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
          MovingReferenceFrame torsoFrame = torso.getParentJoint().getFrameAfterJoint();
          Capsule3D torsoShapeTop = new Capsule3D(0.08, 0.15);
          torsoShapeTop.getPosition().set(0.004, 0.0, 0.253);
-         torsoShapeTop.getAxis().set(Axis.Y);
+         torsoShapeTop.getAxis().set(Axis3D.Y);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeTop, torsoFrame));
 
          Capsule3D torsoShapeBottom = new Capsule3D(0.1, 0.12);
          torsoShapeBottom.getPosition().set(-0.006, 0.0, 0.103);
-         torsoShapeBottom.setAxis(Axis.Y);
+         torsoShapeBottom.setAxis(Axis3D.Y);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeBottom, torsoFrame));
 
          RigidBodyBasics pelvis = RobotCollisionModel.findRigidBody(jointMap.getPelvisName(), multiBodySystem);
          MovingReferenceFrame pelvisFrame = pelvis.getParentJoint().getFrameAfterJoint();
          Capsule3D pelvisShapeTop = new Capsule3D(0.15, 0.1);
-         pelvisShapeTop.setAxis(Axis.Y);
+         pelvisShapeTop.setAxis(Axis3D.Y);
          pelvisShapeTop.getPosition().set(0.0, 0.0, -0.08);
          collidables.add(new Collidable(pelvis, collisionMask, collisionGroup, pelvisShapeTop, pelvisFrame));
          Capsule3D pelvisShapeBottom = new Capsule3D(0.125, 0.14);
@@ -99,18 +99,18 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
             MovingReferenceFrame handFrame = hand.getParentJoint().getFrameAfterJoint();
             Capsule3D handShapeFist = new Capsule3D(0.04, 0.035);
             handShapeFist.getPosition().set(-0.007, robotSide.negateIfRightSide(0.085), -0.012);
-            handShapeFist.getAxis().set(Axis.Z);
+            handShapeFist.getAxis().set(Axis3D.Z);
             collidables.add(new Collidable(hand, collisionMask, collisionGroup, handShapeFist, handFrame));
             Capsule3D handShapePalm = new Capsule3D(0.035, 0.04);
             handShapePalm.getPosition().set(-0.012, robotSide.negateIfRightSide(0.042), -0.01);
-            handShapePalm.getAxis().set(Axis.Z);
+            handShapePalm.getAxis().set(Axis3D.Z);
             collidables.add(new Collidable(hand, collisionMask, collisionGroup, handShapePalm, handFrame));
 
             RigidBodyBasics forearm = elbowRollJoint.getSuccessor();
             MovingReferenceFrame forearmFrame = forearm.getParentJoint().getFrameAfterJoint();
             Capsule3D forearmShape = new Capsule3D(0.21, 0.08);
             forearmShape.getPosition().set(0.005, robotSide.negateIfRightSide(0.11), 0.0);
-            forearmShape.setAxis(Axis.Y);
+            forearmShape.setAxis(Axis3D.Y);
             collidables.add(new Collidable(forearm, collisionMask, collisionGroup, forearmShape, forearmFrame));
          }
          else
@@ -120,7 +120,7 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
             MovingReferenceFrame massSimFrame = massSim.getParentJoint().getFrameAfterJoint();
             Capsule3D massSimShape = new Capsule3D(0.36, 0.065);
             massSimShape.getPosition().set(-0.025, robotSide.negateIfRightSide(0.17), 0.0);
-            massSimShape.getAxis().set(Axis.Y);
+            massSimShape.getAxis().set(Axis3D.Y);
             collidables.add(new Collidable(massSim, collisionMask, collisionGroup, massSimShape, massSimFrame));
          }
       }
@@ -167,7 +167,7 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
          MovingReferenceFrame torsoFrame = torso.getParentJoint().getFrameAfterJoint();
          Capsule3D torsoShapeTop = new Capsule3D(0.15, 0.15);
          torsoShapeTop.getPosition().set(0.014, 0.0, 0.243);
-         torsoShapeTop.getAxis().set(Axis.Y);
+         torsoShapeTop.getAxis().set(Axis3D.Y);
          collidables.add(new Collidable(torso, collisionMask, collisionGroup, torsoShapeTop, torsoFrame));
       }
 
@@ -179,7 +179,7 @@ public class ValkyrieKinematicsCollisionModel implements RobotCollisionModel
          MovingReferenceFrame headFrame = head.getParentJoint().getFrameAfterJoint();
          Capsule3D chinShape = new Capsule3D(0.05, 0.02);
          chinShape.getPosition().set(0.172, 0.0, -0.129);
-         chinShape.getAxis().set(Axis.Y);
+         chinShape.getAxis().set(Axis3D.Y);
          collidables.add(new Collidable(head, collisionMask, collisionGroup, chinShape, headFrame));
       }
 

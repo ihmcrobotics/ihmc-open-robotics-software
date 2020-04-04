@@ -11,6 +11,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
@@ -387,7 +388,7 @@ public class SimulatedIMURawSensorReaderTest
       private ReferenceFrame createOffsetFrame(JointBasics previousJoint, RigidBodyTransform transformToParent, String frameName)
       {
          ReferenceFrame parentFrame = previousJoint.getFrameAfterJoint();
-         ReferenceFrame beforeJointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
+         ReferenceFrame beforeJointFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToParent);
          return beforeJointFrame;
       }
    }

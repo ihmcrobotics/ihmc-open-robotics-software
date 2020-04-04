@@ -32,7 +32,7 @@ public class ProviderBasedConstantOrientationTrajectoryGeneratorTest
    @BeforeEach
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootFrame!");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootFrame!");
       frameOrientation = new FrameQuaternion(referenceFrame);
       orientationProvider = new ConstantOrientationProvider(frameOrientation);
    }

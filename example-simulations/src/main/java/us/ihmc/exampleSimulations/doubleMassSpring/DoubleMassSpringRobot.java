@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.doubleMassSpring;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -18,8 +18,8 @@ public class DoubleMassSpringRobot extends Robot
    {
       super("DoubleMassSpring");
 
-      x1Joint = new SliderJoint("x1", new Vector3D(0.0, 0.0, 0.1), this, Axis.X);
-      x2Joint = new SliderJoint("x2", new Vector3D(0.1, 0.0, 0.1), this, Axis.X);
+      x1Joint = new SliderJoint("x1", new Vector3D(0.0, 0.0, 0.1), this, Axis3D.X);
+      x2Joint = new SliderJoint("x2", new Vector3D(0.1, 0.0, 0.1), this, Axis3D.X);
 
       Link massOneLink = new Link("mass1");
       massOneLink.setMass(mass);

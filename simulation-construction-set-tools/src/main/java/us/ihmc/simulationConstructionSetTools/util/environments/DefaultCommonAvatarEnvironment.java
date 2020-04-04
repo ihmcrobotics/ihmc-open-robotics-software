@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -659,8 +659,8 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
          // Vector3d translation = new Vector3d(-1.0, 0, startDistance);// startDistance);
          Vector3D translation = new Vector3D(-1, 0, 2.9); // startDistance);
 
-         linkGraphics.rotate(Math.PI / 2, Axis.Y);
-         linkGraphics.rotate(Math.toRadians(-courseAngleDeg), Axis.X);
+         linkGraphics.rotate(Math.PI / 2, Axis3D.Y);
+         linkGraphics.rotate(Math.toRadians(-courseAngleDeg), Axis3D.X);
          linkGraphics.translate(translation);
 
          double outsideRadius = 0.2;

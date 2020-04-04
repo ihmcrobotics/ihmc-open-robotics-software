@@ -1,7 +1,7 @@
 package us.ihmc.simulationToolkit.visualizers;
 
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -65,7 +65,7 @@ public class CommonInertiaEllipsoidsExampleSimulation
 
       Graphics3DObject obj = new Graphics3DObject();
       obj.addEllipsoid(a, b, c, YoAppearance.Orange());
-      obj.rotate(-Math.PI / 4.0, Axis.X);
+      obj.rotate(-Math.PI / 4.0, Axis3D.X);
       //      obj.translate(0, 0, -h/2.0);
       //      obj.addCylinder(h, R, YoAppearance.Orange());
       scs.addStaticLinkGraphics(obj);

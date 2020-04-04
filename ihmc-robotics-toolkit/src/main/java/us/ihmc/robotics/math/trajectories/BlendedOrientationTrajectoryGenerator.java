@@ -283,7 +283,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
       initialConstraintTrajectory.getAngularVelocity(initialConstraintAngularVelocityOffset);
       initialConstraintTrajectory.getAngularAcceleration(initialConstraintAngularAccelerationOffset);
 
-      tempTransform.setRotation(rotationMatrix);
+      tempTransform.getRotation().set(rotationMatrix);
       tempTransform.getTranslation().set(0.0, 0.0, 0.0);
       initialConstraintOrientationOffset.changeFrame(trajectoryFrame);
 
@@ -307,7 +307,7 @@ public class BlendedOrientationTrajectoryGenerator implements OrientationTraject
       finalConstraintTrajectory.getAngularVelocity(finalConstraintAngularVelocityOffset);
       finalConstraintTrajectory.getAngularAcceleration(finalConstraintAngularAccelerationOffset);
 
-      tempTransform.setRotation(rotationMatrix);
+      tempTransform.getRotation().set(rotationMatrix);
       tempTransform.getTranslation().set(0.0, 0.0, 0.0);
       finalConstraintOrientationOffset.changeFrame(trajectoryFrame);
 

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -560,15 +560,15 @@ public class SimpleOcclusionTests
    private PlanarRegionsList createSimpleOcclusionField(FramePose3D startPoseToPack, FramePose3D goalPoseToPack)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.addRectangle(6.0, 6.0);
       generator.translate(-1.0, -1.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 4.0);
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(1.0, 1.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 4.0);
 
       startPoseToPack.setToZero(ReferenceFrame.getWorldFrame());
@@ -587,31 +587,31 @@ public class SimpleOcclusionTests
    private PlanarRegionsList createMazeOcclusionField(FramePose3D startPoseToPack, FramePose3D goalPoseToPack)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.addRectangle(6.0, 12.0);
 
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(-1.0, -2.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 8.0);
 
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(1.0, 0.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 8.0);
 
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(0.0, -4.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.X);
+      generator.rotate(-Math.PI / 2.0, Axis3D.X);
       generator.addRectangle(2.0, 1.0);
 
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(0.0, 4.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.X);
+      generator.rotate(-Math.PI / 2.0, Axis3D.X);
       generator.addRectangle(2.0, 1.0);
 
       startPoseToPack.setToZero(ReferenceFrame.getWorldFrame());

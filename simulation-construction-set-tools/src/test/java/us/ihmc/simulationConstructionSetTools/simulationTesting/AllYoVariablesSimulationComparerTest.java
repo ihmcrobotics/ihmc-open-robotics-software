@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
@@ -76,7 +76,7 @@ public class AllYoVariablesSimulationComparerTest
 	{
 		Robot robot = new Robot(name);
 
-		PinJoint joint1 = new PinJoint("joint", new Vector3D(0.0, 0.0, 0.0), robot, Axis.Y);
+		PinJoint joint1 = new PinJoint("joint", new Vector3D(0.0, 0.0, 0.0), robot, Axis3D.Y);
 		Link link1 = link1();
 		joint1.setLink(link1);
 		robot.addRootJoint(joint1);
@@ -90,7 +90,7 @@ public class AllYoVariablesSimulationComparerTest
 	{
 		Robot robot = new Robot(name);
 
-		PinJoint joint2 = new PinJoint("joint", new Vector3D(0.0, 0.0, 0.0), robot, Axis.Y);
+		PinJoint joint2 = new PinJoint("joint", new Vector3D(0.0, 0.0, 0.0), robot, Axis3D.Y);
 		Link link2 = link2();
 		joint2.setLink(link2);
 		robot.addRootJoint(joint2);

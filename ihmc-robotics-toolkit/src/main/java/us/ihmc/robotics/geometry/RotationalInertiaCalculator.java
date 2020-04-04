@@ -1,6 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 
 public class RotationalInertiaCalculator
@@ -41,7 +41,7 @@ public class RotationalInertiaCalculator
       return ret;
    }
 
-   public static Matrix3D getRotationalInertiaMatrixOfSolidCylinder(double mass, double radius, double height, Axis axisOfCylinder)
+   public static Matrix3D getRotationalInertiaMatrixOfSolidCylinder(double mass, double radius, double height, Axis3D axisOfCylinder)
    {
       double[] rotationalInertias = getIxxIyyIzzOfSolidCylinder(mass, radius, height, axisOfCylinder);
 
@@ -74,7 +74,7 @@ public class RotationalInertiaCalculator
       return ret;
    }
 
-   public static double[] getIxxIyyIzzOfSolidCylinder(double mass, double radius, double height, Axis axisOfCylinder)
+   public static double[] getIxxIyyIzzOfSolidCylinder(double mass, double radius, double height, Axis3D axisOfCylinder)
    {
       checkMassAndDimensions(mass, radius, radius, height);
 
