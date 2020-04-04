@@ -77,11 +77,11 @@ public class SwingOverPlanarRegionsTest
 
       double width = 0.25;
       FramePose3D startFoot = new FramePose3D();
-      startFoot.setPosition(0.0, -width / 2.0, 0.5);
+      startFoot.getPosition().set(0.0, -width / 2.0, 0.5);
 
       FramePose3D endFoot = new FramePose3D();
-      endFoot.setPosition(0.6, -width / 2.0, 0.31);
-      endFoot.setOrientationYawPitchRoll(0.0, Math.toRadians(20.0), 0.0);
+      endFoot.getPosition().set(0.6, -width / 2.0, 0.31);
+      endFoot.getOrientation().setYawPitchRoll(0.0, Math.toRadians(20.0), 0.0);
 
       FootstepPostProcessingPacket result = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
 //      checkForCollisions(result, true);
@@ -104,12 +104,12 @@ public class SwingOverPlanarRegionsTest
 
       double width = 0.25;
       FramePose3D startFoot = new FramePose3D();
-      startFoot.setPosition(0.0, -width / 2.0, 0.5);
-      startFoot.setOrientationYawPitchRoll(0.0, -Math.toRadians(5), 0.0);
+      startFoot.getPosition().set(0.0, -width / 2.0, 0.5);
+      startFoot.getOrientation().setYawPitchRoll(0.0, -Math.toRadians(5), 0.0);
 
       FramePose3D endFoot = new FramePose3D();
-      endFoot.setPosition(0.6, -width / 2.0, 0.31);
-      endFoot.setOrientationYawPitchRoll(0.0, Math.toRadians(20.0), 0.0);
+      endFoot.getPosition().set(0.6, -width / 2.0, 0.31);
+      endFoot.getOrientation().setYawPitchRoll(0.0, Math.toRadians(20.0), 0.0);
 
       FootstepPostProcessingPacket result = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
 //      checkForCollisions(result, true);
@@ -128,10 +128,10 @@ public class SwingOverPlanarRegionsTest
 
       double width = 0.25;
       FramePose3D startFoot = new FramePose3D();
-      startFoot.setPosition(0.0, -width / 2.0, 0.5);
+      startFoot.getPosition().set(0.0, -width / 2.0, 0.5);
 
       FramePose3D endFoot = new FramePose3D();
-      endFoot.setPosition(0.2, -width / 2.0, 0.1);
+      endFoot.getPosition().set(0.2, -width / 2.0, 0.1);
 
       FootstepPostProcessingPacket result = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
       checkForCollisions(result, true);
@@ -146,10 +146,10 @@ public class SwingOverPlanarRegionsTest
       generator.addRectangle(1.5, 0.4);
 
       FramePose3D startFoot = new FramePose3D();
-      startFoot.setPosition(0.0, 0.0, 0.0);
+      startFoot.getPosition().set(0.0, 0.0, 0.0);
 
       FramePose3D endFoot = new FramePose3D();
-      endFoot.setPosition(0.6, 0.0, 0.0);
+      endFoot.getPosition().set(0.6, 0.0, 0.0);
 
       FootstepPostProcessingPacket result = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
    }
@@ -171,10 +171,10 @@ public class SwingOverPlanarRegionsTest
       generator.addCubeReferencedAtCenter(cubeDepth, 0.4, cubeHeight);
 
       FramePose3D startFoot = new FramePose3D();
-      startFoot.setPosition(0.0, 0.0, 0.0);
+      startFoot.getPosition().set(0.0, 0.0, 0.0);
 
       FramePose3D endFoot = new FramePose3D();
-      endFoot.setPosition(1.0, 0.0, 0.0);
+      endFoot.getPosition().set(1.0, 0.0, 0.0);
 
       FootstepPostProcessingPacket result = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
    }
@@ -193,10 +193,10 @@ public class SwingOverPlanarRegionsTest
       generator.addCubeReferencedAtCenter(cubeDepth, 0.4, cubeHeight);
 
       FramePose3D startFoot = new FramePose3D();
-      startFoot.setPosition(0.0, 0.0, 0.0);
+      startFoot.getPosition().set(0.0, 0.0, 0.0);
 
       FramePose3D endFoot = new FramePose3D();
-      endFoot.setPosition(1.0, 0.0, 0.0);
+      endFoot.getPosition().set(1.0, 0.0, 0.0);
 
       FootstepPostProcessingPacket processedPacket = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
       checkForCollisions(processedPacket, false);
@@ -210,12 +210,12 @@ public class SwingOverPlanarRegionsTest
       ConvexPolygon2D foot = getFootPolygon();
 
       FramePose3D startFoot = new FramePose3D();
-      startFoot.setPosition(0.75, 0.05, 0.0);
-      startFoot.setOrientation(0.0, 0.0, -0.087, 0.996);
+      startFoot.getPosition().set(0.75, 0.05, 0.0);
+      startFoot.getOrientation().set(0.0, 0.0, -0.087, 0.996);
 
       FramePose3D endFoot = new FramePose3D();
-      endFoot.setPosition(1.4, 0.1, 0.0);
-      endFoot.setOrientation(0.0, 0.0, 0.174, 0.985);
+      endFoot.getPosition().set(1.4, 0.1, 0.0);
+      endFoot.getOrientation().set(0.0, 0.0, 0.174, 0.985);
 
       FootstepPostProcessingPacket processedPacket = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
       checkForCollisions(processedPacket, false);
@@ -229,12 +229,12 @@ public class SwingOverPlanarRegionsTest
       ConvexPolygon2D foot = getFootPolygon();
 
       FramePose3D startFoot = new FramePose3D();
-      startFoot.setPosition(1.1, -0.25, 0.0);
-      startFoot.setOrientation(0.0, 0.0, 0.0, 1.0);
+      startFoot.getPosition().set(1.1, -0.25, 0.0);
+      startFoot.getOrientation().set(0.0, 0.0, 0.0, 1.0);
 
       FramePose3D endFoot = new FramePose3D();
-      endFoot.setPosition(1.95, -0.1, 0.0);
-      endFoot.setOrientation(0.0, 0.0, 0.087, 0.996);
+      endFoot.getPosition().set(1.95, -0.1, 0.0);
+      endFoot.getOrientation().set(0.0, 0.0, 0.087, 0.996);
 
       FootstepPostProcessingPacket processedPacket = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
       checkForCollisions(processedPacket, false);
@@ -248,12 +248,12 @@ public class SwingOverPlanarRegionsTest
       ConvexPolygon2D foot = getFootPolygon();
 
       FramePose3D startFoot = new FramePose3D();
-      startFoot.setPosition(0.75, 0.05, 0.0);
-      startFoot.setOrientation(0.0, 0.0, -0.087, 0.996);
+      startFoot.getPosition().set(0.75, 0.05, 0.0);
+      startFoot.getOrientation().set(0.0, 0.0, -0.087, 0.996);
 
       FramePose3D endFoot = new FramePose3D();
-      endFoot.setPosition(1.4, 0.1, 0.0);
-      endFoot.setOrientation(0.0, 0.0, 0.174, 0.985);
+      endFoot.getPosition().set(1.4, 0.1, 0.0);
+      endFoot.getOrientation().set(0.0, 0.0, 0.174, 0.985);
 
       FootstepPostProcessingPacket processedPacket = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
       checkForCollisions(processedPacket, true);
@@ -267,12 +267,12 @@ public class SwingOverPlanarRegionsTest
       ConvexPolygon2D foot = getFootPolygon();
 
       FramePose3D startFoot = new FramePose3D();
-      startFoot.setPosition(1.1, -0.25, 0.0);
-      startFoot.setOrientation(0.0, 0.0, 0.0, 1.0);
+      startFoot.getPosition().set(1.1, -0.25, 0.0);
+      startFoot.getOrientation().set(0.0, 0.0, 0.0, 1.0);
 
       FramePose3D endFoot = new FramePose3D();
-      endFoot.setPosition(1.95, -0.1, 0.0);
-      endFoot.setOrientation(0.0, 0.0, 0.087, 0.996);
+      endFoot.getPosition().set(1.95, -0.1, 0.0);
+      endFoot.getOrientation().set(0.0, 0.0, 0.087, 0.996);
 
       FootstepPostProcessingPacket processedPacket = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
       checkForCollisions(processedPacket, true);

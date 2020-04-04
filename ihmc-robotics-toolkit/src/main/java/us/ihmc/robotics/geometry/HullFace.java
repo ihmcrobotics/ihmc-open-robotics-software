@@ -163,7 +163,7 @@ public class HullFace
          projectedPoints.add(projectedPoint);
       }
       averagePoint.scale(1.0 / facePoints.size());
-      polygonPose.setPosition(averagePoint);
+      polygonPose.getPosition().set(averagePoint);
 
       Vector3D xVec = new Vector3D(projectedPoints.get(0));
       xVec.sub(averagePoint);
@@ -176,7 +176,7 @@ public class HullFace
 
       RotationMatrix rotationMatrix = new RotationMatrix();
       rotationMatrix.setColumns(xVec, yVec, zVec);
-      polygonPose.setOrientation(rotationMatrix);
+      polygonPose.getOrientation().set(rotationMatrix);
 
       rotationMatrix.transpose();
       polygonToPack.clear();

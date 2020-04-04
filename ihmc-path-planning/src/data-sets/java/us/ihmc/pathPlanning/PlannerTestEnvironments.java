@@ -304,10 +304,10 @@ public class PlannerTestEnvironments
 
       // define start and goal conditions
       FramePose3D initialStanceFootPose = new FramePose3D();
-      initialStanceFootPose.setPosition(0.3, 0.0, 0.5);
+      initialStanceFootPose.getPosition().set(0.3, 0.0, 0.5);
       RobotSide initialStanceSide = RobotSide.LEFT;
       FramePose3D goalPose = new FramePose3D();
-      goalPose.setPosition(3.0, 0.0, 0.5);
+      goalPose.getPosition().set(3.0, 0.0, 0.5);
 
       return generator.getPlanarRegionsList();
    }

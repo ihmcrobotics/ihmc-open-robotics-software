@@ -215,7 +215,7 @@ public class QuadrupedReferenceFrames extends AbstractQuadrupedReferenceFrames
 
       centerOfMassPose.setToZero(centerOfMassFrame);
       centerOfMassPose.changeFrame(bodyFrame);
-      centerOfMassPose.setOrientation(IDENTITY_QUATERNION);
+      centerOfMassPose.getOrientation().set(IDENTITY_QUATERNION);
 
       centerOfMassFrameWithRotation.setPoseAndUpdate(centerOfMassPose);
       centerOfMassZUpFrame.update();

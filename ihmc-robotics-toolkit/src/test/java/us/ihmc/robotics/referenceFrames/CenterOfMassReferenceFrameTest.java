@@ -52,7 +52,7 @@ public class CenterOfMassReferenceFrameTest
       ReferenceFrame centerOfMassReferenceFrame = new CenterOfMassReferenceFrame("com", elevator.getBodyFixedFrame(), elevator);
 
       sixDoFJoint.setJointPosition(RandomGeometry.nextVector3D(random));
-      sixDoFJoint.getJointPose().setOrientationYawPitchRoll(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      sixDoFJoint.getJointPose().getOrientation().setYawPitchRoll(random.nextDouble(), random.nextDouble(), random.nextDouble());
 
       for (RevoluteJoint joint : joints)
       {

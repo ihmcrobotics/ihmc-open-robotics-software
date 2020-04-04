@@ -242,8 +242,8 @@ public class ClippedSpeedOffsetErrorInterpolator
       goalOffsetErrorPose.setIncludingFrame(goalOffsetError);
       if (!isRotationCorrectionEnabled.getBooleanValue())
       {
-         startOffsetErrorPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
-         goalOffsetErrorPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
+         startOffsetErrorPose.getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
+         goalOffsetErrorPose.getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
 //         goalOffsetErrorPose.set(startOffsetError);
       }
       //scs feedback only
@@ -434,7 +434,7 @@ public class ClippedSpeedOffsetErrorInterpolator
 
       //here we express the goal and interpolated translation and rotation with respect to the start Translation and rotation so that the graphs are easier to read in SCS 
       startOffsetErrorPose_Translation.setToZero(worldFrame);
-      startOffsetErrorPose_Translation.setPosition(updatedStartOffset_Translation);
+      startOffsetErrorPose_Translation.getPosition().set(updatedStartOffset_Translation);
       startOffsetErrorReferenceFrame_Translation.setPoseAndUpdate(startOffsetErrorPose_Translation);
 
       startOffsetErrorPose_Rotation.setToZero(worldFrame);

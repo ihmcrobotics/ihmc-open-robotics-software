@@ -580,7 +580,7 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
          return false;
       }
 
-      framePose.setOrientationYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
+      framePose.getOrientation().setYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
       framePose.setPosition(tempFramePointForCentroids);
 
       return true;
@@ -593,7 +593,7 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
       double nominalYaw = getNominalYaw();
 
       getCentroidWithEqualWeightedEndsAveragingLowestZHeightsAcrossEnds(tempFramePointForCentroids);
-      framePose.setOrientationYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
+      framePose.getOrientation().setYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
       framePose.setPosition(tempFramePointForCentroids);
    }
 

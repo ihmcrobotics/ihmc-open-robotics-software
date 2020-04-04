@@ -613,7 +613,7 @@ public class ContinuousStepGenerator implements Updatable
             {
                yawPitchRoll.set(currentSupportFootPose.getOrientation());
                yawPitchRoll.setYaw(footstepPose.getYaw());
-               adjustedPose.setOrientation(yawPitchRoll);
+               adjustedPose.getOrientation().set(yawPitchRoll);
             }
             else
             {
@@ -644,7 +644,7 @@ public class ContinuousStepGenerator implements Updatable
             adjustedPose.setZ(heightMap.heightAt(footstepPose.getX(), footstepPose.getY(), 0.0));
             yawPitchRoll.set(currentSupportFootPose.getOrientation());
             yawPitchRoll.setYaw(footstepPose.getYaw());
-            adjustedPose.setOrientation(yawPitchRoll);
+            adjustedPose.getOrientation().set(yawPitchRoll);
             return adjustedPose;
          }
       });

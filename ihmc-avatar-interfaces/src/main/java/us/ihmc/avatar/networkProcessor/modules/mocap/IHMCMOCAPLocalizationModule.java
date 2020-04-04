@@ -258,7 +258,7 @@ public class IHMCMOCAPLocalizationModule implements MocapRigidbodiesListener, Pa
       pelvisTranslationFromRobotConfigurationData.set(packet.getRootTranslation());
       pelvisOrientationFromRobotConfigurationData.set(packet.getRootOrientation());
 
-      rootJoint.getJointPose().setPosition(pelvisTranslationFromRobotConfigurationData.getX(), pelvisTranslationFromRobotConfigurationData.getY(), pelvisTranslationFromRobotConfigurationData.getZ());
+      rootJoint.getJointPose().getPosition().set(pelvisTranslationFromRobotConfigurationData.getX(), pelvisTranslationFromRobotConfigurationData.getY(), pelvisTranslationFromRobotConfigurationData.getZ());
       rootJoint.getJointPose().getOrientation().setQuaternion(pelvisOrientationFromRobotConfigurationData.getX(), pelvisOrientationFromRobotConfigurationData.getY(), pelvisOrientationFromRobotConfigurationData.getZ(), pelvisOrientationFromRobotConfigurationData.getS());
       
       computeDriftTransform();

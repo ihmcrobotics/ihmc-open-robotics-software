@@ -1,22 +1,22 @@
 package us.ihmc.footstepPlanning.postProcessing;
 
+import java.util.List;
+
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepPostProcessingPacket;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-
-import java.util.List;
 
 /**
  * This class is a post-processing elements that bolts on top of the {@link SwingOverPlanarRegionsTrajectoryExpander} to allow it to take in planar regions,
@@ -67,12 +67,12 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
       RobotSide stanceSide = RobotSide.fromByte(outputPlan.getFootstepDataList().getFootstepDataList().get(0).getRobotSide()).getOppositeSide();
 
       FramePose3D leftFootPose = new FramePose3D();
-      leftFootPose.setPosition(outputPlan.getLeftFootPositionInWorld());
-      leftFootPose.setOrientation(outputPlan.getLeftFootOrientationInWorld());
+      leftFootPose.getPosition().set(outputPlan.getLeftFootPositionInWorld());
+      leftFootPose.getOrientation().set(outputPlan.getLeftFootOrientationInWorld());
 
       FramePose3D rightFootPose = new FramePose3D();
-      rightFootPose.setPosition(outputPlan.getRightFootPositionInWorld());
-      rightFootPose.setOrientation(outputPlan.getRightFootOrientationInWorld());
+      rightFootPose.getPosition().set(outputPlan.getRightFootPositionInWorld());
+      rightFootPose.getOrientation().set(outputPlan.getRightFootOrientationInWorld());
 
       SideDependentList<FramePose3D> footPoses = new SideDependentList<>();
       footPoses.put(RobotSide.LEFT, leftFootPose);
@@ -88,25 +88,25 @@ public class SwingOverRegionsPostProcessingElement implements FootstepPlanPostPr
 
          if (stepNumber > 0)
          {
-            stanceFootPose.setPosition(footstepDataMessageList.get(stepNumber - 1).getLocation());
-            stanceFootPose.setOrientation(footstepDataMessageList.get(stepNumber - 1).getOrientation());
+            stanceFootPose.getPosition().set(footstepDataMessageList.get(stepNumber - 1).getLocation());
+            stanceFootPose.getOrientation().set(footstepDataMessageList.get(stepNumber - 1).getOrientation());
          }
          else
          {
             if (swingSide == RobotSide.LEFT)
             {
-               stanceFootPose.setPosition(outputPlan.getRightFootPositionInWorld());
-               stanceFootPose.setOrientation(outputPlan.getRightFootOrientationInWorld());
+               stanceFootPose.getPosition().set(outputPlan.getRightFootPositionInWorld());
+               stanceFootPose.getOrientation().set(outputPlan.getRightFootOrientationInWorld());
             }
             else
             {
-               stanceFootPose.setPosition(outputPlan.getLeftFootPositionInWorld());
-               stanceFootPose.setOrientation(outputPlan.getLeftFootOrientationInWorld());
+               stanceFootPose.getPosition().set(outputPlan.getLeftFootPositionInWorld());
+               stanceFootPose.getOrientation().set(outputPlan.getLeftFootOrientationInWorld());
             }
          }
 
-         nextFootPose.setPosition(footstepDataMessageList.get(stepNumber).getLocation());
-         nextFootPose.setOrientation(footstepDataMessageList.get(stepNumber).getOrientation());
+         nextFootPose.getPosition().set(footstepDataMessageList.get(stepNumber).getLocation());
+         nextFootPose.getOrientation().set(footstepDataMessageList.get(stepNumber).getOrientation());
 
          double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, footPoses.get(swingSide),
                                                                                                                    nextFootPose, planarRegionsList);

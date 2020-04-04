@@ -140,11 +140,11 @@ public class FrameConvexPolygon2dIntersector
             intersectionToPack.setSecondEndpoint(point2);
          }
 
-         if (intersectionToPack.firstEndpointContainsNaN() && !intersectionToPack.secondEndpointContainsNaN())
+         if (intersectionToPack.getFirstEndpoint().containsNaN() && !intersectionToPack.getSecondEndpoint().containsNaN())
          {
             intersectionToPack.setFirstEndpoint(intersectionToPack.getSecondEndpoint());
          }
-         else if (!intersectionToPack.firstEndpointContainsNaN() && intersectionToPack.secondEndpointContainsNaN())
+         else if (!intersectionToPack.getFirstEndpoint().containsNaN() && intersectionToPack.getSecondEndpoint().containsNaN())
          {
             intersectionToPack.setSecondEndpoint(intersectionToPack.getFirstEndpoint());
          }

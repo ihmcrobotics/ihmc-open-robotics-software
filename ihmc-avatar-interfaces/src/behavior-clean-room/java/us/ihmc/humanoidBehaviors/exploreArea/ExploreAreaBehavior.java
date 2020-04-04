@@ -651,8 +651,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
          double yaw = Math.atan2(startToGoal.getY(), startToGoal.getX());
 
          FramePose3D desiredFramePose = new FramePose3D(worldFrame);
-         desiredFramePose.setPosition(goalPoint);
-         desiredFramePose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
+         desiredFramePose.getPosition().set(goalPoint);
+         desiredFramePose.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
          desiredFramePoses.add(desiredFramePose);
       }
 

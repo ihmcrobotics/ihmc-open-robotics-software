@@ -47,8 +47,8 @@ public class Pose2dReferenceFrame extends ReferenceFrame
 
    public void setPoseAndUpdate(Point2DReadOnly position, double orientation)
    {
-      originPose.setPosition(position);
-      originPose.setOrientation(orientation);
+      originPose.getPosition().set(position);
+      originPose.getOrientation().setYaw(orientation);
       this.update();
    }
 

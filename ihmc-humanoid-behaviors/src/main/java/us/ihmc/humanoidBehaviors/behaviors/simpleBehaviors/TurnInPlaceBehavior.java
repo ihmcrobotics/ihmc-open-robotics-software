@@ -67,7 +67,7 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    public void setTarget(double desiredYaw)
    {
       targetOrientationInWorldFrame = new FramePose3D(referenceFrames.getPelvisZUpFrame());
-      targetOrientationInWorldFrame.setOrientationYawPitchRoll(desiredYaw, 0, 0);
+      targetOrientationInWorldFrame.getOrientation().setYawPitchRoll(desiredYaw, 0, 0);
       targetOrientationInWorldFrame.changeFrame(worldFrame);
 
       hasTargetBeenProvided.set(true);

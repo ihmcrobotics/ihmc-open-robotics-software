@@ -2,10 +2,11 @@ package us.ihmc.footstepPlanning;
 
 import java.util.ArrayList;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -101,8 +102,8 @@ public class FootstepDataMessageConverter
       for (FootstepDataMessage footstepMessage : footstepDataListMessage.getFootstepDataList())
       {
          FramePose3D stepPose = new FramePose3D();
-         stepPose.setPosition(footstepMessage.getLocation());
-         stepPose.setOrientation(footstepMessage.getOrientation());
+         stepPose.getPosition().set(footstepMessage.getLocation());
+         stepPose.getOrientation().set(footstepMessage.getOrientation());
          SimpleFootstep simpleFootstep = footstepPlan.addFootstep(RobotSide.fromByte(footstepMessage.getRobotSide()), stepPose);
 
          IDLSequence.Object<Point3D> predictedContactPoints = footstepMessage.getPredictedContactPoints2d();

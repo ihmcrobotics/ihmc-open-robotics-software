@@ -32,6 +32,7 @@ import gnu.trove.list.array.TIntArrayList;
 import gnu.trove.list.array.TLongArrayList;
 import ihmc_msgs.Point2dRosMessage;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.communication.ros.generators.RosExportedField;
 import us.ihmc.communication.ros.generators.RosMessagePacket;
@@ -48,7 +49,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DBasics;
 import us.ihmc.euclid.tuple4D.interfaces.Tuple4DReadOnly;
-import us.ihmc.commons.lists.RecyclingArrayList;
 
 public class GenericROSTranslationTools
 {
@@ -873,8 +873,8 @@ public class GenericROSTranslationTools
    {
       Pose3D pose3D = new Pose3D();
 
-      pose3D.setPosition(convertVector3(transform.getTranslation()));
-      pose3D.setOrientation(new Quaternion(convertQuaternion(transform.getRotation())));
+      pose3D.getPosition().set(convertVector3(transform.getTranslation()));
+      pose3D.getOrientation().set(new Quaternion(convertQuaternion(transform.getRotation())));
 
       return pose3D;
    }

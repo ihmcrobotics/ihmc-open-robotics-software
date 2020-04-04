@@ -61,8 +61,8 @@ public class FootstepPlannerHeuristicCalculator
       if (snapData != null && !snapData.getSnapTransform().containsNaN())
          snapData.getSnapTransform().transform(midfootPoint);
 
-      midFootPose.setPosition(midfootPoint);
-      midFootPose.setOrientationYawPitchRoll(node.getYaw(), 0.0, 0.0);
+      midFootPose.getPosition().set(midfootPoint);
+      midFootPose.getOrientation().setYawPitchRoll(node.getYaw(), 0.0, 0.0);
 
       double xyDistanceToGoal = EuclidCoreTools.norm(midFootPose.getX() - goalPose.getX(), midFootPose.getY() - goalPose.getY());
 

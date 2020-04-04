@@ -1141,8 +1141,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
       RigidBodyBasics pelvis = fullRobotModel.getPelvis();
 
       FramePose3D desiredRandomPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
-      desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
-      desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
+      desiredRandomPelvisPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 1.0));
+      desiredRandomPelvisPose.getPosition().set(RandomGeometry.nextPoint3D(random, 0.10, 0.20, 0.05));
       desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() - 0.15);
       Point3D desiredPosition = new Point3D();
       Quaternion desiredOrientation = new Quaternion();
@@ -1634,8 +1634,8 @@ public abstract class EndToEndPelvisTrajectoryMessageTest implements MultiRobotT
    protected FramePose3D getRandomPelvisPose(Random random, RigidBodyBasics pelvis)
    {
       FramePose3D desiredRandomPelvisPose = new FramePose3D(pelvis.getBodyFixedFrame());
-      desiredRandomPelvisPose.setOrientation(RandomGeometry.nextQuaternion(random, 1.0));
-      desiredRandomPelvisPose.setPosition(RandomGeometry.nextPoint3D(random, 0.05, 0.05, 0.05));
+      desiredRandomPelvisPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 1.0));
+      desiredRandomPelvisPose.getPosition().set(RandomGeometry.nextPoint3D(random, 0.05, 0.05, 0.05));
       desiredRandomPelvisPose.setZ(desiredRandomPelvisPose.getZ() + getZOffset());
       return desiredRandomPelvisPose;
    }

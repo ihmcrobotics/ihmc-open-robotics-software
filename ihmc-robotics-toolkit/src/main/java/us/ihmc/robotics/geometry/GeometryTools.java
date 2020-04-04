@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commons.Epsilons;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.BoundingBox2D;
@@ -34,7 +35,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.commons.MathTools;
 
 public class GeometryTools
 {
@@ -1023,14 +1023,14 @@ public class GeometryTools
       {
          Point3D newPosition = new Point3D(framePoseToPack.getPosition());
          axisAngle.transform(newPosition);
-         framePoseToPack.setPosition(newPosition);
+         framePoseToPack.getPosition().set(newPosition);
       }
    
       if (!lockOrientation)
       {
          Quaternion newOrientation = new Quaternion(framePoseToPack.getOrientation());
          axisAngle.transform(newOrientation);
-         framePoseToPack.setOrientation(newOrientation);
+         framePoseToPack.getOrientation().set(newOrientation);
       }
    
       framePoseToPack.changeFrame(initialFrame);

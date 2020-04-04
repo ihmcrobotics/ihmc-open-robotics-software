@@ -113,22 +113,22 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
 
       // Simple test with some error:
 
-      startOffsetError.setPosition(new Point3D(0.01, 0.02, 0.03));
-      startOffsetError.setOrientationYawPitchRoll(-0.023, 0.179, 0.11);
-      goalOffsetError.setPosition(new Point3D(0.02, 0.037, -0.04));
-      goalOffsetError.setOrientationYawPitchRoll(0.17, 0.114, -0.005);
+      startOffsetError.getPosition().set(new Point3D(0.01, 0.02, 0.03));
+      startOffsetError.getOrientation().setYawPitchRoll(-0.023, 0.179, 0.11);
+      goalOffsetError.getPosition().set(new Point3D(0.02, 0.037, -0.04));
+      goalOffsetError.getOrientation().setYawPitchRoll(0.17, 0.114, -0.005);
 
       clippedSpeedOffsetErrorInterpolator.setInterpolatorInputs(startOffsetError, goalOffsetError, alphaFilterPosition);
       clippedSpeedOffsetErrorInterpolator.interpolateError(offsetPoseToPack);
 
       FramePose3D expectedPose = new FramePose3D(worldFrame);
       expectedPose.set(startOffsetError);
-      expectedPose.setOrientationYawPitchRoll(expectedPose.getYaw(), 0.0, 0.0);
+      expectedPose.getOrientation().setYawPitchRoll(expectedPose.getYaw(), 0.0, 0.0);
 
       assertTrue(offsetPoseToPack.epsilonEquals(expectedPose, 1e-7));
       clippedSpeedOffsetErrorInterpolator.interpolateError(offsetPoseToPack);
       expectedPose.set(goalOffsetError);
-      expectedPose.setOrientationYawPitchRoll(expectedPose.getYaw(), 0.0, 0.0);
+      expectedPose.getOrientation().setYawPitchRoll(expectedPose.getYaw(), 0.0, 0.0);
       assertTrue(offsetPoseToPack.epsilonEquals(expectedPose, 1e-7));
 
       SimulationConstructionSet scs = null;
@@ -143,10 +143,10 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       
       // With some speed limits, should follow those speed limits:
 
-      startOffsetError.setPosition(new Point3D(0.01, 0.001, 0.0));
-      startOffsetError.setOrientationYawPitchRoll(0.1, 0.2, 0.3);
-      goalOffsetError.setPosition(new Point3D(0.02, 0.002, 0.0));
-      goalOffsetError.setOrientationYawPitchRoll(0.1, 0.2, 0.3);
+      startOffsetError.getPosition().set(new Point3D(0.01, 0.001, 0.0));
+      startOffsetError.getOrientation().setYawPitchRoll(0.1, 0.2, 0.3);
+      goalOffsetError.getPosition().set(new Point3D(0.02, 0.002, 0.0));
+      goalOffsetError.getOrientation().setYawPitchRoll(0.1, 0.2, 0.3);
       
       double distanceFromStartToGoal = startOffsetError.getPosition().distance(goalOffsetError.getPosition());
       clippedSpeedOffsetErrorInterpolator.setMaximumTranslationAndRotationVelocity(distanceFromStartToGoal, 1.0);
@@ -178,10 +178,10 @@ public class ClippedSpeedOffsetErrorInterpolatorTest
       double startYaw = 0.01;
       double endYaw = 0.02;
       
-      startOffsetError.setPosition(new Point3D(0.01, 0.02, 0.03));
-      startOffsetError.setOrientationYawPitchRoll(startYaw, 0.02, 0.03);
-      goalOffsetError.setPosition(new Point3D(0.02, -0.01, 0.0378));
-      goalOffsetError.setOrientationYawPitchRoll(endYaw, 0.014, -0.045);
+      startOffsetError.getPosition().set(new Point3D(0.01, 0.02, 0.03));
+      startOffsetError.getOrientation().setYawPitchRoll(startYaw, 0.02, 0.03);
+      goalOffsetError.getPosition().set(new Point3D(0.02, -0.01, 0.0378));
+      goalOffsetError.getOrientation().setYawPitchRoll(endYaw, 0.014, -0.045);
 
       double rotationFromStartToGoal = endYaw - startYaw;
 
