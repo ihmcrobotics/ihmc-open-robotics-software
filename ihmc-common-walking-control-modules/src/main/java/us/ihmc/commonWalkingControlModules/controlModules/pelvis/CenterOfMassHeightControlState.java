@@ -296,9 +296,8 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       if (feetManager != null)
       {
-         // FIXME check on the ordering here
          comHeightDataAfterSingularityAvoidance.set(comHeightDataAfterSmoothing);
-         feetManager.correctCoMHeightForSingularityAvoidance(desiredICPVelocity, zCurrent, comHeightDataAfterSingularityAvoidance);
+         feetManager.correctCoMHeightForSupportSingularityAvoidance(desiredICPVelocity, zCurrent, comHeightDataAfterSingularityAvoidance);
 
          comHeightDataAfterUnreachableFootstep.set(comHeightDataAfterSingularityAvoidance);
          feetManager.correctCoMHeightForUnreachableFootstep(comHeightDataAfterUnreachableFootstep);
