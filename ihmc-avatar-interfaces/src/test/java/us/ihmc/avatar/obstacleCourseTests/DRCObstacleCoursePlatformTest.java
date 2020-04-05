@@ -530,7 +530,7 @@ public abstract class DRCObstacleCoursePlatformTest implements MultiRobotTestInt
 
       assertTrue(success);
 
-      Point3D center = new Point3D(-5.8, -7.5, 0.87);
+      Point3D center = new Point3D(-5.45, -7.14, 1.17);
       Vector3D plusMinusVector = new Vector3D(0.2, 0.2, 0.2);
       BoundingBox3D boundingBox = BoundingBox3D.createUsingCenterAndPlusMinusVector(center, plusMinusVector);
       drcSimulationTestHelper.assertRobotsRootJointIsInBoundingBox(boundingBox);
