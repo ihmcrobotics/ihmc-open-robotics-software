@@ -53,7 +53,7 @@ mainDependencies {
    api("us.ihmc.ihmcPerception:cuda:7.5")
    api("org.ddogleg:ddogleg:0.7")
 
-   api("us.ihmc:euclid:0.12.2")
+   api("us.ihmc:euclid:0.13.0")
    api("us.ihmc:ihmc-yovariables:0.4.0")
    api("us.ihmc:ihmc-commons:0.28.2")
    api("us.ihmc:simulation-construction-set:0.14.0")

@@ -13,8 +13,8 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid-frame:0.12.2")
-   api("us.ihmc:euclid-shape:0.12.2")
+   api("us.ihmc:euclid-frame:0.13.0")
+   api("us.ihmc:euclid-shape:0.13.0")
    api("us.ihmc:ihmc-yovariables:0.4.0")
    api("org.ejml:dense64:0.30")
    api("org.ejml:core:0.30")
