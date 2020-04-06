@@ -301,15 +301,6 @@ float64 min_y_clearance_from_stance -11.1
 # Radius around the goal inside which the planner should start to turn to match the goal's orientation
 float64 final_turn_proximity -11.1
 
-# Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
-float64 final_turn_body_path_proximity -11.1
-
-# Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
-# final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
-# the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
-# the desired orientation is the final orientation.
-float64 final_turn_proximity_blend_factor -11.1
-
 # When using a cost based planning approach this value defined how the yaw of a footstep will be
 # weighted in comparison to its position.
 float64 yaw_weight -11.1
