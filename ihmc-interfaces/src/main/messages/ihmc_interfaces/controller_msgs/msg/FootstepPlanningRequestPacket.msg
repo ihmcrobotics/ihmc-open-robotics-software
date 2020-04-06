@@ -27,6 +27,8 @@ byte requested_initial_stance_side 255
 bool snap_goal_steps true
 # If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
 bool abort_if_goal_step_snapping_fails
+# If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+bool abort_if_body_path_planner_fails
 
 # If true, will plan a body path. If false, will follow a straight-line path to the goal
 bool plan_body_path

@@ -145,7 +145,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          BodyPathPlanningResult bodyPathPlannerResult = bodyPathPlanner.planWaypoints();
          List<Pose3DReadOnly> waypoints = bodyPathPlanner.getWaypoints();
 
-         if (!bodyPathPlannerResult.validForExecution() || (waypoints.size() < 2 && !footstepPlannerParameters.getReturnBestEffortPlan()))
+         if (!bodyPathPlannerResult.validForExecution() || (waypoints.size() < 2 && request.getAbortIfBodyPathPlannerFails()))
          {
             reportBodyPathPlan(bodyPathPlannerResult);
             output.setBodyPathPlanningResult(bodyPathPlannerResult);
@@ -153,7 +153,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             isPlanning.set(false);
             return;
          }
-         else if (waypoints.size() < 2 && footstepPlannerParameters.getReturnBestEffortPlan())
+         else if (waypoints.size() < 2 && !request.getAbortIfBodyPathPlannerFails())
          {
             double horizonLength = Double.POSITIVE_INFINITY;
             bodyPathPlanner.computeBestEffortPlan(horizonLength);

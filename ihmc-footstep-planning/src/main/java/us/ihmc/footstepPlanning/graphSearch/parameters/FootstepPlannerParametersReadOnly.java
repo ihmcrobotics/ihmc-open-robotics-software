@@ -505,27 +505,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * When the planner is done planning and cannot find a path to the goal, this flag indicates whether the
-    * planner should return the best plan that it found. If this value is false, the planner will return
-    * a {@link FootstepPlan} of type {@link FootstepPlanningResult#NO_PATH_EXISTS}. Otherwise it will return
-    * the "best" effort plan, where the plan is at least {@link #getMinimumStepsForBestEffortPlan()} steps long
-    * "best" is determined by the planner.
-    */
-   default boolean getReturnBestEffortPlan()
-   {
-      return get(returnBestEffortPlan);
-   }
-
-   /**
-    * When {@link #getReturnBestEffortPlan()} is true, the planner will return the best effort plan if the plan
-    * contains at least this many footsteps.
-    */
-   default int getMinimumStepsForBestEffortPlan()
-   {
-      return get(minimumStepsForBestEffortPlan);
-   }
-
-   /**
     * Some node checkers will check if a bounding box that describes the body of the robot will move
     * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
     * collisions, this defines the box height. Note that this box will go from {@code getBodyBoxBaseZ}
