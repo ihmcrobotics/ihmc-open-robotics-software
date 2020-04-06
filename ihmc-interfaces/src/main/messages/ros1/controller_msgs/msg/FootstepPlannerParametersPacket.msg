@@ -385,27 +385,9 @@ float64 foothold_area_weight
 # Field default value -11.1
 float64 cost_per_step
 
-# Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
-bool use_quadratic_distance_cost
-
-# Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
-bool use_quadratic_height_cost
-
 # Gets the weight for the heuristics in the A Star planner.
 # Field default value -11.1
 float64 a_star_heuristics_weight
-
-# Gets the weight for the heuristics in the Visibility graph with A star planner.
-# Field default value -11.1
-float64 vis_graph_with_a_star_heuristics_weight
-
-# Gets the weight for the heuristics in the Depth First planner.
-# Field default value -11.1
-float64 depth_first_heuristics_weight
-
-# Gets the weight for the heuristics in the Body path based planner.
-# Field default value -11.1
-float64 body_path_based_heuristics_weight
 
 # This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
 # Additional checks are done by interpolating between the start and end steps
@@ -416,15 +398,6 @@ uint32 number_of_bounding_box_checks
 # @see FootstepPlannerCostParameters#getBoundingBoxCost
 # Field default value -11.1
 float64 maximum_2d_distance_from_bounding_box_to_penalize
-
-# If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
-# where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
-# {@code c * (1 - d / d_max)}, where d_max is this value.
-# Field default value -11.1
-float64 bounding_box_cost
-
-# Field default value -11.1
-float64 body_path_violation_weight
 
 # Field default value -11.1
 float64 distance_from_path_tolerance

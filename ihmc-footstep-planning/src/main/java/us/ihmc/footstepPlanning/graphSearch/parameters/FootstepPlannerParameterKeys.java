@@ -52,14 +52,11 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  bodyBoxBaseZ                               = keys.addDoubleKey ("Body box base Z", 0.25);
    public static final DoubleStoredPropertyKey  finalTurnProximity                         = keys.addDoubleKey ("Final turn proximity", 0.2);
    public static final IntegerStoredPropertyKey numberOfBoundingBoxChecks                  = keys.addIntegerKey("Number of bounding box checks", 1);
+   public static final DoubleStoredPropertyKey distanceFromPathTolerance                   = keys.addDoubleKey("Distance from path tolerance", 0.3);
+   public static final DoubleStoredPropertyKey deltaYawFromReferenceTolerance              = keys.addDoubleKey("Delta yaw from reference tolerance", 0.35);
 
    // cost parameters
-   public static final BooleanStoredPropertyKey useQuadraticDistanceCost                   = keys.addBooleanKey("Use quadratic distance cost", false);
-   public static final BooleanStoredPropertyKey useQuadraticHeightCost                     = keys.addBooleanKey("Use quadratic height cost", false);
    public static final DoubleStoredPropertyKey  aStarHeuristicsWeight                      = keys.addDoubleKey ("AStar heuristics weight", 1.5);
-   public static final DoubleStoredPropertyKey  visGraphWithAStarHeuristicsWeight          = keys.addDoubleKey ("Vis graph with AStar heuristics weight", 15.0);
-   public static final DoubleStoredPropertyKey  depthFirstHeuristicsWeight                 = keys.addDoubleKey ("Depth first heuristics weight", 1.0);
-   public static final DoubleStoredPropertyKey  bodyPathBasedHeuristicsWeight              = keys.addDoubleKey ("Body path based heuristics weight", 1.0);
    public static final DoubleStoredPropertyKey  yawWeight                                  = keys.addDoubleKey ("Yaw weight", 0.2);
    public static final DoubleStoredPropertyKey  forwardWeight                              = keys.addDoubleKey ("Forward weight", 0.2);
    public static final DoubleStoredPropertyKey  lateralWeight                              = keys.addDoubleKey ("Lateral weight", 0.2);
@@ -69,10 +66,5 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  rollWeight                                 = keys.addDoubleKey ("Roll weight", 0.2);
    public static final DoubleStoredPropertyKey  pitchWeight                                = keys.addDoubleKey ("Pitch weight", 0.2);
    public static final DoubleStoredPropertyKey  maximum2dDistanceFromBoundingBoxToPenalize = keys.addDoubleKey ("Maximum 2D distance from bounding box to penalize", 0.0);
-   public static final DoubleStoredPropertyKey  boundingBoxCost                            = keys.addDoubleKey ("Bounding box cost", 0.0);
    public static final DoubleStoredPropertyKey  footholdAreaWeight                         = keys.addDoubleKey ("Foothold area weight", 0.0);
-   public static final DoubleStoredPropertyKey  longStepWeight                             = keys.addDoubleKey ("Long step weight", 0.2);
-   public static final DoubleStoredPropertyKey bodyPathViolationWeight                         = keys.addDoubleKey("Body path violation weight", 30.0);
-   public static final DoubleStoredPropertyKey distanceFromPathTolerance                   = keys.addDoubleKey("Distance from path tolerance", 0.3);
-   public static final DoubleStoredPropertyKey deltaYawFromReferenceTolerance              = keys.addDoubleKey("Delta yaw from reference tolerance", 0.35);
 }

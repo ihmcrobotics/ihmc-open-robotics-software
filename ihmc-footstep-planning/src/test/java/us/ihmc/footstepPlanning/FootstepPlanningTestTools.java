@@ -72,12 +72,7 @@ public class FootstepPlanningTestTools
       assertEquals(parameters.getMinYClearanceFromStance(), other.getMinYClearanceFromStance(), epsilon);
       assertEquals(parameters.getNumberOfBoundingBoxChecks(), other.getNumberOfBoundingBoxChecks());
 
-      assertEquals(parameters.useQuadraticDistanceCost(), other.useQuadraticDistanceCost());
-      assertEquals(parameters.useQuadraticHeightCost(), other.useQuadraticHeightCost());
       assertEquals(parameters.getAStarHeuristicsWeight().getValue(), other.getAStarHeuristicsWeight().getValue(), epsilon);
-      assertEquals(parameters.getVisGraphWithAStarHeuristicsWeight().getValue(), other.getVisGraphWithAStarHeuristicsWeight().getValue(), epsilon);
-      assertEquals(parameters.getDepthFirstHeuristicsWeight().getValue(), other.getDepthFirstHeuristicsWeight().getValue(), epsilon);
-      assertEquals(parameters.getBodyPathBasedHeuristicsWeight().getValue(), other.getBodyPathBasedHeuristicsWeight().getValue(), epsilon);
       assertEquals(parameters.getYawWeight(), other.getYawWeight(), epsilon);
       assertEquals(parameters.getForwardWeight(), other.getForwardWeight(), epsilon);
       assertEquals(parameters.getLateralWeight(), other.getLateralWeight(), epsilon);
