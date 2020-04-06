@@ -27,8 +27,8 @@ public class PlannerTools
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final double footLength = 0.2;
-   private static final double footWidth = 0.1;
+   public static final double footLength = 0.2;
+   public static final double footWidth = 0.1;
 
    public static ConvexPolygon2D createFootPolygon(double footLength, double heelWidth, double toeWidth)
    {
