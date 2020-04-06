@@ -40,6 +40,8 @@ module controller_msgs
         long planner_request_id;
         double timeout;
         double best_effort_timeout;
+        @defaultValue(value=-1)
+        long max_iterations;
         double horizon_length;
       };
     };

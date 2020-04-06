@@ -2,7 +2,6 @@ start_position 0.0 0.0 0.2
 goal_position 6.42 0.0 0.2
 start_yaw 0.0
 goal_yaw 0.7853981633974484
-planar_region_bipedal_timeout 10.0 
-a_star_timeout 5.0 
-plan_then_snap_timeout 2.0 
-step_planner_status test 
+a_star_iteration_limit 120
+step_planner_status test
+plan_then_snap_status test

@@ -75,6 +75,11 @@ public class PlannerInput
       return containsFlag(prefix + DataSetIOTools.TIMEOUT_SUFFIX);
    }
 
+   public boolean containsIterationLimitFlag(String prefix)
+   {
+      return containsFlag(prefix + DataSetIOTools.ITERATION_LIMIT_SUFFIX);
+   }
+
    public double getQuadrupedTimeout()
    {
       return getDoubleFlag(DataSetIOTools.QUADRUPED_TIMEOUT_TAG);
@@ -83,6 +88,11 @@ public class PlannerInput
    public double getTimeoutFlag(String prefix)
    {
       return getDoubleFlag(prefix + DataSetIOTools.TIMEOUT_SUFFIX);
+   }
+
+   public int getIterationLimitFlag(String prefix)
+   {
+      return getIntFlag(prefix + DataSetIOTools.ITERATION_LIMIT_SUFFIX);
    }
 
    public List<String> getAdditionalData(String key)
@@ -140,6 +150,13 @@ public class PlannerInput
       if(!additionalData.containsKey(key))
          return Double.NaN;
       return Double.parseDouble(additionalData.get(key).get(0));
+   }
+
+   public int getIntFlag(String key)
+   {
+      if(!additionalData.containsKey(key))
+         return 0;
+      return Integer.parseInt(additionalData.get(key).get(0));
    }
 
    public Point3D getPositionFlag(String key)

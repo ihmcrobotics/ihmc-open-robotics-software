@@ -132,6 +132,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
    private static final double defaultNominalWidth = 0.3;
    private static final double defaultNominalLength = 0.0;
 
+   private static final double timeout = 240.0;
    private static final double defaultBestEffortTimeout = 0.5;
    //   private static final double defaultHorizonLength = 1.0;
    private static final double defaultHorizonLength = 2.0;
@@ -349,7 +350,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
                                                                  return false;
 
                                                               return dataSet.getPlannerInput().getStepPlannerIsTestable() && dataSet.getPlannerInput()
-                                                                                                                                    .containsFlag(getTimeoutFlag());
+                                                                                                                                    .containsFlag(getIterationLimitFlag());
                                                            });
       runAssertionsOnAllDatasets(dataSets, false);
    }
@@ -370,7 +371,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
 
                                                               return dataSet.getPlannerInput().getStepPlannerIsTestable() && dataSet.getPlannerInput()
-                                                                                                                                    .containsFlag(getTimeoutFlag());
+                                                                                                                                    .containsFlag(getIterationLimitFlag());
                                                            });
       runAssertionsOnAllDatasets(dataSets, false);
    }
@@ -390,7 +391,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
                                                               }
 
                                                               return dataSet.getPlannerInput().getStepPlannerIsTestable() && dataSet.getPlannerInput()
-                                                                                                                                    .containsFlag(getTimeoutFlag());
+                                                                                                                                    .containsFlag(getIterationLimitFlag());
                                                            });
       runAssertionsOnAllDatasets(dataSets, true);
    }
@@ -403,14 +404,14 @@ public class BipedContinuousPlanningToolboxDataSetTest
                                                            {
                                                               if (!dataSet.hasPlannerInput())
                                                                  return false;
-                                                              return dataSet.getPlannerInput().getStepPlannerIsInDevelopment() && dataSet.getPlannerInput().containsFlag(getTimeoutFlag());
+                                                              return dataSet.getPlannerInput().getStepPlannerIsInDevelopment() && dataSet.getPlannerInput().containsFlag(getIterationLimitFlag());
                                                            });
       runAssertionsOnAllDatasets(dataSets, false);
    }
 
-   protected String getTimeoutFlag()
+   protected String getIterationLimitFlag()
    {
-      return "vis_graph_with_a_star_timeout";
+      return "vis_graph_with_a_star_max_iterations";
    }
 
    private void runAssertionsOnAllDatasets(List<DataSet> allDatasets, boolean simulateOcclusions)
@@ -531,12 +532,14 @@ public class BipedContinuousPlanningToolboxDataSetTest
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, footstepPlannerParameters);
 
       ThreadTools.sleep(100);
-      String timeoutPrefix = "vis_graph_with_a_star";
+      String plannerTypePrefix = "vis_graph_with_a_star";
+      int maxIterations = plannerInput.getIterationLimitFlag(plannerTypePrefix);
 
       BipedContinuousPlanningRequestPacket requestPacket = new BipedContinuousPlanningRequestPacket();
       requestPacket.setHorizonLength(defaultHorizonLength);
-      requestPacket.setTimeout(dataset.getPlannerInput().getTimeoutFlag(timeoutPrefix));
+      requestPacket.setTimeout(timeout);
       requestPacket.setBestEffortTimeout(defaultBestEffortTimeout);
+      requestPacket.setMaxIterations(maxIterations);
       requestPacket.getGoalOrientationInWorld().set(goalOrientation);
       requestPacket.getGoalPositionInWorld().set(plannerInput.getGoalPosition());
 
