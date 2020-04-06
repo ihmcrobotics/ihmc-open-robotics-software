@@ -82,8 +82,6 @@ public class FootstepPlannerMessageTools
       packet.setMaximumStepWidth(parameters.getMaximumStepWidth());
       packet.setMinimumDistanceFromCliffBottoms(parameters.getMinimumDistanceFromCliffBottoms());
       packet.setCliffHeightToAvoid(parameters.getCliffHeightToAvoid());
-      packet.setReturnBestEffortPlan(parameters.getReturnBestEffortPlan());
-      packet.setMinimumStepsForBestEffortPlan(parameters.getMinimumStepsForBestEffortPlan());
       packet.setBodyBoxHeight(parameters.getBodyBoxHeight());
       packet.setBodyBoxDepth(parameters.getBodyBoxDepth());
       packet.setBodyBoxWidth(parameters.getBodyBoxWidth());

@@ -46,6 +46,11 @@ public class FootstepPlannerRequest
    private boolean abortIfGoalStepSnappingFails;
 
    /**
+    * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+    */
+   private boolean abortIfBodyPathPlannerFails;
+
+   /**
     * If true, the planner will plan a body path. If false, it will try to follow a straight line to the goal.
     */
    private boolean planBodyPath;
@@ -119,6 +124,7 @@ public class FootstepPlannerRequest
       goalFootPoses.forEach(Pose3D::setToNaN);
       snapGoalSteps = true;
       abortIfGoalStepSnappingFails = false;
+      abortIfBodyPathPlannerFails = false;
       planBodyPath = false;
       performAStarSearch = true;
       goalDistanceProximity = -1.0;
@@ -201,6 +207,11 @@ public class FootstepPlannerRequest
    public void setAbortIfGoalStepSnappingFails(boolean abortIfGoalStepSnappingFails)
    {
       this.abortIfGoalStepSnappingFails = abortIfGoalStepSnappingFails;
+   }
+
+   public void setAbortIfBodyPathPlannerFails(boolean abortIfBodyPathPlannerFails)
+   {
+      this.abortIfBodyPathPlannerFails = abortIfBodyPathPlannerFails;
    }
 
    public void setPlanBodyPath(boolean planBodyPath)
@@ -288,6 +299,11 @@ public class FootstepPlannerRequest
       return abortIfGoalStepSnappingFails;
    }
 
+   public boolean getAbortIfBodyPathPlannerFails()
+   {
+      return abortIfBodyPathPlannerFails;
+   }
+
    public boolean getPlanBodyPath()
    {
       return planBodyPath;
@@ -362,6 +378,7 @@ public class FootstepPlannerRequest
       setGoalFootPose(RobotSide.RIGHT, requestPacket.getGoalRightFootPose());
       setSnapGoalSteps(requestPacket.getSnapGoalSteps());
       setAbortIfGoalStepSnappingFails(requestPacket.getAbortIfGoalStepSnappingFails());
+      setAbortIfBodyPathPlannerFails(requestPacket.getAbortIfBodyPathPlannerFails());
       setPlanBodyPath(requestPacket.getPlanBodyPath());
       setPerformAStarSearch(requestPacket.getPerformAStarSearch());
       setGoalDistanceProximity(requestPacket.getGoalDistanceProximity());
@@ -397,6 +414,7 @@ public class FootstepPlannerRequest
       requestPacket.getGoalRightFootPose().set(getGoalFootPoses().get(RobotSide.RIGHT));
       requestPacket.setSnapGoalSteps(getSnapGoalSteps());
       requestPacket.setAbortIfGoalStepSnappingFails(getAbortIfGoalStepSnappingFails());
+      requestPacket.setAbortIfBodyPathPlannerFails(getAbortIfBodyPathPlannerFails());
       requestPacket.setPlanBodyPath(getPlanBodyPath());
       requestPacket.setPerformAStarSearch(getPerformAStarSearch());
       requestPacket.setGoalDistanceProximity(getGoalDistanceProximity());
@@ -434,6 +452,7 @@ public class FootstepPlannerRequest
       this.goalFootPoses.get(RobotSide.RIGHT).set(other.goalFootPoses.get(RobotSide.RIGHT));
       this.snapGoalSteps = other.snapGoalSteps;
       this.abortIfGoalStepSnappingFails = other.abortIfGoalStepSnappingFails;
+      this.abortIfBodyPathPlannerFails = other.abortIfBodyPathPlannerFails;
 
       this.planBodyPath = other.planBodyPath;
       this.performAStarSearch = other.performAStarSearch;

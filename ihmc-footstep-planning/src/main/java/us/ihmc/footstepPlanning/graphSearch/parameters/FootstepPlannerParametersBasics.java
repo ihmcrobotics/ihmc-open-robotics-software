@@ -185,17 +185,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.maximumZPenetrationOnValleyRegions, maximumZPenetrationOnValleyRegions);
    }
 
-   default void setReturnBestEffortPlan(boolean returnBestEffortPlan)
-   {
-      set(FootstepPlannerParameterKeys.returnBestEffortPlan, returnBestEffortPlan);
-   }
-
-   default void setMinimumStepsForBestEffortPlan(int minimumStepForBestEffortPlan)
-   {
-      set(FootstepPlannerParameterKeys.minimumStepsForBestEffortPlan, minimumStepForBestEffortPlan);
-   }
-
-
    default void setBodyBoxHeight(double bodyBoxHeight)
    {
       set(FootstepPlannerParameterKeys.bodyBoxHeight, bodyBoxHeight);
@@ -416,9 +405,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setCliffHeightToAvoid(parametersPacket.getCliffHeightToAvoid());
       if (parametersPacket.getMinimumDistanceFromCliffBottoms() != noValue)
          setMinimumDistanceFromCliffBottoms(parametersPacket.getMinimumDistanceFromCliffBottoms());
-      setReturnBestEffortPlan(parametersPacket.getReturnBestEffortPlan());
-      if (parametersPacket.getMinimumStepsForBestEffortPlan() > 0)
-         setMinimumStepsForBestEffortPlan((int) parametersPacket.getMinimumStepsForBestEffortPlan());
       if (parametersPacket.getBodyBoxHeight() != noValue)
          setBodyBoxHeight(parametersPacket.getBodyBoxHeight());
       if (parametersPacket.getBodyBoxDepth() != noValue)

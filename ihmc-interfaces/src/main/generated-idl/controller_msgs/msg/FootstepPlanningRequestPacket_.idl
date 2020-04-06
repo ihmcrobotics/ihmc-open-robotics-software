@@ -72,6 +72,10 @@ module controller_msgs
          */
         boolean abort_if_goal_step_snapping_fails;
         /**
+         * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+         */
+        boolean abort_if_body_path_planner_fails;
+        /**
          * If true, will plan a body path. If false, will follow a straight-line path to the goal
          */
         boolean plan_body_path;

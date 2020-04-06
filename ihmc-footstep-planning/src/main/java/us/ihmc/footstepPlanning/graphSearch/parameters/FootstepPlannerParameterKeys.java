@@ -42,8 +42,6 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  maximumZPenetrationOnValleyRegions         = keys.addDoubleKey ("Max Z penetration on valley regions", Double.POSITIVE_INFINITY);
    public static final DoubleStoredPropertyKey  cliffHeightToAvoid                         = keys.addDoubleKey ("Cliff height to avoid", Double.MAX_VALUE);
    public static final DoubleStoredPropertyKey  minimumDistanceFromCliffBottoms            = keys.addDoubleKey ("Min distance from cliff bottoms", 0.0);
-   public static final BooleanStoredPropertyKey returnBestEffortPlan                       = keys.addBooleanKey("Return best effort plan", false);
-   public static final IntegerStoredPropertyKey minimumStepsForBestEffortPlan              = keys.addIntegerKey("Min steps for best effort plan", 3);
    public static final DoubleStoredPropertyKey  minXClearanceFromStance                    = keys.addDoubleKey ("Min X clearance from stance", 0.0);
    public static final DoubleStoredPropertyKey  minYClearanceFromStance                    = keys.addDoubleKey ("Min Y clearance from stance", 0.0);
    public static final DoubleStoredPropertyKey  bodyBoxWidth                               = keys.addDoubleKey ("Body box width", 0.7);
