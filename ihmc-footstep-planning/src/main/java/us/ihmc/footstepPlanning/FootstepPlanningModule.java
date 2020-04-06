@@ -110,7 +110,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          exception.printStackTrace();
 
          output.clear();
-         output.setPlanId(request.getRequestId());
+         output.setRequestId(request.getRequestId());
          output.setFootstepPlanningResult(FootstepPlanningResult.EXCEPTION);
          output.setException(exception);
          statusCallback.accept(output);
@@ -122,7 +122,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    {
       this.request.set(request);
       requestCallback.accept(request);
-      output.setPlanId(request.getRequestId());
+      output.setRequestId(request.getRequestId());
       isPlanning.set(true);
       bodyPathPlanHolder.getPlan().clear();
 
@@ -224,7 +224,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             output.getBodyPath().add(new Pose3D(bodyPathPlan.getWaypoint(i)));
          }
 
-         output.getLowLevelGoal().set(goalMidFootPose);
+         output.getGoalPose().set(goalMidFootPose);
       }
 
       output.setBodyPathPlanningResult(bodyPathPlanningResult);

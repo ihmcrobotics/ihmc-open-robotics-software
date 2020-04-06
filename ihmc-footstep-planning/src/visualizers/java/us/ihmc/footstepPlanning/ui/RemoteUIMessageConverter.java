@@ -306,7 +306,7 @@ public class RemoteUIMessageConverter
       BodyPathPlanningResult bodyPathPlanningResult = BodyPathPlanningResult.fromByte(packet.getBodyPathPlanningResult());
       FootstepPlanningResult footstepPlanningResult = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
       List<? extends Pose3DReadOnly> bodyPath = packet.getBodyPath();
-      Pose3D lowLevelGoal = packet.getLowLevelPlannerGoal();
+      Pose3D lowLevelGoal = packet.getGoalPose();
 
       if (plannerRequestId > currentPlanRequestId.get())
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerRequestId, plannerRequestId);

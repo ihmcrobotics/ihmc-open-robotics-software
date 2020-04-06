@@ -16,7 +16,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
@@ -156,10 +155,10 @@ public class FootstepPathCalculatorModule
          if (output.getFootstepPlanningResult().validForExecution())
          {
             messager.submitMessage(FootstepPlanResponse, FootstepDataMessageConverter.createFootstepDataListFromPlan(output.getFootstepPlan(), -1.0, -1.0, ExecutionMode.OVERRIDE));
-            if (!output.getLowLevelGoal().containsNaN())
+            if (!output.getGoalPose().containsNaN())
             {
-               messager.submitMessage(LowLevelGoalPosition, new Point3D(output.getLowLevelGoal().getPosition()));
-               messager.submitMessage(LowLevelGoalOrientation, new Quaternion(output.getLowLevelGoal().getOrientation()));
+               messager.submitMessage(LowLevelGoalPosition, new Point3D(output.getGoalPose().getPosition()));
+               messager.submitMessage(LowLevelGoalOrientation, new Quaternion(output.getGoalPose().getOrientation()));
             }
          }
       }
