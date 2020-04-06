@@ -33,6 +33,15 @@ public class AtlasSLAMModule extends SLAMModule
       {
          reaMessager.submitMessage(REAModuleAPI.RobotStatus, false);
       }
+      
+      if (robotConfigurationData.getPelvisLinearVelocity().lengthSquared() < 0.01)
+      {
+         reaMessager.submitMessage(REAModuleAPI.VelocityStatus, true);
+      }
+      else
+      {
+         reaMessager.submitMessage(REAModuleAPI.VelocityStatus, false);
+      }
    }
 
    public AtlasSLAMModule(Messager messager, DRCRobotModel drcRobotModel, File configurationFile)
