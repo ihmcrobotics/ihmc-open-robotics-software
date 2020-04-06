@@ -47,30 +47,37 @@ public class FootstepPlanningModuleTest
       double publishPeriod = 1.0;
       planningModule.setStatusPublishPeriod(publishPeriod);
 
-      MutableInt numberOfStatusesReceived = new MutableInt();
+      MutableInt numberOfStreamingStatuses = new MutableInt();
+
       Consumer<FootstepPlannerOutput> streamingTester = output ->
       {
          if(output.getFootstepPlanningResult() == FootstepPlanningResult.PLANNING)
          {
-            double lapElapsed = stopwatch.lapElapsed();
-            Assertions.assertTrue(MathTools.epsilonEquals(lapElapsed, publishPeriod, 0.08),
-                                  "Planner doesn't appear to be streaming at the correct rate. Requested period: " + publishPeriod + ", actual: " + lapElapsed);
+            // first status received is when body path planning is done and step planning starts
+            if (numberOfStreamingStatuses.getValue() == 0)
+            {
+               stopwatch.start();
+            }
+            else
+            {
+               double lapElapsed = stopwatch.lap();
+               Assertions.assertTrue(MathTools.epsilonEquals(lapElapsed, publishPeriod, 0.08),
+                                     "Planner doesn't appear to be streaming at the correct rate. Requested period: " + publishPeriod + ", actual: " + lapElapsed);
+            }
 
-            stopwatch.lap();
-            numberOfStatusesReceived.increment();
+            numberOfStreamingStatuses.increment();
          }
       };
 
       planningModule.addStatusCallback(streamingTester);
-
-      stopwatch.start();
       planningModule.handleRequest(request);
       double totalElapsed = stopwatch.totalElapsed();
+      int numberOfStreamingIntervals = numberOfStreamingStatuses.getValue() - 1;
 
       int expectedStatuses = (int) (totalElapsed / publishPeriod);
-      Assertions.assertTrue(numberOfStatusesReceived.intValue() == expectedStatuses,
+      Assertions.assertTrue(numberOfStreamingIntervals == expectedStatuses,
                             "Planner doesn't appear to be streaming correctly. Planning duration=" + totalElapsed + ", publish period=" + publishPeriod
-                            + ", # of statuses=" + numberOfStatusesReceived.getValue());
+                            + ", # of statuses=" + numberOfStreamingStatuses.getValue());
    }
    
    @Test

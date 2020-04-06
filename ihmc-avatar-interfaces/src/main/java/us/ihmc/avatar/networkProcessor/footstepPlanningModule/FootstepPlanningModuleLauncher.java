@@ -107,12 +107,6 @@ public class FootstepPlanningModuleLauncher
          new Thread(() -> footstepPlanningModule.handleRequest(request)).start();
       });
 
-      // Body path plan publisher
-      IHMCROS2Publisher<BodyPathPlanMessage> bodyPathPlanPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                                                               BodyPathPlanMessage.class,
-                                                                                               publisherTopicNameGenerator);
-      footstepPlanningModule.addBodyPathPlanCallback(bodyPathPlanPublisher::publish);
-
       // Status publisher
       IHMCROS2Publisher<FootstepPlanningToolboxOutputStatus> resultPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                                                          FootstepPlanningToolboxOutputStatus.class,
@@ -159,14 +153,6 @@ public class FootstepPlanningModuleLauncher
                                                          PLANNING_STEPS).toByte());
                                                    statusPublisher.publish(statusMessage);
                                                 });
-      footstepPlanningModule.addBodyPathPlanCallback(bodyPathPlanMessage ->
-                                                     {
-                                                        FootstepPlannerStatusMessage statusMessage = new FootstepPlannerStatusMessage();
-                                                        boolean planningSteps = FootstepPlanningResult.fromByte(bodyPathPlanMessage.getFootstepPlanningResult())
-                                                                                                      .validForExecution();
-                                                        statusMessage.setFootstepPlannerStatus((planningSteps ? PLANNING_STEPS : IDLE).toByte());
-                                                        statusPublisher.publish(statusMessage);
-                                                     });
       footstepPlanningModule.addStatusCallback(output ->
                                                {
                                                   boolean plannerTerminated = output.getFootstepPlanningResult() != FootstepPlanningResult.PLANNING;
