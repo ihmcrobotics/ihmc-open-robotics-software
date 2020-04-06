@@ -22,7 +22,8 @@ public class SLAMModuleAPI
    private static final CategoryTheme UI = apiFactory.createCategoryTheme("UI");
    private static final CategoryTheme StereoVision = apiFactory.createCategoryTheme("StereoVision");
    private static final CategoryTheme DepthCloud = apiFactory.createCategoryTheme("DepthCloud");
-   private static final CategoryTheme SensorFrame = apiFactory.createCategoryTheme("SensorPose");
+   private static final CategoryTheme SensorFrame = apiFactory.createCategoryTheme("SensorFrame");
+   private static final CategoryTheme VelocityLimit = apiFactory.createCategoryTheme("VelocityLimit");
    private static final CategoryTheme PlanarRegions = apiFactory.createCategoryTheme("PlanarRegions");
    private static final CategoryTheme OcTree = apiFactory.createCategoryTheme("OcTree");
    private static final CategoryTheme Buffer = apiFactory.createCategoryTheme("Buffer");
@@ -43,6 +44,7 @@ public class SLAMModuleAPI
    public static final Topic<PlanarRegionsListMessage> SLAMPlanarRegionsState = Root.child(Module).child(PlanarRegions).topic(Data);
    public static final Topic<RandomICPSLAMParameters> SLAMParameters = Root.child(Module).topic(Parameters);
    public static final Topic<Boolean> SensorStatus = Root.child(Module).child(SensorFrame).topic(Moving);
+   public static final Topic<Boolean> VelocityLimitStatus = Root.child(Module).child(VelocityLimit).topic(Moving);
    
    public static final Topic<String> SLAMStatus = Root.child(Module).topic(Status);
    public static final Topic<String> QueuedBuffers = Root.child(Module).child(Buffer).topic(Status);
