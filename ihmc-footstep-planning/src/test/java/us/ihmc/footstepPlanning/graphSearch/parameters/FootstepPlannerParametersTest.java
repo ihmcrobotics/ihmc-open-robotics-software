@@ -154,14 +154,6 @@ public class FootstepPlannerParametersTest
       parameters.setFinalTurnProximity(finalTurnProximity);
       assertEquals(finalTurnProximity, parameters.getFinalTurnProximity(), epsilon);
 
-      double finalTurnBodyPathProximity = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setFinalTurnBodyPathProximity(finalTurnBodyPathProximity);
-      assertEquals(finalTurnBodyPathProximity, parameters.getFinalTurnBodyPathProximity(), epsilon);
-
-      double finalTurnProximityBlendFactor = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setFinalTurnProximityBlendFactor(finalTurnProximityBlendFactor);
-      assertEquals(finalTurnProximityBlendFactor, parameters.getFinalTurnProximityBlendFactor(), epsilon);
-
       int numberOfBoundingBoxChecks = RandomNumbers.nextInt(random, -10, 10);
       parameters.setNumberOfBoundingBoxChecks(numberOfBoundingBoxChecks);
       assertEquals(numberOfBoundingBoxChecks, parameters.getNumberOfBoundingBoxChecks());

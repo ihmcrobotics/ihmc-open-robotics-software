@@ -91,8 +91,6 @@ public class FootstepPlannerMessageTools
       packet.setMinXClearanceFromStance(parameters.getMinXClearanceFromStance());
       packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
       packet.setFinalTurnProximity(parameters.getFinalTurnProximity());
-      packet.setFinalTurnBodyPathProximity(parameters.getFinalTurnBodyPathProximity());
-      packet.setFinalTurnProximityBlendFactor(parameters.getFinalTurnProximityBlendFactor());
 
       packet.setUseQuadraticDistanceCost(parameters.useQuadraticDistanceCost());
       packet.setUseQuadraticHeightCost(parameters.useQuadraticHeightCost());

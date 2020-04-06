@@ -305,16 +305,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.finalTurnProximity, finalTurnProximity);
    }
 
-   default void setFinalTurnBodyPathProximity(double finalTurnProximity)
-   {
-      set(FootstepPlannerParameterKeys.finalTurnBodyPathProximity, finalTurnProximity);
-   }
-
-   default void setFinalTurnProximityBlendFactor(double finalTurnProximityBlendFactor)
-   {
-      set(FootstepPlannerParameterKeys.finalTurnProximityBlendFactor, finalTurnProximityBlendFactor);
-   }
-
    default void setFootholdAreaWeight(double footholdAreaWeight)
    {
       set(FootstepPlannerParameterKeys.footholdAreaWeight, footholdAreaWeight);
@@ -423,10 +413,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinYClearanceFromStance(parametersPacket.getMinYClearanceFromStance());
       if (parametersPacket.getFinalTurnProximity() != noValue)
          setFinalTurnProximity(parametersPacket.getFinalTurnProximity());
-      if (parametersPacket.getFinalTurnBodyPathProximity() != noValue)
-         setFinalTurnBodyPathProximity(parametersPacket.getFinalTurnBodyPathProximity());
-      if (parametersPacket.getFinalTurnProximityBlendFactor() != noValue)
-         setFinalTurnProximityBlendFactor(parametersPacket.getFinalTurnProximityBlendFactor());
 
       setUseQuadraticDistanceCost(parametersPacket.getUseQuadraticDistanceCost());
       setUseQuadraticHeightCost(parametersPacket.getUseQuadraticHeightCost());
