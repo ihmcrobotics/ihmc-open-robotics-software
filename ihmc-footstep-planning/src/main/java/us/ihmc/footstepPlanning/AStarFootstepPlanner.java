@@ -115,23 +115,24 @@ public class AStarFootstepPlanner
       checker.setPlanarRegions(planarRegionsList);
       idealStepCalculator.setPlanarRegionsList(planarRegionsList);
 
-      boolean horizonLengthImposed =
-            request.getPlanBodyPath() && MathTools.intervalContains(bodyPathPlanHolder.computePathLength(0.0), 0.0, request.getHorizonLength());
+      double pathLength = bodyPathPlanHolder.computePathLength(0.0);
+      boolean imposeHorizonLength =
+            request.getPlanBodyPath() && request.getHorizonLength() > 0.0 && !MathTools.intervalContains(pathLength, 0.0, request.getHorizonLength());
       SideDependentList<FootstepNode> goalNodes;
-      if (horizonLengthImposed)
+      if (imposeHorizonLength)
       {
-         bodyPathPlanHolder.getPointAlongPath(1.0, goalMidFootPose);
+         bodyPathPlanHolder.getPointAlongPath(request.getHorizonLength() / pathLength, goalMidFootPose);
          SideDependentList<Pose3D> goalSteps = PlannerTools.createSquaredUpFootsteps(goalMidFootPose, footstepPlannerParameters.getIdealFootstepWidth());
          goalNodes = createGoalNodes(goalSteps::get);
       }
       else
       {
+         goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
          goalNodes = createGoalNodes(request.getGoalFootPoses()::get);
       }
 
       // Setup footstep planner
       FootstepNode startNode = createStartNode(request);
-      goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
       addFootPosesToSnapper(request);
       footstepPlanner.initialize(startNode);
       distanceAndYawHeuristics.initialize(goalMidFootPose, request.getDesiredHeading());
@@ -139,7 +140,7 @@ public class AStarFootstepPlanner
       completionChecker.initialize(startNode, goalNodes, request.getGoalDistanceProximity(), request.getGoalYawProximity());
 
       // Check valid goal
-      if (!snapAndCheckGoalNodes(goalNodes, horizonLengthImposed, request))
+      if (!snapAndCheckGoalNodes(goalNodes, imposeHorizonLength, request))
       {
          result = FootstepPlanningResult.INVALID_GOAL;
          reportStatus(request, outputToPack);
