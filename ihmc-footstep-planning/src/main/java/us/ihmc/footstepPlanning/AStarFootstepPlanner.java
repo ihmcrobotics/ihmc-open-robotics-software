@@ -150,9 +150,14 @@ public class AStarFootstepPlanner
       // Start planning loop
       while (true)
       {
-         if (stopwatch.totalElapsed() >= request.getTimeout() || haltRequested.get())
+         if (stopwatch.totalElapsed() >= request.getTimeout())
          {
             result = FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION;
+            break;
+         }
+         if (haltRequested.get())
+         {
+            result = FootstepPlanningResult.HALTED;
             break;
          }
          if (request.getMaximumIterations() > 0 && iterations > request.getMaximumIterations())
@@ -233,18 +238,6 @@ public class AStarFootstepPlanner
 
          footstep.setFoothold(snapData.getCroppedFoothold());
          outputToPack.getFootstepPlan().addFootstep(footstep);
-      }
-
-      BodyPathPlan bodyPathPlan = bodyPathPlanHolder.getPlan();
-      if (bodyPathPlan.getNumberOfWaypoints() > 0)
-      {
-         outputToPack.getBodyPath().clear();
-         for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
-         {
-            outputToPack.getBodyPath().add(new Pose3D(bodyPathPlan.getWaypoint(i)));
-         }
-
-         outputToPack.getLowLevelGoal().set(goalMidFootPose);
       }
 
       outputToPack.setPlanarRegionsList(request.getPlanarRegionsList());

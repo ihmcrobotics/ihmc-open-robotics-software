@@ -80,9 +80,9 @@ public class MainTabController
    @FXML
    private TextField iterationsTaken;
    @FXML
-   private TextField planningResult;
+   private TextField bodyPathPlanResult;
    @FXML
-   private TextField plannerStatus;
+   private TextField stepPlanResult;
    @FXML
    private ComboBox<DataSetName> dataSetSelector;
    @FXML
@@ -299,8 +299,8 @@ public class MainTabController
       // control
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestId, new TextViewerListener<>(sentRequestId));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.ReceivedPlanId, new TextViewerListener<>(receivedRequestId));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, new TextViewerListener<>(planningResult));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerStatus, new TextViewerListener<>(plannerStatus));
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.BodyPathPlanningResultTopic, new TextViewerListener<>(bodyPathPlanResult));
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, new TextViewerListener<>(stepPlanResult));
 
       AtomicReference<String> stackTrace = messager.createInput(PlannerExceptionStackTrace, "No stack trace available");
       viewExceptionButton.setOnAction(e ->
