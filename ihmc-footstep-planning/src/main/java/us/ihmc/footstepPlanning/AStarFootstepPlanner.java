@@ -26,7 +26,6 @@ import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
 import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -105,7 +104,7 @@ public class AStarFootstepPlanner
 
       haltRequested.set(false);
       result = FootstepPlanningResult.PLANNING;
-      outputToPack.setPlanId(request.getRequestId());
+      outputToPack.setRequestId(request.getRequestId());
 
       // Update planar regions
       boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
@@ -199,7 +198,7 @@ public class AStarFootstepPlanner
 
    private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
-      outputToPack.setPlanId(request.getRequestId());
+      outputToPack.setRequestId(request.getRequestId());
       outputToPack.setFootstepPlanningResult(result);
 
       // Pack solution path

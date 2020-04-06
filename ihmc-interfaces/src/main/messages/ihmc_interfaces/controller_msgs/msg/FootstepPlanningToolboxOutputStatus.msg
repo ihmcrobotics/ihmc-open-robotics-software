@@ -18,16 +18,28 @@ byte FOOTSTEP_PLANNING_RESULT_HALTED = 7
 
 int32 NO_PLAN_ID = -1
 
-FootstepDataListMessage footstep_data_list
-byte body_path_planning_result 255
-byte footstep_planning_result 255
+# ID of the request this output corresponds to
 int32 plan_id -1
 
+# Footstep plan, may be empty depending on the state of the planner, according to footstep_planning_result
+FootstepDataListMessage footstep_data_list
+
+# Body path plan result. Null if no result is available
+byte body_path_planning_result 255
+
+# Footstep planner result. Null if no result is available
+byte footstep_planning_result 255
+
+# (deprecated) Regions that correspond to the request message. Originally used for debugging networking
 PlanarRegionsListMessage planar_regions_list
 
+# Planned body path. Empty if planner failed
 geometry_msgs/Pose[] body_path
-geometry_msgs/Pose low_level_planner_goal
 
+# Goal pose used by the planner. This will be different from the requested goal pose if it's beyond the horizon length.
+geometry_msgs/Pose goal_pose
+
+# Object to record various planner timings, helpful for debugging
 FootstepPlanningTimingsMessage planner_timings
 
 # Contains planner stack trace if failure is due to an exception

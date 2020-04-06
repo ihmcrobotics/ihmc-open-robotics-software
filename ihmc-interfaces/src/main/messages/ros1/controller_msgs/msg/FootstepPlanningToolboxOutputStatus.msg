@@ -27,23 +27,31 @@ int32 NO_PLAN_ID=-1
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
-controller_msgs/FootstepDataListMessage footstep_data_list
-
-# Field default value 255
-int8 body_path_planning_result
-
-# Field default value 255
-int8 footstep_planning_result
-
+# ID of the request this output corresponds to
 # Field default value -1
 int32 plan_id
 
+# Footstep plan, may be empty depending on the state of the planner, according to footstep_planning_result
+controller_msgs/FootstepDataListMessage footstep_data_list
+
+# Body path plan result. Null if no result is available
+# Field default value 255
+int8 body_path_planning_result
+
+# Footstep planner result. Null if no result is available
+# Field default value 255
+int8 footstep_planning_result
+
+# (deprecated) Regions that correspond to the request message. Originally used for debugging networking
 controller_msgs/PlanarRegionsListMessage planar_regions_list
 
+# Planned body path. Empty if planner failed
 geometry_msgs/Pose[] body_path
 
-geometry_msgs/Pose low_level_planner_goal
+# Goal pose used by the planner. This will be different from the requested goal pose if it's beyond the horizon length.
+geometry_msgs/Pose goal_pose
 
+# Object to record various planner timings, helpful for debugging
 controller_msgs/FootstepPlanningTimingsMessage planner_timings
 
 # Contains planner stack trace if failure is due to an exception

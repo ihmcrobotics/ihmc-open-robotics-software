@@ -477,7 +477,7 @@ public class RemoteFootstepPlannerUIMessagingTest
          Quaternion lowLevelGoalOrientation = EuclidCoreRandomTools.nextQuaternion(random, 100.0);
 
          FootstepPlanningToolboxOutputStatus outputPacket = new FootstepPlanningToolboxOutputStatus();
-         outputPacket.getLowLevelPlannerGoal().set(goalPose);
+         outputPacket.getGoalPose().set(goalPose);
          outputPacket.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
          outputPacket.getFootstepDataList().set(footstepDataListMessage);
          outputPacket.setPlanId(planId);
@@ -485,8 +485,8 @@ public class RemoteFootstepPlannerUIMessagingTest
          outputPacket.setFootstepPlanningResult(result.toByte());
          for (int i = 0; i < bodyPath.size(); i++)
             outputPacket.getBodyPath().add().set(bodyPath.get(i));
-         outputPacket.getLowLevelPlannerGoal().getPosition().set(lowLevelGoalPosition);
-         outputPacket.getLowLevelPlannerGoal().getOrientation().set(lowLevelGoalOrientation);
+         outputPacket.getGoalPose().getPosition().set(lowLevelGoalPosition);
+         outputPacket.getGoalPose().getOrientation().set(lowLevelGoalOrientation);
 
          footstepOutputStatusPublisher.publish(outputPacket);
 
