@@ -83,6 +83,10 @@ bool assume_flat_ground
 # Field default value -1
 int32 planner_request_id
 
+# Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+# Field default value 1.0
+float64 status_publish_period
+
 # Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
 # For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
 bool generate_log

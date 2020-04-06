@@ -81,6 +81,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -153,6 +155,9 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -199,6 +204,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_2(data.getPlannerRequestId());
 
+      cdr.write_type_6(data.getStatusPublishPeriod());
+
       cdr.write_type_7(data.getGenerateLog());
 
    }
@@ -239,6 +246,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       	
       data.setPlannerRequestId(cdr.read_type_2());
       	
+      data.setStatusPublishPeriod(cdr.read_type_6());
+      	
       data.setGenerateLog(cdr.read_type_7());
       	
 
@@ -272,6 +281,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       ser.write_type_7("assume_flat_ground", data.getAssumeFlatGround());
       ser.write_type_2("planner_request_id", data.getPlannerRequestId());
+      ser.write_type_6("status_publish_period", data.getStatusPublishPeriod());
       ser.write_type_7("generate_log", data.getGenerateLog());
    }
 
@@ -303,6 +313,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       data.setAssumeFlatGround(ser.read_type_7("assume_flat_ground"));
       data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
+      data.setStatusPublishPeriod(ser.read_type_6("status_publish_period"));
       data.setGenerateLog(ser.read_type_7("generate_log"));
    }
 
