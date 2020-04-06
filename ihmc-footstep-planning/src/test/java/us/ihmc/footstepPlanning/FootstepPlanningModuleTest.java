@@ -45,7 +45,7 @@ public class FootstepPlanningModuleTest
 
       Stopwatch stopwatch = new Stopwatch();
       double publishPeriod = 1.0;
-      planningModule.setStatusPublishPeriod(publishPeriod);
+      request.setStatusPublishPeriod(publishPeriod);
 
       MutableInt numberOfStreamingStatuses = new MutableInt();
 

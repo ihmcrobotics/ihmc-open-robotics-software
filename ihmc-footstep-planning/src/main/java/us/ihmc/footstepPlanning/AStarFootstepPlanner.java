@@ -39,8 +39,6 @@ import java.util.function.Function;
 
 public class AStarFootstepPlanner
 {
-   private static final double defaultStatusPublishPeriod = 1.0;
-
    private final AStarPathPlanner<FootstepNode> footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final SimplePlanarRegionFootstepNodeSnapper snapper;
@@ -54,7 +52,6 @@ public class AStarFootstepPlanner
    private final FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData();
    private final HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
    private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
-   private double statusPublishPeriod = defaultStatusPublishPeriod;
 
    private final FramePose3D goalMidFootPose = new FramePose3D();
    private final AtomicBoolean haltRequested = new AtomicBoolean();
@@ -186,7 +183,7 @@ public class AStarFootstepPlanner
             result = FootstepPlanningResult.FOUND_SOLUTION;
             break;
          }
-         if (stopwatch.lapElapsed() > statusPublishPeriod && !MathTools.epsilonEquals(stopwatch.totalElapsed(), request.getTimeout(), 0.1))
+         if (publishStatus(request))
          {
             reportStatus(request, outputToPack);
             stopwatch.lap();
@@ -195,6 +192,17 @@ public class AStarFootstepPlanner
 
       markSolutionEdges();
       reportStatus(request, outputToPack);
+   }
+
+   private boolean publishStatus(FootstepPlannerRequest request)
+   {
+      double statusPublishPeriod = request.getStatusPublishPeriod();
+      if (statusPublishPeriod <= 0.0)
+      {
+         return false;
+      }
+
+      return stopwatch.lapElapsed() > statusPublishPeriod && !MathTools.epsilonEquals(stopwatch.totalElapsed(), request.getTimeout(), 0.1);
    }
 
    private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
@@ -304,11 +312,6 @@ public class AStarFootstepPlanner
       {
          return true;
       }
-   }
-
-   public void setStatusPublishPeriod(double statusPublishPeriod)
-   {
-      this.statusPublishPeriod = statusPublishPeriod;
    }
 
    public void halt()

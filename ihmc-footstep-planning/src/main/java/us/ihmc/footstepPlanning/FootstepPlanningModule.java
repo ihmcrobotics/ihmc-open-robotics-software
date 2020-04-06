@@ -331,11 +331,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return aStarFootstepPlanner.getIterationData();
    }
 
-   public void setStatusPublishPeriod(double statusPublishPeriod)
-   {
-      this.aStarFootstepPlanner.setStatusPublishPeriod(statusPublishPeriod);
-   }
-
    @Override
    public void closeAndDispose()
    {

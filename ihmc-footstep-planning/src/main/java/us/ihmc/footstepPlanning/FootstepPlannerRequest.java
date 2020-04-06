@@ -101,6 +101,11 @@ public class FootstepPlannerRequest
     */
    private final ArrayList<Pose3DReadOnly> bodyPathWaypoints = new ArrayList<>();
 
+   /**
+    * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+    */
+   private double statusPublishPeriod;
+
    public FootstepPlannerRequest()
    {
       clear();
@@ -125,6 +130,7 @@ public class FootstepPlannerRequest
       planarRegionsList = null;
       assumeFlatGround = false;
       bodyPathWaypoints.clear();
+      statusPublishPeriod = 1.0;
    }
 
    public void setRequestId(int requestId)
@@ -247,6 +253,11 @@ public class FootstepPlannerRequest
       this.assumeFlatGround = assumeFlatGround;
    }
 
+   public void setStatusPublishPeriod(double statusPublishPeriod)
+   {
+      this.statusPublishPeriod = statusPublishPeriod;
+   }
+
    public int getRequestId()
    {
       return requestId;
@@ -332,6 +343,11 @@ public class FootstepPlannerRequest
       return bodyPathWaypoints;
    }
 
+   public double getStatusPublishPeriod()
+   {
+      return statusPublishPeriod;
+   }
+
    public void setFromPacket(FootstepPlanningRequestPacket requestPacket)
    {
       clear();
@@ -355,6 +371,7 @@ public class FootstepPlannerRequest
       if(requestPacket.getHorizonLength() > 0.0)
          setHorizonLength(requestPacket.getHorizonLength());
       setAssumeFlatGround(requestPacket.getAssumeFlatGround());
+      setStatusPublishPeriod(requestPacket.getStatusPublishPeriod());
 
       FootstepPlanHeading desiredHeading = FootstepPlanHeading.fromByte(requestPacket.getRequestedPathHeading());
       if (desiredHeading != null)
@@ -389,6 +406,7 @@ public class FootstepPlannerRequest
       requestPacket.setMaxIterations(getMaximumIterations());
       requestPacket.setHorizonLength(getHorizonLength());
       requestPacket.setAssumeFlatGround(getAssumeFlatGround());
+      requestPacket.setStatusPublishPeriod(getStatusPublishPeriod());
 
       requestPacket.getBodyPathWaypoints().clear();
       for (int i = 0; i < bodyPathWaypoints.size(); i++)
@@ -426,6 +444,7 @@ public class FootstepPlannerRequest
       this.maximumIterations = other.maximumIterations;
       this.horizonLength = other.horizonLength;
       this.assumeFlatGround = other.assumeFlatGround;
+      this.statusPublishPeriod = other.statusPublishPeriod;
 
       if(other.planarRegionsList != null)
       {
