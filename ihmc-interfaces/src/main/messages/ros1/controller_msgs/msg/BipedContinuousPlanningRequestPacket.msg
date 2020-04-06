@@ -30,6 +30,9 @@ float64 timeout
 
 float64 best_effort_timeout
 
+# Field default value -1
+int32 max_iterations
+
 float64 horizon_length
 
 

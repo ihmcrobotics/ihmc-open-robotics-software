@@ -2,10 +2,8 @@ start_position -0.45 0.0 -0.21
 goal_position -4.26 -0.78 -0.37
 vis_graph_status dev
 step_planner_status dev
-planar_region_bipedal_timeout 5.0
-plan_then_snap_timeout 5.0
-a_star_timeout 5.0
-simple_body_path_timeout 5.0
-vis_graph_with_a_star_timeout 5.0
+plan_then_snap_status test
+a_star_iteration_limit 1600
+vis_graph_with_a_star_iteration_limit 1600
 quadruped_planner_status dev
 quadruped_timeout 5.0

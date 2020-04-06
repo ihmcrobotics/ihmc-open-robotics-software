@@ -25,6 +25,7 @@ public class DataSetIOTools
    public static final String VIS_GRAPH_TAG = "vis_graph_status";
    public static final String STEP_PLANNERS_TAG = "step_planner_status";
    public static final String TIMEOUT_SUFFIX = "_timeout";
+   public static final String ITERATION_LIMIT_SUFFIX = "_iteration_limit";
    public static final String QUADRUPED_PLANNER_TAG = "quadruped_planner_status";
    public static final String QUADRUPED_TIMEOUT_TAG = "quadruped" + TIMEOUT_SUFFIX;
 
