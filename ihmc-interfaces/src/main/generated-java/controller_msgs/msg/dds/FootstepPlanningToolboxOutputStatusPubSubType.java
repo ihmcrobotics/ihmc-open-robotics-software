@@ -46,6 +46,8 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
@@ -83,6 +85,9 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -113,6 +118,8 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       cdr.write_type_4(data.getSequenceId());
 
       controller_msgs.msg.dds.FootstepDataListMessagePubSubType.write(data.getFootstepDataList(), cdr);
+      cdr.write_type_9(data.getBodyPathPlanningResult());
+
       cdr.write_type_9(data.getFootstepPlanningResult());
 
       cdr.write_type_2(data.getPlanId());
@@ -139,6 +146,8 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       data.setSequenceId(cdr.read_type_4());
       	
       controller_msgs.msg.dds.FootstepDataListMessagePubSubType.read(data.getFootstepDataList(), cdr);	
+      data.setBodyPathPlanningResult(cdr.read_type_9());
+      	
       data.setFootstepPlanningResult(cdr.read_type_9());
       	
       data.setPlanId(cdr.read_type_2());
@@ -158,6 +167,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       ser.write_type_4("sequence_id", data.getSequenceId());
       ser.write_type_a("footstep_data_list", new controller_msgs.msg.dds.FootstepDataListMessagePubSubType(), data.getFootstepDataList());
 
+      ser.write_type_9("body_path_planning_result", data.getBodyPathPlanningResult());
       ser.write_type_9("footstep_planning_result", data.getFootstepPlanningResult());
       ser.write_type_2("plan_id", data.getPlanId());
       ser.write_type_a("planar_regions_list", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());
@@ -177,6 +187,7 @@ public class FootstepPlanningToolboxOutputStatusPubSubType implements us.ihmc.pu
       data.setSequenceId(ser.read_type_4("sequence_id"));
       ser.read_type_a("footstep_data_list", new controller_msgs.msg.dds.FootstepDataListMessagePubSubType(), data.getFootstepDataList());
 
+      data.setBodyPathPlanningResult(ser.read_type_9("body_path_planning_result"));
       data.setFootstepPlanningResult(ser.read_type_9("footstep_planning_result"));
       data.setPlanId(ser.read_type_2("plan_id"));
       ser.read_type_a("planar_regions_list", new controller_msgs.msg.dds.PlanarRegionsListMessagePubSubType(), data.getPlanarRegionsList());

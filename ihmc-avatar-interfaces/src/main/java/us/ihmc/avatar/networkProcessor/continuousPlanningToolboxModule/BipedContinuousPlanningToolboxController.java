@@ -460,7 +460,7 @@ public class BipedContinuousPlanningToolboxController extends ToolboxController
       if (currentPlannerOutput.get() != null)
       {
          isPlannedGoalTheFinalGoal = currentPlannerOutput.get().getLowLevelPlannerGoal().getPosition().distanceXY(planningRequestPacket.get().getGoalPositionInWorld()) < proximityGoal;
-         doesThePlanReachTheFinalGoal = FootstepPlanningResult.fromByte(currentPlannerOutput.get().getFootstepPlanningResult()) != FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL;
+         doesThePlanReachTheFinalGoal = FootstepPlanningResult.fromByte(currentPlannerOutput.get().getFootstepPlanningResult()) != FootstepPlanningResult.PLANNING;
       }
       if (!isInitialSegmentOfPlan.getBooleanValue() && isPlannedGoalTheFinalGoal && doesThePlanReachTheFinalGoal && stepQueue.isEmpty())
          hasReachedGoal.set(true);

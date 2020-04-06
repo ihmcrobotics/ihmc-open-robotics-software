@@ -104,10 +104,10 @@ public abstract class FootstepPlannerDataSetTest
       ThreadTools.sleep(1000);
 
       messager.registerTopicListener(FootstepPlanResponse, request -> uiReceivedPlan.set(true));
-      messager.registerTopicListener(PlanningResult, request -> uiReceivedResult.set(true));
+      messager.registerTopicListener(FootstepPlanningResultTopic, request -> uiReceivedResult.set(true));
 
       uiFootstepPlanReference = messager.createInput(FootstepPlanResponse);
-      uiPlanningResultReference = messager.createInput(PlanningResult);
+      uiPlanningResultReference = messager.createInput(FootstepPlanningResultTopic);
    }
 
    @AfterEach

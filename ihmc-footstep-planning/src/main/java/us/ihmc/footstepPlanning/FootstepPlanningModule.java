@@ -80,8 +80,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.visibilityGraphParameters = visibilityGraphParameters;
 
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
-      this.bodyPathPlanner = new VisibilityGraphPathPlanner(footstepPlannerParameters,
-                                                            visibilityGraphParameters,
+      this.bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters,
                                                             pathPostProcessor,
                                                             new YoVariableRegistry(getClass().getSimpleName()));
 
@@ -116,14 +115,14 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
          output.clear();
          output.setPlanId(request.getRequestId());
-         output.setResult(FootstepPlanningResult.EXCEPTION);
+         output.setFootstepPlanningResult(FootstepPlanningResult.EXCEPTION);
          output.setException(exception);
          statusCallback.accept(output);
          return output;
       }
    }
 
-   private void handleRequestInternal(FootstepPlannerRequest request)
+   private void handleRequestInternal(FootstepPlannerRequest request) throws Exception
    {
       this.request.set(request);
       requestCallback.accept(request);
@@ -148,13 +147,13 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          bodyPathPlanner.setStanceFootPoses(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT));
          bodyPathPlanner.setGoal(goalMidFootPose);
 
-         FootstepPlanningResult bodyPathPlannerResult = bodyPathPlanner.planWaypoints();
+         BodyPathPlanningResult bodyPathPlannerResult = bodyPathPlanner.planWaypoints();
          List<Pose3DReadOnly> waypoints = bodyPathPlanner.getWaypoints();
 
          if (!bodyPathPlannerResult.validForExecution() || (waypoints.size() < 2 && !footstepPlannerParameters.getReturnBestEffortPlan()))
          {
             reportBodyPathPlan(bodyPathPlannerResult);
-            output.setResult(bodyPathPlannerResult);
+            output.setBodyPathPlanningResult(bodyPathPlannerResult);
             statusCallback.accept(output);
             isPlanning.set(false);
             return;
@@ -173,7 +172,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
          }
 
-         reportBodyPathPlan(FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL);
+         reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
       }
       else
       {
@@ -183,7 +182,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          waypoints.add(goalMidFootPose);
 
          bodyPathPlanHolder.setPoseWaypoints(waypoints);
-         reportBodyPathPlan(FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL);
+         reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
       }
 
       if (request.getPerformAStarSearch())
@@ -205,7 +204,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          FootstepPlanningResult result = planThenSnapPlanner.plan();
 
          FootstepPlan plan = planThenSnapPlanner.getPlan();
-         output.setResult(result);
+         output.setFootstepPlanningResult(result);
          output.getFootstepPlan().clear();
          for (int i = 0; i < plan.getNumberOfSteps(); i++)
          {
@@ -219,7 +218,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       isPlanning.set(false);
    }
 
-   private void reportBodyPathPlan(FootstepPlanningResult result)
+   private void reportBodyPathPlan(BodyPathPlanningResult result)
    {
       BodyPathPlan bodyPathPlan = bodyPathPlanHolder.getPlan();
       for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)

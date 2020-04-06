@@ -7,7 +7,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
@@ -51,7 +50,7 @@ public class FootstepPlanningModuleTest
       MutableInt numberOfStatusesReceived = new MutableInt();
       Consumer<FootstepPlannerOutput> streamingTester = output ->
       {
-         if(output.getResult() == FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL)
+         if(output.getFootstepPlanningResult() == FootstepPlanningResult.PLANNING)
          {
             double lapElapsed = stopwatch.lapElapsed();
             Assertions.assertTrue(MathTools.epsilonEquals(lapElapsed, publishPeriod, 0.08),
@@ -96,7 +95,7 @@ public class FootstepPlanningModuleTest
       request.setTimeout(2.0);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
    }
 
    @Test
@@ -122,7 +121,7 @@ public class FootstepPlanningModuleTest
       request.setMaximumIterations(200);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
    }
 
    @Test
@@ -151,7 +150,7 @@ public class FootstepPlanningModuleTest
       request.setSnapGoalSteps(true);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
       FootstepPlan footstepPlan = plannerOutput.getFootstepPlan();
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {
@@ -167,7 +166,7 @@ public class FootstepPlanningModuleTest
       request.setAbortIfGoalStepSnappingFails(true);
 
       plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult() == FootstepPlanningResult.INVALID_GOAL);
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult() == FootstepPlanningResult.INVALID_GOAL);
 
       // test that not snapping keeps original requested pose
       double heightOffset = 0.035;
@@ -179,7 +178,7 @@ public class FootstepPlanningModuleTest
       request.setSnapGoalSteps(false);
 
       plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
 
       int planSize = plannerOutput.getFootstepPlan().getNumberOfSteps();
       for (int i = 0; i < 2; i++)
@@ -213,7 +212,7 @@ public class FootstepPlanningModuleTest
       request.setDesiredHeading(FootstepPlanHeading.LEFT);
       request.setRequestedInitialStanceSide(RobotSide.RIGHT);
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
       FootstepPlan plan = plannerOutput.getFootstepPlan();
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
@@ -228,7 +227,7 @@ public class FootstepPlanningModuleTest
       request.setDesiredHeading(FootstepPlanHeading.RIGHT);
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
       plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
       plan = plannerOutput.getFootstepPlan();
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
@@ -242,7 +241,7 @@ public class FootstepPlanningModuleTest
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
       request.setDesiredHeading(FootstepPlanHeading.BACKWARD);
       plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
       plan = plannerOutput.getFootstepPlan();
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {

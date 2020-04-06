@@ -277,14 +277,14 @@ public class SimpleOcclusionTests
                maxSolveTime = seconds;
             }
 
-            if (plannerOutput.getResult().validForExecution())
+            if (plannerOutput.getFootstepPlanningResult().validForExecution())
             {
                haveNewPlan = true;
                plan = plannerOutput.getFootstepPlan();
             }
             else
             {
-               PrintTools.info("Planner failed: " + plannerOutput.getResult());
+               PrintTools.info("Planner failed: " + plannerOutput.getFootstepPlanningResult());
             }
          }
          catch (Exception e)

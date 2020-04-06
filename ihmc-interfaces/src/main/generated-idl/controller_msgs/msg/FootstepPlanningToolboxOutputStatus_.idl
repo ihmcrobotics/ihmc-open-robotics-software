@@ -11,35 +11,38 @@ module controller_msgs
   {
     module dds
     {
-      const octet FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION =
+      const octet BODY_PATH_PLANNING_RESULT_FOUND_SOLUTION =
       0;
 
-      const octet FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION =
+      const octet BODY_PATH_PLANNING_RESULT_NO_PATH_EXISTS =
       1;
 
-      const octet FOOTSTEP_PLANNING_RESULT_SOLUTION_DOES_NOT_REACH_GOAL =
+      const octet BODY_PATH_PLANNING_RESULT_EXCEPTION =
       2;
 
+      const octet FOOTSTEP_PLANNING_RESULT_PLANNING =
+      0;
+
+      const octet FOOTSTEP_PLANNING_RESULT_FOUND_SOLUTION =
+      1;
+
       const octet FOOTSTEP_PLANNING_RESULT_TIMED_OUT_BEFORE_SOLUTION =
-      3;
+      2;
 
       const octet FOOTSTEP_PLANNING_RESULT_NO_PATH_EXISTS =
-      4;
-
-      const octet FOOTSTEP_PLANNING_RESULT_SNAPPING_FAILED =
-      5;
-
-      const octet FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED =
-      6;
+      3;
 
       const octet FOOTSTEP_PLANNING_RESULT_INVALID_GOAL =
-      7;
+      4;
 
       const octet FOOTSTEP_PLANNING_RESULT_MAXIMUM_ITERATIONS_REACHED =
-      8;
+      5;
 
       const octet FOOTSTEP_PLANNING_RESULT_EXCEPTION =
-      9;
+      6;
+
+      const octet FOOTSTEP_PLANNING_RESULT_HALTED =
+      7;
 
       const long NO_PLAN_ID =
       -1;
@@ -56,6 +59,8 @@ module controller_msgs
          */
         unsigned long sequence_id;
         controller_msgs::msg::dds::FootstepDataListMessage footstep_data_list;
+        @defaultValue(value=255)
+        octet body_path_planning_result;
         @defaultValue(value=255)
         octet footstep_planning_result;
         @defaultValue(value=-1)

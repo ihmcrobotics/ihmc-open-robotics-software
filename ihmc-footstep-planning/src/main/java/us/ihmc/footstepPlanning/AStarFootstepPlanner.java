@@ -104,7 +104,7 @@ public class AStarFootstepPlanner
       iterationData.clear();
 
       haltRequested.set(false);
-      result = FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL;
+      result = FootstepPlanningResult.PLANNING;
       outputToPack.setPlanId(request.getRequestId());
 
       // Update planar regions
@@ -178,7 +178,7 @@ public class AStarFootstepPlanner
             recordIterationData(finalIterationData);
             iterationCallback.accept(finalIterationData);
 
-            result = FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
+            result = FootstepPlanningResult.FOUND_SOLUTION;
             break;
          }
          if (stopwatch.lapElapsed() > statusPublishPeriod && !MathTools.epsilonEquals(stopwatch.totalElapsed(), request.getTimeout(), 0.1))
@@ -195,7 +195,7 @@ public class AStarFootstepPlanner
    private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
       outputToPack.setPlanId(request.getRequestId());
-      outputToPack.setResult(result);
+      outputToPack.setFootstepPlanningResult(result);
 
       // Pack solution path
       outputToPack.getFootstepPlan().clear();

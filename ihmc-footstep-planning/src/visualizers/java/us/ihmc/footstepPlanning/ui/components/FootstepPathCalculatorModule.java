@@ -156,14 +156,14 @@ public class FootstepPathCalculatorModule
                                                       messager.submitMessage(BodyPathData, new ArrayList<>(bodyPathMessage.getBodyPath()));
                                                    }
                                                 });
-         planningModule.addStatusCallback(status -> messager.submitMessage(PlanningResult, status.getResult()));
+         planningModule.addStatusCallback(status -> messager.submitMessage(FootstepPlanningResultTopic, status.getFootstepPlanningResult()));
 
          FootstepPlannerOutput output = planningModule.handleRequest(request);
 
-         messager.submitMessage(PlanningResult, output.getResult());
+         messager.submitMessage(FootstepPlanningResultTopic, output.getFootstepPlanningResult());
          messager.submitMessage(PlannerStatus, FootstepPlannerStatus.IDLE);
 
-         if (output.getResult().validForExecution())
+         if (output.getFootstepPlanningResult().validForExecution())
          {
             messager.submitMessage(FootstepPlanResponse, FootstepDataMessageConverter.createFootstepDataListFromPlan(output.getFootstepPlan(), -1.0, -1.0, ExecutionMode.OVERRIDE));
             if (!output.getLowLevelGoal().containsNaN())

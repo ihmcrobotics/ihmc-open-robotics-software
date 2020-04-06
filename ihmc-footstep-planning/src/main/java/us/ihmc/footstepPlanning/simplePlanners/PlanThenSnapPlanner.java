@@ -4,6 +4,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -42,7 +43,7 @@ public class PlanThenSnapPlanner
 
    private FootstepPlan footstepPlan = new FootstepPlan();
 
-   public FootstepPlanningResult plan()
+   public FootstepPlanningResult plan() throws SnappingFailedException
    {
       FootstepPlanningResult result = turnWalkTurnPlanner.plan();
       footstepPlan = turnWalkTurnPlanner.getPlan();
@@ -53,23 +54,16 @@ public class PlanThenSnapPlanner
       snapAndWiggleSingleStep.setPlanarRegions(planarRegionsList);
 
       int numberOfFootsteps = footstepPlan.getNumberOfSteps();
-      for (int i=0; i<numberOfFootsteps; i++)
+      for (int i = 0; i < numberOfFootsteps; i++)
       {
          SimpleFootstep footstep = footstepPlan.getFootstep(i);
-         try
+         FramePose3D solePose = new FramePose3D();
+         footstep.getSoleFramePose(solePose);
+         ConvexPolygon2D footHold = snapAndWiggleSingleStep.snapAndWiggle(solePose, footPolygons.get(footstep.getRobotSide()), true);
+         footstep.setSoleFramePose(solePose);
+         if (footHold != null)
          {
-            FramePose3D solePose = new FramePose3D();
-            footstep.getSoleFramePose(solePose);
-            ConvexPolygon2D footHold = snapAndWiggleSingleStep.snapAndWiggle(solePose, footPolygons.get(footstep.getRobotSide()), true);
-            footstep.setSoleFramePose(solePose);
-            if(footHold!=null)
-            {
-               footstep.setFoothold(footHold);
-            }
-         }
-         catch (Exception e)
-         {
-            return FootstepPlanningResult.SNAPPING_FAILED;
+            footstep.setFoothold(footHold);
          }
       }
       return result;
