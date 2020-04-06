@@ -313,7 +313,6 @@ public class AtlasCorridorNavigationTest
          // Use BodyPathBasedAStarPlanner instead of manual?
 
          boolean useFastFlatInvalidFootsteps = true;
-         footstepPlannerParameters.setReturnBestEffortPlan(true);
          footstepPlannerParameters.setMaximumStepYaw(1.5);
          FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(footstepPlannerParameters);
          FootstepNodeSnapper snapper;

@@ -118,14 +118,6 @@ public class FootstepPlannerParametersTest
       parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliff);
       assertEquals(minimumDistanceFromCliff, parameters.getMinimumDistanceFromCliffBottoms(), epsilon);
 
-      boolean returnBestEffortPlan = RandomNumbers.nextBoolean(random, 0.5);
-      parameters.setReturnBestEffortPlan(returnBestEffortPlan);
-      assertEquals(returnBestEffortPlan, parameters.getReturnBestEffortPlan());
-
-      int minStepsForBestEffort = RandomNumbers.nextInt(random, -10, 10);
-      parameters.setMinimumStepsForBestEffortPlan(minStepsForBestEffort);
-      assertEquals(minStepsForBestEffort, parameters.getMinimumStepsForBestEffortPlan());
-
       double minXClearanceFromStance = RandomNumbers.nextDouble(random, 10.0);
       parameters.setMinXClearanceFromStance(minXClearanceFromStance);
       assertEquals(minXClearanceFromStance, parameters.getMinXClearanceFromStance(), epsilon);

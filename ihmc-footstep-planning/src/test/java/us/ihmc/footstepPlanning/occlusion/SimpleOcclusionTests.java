@@ -72,38 +72,6 @@ public class SimpleOcclusionTests
    }
 
    @Test
-   @Disabled // Resource file does not seem to exist.
-   public void testOcclusionsFromData(TestInfo testInfo)
-   {
-      FramePose3D startPose = new FramePose3D(worldFrame);
-      startPose.setPosition(0.25, -0.25, 0.0);
-
-      FramePose3D goalPose = new FramePose3D(worldFrame);
-      goalPose.setPosition(2.75, 0.95, 0.0);
-      BestEffortPlannerParameters parameters = new BestEffortPlannerParameters();
-
-      Path path = Paths.get(getClass().getClassLoader().getResource("PlanarRegions_20171114_090937").getPath());
-      PlanarRegionsList regions = PlanarRegionFileTools.importPlanarRegionData(path.toFile());
-
-      runTest(testInfo, startPose, goalPose, regions, parameters, new DefaultVisibilityGraphParameters(), 2.0);
-   }
-
-   private class BestEffortPlannerParameters extends DefaultFootstepPlannerParameters
-   {
-      @Override
-      public boolean getReturnBestEffortPlan()
-      {
-         return true;
-      }
-
-      @Override
-      public int getMinimumStepsForBestEffortPlan()
-      {
-         return 3;
-      }
-   }
-
-   @Test
    @Disabled
    public void testMazeWithOcclusions(TestInfo testInfo)
    {
