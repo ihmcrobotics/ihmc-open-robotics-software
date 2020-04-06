@@ -18,6 +18,7 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -295,7 +296,7 @@ public class RemoteUIMessageConverter
       List<? extends Pose3DReadOnly> bodyPath = packet.getBodyPath();
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResult, result);
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, result);
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, bodyPath);
 
       if (verbose)
@@ -311,7 +312,8 @@ public class RemoteUIMessageConverter
    {
       FootstepDataListMessage footstepDataListMessage = packet.getFootstepDataList();
       int plannerRequestId = packet.getPlanId();
-      FootstepPlanningResult result = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
+      BodyPathPlanningResult bodyPathPlanningResult = BodyPathPlanningResult.fromByte(packet.getBodyPathPlanningResult());
+      FootstepPlanningResult footstepPlanningResult = FootstepPlanningResult.fromByte(packet.getFootstepPlanningResult());
       List<? extends Pose3DReadOnly> bodyPath = packet.getBodyPath();
       Pose3D lowLevelGoal = packet.getLowLevelPlannerGoal();
 
@@ -322,14 +324,15 @@ public class RemoteUIMessageConverter
 
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);
       messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanId, plannerRequestId);
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResult, result);
+      messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathPlanningResultTopic, bodyPathPlanningResult);
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, footstepPlanningResult);
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, bodyPath);
       if (lowLevelGoal != null)
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, lowLevelGoal.getPosition());
          messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, lowLevelGoal.getOrientation());
       }
-      if (result == FootstepPlanningResult.EXCEPTION)
+      if (footstepPlanningResult == FootstepPlanningResult.EXCEPTION)
       {
          StringBuilder stackTrace = new StringBuilder();
          stackTrace.append(packet.getExceptionMessage()).append("\n");
@@ -342,7 +345,7 @@ public class RemoteUIMessageConverter
       else
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerExceptionStackTrace,
-                                "No stack trace available, planner status wasn't " + FootstepPlanningResult.EXCEPTION + ", it was: " + result);
+                                "No stack trace available, planner status wasn't " + FootstepPlanningResult.EXCEPTION + ", it was: " + footstepPlanningResult);
       }
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimings, packet.getPlannerTimings());

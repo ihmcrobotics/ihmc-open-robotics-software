@@ -12,7 +12,8 @@ public class FootstepPlannerOutput
 {
    private int planId;
    private final FootstepPlan footstepPlan = new FootstepPlan();
-   private FootstepPlanningResult result;
+   private BodyPathPlanningResult bodyPathPlanningResult;
+   private FootstepPlanningResult footstepPlanningResult;
    private PlanarRegionsList planarRegionsList;
    private final ArrayList<Pose3D> bodyPath = new ArrayList<>();
    private final Pose3D lowLevelGoal = new Pose3D();
@@ -28,7 +29,8 @@ public class FootstepPlannerOutput
    {
       planId = -1;
       footstepPlan.clear();
-      result = null;
+      bodyPathPlanningResult = null;
+      footstepPlanningResult = null;
       planarRegionsList = null;
       bodyPath.clear();
       lowLevelGoal.setToNaN();
@@ -46,9 +48,14 @@ public class FootstepPlannerOutput
       return footstepPlan;
    }
 
-   public FootstepPlanningResult getResult()
+   public BodyPathPlanningResult getBodyPathPlanningResult()
    {
-      return result;
+      return bodyPathPlanningResult;
+   }
+
+   public FootstepPlanningResult getFootstepPlanningResult()
+   {
+      return footstepPlanningResult;
    }
 
    public PlanarRegionsList getPlanarRegionsList()
@@ -81,9 +88,14 @@ public class FootstepPlannerOutput
       this.planId = planId;
    }
 
-   public void setResult(FootstepPlanningResult result)
+   public void setBodyPathPlanningResult(BodyPathPlanningResult bodyPathPlanningResult)
    {
-      this.result = result;
+      this.bodyPathPlanningResult = bodyPathPlanningResult;
+   }
+
+   public void setFootstepPlanningResult(FootstepPlanningResult footstepPlanningResult)
+   {
+      this.footstepPlanningResult = footstepPlanningResult;
    }
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
@@ -105,10 +117,19 @@ public class FootstepPlannerOutput
    {
       outputStatus.setPlanId(getPlanId());
       outputStatus.getFootstepDataList().set(FootstepDataMessageConverter.createFootstepDataListFromPlan(getFootstepPlan(), -1.0, -1.0, ExecutionMode.OVERRIDE));
-      outputStatus.setFootstepPlanningResult(getResult().toByte());
       outputStatus.getBodyPath().clear();
       outputStatus.getLowLevelPlannerGoal().set(getLowLevelGoal());
       getPlannerTimings().setPacket(outputStatus.getPlannerTimings());
+
+      if (getBodyPathPlanningResult() != null)
+      {
+         outputStatus.setBodyPathPlanningResult(getBodyPathPlanningResult().toByte());
+      }
+
+      if (getFootstepPlanningResult() != null)
+      {
+         outputStatus.setFootstepPlanningResult(getFootstepPlanningResult().toByte());
+      }
 
       if(getException() != null)
       {

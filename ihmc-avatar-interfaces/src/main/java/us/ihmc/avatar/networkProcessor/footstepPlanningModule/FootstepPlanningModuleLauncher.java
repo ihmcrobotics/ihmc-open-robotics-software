@@ -169,7 +169,7 @@ public class FootstepPlanningModuleLauncher
                                                      });
       footstepPlanningModule.addStatusCallback(output ->
                                                {
-                                                  boolean plannerTerminated = output.getResult() != FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL;
+                                                  boolean plannerTerminated = output.getFootstepPlanningResult() != FootstepPlanningResult.PLANNING;
                                                   if (plannerTerminated)
                                                   {
                                                      FootstepPlannerStatusMessage statusMessage = new FootstepPlannerStatusMessage();
@@ -189,7 +189,8 @@ public class FootstepPlanningModuleLauncher
       FootstepPlannerLogger logger = new FootstepPlannerLogger(footstepPlanningModule);
       footstepPlanningModule.addStatusCallback(status ->
                                                {
-                                                  if (status.getResult().terminalResult() && generateLog.get())
+                                                  if (status.getFootstepPlanningResult() != null && status.getFootstepPlanningResult().terminalResult()
+                                                      && generateLog.get())
                                                      logger.logSession(LOG_DIRECTORY);
                                                });
 

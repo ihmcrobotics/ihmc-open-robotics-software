@@ -343,9 +343,9 @@ public class AtlasCorridorNavigationTest
          FootstepPlannerOutput plannerOutput = planner.handleRequest(request);
          LogTools.info("Planning took " + footstepPlannerStopwatch.lapElapsed() + "s");
 
-         if (!plannerOutput.getResult().validForExecution())
+         if (!plannerOutput.getFootstepPlanningResult().validForExecution())
          {
-            LogTools.error("Footstep plan not valid for execution! {}", plannerOutput.getResult());
+            LogTools.error("Footstep plan not valid for execution! {}", plannerOutput.getFootstepPlanningResult());
 
             EnumMap<BipedalFootstepPlannerNodeRejectionReason, MutableInt> rejectionReasonCount = new EnumMap<>(BipedalFootstepPlannerNodeRejectionReason.class);
             Arrays.stream(BipedalFootstepPlannerNodeRejectionReason.values).forEach(reason -> rejectionReasonCount.put(reason, new MutableInt()));

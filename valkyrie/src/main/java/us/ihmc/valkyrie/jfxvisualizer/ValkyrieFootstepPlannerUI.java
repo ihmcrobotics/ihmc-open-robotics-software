@@ -77,7 +77,7 @@ public class ValkyrieFootstepPlannerUI extends Application
 
    private void handleMessagerCallbacks(FootstepPlanningModule planningModule, FootstepPlannerOutput status)
    {
-      if (status.getResult().terminalResult())
+      if (status.getFootstepPlanningResult().terminalResult())
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.GraphData,
                                 Pair.of(planningModule.getEdgeDataMap(), planningModule.getIterationData()));

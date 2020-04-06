@@ -73,7 +73,7 @@ public class FootstepPlanningWithBodyPathTest
 
       FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName());
       FootstepPlannerOutput plannerOutput = planner.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
 
       if (visualize)
          PlanningTestTools.visualizeAndSleep(null, plannerOutput.getFootstepPlan(), goalPose, bodyPath);
@@ -140,7 +140,7 @@ public class FootstepPlanningWithBodyPathTest
       request.getBodyPathWaypoints().addAll(waypoints);
 
       FootstepPlannerOutput plannerOutput = planner.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
 
       if (visualize)
          PlanningTestTools.visualizeAndSleep(planarRegionsList, plannerOutput.getFootstepPlan(), goalPose, bodyPath);

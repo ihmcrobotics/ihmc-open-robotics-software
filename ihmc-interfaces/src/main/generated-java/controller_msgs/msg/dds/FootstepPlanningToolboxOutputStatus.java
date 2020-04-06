@@ -11,22 +11,24 @@ import us.ihmc.pubsub.TopicDataType;
        */
 public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanningToolboxOutputStatus> implements Settable<FootstepPlanningToolboxOutputStatus>, EpsilonComparable<FootstepPlanningToolboxOutputStatus>
 {
-   public static final byte FOOTSTEP_PLANNING_RESULT_OPTIMAL_SOLUTION = (byte) 0;
-   public static final byte FOOTSTEP_PLANNING_RESULT_SUB_OPTIMAL_SOLUTION = (byte) 1;
-   public static final byte FOOTSTEP_PLANNING_RESULT_SOLUTION_DOES_NOT_REACH_GOAL = (byte) 2;
-   public static final byte FOOTSTEP_PLANNING_RESULT_TIMED_OUT_BEFORE_SOLUTION = (byte) 3;
-   public static final byte FOOTSTEP_PLANNING_RESULT_NO_PATH_EXISTS = (byte) 4;
-   public static final byte FOOTSTEP_PLANNING_RESULT_SNAPPING_FAILED = (byte) 5;
-   public static final byte FOOTSTEP_PLANNING_RESULT_PLANNER_FAILED = (byte) 6;
-   public static final byte FOOTSTEP_PLANNING_RESULT_INVALID_GOAL = (byte) 7;
-   public static final byte FOOTSTEP_PLANNING_RESULT_MAXIMUM_ITERATIONS_REACHED = (byte) 8;
-   public static final byte FOOTSTEP_PLANNING_RESULT_EXCEPTION = (byte) 9;
+   public static final byte BODY_PATH_PLANNING_RESULT_FOUND_SOLUTION = (byte) 0;
+   public static final byte BODY_PATH_PLANNING_RESULT_NO_PATH_EXISTS = (byte) 1;
+   public static final byte BODY_PATH_PLANNING_RESULT_EXCEPTION = (byte) 2;
+   public static final byte FOOTSTEP_PLANNING_RESULT_PLANNING = (byte) 0;
+   public static final byte FOOTSTEP_PLANNING_RESULT_FOUND_SOLUTION = (byte) 1;
+   public static final byte FOOTSTEP_PLANNING_RESULT_TIMED_OUT_BEFORE_SOLUTION = (byte) 2;
+   public static final byte FOOTSTEP_PLANNING_RESULT_NO_PATH_EXISTS = (byte) 3;
+   public static final byte FOOTSTEP_PLANNING_RESULT_INVALID_GOAL = (byte) 4;
+   public static final byte FOOTSTEP_PLANNING_RESULT_MAXIMUM_ITERATIONS_REACHED = (byte) 5;
+   public static final byte FOOTSTEP_PLANNING_RESULT_EXCEPTION = (byte) 6;
+   public static final byte FOOTSTEP_PLANNING_RESULT_HALTED = (byte) 7;
    public static final int NO_PLAN_ID = -1;
    /**
             * Unique ID used to identify this message, should preferably be consecutively increasing.
             */
    public long sequence_id_;
    public controller_msgs.msg.dds.FootstepDataListMessage footstep_data_list_;
+   public byte body_path_planning_result_ = (byte) 255;
    public byte footstep_planning_result_ = (byte) 255;
    public int plan_id_ = -1;
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_;
@@ -62,6 +64,8 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       sequence_id_ = other.sequence_id_;
 
       controller_msgs.msg.dds.FootstepDataListMessagePubSubType.staticCopy(other.footstep_data_list_, footstep_data_list_);
+      body_path_planning_result_ = other.body_path_planning_result_;
+
       footstep_planning_result_ = other.footstep_planning_result_;
 
       plan_id_ = other.plan_id_;
@@ -95,6 +99,15 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public controller_msgs.msg.dds.FootstepDataListMessage getFootstepDataList()
    {
       return footstep_data_list_;
+   }
+
+   public void setBodyPathPlanningResult(byte body_path_planning_result)
+   {
+      body_path_planning_result_ = body_path_planning_result;
+   }
+   public byte getBodyPathPlanningResult()
+   {
+      return body_path_planning_result_;
    }
 
    public void setFootstepPlanningResult(byte footstep_planning_result)
@@ -190,6 +203,8 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
       if (!this.footstep_data_list_.epsilonEquals(other.footstep_data_list_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_path_planning_result_, other.body_path_planning_result_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.footstep_planning_result_, other.footstep_planning_result_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.plan_id_, other.plan_id_, epsilon)) return false;
@@ -224,6 +239,8 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
       if (!this.footstep_data_list_.equals(otherMyClass.footstep_data_list_)) return false;
+      if(this.body_path_planning_result_ != otherMyClass.body_path_planning_result_) return false;
+
       if(this.footstep_planning_result_ != otherMyClass.footstep_planning_result_) return false;
 
       if(this.plan_id_ != otherMyClass.plan_id_) return false;
@@ -249,6 +266,8 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("footstep_data_list=");
       builder.append(this.footstep_data_list_);      builder.append(", ");
+      builder.append("body_path_planning_result=");
+      builder.append(this.body_path_planning_result_);      builder.append(", ");
       builder.append("footstep_planning_result=");
       builder.append(this.footstep_planning_result_);      builder.append(", ");
       builder.append("plan_id=");
