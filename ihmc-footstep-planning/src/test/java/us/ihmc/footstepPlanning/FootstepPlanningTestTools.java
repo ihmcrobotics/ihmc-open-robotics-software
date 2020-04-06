@@ -62,8 +62,6 @@ public class FootstepPlanningTestTools
       assertEquals(parameters.getMaximumStepWidth(), other.getMaximumStepWidth(), epsilon);
       assertEquals(parameters.getCliffHeightToAvoid(), other.getCliffHeightToAvoid(), epsilon);
       assertEquals(parameters.getMinimumDistanceFromCliffBottoms(), other.getMinimumDistanceFromCliffBottoms(), epsilon);
-      assertEquals(parameters.getReturnBestEffortPlan(), other.getReturnBestEffortPlan());
-      assertEquals(parameters.getMinimumStepsForBestEffortPlan(), other.getMinimumStepsForBestEffortPlan());
       assertEquals(parameters.getBodyBoxHeight(), other.getBodyBoxHeight(), epsilon);
       assertEquals(parameters.getBodyBoxDepth(), other.getBodyBoxDepth(), epsilon);
       assertEquals(parameters.getBodyBoxWidth(), other.getBodyBoxWidth(), epsilon);

@@ -202,15 +202,6 @@ public class BipedContinuousPlanningToolboxDataSetTest
       return parameters;
    }
 
-   public FootstepPlannerParametersBasics getTestFootstepPlannerParameters()
-   {
-      FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
-      parameters.setReturnBestEffortPlan(true);
-      parameters.setMinimumStepsForBestEffortPlan(3);
-
-      return parameters;
-   }
-
    @BeforeEach
    public void setup()
    {
@@ -227,7 +218,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
          visibilityGraphsParameters = getTestVisibilityGraphsParameters();
 
       if (footstepPlannerParameters == null)
-         footstepPlannerParameters = getTestFootstepPlannerParameters();
+         footstepPlannerParameters = new DefaultFootstepPlannerParameters();
 
       DRCRobotModel robotModel = getRobotModel();
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(robotModel, pubSubImplementation);
@@ -1092,7 +1083,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       @Override
       public FootstepPlannerParametersBasics getFootstepPlannerParameters()
       {
-         return getTestFootstepPlannerParameters();
+         return new DefaultFootstepPlannerParameters();
       }
 
       @Override

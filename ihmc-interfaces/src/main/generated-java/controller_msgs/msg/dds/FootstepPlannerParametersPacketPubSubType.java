@@ -108,10 +108,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -293,12 +289,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -472,10 +462,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       cdr.write_type_6(data.getMinimumDistanceFromCliffBottoms());
 
-      cdr.write_type_7(data.getReturnBestEffortPlan());
-
-      cdr.write_type_4(data.getMinimumStepsForBestEffortPlan());
-
       cdr.write_type_6(data.getBodyBoxHeight());
 
       cdr.write_type_6(data.getBodyBoxDepth());
@@ -614,10 +600,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       	
       data.setMinimumDistanceFromCliffBottoms(cdr.read_type_6());
       	
-      data.setReturnBestEffortPlan(cdr.read_type_7());
-      	
-      data.setMinimumStepsForBestEffortPlan(cdr.read_type_4());
-      	
       data.setBodyBoxHeight(cdr.read_type_6());
       	
       data.setBodyBoxDepth(cdr.read_type_6());
@@ -724,8 +706,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("maximum_step_width", data.getMaximumStepWidth());
       ser.write_type_6("cliff_height_to_avoid", data.getCliffHeightToAvoid());
       ser.write_type_6("minimum_distance_from_cliff_bottoms", data.getMinimumDistanceFromCliffBottoms());
-      ser.write_type_7("return_best_effort_plan", data.getReturnBestEffortPlan());
-      ser.write_type_4("minimum_steps_for_best_effort_plan", data.getMinimumStepsForBestEffortPlan());
       ser.write_type_6("body_box_height", data.getBodyBoxHeight());
       ser.write_type_6("body_box_depth", data.getBodyBoxDepth());
       ser.write_type_6("body_box_width", data.getBodyBoxWidth());
@@ -798,8 +778,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setMaximumStepWidth(ser.read_type_6("maximum_step_width"));
       data.setCliffHeightToAvoid(ser.read_type_6("cliff_height_to_avoid"));
       data.setMinimumDistanceFromCliffBottoms(ser.read_type_6("minimum_distance_from_cliff_bottoms"));
-      data.setReturnBestEffortPlan(ser.read_type_7("return_best_effort_plan"));
-      data.setMinimumStepsForBestEffortPlan(ser.read_type_4("minimum_steps_for_best_effort_plan"));
       data.setBodyBoxHeight(ser.read_type_6("body_box_height"));
       data.setBodyBoxDepth(ser.read_type_6("body_box_depth"));
       data.setBodyBoxWidth(ser.read_type_6("body_box_width"));

@@ -23,13 +23,11 @@ public class ValkyrieFootstepPlannerParameters extends StoredPropertySet impleme
       setMinimumStepWidth(0.2);
       setMaximumStepWidth(0.4);
       setMaximumStepZ(0.15);
-      setReturnBestEffortPlan(false);
       setBodyBoxBaseX(0.03);
       setBodyBoxBaseY(0.2);
       setBodyBoxBaseZ(0.3);
       setBodyBoxWidth(0.85);
       setBodyBoxDepth(0.4);
-      setMinimumStepsForBestEffortPlan(3);
       setMinXClearanceFromStance(0.2);
       setMinYClearanceFromStance(0.2);
       setCliffHeightToAvoid(0.07);

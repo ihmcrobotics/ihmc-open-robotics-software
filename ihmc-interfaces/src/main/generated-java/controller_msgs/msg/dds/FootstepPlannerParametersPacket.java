@@ -301,18 +301,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double minimum_distance_from_cliff_bottoms_ = -11.1;
    /**
-            * When the planner is done planning and cannot find a path to the goal, this flag indicates whether the
-            * planner should return the best plan that it found. If this value is false, the planner will return
-            * a {@link FootstepPlan} of type {@link FootstepPlanningResult#NO_PATH_EXISTS}. Otherwise it will return
-            * "best" is determined by the planner.
-            */
-   public boolean return_best_effort_plan_;
-   /**
-            * When {@link #getReturnBestEffortPlan()} is true, the planner will return the best effort plan if the plan
-            * contains at least this many footsteps.
-            */
-   public long minimum_steps_for_best_effort_plan_;
-   /**
             * Some node checkers will check if a bounding box that describes the body of the robot will move
             * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
             * collisions, this defines the box height.
@@ -546,10 +534,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       cliff_height_to_avoid_ = other.cliff_height_to_avoid_;
 
       minimum_distance_from_cliff_bottoms_ = other.minimum_distance_from_cliff_bottoms_;
-
-      return_best_effort_plan_ = other.return_best_effort_plan_;
-
-      minimum_steps_for_best_effort_plan_ = other.minimum_steps_for_best_effort_plan_;
 
       body_box_height_ = other.body_box_height_;
 
@@ -1386,44 +1370,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
    /**
-            * When the planner is done planning and cannot find a path to the goal, this flag indicates whether the
-            * planner should return the best plan that it found. If this value is false, the planner will return
-            * a {@link FootstepPlan} of type {@link FootstepPlanningResult#NO_PATH_EXISTS}. Otherwise it will return
-            * "best" is determined by the planner.
-            */
-   public void setReturnBestEffortPlan(boolean return_best_effort_plan)
-   {
-      return_best_effort_plan_ = return_best_effort_plan;
-   }
-   /**
-            * When the planner is done planning and cannot find a path to the goal, this flag indicates whether the
-            * planner should return the best plan that it found. If this value is false, the planner will return
-            * a {@link FootstepPlan} of type {@link FootstepPlanningResult#NO_PATH_EXISTS}. Otherwise it will return
-            * "best" is determined by the planner.
-            */
-   public boolean getReturnBestEffortPlan()
-   {
-      return return_best_effort_plan_;
-   }
-
-   /**
-            * When {@link #getReturnBestEffortPlan()} is true, the planner will return the best effort plan if the plan
-            * contains at least this many footsteps.
-            */
-   public void setMinimumStepsForBestEffortPlan(long minimum_steps_for_best_effort_plan)
-   {
-      minimum_steps_for_best_effort_plan_ = minimum_steps_for_best_effort_plan;
-   }
-   /**
-            * When {@link #getReturnBestEffortPlan()} is true, the planner will return the best effort plan if the plan
-            * contains at least this many footsteps.
-            */
-   public long getMinimumStepsForBestEffortPlan()
-   {
-      return minimum_steps_for_best_effort_plan_;
-   }
-
-   /**
             * Some node checkers will check if a bounding box that describes the body of the robot will move
             * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
             * collisions, this defines the box height.
@@ -2048,10 +1994,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_distance_from_cliff_bottoms_, other.minimum_distance_from_cliff_bottoms_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.return_best_effort_plan_, other.return_best_effort_plan_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_steps_for_best_effort_plan_, other.minimum_steps_for_best_effort_plan_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_box_height_, other.body_box_height_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_box_depth_, other.body_box_depth_, epsilon)) return false;
@@ -2199,10 +2141,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.minimum_distance_from_cliff_bottoms_ != otherMyClass.minimum_distance_from_cliff_bottoms_) return false;
 
-      if(this.return_best_effort_plan_ != otherMyClass.return_best_effort_plan_) return false;
-
-      if(this.minimum_steps_for_best_effort_plan_ != otherMyClass.minimum_steps_for_best_effort_plan_) return false;
-
       if(this.body_box_height_ != otherMyClass.body_box_height_) return false;
 
       if(this.body_box_depth_ != otherMyClass.body_box_depth_) return false;
@@ -2347,10 +2285,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.cliff_height_to_avoid_);      builder.append(", ");
       builder.append("minimum_distance_from_cliff_bottoms=");
       builder.append(this.minimum_distance_from_cliff_bottoms_);      builder.append(", ");
-      builder.append("return_best_effort_plan=");
-      builder.append(this.return_best_effort_plan_);      builder.append(", ");
-      builder.append("minimum_steps_for_best_effort_plan=");
-      builder.append(this.minimum_steps_for_best_effort_plan_);      builder.append(", ");
       builder.append("body_box_height=");
       builder.append(this.body_box_height_);      builder.append(", ");
       builder.append("body_box_depth=");

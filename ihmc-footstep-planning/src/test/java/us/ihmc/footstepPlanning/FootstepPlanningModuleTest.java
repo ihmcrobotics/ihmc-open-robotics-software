@@ -37,7 +37,6 @@ public class FootstepPlanningModuleTest
       // goal is unreachable
       Pose3D goalPose = new Pose3D(500.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalPose);
-      planningModule.getFootstepPlannerParameters().setReturnBestEffortPlan(true);
 
       // disable wiggling. causes latency of around 0.15s
       planningModule.getFootstepPlannerParameters().setMaximumXYWiggleDistance(0.0);
@@ -84,7 +83,6 @@ public class FootstepPlanningModuleTest
    public void testGoalProximityWhenGoalIsUnreachable()
    {
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
-      planningModule.getFootstepPlannerParameters().setReturnBestEffortPlan(true);
 
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.addRectangle(6.0, 6.0);
@@ -109,7 +107,6 @@ public class FootstepPlanningModuleTest
    public void testGoalProximityWhenGoalIsReachable()
    {
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
-      planningModule.getFootstepPlannerParameters().setReturnBestEffortPlan(true);
 
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.addRectangle(6.0, 6.0);
