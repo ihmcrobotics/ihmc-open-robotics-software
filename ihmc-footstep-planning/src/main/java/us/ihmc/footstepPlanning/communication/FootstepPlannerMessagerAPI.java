@@ -9,7 +9,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
-import us.ihmc.footstepPlanning.FootstepPlannerStatus;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
@@ -138,7 +137,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<FootstepPlanningTimingsMessage> PlannerTimings = topic("PlannerTimings");
    public static final Topic<BodyPathPlanningResult> BodyPathPlanningResultTopic = topic("BodyPathPlanningResult");
    public static final Topic<FootstepPlanningResult> FootstepPlanningResultTopic = topic("FootstepPlanningResult");
-   public static final Topic<FootstepPlannerStatus> PlannerStatus = topic("PlannerStatus");
    public static final Topic<Integer> ReceivedPlanId = topic("ReceivedPlanId");
    public static final Topic<String> PlannerExceptionStackTrace = topic("PlannerExceptionStackTrace");
 

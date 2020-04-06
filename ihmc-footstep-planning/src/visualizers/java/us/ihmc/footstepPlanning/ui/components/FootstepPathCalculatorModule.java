@@ -146,13 +146,12 @@ public class FootstepPathCalculatorModule
          planningModule.getFootstepPlannerParameters().set(parameters.get());
          planningModule.getVisibilityGraphParameters().set(visibilityGraphsParameters.get());
 
-         messager.submitMessage(PlannerStatus, FootstepPlannerStatus.PLANNING_PATH);
          planningModule.addStatusCallback(status -> messager.submitMessage(FootstepPlanningResultTopic, status.getFootstepPlanningResult()));
 
          FootstepPlannerOutput output = planningModule.handleRequest(request);
 
+         messager.submitMessage(BodyPathPlanningResultTopic, output.getBodyPathPlanningResult());
          messager.submitMessage(FootstepPlanningResultTopic, output.getFootstepPlanningResult());
-         messager.submitMessage(PlannerStatus, FootstepPlannerStatus.IDLE);
 
          if (output.getFootstepPlanningResult().validForExecution())
          {

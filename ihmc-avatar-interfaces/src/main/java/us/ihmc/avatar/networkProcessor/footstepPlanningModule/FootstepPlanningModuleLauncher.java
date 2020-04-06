@@ -28,9 +28,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static us.ihmc.footstepPlanning.FootstepPlannerStatus.*;
-import static us.ihmc.footstepPlanning.FootstepPlannerStatus.IDLE;
-
 public class FootstepPlanningModuleLauncher
 {
    private static final String LOG_DIRECTORY_ENVIRONMENT_VARIABLE = "IHMC_FOOTSTEP_PLANNER_LOG_DIR";
@@ -139,29 +136,6 @@ public class FootstepPlanningModuleLauncher
                                                {
                                                   occupancyMapPublisher.publish(occupancyMapAssembler.getOccupancyMap().getAsMessage());
                                                   occupancyMapAssembler.getOccupancyMap().clear();
-                                               });
-
-      // status publisher
-      IHMCROS2Publisher<FootstepPlannerStatusMessage> statusPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                                                                  FootstepPlannerStatusMessage.class,
-                                                                                                  publisherTopicNameGenerator);
-      footstepPlanningModule.addRequestCallback(request ->
-                                                {
-                                                   FootstepPlannerStatusMessage statusMessage = new FootstepPlannerStatusMessage();
-                                                   statusMessage.setFootstepPlannerStatus((request.getPlanBodyPath() ?
-                                                         PLANNING_PATH :
-                                                         PLANNING_STEPS).toByte());
-                                                   statusPublisher.publish(statusMessage);
-                                                });
-      footstepPlanningModule.addStatusCallback(output ->
-                                               {
-                                                  boolean plannerTerminated = output.getFootstepPlanningResult() != FootstepPlanningResult.PLANNING;
-                                                  if (plannerTerminated)
-                                                  {
-                                                     FootstepPlannerStatusMessage statusMessage = new FootstepPlannerStatusMessage();
-                                                     statusMessage.setFootstepPlannerStatus((IDLE).toByte());
-                                                     statusPublisher.publish(statusMessage);
-                                                  }
                                                });
 
       // cancel planning request
