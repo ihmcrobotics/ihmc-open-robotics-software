@@ -401,29 +401,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double cost_per_step_ = -11.1;
    /**
-            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
-            */
-   public boolean use_quadratic_distance_cost_;
-   /**
-            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
-            */
-   public boolean use_quadratic_height_cost_;
-   /**
             * Gets the weight for the heuristics in the A Star planner.
             */
    public double a_star_heuristics_weight_ = -11.1;
-   /**
-            * Gets the weight for the heuristics in the Visibility graph with A star planner.
-            */
-   public double vis_graph_with_a_star_heuristics_weight_ = -11.1;
-   /**
-            * Gets the weight for the heuristics in the Depth First planner.
-            */
-   public double depth_first_heuristics_weight_ = -11.1;
-   /**
-            * Gets the weight for the heuristics in the Body path based planner.
-            */
-   public double body_path_based_heuristics_weight_ = -11.1;
    /**
             * This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
             * Additional checks are done by interpolating between the start and end steps
@@ -434,13 +414,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * @see FootstepPlannerCostParameters#getBoundingBoxCost
             */
    public double maximum_2d_distance_from_bounding_box_to_penalize_ = -11.1;
-   /**
-            * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
-            * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
-            * {@code c * (1 - d / d_max)}, where d_max is this value.
-            */
-   public double bounding_box_cost_ = -11.1;
-   public double body_path_violation_weight_ = -11.1;
    public double distance_from_path_tolerance_ = -11.1;
    public double delta_yaw_from_reference_tolerance_ = -11.1;
 
@@ -562,25 +535,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       cost_per_step_ = other.cost_per_step_;
 
-      use_quadratic_distance_cost_ = other.use_quadratic_distance_cost_;
-
-      use_quadratic_height_cost_ = other.use_quadratic_height_cost_;
-
       a_star_heuristics_weight_ = other.a_star_heuristics_weight_;
-
-      vis_graph_with_a_star_heuristics_weight_ = other.vis_graph_with_a_star_heuristics_weight_;
-
-      depth_first_heuristics_weight_ = other.depth_first_heuristics_weight_;
-
-      body_path_based_heuristics_weight_ = other.body_path_based_heuristics_weight_;
 
       number_of_bounding_box_checks_ = other.number_of_bounding_box_checks_;
 
       maximum_2d_distance_from_bounding_box_to_penalize_ = other.maximum_2d_distance_from_bounding_box_to_penalize_;
-
-      bounding_box_cost_ = other.bounding_box_cost_;
-
-      body_path_violation_weight_ = other.body_path_violation_weight_;
 
       distance_from_path_tolerance_ = other.distance_from_path_tolerance_;
 
@@ -1688,36 +1647,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
    /**
-            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
-            */
-   public void setUseQuadraticDistanceCost(boolean use_quadratic_distance_cost)
-   {
-      use_quadratic_distance_cost_ = use_quadratic_distance_cost;
-   }
-   /**
-            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
-            */
-   public boolean getUseQuadraticDistanceCost()
-   {
-      return use_quadratic_distance_cost_;
-   }
-
-   /**
-            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
-            */
-   public void setUseQuadraticHeightCost(boolean use_quadratic_height_cost)
-   {
-      use_quadratic_height_cost_ = use_quadratic_height_cost;
-   }
-   /**
-            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
-            */
-   public boolean getUseQuadraticHeightCost()
-   {
-      return use_quadratic_height_cost_;
-   }
-
-   /**
             * Gets the weight for the heuristics in the A Star planner.
             */
    public void setAStarHeuristicsWeight(double a_star_heuristics_weight)
@@ -1730,51 +1659,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getAStarHeuristicsWeight()
    {
       return a_star_heuristics_weight_;
-   }
-
-   /**
-            * Gets the weight for the heuristics in the Visibility graph with A star planner.
-            */
-   public void setVisGraphWithAStarHeuristicsWeight(double vis_graph_with_a_star_heuristics_weight)
-   {
-      vis_graph_with_a_star_heuristics_weight_ = vis_graph_with_a_star_heuristics_weight;
-   }
-   /**
-            * Gets the weight for the heuristics in the Visibility graph with A star planner.
-            */
-   public double getVisGraphWithAStarHeuristicsWeight()
-   {
-      return vis_graph_with_a_star_heuristics_weight_;
-   }
-
-   /**
-            * Gets the weight for the heuristics in the Depth First planner.
-            */
-   public void setDepthFirstHeuristicsWeight(double depth_first_heuristics_weight)
-   {
-      depth_first_heuristics_weight_ = depth_first_heuristics_weight;
-   }
-   /**
-            * Gets the weight for the heuristics in the Depth First planner.
-            */
-   public double getDepthFirstHeuristicsWeight()
-   {
-      return depth_first_heuristics_weight_;
-   }
-
-   /**
-            * Gets the weight for the heuristics in the Body path based planner.
-            */
-   public void setBodyPathBasedHeuristicsWeight(double body_path_based_heuristics_weight)
-   {
-      body_path_based_heuristics_weight_ = body_path_based_heuristics_weight;
-   }
-   /**
-            * Gets the weight for the heuristics in the Body path based planner.
-            */
-   public double getBodyPathBasedHeuristicsWeight()
-   {
-      return body_path_based_heuristics_weight_;
    }
 
    /**
@@ -1809,34 +1693,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getMaximum2dDistanceFromBoundingBoxToPenalize()
    {
       return maximum_2d_distance_from_bounding_box_to_penalize_;
-   }
-
-   /**
-            * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
-            * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
-            * {@code c * (1 - d / d_max)}, where d_max is this value.
-            */
-   public void setBoundingBoxCost(double bounding_box_cost)
-   {
-      bounding_box_cost_ = bounding_box_cost;
-   }
-   /**
-            * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
-            * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
-            * {@code c * (1 - d / d_max)}, where d_max is this value.
-            */
-   public double getBoundingBoxCost()
-   {
-      return bounding_box_cost_;
-   }
-
-   public void setBodyPathViolationWeight(double body_path_violation_weight)
-   {
-      body_path_violation_weight_ = body_path_violation_weight;
-   }
-   public double getBodyPathViolationWeight()
-   {
-      return body_path_violation_weight_;
    }
 
    public void setDistanceFromPathTolerance(double distance_from_path_tolerance)
@@ -1981,25 +1837,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cost_per_step_, other.cost_per_step_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_quadratic_distance_cost_, other.use_quadratic_distance_cost_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_quadratic_height_cost_, other.use_quadratic_height_cost_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.a_star_heuristics_weight_, other.a_star_heuristics_weight_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.vis_graph_with_a_star_heuristics_weight_, other.vis_graph_with_a_star_heuristics_weight_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.depth_first_heuristics_weight_, other.depth_first_heuristics_weight_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_path_based_heuristics_weight_, other.body_path_based_heuristics_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_bounding_box_checks_, other.number_of_bounding_box_checks_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_2d_distance_from_bounding_box_to_penalize_, other.maximum_2d_distance_from_bounding_box_to_penalize_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.bounding_box_cost_, other.bounding_box_cost_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_path_violation_weight_, other.body_path_violation_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_from_path_tolerance_, other.distance_from_path_tolerance_, epsilon)) return false;
 
@@ -2124,25 +1966,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.cost_per_step_ != otherMyClass.cost_per_step_) return false;
 
-      if(this.use_quadratic_distance_cost_ != otherMyClass.use_quadratic_distance_cost_) return false;
-
-      if(this.use_quadratic_height_cost_ != otherMyClass.use_quadratic_height_cost_) return false;
-
       if(this.a_star_heuristics_weight_ != otherMyClass.a_star_heuristics_weight_) return false;
-
-      if(this.vis_graph_with_a_star_heuristics_weight_ != otherMyClass.vis_graph_with_a_star_heuristics_weight_) return false;
-
-      if(this.depth_first_heuristics_weight_ != otherMyClass.depth_first_heuristics_weight_) return false;
-
-      if(this.body_path_based_heuristics_weight_ != otherMyClass.body_path_based_heuristics_weight_) return false;
 
       if(this.number_of_bounding_box_checks_ != otherMyClass.number_of_bounding_box_checks_) return false;
 
       if(this.maximum_2d_distance_from_bounding_box_to_penalize_ != otherMyClass.maximum_2d_distance_from_bounding_box_to_penalize_) return false;
-
-      if(this.bounding_box_cost_ != otherMyClass.bounding_box_cost_) return false;
-
-      if(this.body_path_violation_weight_ != otherMyClass.body_path_violation_weight_) return false;
 
       if(this.distance_from_path_tolerance_ != otherMyClass.distance_from_path_tolerance_) return false;
 
@@ -2264,26 +2092,12 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.foothold_area_weight_);      builder.append(", ");
       builder.append("cost_per_step=");
       builder.append(this.cost_per_step_);      builder.append(", ");
-      builder.append("use_quadratic_distance_cost=");
-      builder.append(this.use_quadratic_distance_cost_);      builder.append(", ");
-      builder.append("use_quadratic_height_cost=");
-      builder.append(this.use_quadratic_height_cost_);      builder.append(", ");
       builder.append("a_star_heuristics_weight=");
       builder.append(this.a_star_heuristics_weight_);      builder.append(", ");
-      builder.append("vis_graph_with_a_star_heuristics_weight=");
-      builder.append(this.vis_graph_with_a_star_heuristics_weight_);      builder.append(", ");
-      builder.append("depth_first_heuristics_weight=");
-      builder.append(this.depth_first_heuristics_weight_);      builder.append(", ");
-      builder.append("body_path_based_heuristics_weight=");
-      builder.append(this.body_path_based_heuristics_weight_);      builder.append(", ");
       builder.append("number_of_bounding_box_checks=");
       builder.append(this.number_of_bounding_box_checks_);      builder.append(", ");
       builder.append("maximum_2d_distance_from_bounding_box_to_penalize=");
       builder.append(this.maximum_2d_distance_from_bounding_box_to_penalize_);      builder.append(", ");
-      builder.append("bounding_box_cost=");
-      builder.append(this.bounding_box_cost_);      builder.append(", ");
-      builder.append("body_path_violation_weight=");
-      builder.append(this.body_path_violation_weight_);      builder.append(", ");
       builder.append("distance_from_path_tolerance=");
       builder.append(this.distance_from_path_tolerance_);      builder.append(", ");
       builder.append("delta_yaw_from_reference_tolerance=");

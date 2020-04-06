@@ -594,51 +594,11 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
-    */
-   default boolean useQuadraticDistanceCost()
-   {
-      return get(useQuadraticDistanceCost);
-   }
-
-   /**
-    * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
-    */
-   default boolean useQuadraticHeightCost()
-   {
-      return get(useQuadraticHeightCost);
-   }
-
-   /**
     * Gets the weight for the heuristics in the A Star planner.
     */
    default DoubleProvider getAStarHeuristicsWeight()
    {
       return () -> get(aStarHeuristicsWeight);
-   }
-
-   /**
-    * Gets the weight for the heuristics in the Visibility graph with A star planner.
-    */
-   default DoubleProvider getVisGraphWithAStarHeuristicsWeight()
-   {
-      return () -> get(visGraphWithAStarHeuristicsWeight);
-   }
-
-   /**
-    * Gets the weight for the heuristics in the Depth First planner.
-    */
-   default DoubleProvider getDepthFirstHeuristicsWeight()
-   {
-      return () -> get(depthFirstHeuristicsWeight);
-   }
-
-   /**
-    * Gets the weight for the heuristics in the Body path based planner.
-    */
-   default DoubleProvider getBodyPathBasedHeuristicsWeight()
-   {
-      return () -> get(bodyPathBasedHeuristicsWeight);
    }
 
    /**
@@ -724,16 +684,6 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * When {@link #checkForBodyBoxCollisions()} is true, this sets how many bounding box checks to perform.
-    * If this value is 1, only the final footstep is checked. Additional checks are done by interpolating
-    * between the start and end steps.
-    */
-   default int getNumberOfBoundingBoxChecks()
-   {
-      return get(numberOfBoundingBoxChecks);
-   }
-
-   /**
     * If this value is non-zero, nodes will be given cost if the bounding box is within this xy distance of a planar region
     * @see FootstepPlannerCostParameters#getBoundingBoxCost
     */
@@ -744,13 +694,13 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
-    * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
-    * {@code c * (1 - d / d_max)}, where d_max is this value.
+    * When {@link #checkForBodyBoxCollisions()} is true, this sets how many bounding box checks to perform.
+    * If this value is 1, only the final footstep is checked. Additional checks are done by interpolating
+    * between the start and end steps.
     */
-   default double getBoundingBoxCost()
+   default int getNumberOfBoundingBoxChecks()
    {
-      return get(boundingBoxCost);
+      return get(numberOfBoundingBoxChecks);
    }
 
    /**
@@ -762,33 +712,20 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
-    * When using a cost based planning approach this value defines the weight of the step distance of a step longer than {@link FootstepPlannerParameters#getIdealFootstepLength()} .
+    * If the robot's mid-foot pose is within this distance of the body path, it will match the body path heading.
+    * Otherwise, it will turn towards the body path
     */
-   default double getLongStepWeight()
-   {
-      return get(longStepWeight);
-   }
-
-   default double getBodyPathViolationWeight()
-   {
-      return get(bodyPathViolationWeight);
-   }
-
    default double getDistanceFromPathTolerance()
    {
       return get(distanceFromPathTolerance);
    }
 
+   /**
+    * If the robot's mid-foot pose oriented within this threshold of the body path's heading, it will match the body path heading.
+    * Otherwise, it will turn in plance towards the body path
+    */
    default double getDeltaYawFromReferenceTolerance()
    {
       return get(deltaYawFromReferenceTolerance);
-   }
-
-   /**
-    * Parameters for setting swing trajectories from footstep poses. Will use default values if this returns null
-    */
-   default AdaptiveSwingParameters getAdaptiveSwingParameters()
-   {
-      return null;
    }
 }

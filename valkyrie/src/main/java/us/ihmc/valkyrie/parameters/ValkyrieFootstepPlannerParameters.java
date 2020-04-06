@@ -42,18 +42,10 @@ public class ValkyrieFootstepPlannerParameters extends StoredPropertySet impleme
       setMaximumStepXWhenForwardAndDown(0.23);
       setAStarHeuristicsWeight(5.0);
       setYawWeight(0.15);
-      setUseQuadraticDistanceCost(true);
       setForwardWeight(2.5);
       setMaximum2dDistanceFromBoundingBoxToPenalize(0.05);
-      setBoundingBoxCost(0.0);
 
       load();
-   }
-
-   @Override
-   public AdaptiveSwingParameters getAdaptiveSwingParameters()
-   {
-      return new ValkyrieAdaptiveSwingParameters();
    }
 
    public static void main(String[] args)
