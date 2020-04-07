@@ -9,7 +9,7 @@ public class SLAMOcTreeMeshBuilder extends OcTreeMeshBuilder
    public SLAMOcTreeMeshBuilder(REAUIMessager uiMessager, Topic<Boolean> octreeEnableTopic, Topic<Boolean> clearTopic,
                                 Topic<NormalOcTreeMessage> octreeStateTopic, Topic<DisplayType> displayTypeTopic)
    {
-      super(uiMessager, octreeEnableTopic, clearTopic, octreeStateTopic, displayTypeTopic);
+      super(uiMessager, octreeEnableTopic, clearTopic, octreeStateTopic, displayTypeTopic, false);
       coloringType.setValue(ColoringType.HAS_CENTER);
       displayType.setValue(DisplayType.HIT_LOCATION);
       treeDepthForDisplay.setValue(15);

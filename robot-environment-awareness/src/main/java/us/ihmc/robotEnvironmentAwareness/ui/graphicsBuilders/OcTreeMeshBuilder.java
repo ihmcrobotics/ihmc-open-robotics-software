@@ -95,14 +95,17 @@ public class OcTreeMeshBuilder implements Runnable
    private final AtomicReference<UIOcTree> uiOcTree = new AtomicReference<UIOcTree>(null);
    private final AtomicDouble octreeHitLocationVizSize = new AtomicDouble(DEFAULT_HIT_LOCATION_SIZE);
 
+   private final boolean enableReportModuleState;
+   
    public OcTreeMeshBuilder(REAUIMessager uiMessager)
    {
-      this(uiMessager, REAModuleAPI.OcTreeEnable, REAModuleAPI.OcTreeClear, REAModuleAPI.OcTreeState, REAModuleAPI.UIOcTreeDisplayType);
+      this(uiMessager, REAModuleAPI.OcTreeEnable, REAModuleAPI.OcTreeClear, REAModuleAPI.OcTreeState, REAModuleAPI.UIOcTreeDisplayType, true);
    }
 
    public OcTreeMeshBuilder(REAUIMessager uiMessager, Topic<Boolean> octreeEnableTopic, Topic<Boolean> clearTopic, Topic<NormalOcTreeMessage> octreeStateTopic,
-                            Topic<DisplayType> displayTypeTopic)
+                            Topic<DisplayType> displayTypeTopic, boolean enableReportModuleState)
    {
+      this.enableReportModuleState = enableReportModuleState;
       this.uiMessager = uiMessager;
       enable = uiMessager.createInput(octreeEnableTopic, false);
       clear = uiMessager.createInput(clearTopic, false);
@@ -183,14 +186,19 @@ public class OcTreeMeshBuilder implements Runnable
 
       if (enable.get())
       {
-         uiMessager.submitStateRequestToModule(REAModuleAPI.RequestOctree);
-         uiMessager.submitStateRequestToModule(REAModuleAPI.RequestPlanarRegionSegmentation);
+         if(enableReportModuleState)
+         {
+            uiMessager.submitStateRequestToModule(REAModuleAPI.RequestOctree);
+            uiMessager.submitStateRequestToModule(REAModuleAPI.RequestPlanarRegionSegmentation);
+         }
 
          NormalOcTreeMessage newMessage = ocTreeState.get();
          Map<OcTreeKey, Integer> nodeKeyToRegionIdMap = createNodeKeyToRegionIdMap(planarRegionSegmentationState.getAndSet(null));
 
          if (newMessage == null || nodeKeyToRegionIdMap == null)
             return;
+         
+         LogTools.info("newMessage.treeDepth "+newMessage.treeDepth);
 
          uiOcTree.set(new UIOcTree(ocTreeState.getAndSet(null), nodeKeyToRegionIdMap));
          buildUIOcTreeMesh(uiOcTree.get());

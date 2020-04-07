@@ -12,6 +12,7 @@ import us.ihmc.messager.MessagerAPIFactory.TopicTheme;
 import us.ihmc.messager.MessagerAPIFactory.TypedTopicTheme;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.slam.RandomICPSLAMParameters;
+import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.DisplayType;
 
 public class SLAMModuleAPI
 {
@@ -31,20 +32,36 @@ public class SLAMModuleAPI
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
+   private static final TopicTheme Display = apiFactory.createTopicTheme("Display");
    
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
+   private static final TypedTopicTheme<Boolean> Request = apiFactory.createTypedTopicTheme("Request");
    private static final TypedTopicTheme<Boolean> Clear = apiFactory.createTypedTopicTheme("Clear");
-   //private static final TypedTopicTheme<Boolean> Show = apiFactory.createTypedTopicTheme("Show");
+   private static final TypedTopicTheme<Boolean> Show = apiFactory.createTypedTopicTheme("Show");
    private static final TypedTopicTheme<Boolean> Moving = apiFactory.createTypedTopicTheme("Moving");
    private static final TypedTopicTheme<Integer> Size = apiFactory.createTypedTopicTheme("Size");
    private static final TypedTopicTheme<String> Status = apiFactory.createTypedTopicTheme("Status");
    
+   public static final Topic<Boolean> RequestEntireModuleState = Root.child(Module).topic(Request);
+   public static final Topic<Boolean> RequestPlanarRegions = Root.child(Module).child(PlanarRegions).topic(Request);
+   
    public static final Topic<Boolean> SLAMEnable = Root.child(Module).topic(Enable);
    public static final Topic<Boolean> SLAMClear = Root.child(Module).topic(Clear);
-   public static final Topic<PlanarRegionsListMessage> SLAMPlanarRegionsState = Root.child(Module).child(PlanarRegions).topic(Data);
-   public static final Topic<RandomICPSLAMParameters> SLAMParameters = Root.child(Module).topic(Parameters);
+   
+   public static final Topic<Boolean> ShowPlanarRegionsMap = Root.child(UI).child(PlanarRegions).topic(Show);
+   public static final Topic<Boolean> ShowSLAMOctreeMap = Root.child(UI).child(OcTree).topic(Show);
+   public static final Topic<Boolean> ShowLatestFrame = Root.child(UI).child(DepthCloud).topic(Show);
+   public static final Topic<Boolean> ShowSLAMSensorTrajectory = Root.child(UI).child(SensorFrame).topic(Show);
+   public static final Topic<Boolean> SLAMVizClear = Root.child(UI).topic(Clear);
+   public static final Topic<Boolean> SensorPoseHistoryClear = Root.child(UI).child(SensorFrame).topic(Clear);
+   
    public static final Topic<Boolean> SensorStatus = Root.child(Module).child(SensorFrame).topic(Moving);
    public static final Topic<Boolean> VelocityLimitStatus = Root.child(Module).child(VelocityLimit).topic(Moving);
+   
+   public static final Topic<PlanarRegionsListMessage> SLAMPlanarRegionsState = Root.child(Module).child(PlanarRegions).topic(Data);
+   public static final Topic<RandomICPSLAMParameters> SLAMParameters = Root.child(Module).topic(Parameters);
+   
+   public static final Topic<DisplayType> SLAMOcTreeDisplayType = Root.child(UI).child(OcTree).topic(Display);
    
    public static final Topic<String> SLAMStatus = Root.child(Module).topic(Status);
    public static final Topic<String> QueuedBuffers = Root.child(Module).child(Buffer).topic(Status);

@@ -19,8 +19,8 @@ import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.util.Pair;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.PlanarRegionsMeshBuilder;
@@ -45,7 +45,6 @@ public class SLAMMeshViewer
    private final PlanarRegionsMeshBuilder planarRegionsMeshBuilder;
    private final SLAMOcTreeMeshBuilder ocTreeViewer;
    private final StereoVisionPointCloudViewer latestBufferViewer;
-   private final SensorFrameViewer<StereoVisionPointCloudMessage> sensorFrameViewer;
 
    private final List<AtomicReference<Boolean>> enableTopicList = new ArrayList<>();
    private final Map<AtomicReference<Boolean>, Node> enableTopicToNode = new HashMap<>();
@@ -53,36 +52,31 @@ public class SLAMMeshViewer
    public SLAMMeshViewer(REAUIMessager uiMessager)
    {
       planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager,
-                                                              REAModuleAPI.SLAMPlanarRegionsState,
-                                                              REAModuleAPI.ShowPlanarRegionsMap,
-                                                              REAModuleAPI.SLAMVizClear,
-                                                              REAModuleAPI.SLAMClear);
+                                                              SLAMModuleAPI.SLAMPlanarRegionsState,
+                                                              SLAMModuleAPI.ShowPlanarRegionsMap,
+                                                              SLAMModuleAPI.SLAMVizClear,
+                                                              SLAMModuleAPI.SLAMClear,
+                                                              SLAMModuleAPI.RequestPlanarRegions);
 
       ocTreeViewer = new SLAMOcTreeMeshBuilder(uiMessager,
-                                               REAModuleAPI.ShowSLAMOctreeMap,
-                                               REAModuleAPI.SLAMClear,
-                                               REAModuleAPI.SLAMOctreeMapState,
-                                               REAModuleAPI.SLAMOcTreeDisplayType);
+                                               SLAMModuleAPI.ShowSLAMOctreeMap,
+                                               SLAMModuleAPI.SLAMClear,
+                                               SLAMModuleAPI.SLAMOctreeMapState,
+                                               SLAMModuleAPI.SLAMOcTreeDisplayType);
 
-      latestBufferViewer = new StereoVisionPointCloudViewer(REAModuleAPI.IhmcSLAMFrameState,
+      latestBufferViewer = new StereoVisionPointCloudViewer(SLAMModuleAPI.IhmcSLAMFrameState,
                                                             uiMessager,
-                                                            REAModuleAPI.ShowLatestFrame,
-                                                            REAModuleAPI.SLAMVizClear);
-
-      sensorFrameViewer = new SensorFrameViewer<StereoVisionPointCloudMessage>(uiMessager,
-                                                                               REAModuleAPI.IhmcSLAMFrameState,
-                                                                               REAModuleAPI.UISensorPoseHistoryFrames,
-                                                                               SensorFrameViewer.createStereoVisionSensorFrameExtractor());
+                                                            SLAMModuleAPI.ShowLatestFrame,
+                                                            SLAMModuleAPI.SLAMVizClear);
 
       ocTreeViewer.getRoot().setMouseTransparent(true);
       latestBufferViewer.getRoot().setMouseTransparent(true);
-      sensorFrameViewer.getRoot().setMouseTransparent(true);
-      root.getChildren().addAll(planarRegionMeshView, ocTreeViewer.getRoot(), latestBufferViewer.getRoot(), sensorFrameViewer.getRoot());
+      root.getChildren().addAll(planarRegionMeshView, ocTreeViewer.getRoot(), latestBufferViewer.getRoot());
+//      root.getChildren().addAll(planarRegionMeshView, latestBufferViewer.getRoot());
 
-      addViewer(uiMessager, planarRegionMeshView, REAModuleAPI.ShowPlanarRegionsMap);
-      addViewer(uiMessager, ocTreeViewer.getRoot(), REAModuleAPI.ShowSLAMOctreeMap);
-      addViewer(uiMessager, latestBufferViewer.getRoot(), REAModuleAPI.ShowLatestFrame);
-      addViewer(uiMessager, sensorFrameViewer.getRoot(), REAModuleAPI.ShowSLAMSensorTrajectory);
+      addViewer(uiMessager, planarRegionMeshView, SLAMModuleAPI.ShowPlanarRegionsMap);
+      addViewer(uiMessager, ocTreeViewer.getRoot(), SLAMModuleAPI.ShowSLAMOctreeMap);
+      addViewer(uiMessager, latestBufferViewer.getRoot(), SLAMModuleAPI.ShowLatestFrame);
 
       renderMeshAnimation = new AnimationTimer()
       {
@@ -155,7 +149,6 @@ public class SLAMMeshViewer
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(ocTreeViewer, 0, SLOW_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(latestBufferViewer, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(createViewersController(), 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
-      sensorFrameViewer.start();
    }
 
    public void sleep()
@@ -163,7 +156,6 @@ public class SLAMMeshViewer
       if (meshBuilderScheduledFutures.isEmpty())
          return;
       renderMeshAnimation.stop();
-      sensorFrameViewer.stop();
       for (ScheduledFuture<?> scheduledFuture : meshBuilderScheduledFutures)
          scheduledFuture.cancel(true);
       meshBuilderScheduledFutures.clear();
