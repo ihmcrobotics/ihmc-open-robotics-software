@@ -1,0 +1,36 @@
+#ifndef __controller_msgs__msg__FootstepPlannerActionMessage__idl__
+#define __controller_msgs__msg__FootstepPlannerActionMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      /**
+       * Halts the footstep planner
+       */
+      const octet FOOTSTEP_PLANNER_REQUESTED_ACTION_HALT =
+      0;
+
+      /**
+       * Planner will publish it's current parameters
+       */
+      const octet FOOTSTEP_PLANNER_REQUESTED_ACTION_PUBLISH_PARAMETERS =
+      1;
+
+
+      /**
+       * This message is part of the IHMC footstep planning module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::FootstepPlannerActionMessage_")
+      struct FootstepPlannerActionMessage
+      {
+        @defaultValue(value=255)
+        octet requested_action;
+      };
+    };
+  };
+};
+
+#endif
