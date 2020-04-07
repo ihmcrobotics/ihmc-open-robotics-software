@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -18,16 +17,19 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
+import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
@@ -97,7 +99,7 @@ public class SLAMModule
       planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
 
       robotStatus = reaMessager.createInput(SLAMModuleAPI.SensorStatus, false);
-      velocityStatus = reaMessager.createInput(SLAMModuleAPI.VelocityLimitStatus, false);
+      velocityStatus = reaMessager.createInput(SLAMModuleAPI.VelocityLimitStatus, true);
    }
 
    public void start() throws IOException
@@ -154,7 +156,6 @@ public class SLAMModule
       if (pointCloudQueue.size() == 0)
          return;
 
-      System.out.println("here");
       updateSLAMParameters();
 
       StereoVisionPointCloudMessage pointCloudToCompute = pointCloudQueue.getFirst();
@@ -170,7 +171,7 @@ public class SLAMModule
       }
       else
       {
-         if(reasonableVelocityFlag)
+         if (reasonableVelocityFlag)
          {
             if (stationaryFlag)
             {
@@ -180,13 +181,14 @@ public class SLAMModule
             else
             {
                success = slam.addFrame(pointCloudToCompute);
-            }   
+            }
          }
          else
          {
             success = false;
          }
       }
+
       pointCloudQueue.removeFirst();
       stationaryFlagQueue.removeFirst();
       reasonableVelocityFlagQueue.removeFirst();
@@ -310,7 +312,10 @@ public class SLAMModule
 
    public static SLAMModule createIntraprocessModule(String configurationFilePath) throws Exception
    {
-      SharedMemoryJavaFXMessager messager = new SharedMemoryJavaFXMessager(SLAMModuleAPI.API);
+      KryoMessager messager = KryoMessager.createIntraprocess(SLAMModuleAPI.API,
+                                                              NetworkPorts.SLAM_MODULE_UI_PORT,
+                                                              REACommunicationProperties.getPrivateNetClassList());
+      messager.setAllowSelfSubmit(true);
       messager.startMessager();
 
       File configurationFile = new File(configurationFilePath);
