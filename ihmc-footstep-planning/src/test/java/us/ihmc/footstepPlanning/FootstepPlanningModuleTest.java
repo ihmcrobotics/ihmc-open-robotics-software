@@ -6,6 +6,8 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.pathPlanning.DataSet;
@@ -211,6 +213,7 @@ public class FootstepPlanningModuleTest
       request.setTimeout(2.0);
 
       // test shuffling left
+      // test shuffling left
       Pose3D goalMidFootPose = new Pose3D(0.0, 1.25, 0.0, 0.0, 0.0, 0.0);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
       request.setDesiredHeading(FootstepPlanHeading.LEFT);
@@ -253,5 +256,64 @@ public class FootstepPlanningModuleTest
          double yawThreshold = Math.toRadians(25.0);
          Assertions.assertTrue(Math.abs(yaw) < Math.abs(yawThreshold));
       }
+   }
+
+   @Test
+   public void testCustomTermination()
+   {
+      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
+      DataSet dataSet = DataSetIOTools.loadDataSet(DataSetName._20190219_182005_Random);
+      PlannerInput plannerInput = dataSet.getPlannerInput();
+
+      FootstepPlannerRequest request = new FootstepPlannerRequest();
+      request.setTimeout(Double.MAX_VALUE);
+      Pose3D initialMidFootPose = new Pose3D(plannerInput.getStartPosition(), new Quaternion(plannerInput.getStartYaw(), 0.0, 0.0));
+      Pose3D goalMidFootPose = new Pose3D(plannerInput.getGoalPosition(), new Quaternion(plannerInput.getGoalYaw(), 0.0, 0.0));
+      request.setStartFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), initialMidFootPose);
+      request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
+      request.setRequestedInitialStanceSide(RobotSide.LEFT);
+      request.setPlanarRegionsList(dataSet.getPlanarRegionsList());
+      request.setPlanBodyPath(false);
+      request.setAbortIfBodyPathPlannerFails(false);
+
+      Stopwatch stopwatch = new Stopwatch();
+
+      // test time
+      double customTimeout = 1.65;
+      planningModule.addCustomTerminationCondition((time, iterations, finalStep, pathSize) -> time >= customTimeout);
+      stopwatch.start();
+      FootstepPlannerOutput output = planningModule.handleRequest(request);
+      double planTime = stopwatch.totalElapsed();
+      Assertions.assertEquals(output.getFootstepPlanningResult(), FootstepPlanningResult.HALTED);
+      Assertions.assertTrue(MathTools.epsilonEquals(customTimeout, planTime, 0.075));
+
+      // test iteration limit
+      int iterationLimit = 29;
+      planningModule.clearCustomTerminationConditions();
+      planningModule.addCustomTerminationCondition((time, iterations, finalStep, pathSize) -> iterations >= iterationLimit);
+      output = planningModule.handleRequest(request);
+      Assertions.assertEquals(output.getFootstepPlanningResult(), FootstepPlanningResult.HALTED);
+      Assertions.assertEquals(output.getPlannerTimings().getStepPlanningIterations(), iterationLimit);
+
+      // test step limit
+      int stepLimit = 4;
+      request.setAssumeFlatGround(true);
+      planningModule.clearCustomTerminationConditions();
+      planningModule.addCustomTerminationCondition((time, iterations, finalStep, pathSize) -> pathSize >= stepLimit);
+      output = planningModule.handleRequest(request);
+      Assertions.assertEquals(output.getFootstepPlanningResult(), FootstepPlanningResult.HALTED);
+      Assertions.assertEquals(output.getFootstepPlan().getNumberOfSteps(), stepLimit);
+
+      // test final step position
+      double xThreshold = 3.88;
+      request.setAssumeFlatGround(true);
+      planningModule.clearCustomTerminationConditions();
+      planningModule.addCustomTerminationCondition((time, iterations, finalStep, pathSize) -> finalStep.getX() >= xThreshold);
+      output = planningModule.handleRequest(request);
+      Assertions.assertEquals(output.getFootstepPlanningResult(), FootstepPlanningResult.HALTED);
+      FootstepPlan plan = output.getFootstepPlan();
+
+      double finalStepX = plan.getFootstep(plan.getNumberOfSteps() - 1).getSoleFramePose().getX();
+      Assertions.assertTrue(MathTools.intervalContains(finalStepX, xThreshold, xThreshold + planningModule.getFootstepPlannerParameters().getMaximumStepReach(), 1e-5));
    }
 }
