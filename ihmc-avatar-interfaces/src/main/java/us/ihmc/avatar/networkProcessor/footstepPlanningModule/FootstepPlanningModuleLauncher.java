@@ -14,6 +14,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.FootstepPlannerOccupancyMapAssembler;
+import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
@@ -134,8 +135,12 @@ public class FootstepPlanningModuleLauncher
       footstepPlanningModule.addIterationCallback(occupancyMapAssembler);
       footstepPlanningModule.addStatusCallback(status ->
                                                {
-                                                  occupancyMapPublisher.publish(occupancyMapAssembler.getOccupancyMap().getAsMessage());
-                                                  occupancyMapAssembler.getOccupancyMap().clear();
+                                                  PlannerOccupancyMap occupancyMap = occupancyMapAssembler.getOccupancyMap();
+                                                  if (!occupancyMap.isEmpty())
+                                                  {
+                                                     occupancyMapPublisher.publish(occupancyMap.getAsMessage());
+                                                     occupancyMapAssembler.getOccupancyMap().clear();
+                                                  }
                                                });
 
       // cancel planning request
