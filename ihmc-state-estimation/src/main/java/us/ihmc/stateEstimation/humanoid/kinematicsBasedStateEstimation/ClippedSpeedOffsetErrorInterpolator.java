@@ -420,7 +420,7 @@ public class ClippedSpeedOffsetErrorInterpolator
       if (isRotationCorrectionEnabled.getBooleanValue())
       {
          interpolatedYaw.set(AngleTools.interpolateAngle(startYaw.getValue(), goalYaw.getValue(), cLippedAlphaFilterValue.getValue()));
-         interpolatedRotation.setYawPitchRoll(interpolatedYaw.getValue(), stateEstimatorYawPitchRoll.getRoll(), stateEstimatorYawPitchRoll.getRoll());
+         interpolatedRotation.setYawPitchRoll(interpolatedYaw.getValue(), stateEstimatorYawPitchRoll.getPitch(), stateEstimatorYawPitchRoll.getRoll());
       }
 
       offsetPoseToPack.set(interpolatedTranslation, interpolatedRotation);
