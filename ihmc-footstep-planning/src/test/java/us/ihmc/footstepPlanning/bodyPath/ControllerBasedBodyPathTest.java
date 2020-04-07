@@ -222,7 +222,7 @@ public class ControllerBasedBodyPathTest
             request.setGoalFootPoses(parameters.getIdealFootstepWidth(), goalPose);
             FootstepPlannerOutput output = footstepPlanningModule.handleRequest(request);
 
-            if (output.getResult().validForExecution())
+            if (output.getFootstepPlanningResult().validForExecution())
             {
                FootstepPlan footstepPlan = output.getFootstepPlan();
                int stepsToVisualize = Math.min(footstepPlan.getNumberOfSteps(), steps);
@@ -252,7 +252,7 @@ public class ControllerBasedBodyPathTest
             }
             else
             {
-               PrintTools.info("Failed: " + output.getResult());
+               PrintTools.info("Failed: " + output.getFootstepPlanningResult());
             }
          }
       }

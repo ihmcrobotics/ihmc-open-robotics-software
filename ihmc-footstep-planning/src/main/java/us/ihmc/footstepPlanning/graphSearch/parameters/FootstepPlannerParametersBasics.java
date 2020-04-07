@@ -1,10 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingKeys;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
-import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.bodyPathViolationWeight;
 import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.deltaYawFromReferenceTolerance;
 import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.distanceFromPathTolerance;
 
@@ -185,17 +183,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.maximumZPenetrationOnValleyRegions, maximumZPenetrationOnValleyRegions);
    }
 
-   default void setReturnBestEffortPlan(boolean returnBestEffortPlan)
-   {
-      set(FootstepPlannerParameterKeys.returnBestEffortPlan, returnBestEffortPlan);
-   }
-
-   default void setMinimumStepsForBestEffortPlan(int minimumStepForBestEffortPlan)
-   {
-      set(FootstepPlannerParameterKeys.minimumStepsForBestEffortPlan, minimumStepForBestEffortPlan);
-   }
-
-
    default void setBodyBoxHeight(double bodyBoxHeight)
    {
       set(FootstepPlannerParameterKeys.bodyBoxHeight, bodyBoxHeight);
@@ -226,34 +213,9 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.bodyBoxBaseZ, bodyBoxBaseZ);
    }
 
-   default void setUseQuadraticDistanceCost(boolean useQuadraticDistanceCost)
-   {
-      set(FootstepPlannerParameterKeys.useQuadraticDistanceCost, useQuadraticDistanceCost);
-   }
-
-   default void setUseQuadraticHeightCost(boolean useQuadraticHeightCost)
-   {
-      set(FootstepPlannerParameterKeys.useQuadraticHeightCost, useQuadraticHeightCost);
-   }
-
    default void setAStarHeuristicsWeight(double aStarHeuristicsWeight)
    {
       set(FootstepPlannerParameterKeys.aStarHeuristicsWeight, aStarHeuristicsWeight);
-   }
-
-   default void setVisGraphWithAStarHeuristicsWeight(double visGraphWithAStarHeuristicsWeight)
-   {
-      set(FootstepPlannerParameterKeys.visGraphWithAStarHeuristicsWeight, visGraphWithAStarHeuristicsWeight);
-   }
-
-   default void setDepthFirstHeuristicsWeight(double depthFirstHeuristicsWeight)
-   {
-      set(FootstepPlannerParameterKeys.depthFirstHeuristicsWeight, depthFirstHeuristicsWeight);
-   }
-
-   default void setBodyPathBasedHeuristicWeight(double bodyPathBasedHeuristicWeight)
-   {
-      set(FootstepPlannerParameterKeys.bodyPathBasedHeuristicsWeight, bodyPathBasedHeuristicWeight);
    }
 
    default void setYawWeight(double yawWeight)
@@ -306,39 +268,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.maximum2dDistanceFromBoundingBoxToPenalize, maximum2dDistanceFromBoundingBoxToPenalize);
    }
 
-   default void setBoundingBoxCost(double boundingBoxCost)
-   {
-      set(FootstepPlannerParameterKeys.boundingBoxCost, boundingBoxCost);
-   }
-
    default void setFinalTurnProximity(double finalTurnProximity)
    {
       set(FootstepPlannerParameterKeys.finalTurnProximity, finalTurnProximity);
    }
 
-   default void setFinalTurnBodyPathProximity(double finalTurnProximity)
-   {
-      set(FootstepPlannerParameterKeys.finalTurnBodyPathProximity, finalTurnProximity);
-   }
-
-   default void setFinalTurnProximityBlendFactor(double finalTurnProximityBlendFactor)
-   {
-      set(FootstepPlannerParameterKeys.finalTurnProximityBlendFactor, finalTurnProximityBlendFactor);
-   }
-
    default void setFootholdAreaWeight(double footholdAreaWeight)
    {
       set(FootstepPlannerParameterKeys.footholdAreaWeight, footholdAreaWeight);
-   }
-
-   default void setLongStepWeight(double weight)
-   {
-      set(FootstepPlannerParameterKeys.longStepWeight, weight);
-   }
-
-   default void setBodyPathViolationWeight(double weight)
-   {
-      set(FootstepPlannerParameterKeys.bodyPathViolationWeight, weight);
    }
 
    default void setDistanceFromPathTolerance(double tolerance)
@@ -416,9 +353,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setCliffHeightToAvoid(parametersPacket.getCliffHeightToAvoid());
       if (parametersPacket.getMinimumDistanceFromCliffBottoms() != noValue)
          setMinimumDistanceFromCliffBottoms(parametersPacket.getMinimumDistanceFromCliffBottoms());
-      setReturnBestEffortPlan(parametersPacket.getReturnBestEffortPlan());
-      if (parametersPacket.getMinimumStepsForBestEffortPlan() > 0)
-         setMinimumStepsForBestEffortPlan((int) parametersPacket.getMinimumStepsForBestEffortPlan());
       if (parametersPacket.getBodyBoxHeight() != noValue)
          setBodyBoxHeight(parametersPacket.getBodyBoxHeight());
       if (parametersPacket.getBodyBoxDepth() != noValue)
@@ -437,22 +371,9 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinYClearanceFromStance(parametersPacket.getMinYClearanceFromStance());
       if (parametersPacket.getFinalTurnProximity() != noValue)
          setFinalTurnProximity(parametersPacket.getFinalTurnProximity());
-      if (parametersPacket.getFinalTurnBodyPathProximity() != noValue)
-         setFinalTurnBodyPathProximity(parametersPacket.getFinalTurnBodyPathProximity());
-      if (parametersPacket.getFinalTurnProximityBlendFactor() != noValue)
-         setFinalTurnProximityBlendFactor(parametersPacket.getFinalTurnProximityBlendFactor());
-
-      setUseQuadraticDistanceCost(parametersPacket.getUseQuadraticDistanceCost());
-      setUseQuadraticHeightCost(parametersPacket.getUseQuadraticHeightCost());
 
       if (parametersPacket.getAStarHeuristicsWeight() != noValue)
          setAStarHeuristicsWeight(parametersPacket.getAStarHeuristicsWeight());
-      if (parametersPacket.getVisGraphWithAStarHeuristicsWeight() != noValue)
-         setVisGraphWithAStarHeuristicsWeight(parametersPacket.getVisGraphWithAStarHeuristicsWeight());
-      if (parametersPacket.getDepthFirstHeuristicsWeight() != noValue)
-         setDepthFirstHeuristicsWeight(parametersPacket.getDepthFirstHeuristicsWeight());
-      if (parametersPacket.getBodyPathBasedHeuristicsWeight() != noValue)
-         setBodyPathBasedHeuristicWeight(parametersPacket.getBodyPathBasedHeuristicsWeight());
 
       if (parametersPacket.getYawWeight() != noValue)
          setYawWeight(parametersPacket.getYawWeight());
@@ -472,15 +393,9 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setCostPerStep(parametersPacket.getCostPerStep());
       if (parametersPacket.getMaximum2dDistanceFromBoundingBoxToPenalize() != noValue)
          setMaximum2dDistanceFromBoundingBoxToPenalize(parametersPacket.getMaximum2dDistanceFromBoundingBoxToPenalize());
-      if (parametersPacket.getBoundingBoxCost() != noValue)
-         setBoundingBoxCost(parametersPacket.getBoundingBoxCost());
 
       if (parametersPacket.getFootholdAreaWeight() != noValue)
          setFootholdAreaWeight(parametersPacket.getFootholdAreaWeight());
-      if (parametersPacket.getLongStepWeight() != noValue)
-         setLongStepWeight(parametersPacket.getLongStepWeight());
-      if (parametersPacket.getBodyPathViolationWeight() != noValue)
-         setBodyPathViolationWeight(parametersPacket.getBodyPathViolationWeight());
       if (parametersPacket.getDistanceFromPathTolerance() != noValue)
          setDistanceFromPathTolerance(parametersPacket.getDistanceFromPathTolerance());
       if (parametersPacket.getDeltaYawFromReferenceTolerance() != noValue)

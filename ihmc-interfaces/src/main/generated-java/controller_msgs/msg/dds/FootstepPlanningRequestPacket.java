@@ -51,6 +51,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public boolean abort_if_goal_step_snapping_fails_;
    /**
+            * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+            */
+   public boolean abort_if_body_path_planner_fails_;
+   /**
             * If true, will plan a body path. If false, will follow a straight-line path to the goal
             */
    public boolean plan_body_path_;
@@ -99,6 +103,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
             */
    public int planner_request_id_ = -1;
    /**
+            * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+            */
+   public double status_publish_period_ = 1.0;
+   /**
             * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
             * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
             */
@@ -135,6 +143,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       abort_if_goal_step_snapping_fails_ = other.abort_if_goal_step_snapping_fails_;
 
+      abort_if_body_path_planner_fails_ = other.abort_if_body_path_planner_fails_;
+
       plan_body_path_ = other.plan_body_path_;
 
       perform_a_star_search_ = other.perform_a_star_search_;
@@ -156,6 +166,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       assume_flat_ground_ = other.assume_flat_ground_;
 
       planner_request_id_ = other.planner_request_id_;
+
+      status_publish_period_ = other.status_publish_period_;
 
       generate_log_ = other.generate_log_;
 
@@ -255,6 +267,21 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public boolean getAbortIfGoalStepSnappingFails()
    {
       return abort_if_goal_step_snapping_fails_;
+   }
+
+   /**
+            * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+            */
+   public void setAbortIfBodyPathPlannerFails(boolean abort_if_body_path_planner_fails)
+   {
+      abort_if_body_path_planner_fails_ = abort_if_body_path_planner_fails;
+   }
+   /**
+            * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+            */
+   public boolean getAbortIfBodyPathPlannerFails()
+   {
+      return abort_if_body_path_planner_fails_;
    }
 
    /**
@@ -426,6 +453,21 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    }
 
    /**
+            * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+            */
+   public void setStatusPublishPeriod(double status_publish_period)
+   {
+      status_publish_period_ = status_publish_period;
+   }
+   /**
+            * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+            */
+   public double getStatusPublishPeriod()
+   {
+      return status_publish_period_;
+   }
+
+   /**
             * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
             * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
             */
@@ -472,6 +514,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.abort_if_goal_step_snapping_fails_, other.abort_if_goal_step_snapping_fails_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.abort_if_body_path_planner_fails_, other.abort_if_body_path_planner_fails_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.plan_body_path_, other.plan_body_path_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_a_star_search_, other.perform_a_star_search_, epsilon)) return false;
@@ -500,6 +544,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.planner_request_id_, other.planner_request_id_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.status_publish_period_, other.status_publish_period_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.generate_log_, other.generate_log_, epsilon)) return false;
 
 
@@ -527,6 +573,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       if(this.abort_if_goal_step_snapping_fails_ != otherMyClass.abort_if_goal_step_snapping_fails_) return false;
 
+      if(this.abort_if_body_path_planner_fails_ != otherMyClass.abort_if_body_path_planner_fails_) return false;
+
       if(this.plan_body_path_ != otherMyClass.plan_body_path_) return false;
 
       if(this.perform_a_star_search_ != otherMyClass.perform_a_star_search_) return false;
@@ -548,6 +596,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if(this.assume_flat_ground_ != otherMyClass.assume_flat_ground_) return false;
 
       if(this.planner_request_id_ != otherMyClass.planner_request_id_) return false;
+
+      if(this.status_publish_period_ != otherMyClass.status_publish_period_) return false;
 
       if(this.generate_log_ != otherMyClass.generate_log_) return false;
 
@@ -577,6 +627,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.snap_goal_steps_);      builder.append(", ");
       builder.append("abort_if_goal_step_snapping_fails=");
       builder.append(this.abort_if_goal_step_snapping_fails_);      builder.append(", ");
+      builder.append("abort_if_body_path_planner_fails=");
+      builder.append(this.abort_if_body_path_planner_fails_);      builder.append(", ");
       builder.append("plan_body_path=");
       builder.append(this.plan_body_path_);      builder.append(", ");
       builder.append("perform_a_star_search=");
@@ -601,6 +653,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       builder.append(this.assume_flat_ground_);      builder.append(", ");
       builder.append("planner_request_id=");
       builder.append(this.planner_request_id_);      builder.append(", ");
+      builder.append("status_publish_period=");
+      builder.append(this.status_publish_period_);      builder.append(", ");
       builder.append("generate_log=");
       builder.append(this.generate_log_);
       builder.append("}");

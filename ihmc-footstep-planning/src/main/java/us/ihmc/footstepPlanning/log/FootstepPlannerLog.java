@@ -18,7 +18,6 @@ public class FootstepPlannerLog
    private final FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
    private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
    private final VisibilityGraphsParametersPacket bodyPathParametersPacket = new VisibilityGraphsParametersPacket();
-   private final BodyPathPlanMessage bodyPathPlanMessage = new BodyPathPlanMessage();
    private final FootstepPlanningToolboxOutputStatus statusPacket = new FootstepPlanningToolboxOutputStatus();
 
    private final VisibilityGraphHolder visibilityGraphHolder = new VisibilityGraphHolder();
@@ -53,11 +52,6 @@ public class FootstepPlannerLog
    public FootstepPlanningToolboxOutputStatus getStatusPacket()
    {
       return statusPacket;
-   }
-
-   public BodyPathPlanMessage getBodyPathPlanMessage()
-   {
-      return bodyPathPlanMessage;
    }
 
    public VisibilityGraphHolder getVisibilityGraphHolder()

@@ -72,6 +72,10 @@ module controller_msgs
          */
         boolean abort_if_goal_step_snapping_fails;
         /**
+         * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+         */
+        boolean abort_if_body_path_planner_fails;
+        /**
          * If true, will plan a body path. If false, will follow a straight-line path to the goal
          */
         boolean plan_body_path;
@@ -126,6 +130,11 @@ module controller_msgs
          */
         @defaultValue(value=-1)
         long planner_request_id;
+        /**
+         * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+         */
+        @defaultValue(value=1.0)
+        double status_publish_period;
         /**
          * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
          * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/

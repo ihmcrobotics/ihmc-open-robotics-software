@@ -622,7 +622,6 @@ public class PacketCodeQualityTest
       Set<Field> fieldsToIngore = new HashSet<>();
       fieldsToIngore.add(VideoPacket.class.getField("data_"));
       fieldsToIngore.add(SnapFootstepPacket.class.getField("flag_"));
-      fieldsToIngore.add(FootstepNodeDataMessage.class.getField("bipedal_footstep_planner_node_rejection_reason_"));
 
       for (Class<? extends Packet> packetType : allPacketTypes)
       {

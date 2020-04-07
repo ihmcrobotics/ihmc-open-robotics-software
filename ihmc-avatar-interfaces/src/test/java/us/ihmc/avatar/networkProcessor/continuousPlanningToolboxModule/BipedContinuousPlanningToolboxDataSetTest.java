@@ -202,15 +202,6 @@ public class BipedContinuousPlanningToolboxDataSetTest
       return parameters;
    }
 
-   public FootstepPlannerParametersBasics getTestFootstepPlannerParameters()
-   {
-      FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
-      parameters.setReturnBestEffortPlan(true);
-      parameters.setMinimumStepsForBestEffortPlan(3);
-
-      return parameters;
-   }
-
    @BeforeEach
    public void setup()
    {
@@ -227,7 +218,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
          visibilityGraphsParameters = getTestVisibilityGraphsParameters();
 
       if (footstepPlannerParameters == null)
-         footstepPlannerParameters = getTestFootstepPlannerParameters();
+         footstepPlannerParameters = new DefaultFootstepPlannerParameters();
 
       DRCRobotModel robotModel = getRobotModel();
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(robotModel, pubSubImplementation);
@@ -578,8 +569,8 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       outputFromPlannerReference.set(packet);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, packet.getLowLevelPlannerGoal().getPosition());
-      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, packet.getLowLevelPlannerGoal().getOrientation());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, packet.getGoalPose().getPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, packet.getGoalPose().getOrientation());
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, packet.getBodyPath());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, PlanarRegionMessageConverter.convertToPlanarRegionsList(packet.getPlanarRegionsList()));
    }
@@ -773,7 +764,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       if (outputFromPlannerReference.get() != null)
       {
-         Point3DReadOnly pointReached = outputFromPlannerReference.get().getLowLevelPlannerGoal().getPosition();
+         Point3DReadOnly pointReached = outputFromPlannerReference.get().getGoalPose().getPosition();
          Point3DReadOnly goalPosition = dataSet.getPlannerInput().getGoalPosition();
          if (pointReached.distanceXY(goalPosition) > LatticeNode.gridSizeXY)
          {
@@ -1092,7 +1083,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       @Override
       public FootstepPlannerParametersBasics getFootstepPlannerParameters()
       {
-         return getTestFootstepPlannerParameters();
+         return new DefaultFootstepPlannerParameters();
       }
 
       @Override

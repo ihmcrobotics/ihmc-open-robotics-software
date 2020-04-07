@@ -60,6 +60,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -80,6 +82,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -106,6 +110,9 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getGoalLeftFootPose(), current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getGoalRightFootPose(), current_alignment);
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -153,6 +160,9 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -173,6 +183,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       cdr.write_type_7(data.getSnapGoalSteps());
 
       cdr.write_type_7(data.getAbortIfGoalStepSnappingFails());
+
+      cdr.write_type_7(data.getAbortIfBodyPathPlannerFails());
 
       cdr.write_type_7(data.getPlanBodyPath());
 
@@ -199,6 +211,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       cdr.write_type_2(data.getPlannerRequestId());
 
+      cdr.write_type_6(data.getStatusPublishPeriod());
+
       cdr.write_type_7(data.getGenerateLog());
 
    }
@@ -216,6 +230,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       data.setSnapGoalSteps(cdr.read_type_7());
       	
       data.setAbortIfGoalStepSnappingFails(cdr.read_type_7());
+      	
+      data.setAbortIfBodyPathPlannerFails(cdr.read_type_7());
       	
       data.setPlanBodyPath(cdr.read_type_7());
       	
@@ -239,6 +255,8 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       	
       data.setPlannerRequestId(cdr.read_type_2());
       	
+      data.setStatusPublishPeriod(cdr.read_type_6());
+      	
       data.setGenerateLog(cdr.read_type_7());
       	
 
@@ -259,6 +277,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       ser.write_type_9("requested_initial_stance_side", data.getRequestedInitialStanceSide());
       ser.write_type_7("snap_goal_steps", data.getSnapGoalSteps());
       ser.write_type_7("abort_if_goal_step_snapping_fails", data.getAbortIfGoalStepSnappingFails());
+      ser.write_type_7("abort_if_body_path_planner_fails", data.getAbortIfBodyPathPlannerFails());
       ser.write_type_7("plan_body_path", data.getPlanBodyPath());
       ser.write_type_7("perform_a_star_search", data.getPerformAStarSearch());
       ser.write_type_e("body_path_waypoints", data.getBodyPathWaypoints());
@@ -272,6 +291,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       ser.write_type_7("assume_flat_ground", data.getAssumeFlatGround());
       ser.write_type_2("planner_request_id", data.getPlannerRequestId());
+      ser.write_type_6("status_publish_period", data.getStatusPublishPeriod());
       ser.write_type_7("generate_log", data.getGenerateLog());
    }
 
@@ -290,6 +310,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
       data.setRequestedInitialStanceSide(ser.read_type_9("requested_initial_stance_side"));
       data.setSnapGoalSteps(ser.read_type_7("snap_goal_steps"));
       data.setAbortIfGoalStepSnappingFails(ser.read_type_7("abort_if_goal_step_snapping_fails"));
+      data.setAbortIfBodyPathPlannerFails(ser.read_type_7("abort_if_body_path_planner_fails"));
       data.setPlanBodyPath(ser.read_type_7("plan_body_path"));
       data.setPerformAStarSearch(ser.read_type_7("perform_a_star_search"));
       ser.read_type_e("body_path_waypoints", data.getBodyPathWaypoints());
@@ -303,6 +324,7 @@ public class FootstepPlanningRequestPacketPubSubType implements us.ihmc.pubsub.T
 
       data.setAssumeFlatGround(ser.read_type_7("assume_flat_ground"));
       data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
+      data.setStatusPublishPeriod(ser.read_type_6("status_publish_period"));
       data.setGenerateLog(ser.read_type_7("generate_log"));
    }
 
