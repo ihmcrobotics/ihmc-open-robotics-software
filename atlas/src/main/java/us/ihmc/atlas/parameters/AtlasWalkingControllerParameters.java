@@ -34,6 +34,7 @@ import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PID3DConfiguration;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.partNames.SpineJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -487,7 +488,9 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       String bkxName = jointMap.getSpineJointName(SpineJointName.SPINE_ROLL);
       String bkyName = jointMap.getSpineJointName(SpineJointName.SPINE_PITCH);
-      String[] joints = {bkxName, bkyName};
+      String leftKnyName = jointMap.getLegJointName(RobotSide.LEFT, LegJointName.KNEE_PITCH);
+      String rightKnyName = jointMap.getLegJointName(RobotSide.RIGHT, LegJointName.KNEE_PITCH);
+      String[] joints = {bkxName, bkyName, leftKnyName, rightKnyName};
       return joints;
    }
 
