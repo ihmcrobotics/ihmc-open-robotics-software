@@ -59,7 +59,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> AutoPostProcess = topic("AutoPostProcess");
    public static final Topic<Boolean> GlobalReset = topic("GlobalReset");
    public static final Topic<Boolean> ComputePath = topic("ComputePath");
-   public static final Topic<Boolean> AbortPlanning = topic("AbortPlanning");
+   public static final Topic<Boolean> HaltPlanning = topic("HaltPlanning");
    public static final Topic<Boolean> PostProcessPlan = topic("PostProcessPlan");
    public static final Topic<Boolean> BindStartToRobot = topic("BindStartToRobot");
 
