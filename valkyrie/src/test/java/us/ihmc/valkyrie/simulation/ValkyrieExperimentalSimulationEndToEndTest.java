@@ -68,8 +68,8 @@ public class ValkyrieExperimentalSimulationEndToEndTest extends HumanoidExperime
       assertTrue(drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(3.0));
 
       RigidBodyBasics elevator = drcSimulationTestHelper.getControllerFullRobotModel().getElevator();
-      assertRigidBodiesAreAboveFlatGround(elevator, p -> testEnvironment.getTerrainObject3D().getHeightMapIfAvailable().heightAt(p.getX(), p.getY(), p.getZ()));
-      assertOneDoFJointsAreWithingLimits(elevator, 5.0e-3);
+      assertRigidBodiesAreAboveFlatGround(elevator, p -> testEnvironment.getTerrainObject3D().getHeightMapIfAvailable().heightAt(p.getX(), p.getY(), p.getZ()), 0.0);
+      assertOneDoFJointsAreWithingLimits(elevator, 2.0e-2);
    }
 
    private static class FlyingValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
