@@ -159,7 +159,7 @@ public class MainTabController
       if (verbose)
          LogTools.info("Clicked abort planning...");
 
-      messager.submitMessage(AbortPlanning, true);
+      messager.submitMessage(HaltPlanning, true);
    }
 
    @FXML
