@@ -40,6 +40,9 @@ bool snap_goal_steps
 # If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
 bool abort_if_goal_step_snapping_fails
 
+# If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+bool abort_if_body_path_planner_fails
+
 # If true, will plan a body path. If false, will follow a straight-line path to the goal
 bool plan_body_path
 
@@ -82,6 +85,10 @@ bool assume_flat_ground
 # Set this id to keep track of your request
 # Field default value -1
 int32 planner_request_id
+
+# Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+# Field default value 1.0
+float64 status_publish_period
 
 # Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
 # For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/

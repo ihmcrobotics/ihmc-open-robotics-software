@@ -5,14 +5,11 @@ import controller_msgs.msg.dds.*;
 import javafx.animation.AnimationTimer;
 import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
-import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.layout.Region;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -83,9 +80,9 @@ public class MainTabController
    @FXML
    private TextField iterationsTaken;
    @FXML
-   private TextField planningResult;
+   private TextField bodyPathPlanResult;
    @FXML
-   private TextField plannerStatus;
+   private TextField stepPlanResult;
    @FXML
    private ComboBox<DataSetName> dataSetSelector;
    @FXML
@@ -162,7 +159,7 @@ public class MainTabController
       if (verbose)
          LogTools.info("Clicked abort planning...");
 
-      messager.submitMessage(AbortPlanning, true);
+      messager.submitMessage(HaltPlanning, true);
    }
 
    @FXML
@@ -302,8 +299,8 @@ public class MainTabController
       // control
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestId, new TextViewerListener<>(sentRequestId));
       messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.ReceivedPlanId, new TextViewerListener<>(receivedRequestId));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlanningResult, new TextViewerListener<>(planningResult));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerStatus, new TextViewerListener<>(plannerStatus));
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.BodyPathPlanningResultTopic, new TextViewerListener<>(bodyPathPlanResult));
+      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, new TextViewerListener<>(stepPlanResult));
 
       AtomicReference<String> stackTrace = messager.createInput(PlannerExceptionStackTrace, "No stack trace available");
       viewExceptionButton.setOnAction(e ->

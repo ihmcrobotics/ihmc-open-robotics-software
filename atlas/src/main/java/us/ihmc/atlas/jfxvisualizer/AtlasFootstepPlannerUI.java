@@ -131,7 +131,7 @@ public class AtlasFootstepPlannerUI extends Application
 
    private void handleMessagerCallbacks(FootstepPlanningModule planningModule, FootstepPlannerOutput status)
    {
-      if (status.getResult().terminalResult())
+      if (status.getFootstepPlanningResult() != null && status.getFootstepPlanningResult().terminalResult())
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.GraphData,
                                 Pair.of(planningModule.getEdgeDataMap(), planningModule.getIterationData()));

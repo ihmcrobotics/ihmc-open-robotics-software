@@ -64,7 +64,7 @@ public class RemotePlannerMessageConverter
       this.robotName = robotName;
       this.ros2Node = ros2Node;
 
-      resultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResult);
+      resultReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic);
       footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanResponse);
       plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestId, 0);
       receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanId, 0);
@@ -95,7 +95,7 @@ public class RemotePlannerMessageConverter
       outputStatusPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningToolboxOutputStatus.class,
                                                         FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName));
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanningResult, request -> checkAndPublishIfInvalidResult());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, request -> checkAndPublishIfInvalidResult());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, request -> publishResultingPlan());
    }
 

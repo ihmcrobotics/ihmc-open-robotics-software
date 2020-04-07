@@ -16,9 +16,7 @@ import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -39,7 +37,6 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -441,11 +438,11 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       footstepPlanningModule.getFootstepPlannerParameters().setMaximumStepZ(0.32);
       FootstepPlannerOutput plannerOutput = footstepPlanningModule.handleRequest(request);
 
-      System.out.println("output. " + plannerOutput.getResult());
+      System.out.println("output. " + plannerOutput.getFootstepPlanningResult());
 
-      if (!plannerOutput.getResult().validForExecution())
+      if (!plannerOutput.getFootstepPlanningResult().validForExecution())
       {
-         fail("Invalid footstep plan: " + plannerOutput.getResult());
+         fail("Invalid footstep plan: " + plannerOutput.getFootstepPlanningResult());
       }
 
       FramePose3D leftFootPose = new FramePose3D(drcSimulationTestHelper.getControllerFullRobotModel().getSoleFrame(RobotSide.LEFT));

@@ -26,7 +26,6 @@ import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
 import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -40,8 +39,6 @@ import java.util.function.Function;
 
 public class AStarFootstepPlanner
 {
-   private static final double defaultStatusPublishPeriod = 1.0;
-
    private final AStarPathPlanner<FootstepNode> footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final SimplePlanarRegionFootstepNodeSnapper snapper;
@@ -55,7 +52,6 @@ public class AStarFootstepPlanner
    private final FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData();
    private final HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
    private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
-   private double statusPublishPeriod = defaultStatusPublishPeriod;
 
    private final FramePose3D goalMidFootPose = new FramePose3D();
    private final AtomicBoolean haltRequested = new AtomicBoolean();
@@ -104,8 +100,8 @@ public class AStarFootstepPlanner
       iterationData.clear();
 
       haltRequested.set(false);
-      result = FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL;
-      outputToPack.setPlanId(request.getRequestId());
+      result = FootstepPlanningResult.PLANNING;
+      outputToPack.setRequestId(request.getRequestId());
 
       // Update planar regions
       boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
@@ -116,23 +112,24 @@ public class AStarFootstepPlanner
       checker.setPlanarRegions(planarRegionsList);
       idealStepCalculator.setPlanarRegionsList(planarRegionsList);
 
-      boolean horizonLengthImposed =
-            request.getPlanBodyPath() && MathTools.intervalContains(bodyPathPlanHolder.computePathLength(0.0), 0.0, request.getHorizonLength());
+      double pathLength = bodyPathPlanHolder.computePathLength(0.0);
+      boolean imposeHorizonLength =
+            request.getPlanBodyPath() && request.getHorizonLength() > 0.0 && !MathTools.intervalContains(pathLength, 0.0, request.getHorizonLength());
       SideDependentList<FootstepNode> goalNodes;
-      if (horizonLengthImposed)
+      if (imposeHorizonLength)
       {
-         bodyPathPlanHolder.getPointAlongPath(1.0, goalMidFootPose);
+         bodyPathPlanHolder.getPointAlongPath(request.getHorizonLength() / pathLength, goalMidFootPose);
          SideDependentList<Pose3D> goalSteps = PlannerTools.createSquaredUpFootsteps(goalMidFootPose, footstepPlannerParameters.getIdealFootstepWidth());
          goalNodes = createGoalNodes(goalSteps::get);
       }
       else
       {
+         goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
          goalNodes = createGoalNodes(request.getGoalFootPoses()::get);
       }
 
       // Setup footstep planner
       FootstepNode startNode = createStartNode(request);
-      goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
       addFootPosesToSnapper(request);
       footstepPlanner.initialize(startNode);
       distanceAndYawHeuristics.initialize(goalMidFootPose, request.getDesiredHeading());
@@ -140,7 +137,7 @@ public class AStarFootstepPlanner
       completionChecker.initialize(startNode, goalNodes, request.getGoalDistanceProximity(), request.getGoalYawProximity());
 
       // Check valid goal
-      if (!snapAndCheckGoalNodes(goalNodes, horizonLengthImposed, request))
+      if (!snapAndCheckGoalNodes(goalNodes, imposeHorizonLength, request))
       {
          result = FootstepPlanningResult.INVALID_GOAL;
          reportStatus(request, outputToPack);
@@ -150,9 +147,14 @@ public class AStarFootstepPlanner
       // Start planning loop
       while (true)
       {
-         if (stopwatch.totalElapsed() >= request.getTimeout() || haltRequested.get())
+         if (stopwatch.totalElapsed() >= request.getTimeout())
          {
             result = FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION;
+            break;
+         }
+         if (haltRequested.get())
+         {
+            result = FootstepPlanningResult.HALTED;
             break;
          }
          if (request.getMaximumIterations() > 0 && iterations > request.getMaximumIterations())
@@ -178,10 +180,10 @@ public class AStarFootstepPlanner
             recordIterationData(finalIterationData);
             iterationCallback.accept(finalIterationData);
 
-            result = FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
+            result = FootstepPlanningResult.FOUND_SOLUTION;
             break;
          }
-         if (stopwatch.lapElapsed() > statusPublishPeriod && !MathTools.epsilonEquals(stopwatch.totalElapsed(), request.getTimeout(), 0.1))
+         if (publishStatus(request))
          {
             reportStatus(request, outputToPack);
             stopwatch.lap();
@@ -192,10 +194,21 @@ public class AStarFootstepPlanner
       reportStatus(request, outputToPack);
    }
 
+   private boolean publishStatus(FootstepPlannerRequest request)
+   {
+      double statusPublishPeriod = request.getStatusPublishPeriod();
+      if (statusPublishPeriod <= 0.0)
+      {
+         return false;
+      }
+
+      return stopwatch.lapElapsed() > statusPublishPeriod && !MathTools.epsilonEquals(stopwatch.totalElapsed(), request.getTimeout(), 0.1);
+   }
+
    private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
-      outputToPack.setPlanId(request.getRequestId());
-      outputToPack.setResult(result);
+      outputToPack.setRequestId(request.getRequestId());
+      outputToPack.setFootstepPlanningResult(result);
 
       // Pack solution path
       outputToPack.getFootstepPlan().clear();
@@ -233,18 +246,6 @@ public class AStarFootstepPlanner
 
          footstep.setFoothold(snapData.getCroppedFoothold());
          outputToPack.getFootstepPlan().addFootstep(footstep);
-      }
-
-      BodyPathPlan bodyPathPlan = bodyPathPlanHolder.getPlan();
-      if (bodyPathPlan.getNumberOfWaypoints() > 0)
-      {
-         outputToPack.getBodyPath().clear();
-         for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
-         {
-            outputToPack.getBodyPath().add(new Pose3D(bodyPathPlan.getWaypoint(i)));
-         }
-
-         outputToPack.getLowLevelGoal().set(goalMidFootPose);
       }
 
       outputToPack.setPlanarRegionsList(request.getPlanarRegionsList());
@@ -311,11 +312,6 @@ public class AStarFootstepPlanner
       {
          return true;
       }
-   }
-
-   public void setStatusPublishPeriod(double statusPublishPeriod)
-   {
-      this.statusPublishPeriod = statusPublishPeriod;
    }
 
    public void halt()

@@ -7,7 +7,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
@@ -38,7 +37,6 @@ public class FootstepPlanningModuleTest
       // goal is unreachable
       Pose3D goalPose = new Pose3D(500.0, 0.0, 0.0, 0.0, 0.0, 0.0);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalPose);
-      planningModule.getFootstepPlannerParameters().setReturnBestEffortPlan(true);
 
       // disable wiggling. causes latency of around 0.15s
       planningModule.getFootstepPlannerParameters().setMaximumXYWiggleDistance(0.0);
@@ -46,39 +44,45 @@ public class FootstepPlanningModuleTest
 
       Stopwatch stopwatch = new Stopwatch();
       double publishPeriod = 1.0;
-      planningModule.setStatusPublishPeriod(publishPeriod);
+      request.setStatusPublishPeriod(publishPeriod);
 
-      MutableInt numberOfStatusesReceived = new MutableInt();
+      MutableInt numberOfStreamingStatuses = new MutableInt();
+
       Consumer<FootstepPlannerOutput> streamingTester = output ->
       {
-         if(output.getResult() == FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL)
+         if(output.getFootstepPlanningResult() == FootstepPlanningResult.PLANNING)
          {
-            double lapElapsed = stopwatch.lapElapsed();
-            Assertions.assertTrue(MathTools.epsilonEquals(lapElapsed, publishPeriod, 0.08),
-                                  "Planner doesn't appear to be streaming at the correct rate. Requested period: " + publishPeriod + ", actual: " + lapElapsed);
+            // first status received is when body path planning is done and step planning starts
+            if (numberOfStreamingStatuses.getValue() == 0)
+            {
+               stopwatch.start();
+            }
+            else
+            {
+               double lapElapsed = stopwatch.lap();
+               Assertions.assertTrue(MathTools.epsilonEquals(lapElapsed, publishPeriod, 0.08),
+                                     "Planner doesn't appear to be streaming at the correct rate. Requested period: " + publishPeriod + ", actual: " + lapElapsed);
+            }
 
-            stopwatch.lap();
-            numberOfStatusesReceived.increment();
+            numberOfStreamingStatuses.increment();
          }
       };
 
       planningModule.addStatusCallback(streamingTester);
-
-      stopwatch.start();
       planningModule.handleRequest(request);
       double totalElapsed = stopwatch.totalElapsed();
+      int numberOfStreamingIntervals = numberOfStreamingStatuses.getValue() - 1;
 
       int expectedStatuses = (int) (totalElapsed / publishPeriod);
-      Assertions.assertTrue(numberOfStatusesReceived.intValue() == expectedStatuses,
+      Assertions.assertTrue(numberOfStreamingIntervals == expectedStatuses,
                             "Planner doesn't appear to be streaming correctly. Planning duration=" + totalElapsed + ", publish period=" + publishPeriod
-                            + ", # of statuses=" + numberOfStatusesReceived.getValue());
+                            + ", # of statuses=" + numberOfStreamingStatuses.getValue());
    }
    
    @Test
    public void testGoalProximityWhenGoalIsUnreachable()
    {
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
-      planningModule.getFootstepPlannerParameters().setReturnBestEffortPlan(true);
 
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.addRectangle(6.0, 6.0);
@@ -96,14 +100,13 @@ public class FootstepPlanningModuleTest
       request.setTimeout(2.0);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
    }
 
    @Test
    public void testGoalProximityWhenGoalIsReachable()
    {
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
-      planningModule.getFootstepPlannerParameters().setReturnBestEffortPlan(true);
 
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.addRectangle(6.0, 6.0);
@@ -122,7 +125,7 @@ public class FootstepPlanningModuleTest
       request.setMaximumIterations(200);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
    }
 
    @Test
@@ -151,7 +154,7 @@ public class FootstepPlanningModuleTest
       request.setSnapGoalSteps(true);
 
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
       FootstepPlan footstepPlan = plannerOutput.getFootstepPlan();
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {
@@ -167,7 +170,7 @@ public class FootstepPlanningModuleTest
       request.setAbortIfGoalStepSnappingFails(true);
 
       plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult() == FootstepPlanningResult.INVALID_GOAL);
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult() == FootstepPlanningResult.INVALID_GOAL);
 
       // test that not snapping keeps original requested pose
       double heightOffset = 0.035;
@@ -179,7 +182,7 @@ public class FootstepPlanningModuleTest
       request.setSnapGoalSteps(false);
 
       plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
 
       int planSize = plannerOutput.getFootstepPlan().getNumberOfSteps();
       for (int i = 0; i < 2; i++)
@@ -213,7 +216,7 @@ public class FootstepPlanningModuleTest
       request.setDesiredHeading(FootstepPlanHeading.LEFT);
       request.setRequestedInitialStanceSide(RobotSide.RIGHT);
       FootstepPlannerOutput plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
       FootstepPlan plan = plannerOutput.getFootstepPlan();
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
@@ -228,7 +231,7 @@ public class FootstepPlanningModuleTest
       request.setDesiredHeading(FootstepPlanHeading.RIGHT);
       request.setRequestedInitialStanceSide(RobotSide.LEFT);
       plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
       plan = plannerOutput.getFootstepPlan();
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
@@ -242,7 +245,7 @@ public class FootstepPlanningModuleTest
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
       request.setDesiredHeading(FootstepPlanHeading.BACKWARD);
       plannerOutput = planningModule.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
       plan = plannerOutput.getFootstepPlan();
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
