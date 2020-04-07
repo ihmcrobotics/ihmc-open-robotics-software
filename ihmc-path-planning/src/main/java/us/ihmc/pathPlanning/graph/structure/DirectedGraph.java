@@ -142,6 +142,26 @@ public class DirectedGraph<N>
    }
 
    /**
+    * Returns the number of edges along the path from the start node to the given node
+    */
+   public int getPathLengthFromStart(N node)
+   {
+      checkNodeExists(node);
+
+      int pathLength = 0;
+
+      GraphEdge<N> edgeFromParent = incomingBestEdge.get(node);
+      while (edgeFromParent.getStartNode() != null)
+      {
+         N parentNode = edgeFromParent.getStartNode();
+         edgeFromParent = incomingBestEdge.get(parentNode);
+         pathLength++;
+      }
+
+      return pathLength;
+   }
+
+   /**
     * Will check if a node exists in the graph.
     * @param node
     */

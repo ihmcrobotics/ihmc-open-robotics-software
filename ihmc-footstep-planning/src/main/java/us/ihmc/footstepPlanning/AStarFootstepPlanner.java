@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -52,6 +53,7 @@ public class AStarFootstepPlanner
    private final FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData();
    private final HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
    private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
+   private final List<FootstepPlannerTerminationCondition> customTerminationConditions = new ArrayList<>();
 
    private final FramePose3D goalMidFootPose = new FramePose3D();
    private final AtomicBoolean haltRequested = new AtomicBoolean();
@@ -147,12 +149,15 @@ public class AStarFootstepPlanner
       // Start planning loop
       while (true)
       {
+         iterations++;
+         outputToPack.getPlannerTimings().setStepPlanningIterations(iterations);
+
          if (stopwatch.totalElapsed() >= request.getTimeout())
          {
             result = FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION;
             break;
          }
-         if (haltRequested.get())
+         if (haltRequested.get() || checkCustomTerminationConditions())
          {
             result = FootstepPlanningResult.HALTED;
             break;
@@ -166,7 +171,6 @@ public class AStarFootstepPlanner
          AStarIterationData<FootstepNode> iterationData = footstepPlanner.doPlanningIteration();
          recordIterationData(iterationData);
          iterationCallback.accept(iterationData);
-         iterations++;
 
          if (iterationData.getParentNode() == null)
          {
@@ -277,6 +281,31 @@ public class AStarFootstepPlanner
       this.iterationData.add(loggedData);
    }
 
+   private final Pose2D endNodePose = new Pose2D();
+
+   public boolean checkCustomTerminationConditions()
+   {
+      if (customTerminationConditions.isEmpty())
+      {
+         return false;
+      }
+
+      FootstepNode endNode = completionChecker.getEndNode();
+      endNodePose.set(endNode.getX(), endNode.getY(), endNode.getYaw());
+      int endNodePathSize = completionChecker.getEndNodePathSize();
+
+      for (int i = 0; i < customTerminationConditions.size(); i++)
+      {
+         boolean terminatePlanner = customTerminationConditions.get(i).terminatePlanner(stopwatch.totalElapsed(), iterations, endNodePose, endNodePathSize);
+         if (terminatePlanner)
+         {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
    public void setStatusCallback(Consumer<FootstepPlannerOutput> statusCallback)
    {
       this.statusCallback = statusCallback;
@@ -285,6 +314,16 @@ public class AStarFootstepPlanner
    public void addIterationCallback(Consumer<AStarIterationData<FootstepNode>> callback)
    {
       iterationCallback = iterationCallback.andThen(callback);
+   }
+
+   public void addCustomTerminationCondition(FootstepPlannerTerminationCondition plannerTerminationCondition)
+   {
+      customTerminationConditions.add(plannerTerminationCondition);
+   }
+
+   public void clearCustomTerminationConditions()
+   {
+      customTerminationConditions.clear();
    }
 
    private boolean snapAndCheckGoalNodes(SideDependentList<FootstepNode> goalNodes, boolean horizonLengthImposed, FootstepPlannerRequest request)

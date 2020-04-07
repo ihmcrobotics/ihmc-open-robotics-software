@@ -38,6 +38,7 @@ public class FootstepPlannerCompletionChecker
    private double goalYawProximity;
 
    private FootstepNode startNode, endNode;
+   private int endNodePathSize;
    private SideDependentList<FootstepNode> goalNodes;
    private double endNodeCost;
 
@@ -57,6 +58,7 @@ public class FootstepPlannerCompletionChecker
    {
       this.startNode = startNode;
       this.goalNodes = goalNodes;
+      this.endNodePathSize = 0;
 
       this.goalDistanceProximity = goalDistanceProximity;
       this.goalYawProximity = goalYawProximity;
@@ -114,6 +116,7 @@ public class FootstepPlannerCompletionChecker
          {
             endNode = childNode;
             endNodeCost = cost;
+            endNodePathSize = footstepPlanner.getGraph().getPathLengthFromStart(endNode);
          }
       }
 
@@ -171,6 +174,11 @@ public class FootstepPlannerCompletionChecker
    public FootstepNode getEndNode()
    {
       return endNode;
+   }
+
+   public int getEndNodePathSize()
+   {
+      return endNodePathSize;
    }
 
    private class GoalProximityComparator implements Comparator<FootstepNode>
