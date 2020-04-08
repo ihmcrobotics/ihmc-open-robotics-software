@@ -211,27 +211,25 @@ public class FeetManager
       }
    }
 
-   public void correctCoMHeightForSingularityAvoidance(FrameVector2D desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
+   public void correctCoMHeightForSupportSingularityAvoidance(FrameVector2D desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         footControlModules.get(robotSide).updateLegSingularityModule();
-      }
-
       // Correct, if necessary, the CoM height trajectory to avoid straight knee
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = footControlModules.get(robotSide);
-         footControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame);
+         footControlModule.updateLegSingularityModule();
+         footControlModule.correctCoMHeightTrajectoryForSupportSingularityAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame);
       }
    }
 
-   public void correctCoMHeightForUnreachableFootstep(FrameVector2D desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
+   public void correctCoMHeightForUnreachableFootstep(CoMHeightTimeDerivativesData comHeightData)
    {
       // Do that after to make sure the swing foot will land
       for (RobotSide robotSide : RobotSide.values)
       {
-         footControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
+         FootControlModule footControlModule = footControlModules.get(robotSide);
+         footControlModule.updateLegSingularityModule();
+         footControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
       }
    }
 
