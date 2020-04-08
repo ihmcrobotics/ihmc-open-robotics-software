@@ -86,7 +86,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       addStatusCallback(output -> output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lapElapsed()));
       addStatusCallback(output -> output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed()));
-      aStarFootstepPlanner.addIterationCallback(iterationData -> output.getPlannerTimings().setStepPlanningIterations(aStarFootstepPlanner.getIterations()));
    }
 
    public FootstepPlannerOutput handleRequest(FootstepPlannerRequest request)
@@ -246,6 +245,16 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public void addStatusCallback(Consumer<FootstepPlannerOutput> callback)
    {
       statusCallback = statusCallback.andThen(callback);
+   }
+
+   public void addCustomTerminationCondition(FootstepPlannerTerminationCondition plannerTerminationCondition)
+   {
+      aStarFootstepPlanner.addCustomTerminationCondition(plannerTerminationCondition);
+   }
+
+   public void clearCustomTerminationConditions()
+   {
+      aStarFootstepPlanner.clearCustomTerminationConditions();
    }
 
    public boolean registerRosNode(Ros2Node ros2Node)
