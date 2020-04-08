@@ -67,22 +67,6 @@ public class MainTabController
    @FXML
    private Spinner<Double> horizonLength;
 
-   // status
-   @FXML
-   private TextField sentRequestId;
-   @FXML
-   private TextField receivedRequestId;
-   @FXML
-   private Button viewExceptionButton;
-
-   @FXML
-   private TextField timeTaken;
-   @FXML
-   private TextField iterationsTaken;
-   @FXML
-   private TextField bodyPathPlanResult;
-   @FXML
-   private TextField stepPlanResult;
    @FXML
    private ComboBox<DataSetName> dataSetSelector;
    @FXML
@@ -244,7 +228,6 @@ public class MainTabController
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
-
       currentPlannerRequestId = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestId, -1);
       footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanResponse, null);
    }
@@ -296,38 +279,11 @@ public class MainTabController
    {
       setupControls();
 
-      // control
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestId, new TextViewerListener<>(sentRequestId));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.ReceivedPlanId, new TextViewerListener<>(receivedRequestId));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.BodyPathPlanningResultTopic, new TextViewerListener<>(bodyPathPlanResult));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, new TextViewerListener<>(stepPlanResult));
-
-      AtomicReference<String> stackTrace = messager.createInput(PlannerExceptionStackTrace, "No stack trace available");
-      viewExceptionButton.setOnAction(e ->
-                                      {
-                                         TextArea textArea = new TextArea(stackTrace.toString());
-                                         textArea.setEditable(false);
-
-                                         Alert alert = new Alert(Alert.AlertType.NONE);
-                                         alert.getButtonTypes().add(ButtonType.CLOSE);
-                                         alert.setHeaderText("Planner Stack Trace");
-                                         alert.setResizable(true);
-                                         alert.getDialogPane().setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
-                                         alert.getDialogPane().setContent(textArea);
-                                         alert.show();
-                                      });
-
       messager.bindBidirectional(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, acceptNewRegions.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTimeout, timeout.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLength, horizonLength.getValueFactory().valueProperty(), doubleToDoubleConverter,
                                  true);
-
-      messager.registerTopicListener(PlannerTimings, timings ->
-      {
-         timeTaken.setText(String.format("%.2f", timings.getTotalElapsedSeconds()));
-         iterationsTaken.setText(Long.toString(timings.getStepPlanningIterations()));
-      });
 
       // set goal
       messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabled, placeGoal.disableProperty());
@@ -512,23 +468,6 @@ public class MainTabController
          return newValue;
       }
    };
-
-   private class TextViewerListener<T> implements TopicListener<T>
-   {
-      private final TextField textField;
-
-      public TextViewerListener(TextField textField)
-      {
-         this.textField = textField;
-      }
-
-      @Override
-      public void receivedMessageForTopic(T messageContent)
-      {
-         if (messageContent != null)
-            textField.promptTextProperty().setValue(messageContent.toString());
-      }
-   }
 
    private class WalkingPreviewPlaybackManager extends AnimationTimer
    {
