@@ -115,4 +115,13 @@ public class ZeroablePDGains implements PDGainsReadOnly, Settable<ZeroablePDGain
          return false;
       }
    }
+
+   @Override
+   public String toString()
+   {
+      return "ZeroablePDGains [kp=" + kp + ", kd=" + kd + ", maximumFeedback=" + maximumFeedback + ", maximumFeedbackRate=" + maximumFeedbackRate
+            + ", positionDeadband=" + positionDeadband + "]";
+   }
+   
+   
 }
