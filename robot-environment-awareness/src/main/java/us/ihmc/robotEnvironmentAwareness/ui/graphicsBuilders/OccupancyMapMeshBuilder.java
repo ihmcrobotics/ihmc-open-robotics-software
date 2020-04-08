@@ -58,11 +58,18 @@ public class OccupancyMapMeshBuilder implements Runnable
    
    public void render()
    {
-      
+      //TODO: update confidence factor map.
+      //TODO: render occupancy with color.
+      //TODO: render normal vector.
    }
    
    @Override
    public void run()
+   {
+      
+   }
+   
+   public void updateOctreeKeyToConfidenceFactorMap(double confidenceFactorForNewFrame)
    {
       
    }
@@ -71,6 +78,4 @@ public class OccupancyMapMeshBuilder implements Runnable
    {
       return root;
    }
-   
-   
 }
