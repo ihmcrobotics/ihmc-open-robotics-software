@@ -100,8 +100,8 @@ public class RosModule implements CloseableAndDisposable
          AvatarRobotLidarParameters[] lidarParameters = sensorInformation.getLidarParameters();
          if (lidarParameters.length > 0)
          {
-            AvatarRobotLidarParameters primaryLidar = lidarParameters[0];
-            robotConfigurationPublisher.setAdditionalJointStatePublishing(primaryLidar.getLidarSpindleJointTopic(), primaryLidar.getLidarSpindleJointName());
+//            AvatarRobotLidarParameters primaryLidar = lidarParameters[0];
+//            robotConfigurationPublisher.setAdditionalJointStatePublishing(primaryLidar.getLidarSpindleJointTopic(), primaryLidar.getLidarSpindleJointName());
          }
       }
 

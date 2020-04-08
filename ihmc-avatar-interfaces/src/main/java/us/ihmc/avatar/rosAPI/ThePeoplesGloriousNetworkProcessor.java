@@ -204,19 +204,19 @@ public class ThePeoplesGloriousNetworkProcessor
    private void publishSimulatedCameraAndLidar(FullRobotModel fullRobotModel, HumanoidRobotSensorInformation sensorInformation,
                                                RosRobotConfigurationDataPublisher robotConfigurationPublisher)
    {
-      if (sensorInformation.getCameraParameters().length > 0)
-      {
-         new RosSCSCameraPublisher(scsSensorCommunicationBridge, rosMainNode, rosClockCalculator, sensorInformation.getCameraParameters());
-      }
-
-      AvatarRobotLidarParameters[] lidarParameters = sensorInformation.getLidarParameters();
-      if (lidarParameters.length > 0)
-      {
-         new RosSCSLidarPublisher(scsSensorCommunicationBridge, rosMainNode, rosClockCalculator, fullRobotModel, lidarParameters);
-
-         AvatarRobotLidarParameters primaryLidar = lidarParameters[0];
-         robotConfigurationPublisher.setAdditionalJointStatePublishing(primaryLidar.getLidarSpindleJointTopic(), primaryLidar.getLidarSpindleJointName());
-      }
+//      if (sensorInformation.getCameraParameters().length > 0)
+//      {
+//         new RosSCSCameraPublisher(scsSensorCommunicationBridge, rosMainNode, rosClockCalculator, sensorInformation.getCameraParameters());
+//      }
+//
+//      AvatarRobotLidarParameters[] lidarParameters = sensorInformation.getLidarParameters();
+//      if (lidarParameters.length > 0)
+//      {
+//         new RosSCSLidarPublisher(scsSensorCommunicationBridge, rosMainNode, rosClockCalculator, fullRobotModel, lidarParameters);
+//
+//         AvatarRobotLidarParameters primaryLidar = lidarParameters[0];
+//         robotConfigurationPublisher.setAdditionalJointStatePublishing(primaryLidar.getLidarSpindleJointTopic(), primaryLidar.getLidarSpindleJointName());
+//      }
    }
 
    @SuppressWarnings({"rawtypes", "unchecked"})
