@@ -1,25 +1,13 @@
 package us.ihmc.humanoidRobotics.communication.packets;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
-import static us.ihmc.robotics.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Random;
-import java.util.Set;
-import java.util.TreeMap;
-import java.util.TreeSet;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -31,13 +19,7 @@ import org.reflections.Reflections;
 
 import com.google.common.base.CaseFormat;
 
-import controller_msgs.msg.dds.ExoskeletonBehaviorStatePacket;
-import controller_msgs.msg.dds.FootstepNodeDataMessage;
-import controller_msgs.msg.dds.FootstepPlannerStatusMessage;
-import controller_msgs.msg.dds.FrameInformation;
-import controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage;
-import controller_msgs.msg.dds.SnapFootstepPacket;
-import controller_msgs.msg.dds.VideoPacket;
+import controller_msgs.msg.dds.*;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
