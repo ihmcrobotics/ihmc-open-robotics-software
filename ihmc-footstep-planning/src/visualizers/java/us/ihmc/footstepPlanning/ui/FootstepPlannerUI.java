@@ -90,6 +90,8 @@ public class FootstepPlannerUI
    @FXML
    private MainTabController mainTabController;
    @FXML
+   private FootstepPlannerStatusBarController footstepPlannerStatusBarController;
+   @FXML
    private UIRobotController uiRobotController;
    @FXML
    private VisualizationController visibilityGraphsUIController;
@@ -129,6 +131,7 @@ public class FootstepPlannerUI
       footstepPostProcessingParametersUIController.setPostProcessingParameters(footstepPostProcessingParameters);
 
       mainTabController.attachMessager(messager);
+      footstepPlannerStatusBarController.attachMessager(messager);
       footstepPlannerMenuUIController.attachMessager(messager);
       footstepPlannerParametersUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
@@ -140,6 +143,7 @@ public class FootstepPlannerUI
       footstepPlannerMenuUIController.setMainWindow(primaryStage);
 
       mainTabController.bindControls();
+      footstepPlannerStatusBarController.bindControls();
       footstepPlannerParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
       footstepPostProcessingParametersUIController.bindControls();
