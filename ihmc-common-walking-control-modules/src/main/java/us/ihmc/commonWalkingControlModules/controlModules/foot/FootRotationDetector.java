@@ -118,7 +118,7 @@ public class FootRotationDetector
          lineOfRotationInSole.getPoint().set(tempPointOfRotation);
          lineOfRotationInSole.getDirection().set(soleFrameTwist.getAngularPart());
 
-         double omega = lineOfRotationInSole.getDirection().length();
+         double omega = soleFrameTwist.getAngularPart().length();
          integratedRotationAngle.add(dt * omega);
 
          lineOfRotationInSole.getDirection().scale(1.0 / omega);
