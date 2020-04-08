@@ -9,7 +9,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.animation.AnimationTimer;
 import javafx.application.Platform;
 import javafx.scene.Group;
@@ -23,10 +22,9 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OccupancyMapMeshBuilder;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.PlanarRegionsMeshBuilder;
-import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.SLAMOcTreeMeshBuilder;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
-import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 
 public class SLAMMeshViewer
 {
@@ -43,7 +41,7 @@ public class SLAMMeshViewer
    private final AnimationTimer renderMeshAnimation;
 
    private final PlanarRegionsMeshBuilder planarRegionsMeshBuilder;
-   private final SLAMOcTreeMeshBuilder ocTreeViewer;
+   private final OccupancyMapMeshBuilder occupancyMapViewer;
    private final StereoVisionPointCloudViewer latestBufferViewer;
 
    private final List<AtomicReference<Boolean>> enableTopicList = new ArrayList<>();
@@ -58,24 +56,19 @@ public class SLAMMeshViewer
                                                               SLAMModuleAPI.SLAMClear,
                                                               SLAMModuleAPI.RequestPlanarRegions);
 
-      ocTreeViewer = new SLAMOcTreeMeshBuilder(uiMessager,
-                                               SLAMModuleAPI.ShowSLAMOctreeMap,
-                                               SLAMModuleAPI.SLAMClear,
-                                               SLAMModuleAPI.SLAMOctreeMapState,
-                                               SLAMModuleAPI.SLAMOcTreeDisplayType);
+      occupancyMapViewer = new OccupancyMapMeshBuilder(uiMessager);
 
       latestBufferViewer = new StereoVisionPointCloudViewer(SLAMModuleAPI.IhmcSLAMFrameState,
                                                             uiMessager,
                                                             SLAMModuleAPI.ShowLatestFrame,
                                                             SLAMModuleAPI.SLAMVizClear);
 
-      ocTreeViewer.getRoot().setMouseTransparent(true);
+      occupancyMapViewer.getRoot().setMouseTransparent(true);
       latestBufferViewer.getRoot().setMouseTransparent(true);
-      root.getChildren().addAll(planarRegionMeshView, ocTreeViewer.getRoot(), latestBufferViewer.getRoot());
-//      root.getChildren().addAll(planarRegionMeshView, latestBufferViewer.getRoot());
+      root.getChildren().addAll(planarRegionMeshView, occupancyMapViewer.getRoot(), latestBufferViewer.getRoot());
 
       addViewer(uiMessager, planarRegionMeshView, SLAMModuleAPI.ShowPlanarRegionsMap);
-      addViewer(uiMessager, ocTreeViewer.getRoot(), SLAMModuleAPI.ShowSLAMOctreeMap);
+      addViewer(uiMessager, occupancyMapViewer.getRoot(), SLAMModuleAPI.ShowSLAMOctreeMap);
       addViewer(uiMessager, latestBufferViewer.getRoot(), SLAMModuleAPI.ShowLatestFrame);
 
       renderMeshAnimation = new AnimationTimer()
@@ -83,7 +76,7 @@ public class SLAMMeshViewer
          @Override
          public void handle(long now)
          {
-            ocTreeViewer.render();
+            occupancyMapViewer.render();
             latestBufferViewer.render();
 
             if (planarRegionsMeshBuilder.hasNewMeshAndMaterial())
@@ -146,7 +139,7 @@ public class SLAMMeshViewer
          return;
       renderMeshAnimation.start();
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(planarRegionsMeshBuilder, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
-      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(ocTreeViewer, 0, SLOW_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
+      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(occupancyMapViewer, 0, SLOW_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(latestBufferViewer, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(createViewersController(), 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
    }

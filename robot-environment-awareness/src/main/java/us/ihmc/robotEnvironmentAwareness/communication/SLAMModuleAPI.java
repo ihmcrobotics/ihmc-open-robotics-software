@@ -27,6 +27,7 @@ public class SLAMModuleAPI
    private static final CategoryTheme VelocityLimit = apiFactory.createCategoryTheme("VelocityLimit");
    private static final CategoryTheme PlanarRegions = apiFactory.createCategoryTheme("PlanarRegions");
    private static final CategoryTheme OcTree = apiFactory.createCategoryTheme("OcTree");
+   private static final CategoryTheme Normal = apiFactory.createCategoryTheme("Normal");
    private static final CategoryTheme Buffer = apiFactory.createCategoryTheme("Buffer");
    private static final CategoryTheme Custom = apiFactory.createCategoryTheme("Custom");
 
@@ -50,6 +51,7 @@ public class SLAMModuleAPI
    
    public static final Topic<Boolean> ShowPlanarRegionsMap = Root.child(UI).child(PlanarRegions).topic(Show);
    public static final Topic<Boolean> ShowSLAMOctreeMap = Root.child(UI).child(OcTree).topic(Show);
+   public static final Topic<Boolean> ShowSLAMOctreeNormalMap = Root.child(UI).child(OcTree).child(Normal).topic(Show);
    public static final Topic<Boolean> ShowLatestFrame = Root.child(UI).child(DepthCloud).topic(Show);
    public static final Topic<Boolean> ShowSLAMSensorTrajectory = Root.child(UI).child(SensorFrame).topic(Show);
    public static final Topic<Boolean> SLAMVizClear = Root.child(UI).topic(Clear);
