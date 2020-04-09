@@ -1,8 +1,6 @@
 package us.ihmc.avatar.testTools;
 
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
-import static us.ihmc.robotics.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -206,7 +204,8 @@ public class DRCSimulationTestHelper
          blockingSimulationRunner = new BlockingSimulationRunner(scs, 60.0 * 10.0);
          simulationStarter.attachControllerFailureListener(direction -> blockingSimulationRunner.notifyControllerHasFailed());
          simulationStarter.attachControllerFailureListener(direction -> notifyControllerHasFailed());
-         blockingSimulationRunner.createValidDesiredICPListener();
+         if (scs.getVariable("desiredICPX") != null && scs.getVariable("desiredICPY") != null)
+            blockingSimulationRunner.createValidDesiredICPListener();
          blockingSimulationRunner.setCheckDesiredICPPosition(checkIfDesiredICPHasBeenInvalid);
       }
 
@@ -237,6 +236,11 @@ public class DRCSimulationTestHelper
    {
       ScriptBasedControllerCommandGenerator scriptBasedControllerCommandGenerator = simulationStarter.getScriptBasedControllerCommandGenerator();
       scriptBasedControllerCommandGenerator.loadScriptFile(scriptInputStream, referenceFrame);
+   }
+
+   public DRCSimulationStarter getSimulationStarter()
+   {
+      return simulationStarter;
    }
 
    public DRCSCSInitialSetup getSCSInitialSetup()
