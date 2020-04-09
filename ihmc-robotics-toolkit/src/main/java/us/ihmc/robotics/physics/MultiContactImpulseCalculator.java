@@ -38,6 +38,8 @@ public class MultiContactImpulseCalculator
 
    private static boolean hasCalculatorFailedOnce = false;
 
+   private Map<RigidBodyBasics, PhysicsEngineRobotData> robots;
+
    public MultiContactImpulseCalculator(ReferenceFrame rootFrame)
    {
       this.rootFrame = rootFrame;
@@ -45,6 +47,8 @@ public class MultiContactImpulseCalculator
 
    public void configure(Map<RigidBodyBasics, PhysicsEngineRobotData> robots, MultiRobotCollisionGroup collisionGroup)
    {
+      this.robots = robots;
+
       contactCalculators.clear();
       jointLimitCalculators.clear();
       allCalculators.clear();
@@ -223,6 +227,23 @@ public class MultiContactImpulseCalculator
          return;
 
       robotCalculatorsOutput.forEach(output -> jointVelocityChangeConsumer.accept(output.get()));
+   }
+
+   public void applyJointVelocityChanges()
+   {
+      for (ImpulseBasedConstraintCalculator calculator : allCalculators)
+      {
+         if (!calculator.isConstraintActive())
+            continue;
+
+         for (int i = 0; i < calculator.getNumberOfRobotsInvolved(); i++)
+         {
+            RigidBodyBasics rootBody = calculator.getRootBody(i);
+            SingleRobotForwardDynamicsPlugin robotForwardDynamicsPlugin = robots.get(rootBody).getForwardDynamicsPlugin();
+            DenseMatrix64F jointVelocityChange = calculator.getJointVelocityChange(i);
+            robotForwardDynamicsPlugin.addJointVelocities(jointVelocityChange);
+         }
+      }
    }
 
    public void readExternalWrenches(double dt, List<ExternalWrenchReader> externalWrenchReaders)
