@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.flatGroundPlanning;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
@@ -98,5 +99,24 @@ public class FootstepNodeTest
       node = new FootstepNode(gridX * 3.8, -gridY * 8.1);
       assertEquals(4.0 * gridX, node.getX(), 1.0e-10);
       assertEquals(-8.0 * gridY, node.getY(), 1.0e-10);
+   }
+
+   @Test
+   public void testYawIndexDistance()
+   {
+      FootstepNode n1 = new FootstepNode(0, 0, 0, RobotSide.LEFT);
+      FootstepNode n2 = new FootstepNode(0, 0, 3, RobotSide.LEFT);
+      Assertions.assertEquals(n1.yawIndexDistance(n2), 3);
+      Assertions.assertEquals(n2.yawIndexDistance(n1), 3);
+
+      n1 = new FootstepNode(0, 0, LatticeNode.yawDivisions - 1, RobotSide.LEFT);
+      n2 = new FootstepNode(0, 0, 0, RobotSide.LEFT);
+      Assertions.assertEquals(n1.yawIndexDistance(n2), 1);
+      Assertions.assertEquals(n2.yawIndexDistance(n1), 1);
+
+      n1 = new FootstepNode(0, 0, LatticeNode.yawDivisions - 5, RobotSide.LEFT);
+      n2 = new FootstepNode(0, 0, 5, RobotSide.LEFT);
+      Assertions.assertEquals(n1.yawIndexDistance(n2), 10);
+      Assertions.assertEquals(n2.yawIndexDistance(n1), 10);
    }
 }

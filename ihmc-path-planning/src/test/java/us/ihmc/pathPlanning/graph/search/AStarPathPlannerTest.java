@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.pathPlanning.graph.GridNode;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiPredicate;
@@ -100,9 +101,9 @@ public class AStarPathPlannerTest
       }
    }
 
-   private HashSet<GridNode> getNeighbors(GridNode gridNode)
+   private List<GridNode> getNeighbors(GridNode gridNode)
    {
-      HashSet<GridNode> neighbors = new HashSet<>();
+      List<GridNode> neighbors = new ArrayList<>();
       neighbors.add(new GridNode(gridNode.getX() - 1, gridNode.getY()));
       neighbors.add(new GridNode(gridNode.getX() + 1, gridNode.getY()));
       neighbors.add(new GridNode(gridNode.getX(), gridNode.getY()- 1));
