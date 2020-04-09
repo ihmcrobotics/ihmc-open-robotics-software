@@ -12,7 +12,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.util.Callback;
 import javafx.util.StringConverter;
-import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 import us.ihmc.tools.property.*;
 
 import java.text.NumberFormat;
