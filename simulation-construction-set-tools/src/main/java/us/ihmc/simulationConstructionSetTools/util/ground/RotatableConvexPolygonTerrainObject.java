@@ -116,10 +116,10 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
    private void visualizeNormalVector(Plane3D plane)
    {
       this.linkGraphics.identity();
-      linkGraphics.translate(new Vector3D(plane.getPointCopy()));
+      linkGraphics.translate(new Vector3D(new Point3D(plane.getPoint())));
       linkGraphics.addSphere(0.005, YoAppearance.Black());
 
-      Vector3D normalCopy = plane.getNormalCopy();
+      Vector3D normalCopy = new Vector3D(plane.getNormal());
       normalCopy.scale(0.01);
       linkGraphics.translate(normalCopy);
       linkGraphics.addSphere(0.005, YoAppearance.Blue());
@@ -175,8 +175,8 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
    {
       if (convexPolygon.isPointInside(x, y, EPSILON))
       {
-         topPlane.getPoint(tempPlaneCentroid);
-         topPlane.getNormal(tempPlaneNormal);
+         tempPlaneCentroid.set(topPlane.getPoint());
+         tempPlaneNormal.set(topPlane.getNormal());
 
          return tempPlaneCentroid.getZ()
                - (tempPlaneNormal.getX() * (x - tempPlaneCentroid.getX()) + tempPlaneNormal.getY() * (y - tempPlaneCentroid.getY())) / tempPlaneNormal.getZ();
@@ -202,12 +202,12 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
       // The Origin of the reference frame is facePlane.point
       // The i axis is oriented as (faceVertices3d(0)-facePlane.point) vector
       // The j axis is oriented as facePlane.normal X i
-      Vector3D OriginIJ = new Vector3D(facePlane.getPointCopy());
+      Vector3D OriginIJ = new Vector3D(new Point3D(facePlane.getPoint()));
       Vector3D iVersor = new Vector3D(faceVertices3d.get(0));
       iVersor.sub(OriginIJ);
       iVersor.normalize();
       Vector3D jVersor = new Vector3D();
-      jVersor.cross(facePlane.getNormalCopy(), iVersor);
+      jVersor.cross(new Vector3D(facePlane.getNormal()), iVersor);
       jVersor.normalize();
 
       // Convert 3d points in 2d points
@@ -290,7 +290,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
             if (intersectionToPack != null)
                intersectionToPack.set(projectedPoint);
             if (normalToPack != null)
-               normalToPack.set(face.getNormalCopy());
+               normalToPack.set(new Vector3D(face.getNormal()));
             smallestEdgeDistance = projectedPoint.distance(pointToCheck);
          }
 
@@ -307,7 +307,7 @@ public class RotatableConvexPolygonTerrainObject implements TerrainObject3D, Hei
          if (intersectionToPack != null)
             intersectionToPack.set(projectedPoint);
          if (normalToPack != null)
-            normalToPack.set(topPlane.getNormalCopy());
+            normalToPack.set(new Vector3D(topPlane.getNormal()));
          return true;
       }
 

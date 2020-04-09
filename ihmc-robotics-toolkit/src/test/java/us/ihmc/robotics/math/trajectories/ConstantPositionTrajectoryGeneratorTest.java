@@ -35,7 +35,7 @@ public class ConstantPositionTrajectoryGeneratorTest
    @BeforeEach
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootNameTEST");
       position = new FramePoint3D(referenceFrame, xValue, yValue, zValue);
       positionProvider = new ConstantPositionProvider(position);
       parentRegistry = new YoVariableRegistry("registry");

@@ -2,7 +2,7 @@ package us.ihmc.simulationConstructionSetTools.util.tracks;
 
 import java.util.ArrayList;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -109,14 +109,14 @@ public class Track implements FunctionToIntegrate
       linkGraphics.translate(track_offset);
       linkGraphics.rotate(track_rotation);
       linkGraphics.translate(trackLength / 2.0, trackWidth / 2.0, 0.0);
-      linkGraphics.rotate(Math.PI / 2.0, Axis.X);
+      linkGraphics.rotate(Math.PI / 2.0, Axis3D.X);
       linkGraphics.addCylinder(trackWidth, trackRadius, appearance);
 
       linkGraphics.identity();
       linkGraphics.translate(track_offset);
       linkGraphics.rotate(track_rotation);
       linkGraphics.translate(-trackLength / 2.0, trackWidth / 2.0, 0.0);
-      linkGraphics.rotate(Math.PI / 2.0, Axis.X);
+      linkGraphics.rotate(Math.PI / 2.0, Axis3D.X);
       linkGraphics.addCylinder(trackWidth, trackRadius, appearance);
 
       linkGraphics.identity();

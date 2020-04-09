@@ -1,16 +1,17 @@
 package us.ihmc.footstepPlanning.graphSearch.graph;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.robotics.robotSide.RobotSide;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.*;
+import org.junit.jupiter.api.Test;
+
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
+import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepNodeToolsTest
 {
@@ -50,15 +51,15 @@ public class FootstepNodeToolsTest
       RigidBodyTransform nodeTransform = new RigidBodyTransform();
       FootstepNodeTools.getNodeTransform(node, nodeTransform);
 
-      double[] rotationYawPitchRoll = new double[3];
-      nodeTransform.getRotationYawPitchRoll(rotationYawPitchRoll);
+      YawPitchRoll rotationYawPitchRoll = new YawPitchRoll();
+      rotationYawPitchRoll.set(nodeTransform.getRotation());
 
       assertEquals(nodeTransform.getTranslationX(), x, epsilon);
       assertEquals(nodeTransform.getTranslationY(), y, epsilon);
       assertEquals(nodeTransform.getTranslationZ(), 0.0, epsilon);
-      assertEquals(AngleTools.trimAngleMinusPiToPi(rotationYawPitchRoll[0] - yaw), 0.0, epsilon);
-      assertEquals(rotationYawPitchRoll[1], 0.0, epsilon);
-      assertEquals(rotationYawPitchRoll[2], 0.0, epsilon);
+      assertEquals(AngleTools.trimAngleMinusPiToPi(rotationYawPitchRoll.getYaw() - yaw), 0.0, epsilon);
+      assertEquals(rotationYawPitchRoll.getPitch(), 0.0, epsilon);
+      assertEquals(rotationYawPitchRoll.getRoll(), 0.0, epsilon);
    }
 
    @Test

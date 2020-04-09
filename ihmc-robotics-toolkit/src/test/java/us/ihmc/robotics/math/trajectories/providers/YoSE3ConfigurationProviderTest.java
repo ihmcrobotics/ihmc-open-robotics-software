@@ -27,7 +27,7 @@ public class YoSE3ConfigurationProviderTest
    @BeforeEach
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootNameTEST");
       registry = new YoVariableRegistry("registryTEST");
    }
 

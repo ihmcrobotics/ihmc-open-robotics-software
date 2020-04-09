@@ -313,7 +313,7 @@ public abstract class AvatarKinematicsPlanningToolboxControllerTest implements M
       double trajectoryTime = 5.0;
 
       Pose3D desiredPose = new Pose3D();
-      desiredPose.setPosition(0.5, 0.3, 1.0);
+      desiredPose.getPosition().set(0.5, 0.3, 1.0);
       desiredPose.appendYawRotation(-0.5 * Math.PI);
       desiredPose.appendPitchRotation(0.5 * Math.PI);
       desiredPose.appendYawRotation(0.2 * Math.PI);

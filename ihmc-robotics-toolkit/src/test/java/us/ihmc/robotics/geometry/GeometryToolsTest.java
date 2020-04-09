@@ -16,7 +16,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.RunnableThatThrows;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -406,7 +406,7 @@ public class GeometryToolsTest
          randomVector.setIncludingFrame(EuclidFrameRandomTools.nextFrameVector3D(random, worldFrame, -1.0, 1.0, -1.0, 1.0, -1.0, 1.0));
 
          ReferenceFrame frameA = GeometryTools.constructReferenceFrameFromPointAndZAxis("frameA", randomPoint, randomVector);
-         ReferenceFrame frameB = GeometryTools.constructReferenceFrameFromPointAndAxis("frameB", randomPoint, Axis.Z, randomVector);
+         ReferenceFrame frameB = GeometryTools.constructReferenceFrameFromPointAndAxis("frameB", randomPoint, Axis3D.Z, randomVector);
 
          EuclidCoreTestTools.assertRigidBodyTransformEquals(frameA.getTransformToRoot(), frameB.getTransformToRoot(), 1.0e-2);
       }
@@ -509,7 +509,7 @@ public class GeometryToolsTest
    @Test
    public void testYawAboutPoint()
    {
-      ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
+      ReferenceFrame theFrame = ReferenceFrameTools.constructARootFrame("theFrame");
       double epsilon = 1e-10;
       final FramePoint3D pointToYawAboutException = new FramePoint3D(theFrame, 0.0, 0.0, 0.0);
       final FramePoint3D pointException = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
@@ -554,7 +554,7 @@ public class GeometryToolsTest
    @Test
    public void testPitchAboutPoint()
    {
-      ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
+      ReferenceFrame theFrame = ReferenceFrameTools.constructARootFrame("theFrame");
       double epsilon = 1e-10;
       final FramePoint3D pointToPitchAboutException = new FramePoint3D(theFrame, 0.0, 0.0, 0.0);
       final FramePoint3D pointException = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 1.0, 1.0);
@@ -594,8 +594,8 @@ public class GeometryToolsTest
    @Test
    public void testYawAboutPoint_FramePoint2d_double()
    {
-      ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
-      ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame");
+      ReferenceFrame theFrame = ReferenceFrameTools.constructARootFrame("theFrame");
+      ReferenceFrame aFrame = ReferenceFrameTools.constructARootFrame("aFrame");
       double epsilon = 1e-10;
 
       FramePoint2D original = new FramePoint2D(theFrame, 5.0, 7.0);

@@ -165,7 +165,7 @@ public class FootstepPlanningModuleTest
       }
 
       // test don't snap goal steps and abort if invalid
-      goalMidFootPose.setPosition(100.0, 0.0, 0.0);
+      goalMidFootPose.getPosition().set(100.0, 0.0, 0.0);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
 
       request.setSnapGoalSteps(true);
@@ -177,7 +177,7 @@ public class FootstepPlanningModuleTest
       // test that not snapping keeps original requested pose
       double heightOffset = 0.035;
       double rollOffset = -0.2;
-      goalMidFootPose.setPosition(2.0, 0.0, groundHeight + heightOffset);
+      goalMidFootPose.getPosition().set(2.0, 0.0, groundHeight + heightOffset);
       request.setGoalFootPoses(planningModule.getFootstepPlannerParameters().getIdealFootstepWidth(), goalMidFootPose);
       request.getGoalFootPoses().forEach(pose -> pose.appendRollRotation(rollOffset));
 

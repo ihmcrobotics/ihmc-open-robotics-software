@@ -7,8 +7,6 @@ import java.util.Random;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -17,13 +15,13 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MecanoTestTools;
 import us.ihmc.robotics.screwTheory.MovingMidFootZUpGroundFrame;
 import us.ihmc.robotics.screwTheory.MovingZUpFrame;
 import us.ihmc.robotics.screwTheory.NumericalMovingReferenceFrame;
-import us.ihmc.robotics.screwTheory.TwistCalculatorTest;
 import us.ihmc.robotics.trajectories.providers.SettableDoubleProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -122,7 +120,7 @@ public class MovingWalkingReferenceFrameTest
          private final Vector3D yawPitchRollPhase = new Vector3D(random.nextDouble(), random.nextDouble(), random.nextDouble());
 
          private final Point3D position = new Point3D();
-         private final double[] yawPitchRoll = new double[3];
+         private final YawPitchRoll yawPitchRoll = new YawPitchRoll();
 
          private final FrameVector3D linearVelocity = new FrameVector3D();
          private final double[] yawPitchRollDot = new double[3];
@@ -155,14 +153,14 @@ public class MovingWalkingReferenceFrameTest
                double phi = yawPitchRollPhase.getElement(i);
                double value = amp * Math.sin(pulse * t + phi);
                double valueDot = amp * pulse * Math.cos(pulse * t + phi);
-               yawPitchRoll[i] = value;
+               yawPitchRoll.setElement(i, value);
                yawPitchRollDot[i] = valueDot;
             }
 
             RotationMatrix yaw = new RotationMatrix();
             RotationMatrix pitch = new RotationMatrix();
-            yaw.setToYawMatrix(yawPitchRoll[0]);
-            pitch.setToPitchMatrix(yawPitchRoll[1]);
+            yaw.setToYawOrientation(yawPitchRoll.getYaw());
+            pitch.setToPitchOrientation(yawPitchRoll.getPitch());
 
             angularVelocity.setToZero(parentFrame);
             angularVelocity.add(yawPitchRollDot[2], 0.0, 0.0);
@@ -171,8 +169,8 @@ public class MovingWalkingReferenceFrameTest
             yaw.transform(angularVelocity);
             angularVelocity.add(0.0, 0.0, yawPitchRollDot[0]);
 
-            transformToParent.setTranslation(position);
-            transformToParent.setRotationYawPitchRoll(yawPitchRoll);
+            transformToParent.getTranslation().set(position);
+            transformToParent.getRotation().set(yawPitchRoll);
          }
 
          @Override

@@ -34,7 +34,7 @@ public class ConstantOrientationTrajectoryGeneratorTest
    @BeforeEach
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootNameTEST");
       orientation = new FrameQuaternion(referenceFrame);
       orientationProvider = new ConstantOrientationProvider(orientation);
       parentRegistry = new YoVariableRegistry("parentRegistryTEST");

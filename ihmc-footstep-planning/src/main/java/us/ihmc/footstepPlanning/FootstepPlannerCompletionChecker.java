@@ -83,7 +83,7 @@ public class FootstepPlannerCompletionChecker
             FootstepNode childNode = iterationData.getValidChildNodes().get(i);
             midFootPose.set(childNode.getOrComputeMidFootPoint(footstepPlannerParameters.getIdealFootstepWidth()), childNode.getYaw());
 
-            boolean validYawProximity = midFootPose.getOrientationDistance(goalMidFootPose) <= goalYawProximity;
+            boolean validYawProximity = midFootPose.getOrientation().distance(goalMidFootPose.getOrientation()) <= goalYawProximity;
             boolean validDistanceProximity = midFootPose.getPosition().distanceSquared(goalMidFootPose.getPosition()) <= MathTools.square(goalDistanceProximity);
 
             if (validYawProximity && validDistanceProximity && searchForSquaredUpStepInProximity(iterationData.getParentNode(), childNode))

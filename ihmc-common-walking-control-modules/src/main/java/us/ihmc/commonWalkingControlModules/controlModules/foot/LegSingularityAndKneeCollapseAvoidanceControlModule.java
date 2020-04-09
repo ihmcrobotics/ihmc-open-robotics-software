@@ -290,12 +290,12 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             tempPoint.changeFrame(endEffectorFrame);
             footToHipAxis.setIncludingFrame(tempPoint);
             footToHipAxis.changeFrame(getParent());
-            EuclidGeometryTools.axisAngleFromZUpToVector3D(footToHipAxis, hipPitchRotationToParentFrame);
+            EuclidGeometryTools.orientation3DFromZUpToVector3D(footToHipAxis, hipPitchRotationToParentFrame);
             hipPitchPosition.setToZero(frameBeforeHipPitchJoint);
             hipPitchPosition.changeFrame(getParent());
 
             transformToParent.setRotationAndZeroTranslation(hipPitchRotationToParentFrame);
-            transformToParent.setTranslation(hipPitchPosition);
+            transformToParent.getTranslation().set(hipPitchPosition);
          }
       };
 
@@ -313,12 +313,12 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             tempPoint.changeFrame(endEffectorFrame);
             footToHipAxis.setIncludingFrame(tempPoint);
             footToHipAxis.changeFrame(getParent());
-            EuclidGeometryTools.axisAngleFromZUpToVector3D(footToHipAxis, anklePitchRotationToParentFrame);
+            EuclidGeometryTools.orientation3DFromZUpToVector3D(footToHipAxis, anklePitchRotationToParentFrame);
             anklePitchPosition.setToZero(endEffectorFrame);
             anklePitchPosition.changeFrame(getParent());
 
             transformToParent.setRotationAndZeroTranslation(anklePitchRotationToParentFrame);
-            transformToParent.setTranslation(anklePitchPosition);
+            transformToParent.getTranslation().set(anklePitchPosition);
          }
       };
 

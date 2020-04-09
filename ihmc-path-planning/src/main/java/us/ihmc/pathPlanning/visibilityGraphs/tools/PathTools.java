@@ -81,7 +81,7 @@ public class PathTools
          Pose3DReadOnly segmentStart = path.get(segmentIndex);
          Pose3DReadOnly segmentEnd = path.get(segmentIndex + 1);
 
-         double segmentLength = segmentStart.getPositionDistance(segmentEnd);
+         double segmentLength = segmentStart.getPosition().distance(segmentEnd.getPosition());
 
          if (distance <= segmentLength)
          {

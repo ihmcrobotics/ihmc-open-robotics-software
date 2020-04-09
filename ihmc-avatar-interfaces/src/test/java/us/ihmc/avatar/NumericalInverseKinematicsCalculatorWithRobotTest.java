@@ -1,6 +1,6 @@
 package us.ihmc.avatar;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -13,8 +13,6 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.jointAnglesWriter.JointAnglesWriter;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -330,8 +328,8 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
    {
       FramePose3D handPose = new FramePose3D(worldFrame);
 
-      handPose.setOrientation(desiredOrientation);
-      handPose.setPosition(desiredPosition);
+      handPose.getOrientation().set(desiredOrientation);
+      handPose.getPosition().set(desiredPosition);
       handPose.changeFrame(fullRobotModel.getChest().getBodyFixedFrame());
 
       RigidBodyTransform transform = new RigidBodyTransform();

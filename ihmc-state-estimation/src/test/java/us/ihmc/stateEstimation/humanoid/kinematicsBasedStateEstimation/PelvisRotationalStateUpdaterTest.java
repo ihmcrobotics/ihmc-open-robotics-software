@@ -186,7 +186,7 @@ public class PelvisRotationalStateUpdaterTest
          
          RigidBodyTransform transformFromMeasFrameToWorld = imuSensor.getMeasurementFrame().getTransformToDesiredFrame(ReferenceFrame.getWorldFrame());
          RotationMatrix rotationFromMeasFrameToWorld = new RotationMatrix();
-         transformFromMeasFrameToWorld.getRotation(rotationFromMeasFrameToWorld);
+         rotationFromMeasFrameToWorld.set(transformFromMeasFrameToWorld.getRotation());
          jointAndIMUSensorDataSource.setOrientationSensorValue(imuDefinition, rotationFromMeasFrameToWorld);
       }
 

@@ -288,8 +288,8 @@ public class TrackingCameraBridge
       {
          StampedPosePacket message = new StampedPosePacket();
 
-         message.getPose().setPosition(position);
-         message.getPose().setOrientation(orientation);
+         message.getPose().getPosition().set(position);
+         message.getPose().getOrientation().set(orientation);
          message.getTwist().getLinear().set(linearVelocity);
          message.getTwist().getAngular().set(angularVelocity);
          message.setTimestamp(timeStamp);

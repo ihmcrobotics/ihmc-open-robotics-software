@@ -56,7 +56,7 @@ public class FootstepNodeTest
 
       Vector2D shiftVector = new Vector2D(1.0, 2.0);
       RigidBodyTransform shiftedSoleTransform = FootstepNodeTools.shiftInSoleFrame(shiftVector, soleTransform);
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.0, 2.0, 0.0), shiftedSoleTransform.getTranslationVector(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(1.0, 2.0, 0.0), shiftedSoleTransform.getTranslation(), 1e-7);
       assertTrue(MathTools.epsilonEquals(node.getYaw(), yaw, 1e-7));
 
       soleTranslation = new Vector3D();
@@ -68,7 +68,7 @@ public class FootstepNodeTest
       shiftVector = new Vector2D(1.0, 2.0);
       shiftedSoleTransform = FootstepNodeTools.shiftInSoleFrame(shiftVector, soleTransform);
 
-      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(-2.0, 1.0, 0.0), shiftedSoleTransform.getTranslationVector(), 1e-7);
+      EuclidCoreTestTools.assertTuple3DEquals(new Point3D(-2.0, 1.0, 0.0), shiftedSoleTransform.getTranslation(), 1e-7);
       assertTrue(MathTools.epsilonEquals(node.getYaw(), yaw, 1e-7));
    }
 

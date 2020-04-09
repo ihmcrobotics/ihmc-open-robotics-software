@@ -13,8 +13,6 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.graph.PawNodeTo
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
-import us.ihmc.yoVariables.providers.BooleanProvider;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 
 public class CliffAvoidancePlanarRegionFootstepNodeSnapper extends SimplePlanarRegionPawNodeSnapper
 {
@@ -75,7 +73,7 @@ public class CliffAvoidancePlanarRegionFootstepNodeSnapper extends SimplePlanarR
       double right = -parameters.getMinimumLateralDistanceFromCliffBottoms();
 
       RigidBodyTransform transformToRegion = new RigidBodyTransform();
-      transformToRegion.setRotationYaw(footYaw);
+      transformToRegion.getRotation().setToYawOrientation(footYaw);
 
       ConvexPolygon2D avoidanceRegion = new ConvexPolygon2D();
       avoidanceRegion.addVertex(forward, left);

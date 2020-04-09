@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.forceSensorExamples;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -45,7 +45,7 @@ public class SimpleForceSensorRobot extends Robot
       addRootJoint(baseJoint);
 
       
-      SliderJoint sliderJoint = new SliderJoint("slider", new Vector3D(), this, Axis.Z);
+      SliderJoint sliderJoint = new SliderJoint("slider", new Vector3D(), this, Axis3D.Z);
       
       JointWrenchSensor jointWrenchSensor = new JointWrenchSensor("jointWrench", new Vector3D(), this);
       sliderJoint.addJointWrenchSensor(jointWrenchSensor);     

@@ -44,7 +44,7 @@ public class GenericQuadrupedJointNameMapAndContactDefinition implements Quadrup
          limbNames.put(robotQuadrant.getCamelCaseNameForStartOfExpression() + "Foot", new ImmutablePair<>(robotQuadrant, LimbName.LEG));
 
          RigidBodyTransform soleToParentTransform = new RigidBodyTransform();
-         soleToParentTransform.setTranslation(physicalProperties.getOffsetFromJointBeforeFootToSole(robotQuadrant));
+         soleToParentTransform.getTranslation().set(physicalProperties.getOffsetFromJointBeforeFootToSole(robotQuadrant));
          soleToParentTransforms.put(robotQuadrant, soleToParentTransform);
       }
 

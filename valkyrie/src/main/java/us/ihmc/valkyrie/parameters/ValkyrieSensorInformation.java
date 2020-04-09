@@ -32,7 +32,7 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
    static
    {
       RigidBodyTransform translateForwardAndDownOnFoot = new RigidBodyTransform();
-      translateForwardAndDownOnFoot.setTranslation(0.021564, 0.0, -0.051054);
+      translateForwardAndDownOnFoot.getTranslation().set(0.021564, 0.0, -0.051054);
       translateForwardAndDownOnFoot.setRotationEulerAndZeroTranslation(Math.PI, 0.0, 0.0);
 
       transformFromSixAxisMeasurementToAnkleZUpFrames.put(RobotSide.LEFT, translateForwardAndDownOnFoot);

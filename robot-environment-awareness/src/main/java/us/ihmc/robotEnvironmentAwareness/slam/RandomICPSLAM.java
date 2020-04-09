@@ -252,7 +252,7 @@ public class RandomICPSLAM extends SLAMBasics
          RigidBodyTransform newSensorPose = new RigidBodyTransform();
          convertToSensorPose(input, newSensorPose);
 
-         newSensorPose.normalizeRotationPart();
+         newSensorPose.getRotation().normalize();
          newSensorPose.preMultiplyInvertOther(transformWorldToSensorPose);
 
          transformToPack.set(newSensorPose);

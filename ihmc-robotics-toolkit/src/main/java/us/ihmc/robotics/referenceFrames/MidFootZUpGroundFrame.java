@@ -40,7 +40,7 @@ public class MidFootZUpGroundFrame extends ReferenceFrame
       framePose.interpolate(poseOne, poseTwo, 0.5);
       transformToParent.setIdentity();
       transformToParent.setRotationYawAndZeroTranslation(framePose.getYaw());
-      transformToParent.setTranslation(framePose.getPosition());
-      transformToParent.setTranslationZ(Math.min(poseOne.getZ(), poseTwo.getZ()));
+      transformToParent.getTranslation().set(framePose.getPosition());
+      transformToParent.getTranslation().setZ(Math.min(poseOne.getZ(), poseTwo.getZ()));
    }
 }

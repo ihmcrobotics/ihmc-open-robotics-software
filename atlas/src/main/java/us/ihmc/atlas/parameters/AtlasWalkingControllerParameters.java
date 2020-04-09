@@ -102,14 +102,14 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
          double z = -0.40;
          Vector3D translation = new Vector3D(x, y, z);
          translation.scale(jointMap.getModelScale());
-         transform.setTranslation(translation);
+         transform.getTranslation().set(translation);
 
          RotationMatrix rotation = new RotationMatrix();
          double yaw = 0.0; // robotSide.negateIfRightSide(-1.7);
          double pitch = 0.7;
          double roll = 0.0; // robotSide.negateIfRightSide(-0.8);
          rotation.setYawPitchRoll(yaw, pitch, roll);
-         transform.setRotation(rotation);
+         transform.getRotation().set(rotation);
 
          handPosesWithRespectToChestFrame.put(robotSide, transform);
       }

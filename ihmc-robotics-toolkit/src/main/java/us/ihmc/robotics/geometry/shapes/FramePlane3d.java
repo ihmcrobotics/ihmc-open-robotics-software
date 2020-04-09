@@ -67,7 +67,7 @@ public class FramePlane3d implements ReferenceFrameHolder
    public void getNormal(FrameVector3D normalToPack)
    {
       checkReferenceFrameMatch(normalToPack.getReferenceFrame());
-      this.plane3d.getNormal(temporaryVector);
+      temporaryVector.set(this.plane3d.getNormal());
       normalToPack.set(temporaryVector);
    }
 
@@ -85,18 +85,18 @@ public class FramePlane3d implements ReferenceFrameHolder
 
    public void setNormal(double x, double y, double z)
    {
-      plane3d.setNormal(x, y, z);
+      plane3d.getNormal().set(x, y, z);
    }
 
    public void setNormal(Vector3DReadOnly normal)
    {
-      plane3d.setNormal(normal);
+      plane3d.getNormal().set(normal);
    }
 
    public void getPoint(FramePoint3D pointToPack)
    {
       checkReferenceFrameMatch(pointToPack.getReferenceFrame());
-      this.plane3d.getPoint(temporaryPoint);
+      temporaryPoint.set(this.plane3d.getPoint());
       pointToPack.set(temporaryPoint);
    }
 
@@ -114,12 +114,12 @@ public class FramePlane3d implements ReferenceFrameHolder
 
    public void setPoint(double x, double y, double z)
    {
-      plane3d.setPoint(x, y, z);
+      plane3d.getPoint().set(x, y, z);
    }
 
    public void setPoint(Point3DReadOnly point)
    {
-      plane3d.setPoint(point);
+      plane3d.getPoint().set(point);
    }
 
    public void setPoints(FramePoint3D pointA, FramePoint3D pointB, FramePoint3D pointC)
@@ -252,8 +252,8 @@ public class FramePlane3d implements ReferenceFrameHolder
    public void setIncludingFrame(ReferenceFrame referenceFrame, double pointX, double pointY, double pointZ, double normalX, double normalY, double normalZ)
    {
       this.referenceFrame = referenceFrame;
-      plane3d.setPoint(pointX, pointY, pointZ);
-      plane3d.setNormal(normalX, normalY, normalZ);
+      plane3d.getPoint().set(pointX, pointY, pointZ);
+      plane3d.getNormal().set(normalX, normalY, normalZ);
    }
    
    public void getIntersectionWithLine(FramePoint3D pointToPack, FrameLine3D line)

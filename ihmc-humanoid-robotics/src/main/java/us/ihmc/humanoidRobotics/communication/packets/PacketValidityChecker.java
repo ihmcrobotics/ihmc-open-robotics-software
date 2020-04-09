@@ -6,8 +6,8 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.communication.packets.ObjectValidityChecker;
 import us.ihmc.communication.packets.ObjectValidityChecker.ObjectErrorType;
 import us.ihmc.communication.packets.Packet;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
@@ -709,12 +709,12 @@ public abstract class PacketValidityChecker
       if (errorMessage != null)
          return message.getClass().getSimpleName() + " " + errorMessage;
 
-      if (message.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
+      if (message.getFrameInformation().getDataReferenceFrameId() == EuclidHashCodeTools.NULL_HASHCODE)
       {
          return message.getClass().getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
 
-      if (message.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
+      if (message.getFrameInformation().getTrajectoryReferenceFrameId() == EuclidHashCodeTools.NULL_HASHCODE)
       {
          return message.getClass().getSimpleName() + " Trajectory Reference Frame Id Not Set";
       }
@@ -765,12 +765,12 @@ public abstract class PacketValidityChecker
          return errorMessage;
       }
 
-      if (message.getFrameInformation().getDataReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
+      if (message.getFrameInformation().getDataReferenceFrameId() == EuclidHashCodeTools.NULL_HASHCODE)
       {
          return message.getClass().getSimpleName() + " Expressed In Reference Frame Id Not Set";
       }
 
-      if (message.getFrameInformation().getTrajectoryReferenceFrameId() == NameBasedHashCodeTools.NULL_HASHCODE)
+      if (message.getFrameInformation().getTrajectoryReferenceFrameId() == EuclidHashCodeTools.NULL_HASHCODE)
       {
          return message.getClass().getSimpleName() + " Trajectory Reference Frame Id Not Set";
       }

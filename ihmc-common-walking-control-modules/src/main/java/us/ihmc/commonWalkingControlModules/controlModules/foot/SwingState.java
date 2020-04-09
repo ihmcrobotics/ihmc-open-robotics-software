@@ -393,7 +393,7 @@ public class SwingState extends AbstractFootControlState
       toeContactPoint.setIncludingFrame(toeContactPoint2d, 0.0);
       toeContactPoint.changeFrame(footFrame);
 
-      transformFromToeToAnkle.setTranslation(toeContactPoint);
+      transformFromToeToAnkle.getTranslation().set(toeContactPoint);
       return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() + "ToeFrame", footFrame,
                                                                                transformFromToeToAnkle);
    }
@@ -405,9 +405,9 @@ public class SwingState extends AbstractFootControlState
       currentStateProvider.getOrientation(initialOrientation);
       currentStateProvider.getAngularVelocity(initialAngularVelocity);
       initialPose.changeFrame(initialPosition.getReferenceFrame());
-      initialPose.setPosition(initialPosition);
+      initialPose.getPosition().set(initialPosition);
       initialPose.changeFrame(initialOrientation.getReferenceFrame());
-      initialPose.setOrientation(initialOrientation);
+      initialPose.getOrientation().set(initialOrientation);
       if (ignoreInitialAngularVelocityZ.getBooleanValue())
       {
          initialAngularVelocity.changeFrame(worldFrame);
@@ -499,7 +499,7 @@ public class SwingState extends AbstractFootControlState
             workspaceLimiterControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
          }
 
-         desiredPose.setPosition(desiredAnklePosition);
+         desiredPose.getPosition().set(desiredAnklePosition);
          changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
          desiredPosition.setIncludingFrame(desiredPose.getPosition());
       }

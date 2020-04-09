@@ -3,7 +3,7 @@ package us.ihmc.quadrupedPlanning.footstepChooser;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -76,7 +76,7 @@ public class PlanarRegionBasedPointFootSnapperTest
 
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.translate(-1.0, -1.0, 0.5);
-      planarRegionsListGenerator.rotate(0.25 * Math.PI, Axis.X);
+      planarRegionsListGenerator.rotate(0.25 * Math.PI, Axis3D.X);
       planarRegionsListGenerator.addRectangle(2.0, 2.0);
       PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
 

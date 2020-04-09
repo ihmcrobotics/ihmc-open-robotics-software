@@ -316,8 +316,8 @@ public class PlanarRegionSLAMTools
       Point2DBasics maxPoint = new Point2D();
 
       intersection.getCenterPoint(centerPoint);
-      intersection.getMinPoint(minPoint);
-      intersection.getMaxPoint(maxPoint);
+      minPoint.set(intersection.getMinPoint());
+      maxPoint.set(intersection.getMaxPoint());
 
       Point2D newCenterPointInNewDataLocal = createNewDataReferencePointInNewDataLocal(centerPoint,
                                                                                        transformFromWorldToMap,

@@ -33,6 +33,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.subscribers.PelvisPoseCorrectionCommunicatorInterface;
@@ -585,7 +586,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       {
          targets[i] = new RigidBodyTransform();
          targets[i].setRotationEulerAndZeroTranslation(0, 0, random.nextDouble() * 2.0 * Math.PI);
-         targets[i].setTranslation(RandomGeometry.nextVector3D(random, 1.0));
+         targets[i].getTranslation().set(RandomGeometry.nextVector3D(random, 1.0));
       }
       return targets;
    }
@@ -613,7 +614,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
       Vector3D targetTranslation = new Vector3D();
       Quaternion targetQuat = new Quaternion();
-      double[] yawPitchRoll = new double[3];
+      YawPitchRoll yawPitchRoll = new YawPitchRoll();
       double translationFudgeFactor = 0.015;
       double rotationFudgeFactor = 0.015;
       double largestError = Double.NEGATIVE_INFINITY;
@@ -621,11 +622,11 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       for (int i = 0; i < targets.length; i++)
       {
          success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getEstimatorDT() * 10);
-         targets[i].getTranslation(targetTranslation);
-         targets[i].getRotation(targetQuat);
+         targetTranslation.set(targets[i].getTranslation());
+         targetQuat.set(targets[i].getRotation());
 
          YawPitchRollConversion.convertQuaternionToYawPitchRoll(targetQuat, yawPitchRoll);
-         target.setYawPitchRoll(yawPitchRoll);
+         target.getYawPitchRoll().set(yawPitchRoll);
          target.setXYZ(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ());
 
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
@@ -648,9 +649,9 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
          double xError = Math.abs(pelvisX.getDoubleValue() - targetTranslation.getX());
          double yError = Math.abs(pelvisY.getDoubleValue() - targetTranslation.getY());
          double zError = Math.abs(pelvisZ.getDoubleValue() - targetTranslation.getZ());
-         double yawError = Math.abs(pelvisYaw.getDoubleValue() - yawPitchRoll[0]);
-         double pitchError = Math.abs(pelvisPitch.getDoubleValue() - yawPitchRoll[1]);
-         double rollError = Math.abs(pelvisRoll.getDoubleValue() - yawPitchRoll[2]);
+         double yawError = Math.abs(pelvisYaw.getDoubleValue() - yawPitchRoll.getYaw());
+         double pitchError = Math.abs(pelvisPitch.getDoubleValue() - yawPitchRoll.getPitch());
+         double rollError = Math.abs(pelvisRoll.getDoubleValue() - yawPitchRoll.getRoll());
 
          if (xError > largestError)
             largestError = xError;
@@ -685,7 +686,7 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
 
       Vector3D targetTranslation = new Vector3D();
       Quaternion targetQuat = new Quaternion();
-      double[] yawPitchRoll = new double[3];
+      YawPitchRoll yawPitchRoll = new YawPitchRoll();
       double translationFudgeFactor = 0.015;
       double rotationFudgeFactor = 0.035;
       double largestError = Double.NEGATIVE_INFINITY;
@@ -693,11 +694,11 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
       for (int i = 0; i < targets.length; i++)
       {
          success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getEstimatorDT() * 10);
-         targets[i].getTranslation(targetTranslation);
-         targets[i].getRotation(targetQuat);
+         targetTranslation.set(targets[i].getTranslation());
+         targetQuat.set(targets[i].getRotation());
 
          YawPitchRollConversion.convertQuaternionToYawPitchRoll(targetQuat, yawPitchRoll);
-         target.setYawPitchRoll(yawPitchRoll);
+         target.getYawPitchRoll().set(yawPitchRoll);
          target.setXYZ(targetTranslation.getX(), targetTranslation.getY(), targetTranslation.getZ());
 
          long timeStamp = Conversions.secondsToNanoseconds(simulationConstructionSet.getTime());
@@ -707,9 +708,9 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
          success &= drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(getRobotModel().getEstimatorDT() * 3);
          externalPelvisPosePublisher.setNewestPose(posePacket);
 
-         double yawErrorBeforeCorrection = Math.abs(pelvisYaw.getDoubleValue() - yawPitchRoll[0]);
-         double pitchErrorBeforeCorrection = Math.abs(pelvisPitch.getDoubleValue() - yawPitchRoll[1]);
-         double rollErrorBeforeCorrection = Math.abs(pelvisRoll.getDoubleValue() - yawPitchRoll[2]);
+         double yawErrorBeforeCorrection = Math.abs(pelvisYaw.getDoubleValue() - yawPitchRoll.getYaw());
+         double pitchErrorBeforeCorrection = Math.abs(pelvisPitch.getDoubleValue() - yawPitchRoll.getPitch());
+         double rollErrorBeforeCorrection = Math.abs(pelvisRoll.getDoubleValue() - yawPitchRoll.getRoll());
 
          while (translationClippedAlphaValue.getDoubleValue() > 0.2)
          {
@@ -724,9 +725,9 @@ public abstract class PelvisPoseHistoryCorrectionEndToEndTest implements MultiRo
          double xError = Math.abs(pelvisX.getDoubleValue() - targetTranslation.getX());
          double yError = Math.abs(pelvisY.getDoubleValue() - targetTranslation.getY());
          double zError = Math.abs(pelvisZ.getDoubleValue() - targetTranslation.getZ());
-         double yawErrorAfterCorrection = Math.abs(pelvisYaw.getDoubleValue() - yawPitchRoll[0]);
-         double pitchErrorAfterCorrection = Math.abs(pelvisPitch.getDoubleValue() - yawPitchRoll[1]);
-         double rollErrorAfterCorrection = Math.abs(pelvisRoll.getDoubleValue() - yawPitchRoll[2]);
+         double yawErrorAfterCorrection = Math.abs(pelvisYaw.getDoubleValue() - yawPitchRoll.getYaw());
+         double pitchErrorAfterCorrection = Math.abs(pelvisPitch.getDoubleValue() - yawPitchRoll.getPitch());
+         double rollErrorAfterCorrection = Math.abs(pelvisRoll.getDoubleValue() - yawPitchRoll.getRoll());
 
          if (xError > largestError)
             largestError = xError;

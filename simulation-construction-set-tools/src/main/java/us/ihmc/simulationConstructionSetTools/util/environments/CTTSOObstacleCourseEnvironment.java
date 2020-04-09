@@ -3,7 +3,7 @@ package us.ihmc.simulationConstructionSetTools.util.environments;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -359,7 +359,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       for (RobotSide robotSide : RobotSide.values)
       {
          double filletRadius = curbHeight * fillet;
-         Cylinder3D sideEdgeFillet = new Cylinder3D(new Point3D(location.getTranslation()), Axis.X, gridLength, filletRadius);
+         Cylinder3D sideEdgeFillet = new Cylinder3D(new Point3D(location.getTranslation()), Axis3D.X, gridLength, filletRadius);
          sideEdgeFillet.getPosition().add(0.0, robotSide.negateIfRightSide(gridWidth / 2 - filletRadius), curbHeight / 2 - filletRadius);
          combinedTerrainObject.addTerrainObject(new CylinderTerrainObject(new Vector3D(sideEdgeFillet.getPosition()), 90.0, 0.0, gridLength, filletRadius, edgeAppearance));
 
@@ -450,7 +450,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
       centroidTransform.appendTranslation(location.getX(), location.getY(), 0.0);
       RegularPolygon potholePolygon = new RegularPolygon(centerToPoints, POINTS_PER_POTHOLE);
 
-      PotholePlanarRegionProvider potholePlanarRegionProvider = new PotholePlanarRegionProvider(potholePolygon, centroidTransform.getTranslationVector(),
+      PotholePlanarRegionProvider potholePlanarRegionProvider = new PotholePlanarRegionProvider(potholePolygon, centroidTransform.getTranslation(),
                                                                                                 depthToCentroid);
       List<PlanarRegion> potholePlanarRegions = potholePlanarRegionProvider.getPlanarRegions();
       for (int i = 0; i < potholePlanarRegions.size(); i++)
@@ -497,7 +497,7 @@ public class CTTSOObstacleCourseEnvironment implements CommonAvatarEnvironmentIn
          centroidTransform.appendTranslation(location.getX(), location.getY(), 0.0);
          RegularPolygon potholePolygon = new RegularPolygon(centerToPoints, POINTS_PER_POTHOLE);
 
-         PotholePlanarRegionProvider potholePlanarRegionProvider = new PotholePlanarRegionProvider(potholePolygon, centroidTransform.getTranslationVector(),
+         PotholePlanarRegionProvider potholePlanarRegionProvider = new PotholePlanarRegionProvider(potholePolygon, centroidTransform.getTranslation(),
                                                                                                    depthToCentroid);
          List<PlanarRegion> potholePlanarRegions = potholePlanarRegionProvider.getPlanarRegions();
          for (int j = 0; j < potholePlanarRegions.size(); j++)

@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -137,7 +137,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.addRectangle(5.0, 5.0);
       generator.translate(centerX, centerY, groundHeight + cliffHeight);
-      generator.rotate(rotation, Axis.Z);
+      generator.rotate(rotation, Axis3D.Z);
       double boxWidth = 0.5;
       generator.addRectangle(boxWidth, boxWidth);
 

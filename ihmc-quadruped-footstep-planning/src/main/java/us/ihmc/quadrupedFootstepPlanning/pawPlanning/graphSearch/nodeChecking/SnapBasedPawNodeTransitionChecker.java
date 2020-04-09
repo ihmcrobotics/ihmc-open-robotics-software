@@ -541,10 +541,9 @@ public class SnapBasedPawNodeTransitionChecker extends PawNodeTransitionChecker
       zAxis.cross(xAxisInPlane, yAxisInPlane);
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setRotation(xAxisInPlane.getX(), xAxisInPlane.getY(), xAxisInPlane.getZ(), yAxisInPlane.getX(), yAxisInPlane.getY(), yAxisInPlane.getZ(),
-                            zAxis.getX(), zAxis.getY(), zAxis.getZ());
-      transform.setTranslation(point0);
-      transform.invertRotation();
+      transform.getRotation().set(xAxisInPlane.getX(), xAxisInPlane.getY(), xAxisInPlane.getZ(), yAxisInPlane.getX(), yAxisInPlane.getY(), yAxisInPlane.getZ(), zAxis.getX(), zAxis.getY(), zAxis.getZ());
+      transform.getTranslation().set(point0);
+      transform.getRotation().invert();
 
       point0.applyInverseTransform(transform);
       point1.applyInverseTransform(transform);

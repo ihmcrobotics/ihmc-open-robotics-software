@@ -1,9 +1,9 @@
 package us.ihmc.quadrupedBasics.utils;
 
+import us.ihmc.euclid.referenceFrame.FrameEllipsoid3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.robotics.geometry.shapes.FrameEllipsoid3d;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.sensorProcessing.frames.CommonQuadrupedReferenceFrames;
 
@@ -52,7 +52,7 @@ public class QuadrupedGeometryTools
     * @param ellipsoidToPackInHipPitchFrame
     * @param robotQuadrant
     */
-   public static void updateFootstepWorkspace(RobotQuadrant robotQuadrant, FrameEllipsoid3d ellipsoidToPack, CommonQuadrupedReferenceFrames referenceFrames)
+   public static void updateFootstepWorkspace(RobotQuadrant robotQuadrant, FrameEllipsoid3D ellipsoidToPack, CommonQuadrupedReferenceFrames referenceFrames)
    {
       double hipPitchHeight = ReferenceFrame.getWorldFrame().getTransformToDesiredFrame(referenceFrames.getHipPitchFrame(robotQuadrant)).getM23();
       double maxStepDistance = Math.sqrt(Math.pow(referenceFrames.getLegLength(robotQuadrant), 2) - Math.pow(hipPitchHeight, 2));
@@ -60,10 +60,10 @@ public class QuadrupedGeometryTools
       ellipsoidToPack.checkReferenceFrameMatch(referenceFrames.getHipPitchFrame(robotQuadrant));
       
       RigidBodyTransform ellipsoidTransform = new RigidBodyTransform();
-      ellipsoidTransform.setTranslation(0.0, 0.0, -hipPitchHeight);
+      ellipsoidTransform.getTranslation().set(0.0, 0.0, -hipPitchHeight);
       ellipsoidToPack.applyTransform(ellipsoidTransform);
-      ellipsoidToPack.getEllipsoid3d().setRadiusX(maxStepDistance);
-      ellipsoidToPack.getEllipsoid3d().setRadiusY(maxStepDistance);
-      ellipsoidToPack.getEllipsoid3d().setRadiusZ(0.0);
+      ellipsoidToPack.getRadii().setX(maxStepDistance);
+      ellipsoidToPack.getRadii().setY(maxStepDistance);
+      ellipsoidToPack.getRadii().setZ(0.0);
    }
 }

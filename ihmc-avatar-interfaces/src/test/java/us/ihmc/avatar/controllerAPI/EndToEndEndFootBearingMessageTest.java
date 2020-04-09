@@ -54,7 +54,7 @@ public abstract class EndToEndEndFootBearingMessageTest implements MultiRobotTes
       {
          // First need to pick up the foot:
          FramePose3D footPoseCloseToActual = new FramePose3D(fullRobotModel.getEndEffectorFrame(robotSide, LimbName.LEG));
-         footPoseCloseToActual.setPosition(0.0, 0.0, 0.05);
+         footPoseCloseToActual.getPosition().set(0.0, 0.0, 0.05);
          footPoseCloseToActual.changeFrame(ReferenceFrame.getWorldFrame());
          Point3D desiredPosition = new Point3D();
          Quaternion desiredOrientation = new Quaternion();

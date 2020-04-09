@@ -2,8 +2,9 @@ package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobo
 
 import java.util.ArrayList;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
+import us.ihmc.euclid.referenceFrame.FrameCylinder3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -14,7 +15,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.simulationconstructionset.FloatingJoint;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.GroundContactPointGroup;
@@ -28,7 +28,7 @@ public class ContactableCylinderRobot extends ContactableRobot
    private static final double DEFAULT_MASS = 1.0;
 
    private final RigidBodyTransform rootJointTransformToWorld;
-   private final FrameCylinder3d frameCylinder;
+   private final FrameCylinder3D frameCylinder;
 
    private final FloatingJoint floatingJoint;
    private final ReferenceFrame afterRootJointFrame;
@@ -59,14 +59,14 @@ public class ContactableCylinderRobot extends ContactableRobot
             floatingJoint.getTransformToWorld(transformToParent);
          }
       };
-      frameCylinder = new FrameCylinder3d(afterRootJointFrame, height, radius);
+      frameCylinder = new FrameCylinder3D(afterRootJointFrame, height, radius);
 
 
       link = new Link(name + "Link");
       link.setMass(mass);
       link.setComOffset(new Vector3D(0.0, 0.0, height / 3.0));
 
-      Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, height, Axis.Z);
+      Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(mass, radius, height, Axis3D.Z);
       link.setMomentOfInertia(inertia);
 
       linkGraphics = new Graphics3DObject();
@@ -112,7 +112,7 @@ public class ContactableCylinderRobot extends ContactableRobot
    {
       afterRootJointFrame.update();
       frameCylinder.changeFrame(worldFrame);
-      boolean insideOrOnSurface = frameCylinder.getCylinder3d().isPointInside(pointInWorldToCheck);
+      boolean insideOrOnSurface = frameCylinder.isPointInside(pointInWorldToCheck);
       frameCylinder.changeFrame(afterRootJointFrame);
       return insideOrOnSurface;
    }
@@ -128,7 +128,7 @@ public class ContactableCylinderRobot extends ContactableRobot
    {
       afterRootJointFrame.update();
       frameCylinder.changeFrame(worldFrame);
-      frameCylinder.getCylinder3d().evaluatePoint3DCollision(pointInWorldToCheck, intersectionToPack, normalToPack);
+      frameCylinder.evaluatePoint3DCollision(pointInWorldToCheck, intersectionToPack, normalToPack);
       frameCylinder.changeFrame(afterRootJointFrame);
    }
 

@@ -207,15 +207,15 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
       {
          DenseMatrix64F pixelToNorm = computePixelToNorm(bufferedImage);
 
-         cameraRigidTransform.setRotation(cameraOrientationInWorldXForward);
+         cameraRigidTransform.getRotation().set(cameraOrientationInWorldXForward);
          cameraRigidPosition.set(cameraPositionInWorld);
-         cameraRigidTransform.setTranslation(cameraRigidPosition);
+         cameraRigidTransform.getTranslation().set(cameraRigidPosition);
 
          cameraReferenceFrame.update();
          detectorReferenceFrame.update();
 
-         cameraPose.setOrientation(cameraOrientationInWorldXForward);
-         cameraPose.setPosition(cameraPositionInWorld);
+         cameraPose.getOrientation().set(cameraOrientationInWorldXForward);
+         cameraPose.getPosition().set(cameraPositionInWorld);
 
          ObjectDetectorResultPacket result = results.poll();
 
@@ -271,8 +271,8 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
             tempFiducialRotationQuat.set(fiducialRotationMatrix);
 
             tempFiducialDetectorFrame.setToZero(detectorReferenceFrame);
-            tempFiducialDetectorFrame.setOrientation(tempFiducialRotationQuat);
-            tempFiducialDetectorFrame.setPosition(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
+            tempFiducialDetectorFrame.getOrientation().set(tempFiducialRotationQuat);
+            tempFiducialDetectorFrame.getPosition().set(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
             tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
 
             locatedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);

@@ -38,7 +38,7 @@ public class ZUpFrame extends ReferenceFrame
    {
       //TODO: Combine with RotationTools.removePitchAndRollFromTransform(). 
       origin.getReferenceFrame().getTransformToDesiredFrame(nonZUpToWorld, worldFrame);
-      nonZUpToWorld.getRotation(nonZUpToWorldRotation);
+      nonZUpToWorldRotation.set(nonZUpToWorld.getRotation());
 
       double yaw = nonZUpToWorldRotation.getYaw();
       euler.set(0.0, 0.0, yaw);
@@ -47,6 +47,6 @@ public class ZUpFrame extends ReferenceFrame
       originPoint3d.set(origin);
       nonZUpToWorld.transform(originPoint3d);
       translation.set(originPoint3d);
-      transformToParent.setTranslation(translation);
+      transformToParent.getTranslation().set(translation);
    }
 }

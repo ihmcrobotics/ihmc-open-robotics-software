@@ -12,7 +12,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.RandomNumbers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -128,7 +128,7 @@ public class ContactableValveRobotTest
 
       floatingRobot.setGravity(0.0, 0.0, 0.0);
 
-      horizontalJoint = new SliderJoint("y", position, floatingRobot, Axis.Y);
+      horizontalJoint = new SliderJoint("y", position, floatingRobot, Axis3D.Y);
 
       floatingRobot.addRootJoint(horizontalJoint);
 
@@ -143,7 +143,7 @@ public class ContactableValveRobotTest
 
       horizontalJoint.setLink(linkHorizontal);
 
-      verticalJoint = new SliderJoint("z", new Vector3D(0.0, 0.0, 0.0), floatingRobot, Axis.Z);
+      verticalJoint = new SliderJoint("z", new Vector3D(0.0, 0.0, 0.0), floatingRobot, Axis3D.Z);
 
       Link linkVertical = new Link("linkVertical");
       linkVertical.setMass(0.5);

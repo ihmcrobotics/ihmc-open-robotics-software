@@ -5,7 +5,13 @@ import java.util.List;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FrameLine2D;
+import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -139,8 +145,8 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
 
       ReferenceFrame referenceFrame = footPolygon.getReferenceFrame();
       toeOffContactLine2d.setToZero(referenceFrame);
-      toeOffContactLine2d.setFirstEndpoint(referenceFrame, Double.NEGATIVE_INFINITY, 0.0);
-      toeOffContactLine2d.setSecondEndpoint(referenceFrame, Double.NEGATIVE_INFINITY, 0.0);
+      toeOffContactLine2d.getFirstEndpoint().set(referenceFrame, Double.NEGATIVE_INFINITY, 0.0);
+      toeOffContactLine2d.getSecondEndpoint().set(referenceFrame, Double.NEGATIVE_INFINITY, 0.0);
 
       // gets the leading two toe points
       for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
@@ -149,11 +155,11 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
          if (tmpPoint2d.getX() > toeOffContactLine2d.getFirstEndpoint().getX())
          { // further ahead than leading point
             toeOffContactLine2d.flipDirection();
-            toeOffContactLine2d.setFirstEndpoint(tmpPoint2d);
+            toeOffContactLine2d.getFirstEndpoint().set(tmpPoint2d);
          }
          else if (tmpPoint2d.getX() > toeOffContactLine2d.getSecondEndpoint().getX())
          { // further ahead than second leading point
-            toeOffContactLine2d.setSecondEndpoint(tmpPoint2d);
+            toeOffContactLine2d.getSecondEndpoint().set(tmpPoint2d);
          }
       }
 

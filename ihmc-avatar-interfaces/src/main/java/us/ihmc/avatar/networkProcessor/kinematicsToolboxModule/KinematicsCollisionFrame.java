@@ -79,7 +79,7 @@ public class KinematicsCollisionFrame extends ReferenceFrame
       this.origin.changeFrame(getParent());
       this.zAxis.changeFrame(getParent());
 
-      transformToParent.setTranslation(this.origin);
+      transformToParent.getTranslation().set(this.origin);
       EuclidCoreMissingTools.rotationMatrix3DFromZUpToVector3D(this.zAxis, transformToParent.getRotation());
       update();
    }

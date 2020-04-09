@@ -122,8 +122,8 @@ public class OccupancyGridToolsTest
       OccupancyGrid occupancyGrid = new OccupancyGrid("", worldFrame, new YoVariableRegistry("test"));
       FrameLine2D verticalLine = new FrameLine2D();
       FrameLine2D horizontalLine = new FrameLine2D();
-      verticalLine.setDirection(1.0, 0.0);
-      horizontalLine.setDirection(0.0, 1.0);
+      verticalLine.getDirection().set(1.0, 0.0);
+      horizontalLine.getDirection().set(0.0, 1.0);
 
       occupancyGrid.registerPoint(new FramePoint2D(worldFrame, 0.0, 1.0));
 

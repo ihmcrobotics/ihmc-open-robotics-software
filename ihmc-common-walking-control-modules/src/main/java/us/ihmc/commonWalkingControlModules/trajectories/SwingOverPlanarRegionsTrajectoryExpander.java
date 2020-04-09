@@ -281,7 +281,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       axisAngle.set(swingTrajectoryPlane.getNormal(), Math.PI / 2.0);
 
-      rigidBodyTransform.setRotation(axisAngle);
+      rigidBodyTransform.getRotation().set(axisAngle);
       tempPlaneNormal.sub(swingStartPosition, swingEndPosition);
       rigidBodyTransform.transform(tempPlaneNormal);
       tempPlaneNormal.normalize();
@@ -688,7 +688,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private void computeWaypointAdjustmentDirection(double fraction)
    {
       axisAngle.set(swingTrajectoryPlane.getNormal(), Math.PI * fraction);
-      rigidBodyTransform.setRotation(axisAngle);
+      rigidBodyTransform.getRotation().set(axisAngle);
 
       waypointAdjustment.sub(swingStartPosition, swingEndPosition);
       waypointAdjustment.normalize();
