@@ -156,4 +156,9 @@ public class JavaFXStoredPropertyMap
       JavaFXPropertyHolder javaFXProperty = fromStoredPropertyMap.get(storedProperty);
       javaFXProperty.addValueChangedListener(runnable);
    }
+
+   public StoredPropertySetBasics getStoredPropertySet()
+   {
+      return storedPropertySet;
+   }
 }
