@@ -147,6 +147,8 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    public void reset()
    {
       tempFramePoint.setToZero(centerOfMassFrame);
+      tempFramePoint.changeFrame(frameOfLastFootstep);
+      tempFramePoint.setZ(nominalHeightAboveGround.getDoubleValue());
       tempFramePoint.changeFrame(worldFrame);
 
       desiredCoMPosition.set(tempFramePoint);
