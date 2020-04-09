@@ -61,7 +61,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
       robotRegistry.addChild(interRobotContactCalculatorRegistry);
       robotRegistry.addChild(selfContactCalculatorRegistry);
 
-      environmentContactConstraintCalculatorPool = new RecyclingArrayList<>(8, SupplierBuilder.indexedSupplier(identifier ->
+      environmentContactConstraintCalculatorPool = new RecyclingArrayList<>(20, SupplierBuilder.indexedSupplier(identifier ->
       {
          YoSingleContactImpulseCalculator calculator = new YoSingleContactImpulseCalculator("Single",
                                                                                             identifier,
