@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeExpansion;
 
+import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -9,104 +10,90 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.HashSet;
-import java.util.function.DoubleSupplier;
 
 public class ParameterBasedNodeExpansion
 {
    private final HashSet<FootstepNode> expansion = new HashSet<>();
+   private final FootstepPlannerParametersReadOnly parameters;
 
-   private final DoubleSupplier minimumStepLength;
-   private final DoubleSupplier maximumStepReach;
-   private final DoubleSupplier stepYawReductionFactorAtMaxReach;
-   private final DoubleSupplier minimumStepYaw;
-   private final DoubleSupplier maximumStepYaw;
-   private final DoubleSupplier minimumStepWidth;
-   private final DoubleSupplier maximumStepWidth;
-   private final DoubleSupplier idealFootstepWidth;
-   private final DoubleSupplier minXClearanceFromStance;
-   private final DoubleSupplier minYClearanceFromStance;
+   private final TDoubleArrayList xOffsets = new TDoubleArrayList();
+   private final TDoubleArrayList yOffsets = new TDoubleArrayList();
+   private final TDoubleArrayList yawOffsets = new TDoubleArrayList();
 
    public ParameterBasedNodeExpansion(FootstepPlannerParametersReadOnly parameters)
    {
-      this(parameters::getMinimumStepLength,
-           parameters::getMaximumStepReach,
-           parameters::getStepYawReductionFactorAtMaxReach,
-           parameters::getMinimumStepYaw,
-           parameters::getMaximumStepYaw,
-           parameters::getMinimumStepWidth,
-           parameters::getMaximumStepWidth,
-           parameters::getIdealFootstepWidth,
-           parameters::getMinXClearanceFromStance,
-           parameters::getMinYClearanceFromStance);
+      this.parameters = parameters;
    }
 
-   public ParameterBasedNodeExpansion(DoubleSupplier minimumStepLength,
-                                      DoubleSupplier maximumStepReach,
-                                      DoubleSupplier stepYawReductionFactorAtMaxReach,
-                                      DoubleSupplier minimumStepYaw,
-                                      DoubleSupplier maximumStepYaw,
-                                      DoubleSupplier minimumStepWidth,
-                                      DoubleSupplier maximumStepWidth,
-                                      DoubleSupplier idealFootstepWidth,
-                                      DoubleSupplier minXClearanceFromStance,
-                                      DoubleSupplier minYClearanceFromStance)
+   public void initialize()
    {
-      this.minimumStepLength = minimumStepLength;
-      this.maximumStepReach = maximumStepReach;
-      this.stepYawReductionFactorAtMaxReach = stepYawReductionFactorAtMaxReach;
-      this.minimumStepYaw = minimumStepYaw;
-      this.maximumStepYaw = maximumStepYaw;
-      this.minimumStepWidth = minimumStepWidth;
-      this.maximumStepWidth = maximumStepWidth;
-      this.idealFootstepWidth = idealFootstepWidth;
-      this.minXClearanceFromStance = minXClearanceFromStance;
-      this.minYClearanceFromStance = minYClearanceFromStance;
-   }
+      xOffsets.clear();
+      yOffsets.clear();
+      yawOffsets.clear();
 
-   public HashSet<FootstepNode> expandNode(FootstepNode node)
-   {
-      expansion.clear();
+      double maxReachSquared = MathTools.square(parameters.getMaximumStepReach());
 
-      RobotSide nextSide = node.getRobotSide().getOppositeSide();
-      double maxReachSquared = MathTools.square(maximumStepReach.getAsDouble());
-      double minYawAtFullExtension = (1.0 - stepYawReductionFactorAtMaxReach.getAsDouble()) * minimumStepYaw.getAsDouble();
-      double maxYawAtFullExtension = (1.0 - stepYawReductionFactorAtMaxReach.getAsDouble()) * maximumStepYaw.getAsDouble();
-      for (double x = minimumStepLength.getAsDouble(); x <= maximumStepReach.getAsDouble(); x += LatticeNode.gridSizeXY)
+      for (double x = parameters.getMinimumStepLength(); x <= parameters.getMaximumStepReach(); x += LatticeNode.gridSizeXY)
       {
-         for (double y = minimumStepWidth.getAsDouble(); y <= maximumStepWidth.getAsDouble(); y += LatticeNode.gridSizeXY)
+         for (double y = parameters.getMinimumStepWidth(); y <= parameters.getMaximumStepWidth(); y += LatticeNode.gridSizeXY)
          {
-            double relativeYToIdeal = y - idealFootstepWidth.getAsDouble();
+            double relativeYToIdeal = y - parameters.getIdealFootstepWidth();
             double reachSquared = EuclidCoreTools.normSquared(x, relativeYToIdeal);
             if (reachSquared > maxReachSquared)
                continue;
 
-            if (Math.abs(x) <= minXClearanceFromStance.getAsDouble() && Math.abs(y) <= minYClearanceFromStance.getAsDouble())
+            if (Math.abs(x) <= parameters.getMinXClearanceFromStance() && Math.abs(y) <= parameters.getMinYClearanceFromStance())
                continue;
 
-            double reachFraction = EuclidCoreTools.fastSquareRoot(reachSquared) / maximumStepReach.getAsDouble();
-            double minYaw = InterpolationTools.linearInterpolate(minimumStepYaw.getAsDouble(), minYawAtFullExtension, reachFraction);
-            double maxYaw = InterpolationTools.linearInterpolate(maximumStepYaw.getAsDouble(), maxYawAtFullExtension, reachFraction);
+            double reachFraction = EuclidCoreTools.fastSquareRoot(reachSquared) / parameters.getMaximumStepReach();
+            double minYawAtFullExtension = (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMinimumStepYaw();
+            double maxYawAtFullExtension = (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMaximumStepYaw();
+
+            double minYaw = InterpolationTools.linearInterpolate(parameters.getMinimumStepYaw(), minYawAtFullExtension, reachFraction);
+            double maxYaw = InterpolationTools.linearInterpolate(parameters.getMaximumStepYaw(), maxYawAtFullExtension, reachFraction);
 
             for (double yaw = minYaw; yaw <= maxYaw; yaw += LatticeNode.gridSizeYaw)
             {
-               FootstepNode offsetNode = constructNodeInPreviousNodeFrame(x, nextSide.negateIfRightSide(y), nextSide.negateIfRightSide(yaw), node);
-               expansion.add(offsetNode);
+               xOffsets.add(x);
+               yOffsets.add(y);
+               yawOffsets.add(yaw);
             }
          }
+      }
+   }
+
+   public HashSet<FootstepNode> expandNode(FootstepNode stanceNode)
+   {
+      expansion.clear();
+      RobotSide stepSide = stanceNode.getRobotSide().getOppositeSide();
+
+      for (int i = 0; i < xOffsets.size(); i++)
+      {
+         double stepLength = xOffsets.get(i);
+         double stepWidth = stepSide.negateIfRightSide(yOffsets.get(i));
+         double stepYaw = stepSide.negateIfRightSide(yawOffsets.get(i));
+         FootstepNode childNode = constructNodeInPreviousNodeFrame(stepLength, stepWidth, stepYaw, stanceNode);
+
+         expansion.add(childNode);
       }
 
       return expansion;
    }
 
-   private static FootstepNode constructNodeInPreviousNodeFrame(double stepLength, double stepWidth, double stepYaw, FootstepNode node)
-   {
-      Vector2D footstep = new Vector2D(stepLength, stepWidth);
-      AxisAngle rotation = new AxisAngle(node.getYaw(), 0.0, 0.0);
-      rotation.transform(footstep);
+   private final Vector2D footstepTranslation = new Vector2D();
+   private final AxisAngle footstepRotation = new AxisAngle();
 
-      return new FootstepNode(node.getX() + footstep.getX(), node.getY() + footstep.getY(), stepYaw + node.getYaw(), node.getRobotSide().getOppositeSide());
+   private FootstepNode constructNodeInPreviousNodeFrame(double stepLength, double stepWidth, double stepYaw, FootstepNode node)
+   {
+      footstepTranslation.set(stepLength, stepWidth);
+      footstepRotation.setYawPitchRoll(node.getYaw(), 0.0, 0.0);
+      footstepRotation.transform(footstepTranslation);
+
+      return new FootstepNode(node.getX() + footstepTranslation.getX(),
+                              node.getY() + footstepTranslation.getY(),
+                              stepYaw + node.getYaw(),
+                              node.getRobotSide().getOppositeSide());
    }
 }
