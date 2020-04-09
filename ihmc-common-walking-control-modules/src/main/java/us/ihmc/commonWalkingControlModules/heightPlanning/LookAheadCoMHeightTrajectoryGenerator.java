@@ -886,4 +886,14 @@ public class LookAheadCoMHeightTrajectoryGenerator
             + position.getY() + ", " + position.getZ() + "), new Quat4d(" + orientation.getS() + ", " + orientation.getX() + ", " + orientation.getY() + ", "
             + orientation.getZ() + ")));");
    }
+
+   public void getCurrentDesiredHeight(FramePoint3D positionToPack)
+   {
+      positionToPack.setIncludingFrame(desiredCoMPosition);
+   }
+
+   public double getOffsetHeightTimeInTrajectory()
+   {
+      return yoTime.getValue();
+   }
 }

@@ -3,7 +3,6 @@ package us.ihmc.commonWalkingControlModules.heightPlanning;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -17,8 +16,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
-import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -94,9 +91,9 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       heightOffsetHandler = new HeightOffsetHandler(yoTime, defaultOffsetHeightAboveGround, registry);
 
-      setMinimumLegLengthToGround(minimumHeightAboveGround);
-      setNominalLegLengthToGround(nominalHeightAboveGround);
-      setMaximumLegLengthToGround(maximumHeightAboveGround);
+      setMinimumHeightAboveGround(minimumHeightAboveGround);
+      setNominalHeightAboveGround(nominalHeightAboveGround);
+      setMaximumHeightAboveGround(maximumHeightAboveGround);
 
       heightWaypoints = new RecyclingArrayList<>(5, SupplierBuilder.indexedSupplier(this::createHeightWaypoint));
 
@@ -157,17 +154,17 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       heightOffsetHandler.reset();
    }
 
-   public void setMinimumLegLengthToGround(double minimumHeightAboveGround)
+   public void setMinimumHeightAboveGround(double minimumHeightAboveGround)
    {
       this.minimumHeightAboveGround.set(minimumHeightAboveGround);
    }
 
-   public void setNominalLegLengthToGround(double nominalHeightAboveGround)
+   public void setNominalHeightAboveGround(double nominalHeightAboveGround)
    {
       this.nominalHeightAboveGround.set(nominalHeightAboveGround);
    }
 
-   public void setMaximumLegLengthToGround(double maximumHeightAboveGround)
+   public void setMaximumHeightAboveGround(double maximumHeightAboveGround)
    {
       this.maximumHeightAboveGround.set(maximumHeightAboveGround);
    }
@@ -181,6 +178,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    {
       frameOfLastFootstep = soleFrames.get(supportLeg);
       splinedHeightTrajectory.setReferenceFrame(frameOfLastFootstep);
+      heightOffsetHandler.setReferenceFrame(frameOfLastFootstep);
    }
 
    public void initialize(NewTransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight, boolean isInTransfer)

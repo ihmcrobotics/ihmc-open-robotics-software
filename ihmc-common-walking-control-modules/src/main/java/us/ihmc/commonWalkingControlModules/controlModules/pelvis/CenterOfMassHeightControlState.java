@@ -6,7 +6,6 @@ import us.ihmc.commonWalkingControlModules.controlModules.TaskspaceTrajectorySta
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.heightPlanning.*;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commons.MathTools;
@@ -14,7 +13,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
@@ -24,7 +22,6 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTraje
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.PDControllerWithGainSetter;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
@@ -100,61 +97,41 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    }
 
    public BetterLookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(HighLevelHumanoidControllerToolbox controllerToolbox,
-                                                                          WalkingControllerParameters walkingControllerParameters,
-                                                                          CommonHumanoidReferenceFrames referenceFrames)
+                                                                                WalkingControllerParameters walkingControllerParameters,
+                                                                                CommonHumanoidReferenceFrames referenceFrames)
    {
       double minimumHeightAboveGround = walkingControllerParameters.minimumHeightAboveAnkle();
       double nominalHeightAboveGround = walkingControllerParameters.nominalHeightAboveAnkle();
       double maximumHeightAboveGround = walkingControllerParameters.maximumHeightAboveAnkle();
-      double defaultOffsetHeightAboveGround = walkingControllerParameters.defaultOffsetHeightAboveAnkle();
+      double defaultOffsetHeightAboveGround = 0.0;
 
-      return createTrajectoryGenerator(minimumHeightAboveGround,
-                                       nominalHeightAboveGround,
-                                       maximumHeightAboveGround,
-                                       defaultOffsetHeightAboveGround,
-                                       referenceFrames.getPelvisFrame(),
-                                       referenceFrames.getSoleZUpFrames(),
-                                       controllerToolbox.getYoTime(),
-                                       controllerToolbox.getYoGraphicsListRegistry());
-   }
-
-   public BetterLookAheadCoMHeightTrajectoryGenerator createTrajectoryGenerator(double minimumHeightAboveGround,
-                                                                          double nominalHeightAboveGround,
-                                                                          double maximumHeightAboveGround,
-                                                                          double defaultOffsetHeightAboveGround,
-                                                                          ReferenceFrame pelvisFrame,
-                                                                          SideDependentList<? extends ReferenceFrame> soleZUpFrames,
-                                                                          DoubleProvider yoTime,
-                                                                          YoGraphicsListRegistry yoGraphicsListRegistry)
-   {
       double doubleSupportPercentageIn = 0.3;
 
-      BetterLookAheadCoMHeightTrajectoryGenerator centerOfMassTrajectoryGenerator = new BetterLookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
-                                                                                                                        nominalHeightAboveGround,
-                                                                                                                        maximumHeightAboveGround,
-                                                                                                                        defaultOffsetHeightAboveGround,
-                                                                                                                        doubleSupportPercentageIn,
-                                                                                                                        pelvisFrame,
-                                                                                                                        soleZUpFrames,
-                                                                                                                        yoTime,
-                                                                                                                        yoGraphicsListRegistry,
-                                                                                                                                    registry);
-      return centerOfMassTrajectoryGenerator;
+      return new BetterLookAheadCoMHeightTrajectoryGenerator(minimumHeightAboveGround,
+                                                             nominalHeightAboveGround,
+                                                             maximumHeightAboveGround,
+                                                             defaultOffsetHeightAboveGround,
+                                                             doubleSupportPercentageIn,
+                                                             pelvisFrame,
+                                                             referenceFrames.getSoleZUpFrames(),
+                                                             controllerToolbox.getYoTime(),
+                                                             controllerToolbox.getYoGraphicsListRegistry(),
+                                                             registry);
    }
 
    public void setMinimumHeightAboveGround(double minimumHeightAboveGround)
    {
-      centerOfMassTrajectoryGenerator.setMinimumLegLengthToGround(minimumHeightAboveGround);
+      centerOfMassTrajectoryGenerator.setMinimumHeightAboveGround(minimumHeightAboveGround);
    }
 
    public void setNominalHeightAboveGround(double nominalHeightAboveGround)
    {
-      centerOfMassTrajectoryGenerator.setNominalLegLengthToGround(nominalHeightAboveGround);
+      centerOfMassTrajectoryGenerator.setNominalHeightAboveGround(nominalHeightAboveGround);
    }
 
    public void setMaximumHeightAboveGround(double maximumHeightAboveGround)
    {
-      centerOfMassTrajectoryGenerator.setMaximumLegLengthToGround(maximumHeightAboveGround);
+      centerOfMassTrajectoryGenerator.setMaximumHeightAboveGround(maximumHeightAboveGround);
    }
 
    @Override
@@ -236,7 +213,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
    private boolean desiredCMPcontainedNaN = false;
 
-
    @Override
    public double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity,
                                                      boolean isInDoubleSupport,
@@ -283,8 +259,10 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       comAcceleration.sub(comVelocity);
       comAcceleration.scale(omega0); // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
 
-
-      CoMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing, comVelocity, comAcceleration, comHeightPartialDerivatives);
+      CoMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing,
+                                                                         comVelocity,
+                                                                         comAcceleration,
+                                                                         comHeightPartialDerivatives);
 
       comHeightDataBeforeSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCoMHeightFromTrajectory.set(desiredCenterOfMassHeightPoint.getZ());
