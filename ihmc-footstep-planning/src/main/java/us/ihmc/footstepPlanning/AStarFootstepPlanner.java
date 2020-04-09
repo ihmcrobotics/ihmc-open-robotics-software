@@ -170,6 +170,7 @@ public class AStarFootstepPlanner
             break;
          }
 
+         checker.onIterationStart();
          AStarIterationData<FootstepNode> iterationData = footstepPlanner.doPlanningIteration();
          recordIterationData(iterationData);
          iterationCallback.accept(iterationData);
