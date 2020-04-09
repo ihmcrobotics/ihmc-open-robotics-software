@@ -8,7 +8,7 @@
 
 <SplitPane dividerPositions="0.45, 0.85" xmlns="http://javafx.com/javafx/10.0.2-internal" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.MainTabController">
     <items>
-        <VBox alignment="TOP_CENTER" minHeight="0.0" minWidth="0.0" prefHeight="340">
+        <VBox alignment="TOP_CENTER" minHeight="0.0" minWidth="0.0" >
             <children>
 
                 <Region prefHeight="5" />
@@ -65,6 +65,28 @@
 
                 <Separator prefHeight="20" />
 
+                <HBox>
+                    <Label alignment="CENTER" contentDisplay="BOTTOM" prefHeight="20.0" text=" Load data set: " />
+                    <ComboBox fx:id="dataSetSelector" />
+                </HBox>
+
+            </children>
+            <opaqueInsets>
+                <Insets />
+            </opaqueInsets>
+        </VBox>
+
+        <VBox alignment="TOP_CENTER" minHeight="0.0" minWidth="0.0">
+            <children>
+
+                <Region prefHeight="5" />
+                <Label alignment="CENTER" contentDisplay="CENTER" text="Goal Placement" textAlignment="CENTER">
+                    <font>
+                        <Font size="16.0" />
+                    </font>
+                </Label>
+                <Region prefHeight="5" />
+
                 <GridPane layoutX="23.0" layoutY="29.0" vgap="3">
                     <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" minWidth="90.0" prefWidth="150.0" />
@@ -109,68 +131,6 @@
                     </children>
                 </GridPane>
 
-            </children>
-            <opaqueInsets>
-                <Insets />
-            </opaqueInsets>
-        </VBox>
-
-        <VBox alignment="TOP_CENTER" minHeight="0.0" minWidth="0.0" prefHeight="340">
-            <children>
-
-                <Region prefHeight="5" />
-
-                <Label alignment="CENTER" contentDisplay="CENTER" text="Planner Status" textAlignment="CENTER">
-                    <font>
-                        <Font size="16.0" />
-                    </font>
-                </Label>
-
-                <Region prefHeight="10" />
-
-                <GridPane alignment="TOP_CENTER" hgap="10" vgap="5">
-                    <children>
-                        <Label text="Sent ID" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
-                        <Label text="Received ID" GridPane.columnIndex="0" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-
-                        <Label text="Body path result" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
-                        <Label text="Step result" GridPane.columnIndex="2" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-
-                        <Label text="Time Taken" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="0" />
-                        <Label text="Iterations" GridPane.columnIndex="4" GridPane.halignment="RIGHT" GridPane.rowIndex="1" />
-
-                        <TextField fx:id="sentRequestId" prefWidth="60" GridPane.columnIndex="1" GridPane.rowIndex="0" />
-                        <TextField fx:id="receivedRequestId" prefWidth="60" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-
-                        <TextField fx:id="bodyPathPlanResult" GridPane.columnIndex="3" GridPane.rowIndex="0" />
-                        <TextField fx:id="stepPlanResult" GridPane.columnIndex="3" GridPane.rowIndex="1" />
-                        <Button fx:id="viewExceptionButton" text="View exception" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-
-                        <TextField fx:id="timeTaken" prefWidth="80" GridPane.columnIndex="5" GridPane.rowIndex="0" />
-                        <TextField fx:id="iterationsTaken" prefWidth="80" GridPane.columnIndex="5" GridPane.rowIndex="1" />
-                    </children>
-               <columnConstraints>
-                  <ColumnConstraints />
-                  <ColumnConstraints />
-                  <ColumnConstraints />
-                  <ColumnConstraints />
-                  <ColumnConstraints />
-                  <ColumnConstraints />
-               </columnConstraints>
-               <rowConstraints>
-                  <RowConstraints />
-                  <RowConstraints />
-                  <RowConstraints />
-               </rowConstraints>
-                </GridPane>
-
-                <Separator prefHeight="20" />
-
-                <HBox>
-                    <Label alignment="CENTER" contentDisplay="BOTTOM" prefHeight="20.0" text=" Load data set: " />
-                    <ComboBox fx:id="dataSetSelector" />
-                </HBox>
-
                 <Separator prefHeight="20" />
 
                 <Label alignment="CENTER" contentDisplay="CENTER" text="Logging" textAlignment="CENTER">
@@ -201,7 +161,7 @@
             </children>
         </VBox>
 
-        <VBox alignment="TOP_CENTER" minHeight="0.0" minWidth="0.0" prefHeight="340">
+        <VBox alignment="TOP_CENTER" minHeight="0.0" minWidth="0.0" >
             <children>
 
             <Region prefHeight="5" />
@@ -261,7 +221,7 @@
                         <graphic>
                             <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                 <image>
-<!--                                    <Image url="/us/ihmc/footstepPlanning/ui/icons/play.png" />-->
+                                    <Image url="/us/ihmc/footstepPlanning/ui/icons/play.png" />
                                 </image>
                             </ImageView>
                         </graphic>
@@ -271,7 +231,7 @@
                         <graphic>
                             <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                 <image>
-<!--                                    <Image url="/us/ihmc/footstepPlanning/ui/icons/pause.png" />-->
+                                    <Image url="/us/ihmc/footstepPlanning/ui/icons/pause.png" />
                                 </image>
                             </ImageView>
                         </graphic>
@@ -281,25 +241,14 @@
                         <graphic>
                             <ImageView fitWidth="20.0" pickOnBounds="true" preserveRatio="true">
                                 <image>
-<!--                                    <Image url="/us/ihmc/footstepPlanning/ui/icons/stop.png" />-->
+                                    <Image url="/us/ihmc/footstepPlanning/ui/icons/stop.png" />
                                 </image>
                             </ImageView>
                         </graphic>
                     </Button>
-                    <columnConstraints>
-                        <ColumnConstraints />
-                        <ColumnConstraints />
-                        <ColumnConstraints />
-                        <ColumnConstraints />
-                        <ColumnConstraints />
-                        <ColumnConstraints />
-                    </columnConstraints>
-                    <rowConstraints>
-                        <RowConstraints />
-                  <RowConstraints />
-                    </rowConstraints>
                 </GridPane>
             </children>
+
         </VBox>
     </items>
 </SplitPane>
