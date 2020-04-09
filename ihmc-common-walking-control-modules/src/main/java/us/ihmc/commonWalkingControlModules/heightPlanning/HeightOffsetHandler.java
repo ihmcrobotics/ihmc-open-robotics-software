@@ -358,4 +358,9 @@ public class HeightOffsetHandler
       isTrajectoryOffsetStopped.set(command.isStopAllTrajectory());
       offsetHeightAboveGround.set(offsetHeightAboveGroundPrevValue.getDoubleValue());
    }
+
+   public double getOffsetHeightAboveGroundChangedTime()
+   {
+      return offsetHeightAboveGroundChangedTime.getDoubleValue();
+   }
 }

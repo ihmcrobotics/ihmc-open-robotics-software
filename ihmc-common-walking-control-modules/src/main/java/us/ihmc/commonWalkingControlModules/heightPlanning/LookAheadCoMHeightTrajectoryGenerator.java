@@ -894,6 +894,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    public double getOffsetHeightTimeInTrajectory()
    {
-      return yoTime.getValue();
+      return yoTime.getValue() - heightOffsetHandler.getOffsetHeightAboveGroundChangedTime();
    }
 }

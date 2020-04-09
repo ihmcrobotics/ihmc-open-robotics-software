@@ -119,20 +119,6 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
                                                              registry);
    }
 
-   public void setMinimumHeightAboveGround(double minimumHeightAboveGround)
-   {
-      centerOfMassTrajectoryGenerator.setMinimumHeightAboveGround(minimumHeightAboveGround);
-   }
-
-   public void setNominalHeightAboveGround(double nominalHeightAboveGround)
-   {
-      centerOfMassTrajectoryGenerator.setNominalHeightAboveGround(nominalHeightAboveGround);
-   }
-
-   public void setMaximumHeightAboveGround(double maximumHeightAboveGround)
-   {
-      centerOfMassTrajectoryGenerator.setMaximumHeightAboveGround(maximumHeightAboveGround);
-   }
 
    @Override
    public void initialize()
