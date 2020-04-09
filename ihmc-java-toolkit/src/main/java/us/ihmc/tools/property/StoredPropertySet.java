@@ -404,4 +404,10 @@ public class StoredPropertySet implements StoredPropertySetBasics
 
       return finalPath;
    }
+
+   @Override
+   public StoredPropertyKeyList getKeyList()
+   {
+      return keys;
+   }
 }
