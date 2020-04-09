@@ -1,6 +1,11 @@
 package us.ihmc.robotics.physics;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.lists.SupplierBuilder;
@@ -86,7 +91,7 @@ public class MultiRobotForwardDynamicsPlugin
       for (MultiContactImpulseCalculator impulseCalculator : impulseCalculators)
       {
          impulseCalculator.computeImpulses(dt, false);
-         robots.forEach((rootBody, robot) -> impulseCalculator.applyJointVelocityChange(rootBody, robot.getForwardDynamicsPlugin()::addJointVelocities));
+         impulseCalculator.applyJointVelocityChanges();
          impulseCalculator.readExternalWrenches(dt, externalWrenchReaders);
       }
 
