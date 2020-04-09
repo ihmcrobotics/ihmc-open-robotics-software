@@ -40,4 +40,10 @@ public class VisibilityGraphsParametersUIController
    {
       tableViewWrapper.removeHeader();
    }
+
+   @FXML
+   public void saveParameters()
+   {
+      planningParameters.save();
+   }
 }

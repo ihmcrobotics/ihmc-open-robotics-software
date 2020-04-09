@@ -46,4 +46,10 @@ public class FootstepPostProcessingParametersUIController
    {
       tableViewWrapper.removeHeader();
    }
+
+   @FXML
+   public void saveParameters()
+   {
+      postProcessingParameters.save();
+   }
 }
