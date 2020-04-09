@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.heightPlanning;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.heightPlanning.BetterLookAheadCoMHeightTrajectoryGenerator;
@@ -27,7 +28,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
 {
-   private static  boolean visualize = false;
+   private static  boolean visualize = true;
    private static final double minimumHeight = 0.75;
    private static double nominalHeight = 0.8;
    private static final double maximumHeight = 0.95;
@@ -82,7 +83,6 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
       FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.919);
       FramePoint3D transferFrom = new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.007, 0.164, 0.0);
       FramePoint3D transferTo = new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.007, -0.164, 0.0);
-      FramePoint3D nextFootstep = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.2, 0.2, 0.0);
 
       transferToAndNextFootstepsData.setTransferToPosition(transferTo);
 
@@ -96,7 +96,6 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
       FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.0, 0.0, 0.919);
       FramePoint3D transferFrom = new FramePoint3D(ReferenceFrame.getWorldFrame(), -0.007, 0.164, 0.0);
       FramePoint3D transferTo = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.4, -0.164, 0.0);
-      FramePoint3D nextFootstep = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.8, 0.2, 0.0);
 
       transferToAndNextFootstepsData.setTransferToPosition(transferTo);
 
@@ -110,13 +109,13 @@ public class BetterLookAheadCoMHeightTrajectoryGeneratorTest
       FramePoint3D startCoM = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.57273, -0.02010, 0.80325);
       FramePoint3D transferFrom = new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.60080, -0.19949, -0.00120);
       FramePoint3D transferTo = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, 0.2, 0.0);
-      FramePoint3D nextFootstep = new FramePoint3D(ReferenceFrame.getWorldFrame(), 1.0, -0.2, 0.151);
 
       transferToAndNextFootstepsData.setTransferToPosition(transferTo);
 
       runTest(transferFrom, startCoM, RobotSide.RIGHT, transferToAndNextFootstepsData);
    }
 
+   @Disabled
    @Test
    public void testBigSteppingDown()
    {
