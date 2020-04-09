@@ -7,9 +7,9 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.StoredPropertyTableViewWrapper;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.StoredPropertyTableViewWrapper.ParametersTableRow;
+import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
+import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper;
+import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper.ParametersTableRow;
 
 public class FootstepPlannerParametersUIController
 {

@@ -5,9 +5,9 @@ import javafx.scene.control.TableView;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.StoredPropertyTableViewWrapper;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.StoredPropertyTableViewWrapper.ParametersTableRow;
+import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
+import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper;
+import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper.ParametersTableRow;
 
 public class VisibilityGraphsParametersUIController
 {

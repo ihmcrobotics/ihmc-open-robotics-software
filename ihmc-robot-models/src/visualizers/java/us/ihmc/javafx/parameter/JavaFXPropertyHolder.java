@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.ui.properties;
+package us.ihmc.javafx.parameter;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
