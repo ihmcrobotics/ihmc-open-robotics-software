@@ -38,7 +38,8 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
       }
    };
 
-   private double springConstant = 0.0;
+   private final ConstraintParameters constraintParameters = new ConstraintParameters();
+
    private final List<OneDoFJointBasics> jointsAtLimit = new ArrayList<>();
    private final List<ActiveLimit> activeLimits = new ArrayList<>();
 
@@ -116,16 +117,17 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
          ActiveLimit activeLimit = activeLimits.get(i);
 
          double qd = joint.getQd() + dt * forwardDynamicsCalculator.getComputedJointAcceleration(joint).get(0);
+         qd *= constraintParameters.getCoefficientOfRestitution();
 
          if (activeLimit == ActiveLimit.LOWER)
          {
             double distanceToLowerLimit = joint.getQ() - joint.getJointLimitLower();
-            qd += springConstant * distanceToLowerLimit;
+            qd += distanceToLowerLimit * constraintParameters.getErrorReductionParameter() / dt;
          }
          else
          {
             double distanceToUpperLimit = joint.getQ() - joint.getJointLimitUpper();
-            qd += springConstant * distanceToUpperLimit;
+            qd += distanceToUpperLimit * constraintParameters.getErrorReductionParameter() / dt;
          }
          jointVelocityNoImpulse.set(i, qd);
       }
@@ -270,9 +272,9 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
       isFirstUpdate = false;
    }
 
-   public void setSpringConstant(double springConstant)
+   public void setConstraintParameters(ConstraintParametersReadOnly parameters)
    {
-      this.springConstant = springConstant;
+      constraintParameters.set(parameters);
    }
 
    @Override
@@ -370,5 +372,10 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
    public MultiBodyResponseCalculator getResponseCalculator()
    {
       return responseCalculator;
+   }
+
+   public ConstraintParametersBasics getConstraintParameters()
+   {
+      return constraintParameters;
    }
 }

@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class MultiRobotForwardDynamicsPlugin
 {
@@ -22,10 +23,20 @@ public class MultiRobotForwardDynamicsPlugin
 
    private List<MultiRobotCollisionGroup> collisionGroups;
 
+   private final YoBoolean hasGlobalContactParameters;
+   private final YoContactParameters globalContactParameters;
+   private final YoBoolean hasGlobalConstraintParameters;
+   private final YoConstraintParameters globalConstraintParameters;
+
    public MultiRobotForwardDynamicsPlugin(ReferenceFrame rootFrame, YoVariableRegistry registry)
    {
       YoVariableRegistry multiContactCalculatorRegistry = new YoVariableRegistry(MultiContactImpulseCalculator.class.getSimpleName());
       registry.addChild(multiContactCalculatorRegistry);
+
+      hasGlobalContactParameters = new YoBoolean("hasGlobalContactParameters", registry);
+      globalContactParameters = new YoContactParameters("globalContact", registry);
+      hasGlobalConstraintParameters = new YoBoolean("hasGlobalConstraintParameters", registry);
+      globalConstraintParameters = new YoConstraintParameters("globalConstraint", registry);
 
       multiContactImpulseCalculators = new RecyclingArrayList<>(1, SupplierBuilder.indexedSupplier(identifier ->
       {
@@ -47,6 +58,18 @@ public class MultiRobotForwardDynamicsPlugin
    public void addExternalWrenchReader(ExternalWrenchReader externalWrenchReader)
    {
       externalWrenchReaders.add(externalWrenchReader);
+   }
+
+   public void setGlobalConstraintParameters(ConstraintParametersReadOnly parameters)
+   {
+      globalConstraintParameters.set(parameters);
+      hasGlobalConstraintParameters.set(true);
+   }
+
+   public void setGlobalContactParameters(ContactParametersReadOnly parameters)
+   {
+      globalContactParameters.set(parameters);
+      hasGlobalContactParameters.set(true);
    }
 
    public void submitCollisions(SimpleCollisionDetection collisionDetectionPlugin)
@@ -73,7 +96,14 @@ public class MultiRobotForwardDynamicsPlugin
       for (MultiRobotCollisionGroup collisionGroup : collisionGroups)
       {
          MultiContactImpulseCalculator calculator = multiContactImpulseCalculators.add();
+
          calculator.configure(robots, collisionGroup);
+
+         if (hasGlobalConstraintParameters.getValue())
+            calculator.setConstraintParameters(globalConstraintParameters);
+         if (hasGlobalContactParameters.getValue())
+            calculator.setContactParameters(globalContactParameters);
+
          impulseCalculators.add(calculator);
          uncoveredRobotsRootBody.removeAll(collisionGroup.getRootBodies());
       }

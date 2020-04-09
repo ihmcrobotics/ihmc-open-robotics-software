@@ -1,9 +1,17 @@
 package us.ihmc.robotics.physics;
 
-import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.*;
+import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.computeContactVelocity;
+import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.nextCollidable;
+import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.nextSingleFloatingRigidBody;
+import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.nextStaticCollidable;
+import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.setupForwardDynamicsCalculator;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -83,7 +91,6 @@ public class MultiContactImpulseCalculatorTest
          multiContactImpulseCalculator.configure(physicsEngineRobotDataMap, collisionGroup);
          multiContactImpulseCalculator.setTolerance(TERMINAL_TOLERANCE);
          multiContactImpulseCalculator.setSingleContactTolerance(SINGLE_CONTACT_GAMMA);
-         multiContactImpulseCalculator.setSpringConstant(0.0);
          try
          {
             multiContactImpulseCalculator.computeImpulses(dt, false);
