@@ -544,7 +544,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       }
    }
 
-   private final FrameVector2D desiredICPVelocityAsFrameVector = new FrameVector2D();
+   private final FrameVector2D desiredCoMVelocityAsFrameVector = new FrameVector2D();
 
    private final SideDependentList<FramePoint2D> footDesiredCoPs = new SideDependentList<FramePoint2D>(new FramePoint2D(), new FramePoint2D());
    private final RecyclingArrayList<PlaneContactStateCommand> planeContactStateCommandPool = new RecyclingArrayList<>(4, PlaneContactStateCommand.class);
@@ -655,8 +655,8 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
 
    public void updateManagers(WalkingState currentState)
    {
-      desiredICPVelocityAsFrameVector.setToZero(ReferenceFrame.getWorldFrame());
-      balanceManager.getDesiredCoMVelocity(desiredICPVelocityAsFrameVector);
+      desiredCoMVelocityAsFrameVector.setToZero(ReferenceFrame.getWorldFrame());
+      balanceManager.getDesiredCoMVelocity(desiredCoMVelocityAsFrameVector);
       boolean isInDoubleSupport = currentState.isDoubleSupportState();
       double omega0 = controllerToolbox.getOmega0();
       boolean isRecoveringFromPush = balanceManager.isRecovering();
@@ -680,7 +680,7 @@ public class WalkingHighLevelHumanoidController implements JointLoadStatusProvid
       pelvisOrientationManager.compute();
 
       comHeightManager.compute();
-      controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredICPVelocityAsFrameVector, isInDoubleSupport, omega0,
+      controlledCoMHeightAcceleration.set(comHeightManager.computeDesiredCoMHeightAcceleration(desiredCoMVelocityAsFrameVector, isInDoubleSupport, omega0,
                                                                                                isRecoveringFromPush, feetManager));
 
       // the comHeightManager can control the pelvis with a feedback controller and doesn't always need the z component of the momentum command. It would be better to remove the coupling between these two modules
