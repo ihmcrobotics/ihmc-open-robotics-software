@@ -1,19 +1,13 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
-import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.control.TableView;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingKeys;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.StoredPropertyTableViewWrapper;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.StoredPropertyTableViewWrapper.ParametersTableRow;
+import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
+import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper;
+import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper.ParametersTableRow;
 
 public class FootstepPostProcessingParametersUIController
 {
