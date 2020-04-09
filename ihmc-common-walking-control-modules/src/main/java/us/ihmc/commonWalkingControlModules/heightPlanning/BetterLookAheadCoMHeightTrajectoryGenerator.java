@@ -269,7 +269,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       double endX = endCoMPosition.getX();
 
       double percentIn = MathTools.clamp(doubleSupportPercentageIn.getDoubleValue(),
-                                         nominalDoubleSupportPercentageIn.getManualScalingMin(),
+                                         nominalDoubleSupportPercentageIn.getDoubleValue(),
                                          1.0 - nominalDoubleSupportPercentageIn.getDoubleValue());
 
       double firstAlpha, secondAlpha, thirdAlpha;
