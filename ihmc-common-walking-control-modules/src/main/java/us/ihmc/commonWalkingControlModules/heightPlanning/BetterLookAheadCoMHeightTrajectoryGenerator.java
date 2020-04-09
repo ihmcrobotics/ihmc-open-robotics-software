@@ -414,6 +414,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    public double getOffsetHeightTimeInTrajectory()
    {
-      return yoTime.getValue();
+      return yoTime.getValue() - heightOffsetHandler.getOffsetHeightAboveGroundChangedTime();
    }
 }
