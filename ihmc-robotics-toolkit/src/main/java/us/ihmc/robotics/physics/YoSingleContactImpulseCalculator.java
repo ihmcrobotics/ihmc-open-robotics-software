@@ -54,7 +54,7 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
       velocityDueToOtherImpulseA = new YoFrameVector3D(prefix + "VelocityDueToOtherImpulseA" + identifier, rootFrame, registry);
       velocityChangeA = new YoFrameVector3D(prefix + "VelocityChangeA" + identifier, rootFrame, registry);
       jointVelocityChangeAList = SubtreeStreams.fromChildren(rootBodyA)
-                                               .map(joint -> JointVelocityChange.toJointVelocityChange(prefix, identifier, joint, registry))
+                                               .map(joint -> JointVelocityChange.toJointVelocityChange(prefix, "VelocityChangeA", identifier, joint, registry))
                                                .collect(Collectors.toList());
 
       if (rootBodyB != null)
@@ -65,7 +65,11 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
          velocityDueToOtherImpulseB = new YoFrameVector3D(prefix + "VelocityDueToOtherImpulseB" + identifier, rootFrame, registry);
          velocityChangeB = new YoFrameVector3D(prefix + "VelocityChangeB" + identifier, rootFrame, registry);
          jointVelocityChangeBList = SubtreeStreams.fromChildren(rootBodyB)
-                                                  .map(joint -> JointVelocityChange.toJointVelocityChange(prefix, identifier, joint, registry))
+                                                  .map(joint -> JointVelocityChange.toJointVelocityChange(prefix,
+                                                                                                          "VelocityChangeB",
+                                                                                                          identifier,
+                                                                                                          joint,
+                                                                                                          registry))
                                                   .collect(Collectors.toList());
       }
       else
@@ -181,12 +185,12 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
 
    private static interface JointVelocityChange
    {
-      public static JointVelocityChange toJointVelocityChange(String prefix, int identifier, JointReadOnly joint, YoVariableRegistry registry)
+      public static JointVelocityChange toJointVelocityChange(String prefix, String suffix, int identifier, JointReadOnly joint, YoVariableRegistry registry)
       {
          if (joint instanceof SixDoFJointReadOnly)
-            return new SixDoFJointVelocityChange(prefix, identifier, (SixDoFJointReadOnly) joint, registry);
+            return new SixDoFJointVelocityChange(prefix, suffix, identifier, (SixDoFJointReadOnly) joint, registry);
          else if (joint instanceof OneDoFJointReadOnly)
-            return new OneDoFJointVelocityChange(prefix, identifier, (OneDoFJointReadOnly) joint, registry);
+            return new OneDoFJointVelocityChange(prefix, suffix, identifier, (OneDoFJointReadOnly) joint, registry);
          else
             throw new IllegalStateException("Unexpected joint type: " + joint.getClass().getSimpleName());
       }
@@ -205,11 +209,11 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
       private final SixDoFJointReadOnly joint;
       private final YoFixedFrameTwist velocityChange;
 
-      public SixDoFJointVelocityChange(String prefix, int identifier, SixDoFJointReadOnly joint, YoVariableRegistry registry)
+      public SixDoFJointVelocityChange(String prefix, String suffix, int identifier, SixDoFJointReadOnly joint, YoVariableRegistry registry)
       {
          this.joint = joint;
 
-         velocityChange = new YoFixedFrameTwist(prefix + StringUtils.capitalize(joint.getName()) + "VelocityChangeA"
+         velocityChange = new YoFixedFrameTwist(prefix + StringUtils.capitalize(joint.getName()) + suffix
                + identifier, joint.getFrameAfterJoint(), joint.getFrameBeforeJoint(), joint.getFrameAfterJoint(), registry);
       }
 
@@ -243,11 +247,11 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
       private final OneDoFJointReadOnly joint;
       private final YoDouble velocityChange;
 
-      public OneDoFJointVelocityChange(String prefix, int identifier, OneDoFJointReadOnly joint, YoVariableRegistry registry)
+      public OneDoFJointVelocityChange(String prefix, String suffix, int identifier, OneDoFJointReadOnly joint, YoVariableRegistry registry)
       {
          this.joint = joint;
 
-         velocityChange = new YoDouble(prefix + StringUtils.capitalize(joint.getName()) + "VelocityChangeA" + identifier, registry);
+         velocityChange = new YoDouble(prefix + StringUtils.capitalize(joint.getName()) + suffix + identifier, registry);
       }
 
       @Override
