@@ -11,20 +11,23 @@ import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-import java.util.HashSet;
+import java.util.*;
 
 public class ParameterBasedNodeExpansion
 {
-   private final HashSet<FootstepNode> expansion = new HashSet<>();
+   private final List<FootstepNode> expansion = new ArrayList<>();
    private final FootstepPlannerParametersReadOnly parameters;
+   private final IdealStepCalculator idealStepCalculator;
+   private final IdealStepProximityComparator idealStepProximityComparator = new IdealStepProximityComparator();
 
    private final TDoubleArrayList xOffsets = new TDoubleArrayList();
    private final TDoubleArrayList yOffsets = new TDoubleArrayList();
    private final TDoubleArrayList yawOffsets = new TDoubleArrayList();
 
-   public ParameterBasedNodeExpansion(FootstepPlannerParametersReadOnly parameters)
+   public ParameterBasedNodeExpansion(FootstepPlannerParametersReadOnly parameters, IdealStepCalculator idealStepCalculator)
    {
       this.parameters = parameters;
+      this.idealStepCalculator = idealStepCalculator;
    }
 
    public void initialize()
@@ -64,7 +67,7 @@ public class ParameterBasedNodeExpansion
       }
    }
 
-   public HashSet<FootstepNode> expandNode(FootstepNode stanceNode)
+   public List<FootstepNode> expandNode(FootstepNode stanceNode)
    {
       expansion.clear();
       RobotSide stepSide = stanceNode.getRobotSide().getOppositeSide();
@@ -76,10 +79,47 @@ public class ParameterBasedNodeExpansion
          double stepYaw = stepSide.negateIfRightSide(yawOffsets.get(i));
          FootstepNode childNode = constructNodeInPreviousNodeFrame(stepLength, stepWidth, stepYaw, stanceNode);
 
-         expansion.add(childNode);
+         if (!expansion.contains(childNode))
+            expansion.add(childNode);
+      }
+
+      if (idealStepCalculator != null)
+      {
+         idealStepProximityComparator.update(stanceNode);
+         expansion.sort(idealStepProximityComparator);
       }
 
       return expansion;
+   }
+
+   private class IdealStepProximityComparator implements Comparator<FootstepNode>
+   {
+      private FootstepNode idealStep = null;
+
+      void update(FootstepNode stanceNode)
+      {
+         idealStep = idealStepCalculator.computeIdealStep(stanceNode);
+      }
+
+      @Override
+      public int compare(FootstepNode node1, FootstepNode node2)
+      {
+         Objects.requireNonNull(idealStep);
+
+         int dX1 = node1.getXIndex() - idealStep.getXIndex();
+         int dX2 = node2.getXIndex() - idealStep.getXIndex();
+
+         int dY1 = node1.getYIndex() - idealStep.getYIndex();
+         int dY2 = node2.getYIndex() - idealStep.getYIndex();
+
+         int dYaw1 = node1.yawIndexDistance(idealStep);
+         int dYaw2 = node2.yawIndexDistance(idealStep);
+
+         double d1 = Math.abs(dX1) + Math.abs(dY1) + Math.abs(dYaw1);
+         double d2 = Math.abs(dX2) + Math.abs(dY2) + Math.abs(dYaw2);
+
+         return Double.compare(d1, d2);
+      }
    }
 
    private final Vector2D footstepTranslation = new Vector2D();

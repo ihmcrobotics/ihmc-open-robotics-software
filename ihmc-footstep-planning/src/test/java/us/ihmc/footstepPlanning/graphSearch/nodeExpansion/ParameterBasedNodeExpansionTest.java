@@ -10,6 +10,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Set;
 
 import static us.ihmc.robotics.Assert.assertTrue;
@@ -22,7 +23,7 @@ public class ParameterBasedNodeExpansionTest
    public void testExpansionAlongBoundsFromOriginDefaultParametersWithRight()
    {
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null);
 
       double maxYaw = parameters.getMaximumStepYaw();
       double minYaw = parameters.getMinimumStepYaw();
@@ -31,7 +32,7 @@ public class ParameterBasedNodeExpansionTest
       double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
       double minYawAtFullLength = (1.0 - yawReduction) * minYaw;
 
-      Set<FootstepNode> childNodes = expansion.expandNode(new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT));
+      List<FootstepNode> childNodes = expansion.expandNode(new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT));
       FootstepNode mostForward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getX()));
       FootstepNode furthestReach = getExtremumNode(childNodes, Comparator.comparingDouble(node -> getReachAtNode(node, parameters.getIdealFootstepWidth())));
       FootstepNode mostBackward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getX()));
@@ -60,7 +61,7 @@ public class ParameterBasedNodeExpansionTest
    public void testExpansionAlongBoundsFromOriginDefaultParametersWithLeft()
    {
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null);
 
       double maxYaw = parameters.getMaximumStepYaw();
       double minYaw = parameters.getMinimumStepYaw();
@@ -69,7 +70,7 @@ public class ParameterBasedNodeExpansionTest
       double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
       double minYawAtFullLength = (1.0 - yawReduction) * minYaw;
 
-      Set<FootstepNode> childNodes = expansion.expandNode(new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT));
+      List<FootstepNode> childNodes = expansion.expandNode(new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT));
       FootstepNode mostForward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getX()));
       FootstepNode furthestReach = getExtremumNode(childNodes, Comparator.comparingDouble(node -> getReachAtNode(node, parameters.getIdealFootstepWidth())));
       FootstepNode mostBackward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getX()));
@@ -98,7 +99,7 @@ public class ParameterBasedNodeExpansionTest
    public void testExpansionAlongBoundsFromOrigin()
    {
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters);
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null);
 
       double maxYaw = 1.2;
       double minYaw = -0.5;
@@ -110,7 +111,7 @@ public class ParameterBasedNodeExpansionTest
       double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
       double minYawAtFullLength = (1.0 - yawReduction) * minYaw;
 
-      Set<FootstepNode> childNodes = expansion.expandNode(new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT));
+      List<FootstepNode> childNodes = expansion.expandNode(new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT));
       FootstepNode mostForward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getX()));
       FootstepNode furthestReach = getExtremumNode(childNodes, Comparator.comparingDouble(node -> getReachAtNode(node, parameters.getIdealFootstepWidth())));
       FootstepNode mostBackward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getX()));

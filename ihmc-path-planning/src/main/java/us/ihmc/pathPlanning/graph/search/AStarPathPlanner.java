@@ -4,6 +4,7 @@ import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.PriorityQueue;
 import java.util.function.*;
 
@@ -20,7 +21,7 @@ public class AStarPathPlanner<N>
    private final AStarIterationData<N> iterationData = new AStarIterationData<>();
 
    private final PriorityQueue<N> stack;
-   private final Function<N, HashSet<N>> nodeExpansion;
+   private final Function<N, List<N>> nodeExpansion;
    private final BiPredicate<N, N> edgeChecker;
    private final ToDoubleBiFunction<N, N> edgeCostCalculator;
 
@@ -30,7 +31,7 @@ public class AStarPathPlanner<N>
     * @param edgeCostCalculator calculates the cost of an edge (nodes are assumed zero cost), the arguments are {@code edgeCostCalculator.applyAsDouble(parentNode, childNode)}
     * @param heuristicsCalculator calling {@code heuristicsCalculator.applyAsDouble(node)} returns the heuristic cost from the node to the goal
     */
-   public AStarPathPlanner(Function<N, HashSet<N>> nodeExpansion,
+   public AStarPathPlanner(Function<N, List<N>> nodeExpansion,
                            BiPredicate<N, N> edgeChecker,
                            ToDoubleBiFunction<N, N> edgeCostCalculator,
                            ToDoubleFunction<N> heuristicsCalculator)
@@ -86,7 +87,7 @@ public class AStarPathPlanner<N>
       iterationData.setParentNode(nodeToExpand);
       expandedNodeSet.add(nodeToExpand);
 
-      HashSet<N> neighbors = nodeExpansion.apply(nodeToExpand);
+      List<N> neighbors = nodeExpansion.apply(nodeToExpand);
       for(N neighbor : neighbors)
       {
          if(edgeChecker.test(neighbor, nodeToExpand))

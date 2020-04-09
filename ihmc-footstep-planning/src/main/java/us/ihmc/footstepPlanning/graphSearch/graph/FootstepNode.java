@@ -99,6 +99,12 @@ public class FootstepNode
       return dx * dx + dy * dy;
    }
 
+   public int yawIndexDistance(FootstepNode other)
+   {
+      int dYaw = Math.abs(latticeNode.getYawIndex() - other.getYawIndex());
+      return Math.min(dYaw, LatticeNode.yawDivisions - dYaw);
+   }
+
    public boolean equalPosition(FootstepNode other)
    {
       return getXIndex() == other.getXIndex() && getYIndex() == other.getYIndex();
