@@ -44,8 +44,7 @@ public class CenterOfMassHeightManager
    private final YoEnum<PelvisHeightControlMode> requestedState;
 
    /** Manages the height of the robot by default, Tries to adjust the pelvis based on the nominal height requested **/
-//   private final CenterOfMassHeightControlState centerOfMassHeightControlState;
-   private final BetterCenterOfMassHeightControlState betterCenterOfMassHeightControlState;
+   private final CenterOfMassHeightControlState centerOfMassHeightControlState;
 
    /** User Controlled Pelvis Height Mode, tries to achieve a desired pelvis height regardless of the robot configuration**/
    private final PelvisHeightControlState pelvisHeightControlState;
@@ -71,16 +70,14 @@ public class CenterOfMassHeightManager
          YoDouble yoTime = controllerToolbox.getYoTime();
          String namePrefix = getClass().getSimpleName();
          requestedState = new YoEnum<>(namePrefix + "RequestedControlMode", registry, PelvisHeightControlMode.class, true);
-//         centerOfMassHeightControlState = new CenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, registry);
-         betterCenterOfMassHeightControlState = new BetterCenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, registry);
+         centerOfMassHeightControlState = new CenterOfMassHeightControlState(controllerToolbox, walkingControllerParameters, registry);
 
          stateMachine = setupStateMachine(namePrefix, yoTime);
       }
       else
       {
          requestedState = null;
-//         centerOfMassHeightControlState = null;
-         betterCenterOfMassHeightControlState = null;
+         centerOfMassHeightControlState = null;
          stateMachine = null;
       }
    }
@@ -90,7 +87,7 @@ public class CenterOfMassHeightManager
       StateMachineFactory<PelvisHeightControlMode, PelvisAndCenterOfMassHeightControlState> factory = new StateMachineFactory<>(PelvisHeightControlMode.class);
       factory.setNamePrefix(namePrefix).setRegistry(registry).buildYoClock(timeProvider);
 
-      factory.addState(PelvisHeightControlMode.WALKING_CONTROLLER, betterCenterOfMassHeightControlState);
+      factory.addState(PelvisHeightControlMode.WALKING_CONTROLLER, centerOfMassHeightControlState);
       factory.addState(PelvisHeightControlMode.USER, pelvisHeightControlState);
 
       for (PelvisHeightControlMode from : PelvisHeightControlMode.values())
@@ -106,8 +103,7 @@ public class CenterOfMassHeightManager
       if (useStateMachine)
       {
          stateMachine.resetToInitialState();
-//         centerOfMassHeightControlState.initialize();
-         betterCenterOfMassHeightControlState.initialize();
+         centerOfMassHeightControlState.initialize();
       }
 
       pelvisHeightControlState.initialize();
@@ -157,8 +153,7 @@ public class CenterOfMassHeightManager
       if (stateMachine.getCurrentStateKey().equals(PelvisHeightControlMode.USER))
       {
          //need to check if setting the actual to the desireds here is a bad idea, might be better to go from desired to desired
-//         centerOfMassHeightControlState.initializeDesiredHeightToCurrent();
-         betterCenterOfMassHeightControlState.initializeDesiredHeightToCurrent();
+         centerOfMassHeightControlState.initializeDesiredHeightToCurrent();
          requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
       }
    }
@@ -205,8 +200,7 @@ public class CenterOfMassHeightManager
             return;
          }
 
-//         centerOfMassHeightControlState.handlePelvisTrajectoryCommand(command);
-         betterCenterOfMassHeightControlState.handlePelvisTrajectoryCommand(command);
+         centerOfMassHeightControlState.handlePelvisTrajectoryCommand(command);
          requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
       }
       else
@@ -237,8 +231,7 @@ public class CenterOfMassHeightManager
             return;
          }
 
-//         centerOfMassHeightControlState.handlePelvisHeightTrajectoryCommand(command);
-         betterCenterOfMassHeightControlState.handlePelvisHeightTrajectoryCommand(command);
+         centerOfMassHeightControlState.handlePelvisHeightTrajectoryCommand(command);
          requestState(PelvisHeightControlMode.WALKING_CONTROLLER);
       }
       else
@@ -280,8 +273,7 @@ public class CenterOfMassHeightManager
    {
       if (useStateMachine)
       {
-//         centerOfMassHeightControlState.setSupportLeg(supportLeg);
-         betterCenterOfMassHeightControlState.setSupportLeg(supportLeg);
+         centerOfMassHeightControlState.setSupportLeg(supportLeg);
       }
    }
 
@@ -289,8 +281,7 @@ public class CenterOfMassHeightManager
    {
       if (useStateMachine)
       {
-//         centerOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight);
-         betterCenterOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight, isInTransfer);
+         centerOfMassHeightControlState.initialize(transferToAndNextFootstepsData, extraToeOffHeight, isInTransfer);
       }
    }
 
@@ -305,18 +296,6 @@ public class CenterOfMassHeightManager
       else
       {
          return pelvisHeightControlState.computeDesiredCoMHeightAcceleration(desiredICPVelocity, isInDoubleSupport, omega0, isRecoveringFromPush, feetManager);
-      }
-   }
-
-   public boolean hasBeenInitializedWithNextStep()
-   {
-      if (useStateMachine)
-      {
-         return betterCenterOfMassHeightControlState.hasBeenInitializedWithNextStep();
-      }
-      else
-      {
-         return true;
       }
    }
 
@@ -368,8 +347,7 @@ public class CenterOfMassHeightManager
    {
       if (useStateMachine)
       {
-//         centerOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
-         betterCenterOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
+         centerOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
       }
       pelvisHeightControlState.setGains(userModeComHeightGains);
    }

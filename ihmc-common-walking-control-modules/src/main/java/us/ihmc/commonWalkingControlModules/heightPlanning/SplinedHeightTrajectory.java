@@ -194,4 +194,9 @@ public class SplinedHeightTrajectory
 
       return percentAlongSegment;
    }
+
+   public double getHeightSplineSetpoint()
+   {
+      return spline.getPosition();
+   }
 }
