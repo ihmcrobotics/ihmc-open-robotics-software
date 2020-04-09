@@ -8,6 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.lists.FrameTuple2dArrayList;
@@ -158,7 +159,7 @@ public class YoPlaneContactState implements PlaneContactState, ModifiableContact
       this.coefficientOfFriction.set(coefficientOfFriction);
    }
 
-   public void setContactNormalVector(FrameVector3D normalContactVector)
+   public void setContactNormalVector(FrameVector3DReadOnly normalContactVector)
    {
       if (normalContactVector == null)
       {
