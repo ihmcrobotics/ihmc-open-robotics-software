@@ -44,6 +44,7 @@ public class AStarFootstepPlanner
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final SimplePlanarRegionFootstepNodeSnapper snapper;
    private final FootstepNodeSnapAndWiggler snapAndWiggler;
+   private final ParameterBasedNodeExpansion expansion;
    private final FootstepNodeChecker checker;
    private final FootstepPlannerHeuristicCalculator distanceAndYawHeuristics;
    private final IdealStepCalculator idealStepCalculator;
@@ -74,7 +75,7 @@ public class AStarFootstepPlanner
       this.snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       this.snapAndWiggler = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlannerParameters);
 
-      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters);
+      this.expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters);
       this.checker = new FootstepNodeChecker(footstepPlannerParameters, footPolygons, snapper, edgeData);
       this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker::isNodeValid, bodyPathPlanHolder);
 
@@ -137,6 +138,7 @@ public class AStarFootstepPlanner
       distanceAndYawHeuristics.initialize(goalMidFootPose, request.getDesiredHeading());
       idealStepCalculator.initialize(goalNodes, request.getDesiredHeading());
       completionChecker.initialize(startNode, goalNodes, request.getGoalDistanceProximity(), request.getGoalYawProximity());
+      expansion.initialize();
 
       // Check valid goal
       if (!snapAndCheckGoalNodes(goalNodes, imposeHorizonLength, request))
