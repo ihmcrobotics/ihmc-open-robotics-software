@@ -57,7 +57,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
       environmentContactConstraintCalculatorPool = new RecyclingArrayList<>(20, SupplierBuilder.indexedSupplier(identifier ->
       {
          YoSingleContactImpulseCalculator calculator = new YoSingleContactImpulseCalculator("Single",
-                                                                                            identifier++,
+                                                                                            identifier,
                                                                                             multiBodySystem.getInertialFrame(),
                                                                                             rootBody,
                                                                                             forwardDynamicsPlugin.getForwardDynamicsCalculator(),
@@ -138,7 +138,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
          calculators = new RecyclingArrayList<>(SupplierBuilder.indexedSupplier(identifier ->
          {
             return new YoSingleContactImpulseCalculator("Dual",
-                                                        identifier++,
+                                                        identifier,
                                                         multiBodySystem.getInertialFrame(),
                                                         rootBody,
                                                         forwardDynamicsPlugin.getForwardDynamicsCalculator(),
@@ -146,6 +146,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
                                                         otherRobot.getForwardDynamicsPlugin().getForwardDynamicsCalculator(),
                                                         contactConstraintCalculatorRegistry);
          }));
+         interRobotContactConstraintCalculatorPools.put(otherRobot.getRootBody(), calculators);
       }
 
       return calculators.add();
