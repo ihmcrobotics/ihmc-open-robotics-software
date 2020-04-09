@@ -1,5 +1,6 @@
 package us.ihmc.commonWalkingControlModules.heightPlanning;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
@@ -56,6 +57,12 @@ public class CoMHeightTrajectoryWaypoint
    public void setHeight(double height)
    {
       waypoint.setZ(height);
+   }
+
+   public void addHeightOffset(double offset)
+   {
+      double desiredHeight = MathTools.clamp(waypoint.getZ() + offset, minWaypoint.getZ(), maxWaypoint.getZ());
+      waypoint.setZ(desiredHeight);
    }
 
    public void setMinMax(double zMin, double zMax)

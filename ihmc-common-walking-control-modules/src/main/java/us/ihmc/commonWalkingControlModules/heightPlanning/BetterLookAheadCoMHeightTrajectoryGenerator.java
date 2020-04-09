@@ -229,7 +229,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       for (int i = 0; i < heightWaypoints.size(); i++)
       {
-         heightWaypoints.get(i).setHeight(heightWaypoints.get(i).getHeight() + heightOffsetHandler.getOffsetHeightAboveGround());
+         heightWaypoints.get(i).addHeightOffset(heightOffsetHandler.getOffsetHeightAboveGround());
          heightWaypoints.get(i).update();
       }
 
@@ -308,7 +308,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       endWaypoint.setMinMax(endMinHeight, endMaxHeight);
 
       startWaypoint.setHeight(MathTools.clamp(startCoMPosition.getZ(), startMinHeight, startMaxHeight));
-      endWaypoint.setHeight(MathTools.clamp(endCoMPosition.getZ() + heightOffsetHandler.getOffsetHeightAboveGround(), endMinHeight, endMaxHeight));
+      endWaypoint.setHeight(MathTools.clamp(endCoMPosition.getZ(), endMinHeight, endMaxHeight));
    }
 
    private CoMHeightTrajectoryWaypoint getWaypointInFrame(ReferenceFrame referenceFrame)
