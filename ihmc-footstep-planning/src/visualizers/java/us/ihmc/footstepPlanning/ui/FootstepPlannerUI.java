@@ -343,6 +343,7 @@ public class FootstepPlannerUI
       footstepPlannerLogVisualizerController.onPrimaryStageLoaded();
       footstepPlannerParametersUIController.onPrimaryStageLoaded();
       visibilityGraphsParametersUIController.onPrimaryStageLoaded();
+      footstepPostProcessingParametersUIController.onPrimaryStageLoaded();
    }
 
    public void stop()

@@ -4,6 +4,7 @@ import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -191,6 +192,7 @@ public class StoredPropertyTableViewWrapper
                {
                   CheckBox checkBox = new CheckBox("");
                   javaFXStoredPropertyMap.put(checkBox, (BooleanStoredPropertyKey) propertyKey);
+                  checkBox.setAlignment(Pos.CENTER);
                   return checkBox;
                }
                else if (propertyKey instanceof DoubleStoredPropertyKey)
@@ -204,7 +206,7 @@ public class StoredPropertyTableViewWrapper
                }
                else if (propertyKey instanceof IntegerStoredPropertyKey)
                {
-                  Spinner<Integer> spinner = new Spinner<>(-Integer.MAX_VALUE, Integer.MAX_VALUE, 0, 1);
+                  Spinner<Integer> spinner = new Spinner<>(Integer.MIN_VALUE, Integer.MAX_VALUE, 0, 1);
                   spinner.setEditable(true);
                   javaFXStoredPropertyMap.put(spinner, (IntegerStoredPropertyKey) propertyKey);
                   return spinner;
