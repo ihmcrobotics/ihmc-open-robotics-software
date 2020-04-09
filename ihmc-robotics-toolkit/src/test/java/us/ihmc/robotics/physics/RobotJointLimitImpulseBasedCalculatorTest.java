@@ -69,7 +69,6 @@ public class RobotJointLimitImpulseBasedCalculatorTest
          joint.setJointLimits(jointLimitLower, jointLimitUpper);
 
          RobotJointLimitImpulseBasedCalculator calculator = new RobotJointLimitImpulseBasedCalculator(rootBody, forwardDynamicsCalculator);
-         calculator.setSpringConstant(0.0);
          calculator.initialize(dt);
          calculator.updateInertia(null, null);
          calculator.computeImpulse(dt);
@@ -133,7 +132,6 @@ public class RobotJointLimitImpulseBasedCalculatorTest
          }
 
          RobotJointLimitImpulseBasedCalculator calculator = new RobotJointLimitImpulseBasedCalculator(rootBody, forwardDynamicsCalculator);
-         calculator.setSpringConstant(0.0);
          calculator.initialize(dt);
          calculator.updateInertia(null, null);
          calculator.computeImpulse(dt);

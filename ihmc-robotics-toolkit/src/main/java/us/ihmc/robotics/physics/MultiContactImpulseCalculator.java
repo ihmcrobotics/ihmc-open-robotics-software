@@ -214,9 +214,14 @@ public class MultiContactImpulseCalculator
       contactCalculators.forEach(calculator -> calculator.setTolerance(gamma));
    }
 
-   public void setSpringConstant(double springConstant)
+   public void setConstraintParameters(ConstraintParametersReadOnly constraintParameters)
    {
-      contactCalculators.forEach(calculator -> calculator.setSpringConstant(springConstant));
+      jointLimitCalculators.forEach(calculator -> calculator.setConstraintParameters(constraintParameters));
+   }
+
+   public void setContactParameters(ContactParametersReadOnly contactParameters)
+   {
+      contactCalculators.forEach(calculator -> calculator.setContactParameters(contactParameters));
    }
 
    public void applyJointVelocityChange(RigidBodyBasics rootBody, Consumer<DenseMatrix64F> jointVelocityChangeConsumer)

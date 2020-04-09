@@ -98,6 +98,16 @@ public class ExperimentalPhysicsEngine
       multiRobotPhysicsEnginePlugin.addExternalWrenchReader(externalWrenchReader);
    }
 
+   public void setGlobalConstraintParameters(ConstraintParametersReadOnly parameters)
+   {
+      multiRobotPhysicsEnginePlugin.setGlobalConstraintParameters(parameters);
+   }
+
+   public void setGlobalContactParameters(ContactParametersReadOnly parameters)
+   {
+      multiRobotPhysicsEnginePlugin.setGlobalContactParameters(parameters);
+   }
+
    public boolean initialize()
    {
       if (!initialize)
