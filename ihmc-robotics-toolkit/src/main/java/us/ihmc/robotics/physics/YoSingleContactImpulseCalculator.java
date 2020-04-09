@@ -81,6 +81,7 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
          velocityChangeB = null;
          jointVelocityChangeBList = null;
       }
+      clear();
    }
 
    public void setupGraphics(YoGraphicsListRegistry yoGraphicsListRegistry)
