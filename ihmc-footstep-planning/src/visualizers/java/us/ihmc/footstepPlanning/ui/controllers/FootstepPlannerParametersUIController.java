@@ -50,7 +50,7 @@ public class FootstepPlannerParametersUIController
 
    public void bindControls()
    {
-      tableViewWrapper = new StoredPropertyTableViewWrapper(380.0, 260.0, 5, parameterTable, javaFXStoredPropertyMap);
+      tableViewWrapper = new StoredPropertyTableViewWrapper(380.0, 260.0, 4, parameterTable, javaFXStoredPropertyMap);
       tableViewWrapper.setTableUpdatedCallback(() -> messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, planningParameters));
 
       // set messager updates to update all stored properties and select JavaFX properties
