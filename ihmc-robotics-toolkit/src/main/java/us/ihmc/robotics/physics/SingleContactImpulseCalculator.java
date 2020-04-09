@@ -46,7 +46,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private double beta2 = 0.95;
    private double beta3 = 1.15;
    private double gamma = 1.0e-6;
-   private final ContactParameters contactParameters = new ContactParameters();
+   private final ContactParameters contactParameters = new ContactParameters(0.7, 0.1, 0.1, 0.99);
 
    private boolean isFirstUpdate = false;
    private boolean isImpulseZero = false;
@@ -107,8 +107,6 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    {
       this.forwardDynamicsCalculatorA = forwardDynamicsCalculatorA;
       this.forwardDynamicsCalculatorB = forwardDynamicsCalculatorB;
-
-      contactParameters.setCoefficientOfFriction(0.7);
 
       rootA = rootBodyA;
       rootB = rootBodyB;
@@ -308,6 +306,22 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          velocityRelativePrevious.set(velocityRelative);
       }
 
+      /*
+       * Modifying the contact velocity that the solver is trying to cancel. For instance, the coefficient
+       * of restitution is 1.0, the velocity is doubled, which results in an impulse which magnitude is
+       * doubled, such that, the post-impact velocity is opposite of the pre-impact velocity along the
+       * collision axis.
+       */
+      velocityRelative.scale(1.0 + contactParameters.getCoefficientOfRestitution());
+
+      /*
+       * Computing the correction term based on the penetration of the two collidables. This assumes that
+       * the two shapes are inter-penetrating. The penetration distance is transformed into a velocity
+       * that would allow to correct the error in a single tick, this velocity is scaled with the user
+       * parameter error-reduction-parameter which is in [0, 1]. The resulting is subtracted to the
+       * relative velocity that the solver is trying to cancel, this way the calculator will implicitly
+       * account for the error.
+       */
       collisionPositionTerm.setIncludingFrame(collisionResult.getPointOnBRootFrame());
       collisionPositionTerm.sub(collisionResult.getPointOnARootFrame());
       collisionPositionTerm.scale(contactParameters.getErrorReductionParameter() / dt);
@@ -317,9 +331,6 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       impulseA.setToZero(bodyFrameA, contactFrame);
 
       isContactClosing = velocityRelative.getZ() < 0.0;
-
-      //      velocityRelative.setZ(velocityRelative.getZ() * (1.0 + contactParameters.getCoefficientOfRestitution()));
-      velocityRelative.scale(1.0 + contactParameters.getCoefficientOfRestitution()); // TODO Not sure if this should be on z only
 
       if (isContactClosing)
       { // Closing contact, impulse needs to be calculated.
@@ -353,6 +364,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
       if (impulseA.getLinearPart().getZ() < 0.0)
          throw new IllegalStateException("Malformed impulse");
+
+      impulseA.getLinearPart().scale(contactParameters.getConstraintForceMixing());
 
       if (isFirstUpdate)
       {

@@ -38,7 +38,7 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
       }
    };
 
-   private final ConstraintParameters constraintParameters = new ConstraintParameters();
+   private final ConstraintParameters constraintParameters = new ConstraintParameters(0.1, 0.1, 0.99);
 
    private final List<OneDoFJointBasics> jointsAtLimit = new ArrayList<>();
    private final List<ActiveLimit> activeLimits = new ArrayList<>();
@@ -117,7 +117,7 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
          ActiveLimit activeLimit = activeLimits.get(i);
 
          double qd = joint.getQd() + dt * forwardDynamicsCalculator.getComputedJointAcceleration(joint).get(0);
-         qd *= constraintParameters.getCoefficientOfRestitution();
+         qd *= 1.0 + constraintParameters.getCoefficientOfRestitution();
 
          if (activeLimit == ActiveLimit.LOWER)
          {
@@ -245,6 +245,8 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
          ActiveLimit activeLimit = activeLimits.get(i);
          impulse.set(i, activeLimit.transform(solverOutput_f.get(i)));
       }
+      
+      CommonOps.scale(constraintParameters.getConstraintForceMixing(), impulse);
 
       if (isFirstUpdate)
       {
