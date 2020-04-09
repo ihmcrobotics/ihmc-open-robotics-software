@@ -10,6 +10,13 @@ public class ConstraintParameters implements ConstraintParametersBasics
    {
    }
 
+   public ConstraintParameters(double coefficientOfRestitution, double errorReductionParameter, double constraintForceMixing)
+   {
+      this.coefficientOfRestitution = coefficientOfRestitution;
+      this.errorReductionParameter = errorReductionParameter;
+      this.constraintForceMixing = constraintForceMixing;
+   }
+
    @Override
    public void setCoefficientOfRestitution(double coefficientOfRestitution)
    {
