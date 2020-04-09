@@ -126,7 +126,7 @@ public class PlannerTools
       FramePose3D achievedGoal = new FramePose3D(stepPose);
       Point3D goalPosition = new Point3D(achievedGoal.getPosition());
       goalPosition.add(goalOffset);
-      achievedGoal.setPosition(goalPosition);
+      achievedGoal.getPosition().set(goalPosition);
 
       if (achievedGoal.epsilonEquals(goalPose, epsilon))
          return true;

@@ -76,7 +76,7 @@ public class SimpleLidarRobotController implements RobotController
          @Override
          public void notifyOfVariableChange(YoVariable<?> v)
          {
-            lidarYawPitchRoll.getQuaternion(localQuaternion);
+            localQuaternion.set(lidarYawPitchRoll);
             rootJoint.setQuaternion(localQuaternion);
          }
       });
@@ -136,7 +136,7 @@ public class SimpleLidarRobotController implements RobotController
          for (int i = 0; i < scan.size(); i++)
          {
             Point3D sensorOrigin = new Point3D();
-            transform.getTranslation(sensorOrigin);
+            sensorOrigin.set(transform.getTranslation());
             Point3D scanPoint = scan.getPoint(i);
             if (sensorOrigin.distance(scanPoint) < lidarRange.getDoubleValue())
             {

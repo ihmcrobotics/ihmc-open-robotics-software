@@ -89,7 +89,7 @@ public class SpatialData
          if (rigidBodyNames.get(i) != other.getRigidBodyNames().get(i))
             PrintTools.warn("other spatial data has different order");
 
-         distance = distance + rigidBodySpatials.get(i).getPositionDistance(other.getRigidBodySpatials().get(i));
+         distance = distance + rigidBodySpatials.get(i).getPosition().distance(other.getRigidBodySpatials().get(i).getPosition());
       }
 
       return distance;
@@ -106,7 +106,7 @@ public class SpatialData
          if (rigidBodySpatials.get(i).getOrientation().equals(other.getRigidBodySpatials().get(i).getOrientation()))
             orientationDistance = 0.0;
          else
-            orientationDistance = rigidBodySpatials.get(i).getOrientationDistance(other.getRigidBodySpatials().get(i));
+            orientationDistance = rigidBodySpatials.get(i).getOrientation().distance(other.getRigidBodySpatials().get(i).getOrientation());
 
          orientationDistance = AngleTools.trimAngleMinusPiToPi(orientationDistance);
          orientationDistance = Math.abs(orientationDistance);
@@ -123,7 +123,7 @@ public class SpatialData
 
       for (int i = 0; i < rigidBodySpatials.size(); i++)
       {
-         double positionDistance = rigidBodySpatials.get(i).getPositionDistance(other.getRigidBodySpatials().get(i));
+         double positionDistance = rigidBodySpatials.get(i).getPosition().distance(other.getRigidBodySpatials().get(i).getPosition());
 
          if (distance < positionDistance)
             distance = positionDistance;
@@ -138,7 +138,7 @@ public class SpatialData
 
       for (int i = 0; i < rigidBodySpatials.size(); i++)
       {
-         double orientationDistance = rigidBodySpatials.get(i).getOrientationDistance(other.getRigidBodySpatials().get(i));
+         double orientationDistance = rigidBodySpatials.get(i).getOrientation().distance(other.getRigidBodySpatials().get(i).getOrientation());
          orientationDistance = AngleTools.trimAngleMinusPiToPi(orientationDistance);
          orientationDistance = Math.abs(orientationDistance);
          if (distance < orientationDistance)

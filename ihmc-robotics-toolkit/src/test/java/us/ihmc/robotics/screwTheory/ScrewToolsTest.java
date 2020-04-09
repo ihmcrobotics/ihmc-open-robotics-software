@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -54,8 +55,8 @@ public class ScrewToolsTest
    private ArrayList<RevoluteJoint> joints;
 
    protected static final double epsilon = 1e-10;
-   protected ReferenceFrame theFrame = ReferenceFrame.constructARootFrame("theFrame");
-   protected ReferenceFrame aFrame = ReferenceFrame.constructARootFrame("aFrame");
+   protected ReferenceFrame theFrame = ReferenceFrameTools.constructARootFrame("theFrame");
+   protected ReferenceFrame aFrame = ReferenceFrameTools.constructARootFrame("aFrame");
 
    @BeforeEach
    public void setUp()

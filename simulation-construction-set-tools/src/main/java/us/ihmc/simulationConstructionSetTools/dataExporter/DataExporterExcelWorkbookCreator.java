@@ -20,7 +20,7 @@ import jxl.write.WritableSheet;
 import jxl.write.WritableWorkbook;
 import jxl.write.WriteException;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -354,10 +354,10 @@ public class DataExporterExcelWorkbookCreator
          Vector3D offset = new Vector3D();
          joint.getOffset(offset);
 
-         for (Axis axis : Axis.values())
+         for (Axis3D axis : Axis3D.values())
          {
             addHeaderEntry(configDataSheet, column, "Joint offset " + axis.toString().toLowerCase());
-            addNumberToSheet(configDataSheet, column++, row, Axis.get(offset, axis));
+            addNumberToSheet(configDataSheet, column++, row, Axis3D.get(offset, axis));
          }
 
          // Mass
@@ -369,10 +369,10 @@ public class DataExporterExcelWorkbookCreator
          Vector3D comOffset = new Vector3D();
          link.getComOffset(comOffset);
 
-         for (Axis axis : Axis.values())
+         for (Axis3D axis : Axis3D.values())
          {
             addHeaderEntry(configDataSheet, column, "CoM offset " + axis.toString().toLowerCase());
-            addNumberToSheet(configDataSheet, column++, row, Axis.get(offset, axis));
+            addNumberToSheet(configDataSheet, column++, row, Axis3D.get(offset, axis));
          }
 
          // Mass moment of inertia

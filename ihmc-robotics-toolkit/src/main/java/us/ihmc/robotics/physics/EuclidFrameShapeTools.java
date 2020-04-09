@@ -1,14 +1,27 @@
 package us.ihmc.robotics.physics;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DBasics;
-import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixBasics;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.collision.interfaces.SupportingVertexHolder;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
-import us.ihmc.euclid.shape.primitives.*;
-import us.ihmc.euclid.shape.primitives.interfaces.*;
+import us.ihmc.euclid.shape.primitives.Box3D;
+import us.ihmc.euclid.shape.primitives.Capsule3D;
+import us.ihmc.euclid.shape.primitives.Cylinder3D;
+import us.ihmc.euclid.shape.primitives.Ellipsoid3D;
+import us.ihmc.euclid.shape.primitives.PointShape3D;
+import us.ihmc.euclid.shape.primitives.Ramp3D;
+import us.ihmc.euclid.shape.primitives.Sphere3D;
+import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Capsule3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Cylinder3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Ellipsoid3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.PointShape3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Ramp3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
+import us.ihmc.euclid.shape.primitives.interfaces.Sphere3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -49,7 +62,7 @@ public class EuclidFrameShapeTools
 
       RigidBodyTransform transformToRoot = frame.getTransformToRoot();
       Vector3DBasics framePos = transformToRoot.getTranslation();
-      RotationMatrix frameRot = transformToRoot.getRotation();
+      RotationMatrixBasics frameRot = transformToRoot.getRotation();
 
       if (frameRot.isIdentity())
       {
@@ -123,7 +136,7 @@ public class EuclidFrameShapeTools
 
       RigidBodyTransform transformToRoot = frame.getTransformToRoot();
       Vector3DBasics framePos = transformToRoot.getTranslation();
-      RotationMatrix frameRot = transformToRoot.getRotation();
+      RotationMatrixBasics frameRot = transformToRoot.getRotation();
 
       if (frameRot.isIdentity())
       {
@@ -180,7 +193,7 @@ public class EuclidFrameShapeTools
 
       RigidBodyTransform transformToRoot = frame.getTransformToRoot();
       Vector3DBasics framePos = transformToRoot.getTranslation();
-      RotationMatrix frameRot = transformToRoot.getRotation();
+      RotationMatrixBasics frameRot = transformToRoot.getRotation();
 
       if (frameRot.isIdentity())
       {
@@ -242,7 +255,7 @@ public class EuclidFrameShapeTools
 
       RigidBodyTransform transformToRoot = frame.getTransformToRoot();
       Vector3DBasics framePos = transformToRoot.getTranslation();
-      RotationMatrix frameRot = transformToRoot.getRotation();
+      RotationMatrixBasics frameRot = transformToRoot.getRotation();
 
       if (frameRot.isIdentity())
       {
@@ -330,7 +343,7 @@ public class EuclidFrameShapeTools
 
       RigidBodyTransform transformToRoot = frame.getTransformToRoot();
       Vector3DBasics framePos = transformToRoot.getTranslation();
-      RotationMatrix frameRot = transformToRoot.getRotation();
+      RotationMatrixBasics frameRot = transformToRoot.getRotation();
 
       if (frameRot.isIdentity())
       {
@@ -423,7 +436,7 @@ public class EuclidFrameShapeTools
       }
 
       RigidBodyTransform transformToRoot = frame.getTransformToRoot();
-      RotationMatrix frameRot = transformToRoot.getRotation();
+      RotationMatrixBasics frameRot = transformToRoot.getRotation();
       Vector3DReadOnly framePos = transformToRoot.getTranslation();
 
       if (frameRot.isIdentity())
@@ -469,7 +482,7 @@ public class EuclidFrameShapeTools
       }
 
       RigidBodyTransform transformToRoot = frame.getTransformToRoot();
-      RotationMatrix frameRot = transformToRoot.getRotation();
+      RotationMatrixBasics frameRot = transformToRoot.getRotation();
       Vector3DReadOnly framePos = transformToRoot.getTranslation();
 
       if (frameRot.isIdentity())
@@ -493,7 +506,7 @@ public class EuclidFrameShapeTools
       double maxZ = Double.NEGATIVE_INFINITY;
 
       RigidBodyTransform transformToRoot = frame.getTransformToRoot();
-      RotationMatrix frameRot = transformToRoot.getRotation();
+      RotationMatrixBasics frameRot = transformToRoot.getRotation();
       Vector3DReadOnly framePos = transformToRoot.getTranslation();
 
       Point3DReadOnly supportingVertex;
@@ -501,21 +514,21 @@ public class EuclidFrameShapeTools
 
       if (frameRot.isIdentity())
       {
-         supportDirection.set(Axis.X);
+         supportDirection.set(Axis3D.X);
          supportingVertex = supportingVertexHolder.getSupportingVertex(supportDirection);
          maxX = supportingVertex.getX();
          supportDirection.negate();
          supportingVertex = supportingVertexHolder.getSupportingVertex(supportDirection);
          minX = supportingVertex.getX();
 
-         supportDirection.set(Axis.Y);
+         supportDirection.set(Axis3D.Y);
          supportingVertex = supportingVertexHolder.getSupportingVertex(supportDirection);
          maxY = supportingVertex.getY();
          supportDirection.negate();
          supportingVertex = supportingVertexHolder.getSupportingVertex(supportDirection);
          minY = supportingVertex.getY();
 
-         supportDirection.set(Axis.Z);
+         supportDirection.set(Axis3D.Z);
          supportingVertex = supportingVertexHolder.getSupportingVertex(supportDirection);
          maxZ = supportingVertex.getZ();
          supportDirection.negate();

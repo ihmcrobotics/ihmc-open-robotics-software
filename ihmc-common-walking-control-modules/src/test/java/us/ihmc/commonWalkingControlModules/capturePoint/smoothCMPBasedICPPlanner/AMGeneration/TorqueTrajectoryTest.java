@@ -10,7 +10,7 @@ import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.RandomNumbers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.commons.MathTools;
@@ -56,8 +56,8 @@ public class TorqueTrajectoryTest
          {
             TrajectoryMathTools.getDerivative(calculatedTrajectory.getTrajectoryX(), angularMomentumTrajectory.getSegment(i).getTrajectoryY());
             TrajectoryMathTools.getDerivative(calculatedTrajectory.getTrajectoryY(), angularMomentumTrajectory.getSegment(i).getTrajectoryX());
-            calculatedTrajectory.getTrajectoryZ().setConstant(angularMomentumTrajectory.getSegment(i).getInitialTime(Axis.X),
-                                                              angularMomentumTrajectory.getSegment(i).getFinalTime(Axis.X), 0.0);
+            calculatedTrajectory.getTrajectoryZ().setConstant(angularMomentumTrajectory.getSegment(i).getInitialTime(Axis3D.X),
+                                                              angularMomentumTrajectory.getSegment(i).getFinalTime(Axis3D.X), 0.0);
             TrajectoryMathTools.scale(calculatedTrajectory.getTrajectoryY(), -1.0);
             TrajectoryMathTools.scale(1.0 / verticalScalar, calculatedTrajectory);
 
@@ -91,8 +91,8 @@ public class TorqueTrajectoryTest
       {
          TrajectoryMathTools.getDerivative(calculatedTrajectory.getTrajectoryX(), angularMomentumTrajectory.getSegment(i).getTrajectoryY());
          TrajectoryMathTools.getDerivative(calculatedTrajectory.getTrajectoryY(), angularMomentumTrajectory.getSegment(i).getTrajectoryX());
-         calculatedTrajectory.getTrajectoryZ().setConstant(angularMomentumTrajectory.getSegment(i).getInitialTime(Axis.X),
-                                                           angularMomentumTrajectory.getSegment(i).getFinalTime(Axis.X), 0.0);
+         calculatedTrajectory.getTrajectoryZ().setConstant(angularMomentumTrajectory.getSegment(i).getInitialTime(Axis3D.X),
+                                                           angularMomentumTrajectory.getSegment(i).getFinalTime(Axis3D.X), 0.0);
          TrajectoryMathTools.scale(calculatedTrajectory.getTrajectoryY(), -1.0);
          TrajectoryMathTools.scale(1.0 / verticalScalar, calculatedTrajectory);
 

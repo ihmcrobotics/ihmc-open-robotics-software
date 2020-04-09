@@ -105,8 +105,8 @@ public class MotionQPInputCalculatorTest
          centerOfMassFrame.update();
 
          RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
-         controlFrameTransform.setTranslation(EuclidCoreRandomTools.nextPoint3D(random, 10.0));
-         ReferenceFrame controlFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("controlFrame" + i, endEffectorFrame, controlFrameTransform);
+         controlFrameTransform.getTranslation().set(EuclidCoreRandomTools.nextPoint3D(random, 10.0));
+         ReferenceFrame controlFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("controlFrame" + i, endEffectorFrame, controlFrameTransform);
 
          SpatialAcceleration desiredSpatialAcceleration = new SpatialAcceleration(endEffectorFrame, rootFrame, controlFrame);
          desiredSpatialAcceleration.getLinearPart().set(EuclidCoreRandomTools.nextVector3D(random, -10.0, 10.0));

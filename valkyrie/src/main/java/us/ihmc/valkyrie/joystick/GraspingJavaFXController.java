@@ -523,8 +523,8 @@ public class GraspingJavaFXController
                objectToVisualize.set(controlTransform);
             double lengthOfFrame = lengthOfkeyFrameReferenceFrame;
 
-            Tuple3DBasics translation = new Point3D(objectToVisualize.getTranslationVector());
-            Quaternion orientation = new Quaternion(objectToVisualize.getRotationMatrix());
+            Tuple3DBasics translation = new Point3D(objectToVisualize.getTranslation());
+            Quaternion orientation = new Quaternion(objectToVisualize.getRotation());
 
             JavaFXCoordinateSystem controlCoordinateSystem = new JavaFXCoordinateSystem(lengthOfFrame);
             Affine controlTransform = JavaFXTools.createAffineFromQuaternionAndTuple(new Quaternion(orientation), translation);

@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoPGeneration;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,8 +12,6 @@ import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.configurations.CoPPointName;
 import us.ihmc.commons.Epsilons;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -178,12 +177,11 @@ public class CoPPointsInFootTest
       copPointsInFoot.setFeetLocation(new FramePoint3D(worldFrame, 0.2, 0.1, 0.1), new FramePoint3D(worldFrame, 0.2, -0.1, 0.1));
       copPointsInFoot.addWaypoint(CoPPointName.MIDFOOT_COP, 0.2, new FramePoint3D(worldFrame, 0.2, 0.15, 0.1));
       copPointsInFoot.addWaypoint(CoPPointName.ENTRY_COP, 0.8, new FramePoint3D(worldFrame, 0.15, -0.05, 0.11));
-      ReferenceFrame newFrameToRegister = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("RandomFrameToRegister", worldFrame,
-                                                                                                         new RigidBodyTransform(new Quaternion(),
-                                                                                                                                new FrameVector3D(worldFrame,
-                                                                                                                                                  newFrameOriginX,
-                                                                                                                                                  newFrameOriginY,
-                                                                                                                                                  newFrameOriginZ)));
+      ReferenceFrame newFrameToRegister = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("RandomFrameToRegister", worldFrame, new RigidBodyTransform(new Quaternion(),
+        new FrameVector3D(worldFrame,
+                          newFrameOriginX,
+                          newFrameOriginY,
+                          newFrameOriginZ)));
       copPointsInFoot.changeFrame(newFrameToRegister);
       FramePoint3D tempFramePoint = new FramePoint3D();
       copPointsInFoot.getSupportFootLocation(tempFramePoint);

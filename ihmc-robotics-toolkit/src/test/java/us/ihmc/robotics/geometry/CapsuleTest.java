@@ -1,14 +1,13 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -38,14 +37,14 @@ public class CapsuleTest
       transforms.add(new RigidBodyTransform(tr_base));
 
       // / tr_other.setToRollMatrix( 0.5);
-      tr_other.setTranslation(new Vector3D(1, 1, 1));
+      tr_other.getTranslation().set(new Vector3D(1, 1, 1));
       tr_base.multiply(tr_other);
       transforms.add(new RigidBodyTransform(tr_base));
 
       tr_other.setRotationPitchAndZeroTranslation(1.2);
       tr_base.multiply(tr_other);
       tr_other.setRotationYawAndZeroTranslation(-0.6);
-      tr_other.setTranslation(new Vector3D(0, -2, 3));
+      tr_other.getTranslation().set(new Vector3D(0, -2, 3));
       tr_base.multiply(tr_other);
       transforms.add(new RigidBodyTransform(tr_base));
 

@@ -106,7 +106,7 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             pelvisFrame.getTransformToDesiredFrame(transformToParent, getParent());
-            transformToParent.setRotation(desiredPelvisOrientation);
+            transformToParent.getRotation().set(desiredPelvisOrientation);
          }
       };
 

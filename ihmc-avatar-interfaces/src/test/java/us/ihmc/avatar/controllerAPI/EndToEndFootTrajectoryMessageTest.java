@@ -129,7 +129,7 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       double timeToPickupFoot = 1.0;
 
       FramePose3D footPoseCloseToActual = new FramePose3D(foot.getBodyFixedFrame());
-      footPoseCloseToActual.setPosition(0.0, 0.0, getLiftOffHeight());
+      footPoseCloseToActual.getPosition().set(0.0, 0.0, getLiftOffHeight());
       footPoseCloseToActual.changeFrame(ReferenceFrame.getWorldFrame());
       footPoseCloseToActual.get(desiredPosition, desiredOrientation);
 
@@ -179,8 +179,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       String bodyName = foot.getName();
 
       FramePose3D desiredRandomFootPose = new FramePose3D(foot.getBodyFixedFrame());
-      desiredRandomFootPose.setOrientation(RandomGeometry.nextQuaternion(random, 0.3));
-      desiredRandomFootPose.setPosition(getRandomPositionInSphere(random, robotSide));
+      desiredRandomFootPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 0.3));
+      desiredRandomFootPose.getPosition().set(getRandomPositionInSphere(random, robotSide));
       desiredRandomFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryTime, desiredRandomFootPose);
@@ -421,8 +421,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       ReferenceFrame footFixedFrame = fullRobotModel.getFoot(robotSide).getBodyFixedFrame();
 
       RigidBodyTransform controlFrameTransform = new RigidBodyTransform();
-      controlFrameTransform.setRotationEuler(Math.PI / 4.0, 0.0, Math.PI / 2.0);
-      controlFrameTransform.setTranslation(-0.2, 0.2, -0.1);
+      controlFrameTransform.getRotation().setEuler(Math.PI / 4.0, 0.0, Math.PI / 2.0);
+      controlFrameTransform.getTranslation().set(-0.2, 0.2, -0.1);
       ReferenceFrame controlFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("ControlFrame", footFixedFrame, controlFrameTransform);
 
       RigidBodyTransform controlFrameToWorldFrame = controlFrame.getTransformToWorldFrame();
@@ -441,8 +441,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       double trajectoryTime = 0.5;
       FootTrajectoryMessage footTrajectoryMessage = HumanoidMessageTools.createFootTrajectoryMessage(robotSide, trajectoryTime, desiredPose);
       footTrajectoryMessage.getSe3Trajectory().setUseCustomControlFrame(true);
-      footTrajectoryMessage.getSe3Trajectory().getControlFramePose().setOrientation(new Quaternion(controlFrameTransform.getRotation()));
-      footTrajectoryMessage.getSe3Trajectory().getControlFramePose().setPosition(new Point3D(controlFrameTransform.getTranslation()));
+      footTrajectoryMessage.getSe3Trajectory().getControlFramePose().getOrientation().set(new Quaternion(controlFrameTransform.getRotation()));
+      footTrajectoryMessage.getSe3Trajectory().getControlFramePose().getPosition().set(new Point3D(controlFrameTransform.getTranslation()));
       footTrajectoryMessage.getSe3Trajectory().getFrameInformation().setTrajectoryReferenceFrameId(MessageTools.toFrameId(trajectoryFrame));
 
       drcSimulationTestHelper.publishToController(footTrajectoryMessage);
@@ -864,8 +864,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       FramePose3D currentPose = new FramePose3D(foot.getBodyFixedFrame());
       currentPose.changeFrame(worldFrame);
       EuclidGeometryTestTools.assertPose3DGeometricallyEquals("Poor tracking for side: " + robotSide + " position: "
-            + currentPose.getPositionDistance(controllerDesiredPose) + ", orientation: "
-            + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientationDistance(controllerDesiredPose))), controllerDesiredPose, currentPose, 5.0e-3);
+            + currentPose.getPosition().distance(controllerDesiredPose.getPosition()) + ", orientation: "
+            + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientation().distance(controllerDesiredPose.getOrientation()))), controllerDesiredPose, currentPose, 5.0e-3);
 
       success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5 * trajectoryTime.getValue() + 1.5);
       assertTrue(success);
@@ -883,8 +883,8 @@ public abstract class EndToEndFootTrajectoryMessageTest implements MultiRobotTes
       currentPose = new FramePose3D(foot.getBodyFixedFrame());
       currentPose.changeFrame(worldFrame);
       EuclidGeometryTestTools.assertPose3DGeometricallyEquals("Poor tracking for side: " + robotSide + " position: "
-            + currentPose.getPositionDistance(controllerDesiredPose) + ", orientation: "
-            + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientationDistance(controllerDesiredPose))), controllerDesiredPose, currentPose, 1.0e-3);
+            + currentPose.getPosition().distance(controllerDesiredPose.getPosition()) + ", orientation: "
+            + Math.abs(AngleTools.trimAngleMinusPiToPi(currentPose.getOrientation().distance(controllerDesiredPose.getOrientation()))), controllerDesiredPose, currentPose, 1.0e-3);
    }
 
    //Creates a trajectory for the foot, depending on the number of iterations, it looks like a ribbon or a sphere

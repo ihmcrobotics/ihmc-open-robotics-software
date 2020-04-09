@@ -6,7 +6,7 @@ import java.util.Random;
 
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -253,14 +253,14 @@ public class ReachabilitySphereMapVisualizers
       {
          // Rotate the frame of PI around the principal axis, such that the third axis is pointing towards the point cloud.
          RotationMatrix invertThirdAxis = new RotationMatrix();
-         invertThirdAxis.setToRollMatrix(Math.PI);
+         invertThirdAxis.setToRollOrientation(Math.PI);
          rotationMatrix.multiply(invertThirdAxis);
       }
 
       // Transform the cone head to  the parent frame, in this case world.
       RigidBodyTransform coneTransform = new RigidBodyTransform();
-      coneTransform.setRotation(rotationMatrix);
-      coneTransform.setTranslation(sphereOrigin.getX(), sphereOrigin.getY(), sphereOrigin.getZ());
+      coneTransform.getRotation().set(rotationMatrix);
+      coneTransform.getTranslation().set(sphereOrigin.getX(), sphereOrigin.getY(), sphereOrigin.getZ());
 
       // Build the cone
       double smallestDotProduct = Double.POSITIVE_INFINITY;
@@ -291,7 +291,7 @@ public class ReachabilitySphereMapVisualizers
       Graphics3DObject coneGraphic = new Graphics3DObject();
       coneGraphic.transform(coneTransform);
       coneGraphic.translate(0.0, 0.0, coneHeight);
-      coneGraphic.rotate(Math.PI, Axis.Y);
+      coneGraphic.rotate(Math.PI, Axis3D.Y);
       coneGraphic.addCone(coneHeight, coneBaseRadius, YoAppearance.DarkGreen());
       scs.addStaticLinkGraphics(coneGraphic);
    }

@@ -5,7 +5,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePose2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 public class Pose2dReferenceFrame extends ReferenceFrame
@@ -34,21 +33,21 @@ public class Pose2dReferenceFrame extends ReferenceFrame
    public void setPositionAndUpdate(FramePoint2D framePoint)
    {
       framePoint.checkReferenceFrameMatch(getParent());
-      originPose.setPosition(framePoint);
+      originPose.getPosition().set(framePoint);
       this.update();
    }
 
    public void setOrientationAndUpdate(FrameOrientation2D frameOrientation)
    {
       frameOrientation.checkReferenceFrameMatch(getParent());
-      originPose.setOrientation(frameOrientation);
+      originPose.getOrientation().set(frameOrientation);
       this.update();
    }
 
    public void setPoseAndUpdate(Point2DReadOnly position, double orientation)
    {
-      originPose.setPosition(position);
-      originPose.setOrientation(orientation);
+      originPose.getPosition().set(position);
+      originPose.getOrientation().setYaw(orientation);
       this.update();
    }
 
@@ -61,10 +60,10 @@ public class Pose2dReferenceFrame extends ReferenceFrame
    public void setPoseAndUpdate(FramePoint2D position, FrameOrientation2D orientation)
    {
       position.changeFrame(originPose.getReferenceFrame());
-      originPose.setPosition(position);
+      originPose.getPosition().set(position);
 
       orientation.changeFrame(originPose.getReferenceFrame());
-      originPose.setOrientation(orientation);
+      originPose.getOrientation().set(orientation);
       this.update();
    }
 

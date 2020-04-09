@@ -24,7 +24,7 @@ public class TrajectoryLibraryForDRC
 
       double distanceBetweenKnobAndDoor = 0.0;
       Vector3D zVectorOfKnob = new Vector3D();
-      handControl.getRotationMatrix().getColumn(2, zVectorOfKnob);
+      handControl.getRotation().getColumn(2, zVectorOfKnob);
 
       Vector3D translationFromKnobToDoorPlane = new Vector3D();
 
@@ -67,7 +67,7 @@ public class TrajectoryLibraryForDRC
          knobCenterControl.appendTranslation(0, 0, twistRadius - openingRadius);
 
          knobCenterOrientationControl.prependYawRotation(openingDirectionCW ? (-openingAngle * phase) : (openingAngle * phase));
-         knobCenterControl.setRotation(knobCenterOrientationControl);
+         knobCenterControl.getRotation().set(knobCenterOrientationControl);
 
          knobCenterControl.appendTranslation(0, 0, -twistRadius + openingRadius);
 
@@ -149,11 +149,11 @@ public class TrajectoryLibraryForDRC
    {
       double progress = time / trajectoryTime;
 
-      Point3D fromPoint = new Point3D(from.getTranslationVector());
-      Point3D toPoint = new Point3D(to.getTranslationVector());
+      Point3D fromPoint = new Point3D(from.getTranslation());
+      Point3D toPoint = new Point3D(to.getTranslation());
 
-      Quaternion fromOrienation = new Quaternion(from.getRotationMatrix());
-      Quaternion toOrienation = new Quaternion(to.getRotationMatrix());
+      Quaternion fromOrienation = new Quaternion(from.getRotation());
+      Quaternion toOrienation = new Quaternion(to.getRotation());
 
       Point3D point = new Point3D();
       Quaternion orientation = new Quaternion();

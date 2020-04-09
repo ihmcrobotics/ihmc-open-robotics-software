@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -41,8 +42,7 @@ public class SelectionCalculatorTest
       for (int i = 0; i < 1000; i++)
       {
          RigidBodyTransform selectionFrameTransform = EuclidCoreRandomTools.nextRigidBodyTransform(random);
-         selectionFrame = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("SelectionFrame", ReferenceFrame.getWorldFrame(),
-                                                                                         selectionFrameTransform);
+         selectionFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("SelectionFrame", ReferenceFrame.getWorldFrame(), selectionFrameTransform);
          objective = EuclidCoreRandomTools.nextVector3D(random);
          selectionMatrix.setSelectionFrame(selectionFrame);
          selectionMatrix.selectXAxis(random.nextBoolean());

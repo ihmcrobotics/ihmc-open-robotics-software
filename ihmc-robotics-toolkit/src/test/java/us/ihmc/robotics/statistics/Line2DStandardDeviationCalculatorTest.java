@@ -1,6 +1,11 @@
 package us.ihmc.robotics.statistics;
 
+import static us.ihmc.robotics.Assert.assertEquals;
+
+import java.util.Random;
+
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
@@ -9,10 +14,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameLine2D;
-
-import java.util.Random;
-
-import static us.ihmc.robotics.Assert.assertEquals;
 
 public class Line2DStandardDeviationCalculatorTest
 {
@@ -29,8 +30,8 @@ public class Line2DStandardDeviationCalculatorTest
       Vector2D direction = new Vector2D(17.3, 5.6);
       Point2D position = new Point2D(17.3, 5.6);
       direction.normalize();
-      valueProvider.setDirection(direction);
-      valueProvider.setPoint(position);
+      valueProvider.getDirection().set(direction);
+      valueProvider.getPoint().set(position);
 
       for (int i = 0; i < numberOfValues; i++)
       {
@@ -55,13 +56,13 @@ public class Line2DStandardDeviationCalculatorTest
       Vector2D direction = new Vector2D(17.3, 5.6);
       Point2D position = new Point2D(17.3, 5.6);
       direction.normalize();
-      valueProvider.setDirection(direction);
-      valueProvider.setPoint(position);
+      valueProvider.getDirection().set(direction);
+      valueProvider.getPoint().set(position);
 
       for (int i = 0; i < numberOfValues; i++)
       {
          direction.negate();
-         valueProvider.setDirection(direction);
+         valueProvider.getDirection().set(direction);
          calculator.update();
       }
 
@@ -83,8 +84,8 @@ public class Line2DStandardDeviationCalculatorTest
       Vector2D direction = new Vector2D(17.3, 5.6);
       Point2D position = new Point2D(17.3, 5.6);
       direction.normalize();
-      valueProvider.setDirection(direction);
-      valueProvider.setPoint(position);
+      valueProvider.getDirection().set(direction);
+      valueProvider.getPoint().set(position);
 
       Line2D originalValue = new Line2D(valueProvider);
 
@@ -97,7 +98,7 @@ public class Line2DStandardDeviationCalculatorTest
          positionModification.scale(RandomNumbers.nextDouble(random, 10.0));
          modifiedPosition.add(positionModification);
 
-         valueProvider.setPoint(modifiedPosition);
+         valueProvider.getPoint().set(modifiedPosition);
 
          calculator.update();
       }

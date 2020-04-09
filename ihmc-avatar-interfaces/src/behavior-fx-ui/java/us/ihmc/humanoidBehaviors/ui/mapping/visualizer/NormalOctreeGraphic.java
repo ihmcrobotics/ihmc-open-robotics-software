@@ -62,8 +62,8 @@ public class NormalOctreeGraphic extends Group
          Vector3D planeNormal = new Vector3D();
          Point3D pointOnPlane = new Point3D();
 
-         singlePlane.getNormal(planeNormal);
-         singlePlane.getPoint(pointOnPlane);
+         planeNormal.set(singlePlane.getNormal());
+         pointOnPlane.set(singlePlane.getPoint());
 
          intersectionPlaneBoxCalculator.setCube(octreeResolution, pointOnPlane.getX(), pointOnPlane.getY(), pointOnPlane.getZ());
          intersectionPlaneBoxCalculator.setPlane(pointOnPlane, planeNormal);

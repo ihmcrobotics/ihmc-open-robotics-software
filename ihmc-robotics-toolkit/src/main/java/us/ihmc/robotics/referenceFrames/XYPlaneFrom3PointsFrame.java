@@ -48,6 +48,6 @@ public class XYPlaneFrom3PointsFrame extends ReferenceFrame
       rotation.setColumns(eX, eY, eZ);
 
       transformToParent.setRotationAndZeroTranslation(rotation);
-      transformToParent.setTranslation(p1.getX(), p1.getY(), p1.getZ());
+      transformToParent.getTranslation().set(p1.getX(), p1.getY(), p1.getZ());
    }
 }

@@ -248,8 +248,8 @@ public class ICPOptimizationReachabilityConstraintHandler
       adjustmentDirection.sub(adjustedLocation, referenceLocation);
       EuclidGeometryTools.perpendicularVector2D(adjustmentDirection, adjustmentDirection);
 
-      motionLine.setPoint(adjustedLocation);
-      motionLine.setDirection(adjustmentDirection);
+      motionLine.getPoint().set(adjustedLocation);
+      motionLine.getDirection().set(adjustmentDirection);
 
       contractedReachabilityPolygon.update();
       ConvexPolygonTools.cutPolygonWithLine(motionLine, contractedReachabilityPolygon, lineIntersector2d, RobotSide.LEFT);

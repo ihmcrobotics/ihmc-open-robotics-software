@@ -96,8 +96,8 @@ public class BoofCVChessboardPoseEstimator
    {
       DenseMatrix64F rotation =new DenseMatrix64F(3,3);
       Vector3D translation = new Vector3D();
-      transform.getRotation(rotation);
-      transform.getTranslation(translation);
+      transform.getRotation().get(rotation);
+      translation.set(transform.getTranslation());
       Se3_F64 targetToSensor = new Se3_F64(rotation,new Vector3D_F64(translation.getX(), translation.getY(), translation.getZ()));
 
       Graphics2D g2 = image.createGraphics();

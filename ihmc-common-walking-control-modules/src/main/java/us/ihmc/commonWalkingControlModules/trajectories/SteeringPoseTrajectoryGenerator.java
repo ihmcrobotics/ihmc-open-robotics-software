@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.trajectories;
 import static us.ihmc.robotics.geometry.AngleTools.computeAngleDifferenceMinusPiToPi;
 import static us.ihmc.robotics.geometry.AngleTools.trimAngleMinusPiToPi;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -17,7 +18,9 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsList;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.commons.MathTools;
+import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
+import us.ihmc.robotics.math.trajectories.YoPolynomial;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -27,9 +30,6 @@ import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoFrameQuaternion;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
-import us.ihmc.robotics.math.trajectories.YoPolynomial;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
 public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 {
@@ -423,7 +423,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       else
       {
          tangentialSteeringFramePose.setToZero(currentPosition.getReferenceFrame());
-         tangentialSteeringFramePose.setPosition(currentPosition);
+         tangentialSteeringFramePose.getPosition().set(currentPosition);
       }
 
       tangentialSteeringFramePose.changeFrame(steeringWheelFrame);
@@ -432,7 +432,7 @@ public class SteeringPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       double y = tangentialSteeringFramePose.getY();
 
       double yaw = trimAngleMinusPiToPi(Math.PI / 2.0 + Math.atan2(y, x));
-      tangentialSteeringFramePose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
+      tangentialSteeringFramePose.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
       tangentialSteeringFrame.setPoseAndUpdate(tangentialSteeringFramePose);
       yoTangentialSteeringFramePose.setMatchingFrame(tangentialSteeringFramePose);
    }

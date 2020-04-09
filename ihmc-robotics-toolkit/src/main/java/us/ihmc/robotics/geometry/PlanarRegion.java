@@ -20,7 +20,6 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.shape.collision.interfaces.SupportingVertexHolder;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -909,7 +908,7 @@ public class PlanarRegion implements SupportingVertexHolder
     */
    public void getPointInRegion(Point3DBasics pointToPack)
    {
-      fromLocalToWorldTransform.getTranslation(pointToPack);
+      pointToPack.set(fromLocalToWorldTransform.getTranslation());
    }
 
    /**
@@ -1326,8 +1325,8 @@ public class PlanarRegion implements SupportingVertexHolder
    public Plane3D getPlane()
    {
       Plane3D ret = new Plane3D();
-      ret.setPoint(fromLocalToWorldTransform.getM03(), fromLocalToWorldTransform.getM13(), fromLocalToWorldTransform.getM23());
-      ret.setNormal(fromLocalToWorldTransform.getM02(), fromLocalToWorldTransform.getM12(), fromLocalToWorldTransform.getM22());
+      ret.getPoint().set(fromLocalToWorldTransform.getM03(), fromLocalToWorldTransform.getM13(), fromLocalToWorldTransform.getM23());
+      ret.getNormal().set(fromLocalToWorldTransform.getM02(), fromLocalToWorldTransform.getM12(), fromLocalToWorldTransform.getM22());
       return ret;
    }
 

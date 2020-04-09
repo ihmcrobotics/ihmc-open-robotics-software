@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 
 public class CurrentPositionProviderTest
 {
@@ -19,7 +20,7 @@ public class CurrentPositionProviderTest
    @BeforeEach
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootNameTEST");
    }
 
    @AfterEach

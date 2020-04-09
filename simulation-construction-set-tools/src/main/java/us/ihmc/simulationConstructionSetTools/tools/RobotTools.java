@@ -155,7 +155,7 @@ public class RobotTools
          if (scsFloatingJoint != null)
          {
             scsFloatingJoint.getTransformToWorld(transformToWorld);
-            transformToWorld.normalizeRotationPart();
+            transformToWorld.getRotation().normalize();
             idFloatingJoint.setJointConfiguration(transformToWorld);
          }
 
@@ -226,7 +226,7 @@ public class RobotTools
       RigidBodyTransform offsetTransform = new RigidBodyTransform();
       idJoint.getJointOffset(offsetTransform);
       Vector3D offsetVector = new Vector3D();
-      offsetTransform.getTranslation(offsetVector);
+      offsetVector.set(offsetTransform.getTranslation());
 
       if (idJoint instanceof SixDoFJoint)
       {

@@ -141,7 +141,7 @@ public class LineModDetectorTest
               if(bestDetection!=null)
               {
                       Vector3D rollPitchYaw = new Vector3D();
-                      bestDetection.template.transform.getRotationEuler(rollPitchYaw);
+                      bestDetection.template.transform.getRotation().getEuler(rollPitchYaw);
                       double estimatedYaw= rollPitchYaw.getZ();
                       double yawError = Math.min(Math.abs(estimatedYaw-groundTruthYaw),Math.PI*2-Math.abs(estimatedYaw-groundTruthYaw));
                       System.out.println(yawError/UnitConversions.DEG_TO_RAD);

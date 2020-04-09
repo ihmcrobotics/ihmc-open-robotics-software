@@ -309,7 +309,7 @@ public class MovingBaseRobotArmController implements RobotController
          trajectory.setInitialPose(initialPosition, initialOrientation);
          FramePoint3D finalPosition = new FramePoint3D(handTargetPosition);
          FrameQuaternion finalOrientation = new FrameQuaternion();
-         handTargetOrientation.getFrameOrientationIncludingFrame(finalOrientation);
+         finalOrientation.setIncludingFrame(handTargetOrientation);
          trajectory.setFinalPose(finalPosition, finalOrientation);
          trajectory.setTrajectoryTime(trajectoryDuration.getDoubleValue());
          trajectory.initialize();

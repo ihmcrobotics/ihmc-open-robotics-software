@@ -55,8 +55,8 @@ public class FloatingEmergencyButtonEnvironment implements CommonAvatarEnvironme
 		double alpha = Math.atan(pushVector.getY() / pushVector.getX());
 		double beta = (Math.PI / 2.0) - Math.atan(pushVector.getZ() / Math.sqrt(Math.pow(pushVector.getX(), 2.0) + Math.pow(pushVector.getY(),2.0)));
 		
-		zRotation.setToYawMatrix(alpha);
-		yRotation.setToPitchMatrix(beta);
+		zRotation.setToYawOrientation(alpha);
+		yRotation.setToPitchOrientation(beta);
 		rotation.set(zRotation);
 		rotation.multiply(yRotation);
 		

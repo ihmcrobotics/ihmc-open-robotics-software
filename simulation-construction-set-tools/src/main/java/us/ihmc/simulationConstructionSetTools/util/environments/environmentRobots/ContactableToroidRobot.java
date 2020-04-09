@@ -8,6 +8,7 @@ import org.apache.commons.math3.util.FastMath;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -72,12 +73,12 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
       
       RotationMatrix rotation = new RotationMatrix();
       Vector3D offset = new Vector3D();
-      pinJointTransform.getTranslation(offset);
-      pinJointTransform.getRotation(rotation);
+      offset.set(pinJointTransform.getTranslation());
+      rotation.set(pinJointTransform.getRotation());
       
       Vector3D axis = new Vector3D(0.0, 0.0, 1.0);
       RigidBodyTransform rotationTransform = new RigidBodyTransform();
-      rotationTransform.setRotation(rotation);
+      rotationTransform.getRotation().set(rotation);
       rotationTransform.transform(axis);
       
       
@@ -90,7 +91,7 @@ public class ContactableToroidRobot extends ContactablePinJointRobot implements 
       Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfTorus(mass, wheelTorus.getRadius(), wheelTorus.getThickness());
       
       SpatialInertia rigidBodyInertia = new SpatialInertia(ReferenceFrame.getWorldFrame(), ReferenceFrame.getWorldFrame(), inertia, mass);
-      ReferenceFrame jointFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("toroidFrame", ReferenceFrame.getWorldFrame(), pinJointTransform);
+      ReferenceFrame jointFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("toroidFrame", ReferenceFrame.getWorldFrame(), pinJointTransform);
       rigidBodyInertia.changeFrame(jointFrame);
       wheelLink.setMomentOfInertia(new Matrix3D(rigidBodyInertia.getMomentOfInertia()));
 

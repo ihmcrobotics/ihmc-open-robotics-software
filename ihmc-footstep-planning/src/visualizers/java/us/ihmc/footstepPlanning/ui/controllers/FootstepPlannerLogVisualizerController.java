@@ -481,7 +481,7 @@ public class FootstepPlannerLogVisualizerController
          if(idealStepSnapData == null || idealStepSnapData.getSnapTransform().containsNaN())
          {
             FootstepNodeTools.getNodeTransform(idealStep, idealStepTransform);
-            idealStepTransform.setTranslationZ(transform.getTranslationZ());
+            idealStepTransform.getTranslation().setZ(transform.getTranslationZ());
          }
          else
          {

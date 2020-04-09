@@ -434,18 +434,18 @@ public class QuadrupedSimulationFactory
       List<CameraMount> cameraMounts = new ArrayList<>();
 
       // straight behind
-      cameraTransform.setTranslation(-2.4, 0.0, 0.5);
-      cameraTransform.setRotationEuler(0.0, Math.toRadians(15.0), 0.0);
+      cameraTransform.getTranslation().set(-2.4, 0.0, 0.5);
+      cameraTransform.getRotation().setEuler(0.0, Math.toRadians(15.0), 0.0);
       cameraMounts.add(new CameraMount("ThirdPersonViewBehind", cameraTransform, 1.4, 0.5, 20.0, robot));
 
       // behind and to the side
-      cameraTransform.setTranslation(-2.0, 0.95, 1.0);
-      cameraTransform.setRotationEuler(0.0, Math.toRadians(25.0), Math.toRadians(-18.0));
+      cameraTransform.getTranslation().set(-2.0, 0.95, 1.0);
+      cameraTransform.getRotation().setEuler(0.0, Math.toRadians(25.0), Math.toRadians(-18.0));
       cameraMounts.add(new CameraMount("ThirdPersonViewSide", cameraTransform, 1.4, 0.5, 20.0, robot));
 
       // top-down
-      cameraTransform.setTranslation(0.5, 0.0, 3.5);
-      cameraTransform.setRotationEuler(0.0, Math.toRadians(90.0), 0.0);
+      cameraTransform.getTranslation().set(0.5, 0.0, 3.5);
+      cameraTransform.getRotation().setEuler(0.0, Math.toRadians(90.0), 0.0);
       cameraMounts.add(new CameraMount("TopDownView", cameraTransform, 1.4, 0.5, 20.0, robot));
 
       for (int i = 0; i < cameraMounts.size(); i++)

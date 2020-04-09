@@ -33,7 +33,7 @@ public class YoPositionProviderTest
    @BeforeEach
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootNameTEST");
       registry = new YoVariableRegistry("parentRegistryTEST");
       yoFramePoint = new YoFramePoint3D(namePrefix, referenceFrame, registry);
       yoFramePoint.set(xValue, yValue, zValue);

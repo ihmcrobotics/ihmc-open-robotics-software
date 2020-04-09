@@ -583,7 +583,7 @@ public class ContinuousPlanningToolboxDataSetTest
       QuadrantDependentList<FramePoint3D> feetPositions = new QuadrantDependentList<>();
       Quaternion startOrientation = new Quaternion();
       if (dataSet.getPlannerInput().hasStartOrientation())
-         startOrientation.setToYawQuaternion(dataSet.getPlannerInput().getQuadrupedStartYaw());
+         startOrientation.setToYawOrientation(dataSet.getPlannerInput().getQuadrupedStartYaw());
       PoseReferenceFrame startFrame = new PoseReferenceFrame("startFrame", ReferenceFrame.getWorldFrame());
       startFrame.setPositionAndUpdate(new FramePoint3D(ReferenceFrame.getWorldFrame(), dataSet.getPlannerInput().getQuadrupedStartPosition()));
       startFrame.setOrientationAndUpdate(startOrientation);

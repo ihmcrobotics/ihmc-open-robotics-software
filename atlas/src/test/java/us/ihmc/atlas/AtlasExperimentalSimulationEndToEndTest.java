@@ -9,7 +9,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 
 public class AtlasExperimentalSimulationEndToEndTest extends HumanoidExperimentalSimulationEndToEndTest
 {
-   private static final AtlasRobotVersion VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ;
+   private static final AtlasRobotVersion VERSION = AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS;
 
    @Override
    public DRCRobotModel getRobotModel()

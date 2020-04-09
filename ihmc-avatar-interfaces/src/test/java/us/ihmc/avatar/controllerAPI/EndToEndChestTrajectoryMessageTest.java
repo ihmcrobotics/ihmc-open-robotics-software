@@ -1697,7 +1697,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
       DenseMatrix64F rotationVectorMatrix = new DenseMatrix64F(3, 1);
 
       t1.appendYawRotation(Math.PI / 8.0);
-      t1.getRotation(rotationVector);
+      t1.getRotation().getRotationVector(rotationVector);
       rotationVector.get(rotationVectorMatrix);
 
       SelectionMatrix3D selectionMatrix3d = new SelectionMatrix3D();

@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor.modules.mocap;
 import optiTrack.MocapRigidBody;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
@@ -24,7 +25,7 @@ public class MocapToPelvisFrameConverter
    {
       Vector3D marker2PositionInPelvisFrame = new Vector3D(markerPlateOriginInPelvisFrame);
       marker2PositionInPelvisFrame.add(plateOriginToMarker2InPelvisFrame);
-      pelvisToMarker2Transform.setTranslation(marker2PositionInPelvisFrame);
+      pelvisToMarker2Transform.getTranslation().set(marker2PositionInPelvisFrame);
       pelvisToMarker2Transform.invert();      
    }
 
@@ -50,7 +51,7 @@ public class MocapToPelvisFrameConverter
       worldToMocapTransform.multiply(pelvisToMarker2Transform);
       worldToMocapTransform.multiply(worldToPelvisTransform);
 
-      mocapFrame = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("mocapFrame", ReferenceFrame.getWorldFrame(), worldToMocapTransform);
+      mocapFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("mocapFrame", ReferenceFrame.getWorldFrame(), worldToMocapTransform);
       initialized = true;
    }
 

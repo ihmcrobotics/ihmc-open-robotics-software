@@ -1,8 +1,21 @@
 package us.ihmc.quadrupedBasics.supportPolygon;
 
+import static us.ihmc.robotics.robotSide.RobotQuadrant.FRONT_LEFT;
+import static us.ihmc.robotics.robotSide.RobotQuadrant.FRONT_RIGHT;
+import static us.ihmc.robotics.robotSide.RobotQuadrant.HIND_LEFT;
+import static us.ihmc.robotics.robotSide.RobotQuadrant.HIND_RIGHT;
+import static us.ihmc.robotics.robotSide.RobotQuadrant.getQuadrant;
+
+import java.io.Serializable;
+
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DBasics;
@@ -12,11 +25,11 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.math.exceptions.UndefinedOperationException;
-import us.ihmc.robotics.robotSide.*;
-
-import java.io.Serializable;
-
-import static us.ihmc.robotics.robotSide.RobotQuadrant.*;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RecyclingQuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotEnd;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Serializable
 {
@@ -580,8 +593,8 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
          return false;
       }
 
-      framePose.setOrientationYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
-      framePose.setPosition(tempFramePointForCentroids);
+      framePose.getOrientation().setYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
+      framePose.getPosition().set(tempFramePointForCentroids);
 
       return true;
    }
@@ -593,8 +606,8 @@ public class QuadrupedSupportPolygon extends FrameConvexPolygon2D implements Ser
       double nominalYaw = getNominalYaw();
 
       getCentroidWithEqualWeightedEndsAveragingLowestZHeightsAcrossEnds(tempFramePointForCentroids);
-      framePose.setOrientationYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
-      framePose.setPosition(tempFramePointForCentroids);
+      framePose.getOrientation().setYawPitchRoll(nominalYaw, nominalPitch, nominalRoll);
+      framePose.getPosition().set(tempFramePointForCentroids);
    }
 
    public void getCentroid2d(FramePoint2D centroidToPack2d)

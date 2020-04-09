@@ -296,7 +296,7 @@ public class QuadrupedSupportPlanarRegionPublisher
       if (desiredRootJoint != null)
       {
          Vector3D translation = robotConfigurationData.getRootTranslation();
-         desiredRootJoint.getJointPose().setPosition(translation.getX(), translation.getY(), translation.getZ());
+         desiredRootJoint.getJointPose().getPosition().set(translation.getX(), translation.getY(), translation.getZ());
          Quaternion orientation = robotConfigurationData.getRootOrientation();
          desiredRootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
          desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));

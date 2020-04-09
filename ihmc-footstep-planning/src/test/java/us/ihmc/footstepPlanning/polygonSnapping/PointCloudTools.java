@@ -269,10 +269,10 @@ public class PointCloudTools
                      bw.write(System.getProperty("line.separator"));
                      
                      Vector3D translation = new Vector3D();
-                     transformToWorld.getTranslation(translation);
+                     translation.set(transformToWorld.getTranslation());
                      
                      Quaternion quat = new Quaternion();
-                     transformToWorld.getRotation(quat);
+                     quat.set(transformToWorld.getRotation());
                      
                      bw.write("RBT," + translation + ", " + quat);
                      bw.write(System.getProperty("line.separator"));

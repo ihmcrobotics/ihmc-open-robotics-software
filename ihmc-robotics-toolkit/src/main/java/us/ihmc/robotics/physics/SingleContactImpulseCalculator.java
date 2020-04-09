@@ -9,7 +9,7 @@ import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -420,7 +420,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
       for (int axis = 0; axis < 3; axis++)
       {
-         testImpulse.setIncludingFrame(body.getBodyFixedFrame(), contactFrame, EuclidCoreTools.zeroVector3D, Axis.values[axis]);
+         testImpulse.setIncludingFrame(body.getBodyFixedFrame(), contactFrame, EuclidCoreTools.zeroVector3D, Axis3D.values[axis]);
 
          if (!calculator.applyRigidBodyImpulse(body, testImpulse))
             throw new IllegalStateException("Something went wrong with the response calculator");

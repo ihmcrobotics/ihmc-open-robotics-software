@@ -189,7 +189,7 @@ public class QuadrupedReferenceFrames extends AbstractQuadrupedReferenceFrames
 
       }
       centerOfFourHipsFramePoint.scale(0.25);
-      centerOfFourHipsFramePose.setPosition(centerOfFourHipsFramePoint);
+      centerOfFourHipsFramePose.getPosition().set(centerOfFourHipsFramePoint);
       centerOfFourHipsFrame.setPoseAndUpdate(centerOfFourHipsFramePose);
    }
 
@@ -215,7 +215,7 @@ public class QuadrupedReferenceFrames extends AbstractQuadrupedReferenceFrames
 
       centerOfMassPose.setToZero(centerOfMassFrame);
       centerOfMassPose.changeFrame(bodyFrame);
-      centerOfMassPose.setOrientation(IDENTITY_QUATERNION);
+      centerOfMassPose.getOrientation().set(IDENTITY_QUATERNION);
 
       centerOfMassFrameWithRotation.setPoseAndUpdate(centerOfMassPose);
       centerOfMassZUpFrame.update();
@@ -241,7 +241,7 @@ public class QuadrupedReferenceFrames extends AbstractQuadrupedReferenceFrames
       centerOfFourFeetFramePoint.changeFrame(bodyFrame);
       centerOfFourFeetFramePose.setToZero(bodyFrame);
 
-      centerOfFourFeetFramePose.setPosition(centerOfFourFeetFramePoint);
+      centerOfFourFeetFramePose.getPosition().set(centerOfFourFeetFramePoint);
       centerOfFourFeetFrameWithBodyRotation.setPoseAndUpdate(centerOfFourFeetFramePose);
    }
 

@@ -121,8 +121,8 @@ public class FootstepNodeSnappingTools
 
       RigidBodyTransform footstepPose = new RigidBodyTransform();
       footstepPose.setRotationYawAndZeroTranslation(yaw);
-      footstepPose.setTranslationX(midFootPoint.getX());
-      footstepPose.setTranslationY(midFootPoint.getY());
+      footstepPose.getTranslation().setX(midFootPoint.getX());
+      footstepPose.getTranslation().setY(midFootPoint.getY());
       snapTransform.transform(footstepPose);
 
       int numberOfChecks = 5;

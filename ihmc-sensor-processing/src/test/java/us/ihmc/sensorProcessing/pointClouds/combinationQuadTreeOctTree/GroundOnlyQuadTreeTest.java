@@ -993,7 +993,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
 
    private static ArrayList<Point3D> generatePointsForSlope(Plane3D plane3d, double halfWidth, double stepSize)
    {
-      Point3D centerPoint = plane3d.getPointCopy();
+      Point3D centerPoint = new Point3D(plane3d.getPoint());
 
       double minX = centerPoint.getX() - halfWidth;
       double minY = centerPoint.getY() - halfWidth;
@@ -1252,7 +1252,7 @@ public class GroundOnlyQuadTreeTest extends AbstractHeightMapTest
       RigidBodyTransform location = new RigidBodyTransform();
       location.setRotationYawAndZeroTranslation(Math.toRadians(yawDegrees));
 
-      location.setTranslation(new Vector3D(x, y, height / 2));
+      location.getTranslation().set(new Vector3D(x, y, height / 2));
       RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, length, width, height), app);
       combinedTerrainObject.addTerrainObject(newBox);
    }

@@ -1,19 +1,14 @@
 package us.ihmc.robotics.screwTheory;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Random;
-import java.util.Set;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
@@ -21,6 +16,7 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -52,7 +48,7 @@ public class MovingZUpFrameTest
          RotationMatrix rotationMatrix = EuclidCoreRandomTools.nextRotationMatrix(random);
 
          RotationMatrix expectedZUp = new RotationMatrix();
-         expectedZUp.setToYawMatrix(rotationMatrix.getYaw());
+         expectedZUp.setToYawOrientation(rotationMatrix.getYaw());
 
          RotationMatrix actualZUp = new RotationMatrix();
          double sinPitch = -rotationMatrix.getM20();
@@ -88,8 +84,8 @@ public class MovingZUpFrameTest
          zUpFrame.update();
 
          RigidBodyTransform expectedTransform = new RigidBodyTransform();
-         expectedTransform.setTranslation(originalTransform.getTranslationVector());
-         expectedTransform.setRotationYaw(originalTransform.getRotationMatrix().getYaw());
+         expectedTransform.getTranslation().set(originalTransform.getTranslation());
+         expectedTransform.getRotation().setToYawOrientation(originalTransform.getRotation().getYaw());
 
          EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, zUpFrame.getTransformToWorldFrame(), EPSILON);
       }
@@ -105,8 +101,8 @@ public class MovingZUpFrameTest
          RotationMatrix rotationMatrix = EuclidCoreRandomTools.nextRotationMatrix(random);
          Vector3D angularVelocity = EuclidCoreRandomTools.nextVector3D(random);
 
-         double[] yawPitchRoll = new double[3];
-         rotationMatrix.getYawPitchRoll(yawPitchRoll);
+         YawPitchRoll yawPitchRoll = new YawPitchRoll();
+         yawPitchRoll.set(rotationMatrix);
 
          double sinPitch = -rotationMatrix.getM20();
          double cosPitch = Math.sqrt(1.0 - sinPitch * sinPitch);
@@ -115,12 +111,12 @@ public class MovingZUpFrameTest
          double cosRoll = rotationMatrix.getM22() / cosPitch;
          double sinRoll = rotationMatrix.getM21() / cosPitch;
 
-         assertEquals(sinPitch, Math.sin(yawPitchRoll[1]), EPSILON);
-         assertEquals(cosPitch, Math.cos(yawPitchRoll[1]), EPSILON);
-         assertEquals(sinYaw, Math.sin(yawPitchRoll[0]), EPSILON);
-         assertEquals(cosYaw, Math.cos(yawPitchRoll[0]), EPSILON);
-         assertEquals(sinRoll, Math.sin(yawPitchRoll[2]), EPSILON);
-         assertEquals(cosRoll, Math.cos(yawPitchRoll[2]), EPSILON);
+         assertEquals(sinPitch, Math.sin(yawPitchRoll.getPitch()), EPSILON);
+         assertEquals(cosPitch, Math.cos(yawPitchRoll.getPitch()), EPSILON);
+         assertEquals(sinYaw, Math.sin(yawPitchRoll.getYaw()), EPSILON);
+         assertEquals(cosYaw, Math.cos(yawPitchRoll.getYaw()), EPSILON);
+         assertEquals(sinRoll, Math.sin(yawPitchRoll.getRoll()), EPSILON);
+         assertEquals(cosRoll, Math.cos(yawPitchRoll.getRoll()), EPSILON);
 
          double actuaYawRate = (sinRoll * angularVelocity.getY() + cosRoll * angularVelocity.getZ()) / cosPitch;
          double expectedYawRate = RotationTools.computeYawRate(yawPitchRoll, angularVelocity, true);
@@ -156,8 +152,8 @@ public class MovingZUpFrameTest
          randomMovingFrame.update();
          zUpFrame.update();
 
-         double[] yawPitchRoll = new double[3];
-         originalTransform.getRotationYawPitchRoll(yawPitchRoll);
+         YawPitchRoll yawPitchRoll = new YawPitchRoll();
+         yawPitchRoll.set(originalTransform.getRotation());
          Twist expectedTwist = new Twist(zUpFrame, ReferenceFrame.getWorldFrame(), randomMovingFrame);
          expectedTwist.getLinearPart().set(originalLinearVelocity);
          expectedTwist.changeFrame(zUpFrame);

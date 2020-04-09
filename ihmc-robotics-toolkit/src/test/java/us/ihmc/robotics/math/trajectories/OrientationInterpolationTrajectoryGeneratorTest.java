@@ -38,7 +38,7 @@ public class OrientationInterpolationTrajectoryGeneratorTest
    @BeforeEach
    public void setUp()
    {
-      referenceFrame = ReferenceFrame.constructARootFrame("rootFrameTEST");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootFrameTEST");
       orientation = new FrameQuaternion(referenceFrame);
       
       trajectoryTimeProvider = new SettableDoubleProvider(trajectoryTime);

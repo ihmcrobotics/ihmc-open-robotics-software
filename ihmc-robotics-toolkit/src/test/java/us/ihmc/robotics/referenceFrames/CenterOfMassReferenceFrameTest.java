@@ -52,7 +52,7 @@ public class CenterOfMassReferenceFrameTest
       ReferenceFrame centerOfMassReferenceFrame = new CenterOfMassReferenceFrame("com", elevator.getBodyFixedFrame(), elevator);
 
       sixDoFJoint.setJointPosition(RandomGeometry.nextVector3D(random));
-      sixDoFJoint.getJointPose().setOrientationYawPitchRoll(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      sixDoFJoint.getJointPose().getOrientation().setYawPitchRoll(random.nextDouble(), random.nextDouble(), random.nextDouble());
 
       for (RevoluteJoint joint : joints)
       {
@@ -73,7 +73,7 @@ public class CenterOfMassReferenceFrameTest
 
       RotationMatrix rotation = new RotationMatrix();
       RigidBodyTransform transform = centerOfMassReferenceFrame.getTransformToDesiredFrame(elevator.getBodyFixedFrame());
-      transform.getRotation(rotation);
+      rotation.set(transform.getRotation());
       RotationMatrix idenitity = new RotationMatrix();
       idenitity.setIdentity();
       EuclidCoreTestTools.assertMatrix3DEquals("", idenitity, rotation, 1e-12);

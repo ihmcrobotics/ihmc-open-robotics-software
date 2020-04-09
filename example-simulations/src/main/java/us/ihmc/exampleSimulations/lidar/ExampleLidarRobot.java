@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.lidar;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -26,7 +26,7 @@ public class ExampleLidarRobot extends Robot
       double height = 0.2;
       double radius = 0.05;
 
-      gimbalJoint = new GimbalJoint("gimbalZ", "gimbalX", "gimbalY", new Vector3D(0.0, 0.0, 1.0), this, Axis.Z, Axis.X, Axis.Y);
+      gimbalJoint = new GimbalJoint("gimbalZ", "gimbalX", "gimbalY", new Vector3D(0.0, 0.0, 1.0), this, Axis3D.Z, Axis3D.X, Axis3D.Y);
       Link link = new Link("lidar");
       link.setMassAndRadiiOfGyration(1.0, radius, radius, radius);
       Graphics3DObject linkGraphics = new Graphics3DObject();
@@ -38,7 +38,7 @@ public class ExampleLidarRobot extends Robot
       gimbalJoint.addCameraMount(robotCam);
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setTranslation(new Vector3D(radius + 0.001, 0.0, height / 2.0));
+      transform.getTranslation().set(new Vector3D(radius + 0.001, 0.0, height / 2.0));
       lidarScanParameters = new LidarScanParameters(720, (float) (-Math.PI / 2), (float) (Math.PI / 2), 0f, 0.1f, 30.0f, 0f);
       LidarSensorDescription lidarSensorDescription = new LidarSensorDescription("lidar", transform);
       lidarSensorDescription.setPointsPerSweep(lidarScanParameters.getPointsPerSweep());
