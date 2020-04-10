@@ -221,7 +221,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    private final FramePoint3D tempPoint = new FramePoint3D();
 
    private final YoFramePoint3D yoSingleSupportFinalCoM;
-   private final FramePoint3D singleSupportFinalCoM = new FramePoint3D();
+   private final YoFramePoint3D endOfStateCoM;
 
    private final int maxNumberOfICPCornerPointsVisualized = 20;
 
@@ -295,6 +295,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       transferDurationAlphas.add(transferDurationAlpha);
 
       yoSingleSupportFinalCoM = new YoFramePoint3D(namePrefix + "SingleSupportFinalCoM", worldFrame, registry);
+      endOfStateCoM = new YoFramePoint3D(namePrefix + "EndOfStateCoM", worldFrame, registry);
 
       this.gravityZ = gravityZ;
       defaultSwingDurationShiftFraction = new YoDouble(namePrefix + "DefaultSwingDurationShiftFraction", registry);
@@ -919,8 +920,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    @Override
    public void computeFinalCoMPositionInTransfer()
    {
-      referenceCoMGenerator.getFinalCoMPositionInTransfer(singleSupportFinalCoM);
-      yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
+      referenceCoMGenerator.getFinalCoMPositionInTransfer(yoSingleSupportFinalCoM);
    }
 
    /** {@inheritDoc} */
@@ -953,8 +953,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    @Override
    public void computeFinalCoMPositionInSwing()
    {
-      referenceCoMGenerator.getFinalCoMPositionInSwing(singleSupportFinalCoM);
-      yoSingleSupportFinalCoM.set(singleSupportFinalCoM);
+      referenceCoMGenerator.getFinalCoMPositionInSwing(yoSingleSupportFinalCoM);
    }
 
    @Override
@@ -1041,6 +1040,8 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       referenceICPGenerator.getICPPhaseEntryCornerPoints(icpPhaseEntryCornerPoints);
       referenceICPGenerator.getICPPhaseExitCornerPoints(icpPhaseExitCornerPoints);
       updateListeners();
+
+      referenceCoMGenerator.getFinalCoMPositionInTransfer(endOfStateCoM);
    }
 
    protected void updateSingleSupportPlan(boolean maintainContinuity)
@@ -1101,6 +1102,8 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       CapturePointTools.computeDesiredCapturePointVelocity(omega0.getDoubleValue(), 0.0, singleSupportFinalICP, tempPoint, singleSupportFinalICPVelocity);
 
       updateListeners();
+
+      referenceCoMGenerator.getFinalCoMPositionInSwing(endOfStateCoM);
    }
 
    /** {@inheritDoc} */
@@ -1215,23 +1218,18 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       finalDesiredCapturePointPositionToPack.set(tempFinalICP);
    }
 
-   private final FramePoint3D tempFinalCoM = new FramePoint3D();
-
    /** {@inheritDoc} */
    @Override
    public void getFinalDesiredCenterOfMassPosition(FixedFramePoint3DBasics finalDesiredCenterOfMassPositionToPack)
    {
       if (isStanding.getBooleanValue())
       {
-         referenceCoPGenerator.getWaypoints().get(1).get(0).getPosition(tempFinalCoM);
+         referenceCoPGenerator.getWaypoints().get(1).get(0).getPosition(finalDesiredCenterOfMassPositionToPack);
       }
       else
       {
-         tempFinalCoM.set(singleSupportFinalCoM);
+         finalDesiredCenterOfMassPositionToPack.set(endOfStateCoM);
       }
-
-      finalDesiredCenterOfMassPositionToPack.setMatchingFrame(tempFinalCoM);
-
    }
 
    /** {@inheritDoc} */
