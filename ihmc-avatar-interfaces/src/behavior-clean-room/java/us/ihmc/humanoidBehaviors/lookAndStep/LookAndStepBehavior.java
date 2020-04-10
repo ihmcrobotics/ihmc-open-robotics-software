@@ -194,6 +194,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private void footstepPlanningThread(FootstepPlannerRequest footstepPlannerRequest)
    {
+      footstepPlanningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= 1);
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.handleRequest(footstepPlannerRequest);
       footstepPlannerOutputNotification.add(footstepPlannerOutput);
 
