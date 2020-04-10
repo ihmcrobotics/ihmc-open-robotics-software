@@ -40,9 +40,12 @@ public class SoleTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -59,10 +62,13 @@ public class SoleTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.getCdrSerializedSize(data.getPositionTrajectory(), current_alignment);
@@ -73,19 +79,25 @@ public class SoleTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void write(controller_msgs.msg.dds.SoleTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
+
       cdr.write_type_9(data.getRobotQuadrant());
+
 
       controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.write(data.getPositionTrajectory(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.SoleTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setRobotQuadrant(cdr.read_type_9());
       	
+
       controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType.read(data.getPositionTrajectory(), cdr);	
 
    }
@@ -93,8 +105,11 @@ public class SoleTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void serialize(controller_msgs.msg.dds.SoleTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_9("robot_quadrant", data.getRobotQuadrant());
+
       ser.write_type_a("position_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getPositionTrajectory());
 
    }
@@ -102,8 +117,11 @@ public class SoleTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.SoleTrajectoryMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setRobotQuadrant(ser.read_type_9("robot_quadrant"));
+
       ser.read_type_a("position_trajectory", new controller_msgs.msg.dds.EuclideanTrajectoryMessagePubSubType(), data.getPositionTrajectory());
 
    }

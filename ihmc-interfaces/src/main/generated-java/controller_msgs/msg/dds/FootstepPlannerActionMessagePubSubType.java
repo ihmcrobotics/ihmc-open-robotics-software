@@ -40,6 +40,7 @@ public class FootstepPlannerActionMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -55,6 +56,7 @@ public class FootstepPlannerActionMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -64,12 +66,14 @@ public class FootstepPlannerActionMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void write(controller_msgs.msg.dds.FootstepPlannerActionMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_9(data.getRequestedAction());
 
    }
 
    public static void read(controller_msgs.msg.dds.FootstepPlannerActionMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setRequestedAction(cdr.read_type_9());
       	
 
@@ -78,13 +82,16 @@ public class FootstepPlannerActionMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void serialize(controller_msgs.msg.dds.FootstepPlannerActionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_9("requested_action", data.getRequestedAction());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepPlannerActionMessage data)
    {
-      data.setRequestedAction(ser.read_type_9("requested_action"));   }
+
+      data.setRequestedAction(ser.read_type_9("requested_action"));
+   }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlannerActionMessage src, controller_msgs.msg.dds.FootstepPlannerActionMessage dest)
    {

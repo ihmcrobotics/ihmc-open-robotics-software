@@ -40,38 +40,55 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -88,7 +105,9 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -96,46 +115,61 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
       {
           current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getCdrSerializedSize(data.getFootstepDataList().get(i0), current_alignment);}
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
@@ -146,76 +180,110 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void write(controller_msgs.msg.dds.FootstepDataListMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       if(data.getFootstepDataList().size() <= 50)
       cdr.write_type_e(data.getFootstepDataList());else
           throw new RuntimeException("footstep_data_list field exceeds the maximum length");
 
+
       cdr.write_type_9(data.getExecutionTiming());
+
 
       cdr.write_type_6(data.getDefaultSwingDuration());
 
+
       cdr.write_type_6(data.getDefaultTransferDuration());
+
 
       cdr.write_type_6(data.getFinalTransferDuration());
 
+
       cdr.write_type_6(data.getDefaultSwingDurationShiftFraction());
+
 
       cdr.write_type_6(data.getDefaultSwingSplitFraction());
 
+
       cdr.write_type_6(data.getDefaultTransferSplitFraction());
+
 
       cdr.write_type_6(data.getFinalTransferSplitFraction());
 
+
       cdr.write_type_6(data.getDefaultTransferWeightDistribution());
+
 
       cdr.write_type_6(data.getFinalTransferWeightDistribution());
 
+
       cdr.write_type_7(data.getTrustHeightOfFootsteps());
+
 
       cdr.write_type_7(data.getAreFootstepsAdjustable());
 
+
       cdr.write_type_7(data.getOffsetFootstepsWithExecutionError());
 
+
       cdr.write_type_7(data.getOffsetFootstepsHeightWithExecutionError());
+
 
       controller_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.FootstepDataListMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       cdr.read_type_e(data.getFootstepDataList());	
+
       data.setExecutionTiming(cdr.read_type_9());
       	
+
       data.setDefaultSwingDuration(cdr.read_type_6());
       	
+
       data.setDefaultTransferDuration(cdr.read_type_6());
       	
+
       data.setFinalTransferDuration(cdr.read_type_6());
       	
+
       data.setDefaultSwingDurationShiftFraction(cdr.read_type_6());
       	
+
       data.setDefaultSwingSplitFraction(cdr.read_type_6());
       	
+
       data.setDefaultTransferSplitFraction(cdr.read_type_6());
       	
+
       data.setFinalTransferSplitFraction(cdr.read_type_6());
       	
+
       data.setDefaultTransferWeightDistribution(cdr.read_type_6());
       	
+
       data.setFinalTransferWeightDistribution(cdr.read_type_6());
       	
+
       data.setTrustHeightOfFootsteps(cdr.read_type_7());
       	
+
       data.setAreFootstepsAdjustable(cdr.read_type_7());
       	
+
       data.setOffsetFootstepsWithExecutionError(cdr.read_type_7());
       	
+
       data.setOffsetFootstepsHeightWithExecutionError(cdr.read_type_7());
       	
+
       controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
 
    }
@@ -223,22 +291,39 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void serialize(controller_msgs.msg.dds.FootstepDataListMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_e("footstep_data_list", data.getFootstepDataList());
+
       ser.write_type_9("execution_timing", data.getExecutionTiming());
+
       ser.write_type_6("default_swing_duration", data.getDefaultSwingDuration());
+
       ser.write_type_6("default_transfer_duration", data.getDefaultTransferDuration());
+
       ser.write_type_6("final_transfer_duration", data.getFinalTransferDuration());
+
       ser.write_type_6("default_swing_duration_shift_fraction", data.getDefaultSwingDurationShiftFraction());
+
       ser.write_type_6("default_swing_split_fraction", data.getDefaultSwingSplitFraction());
+
       ser.write_type_6("default_transfer_split_fraction", data.getDefaultTransferSplitFraction());
+
       ser.write_type_6("final_transfer_split_fraction", data.getFinalTransferSplitFraction());
+
       ser.write_type_6("default_transfer_weight_distribution", data.getDefaultTransferWeightDistribution());
+
       ser.write_type_6("final_transfer_weight_distribution", data.getFinalTransferWeightDistribution());
+
       ser.write_type_7("trust_height_of_footsteps", data.getTrustHeightOfFootsteps());
+
       ser.write_type_7("are_footsteps_adjustable", data.getAreFootstepsAdjustable());
+
       ser.write_type_7("offset_footsteps_with_execution_error", data.getOffsetFootstepsWithExecutionError());
+
       ser.write_type_7("offset_footsteps_height_with_execution_error", data.getOffsetFootstepsHeightWithExecutionError());
+
       ser.write_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
    }
@@ -246,22 +331,39 @@ public class FootstepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepDataListMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_e("footstep_data_list", data.getFootstepDataList());
+
       data.setExecutionTiming(ser.read_type_9("execution_timing"));
+
       data.setDefaultSwingDuration(ser.read_type_6("default_swing_duration"));
+
       data.setDefaultTransferDuration(ser.read_type_6("default_transfer_duration"));
+
       data.setFinalTransferDuration(ser.read_type_6("final_transfer_duration"));
+
       data.setDefaultSwingDurationShiftFraction(ser.read_type_6("default_swing_duration_shift_fraction"));
+
       data.setDefaultSwingSplitFraction(ser.read_type_6("default_swing_split_fraction"));
+
       data.setDefaultTransferSplitFraction(ser.read_type_6("default_transfer_split_fraction"));
+
       data.setFinalTransferSplitFraction(ser.read_type_6("final_transfer_split_fraction"));
+
       data.setDefaultTransferWeightDistribution(ser.read_type_6("default_transfer_weight_distribution"));
+
       data.setFinalTransferWeightDistribution(ser.read_type_6("final_transfer_weight_distribution"));
+
       data.setTrustHeightOfFootsteps(ser.read_type_7("trust_height_of_footsteps"));
+
       data.setAreFootstepsAdjustable(ser.read_type_7("are_footsteps_adjustable"));
+
       data.setOffsetFootstepsWithExecutionError(ser.read_type_7("offset_footsteps_with_execution_error"));
+
       data.setOffsetFootstepsHeightWithExecutionError(ser.read_type_7("offset_footsteps_height_with_execution_error"));
+
       ser.read_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
    }

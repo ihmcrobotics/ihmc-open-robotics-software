@@ -40,7 +40,9 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -57,7 +59,9 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -70,7 +74,9 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void write(controller_msgs.msg.dds.MessageCollection data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       if(data.getSequences().size() <= 100)
       cdr.write_type_e(data.getSequences());else
@@ -80,8 +86,10 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void read(controller_msgs.msg.dds.MessageCollection data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       cdr.read_type_e(data.getSequences());	
 
    }
@@ -89,14 +97,18 @@ public class MessageCollectionPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void serialize(controller_msgs.msg.dds.MessageCollection data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_e("sequences", data.getSequences());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.MessageCollection data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_e("sequences", data.getSequences());
    }
 
