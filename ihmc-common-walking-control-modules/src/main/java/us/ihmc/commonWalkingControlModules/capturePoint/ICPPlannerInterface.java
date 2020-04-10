@@ -511,7 +511,7 @@ public interface ICPPlannerInterface
     */
    default void getFinalDesiredCenterOfMassPosition(FramePoint3DBasics finalDesiredCenterOfMassPositionToPack)
    {
-      finalDesiredCenterOfMassPositionToPack.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+      finalDesiredCenterOfMassPositionToPack.setReferenceFrame(ReferenceFrame.getWorldFrame());
       getFinalDesiredCenterOfMassPosition((FixedFramePoint3DBasics) finalDesiredCenterOfMassPositionToPack);
    }
 
