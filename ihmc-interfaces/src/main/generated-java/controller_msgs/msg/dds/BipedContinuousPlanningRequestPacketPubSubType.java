@@ -62,6 +62,8 @@ public class BipedContinuousPlanningRequestPacketPubSubType implements us.ihmc.p
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -104,6 +106,9 @@ public class BipedContinuousPlanningRequestPacketPubSubType implements us.ihmc.p
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -129,6 +134,8 @@ public class BipedContinuousPlanningRequestPacketPubSubType implements us.ihmc.p
 
       cdr.write_type_6(data.getBestEffortTimeout());
 
+      cdr.write_type_2(data.getMaxIterations());
+
       cdr.write_type_6(data.getHorizonLength());
 
    }
@@ -150,6 +157,8 @@ public class BipedContinuousPlanningRequestPacketPubSubType implements us.ihmc.p
       data.setTimeout(cdr.read_type_6());
       	
       data.setBestEffortTimeout(cdr.read_type_6());
+      	
+      data.setMaxIterations(cdr.read_type_2());
       	
       data.setHorizonLength(cdr.read_type_6());
       	
@@ -176,6 +185,7 @@ public class BipedContinuousPlanningRequestPacketPubSubType implements us.ihmc.p
       ser.write_type_2("planner_request_id", data.getPlannerRequestId());
       ser.write_type_6("timeout", data.getTimeout());
       ser.write_type_6("best_effort_timeout", data.getBestEffortTimeout());
+      ser.write_type_2("max_iterations", data.getMaxIterations());
       ser.write_type_6("horizon_length", data.getHorizonLength());
    }
 
@@ -199,6 +209,7 @@ public class BipedContinuousPlanningRequestPacketPubSubType implements us.ihmc.p
       data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
       data.setTimeout(ser.read_type_6("timeout"));
       data.setBestEffortTimeout(ser.read_type_6("best_effort_timeout"));
+      data.setMaxIterations(ser.read_type_2("max_iterations"));
       data.setHorizonLength(ser.read_type_6("horizon_length"));
    }
 

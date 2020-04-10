@@ -47,7 +47,7 @@ public class VisibilityGraphTest
       Point2D pointC = new Point2D(10.0 + 1.01, 1.01);
       Point2D pointD = new Point2D(10.0 + 1.01, -0.01);
 
-      transform.setTranslation(-10.0, 0.0, 0.0);
+      transform.getTranslation().set(-10.0, 0.0, 0.0);
       ConvexPolygon2D polygon0_0 = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointA, pointB, pointC, pointD));
 
       PlanarRegion planarRegion0 = new PlanarRegion(transform, polygon0_0);
@@ -218,7 +218,7 @@ public class VisibilityGraphTest
 
       RigidBodyTransform transform0 = new RigidBodyTransform();
       RigidBodyTransform transform1 = new RigidBodyTransform();
-      transform1.setTranslation(-7.0 + 1.1, -3.0, 0.0);
+      transform1.getTranslation().set(-7.0 + 1.1, -3.0, 0.0);
 
       PlanarRegion planarRegion0 = new PlanarRegion(transform0, polygon0_0);
       planarRegion0.setRegionId(77);
@@ -443,7 +443,7 @@ public class VisibilityGraphTest
 
       RigidBodyTransform transform0 = new RigidBodyTransform();
       RigidBodyTransform transform1 = new RigidBodyTransform();
-      transform1.setTranslation(1.25, 0.0, 0.0);
+      transform1.getTranslation().set(1.25, 0.0, 0.0);
 
       PlanarRegion planarRegion0 = new PlanarRegion(transform0, polygon0_0);
       planarRegion0.setRegionId(77);
@@ -460,8 +460,8 @@ public class VisibilityGraphTest
 
       ConvexPolygon2D barrierPolygon = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(barrierPointI, barrierPointJ, barrierPointK, barrierPointL));
       RigidBodyTransform barrierTransform = new RigidBodyTransform();
-      barrierTransform.setRotationEuler(0.0, -Math.PI / 2.0, 0.0);
-      barrierTransform.setTranslation(1.125, 0.0, 0.0);
+      barrierTransform.getRotation().setEuler(0.0, -Math.PI / 2.0, 0.0);
+      barrierTransform.getTranslation().set(1.125, 0.0, 0.0);
 
       PlanarRegion barrierPlanarRegion = new PlanarRegion(barrierTransform, barrierPolygon);
       barrierPlanarRegion.setRegionId(99);
@@ -571,7 +571,7 @@ public class VisibilityGraphTest
       RigidBodyTransform transform1 = new RigidBodyTransform();
 
       double height = 0.05;
-      transform1.setTranslation(0.0, 0.0, height);
+      transform1.getTranslation().set(0.0, 0.0, height);
 
       PlanarRegion planarRegion0 = new PlanarRegion(transform0, polygon0_0);
       planarRegion0.setRegionId(77);

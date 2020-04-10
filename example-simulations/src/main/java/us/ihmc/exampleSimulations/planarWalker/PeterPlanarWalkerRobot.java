@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.planarWalker;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -52,7 +52,7 @@ public class PeterPlanarWalkerRobot extends Robot
       {
 
          PinJoint hipJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "Hip", new Vector3D(0.0, robotSide.negateIfRightSide(hipOffsetY), 0.0), this,
-               Axis.Y);
+               Axis3D.Y);
          hipJoints.put(robotSide, hipJoint);
          hipJoint.setDynamic(true);
          hipJoint.setLimitStops(-Math.PI, Math.PI, 1e6, 1e3);

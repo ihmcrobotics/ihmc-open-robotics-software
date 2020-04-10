@@ -40,8 +40,8 @@ public abstract class RosPoseStampedSubscriber extends AbstractRosTopicSubscribe
       frameID = received.getHeader().getFrameId();
 
       TimeStampedTransform3D transform = new TimeStampedTransform3D();
-      transform.getTransform3D().setTranslation(pos);
-      transform.getTransform3D().setRotation(rot);
+      transform.getTransform3D().getTranslation().set(pos);
+      transform.getTransform3D().getRotation().set(rot);
       transform.setTimeStamp(timeStamp);
       
       newPose(frameID, transform);

@@ -20,7 +20,6 @@
                 <RowConstraints minHeight="10.0" vgrow="SOMETIMES"/>
             </rowConstraints>
             <children>
-                <Button mnemonicParsing="false" onAction="#requestStatistics" text="Request Statistics" GridPane.rowIndex="1"/>
                 <CheckBox fx:id="showBodyPathToggleButton" mnemonicParsing="false" selected="true" text="Show body path" GridPane.rowIndex="2"/>
 
                 <CheckBox fx:id="showPlanarRegionsToggleButton" mnemonicParsing="false" selected="true" text="Show planar regions" GridPane.columnIndex="2"

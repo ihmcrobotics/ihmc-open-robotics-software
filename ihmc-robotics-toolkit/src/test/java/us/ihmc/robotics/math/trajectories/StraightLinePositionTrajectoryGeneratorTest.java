@@ -41,7 +41,7 @@ public class StraightLinePositionTrajectoryGeneratorTest
    public void setUp()
    {
       parentRegistry = new YoVariableRegistry("parentRegistryTEST");
-      referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootNameTEST");
       position = new FramePoint3D(referenceFrame, xValue, yValue, zValue);
       initialPositionProvider = new ConstantPositionProvider(position);
       finalPositionProvider = new ConstantPositionProvider(position);

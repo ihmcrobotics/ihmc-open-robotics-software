@@ -34,10 +34,10 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior.DiagnosticTask;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ArmTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.ChestTrajectoryBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.FootTrajectoryBehavior;
@@ -481,8 +481,8 @@ public class DiagnosticBehavior extends AbstractBehavior
          else
          {
             AxisAngle rotation = new AxisAngle();
-            EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(expectedArmZeroConfiguration, tempVector, rotation);
-            armZeroJointAngleConfigurationOffset.setRotation(rotation);
+            EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(expectedArmZeroConfiguration, tempVector, rotation);
+            armZeroJointAngleConfigurationOffset.getRotation().set(rotation);
          }
 
          Vector3D expectedElbowAxis = new Vector3D(0.0, 0.0, 1.0);
@@ -1317,8 +1317,8 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -Math.PI / 2.0, null, mirrorOrientationsForRightSide);
 
       FramePose3D footPose = new FramePose3D(ankleZUpFrame);
-      footPose.setPosition(-0.40, robotSide.negateIfRightSide(0.25), 0.40);
-      footPose.setOrientationYawPitchRoll(0.0, 0.8 * Math.PI / 2.0, 0.0);
+      footPose.getPosition().set(-0.40, robotSide.negateIfRightSide(0.25), 0.40);
+      footPose.getOrientation().setYawPitchRoll(0.0, 0.8 * Math.PI / 2.0, 0.0);
       submitFootPose(true, robotSide, footPose);
 
       submitDesiredChestOrientation(true, 0.0, Math.toRadians(20.0), 0.0);
@@ -1331,8 +1331,8 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitSymmetricHandPose(desiredUpperArmOrientation, 0.0, null); // Couldn't find Solution for upper arm
 
       footPose.setToZero(ankleZUpFrame);
-      footPose.setPosition(0.0, robotSide.negateIfRightSide(0.65), 0.13);
-      footPose.setOrientationYawPitchRoll(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(40.0)));
+      footPose.getPosition().set(0.0, robotSide.negateIfRightSide(0.65), 0.13);
+      footPose.getOrientation().setYawPitchRoll(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(40.0)));
       submitFootPose(true, robotSide, footPose);
       submitChestHomeCommand(true);
       submitDesiredPelvisOrientation(true, 0.0, 0.0, Math.toRadians(robotSide.negateIfRightSide(25.0)));
@@ -1343,8 +1343,8 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
 
       footPose.setToZero(ankleZUpFrame);
-      footPose.setPosition(0.0, robotSide.negateIfRightSide(0.25), 0.13);
-      footPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
+      footPose.getPosition().set(0.0, robotSide.negateIfRightSide(0.25), 0.13);
+      footPose.getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
       submitFootPose(true, robotSide, footPose);
 
       submitDesiredPelvisOrientation(true, 0.0, 0.0, 0.0);
@@ -1772,8 +1772,8 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       FramePose3D footPose = new FramePose3D();
       footPose.setToZero(ankleZUpFrame);
-      footPose.setPosition(0.0, robotSide.negateIfRightSide(0.25), 0.1);
-      footPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
+      footPose.getPosition().set(0.0, robotSide.negateIfRightSide(0.25), 0.1);
+      footPose.getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
       submitFootPose(true, robotSide, footPose);
 
       submitChestHomeCommand(true);
@@ -1879,8 +1879,8 @@ public class DiagnosticBehavior extends AbstractBehavior
       // Supa powerful front kick!!!!!
       FramePose3D footPose = new FramePose3D();
       footPose.setToZero(ankleZUpFrame);
-      footPose.setPosition(0.75, robotSide.negateIfRightSide(0.25), 0.25);
-      footPose.setOrientationYawPitchRoll(0.0, -halfPi / 2.0, 0.0);
+      footPose.getPosition().set(0.75, robotSide.negateIfRightSide(0.25), 0.25);
+      footPose.getOrientation().setYawPitchRoll(0.0, -halfPi / 2.0, 0.0);
       submitFootPose(true, robotSide, footPose);
 
       submitDesiredChestOrientation(true, 0.0, Math.toRadians(-5.0), 0.0);
@@ -1896,8 +1896,8 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -0.3, null, true);
 
       footPose.setToZero(ankleZUpFrame);
-      footPose.setPosition(-0.75, robotSide.negateIfRightSide(0.25), 0.35);
-      footPose.setOrientationYawPitchRoll(0.0, 0.8 * halfPi, 0.0);
+      footPose.getPosition().set(-0.75, robotSide.negateIfRightSide(0.25), 0.35);
+      footPose.getOrientation().setYawPitchRoll(0.0, 0.8 * halfPi, 0.0);
       submitFootPose(true, robotSide, footPose);
 
       submitDesiredChestOrientation(true, 0.0, Math.toRadians(30.0), 0.0);
@@ -1909,8 +1909,8 @@ public class DiagnosticBehavior extends AbstractBehavior
       desiredUpperArmOrientation.setYawPitchRoll(-0.7800, 0.1585, -0.8235);
       submitSymmetricHandPose(desiredUpperArmOrientation, -1.40, null);
       footPose.setToZero(ankleZUpFrame);
-      footPose.setPosition(0.75, robotSide.negateIfRightSide(0.25), 0.25);
-      footPose.setOrientationYawPitchRoll(0.0, -halfPi / 2.0, 0.0);
+      footPose.getPosition().set(0.75, robotSide.negateIfRightSide(0.25), 0.25);
+      footPose.getOrientation().setYawPitchRoll(0.0, -halfPi / 2.0, 0.0);
       submitFootPose(true, robotSide, footPose);
 
       submitDesiredChestOrientation(true, 0.0, Math.toRadians(-5.0), 0.0);
@@ -1926,8 +1926,8 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitHandPose(robotSide.getOppositeSide(), desiredUpperArmOrientation, -halfPi, null, true);
 
       footPose.setToZero(ankleZUpFrame);
-      footPose.setPosition(0.0, robotSide.negateIfRightSide(0.65), 0.2);
-      footPose.setOrientationYawPitchRoll(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(40.0)));
+      footPose.getPosition().set(0.0, robotSide.negateIfRightSide(0.65), 0.2);
+      footPose.getOrientation().setYawPitchRoll(0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(40.0)));
       submitFootPose(true, robotSide, footPose);
 
       submitDesiredChestOrientation(true, 0.0, 0.0, robotSide.negateIfRightSide(Math.toRadians(30.0)));
@@ -1939,8 +1939,8 @@ public class DiagnosticBehavior extends AbstractBehavior
       submitSymmetricHumanoidArmPose(HumanoidArmPose.STAND_PREP);
 
       footPose.setToZero(ankleZUpFrame);
-      footPose.setPosition(0.0, robotSide.negateIfRightSide(0.25), 0.1);
-      footPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
+      footPose.getPosition().set(0.0, robotSide.negateIfRightSide(0.25), 0.1);
+      footPose.getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
       submitFootPose(true, robotSide, footPose);
 
       submitChestHomeCommand(true);
@@ -2102,8 +2102,8 @@ public class DiagnosticBehavior extends AbstractBehavior
    {
       ReferenceFrame frameAfterRootJoint = fullRobotModel.getRootJoint().getFrameAfterJoint();
       FramePose3D desiredPelvisPose = new FramePose3D(frameAfterRootJoint);
-      desiredPelvisPose.setPosition(dx, dy, dz);
-      desiredPelvisPose.setOrientationYawPitchRoll(yaw, pitch, roll);
+      desiredPelvisPose.getPosition().set(dx, dy, dz);
+      desiredPelvisPose.getOrientation().setYawPitchRoll(yaw, pitch, roll);
       desiredPelvisPose.changeFrame(worldFrame);
       Point3D position = new Point3D();
       Quaternion orientation = new Quaternion();
@@ -2146,7 +2146,7 @@ public class DiagnosticBehavior extends AbstractBehavior
    public void submitHumanoidArmPose(RobotSide robotSide, HumanoidArmPose armPose)
    {
       FrameQuaternion desiredUpperArmOrientation = new FrameQuaternion();
-      desiredUpperArmOrientation.setYawPitchRollIncludingFrame(fullRobotModel.getChest().getBodyFixedFrame(), armPose.getDesiredUpperArmYawPitchRoll());
+      desiredUpperArmOrientation.setIncludingFrame(fullRobotModel.getChest().getBodyFixedFrame(), new YawPitchRoll(armPose.getDesiredUpperArmYawPitchRoll()));
       double elbowAngle = robotSide.negateIfRightSide(armPose.getDesiredElbowAngle(robotSide));
       double[] handOrientation = new double[3];
       if (enableHandOrientation.getBooleanValue())
@@ -2154,7 +2154,7 @@ public class DiagnosticBehavior extends AbstractBehavior
          handOrientation = armPose.getDesiredHandYawPitchRoll();
       }
       FrameQuaternion desiredHandOrientation = new FrameQuaternion();
-      desiredHandOrientation.setYawPitchRollIncludingFrame(lowerArmsFrames.get(robotSide), handOrientation);
+      desiredHandOrientation.setIncludingFrame(lowerArmsFrames.get(robotSide), new YawPitchRoll(handOrientation));
       submitHandPose(robotSide, desiredUpperArmOrientation, elbowAngle, desiredHandOrientation, true);
    }
 
@@ -2265,15 +2265,15 @@ public class DiagnosticBehavior extends AbstractBehavior
 
       if (mirrorOrientationForRightSide)
       {
-         double[] yawPitchRoll = new double[3];
-         temporaryDesiredUpperArmOrientation.getYawPitchRoll(yawPitchRoll);
-         yawPitchRoll[0] = robotSide.negateIfRightSide(yawPitchRoll[0]);
-         yawPitchRoll[2] = robotSide.negateIfRightSide(yawPitchRoll[2]);
-         temporaryDesiredUpperArmOrientation.setYawPitchRoll(yawPitchRoll);
+         YawPitchRoll yawPitchRoll = new YawPitchRoll();
+         yawPitchRoll.set(temporaryDesiredUpperArmOrientation);
+         yawPitchRoll.setYaw(robotSide.negateIfRightSide(yawPitchRoll.getYaw()));
+         yawPitchRoll.setRoll(robotSide.negateIfRightSide(yawPitchRoll.getRoll()));
+         temporaryDesiredUpperArmOrientation.set(yawPitchRoll);
       }
 
       RigidBodyTransform desiredTransformForUpperArm = new RigidBodyTransform();
-      desiredTransformForUpperArm.setRotation(temporaryDesiredUpperArmOrientation);
+      desiredTransformForUpperArm.getRotation().set(temporaryDesiredUpperArmOrientation);
       desiredTransformForUpperArm.set(desiredTransformForUpperArm);
       desiredTransformForUpperArm.multiply(armZeroJointAngleConfigurationOffsets.get(robotSide));
       boolean success = inverseKinematicsForUpperArms.get(robotSide).solve(desiredTransformForUpperArm);
@@ -2323,7 +2323,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       }
 
       RigidBodyTransform desiredTransformForLowerArm = new RigidBodyTransform();
-      desiredTransformForLowerArm.setRotation(temporaryDesiredHandOrientation);
+      desiredTransformForLowerArm.getRotation().set(temporaryDesiredHandOrientation);
       boolean success = inverseKinematicsForLowerArms.get(robotSide).solve(desiredTransformForLowerArm);
 
       if (!success)
@@ -2741,8 +2741,8 @@ public class DiagnosticBehavior extends AbstractBehavior
 
             RigidBodyTransform pelvisTransformInPast_Translation = new RigidBodyTransform(pelvisTimeStampedTransformInThePast.getTransform3D());
             RigidBodyTransform pelvisTransformInPast_Rotation = new RigidBodyTransform(pelvisTransformInPast_Translation);
-            pelvisTransformInPast_Translation.setRotationToZero();
-            pelvisTransformInPast_Rotation.setTranslationToZero();
+            pelvisTransformInPast_Translation.getRotation().setToZero();
+            pelvisTransformInPast_Rotation.getTranslation().setToZero();
 
             Quaternion orientationOffset = RandomGeometry.nextQuaternion(random, minMaxIcpAngularOffset.getDoubleValue());
             Vector3D translationOffset = RandomGeometry.nextVector3D(random, minMaxIcpTranslationOffset.getDoubleValue());

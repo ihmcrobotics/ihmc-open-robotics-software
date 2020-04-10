@@ -1,6 +1,7 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
@@ -8,9 +9,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -72,8 +71,8 @@ public class FramePoseTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
       FramePose3D framePose = new FramePose3D(worldFrame);
-      framePose.setPosition(1.0, 0.0, 1.0);
-      framePose.setOrientation(RandomGeometry.nextQuaternion(random));
+      framePose.getPosition().set(1.0, 0.0, 1.0);
+      framePose.getOrientation().set(RandomGeometry.nextQuaternion(random));
 
       FrameVector3D rotationAxis = new FrameVector3D(worldFrame, 0.0, 0.0, 1.0);
       FramePoint3D rotationAxisOrigin = new FramePoint3D(worldFrame, 0.0, 0.0, 0.0);
@@ -101,10 +100,10 @@ public class FramePoseTest
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
       FramePose3D framePose = new FramePose3D(worldFrame);
-      framePose.setPosition(1.0, 0.0, 1.0);
-      framePose.setOrientation(RandomGeometry.nextQuaternion(random));
+      framePose.getPosition().set(1.0, 0.0, 1.0);
+      framePose.getOrientation().set(RandomGeometry.nextQuaternion(random));
 
-      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, angleToRotate, framePose);
+      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis3D.Z, angleToRotate, framePose);
 
       Point3D actualPosePositionAfterRotation = new Point3D(framePose.getPosition());
 
@@ -133,11 +132,11 @@ public class FramePoseTest
 
       while (angleToRotate < Math.toRadians(720.0))
       {
-         initialPose.setPosition(0.0, 0.0, RandomNumbers.nextDouble(random, 10.0));
+         initialPose.getPosition().set(0.0, 0.0, RandomNumbers.nextDouble(random, 10.0));
          rotatedPose.setIncludingFrame(initialPose);
 
          desiredRotationAxisAngle.setAngle(angleToRotate);
-         GeometryTools.rotatePoseAboutAxis(rotatedPose.getReferenceFrame(), Axis.Z, angleToRotate, rotatedPose);
+         GeometryTools.rotatePoseAboutAxis(rotatedPose.getReferenceFrame(), Axis3D.Z, angleToRotate, rotatedPose);
 
          PoseReferenceFrame initialPoseFrame = new PoseReferenceFrame("initialPoseFrame", initialPose);
          rotatedPose.changeFrame(initialPoseFrame);
@@ -160,11 +159,11 @@ public class FramePoseTest
       double angleToRotate = RandomNumbers.nextDouble(random, Math.toRadians(720.0));
 
       FramePose3D framePose = new FramePose3D(worldFrame);
-      framePose.setPosition(0.0, 0.0, 1.0);
+      framePose.getPosition().set(0.0, 0.0, 1.0);
       FramePose3D framePoseCopy = new FramePose3D(framePose);
 
-      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, 0.5 * angleToRotate, framePose);
-      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, 0.5 * angleToRotate, framePose);
+      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis3D.Z, 0.5 * angleToRotate, framePose);
+      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis3D.Z, 0.5 * angleToRotate, framePose);
 
       double positionDistance = framePose.getPositionDistance(framePoseCopy);
       double orientationDistance = AngleTools.trimAngleMinusPiToPi(framePose.getOrientationDistance(framePoseCopy));
@@ -184,11 +183,11 @@ public class FramePoseTest
       double angleToRotate = Math.toRadians(90.0);
 
       FramePose3D framePose = new FramePose3D(worldFrame);
-      framePose.setPosition(0.0, 0.0, 1.0);
+      framePose.getPosition().set(0.0, 0.0, 1.0);
       FramePose3D framePoseCopy = new FramePose3D(framePose);
 
-      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, 0.5 * angleToRotate , framePose);
-      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis.Z, -0.5 * angleToRotate, framePose);
+      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis3D.Z, 0.5 * angleToRotate , framePose);
+      GeometryTools.rotatePoseAboutAxis(framePose.getReferenceFrame(), Axis3D.Z, -0.5 * angleToRotate, framePose);
 
       double positionDistance = framePose.getPositionDistance(framePoseCopy);
       double orientationDistance = framePose.getOrientationDistance(framePoseCopy);
@@ -218,11 +217,11 @@ public class FramePoseTest
 
       while (angleToRotate < Math.toRadians(720.0))
       {
-         initialPose.setPosition(1.0, 0.0, 1.0);
-         initialPose.setOrientation(RandomGeometry.nextQuaternion(random));
+         initialPose.getPosition().set(1.0, 0.0, 1.0);
+         initialPose.getOrientation().set(RandomGeometry.nextQuaternion(random));
          rotatedPose.setIncludingFrame(initialPose);
          
-         GeometryTools.rotatePoseAboutAxis(worldFrame, Axis.Z, angleToRotate, lockPosition, lockOrientation, rotatedPose);
+         GeometryTools.rotatePoseAboutAxis(worldFrame, Axis3D.Z, angleToRotate, lockPosition, lockOrientation, rotatedPose);
          actualPosition.set(rotatedPose.getPosition());
 
          desiredPosition.set(Math.cos(angleToRotate), Math.sin(angleToRotate), 1.0);
@@ -256,14 +255,14 @@ public class FramePoseTest
 
       while (angleToRotate < Math.toRadians(180.0))
       {
-         rotatedPose.setPosition(1.0, 0.0, 1.0);
-         rotatedPose.setOrientation(RandomGeometry.nextQuaternion(random));
+         rotatedPose.getPosition().set(1.0, 0.0, 1.0);
+         rotatedPose.getOrientation().set(RandomGeometry.nextQuaternion(random));
 
          initialPose.setIncludingFrame(rotatedPose);
 
          Point3D actualpositionBeforeRotation = new Point3D(rotatedPose.getPosition());
 
-         GeometryTools.rotatePoseAboutAxis(rotatedPose.getReferenceFrame(), Axis.Z, angleToRotate, lockPosition, lockOrientation, rotatedPose);
+         GeometryTools.rotatePoseAboutAxis(rotatedPose.getReferenceFrame(), Axis3D.Z, angleToRotate, lockPosition, lockOrientation, rotatedPose);
 
          Point3D actualPosePositionAfterRotation = new Point3D(rotatedPose.getPosition());
 

@@ -15,17 +15,17 @@ module controller_msgs
       const octet ROBOT_SIDE_RIGHT =
       1;
 
-      const octet FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP =
+      const octet FOOTSTEP_PLAN_HEADING_FORWARD =
       0;
 
-      /**
-       * The recommended planner type
-       */
-      const octet FOOTSTEP_PLANNER_TYPE_A_STAR =
+      const octet FOOTSTEP_PLAN_HEADING_BACKWARD =
       1;
 
-      const octet FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR =
+      const octet FOOTSTEP_PLAN_HEADING_LEFT =
       2;
+
+      const octet FOOTSTEP_PLAN_HEADING_RIGHT =
+      3;
 
       const long NO_PLAN_ID =
       -1;
@@ -72,20 +72,37 @@ module controller_msgs
          */
         boolean abort_if_goal_step_snapping_fails;
         /**
-         * Footstep planner type, see above
+         * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
          */
-        @defaultValue(value=255)
-        octet requested_footstep_planner_type;
+        boolean abort_if_body_path_planner_fails;
         /**
-         * Acceptable xy distance from the given goal for the planner to terminate
+         * If true, will plan a body path. If false, will follow a straight-line path to the goal
+         */
+        boolean plan_body_path;
+        /**
+         * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+         */
+        @defaultValue(value=True)
+        boolean perform_a_star_search;
+        /**
+         * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+         */
+        sequence<geometry_msgs::msg::dds::Pose, 50> body_path_waypoints;
+        /**
+         * (In beta) acceptable xy distance from the given goal for the planner to terminate
          */
         @defaultValue(value=-1.0)
         double goal_distance_proximity;
         /**
-         * Acceptable yaw offset from the given goal for the planner to terminate
+         * (In beta) acceptable yaw offset from the given goal for the planner to terminate
          */
         @defaultValue(value=-1.0)
         double goal_yaw_proximity;
+        /**
+         * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+         */
+        @defaultValue(value=255)
+        octet requested_path_heading;
         /**
          * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
          */
@@ -96,10 +113,6 @@ module controller_msgs
          */
         @defaultValue(value=-1)
         long max_iterations;
-        /**
-         * Best effort timeout in seconds
-         */
-        double best_effort_timeout;
         /**
          * Max body path length if using body path
          */
@@ -118,9 +131,10 @@ module controller_msgs
         @defaultValue(value=-1)
         long planner_request_id;
         /**
-         * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+         * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
          */
-        sequence<geometry_msgs::msg::dds::Pose, 50> body_path_waypoints;
+        @defaultValue(value=1.0)
+        double status_publish_period;
         /**
          * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
          * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/

@@ -1,9 +1,5 @@
 package us.ihmc.footstepPlanning;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponse;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlannerType;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.PlanningResult;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -23,7 +19,6 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.ui.FootstepPlannerUI;
@@ -41,9 +36,11 @@ import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+
 public abstract class FootstepPlannerDataSetTest
 {
-   protected static final double bambooTimeScaling = 4.0;
+   private static final double timeout = 240.0;
 
    // Whether to start the UI or not.
    protected static boolean VISUALIZE = false;
@@ -71,7 +68,11 @@ public abstract class FootstepPlannerDataSetTest
 
    private FootstepPathCalculatorModule module = null;
 
-   protected abstract FootstepPlannerType getPlannerType();
+   protected abstract boolean getPlanBodyPath();
+
+   protected abstract boolean getPerformAStarSearch();
+
+   protected abstract String getTestNamePrefix();
 
    @BeforeEach
    public void setup()
@@ -103,10 +104,10 @@ public abstract class FootstepPlannerDataSetTest
       ThreadTools.sleep(1000);
 
       messager.registerTopicListener(FootstepPlanResponse, request -> uiReceivedPlan.set(true));
-      messager.registerTopicListener(PlanningResult, request -> uiReceivedResult.set(true));
+      messager.registerTopicListener(FootstepPlanningResultTopic, request -> uiReceivedResult.set(true));
 
       uiFootstepPlanReference = messager.createInput(FootstepPlanResponse);
-      uiPlanningResultReference = messager.createInput(PlanningResult);
+      uiPlanningResultReference = messager.createInput(FootstepPlanningResultTopic);
    }
 
    @AfterEach
@@ -154,7 +155,7 @@ public abstract class FootstepPlannerDataSetTest
                                                                  return false;
                                                               if(!dataSet.getPlannerInput().getStepPlannerIsTestable())
                                                                  return false;
-                                                              return dataSet.getPlannerInput().containsTimeoutFlag(getPlannerType().toString().toLowerCase());
+                                                              return dataSet.getPlannerInput().containsIterationLimitFlag(getTestNamePrefix().toLowerCase());
                                                            });
       runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
@@ -169,7 +170,7 @@ public abstract class FootstepPlannerDataSetTest
                                                                  return false;
                                                               if(!dataSet.getPlannerInput().getStepPlannerIsInDevelopment())
                                                                  return false;
-                                                              return dataSet.getPlannerInput().containsTimeoutFlag(getPlannerType().toString().toLowerCase());
+                                                              return dataSet.getPlannerInput().containsIterationLimitFlag(getTestNamePrefix().toLowerCase());
                                                            });
       runAssertionsOnAllDatasets(this::runAssertions, dataSets);
    }
@@ -262,15 +263,15 @@ public abstract class FootstepPlannerDataSetTest
       messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, goalSteps.get(RobotSide.LEFT));
       messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, goalSteps.get(RobotSide.RIGHT));
 
-      messager.submitMessage(PlannerType, getPlannerType());
+      messager.submitMessage(PlanBodyPath, getPlanBodyPath());
+      messager.submitMessage(PerformAStarSearch, getPerformAStarSearch());
+
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, dataset.getPlanarRegionsList());
 
-      double timeMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 2.0;
-      double timeout = plannerInput.getTimeoutFlag(getPlannerType().toString().toLowerCase());
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeMultiplier * timeout);
-
+      int maxIterations = plannerInput.getIterationLimitFlag(getTestNamePrefix().toLowerCase());
+      messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations, maxIterations);
+      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerHorizonLength, Double.MAX_VALUE);
-
       messager.submitMessage(FootstepPlannerMessagerAPI.ComputePath, true);
 
       if (DEBUG)
@@ -429,11 +430,9 @@ public abstract class FootstepPlannerDataSetTest
    {
       PlannerInput plannerInput = dataset.getPlannerInput();
       totalTimeTaken = 0.0;
-      double timeoutMultiplier = ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer() ? bambooTimeScaling : 1.0;
-      double maxTimeToWait = 2.0 * timeoutMultiplier * plannerInput.getTimeoutFlag(getPlannerType().toString().toLowerCase());
       String datasetName = dataset.getName();
 
-      String errorMessage = waitForResult(maxTimeToWait, datasetName);
+      String errorMessage = waitForResult(timeout, datasetName);
       if (!errorMessage.isEmpty())
          return errorMessage;
 
@@ -441,7 +440,7 @@ public abstract class FootstepPlannerDataSetTest
       if (!errorMessage.isEmpty())
          return errorMessage;
 
-      errorMessage = waitForPlan(maxTimeToWait, datasetName);
+      errorMessage = waitForPlan(timeout, datasetName);
       if (!errorMessage.isEmpty())
          return errorMessage;
 

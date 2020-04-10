@@ -18,7 +18,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.trajectories.PositionOptimizedTrajectoryGenerator;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.MessageTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -337,7 +337,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
 
       double yaw = startingLocation.getStartingLocationOffset().getYaw();
       RigidBodyTransformGenerator generator = new RigidBodyTransformGenerator();
-      generator.rotate(yaw, Axis.Z);
+      generator.rotate(yaw, Axis3D.Z);
       RigidBodyTransform transform = generator.getRigidBodyTransformCopy();
 
       FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
@@ -345,7 +345,7 @@ public abstract class AvatarSwingWithWaypointsTest implements MultiRobotTestInte
       Point3D stepPosition = new Point3D(stepLength, footstepY, 0.0);
       Quaternion stepOrientation = new Quaternion();
       transform.transform(stepPosition);
-      transform.getRotation(stepOrientation);
+      stepOrientation.set(transform.getRotation());
       FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, stepPosition, stepOrientation);
       footsteps.getFootstepDataList().add().set(footstepData);
 

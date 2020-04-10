@@ -3,15 +3,26 @@ package us.ihmc.footstepPlanning.messager;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.footstepPlanning.FootstepPlannerDataSetTest;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.pathPlanning.DataSetName;
 
 public class MessagerAStarDataSetTest extends FootstepPlannerDataSetTest
 {
    @Override
-   public FootstepPlannerType getPlannerType()
+   protected boolean getPlanBodyPath()
    {
-      return FootstepPlannerType.A_STAR;
+      return false;
+   }
+
+   @Override
+   protected boolean getPerformAStarSearch()
+   {
+      return true;
+   }
+
+   @Override
+   protected String getTestNamePrefix()
+   {
+      return "a_star";
    }
 
    @Override

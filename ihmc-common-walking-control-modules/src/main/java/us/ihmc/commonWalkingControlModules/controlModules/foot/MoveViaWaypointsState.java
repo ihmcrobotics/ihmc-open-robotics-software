@@ -37,6 +37,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    private ReferenceFrame controlFrame;
    private final ReferenceFrame ankleFrame;
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
+   private final WorkspaceLimiterControlModule workspaceLimiterControlModule;
 
    private final PIDSE3GainsReadOnly gains;
 
@@ -68,6 +69,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       spatialFeedbackControlCommand.setPrimaryBase(pelvis);
 
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
+      workspaceLimiterControlModule = footControlHelper.getWorkspaceLimiterControlModule();
    }
 
    public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
@@ -103,6 +105,10 @@ public class MoveViaWaypointsState extends AbstractFootControlState
       if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
       {
          legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(false);
+      }
+      if (workspaceLimiterControlModule != null)
+      {
+         workspaceLimiterControlModule.setCheckVelocityForSwingSingularityAvoidance(false);
       }
    }
 
@@ -159,7 +165,7 @@ public class MoveViaWaypointsState extends AbstractFootControlState
 
    private void doSingularityAvoidance(SpatialFeedbackControlCommand spatialFeedbackControlCommand)
    {
-      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null || workspaceLimiterControlModule != null)
       {
          desiredPosition.setIncludingFrame(spatialFeedbackControlCommand.getReferencePosition());
          desiredOrientation.setIncludingFrame(spatialFeedbackControlCommand.getReferenceOrientation());
@@ -172,9 +178,17 @@ public class MoveViaWaypointsState extends AbstractFootControlState
          changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
          desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
 
-         legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+         if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+         {
+            legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+         }
+         if (workspaceLimiterControlModule != null)
+         {
+            workspaceLimiterControlModule.update();
+            workspaceLimiterControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+         }
 
-         desiredPose.setPosition(desiredAnklePosition);
+         desiredPose.getPosition().set(desiredAnklePosition);
          changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
          desiredPosition.setIncludingFrame(desiredPose.getPosition());
       }
@@ -217,9 +231,9 @@ public class MoveViaWaypointsState extends AbstractFootControlState
    }
 
    @Override
-   public void onExit()
+   public void onExit(double timeInState)
    {
-      poseController.onExit();
+      poseController.onExit(timeInState);
    }
 
    @Override

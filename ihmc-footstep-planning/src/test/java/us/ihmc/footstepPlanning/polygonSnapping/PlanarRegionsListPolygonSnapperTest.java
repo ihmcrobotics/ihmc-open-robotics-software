@@ -53,7 +53,7 @@ public class PlanarRegionsListPolygonSnapperTest
       }
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
-      expectedTransform.setTranslation(0.0, 0.0, 0.7);
+      expectedTransform.getTranslation().set(0.0, 0.0, 0.7);
       assertTrue(expectedTransform.epsilonEquals(snapTransform, 1e-7));
 
       if (visualize)
@@ -189,7 +189,7 @@ public class PlanarRegionsListPolygonSnapperTest
          ConvexPolygon2D polygonToSnap = new ConvexPolygon2D(originalPolygon);
          nonSnappedTransform = new RigidBodyTransform();
          nonSnappedTransform.setRotationEulerAndZeroTranslation(0.0, 0.0, xyYaw[2]);
-         nonSnappedTransform.setTranslation(xyYaw[0], xyYaw[1], 0.0);
+         nonSnappedTransform.getTranslation().set(xyYaw[0], xyYaw[1], 0.0);
          polygonToSnap.applyTransform(nonSnappedTransform, false);
 
          PlanarRegion planarRegionIntersection = new PlanarRegion();

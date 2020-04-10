@@ -198,10 +198,10 @@ public class RosTools
    public static void packEuclidRigidBodyTransformToGeometry_msgsPose(RigidBodyTransform pelvisTransform, Pose pose)
    {
       Vector3D point = new Vector3D();
-      pelvisTransform.getTranslation(point);
+      point.set(pelvisTransform.getTranslation());
 
       us.ihmc.euclid.tuple4D.Quaternion rotation = new us.ihmc.euclid.tuple4D.Quaternion();
-      pelvisTransform.getRotation(rotation);
+      rotation.set(pelvisTransform.getRotation());
       
       packEuclidTuple3DAndQuaternionToGeometry_msgsPose(point, rotation, pose);
    }
