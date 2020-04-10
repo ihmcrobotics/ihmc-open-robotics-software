@@ -204,7 +204,7 @@ public abstract class TransferState extends WalkingState
       NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
       transferToAndNextFootstepsData.setComAtEndOfState(desiredCoM);
       comHeightManager.setSupportLeg(transferToSide);
-      comHeightManager.initialize(transferToAndNextFootstepsData, 0.0, true);
+      comHeightManager.initialize(transferToAndNextFootstepsData, 0.0);
    }
 
    protected void updateICPPlan()

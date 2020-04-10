@@ -121,7 +121,7 @@ public class TransferToStandingState extends WalkingState
       NewTransferToAndNextFootstepsData transferToAndNextFootstepsDataForDoubleSupport = walkingMessageHandler
             .createTransferToAndNextFootstepDataForDoubleSupport(RobotSide.LEFT);
       double extraToeOffHeight = 0.0;
-      comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight, false);
+      comHeightManager.initialize(transferToAndNextFootstepsDataForDoubleSupport, extraToeOffHeight);
 
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();

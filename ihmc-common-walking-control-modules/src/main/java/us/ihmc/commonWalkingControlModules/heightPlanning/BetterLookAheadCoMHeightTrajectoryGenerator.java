@@ -43,6 +43,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    private final YoDouble minimumHeightAboveGround = new YoDouble("minimumHeightAboveGround", registry);
    private final YoDouble nominalHeightAboveGround = new YoDouble("nominalHeightAboveGround", registry);
    private final YoDouble maximumHeightAboveGround = new YoDouble("maximumHeightAboveGround", registry);
+   private final YoDouble extraToeOffHeight = new YoDouble("extraToeOffHeight", registry);
 
    private final YoDouble nominalDoubleSupportPercentageIn = new YoDouble("nominalDoubleSupportPercentageIn", registry);
    private final YoDouble doubleSupportPercentageIn = new YoDouble("doubleSupportPercentageIn", registry);
@@ -51,8 +52,8 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    private final YoDouble offsetFromNominalInPlan = new YoDouble("offsetFromNominalInPlan", registry);
 
-   private final YoFramePoint3D transferFromPosition = new YoFramePoint3D("transferFromPosition", ReferenceFrame.getWorldFrame(), registry);
-   private final YoFramePoint3D transferToPosition = new YoFramePoint3D("transferToPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final FramePoint3D transferFromPosition = new FramePoint3D();
+   private final FramePoint3D transferToPosition = new FramePoint3D();
    private final YoFramePoint3D desiredCoMPositionAtStart = new YoFramePoint3D("desiredCoMPositionAtStart", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoFramePoint3D desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
@@ -64,7 +65,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    private final DoubleProvider yoTime;
 
    private ReferenceFrame frameOfSupportLeg;
-   private ReferenceFrame frameOfOppositeSupportLeg;
    private final ReferenceFrame centerOfMassFrame;
    private final SideDependentList<? extends ReferenceFrame> soleFrames;
 
@@ -157,6 +157,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       desiredCoMPosition.set(tempFramePoint);
 
       offsetFromNominalInPlan.set(0.0);
+      extraToeOffHeight.set(0.0);
 
       heightOffsetHandler.reset();
    }
@@ -184,30 +185,23 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    public void setSupportLeg(RobotSide supportLeg)
    {
       frameOfSupportLeg = soleFrames.get(supportLeg);
-      frameOfOppositeSupportLeg = soleFrames.get(supportLeg.getOppositeSide());
       splinedHeightTrajectory.setReferenceFrame(frameOfSupportLeg);
       heightOffsetHandler.setReferenceFrame(frameOfSupportLeg);
    }
 
-   public void initialize(NewTransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight, boolean isInTransfer)
+   public void initialize(NewTransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
    {
       FramePoint3DReadOnly transferToFootstepPosition = transferToAndNextFootstepsData.getTransferToPosition();
       offsetFromNominalInPlan.set(heightOffsetHandler.getOffsetHeightAboveGround());
+      this.extraToeOffHeight.set(extraToeOffHeight);
 
-      double startAnkleZ = 0.0;
-      if (isInTransfer)
-      {
-         tempFramePoint.setToZero(frameOfOppositeSupportLeg);
-         tempFramePoint.changeFrame(frameOfSupportLeg);
-         startAnkleZ = tempFramePoint.getZ();
-      }
-      else
-      {
-         tempFramePoint.setToZero(frameOfSupportLeg);
-      }
-      transferFromPosition.setMatchingFrame(tempFramePoint);
+      transferToPosition.setToZero(soleFrames.get(transferToAndNextFootstepsData.getTransferToSide()));
+      transferFromPosition.setToZero(soleFrames.get(transferToAndNextFootstepsData.getTransferToSide().getOppositeSide()));
+      transferToPosition.changeFrame(frameOfSupportLeg);
+      transferFromPosition.changeFrame(frameOfSupportLeg);
+      double midstanceWidth = 0.5 * (transferToPosition.getY() + transferFromPosition.getY());
+      double startAnkleZ = transferFromPosition.getZ();
 
-      transferToPosition.setMatchingFrame(transferToFootstepPosition);
       desiredCoMPositionAtStart.set(desiredCoMPosition);
 
       startCoMPosition.setIncludingFrame(desiredCoMPosition);
@@ -217,12 +211,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       middleCoMPosition.changeFrame(frameOfSupportLeg);
       double middleAnkleZ = middleCoMPosition.getZ();
       middleCoMPosition.addZ(nominalHeightAboveGround.getDoubleValue() + offsetFromNominalInPlan.getDoubleValue());
-
-      double midstanceWidth;
-      if (isInTransfer)
-         midstanceWidth = 0.5 * tempFramePoint.getY();
-      else
-         midstanceWidth = 0.5 * middleCoMPosition.getY();
 
       startCoMPosition.setY(midstanceWidth);
       middleCoMPosition.setY(midstanceWidth);
@@ -241,9 +229,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
          doubleSupportPercentageIn.set(nominalDoubleSupportPercentageIn.getDoubleValue());
       }
 
-
-
-
       heightWaypoints.clear();
 
       computeWaypoints(startCoMPosition,
@@ -251,7 +236,8 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                        startAnkleZ,
                        middleAnkleZ,
                        minimumHeightAboveGround.getDoubleValue(),
-                       maximumHeightAboveGround.getDoubleValue());
+                       maximumHeightAboveGround.getDoubleValue(),
+                       this.extraToeOffHeight.getDoubleValue());
 
       for (int i = 0; i < heightWaypoints.size(); i++)
          heightWaypoints.get(i).update();
@@ -266,7 +252,8 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                                  double startGroundHeight,
                                  double endGroundHeight,
                                  double minimumHeight,
-                                 double maximumHeight)
+                                 double maximumHeight,
+                                 double extraToeOffHeight)
    {
       double midstanceWidth = 0.5 * (startCoMPosition.getY() + endCoMPosition.getY());
 
@@ -294,13 +281,13 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       endWaypoint.setXY(endX, midstanceWidth);
 
       double startMinHeight = findWaypointHeight(minimumHeight, 0.0, startX, startGroundHeight);
-      double startMaxHeight = findWaypointHeight(maximumHeight, 0.0, startX, startGroundHeight);
+      double startMaxHeight = findWaypointHeight(maximumHeight + extraToeOffHeight, 0.0, startX, startGroundHeight);
       double firstMinHeight = findWaypointHeight(minimumHeight, 0.0, firstMidpointX, startGroundHeight);
       double firstMaxHeight = findWaypointHeight(maximumHeight, 0.0, firstMidpointX, startGroundHeight);
 
       double exchangeFromMinHeight = findWaypointHeight(minimumHeight, 0.0, secondMidpointX, startGroundHeight);
       double exchangeToMinHeight = findWaypointHeight(minimumHeight, endX, secondMidpointX, endGroundHeight);
-      double exchangeFromMaxHeight = findWaypointHeight(maximumHeight, 0.0, secondMidpointX, startGroundHeight);
+      double exchangeFromMaxHeight = findWaypointHeight(maximumHeight + extraToeOffHeight, 0.0, secondMidpointX, startGroundHeight);
       double exchangeToMaxHeight = findWaypointHeight(maximumHeight, endX, secondMidpointX, endGroundHeight);
       double secondMinHeight = Math.min(Math.max(exchangeFromMinHeight, exchangeToMinHeight), Math.min(exchangeFromMaxHeight, exchangeToMaxHeight));
       double secondMaxHeight = Math.min(exchangeFromMaxHeight, exchangeToMaxHeight);
