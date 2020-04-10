@@ -515,14 +515,14 @@ public class BalanceManager
       desiredICPVelocityToPack.setIncludingFrame(yoDesiredICPVelocity);
    }
 
-   public void getFinalDesiredCoMPosition(FixedFramePoint3DBasics desiredCoMVelocityToPack)
+   public void getFinalDesiredCoMPosition(FixedFramePoint3DBasics desiredCoMPositionToPack)
    {
-      desiredCoMVelocityToPack.set(yoFinalDesiredCoM);
+      desiredCoMPositionToPack.set(yoFinalDesiredCoM);
    }
 
-   public void getDesiredCoMPosition(FixedFramePoint3DBasics desiredCoMVelocityToPack)
+   public void getDesiredCoMPosition(FixedFramePoint3DBasics desiredCoMPositionToPack)
    {
-      desiredCoMVelocityToPack.set(yoDesiredCoMPosition);
+      desiredCoMPositionToPack.set(yoDesiredCoMPosition);
    }
 
    public void getDesiredCoMVelocity(FixedFrameVector2DBasics desiredCoMVelocityToPack)
