@@ -200,11 +200,10 @@ public abstract class TransferState extends WalkingState
       double transferTime = walkingMessageHandler.getNextTransferTime();
       comHeightManager.transfer(transferFootPosition, transferTime, swingSide, extraToeOffHeight);
 
-      // TODO double check this
-      balanceManager.getDesiredCoMPosition(desiredCoM);
+      balanceManager.getFinalDesiredCoMPosition(desiredCoM);
       NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForDoubleSupport(transferToSide);
       transferToAndNextFootstepsData.setComAtEndOfState(desiredCoM);
-      comHeightManager.setSupportLeg(transferToSide.getOppositeSide());
+      comHeightManager.setSupportLeg(transferToSide);
       comHeightManager.initialize(transferToAndNextFootstepsData, 0.0, true);
    }
 
