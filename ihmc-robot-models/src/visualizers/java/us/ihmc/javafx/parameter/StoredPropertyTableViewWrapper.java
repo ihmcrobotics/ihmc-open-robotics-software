@@ -73,7 +73,7 @@ public class StoredPropertyTableViewWrapper
    {
       parameterTable.setPadding(new Insets(10.0));
 
-      StoredPropertyKeyList keys = javaFXStoredPropertyMap.getStoredPropertySet().getKeyList();
+      StoredPropertyKeyListReadOnly keys = javaFXStoredPropertyMap.getStoredPropertySet().getKeyList();
       int numRows = keys.keys().size() / tableColumns + 1;
 
       List<StoredPropertyKey<?>> orderedKeys = new ArrayList<>(keys.keys());
