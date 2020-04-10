@@ -40,7 +40,9 @@ public class ChestTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -57,7 +59,9 @@ public class ChestTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getSo3Trajectory(), current_alignment);
@@ -68,15 +72,19 @@ public class ChestTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void write(controller_msgs.msg.dds.ChestTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.write(data.getSo3Trajectory(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.ChestTrajectoryMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType.read(data.getSo3Trajectory(), cdr);	
 
    }
@@ -84,7 +92,9 @@ public class ChestTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void serialize(controller_msgs.msg.dds.ChestTrajectoryMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_a("so3_trajectory", new controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getSo3Trajectory());
 
    }
@@ -92,7 +102,9 @@ public class ChestTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ChestTrajectoryMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_a("so3_trajectory", new controller_msgs.msg.dds.SO3TrajectoryMessagePubSubType(), data.getSo3Trajectory());
 
    }

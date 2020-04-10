@@ -40,12 +40,16 @@ public class KinematicsPlanningToolboxInputMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+
       current_alignment += controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       current_alignment += controller_msgs.msg.dds.KinematicsToolboxConfigurationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -62,7 +66,9 @@ public class KinematicsPlanningToolboxInputMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -70,7 +76,9 @@ public class KinematicsPlanningToolboxInputMessagePubSubType implements us.ihmc.
       {
           current_alignment += controller_msgs.msg.dds.KinematicsPlanningToolboxRigidBodyMessagePubSubType.getCdrSerializedSize(data.getRigidBodyMessages().get(i0), current_alignment);}
 
+
       current_alignment += controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessagePubSubType.getCdrSerializedSize(data.getCenterOfMassMessage(), current_alignment);
+
 
       current_alignment += controller_msgs.msg.dds.KinematicsToolboxConfigurationMessagePubSubType.getCdrSerializedSize(data.getKinematicsConfigurationMessage(), current_alignment);
 
@@ -80,22 +88,30 @@ public class KinematicsPlanningToolboxInputMessagePubSubType implements us.ihmc.
 
    public static void write(controller_msgs.msg.dds.KinematicsPlanningToolboxInputMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       if(data.getRigidBodyMessages().size() <= 100)
       cdr.write_type_e(data.getRigidBodyMessages());else
           throw new RuntimeException("rigid_body_messages field exceeds the maximum length");
 
+
       controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessagePubSubType.write(data.getCenterOfMassMessage(), cdr);
+
       controller_msgs.msg.dds.KinematicsToolboxConfigurationMessagePubSubType.write(data.getKinematicsConfigurationMessage(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.KinematicsPlanningToolboxInputMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       cdr.read_type_e(data.getRigidBodyMessages());	
+
       controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessagePubSubType.read(data.getCenterOfMassMessage(), cdr);	
+
       controller_msgs.msg.dds.KinematicsToolboxConfigurationMessagePubSubType.read(data.getKinematicsConfigurationMessage(), cdr);	
 
    }
@@ -103,9 +119,13 @@ public class KinematicsPlanningToolboxInputMessagePubSubType implements us.ihmc.
    @Override
    public final void serialize(controller_msgs.msg.dds.KinematicsPlanningToolboxInputMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_e("rigid_body_messages", data.getRigidBodyMessages());
+
       ser.write_type_a("center_of_mass_message", new controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessagePubSubType(), data.getCenterOfMassMessage());
+
 
       ser.write_type_a("kinematics_configuration_message", new controller_msgs.msg.dds.KinematicsToolboxConfigurationMessagePubSubType(), data.getKinematicsConfigurationMessage());
 
@@ -114,9 +134,13 @@ public class KinematicsPlanningToolboxInputMessagePubSubType implements us.ihmc.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.KinematicsPlanningToolboxInputMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_e("rigid_body_messages", data.getRigidBodyMessages());
+
       ser.read_type_a("center_of_mass_message", new controller_msgs.msg.dds.KinematicsPlanningToolboxCenterOfMassMessagePubSubType(), data.getCenterOfMassMessage());
+
 
       ser.read_type_a("kinematics_configuration_message", new controller_msgs.msg.dds.KinematicsToolboxConfigurationMessagePubSubType(), data.getKinematicsConfigurationMessage());
 
