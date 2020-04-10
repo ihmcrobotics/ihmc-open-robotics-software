@@ -9,12 +9,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.Connection;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.ConnectionPoint3D;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMap;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.*;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.robotics.geometry.PlanarRegionTestTools;
 
@@ -22,7 +18,7 @@ public class VisibilityGraphTestTools
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   public static void assertVisibilityGraphStatisticsEqual(VisibilityGraphStatistics expected, VisibilityGraphStatistics actual, double epsilon)
+   public static void assertVisibilityGraphStatisticsEqual(VisibilityGraphHolder expected, VisibilityGraphHolder actual, double epsilon)
    {
       assertEquals(expected.getGoalMapId(), actual.getGoalMapId());
       assertEquals(expected.getStartMapId(), actual.getStartMapId());

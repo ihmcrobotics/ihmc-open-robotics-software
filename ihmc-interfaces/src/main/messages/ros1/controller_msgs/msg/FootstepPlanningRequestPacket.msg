@@ -4,12 +4,13 @@ int8 ROBOT_SIDE_LEFT=0
 
 int8 ROBOT_SIDE_RIGHT=1
 
-int8 FOOTSTEP_PLANNER_TYPE_PLAN_THEN_SNAP=0
+int8 FOOTSTEP_PLAN_HEADING_FORWARD=0
 
-# The recommended planner type
-int8 FOOTSTEP_PLANNER_TYPE_A_STAR=1
+int8 FOOTSTEP_PLAN_HEADING_BACKWARD=1
 
-int8 FOOTSTEP_PLANNER_TYPE_VIS_GRAPH_WITH_A_STAR=2
+int8 FOOTSTEP_PLAN_HEADING_LEFT=2
+
+int8 FOOTSTEP_PLAN_HEADING_RIGHT=3
 
 int32 NO_PLAN_ID=-1
 
@@ -39,17 +40,30 @@ bool snap_goal_steps
 # If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
 bool abort_if_goal_step_snapping_fails
 
-# Footstep planner type, see above
-# Field default value 255
-int8 requested_footstep_planner_type
+# If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+bool abort_if_body_path_planner_fails
 
-# Acceptable xy distance from the given goal for the planner to terminate
+# If true, will plan a body path. If false, will follow a straight-line path to the goal
+bool plan_body_path
+
+# If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+# Field default value True
+bool perform_a_star_search
+
+# Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+geometry_msgs/Pose[] body_path_waypoints
+
+# (In beta) acceptable xy distance from the given goal for the planner to terminate
 # Field default value -1.0
 float64 goal_distance_proximity
 
-# Acceptable yaw offset from the given goal for the planner to terminate
+# (In beta) acceptable yaw offset from the given goal for the planner to terminate
 # Field default value -1.0
 float64 goal_yaw_proximity
+
+# Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+# Field default value 255
+int8 requested_path_heading
 
 # Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
 # Field default value 5.0
@@ -58,9 +72,6 @@ float64 timeout
 # Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
 # Field default value -1
 int32 max_iterations
-
-# Best effort timeout in seconds
-float64 best_effort_timeout
 
 # Max body path length if using body path
 float64 horizon_length
@@ -75,8 +86,9 @@ bool assume_flat_ground
 # Field default value -1
 int32 planner_request_id
 
-# Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
-geometry_msgs/Pose[] body_path_waypoints
+# Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+# Field default value 1.0
+float64 status_publish_period
 
 # Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
 # For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/

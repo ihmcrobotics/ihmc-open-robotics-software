@@ -220,7 +220,7 @@ public class NavigationBehavior implements BehaviorInterface
       FramePose3D goalPose = new FramePose3D();
       goalPose.setX(finalPose.getX());
       goalPose.setY(finalPose.getY());
-      goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0); // TODO: use initial yaw?
+      goalPose.getOrientation().setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0); // TODO: use initial yaw?
 
 //      LogTools.info("Creating A* planner");
 //      YoVariableRegistry registry = new YoVariableRegistry("registry");

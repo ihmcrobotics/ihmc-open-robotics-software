@@ -27,7 +27,7 @@ public class PlanarRegionMessageConverter
       planarRegion.getNormal(message.getRegionNormal());
       RigidBodyTransform transform = new RigidBodyTransform();
       planarRegion.getTransformToWorld(transform);
-      message.getRegionOrientation().set(transform.getRotationMatrix());
+      message.getRegionOrientation().set(transform.getRotation());
 
       message.setConcaveHullSize(planarRegion.getConcaveHullSize());
       message.setNumberOfConvexPolygons(planarRegion.getNumberOfConvexPolygons());

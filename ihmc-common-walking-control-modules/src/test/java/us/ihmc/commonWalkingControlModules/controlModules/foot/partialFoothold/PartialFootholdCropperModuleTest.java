@@ -83,7 +83,7 @@ public class PartialFootholdCropperModuleTest
 
       YoInteger shrinkMaxLimit = ((YoInteger) registry.getVariable("Cropping_ShrinkMaxLimit"));
       shrinkMaxLimit.set(6);
-      YoBoolean applyPartialFootholds = ((YoBoolean) registry.getVariable("leftApplyPartialFootholds"));
+      YoBoolean applyPartialFootholds = ((YoBoolean) registry.getVariable("applyPartialFootholds"));
       applyPartialFootholds.set(true);
 
 
@@ -125,7 +125,7 @@ public class PartialFootholdCropperModuleTest
       for (int increment = 0; increment < historyRequirement; increment++)
       {
          footPitch += -omegaNorm * dt;
-         solePose.setOrientationYawPitchRoll(0.0, footPitch, 0.0);
+         solePose.getOrientation().setYawPitchRoll(0.0, footPitch, 0.0);
          soleFrame.update();
 
          FramePoint2D measuredCoP = new FramePoint2D(soleFrame, direction);
@@ -227,7 +227,7 @@ public class PartialFootholdCropperModuleTest
       for (int increment = 0; increment < historyRequirement; increment++)
       {
          footPitch += -omegaNorm * dt;
-         solePose.setOrientationYawPitchRoll(0.0, footPitch, 0.0);
+         solePose.getOrientation().setYawPitchRoll(0.0, footPitch, 0.0);
          soleFrame.update();
 
          FramePoint2D measuredCoP = new FramePoint2D(soleFrame, direction);
@@ -281,7 +281,7 @@ public class PartialFootholdCropperModuleTest
       for (int increment = 0; increment < historyRequirement; increment++)
       {
          footPitch += omegaNorm * dt;
-         solePose.setOrientationYawPitchRoll(0.0, footPitch, 0.0);
+         solePose.getOrientation().setYawPitchRoll(0.0, footPitch, 0.0);
          soleFrame.update();
 
          FramePoint2D measuredCoP = new FramePoint2D(soleFrame, direction);
@@ -321,7 +321,7 @@ public class PartialFootholdCropperModuleTest
       for (int increment = 0; increment < historyRequirement; increment++)
       {
          footPitch += omegaNorm * dt;
-         solePose.setOrientationYawPitchRoll(0.0, footPitch, 0.0);
+         solePose.getOrientation().setYawPitchRoll(0.0, footPitch, 0.0);
          soleFrame.update();
 
          FramePoint2D measuredCoP = new FramePoint2D(soleFrame, direction);

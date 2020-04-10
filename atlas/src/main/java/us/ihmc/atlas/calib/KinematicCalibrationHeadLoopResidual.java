@@ -15,6 +15,7 @@ import georegression.struct.point.Point2D_F64;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -110,8 +111,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
 
       ReferenceFrame cameraFrame = fullRobotModel.getCameraFrame("stereo_camera_left");
       RigidBodyTransform imageToCamera = new RigidBodyTransform(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
-      ReferenceFrame cameraImageFrame = ReferenceFrame.
-            constructFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
+      ReferenceFrame cameraImageFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
 
       //compute error
       int offset = 0;
@@ -146,8 +146,8 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
       rotFull.multiply(targetRotation);
 
       RigidBodyTransform targetToEE = new RigidBodyTransform();
-      targetToEE.setTranslation(tran);
-      targetToEE.setRotation(rotFull);
+      targetToEE.getTranslation().set(tran);
+      targetToEE.getRotation().set(rotFull);
 
       return targetToEE;
    }
@@ -156,7 +156,7 @@ public class KinematicCalibrationHeadLoopResidual implements FunctionNtoM
    {
 
       ReferenceFrame activeArmEEFrame = fullRobotModel.getEndEffectorFrame(activeSide, LimbName.ARM);
-      ReferenceFrame boardFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("boardFrame", activeArmEEFrame, targetToEE);
+      ReferenceFrame boardFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("boardFrame", activeArmEEFrame, targetToEE);
       return boardFrame.getTransformToDesiredFrame(cameraImageFrame);
    }
 

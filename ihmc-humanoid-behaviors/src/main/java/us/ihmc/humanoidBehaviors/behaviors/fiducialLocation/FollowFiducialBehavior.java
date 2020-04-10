@@ -18,18 +18,14 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior.FollowFiducialState;
@@ -44,10 +40,8 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.robotics.time.YoStopwatch;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -446,13 +440,14 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       Quaternion orientation = new Quaternion();
       currentGoalPose.get().get(location, orientation);
       publishUIPositionCheckerPacket(location, orientation);
+      boolean planBodyPath = false;
 
       FootstepPlanningRequestPacket request = FootstepPlannerMessageTools.createFootstepPlanningRequestPacket(initialStanceSide,
                                                                                                               startLeftFootPose,
                                                                                                               startRightFootPose,
                                                                                                               currentGoalPose.get(),
                                                                                                               idealStanceWidth,
-                                                                                                              FootstepPlannerType.A_STAR); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+                                                                                                              planBodyPath);
 
       if (planarRegions.get() != null)
          request.getPlanarRegionsListMessage().set(planarRegions.get());
@@ -493,11 +488,11 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       }
       shorterGoalPosition.set(pointBetweenFeet);
       shorterGoalPosition.add(vectorFromFeetToGoal);
-      goalPose.setPosition(shorterGoalPosition);
+      goalPose.getPosition().set(shorterGoalPosition);
 
       double headingFromFeetToGoal = Math.atan2(vectorFromFeetToGoal.getY(), vectorFromFeetToGoal.getX());
       AxisAngle goalOrientation = new AxisAngle(0.0, 0.0, 1.0, headingFromFeetToGoal);
-      goalPose.setOrientation(goalOrientation);
+      goalPose.getOrientation().set(goalOrientation);
       return goalPose;
 
    }

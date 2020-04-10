@@ -7,7 +7,7 @@ import org.ejml.ops.CommonOps;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.DenseMatrixVector3D;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.ICPGeneration.SmoothCapturePointToolbox;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
@@ -335,7 +335,7 @@ public class SmoothCoMIntegrationToolbox
                                       Tuple3DReadOnly icpPositionDesiredFinal, Tuple3DReadOnly comPositionDesiredInitial,
                                       Tuple3DBasics comQuantityDesiredToPack)
    {
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
       {
          DenseMatrix64F alphaBetaCoM = generalizedAlphaBetaCoMPrime.getMatrix(axis);
          DenseMatrix64F alphaICP = generalizedAlphaPrimeTerminal.getMatrix(axis);
@@ -424,7 +424,7 @@ public class SmoothCoMIntegrationToolbox
             double scalarAlpha = signAlpha * omega0PowerAlpha; // sign * omega0^(-j)
             double scalarBeta = signBeta * omega0PowerBeta * omega0PowerAlpha * expOmega0Time; // == sign * omega^(betaCoMDerivativeOrder - j) * exp(omega0 * (timeSegmentInitial - time))
 
-            for (Axis dir : Axis.values)
+            for (Axis3D dir : Axis3D.values)
             {
                Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
                DenseMatrix64F geometricSequenceDerivative = cmpPolynomial.evaluateGeometricSequenceDerivative(j + alphaBetaCoMDerivativeOrder, time);
@@ -472,7 +472,7 @@ public class SmoothCoMIntegrationToolbox
       int numberOfCoefficients = cmpPolynomial3D.getNumberOfCoefficients();
       double timeSegmentInitial = cmpPolynomial3D.getInitialTime();
 
-      for (Axis dir : Axis.values)
+      for (Axis3D dir : Axis3D.values)
       {
          generalizedAlphaBetaCoMPrime.getMatrix(dir).reshape(1, cmpPolynomial3D.getNumberOfCoefficients(dir));
       }
@@ -495,7 +495,7 @@ public class SmoothCoMIntegrationToolbox
             double scalarAlpha = signAlpha * omega0PowerAlpha; // sign * omega0^(-j)
             double scalarBeta = signBeta * omega0PowerBeta * omega0PowerAlpha * expOmega0Time; // == sign * omega^(betaCoMDerivativeOrder - j) * exp(omega0 * (timeSegmentInitial - time))
 
-            for (Axis dir : Axis.values)
+            for (Axis3D dir : Axis3D.values)
             {
                Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
                DenseMatrix64F matrix = generalizedAlphaBetaCoMPrime.getMatrix(dir);
@@ -546,7 +546,7 @@ public class SmoothCoMIntegrationToolbox
       int numberOfCoefficients = cmpPolynomial3D.getNumberOfCoefficients();
       double timeSegmentInitial = cmpPolynomial3D.getInitialTime();
 
-      for (Axis dir : Axis.values)
+      for (Axis3D dir : Axis3D.values)
       {
          int numCols = cmpPolynomial3D.getNumberOfCoefficients(dir);
          alphaBetaCoMPrime.getMatrix(dir).reshape(1, numCols);
@@ -576,7 +576,7 @@ public class SmoothCoMIntegrationToolbox
 
          for (int j = k; j < numberOfCoefficients; j++)
          {
-            for (Axis dir : Axis.values)
+            for (Axis3D dir : Axis3D.values)
             {
                Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
 
@@ -630,7 +630,7 @@ public class SmoothCoMIntegrationToolbox
          {
             double scalar = sign * omega0Power; // sign * omega0^(-j)
 
-            for (Axis dir : Axis.values)
+            for (Axis3D dir : Axis3D.values)
             {
                Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
                DenseMatrix64F geometricSequenceDerivative = cmpPolynomial.evaluateGeometricSequenceDerivative(j + alphaCoMDerivativeOrder, time);
@@ -710,7 +710,7 @@ public class SmoothCoMIntegrationToolbox
          {
             double scalar = sign * omega0Pow * expOmega0Time; // == sign * omega^(betaCoMDerivativeOrder - j) * exp(omega0 * (timeSegmentInitial - time))
 
-            for (Axis dir : Axis.values)
+            for (Axis3D dir : Axis3D.values)
             {
                Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
 

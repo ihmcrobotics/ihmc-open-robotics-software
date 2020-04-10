@@ -548,7 +548,7 @@ public class InverseDynamicsCalculatorSCSTest
       floatingJoint.setYawPitchRoll(yaw, pitch, roll);
 
       sixDoFJoint.setJointPosition(rootPosition);
-      sixDoFJoint.getJointPose().setOrientationYawPitchRoll(yaw, pitch, roll);
+      sixDoFJoint.getJointPose().getOrientation().setYawPitchRoll(yaw, pitch, roll);
    }
    
    private final FrameVector3D linearVelocityFrameVector = new FrameVector3D();

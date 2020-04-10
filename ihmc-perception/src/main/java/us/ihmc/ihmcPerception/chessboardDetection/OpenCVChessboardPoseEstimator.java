@@ -177,9 +177,9 @@ public class OpenCVChessboardPoseEstimator
    public static void rigidBodyTransformToOpenCVTR(RigidBodyTransform transform, Mat tvec, Mat rvec)
    {
       Point3D translation = new Point3D();
-      transform.getTranslation(translation);
+      translation.set(transform.getTranslation());
       AxisAngle axisAngle = new AxisAngle();
-      transform.getRotation(axisAngle);
+      axisAngle.set(transform.getRotation());
       Vector3D rotVector = new Vector3D(axisAngle.getX(), axisAngle.getY(), axisAngle.getZ());
       rotVector.normalize();
       rotVector.scale(axisAngle.getAngle());

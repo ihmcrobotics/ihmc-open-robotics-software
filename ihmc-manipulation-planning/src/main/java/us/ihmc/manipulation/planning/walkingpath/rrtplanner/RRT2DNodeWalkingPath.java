@@ -40,7 +40,7 @@ public class RRT2DNodeWalkingPath extends RRTNode
 
       RigidBodyTransform transform;
       transform = new RigidBodyTransform();
-      transform.setTranslation(translationOfNode);
+      transform.getTranslation().set(translationOfNode);
 
       collisionDetector.getCollisionObjects().get(0).setTransformToWorld(transform);
       collisionDetectionResult.clear();
@@ -92,7 +92,7 @@ public class RRT2DNodeWalkingPath extends RRTNode
 
          RigidBodyTransform transform;
          transform = new RigidBodyTransform();
-         transform.setTranslation(boxes[i].center);
+         transform.getTranslation().set(boxes[i].center);
          collisionDetector.getCollisionObjects().get(i + 1).setTransformToWorld(transform);
 
          collisionDetector.getCollisionObjects().get(i + 1).setCollisionMask(0b01);

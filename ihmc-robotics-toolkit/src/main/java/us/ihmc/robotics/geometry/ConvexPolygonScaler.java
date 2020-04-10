@@ -261,7 +261,7 @@ public class ConvexPolygonScaler
          }
 
 
-         edgeOnQ.negateDirection();
+         edgeOnQ.getDirection().negate();
          double extraDistanceToPoint2 = 0.0;
 
          leftMostIndexOnInteriorPolygon = EuclidGeometryPolygonTools.findVertexIndex(interiorPolygon, true, Bound.MIN, Bound.MIN);

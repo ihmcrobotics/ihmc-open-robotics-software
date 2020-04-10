@@ -36,8 +36,8 @@ public class ConstantGoalDetectorBehaviorService extends GoalDetectorBehaviorSer
 
       FrameQuaternion goalOrientation = new FrameQuaternion(midFeetZUpFrame);
       goalOrientation.changeFrame(ReferenceFrame.getWorldFrame());
-      framePoseToPack.setPosition(goalPosition);
-      framePoseToPack.setOrientation(goalOrientation);
+      framePoseToPack.getPosition().set(goalPosition);
+      framePoseToPack.getOrientation().set(goalOrientation);
    }
 
    @Override

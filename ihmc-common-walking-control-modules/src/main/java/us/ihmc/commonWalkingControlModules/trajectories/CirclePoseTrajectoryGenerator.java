@@ -180,7 +180,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
          {
             localTranslation.set(circleOrigin);
             localRotationAxis.set(rotationAxis);
-            EuclidGeometryTools.axisAngleFromZUpToVector3D(localRotationAxis, localAxisAngle);
+            EuclidGeometryTools.orientation3DFromZUpToVector3D(localRotationAxis, localAxisAngle);
             transformToParent.set(localAxisAngle, localTranslation);
          }
       };
@@ -433,7 +433,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       else
       {
          tangentialCircleFramePose.setToZero(currentPosition.getReferenceFrame());
-         tangentialCircleFramePose.setPosition(currentPosition);
+         tangentialCircleFramePose.getPosition().set(currentPosition);
       }
 
       tangentialCircleFramePose.changeFrame(circleFrame);
@@ -442,7 +442,7 @@ public class CirclePoseTrajectoryGenerator implements PoseTrajectoryGenerator
       double y = tangentialCircleFramePose.getY();
 
       double yaw = trimAngleMinusPiToPi(Math.PI / 2.0 + Math.atan2(y, x));
-      tangentialCircleFramePose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
+      tangentialCircleFramePose.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
       tangentialCircleFrame.setPoseAndUpdate(tangentialCircleFramePose);
       yoTangentialCircleFramePose.setMatchingFrame(tangentialCircleFramePose);
    }

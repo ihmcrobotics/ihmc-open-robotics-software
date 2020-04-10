@@ -1,23 +1,14 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import org.ejml.data.DenseMatrix64F;
-import org.junit.jupiter.api.AfterEach;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.robotics.Assert;
 
 public class ICPOptimizationControllerHelperTest
 {
-   @AfterEach
-   public void tearDown()
-   {
-      ReferenceFrameTools.clearWorldFrameTree();
-   }
-
    @Test
    public void testTransformFromDynamicsFrame()
    {

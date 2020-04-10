@@ -144,8 +144,8 @@ public class ScsMocapRigidBody
    public void getPose(RigidBodyTransform pose)
    {
       quaternion.set(qx.getDoubleValue(), qy.getDoubleValue(), qz.getDoubleValue(), qw.getDoubleValue());
-      pose.setRotation(quaternion);
-      pose.setTranslation(xPos.getDoubleValue(), yPos.getDoubleValue(), zPos.getDoubleValue());
+      pose.getRotation().set(quaternion);
+      pose.getTranslation().set(xPos.getDoubleValue(), yPos.getDoubleValue(), zPos.getDoubleValue());
    }
 }
 

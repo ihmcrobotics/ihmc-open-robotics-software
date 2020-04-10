@@ -46,9 +46,19 @@ public class FootstepPlannerRequest
    private boolean abortIfGoalStepSnappingFails;
 
    /**
+    * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+    */
+   private boolean abortIfBodyPathPlannerFails;
+
+   /**
     * If true, the planner will plan a body path. If false, it will try to follow a straight line to the goal.
     */
    private boolean planBodyPath;
+
+   /**
+    * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+    */
+   private boolean performAStarSearch;
 
    /**
     * (beta) This specifies an acceptable xy distance that is acceptable to terminate planning. Set to non-positive value to disable.
@@ -59,6 +69,12 @@ public class FootstepPlannerRequest
     * (beta) This specifies an acceptable orientation distance that is acceptable to terminate planning. Set to non-positive value to disable.
     */
    private double goalYawProximity;
+
+   /**
+    * Specifies the desired robot heading.
+    * The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+    */
+   private FootstepPlanHeading desiredHeading;
 
    /**
     * Planner timeout in seconds. If {@link #maximumIterations} is set also, the planner terminates whenever either is reached
@@ -90,6 +106,11 @@ public class FootstepPlannerRequest
     */
    private final ArrayList<Pose3DReadOnly> bodyPathWaypoints = new ArrayList<>();
 
+   /**
+    * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+    */
+   private double statusPublishPeriod;
+
    public FootstepPlannerRequest()
    {
       clear();
@@ -103,15 +124,19 @@ public class FootstepPlannerRequest
       goalFootPoses.forEach(Pose3D::setToNaN);
       snapGoalSteps = true;
       abortIfGoalStepSnappingFails = false;
+      abortIfBodyPathPlannerFails = false;
       planBodyPath = false;
+      performAStarSearch = true;
       goalDistanceProximity = -1.0;
       goalYawProximity = -1.0;
+      desiredHeading = FootstepPlanHeading.FORWARD;
       timeout = 5.0;
       maximumIterations = -1;
       horizonLength = Double.MAX_VALUE;
       planarRegionsList = null;
       assumeFlatGround = false;
       bodyPathWaypoints.clear();
+      statusPublishPeriod = 1.0;
    }
 
    public void setRequestId(int requestId)
@@ -184,9 +209,19 @@ public class FootstepPlannerRequest
       this.abortIfGoalStepSnappingFails = abortIfGoalStepSnappingFails;
    }
 
+   public void setAbortIfBodyPathPlannerFails(boolean abortIfBodyPathPlannerFails)
+   {
+      this.abortIfBodyPathPlannerFails = abortIfBodyPathPlannerFails;
+   }
+
    public void setPlanBodyPath(boolean planBodyPath)
    {
       this.planBodyPath = planBodyPath;
+   }
+
+   public void setPerformAStarSearch(boolean performAStarSearch)
+   {
+      this.performAStarSearch = performAStarSearch;
    }
 
    public void setGoalDistanceProximity(double goalDistanceProximity)
@@ -197,6 +232,11 @@ public class FootstepPlannerRequest
    public void setGoalYawProximity(double goalYawProximity)
    {
       this.goalYawProximity = goalYawProximity;
+   }
+
+   public void setDesiredHeading(FootstepPlanHeading desiredHeading)
+   {
+      this.desiredHeading = desiredHeading;
    }
 
    public void setTimeout(double timeout)
@@ -222,6 +262,11 @@ public class FootstepPlannerRequest
    public void setAssumeFlatGround(boolean assumeFlatGround)
    {
       this.assumeFlatGround = assumeFlatGround;
+   }
+
+   public void setStatusPublishPeriod(double statusPublishPeriod)
+   {
+      this.statusPublishPeriod = statusPublishPeriod;
    }
 
    public int getRequestId()
@@ -254,9 +299,19 @@ public class FootstepPlannerRequest
       return abortIfGoalStepSnappingFails;
    }
 
+   public boolean getAbortIfBodyPathPlannerFails()
+   {
+      return abortIfBodyPathPlannerFails;
+   }
+
    public boolean getPlanBodyPath()
    {
       return planBodyPath;
+   }
+
+   public boolean getPerformAStarSearch()
+   {
+      return performAStarSearch;
    }
 
    public double getGoalDistanceProximity()
@@ -267,6 +322,11 @@ public class FootstepPlannerRequest
    public double getGoalYawProximity()
    {
       return goalYawProximity;
+   }
+
+   public FootstepPlanHeading getDesiredHeading()
+   {
+      return desiredHeading;
    }
 
    public double getTimeout()
@@ -299,6 +359,11 @@ public class FootstepPlannerRequest
       return bodyPathWaypoints;
    }
 
+   public double getStatusPublishPeriod()
+   {
+      return statusPublishPeriod;
+   }
+
    public void setFromPacket(FootstepPlanningRequestPacket requestPacket)
    {
       clear();
@@ -313,8 +378,9 @@ public class FootstepPlannerRequest
       setGoalFootPose(RobotSide.RIGHT, requestPacket.getGoalRightFootPose());
       setSnapGoalSteps(requestPacket.getSnapGoalSteps());
       setAbortIfGoalStepSnappingFails(requestPacket.getAbortIfGoalStepSnappingFails());
-
-      setPlanBodyPath(FootstepPlannerType.fromByte(requestPacket.getRequestedFootstepPlannerType()).plansPath());
+      setAbortIfBodyPathPlannerFails(requestPacket.getAbortIfBodyPathPlannerFails());
+      setPlanBodyPath(requestPacket.getPlanBodyPath());
+      setPerformAStarSearch(requestPacket.getPerformAStarSearch());
       setGoalDistanceProximity(requestPacket.getGoalDistanceProximity());
       setGoalYawProximity(requestPacket.getGoalYawProximity());
       setTimeout(requestPacket.getTimeout());
@@ -322,6 +388,11 @@ public class FootstepPlannerRequest
       if(requestPacket.getHorizonLength() > 0.0)
          setHorizonLength(requestPacket.getHorizonLength());
       setAssumeFlatGround(requestPacket.getAssumeFlatGround());
+      setStatusPublishPeriod(requestPacket.getStatusPublishPeriod());
+
+      FootstepPlanHeading desiredHeading = FootstepPlanHeading.fromByte(requestPacket.getRequestedPathHeading());
+      if (desiredHeading != null)
+         setDesiredHeading(desiredHeading);
 
       for (int i = 0; i < requestPacket.getBodyPathWaypoints().size(); i++)
       {
@@ -343,14 +414,17 @@ public class FootstepPlannerRequest
       requestPacket.getGoalRightFootPose().set(getGoalFootPoses().get(RobotSide.RIGHT));
       requestPacket.setSnapGoalSteps(getSnapGoalSteps());
       requestPacket.setAbortIfGoalStepSnappingFails(getAbortIfGoalStepSnappingFails());
-
-      requestPacket.setRequestedFootstepPlannerType((getPlanBodyPath() ? FootstepPlannerType.VIS_GRAPH_WITH_A_STAR : FootstepPlannerType.A_STAR).toByte());
+      requestPacket.setAbortIfBodyPathPlannerFails(getAbortIfBodyPathPlannerFails());
+      requestPacket.setPlanBodyPath(getPlanBodyPath());
+      requestPacket.setPerformAStarSearch(getPerformAStarSearch());
       requestPacket.setGoalDistanceProximity(getGoalDistanceProximity());
       requestPacket.setGoalYawProximity(getGoalYawProximity());
+      requestPacket.setRequestedPathHeading(getDesiredHeading().toByte());
       requestPacket.setTimeout(getTimeout());
       requestPacket.setMaxIterations(getMaximumIterations());
       requestPacket.setHorizonLength(getHorizonLength());
       requestPacket.setAssumeFlatGround(getAssumeFlatGround());
+      requestPacket.setStatusPublishPeriod(getStatusPublishPeriod());
 
       requestPacket.getBodyPathWaypoints().clear();
       for (int i = 0; i < bodyPathWaypoints.size(); i++)
@@ -378,14 +452,18 @@ public class FootstepPlannerRequest
       this.goalFootPoses.get(RobotSide.RIGHT).set(other.goalFootPoses.get(RobotSide.RIGHT));
       this.snapGoalSteps = other.snapGoalSteps;
       this.abortIfGoalStepSnappingFails = other.abortIfGoalStepSnappingFails;
+      this.abortIfBodyPathPlannerFails = other.abortIfBodyPathPlannerFails;
 
       this.planBodyPath = other.planBodyPath;
+      this.performAStarSearch = other.performAStarSearch;
       this.goalDistanceProximity = other.goalDistanceProximity;
       this.goalYawProximity = other.goalYawProximity;
+      this.desiredHeading = other.desiredHeading;
       this.timeout = other.timeout;
       this.maximumIterations = other.maximumIterations;
       this.horizonLength = other.horizonLength;
       this.assumeFlatGround = other.assumeFlatGround;
+      this.statusPublishPeriod = other.statusPublishPeriod;
 
       if(other.planarRegionsList != null)
       {
