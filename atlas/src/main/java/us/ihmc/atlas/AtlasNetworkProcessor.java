@@ -19,7 +19,7 @@ public class AtlasNetworkProcessor
    private static final Application VR = AtlasNetworkProcessor::vrNetworkProcessor;
    private static final Application MINIMAL = AtlasNetworkProcessor::minimalNetworkProcessor;
 
-   private static final Application APPLICATION = DEFAULT;
+   private static final Application APPLICATION = VR;
 
    public static void main(String[] args) throws JSAPException
    {
@@ -99,6 +99,7 @@ public class AtlasNetworkProcessor
       networkProcessor.setupRosModule();
       networkProcessor.setupBipedalSupportPlanarRegionPublisherModule();
       networkProcessor.setupHumanoidAvatarREAStateUpdater();
+      networkProcessor.setupKinematicsToolboxModule(false);
       
       AtlasSensorSuiteManager sensorModule = robotModel.getSensorSuiteManager();
       networkProcessor.setupSensorModule();
