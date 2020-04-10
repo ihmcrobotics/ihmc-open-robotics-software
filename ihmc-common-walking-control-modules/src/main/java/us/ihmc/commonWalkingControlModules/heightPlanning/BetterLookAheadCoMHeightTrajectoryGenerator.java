@@ -49,6 +49,8 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    private final YoDouble percentageThroughSegment = new YoDouble("percentageThroughSegment", registry);
    private final YoDouble splineQuery = new YoDouble("splineQuery", registry);
 
+   private final YoDouble offsetFromNominalInPlan = new YoDouble("offsetFromNominalInPlan", registry);
+
    private final YoFramePoint3D transferFromPosition = new YoFramePoint3D("transferFromPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D transferToPosition = new YoFramePoint3D("transferToPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D desiredCoMPositionAtStart = new YoFramePoint3D("desiredCoMPositionAtStart", ReferenceFrame.getWorldFrame(), registry);
@@ -154,6 +156,8 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       desiredCoMPosition.set(tempFramePoint);
 
+      offsetFromNominalInPlan.set(0.0);
+
       heightOffsetHandler.reset();
    }
 
@@ -188,6 +192,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    public void initialize(NewTransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight, boolean isInTransfer)
    {
       FramePoint3DReadOnly transferToFootstepPosition = transferToAndNextFootstepsData.getTransferToPosition();
+      offsetFromNominalInPlan.set(heightOffsetHandler.getOffsetHeightAboveGround());
 
       double startAnkleZ = 0.0;
       if (isInTransfer)
@@ -206,13 +211,12 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       desiredCoMPositionAtStart.set(desiredCoMPosition);
 
       startCoMPosition.setIncludingFrame(desiredCoMPosition);
-      startCoMPosition.subZ(heightOffsetHandler.getOffsetHeightAboveGround());
       startCoMPosition.changeFrame(frameOfSupportLeg);
 
       middleCoMPosition.setIncludingFrame(transferToFootstepPosition);
       middleCoMPosition.changeFrame(frameOfSupportLeg);
       double middleAnkleZ = middleCoMPosition.getZ();
-      middleCoMPosition.addZ(nominalHeightAboveGround.getDoubleValue());
+      middleCoMPosition.addZ(nominalHeightAboveGround.getDoubleValue() + offsetFromNominalInPlan.getDoubleValue());
 
       double midstanceWidth;
       if (isInTransfer)
@@ -250,11 +254,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                        maximumHeightAboveGround.getDoubleValue());
 
       for (int i = 0; i < heightWaypoints.size(); i++)
-      {
-         //         if (i > 0)
-         //            heightWaypoints.get(i).addHeightOffset(heightOffsetHandler.getOffsetHeightAboveGround());
          heightWaypoints.get(i).update();
-      }
 
       splinedHeightTrajectory.clearWaypoints();
       splinedHeightTrajectory.addWaypoints(heightWaypoints);
@@ -354,10 +354,10 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       heightOffsetHandler.update(splinedHeightTrajectory.getHeightSplineSetpoint());
 
-      point.addY(heightOffsetHandler.getOffsetHeightAboveGround());
+      point.addY(heightOffsetHandler.getOffsetHeightAboveGround() - offsetFromNominalInPlan.getDoubleValue());
       comHeightPartialDerivativesDataToPack.setCoMHeight(worldFrame,
                                                          comHeightPartialDerivativesDataToPack.getComHeight()
-                                                         + heightOffsetHandler.getOffsetHeightAboveGround());
+                                                         + heightOffsetHandler.getOffsetHeightAboveGround() - offsetFromNominalInPlan.getDoubleValue());
 
       this.splineQuery.set(point.getX());
       if (point.containsNaN())
