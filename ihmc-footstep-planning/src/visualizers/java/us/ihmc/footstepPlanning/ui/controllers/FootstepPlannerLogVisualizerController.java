@@ -90,7 +90,7 @@ public class FootstepPlannerLogVisualizerController
                                      graphData -> Platform.runLater(() -> updateGraphData(planarRegionData.get(), graphData.getLeft(), graphData.getRight())));
    }
 
-   public void setup()
+   public void onPrimaryStageLoaded()
    {
       parentColumnHolder = new TableColumnHolder(debugParentStepTable, true);
       childColumnHolder = new TableColumnHolder(debugChildStepTable, false);
