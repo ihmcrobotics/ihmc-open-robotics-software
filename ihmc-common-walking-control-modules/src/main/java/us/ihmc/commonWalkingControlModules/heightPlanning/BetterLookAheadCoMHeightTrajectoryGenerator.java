@@ -152,6 +152,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       tempFramePoint.setToZero(centerOfMassFrame);
       tempFramePoint.changeFrame(frameOfSupportLeg);
       tempFramePoint.setZ(nominalHeightAboveGround.getDoubleValue());
+      desiredCoMHeight.set(nominalHeightAboveGround.getDoubleValue());
       tempFramePoint.changeFrame(worldFrame);
 
       desiredCoMPosition.set(tempFramePoint);
@@ -335,11 +336,11 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    {
       this.queryPosition.set(queryPoint);
 
-      handleInitializeToCurrent();
-
       percentageThroughSegment.set(splinedHeightTrajectory.solve(comHeightPartialDerivativesDataToPack, queryPoint, point));
 
       heightOffsetHandler.update(splinedHeightTrajectory.getHeightSplineSetpoint());
+
+      handleInitializeToCurrent(point.getY() + heightOffsetHandler.getOffsetHeightAboveGround() - offsetFromNominalInPlan.getDoubleValue());
 
       point.addY(heightOffsetHandler.getOffsetHeightAboveGround() - offsetFromNominalInPlan.getDoubleValue());
       comHeightPartialDerivativesDataToPack.setCoMHeight(worldFrame,
@@ -347,12 +348,11 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                                                          + heightOffsetHandler.getOffsetHeightAboveGround() - offsetFromNominalInPlan.getDoubleValue());
 
       this.splineQuery.set(point.getX());
-      if (point.containsNaN())
-         throw new RuntimeException("what");
       this.desiredCoMHeight.set(point.getY());
+
    }
 
-   private void handleInitializeToCurrent()
+   private void handleInitializeToCurrent(double normalDesiredHeight)
    {
       if (!initializeToCurrent.getBooleanValue())
          return;
@@ -362,7 +362,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       tempFramePoint.setToZero(centerOfMassFrame);
       tempFramePoint.changeFrame(frameOfSupportLeg);
 
-      double heightOffset = tempFramePoint.getZ() - desiredCoMHeight.getDoubleValue();
+      double heightOffset = tempFramePoint.getZ() - normalDesiredHeight;
 
       heightOffsetHandler.initializeToCurrent(heightOffset);
    }
