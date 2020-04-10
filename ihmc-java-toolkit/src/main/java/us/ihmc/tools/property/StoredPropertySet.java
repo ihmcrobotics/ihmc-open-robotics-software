@@ -406,7 +406,7 @@ public class StoredPropertySet implements StoredPropertySetBasics
    }
 
    @Override
-   public StoredPropertyKeyList getKeyList()
+   public StoredPropertyKeyListReadOnly getKeyList()
    {
       return keys;
    }

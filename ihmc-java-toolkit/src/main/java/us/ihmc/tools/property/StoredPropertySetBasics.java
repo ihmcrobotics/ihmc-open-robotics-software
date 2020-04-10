@@ -27,5 +27,5 @@ public interface StoredPropertySetBasics extends StoredPropertySetReadOnly
 
    void save();
 
-   StoredPropertyKeyList getKeyList();
+   StoredPropertyKeyListReadOnly getKeyList();
 }
