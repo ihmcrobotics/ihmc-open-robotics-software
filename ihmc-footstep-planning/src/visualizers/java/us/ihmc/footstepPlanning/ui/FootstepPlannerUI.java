@@ -339,8 +339,11 @@ public class FootstepPlannerUI
    public void show()
    {
       primaryStage.show();
-      footstepPlannerLogVisualizerController.setup();
-      footstepPlannerParametersUIController.setup();
+
+      footstepPlannerLogVisualizerController.onPrimaryStageLoaded();
+      footstepPlannerParametersUIController.onPrimaryStageLoaded();
+      visibilityGraphsParametersUIController.onPrimaryStageLoaded();
+      footstepPostProcessingParametersUIController.onPrimaryStageLoaded();
    }
 
    public void stop()

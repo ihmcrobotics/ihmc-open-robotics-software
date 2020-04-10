@@ -15,7 +15,7 @@
     </right>
 
     <bottom>
-        <TabPane prefHeight="337.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+        <TabPane prefHeight="320" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
             <tabs>
                 <Tab text="Main">
                     <content>

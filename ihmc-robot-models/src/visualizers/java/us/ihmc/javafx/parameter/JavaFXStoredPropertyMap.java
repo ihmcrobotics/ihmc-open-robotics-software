@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.ui.properties;
+package us.ihmc.javafx.parameter;
 
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Slider;
@@ -155,5 +155,10 @@ public class JavaFXStoredPropertyMap
       StoredPropertyBasics storedProperty = storedPropertySet.getProperty(storedPropertyKey);
       JavaFXPropertyHolder javaFXProperty = fromStoredPropertyMap.get(storedProperty);
       javaFXProperty.addValueChangedListener(runnable);
+   }
+
+   public StoredPropertySetBasics getStoredPropertySet()
+   {
+      return storedPropertySet;
    }
 }
