@@ -47,6 +47,10 @@ bool do_initial_fast_approximation
 # Field default value -1.0
 float64 minimum_swing_foot_clearance
 
+# If using the swing over planar regions module, this sets up how much less clearance is required on the fast approximation, since it doesn't usually have
+# the same amount of curve to the trajectory.
+float64 fast_approximation_less_clearance
+
 # If using the swing over planar regions module, this is the number of points along the swing foot trajectory that are checked.
 # Field default value 100
 uint32 number_of_checks_per_swing
@@ -60,9 +64,17 @@ uint32 maximum_number_of_adjustment_attempts
 # Field default value -1.0
 float64 maximum_waypoint_adjustment_distance
 
-# If using the swing over planar regions module, this is the distance that the swing waypoints will be adjusted by.
+# If using the swing over planar regions module, this is the minimum distance that the swing waypoints will be adjusted by on each increment.
 # Field default value -1.0
-float64 incremental_waypoint_adjustment_distance
+float64 minimum_adjustment_increment_distance
+
+# If using the swing over planar regions module, this is the maximum distance that the swing waypoints will be adjusted by on each increment.
+# Field default value -1.0
+float64 maximum_adjustment_increment_distance
+
+# If using the swing over planar regions module, this is the scale factor to be applied to the collision on each increment for adjustment.
+# Field default value -1.0
+float64 adjustment_increment_distance_gain
 
 # Field default value -1.0
 float64 minimum_height_above_floor_for_collision

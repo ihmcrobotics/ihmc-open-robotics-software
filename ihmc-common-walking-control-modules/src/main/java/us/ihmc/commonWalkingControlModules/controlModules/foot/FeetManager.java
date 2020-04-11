@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactSt
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.CentroidProjectionToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.ICPPlanToeOffCalculator;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.toeOffCalculator.SimpleToeOffCalculator;
@@ -97,6 +98,7 @@ public class FeetManager
       {
          explorationParameters = new ExplorationParameters(registry);
       }
+      FootholdRotationParameters footholdRotationParameters = new FootholdRotationParameters(registry);
 
       boolean enableSmoothUnloading = walkingControllerParameters.enforceSmoothFootUnloading();
       DoubleProvider minWeightFractionPerFoot = enableSmoothUnloading ? new DoubleParameter("minWeightFractionPerFoot", registry, 0.0) : null;
@@ -104,9 +106,18 @@ public class FeetManager
 
       for (RobotSide robotSide : RobotSide.values)
       {
-         FootControlModule footControlModule = new FootControlModule(robotSide, toeOffCalculator, walkingControllerParameters, swingFootGains, holdFootGains,
-                                                                     toeOffFootGains, controllerToolbox, explorationParameters, minWeightFractionPerFoot,
-                                                                     maxWeightFractionPerFoot, registry);
+         FootControlModule footControlModule = new FootControlModule(robotSide,
+                                                                     toeOffCalculator,
+                                                                     walkingControllerParameters,
+                                                                     swingFootGains,
+                                                                     holdFootGains,
+                                                                     toeOffFootGains,
+                                                                     controllerToolbox,
+                                                                     explorationParameters,
+                                                                     footholdRotationParameters,
+                                                                     minWeightFractionPerFoot,
+                                                                     maxWeightFractionPerFoot,
+                                                                     registry);
 
          footControlModules.put(robotSide, footControlModule);
       }
@@ -200,27 +211,25 @@ public class FeetManager
       }
    }
 
-   public void correctCoMHeightForSingularityAvoidance(FrameVector2D desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
+   public void correctCoMHeightForSupportSingularityAvoidance(FrameVector2D desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
    {
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         footControlModules.get(robotSide).updateLegSingularityModule();
-      }
-
       // Correct, if necessary, the CoM height trajectory to avoid straight knee
       for (RobotSide robotSide : RobotSide.values)
       {
          FootControlModule footControlModule = footControlModules.get(robotSide);
-         footControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame);
+         footControlModule.updateLegSingularityModule();
+         footControlModule.correctCoMHeightTrajectoryForSupportSingularityAvoidance(desiredICPVelocity, comHeightData, zCurrent, pelvisZUpFrame);
       }
    }
 
-   public void correctCoMHeightForUnreachableFootstep(FrameVector2D desiredICPVelocity, double zCurrent, CoMHeightTimeDerivativesData comHeightData)
+   public void correctCoMHeightForUnreachableFootstep(CoMHeightTimeDerivativesData comHeightData)
    {
       // Do that after to make sure the swing foot will land
       for (RobotSide robotSide : RobotSide.values)
       {
-         footControlModules.get(robotSide).correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
+         FootControlModule footControlModule = footControlModules.get(robotSide);
+         footControlModule.updateLegSingularityModule();
+         footControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightData);
       }
    }
 

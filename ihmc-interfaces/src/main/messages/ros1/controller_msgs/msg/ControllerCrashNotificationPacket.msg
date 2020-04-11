@@ -18,6 +18,10 @@ uint32 sequence_id
 # Field default value 255
 int8 controller_crash_location
 
-string stacktrace
+string exception_type
+
+string error_message
+
+string[] stacktrace
 
 

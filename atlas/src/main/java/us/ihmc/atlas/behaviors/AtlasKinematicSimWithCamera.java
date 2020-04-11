@@ -7,6 +7,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.scsSensorSimulation.SensorOnlySimulation;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameters;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
@@ -32,6 +33,7 @@ public class AtlasKinematicSimWithCamera
    private static boolean CREATE_YOVARIABLE_SERVER = Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
 
    private IHMCROS2Publisher<VideoPacket> scsCameraPublisher;
+   private final Ros2Node ros2Node;
 
    public AtlasKinematicSimWithCamera(CommonAvatarEnvironmentInterface environment)
    {
@@ -43,21 +45,14 @@ public class AtlasKinematicSimWithCamera
       kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YOVARIABLE_SERVER);
       AtlasKinematicSimulation.create(robotModel, kinematicsSimulationParameters);
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "kinematic_camera");
+      ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "kinematic_camera");
 
-      if (SHOW_ROBOT_VIEWER)
-      {
-         new Thread(() ->
-         {
-            LogTools.info("Creating robot and map viewer");
-            new RobotAndMapViewer(createRobotModel(), ros2Node);
-         }).start();
-      }
+      if (SHOW_ROBOT_VIEWER) ThreadTools.startAThread(this::robotViewer, "RobotViewer");
 
       scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class);
 
       RemoteSyncedHumanoidRobotState remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
-      remoteSyncedHumanoidFrames.pollHumanoidRobotState().getNeckFrame(NeckJointName.DISTAL_NECK_PITCH);
+      remoteSyncedHumanoidFrames.pollHumanoidRobotState().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
 
       /// create scs
       SensorOnlySimulation sensorOnlySimulation = new SensorOnlySimulation();
@@ -84,6 +79,14 @@ public class AtlasKinematicSimWithCamera
                                   new VideoDataServerImageCallback(new SCSVideoDataROS2Bridge(scsCameraPublisher::publish)),
                                   () -> robotConfigurationData.getLatest().getSyncTimestamp(),
                                   framesPerSecond);
+
+      scs.simulate();
+   }
+
+   private void robotViewer()
+   {
+      LogTools.info("Creating robot and map viewer");
+      new RobotAndMapViewer(createRobotModel(), ros2Node);
    }
 
    private AtlasRobotModel createRobotModel()

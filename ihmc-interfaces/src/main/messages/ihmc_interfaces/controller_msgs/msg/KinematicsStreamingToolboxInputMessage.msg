@@ -3,6 +3,9 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+# The timestamp (in nanoseconds) at which this message was generated.
+# This is used on the toolbox side to estimate things such as desired end-effector velocities.
+int64 timestamp 0
 # When false, the toolbox will only publish a status with KinematicsToolboxOutputStatus such that the user can validate
 # that the solver is working properly.
 # When true, the toolbox will stream to the IHMC walking controller the desired robot configuration. The status mentioned is

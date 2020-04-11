@@ -57,19 +57,31 @@ public class AStarPathPlanner<N>
    }
 
    /**
-    * Does single search iteration. A search iteration consists of expanding a single node and adding the resulting edges to the graph.
+    * Performs iteration according to {@link #doPlanningIteration}.
+    * The node expanded is the one with the {@code costFromStart + heuristicCostToGoal}
+    *
     * @return the node that was expanded and all child nodes that were added to the graph
     */
    public AStarIterationData<N> doPlanningIteration()
    {
-      iterationData.clear();
-
       if (stack.isEmpty())
          return iterationData;
 
       N nodeToExpand = getNextNode();
       if(nodeToExpand == null)
          return iterationData;
+
+      return doPlanningIteration(nodeToExpand);
+   }
+
+   /**
+    * Does single search iteration. A search iteration consists of expanding a single node and adding the resulting edges to the graph.
+    * @param nodeToExpand the node that will be expanded
+    * @return the node that was expanded and all child nodes that were added to the graph
+    */
+   public AStarIterationData<N> doPlanningIteration(N nodeToExpand)
+   {
+      iterationData.clear();
 
       iterationData.setParentNode(nodeToExpand);
       expandedNodeSet.add(nodeToExpand);
@@ -114,5 +126,10 @@ public class AStarPathPlanner<N>
    public PriorityQueue<N> getStack()
    {
       return stack;
+   }
+
+   public AStarIterationData<N> getIterationData()
+   {
+      return iterationData;
    }
 }

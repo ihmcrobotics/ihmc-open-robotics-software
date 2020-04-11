@@ -1,7 +1,13 @@
 package us.ihmc.humanoidBehaviors.tools;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.commons.MathTools;
+
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -20,13 +26,12 @@ import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
 
-import java.util.*;
-
 public class SimulatedDepthCamera
 {
    enum FilterType { SPHERICAL, PLANE_CUTTING }
    private static final FilterType FILTER_TYPE = FilterType.SPHERICAL;
 
+   private double range;
    private final ReferenceFrame cameraFrame;
 
    private final double verticalFOV;
@@ -49,8 +54,14 @@ public class SimulatedDepthCamera
 
    public SimulatedDepthCamera(double verticalFOV, double horizontalFOV, ReferenceFrame cameraFrame)
    {
+      this(verticalFOV, horizontalFOV, Double.POSITIVE_INFINITY, cameraFrame);
+   }
+
+   public SimulatedDepthCamera(double verticalFOV, double horizontalFOV, double range, ReferenceFrame cameraFrame)
+   {
       this.verticalFOV = verticalFOV;
       this.horizontalFOV = horizontalFOV;
+      this.range = range;
       this.cameraFrame = cameraFrame;
 
       planeTop = new Plane3D();
@@ -80,16 +91,25 @@ public class SimulatedDepthCamera
       double sphereRadius = 5.0;
       Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(tempCameraPose.getPosition(), sphereRadius, numberOfPointsToGenerate);
 
-      double rayLength = 5.0;
-      double rayLengthSquared = MathTools.square(rayLength);
+      updateViewPlanes();
+
+      ArrayList<Point3D> pointsInView = new ArrayList<>();
+      for (Point3D point3D : pointsOnSphere)
+      {
+         if (planeTop.isOnOrAbove(point3D) && planeBottom.isOnOrAbove(point3D) && planeLeft.isOnOrAbove(point3D) && planeRight.isOnOrAbove(point3D))
+         {
+            pointsInView.add(point3D);
+         }
+      }
+
       tempCircleOrigin.set(tempCameraPose.getPosition());
       List<PlanarRegion> filteredRegions = map.getPlanarRegionsAsList();
-//      List<PlanarRegion> filteredRegions = PlanarRegionTools.filterPlanarRegionsWithBoundingCircle(tempCircleOrigin, rayLength, map.getPlanarRegionsAsList());
+//      List<PlanarRegion> filteredRegions = PlanarRegionTools.filterPlanarRegionsWithBoundingCircle(tempCircleOrigin, range, map.getPlanarRegionsAsList());
 
-      for (Point3D pointOnSphere : pointsOnSphere)
+      for (Point3D pointInView : pointsInView)
       {
          Vector3D rayDirection = new Vector3D();
-         rayDirection.sub(pointOnSphere, tempCameraPose.getPosition());
+         rayDirection.sub(pointInView, tempCameraPose.getPosition());
          ImmutablePair<Point3D, PlanarRegion> intersectionPair = PlanarRegionTools.intersectRegionsWithRay(filteredRegions,
                                                                                                            tempCameraPose.getPosition(),
                                                                                                            rayDirection);
@@ -105,6 +125,9 @@ public class SimulatedDepthCamera
          Point3D intersection = intersectionPair.getLeft();
          PlanarRegion region = intersectionPair.getRight();
 
+         if (intersection.distance(tempCameraPose.getPosition()) > range)
+            continue;
+
          Point3D pointOnPlane = new Point3D(intersection);
          region.transformFromWorldToLocal(pointOnPlane);
 
@@ -115,6 +138,10 @@ public class SimulatedDepthCamera
       for (PlanarRegion originalRegion : pointsInRegions.keySet())
       {
          List<Point3D> points = pointsInRegions.get(originalRegion);
+
+         if (points.isEmpty())
+            continue;
+
          Point3D center = new Point3D();
          originalRegion.getBoundingBox3dInWorld().getCenterPoint(center);
          PlanarRegionSegmentationRawData rawData = new PlanarRegionSegmentationRawData(originalRegion.getRegionId(),
@@ -133,10 +160,7 @@ public class SimulatedDepthCamera
       // List<PlanarRegion> filteredRegions = PlanarRegionTools
       //            .filterPlanarRegionsWithBoundingCircle(new Point2D(observer), Math.sqrt(rayLengthSquared), regions.getPlanarRegionsAsList());
 
-      updatePlaneToFrameWithParameters(planeTop, -verticalFOV / 2.0, 0.0, 0.0, -1.0);
-      updatePlaneToFrameWithParameters(planeBottom, verticalFOV / 2.0, 0.0, 0.0, 1.0);
-      updatePlaneToFrameWithParameters(planeLeft, 0.0, -horizontalFOV / 2.0, 1.0, 0.0);
-      updatePlaneToFrameWithParameters(planeRight, 0.0, horizontalFOV / 2.0, -1.0, 0.0);
+      updateViewPlanes();
 
       map = PlanarRegionsListCutTool.cutByPlane(planeTop, map);
       map = PlanarRegionsListCutTool.cutByPlane(planeBottom, map);
@@ -184,11 +208,19 @@ public class SimulatedDepthCamera
       return map;
    }
 
+   private void updateViewPlanes()
+   {
+      updatePlaneToFrameWithParameters(planeTop, -verticalFOV / 2.0, 0.0, 0.0, -1.0);
+      updatePlaneToFrameWithParameters(planeBottom, verticalFOV / 2.0, 0.0, 0.0, 1.0);
+      updatePlaneToFrameWithParameters(planeLeft, 0.0, -horizontalFOV / 2.0, 1.0, 0.0);
+      updatePlaneToFrameWithParameters(planeRight, 0.0, horizontalFOV / 2.0, -1.0, 0.0);
+   }
+
    private void updatePlaneToFrameWithParameters(Plane3D plane, double pitch, double yaw, double yFace, double zFace)
    {
       tempFramePoint3D.setToZero(cameraFrame);
       tempFramePoint3D.changeFrame(ReferenceFrame.getWorldFrame());
-      plane.setPoint(tempFramePoint3D);
+      plane.getPoint().set(tempFramePoint3D);
 
       tempFramePose3D.setToZero();
       tempFramePose3D.setReferenceFrame(cameraFrame);
@@ -197,6 +229,6 @@ public class SimulatedDepthCamera
       tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
       tempNormal.set(0.0, yFace, zFace);
       tempFramePose3D.getOrientation().transform(tempNormal);
-      plane.setNormal(tempNormal);
+      plane.getNormal().set(tempNormal);
    }
 }

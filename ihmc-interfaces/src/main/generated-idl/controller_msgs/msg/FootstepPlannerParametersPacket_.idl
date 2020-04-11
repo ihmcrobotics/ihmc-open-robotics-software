@@ -66,6 +66,16 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double ideal_footstep_length;
         /**
+         * Returns the ideal step side step width when "shuffling" sideways.
+         */
+        @defaultValue(value=-11.1)
+        double ideal_side_step_width;
+        /**
+         * Returns the ideal length when walking backwards. This value is negative.
+         */
+        @defaultValue(value=-11.1)
+        double ideal_back_step_length;
+        /**
          * If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
          * regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
          * edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
@@ -325,18 +335,6 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double minimum_distance_from_cliff_bottoms;
         /**
-         * When the planner is done planning and cannot find a path to the goal, this flag indicates whether the
-         * planner should return the best plan that it found. If this value is false, the planner will return
-         * a {@link FootstepPlan} of type {@link FootstepPlanningResult#NO_PATH_EXISTS}. Otherwise it will return
-         * "best" is determined by the planner.
-         */
-        boolean return_best_effort_plan;
-        /**
-         * When {@link #getReturnBestEffortPlan()} is true, the planner will return the best effort plan if the plan
-         * contains at least this many footsteps.
-         */
-        unsigned long minimum_steps_for_best_effort_plan;
-        /**
          * Some node checkers will check if a bounding box that describes the body of the robot will move
          * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
          * collisions, this defines the box height.
@@ -398,19 +396,6 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double final_turn_proximity;
         /**
-         * Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
-         */
-        @defaultValue(value=-11.1)
-        double final_turn_body_path_proximity;
-        /**
-         * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
-         * final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
-         * the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
-         * the desired orientation is the final orientation.
-         */
-        @defaultValue(value=-11.1)
-        double final_turn_proximity_blend_factor;
-        /**
          * When using a cost based planning approach this value defined how the yaw of a footstep will be
          * weighted in comparison to its position.
          */
@@ -469,33 +454,10 @@ module controller_msgs
         @defaultValue(value=-11.1)
         double cost_per_step;
         /**
-         * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
-         */
-        boolean use_quadratic_distance_cost;
-        /**
-         * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
-         */
-        boolean use_quadratic_height_cost;
-        /**
          * Gets the weight for the heuristics in the A Star planner.
          */
         @defaultValue(value=-11.1)
         double a_star_heuristics_weight;
-        /**
-         * Gets the weight for the heuristics in the Visibility graph with A star planner.
-         */
-        @defaultValue(value=-11.1)
-        double vis_graph_with_a_star_heuristics_weight;
-        /**
-         * Gets the weight for the heuristics in the Depth First planner.
-         */
-        @defaultValue(value=-11.1)
-        double depth_first_heuristics_weight;
-        /**
-         * Gets the weight for the heuristics in the Body path based planner.
-         */
-        @defaultValue(value=-11.1)
-        double body_path_based_heuristics_weight;
         /**
          * This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
          * Additional checks are done by interpolating between the start and end steps
@@ -508,15 +470,6 @@ module controller_msgs
          */
         @defaultValue(value=-11.1)
         double maximum_2d_distance_from_bounding_box_to_penalize;
-        /**
-         * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
-         * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
-         * {@code c * (1 - d / d_max)}, where d_max is this value.
-         */
-        @defaultValue(value=-11.1)
-        double bounding_box_cost;
-        @defaultValue(value=-11.1)
-        double body_path_violation_weight;
         @defaultValue(value=-11.1)
         double distance_from_path_tolerance;
         @defaultValue(value=-11.1)

@@ -1,29 +1,23 @@
 package us.ihmc.humanoidBehaviors.ui;
 
 import javafx.application.Platform;
+import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.Tab;
+import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
-import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.BehaviorRegistry;
+import us.ihmc.humanoidBehaviors.*;
 import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
-import us.ihmc.humanoidBehaviors.ui.behaviors.ExploreAreaBehaviorUIController;
-import us.ihmc.humanoidBehaviors.ui.behaviors.FancyPosesBehaviorUIController;
-import us.ihmc.humanoidBehaviors.ui.behaviors.PatrolBehaviorUIController;
-import us.ihmc.humanoidBehaviors.ui.behaviors.PlannerParametersUIController;
-import us.ihmc.humanoidBehaviors.ui.behaviors.StepInPlaceBehaviorUIController;
+import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.javafx.graphics.LabelGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.JavaFXRemoteRobotVisualizer;
 import us.ihmc.humanoidBehaviors.ui.tools.LocalParameterServer;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
@@ -32,28 +26,40 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.Ros2Node;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  * This class constructs a UI for behavior operation.
  */
 public class BehaviorUI
 {
-   private static boolean showLivePlanarRegionsGraphic = true;
-
    private BorderPane mainPane;
+   private final Messager behaviorMessager;
+   private final Map<String, BehaviorUIInterface> behaviorUIInterfaces = new HashMap<>();
 
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
    @FXML private ChoiceBox<String> behaviorSelector;
-
-   @FXML private PatrolBehaviorUIController patrolBehaviorUIController;
-   @FXML private StepInPlaceBehaviorUIController stepInPlaceBehaviorUIController;
-   @FXML private FancyPosesBehaviorUIController fancyPosesBehaviorUIController;
-   @FXML private ExploreAreaBehaviorUIController exploreAreaBehaviorUIController;
-   @FXML private PlannerParametersUIController plannerParametersUIController;
    @FXML private DirectRobotUIController directRobotUIController;
 
-   public BehaviorUI(Messager behaviorMessager, DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
+   public static BehaviorUI createInterprocess(BehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, String behaviorModuleAddress)
    {
+      return new BehaviorUI(behaviorUIRegistry,
+                            RemoteBehaviorInterface.createForUI(behaviorUIRegistry, behaviorModuleAddress),
+                            robotModel,
+                            PubSubImplementation.FAST_RTPS);
+   }
+
+   public static BehaviorUI createIntraprocess(BehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, Messager behaviorSharedMemoryMessager)
+   {
+      return new BehaviorUI(behaviorUIRegistry, behaviorSharedMemoryMessager, robotModel, PubSubImplementation.INTRAPROCESS);
+   }
+
+   private BehaviorUI(BehaviorUIRegistry behaviorUIRegistry, Messager behaviorMessager, DRCRobotModel robotModel, PubSubImplementation pubSubImplementation)
+   {
+      this.behaviorMessager = behaviorMessager;
+
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "behavior_ui");
 
       if (LabelGraphic.TUNING_MODE)
@@ -66,11 +72,18 @@ public class BehaviorUI
       JavaFXApplicationCreator.createAJavaFXApplication();
       Platform.runLater(() ->
       {
-         FXMLLoader loader = new FXMLLoader();
-         loader.setController(this);
-         loader.setLocation(getClass().getResource(getClass().getSimpleName() + ".fxml"));
+         mainPane = JavaFXMissingTools.loadFromFXML(this);
 
-         ExceptionTools.handle(() -> mainPane = loader.load(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+         BorderPane bottom = (BorderPane) mainPane.getBottom();
+         TabPane tabPane = (TabPane) bottom.getCenter();
+
+         for (BehaviorUIDefinition uiDefinitionEntry : behaviorUIRegistry.getUIDefinitionEntries())
+         {
+            BehaviorUIInterface behaviorUIInterface = uiDefinitionEntry.getBehaviorUISupplier().get();
+            behaviorUIInterfaces.put(uiDefinitionEntry.getName(), behaviorUIInterface);
+            Tab tab = new Tab(uiDefinitionEntry.getName(), JavaFXMissingTools.loadFromFXML(behaviorUIInterface));
+            tabPane.getTabs().add(tab);
+         }
 
          View3DFactory view3dFactory = View3DFactory.createSubscene();
          view3dFactory.addCameraController(0.05, 2000.0,true);
@@ -79,41 +92,53 @@ public class BehaviorUI
          SubScene subScene = view3dFactory.getSubScene();
          Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
 
-         behaviorSelector.getItems().add("NONE");
-         for (BehaviorRegistry behavior : BehaviorRegistry.values)
+         behaviorSelector.getItems().add("None");
+         behaviorSelector.setValue("None");
+
+         for (BehaviorDefinition behaviorDefinition : behaviorUIRegistry.getDefinitionEntries())
          {
-            behaviorSelector.getItems().add(behavior.name());
-         }
-         behaviorSelector.valueProperty().addListener(
-               (observable, oldValue, newValue) -> behaviorMessager.submitMessage(BehaviorModule.API.BehaviorSelection, newValue));
-
-         stepInPlaceBehaviorUIController.init(behaviorMessager);
-         fancyPosesBehaviorUIController.init(behaviorMessager);
-         exploreAreaBehaviorUIController.init(subScene, behaviorMessager, robotModel);
-         patrolBehaviorUIController.init(subScene, behaviorMessager, robotModel);
-         plannerParametersUIController.init(behaviorMessager, robotModel);
-         directRobotUIController.init(ros2Node, robotModel);
-
-         view3dFactory.addNodeToView(patrolBehaviorUIController);
-         view3dFactory.addNodeToView(exploreAreaBehaviorUIController);
-
-         if (showLivePlanarRegionsGraphic)
-         {
-            view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, false));
+            behaviorSelector.getItems().add(behaviorDefinition.getName());
          }
 
+         for (BehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces.values())
+         {
+            behaviorUIInterface.init(subScene, behaviorMessager, robotModel);
+            view3dFactory.addNodeToView(behaviorUIInterface);
+         }
+
+         behaviorSelector.valueProperty().addListener(this::onBehaviorSelection);
+
+         directRobotUIController.init(subScene, ros2Node, robotModel);
+         view3dFactory.addNodeToView(directRobotUIController);
          view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
          mainPane.setCenter(subSceneWrappedInsidePane);
          Stage primaryStage = new Stage();
          primaryStage.setTitle(getClass().getSimpleName());
          primaryStage.setMaximized(false);
-         Scene mainScene = new Scene(mainPane, 1554, 1000);
+         Scene mainScene = new Scene(mainPane, 1750, 1000);
 
          primaryStage.setScene(mainScene);
          primaryStage.show();
          primaryStage.toFront();
       });
+   }
+
+   private void onBehaviorSelection(ObservableValue<? extends String> observable, String oldValue, String newValue)
+   {
+      behaviorMessager.submitMessage(BehaviorModule.API.BehaviorSelection, newValue);
+
+      for (String behaviorName : behaviorUIInterfaces.keySet())
+      {
+         if (newValue.equals(behaviorName))
+         {
+            behaviorUIInterfaces.get(behaviorName).setEnabled(true);
+         }
+         else
+         {
+            behaviorUIInterfaces.get(behaviorName).setEnabled(false);
+         }
+      }
    }
 
    public static void claimEditing(Object claimingEditor)

@@ -7,6 +7,7 @@ import java.util.Map;
 import us.ihmc.commonWalkingControlModules.controlModules.ControllerCommandValidationTools;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
@@ -37,6 +38,11 @@ public class RigidBodyJointControlHelper
    private final List<YoInteger> numberOfPointsInQueue = new ArrayList<>();
    private final List<YoInteger> numberOfPointsInGenerator = new ArrayList<>();
    private final List<YoInteger> numberOfPoints = new ArrayList<>();
+   /**
+    * Used when streaming to account for time variations occurring during the transport of the message
+    * over the network.
+    */
+   private final YoDouble streamTimestampOffset;
 
    private final YoBoolean usingWeightFromMessage;
    private final List<DoubleProvider> defaultWeights = new ArrayList<>();
@@ -53,12 +59,15 @@ public class RigidBodyJointControlHelper
    private final OneDoFJointBasics[] joints;
    private final int numberOfJoints;
 
-   public RigidBodyJointControlHelper(String bodyName, OneDoFJointBasics[] jointsToControl, YoVariableRegistry parentRegistry)
+   private final DoubleProvider time;
+
+   public RigidBodyJointControlHelper(String bodyName, OneDoFJointBasics[] jointsToControl, DoubleProvider time, YoVariableRegistry parentRegistry)
    {
       warningPrefix = shortName + " for " + bodyName + ": ";
       registry = new YoVariableRegistry(bodyName + shortName);
       trajectoryDone = new YoBoolean(shortName + "Done", registry);
 
+      this.time = time;
       this.joints = jointsToControl;
       numberOfJoints = joints.length;
 
@@ -88,6 +97,9 @@ public class RigidBodyJointControlHelper
          messageWeights.add(new YoDouble(prefix + "_" + jointName + "_messageWeight", registry));
          currentWeights.add(new YoDouble(prefix + "_" + jointName + "_currentWeight", registry));
       }
+
+      streamTimestampOffset = new YoDouble(prefix + "StreamTimestampOffset", registry);
+      streamTimestampOffset.setToNaN();
 
       parentRegistry.addChild(registry);
    }
@@ -190,6 +202,9 @@ public class RigidBodyJointControlHelper
             allDone = false;
          }
 
+         if (allDone)
+            streamTimestampOffset.setToNaN();
+
          generator.compute(timeInTrajectory);
          double desiredPosition = generator.getValue();
          double desiredVelocity = generator.getVelocity();
@@ -265,6 +280,9 @@ public class RigidBodyJointControlHelper
          return false;
       }
 
+      // The timestamp is being cleared in the overrideTrajectory method, need to save it to use it further down.
+      double previousStreamTimestampOffset = streamTimestampOffset.getValue();
+
       // Both OVERRIDE and STREAM should override the current trajectory stored.
       boolean override = command.getExecutionMode() != ExecutionMode.QUEUE;
 
@@ -302,6 +320,37 @@ public class RigidBodyJointControlHelper
          usingWeightFromMessage.set(messageHasValidWeights);
       }
 
+      double timeOffset = 0.0;
+
+      if (command.getExecutionMode() == ExecutionMode.STREAM)
+      {
+         if (command.getTimestamp() <= 0)
+         {
+            streamTimestampOffset.setToNaN();
+         }
+         else
+         {
+            double senderTime = Conversions.nanosecondsToSeconds(command.getTimestamp());
+            timeOffset = time.getValue() - senderTime;
+            if (Double.isNaN(previousStreamTimestampOffset))
+            {
+               streamTimestampOffset.set(timeOffset);
+            }
+            else
+            {
+               /*
+                * Update to the smallest time offset, which is closer to the true offset between the sender CPU and
+                * control CPU. If the change in offset is too large though, we always set the streamTimestampOffset
+                * for safety.
+                */
+               if (Math.abs(timeOffset - previousStreamTimestampOffset) > 0.5)
+                  streamTimestampOffset.set(timeOffset);
+               else
+                  streamTimestampOffset.set(Math.min(timeOffset, previousStreamTimestampOffset));
+            }
+         }
+      }
+
       for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
       {
          OneDoFJointTrajectoryCommand trajectoryPoints = command.getJointTrajectoryPointList(jointIdx);
@@ -322,14 +371,20 @@ public class RigidBodyJointControlHelper
                return false;
             }
 
-            if (!queuePoint(trajectoryPoint, jointIdx))
+            // When a message is delayed during shipping over network, timeOffset > streamTimestampOffset.getValue().
+            // This new time will put the trajectory point in the past, closer to when it should have been received.
+            double t0 = streamTimestampOffset.isNaN() ? 0.0 : streamTimestampOffset.getValue() - timeOffset;
+            double q0 = trajectoryPoint.getPosition();
+            double qd0 = trajectoryPoint.getVelocity();
+
+            if (!queuePoint(q0, qd0, t0, jointIdx))
                return false;
 
-            double t = command.getStreamIntegrationDuration();
-            double qd = trajectoryPoint.getVelocity();
-            double q = trajectoryPoint.getPosition() + t * qd;
+            double t1 = command.getStreamIntegrationDuration() + t0;
+            double qd1 = trajectoryPoint.getVelocity();
+            double q1 = trajectoryPoint.getPosition() + command.getStreamIntegrationDuration() * qd1;
 
-            if (!queuePoint(q, qd, t, jointIdx))
+            if (!queuePoint(q1, qd1, t1, jointIdx))
                return false;
          }
          else
@@ -454,6 +509,7 @@ public class RigidBodyJointControlHelper
       {
          overrideTrajectory(jointIdx);
       }
+      streamTimestampOffset.setToNaN();
    }
 
    private void overrideTrajectory(int jointIdx)

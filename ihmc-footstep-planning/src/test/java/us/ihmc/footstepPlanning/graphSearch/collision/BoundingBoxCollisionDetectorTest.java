@@ -2,7 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.collision;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -229,7 +229,7 @@ public class BoundingBoxCollisionDetectorTest
       double cubeY = -0.5;
       double cubeZ = 0.25;
       generator.translate(cubeX, cubeY, cubeZ);
-      generator.rotate(0.25 * Math.PI, Axis.Z);
+      generator.rotate(0.25 * Math.PI, Axis3D.Z);
 
       double epsilon = 1e-7;
       double distanceOutsideRegion = 0.001;
@@ -271,7 +271,7 @@ public class BoundingBoxCollisionDetectorTest
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       transformToWorld.setTranslationAndIdentityRotation(x, y, z);
-      transformToWorld.setRotationYaw(yaw);
+      transformToWorld.getRotation().setToYawOrientation(yaw);
       return new PlanarRegionsList(new PlanarRegion(transformToWorld, Arrays.asList(unitSquare)));
    }
 }

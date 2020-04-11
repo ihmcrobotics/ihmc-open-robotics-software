@@ -7,7 +7,7 @@ import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
-import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsTrajectoryExpansionStatus;
+import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander.SwingOverPlanarRegionsStatus;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -55,7 +55,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
       partialFootholdPolygon = new ConvexPolygon2D();
    }
 
-   public SwingOverPlanarRegionsTrajectoryExpansionStatus getStatus()
+   public SwingOverPlanarRegionsStatus getStatus()
    {
       return swingOverPlanarRegionsTrajectoryExpander.getStatus();
    }

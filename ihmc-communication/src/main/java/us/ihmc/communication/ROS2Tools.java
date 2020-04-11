@@ -31,6 +31,7 @@ public class ROS2Tools
    public static final ROS2ModuleIdentifier STEREO_REA = new ROS2ModuleIdentifier("SREA_module", "/srea");
    public static final ROS2ModuleIdentifier LLAMA = new ROS2ModuleIdentifier("llama_network", "/quadruped_control");
    public static final ROS2ModuleIdentifier FOOTSTEP_PLANNER = new ROS2ModuleIdentifier("ihmc_multi_stage_footstep_planning_module", "/toolbox/footstep_plan");
+   public static final ROS2ModuleIdentifier BEHAVIOR_MODULE = new ROS2ModuleIdentifier("behavior_module", "/behavior");
 
    public static final String IHMC_ROS_TOPIC_PREFIX = "/ihmc";
    public static final String OUTPUT_ROS_TOPIC_PREFIX = "/output";
@@ -54,11 +55,13 @@ public class ROS2Tools
    public static final String QUADRUPED_SUPPORT_REGION_PUBLISHER = "/quadruped_support_region_publisher";
 
    public static final String BIPED_SUPPORT_REGION_PUBLISHER = "/bipedal_support_region_publisher";
-   public static final String BEHAVIOR_MODULE = "/behavior";
+   public static final String BEHAVIOR_MODULE_QUALIFIER = BEHAVIOR_MODULE.getModuleTopicQualifier();
    public static final String REA_MODULE = REA.getModuleTopicQualifier();
    public static final String REA_CUSTOM_REGION_QUALIFIER = "/custom_region";
 
    public static final String STEREO_REA_MODULE = STEREO_REA.getModuleTopicQualifier();
+   public static final String REALSENSE_SLAM_MAP_TOPIC_NAME = IHMC_ROS_TOPIC_PREFIX + "/planar_regions_list_slam";
+   public static final String REA_SUPPORT_REGIONS_TOPIC_NAME = IHMC_ROS_TOPIC_PREFIX + "/rea/custom_region/input/planar_regions_list";
 
    public enum ROS2TopicQualifier
    {

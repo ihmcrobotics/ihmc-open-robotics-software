@@ -26,13 +26,14 @@ public class PlanarRegionsMappingModule
    private Notification slamUpdated = new Notification();
 
    private long i = 0; // to slow down trying to SLAM for now
+   private long sequenceId = 0; // to detect slam updated
    private static final int SLAM_EVERY = 1;
 
    public PlanarRegionsMappingModule(DomainFactory.PubSubImplementation pubSubImplementation)
    {
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.MAPPING_MODULE.getNodeName());
 
-      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.MAPPING_MODULE);
+      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME);
 
       new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA, this::process);
    }
@@ -64,6 +65,11 @@ public class PlanarRegionsMappingModule
       }
 
       PlanarRegionsListMessage message = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(slamMap);
+      if (slamUpdatedTemp)
+      {
+         sequenceId++;
+      }
+      message.setSequenceId(sequenceId);
       planarRegionPublisher.publish(message);
 
       if (slamUpdatedTemp)

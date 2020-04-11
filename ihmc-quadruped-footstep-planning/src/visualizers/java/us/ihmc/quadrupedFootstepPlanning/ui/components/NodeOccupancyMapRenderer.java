@@ -96,7 +96,7 @@ public class NodeOccupancyMapRenderer extends AnimationTimer
          double y = node.getYIndex(movingQuadrant) * PawNode.gridSizeXY;
          double z = getHeightAtPoint(x, y) + nodeOffsetZ;
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setTranslation(x, y, z);
+         transform.getTranslation().set(x, y, z);
 
          meshBuilder.addPolygon(transform, cellPolygon, color);
       }

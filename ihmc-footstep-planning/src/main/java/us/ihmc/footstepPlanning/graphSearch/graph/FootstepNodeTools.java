@@ -19,7 +19,7 @@ public class FootstepNodeTools
    public static RigidBodyTransform shiftInSoleFrame(Vector2D shiftVector, RigidBodyTransform soleTransform)
    {
       RigidBodyTransform shiftTransform = new RigidBodyTransform();
-      shiftTransform.setTranslation(new Vector3D(shiftVector.getX(), shiftVector.getY(), 0.0));
+      shiftTransform.getTranslation().set(new Vector3D(shiftVector.getX(), shiftVector.getY(), 0.0));
       soleTransform.multiply(shiftTransform);
       return soleTransform;
    }
@@ -35,7 +35,7 @@ public class FootstepNodeTools
       double soleYaw = node.getYaw();
       Point3D solePosition = new Point3D(node.getX(), node.getY(), 0.0);
       nodeToWorldTransformToPack.setRotationYawAndZeroTranslation(soleYaw);
-      nodeToWorldTransformToPack.setTranslation(solePosition);
+      nodeToWorldTransformToPack.getTranslation().set(solePosition);
    }
 
    /**
@@ -95,6 +95,11 @@ public class FootstepNodeTools
       FootstepNodeTools.getNodeTransform(node, nodeTransform);
 
       footPolygonToPack.applyTransform(nodeTransform);
+   }
+
+   public static double getSnappedNodeHeight(FootstepNode footstepNode, RigidBodyTransform snapTransform)
+   {
+      return snapTransform.getRotation().getM20() * footstepNode.getX() + snapTransform.getRotation().getM21() * footstepNode.getY() + snapTransform.getTranslationZ();
    }
 
    public static LatticeNode interpolate(LatticeNode nodeA, LatticeNode nodeB, double alpha)

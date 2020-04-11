@@ -442,7 +442,7 @@
             <registry name="WalkingControllerState">
                <registry name="WalkingHighLevelHumanoidController">
                   <registry name="ControllerCoreOptimizationSettings">
-                     <parameter name="RhoMin" type="DoubleParameter" min="0.0" max="1.0" value="1.0" />
+                     <parameter name="RhoMin" type="DoubleParameter" min="0.0" max="1.0" value="2.0" />
                   </registry>
                   <registry name="ToWalkingLeftSupport">
                      <parameter name="minimizeAngularMomentumRateZDuringTransfer" type="BooleanParameter" value="false" />

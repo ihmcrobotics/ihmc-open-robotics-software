@@ -132,7 +132,7 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 
       FramePose3D footstepPose = new FramePose3D();
       footstepPose.setToZero(frame);
-      footstepPose.setPosition(xOffset, yOffset, 0.0);
+      footstepPose.getPosition().set(xOffset, yOffset, 0.0);
       footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       footstepDataMessage.getLocation().set(footstepPose.getPosition());

@@ -9,6 +9,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
@@ -28,7 +29,7 @@ public class RobotArm extends Robot
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final RigidBodyTransform elevatorFrameTransformToWorld = new RigidBodyTransform(new AxisAngle(), RobotArmJointParameters.getRootJoint().getJointOffset());
-   private final ReferenceFrame elevatorFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("elevatorFrame", worldFrame, elevatorFrameTransformToWorld);
+   private final ReferenceFrame elevatorFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("elevatorFrame", worldFrame, elevatorFrameTransformToWorld);
    private final RigidBodyBasics elevator = new RigidBody("elevator", elevatorFrame);
 
    private final RigidBodyTransform transformFromControlFrameToEndEffectorBodyFixedFrame = new RigidBodyTransform(new AxisAngle(0.0, 1.0, 0.0, Math.PI / 2.0), new Vector3D(0.0, 0.0, -0.08));
@@ -90,7 +91,7 @@ public class RobotArm extends Robot
       }
 
       RigidBodyBasics endEffector = robotArmRigidBodies.get(RobotArmLinkParameters.getEndEffector());
-      controlFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("controlFrame", endEffector.getBodyFixedFrame(), transformFromControlFrameToEndEffectorBodyFixedFrame);
+      controlFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("controlFrame", endEffector.getBodyFixedFrame(), transformFromControlFrameToEndEffectorBodyFixedFrame);
       jacobian = new GeometricJacobian(elevator, endEffector, robotArmRigidBodies.get(RobotArmLinkParameters.HAND).getBodyFixedFrame());
    }
 

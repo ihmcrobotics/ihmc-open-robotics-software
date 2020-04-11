@@ -1,0 +1,42 @@
+#ifndef __controller_msgs__msg__FootstepPlanningTimingsMessage__idl__
+#define __controller_msgs__msg__FootstepPlanningTimingsMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the IHMC footstep planning module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::FootstepPlanningTimingsMessage_")
+      struct FootstepPlanningTimingsMessage
+      {
+        /**
+         * Total time measured in the planner process between receiving request message and publishing output message
+         */
+        double total_elapsed_seconds;
+        /**
+         * Elapsed time between receiving request message and starting to plan body path
+         */
+        double time_before_planning_seconds;
+        /**
+         * Elapsed time for planning body path
+         */
+        double time_planning_body_path_seconds;
+        /**
+         * Elapsed time for step planning
+         */
+        double time_planning_steps_seconds;
+        /**
+         * Number of iterations performed during step planning
+         */
+        long long step_planning_iterations;
+      };
+    };
+  };
+};
+
+#endif

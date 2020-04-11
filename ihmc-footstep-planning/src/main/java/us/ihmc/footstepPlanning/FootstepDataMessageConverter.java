@@ -2,10 +2,14 @@ package us.ihmc.footstepPlanning;
 
 import java.util.ArrayList;
 
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -98,8 +102,8 @@ public class FootstepDataMessageConverter
       for (FootstepDataMessage footstepMessage : footstepDataListMessage.getFootstepDataList())
       {
          FramePose3D stepPose = new FramePose3D();
-         stepPose.setPosition(footstepMessage.getLocation());
-         stepPose.setOrientation(footstepMessage.getOrientation());
+         stepPose.getPosition().set(footstepMessage.getLocation());
+         stepPose.getOrientation().set(footstepMessage.getOrientation());
          SimpleFootstep simpleFootstep = footstepPlan.addFootstep(RobotSide.fromByte(footstepMessage.getRobotSide()), stepPose);
 
          IDLSequence.Object<Point3D> predictedContactPoints = footstepMessage.getPredictedContactPoints2d();
@@ -116,5 +120,22 @@ public class FootstepDataMessageConverter
       }
 
       return footstepPlan;
+   }
+
+   public static ArrayList<Pair<RobotSide, Pose3D>> reduceFootstepPlanForUIMessager(FootstepDataListMessage footstepDataListMessage)
+   {
+      return reduceFootstepPlanForUIMessager(convertToFootstepPlan(footstepDataListMessage));
+   }
+
+   public static ArrayList<Pair<RobotSide, Pose3D>> reduceFootstepPlanForUIMessager(FootstepPlan footstepPlan)
+   {
+      ArrayList<Pair<RobotSide, Pose3D>> footstepLocations = new ArrayList<>();
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
+      {
+         FramePose3D soleFramePoseToPack = new FramePose3D();
+         footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
+         footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
+      }
+      return footstepLocations;
    }
 }

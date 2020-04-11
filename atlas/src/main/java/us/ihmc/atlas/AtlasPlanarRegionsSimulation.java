@@ -9,13 +9,11 @@ import us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvi
 
 public class AtlasPlanarRegionsSimulation
 {
-   private static final DataSetName DATA_SET_TO_USE = DataSetName._20190219_182005_SteppingStones;
+   private static final DataSetName DATA_SET_TO_USE = DataSetName._20200226_120200_FlatGround_StartMidRegion;
 
    public static void main(String[] args)
    {
       DRCRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS);
-      double height = 0.3;
-      BlockEnvironment blockEnvironment = new BlockEnvironment(1.0, 1.0, height);
-      AvatarPlanarRegionsSimulation.startSimulation(robotModel, blockEnvironment.getPlanarRegionsList(), new Vector3D(0.0, 0.0, height), 0.0);
+      new AvatarPlanarRegionsSimulation(robotModel, DATA_SET_TO_USE);
    }
 }

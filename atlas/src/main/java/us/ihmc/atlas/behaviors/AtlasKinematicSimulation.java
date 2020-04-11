@@ -14,7 +14,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 
 public class AtlasKinematicSimulation
 {
-   public static void create(AtlasRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
+   public static HumanoidKinematicsSimulation create(AtlasRobotModel robotModel, HumanoidKinematicsSimulationParameters kinematicsSimulationParameters)
    {
       AtlasWalkingControllerParameters walkingControllerParameters = (AtlasWalkingControllerParameters) robotModel.getWalkingControllerParameters();
       walkingControllerParameters.setDoPrepareManipulationForLocomotion(false);
@@ -23,7 +23,7 @@ public class AtlasKinematicSimulation
             new AtlasKinematicSwingTrajectoryParameters(robotModel.getTarget(), robotModel.getJointMap().getModelScale()));
       walkingControllerParameters.setJointPrivilegedConfigurationParameters(
             new AtlasKinematicJointPrivilegedConfigurationParameters(robotModel.getTarget() == RobotTarget.REAL_ROBOT));
-      HumanoidKinematicsSimulation.create(robotModel, kinematicsSimulationParameters);
+      return HumanoidKinematicsSimulation.create(robotModel, kinematicsSimulationParameters);
    }
 
    static class AtlasKinematicSteppingParameters extends AtlasSteppingParameters

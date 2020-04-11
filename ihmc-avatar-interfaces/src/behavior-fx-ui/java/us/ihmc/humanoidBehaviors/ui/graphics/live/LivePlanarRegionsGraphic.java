@@ -9,8 +9,8 @@ import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.ROS2ModuleIdentifier;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
-import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 
@@ -35,19 +35,50 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
 
    public LivePlanarRegionsGraphic(Ros2Node ros2Node, ROS2ModuleIdentifier regionsSource, boolean initializeToFlatGround)
    {
+      this(ros2Node,
+           ROS2Tools.generateDefaultTopicName(PlanarRegionsListMessage.class,
+                                              null,
+                                              regionsSource.getModuleTopicQualifier(),
+                                              regionsSource.deriveIOTopicQualifierForSubscriber(ros2Node.getName())),
+           initializeToFlatGround);
+   }
+
+   public LivePlanarRegionsGraphic(Ros2Node ros2Node, String regionsSourceTopicName, boolean initializeToFlatGround)
+   {
       super(initializeToFlatGround);
 
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, null, regionsSource, this::acceptPlanarRegions);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, regionsSourceTopicName, this::acceptPlanarRegions);
       animationTimer.start();
    }
 
-   private synchronized void acceptPlanarRegions(PlanarRegionsListMessage incomingData)
+   public LivePlanarRegionsGraphic(boolean initializeToFlatGround)
+   {
+      super(initializeToFlatGround);
+      animationTimer.start();
+   }
+
+   public synchronized void acceptPlanarRegions(PlanarRegionsListMessage incomingData)
    {
       if (acceptNewRegions)
       {
          synchronized (this) // just here for clear method
          {
             executorService.submit(() -> convertAndGenerateMesh(incomingData));
+         }
+      }
+   }
+
+   public synchronized void acceptPlanarRegions(PlanarRegionsList incomingData)
+   {
+      if (acceptNewRegions)
+      {
+         synchronized (this) // just here for clear method
+         {
+            executorService.submit(() ->
+            {
+               this.latestPlanarRegionsList = incomingData;
+               generateMeshes(incomingData);
+            });
          }
       }
    }
@@ -62,6 +93,11 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
    private void handle(long now)
    {
       super.update();
+   }
+
+   public void setEnabled(boolean enabled)
+   {
+      acceptNewRegions = enabled;
    }
 
    public synchronized void clear()

@@ -8,11 +8,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameLine2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -21,11 +17,7 @@ import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoInteger;
+import us.ihmc.yoVariables.variable.*;
 
 public class PartialFootholdControlModule
 {
@@ -182,7 +174,7 @@ public class PartialFootholdControlModule
       lineOfRotations.put(RotationCalculatorType.VELOCITY, new FrameLine2D(soleFrame));
       lineOfRotations.put(RotationCalculatorType.GEOMETRY, new FrameLine2D(soleFrame));
 
-      rotationVerificator = new RotationVerificator(namePrefix, contactableFoot, explorationParameters, registry);
+      rotationVerificator = new RotationVerificator(namePrefix, contactableFoot.getSoleFrame(), explorationParameters, registry);
 
       unsafeArea = new YoDouble(namePrefix + "UnsafeArea", registry);
       unsafeAreaAboveThreshold = new YoBoolean(namePrefix + "UnsafeAreaAboveThreshold", registry);
@@ -364,7 +356,7 @@ public class PartialFootholdControlModule
       {
          tempPosition.setIncludingFrame(controllerFootPolygon.getVertex(i), 0.0);
          YoContactPoint contactPoint = contactPoints.get(i);
-         contactPoint.setPosition(tempPosition);
+         contactPoint.setMatchingFrame(tempPosition);
          contactPoint.setInContact(true);
       }
 

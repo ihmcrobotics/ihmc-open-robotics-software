@@ -260,7 +260,7 @@ public class LinearMomentumRateControlModule
       this.transferDurations.reset();
       for (int i = 0; i < input.getTransferDurations().size(); i++)
       {
-         this.transferDurations.add(input.getTransferDurations().size());
+         this.transferDurations.add(input.getTransferDurations().get(i));
       }
       this.finalTransferDuration = input.getFinalTransferDuration();
       this.initializeForStanding = input.getInitializeForStanding();

@@ -457,8 +457,8 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
             fullRobotModelCorruptor.corruptFullRobotModel();
 
             RigidBodyTransform transform = new RigidBodyTransform();
-            transform.setTranslation(new Vector3D(q_x.getDoubleValue(), q_y.getDoubleValue(), q_z.getDoubleValue()));
-            transform.setRotation(new Quaternion(q_qx.getDoubleValue(), q_qy.getDoubleValue(), q_qz.getDoubleValue(), q_qs.getDoubleValue()));
+            transform.getTranslation().set(new Vector3D(q_x.getDoubleValue(), q_y.getDoubleValue(), q_z.getDoubleValue()));
+            transform.getRotation().set(new Quaternion(q_qx.getDoubleValue(), q_qy.getDoubleValue(), q_qz.getDoubleValue(), q_qs.getDoubleValue()));
 
             fullRobotModel.getRootJoint().setJointConfiguration(transform);
             fullRobotModel.updateFrames();

@@ -116,7 +116,7 @@ public class AvatarEstimatorThread extends ModularRobotController
       {
          if (controllerCrashPublisher != null)
          {
-            controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_RUN, e.getMessage()));
+            controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_RUN, e));
          }
          throw new RuntimeException(e);
       }

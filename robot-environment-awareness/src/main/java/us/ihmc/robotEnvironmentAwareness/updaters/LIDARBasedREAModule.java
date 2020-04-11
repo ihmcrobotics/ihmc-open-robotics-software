@@ -13,7 +13,13 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import controller_msgs.msg.dds.*;
+import controller_msgs.msg.dds.LidarScanMessage;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
+import controller_msgs.msg.dds.REAStateRequestMessage;
+import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
+import controller_msgs.msg.dds.StampedPosePacket;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
@@ -151,7 +157,7 @@ public class LIDARBasedREAModule
       moduleStateReporter.registerDepthCloudMessage(message);
       depthCloudBufferUpdater.handleStereoVisionPointCloudMessage(message);
    }
-   
+
    private void dispatchStampedPosePacket(Subscriber<StampedPosePacket> subscriber)
    {
       StampedPosePacket message = subscriber.takeNextData();

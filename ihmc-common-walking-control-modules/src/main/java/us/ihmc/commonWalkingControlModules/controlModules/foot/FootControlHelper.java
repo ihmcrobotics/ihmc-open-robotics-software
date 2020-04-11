@@ -4,6 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ToeOffParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootholdRotationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -33,18 +34,25 @@ public class FootControlHelper
    private final BipedSupportPolygons bipedSupportPolygons;
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
+   private final WorkspaceLimiterControlModule workspaceLimiterControlModule;
 
    private final ToeSlippingDetector toeSlippingDetector;
 
    private final ExplorationParameters explorationParameters;
+   private final FootholdRotationParameters footholdRotationParameters;
 
-   public FootControlHelper(RobotSide robotSide, WalkingControllerParameters walkingControllerParameters, HighLevelHumanoidControllerToolbox controllerToolbox,
-                            ExplorationParameters explorationParameters, YoVariableRegistry registry)
+   public FootControlHelper(RobotSide robotSide,
+                            WalkingControllerParameters walkingControllerParameters,
+                            HighLevelHumanoidControllerToolbox controllerToolbox,
+                            ExplorationParameters explorationParameters,
+                            FootholdRotationParameters footholdRotationParameters,
+                            YoVariableRegistry registry)
    {
       this.robotSide = robotSide;
       this.controllerToolbox = controllerToolbox;
       this.walkingControllerParameters = walkingControllerParameters;
       this.explorationParameters = explorationParameters;
+      this.footholdRotationParameters = footholdRotationParameters;
 
       contactableFoot = controllerToolbox.getContactableFeet().get(robotSide);
       RigidBodyBasics foot = contactableFoot.getRigidBody();
@@ -61,6 +69,7 @@ public class FootControlHelper
          partialFootholdControlModule = null;
       }
 
+
       isDesiredCoPOnEdge = new YoBoolean(namePrefix + "IsDesiredCoPOnEdge", registry);
 
       fullyConstrainedNormalContactVector = new FrameVector3D(contactableFoot.getSoleFrame(), 0.0, 0.0, 1.0);
@@ -69,13 +78,16 @@ public class FootControlHelper
 
       if (walkingControllerParameters.enableLegSingularityAndKneeCollapseAvoidanceModule())
       {
-         legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
-                                                                                                                       walkingControllerParameters,
-                                                                                                                       controllerToolbox, registry);
+//         legSingularityAndKneeCollapseAvoidanceControlModule = new LegSingularityAndKneeCollapseAvoidanceControlModule(namePrefix, contactableFoot, robotSide,
+//                                                                                                                       walkingControllerParameters,
+//                                                                                                                       controllerToolbox, registry);
+         legSingularityAndKneeCollapseAvoidanceControlModule = null;
+         workspaceLimiterControlModule = new WorkspaceLimiterControlModule(namePrefix, contactableFoot, robotSide, walkingControllerParameters, controllerToolbox, registry);
       }
       else
       {
          legSingularityAndKneeCollapseAvoidanceControlModule = null;
+         workspaceLimiterControlModule = null;
       }
 
       if (walkingControllerParameters.enableToeOffSlippingDetection())
@@ -165,6 +177,11 @@ public class FootControlHelper
       return legSingularityAndKneeCollapseAvoidanceControlModule;
    }
 
+   public WorkspaceLimiterControlModule getWorkspaceLimiterControlModule()
+   {
+      return workspaceLimiterControlModule;
+   }
+
    public ToeSlippingDetector getToeSlippingDetector()
    {
       return toeSlippingDetector;
@@ -173,5 +190,10 @@ public class FootControlHelper
    public ExplorationParameters getExplorationParameters()
    {
       return explorationParameters;
+   }
+
+   public FootholdRotationParameters getFootholdRotationParameters()
+   {
+      return footholdRotationParameters;
    }
 }

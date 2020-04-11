@@ -4,7 +4,11 @@ import javafx.beans.value.ChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.Slider;
+import javafx.scene.control.ToggleButton;
+import javafx.scene.control.Tooltip;
 import us.ihmc.javaFXToolkit.StringConverterTools;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -72,7 +76,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
          return new Double(newValue.doubleValue());
       }
    };
-   
+
    private final PropertyToMessageTypeConverter<Double, Number> numberToDoubleConverter = new PropertyToMessageTypeConverter<Double, Number>()
    {
       @Override
@@ -101,10 +105,10 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       coloringTypeComboBox.setItems(coloringTypeOptions);
       coloringTypeComboBox.setValue(ColoringType.REGION);
       lidarBufferSizeSlider.setLabelFormatter(StringConverterTools.thousandRounding(true));
-      
+
       surfaceNormalUpperBoundSlider.setLabelFormatter(StringConverterTools.radiansToRoundedDegrees());
       surfaceNormalLowerBoundSlider.setLabelFormatter(StringConverterTools.radiansToRoundedDegrees());
-      
+
       Tooltip tooltip = new Tooltip();
       tooltip.setText("Press Clear Btn to apply the change of Octree resolution");
       resolutionSlider.setTooltip(tooltip);
@@ -173,7 +177,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       loadUIControlProperty(REAModuleAPI.UIOcTreeShowLidarBuffer, showLidarBufferButton);
       loadUIControlProperty(REAModuleAPI.UILidarScanShow, showInputLidarScanButton);
    }
-   
+
    public void setParametersForStereo()
    {
       BoundingBoxParametersMessage boundindBoxMessage = new BoundingBoxParametersMessage();
@@ -183,7 +187,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       boundindBoxMessage.setMinY(-1.0f);
       boundindBoxMessage.setMaxZ(1.0f);
       boundindBoxMessage.setMinZ(-2.0f);
-      
+
       uiMessager.broadcastMessage(REAModuleAPI.LidarBufferEnable, false);
       uiMessager.broadcastMessage(REAModuleAPI.StereoVisionBufferEnable, true);
       uiMessager.broadcastMessage(REAModuleAPI.DepthCloudBufferEnable, false);
@@ -191,7 +195,7 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundindBoxMessage);
       uiMessager.broadcastMessage(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
    }
-   
+
    public void setParametersForDepth()
    {
       BoundingBoxParametersMessage boundindBoxMessage = new BoundingBoxParametersMessage();
@@ -201,11 +205,11 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       boundindBoxMessage.setMinY(-1.0f);
       boundindBoxMessage.setMaxZ(1.0f);
       boundindBoxMessage.setMinZ(-2.0f);
-      
+
       uiMessager.broadcastMessage(REAModuleAPI.LidarBufferEnable, false);
       uiMessager.broadcastMessage(REAModuleAPI.StereoVisionBufferEnable, false);
       uiMessager.broadcastMessage(REAModuleAPI.DepthCloudBufferEnable, true);
-      uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxEnable, true);
+      uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxEnable, false);
       uiMessager.broadcastMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundindBoxMessage);
       uiMessager.broadcastMessage(REAModuleAPI.UIOcTreeDisplayType, DisplayType.HIDE);
    }

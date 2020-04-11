@@ -108,7 +108,6 @@ public class PlanarRegionTools
       return isPointInsideConcaveHull(polygon, pointToCheck.getX(), pointToCheck.getY(), epsilon);
    }
 
-
    /**
     * Return true if the given point is contained inside the boundary.
     * https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
@@ -233,10 +232,8 @@ public class PlanarRegionTools
       if (startOfRayY < vertex.getY() == startOfRayY < previousVertex.getY())
          return false;
       // checks to see if the line through the point actually intersects with a line segment.
-      return (startOfRayX < (previousVertex.getX() - vertex.getX()) / (previousVertex.getY() - vertex.getY()) * (startOfRayY - vertex.getY())  + vertex.getX());
+      return (startOfRayX < (previousVertex.getX() - vertex.getX()) / (previousVertex.getY() - vertex.getY()) * (startOfRayY - vertex.getY()) + vertex.getX());
    }
-
-
 
    public static boolean isPointInWorldInsidePlanarRegion(PlanarRegion planarRegion, Point3DReadOnly pointInWorldToCheck, double epsilon)
    {
@@ -287,15 +284,21 @@ public class PlanarRegionTools
    }
 
    public static double getDistanceFromLineSegment3DToPlanarRegion(LineSegment3DReadOnly lineSegmentInLocal,
-                                                                   PlanarRegion planarRegion, Point3DBasics closestPointOnSegmentToPack,
+                                                                   PlanarRegion planarRegion,
+                                                                   Point3DBasics closestPointOnSegmentToPack,
                                                                    Point3DBasics closestPointOnRegionToPack)
    {
-      return getDistanceFromLineSegment3DToPlanarRegion(lineSegmentInLocal.getFirstEndpoint(), lineSegmentInLocal.getSecondEndpoint(), planarRegion,
-                                                        closestPointOnSegmentToPack, closestPointOnRegionToPack);
+      return getDistanceFromLineSegment3DToPlanarRegion(lineSegmentInLocal.getFirstEndpoint(),
+                                                        lineSegmentInLocal.getSecondEndpoint(),
+                                                        planarRegion,
+                                                        closestPointOnSegmentToPack,
+                                                        closestPointOnRegionToPack);
    }
 
-   public static double getDistanceFromLineSegment3DToPlanarRegion(Point3DReadOnly firstEndPointInLocal, Point3DReadOnly secondEndPointInLocal,
-                                                                   PlanarRegion planarRegion, Point3DBasics closestPointOnSegmentToPack,
+   public static double getDistanceFromLineSegment3DToPlanarRegion(Point3DReadOnly firstEndPointInLocal,
+                                                                   Point3DReadOnly secondEndPointInLocal,
+                                                                   PlanarRegion planarRegion,
+                                                                   Point3DBasics closestPointOnSegmentToPack,
                                                                    Point3DBasics closestPointOnRegionToPack)
    {
       List<Point3D> vertices = Arrays.stream(planarRegion.getConcaveHull()).map(Point3D::new).collect(Collectors.toList());
@@ -322,8 +325,12 @@ public class PlanarRegionTools
       }
       else if (numberOfVertices == 2)
       {
-         minDistanceToEdge = closestPoint3DsBetweenTwoLineSegment3Ds(firstEndPointInLocal, secondEndPointInLocal, vertices.get(0), vertices.get(1),
-                                                                     closestPointOnSegmentToPack, closestPointOnRegionToPack);
+         minDistanceToEdge = closestPoint3DsBetweenTwoLineSegment3Ds(firstEndPointInLocal,
+                                                                     secondEndPointInLocal,
+                                                                     vertices.get(0),
+                                                                     vertices.get(1),
+                                                                     closestPointOnSegmentToPack,
+                                                                     closestPointOnRegionToPack);
       }
       else
       {
@@ -333,8 +340,11 @@ public class PlanarRegionTools
          for (ConvexPolygon2D convexPolygon : planarRegion.getConvexPolygons())
          {
             List<Point3D> polygonVertices = convexPolygon.getVertexBufferView().stream().map(Point3D::new).collect(Collectors.toList());
-            double distanceToPolygon = getDistanceFromLineSegment3DToConvexPolygon(firstEndPointInLocal, secondEndPointInLocal, polygonVertices,
-                                                                                   point1ToThrowAway, point2ToThrowAway);
+            double distanceToPolygon = getDistanceFromLineSegment3DToConvexPolygon(firstEndPointInLocal,
+                                                                                   secondEndPointInLocal,
+                                                                                   polygonVertices,
+                                                                                   point1ToThrowAway,
+                                                                                   point2ToThrowAway);
             if (distanceToPolygon < minDistanceToEdge)
             {
                minDistanceToEdge = distanceToPolygon;
@@ -349,8 +359,10 @@ public class PlanarRegionTools
       return minDistanceToEdge;
    }
 
-   public static double getDistanceFromLineSegment3DToConvexPolygon(Point3DReadOnly firstEndPointInLocal, Point3DReadOnly secondEndPointInLocal,
-                                                                    List<Point3D> convexPolygon3D, Point3DBasics closestPointOnSegmentToPack,
+   public static double getDistanceFromLineSegment3DToConvexPolygon(Point3DReadOnly firstEndPointInLocal,
+                                                                    Point3DReadOnly secondEndPointInLocal,
+                                                                    List<Point3D> convexPolygon3D,
+                                                                    Point3DBasics closestPointOnSegmentToPack,
                                                                     Point3DBasics closestPointOnRegionToPack)
    {
       int numberOfVertices = convexPolygon3D.size();
@@ -376,8 +388,12 @@ public class PlanarRegionTools
 
       else if (numberOfVertices == 2)
       {
-         minDistanceToEdge = closestPoint3DsBetweenTwoLineSegment3Ds(firstEndPointInLocal, secondEndPointInLocal, convexPolygon3D.get(0), convexPolygon3D.get(1),
-                                                                     closestPointOnSegmentToPack, closestPointOnRegionToPack);
+         minDistanceToEdge = closestPoint3DsBetweenTwoLineSegment3Ds(firstEndPointInLocal,
+                                                                     secondEndPointInLocal,
+                                                                     convexPolygon3D.get(0),
+                                                                     convexPolygon3D.get(1),
+                                                                     closestPointOnSegmentToPack,
+                                                                     closestPointOnRegionToPack);
       }
       else
       {
@@ -393,7 +409,11 @@ public class PlanarRegionTools
             Point2DReadOnly edgeStart2D = new Point2D(edgeStart);
             Point2DReadOnly edgeEnd2D = new Point2D(edgeEnd);
 
-            double distanceToEdge = closestPoint3DsBetweenTwoLineSegment3Ds(firstEndPointInLocal, secondEndPointInLocal, edgeStart, edgeEnd, point1ToThrowAway,
+            double distanceToEdge = closestPoint3DsBetweenTwoLineSegment3Ds(firstEndPointInLocal,
+                                                                            secondEndPointInLocal,
+                                                                            edgeStart,
+                                                                            edgeEnd,
+                                                                            point1ToThrowAway,
                                                                             point2ToThrowAway);
             if (distanceToEdge < minDistanceToEdge)
             {
@@ -419,7 +439,7 @@ public class PlanarRegionTools
             {
                minDistanceToEdge = distanceToFirstEnd;
                if (closestPointOnSegmentToPack != null)
-               closestPointOnSegmentToPack.set(firstEndPointInLocal);
+                  closestPointOnSegmentToPack.set(firstEndPointInLocal);
                if (closestPointOnRegionToPack != null)
                   closestPointOnRegionToPack.set(firstEndPointInLocal.getX(), firstEndPointInLocal.getY(), 0.0);
             }
@@ -436,7 +456,8 @@ public class PlanarRegionTools
          { // points are on opposite sides of the plane
             Point3DReadOnly intersectionWithPlane = EuclidGeometryTools.intersectionBetweenLineSegment3DAndPlane3D(convexPolygon3D.get(0),
                                                                                                                    new Vector3D(0.0, 0.0, 1.0),
-                                                                                                                   firstEndPointInLocal, secondEndPointInLocal);
+                                                                                                                   firstEndPointInLocal,
+                                                                                                                   secondEndPointInLocal);
 
             // checking convex hull here - might be better to check all polygons to avoid false positive
             if (intersectionWithPlane != null)
@@ -461,7 +482,8 @@ public class PlanarRegionTools
       return minDistanceToEdge;
    }
 
-   public static double getDistanceFromLineSegment3DToConvexPolygon(Point3DReadOnly firstEndPointInLocal, Point3DReadOnly secondEndPointInLocal,
+   public static double getDistanceFromLineSegment3DToConvexPolygon(Point3DReadOnly firstEndPointInLocal,
+                                                                    Point3DReadOnly secondEndPointInLocal,
                                                                     List<Point3D> convexPolygon3D)
    {
       int numberOfVertices = convexPolygon3D.size();
@@ -504,7 +526,8 @@ public class PlanarRegionTools
          { // points are on opposite sides of the plane
             Point3DReadOnly intersectionWithPlane = EuclidGeometryTools.intersectionBetweenLineSegment3DAndPlane3D(convexPolygon3D.get(0),
                                                                                                                    new Vector3D(0.0, 0.0, 1.0),
-                                                                                                                   firstEndPointInLocal, secondEndPointInLocal);
+                                                                                                                   firstEndPointInLocal,
+                                                                                                                   secondEndPointInLocal);
 
             // checking convex hull here - might be better to check all polygons to avoid false positive
             if (intersectionWithPlane != null)
@@ -616,19 +639,23 @@ public class PlanarRegionTools
       return planarRegions.stream().filter(region -> isPlanarRegionIntersectingWithCircle(circleOrigin, circleRadius, region)).collect(Collectors.toList());
    }
 
-   public static List<PlanarRegion> filterPlanarRegionsWithBoundingCapsule(Point3DReadOnly capsuleStartInWorld, Point3DReadOnly capsuleEndInWorld,
-                                                                           double capsuleRadius, List<PlanarRegion> planarRegions)
+   public static List<PlanarRegion> filterPlanarRegionsWithBoundingCapsule(Point3DReadOnly capsuleStartInWorld,
+                                                                           Point3DReadOnly capsuleEndInWorld,
+                                                                           double capsuleRadius,
+                                                                           List<PlanarRegion> planarRegions)
    {
       return filterPlanarRegionsWithBoundingCapsule(new LineSegment3D(capsuleStartInWorld, capsuleEndInWorld), capsuleRadius, planarRegions);
    }
 
-   public static List<PlanarRegion> filterPlanarRegionsWithBoundingCapsule(LineSegment3D capsuleSegmentInWorld, double capsuleRadius,
+   public static List<PlanarRegion> filterPlanarRegionsWithBoundingCapsule(LineSegment3D capsuleSegmentInWorld,
+                                                                           double capsuleRadius,
                                                                            List<PlanarRegion> planarRegions)
    {
       if (!Double.isFinite(capsuleRadius) || capsuleRadius < 0.0)
          return planarRegions;
 
-      return planarRegions.stream().filter(region -> isPlanarRegionIntersectingWithCapsule(capsuleSegmentInWorld, capsuleRadius, region))
+      return planarRegions.stream()
+                          .filter(region -> isPlanarRegionIntersectingWithCapsule(capsuleSegmentInWorld, capsuleRadius, region))
                           .collect(Collectors.toList());
    }
 
@@ -830,7 +857,9 @@ public class PlanarRegionTools
     * @return the list of planar regions containing the query. Returns null when no region contains
     *         the query.
     */
-   public static List<PlanarRegion> findPlanarRegionsContainingPoint(List<PlanarRegion> planarRegionsToCheck, Point3DReadOnly point, double maximumOrthogonalDistance)
+   public static List<PlanarRegion> findPlanarRegionsContainingPoint(List<PlanarRegion> planarRegionsToCheck,
+                                                                     Point3DReadOnly point,
+                                                                     double maximumOrthogonalDistance)
    {
       List<PlanarRegion> containers = null;
 
@@ -904,12 +933,12 @@ public class PlanarRegionTools
       if (!boundingBoxOne.intersectsEpsilon(boundingBoxTwo, epsilon))
          return false;
 
-//      ConvexPolygon2D convexHullOne = getVerticallyProjectedConvexHull(regionOne);
-//      ConvexPolygon2D convexHullTwo = getVerticallyProjectedConvexHull(regionTwo);
+      //      ConvexPolygon2D convexHullOne = getVerticallyProjectedConvexHull(regionOne);
+      //      ConvexPolygon2D convexHullTwo = getVerticallyProjectedConvexHull(regionTwo);
 
       return true;
       //++++++JerryPratt: FixMe fix this and use this if you want it to be more accurate.
-//      return doPolygonsIntersect(convexHullOne, convexHullTwo, epsilon);
+      //      return doPolygonsIntersect(convexHullOne, convexHullTwo, epsilon);
    }
 
    public static BoundingBox2DReadOnly getVerticallyProjectedBoundingBox(PlanarRegion planarRegion)
@@ -925,7 +954,8 @@ public class PlanarRegionTools
       return projectPolygonVertically(planarRegion.getTransformToWorld(), planarRegion.getConvexHull());
    }
 
-   public static ConvexPolygon2D projectPolygonVertically(RigidBodyTransformReadOnly transformToWorld, ConvexPolygon2DReadOnly polygonInLocalToProjectVertically)
+   public static ConvexPolygon2D projectPolygonVertically(RigidBodyTransformReadOnly transformToWorld,
+                                                          ConvexPolygon2DReadOnly polygonInLocalToProjectVertically)
    {
       List<? extends Point2DReadOnly> verticesToProject = polygonInLocalToProjectVertically.getPolygonVerticesView();
 
@@ -949,11 +979,15 @@ public class PlanarRegionTools
       {
          if (polygonTwo.getNumberOfVertices() == 2)
          {
-            return EuclidGeometryTools.distanceBetweenTwoLineSegment3Ds(new Point3D(polygonOne.getVertex(0)), new Point3D(polygonOne.getVertex(1)), new Point3D(polygonTwo.getVertex(0)), new Point3D(polygonTwo.getVertex(1))) < epsilon;
+            return EuclidGeometryTools.distanceBetweenTwoLineSegment3Ds(new Point3D(polygonOne.getVertex(0)),
+                                                                        new Point3D(polygonOne.getVertex(1)),
+                                                                        new Point3D(polygonTwo.getVertex(0)),
+                                                                        new Point3D(polygonTwo.getVertex(1))) < epsilon;
          }
          else
          {
-            Point2D[] intersections = EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(polygonOne.getVertex(0), polygonOne.getVertex(1),
+            Point2D[] intersections = EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(polygonOne.getVertex(0),
+                                                                                                                    polygonOne.getVertex(1),
                                                                                                                     polygonTwo.getVertexBufferView(),
                                                                                                                     polygonTwo.getNumberOfVertices(),
                                                                                                                     polygonTwo.isClockwiseOrdered());
@@ -962,13 +996,13 @@ public class PlanarRegionTools
       }
       else if (polygonTwo.getNumberOfVertices() == 2)
       {
-         Point2D[] intersections = EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(polygonTwo.getVertex(0), polygonTwo.getVertex(1),
+         Point2D[] intersections = EuclidGeometryPolygonTools.intersectionBetweenLineSegment2DAndConvexPolygon2D(polygonTwo.getVertex(0),
+                                                                                                                 polygonTwo.getVertex(1),
                                                                                                                  polygonOne.getVertexBufferView(),
                                                                                                                  polygonOne.getNumberOfVertices(),
                                                                                                                  polygonOne.isClockwiseOrdered());
          return intersections != null;
       }
-
 
       //TODO: Inefficient:
       ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
@@ -1062,14 +1096,19 @@ public class PlanarRegionTools
     */
    public static Point3D closestPointOnPlane(Point3DReadOnly pointInWorld, PlanarRegion region)
    {
-      RigidBodyTransformReadOnly regionToWorld = region.getTransformToWorld();
-      RigidBodyTransformReadOnly regionToLocal = region.getTransformToLocal();
+      return closestPointOnPlane(pointInWorld, region.getConvexHull(), region.getTransformToWorld(), region.getTransformToLocal());
+   }
 
+   public static Point3D closestPointOnPlane(Point3DReadOnly pointInWorld,
+                                             ConvexPolygon2DReadOnly regionConvexHull,
+                                             RigidBodyTransformReadOnly regionToWorld,
+                                             RigidBodyTransformReadOnly regionToLocal)
+   {
       Vector3D planeNormal = new Vector3D(0.0, 0.0, 1.0);
       planeNormal.applyTransform(regionToWorld);
 
       Point3D pointOnPlane = new Point3D();
-      pointOnPlane.set(region.getConvexPolygon(0).getVertex(0));
+      pointOnPlane.set(regionConvexHull.getVertex(0));
       pointOnPlane.applyTransform(regionToWorld);
 
       Point3D intersectionWithPlane = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, pointInWorld, planeNormal);
@@ -1083,10 +1122,9 @@ public class PlanarRegionTools
       Point2D intersectionInPlaneFrame2D = new Point2D(intersectionInPlaneFrame);
 
       // checking convex hull here - might be better to check all polygons to avoid false positive
-      ConvexPolygon2D convexHull = region.getConvexHull();
-      if (!convexHull.isPointInside(intersectionInPlaneFrame2D))
+      if (!regionConvexHull.isPointInside(intersectionInPlaneFrame2D))
       {
-         convexHull.orthogonalProjection(intersectionInPlaneFrame2D);
+         regionConvexHull.orthogonalProjection(intersectionInPlaneFrame2D);
          intersectionWithPlane.setToZero();
          intersectionWithPlane.set(intersectionInPlaneFrame2D);
          intersectionWithPlane.applyTransform(regionToWorld);
@@ -1112,7 +1150,9 @@ public class PlanarRegionTools
       pointOnLineInLocal.applyTransform(regionToLocal);
       directionOfLineInLocal.applyTransform(regionToLocal);
 
-      Point3D intersectionWithPlaneInLocal = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, pointOnLineInLocal,
+      Point3D intersectionWithPlaneInLocal = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane,
+                                                                                                     planeNormal,
+                                                                                                     pointOnLineInLocal,
                                                                                                      directionOfLineInLocal);
       if (intersectionWithPlaneInLocal == null)
       {

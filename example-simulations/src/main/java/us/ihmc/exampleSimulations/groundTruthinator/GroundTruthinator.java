@@ -80,7 +80,7 @@ public class GroundTruthinator
 
       averageCorrectionVector.scale(rate);
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setTranslation(averageCorrectionVector);
+      transform.getTranslation().set(averageCorrectionVector);
 
       estimatedPose.applyTransform(transform);
 

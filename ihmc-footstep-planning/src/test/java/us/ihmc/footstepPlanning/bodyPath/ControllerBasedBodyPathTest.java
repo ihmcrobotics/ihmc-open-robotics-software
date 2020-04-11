@@ -205,25 +205,24 @@ public class ControllerBasedBodyPathTest
             FramePose3D initialMidFootPose = new FramePose3D();
             initialMidFootPose.setX(startPose.getX());
             initialMidFootPose.setY(startPose.getY());
-            initialMidFootPose.setOrientationYawPitchRoll(0.0, 0.0, 0.0);
+            initialMidFootPose.getOrientation().setYawPitchRoll(0.0, 0.0, 0.0);
             PoseReferenceFrame midFootFrame = new PoseReferenceFrame("InitialMidFootFrame", initialMidFootPose);
 
             RobotSide initialStanceFootSide = newY > 0.0 ? RobotSide.RIGHT : RobotSide.LEFT;
-            FramePose3D initialStanceFootPose = new FramePose3D(midFootFrame);
-            initialStanceFootPose.setY(initialStanceFootSide.negateIfRightSide(parameters.getIdealFootstepWidth() / 2.0));
-            initialStanceFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+            FramePose3D midFootPose = new FramePose3D(midFootFrame);
+            midFootPose.changeFrame(ReferenceFrame.getWorldFrame());
 
             FramePose3D goalPose = new FramePose3D();
             goalPose.setX(finalPose.getX());
             goalPose.setY(finalPose.getY());
-            goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
+            goalPose.getOrientation().setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
 
-            request.setInitialStancePose(initialStanceFootPose);
-            request.setInitialStanceSide(initialStanceFootSide);
-            request.setGoalPose(goalPose);
+            request.setStartFootPoses(parameters.getIdealFootstepWidth(), midFootPose);
+            request.setRequestedInitialStanceSide(initialStanceFootSide);
+            request.setGoalFootPoses(parameters.getIdealFootstepWidth(), goalPose);
             FootstepPlannerOutput output = footstepPlanningModule.handleRequest(request);
 
-            if (output.getResult().validForExecution())
+            if (output.getFootstepPlanningResult().validForExecution())
             {
                FootstepPlan footstepPlan = output.getFootstepPlan();
                int stepsToVisualize = Math.min(footstepPlan.getNumberOfSteps(), steps);
@@ -253,7 +252,7 @@ public class ControllerBasedBodyPathTest
             }
             else
             {
-               PrintTools.info("Failed: " + output.getResult());
+               PrintTools.info("Failed: " + output.getFootstepPlanningResult());
             }
          }
       }

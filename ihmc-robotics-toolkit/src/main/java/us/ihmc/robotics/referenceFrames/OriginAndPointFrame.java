@@ -55,6 +55,6 @@ public class OriginAndPointFrame extends ReferenceFrame
       rotationMatrix.setColumns(xAxis, yAxis, zAxis);
 
       transformToParent.setRotationAndZeroTranslation(rotationMatrix);
-      transformToParent.setTranslation(originVector);
+      transformToParent.getTranslation().set(originVector);
    }
 }

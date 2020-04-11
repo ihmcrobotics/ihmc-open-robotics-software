@@ -36,7 +36,7 @@ public class AtlasBehaviorSimulation
       return create(robotModel, environment, PubSubImplementation.INTRAPROCESS, 1);
    }
 
-   private static SimulationConstructionSet create(DRCRobotModel robotModel,
+   public static SimulationConstructionSet create(DRCRobotModel robotModel,
                                                    CommonAvatarEnvironmentInterface environment,
                                                    PubSubImplementation pubSubImplementation, int recordTicksPerControllerTick)
    {

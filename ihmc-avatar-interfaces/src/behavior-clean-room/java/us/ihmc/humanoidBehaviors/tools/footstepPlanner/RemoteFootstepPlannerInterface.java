@@ -8,19 +8,20 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.tools.thread.TypedNotification;
 
@@ -138,49 +139,51 @@ public class RemoteFootstepPlannerInterface
     */
    public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start, FramePose3DReadOnly goal)
    {
-      return requestPlan(start, goal, (PlanarRegionsListMessage) null);
+      return requestPlan(start, goal, null, new DefaultFootstepPlannerParameters());
    }
 
    public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start, FramePose3DReadOnly goal, PlanarRegionsList planarRegionsList)
    {
-      return requestPlan(start, goal, PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
+      return requestPlan(start,
+                         goal,
+                         PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList),
+                         new DefaultFootstepPlannerParameters());
    }
 
    public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start,
                                                                      FramePose3DReadOnly goal,
-                                                                     PlanarRegionsListMessage planarRegionsListMessage)
+                                                                     PlanarRegionsListMessage planarRegionsListMessage,
+                                                                     FootstepPlannerParametersBasics settableFootstepPlannerParameters)
    {
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));  // This is necessary! - @dcalvert 190318
-
-      DefaultFootstepPlannerParameters settableFootstepPlannerParameters = new DefaultFootstepPlannerParameters();
-      if (decidePlanType(start, goal) == PlanTravelDistance.CLOSE)
-      {
-         settableFootstepPlannerParameters.setMaximumStepYaw(1.1); // enable quick turn arounds
-      }
 
       FootstepPlannerParametersPacket footstepPlannerParametersPacket = new FootstepPlannerParametersPacket();
       FootstepPlannerMessageTools.copyParametersToPacket(footstepPlannerParametersPacket, settableFootstepPlannerParameters);
       parametersPublisher.publish(footstepPlannerParametersPacket);
 
-      FramePose3D soleStart = new FramePose3D(start);
-      double midFeetToSoleOffset = footstepPlannerParameters.getIdealFootstepWidth() / 2;
-      soleStart.appendTranslation(-midFeetToSoleOffset, 0.0, 0.0);
+      RobotSide initialStanceSide = RobotSide.LEFT;
+      SideDependentList<Pose3D> startSteps = PlannerTools.createSquaredUpFootsteps(start, footstepPlannerParameters.getIdealFootstepWidth());
+      SideDependentList<Pose3D> goalSteps = PlannerTools.createSquaredUpFootsteps(goal, footstepPlannerParameters.getIdealFootstepWidth());
 
+      Pose3D initialStanceFoot = startSteps.get(initialStanceSide);
       LogTools.debug("Planning from {}",
-            soleStart.getPosition().getX() + ", " + soleStart.getPosition().getY() + ", yaw: " + soleStart.getOrientation().getYaw()
-            + " to "
-            + goal.getPosition().getX() + ", " + goal.getPosition().getY() + ", yaw: " + goal.getOrientation().getYaw()
-      );
+                     initialStanceFoot.getX() + ", " + initialStanceFoot.getY() + ", yaw: " + initialStanceFoot.getOrientation().getYaw() + " to "
+                     + goal.getPosition().getX() + ", " + goal.getPosition().getY() + ", yaw: " + goal.getOrientation().getYaw());
 
       FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
-      packet.setInitialStanceRobotSide(RobotSide.LEFT.toByte());
-      packet.getStanceFootPositionInWorld().set(soleStart.getPosition());             // assuming start pose is left foot center
-      packet.getStanceFootOrientationInWorld().set(soleStart.getOrientation());
-      packet.getGoalPositionInWorld().set(goal.getPosition());                    // assuming goal position specified in mid feet z up
-      packet.getGoalOrientationInWorld().set(goal.getOrientation());
+
+      boolean planBodyPath = false;
+      boolean performAStarSearch = true;
+      packet.setPlanBodyPath(planBodyPath);
+      packet.setPerformAStarSearch(performAStarSearch);
+
+      packet.setRequestedInitialStanceSide(initialStanceSide.toByte());
+      packet.getStartLeftFootPose().set(startSteps.get(RobotSide.LEFT));
+      packet.getStartRightFootPose().set(startSteps.get(RobotSide.RIGHT));
+      packet.getGoalLeftFootPose().set(goalSteps.get(RobotSide.LEFT));
+      packet.getGoalRightFootPose().set(goalSteps.get(RobotSide.RIGHT));
 
       packet.setTimeout(timeout);
-      packet.setRequestedFootstepPlannerType(FootstepPlanningRequestPacket.FOOTSTEP_PLANNER_TYPE_A_STAR);
       int sentPlannerId = requestCounter.getAndIncrement();
       packet.setPlannerRequestId(sentPlannerId);
       if (planarRegionsListMessage != null)
@@ -199,10 +202,5 @@ public class RemoteFootstepPlannerInterface
    {
       LogTools.debug("Sending SLEEP to footstep planner");
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.SLEEP));
-   }
-
-   public static PlanTravelDistance decidePlanType(Pose3DReadOnly start, Pose3DReadOnly goal)
-   {
-      return start.getPositionDistance(goal) < PlanTravelDistance.CLOSE_PLAN_RADIUS ? PlanTravelDistance.CLOSE : PlanTravelDistance.FAR;
    }
 }

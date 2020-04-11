@@ -35,14 +35,14 @@ public class PatrolWaypointGraphic extends Group implements PoseEditable
    @Override
    public void setPosition(Point3DReadOnly position)
    {
-      pose.setPosition(position);
+      pose.getPosition().set(position);
       updateGraphics();
    }
 
    @Override
    public void setOrientation(Orientation3DReadOnly orientationPoint)
    {
-      pose.setOrientation(orientationPoint);
+      pose.getOrientation().set(orientationPoint);
       updateGraphics();
    }
 

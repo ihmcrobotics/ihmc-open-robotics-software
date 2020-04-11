@@ -134,7 +134,7 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
       @Override
       public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
       {
-         return new TestICPPlannerParameters(getPhysicalProperties());
+         return new TestICPPlannerParameters(getPhysicalProperties(), RobotTarget.SCS);
       }
    }
 
@@ -371,9 +371,9 @@ public class AtlasStraightLegSingleStepTest extends AvatarStraightLegSingleStepT
 
    private class TestICPPlannerParameters extends AtlasSmoothCMPPlannerParameters
    {
-      public TestICPPlannerParameters(AtlasPhysicalProperties physicalProperties)
+      public TestICPPlannerParameters(AtlasPhysicalProperties physicalProperties, RobotTarget target)
       {
-         super(physicalProperties);
+         super(physicalProperties, target);
       }
 
       @Override

@@ -21,8 +21,23 @@ float64 sensor_pose_confidence
 # Field default value 1.0
 float64 point_cloud_confidence
 
-float32[] point_cloud
+# The center location of the bounding box of all the points.
+# The location of each point in the pointcloud is with respect to this location.
+geometry_msgs/Point point_cloud_center
 
-int32[] colors
+# The pointcloud is compressed by using an octree.
+# This indicates the resolution used for the octree, the octree depth is 16.
+float64 resolution
+
+# The number of points in this frame.
+int32 number_of_points
+
+# The compressed pointcloud.
+# See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+int8[] point_cloud
+
+# The compressed colors.
+# See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+int8[] colors
 
 

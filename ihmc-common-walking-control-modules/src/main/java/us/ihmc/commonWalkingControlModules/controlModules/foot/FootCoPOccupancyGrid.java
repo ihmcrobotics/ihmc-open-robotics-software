@@ -10,7 +10,9 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameLine2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -194,7 +196,7 @@ public class FootCoPOccupancyGrid
 
    private final FramePoint3D cellPosition = new FramePoint3D();
 
-   public void registerCenterOfPressureLocation(FramePoint2D copToRegister)
+   public void registerCenterOfPressureLocation(FramePoint2DReadOnly copToRegister)
    {
       copToRegister.checkReferenceFrameMatch(soleFrame);
       tempPoint.sub(copToRegister, gridOrigin);
@@ -311,7 +313,7 @@ public class FootCoPOccupancyGrid
       return computeNumberOfCellsOccupiedOnSideOfLine(frameLine, sideToLookAt, 0.0);
    }
 
-   public int computeNumberOfCellsOccupiedOnSideOfLine(FrameLine2D frameLine, RobotSide sideToLookAt, double minDistanceFromLine)
+   public int computeNumberOfCellsOccupiedOnSideOfLine(FrameLine2DReadOnly frameLine, RobotSide sideToLookAt, double minDistanceFromLine)
    {
       // First create a shifted line towards the sideToLookAt such that we don't check the cells for which the line goes through.
       frameLine.checkReferenceFrameMatch(soleFrame);
@@ -616,8 +618,8 @@ public class FootCoPOccupancyGrid
          return false;
 
       lineToPack.setToZero(soleFrame);
-      lineToPack.setPoint(lineOrigin);
-      lineToPack.setDirection(lineDirection);
+      lineToPack.getPoint().set(lineOrigin);
+      lineToPack.getDirection().set(lineDirection);
       return true;
    }
 }

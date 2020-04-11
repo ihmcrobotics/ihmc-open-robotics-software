@@ -386,8 +386,8 @@ public class RigidBodyControlManagerTest
       SE3TrajectoryMessage message = new SE3TrajectoryMessage();
       message.getFrameInformation().setDataReferenceFrameId(worldFrame.hashCode());
       message.getFrameInformation().setTrajectoryReferenceFrameId(worldFrame.hashCode());
-      message.getControlFramePose().setPosition(controlFramePosition);
-      message.getControlFramePose().setOrientation(controlFrameOrientation);
+      message.getControlFramePose().getPosition().set(controlFramePosition);
+      message.getControlFramePose().getOrientation().set(controlFrameOrientation);
       message.setUseCustomControlFrame(true);
       message.getTaskspaceTrajectoryPoints().add()
              .set(HumanoidMessageTools.createSE3TrajectoryPointMessage(trajectoryTime, position, orientation, linearVelocity, angularVelocity));

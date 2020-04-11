@@ -1,6 +1,5 @@
 package us.ihmc.communication.packets;
 
-import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -38,6 +37,7 @@ import us.ihmc.euclid.interfaces.EpsilonComparable;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Point3D32;
@@ -49,7 +49,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.Quaternion32;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
-import us.ihmc.euclid.utils.NameBasedHashCodeTools;
 import us.ihmc.idl.IDLSequence.Float;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
@@ -307,8 +306,8 @@ public class MessageTools
       message.getDesiredOrientationInWorld().set(desiredOrientation);
       RigidBodyTransform transformToBodyFixedFrame = new RigidBodyTransform();
       controlFrame.getTransformToDesiredFrame(transformToBodyFixedFrame, endEffector.getBodyFixedFrame());
-      message.getControlFramePositionInEndEffector().set(transformToBodyFixedFrame.getTranslationVector());
-      message.getControlFrameOrientationInEndEffector().set(transformToBodyFixedFrame.getRotationMatrix());
+      message.getControlFramePositionInEndEffector().set(transformToBodyFixedFrame.getTranslation());
+      message.getControlFrameOrientationInEndEffector().set(transformToBodyFixedFrame.getRotation());
       return message;
    }
 
@@ -438,27 +437,34 @@ public class MessageTools
       return message;
    }
 
-   public static ControllerCrashNotificationPacket createControllerCrashNotificationPacket(ControllerCrashLocation location, String stackTrace)
+   public static ControllerCrashNotificationPacket createControllerCrashNotificationPacket(Throwable exception)
+   {
+      return createControllerCrashNotificationPacket(null, exception);
+   }
+
+   public static ControllerCrashNotificationPacket createControllerCrashNotificationPacket(ControllerCrashLocation location, Throwable exception)
    {
       ControllerCrashNotificationPacket message = new ControllerCrashNotificationPacket();
-      message.setControllerCrashLocation(location.toByte());
-      message.setStacktrace(stackTrace);
-      return message;
-   }
+      message.setControllerCrashLocation(location != null ? location.toByte() : -1);
+      message.setExceptionType(exception.getClass().getSimpleName());
+      message.setErrorMessage(exception.getMessage());
 
-   public static StereoVisionPointCloudMessage createStereoVisionPointCloudMessage(long timestamp, float[] pointCloud, int[] colors)
-   {
-      return createStereoVisionPointCloudMessage(timestamp, pointCloud, colors, 1.0);
-   }
+      StackTraceElement[] stackTrace = exception.getStackTrace();
 
-   public static StereoVisionPointCloudMessage createStereoVisionPointCloudMessage(long timestamp, float[] pointCloud, int[] colors, double poseConfidence)
-   {
-      StereoVisionPointCloudMessage message = new StereoVisionPointCloudMessage();
-      message.setTimestamp(timestamp);
-      message.getPointCloud().add(pointCloud);
-      message.getColors().add(colors);
-      message.setSensorPoseConfidence(poseConfidence);
+      message.getStacktrace().clear();
+
+      if (stackTrace != null)
+      {
+         int length = Math.min(50, stackTrace.length);
+
+         for (int i = 0; i < length; i++)
+         {
+            message.getStacktrace().add(stackTrace[i].toString());
+         }
+      }
+
       return message;
+
    }
 
    public static ToolboxStateMessage createToolboxStateMessage(ToolboxState requestedState)
@@ -475,9 +481,17 @@ public class MessageTools
 
    public static LidarScanParameters toLidarScanParameters(LidarScanParametersMessage message)
    {
-      return new LidarScanParameters(message.getPointsPerSweep(), message.getScanHeight(), message.getSweepYawMin(), message.getSweepYawMax(),
-                                     message.getHeightPitchMin(), message.getHeightPitchMax(), message.getTimeIncrement(), message.getMinRange(),
-                                     message.getMaxRange(), message.getScanTime(), message.getTimestamp());
+      return new LidarScanParameters(message.getPointsPerSweep(),
+                                     message.getScanHeight(),
+                                     message.getSweepYawMin(),
+                                     message.getSweepYawMax(),
+                                     message.getHeightPitchMin(),
+                                     message.getHeightPitchMax(),
+                                     message.getTimeIncrement(),
+                                     message.getMinRange(),
+                                     message.getMaxRange(),
+                                     message.getScanTime(),
+                                     message.getTimestamp());
    }
 
    /**
@@ -747,35 +761,9 @@ public class MessageTools
    public static long toFrameId(ReferenceFrame referenceFrame)
    {
       if (referenceFrame == null)
-         return NameBasedHashCodeTools.NULL_HASHCODE;
+         return EuclidHashCodeTools.NULL_HASHCODE;
       else
          return referenceFrame.hashCode();
-   }
-
-   public static Point3D32[] unpackPointCloud32(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
-   {
-      Point3D32[] points = new Point3D32[stereoVisionPointCloudMessage.getPointCloud().size() / 3];
-      for (int index = 0; index < stereoVisionPointCloudMessage.getPointCloud().size() / 3; index++)
-      {
-         Point3D32 scanPoint = new Point3D32();
-         scanPoint.setX(stereoVisionPointCloudMessage.getPointCloud().get(3 * index + 0));
-         scanPoint.setY(stereoVisionPointCloudMessage.getPointCloud().get(3 * index + 1));
-         scanPoint.setZ(stereoVisionPointCloudMessage.getPointCloud().get(3 * index + 2));
-         points[index] = scanPoint;
-      }
-      return points;
-   }
-
-   public static Color[] unpackPointCloudColors(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
-   {
-      Color[] colors = new Color[stereoVisionPointCloudMessage.getColors().size()];
-
-      for (int i = 0; i < stereoVisionPointCloudMessage.getColors().size(); i++)
-      {
-         colors[i] = new Color(stereoVisionPointCloudMessage.getColors().get(i));
-      }
-
-      return colors;
    }
 
    /**
@@ -1107,25 +1095,8 @@ public class MessageTools
       return scanPoints;
    }
 
-   public static void unpackScanPoint(StereoVisionPointCloudMessage stereoVisionPointCloudMessage, int index, Point3DBasics scanPointToPack)
+   public static RigidBodyTransform unpackSensorPose(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
    {
-      index *= 3;
-      scanPointToPack.setX(stereoVisionPointCloudMessage.getPointCloud().get(index++));
-      scanPointToPack.setY(stereoVisionPointCloudMessage.getPointCloud().get(index++));
-      scanPointToPack.setZ(stereoVisionPointCloudMessage.getPointCloud().get(index++));
-   }
-
-   public static Point3D[] unpackScanPoint3ds(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
-   {
-      int numberOfScanPoints = stereoVisionPointCloudMessage.point_cloud_.size() / 3;
-      Point3D[] scanPoints = new Point3D[numberOfScanPoints];
-      for (int index = 0; index < numberOfScanPoints; index++)
-      {
-         Point3D scanPoint1 = new Point3D();
-         MessageTools.unpackScanPoint(stereoVisionPointCloudMessage, index, scanPoint1);
-         Point3D scanPoint = scanPoint1;
-         scanPoints[index] = scanPoint;
-      }
-      return scanPoints;
+      return new RigidBodyTransform(stereoVisionPointCloudMessage.getSensorOrientation(), stereoVisionPointCloudMessage.getSensorPosition());
    }
 }

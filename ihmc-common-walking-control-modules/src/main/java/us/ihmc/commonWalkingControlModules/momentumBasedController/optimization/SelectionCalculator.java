@@ -82,7 +82,7 @@ public class SelectionCalculator
       if (selectionFrame != taskFrame)
       {
          taskFrame.getTransformToDesiredFrame(tempTransform, selectionFrame);
-         tempTransform.getRotation(tempRotationMatrix);
+         tempTransform.getRotation().get(tempRotationMatrix);
          tempRotationMatrixWithSelection.reshape(reducedTaskSize, 3);
          CommonOps.mult(denseSelectionMatrix, tempRotationMatrix, tempRotationMatrixWithSelection);
          taskJacobianToPack.reshape(reducedTaskSize, problemSize);
@@ -113,7 +113,7 @@ public class SelectionCalculator
       if (weightFrame != selectionFrame)
       {
          weightFrame.getTransformToDesiredFrame(tempTransform, selectionFrame);
-         tempTransform.getRotation(tempRotationMatrix);
+         tempTransform.getRotation().get(tempRotationMatrix);
          tempRotationMatrixWithSelection.reshape(reducedTaskSize, 3);
          CommonOps.mult(denseSelectionMatrix, tempRotationMatrix, tempRotationMatrixWithSelection);
          tempTaskWeight.reshape(reducedTaskSize, 3);

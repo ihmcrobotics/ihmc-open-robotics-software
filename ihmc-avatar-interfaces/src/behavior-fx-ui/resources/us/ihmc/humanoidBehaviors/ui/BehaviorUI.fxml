@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.geometry.Insets?>
 <?import javafx.scene.control.ChoiceBox?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.layout.AnchorPane?>
@@ -30,55 +32,7 @@
               <TabPane prefHeight="250.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
                   <tabs>
       
-                      <Tab text="Patrol">
-                          <content>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="171.0" prefWidth="601.0">
-                                  <children>
-                                      <fx:include fx:id="patrolBehaviorUI" source="PatrolBehaviorUI.fxml" />
-                                  </children>
-                              </AnchorPane>
-                          </content>
-                      </Tab>
-      
-                      <Tab text="Step in Place">
-                          <content>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                  <children>
-                                      <fx:include fx:id="stepInPlaceBehaviorUI" source="StepInPlaceBehaviorUI.fxml" />
-                                  </children>
-                              </AnchorPane>
-                          </content>
-                      </Tab>
-                      
-                      <Tab text="FancyPoses">
-                          <content>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                  <children>
-                                      <fx:include fx:id="fancyPosesBehaviorUI" source="FancyPosesBehaviorUI.fxml" />
-                                  </children>
-                              </AnchorPane>
-                          </content>
-                      </Tab>
-                      
-                      <Tab text="ExploreArea">
-                          <content>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                  <children>
-                                      <fx:include fx:id="exploreAreaBehaviorUI" source="ExploreAreaBehaviorUI.fxml" />
-                                  </children>
-                              </AnchorPane>
-                          </content>
-                      </Tab>
 
-                      <Tab text="Planner Parameters">
-                          <content>
-                              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                                  <children>
-                                      <fx:include fx:id="plannerParametersUI" source="PlannerParametersUI.fxml" />
-                                  </children>
-                              </AnchorPane>
-                          </content>
-                      </Tab>
       
                   </tabs>
               </TabPane>
@@ -86,6 +40,11 @@
          <top>
             <FlowPane BorderPane.alignment="CENTER">
                <children>
+                  <Label text="Behavior selection:">
+                     <FlowPane.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </FlowPane.margin>
+                  </Label>
                   <ChoiceBox fx:id="behaviorSelector" prefWidth="150.0" />
                </children>
             </FlowPane>

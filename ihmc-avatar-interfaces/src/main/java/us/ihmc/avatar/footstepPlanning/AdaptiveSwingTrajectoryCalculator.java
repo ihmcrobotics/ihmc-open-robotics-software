@@ -1,5 +1,6 @@
 package us.ihmc.avatar.footstepPlanning;
 
+import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -9,6 +10,7 @@ import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
+import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 /**
@@ -93,7 +95,7 @@ public class AdaptiveSwingTrajectoryCalculator
    {
       Box3D footStubBox = new Box3D();
       double stubClearance = adaptiveSwingParameters.getFootStubClearance();
-      footStubBox.setSize(stubClearance, walkingControllerParameters.getSteppingParameters().getFootWidth(), boxHeight);
+      footStubBox.getSize().set(stubClearance, walkingControllerParameters.getSteppingParameters().getFootWidth(), boxHeight);
 
       Pose3D boxCenter = new Pose3D(stepAtRiskOfToeStubbing);
 
@@ -114,5 +116,35 @@ public class AdaptiveSwingTrajectoryCalculator
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
+   }
+
+   public void setSwingParameters(Pose3DReadOnly initialStanceFootPose, FootstepDataListMessage footstepDataListMessage)
+   {
+      IDLSequence.Object<FootstepDataMessage> footstepDataList = footstepDataListMessage.getFootstepDataList();
+      for (int i = 0; i < footstepDataList.size(); i++)
+      {
+         FootstepDataMessage footstepDataMessage = footstepDataList.get(i);
+         Pose3D startPose = new Pose3D();
+         Pose3D endPose = new Pose3D();
+
+         endPose.set(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
+
+         if(i < 2)
+         {
+            startPose.set(initialStanceFootPose);
+         }
+         else
+         {
+            FootstepDataMessage previousStep = footstepDataList.get(i - 2);
+            startPose.set(previousStep.getLocation(), previousStep.getOrientation());
+         }
+
+         if(!checkForFootCollision(startPose, footstepDataMessage))
+         {
+            footstepDataMessage.setSwingHeight(calculateSwingHeight(startPose.getPosition(), endPose.getPosition()));
+         }
+
+         footstepDataMessage.setSwingDuration(calculateSwingTime(startPose.getPosition(), endPose.getPosition()));
+      }
    }
 }

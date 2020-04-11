@@ -37,7 +37,7 @@ public class ConstantPelvisRotationalStateUpdater implements PelvisRotationalSta
    @Override
    public void updateRootJointOrientationAndAngularVelocity()
    {
-      yoRootJointFrameOrientation.getQuaternion(rootJointOrientation);
+      rootJointOrientation.set(yoRootJointFrameOrientation);
       rootJoint.setJointOrientation(rootJointOrientation);
 
       twistRootBodyRelativeToWorld.setIncludingFrame(rootJoint.getJointTwist());
@@ -48,7 +48,7 @@ public class ConstantPelvisRotationalStateUpdater implements PelvisRotationalSta
    @Override
    public void getEstimatedOrientation(FrameQuaternion estimatedOrientation)
    {
-      yoRootJointFrameOrientation.getFrameOrientationIncludingFrame(estimatedOrientation);
+      estimatedOrientation.setIncludingFrame(yoRootJointFrameOrientation);
    }
 
    @Override

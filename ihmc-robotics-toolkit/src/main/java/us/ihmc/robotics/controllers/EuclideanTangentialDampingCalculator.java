@@ -43,7 +43,7 @@ public class EuclideanTangentialDampingCalculator
          {
             positionError.changeFrame(bodyFrame);
 
-            EuclidGeometryTools.axisAngleFromZUpToVector3D(positionError, rotationToControlFrame);
+            EuclidGeometryTools.orientation3DFromZUpToVector3D(positionError, rotationToControlFrame);
 
             transformToParent.setRotationAndZeroTranslation(rotationToControlFrame);
          }

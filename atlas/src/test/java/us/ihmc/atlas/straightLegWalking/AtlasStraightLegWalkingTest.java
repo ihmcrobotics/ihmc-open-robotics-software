@@ -27,6 +27,7 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationGains;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
+import us.ihmc.simulationConstructionSetTools.util.dataProcessors.RobotAllJointsDataChecker;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 
 @Tag("humanoid-flat-ground-slow")
@@ -127,7 +128,7 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
       @Override
       public ICPWithTimeFreezingPlannerParameters getCapturePointPlannerParameters()
       {
-         return new TestICPPlannerParameters(getPhysicalProperties());
+         return new TestICPPlannerParameters(getPhysicalProperties(), RobotTarget.SCS);
       }
    }
 
@@ -362,9 +363,9 @@ public class AtlasStraightLegWalkingTest extends AvatarStraightLegWalkingTest
 
    private class TestICPPlannerParameters extends AtlasSmoothCMPPlannerParameters
    {
-      public TestICPPlannerParameters(AtlasPhysicalProperties physicalProperties)
+      public TestICPPlannerParameters(AtlasPhysicalProperties physicalProperties, RobotTarget target)
       {
-         super(physicalProperties);
+         super(physicalProperties, target);
       }
 
       @Override

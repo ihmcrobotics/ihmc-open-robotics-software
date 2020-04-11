@@ -83,7 +83,7 @@
                      </children>
                   </AnchorPane>
                </content>
-            </Tab>
+            </Tab>            
          </tabs>
       </TabPane>
    </bottom>

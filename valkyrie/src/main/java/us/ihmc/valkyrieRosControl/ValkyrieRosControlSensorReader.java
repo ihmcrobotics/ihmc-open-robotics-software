@@ -5,7 +5,6 @@ import java.util.stream.Collectors;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -191,11 +190,11 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
       lowlLevelController.subtractTorqueOffset(oneDoFJoint, torqueOffset);
    }
 
-   public void attachControllerAPI(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager)
+   public void attachControllerAPI(StatusMessageOutputManager statusOutputManager)
    {
       if (ValkyrieRosControlController.ENABLE_FINGER_JOINTS)
-         fingerStateEstimator.attachControllerAPI(commandInputManager, statusOutputManager);
-      lowlLevelController.attachControllerAPI(commandInputManager, statusOutputManager);
+         fingerStateEstimator.attachControllerAPI(statusOutputManager);
+      lowlLevelController.attachControllerAPI(statusOutputManager);
    }
 
    public void attachJointTorqueOffsetEstimator(JointTorqueOffsetEstimator jointTorqueOffsetEstimator)

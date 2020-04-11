@@ -1,6 +1,6 @@
 package us.ihmc.valkyrie.kinematics.transmissions;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -22,7 +22,7 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
 
    private static final double DEGREES = Math.PI/180.0;
 
-   private Axis topJointAxis, bottomJointAxis;
+   private Axis3D topJointAxis, bottomJointAxis;
    
    private double heightOfTopAxisAboveBottomAxis;    // meters (m)
 
@@ -114,11 +114,11 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
       
       RigidBodyTransform transformFromActuatorSlide5FrameToBoneFrame = new RigidBodyTransform();      
       transformFromActuatorSlide5FrameToBoneFrame.setRotationPitchAndZeroTranslation(-actuatorSlider5PitchRotation);
-      transformFromActuatorSlide5FrameToBoneFrame.setTranslation(new Vector3D(rod5PointInBoneFrame));
+      transformFromActuatorSlide5FrameToBoneFrame.getTranslation().set(new Vector3D(rod5PointInBoneFrame));
       
       RigidBodyTransform transformFromActuatorSlide6FrameToBoneFrame = new RigidBodyTransform();      
       transformFromActuatorSlide6FrameToBoneFrame.setRotationPitchAndZeroTranslation(-actuatorSlider6PitchRotation);
-      transformFromActuatorSlide6FrameToBoneFrame.setTranslation(new Vector3D(rod6PointInBoneFrame));
+      transformFromActuatorSlide6FrameToBoneFrame.getTranslation().set(new Vector3D(rod6PointInBoneFrame));
 
       actuator5SlideFrame.setTransformAndUpdate(transformFromActuatorSlide5FrameToBoneFrame);
       actuator6SlideFrame.setTransformAndUpdate(transformFromActuatorSlide6FrameToBoneFrame);
@@ -180,8 +180,8 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
    
    public void setupForAnkleActuators()
    {
-      topJointAxis = Axis.Y; // Pitch.
-      bottomJointAxis = Axis.X; // Roll.
+      topJointAxis = Axis3D.Y; // Pitch.
+      bottomJointAxis = Axis3D.X; // Roll.
       
       heightOfTopAxisAboveBottomAxis = 0.0127;
 
@@ -199,8 +199,8 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
    
    public void setupForWaistActuators()
    {
-      topJointAxis = Axis.X; // Roll.
-      bottomJointAxis = Axis.Y; // Pitch.
+      topJointAxis = Axis3D.X; // Roll.
+      bottomJointAxis = Axis3D.Y; // Pitch.
       
       heightOfTopAxisAboveBottomAxis = 0.02032;
 
@@ -403,13 +403,13 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
 
    }
    
-   private void setJacobianElement(YoDouble jacobianElement, FrameVector3D rCrossFVector, Axis jointAxis)
+   private void setJacobianElement(YoDouble jacobianElement, FrameVector3D rCrossFVector, Axis3D jointAxis)
    {
-      if (jointAxis == Axis.X)
+      if (jointAxis == Axis3D.X)
       {
          jacobianElement.set(rCrossFVector.getX());
       }
-      else if (jointAxis == Axis.Y)
+      else if (jointAxis == Axis3D.Y)
       {
          jacobianElement.set(rCrossFVector.getY());
       }
@@ -419,7 +419,7 @@ public class InefficientPushrodTransmissionJacobian implements PushrodTransmissi
       }
    }
 
-   private static void computeRotationTransform(RigidBodyTransform transform3DToPack, double rotationAngle, Axis rotationAxis)
+   private static void computeRotationTransform(RigidBodyTransform transform3DToPack, double rotationAngle, Axis3D rotationAxis)
    {
       transform3DToPack.setIdentity();
       switch(rotationAxis)

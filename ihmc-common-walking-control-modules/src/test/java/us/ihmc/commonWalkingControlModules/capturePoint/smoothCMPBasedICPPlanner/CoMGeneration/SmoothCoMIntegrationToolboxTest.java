@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner
 import us.ihmc.commons.RandomNumbers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -310,7 +310,7 @@ public class SmoothCoMIntegrationToolboxTest
          DenseMatrix64F polynomialCoeffs = new DenseMatrix64F(3 * nPolynomialCoeffs, 1);
          DenseMatrixVector3D polynomialCoeffsVector = new DenseMatrixVector3D(nPolynomialCoeffs, 1);
 
-         for (Axis axis : Axis.values)
+         for (Axis3D axis : Axis3D.values)
          {
             int rowOffset = nPolynomialCoeffs * axis.ordinal();
 
@@ -399,18 +399,18 @@ public class SmoothCoMIntegrationToolboxTest
 
          DenseMatrix64F error = new DenseMatrix64F(3, 3 * cmpPolynomial3D.getNumberOfCoefficients());
 
-         for (int k = 0; k < actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.X).numCols; k++)
-            error.set(0, k, expectedGeneralizedAlphaBetaCoMPrime.get(0, k) - actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.X).get(0, k));
+         for (int k = 0; k < actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis3D.X).numCols; k++)
+            error.set(0, k, expectedGeneralizedAlphaBetaCoMPrime.get(0, k) - actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis3D.X).get(0, k));
 
-         int colOffset = actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.X).numCols;
-         for (int k = 0; k < actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.Y).numCols; k++)
+         int colOffset = actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis3D.X).numCols;
+         for (int k = 0; k < actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis3D.Y).numCols; k++)
             error.set(1, colOffset + k,
-                      expectedGeneralizedAlphaBetaCoMPrime.get(1, colOffset + k) - actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.Y).get(0, k));
+                      expectedGeneralizedAlphaBetaCoMPrime.get(1, colOffset + k) - actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis3D.Y).get(0, k));
 
-         colOffset += actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.Y).numCols;
-         for (int k = 0; k < actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.Z).numCols; k++)
+         colOffset += actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis3D.Y).numCols;
+         for (int k = 0; k < actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis3D.Z).numCols; k++)
             error.set(2, colOffset + k,
-                      expectedGeneralizedAlphaBetaCoMPrime.get(2, colOffset + k) - actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis.Z).get(0, k));
+                      expectedGeneralizedAlphaBetaCoMPrime.get(2, colOffset + k) - actualGeneralizedAlphaBetaCoMPrime.getMatrix(Axis3D.Z).get(0, k));
 
          for (int j = 0; j < error.getNumElements(); j++)
             error.set(j, Math.abs(error.get(j)));

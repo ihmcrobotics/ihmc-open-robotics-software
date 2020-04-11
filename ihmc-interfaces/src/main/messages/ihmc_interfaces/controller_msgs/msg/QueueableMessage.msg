@@ -37,3 +37,6 @@ float64 execution_delay_time
 # This integration allows to improve continuity of execution for streams.
 # If no new message is received once the integration duration has elapsed, the controller will hold the desired position and reset the desired velocity to 0.
 float64 stream_integration_duration 0
+# Timestamp (in nanoseconds) when this message was created.
+# The timestamp can be generated from the computer where this message originates.
+int64 timestamp

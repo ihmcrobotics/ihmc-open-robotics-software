@@ -54,13 +54,13 @@ public class OrientationGraphic
 
    public void setPosition(Point3DReadOnly position)
    {
-      this.pose.setPosition(position);
+      this.pose.getPosition().set(position);
       update();
    }
 
    public void setOrientation(Orientation3DReadOnly orientation)
    {
-      this.pose.setOrientation(orientation);
+      this.pose.getOrientation().set(orientation);
       update();
    }
 

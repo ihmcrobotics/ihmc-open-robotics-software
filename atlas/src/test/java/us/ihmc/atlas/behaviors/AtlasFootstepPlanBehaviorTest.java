@@ -57,9 +57,9 @@ public class AtlasFootstepPlanBehaviorTest
 
       footstepDataListPublisher.publish(output.getFootstepDataList());
 
-      AtlasTestScripts.takeSteps(conductor, variables, output.getFootstepDataList().getFootstepDataList().size(), 6.0);
+      AtlasTestScripts.awaitSteps(conductor, variables, output.getFootstepDataList().getFootstepDataList().size(), 6.0);
 
-      AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, 6.0);
+      AtlasTestScripts.awaitDoubleSupportReachedAndHeld(conductor, variables, 3.0, 6.0);
    }
 
    @Disabled
@@ -81,7 +81,7 @@ public class AtlasFootstepPlanBehaviorTest
       RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, null);
 
-      AtlasTestScripts.wait(conductor, variables, 0.25);  // allows to update frames
+      AtlasTestScripts.awaitDuration(conductor, variables, 0.25);  // allows to update frames
 
       planSteps(0.0, 0.0, 0.5);  // 0.24 s
       planSteps(0.0, 0.0, -0.5); // 0.38 s
@@ -98,7 +98,7 @@ public class AtlasFootstepPlanBehaviorTest
       planSteps(0.0, 0.0, 3.1); // timeout
       planSteps(0.0, 0.0, -3.1);
 
-      AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, 6.0);
+      AtlasTestScripts.awaitDoubleSupportReachedAndHeld(conductor, variables, 3.0, 6.0);
    }
 
    private void planSteps(double x, double y, double yaw)
@@ -118,14 +118,14 @@ public class AtlasFootstepPlanBehaviorTest
       RemoteFootstepPlannerResult result = resultNotification.blockingPoll();
 
       LogTools.info("Received footstep planning result: {}", FootstepPlanningResult.fromByte(result.getMessage().getFootstepPlanningResult()));
-      LogTools.info("Received footstep plan took: {} s", result.getMessage().getFootstepPlanningStatistics().getTimeTaken());
+      LogTools.info("Received footstep plan took: {} s", result.getMessage().getPlannerTimings().getTotalElapsedSeconds());
       LogTools.info("Received footstep planning status: {}", result);
 
       assertTrue(result.isValidForExecution(), "Solution failed");
 
       footstepDataListPublisher.publish(result.getMessage().getFootstepDataList());
 
-      AtlasTestScripts.takeSteps(conductor, variables, result.getMessage().getFootstepDataList().getFootstepDataList().size(), 6.0);
+      AtlasTestScripts.awaitSteps(conductor, variables, result.getMessage().getFootstepDataList().getFootstepDataList().size(), 6.0);
 
       lastX = x;
       lastY = y;
@@ -144,11 +144,11 @@ public class AtlasFootstepPlanBehaviorTest
 
       footstepDataListPublisher.publish(output.getFootstepDataList());
 
-      AtlasTestScripts.takeSteps(conductor, variables, output.getFootstepDataList().getFootstepDataList().size() / 2, 6.0);
+      AtlasTestScripts.awaitSteps(conductor, variables, output.getFootstepDataList().getFootstepDataList().size() / 2, 6.0);
 
       abortPublisher.publish(new AbortWalkingMessage());   // stop
 
-      AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, 0.5);
+      AtlasTestScripts.awaitDoubleSupportReachedAndHeld(conductor, variables, 3.0, 0.5);
    }
 
    private FootstepPlanningToolboxOutputStatus setupForFootstepTest() throws IOException
@@ -168,7 +168,7 @@ public class AtlasFootstepPlanBehaviorTest
       RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
       RemoteFootstepPlannerInterface remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, null);
 
-      AtlasTestScripts.wait(conductor, variables, 0.25);  // allows to update frames
+      AtlasTestScripts.awaitDuration(conductor, variables, 0.25);  // allows to update frames
 
       FramePose3D midFeetZUpPose = new FramePose3D(remoteSyncedHumanoidRobotState.pollHumanoidRobotState().getMidFeetZUpFrame());
       LogTools.debug("MidFeetZUp = {}", midFeetZUpPose);
@@ -201,7 +201,7 @@ public class AtlasFootstepPlanBehaviorTest
       conductor = new GoalOrientedTestConductor(scs, simulationTestingParameters);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      AtlasTestScripts.standUp(conductor, variables);
+      AtlasTestScripts.awaitStandUp(conductor, variables);
    }
 
    @AfterAll

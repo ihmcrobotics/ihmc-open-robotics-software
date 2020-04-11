@@ -1,18 +1,36 @@
 package us.ihmc.humanoidBehaviors.exploreArea;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -22,8 +40,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
-import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
@@ -58,15 +76,10 @@ import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.TypedNotification;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
-
 public class ExploreAreaBehavior implements BehaviorInterface
 {
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Explore Area", ExploreAreaBehavior::new, ExploreAreaBehaviorAPI.create());
+
    private final ExploreAreaBehaviorParameters parameters = new ExploreAreaBehaviorParameters();
 
    private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -214,7 +227,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          //         transform.setTranslation(0.01, -0.01, 0.01);
          //         transform.setTranslation(0.02, -0.02, 0.0);
          //         transform.setTranslation(0.02, -0.02, 0.02);
-         transform.setRotationYaw(0.025);
+         transform.getRotation().setToYawOrientation(0.025);
 
          boolean sendingSlamCorrection = false;
          publishPoseUpdateForStateEstimator(transform, sendingSlamCorrection);
@@ -381,7 +394,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private void doSlam(boolean doSlam)
    {
-      PlanarRegionsList latestPlanarRegionsList = rea.getLatestPlanarRegionList();
+      PlanarRegionsList latestPlanarRegionsList = rea.getLatestPlanarRegionsList();
 
       this.latestPlanarRegionsList = latestPlanarRegionsList;
       if (concatenatedMap == null)
@@ -628,7 +641,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          FramePoint3D desiredLocation = new FramePoint3D(midFeetZUpFrame, 0.0, 0.0, 0.0);
 
          FramePose3D desiredFramePose = new FramePose3D(midFeetZUpFrame);
-         desiredFramePose.setPosition(desiredLocation);
+         desiredFramePose.getPosition().set(desiredLocation);
 
          desiredFramePose.changeFrame(worldFrame);
          desiredFramePoses.add(desiredFramePose);
@@ -648,8 +661,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
          double yaw = Math.atan2(startToGoal.getY(), startToGoal.getX());
 
          FramePose3D desiredFramePose = new FramePose3D(worldFrame);
-         desiredFramePose.setPosition(goalPoint);
-         desiredFramePose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
+         desiredFramePose.getPosition().set(goalPoint);
+         desiredFramePose.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
          desiredFramePoses.add(desiredFramePose);
       }
 

@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
-public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
+public class ObstacleBetweenNodesChecker
 {
    private static final boolean DEBUG = false;
 
@@ -49,13 +49,6 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
       this.heightExtrusion = heightExtrusion;
    }
 
-   @Override
-   public void setFootstepGraph(DirectedGraph graph)
-   {
-
-   }
-
-   @Override
    public void setPlanarRegions(PlanarRegionsList planarRegions)
    {
       this.planarRegionsList = planarRegions;
@@ -66,10 +59,9 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
       return planarRegionsList != null && !planarRegionsList.isEmpty();
    }
 
-   @Override
    public boolean isNodeValid(FootstepNode node, FootstepNode previousNode)
    {
-      if (previousNode == null || !checkForPathCollisions.getAsBoolean())
+      if (previousNode == null || !checkForPathCollisions.getAsBoolean() || !hasPlanarRegions())
          return true;
 
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
@@ -84,7 +76,7 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
       snapTransform.transform(nodePosition);
       previousSnapTransform.transform(previousNodePosition);
 
-      if (hasPlanarRegions() && isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegionsList.getPlanarRegionsAsList()))
+      if (isObstacleBetweenNodes(nodePosition, previousNodePosition, planarRegionsList.getPlanarRegionsAsList()))
       {
          if (DEBUG)
          {
@@ -149,10 +141,9 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
       zAxis.cross(xAxisInPlane, yAxisInPlane);
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setRotation(xAxisInPlane.getX(), xAxisInPlane.getY(), xAxisInPlane.getZ(), yAxisInPlane.getX(), yAxisInPlane.getY(), yAxisInPlane.getZ(),
-                            zAxis.getX(), zAxis.getY(), zAxis.getZ());
-      transform.setTranslation(point0);
-      transform.invertRotation();
+      transform.getRotation().set(xAxisInPlane.getX(), xAxisInPlane.getY(), xAxisInPlane.getZ(), yAxisInPlane.getX(), yAxisInPlane.getY(), yAxisInPlane.getZ(), zAxis.getX(), zAxis.getY(), zAxis.getZ());
+      transform.getTranslation().set(point0);
+      transform.getRotation().invert();
 
       point0.applyInverseTransform(transform);
       point1.applyInverseTransform(transform);
@@ -167,11 +158,5 @@ public class ObstacleBetweenNodesChecker implements SnapBasedCheckerComponent
       polygon.update();
 
       return new PlanarRegion(transform, polygon);
-   }
-
-   @Override
-   public BipedalFootstepPlannerNodeRejectionReason getRejectionReason()
-   {
-      return BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_BLOCKING_BODY;
    }
 }

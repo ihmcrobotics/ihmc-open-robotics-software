@@ -1,15 +1,7 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
-import java.util.ArrayList;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepNodeDataListMessage;
-import controller_msgs.msg.dds.FootstepNodeDataMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -19,6 +11,7 @@ import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -28,11 +21,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeData;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerNodeDataList;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.idl.IDLSequence;
 import us.ihmc.idl.IDLSequence.Double;
 import us.ihmc.jMonkeyEngineToolkit.tralala.Pair;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
@@ -42,6 +31,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+
+import java.util.ArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
@@ -58,12 +53,11 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
    private final double[] defaultWaypointProportions = new double[]{0.15, 0.85};
    private final AtomicReference<Boolean> showSolution;
-   private final AtomicReference<Boolean> showIntermediatePlan;
    private final AtomicReference<Boolean> showPostProcessingInfo;
    private final AtomicReference<FootstepDataListMessage> footstepDataListMessage;
    private final AtomicReference<Boolean> ignorePartialFootholds;
-   private final AtomicReference<Point3D> leftFootPosition;
-   private final AtomicReference<Point3D> rightFootPosition;
+   private final AtomicReference<Pose3DReadOnly> leftFootPose;
+   private final AtomicReference<Pose3DReadOnly> rightFootPose;
    private final AtomicBoolean solutionWasReceived = new AtomicBoolean(false);
    private final AtomicBoolean reset = new AtomicBoolean(false);
    private final AtomicBoolean renderShiftedFootsteps = new AtomicBoolean(false);
@@ -80,17 +74,12 @@ public class FootstepPathMeshViewer extends AnimationTimer
    {
       ignorePartialFootholds = messager.createInput(IgnorePartialFootholds, false);
       footstepDataListMessage = messager.createInput(FootstepPlanResponse, null);
-      leftFootPosition = messager.createInput(LeftFootStartPosition, null);
-      rightFootPosition = messager.createInput(RightFootStartPosition, null);
+      leftFootPose = messager.createInput(LeftFootPose, null);
+      rightFootPose = messager.createInput(RightFootPose, null);
 
       messager.registerTopicListener(FootstepPlanResponse, footstepPlan -> executorService.submit(() -> {
          solutionWasReceived.set(true);
          processFootstepPath(footstepPlan);
-      }));
-
-      messager.registerTopicListener(NodeData, nodeData -> executorService.submit(() -> {
-         solutionWasReceived.set(false);
-         processLowestCostNodeList(nodeData);
       }));
 
       messager.registerTopicListener(RenderShiftedWaypoints, value ->
@@ -100,36 +89,20 @@ public class FootstepPathMeshViewer extends AnimationTimer
       });
 
       messager.registerTopicListener(IgnorePartialFootholds, b -> processFootstepPath(footstepDataListMessage.get()));
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
+      messager.registerTopicListener(ComputePath, data -> reset.set(true));
+      messager.registerTopicListener(GlobalReset, data -> reset.set(true));
 
       showSolution = messager.createInput(ShowFootstepPlan, true);
-      showIntermediatePlan = messager.createInput(ShowNodeData, true);
       showPostProcessingInfo = messager.createInput(ShowPostProcessingInfo, true);
-   }
-
-   private void processLowestCostNodeList(PlannerNodeDataList nodeDataList)
-   {
-      if (nodeDataList.isFootstepGraph())
-         return;
-
-
-      FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
-      for (PlannerNodeData nodeData : nodeDataList.getNodeData())
-         addNodeDataToFootstepPlan(footstepDataListMessage, nodeData);
-
-      processFootstepPath(footstepDataListMessage);
-   }
-
-   private static void addNodeDataToFootstepPlan(FootstepDataListMessage footstepDataListMessage, PlannerNodeData nodeData)
-   {
-      FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().add();
-      footstepDataMessage.getLocation().set(nodeData.getNodePose().getTranslation());
-      footstepDataMessage.getOrientation().set(nodeData.getNodePose().getRotation());
-      footstepDataMessage.setRobotSide(nodeData.getFootstepNode().getRobotSide().toByte());
    }
 
    private synchronized void processFootstepPath(FootstepDataListMessage footstepDataListMessage)
    {
+      if (footstepDataListMessage == null)
+      {
+         return;
+      }
+
       meshBuilder.clear();
 
       FramePose3D footPose = new FramePose3D();
@@ -145,20 +118,20 @@ public class FootstepPathMeshViewer extends AnimationTimer
          }
       }
 
-      boolean hasInfoToRenderFootsteps = leftFootPosition.get() != null && rightFootPosition.get() != null;
+      boolean hasInfoToRenderFootsteps = leftFootPose.get() != null && rightFootPose.get() != null;
 
       FramePoint3D stanceFootPosition = new FramePoint3D();
       FramePoint3D previousStanceFootPosition = new FramePoint3D();
       RobotSide firstStepSide = plan.getFootstep(0).getRobotSide();
       if (hasInfoToRenderFootsteps && firstStepSide == RobotSide.LEFT)
       {
-         previousStanceFootPosition.set(leftFootPosition.get());
-         stanceFootPosition.set(rightFootPosition.get());
+         previousStanceFootPosition.set(leftFootPose.get().getPosition());
+         stanceFootPosition.set(rightFootPose.get().getPosition());
       }
       else if (hasInfoToRenderFootsteps)
       {
-         previousStanceFootPosition.set(rightFootPosition.get());
-         stanceFootPosition.set(leftFootPosition.get());
+         previousStanceFootPosition.set(rightFootPose.get().getPosition());
+         stanceFootPosition.set(leftFootPose.get().getPosition());
       }
 
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
@@ -229,14 +202,8 @@ public class FootstepPathMeshViewer extends AnimationTimer
             }
          }
       }
-      else if (solutionWasReceived.get())
-      {
-         return footstepDataMessage.getRobotSide() == 0 ? Color.RED : Color.GREEN;
-      }
-      else
-      {
-         return Color.GRAY;
-      }
+
+      return footstepDataMessage.getRobotSide() == 0 ? Color.RED : Color.GREEN;
    }
 
    private Color getWaypointColor(FootstepDataMessage footstepDataMessage)
@@ -258,17 +225,15 @@ public class FootstepPathMeshViewer extends AnimationTimer
    @Override
    public void handle(long now)
    {
-      boolean addIntermediatePlan = showIntermediatePlan.get() && !solutionWasReceived.get() && root.getChildren().isEmpty();
-      boolean addFinalPlan = showSolution.get() && solutionWasReceived.get() && root.getChildren().isEmpty();
-      if (addIntermediatePlan || addFinalPlan)
+      boolean addSolution = showSolution.get() && solutionWasReceived.get() && root.getChildren().isEmpty();
+      if (addSolution)
          root.getChildren().add(footstepPathMeshView);
-      boolean addPostProcessingInfo = showPostProcessingInfo.get() && addFinalPlan;
+      boolean addPostProcessingInfo = showPostProcessingInfo.get() && addSolution;
       if (addPostProcessingInfo)
          root.getChildren().add(footstepPostProcessedMeshView);
 
-      boolean removeIntermediatePlan = !showIntermediatePlan.get() && !solutionWasReceived.get() && !root.getChildren().isEmpty();
-      boolean removeFinalPlan = !showSolution.get() && solutionWasReceived.get() && !root.getChildren().isEmpty();
-      if (removeIntermediatePlan || removeFinalPlan)
+      boolean removeSolution = !showSolution.get() && solutionWasReceived.get() && !root.getChildren().isEmpty();
+      if (removeSolution)
          root.getChildren().clear();
 
       if (reset.getAndSet(false))

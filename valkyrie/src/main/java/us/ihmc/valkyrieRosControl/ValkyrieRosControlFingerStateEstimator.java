@@ -39,7 +39,6 @@ import org.yaml.snakeyaml.Yaml;
 
 import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager.StatusMessageListener;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
@@ -97,6 +96,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
       List<OneDoFJointBasics> allJoints = stateEstimatorSensorDefinitions.getJointSensorDefinitions();
 
       forceMotorBasedPositionSwitch = new YoBoolean("forceMotorBasedPositionSwitch", registry);
+      forceMotorBasedPositionSwitch.set(true); // The finger joint encoders are too unreliable, ignore them.
       doZeroFingerCalibrationNow = new YoEnum<>("doZeroFingerCalibrationNow", registry, RobotSide.class, true);
       doZeroFingerCalibrationNow.set(null);
       startFingerCalibration = new YoBoolean("startFingerCalibration", registry);
@@ -424,7 +424,7 @@ public class ValkyrieRosControlFingerStateEstimator implements SensorProcessingC
       }
    }
 
-   public void attachControllerAPI(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager)
+   public void attachControllerAPI(StatusMessageOutputManager statusOutputManager)
    {
       statusOutputManager.attachStatusMessageListener(HighLevelStateChangeStatusMessage.class, new StatusMessageListener<HighLevelStateChangeStatusMessage>()
       {

@@ -67,6 +67,8 @@ public class LIDARBasedEnvironmentAwarenessUI
 
    private final UIConnectionHandler uiConnectionHandler;
 
+   private final StereoVisionPointCloudDataExporter stereoVisionPointCloudDataExporter;
+
    private LIDARBasedEnvironmentAwarenessUI(REAUIMessager uiMessager, Stage primaryStage) throws Exception
    {
       this.primaryStage = primaryStage;
@@ -93,7 +95,7 @@ public class LIDARBasedEnvironmentAwarenessUI
                                                                      SensorFrameViewer.createStampedPosePacketSensorFrameExtractor());
       new PlanarRegionSegmentationDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       new PlanarRegionDataExporter(uiMessager); // No need to anything with it beside instantiating it.
-      new StereoVisionPointCloudDataExporter(uiMessager);
+      stereoVisionPointCloudDataExporter = new StereoVisionPointCloudDataExporter(uiMessager);
 
       initializeControllers(uiMessager);
 
@@ -195,6 +197,8 @@ public class LIDARBasedEnvironmentAwarenessUI
          reaMeshViewer.stop();
          lidarFrameViewer.stop();
          stereoFrameViewer.stop();
+
+         stereoVisionPointCloudDataExporter.shutdown();
       }
       catch (Exception e)
       {

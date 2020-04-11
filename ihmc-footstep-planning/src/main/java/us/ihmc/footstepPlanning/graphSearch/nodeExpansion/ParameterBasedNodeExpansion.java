@@ -14,7 +14,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.HashSet;
 import java.util.function.DoubleSupplier;
 
-public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
+public class ParameterBasedNodeExpansion
 {
    private final HashSet<FootstepNode> expansion = new HashSet<>();
 
@@ -66,7 +66,6 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       this.minYClearanceFromStance = minYClearanceFromStance;
    }
 
-   @Override
    public HashSet<FootstepNode> expandNode(FootstepNode node)
    {
       expansion.clear();
