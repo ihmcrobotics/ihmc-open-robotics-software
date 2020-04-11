@@ -113,4 +113,10 @@ public class VisibilityMap implements Transformable, Iterable<Connection>
    {
       connections.forEach(c -> c.applyInverseTransform(transform));
    }
+
+   public void clear()
+   {
+      connections.clear();
+      vertices.clear();
+   }
 }

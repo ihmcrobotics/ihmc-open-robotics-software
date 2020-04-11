@@ -15,5 +15,18 @@ float64 sensor_pose_confidence 1.0
 # The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
 # The confidence of the point cloud represents the quality of the collected point cloud data.
 float64 point_cloud_confidence 1.0
-float32[<=600000] point_cloud
-int32[<=200000] colors
+
+# The center location of the bounding box of all the points.
+# The location of each point in the pointcloud is with respect to this location.
+geometry_msgs/Point point_cloud_center
+# The pointcloud is compressed by using an octree.
+# This indicates the resolution used for the octree, the octree depth is 16.
+float64 resolution
+# The number of points in this frame.
+int32 number_of_points
+# The compressed pointcloud.
+# See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+byte[<=2000000] point_cloud
+# The compressed colors.
+# See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+byte[<=700000] colors

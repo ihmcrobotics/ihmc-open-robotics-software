@@ -282,7 +282,7 @@ public class FootstepListBehavior extends AbstractBehavior
 
       RigidBodyTransform firstSingleSupportFootTransformToWorld = fullRobotModel.getFoot(RobotSide.fromByte(firstStepData.getRobotSide()).getOppositeSide())
                                                                                 .getBodyFixedFrame().getTransformToWorldFrame();
-      firstSingleSupportFootTransformToWorld.getTranslation(firstSingleSupportFootTranslationFromWorld);
+      firstSingleSupportFootTranslationFromWorld.set(firstSingleSupportFootTransformToWorld.getTranslation());
 
       previousFootStepLocation.set(firstSingleSupportFootTranslationFromWorld);
       nextFootStepLocation.set(firstStepData.getLocation());

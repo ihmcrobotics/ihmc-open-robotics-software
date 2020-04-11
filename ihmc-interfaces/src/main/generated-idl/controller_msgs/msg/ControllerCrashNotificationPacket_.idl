@@ -38,7 +38,9 @@ module controller_msgs
         unsigned long sequence_id;
         @defaultValue(value=255)
         octet controller_crash_location;
-        string stacktrace;
+        string exception_type;
+        string error_message;
+        sequence<string, 50> stacktrace;
       };
     };
   };

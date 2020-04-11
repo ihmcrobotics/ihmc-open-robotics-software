@@ -60,9 +60,15 @@ public class FootstepPostProcessingParametersPacketPubSubType implements us.ihmc
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -121,10 +127,19 @@ public class FootstepPostProcessingParametersPacketPubSubType implements us.ihmc
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -174,13 +189,19 @@ public class FootstepPostProcessingParametersPacketPubSubType implements us.ihmc
 
       cdr.write_type_6(data.getMinimumSwingFootClearance());
 
+      cdr.write_type_6(data.getFastApproximationLessClearance());
+
       cdr.write_type_4(data.getNumberOfChecksPerSwing());
 
       cdr.write_type_4(data.getMaximumNumberOfAdjustmentAttempts());
 
       cdr.write_type_6(data.getMaximumWaypointAdjustmentDistance());
 
-      cdr.write_type_6(data.getIncrementalWaypointAdjustmentDistance());
+      cdr.write_type_6(data.getMinimumAdjustmentIncrementDistance());
+
+      cdr.write_type_6(data.getMaximumAdjustmentIncrementDistance());
+
+      cdr.write_type_6(data.getAdjustmentIncrementDistanceGain());
 
       cdr.write_type_6(data.getMinimumHeightAboveFloorForCollision());
 
@@ -216,13 +237,19 @@ public class FootstepPostProcessingParametersPacketPubSubType implements us.ihmc
       	
       data.setMinimumSwingFootClearance(cdr.read_type_6());
       	
+      data.setFastApproximationLessClearance(cdr.read_type_6());
+      	
       data.setNumberOfChecksPerSwing(cdr.read_type_4());
       	
       data.setMaximumNumberOfAdjustmentAttempts(cdr.read_type_4());
       	
       data.setMaximumWaypointAdjustmentDistance(cdr.read_type_6());
       	
-      data.setIncrementalWaypointAdjustmentDistance(cdr.read_type_6());
+      data.setMinimumAdjustmentIncrementDistance(cdr.read_type_6());
+      	
+      data.setMaximumAdjustmentIncrementDistance(cdr.read_type_6());
+      	
+      data.setAdjustmentIncrementDistanceGain(cdr.read_type_6());
       	
       data.setMinimumHeightAboveFloorForCollision(cdr.read_type_6());
       	
@@ -250,10 +277,13 @@ public class FootstepPostProcessingParametersPacketPubSubType implements us.ihmc
       ser.write_type_6("transfer_weight_distribution_at_full_depth", data.getTransferWeightDistributionAtFullDepth());
       ser.write_type_7("do_initial_fast_approximation", data.getDoInitialFastApproximation());
       ser.write_type_6("minimum_swing_foot_clearance", data.getMinimumSwingFootClearance());
+      ser.write_type_6("fast_approximation_less_clearance", data.getFastApproximationLessClearance());
       ser.write_type_4("number_of_checks_per_swing", data.getNumberOfChecksPerSwing());
       ser.write_type_4("maximum_number_of_adjustment_attempts", data.getMaximumNumberOfAdjustmentAttempts());
       ser.write_type_6("maximum_waypoint_adjustment_distance", data.getMaximumWaypointAdjustmentDistance());
-      ser.write_type_6("incremental_waypoint_adjustment_distance", data.getIncrementalWaypointAdjustmentDistance());
+      ser.write_type_6("minimum_adjustment_increment_distance", data.getMinimumAdjustmentIncrementDistance());
+      ser.write_type_6("maximum_adjustment_increment_distance", data.getMaximumAdjustmentIncrementDistance());
+      ser.write_type_6("adjustment_increment_distance_gain", data.getAdjustmentIncrementDistanceGain());
       ser.write_type_6("minimum_height_above_floor_for_collision", data.getMinimumHeightAboveFloorForCollision());
       ser.write_type_6("fraction_load_if_foot_has_full_support", data.getFractionLoadIfFootHasFullSupport());
       ser.write_type_6("fraction_time_on_foot_if_foot_has_full_support", data.getFractionTimeOnFootIfFootHasFullSupport());
@@ -274,10 +304,13 @@ public class FootstepPostProcessingParametersPacketPubSubType implements us.ihmc
       data.setTransferWeightDistributionAtFullDepth(ser.read_type_6("transfer_weight_distribution_at_full_depth"));
       data.setDoInitialFastApproximation(ser.read_type_7("do_initial_fast_approximation"));
       data.setMinimumSwingFootClearance(ser.read_type_6("minimum_swing_foot_clearance"));
+      data.setFastApproximationLessClearance(ser.read_type_6("fast_approximation_less_clearance"));
       data.setNumberOfChecksPerSwing(ser.read_type_4("number_of_checks_per_swing"));
       data.setMaximumNumberOfAdjustmentAttempts(ser.read_type_4("maximum_number_of_adjustment_attempts"));
       data.setMaximumWaypointAdjustmentDistance(ser.read_type_6("maximum_waypoint_adjustment_distance"));
-      data.setIncrementalWaypointAdjustmentDistance(ser.read_type_6("incremental_waypoint_adjustment_distance"));
+      data.setMinimumAdjustmentIncrementDistance(ser.read_type_6("minimum_adjustment_increment_distance"));
+      data.setMaximumAdjustmentIncrementDistance(ser.read_type_6("maximum_adjustment_increment_distance"));
+      data.setAdjustmentIncrementDistanceGain(ser.read_type_6("adjustment_increment_distance_gain"));
       data.setMinimumHeightAboveFloorForCollision(ser.read_type_6("minimum_height_above_floor_for_collision"));
       data.setFractionLoadIfFootHasFullSupport(ser.read_type_6("fraction_load_if_foot_has_full_support"));
       data.setFractionTimeOnFootIfFootHasFullSupport(ser.read_type_6("fraction_time_on_foot_if_foot_has_full_support"));

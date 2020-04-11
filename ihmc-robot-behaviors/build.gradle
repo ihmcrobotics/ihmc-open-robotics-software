@@ -2,7 +2,7 @@ plugins {
    id("us.ihmc.ihmc-build") version "0.20.1"
    id("us.ihmc.ihmc-ci") version "5.3"
    id("us.ihmc.ihmc-cd") version "1.14"
-   id("us.ihmc.log-tools") version "0.3.1"
+   id("us.ihmc.log-tools") version "0.4.1"
 }
 
 ihmc {
@@ -17,7 +17,7 @@ mainDependencies {
    api("us.ihmc.thirdparty.org.kc7bfi:jflac:1.4.0")
    api("commons-io:commons-io:2.6")
 
-   api("us.ihmc:ihmc-commons:0.26.6")
+   api("us.ihmc:ihmc-commons:0.28.2")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-java-toolkit:source")
@@ -25,6 +25,6 @@ mainDependencies {
 
 testDependencies {
 
-   api("us.ihmc:ihmc-commons-testing:0.26.6")
+   api("us.ihmc:ihmc-commons-testing:0.28.2")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }

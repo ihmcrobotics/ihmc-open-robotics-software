@@ -15,7 +15,7 @@ import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -107,8 +107,8 @@ public class VisibilityGraphsOcclusionTest
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.addRectangle(10.0, 5.0);
       generator.translate(0.0, 0.0, 1.0);
-      generator.rotate(Math.PI / 2.0, Axis.Y);
-      generator.rotate(Math.PI / 2.0, Axis.Z);
+      generator.rotate(Math.PI / 2.0, Axis3D.Y);
+      generator.rotate(Math.PI / 2.0, Axis3D.Z);
       generator.addRectangle(3.0, 2.0);
 
       PlanarRegionsList regions = generator.getPlanarRegionsList();
@@ -616,12 +616,12 @@ public class VisibilityGraphsOcclusionTest
       //      generator.rotate(Math.toRadians(10.0), Axis.X);
       generator.addRectangle(6.0, 6.0);
       generator.translate(-1.0, -1.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 4.0);
       generator.identity();
       //      generator.rotate(Math.toRadians(10.0), Axis.X);
       generator.translate(1.0, 1.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 4.0);
 
       startPoseToPack.set(-2.0, -2.0, 0.0);
@@ -636,31 +636,31 @@ public class VisibilityGraphsOcclusionTest
    private PlanarRegionsList createMazeOcclusionField(Point3D startPoseToPack, Point3D goalPoseToPack)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.addRectangle(6.0, 12.0);
 
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(-1.0, -2.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 8.0);
 
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(1.0, 0.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 8.0);
 
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(0.0, -4.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.X);
+      generator.rotate(-Math.PI / 2.0, Axis3D.X);
       generator.addRectangle(2.0, 1.0);
 
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(0.0, 4.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.X);
+      generator.rotate(-Math.PI / 2.0, Axis3D.X);
       generator.addRectangle(2.0, 1.0);
 
       startPoseToPack.set(-2.0, -5.0, 0.0);
@@ -694,7 +694,7 @@ public class VisibilityGraphsOcclusionTest
 
       generator.translate(4.5, 2.5, 0.0);
       generator.addRectangle(3.0 + extrusionDistance, 1.0 + extrusionDistance);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
       generator.translate(-0.5 * wallHeight, 0.5 * (wallSeparation + wallWidth), 0.0);
       generator.addRectangle(wallHeight, wallWidth);
       generator.translate(0.0, -2.0 * 0.5 * (wallSeparation + wallWidth), 0.0);
@@ -703,14 +703,14 @@ public class VisibilityGraphsOcclusionTest
 
       // high-sloped ramp
       generator.translate(3.5, 0.5, 0.5);
-      generator.rotate(-0.25 * Math.PI, Axis.Y);
+      generator.rotate(-0.25 * Math.PI, Axis3D.Y);
       generator.addRectangle(Math.sqrt(2.0), 1.0);
       generator.identity();
       generator.translate(4.5, 0.5, 1.0);
       generator.addRectangle(1.0 + extrusionDistance, 1.0 + extrusionDistance);
       generator.identity();
       generator.translate(5.5, 0.5, 0.5);
-      generator.rotate(0.25 * Math.PI, Axis.Y);
+      generator.rotate(0.25 * Math.PI, Axis3D.Y);
       generator.addRectangle(Math.sqrt(2.0), 1.0);
       generator.identity();
 
@@ -741,7 +741,7 @@ public class VisibilityGraphsOcclusionTest
       generator.translate(4.5, -5.5, 0.0);
       generator.addRectangle(3.0 + extrusionDistance, 1.0 + extrusionDistance);
       generator.translate(0.0, 0.0, 0.5 * barrierHeight);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
       generator.addRectangle(barrierHeight, barrierWidth);
       generator.identity();
 
@@ -774,7 +774,7 @@ public class VisibilityGraphsOcclusionTest
       wallHeight = 1.0;
 
       generator.translate(3.0, -9.5, 0.0);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
       generator.translate(-0.5 * wallHeight, 0.5 * (wallSeparation + wallWidth), 0.0);
       generator.addRectangle(wallHeight, wallWidth);
       generator.translate(0.0, -2.0 * 0.5 * (wallSeparation + wallWidth), 0.0);
@@ -850,14 +850,14 @@ public class VisibilityGraphsOcclusionTest
          break;
       }
 
-      Axis axis = null;
+      Axis3D axis = null;
       switch (axisType)
       {
       case 0:
-         axis = Axis.X;
+         axis = Axis3D.X;
          break;
       case 1:
-         axis = Axis.Y;
+         axis = Axis3D.Y;
          break;
       }
 

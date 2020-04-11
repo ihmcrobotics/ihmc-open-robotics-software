@@ -4,7 +4,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.euclid.referenceFrame.FrameOrientation2D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationPlannedBehavior;
@@ -48,7 +47,8 @@ public class TurnInPlaceBehavior extends AbstractBehavior
          protected void setBehaviorInput()
          {
             walkToLocationPlannedBehavior.setAssumeFlatGround(true);
-            walkToLocationPlannedBehavior.setFootStepPlanner(FootstepPlannerType.PLAN_THEN_SNAP);
+            walkToLocationPlannedBehavior.setPlanBodyPath(false);
+            walkToLocationPlannedBehavior.setPerformAStarSearch(false);
             walkToLocationPlannedBehavior.setTarget(targetOrientationInWorldFrame);
          }
       };
@@ -67,7 +67,7 @@ public class TurnInPlaceBehavior extends AbstractBehavior
    public void setTarget(double desiredYaw)
    {
       targetOrientationInWorldFrame = new FramePose3D(referenceFrames.getPelvisZUpFrame());
-      targetOrientationInWorldFrame.setOrientationYawPitchRoll(desiredYaw, 0, 0);
+      targetOrientationInWorldFrame.getOrientation().setYawPitchRoll(desiredYaw, 0, 0);
       targetOrientationInWorldFrame.changeFrame(worldFrame);
 
       hasTargetBeenProvided.set(true);

@@ -4,7 +4,7 @@ import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.ONE_MILLIONTH;
 import static us.ihmc.euclid.tools.EuclidCoreTools.normSquared;
 
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
@@ -167,7 +167,7 @@ public class EuclidCoreMissingTools
     */
    public static void rotationMatrix3DFromZUpToVector3D(Vector3DReadOnly vector, CommonMatrix3DBasics rotationToPack)
    {
-      rotationMatrix3DFromFirstToSecondVector3D(Axis.Z, vector, rotationToPack);
+      rotationMatrix3DFromFirstToSecondVector3D(Axis3D.Z, vector, rotationToPack);
    }
 
    /**

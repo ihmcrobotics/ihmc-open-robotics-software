@@ -1,20 +1,19 @@
 package us.ihmc.footstepPlanning;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 
 import java.util.Random;
 
 public enum FootstepPlanningResult
 {
-   OPTIMAL_SOLUTION,
-   SUB_OPTIMAL_SOLUTION,
-   SOLUTION_DOES_NOT_REACH_GOAL,
+   PLANNING,
+   FOUND_SOLUTION,
    TIMED_OUT_BEFORE_SOLUTION,
    NO_PATH_EXISTS,
-   SNAPPING_FAILED,
-   PLANNER_FAILED,
-   INVALID_GOAL;
+   INVALID_GOAL,
+   MAXIMUM_ITERATIONS_REACHED,
+   EXCEPTION,
+   HALTED;
 
    public static final FootstepPlanningResult[] values = values();
 
@@ -27,9 +26,8 @@ public enum FootstepPlanningResult
    {
       switch (this)
       {
-      case OPTIMAL_SOLUTION:
-      case SUB_OPTIMAL_SOLUTION:
-      case SOLUTION_DOES_NOT_REACH_GOAL:
+      case FOUND_SOLUTION:
+      case PLANNING:
          return true;
       default:
          return false;
@@ -38,14 +36,7 @@ public enum FootstepPlanningResult
 
    public boolean terminalResult()
    {
-      return this != SOLUTION_DOES_NOT_REACH_GOAL;
-   }
-
-   public static FootstepPlanningResult getWorstResult(FootstepPlanningResult resultA, FootstepPlanningResult resultB)
-   {
-      byte aResult = (byte) MathTools.clamp(resultA.toByte(), OPTIMAL_SOLUTION.toByte(), INVALID_GOAL.toByte());
-      byte bResult = (byte) MathTools.clamp(resultB.toByte(), OPTIMAL_SOLUTION.toByte(), INVALID_GOAL.toByte());
-      return fromByte((byte) Math.max(aResult, bResult));
+      return this != PLANNING;
    }
 
    public byte toByte()
@@ -55,6 +46,9 @@ public enum FootstepPlanningResult
 
    public static FootstepPlanningResult fromByte(byte enumAsByte)
    {
-      return values[enumAsByte];
+      if (enumAsByte == -1)
+         return null;
+      else
+         return values[enumAsByte];
    }
 }

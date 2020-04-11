@@ -22,11 +22,15 @@ public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNot
             */
    public long sequence_id_;
    public byte controller_crash_location_ = (byte) 255;
-   public java.lang.StringBuilder stacktrace_;
+   public java.lang.StringBuilder exception_type_;
+   public java.lang.StringBuilder error_message_;
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  stacktrace_;
 
    public ControllerCrashNotificationPacket()
    {
-      stacktrace_ = new java.lang.StringBuilder(255);
+      exception_type_ = new java.lang.StringBuilder(255);
+      error_message_ = new java.lang.StringBuilder(255);
+      stacktrace_ = new us.ihmc.idl.IDLSequence.StringBuilderHolder (50, "type_d");
    }
 
    public ControllerCrashNotificationPacket(ControllerCrashNotificationPacket other)
@@ -41,9 +45,13 @@ public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNot
 
       controller_crash_location_ = other.controller_crash_location_;
 
-      stacktrace_.setLength(0);
-      stacktrace_.append(other.stacktrace_);
+      exception_type_.setLength(0);
+      exception_type_.append(other.exception_type_);
 
+      error_message_.setLength(0);
+      error_message_.append(other.error_message_);
+
+      stacktrace_.set(other.stacktrace_);
    }
 
    /**
@@ -70,17 +78,38 @@ public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNot
       return controller_crash_location_;
    }
 
-   public void setStacktrace(java.lang.String stacktrace)
+   public void setExceptionType(java.lang.String exception_type)
    {
-      stacktrace_.setLength(0);
-      stacktrace_.append(stacktrace);
+      exception_type_.setLength(0);
+      exception_type_.append(exception_type);
    }
 
-   public java.lang.String getStacktraceAsString()
+   public java.lang.String getExceptionTypeAsString()
    {
-      return getStacktrace().toString();
+      return getExceptionType().toString();
    }
-   public java.lang.StringBuilder getStacktrace()
+   public java.lang.StringBuilder getExceptionType()
+   {
+      return exception_type_;
+   }
+
+   public void setErrorMessage(java.lang.String error_message)
+   {
+      error_message_.setLength(0);
+      error_message_.append(error_message);
+   }
+
+   public java.lang.String getErrorMessageAsString()
+   {
+      return getErrorMessage().toString();
+   }
+   public java.lang.StringBuilder getErrorMessage()
+   {
+      return error_message_;
+   }
+
+
+   public us.ihmc.idl.IDLSequence.StringBuilderHolder  getStacktrace()
    {
       return stacktrace_;
    }
@@ -107,7 +136,11 @@ public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNot
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.controller_crash_location_, other.controller_crash_location_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.stacktrace_, other.stacktrace_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.exception_type_, other.exception_type_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilder(this.error_message_, other.error_message_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsStringBuilderSequence(this.stacktrace_, other.stacktrace_, epsilon)) return false;
 
 
       return true;
@@ -126,8 +159,11 @@ public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNot
 
       if(this.controller_crash_location_ != otherMyClass.controller_crash_location_) return false;
 
-      if (!us.ihmc.idl.IDLTools.equals(this.stacktrace_, otherMyClass.stacktrace_)) return false;
+      if (!us.ihmc.idl.IDLTools.equals(this.exception_type_, otherMyClass.exception_type_)) return false;
 
+      if (!us.ihmc.idl.IDLTools.equals(this.error_message_, otherMyClass.error_message_)) return false;
+
+      if (!this.stacktrace_.equals(otherMyClass.stacktrace_)) return false;
 
       return true;
    }
@@ -142,6 +178,10 @@ public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNot
       builder.append(this.sequence_id_);      builder.append(", ");
       builder.append("controller_crash_location=");
       builder.append(this.controller_crash_location_);      builder.append(", ");
+      builder.append("exception_type=");
+      builder.append(this.exception_type_);      builder.append(", ");
+      builder.append("error_message=");
+      builder.append(this.error_message_);      builder.append(", ");
       builder.append("stacktrace=");
       builder.append(this.stacktrace_);
       builder.append("}");

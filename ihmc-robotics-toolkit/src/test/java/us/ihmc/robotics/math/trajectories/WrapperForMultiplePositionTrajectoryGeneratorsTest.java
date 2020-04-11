@@ -40,7 +40,7 @@ public class WrapperForMultiplePositionTrajectoryGeneratorsTest
    public void setUp()
    {
       parentRegistry = new YoVariableRegistry("parentRegistryTEST");
-      referenceFrame = ReferenceFrame.constructARootFrame("rootNameTEST");
+      referenceFrame = ReferenceFrameTools.constructARootFrame("rootNameTEST");
       position = new FramePoint3D(referenceFrame, xValue, yValue, zValue);
       positionTrajectoryGenerators = new ArrayList<PositionTrajectoryGenerator>();
       positionProvider = new ConstantPositionProvider(position);

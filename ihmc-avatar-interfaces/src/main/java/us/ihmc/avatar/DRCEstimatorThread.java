@@ -416,7 +416,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          if (controllerCrashPublisher != null)
          {
-            controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_READ, e.getMessage()));
+            controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_READ, e));
          }
          throw new RuntimeException(e);
       }
@@ -455,7 +455,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          if (controllerCrashPublisher != null)
          {
-            controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_RUN, e.getMessage()));
+            controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_RUN, e));
          }
          throw new RuntimeException(e);
       }
@@ -489,7 +489,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       {
          if (controllerCrashPublisher != null)
          {
-            controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_WRITE, e.getMessage()));
+            controllerCrashPublisher.publish(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.ESTIMATOR_WRITE, e));
          }
          throw new RuntimeException(e);
       }

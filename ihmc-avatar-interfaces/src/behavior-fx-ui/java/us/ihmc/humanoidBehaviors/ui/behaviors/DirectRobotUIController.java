@@ -3,6 +3,8 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 import com.sun.javafx.collections.ImmutableObservableList;
 import controller_msgs.msg.dds.*;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
+import javafx.scene.SubScene;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -13,6 +15,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
+import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.AtlasDirectRobotInterface;
 import us.ihmc.humanoidBehaviors.ui.tools.ValkyrieDirectRobotInterface;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
@@ -25,9 +28,10 @@ import us.ihmc.ros2.Ros2Node;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class DirectRobotUIController
+public class DirectRobotUIController extends Group
 {
    @FXML private ComboBox<Integer> pumpPSI;
+   @FXML private CheckBox showRegions;
    @FXML private CheckBox enableSupportRegions;
    @FXML private Spinner<Double> supportRegionScale;
    @FXML private Slider stanceHeightSlider;
@@ -39,8 +43,9 @@ public class DirectRobotUIController
    private IHMCROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher;
    private IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
    private IHMCROS2Publisher<NeckTrajectoryMessage> neckTrajectoryPublisher;
+   private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
 
-   public void init(Ros2Node ros2Node, DRCRobotModel robotModel)
+   public void init(SubScene subScene, Ros2Node ros2Node, DRCRobotModel robotModel)
    {
       String robotName = robotModel.getSimpleRobotName();
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
@@ -86,6 +91,9 @@ public class DirectRobotUIController
       pumpPSI.valueProperty().addListener((ChangeListener) -> sendPumpPSI());
       pumpPSI.getSelectionModel().select(1);
 
+      livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, false);
+      livePlanarRegionsGraphic.setEnabled(false);
+      getChildren().add(livePlanarRegionsGraphic);
       reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, null, ROS2Tools.REA);
 
       supportRegionScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, BipedalSupportPlanarRegionPublisher.defaultScaleFactor, 0.1));
@@ -152,6 +160,12 @@ public class DirectRobotUIController
       supportPlanarRegionParametersMessage.setEnable(enableSupportRegions.isSelected());
       supportPlanarRegionParametersMessage.setSupportRegionScaleFactor(supportRegionScale.getValue());
       supportRegionsParametersPublisher.publish(supportPlanarRegionParametersMessage);
+   }
+
+   @FXML public void showRegions()
+   {
+      livePlanarRegionsGraphic.setEnabled(showRegions.isSelected());
+      livePlanarRegionsGraphic.clear();
    }
 
    @FXML public void clearREA()

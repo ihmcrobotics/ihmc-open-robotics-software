@@ -61,6 +61,7 @@ public class ConstraintToConvexRegion extends ICPInequalityInput
       super.reset();
       positionOffset.zero();
       convexPolygon.clear();
+      scaledConvexPolygon.clear();
    }
 
    /**
@@ -177,7 +178,17 @@ public class ConstraintToConvexRegion extends ICPInequalityInput
     */
    public int getInequalityConstraintSize()
    {
-      int numberOfVertices = convexPolygon.getNumberOfVertices();
+      /*
+       * Ideally, the constraint size should always be determined from the scaledConvexPolygon as it is
+       * the one used to formulate the constraint and might have a different number of vertices than the
+       * convexPolygon (in rare occasion such as when a foot has tiny support polygon as for instance when
+       * doing toe-off). However, this method is called before formulating the constraint as a
+       * quick-check, in which case it is fine to use the convexPolygon instead. Since during reset the
+       * scaledConvexPolygon is cleared, and it is only updated once formulating the constraint, we can
+       * use the fact that it is empty as test for whether or not to use it.
+       */
+      ConvexPolygon2D polygon = scaledConvexPolygon.isEmpty() ? convexPolygon : scaledConvexPolygon;
+      int numberOfVertices = polygon.getNumberOfVertices();
       if (numberOfVertices > 2)
          return numberOfVertices;
       else if (numberOfVertices > 0)

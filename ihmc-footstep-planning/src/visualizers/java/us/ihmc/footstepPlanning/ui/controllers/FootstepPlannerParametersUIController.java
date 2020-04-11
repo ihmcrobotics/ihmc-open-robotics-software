@@ -1,51 +1,23 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Spinner;
-import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import javafx.scene.control.*;
 import javafx.scene.shape.Rectangle;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
+import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
+import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper;
+import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper.ParametersTableRow;
 
 public class FootstepPlannerParametersUIController
 {
    private JavaFXMessager messager;
    private FootstepPlannerParametersBasics planningParameters;
-
-   @FXML
-   private CheckBox returnBestEffortPlan;
-
-   @FXML
-   private Spinner<Double> idealStepWidth;
-   @FXML
-   private Spinner<Double> idealStepLength;
-
-   @FXML
-   private Spinner<Double> maxStepLength;
-   @FXML
-   private Spinner<Double> maxStepWidth;
-   @FXML
-   private Spinner<Double> minStepWidth;
-
-   @FXML
-   private Spinner<Double> minStepLength;
-   @FXML
-   private Spinner<Double> maxStepZ;
-   @FXML
-   private Spinner<Double> minSurfaceIncline;
-
-   @FXML
-   private Spinner<Double> maxStepYaw;
-   @FXML
-   private Spinner<Double> minStepYaw;
-   @FXML
-   private Spinner<Double> stepYawReductionFactor;
-   @FXML
-   private Spinner<Double> minFootholdPercent;
+   private JavaFXStoredPropertyMap javaFXStoredPropertyMap;
+   private final StepShapeManager stepShapeManager = new StepShapeManager();
+   private StoredPropertyTableViewWrapper tableViewWrapper;
 
    @FXML
    private Rectangle stepShape;
@@ -55,46 +27,14 @@ public class FootstepPlannerParametersUIController
    private Rectangle swingFootShape;
    @FXML
    private Rectangle clearanceBox;
-
-   @FXML
-   private Spinner<Double> minXClearance;
-   @FXML
-   private Spinner<Double> minYClearance;
-   @FXML
-   private Spinner<Double> cliffHeightSpinner;
-   @FXML
-   private Spinner<Double> cliffClearance;
-   @FXML
-   private Spinner<Double> maxXYWiggleSpinner;
-   @FXML
-   private Spinner<Double> maxYawWiggleSpinner;
-   @FXML
-   private Spinner<Double> wiggleInsideDeltaSpinner;
-
-   @FXML
-   private Spinner<Double> maxStepUpX;
-   @FXML
-   private Spinner<Double> maxStepUpY;
-   @FXML
-   private Spinner<Double> stepUpHeight;
-   @FXML
-   private Spinner<Double> maxStepDownX;
-   @FXML
-   private Spinner<Double> maxStepDownY;
-   @FXML
-   private Spinner<Double> stepDownHeight;
-
    private static final double footWidth = 0.15;
    private static final double footLength = 0.25;
    private static final double leftFootOriginX = 30;
    private static final double leftFootOriginY = 100;
-
    private static final double metersToPixel = 200;
 
-
-   public FootstepPlannerParametersUIController()
-   {
-   }
+   @FXML
+   private TableView<ParametersTableRow> parameterTable;
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -104,94 +44,22 @@ public class FootstepPlannerParametersUIController
    public void setPlannerParameters(FootstepPlannerParametersBasics parameters)
    {
       this.planningParameters = parameters;
-   }
-
-   public void setupControls()
-   {
-      idealStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.3, 0.02));
-      idealStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.22, 0.01));
-
-      maxStepLength.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.7, 0.0, 0.05));
-      maxStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
-      minStepWidth.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));
-
-      minStepLength.setValueFactory(new DoubleSpinnerValueFactory(-0.6, 0.0, 0.0, 0.05));
-      maxStepZ.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.02));
-      minSurfaceIncline.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
-      maxStepUpX.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.01));
-      maxStepUpY.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
-      stepUpHeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.01));
-      maxStepDownX.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.01));
-      maxStepDownY.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
-      stepDownHeight.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.01));
-
-      maxStepYaw.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.5, 0.0, 0.1));
-      minStepYaw.setValueFactory(new DoubleSpinnerValueFactory(-1.5, 0.0, 0.0, 0.1));
-      stepYawReductionFactor.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
-      minFootholdPercent.setValueFactory(new DoubleSpinnerValueFactory(0.0, 1.0, 0.0, 0.05));
-
-      minXClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));
-      minYClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.01));
-      maxXYWiggleSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.005));
-      maxYawWiggleSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.005));
-      wiggleInsideDeltaSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.3, 0.0, 0.005));
-
-      maxStepLength.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
-      minStepLength.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
-      maxStepWidth.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
-      minStepWidth.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
-      maxStepYaw.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
-      minStepYaw.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
-      minXClearance.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
-      minYClearance.getValueFactory().valueProperty().addListener(observable -> updateStepShape());
-      
-      cliffHeightSpinner.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
-      cliffClearance.setValueFactory(new DoubleSpinnerValueFactory(0.0, 0.5, 0.0, 0.01));
+      this.javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
+      stepShapeManager.update();
    }
 
    public void bindControls()
    {
-      setupControls();
-
-      JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(planningParameters);
-      javaFXStoredPropertyMap.put(idealStepLength, FootstepPlannerParameterKeys.idealFootstepLength);
-      javaFXStoredPropertyMap.put(idealStepWidth, FootstepPlannerParameterKeys.idealFootstepWidth);
-      javaFXStoredPropertyMap.put(returnBestEffortPlan, FootstepPlannerParameterKeys.returnBestEffortPlan);
-      javaFXStoredPropertyMap.put(maxStepLength, FootstepPlannerParameterKeys.maxStepReach);
-      javaFXStoredPropertyMap.put(maxStepWidth, FootstepPlannerParameterKeys.maxStepWidth);
-      javaFXStoredPropertyMap.put(minStepWidth, FootstepPlannerParameterKeys.minStepWidth);
-      javaFXStoredPropertyMap.put(minStepLength, FootstepPlannerParameterKeys.minStepLength);
-      javaFXStoredPropertyMap.put(maxStepZ, FootstepPlannerParameterKeys.maxStepZ);
-      javaFXStoredPropertyMap.put(minSurfaceIncline, FootstepPlannerParameterKeys.minSurfaceIncline);
-      javaFXStoredPropertyMap.put(maxStepYaw, FootstepPlannerParameterKeys.maxStepYaw);
-      javaFXStoredPropertyMap.put(minStepYaw, FootstepPlannerParameterKeys.minStepYaw);
-      javaFXStoredPropertyMap.put(stepYawReductionFactor, FootstepPlannerParameterKeys.stepYawReductionFactorAtMaxReach);
-      javaFXStoredPropertyMap.put(minFootholdPercent, FootstepPlannerParameterKeys.minFootholdPercent);
-      javaFXStoredPropertyMap.put(minXClearance, FootstepPlannerParameterKeys.minXClearanceFromStance);
-      javaFXStoredPropertyMap.put(minYClearance, FootstepPlannerParameterKeys.minYClearanceFromStance);
-      javaFXStoredPropertyMap.put(cliffHeightSpinner, FootstepPlannerParameterKeys.cliffHeightToAvoid);
-      javaFXStoredPropertyMap.put(cliffClearance, FootstepPlannerParameterKeys.minimumDistanceFromCliffBottoms);
-      javaFXStoredPropertyMap.put(maxXYWiggleSpinner, FootstepPlannerParameterKeys.maximumXYWiggleDistance);
-      javaFXStoredPropertyMap.put(maxYawWiggleSpinner, FootstepPlannerParameterKeys.maximumYawWiggle);
-      javaFXStoredPropertyMap.put(wiggleInsideDeltaSpinner, FootstepPlannerParameterKeys.wiggleInsideDelta);
-      javaFXStoredPropertyMap.put(maxStepUpX, FootstepPlannerParameterKeys.maximumStepReachWhenSteppingUp);
-      javaFXStoredPropertyMap.put(maxStepUpY, FootstepPlannerParameterKeys.maximumStepWidthWhenSteppingUp);
-      javaFXStoredPropertyMap.put(stepUpHeight, FootstepPlannerParameterKeys.maximumStepZWhenSteppingUp);
-      javaFXStoredPropertyMap.put(maxStepDownX, FootstepPlannerParameterKeys.maximumStepXWhenForwardAndDown);
-      javaFXStoredPropertyMap.put(maxStepDownY, FootstepPlannerParameterKeys.maximumStepYWhenForwardAndDown);
-      javaFXStoredPropertyMap.put(stepDownHeight, FootstepPlannerParameterKeys.maximumStepZWhenForwardAndDown);
+      tableViewWrapper = new StoredPropertyTableViewWrapper(380.0, 260.0, 4, parameterTable, javaFXStoredPropertyMap);
+      tableViewWrapper.setTableUpdatedCallback(() -> messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, planningParameters));
 
       // set messager updates to update all stored properties and select JavaFX properties
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlannerParameters, parameters ->
       {
          planningParameters.set(parameters);
-
          javaFXStoredPropertyMap.copyStoredToJavaFX();
+         stepShapeManager.update();
       });
-
-      // set JavaFX user input to update stored properties and publish messager message
-      javaFXStoredPropertyMap.bindStoredToJavaFXUserInput();
-      javaFXStoredPropertyMap.bindToJavaFXUserInput(() -> publishParameters());
 
       // these dimensions work best for valkyrie
       stanceFootShape.setHeight(footLength * metersToPixel);
@@ -202,15 +70,12 @@ public class FootstepPlannerParametersUIController
       swingFootShape.setHeight(footLength * metersToPixel);
       swingFootShape.setWidth(footWidth * metersToPixel);
       swingFootShape.setLayoutY(leftFootOriginY);
-
-      updateStepShape();
    }
 
-   private void publishParameters()
+   public void onPrimaryStageLoaded()
    {
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, planningParameters);
+      tableViewWrapper.removeHeader();
    }
-
 
    @FXML
    public void saveToFile()
@@ -218,36 +83,66 @@ public class FootstepPlannerParametersUIController
       planningParameters.save();
    }
 
-   private void updateStepShape()
+   private class StepShapeManager
    {
-      double worstYaw = maxStepYaw.getValue() > Math.abs(minStepYaw.getValue()) ? maxStepYaw.getValue() : minStepYaw.getValue();
-      setStepShape(maxStepLength.getValue(), minStepLength.getValue(), maxStepWidth.getValue(), minStepWidth.getValue(), worstYaw);
-   }
+      double minStepYaw, maxStepYaw, minStepWidth, maxStepWidth, minStepLength, maxStepLength, worstYaw;
 
-   private void setStepShape(double maxLength, double minLength, double maxWidth, double minWidth, double yaw)
-   {
-      double footCenterX = leftFootOriginX + 0.5 * footWidth * metersToPixel;
-      double footCenterY = leftFootOriginY + 0.5 * footLength * metersToPixel;
+      void update()
+      {
+         double minStepYaw = planningParameters.getMinimumStepYaw();
+         double maxStepYaw = planningParameters.getMaximumStepYaw();
+         double minStepWidth = planningParameters.getMinimumStepWidth();
+         double maxStepWidth = planningParameters.getMaximumStepWidth();
+         double minStepLength = planningParameters.getMinimumStepLength();
+         double maxStepLength = planningParameters.getMaximumStepReach();
+         double worstYaw = maxStepYaw > Math.abs(minStepYaw) ? maxStepYaw : minStepYaw;
 
-      double furthestIn = Math.max(minWidth, minYClearance.getValue()) * metersToPixel;
+         if (EuclidCoreTools.epsilonEquals(minStepYaw, this.minStepYaw, 1e-3) &&
+             EuclidCoreTools.epsilonEquals(maxStepYaw, this.maxStepYaw, 1e-3) &&
+             EuclidCoreTools.epsilonEquals(minStepWidth, this.minStepWidth, 1e-3) &&
+             EuclidCoreTools.epsilonEquals(maxStepWidth, this.maxStepWidth, 1e-3) &&
+             EuclidCoreTools.epsilonEquals(minStepLength, this.minStepLength, 1e-3) &&
+             EuclidCoreTools.epsilonEquals(maxStepLength, this.maxStepLength, 1e-3) &&
+             EuclidCoreTools.epsilonEquals(worstYaw, this.worstYaw, 1e-3))
+            return;
 
-      double width = maxWidth - minWidth;
-      double height = maxLength - minLength;
-      double xCenterInPanel = footCenterX + metersToPixel * minWidth;
-      double yCenterInPanel = footCenterY - metersToPixel * maxLength;
+         this.minStepYaw = minStepYaw;
+         this.maxStepYaw = maxStepYaw;
+         this.minStepWidth = minStepWidth;
+         this.maxStepWidth = maxStepWidth;
+         this.minStepLength = minStepLength;
+         this.maxStepLength = maxStepLength;
+         this.worstYaw = worstYaw;
+         setStepShape();
+      }
 
+      void setStepShape()
+      {
+         double minXClearance = planningParameters.getMinXClearanceFromStance();
+         double minYClearance = planningParameters.getMinYClearanceFromStance();
 
-      stepShape.setLayoutX(xCenterInPanel);
-      stepShape.setWidth(metersToPixel * width);
-      stepShape.setLayoutY(yCenterInPanel);
-      stepShape.setHeight(metersToPixel * height);
+         double footCenterX = leftFootOriginX + 0.5 * footWidth * metersToPixel;
+         double footCenterY = leftFootOriginY + 0.5 * footLength * metersToPixel;
 
-      swingFootShape.setLayoutX(footCenterX + furthestIn - 0.5 * footWidth * metersToPixel);
-      swingFootShape.setRotate(Math.toDegrees(yaw));
+         double furthestIn = Math.max(minStepWidth, minYClearance) * metersToPixel;
 
-      clearanceBox.setLayoutX(leftFootOriginX + (0.5 * footWidth - minYClearance.getValue()) * metersToPixel);
-      clearanceBox.setLayoutY(leftFootOriginY + (0.5 * footLength - minXClearance.getValue()) * metersToPixel);
-      clearanceBox.setWidth(metersToPixel * (minYClearance.getValue() * 2.0));
-      clearanceBox.setHeight(metersToPixel * (minXClearance.getValue() * 2.0));
+         double width = maxStepWidth - minStepWidth;
+         double height = maxStepLength - minStepLength;
+         double xCenterInPanel = footCenterX + metersToPixel * minStepWidth;
+         double yCenterInPanel = footCenterY - metersToPixel * maxStepLength;
+
+         stepShape.setLayoutX(xCenterInPanel);
+         stepShape.setWidth(metersToPixel * width);
+         stepShape.setLayoutY(yCenterInPanel);
+         stepShape.setHeight(metersToPixel * height);
+
+         swingFootShape.setLayoutX(footCenterX + furthestIn - 0.5 * footWidth * metersToPixel);
+         swingFootShape.setRotate(Math.toDegrees(worstYaw));
+
+         clearanceBox.setLayoutX(leftFootOriginX + (0.5 * footWidth - minYClearance) * metersToPixel);
+         clearanceBox.setLayoutY(leftFootOriginY + (0.5 * footLength - minXClearance) * metersToPixel);
+         clearanceBox.setWidth(metersToPixel * (minYClearance * 2.0));
+         clearanceBox.setHeight(metersToPixel * (minXClearance * 2.0));
+      }
    }
 }

@@ -58,6 +58,11 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
             * If no new message is received once the integration duration has elapsed, the controller will hold the desired position and reset the desired velocity to 0.
             */
    public double stream_integration_duration_;
+   /**
+            * Timestamp (in nanoseconds) when this message was created.
+            * The timestamp can be generated from the computer where this message originates.
+            */
+   public long timestamp_;
 
    public QueueableMessage()
    {
@@ -82,6 +87,8 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
       execution_delay_time_ = other.execution_delay_time_;
 
       stream_integration_duration_ = other.stream_integration_duration_;
+
+      timestamp_ = other.timestamp_;
 
    }
 
@@ -213,6 +220,23 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
       return stream_integration_duration_;
    }
 
+   /**
+            * Timestamp (in nanoseconds) when this message was created.
+            * The timestamp can be generated from the computer where this message originates.
+            */
+   public void setTimestamp(long timestamp)
+   {
+      timestamp_ = timestamp;
+   }
+   /**
+            * Timestamp (in nanoseconds) when this message was created.
+            * The timestamp can be generated from the computer where this message originates.
+            */
+   public long getTimestamp()
+   {
+      return timestamp_;
+   }
+
 
    public static Supplier<QueueableMessagePubSubType> getPubSubType()
    {
@@ -243,6 +267,8 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.stream_integration_duration_, other.stream_integration_duration_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.timestamp_, other.timestamp_, epsilon)) return false;
+
 
       return true;
    }
@@ -268,6 +294,8 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
 
       if(this.stream_integration_duration_ != otherMyClass.stream_integration_duration_) return false;
 
+      if(this.timestamp_ != otherMyClass.timestamp_) return false;
+
 
       return true;
    }
@@ -289,7 +317,9 @@ public class QueueableMessage extends Packet<QueueableMessage> implements Settab
       builder.append("execution_delay_time=");
       builder.append(this.execution_delay_time_);      builder.append(", ");
       builder.append("stream_integration_duration=");
-      builder.append(this.stream_integration_duration_);
+      builder.append(this.stream_integration_duration_);      builder.append(", ");
+      builder.append("timestamp=");
+      builder.append(this.timestamp_);
       builder.append("}");
       return builder.toString();
    }

@@ -10,8 +10,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -21,14 +19,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.DoubleSupplier;
 
-public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
+public class PlanarRegionBaseOfCliffAvoider
 {
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepNodeSnapperReadOnly snapper;
    private final DoubleSupplier minimumDistanceFromCliffBottoms;
    private final DoubleSupplier cliffHeightToAvoid;
-
-   private FootstepNode startNode;
+   private PlanarRegionsList planarRegionsList;
 
    public PlanarRegionBaseOfCliffAvoider(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapperReadOnly snapper, SideDependentList<ConvexPolygon2D> footPolygons)
    {
@@ -46,21 +43,13 @@ public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
       this.cliffHeightToAvoid = cliffHeightToAvoid;
    }
 
-   @Override
-   public void addStartNode(FootstepNode startNode, RigidBodyTransform startNodeTransform)
+   public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
    {
-      this.startNode = startNode;
+      this.planarRegionsList = planarRegionsList;
    }
 
-   @Override
-   public boolean isNodeValidInternal(FootstepNode node, FootstepNode previousNode)
+   public boolean isNodeValid(FootstepNode node)
    {
-      if(startNode != null && startNode.equals(node))
-         return true;
-
-      if(!hasPlanarRegions())
-         return true;
-
       double cliffHeightToAvoid = this.cliffHeightToAvoid.getAsDouble();
       double minimumDistanceFromCliffBottoms = this.minimumDistanceFromCliffBottoms.getAsDouble();
 
@@ -90,67 +79,65 @@ public class PlanarRegionBaseOfCliffAvoider extends FootstepNodeChecker
       double maximumCliffZInSoleFrame = findHighestPointInFrame(planarRegionsList, soleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame, new Point3D());
 
       boolean cliffDetected = maximumCliffZInSoleFrame >= cliffHeightToAvoid;
-      if(cliffDetected)
-         rejectNode(node, previousNode, BipedalFootstepPlannerNodeRejectionReason.AT_CLIFF_BOTTOM);
       return !cliffDetected;
    }
 
    public static double findHighestPointInFrame(PlanarRegionsList planarRegionsList, RigidBodyTransformReadOnly soleTransform, ArrayList<LineSegment2D> lineSegmentsInSoleFrame,
-                                                      Point3D highestPointInSoleFrameToPack, LineSegment2D highestLineSegmentInSoleFrameToPack, Point3D closestCliffPointToPack)
-     {
-        double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
-        double closestCliffPointDistance = Double.POSITIVE_INFINITY;
+                                                Point3D highestPointInSoleFrameToPack, LineSegment2D highestLineSegmentInSoleFrameToPack, Point3D closestCliffPointToPack)
+   {
+      double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
+      double closestCliffPointDistance = Double.POSITIVE_INFINITY;
 
-        LineSegment2D lineSegmentInWorldFrame = new LineSegment2D();
-        Point3D pointOneInWorldFrame = new Point3D();
-        Point3D pointTwoInWorldFrame = new Point3D();
+      LineSegment2D lineSegmentInWorldFrame = new LineSegment2D();
+      Point3D pointOneInWorldFrame = new Point3D();
+      Point3D pointTwoInWorldFrame = new Point3D();
 
-        for (LineSegment2D lineSegmentInSoleFrame : lineSegmentsInSoleFrame)
-        {
-           pointOneInWorldFrame.set(lineSegmentInSoleFrame.getFirstEndpointX(), lineSegmentInSoleFrame.getFirstEndpointY(), 0.0);
-           pointTwoInWorldFrame.set(lineSegmentInSoleFrame.getSecondEndpointX(), lineSegmentInSoleFrame.getSecondEndpointY(), 0.0);
+      for (LineSegment2D lineSegmentInSoleFrame : lineSegmentsInSoleFrame)
+      {
+         pointOneInWorldFrame.set(lineSegmentInSoleFrame.getFirstEndpointX(), lineSegmentInSoleFrame.getFirstEndpointY(), 0.0);
+         pointTwoInWorldFrame.set(lineSegmentInSoleFrame.getSecondEndpointX(), lineSegmentInSoleFrame.getSecondEndpointY(), 0.0);
 
-           soleTransform.transform(pointOneInWorldFrame);
-           soleTransform.transform(pointTwoInWorldFrame);
+         soleTransform.transform(pointOneInWorldFrame);
+         soleTransform.transform(pointTwoInWorldFrame);
 
-           lineSegmentInWorldFrame.set(pointOneInWorldFrame.getX(), pointOneInWorldFrame.getY(), pointTwoInWorldFrame.getX(), pointTwoInWorldFrame.getY());
+         lineSegmentInWorldFrame.set(pointOneInWorldFrame.getX(), pointOneInWorldFrame.getY(), pointTwoInWorldFrame.getX(), pointTwoInWorldFrame.getY());
 
-           ArrayList<PlanarRegion> intersectingRegionsToPack = new ArrayList<>();
-           planarRegionsList.findPlanarRegionsIntersectingLineSegment(lineSegmentInWorldFrame, intersectingRegionsToPack);
-           for (PlanarRegion intersectingRegion : intersectingRegionsToPack)
-           {
-              List<Point2DBasics[]> intersectionsInPlaneFrameToPack = new ArrayList<>();
-              intersectingRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegmentInWorldFrame, intersectionsInPlaneFrameToPack);
-              for (int i = 0; i < intersectionsInPlaneFrameToPack.size(); i++)
-              {
-                 Point2DBasics[] points = intersectionsInPlaneFrameToPack.get(i);
-                 for (int j = 0; j < points.length; j++)
-                 {
-                    Point2DBasics point = points[j];
-                    RigidBodyTransform regionTransformToWorld = new RigidBodyTransform();
-                    intersectingRegion.getTransformToWorld(regionTransformToWorld);
-                    Point3D pointInOriginalSoleFrame = new Point3D(point.getX(), point.getY(), 0.0);
-                    regionTransformToWorld.transform(pointInOriginalSoleFrame);
-                    soleTransform.inverseTransform(pointInOriginalSoleFrame);
+         ArrayList<PlanarRegion> intersectingRegionsToPack = new ArrayList<>();
+         planarRegionsList.findPlanarRegionsIntersectingLineSegment(lineSegmentInWorldFrame, intersectingRegionsToPack);
+         for (PlanarRegion intersectingRegion : intersectingRegionsToPack)
+         {
+            List<Point2DBasics[]> intersectionsInPlaneFrameToPack = new ArrayList<>();
+            intersectingRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegmentInWorldFrame, intersectionsInPlaneFrameToPack);
+            for (int i = 0; i < intersectionsInPlaneFrameToPack.size(); i++)
+            {
+               Point2DBasics[] points = intersectionsInPlaneFrameToPack.get(i);
+               for (int j = 0; j < points.length; j++)
+               {
+                  Point2DBasics point = points[j];
+                  RigidBodyTransform regionTransformToWorld = new RigidBodyTransform();
+                  intersectingRegion.getTransformToWorld(regionTransformToWorld);
+                  Point3D pointInOriginalSoleFrame = new Point3D(point.getX(), point.getY(), 0.0);
+                  regionTransformToWorld.transform(pointInOriginalSoleFrame);
+                  soleTransform.inverseTransform(pointInOriginalSoleFrame);
 
-                    if(pointInOriginalSoleFrame.getZ() > 0.03 && pointInOriginalSoleFrame.distanceFromOrigin() < closestCliffPointDistance)
-                    {
-                       closestCliffPointDistance = pointInOriginalSoleFrame.distanceFromOrigin();
-                       closestCliffPointToPack.set(pointInOriginalSoleFrame);
-                    }
+                  if(pointInOriginalSoleFrame.getZ() > 0.03 && pointInOriginalSoleFrame.distanceFromOrigin() < closestCliffPointDistance)
+                  {
+                     closestCliffPointDistance = pointInOriginalSoleFrame.distanceFromOrigin();
+                     closestCliffPointToPack.set(pointInOriginalSoleFrame);
+                  }
 
-                    if (pointInOriginalSoleFrame.getZ() > maxZInSoleFrame)
-                    {
-                       maxZInSoleFrame = pointInOriginalSoleFrame.getZ();
-                       highestPointInSoleFrameToPack.set(pointInOriginalSoleFrame);
-                       highestLineSegmentInSoleFrameToPack.set(lineSegmentInSoleFrame);
-                    }
-                 }
-              }
-           }
-        }
+                  if (pointInOriginalSoleFrame.getZ() > maxZInSoleFrame)
+                  {
+                     maxZInSoleFrame = pointInOriginalSoleFrame.getZ();
+                     highestPointInSoleFrameToPack.set(pointInOriginalSoleFrame);
+                     highestLineSegmentInSoleFrameToPack.set(lineSegmentInSoleFrame);
+                  }
+               }
+            }
+         }
+      }
 
-        return maxZInSoleFrame;
-     }
+      return maxZInSoleFrame;
+   }
 
 }

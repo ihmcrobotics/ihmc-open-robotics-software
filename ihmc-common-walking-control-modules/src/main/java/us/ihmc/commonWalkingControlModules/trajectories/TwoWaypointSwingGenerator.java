@@ -456,6 +456,11 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       waypointDataToPack.setLinearVelocity(tempWaypointVelocity);
    }
 
+   public FramePoint3DReadOnly getWaypoint(int index)
+   {
+      return waypointPositions.get(index);
+   }
+
    public double computeAndGetMaxSpeed()
    {
       trajectory.computeMaxSpeed();

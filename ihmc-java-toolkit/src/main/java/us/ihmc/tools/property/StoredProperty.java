@@ -34,4 +34,21 @@ public class StoredProperty<T> implements StoredPropertyBasics<T>
    {
       set.save();
    }
+
+   @Override
+   public int hashCode()
+   {
+      return key.hashCode();
+   }
+
+   @Override
+   public boolean equals(Object other)
+   {
+      if (other == null)
+         return false;
+      if (!(other instanceof StoredProperty))
+         return false;
+      StoredProperty otherStoredProperty = (StoredProperty) other;
+      return key.equals(otherStoredProperty.key);
+   }
 }

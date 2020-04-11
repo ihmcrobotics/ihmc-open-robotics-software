@@ -158,8 +158,7 @@ public class HumanoidHighLevelControllerManager implements RobotController
       catch (Exception e)
       {
          e.printStackTrace();
-         statusMessageOutputManager.reportStatusMessage(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_RUN,
-                                                                                                             e.getMessage()));
+         statusMessageOutputManager.reportStatusMessage(MessageTools.createControllerCrashNotificationPacket(ControllerCrashLocation.CONTROLLER_RUN, e));
          controllerToolbox.reportControllerFailureToListeners(null);
       }
 

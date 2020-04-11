@@ -555,9 +555,9 @@ public class ConcaveHullMergerTest
       ConvexPolygon2D polygonB = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointB0, pointB1, pointB2, pointB3));
 
       RigidBodyTransform transformA = new RigidBodyTransform();
-      transformA.setTranslation(1.0, 2.0, 3.0);
+      transformA.getTranslation().set(1.0, 2.0, 3.0);
       RigidBodyTransform transformB = new RigidBodyTransform();
-      transformB.setTranslation(1.5, 2.5, 3.0);
+      transformB.getTranslation().set(1.5, 2.5, 3.0);
 
       PlanarRegion regionA = new PlanarRegion(transformA, polygonA);
       PlanarRegion regionB = new PlanarRegion(transformB, polygonB);
@@ -603,8 +603,8 @@ public class ConcaveHullMergerTest
       ConvexPolygon2D polygonA = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointA0, pointA1, pointA2, pointA3));
 
       RigidBodyTransform transformA = new RigidBodyTransform();
-      transformA.setTranslation(0.1, -0.2, 0.3);
-      transformA.setRotationYawPitchRoll(0.16, 0.37, 0.44);
+      transformA.getTranslation().set(0.1, -0.2, 0.3);
+      transformA.getRotation().setYawPitchRoll(0.16, 0.37, 0.44);
 
       RigidBodyTransform transformAInverse = new RigidBodyTransform(transformA);
       transformAInverse.invert();
@@ -615,8 +615,8 @@ public class ConcaveHullMergerTest
       transformA.transform(pointOnPlaneA);
 
       RigidBodyTransform transformB = new RigidBodyTransform();
-      transformB.setTranslation(pointOnPlaneA);
-      transformB.setRotationYawPitchRoll(0.16, 0.37, 0.44);
+      transformB.getTranslation().set(pointOnPlaneA);
+      transformB.getRotation().setYawPitchRoll(0.16, 0.37, 0.44);
       RigidBodyTransform transformBInverse = new RigidBodyTransform(transformB);
       transformBInverse.invert();
 

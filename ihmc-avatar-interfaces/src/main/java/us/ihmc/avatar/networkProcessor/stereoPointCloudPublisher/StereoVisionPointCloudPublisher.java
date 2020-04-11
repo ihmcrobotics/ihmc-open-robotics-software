@@ -12,6 +12,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessagePubSubType;
 import sensor_msgs.PointCloud2;
 import us.ihmc.avatar.networkProcessor.lidarScanPublisher.ScanPointFilterList;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
@@ -79,7 +80,8 @@ public class StereoVisionPointCloudPublisher
    private final AtomicDouble linearVelocityThreshold = new AtomicDouble(Double.MAX_VALUE);
    private final AtomicDouble angularVelocityThreshold = new AtomicDouble(Double.MAX_VALUE);
 
-   private long publisherPeriodInMillisecond = 1L;
+   private long publisherPeriodInMillisecond = 200L;
+   private double minimumResolution = 0.005;
 
    public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
    {
@@ -146,6 +148,19 @@ public class StereoVisionPointCloudPublisher
    {
       publisherTask.cancel(false);
       executorService.shutdownNow();
+   }
+
+   /**
+    * Sets the smallest value in meter for the resolution when compressing the pointcloud data.
+    * <p>
+    * Smaller means more accurate, but also more expensive bandwidth-wise.
+    * </p>
+    * 
+    * @param minimumResolution the value in meter for the minimum resolution, default is 0.005.
+    */
+   public void setMinimumResolution(double minimumResolution)
+   {
+      this.minimumResolution = minimumResolution;
    }
 
    public void setSelfCollisionFilter(CollisionBoxProvider collisionBoxProvider)
@@ -297,12 +312,20 @@ public class StereoVisionPointCloudPublisher
       if (rangeFilter != null)
          rangeFilter.setSensorPosition(sensorPose.getPosition());
 
-      StereoVisionPointCloudMessage message = pointCloudData.toStereoVisionPointCloudMessage(activeFilters);
+      long startTime = System.nanoTime();
+      StereoVisionPointCloudMessage message = pointCloudData.toStereoVisionPointCloudMessage(minimumResolution, activeFilters);
+
+      if (message == null)
+         return; // TODO Sometimes the LZ4 compression fails. Need to figure it out, for now just giving up.
+
       message.getSensorPosition().set(sensorPose.getPosition());
       message.getSensorOrientation().set(sensorPose.getOrientation());
+      long endTime = System.nanoTime();
 
       if (Debug)
-         System.out.println("Publishing stereo data, number of points: " + (message.getPointCloud().size() / 3));
+         System.out.println("Publishing stereo data, number of points: " + (message.getPointCloud().size() / 3) + ", packet size in kilobytes: "
+               + (StereoVisionPointCloudMessagePubSubType.getCdrSerializedSize(message) / 1000) + ", compression time in milliseconds: "
+               + Conversions.nanosecondsToMilliseconds(endTime - startTime));
       if (pointcloudPublisher != null)
          pointcloudPublisher.publish(message);
       else

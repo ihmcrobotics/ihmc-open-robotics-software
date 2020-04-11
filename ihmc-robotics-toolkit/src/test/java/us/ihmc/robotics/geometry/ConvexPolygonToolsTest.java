@@ -1,10 +1,7 @@
 package us.ihmc.robotics.geometry;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertNotNull;
-import static us.ihmc.robotics.Assert.fail;
+import static us.ihmc.robotics.Assert.*;
 
 import java.awt.Color;
 import java.util.ArrayList;
@@ -16,26 +13,34 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DBasics;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.Assert;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 public class ConvexPolygonToolsTest
 {
@@ -54,7 +59,7 @@ public class ConvexPolygonToolsTest
    {
       Random random = new Random(1776L);
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame");
+      ReferenceFrame zUpFrame = ReferenceFrameTools.constructARootFrame("someFrame");
       double xMin1 = 0.0, xMax1 = 1.0, yMin1 = 0.0, yMax1 = 1.0;
       ArrayList<FramePoint2D> points1 = ConvexPolygon2dTestHelpers.generateRandomCircularFramePoints(random, zUpFrame, xMin1, xMax1, yMin1, yMax1, 100);
 
@@ -253,6 +258,53 @@ public class ConvexPolygonToolsTest
    }
 
    @Test
+   public void testLimitVerticesConservativeWithApproximateRectangle()
+   {
+      Random random = new Random(123821L);
+      int tests = 1000;
+
+      for (int i = 0; i < tests; i++)
+      {
+         double rectangleHalfLength = EuclidCoreRandomTools.nextDouble(random, 0.1, 1.0);
+         double rectangleHalfWidth = EuclidCoreRandomTools.nextDouble(random, 0.1, 1.0);
+
+         FrameConvexPolygon2D polygon = new FrameConvexPolygon2D();
+         polygon.addVertex(rectangleHalfLength, rectangleHalfWidth);
+         polygon.addVertex(rectangleHalfLength, - rectangleHalfWidth);
+         polygon.addVertex(- rectangleHalfLength, rectangleHalfWidth);
+         polygon.addVertex(- rectangleHalfLength, - rectangleHalfWidth);
+         polygon.update();
+
+         double distanceEpsilon = 1e-10;
+         int numberOfPolygonsAroundPerimeter = 1 + random.nextInt(10);
+         for (int j = 0; j < numberOfPolygonsAroundPerimeter; j++)
+         {
+            boolean epsilonMatchLength = random.nextBoolean();
+            double epsilon = distanceEpsilon * (random.nextBoolean() ? 1.0 : -1.0);
+            double px = epsilonMatchLength ? rectangleHalfLength + epsilon : EuclidCoreRandomTools.nextDouble(random, rectangleHalfLength);
+            double py = !epsilonMatchLength ? rectangleHalfWidth + epsilon : EuclidCoreRandomTools.nextDouble(random, rectangleHalfWidth);
+            polygon.addVertex(px, py);
+         }
+         polygon.update();
+         FrameConvexPolygon2D originalPolygon = new FrameConvexPolygon2D(polygon);
+
+         ConvexPolygonTools.limitVerticesConservative(polygon, 4);
+         double area = polygon.getArea();
+         double expectedArea = 4.0 * rectangleHalfLength * rectangleHalfWidth;
+         System.out.println(polygon);
+
+         if(PLOT_RESULTS)
+         {
+            plotPolygon(polygon, 4, originalPolygon);
+         }
+         else
+         {
+            Assertions.assertTrue(EuclidCoreTools.epsilonEquals(area, expectedArea, 1e-6), "Limiting number of vertices failed. Expected area = " + expectedArea + " computed area: " + area);
+         }
+      }
+   }
+
+   @Test
    public void testLimitVerticesConservative()
    {
       Random random = new Random(123821L);
@@ -285,25 +337,7 @@ public class ConvexPolygonToolsTest
 
          if (PLOT_RESULTS)
          {
-            FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(-0.1, 1.1, -0.1, 1.1);
-            FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
-            plotter.setDrawPointsLarge();
-
-            plotter.addPolygon(originalPolygon, Color.BLUE);
-            plotter.addPolygon(polygon, Color.RED);
-
-            for (int i = 0; i < originalPolygon.getNumberOfVertices(); i++)
-            {
-               plotter.addFramePoint2d(new FramePoint2D(ReferenceFrame.getWorldFrame(), originalPolygon.getVertex(i)), Color.BLUE);
-            }
-            for (int i = 0; i < polygon.getNumberOfVertices(); i++)
-            {
-               plotter.addFramePoint2d(new FramePoint2D(ReferenceFrame.getWorldFrame(), polygon.getVertex(i)), Color.RED);
-            }
-
-            System.out.println("Expecting " + desiredNumberOfVertices + " Vertices.");
-            waitForButtonOrPause(testFrame);
-            testFrame.dispose();
+            plotPolygon(polygon, desiredNumberOfVertices, originalPolygon);
          }
 
          // check if the number of vertices is correct
@@ -315,6 +349,34 @@ public class ConvexPolygonToolsTest
 
 //      System.out.println("Tested " + increase + " point increases");
 //      System.out.println("Tested " + decrease + " point decreases");
+   }
+
+   private void plotPolygon(FrameConvexPolygon2D polygonWithLimitedVertices, int desiredNumberOfVertices, FrameConvexPolygon2D originalPolygon)
+   {
+      double minX = Math.min(polygonWithLimitedVertices.getMinX(), originalPolygon.getMinX()) - 0.2;
+      double maxX = Math.min(polygonWithLimitedVertices.getMaxX(), originalPolygon.getMaxX()) + 0.2;
+      double minY = Math.min(polygonWithLimitedVertices.getMinY(), originalPolygon.getMinY()) - 0.2;
+      double maxY = Math.min(polygonWithLimitedVertices.getMaxY(), originalPolygon.getMaxY()) + 0.2;
+
+      FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(minX, maxX, minY, maxY);
+      FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
+      plotter.setDrawPointsLarge();
+
+      plotter.addPolygon(originalPolygon, Color.BLUE);
+      plotter.addPolygon(polygonWithLimitedVertices, Color.RED);
+
+      for (int i = 0; i < originalPolygon.getNumberOfVertices(); i++)
+      {
+         plotter.addFramePoint2d(new FramePoint2D(ReferenceFrame.getWorldFrame(), originalPolygon.getVertex(i)), Color.BLUE);
+      }
+      for (int i = 0; i < polygonWithLimitedVertices.getNumberOfVertices(); i++)
+      {
+         plotter.addFramePoint2d(new FramePoint2D(ReferenceFrame.getWorldFrame(), polygonWithLimitedVertices.getVertex(i)), Color.RED);
+      }
+
+      System.out.println("Expecting " + desiredNumberOfVertices + " Vertices.");
+      waitForButtonOrPause(testFrame);
+      testFrame.dispose();
    }
 
    @Test
@@ -1173,7 +1235,7 @@ public class ConvexPolygonToolsTest
       ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
       Random random = new Random(1886L);
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame");
+      ReferenceFrame zUpFrame = ReferenceFrameTools.constructARootFrame("someFrame");
 
       double xMin = 0.0, xMax = 1.0, yMin = 0.0, yMax = 1.0;
       double widthMax = 0.5, heightMax = 0.5;

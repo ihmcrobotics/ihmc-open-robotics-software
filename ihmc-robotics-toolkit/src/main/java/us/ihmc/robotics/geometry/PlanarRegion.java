@@ -20,7 +20,6 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.shape.collision.interfaces.SupportingVertexHolder;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -42,6 +41,10 @@ public class PlanarRegion implements SupportingVertexHolder
    public static final double DEFAULT_BOUNDING_BOX_EPSILON = 0.0;
 
    private int regionId = NO_REGION_ID;
+   
+   /**
+    * This transform also represents the pose of the PlanarRegion.
+    */
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
    private final Point2D[] concaveHullsVertices;
@@ -905,7 +908,7 @@ public class PlanarRegion implements SupportingVertexHolder
     */
    public void getPointInRegion(Point3DBasics pointToPack)
    {
-      fromLocalToWorldTransform.getTranslation(pointToPack);
+      pointToPack.set(fromLocalToWorldTransform.getTranslation());
    }
 
    /**
@@ -1175,20 +1178,9 @@ public class PlanarRegion implements SupportingVertexHolder
     *
     * @param fromDesiredToCurrentTransform transform from current frame to desired frame
     */
-   public void transform(RigidBodyTransform fromDesiredToCurrentTransform)
+   public void applyTransform(RigidBodyTransform transform)
    {
-      fromLocalToWorldTransform.multiply(fromDesiredToCurrentTransform);
-      fromWorldToLocalTransform.set(fromLocalToWorldTransform);
-      fromWorldToLocalTransform.invert();
-
-      updateBoundingBox();
-      updateConvexHull();
-   }
-
-   //TODO: +++JEP 190719 I think this is the correct implementation for transform(). Double check and if so, replace the one above with this.
-   public void transformByPreMultiply(RigidBodyTransform transform)
-   {
-      fromLocalToWorldTransform.preMultiply(transform);
+      transform.transform(fromLocalToWorldTransform);
       fromWorldToLocalTransform.set(fromLocalToWorldTransform);
       fromWorldToLocalTransform.invert();
 
@@ -1333,8 +1325,8 @@ public class PlanarRegion implements SupportingVertexHolder
    public Plane3D getPlane()
    {
       Plane3D ret = new Plane3D();
-      ret.setPoint(fromLocalToWorldTransform.getM03(), fromLocalToWorldTransform.getM13(), fromLocalToWorldTransform.getM23());
-      ret.setNormal(fromLocalToWorldTransform.getM02(), fromLocalToWorldTransform.getM12(), fromLocalToWorldTransform.getM22());
+      ret.getPoint().set(fromLocalToWorldTransform.getM03(), fromLocalToWorldTransform.getM13(), fromLocalToWorldTransform.getM23());
+      ret.getNormal().set(fromLocalToWorldTransform.getM02(), fromLocalToWorldTransform.getM12(), fromLocalToWorldTransform.getM22());
       return ret;
    }
 

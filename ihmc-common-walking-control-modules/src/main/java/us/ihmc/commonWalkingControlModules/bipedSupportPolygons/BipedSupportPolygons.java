@@ -10,7 +10,6 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
@@ -115,15 +114,14 @@ public class BipedSupportPolygons
 
             for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
             {
-               ContactPointInterface contactPoint = contactState.getContactPoints().get(i);
+               ContactPointBasics contactPoint = contactState.getContactPoints().get(i);
                if (!contactPoint.isInContact())
                   continue;
 
-               FramePoint3DReadOnly position = contactPoint.getPosition();
-               footPolygonInWorldFrame.addVertexMatchingFrame(position);
-               footPolygonInSoleFrame.addVertexMatchingFrame(position);
-               footPolygonInSoleZUpFrame.addVertexMatchingFrame(position);
-               footPolygonInMidFeetZUp.addVertexMatchingFrame(position);
+               footPolygonInWorldFrame.addVertexMatchingFrame(contactPoint);
+               footPolygonInSoleFrame.addVertexMatchingFrame(contactPoint);
+               footPolygonInSoleZUpFrame.addVertexMatchingFrame(contactPoint);
+               footPolygonInMidFeetZUp.addVertexMatchingFrame(contactPoint);
             }
 
             footPolygonInWorldFrame.update();

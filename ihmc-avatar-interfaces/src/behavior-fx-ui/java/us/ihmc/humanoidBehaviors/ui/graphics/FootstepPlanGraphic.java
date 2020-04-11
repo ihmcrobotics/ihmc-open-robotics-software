@@ -14,10 +14,10 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.humanoidBehaviors.ui.tools.PrivateAnimationTimer;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -58,7 +58,7 @@ public class FootstepPlanGraphic extends Group
    public void generateMeshesAsynchronously(ArrayList<Pair<RobotSide, Pose3D>> plan)
    {
       executorService.submit(() -> {
-         LogTools.debug("Received footstep plan containing {} steps", plan.size());
+         LogTools.trace("Received footstep plan containing {} steps", plan.size());
          generateMeshes(plan);
       });
    }
@@ -120,5 +120,10 @@ public class FootstepPlanGraphic extends Group
          meshView.setMesh(mesh);
          meshView.setMaterial(material);
       }
+   }
+
+   public void clear()
+   {
+      generateMeshes(new ArrayList<>());
    }
 }

@@ -1,7 +1,5 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import java.awt.Color;
-
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.euclid.referenceFrame.FrameLine3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -18,13 +16,12 @@ import us.ihmc.robotics.math.filters.AlphaFilteredYoFramePoint2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoFrameVector2d;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.statistics.Line2DStatisticsCalculator;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameLine2D;
-import us.ihmc.yoVariables.variable.YoFramePoint2D;
-import us.ihmc.yoVariables.variable.YoFrameVector2D;
+import us.ihmc.yoVariables.variable.*;
+
+import java.awt.*;
 
 /**
  * This class computes whether a foot is rotating.</br>
@@ -35,7 +32,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector2D;
  * the angular velocity of the foot to be sufficiently large. A threshold determines if that is the case. The speed of
  * rotation is the integrated using a leak rate. If the integral which is a measure of absolute foot rotation exceeds
  * a second threshold the foot is assumed to rotate.]
- * 
+ *
  * @author Georg Wiedebach
  */
 public class FootRotationDetector
@@ -60,6 +57,8 @@ public class FootRotationDetector
    private final DoubleProvider decayBreakFrequency;
    private final DoubleProvider filterBreakFrequency;
    private final DoubleProvider rotationThreshold;
+
+   private final Line2DStatisticsCalculator lineOfRotationStandardDeviation;
 
    public FootRotationDetector(RobotSide side, MovingReferenceFrame soleFrame, double dt, YoVariableRegistry parentRegistry,
                                YoGraphicsListRegistry graphicsRegistry)
@@ -86,6 +85,8 @@ public class FootRotationDetector
       YoFramePoint2D point = new YoFramePoint2D(side.getLowerCaseName() + "LineOfRotationPoint", soleFrame, registry);
       YoFrameVector2D direction = new YoFrameVector2D(side.getLowerCaseName() + "LineOfRotationDirection", soleFrame, registry);
       lineOfRotationInSole = new YoFrameLine2D(point, direction);
+
+      lineOfRotationStandardDeviation = new Line2DStatisticsCalculator(side.getLowerCaseName() + "LineOfRotation", lineOfRotationInSole, registry);
 
       DoubleProvider alpha = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(filterBreakFrequency.getValue(), dt);
       filteredPointOfRotation = new AlphaFilteredYoFramePoint2d(side + "FilteredPointOfRotation", "", registry, alpha, soleFrame);
@@ -117,7 +118,7 @@ public class FootRotationDetector
          lineOfRotationInSole.getPoint().set(tempPointOfRotation);
          lineOfRotationInSole.getDirection().set(soleFrameTwist.getAngularPart());
 
-         double omega = lineOfRotationInSole.getDirection().length();
+         double omega = soleFrameTwist.getAngularPart().length();
          integratedRotationAngle.add(dt * omega);
 
          lineOfRotationInSole.getDirection().scale(1.0 / omega);
@@ -132,12 +133,16 @@ public class FootRotationDetector
          filteredAxisOfRotation.update(lineOfRotationInSole.getDirection());
          lineOfRotationInSole.set(filteredPointOfRotation, filteredAxisOfRotation);
          lineOfRotationInSole.getDirection().normalize();
+
+         lineOfRotationStandardDeviation.update();
       }
       else if (!isRotating.getValue())
       {
          filteredPointOfRotation.reset();
          filteredAxisOfRotation.reset();
          lineOfRotationInSole.setToZero();
+
+         lineOfRotationStandardDeviation.reset();
       }
 
       if (!isRotating.getValue())

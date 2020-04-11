@@ -54,7 +54,7 @@ public class FusionSensorMeshViewer
       stereoVisionPointCloudViewer = new StereoVisionPointCloudViewer(REAModuleAPI.StereoVisionPointCloudState, reaMessager, REAModuleAPI.UIStereoVisionShow,
                                                                       REAModuleAPI.UIStereoVisionClear);
       detectedObjectViewer = new DetectedObjectViewer(ros2Node);
-      planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(reaMessager);
+      planarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(reaMessager, REAModuleAPI.PlanarRegionsState);
       lidarImageFusionDataViewer = new LidarImageFusionDataViewer(messager);
       
       messager.registerTopicListener(LidarImageFusionAPI.ClearREA, (content) -> clear());

@@ -93,7 +93,7 @@ public class StartGoalOrientationEditor extends AnimationTimer
       planarRegion.getTransformToWorld(regionTransform);
       Vector3D planeNormal = planarRegion.getNormal();
       Point3D pointOnPlane = new Point3D();
-      regionTransform.getTranslation(pointOnPlane);
+      pointOnPlane.set(regionTransform.getTranslation());
 
       return EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane, planeNormal, line.getPoint(), line.getDirection());
    }

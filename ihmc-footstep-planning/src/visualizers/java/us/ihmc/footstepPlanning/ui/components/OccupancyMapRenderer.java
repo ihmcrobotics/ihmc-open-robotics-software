@@ -24,6 +24,7 @@ import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -33,9 +34,8 @@ public class OccupancyMapRenderer extends AnimationTimer
 {
    private static final double cellWidth = 0.02;
    private static final double nodeOffsetZ = 0.05;
-   private static final double cellOpacity = 0.9;
-   private static final Color validCellColor = Color.rgb(219, 124, 87, cellOpacity);
-   private static final Color rejectedCellColor = Color.rgb(139, 0, 0, cellOpacity);
+   private static final double cellOpacity = 0.5;
+   private static final Color occupancyCellColor = Color.rgb(219, 124, 87, cellOpacity);
 
    private ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
 
@@ -49,6 +49,7 @@ public class OccupancyMapRenderer extends AnimationTimer
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
 
+   private final HashSet<PlannerCell> renderedCells = new HashSet<>();
    private final MeshView occupancyMapMeshView = new MeshView();
    private final ConvexPolygon2D cellPolygon = new ConvexPolygon2D();
 
@@ -58,6 +59,7 @@ public class OccupancyMapRenderer extends AnimationTimer
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList::set);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.AssumeFlatGround, data -> reset.set(true));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.GlobalReset, data -> reset.set(true));
       show = messager.createInput(FootstepPlannerMessagerAPI.ShowOccupancyMap, true);
 
       cellPolygon.addVertex(cellWidth, 0.0);
@@ -78,16 +80,17 @@ public class OccupancyMapRenderer extends AnimationTimer
       Collection<PlannerCell> occupiedCells = occupancyMap.getOccupiedCells();
       for (PlannerCell cell : occupiedCells)
       {
+         if (renderedCells.contains(cell))
+            continue;
+
          double x = cell.getXIndex() * LatticeNode.gridSizeXY;
          double y = cell.getYIndex() * LatticeNode.gridSizeXY;
          double z = getHeightAtPoint(x, y) + nodeOffsetZ;
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setTranslation(x, y, z);
+         transform.getTranslation().set(x, y, z);
 
-//         if (cell.getNodeIsValid())
-         meshBuilder.addPolygon(transform, cellPolygon, validCellColor);
-//         else
-//            occupancyMapBuilder.addPolygon(transform, cellPolygon, rejectedCellColor);
+         renderedCells.add(cell);
+         meshBuilder.addPolygon(transform, cellPolygon, occupancyCellColor);
       }
 
       occupancyMapToRender.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
@@ -110,18 +113,17 @@ public class OccupancyMapRenderer extends AnimationTimer
       else if (!show.get() && !root.getChildren().isEmpty())
          root.getChildren().clear();
 
-      // FIXME make sure the occupancy map builder is getting cleared at the right time
-
       if (reset.getAndSet(false))
       {
          meshBuilder.clear();
          occupancyMapToRender.set(null);
          occupancyMapMeshView.setMesh(null);
          occupancyMapMeshView.setMaterial(null);
+         renderedCells.clear();
          return;
       }
 
-      Pair<Mesh, Material> newOccupancyMapMesh = occupancyMapToRender.get();
+      Pair<Mesh, Material> newOccupancyMapMesh = occupancyMapToRender.getAndSet(null);
       if (newOccupancyMapMesh != null)
       {
          occupancyMapMeshView.setMesh(newOccupancyMapMesh.getKey());

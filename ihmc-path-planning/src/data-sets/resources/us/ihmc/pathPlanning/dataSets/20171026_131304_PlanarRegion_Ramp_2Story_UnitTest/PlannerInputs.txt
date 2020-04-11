@@ -1,7 +1,8 @@
 start_position 1.038 0.356 0.000
 goal_position 9.169 -0.764 0.625
+start_yaw 0.0
+goal_yaw 0.0
 vis_graph_status dev
 step_planner_status test
-planar_region_bipedal_timeout 10.0
-a_star_timeout 5.0
-vis_graph_with_a_star_timeout 20.0
+a_star_iteration_limit 700
+vis_graph_with_a_star_iteration_limit 100

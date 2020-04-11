@@ -6,25 +6,23 @@ import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.
 import java.util.Map;
 
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.HumanoidRobotKinematicsCollisionModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.tools.string.StringTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -74,6 +72,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
                            fullRobotModelFactory,
                            walkingControllerPeriod,
                            toolboxControllerPeriod,
+                           time,
                            yoGraphicsListRegistry,
                            registry);
 
@@ -94,7 +93,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
       tools.getIKController().setInitialRobotConfigurationNamedMap(initialConfiguration);
    }
 
-   public void setCollisionModel(HumanoidRobotKinematicsCollisionModel collisionModel)
+   public void setCollisionModel(RobotCollisionModel collisionModel)
    {
       tools.getIKController().setCollisionModel(collisionModel);
    }
@@ -148,14 +147,7 @@ public class KinematicsStreamingToolboxController extends ToolboxController
 
          try
          {
-            reportMessage(toCrashNotification(0, StringTools.getEveryUppercaseLetter(e.getClass().getSimpleName()) + " " + e.getMessage()));
-            ThreadTools.sleep(10);
-
-            for (int i = 0; i < e.getStackTrace().length; i++)
-            {
-               reportMessage(toCrashNotification(i + 1, e.getStackTrace()[i].toString()));
-               ThreadTools.sleep(10);
-            }
+            reportMessage(MessageTools.createControllerCrashNotificationPacket(null, e));
          }
          catch (Exception e1)
          {
@@ -164,18 +156,6 @@ public class KinematicsStreamingToolboxController extends ToolboxController
 
          isDone.set(true);
       }
-   }
-
-   private static ControllerCrashNotificationPacket toCrashNotification(int index, String message)
-   {
-      ControllerCrashNotificationPacket errorMessage = new ControllerCrashNotificationPacket();
-      errorMessage.setSequenceId(index);
-      StringBuilder stacktrace = errorMessage.getStacktrace();
-      if (message.length() < 255)
-         stacktrace.append(message);
-      else
-         stacktrace.append(message.substring(message.length() - 255, message.length()));
-      return errorMessage;
    }
 
    @Override

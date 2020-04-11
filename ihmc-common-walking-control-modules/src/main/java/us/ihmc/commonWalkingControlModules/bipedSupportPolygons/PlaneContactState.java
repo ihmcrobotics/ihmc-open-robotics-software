@@ -37,7 +37,7 @@ public interface PlaneContactState
 
    public abstract int getTotalNumberOfContactPoints();
 
-   public abstract List<? extends ContactPointInterface> getContactPoints();
+   public abstract List<? extends ContactPointBasics> getContactPoints();
 
    public abstract void updateFromPlaneContactStateCommand(PlaneContactStateCommand planeContactStateCommand);
 
@@ -50,8 +50,8 @@ public interface PlaneContactState
    public abstract boolean peekContactHasChangedNotification();
 
    /**
-    * Will modify the provided contact state such that all contact points with the largest
-    * x position value will be in contact and all other contact points will be deactivated.
+    * Will modify the provided contact state such that all contact points with the largest x position
+    * value will be in contact and all other contact points will be deactivated.
     *
     * @param contactState to enable the toe contacts on.
     */
@@ -60,20 +60,20 @@ public interface PlaneContactState
       double maxX = Double.NEGATIVE_INFINITY;
       for (int i = 0; i < contactState.getContactPoints().size(); i++)
       {
-         double x = contactState.getContactPoints().get(i).getPosition().getX();
+         double x = contactState.getContactPoints().get(i).getX();
          maxX = Math.max(maxX, x);
       }
       for (int i = 0; i < contactState.getContactPoints().size(); i++)
       {
-         double x = contactState.getContactPoints().get(i).getPosition().getX();
+         double x = contactState.getContactPoints().get(i).getX();
          contactState.getContactPoints().get(i).setInContact(Precision.equals(x, maxX));
       }
       contactState.notifyContactStateHasChanged();
    }
 
    /**
-    * Will modify the provided contact state such that all contact points with the smallest
-    * x position value will be in contact and all other contact points will be deactivated.
+    * Will modify the provided contact state such that all contact points with the smallest x position
+    * value will be in contact and all other contact points will be deactivated.
     *
     * @param contactState to enable the heel contacts on.
     */
@@ -82,12 +82,12 @@ public interface PlaneContactState
       double minX = Double.POSITIVE_INFINITY;
       for (int i = 0; i < contactState.getContactPoints().size(); i++)
       {
-         double x = contactState.getContactPoints().get(i).getPosition().getX();
+         double x = contactState.getContactPoints().get(i).getX();
          minX = Math.min(minX, x);
       }
       for (int i = 0; i < contactState.getContactPoints().size(); i++)
       {
-         double x = contactState.getContactPoints().get(i).getPosition().getX();
+         double x = contactState.getContactPoints().get(i).getX();
          contactState.getContactPoints().get(i).setInContact(Precision.equals(x, minX));
       }
       contactState.notifyContactStateHasChanged();

@@ -16,7 +16,7 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
-class SCSVideoDataROS2Bridge implements VideoDataServer
+public class SCSVideoDataROS2Bridge implements VideoDataServer
 {
    private static final Object hackyLockBecauseJPEGEncoderIsNotThreadsafe = new Object();
 

@@ -17,6 +17,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 
@@ -222,8 +223,8 @@ public class REAOcTreeBuffer
          scanCollection.addScan(toScan(lidarMessage.getScan(), lidarMessage.getLidarPosition()));
 
          Pose3D sensorPose = new Pose3D();
-         sensorPose.setPosition(lidarMessage.getLidarPosition());
-         sensorPose.setOrientation(lidarMessage.getLidarOrientation());
+         sensorPose.getPosition().set(lidarMessage.getLidarPosition());
+         sensorPose.getOrientation().set(lidarMessage.getLidarOrientation());
          newSensorPoseReference.set(sensorPose);
       }
 
@@ -233,14 +234,21 @@ public class REAOcTreeBuffer
          newFullScanReference.set(scanCollection);
          scanCollection.setSubSampleSize(stereoVisionBufferSize.get());
          // FIXME Not downsizing the scan anymore, this needs to be reviewed to improve speed.
-         scanCollection.addScan(toScan(stereoMessage.getPointCloud(), stereoMessage.getSensorPosition()));
+         scanCollection.addScan(toScan(stereoMessage));
          // TODO: make NormalOctree constructor with octreeDepth.get().
 
          Pose3D sensorPose = new Pose3D();
-         sensorPose.setPosition(stereoMessage.getSensorPosition());
-         sensorPose.setOrientation(stereoMessage.getSensorOrientation());
+         sensorPose.getPosition().set(stereoMessage.getSensorPosition());
+         sensorPose.getOrientation().set(stereoMessage.getSensorOrientation());
          newSensorPoseReference.set(sensorPose);
       }
+   }
+
+   private static Scan toScan(StereoVisionPointCloudMessage stereoMessage)
+   {
+      PointCloud pointCloud = new PointCloud();
+      PointCloudCompression.decompressPointCloud(stereoMessage, pointCloud::add);
+      return new Scan(stereoMessage.getSensorPosition(), pointCloud);
    }
 
    private static Scan toScan(Float data, Point3DReadOnly sensorPosition)

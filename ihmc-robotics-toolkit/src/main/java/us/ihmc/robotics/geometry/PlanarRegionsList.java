@@ -15,6 +15,11 @@ public class PlanarRegionsList
 {
    private final List<PlanarRegion> regions;
 
+   public PlanarRegionsList()
+   {
+      regions = new ArrayList<>();
+   }
+
    public PlanarRegionsList(PlanarRegion... planarRegions)
    {
       regions = new ArrayList<>();
@@ -380,19 +385,11 @@ public class PlanarRegionsList
     *
     * @param rigidBodyTransform transform from current frame to desired frame
     */
-   public void transform(RigidBodyTransform rigidBodyTransform)
+   public void applyTransform(RigidBodyTransform rigidBodyTransform)
    {
       for (int i = 0; i < regions.size(); i++)
       {
-         regions.get(i).transform(rigidBodyTransform);
-      }
-   }
-
-   public void transformByPreMultiply(RigidBodyTransform rigidBodyTransform)
-   {
-      for (int i = 0; i < regions.size(); i++)
-      {
-         regions.get(i).transformByPreMultiply(rigidBodyTransform);
+         regions.get(i).applyTransform(rigidBodyTransform);
       }
    }
 

@@ -11,7 +11,7 @@ public class FlatGroundPlanningUtils
    public static FramePose3D poseFormPose2d(FramePose2D pose2d)
    {
       FramePose3D pose = new FramePose3D(pose2d.getReferenceFrame());
-      pose.setOrientationYawPitchRoll(pose2d.getYaw(), 0.0, 0.0);
+      pose.getOrientation().setYawPitchRoll(pose2d.getYaw(), 0.0, 0.0);
       pose.setX(pose2d.getX());
       pose.setY(pose2d.getY());
       return pose;

@@ -1,22 +1,25 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Tuple2DBasics;
 
-public class ContactPoint implements ContactPointInterface
+public class ContactPoint implements ContactPointBasics
 {
    private boolean inContact = false;
-   private final FramePoint3D position;
+   private double x, y, z;
+   private final ReferenceFrame referenceFrame;
    private final PlaneContactState parentContactState;
 
-   public ContactPoint(FramePoint2D point2d, PlaneContactState parentContactState)
+   public ContactPoint(ReferenceFrame referenceFrame, PlaneContactState parentContactState)
    {
-      position = new FramePoint3D(point2d.getReferenceFrame(), point2d.getX(), point2d.getY(), 0.0);
+      this.referenceFrame = referenceFrame;
+      this.parentContactState = parentContactState;
+   }
+
+   public ContactPoint(FrameTuple2DReadOnly position, PlaneContactState parentContactState)
+   {
+      this.referenceFrame = position.getReferenceFrame();
+      set(position, 0.0);
       this.parentContactState = parentContactState;
    }
 
@@ -33,50 +36,50 @@ public class ContactPoint implements ContactPointInterface
    }
 
    @Override
-   public void setPosition(FrameTuple3DReadOnly position)
-   {
-      this.position.set(position);
-   }
-
-   @Override
    public PlaneContactState getParentContactState()
    {
       return parentContactState;
    }
 
    @Override
-   public FramePoint3D getPosition()
+   public void setX(double x)
    {
-      return position;
+      this.x = x;
    }
 
    @Override
-   public void getPosition(FramePoint3D framePointToPack)
+   public void setY(double y)
    {
-      framePointToPack.setIncludingFrame(position);
+      this.y = y;
    }
 
    @Override
-   public void getPosition2d(FrameTuple2DBasics framePoint2dToPack)
+   public void setZ(double z)
    {
-      framePoint2dToPack.setIncludingFrame(getReferenceFrame(), position.getX(), position.getY());
-   }
-
-   @Override
-   public void getPosition2d(Tuple2DBasics position2d)
-   {
-      position2d.set(position);
-   }
-
-   @Override
-   public void setPosition2d(FrameTuple2DReadOnly position2d)
-   {
-      position.set(position2d, 0.0);
+      this.z = z;
    }
 
    @Override
    public ReferenceFrame getReferenceFrame()
    {
-      return position.getReferenceFrame();
+      return referenceFrame;
+   }
+
+   @Override
+   public double getX()
+   {
+      return x;
+   }
+
+   @Override
+   public double getY()
+   {
+      return y;
+   }
+
+   @Override
+   public double getZ()
+   {
+      return z;
    }
 }

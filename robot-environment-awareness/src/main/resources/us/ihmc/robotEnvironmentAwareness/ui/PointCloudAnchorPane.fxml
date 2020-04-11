@@ -8,8 +8,8 @@
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.Label?>
 <?import javafx.scene.control.Slider?>
-<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.control.Spinner?>
+<?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
@@ -78,7 +78,7 @@
                   </VBox>
                </children>
             </VBox>
-            <VBox alignment="CENTER" prefHeight="180.0" prefWidth="150.0">
+            <VBox alignment="CENTER" prefHeight="180.0" prefWidth="150.0" spacing="10.0">
                <children>
                   <Label alignment="CENTER" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" text="Sensor Pose History" textAlignment="CENTER">
                      <font>
@@ -95,7 +95,7 @@
                         </Slider>
                      </children>
                   </HBox>
-                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearNavigation" text="Clear" />
+                  <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearNavigation" text="Clear"/>
                </children>
             </VBox>
          </children>

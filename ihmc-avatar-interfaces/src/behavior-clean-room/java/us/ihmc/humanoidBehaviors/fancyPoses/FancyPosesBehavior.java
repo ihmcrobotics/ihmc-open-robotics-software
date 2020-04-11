@@ -14,6 +14,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
+import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
@@ -34,6 +35,8 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 
 public class FancyPosesBehavior implements BehaviorInterface
 {
+   public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Fancy Poses", FancyPosesBehavior::new, API.create());
+
    private final BehaviorHelper helper;
 
    private final ActivationReference<Boolean> stepping;
@@ -156,8 +159,8 @@ public class FancyPosesBehavior implements BehaviorInterface
 
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
-      footPose.setPosition(-0.40, supportSide.negateIfLeftSide(0.25), 0.40);
-      footPose.setOrientationYawPitchRoll(0.0, 0.8 * Math.PI / 2.0, 0.0);
+      footPose.getPosition().set(-0.40, supportSide.negateIfLeftSide(0.25), 0.40);
+      footPose.getOrientation().setYawPitchRoll(0.0, 0.8 * Math.PI / 2.0, 0.0);
       footPose.changeFrame(worldFrame);
       robot.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, footPose);
 
@@ -182,7 +185,7 @@ public class FancyPosesBehavior implements BehaviorInterface
 
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
-      footPose.setPosition(0.10, supportSide.negateIfLeftSide(0.25), 0.20);
+      footPose.getPosition().set(0.10, supportSide.negateIfLeftSide(0.25), 0.20);
       footPose.changeFrame(worldFrame);
       robot.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, footPose);
 
@@ -202,8 +205,8 @@ public class FancyPosesBehavior implements BehaviorInterface
 
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
-      footPose.setPosition(0.6, supportSide.negateIfLeftSide(0.25), 0.25);
-      footPose.setOrientationYawPitchRoll(0.0, -Math.PI / 4.0, 0.0);
+      footPose.getPosition().set(0.6, supportSide.negateIfLeftSide(0.25), 0.25);
+      footPose.getOrientation().setYawPitchRoll(0.0, -Math.PI / 4.0, 0.0);
       footPose.changeFrame(worldFrame);
       robot.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, footPose);
 
@@ -228,8 +231,8 @@ public class FancyPosesBehavior implements BehaviorInterface
 
       ReferenceFrame supportAnkleZUpFrame = referenceFrames.getAnkleZUpFrame(supportSide);
       FramePose3D footPose = new FramePose3D(supportAnkleZUpFrame);
-      footPose.setPosition(0.00, supportSide.negateIfLeftSide(0.65), 0.2);
-      footPose.setOrientationYawPitchRoll(0.0, 0.0, supportSide.negateIfLeftSide(Math.toRadians(40.0)));
+      footPose.getPosition().set(0.00, supportSide.negateIfLeftSide(0.65), 0.2);
+      footPose.getOrientation().setYawPitchRoll(0.0, 0.0, supportSide.negateIfLeftSide(Math.toRadians(40.0)));
       footPose.changeFrame(worldFrame);
       robot.requestFootTrajectory(supportSide.getOppositeSide(), trajectoryTime, footPose);
 
@@ -256,8 +259,8 @@ public class FancyPosesBehavior implements BehaviorInterface
       double trajectoryTime = 5.0;
 
       FramePose3D footPose = new FramePose3D(soleFrame);
-      footPose.setPosition(-0.511, 0.160, 0.277);
-      footPose.setOrientation(0.008, 0.263, 0.216, 0.940);
+      footPose.getPosition().set(-0.511, 0.160, 0.277);
+      footPose.getOrientation().set(0.008, 0.263, 0.216, 0.940);
       footPose.changeFrame(worldFrame);
       Point3D position = new Point3D();
       Quaternion orientation = new Quaternion();

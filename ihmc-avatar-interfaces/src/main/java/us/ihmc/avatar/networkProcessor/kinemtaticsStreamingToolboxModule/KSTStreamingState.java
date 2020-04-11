@@ -13,6 +13,7 @@ import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.HumanoidKinematicsToolboxController;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.OutputPublisher;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -28,6 +29,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameSpatialVector;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
@@ -42,6 +44,7 @@ import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
+import us.ihmc.tools.UnitConversions;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -57,6 +60,8 @@ public class KSTStreamingState implements State
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    private final KSTTools tools;
+   private final double toolboxControllerPeriod;
+
    private OutputPublisher outputPublisher = m ->
    {
    };
@@ -117,16 +122,21 @@ public class KSTStreamingState implements State
    private final YoPIDSE3Gains ikSolverSpatialGains;
    private final YoPIDGains ikSolverJointGains;
 
-   private final Map<RigidBodyBasics, AlphaFilteredYoFramePoint> filteredInputPositions = new HashMap<>();
-   private final Map<RigidBodyBasics, AlphaFilteredYoFrameQuaternion> filteredInputOrientations = new HashMap<>();
+   private final Map<RigidBodyBasics, AlphaFilteredYoFramePoint> filteredInputPositionMap = new HashMap<>();
+   private final Map<RigidBodyBasics, AlphaFilteredYoFrameQuaternion> filteredInputOrientationMap = new HashMap<>();
+   private final YoFixedFrameSpatialVector[] inputSpatialVelocityArray;
+   private final Map<RigidBodyBasics, YoFixedFrameSpatialVector> inputSpatialVelocityMap = new HashMap<>();
+   private final YoDouble inputVelocityDecay = new YoDouble("inputVelocityDecay", registry);
 
    public KSTStreamingState(KSTTools tools)
    {
       this.tools = tools;
+      toolboxControllerPeriod = tools.getToolboxControllerPeriod();
       ikController = tools.getIKController();
       ikSolverSpatialGains = ikController.getDefaultSpatialGains();
       ikSolverJointGains = ikController.getDefaultJointGains();
       ikController.getCenterOfMassSafeMargin().set(0.05);
+      ikController.setPublishingSolutionPeriod(UnitConversions.hertzToSeconds(60.0));
       desiredFullRobotModel = tools.getDesiredFullRobotModel();
       ikCommandInputManager = tools.getIKCommandInputManager();
 
@@ -163,7 +173,12 @@ public class KSTStreamingState implements State
 
       defaultLinearWeight.set(20.0);
       defaultAngularWeight.set(1.0);
-      preferredArmConfigWeight.set(0.1);
+      /*
+       * TODO This was introduced to reduce the risk of shoulder flip on Valkyrie, but it seems that it is
+       * impacting too much the task-space objectives and preventing the privileged configuration to kick
+       * in when there's a singularity.
+       */
+      preferredArmConfigWeight.set(0.075);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -190,15 +205,16 @@ public class KSTStreamingState implements State
       outputRobotState = new YoKinematicsToolboxOutputStatus("FD", rootJoint, oneDoFJoints, registry);
 
       YoDouble inputFrequencyAlpha = new YoDouble("inputFrequencyFilter", registry);
-      inputFrequencyAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(2.0, tools.getToolboxControllerPeriod()));
+      inputFrequencyAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(2.0, toolboxControllerPeriod));
       inputFrequency = new AlphaFilteredYoVariable("inputFrequency", registry, inputFrequencyAlpha, rawInputFrequency);
       inputDecayFactor = new YoDouble("inputDecayFactor", registry);
-      inputDecayFactor.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0 / 3.0, tools.getToolboxControllerPeriod()));
+      inputDecayFactor.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0 / 3.0, toolboxControllerPeriod));
 
       Collection<? extends RigidBodyBasics> controllableRigidBodies = tools.getIKController().getControllableRigidBodies();
       DoubleProvider inputsAlphaProvider = () -> AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(inputsFilterBreakFrequency.getValue(),
-                                                                                                                 tools.getToolboxControllerPeriod());
+                                                                                                                 toolboxControllerPeriod);
       inputsFilterBreakFrequency.set(2.0);
+      inputVelocityDecay.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(1.0 / 0.5, toolboxControllerPeriod));
 
       for (RigidBodyBasics rigidBody : controllableRigidBodies)
       {
@@ -207,8 +223,19 @@ public class KSTStreamingState implements State
                + "Position", "", registry, inputsAlphaProvider, worldFrame);
          AlphaFilteredYoFrameQuaternion filteredInputOrientation = new AlphaFilteredYoFrameQuaternion(namePrefix
                + "Orientation", "", inputsAlphaProvider, worldFrame, registry);
-         filteredInputPositions.put(rigidBody, filteredInputPosition);
-         filteredInputOrientations.put(rigidBody, filteredInputOrientation);
+         YoFixedFrameSpatialVector inputSpatialVelocity = new YoFixedFrameSpatialVector(namePrefix + "Velocity", worldFrame, registry);
+         filteredInputPositionMap.put(rigidBody, filteredInputPosition);
+         filteredInputOrientationMap.put(rigidBody, filteredInputOrientation);
+         inputSpatialVelocityMap.put(rigidBody, inputSpatialVelocity);
+      }
+
+      inputSpatialVelocityArray = new YoFixedFrameSpatialVector[controllableRigidBodies.size()];
+
+      int index = 0;
+
+      for (RigidBodyBasics rigidBody : controllableRigidBodies)
+      {
+         inputSpatialVelocityArray[index++] = inputSpatialVelocityMap.get(rigidBody);
       }
    }
 
@@ -224,7 +251,6 @@ public class KSTStreamingState implements State
    {
       isStreaming.set(false);
       wasStreaming.set(false);
-      hasPreviousInputs = false;
       timeOfLastMessageSentToController.set(Double.NEGATIVE_INFINITY);
       ikSolverSpatialGains.setPositionProportionalGains(50.0);
       ikSolverSpatialGains.setOrientationProportionalGains(50.0);
@@ -285,22 +311,30 @@ public class KSTStreamingState implements State
       timeSinceLastInput.set(Double.NaN);
       inputFrequency.reset();
 
-      for (AlphaFilteredYoFramePoint filteredInputPosition : filteredInputPositions.values())
+      for (AlphaFilteredYoFramePoint filteredInputPosition : filteredInputPositionMap.values())
       {
          filteredInputPosition.setToNaN();
          filteredInputPosition.reset();
       }
-      for (AlphaFilteredYoFrameQuaternion filteredInputOrientation : filteredInputOrientations.values())
+      for (AlphaFilteredYoFrameQuaternion filteredInputOrientation : filteredInputOrientationMap.values())
       {
          filteredInputOrientation.setToNaN();
          filteredInputOrientation.reset();
       }
+      resetEstimatedInputVelocities();
 
       System.gc();
    }
 
-   private boolean hasPreviousInputs = false;
-   private final KinematicsStreamingToolboxInputCommand previousInputs = new KinematicsStreamingToolboxInputCommand();
+   private void resetEstimatedInputVelocities()
+   {
+      for (YoFixedFrameSpatialVector filteredInputSpatialVelocity : inputSpatialVelocityArray)
+      {
+         filteredInputSpatialVelocity.setToZero();
+      }
+   }
+
+   private final KinematicsStreamingToolboxInputCommand rawInputs = new KinematicsStreamingToolboxInputCommand();
    private final KinematicsStreamingToolboxInputCommand filteredInputs = new KinematicsStreamingToolboxInputCommand();
 
    @Override
@@ -310,41 +344,59 @@ public class KSTStreamingState implements State
       MessageTools.packWeightMatrix3DMessage(defaultPelvisMessageAngularWeight.getValue(), defaultPelvisMessage.getAngularWeightMatrix());
       MessageTools.packWeightMatrix3DMessage(defaultChestMessageAngularWeight.getValue(), defaultChestMessage.getAngularWeightMatrix());
 
-      KinematicsStreamingToolboxInputCommand latestInput = tools.pollInputCommand();
+      tools.pollInputCommand();
+
+      estimateInputsVelocity();
+
+      KinematicsStreamingToolboxInputCommand latestInput = tools.getLatestInput();
 
       if (latestInput != null)
       {
          for (int i = 0; i < latestInput.getNumberOfInputs(); i++)
-         {
+         { // Sets the user weights only if provided.
             setDefaultWeightIfNeeded(latestInput.getInput(i).getSelectionMatrix(), latestInput.getInput(i).getWeightMatrix());
          }
 
-         if (!latestInput.getStreamToController() && latestInput.getNumberOfInputs() == 0 && hasPreviousInputs)
+         if (!latestInput.getStreamToController() && latestInput.getNumberOfInputs() == 0 && tools.hasPreviousInput())
          {
-            latestInput.addInputs(previousInputs.getInputs());
+            /*
+             * In case the abruptly stops streaming and the message is empty. Only then we remember the last
+             * inputs and use them to finish this session. Without this, the robot would go to its privileged
+             * configuration.
+             */
+            latestInput.addInputs(tools.getPreviousInput().getInputs());
+            filteredInputs.set(latestInput);
          }
 
-         filteredInputs.set(latestInput);
+         if (tools.hasNewInputCommand())
+            rawInputs.set(latestInput);
+         else
+            extrapolateInputPositions(rawInputs);
+
+         filteredInputs.set(rawInputs);
 
          for (int i = 0; i < filteredInputs.getNumberOfInputs(); i++)
          {
+            /*
+             * Extract info from user inputs and filter position and orientation of each controlled body.
+             */
             KinematicsToolboxRigidBodyCommand filteredInput = filteredInputs.getInput(i);
             RigidBodyBasics endEffector = filteredInput.getEndEffector();
-            AlphaFilteredYoFramePoint filteredInputPosition = filteredInputPositions.get(endEffector);
-            AlphaFilteredYoFrameQuaternion filteredInputOrientation = filteredInputOrientations.get(endEffector);
             FramePose3D desiredPose = filteredInput.getDesiredPose();
 
-            if (filteredInputPosition != null)
-            {
-               filteredInputPosition.update(desiredPose.getPosition());
-               desiredPose.getPosition().set(filteredInputPosition);
-            }
+            AlphaFilteredYoFramePoint filteredInputPosition = filteredInputPositionMap.get(endEffector);
 
-            if (filteredInputOrientation != null)
-            {
-               filteredInputOrientation.update(desiredPose.getOrientation());
-               desiredPose.getOrientation().set(filteredInputOrientation);
-            }
+            if (filteredInputPosition == null)
+               continue;
+
+            AlphaFilteredYoFrameQuaternion filteredInputOrientation = filteredInputOrientationMap.get(endEffector);
+
+            // Update filters
+            filteredInputPosition.update(desiredPose.getPosition());
+            filteredInputOrientation.update(desiredPose.getOrientation());
+
+            desiredPose.getPosition().set(filteredInputPosition);
+            desiredPose.getOrientation().set(filteredInputOrientation);
 
             ikCommandInputManager.submitCommand(filteredInput);
          }
@@ -388,14 +440,11 @@ public class KSTStreamingState implements State
          else
             linearRateLimit.set(defaultLinearRateLimit.getValue());
 
-         if (hasPreviousInputs)
+         if (tools.hasPreviousInput())
          {
-            handleInputsDecay(latestInput, previousInputs);
+            handleInputsDecay(latestInput, tools.getPreviousInput());
             ikCommandInputManager.submitCommands(decayingInputs);
          }
-
-         hasPreviousInputs = true;
-         previousInputs.set(latestInput);
       }
 
       if (tools.hasNewInputCommand())
@@ -503,6 +552,76 @@ public class KSTStreamingState implements State
       }
 
       wasStreaming.set(isStreaming.getValue());
+   }
+
+   private void estimateInputsVelocity()
+   {
+      if (!tools.hasPreviousInput())
+      {
+         resetEstimatedInputVelocities();
+      }
+      else if (tools.hasNewInputCommand())
+      { // The inputs just got updated, need to recompute velocities.
+         KinematicsStreamingToolboxInputCommand latestInput = tools.getLatestInput();
+         KinematicsStreamingToolboxInputCommand previousInput = tools.getPreviousInput();
+
+         if (latestInput.getNumberOfInputs() != previousInput.getNumberOfInputs())
+         {
+            resetEstimatedInputVelocities();
+         }
+         else
+         {
+            double latestInputReceivedTime = Conversions.nanosecondsToSeconds(latestInput.getTimestamp());
+            double previousInputReceivedTime = Conversions.nanosecondsToSeconds(previousInput.getTimestamp());
+
+            double timeInterval = latestInputReceivedTime - previousInputReceivedTime;
+
+            for (int i = 0; i < latestInput.getNumberOfInputs(); i++)
+            {
+               YoFixedFrameSpatialVector spatialVelocity = inputSpatialVelocityMap.get(latestInput.getInput(i).getEndEffector());
+
+               if (spatialVelocity == null)
+                  continue;
+
+               /*
+                * We compute the velocity of the inputs and then do a 1st-order extrapolation in the future and
+                * update the raw input. This way, if for the next control tick we didn't get any new inputs, the IK
+                * keep moving which in result should improve continuity of any motion.
+                */
+               FramePose3D latestDesiredPose = latestInput.getInput(i).getDesiredPose();
+               FramePose3D previousDesiredPose = previousInput.getInput(i).getDesiredPose();
+
+               KSTTools.computeLinearVelocity(timeInterval,
+                                              previousDesiredPose.getPosition(),
+                                              latestDesiredPose.getPosition(),
+                                              spatialVelocity.getLinearPart());
+               KSTTools.computeAngularVelocity(timeInterval,
+                                               previousDesiredPose.getOrientation(),
+                                               latestDesiredPose.getOrientation(),
+                                               spatialVelocity.getAngularPart());
+            }
+         }
+      }
+      else
+      {
+         for (YoFixedFrameSpatialVector inputSpatialVelocity : inputSpatialVelocityArray)
+         {
+            inputSpatialVelocity.scale(inputVelocityDecay.getValue());
+         }
+      }
+   }
+
+   private void extrapolateInputPositions(KinematicsStreamingToolboxInputCommand inputs)
+   {
+      for (int i = 0; i < inputs.getNumberOfInputs(); i++)
+      {
+         KinematicsToolboxRigidBodyCommand input = inputs.getInput(i);
+         YoFixedFrameSpatialVector inputVelocity = inputSpatialVelocityMap.get(input.getEndEffector());
+
+         FramePose3D desiredPose = input.getDesiredPose();
+         KSTTools.integrateLinearVelocity(toolboxControllerPeriod, desiredPose.getPosition(), inputVelocity.getLinearPart(), desiredPose.getPosition());
+         KSTTools.integrateAngularVelocity(toolboxControllerPeriod, desiredPose.getOrientation(), inputVelocity.getLinearPart(), desiredPose.getOrientation());
+      }
    }
 
    private void handleInputsDecay(KinematicsStreamingToolboxInputCommand latestInputs, KinematicsStreamingToolboxInputCommand previousInputs)

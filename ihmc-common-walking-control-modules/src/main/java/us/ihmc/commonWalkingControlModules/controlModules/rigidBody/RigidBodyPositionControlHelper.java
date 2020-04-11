@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -29,7 +30,9 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanT
 import us.ihmc.robotics.screwTheory.SelectionMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
@@ -42,6 +45,11 @@ public class RigidBodyPositionControlHelper
    private final RecyclingArrayDeque<FrameEuclideanTrajectoryPoint> pointQueue = new RecyclingArrayDeque<>(RigidBodyTaskspaceControlState.maxPoints,
                                                                                                            FrameEuclideanTrajectoryPoint.class,
                                                                                                            FrameEuclideanTrajectoryPoint::set);
+   /**
+    * Used when streaming to account for time variations occurring during the transport of the message
+    * over the network.
+    */
+   private final YoDouble streamTimestampOffset;
 
    private boolean messageWeightValid = false;
    private final BooleanProvider useWeightFromMessage;
@@ -77,14 +85,18 @@ public class RigidBodyPositionControlHelper
 
    private final String warningPrefix;
 
+   private final DoubleProvider time;
+
    public RigidBodyPositionControlHelper(String warningPrefix, RigidBodyBasics bodyToControl, RigidBodyBasics baseBody, RigidBodyBasics elevator,
                                          ReferenceFrame controlFrame, ReferenceFrame baseFrame, BooleanProvider useBaseFrameForControl,
-                                         BooleanProvider useWeightFromMessage, YoVariableRegistry registry, YoGraphicsListRegistry graphicsListRegistry)
+                                         BooleanProvider useWeightFromMessage, DoubleProvider time, YoVariableRegistry registry,
+                                         YoGraphicsListRegistry graphicsListRegistry)
    {
       this.warningPrefix = warningPrefix;
       this.useBaseFrameForControl = useBaseFrameForControl;
       this.useWeightFromMessage = useWeightFromMessage;
       this.baseFrame = baseFrame;
+      this.time = time;
 
       String bodyName = bodyToControl.getName();
       String prefix = bodyName + "TaskspacePosition";
@@ -115,6 +127,9 @@ public class RigidBodyPositionControlHelper
          yoCurrentPosition = null;
          yoDesiredPosition = null;
       }
+
+      streamTimestampOffset = new YoDouble(prefix + "StreamTimestampOffset", registry);
+      streamTimestampOffset.setToNaN();
    }
 
    public void setGains(PID3DGainsReadOnly gains)
@@ -241,6 +256,9 @@ public class RigidBodyPositionControlHelper
          done = fillAndReinitializeTrajectories();
       }
 
+      if (done)
+         streamTimestampOffset.setToNaN();
+
       trajectoryGenerator.compute(timeInTrajectory);
       trajectoryGenerator.getLinearData(desiredPosition, desiredVelocity, feedForwardAcceleration);
 
@@ -312,6 +330,9 @@ public class RigidBodyPositionControlHelper
 
    public boolean handleTrajectoryCommand(EuclideanTrajectoryControllerCommand command, FrameQuaternionBasics currentDesiredOrientation)
    {
+      // The timestamp is being cleared in the clear method, need to save it to use it further down.
+      double previousStreamTimestampOffset = streamTimestampOffset.getValue();
+
       // Both OVERRIDE and STREAM clear the current trajectory.
       if (command.getExecutionMode() != ExecutionMode.QUEUE || isEmpty())
       {
@@ -363,6 +384,34 @@ public class RigidBodyPositionControlHelper
 
       if (command.getExecutionMode() == ExecutionMode.STREAM)
       {
+         double timeOffset = 0.0;
+
+         if (command.getTimestamp() <= 0)
+         {
+            streamTimestampOffset.setToNaN();
+         }
+         else
+         {
+            double senderTime = Conversions.nanosecondsToSeconds(command.getTimestamp());
+            timeOffset = time.getValue() - senderTime;
+            if (Double.isNaN(previousStreamTimestampOffset))
+            {
+               streamTimestampOffset.set(timeOffset);
+            }
+            else
+            {
+               /*
+                * Update to the smallest time offset, which is closer to the true offset between the sender CPU and
+                * control CPU. If the change in offset is too large though, we always set the streamTimestampOffset
+                * for safety.
+                */
+               if (Math.abs(timeOffset - previousStreamTimestampOffset) > 0.5)
+                  streamTimestampOffset.set(timeOffset);
+               else
+                  streamTimestampOffset.set(Math.min(timeOffset, previousStreamTimestampOffset));
+            }
+         }
+
          if (trajectoryPoints.getNumberOfTrajectoryPoints() != 1)
          {
             LogTools.warn("When streaming, trajectories should contain only 1 trajectory point, was: " + trajectoryPoints.getNumberOfTrajectoryPoints());
@@ -377,8 +426,14 @@ public class RigidBodyPositionControlHelper
             return false;
          }
 
-         if (!queuePoint(trajectoryPoint))
+         FrameEuclideanTrajectoryPoint initialPoint = addPoint();
+
+         if (initialPoint == null)
             return false;
+
+         initialPoint.setIncludingFrame(trajectoryPoint);
+         if (!streamTimestampOffset.isNaN())
+            initialPoint.setTime(streamTimestampOffset.getValue() - timeOffset);
 
          FrameEuclideanTrajectoryPoint integratedPoint = addPoint();
 
@@ -386,9 +441,11 @@ public class RigidBodyPositionControlHelper
             return false;
 
          integratedPoint.setIncludingFrame(trajectoryPoint);
-         integratedPosition.scaleAdd(command.getStreamIntegrationDuration(), integratedPoint.getLinearVelocity(), integratedPoint.getPosition());
+         integratedPosition.scaleAdd(command.getStreamIntegrationDuration(),
+                                     integratedPoint.getLinearVelocity(),
+                                     integratedPoint.getPosition());
          integratedPoint.setPosition(integratedPosition);
-         integratedPoint.setTime(command.getStreamIntegrationDuration());
+         integratedPoint.setTime(command.getStreamIntegrationDuration() + initialPoint.getTime());
       }
       else
       {
@@ -500,6 +557,7 @@ public class RigidBodyPositionControlHelper
       trajectoryGenerator.clear(baseFrame);
       setDefaultControlFrame();
       pointQueue.clear();
+      streamTimestampOffset.setToNaN();
    }
 
    public void disable()

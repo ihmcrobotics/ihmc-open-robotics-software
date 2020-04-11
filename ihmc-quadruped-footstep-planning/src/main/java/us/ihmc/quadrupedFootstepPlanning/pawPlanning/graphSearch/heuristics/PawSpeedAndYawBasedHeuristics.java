@@ -59,7 +59,7 @@ public class PawSpeedAndYawBasedHeuristics extends PawPlanningCostToGoHeuristics
 
          if (!nodeTransform.containsNaN())
          {
-            double heightChange = goalPose.getZ() - nodeTransform.getTranslationVector().getZ();
+            double heightChange = goalPose.getZ() - nodeTransform.getTranslation().getZ();
 
             if (heightChange > 0.0)
                heightCost += parameters.getStepUpWeight() * heightChange;
