@@ -61,6 +61,7 @@ public class YoOptimizedPolynomial
       jtW = new DenseMatrix64F(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
 
       numberOfCoefficients = new YoInteger(name + "_nCoeffs", registry);
+      numberOfCoefficients.set(maximumNumberOfCoefficients);
 
       for (int i = 0; i < maximumNumberOfCoefficients; i++)
       {
@@ -156,7 +157,7 @@ public class YoOptimizedPolynomial
          maxX = Math.max(maxX, point.getX());
       }
 
-      int nCoeffs = coefficients.length;
+      int nCoeffs = numberOfCoefficients.getIntegerValue();
       int size = positionPoints.size() + velocityPoints.size();
       jacobian.reshape(size, nCoeffs);
       weight.reshape(size, size);
