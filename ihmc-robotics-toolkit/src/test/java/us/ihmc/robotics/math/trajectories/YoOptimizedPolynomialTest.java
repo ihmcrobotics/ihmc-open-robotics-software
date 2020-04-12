@@ -32,6 +32,11 @@ public class YoOptimizedPolynomialTest
       double a0 = linear.getCoefficient(0);
       double a1 = linear.getCoefficient(1);
 
+      double y0Manual = a0 + a1 * x0;
+      double yfManual = a0 + a1 * xf;
+      assertEquals(y0, y0Manual, EPSILON);
+      assertEquals(yf, yfManual, EPSILON);
+
       double yLinear = linear.getDerivative(0, x);
       double yManual = a0 + a1*x;
       assertEquals(yLinear, yManual, EPSILON);
@@ -48,6 +53,11 @@ public class YoOptimizedPolynomialTest
       assertEquals(yManual, linear.getPosition(), EPSILON);
       assertEquals(dyManual, linear.getVelocity(), EPSILON);
       assertEquals(ddyManual, linear.getAcceleration(), EPSILON);
+
+      linear.compute(x0);
+      assertEquals(y0, linear.getPosition(), EPSILON);
+      linear.compute(xf);
+      assertEquals(yf, linear.getPosition(), EPSILON);
    }
 
    @Test
@@ -94,6 +104,14 @@ public class YoOptimizedPolynomialTest
       double x = 2.0/3.0 * (xf - x0);
 
       compareDerivativesPoint(cubic, x);
+
+      cubic.compute(x0);
+      assertEquals(y0, cubic.getPosition(), EPSILON);
+      assertEquals(dy0, cubic.getVelocity(), EPSILON);
+
+      cubic.compute(xf);
+      assertEquals(yf, cubic.getPosition(), EPSILON);
+      assertEquals(dyf, cubic.getVelocity(), EPSILON);
    }
 
 
@@ -127,6 +145,14 @@ public class YoOptimizedPolynomialTest
          double x = Math.random() * (xf - x0);
 
          compareXPowersDerivativesVector(cubic, x);
+
+         cubic.compute(x0);
+         assertEquals(y0, cubic.getPosition(), EPSILON);
+         assertEquals(dy0, cubic.getVelocity(), EPSILON);
+
+         cubic.compute(xf);
+         assertEquals(yf, cubic.getPosition(), EPSILON);
+         assertEquals(dyf, cubic.getVelocity(), EPSILON);
       }
    }
 
@@ -216,6 +242,14 @@ public class YoOptimizedPolynomialTest
          double x = Math.random() * (xf - x0);
 
          compareDerivativeVersions(cubic, x);
+
+         cubic.compute(x0);
+         assertEquals(y0, cubic.getPosition(), EPSILON);
+         assertEquals(dy0, cubic.getVelocity(), EPSILON);
+
+         cubic.compute(xf);
+         assertEquals(yf, cubic.getPosition(), EPSILON);
+         assertEquals(dyf, cubic.getVelocity(), EPSILON);
       }
    }
 

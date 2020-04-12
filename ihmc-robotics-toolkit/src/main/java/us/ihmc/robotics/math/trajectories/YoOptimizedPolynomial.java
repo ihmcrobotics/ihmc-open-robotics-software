@@ -10,12 +10,10 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.util.List;
-
 public class YoOptimizedPolynomial
 {
    private final int maximumNumberOfCoefficients;
-   private double pos, vel, acc, dPos;
+   private double pos, vel, acc;
    private final double[] xPowers;
 
    private final RecyclingArrayList<PositionPoint1D> positionPoints = new RecyclingArrayList<>(PositionPoint1D::new);
@@ -246,10 +244,7 @@ public class YoOptimizedPolynomial
    public double[] getCoefficients()
    {
       double[] ret = new double[numberOfCoefficients.getIntegerValue()];
-      for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
-      {
-         ret[i] = coefficients[i].getDoubleValue();
-      }
+      getCoefficients(ret);
       return ret;
    }
 
@@ -261,11 +256,9 @@ public class YoOptimizedPolynomial
       setXPowers(xPowers, x);
 
       double dPos = 0.0;
-      int derivativeCoefficient = 0;
       for (int i = order; i < numberOfCoefficients.getIntegerValue(); i++)
       {
-         derivativeCoefficient = getDerivativeCoefficient(order, i);
-         dPos += derivativeCoefficient * coefficients[i].getDoubleValue() * xPowers[i - order];
+         dPos += getDerivativeCoefficient(order, i) * coefficients[i].getDoubleValue() * xPowers[i - order];
       }
       return dPos;
    }
@@ -293,12 +286,8 @@ public class YoOptimizedPolynomial
       setXPowers(xPowers, x);
       xPowersDerivativeVectorToPack.zero();
 
-      int derivativeCoefficient = 0;
       for (int i = order; i < numberOfCoefficients.getIntegerValue(); i++)
-      {
-         derivativeCoefficient = getDerivativeCoefficient(order, i);
-         xPowersDerivativeVectorToPack.set(i, derivativeCoefficient * xPowers[i - order]);
-      }
+         xPowersDerivativeVectorToPack.set(i, getDerivativeCoefficient(order, i) * xPowers[i - order]);
    }
 
    private void setPositionConstraint(int row, PositionPoint1D point)
