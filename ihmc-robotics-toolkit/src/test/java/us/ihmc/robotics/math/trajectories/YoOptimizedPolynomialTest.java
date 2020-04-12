@@ -8,7 +8,7 @@ import static us.ihmc.robotics.Assert.assertEquals;
 
 public class YoOptimizedPolynomialTest
 {
-   private static double EPSILON = 1e-6;
+   private static double EPSILON = 1e-4;
 
    String namePrefix = "YoPolynomialTest";
 
@@ -32,13 +32,17 @@ public class YoOptimizedPolynomialTest
       double a0 = linear.getCoefficient(0);
       double a1 = linear.getCoefficient(1);
 
-      double y0Manual = a0 + a1 * x0;
-      double yfManual = a0 + a1 * xf;
-      assertEquals(y0, y0Manual, EPSILON);
-      assertEquals(yf, yfManual, EPSILON);
+      double scale = xf - x0;
+      double offset = -x0;
+
+      double a1Expected = (yf - y0) / scale;
+      double a0Expected = y0 - (x0 + offset) * a1Expected;
+
+      assertEquals(a0Expected, a0, EPSILON);
+      assertEquals(a1Expected, a1, EPSILON);
 
       double yLinear = linear.getDerivative(0, x);
-      double yManual = a0 + a1*x;
+      double yManual = a0 + a1 * (x + offset) / scale;
       assertEquals(yLinear, yManual, EPSILON);
 
       double dyLinear = linear.getDerivative(1, x);
@@ -59,6 +63,56 @@ public class YoOptimizedPolynomialTest
       linear.compute(xf);
       assertEquals(yf, linear.getPosition(), EPSILON);
    }
+
+   @Test
+   public void testLinearDerivativePointAndSlope()
+   {
+      //linear polynomial: y(x) = a0 + a1*x
+      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      int numberOfCoefficients = 2;
+      YoOptimizedPolynomial linear = new YoOptimizedPolynomial(namePrefix + "Linear", numberOfCoefficients, registry);
+
+      double x0 = 1.0;
+      double y0 = 0.5;
+      double dy0 = 1.0;
+
+      linear.reshape(2);
+      linear.addPositionPoint(x0, y0);
+      linear.addVelocityPoint(x0, dy0);
+      linear.fit();
+
+      double x = 2.0/3.0 * 1.6;
+      double a0 = linear.getCoefficient(0);
+      double a1 = linear.getCoefficient(1);
+
+      double a1Expected = dy0;
+      double a0Expected = y0 - x0 * a1Expected;
+
+      assertEquals(a1Expected, a1, EPSILON);
+      assertEquals(a0Expected, a0, EPSILON);
+
+      double yLinear = linear.getDerivative(0, x);
+      double yManual = a0 + a1 * x;
+      assertEquals(yLinear, yManual, EPSILON);
+
+      double dyLinear = linear.getDerivative(1, x);
+      double dyManual = a1;
+      assertEquals(dyLinear, dyManual, EPSILON);
+
+      double ddyLinear = linear.getDerivative(2, x);
+      double ddyManual = 0.0;
+      assertEquals(ddyLinear, ddyManual, EPSILON);
+
+      linear.compute(x);
+      assertEquals(yManual, linear.getPosition(), EPSILON);
+      assertEquals(dyManual, linear.getVelocity(), EPSILON);
+      assertEquals(ddyManual, linear.getAcceleration(), EPSILON);
+
+      linear.compute(x0);
+      assertEquals(y0, linear.getPosition(), EPSILON);
+      assertEquals(dy0, linear.getVelocity(), EPSILON);
+   }
+
 
    @Test
    public void testLinearDerivativePointAutomated()
@@ -98,12 +152,10 @@ public class YoOptimizedPolynomialTest
       cubic.addPositionPoint(x0, y0);
       cubic.addVelocityPoint(x0, dy0);
       cubic.addPositionPoint(xf, yf);
-      cubic.addPositionPoint(xf, dyf);
+      cubic.addVelocityPoint(xf, dyf);
       cubic.fit();
 
       double x = 2.0/3.0 * (xf - x0);
-
-      compareDerivativesPoint(cubic, x);
 
       cubic.compute(x0);
       assertEquals(y0, cubic.getPosition(), EPSILON);
@@ -112,6 +164,8 @@ public class YoOptimizedPolynomialTest
       cubic.compute(xf);
       assertEquals(yf, cubic.getPosition(), EPSILON);
       assertEquals(dyf, cubic.getVelocity(), EPSILON);
+
+      compareDerivativesPoint(cubic, x);
    }
 
 
@@ -144,8 +198,6 @@ public class YoOptimizedPolynomialTest
 
          double x = Math.random() * (xf - x0);
 
-         compareXPowersDerivativesVector(cubic, x);
-
          cubic.compute(x0);
          assertEquals(y0, cubic.getPosition(), EPSILON);
          assertEquals(dy0, cubic.getVelocity(), EPSILON);
@@ -153,6 +205,8 @@ public class YoOptimizedPolynomialTest
          cubic.compute(xf);
          assertEquals(yf, cubic.getPosition(), EPSILON);
          assertEquals(dyf, cubic.getVelocity(), EPSILON);
+
+         compareXPowersDerivativesVector(cubic, x);
       }
    }
 
@@ -238,18 +292,19 @@ public class YoOptimizedPolynomialTest
          cubic.addPositionPoint(xf, yf);
          cubic.addVelocityPoint(x0, dy0);
          cubic.addVelocityPoint(xf, dyf);
+         cubic.fit();
 
          double x = Math.random() * (xf - x0);
 
          compareDerivativeVersions(cubic, x);
 
          cubic.compute(x0);
-         assertEquals(y0, cubic.getPosition(), EPSILON);
-         assertEquals(dy0, cubic.getVelocity(), EPSILON);
+         assertEquals("trial = " + i, y0, cubic.getPosition(), EPSILON);
+         assertEquals("trial = " + i, dy0, cubic.getVelocity(), EPSILON);
 
          cubic.compute(xf);
-         assertEquals(yf, cubic.getPosition(), EPSILON);
-         assertEquals(dyf, cubic.getVelocity(), EPSILON);
+         assertEquals("trial = " + i, yf, cubic.getPosition(), EPSILON);
+         assertEquals("trial = " + i, dyf, cubic.getVelocity(), EPSILON);
       }
    }
 
@@ -257,6 +312,7 @@ public class YoOptimizedPolynomialTest
    public void compareDerivativesPoint(YoOptimizedPolynomial polynomial, double x)
    {
       double[] coefficients = polynomial.getCoefficients();
+
       for(int i = 0; i < coefficients.length + 3; i++)
       {
          double generalizedDYPoly = polynomial.getDerivative(i, x);
@@ -267,7 +323,7 @@ public class YoOptimizedPolynomialTest
             for(int j = i; j < coefficients.length; j++)
             {
                double derivativeCoefficient = polynomial.getDerivativeCoefficient(i, j);
-               generalizedDYHand += coefficients[j] * derivativeCoefficient * Math.pow(x, j-i);
+               generalizedDYHand += coefficients[j] * derivativeCoefficient * Math.pow(polynomial.normalizeTime(x), j-i);
             }
          }
          else
@@ -291,7 +347,7 @@ public class YoOptimizedPolynomialTest
             for(int j = i; j < coefficients.length; j++)
             {
                double derivativeCoefficient = polynomial.getDerivativeCoefficient(i, j);
-               generalizedDYHand.set(j, 0, derivativeCoefficient * Math.pow(x, j - i));
+               generalizedDYHand.set(j, 0, derivativeCoefficient * Math.pow(polynomial.normalizeTime(x), j - i));
             }
          }
          for(int k = 0; k < coefficients.length; k++)
