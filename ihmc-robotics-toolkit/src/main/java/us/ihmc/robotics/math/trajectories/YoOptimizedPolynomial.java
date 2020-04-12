@@ -6,6 +6,7 @@ import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
+import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -167,7 +168,7 @@ public class YoOptimizedPolynomial
       for (int i = 0; i < positionPoints.size(); i++)
          setPositionConstraint(i, positionPoints.get(i));
       for (int i = 0; i < velocityPoints.size(); i++)
-         setVelocityConstraint(i, velocityPoints.get(i));
+         setVelocityConstraint(i + positionPoints.size(), velocityPoints.get(i));
 
       jtW.reshape(nCoeffs, size);
       CommonOps.multTransA(jacobian, weight, jtW);
@@ -191,7 +192,8 @@ public class YoOptimizedPolynomial
 
    public void compute(double x)
    {
-      setXPowers(xPowers, x);
+      double time = normalizeTime(x);
+      setXPowers(xPowers, time);
 
       pos = vel = acc = 0.0;
       for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
@@ -253,7 +255,8 @@ public class YoOptimizedPolynomial
     */
    public double getDerivative(int order, double x)
    {
-      setXPowers(xPowers, x);
+      double time = normalizeTime(x);
+      setXPowers(xPowers, time);
 
       double dPos = 0.0;
       for (int i = order; i < numberOfCoefficients.getIntegerValue(); i++)
@@ -283,7 +286,8 @@ public class YoOptimizedPolynomial
     */
    public void getXPowersDerivativeVector(int order, double x, DenseMatrix64F xPowersDerivativeVectorToPack)
    {
-      setXPowers(xPowers, x);
+      double time = normalizeTime(x);
+      setXPowers(xPowers, time);
       xPowersDerivativeVectorToPack.zero();
 
       for (int i = order; i < numberOfCoefficients.getIntegerValue(); i++)
@@ -300,9 +304,9 @@ public class YoOptimizedPolynomial
       setConstraintRow(row, point.getX(), point.getYDot(), point.getWeight(), 1);
    }
 
-   private void setConstraintRow(int row, double x, double desiredZDerivative, double weight, int derivativeOrderWithPositionBeingZero)
+   private void setConstraintRow(int row, double x, double desiredYDerivative, double weight, int derivativeOrderWithPositionBeingZero)
    {
-      double xPower = 1.0;
+      double x_n = 1.0;
       double time = normalizeTime(x);
 
       for (int col = derivativeOrderWithPositionBeingZero; col < numberOfCoefficients.getIntegerValue(); col++)
@@ -312,18 +316,22 @@ public class YoOptimizedPolynomial
          {
             columnPower *= col - i;
          }
-         jacobian.set(row, col, xPower * columnPower);
-         xPower *= time;
+         jacobian.set(row, col, x_n * columnPower);
+         x_n *= time;
       }
 
       this.weight.set(row, row, weight);
-      objective.set(row, 0, desiredZDerivative);
+      objective.set(row, desiredYDerivative);
    }
 
 
-   private double normalizeTime(double time)
+   public double normalizeTime(double time)
    {
-      return (time - minX) / timeScale();
+      double timeScale = timeScale();
+      if (timeScale > 1e-5)
+         return (time - minX) / timeScale;
+      else
+         return time;
    }
 
    private double timeScale()
