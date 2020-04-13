@@ -1,5 +1,3 @@
-import us.ihmc.ros2.rosidl.RosInterfaceGenerator
-
 buildscript {
    repositories {
       maven { url = uri("https://plugins.gradle.org/m2/") }
@@ -49,7 +47,7 @@ generatorDependencies {
    api("us.ihmc:ros2-msg-to-pubsub-generator:0.16.1")
 }
 
-val generator = RosInterfaceGenerator()
+val generator = us.ihmc.ros2.rosidl.RosInterfaceGenerator()
 
 tasks.create("generateMessages") {
    doFirst {
@@ -103,8 +101,8 @@ tasks.create("generateMessages") {
          into("src/main/messages/ros1/controller_msgs")
       }
 
-      RosInterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/generated-idl").toPath())
-      RosInterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/generated-java").toPath())
-      RosInterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/messages/ros1").toPath())
+      us.ihmc.ros2.rosidl.RosInterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/generated-idl").toPath())
+      us.ihmc.ros2.rosidl.RosInterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/generated-java").toPath())
+      us.ihmc.ros2.rosidl.RosInterfaceGenerator.convertDirectoryToUnixEOL(file("src/main/messages/ros1").toPath())
    }
 }
