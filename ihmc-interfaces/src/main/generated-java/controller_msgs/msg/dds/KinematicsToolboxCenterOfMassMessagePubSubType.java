@@ -40,11 +40,15 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       current_alignment += controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -61,12 +65,16 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredPositionInWorld(), current_alignment);
 
+
       current_alignment += controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.getCdrSerializedSize(data.getSelectionMatrix(), current_alignment);
+
 
       current_alignment += controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.getCdrSerializedSize(data.getWeights(), current_alignment);
 
@@ -76,19 +84,27 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
 
    public static void write(controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredPositionInWorld(), cdr);
+
       controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.write(data.getSelectionMatrix(), cdr);
+
       controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.write(data.getWeights(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredPositionInWorld(), cdr);	
+
       controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType.read(data.getSelectionMatrix(), cdr);	
+
       controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType.read(data.getWeights(), cdr);	
 
    }
@@ -96,10 +112,14 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
    @Override
    public final void serialize(controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_a("desired_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredPositionInWorld());
 
+
       ser.write_type_a("selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
+
 
       ser.write_type_a("weights", new controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType(), data.getWeights());
 
@@ -108,10 +128,14 @@ public class KinematicsToolboxCenterOfMassMessagePubSubType implements us.ihmc.p
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_a("desired_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredPositionInWorld());
 
+
       ser.read_type_a("selection_matrix", new controller_msgs.msg.dds.SelectionMatrix3DMessagePubSubType(), data.getSelectionMatrix());
+
 
       ser.read_type_a("weights", new controller_msgs.msg.dds.WeightMatrix3DMessagePubSubType(), data.getWeights());
 

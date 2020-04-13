@@ -40,11 +40,14 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);}
+
       current_alignment += geometry_msgs.msg.dds.WrenchPubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -60,13 +63,16 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getEstimatedExternalForces().size(); ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getEstimatedExternalForces().get(i0), current_alignment);}
+
 
       current_alignment += geometry_msgs.msg.dds.WrenchPubSubType.getCdrSerializedSize(data.getEstimatedRootJointWrench(), current_alignment);
 
@@ -76,20 +82,26 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
 
    public static void write(controller_msgs.msg.dds.ExternalForceEstimationOutputStatus data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       if(data.getEstimatedExternalForces().size() <= 10)
       cdr.write_type_e(data.getEstimatedExternalForces());else
           throw new RuntimeException("estimated_external_forces field exceeds the maximum length");
+
 
       geometry_msgs.msg.dds.WrenchPubSubType.write(data.getEstimatedRootJointWrench(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.ExternalForceEstimationOutputStatus data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       cdr.read_type_e(data.getEstimatedExternalForces());	
+
       geometry_msgs.msg.dds.WrenchPubSubType.read(data.getEstimatedRootJointWrench(), cdr);	
 
    }
@@ -97,8 +109,11 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
    @Override
    public final void serialize(controller_msgs.msg.dds.ExternalForceEstimationOutputStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_e("estimated_external_forces", data.getEstimatedExternalForces());
+
       ser.write_type_a("estimated_root_joint_wrench", new geometry_msgs.msg.dds.WrenchPubSubType(), data.getEstimatedRootJointWrench());
 
    }
@@ -106,8 +121,11 @@ public class ExternalForceEstimationOutputStatusPubSubType implements us.ihmc.pu
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ExternalForceEstimationOutputStatus data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_e("estimated_external_forces", data.getEstimatedExternalForces());
+
       ser.read_type_a("estimated_root_joint_wrench", new geometry_msgs.msg.dds.WrenchPubSubType(), data.getEstimatedRootJointWrench());
 
    }

@@ -40,16 +40,21 @@ public class WholeBodyTrajectoryToolboxMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.WaypointBasedTrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 10; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.ReachingManifoldMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -66,20 +71,25 @@ public class WholeBodyTrajectoryToolboxMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessagePubSubType.getCdrSerializedSize(data.getConfiguration(), current_alignment);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getEndEffectorTrajectories().size(); ++i0)
       {
           current_alignment += controller_msgs.msg.dds.WaypointBasedTrajectoryMessagePubSubType.getCdrSerializedSize(data.getEndEffectorTrajectories().get(i0), current_alignment);}
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getExplorationConfigurations().size(); ++i0)
       {
           current_alignment += controller_msgs.msg.dds.RigidBodyExplorationConfigurationMessagePubSubType.getCdrSerializedSize(data.getExplorationConfigurations().get(i0), current_alignment);}
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getReachingManifolds().size(); ++i0)
@@ -92,16 +102,21 @@ public class WholeBodyTrajectoryToolboxMessagePubSubType implements us.ihmc.pubs
 
    public static void write(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
+
       controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessagePubSubType.write(data.getConfiguration(), cdr);
+
       if(data.getEndEffectorTrajectories().size() <= 10)
       cdr.write_type_e(data.getEndEffectorTrajectories());else
           throw new RuntimeException("end_effector_trajectories field exceeds the maximum length");
 
+
       if(data.getExplorationConfigurations().size() <= 10)
       cdr.write_type_e(data.getExplorationConfigurations());else
           throw new RuntimeException("exploration_configurations field exceeds the maximum length");
+
 
       if(data.getReachingManifolds().size() <= 10)
       cdr.write_type_e(data.getReachingManifolds());else
@@ -111,11 +126,16 @@ public class WholeBodyTrajectoryToolboxMessagePubSubType implements us.ihmc.pubs
 
    public static void read(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessagePubSubType.read(data.getConfiguration(), cdr);	
+
       cdr.read_type_e(data.getEndEffectorTrajectories());	
+
       cdr.read_type_e(data.getExplorationConfigurations());	
+
       cdr.read_type_e(data.getReachingManifolds());	
 
    }
@@ -123,22 +143,32 @@ public class WholeBodyTrajectoryToolboxMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void serialize(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_a("configuration", new controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessagePubSubType(), data.getConfiguration());
 
+
       ser.write_type_e("end_effector_trajectories", data.getEndEffectorTrajectories());
+
       ser.write_type_e("exploration_configurations", data.getExplorationConfigurations());
+
       ser.write_type_e("reaching_manifolds", data.getReachingManifolds());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WholeBodyTrajectoryToolboxMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_a("configuration", new controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessagePubSubType(), data.getConfiguration());
 
+
       ser.read_type_e("end_effector_trajectories", data.getEndEffectorTrajectories());
+
       ser.read_type_e("exploration_configurations", data.getExplorationConfigurations());
+
       ser.read_type_e("reaching_manifolds", data.getReachingManifolds());
    }
 

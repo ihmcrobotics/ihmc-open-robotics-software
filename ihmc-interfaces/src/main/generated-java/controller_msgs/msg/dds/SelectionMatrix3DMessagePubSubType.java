@@ -40,13 +40,18 @@ public class SelectionMatrix3DMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -63,16 +68,21 @@ public class SelectionMatrix3DMessagePubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -84,13 +94,18 @@ public class SelectionMatrix3DMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(controller_msgs.msg.dds.SelectionMatrix3DMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_11(data.getSelectionFrameId());
 
+
       cdr.write_type_7(data.getXSelected());
 
+
       cdr.write_type_7(data.getYSelected());
+
 
       cdr.write_type_7(data.getZSelected());
 
@@ -98,14 +113,19 @@ public class SelectionMatrix3DMessagePubSubType implements us.ihmc.pubsub.TopicD
 
    public static void read(controller_msgs.msg.dds.SelectionMatrix3DMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setSelectionFrameId(cdr.read_type_11());
       	
+
       data.setXSelected(cdr.read_type_7());
       	
+
       data.setYSelected(cdr.read_type_7());
       	
+
       data.setZSelected(cdr.read_type_7());
       	
 
@@ -114,20 +134,30 @@ public class SelectionMatrix3DMessagePubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(controller_msgs.msg.dds.SelectionMatrix3DMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_11("selection_frame_id", data.getSelectionFrameId());
+
       ser.write_type_7("x_selected", data.getXSelected());
+
       ser.write_type_7("y_selected", data.getYSelected());
+
       ser.write_type_7("z_selected", data.getZSelected());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.SelectionMatrix3DMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setSelectionFrameId(ser.read_type_11("selection_frame_id"));
+
       data.setXSelected(ser.read_type_7("x_selected"));
+
       data.setYSelected(ser.read_type_7("y_selected"));
+
       data.setZSelected(ser.read_type_7("z_selected"));
    }
 
