@@ -42,6 +42,7 @@ public class SLAMModuleAPI
    private static final TypedTopicTheme<Boolean> Moving = apiFactory.createTypedTopicTheme("Moving");
    private static final TypedTopicTheme<Integer> Size = apiFactory.createTypedTopicTheme("Size");
    private static final TypedTopicTheme<String> Status = apiFactory.createTypedTopicTheme("Status");
+   private static final TypedTopicTheme<Double> Value = apiFactory.createTypedTopicTheme("Value");
    
    public static final Topic<Boolean> RequestEntireModuleState = Root.child(Module).topic(Request);
    public static final Topic<Boolean> RequestPlanarRegions = Root.child(Module).child(PlanarRegions).topic(Request);
@@ -74,6 +75,7 @@ public class SLAMModuleAPI
    public static final Topic<NormalOcTreeMessage> SLAMOctreeMapState = Root.child(UI).child(OcTree).topic(Data);
    public static final Topic<Integer> UISensorPoseHistoryFrames = Root.child(UI).child(SensorFrame).topic(Size);
    public static final Topic<StampedPosePacket> CustomizedFrameState = Root.child(UI).child(Custom).topic(Data);
+   public static final Topic<Double> LatestFrameConfidenceFactor = Root.child(UI).child(SensorFrame).topic(Value);
    
    
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
