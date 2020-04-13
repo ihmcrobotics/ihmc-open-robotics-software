@@ -5,7 +5,7 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class YoContactParameters extends YoConstraintParameters implements ContactParametersBasics
 {
-   private YoDouble coefficientOfFriction;
+   private final YoDouble coefficientOfFriction;
 
    public YoContactParameters(String prefix, YoVariableRegistry registry)
    {
@@ -13,7 +13,7 @@ public class YoContactParameters extends YoConstraintParameters implements Conta
 
       String cofName;
 
-      if (prefix == null | prefix.isEmpty())
+      if (prefix == null || prefix.isEmpty())
          cofName = "coefficientOfFriction";
       else
          cofName = prefix + "CoefficientOfFriction";
