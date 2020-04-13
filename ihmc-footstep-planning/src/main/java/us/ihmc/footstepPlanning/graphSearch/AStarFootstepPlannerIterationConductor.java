@@ -2,13 +2,17 @@ package us.ihmc.footstepPlanning.graphSearch;
 
 import us.ihmc.footstepPlanning.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
-import java.util.function.*;
+import java.util.function.BiPredicate;
+import java.util.function.ToDoubleBiFunction;
+import java.util.function.ToDoubleFunction;
 
 /**
  * Class that performs planning iterations given generic node expansion, checker, cost and heuristic calculators.
@@ -19,9 +23,10 @@ public class AStarFootstepPlannerIterationConductor
    private final HashSet<FootstepNode> expandedNodeSet = new HashSet<>();
    private final DirectedGraph<FootstepNode> graph = new DirectedGraph<>();
    private final AStarIterationData<FootstepNode> iterationData = new AStarIterationData<>();
+   private final List<FootstepNode> neighbors = new ArrayList<>();
 
    private final PriorityQueue<FootstepNode> stack;
-   private final Function<FootstepNode, List<FootstepNode>> nodeExpansion;
+   private final FootstepNodeExpansion nodeExpansion;
    private final BiPredicate<FootstepNode, FootstepNode> edgeChecker;
    private final ToDoubleBiFunction<FootstepNode, FootstepNode> edgeCostCalculator;
 
@@ -31,7 +36,7 @@ public class AStarFootstepPlannerIterationConductor
     * @param edgeCostCalculator calculates the cost of an edge (nodes are assumed zero cost), the arguments are {@code edgeCostCalculator.applyAsDouble(parentNode, childNode)}
     * @param heuristicsCalculator calling {@code heuristicsCalculator.applyAsDouble(node)} returns the heuristic cost from the node to the goal
     */
-   public AStarFootstepPlannerIterationConductor(Function<FootstepNode, List<FootstepNode>> nodeExpansion,
+   public AStarFootstepPlannerIterationConductor(FootstepNodeExpansion nodeExpansion,
                                                  BiPredicate<FootstepNode, FootstepNode> edgeChecker,
                                                  ToDoubleBiFunction<FootstepNode, FootstepNode> edgeCostCalculator,
                                                  ToDoubleFunction<FootstepNode> heuristicsCalculator)
@@ -65,6 +70,7 @@ public class AStarFootstepPlannerIterationConductor
     */
    public AStarIterationData<FootstepNode> doPlanningIteration()
    {
+      iterationData.clear();
       if (stack.isEmpty())
          return iterationData;
 
@@ -72,7 +78,7 @@ public class AStarFootstepPlannerIterationConductor
       if(nodeToExpand == null)
          return iterationData;
 
-      return doPlanningIteration(nodeToExpand);
+      return doPlanningIteration(nodeToExpand, true);
    }
 
    /**
@@ -80,14 +86,22 @@ public class AStarFootstepPlannerIterationConductor
     * @param nodeToExpand the node that will be expanded
     * @return the node that was expanded and all child nodes that were added to the graph
     */
-   public AStarIterationData<FootstepNode> doPlanningIteration(FootstepNode nodeToExpand)
+   public AStarIterationData<FootstepNode> doPlanningIteration(FootstepNode nodeToExpand, boolean performIterativeExpansion)
    {
       iterationData.clear();
-
       iterationData.setParentNode(nodeToExpand);
-      expandedNodeSet.add(nodeToExpand);
 
-      List<FootstepNode> neighbors = nodeExpansion.apply(nodeToExpand);
+      boolean partialExpansion;
+      if (performIterativeExpansion)
+      {
+         partialExpansion = nodeExpansion.doIterativeExpansion(nodeToExpand, neighbors);
+      }
+      else
+      {
+         nodeExpansion.doFullExpansion(nodeToExpand, neighbors);
+         partialExpansion = false;
+      }
+
       for(FootstepNode neighbor : neighbors)
       {
          if(edgeChecker.test(neighbor, nodeToExpand))
@@ -102,6 +116,15 @@ public class AStarFootstepPlannerIterationConductor
             graph.checkAndSetEdge(nodeToExpand, neighbor, Double.POSITIVE_INFINITY);
             iterationData.getInvalidChildNodes().add(neighbor);
          }
+      }
+
+      if (partialExpansion)
+      {
+         stack.add(nodeToExpand);
+      }
+      else
+      {
+         expandedNodeSet.add(nodeToExpand);
       }
 
       return iterationData;
@@ -122,11 +145,6 @@ public class AStarFootstepPlannerIterationConductor
    public DirectedGraph<FootstepNode> getGraph()
    {
       return graph;
-   }
-
-   public PriorityQueue<FootstepNode> getStack()
-   {
-      return stack;
    }
 
    public AStarIterationData<FootstepNode> getIterationData()

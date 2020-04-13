@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
+import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.FootstepNodeExpansion;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -60,7 +61,7 @@ public class AStarFootstepPlannerIterationConductorTest
       planner.initialize(startNode);
 
       planningLoop:
-      while(true)
+      while (true)
       {
          AStarIterationData<FootstepNode> iterationData = planner.doPlanningIteration();
          List<FootstepNode> childNodes = iterationData.getValidChildNodes();
@@ -98,18 +99,17 @@ public class AStarFootstepPlannerIterationConductorTest
 
       double getManhattanDistance(FootstepNode other)
       {
-         return (Math.abs(other.getXIndex() - goalNode.getXIndex()) + Math.abs(other.getYIndex() - goalNode.getYIndex()));
+         return Math.abs(other.getXIndex() - goalNode.getXIndex()) + Math.abs(other.getYIndex() - goalNode.getYIndex());
       }
    }
 
-   private List<FootstepNode> getNeighbors(FootstepNode node)
+   private void getNeighbors(FootstepNode node, List<FootstepNode> expansionToPack)
    {
-      List<FootstepNode> neighbors = new ArrayList<>();
-      neighbors.add(new FootstepNode(node.getXIndex() - 1, node.getYIndex(), node.getYawIndex(), node.getRobotSide().getOppositeSide()));
-      neighbors.add(new FootstepNode(node.getXIndex() + 1, node.getYIndex(), node.getYawIndex(), node.getRobotSide().getOppositeSide()));
-      neighbors.add(new FootstepNode(node.getXIndex(), node.getYIndex() - 1, node.getYawIndex(), node.getRobotSide().getOppositeSide()));
-      neighbors.add(new FootstepNode(node.getXIndex(), node.getYIndex() + 1, node.getYawIndex(), node.getRobotSide().getOppositeSide()));
-      return neighbors;
+      expansionToPack.clear();
+      expansionToPack.add(new FootstepNode(node.getXIndex() - 1, node.getYIndex(), node.getYawIndex(), node.getRobotSide().getOppositeSide()));
+      expansionToPack.add(new FootstepNode(node.getXIndex() + 1, node.getYIndex(), node.getYawIndex(), node.getRobotSide().getOppositeSide()));
+      expansionToPack.add(new FootstepNode(node.getXIndex(), node.getYIndex() - 1, node.getYawIndex(), node.getRobotSide().getOppositeSide()));
+      expansionToPack.add(new FootstepNode(node.getXIndex(), node.getYIndex() + 1, node.getYawIndex(), node.getRobotSide().getOppositeSide()));
    }
 }
 

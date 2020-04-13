@@ -136,7 +136,7 @@ public class FootstepPlannerCompletionChecker
       if (!graph.getOutgoingEdges().containsKey(nodeInProximity))
       {
          // this step hasn't been expanded yet, perform iteration now
-         iterationConductor.doPlanningIteration(nodeInProximity);
+         iterationConductor.doPlanningIteration(nodeInProximity, false);
       }
 
       // grab all outgoing edges
