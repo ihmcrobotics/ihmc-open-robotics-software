@@ -221,6 +221,7 @@ public class SLAMModule
          latestStereoMessage.getSensorPosition().set(sensorPose.getTranslation());
          latestStereoMessage.getSensorOrientation().set(sensorPose.getRotation());
          reaMessager.submitMessage(SLAMModuleAPI.IhmcSLAMFrameState, latestStereoMessage);
+         reaMessager.submitMessage(SLAMModuleAPI.LatestFrameConfidenceFactor, latestFrame.getConfidenceFactor());
 
          if (estimatedPelvisPublisher != null)
          {
@@ -233,8 +234,7 @@ public class SLAMModule
             }
             else
             {
-               //posePacket.setConfidenceFactor(1.0 - (double) pointCloudQueue.size() / maximumBufferOfQueue);
-               posePacket.setConfidenceFactor(1.0);
+               posePacket.setConfidenceFactor(latestFrame.getConfidenceFactor());
             }
             RigidBodyTransform estimatedPelvisPose = new RigidBodyTransform(sensorPoseToPelvisTransformer);
             estimatedPelvisPose.preMultiply(sensorPose);
