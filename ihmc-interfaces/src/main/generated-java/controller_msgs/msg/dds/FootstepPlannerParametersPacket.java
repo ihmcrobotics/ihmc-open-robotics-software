@@ -764,12 +764,36 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
     */
    public double maximum_2d_distance_from_bounding_box_to_penalize_ = -11.1;
 
+   /**
+       
+    * If the robot's mid-foot pose is within this distance of the body path, it will match the body path heading.
+       
+    * Otherwise, it will turn towards the body path
+       
+    */
    public double distance_from_path_tolerance_ = -11.1;
 
+   /**
+       
+    * If the robot's mid-foot pose oriented within this threshold of the body path's heading, it will match the body path heading.
+       
+    * Otherwise, it will turn in plance towards the body path
+       
+    */
    public double delta_yaw_from_reference_tolerance_ = -11.1;
+
+   /**
+       
+    * Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
+       
+    * ideal step are considered and the others are ignored. Set to non-positive number to disable
+       
+    */
+   public int maximum_branch_factor_ = -1;
 
    public FootstepPlannerParametersPacket()
    {
+
 
 
 
@@ -1012,6 +1036,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
       delta_yaw_from_reference_tolerance_ = other.delta_yaw_from_reference_tolerance_;
+
+
+      maximum_branch_factor_ = other.maximum_branch_factor_;
 
    }
 
@@ -2752,23 +2779,75 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
 
+   /**
+       
+    * If the robot's mid-foot pose is within this distance of the body path, it will match the body path heading.
+       
+    * Otherwise, it will turn towards the body path
+       
+    */
    public void setDistanceFromPathTolerance(double distance_from_path_tolerance)
    {
       distance_from_path_tolerance_ = distance_from_path_tolerance;
    }
+   /**
+       
+    * If the robot's mid-foot pose is within this distance of the body path, it will match the body path heading.
+       
+    * Otherwise, it will turn towards the body path
+       
+    */
    public double getDistanceFromPathTolerance()
    {
       return distance_from_path_tolerance_;
    }
 
 
+   /**
+       
+    * If the robot's mid-foot pose oriented within this threshold of the body path's heading, it will match the body path heading.
+       
+    * Otherwise, it will turn in plance towards the body path
+       
+    */
    public void setDeltaYawFromReferenceTolerance(double delta_yaw_from_reference_tolerance)
    {
       delta_yaw_from_reference_tolerance_ = delta_yaw_from_reference_tolerance;
    }
+   /**
+       
+    * If the robot's mid-foot pose oriented within this threshold of the body path's heading, it will match the body path heading.
+       
+    * Otherwise, it will turn in plance towards the body path
+       
+    */
    public double getDeltaYawFromReferenceTolerance()
    {
       return delta_yaw_from_reference_tolerance_;
+   }
+
+
+   /**
+       
+    * Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
+       
+    * ideal step are considered and the others are ignored. Set to non-positive number to disable
+       
+    */
+   public void setMaximumBranchFactor(int maximum_branch_factor)
+   {
+      maximum_branch_factor_ = maximum_branch_factor;
+   }
+   /**
+       
+    * Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
+       
+    * ideal step are considered and the others are ignored. Set to non-positive number to disable
+       
+    */
+   public int getMaximumBranchFactor()
+   {
+      return maximum_branch_factor_;
    }
 
 
@@ -2964,6 +3043,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.delta_yaw_from_reference_tolerance_, other.delta_yaw_from_reference_tolerance_, epsilon)) return false;
 
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_branch_factor_, other.maximum_branch_factor_, epsilon)) return false;
+
+
       return true;
    }
 
@@ -3151,6 +3233,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.delta_yaw_from_reference_tolerance_ != otherMyClass.delta_yaw_from_reference_tolerance_) return false;
 
 
+      if(this.maximum_branch_factor_ != otherMyClass.maximum_branch_factor_) return false;
+
+
       return true;
    }
 
@@ -3333,7 +3418,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.distance_from_path_tolerance_);      builder.append(", ");
 
       builder.append("delta_yaw_from_reference_tolerance=");
-      builder.append(this.delta_yaw_from_reference_tolerance_);
+      builder.append(this.delta_yaw_from_reference_tolerance_);      builder.append(", ");
+
+      builder.append("maximum_branch_factor=");
+      builder.append(this.maximum_branch_factor_);
       builder.append("}");
       return builder.toString();
    }
