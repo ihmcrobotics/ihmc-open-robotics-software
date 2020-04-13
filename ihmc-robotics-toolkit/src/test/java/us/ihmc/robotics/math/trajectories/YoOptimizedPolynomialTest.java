@@ -2,9 +2,12 @@ package us.ihmc.robotics.math.trajectories;
 
 import org.ejml.data.DenseMatrix64F;
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.MathTools;
+import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.fail;
 
 public class YoOptimizedPolynomialTest
 {
@@ -308,8 +311,357 @@ public class YoOptimizedPolynomialTest
       }
    }
 
+   @Test
+   public void testComputeSquaredHessianLinear()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoOptimizedPolynomial function = new YoOptimizedPolynomial(namePrefix + "Function", 2, registry);
 
-   public void compareDerivativesPoint(YoOptimizedPolynomial polynomial, double x)
+      double x0 = 0.5, xf = 2.5;
+      double y0 = 1.3, yf = 2.6;
+      function.addPositionPoint(x0, y0);
+      function.addPositionPoint(xf, yf);
+      function.fit();
+
+      DenseMatrix64F hessian = new DenseMatrix64F(2, 2);
+      DenseMatrix64F a = new DenseMatrix64F(2, 1);
+      DenseMatrix64F costMatrix = new DenseMatrix64F(1, 1);
+      double a0 = function.getCoefficient(0);
+      double a1 = function.getCoefficient(1);
+      a.set(0, a0);
+      a.set(1, a1);
+
+      function.computeSquaredIntegralCostHessian(hessian, 0);
+
+      NativeCommonOps.multQuad(a, hessian, costMatrix);
+
+      double h00 = (xf - x0);
+      double h01 = 1.0 / 2.0 * (xf * xf - x0 * x0);
+      double h11 = 1.0 / 3.0 * (xf * xf * xf - x0 * x0 * x0);
+
+      assertEquals(h00, hessian.get(0, 0), EPSILON);
+      assertEquals(h01, hessian.get(0, 1), EPSILON);
+      assertEquals(h01, hessian.get(1, 0), EPSILON);
+      assertEquals(h11, hessian.get(1, 1), EPSILON);
+
+      double expectedCost = a0 * a0 * (xf - x0);
+      expectedCost += a0 * a1 * (xf * xf - x0 * x0);
+      expectedCost += 1.0 / 3.0 * a1 * a1 * (MathTools.pow(xf, 3) - MathTools.pow(x0, 3));
+
+      assertEquals(expectedCost, costMatrix.get(0), EPSILON);
+
+      function.computeSquaredIntegralCostHessian(hessian, 1);
+
+      NativeCommonOps.multQuad(a, hessian, costMatrix);
+
+      assertEquals(0.0, hessian.get(0, 0), EPSILON);
+      assertEquals(0.0, hessian.get(1, 0), EPSILON);
+      assertEquals(0.0, hessian.get(0, 1), EPSILON);
+      assertEquals(h00, hessian.get(1, 1), EPSILON);
+
+      expectedCost = a1 * a1 * (xf - x0);
+
+      assertEquals(expectedCost, costMatrix.get(0), EPSILON);
+
+      function.computeSquaredIntegralCostHessian(hessian, 2);
+      NativeCommonOps.multQuad(a, hessian, costMatrix);
+      assertEquals(0.0, costMatrix.get(0), EPSILON);
+
+      function.computeSquaredIntegralCostHessian(hessian, 3);
+      NativeCommonOps.multQuad(a, hessian, costMatrix);
+      assertEquals(0.0, costMatrix.get(0), EPSILON);
+   }
+
+   @Test
+   public void testComputeSquaredHessianQuadratic()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoOptimizedPolynomial function = new YoOptimizedPolynomial(namePrefix + "Function", 3, registry);
+
+      double x0 = 0.5, xm = 1.3, xf = 2.5;
+      double y0 = 1.3, ym = 2.0, yf = 2.6;
+      function.addPositionPoint(x0, y0);
+      function.addPositionPoint(xm, ym);
+      function.addPositionPoint(xf, yf);
+      function.fit();
+
+      DenseMatrix64F hessian = new DenseMatrix64F(3, 3);
+      DenseMatrix64F a = new DenseMatrix64F(3, 1);
+      DenseMatrix64F costMatrix = new DenseMatrix64F(1, 1);
+      double a0 = function.getCoefficient(0);
+      double a1 = function.getCoefficient(1);
+      double a2 = function.getCoefficient(2);
+      a.set(0, a0);
+      a.set(1, a1);
+      a.set(2, a2);
+
+      function.computeSquaredIntegralCostHessian(hessian, 0);
+
+      NativeCommonOps.multQuad(a, hessian, costMatrix);
+
+      double h00 = (xf - x0);
+      double h01 = 1.0 / 2.0 * (xf * xf - x0 * x0);
+      double h02 = 1.0 / 3.0 * (MathTools.pow(xf, 3) - MathTools.pow(x0, 3));
+      double h11 = 1.0 / 3.0 * (xf * xf * xf - x0 * x0 * x0);
+      double h12 = 1.0 / 4.0 * (MathTools.pow(xf, 4) - MathTools.pow(x0, 4));
+      double h22 = 1.0 / 5.0 * (MathTools.pow(xf, 5) - MathTools.pow(x0, 5));
+
+      assertEquals(h00, hessian.get(0, 0), EPSILON);
+      assertEquals(h01, hessian.get(0, 1), EPSILON);
+      assertEquals(h02, hessian.get(0, 2), EPSILON);
+      assertEquals(h11, hessian.get(1, 1), EPSILON);
+      assertEquals(h01, hessian.get(1, 0), EPSILON);
+      assertEquals(h12, hessian.get(1, 2), EPSILON);
+      assertEquals(h02, hessian.get(2, 0), EPSILON);
+      assertEquals(h12, hessian.get(2, 1), EPSILON);
+      assertEquals(h22, hessian.get(2, 2), EPSILON);
+
+      double expectedCost = a0 * a0 * (xf - x0);
+      expectedCost += a0 * a1 * (xf * xf - x0 * x0);
+      expectedCost += 1.0 / 3.0 * (2.0 * a0 * a2 + a1 * a1)* (MathTools.pow(xf, 3) - MathTools.pow(x0, 3));
+      expectedCost += 0.5 * a1 * a2 * (MathTools.pow(xf, 4) - MathTools.pow(x0, 4));
+      expectedCost += 1.0 / 5.0 * a2 * a2 * (MathTools.pow(xf, 5) - MathTools.pow(x0, 5));
+
+      assertEquals(expectedCost, costMatrix.get(0), EPSILON);
+
+      function.computeSquaredIntegralCostHessian(hessian, 1);
+
+      NativeCommonOps.multQuad(a, hessian, costMatrix);
+
+      h00 = 0.0;
+      h01 = 0.0;
+      h02 = 0.0;
+      h11 = (xf - x0);
+      h12 = (xf * xf - x0 * x0);
+      h22 = 4.0 / 3.0 * (xf * xf * xf - x0 * x0 * x0);
+
+      assertEquals(h00, hessian.get(0, 0), EPSILON);
+      assertEquals(h01, hessian.get(0, 1), EPSILON);
+      assertEquals(h02, hessian.get(0, 2), EPSILON);
+      assertEquals(h11, hessian.get(1, 1), EPSILON);
+      assertEquals(h01, hessian.get(1, 0), EPSILON);
+      assertEquals(h12, hessian.get(1, 2), EPSILON);
+      assertEquals(h02, hessian.get(2, 0), EPSILON);
+      assertEquals(h12, hessian.get(2, 1), EPSILON);
+      assertEquals(h22, hessian.get(2, 2), EPSILON);
+//
+//
+      expectedCost = a1 * a1 * (xf - x0);
+      expectedCost += 2.0 * a1 * a2 * (xf * xf - x0 * x0);
+      expectedCost += 4.0 / 3.0 * a2 * a2 * (MathTools.pow(xf, 3) - MathTools.pow(x0, 3));
+
+      assertEquals(expectedCost, costMatrix.get(0), EPSILON);
+
+      function.computeSquaredIntegralCostHessian(hessian, 2);
+      NativeCommonOps.multQuad(a, hessian, costMatrix);
+
+      h11 = 0.0;
+      h12 = 0.0;
+      h22 = 4.0 * (xf - x0);
+
+      assertEquals(h00, hessian.get(0, 0), EPSILON);
+      assertEquals(h01, hessian.get(0, 1), EPSILON);
+      assertEquals(h02, hessian.get(0, 2), EPSILON);
+      assertEquals(h11, hessian.get(1, 1), EPSILON);
+      assertEquals(h01, hessian.get(1, 0), EPSILON);
+      assertEquals(h12, hessian.get(1, 2), EPSILON);
+      assertEquals(h02, hessian.get(2, 0), EPSILON);
+      assertEquals(h12, hessian.get(2, 1), EPSILON);
+      assertEquals(h22, hessian.get(2, 2), EPSILON);
+
+      expectedCost = 4.0 * a2 * a2 * (xf - x0);
+
+      assertEquals(expectedCost, costMatrix.get(0), EPSILON);
+
+      function.computeSquaredIntegralCostHessian(hessian, 3);
+      NativeCommonOps.multQuad(a, hessian, costMatrix);
+
+      h22 = 0.0;
+
+      assertEquals(h00, hessian.get(0, 0), EPSILON);
+      assertEquals(h01, hessian.get(0, 1), EPSILON);
+      assertEquals(h02, hessian.get(0, 2), EPSILON);
+      assertEquals(h11, hessian.get(1, 1), EPSILON);
+      assertEquals(h01, hessian.get(1, 0), EPSILON);
+      assertEquals(h12, hessian.get(1, 2), EPSILON);
+      assertEquals(h02, hessian.get(2, 0), EPSILON);
+      assertEquals(h12, hessian.get(2, 1), EPSILON);
+      assertEquals(h22, hessian.get(2, 2), EPSILON);
+
+      assertEquals(0.0, costMatrix.get(0), EPSILON);
+   }
+
+   @Test
+   public void testComputeSquaredHessianCubic()
+   {
+      YoVariableRegistry registry = new YoVariableRegistry(namePrefix);
+      YoOptimizedPolynomial function = new YoOptimizedPolynomial(namePrefix + "Function", 4, registry);
+
+      double x0 = 0.5, xm1 = 1.3, xm2 = 2.0, xf = 2.5;
+      double y0 = 1.3, ym1 = 2.0, ym2 = 2.2, yf = 2.6;
+      function.addPositionPoint(x0, y0);
+      function.addPositionPoint(xm1, ym1);
+      function.addPositionPoint(xm2, ym2);
+      function.addPositionPoint(xf, yf);
+      function.fit();
+
+      DenseMatrix64F hessian = new DenseMatrix64F(4, 4);
+      DenseMatrix64F a = new DenseMatrix64F(4, 1);
+      DenseMatrix64F costMatrix = new DenseMatrix64F(1, 1);
+      double a0 = function.getCoefficient(0);
+      double a1 = function.getCoefficient(1);
+      double a2 = function.getCoefficient(2);
+      double a3 = function.getCoefficient(3);
+      a.set(0, a0);
+      a.set(1, a1);
+      a.set(2, a2);
+      a.set(3, a3);
+
+      function.computeSquaredIntegralCostHessian(hessian, 0);
+
+      NativeCommonOps.multQuad(a, hessian, costMatrix);
+
+      double h00 = (xf - x0);
+      double h01 = 1.0 / 2.0 * (xf * xf - x0 * x0);
+      double h02 = 1.0 / 3.0 * (MathTools.pow(xf, 3) - MathTools.pow(x0, 3));
+      double h03 = 1.0 / 4.0 * (MathTools.pow(xf, 4) - MathTools.pow(x0, 4));
+      double h11 = 1.0 / 3.0 * (xf * xf * xf - x0 * x0 * x0);
+      double h12 = 1.0 / 4.0 * (MathTools.pow(xf, 4) - MathTools.pow(x0, 4));
+      double h13 = 1.0 / 5.0 * (MathTools.pow(xf, 5) - MathTools.pow(x0, 5));
+      double h22 = 1.0 / 5.0 * (MathTools.pow(xf, 5) - MathTools.pow(x0, 5));
+      double h23 = 1.0 / 6.0 * (MathTools.pow(xf, 6) - MathTools.pow(x0, 6));
+      double h33 = 1.0 / 7.0 * (MathTools.pow(xf, 7) - MathTools.pow(x0, 7));
+
+      assertEquals(h00, hessian.get(0, 0), EPSILON);
+      assertEquals(h01, hessian.get(0, 1), EPSILON);
+      assertEquals(h02, hessian.get(0, 2), EPSILON);
+      assertEquals(h03, hessian.get(0, 3), EPSILON);
+      assertEquals(h11, hessian.get(1, 1), EPSILON);
+      assertEquals(h01, hessian.get(1, 0), EPSILON);
+      assertEquals(h12, hessian.get(1, 2), EPSILON);
+      assertEquals(h13, hessian.get(1, 3), EPSILON);
+      assertEquals(h02, hessian.get(2, 0), EPSILON);
+      assertEquals(h12, hessian.get(2, 1), EPSILON);
+      assertEquals(h22, hessian.get(2, 2), EPSILON);
+      assertEquals(h23, hessian.get(2, 3), EPSILON);
+      assertEquals(h03, hessian.get(3, 0), EPSILON);
+      assertEquals(h13, hessian.get(3, 1), EPSILON);
+      assertEquals(h23, hessian.get(3, 2), EPSILON);
+      assertEquals(h33, hessian.get(3, 3), EPSILON);
+
+      double expectedCost = a0 * a0 * (xf - x0);
+      expectedCost += a0 * a1 * (MathTools.pow(xf, 2) - MathTools.pow(x0, 2));
+      expectedCost += 1.0 / 3.0 * (2.0 * a0 * a2 + a1 * a1)* (MathTools.pow(xf, 3) - MathTools.pow(x0, 3));
+      expectedCost += 0.5 * (a0 * a3 + a1 * a2) * (MathTools.pow(xf, 4) - MathTools.pow(x0, 4));
+      expectedCost += 1.0 / 5.0 * (a2 * a2 + 2.0 * a1 * a3) * (MathTools.pow(xf, 5) - MathTools.pow(x0, 5));
+      expectedCost += 1.0 / 3.0 * (a2 * a3) * (MathTools.pow(xf, 6) - MathTools.pow(x0, 6));
+      expectedCost += 1.0 / 7.0 * (a3 * a3) * (MathTools.pow(xf, 7) - MathTools.pow(x0, 7));
+
+      assertEquals(expectedCost, costMatrix.get(0), EPSILON);
+
+      function.computeSquaredIntegralCostHessian(hessian, 1);
+
+      NativeCommonOps.multQuad(a, hessian, costMatrix);
+
+      h00 = 0.0;
+      h01 = 0.0;
+      h02 = 0.0;
+      h03 = 0.0;
+      h11 = (xf - x0);
+      h12 = (xf * xf - x0 * x0);
+      h13 = MathTools.pow(xf, 3) - MathTools.pow(x0, 3);
+      h22 = 4.0 / 3.0 * (xf * xf * xf - x0 * x0 * x0);
+      h23 = 6.0 / 4.0 * (MathTools.pow(xf, 4) - MathTools.pow(x0, 4));
+      h33 = 9.0 / 5.0 * (MathTools.pow(xf, 5) - MathTools.pow(x0, 5));
+
+      assertEquals(h00, hessian.get(0, 0), EPSILON);
+      assertEquals(h01, hessian.get(0, 1), EPSILON);
+      assertEquals(h02, hessian.get(0, 2), EPSILON);
+      assertEquals(h03, hessian.get(0, 3), EPSILON);
+      assertEquals(h11, hessian.get(1, 1), EPSILON);
+      assertEquals(h01, hessian.get(1, 0), EPSILON);
+      assertEquals(h12, hessian.get(1, 2), EPSILON);
+      assertEquals(h13, hessian.get(1, 3), EPSILON);
+      assertEquals(h02, hessian.get(2, 0), EPSILON);
+      assertEquals(h12, hessian.get(2, 1), EPSILON);
+      assertEquals(h22, hessian.get(2, 2), EPSILON);
+      assertEquals(h23, hessian.get(2, 3), EPSILON);
+      assertEquals(h03, hessian.get(3, 0), EPSILON);
+      assertEquals(h13, hessian.get(3, 1), EPSILON);
+      assertEquals(h23, hessian.get(3, 2), EPSILON);
+      assertEquals(h33, hessian.get(3, 3), EPSILON);
+
+      expectedCost = a1 * a1 * (xf - x0);
+      expectedCost += 2.0 * a1 * a2 * (xf * xf - x0 * x0);
+      expectedCost += 1.0 / 3.0 * (4.0 * a2 * a2 + 6.0 * a1 * a3) * (MathTools.pow(xf, 3) - MathTools.pow(x0, 3));
+      expectedCost += 12.0 / 4.0 * a2 * a3 * (MathTools.pow(xf, 4) - MathTools.pow(x0, 4));
+      expectedCost += 9.0 / 5.0 * a3 * a3 * (MathTools.pow(xf, 5) - MathTools.pow(x0, 5));
+
+      assertEquals(expectedCost, costMatrix.get(0), EPSILON);
+
+      function.computeSquaredIntegralCostHessian(hessian, 2);
+      NativeCommonOps.multQuad(a, hessian, costMatrix);
+
+      h11 = 0.0;
+      h12 = 0.0;
+      h13 = 0.0;
+      h22 = 4.0 * (xf - x0);
+      h23 = 6.0 * (MathTools.pow(xf, 2) - MathTools.pow(x0, 2));
+      h33 = 12.0 * (MathTools.pow(xf, 3) - MathTools.pow(x0, 3));
+
+      assertEquals(h00, hessian.get(0, 0), EPSILON);
+      assertEquals(h01, hessian.get(0, 1), EPSILON);
+      assertEquals(h02, hessian.get(0, 2), EPSILON);
+      assertEquals(h03, hessian.get(0, 3), EPSILON);
+      assertEquals(h11, hessian.get(1, 1), EPSILON);
+      assertEquals(h01, hessian.get(1, 0), EPSILON);
+      assertEquals(h12, hessian.get(1, 2), EPSILON);
+      assertEquals(h13, hessian.get(1, 3), EPSILON);
+      assertEquals(h02, hessian.get(2, 0), EPSILON);
+      assertEquals(h12, hessian.get(2, 1), EPSILON);
+      assertEquals(h22, hessian.get(2, 2), EPSILON);
+      assertEquals(h23, hessian.get(2, 3), EPSILON);
+      assertEquals(h03, hessian.get(3, 0), EPSILON);
+      assertEquals(h13, hessian.get(3, 1), EPSILON);
+      assertEquals(h23, hessian.get(3, 2), EPSILON);
+      assertEquals(h33, hessian.get(3, 3), EPSILON);
+
+      expectedCost = 4.0 * a2 * a2 * (xf - x0);
+      expectedCost += 12.0 * a2 * a3 * (MathTools.pow(xf, 2) - MathTools.pow(x0, 2));
+      expectedCost += 12.0 * a3 * a3 * (MathTools.pow(xf, 3) - MathTools.pow(x0, 3));
+
+      assertEquals(expectedCost, costMatrix.get(0), EPSILON);
+
+      function.computeSquaredIntegralCostHessian(hessian, 3);
+      NativeCommonOps.multQuad(a, hessian, costMatrix);
+
+      h22 = 0.0;
+      h23 = 0.0;
+      h33 = 36.0 * (xf - x0);
+
+      assertEquals(h00, hessian.get(0, 0), EPSILON);
+      assertEquals(h01, hessian.get(0, 1), EPSILON);
+      assertEquals(h02, hessian.get(0, 2), EPSILON);
+      assertEquals(h03, hessian.get(0, 3), EPSILON);
+      assertEquals(h11, hessian.get(1, 1), EPSILON);
+      assertEquals(h01, hessian.get(1, 0), EPSILON);
+      assertEquals(h12, hessian.get(1, 2), EPSILON);
+      assertEquals(h13, hessian.get(1, 3), EPSILON);
+      assertEquals(h02, hessian.get(2, 0), EPSILON);
+      assertEquals(h12, hessian.get(2, 1), EPSILON);
+      assertEquals(h22, hessian.get(2, 2), EPSILON);
+      assertEquals(h23, hessian.get(2, 3), EPSILON);
+      assertEquals(h03, hessian.get(3, 0), EPSILON);
+      assertEquals(h13, hessian.get(3, 1), EPSILON);
+      assertEquals(h23, hessian.get(3, 2), EPSILON);
+      assertEquals(h33, hessian.get(3, 3), EPSILON);
+
+      expectedCost = 36.0 * a3 * a3 * (xf - x0);
+
+      assertEquals(expectedCost, costMatrix.get(0), EPSILON);
+   }
+
+   private void compareDerivativesPoint(YoOptimizedPolynomial polynomial, double x)
    {
       double[] coefficients = polynomial.getCoefficients();
 
@@ -334,7 +686,7 @@ public class YoOptimizedPolynomialTest
       }
    }
 
-   public void compareXPowersDerivativesVector(YoOptimizedPolynomial polynomial, double x)
+   private void compareXPowersDerivativesVector(YoOptimizedPolynomial polynomial, double x)
    {
       double[] coefficients = polynomial.getCoefficients();
       for(int i = 0; i < coefficients.length + 3; i++)
@@ -358,7 +710,7 @@ public class YoOptimizedPolynomialTest
    }
 
 
-   public void compareDerivativeVersions(YoOptimizedPolynomial polynomial, double x)
+   private void compareDerivativeVersions(YoOptimizedPolynomial polynomial, double x)
    {
       double[] coefficients = polynomial.getCoefficients();
       for(int i = 0; i < coefficients.length + 3; i++)

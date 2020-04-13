@@ -4,9 +4,9 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.factory.LinearSolverFactory;
 import org.ejml.interfaces.linsol.LinearSolver;
 import org.ejml.ops.CommonOps;
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
-import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
@@ -325,6 +325,32 @@ public class YoOptimizedPolynomial
       objective.set(row, desiredYDerivative);
    }
 
+   void computeSquaredIntegralCostHessian(DenseMatrix64F hessianToPack, int derivativeToIntegrate)
+   {
+      for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
+      {
+         for (int j = 0; j < numberOfCoefficients.getIntegerValue(); j++)
+         {
+            if (i >= derivativeToIntegrate && j >= derivativeToIntegrate)
+            {
+               int power = i + j - 2 * derivativeToIntegrate + 1;
+               double scalar = 1.0 / power;
+
+               for (int k = 0; k < derivativeToIntegrate; k++)
+               {
+                  scalar *= (i - k) * (j - k);
+               }
+
+               double value = scalar * (MathTools.pow(maxX, power) - MathTools.pow(minX, power));
+               hessianToPack.set(i, j, value);
+            }
+            else
+            {
+               hessianToPack.set(i, j, 0.0);
+            }
+         }
+      }
+   }
 
    public double normalizeTime(double time)
    {
