@@ -13,7 +13,7 @@ public class YoConstraintParameters implements ConstraintParametersBasics
    {
       String corName, erpName, cfmName;
 
-      if (prefix == null | prefix.isEmpty())
+      if (prefix == null || prefix.isEmpty())
       {
          corName = "coefficientOfRestitution";
          erpName = "errorReductionParameter";
