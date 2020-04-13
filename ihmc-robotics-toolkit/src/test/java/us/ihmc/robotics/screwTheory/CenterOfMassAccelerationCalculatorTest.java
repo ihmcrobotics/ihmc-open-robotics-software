@@ -58,7 +58,7 @@ public class CenterOfMassAccelerationCalculatorTest
       SpatialAcceleration jointAcceleration = new SpatialAcceleration(frameAfterJoint, frameBeforeJoint, frameAfterJoint, new Vector3D(),
                                                        getRandomVector(random));
       sixDoFJoint.setJointPosition(getRandomVector(random));
-      sixDoFJoint.getJointPose().setOrientationYawPitchRoll(random.nextDouble(), random.nextDouble(), random.nextDouble());
+      sixDoFJoint.getJointPose().getOrientation().setYawPitchRoll(random.nextDouble(), random.nextDouble(), random.nextDouble());
       sixDoFJoint.setJointAcceleration(jointAcceleration);
       elevator.updateFramesRecursively();
 

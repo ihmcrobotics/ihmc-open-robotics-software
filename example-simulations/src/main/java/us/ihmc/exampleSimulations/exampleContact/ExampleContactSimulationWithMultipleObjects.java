@@ -72,8 +72,8 @@ public class ExampleContactSimulationWithMultipleObjects
          RigidBodyTransform transform3d = new RigidBodyTransform();
          
          AxisAngle randomRotation = RandomGeometry.nextAxisAngle(random);
-         transform3d.setTranslation(toroidPosition);
-         transform3d.setRotation(randomRotation);
+         transform3d.getTranslation().set(toroidPosition);
+         transform3d.getRotation().set(randomRotation);
 
          double steeringWheelRadius = 0.5;
          double steeringWheelThickness = 0.1; 
@@ -96,8 +96,8 @@ public class ExampleContactSimulationWithMultipleObjects
          RigidBodyTransform transform3d = new RigidBodyTransform();
          
          AxisAngle randomRotation = RandomGeometry.nextAxisAngle(random);
-         transform3d.setTranslation(cylinderPosition);
-         transform3d.setRotation(randomRotation);
+         transform3d.getTranslation().set(cylinderPosition);
+         transform3d.getRotation().set(randomRotation);
 
          double cylinderHeight = 1.5;
          double cylinderRadius = 0.25;

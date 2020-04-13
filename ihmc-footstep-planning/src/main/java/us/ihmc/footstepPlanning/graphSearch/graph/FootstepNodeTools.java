@@ -19,7 +19,7 @@ public class FootstepNodeTools
    public static RigidBodyTransform shiftInSoleFrame(Vector2D shiftVector, RigidBodyTransform soleTransform)
    {
       RigidBodyTransform shiftTransform = new RigidBodyTransform();
-      shiftTransform.setTranslation(new Vector3D(shiftVector.getX(), shiftVector.getY(), 0.0));
+      shiftTransform.getTranslation().set(new Vector3D(shiftVector.getX(), shiftVector.getY(), 0.0));
       soleTransform.multiply(shiftTransform);
       return soleTransform;
    }
@@ -35,7 +35,7 @@ public class FootstepNodeTools
       double soleYaw = node.getYaw();
       Point3D solePosition = new Point3D(node.getX(), node.getY(), 0.0);
       nodeToWorldTransformToPack.setRotationYawAndZeroTranslation(soleYaw);
-      nodeToWorldTransformToPack.setTranslation(solePosition);
+      nodeToWorldTransformToPack.getTranslation().set(solePosition);
    }
 
    /**

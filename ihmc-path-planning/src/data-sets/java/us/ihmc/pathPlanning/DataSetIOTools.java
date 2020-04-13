@@ -2,11 +2,14 @@ package us.ihmc.pathPlanning;
 
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.function.Predicate;
@@ -25,6 +28,7 @@ public class DataSetIOTools
    public static final String VIS_GRAPH_TAG = "vis_graph_status";
    public static final String STEP_PLANNERS_TAG = "step_planner_status";
    public static final String TIMEOUT_SUFFIX = "_timeout";
+   public static final String ITERATION_LIMIT_SUFFIX = "_iteration_limit";
    public static final String QUADRUPED_PLANNER_TAG = "quadruped_planner_status";
    public static final String QUADRUPED_TIMEOUT_TAG = "quadruped" + TIMEOUT_SUFFIX;
 
@@ -237,5 +241,29 @@ public class DataSetIOTools
       }
 
       return hasPlanarRegions && (hasPlannerInputs || !requirePlannerInputsFile);
+   }
+
+
+   public static void main(String[] args)
+   {
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.addRectangle(2.0, 2.0);
+
+      generator.translate(5.0, 0.0, 0.0);
+      generator.addRectangle(1.0, 1.0);
+      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+
+      String namePrefix = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+      DataSet dataSet = new DataSet(namePrefix + "UnreachablePlatform", planarRegionsList);
+
+      PlannerInput plannerInput = new PlannerInput();
+      plannerInput.getStartPosition().setToZero();
+      plannerInput.setStartYaw(0.0);
+
+      plannerInput.getGoalPosition().set(1.0, 1.0, 0.0);
+      plannerInput.setGoalYaw(0.0);
+      dataSet.setPlannerInput(plannerInput);
+
+      DataSetIOTools.exportDataSet(dataSet);
    }
 }

@@ -1,5 +1,7 @@
 package us.ihmc.footstepPlanning.postProcessing;
 
+import java.util.List;
+
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepPostProcessingPacket;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
@@ -7,8 +9,6 @@ import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.List;
 
 /**
  * The purpose of this class is to modify elements of the dynamic trajectory planner based on the step position.
@@ -56,13 +56,13 @@ public class PositionSplitFractionPostProcessingElement implements FootstepPlanP
       RobotSide initialStanceSide = RobotSide.fromByte(outputPlan.getFootstepDataList().getFootstepDataList().get(0).getRobotSide()).getOppositeSide();
       if (initialStanceSide == RobotSide.LEFT)
       {
-         stanceFootPose.setPosition(outputPlan.getLeftFootPositionInWorld());
-         stanceFootPose.setOrientation(outputPlan.getLeftFootOrientationInWorld());
+         stanceFootPose.getPosition().set(outputPlan.getLeftFootPositionInWorld());
+         stanceFootPose.getOrientation().set(outputPlan.getLeftFootOrientationInWorld());
       }
       else
       {
-         stanceFootPose.setPosition(outputPlan.getRightFootPositionInWorld());
-         stanceFootPose.setOrientation(outputPlan.getRightFootOrientationInWorld());
+         stanceFootPose.getPosition().set(outputPlan.getRightFootPositionInWorld());
+         stanceFootPose.getOrientation().set(outputPlan.getRightFootOrientationInWorld());
       }
 
       FramePose3D nextFootPose = new FramePose3D();
@@ -75,12 +75,12 @@ public class PositionSplitFractionPostProcessingElement implements FootstepPlanP
       {
          if (stepNumber > 0)
          {
-            stanceFootPose.setPosition(footstepDataMessageList.get(stepNumber - 1).getLocation());
-            stanceFootPose.setOrientation(footstepDataMessageList.get(stepNumber - 1).getOrientation());
+            stanceFootPose.getPosition().set(footstepDataMessageList.get(stepNumber - 1).getLocation());
+            stanceFootPose.getOrientation().set(footstepDataMessageList.get(stepNumber - 1).getOrientation());
          }
 
-         nextFootPose.setPosition(footstepDataMessageList.get(stepNumber).getLocation());
-         nextFootPose.setOrientation(footstepDataMessageList.get(stepNumber).getOrientation());
+         nextFootPose.getPosition().set(footstepDataMessageList.get(stepNumber).getLocation());
+         nextFootPose.getOrientation().set(footstepDataMessageList.get(stepNumber).getOrientation());
 
          // This step is a big step down.
          double stepDownHeight = nextFootPose.getZ() - stanceFootPose.getZ();

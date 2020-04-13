@@ -171,6 +171,12 @@ public class RemoteFootstepPlannerInterface
                      + goal.getPosition().getX() + ", " + goal.getPosition().getY() + ", yaw: " + goal.getOrientation().getYaw());
 
       FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
+
+      boolean planBodyPath = false;
+      boolean performAStarSearch = true;
+      packet.setPlanBodyPath(planBodyPath);
+      packet.setPerformAStarSearch(performAStarSearch);
+
       packet.setRequestedInitialStanceSide(initialStanceSide.toByte());
       packet.getStartLeftFootPose().set(startSteps.get(RobotSide.LEFT));
       packet.getStartRightFootPose().set(startSteps.get(RobotSide.RIGHT));
@@ -178,7 +184,6 @@ public class RemoteFootstepPlannerInterface
       packet.getGoalRightFootPose().set(goalSteps.get(RobotSide.RIGHT));
 
       packet.setTimeout(timeout);
-      packet.setRequestedFootstepPlannerType(FootstepPlanningRequestPacket.FOOTSTEP_PLANNER_TYPE_A_STAR);
       int sentPlannerId = requestCounter.getAndIncrement();
       packet.setPlannerRequestId(sentPlannerId);
       if (planarRegionsListMessage != null)

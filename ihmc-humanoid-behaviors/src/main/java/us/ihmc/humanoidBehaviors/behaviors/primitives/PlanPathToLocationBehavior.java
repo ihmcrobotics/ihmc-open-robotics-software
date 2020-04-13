@@ -8,17 +8,13 @@ import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
@@ -61,7 +57,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
 
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
 
-   private FootstepPlannerType footStepPlannerToUse = FootstepPlannerType.A_STAR;
+   private boolean planBodyPath = false;
 
    private boolean assumeFlatGround = false;
    private FootstepPlannerParametersBasics footstepPlannerParameters;
@@ -85,12 +81,12 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
                          RobotSide initialStanceSide,
                          Pose3DReadOnly leftFootPose,
                          Pose3DReadOnly rightFootPose,
-                         FootstepPlannerType footStepPlannerToUse,
+                         boolean planBodyPath,
                          boolean assumeFlatGround)
    {
       this.goalPose = goalPose;
       this.assumeFlatGround = assumeFlatGround;
-      this.footStepPlannerToUse = footStepPlannerToUse;
+      this.planBodyPath = planBodyPath;
       this.initialStanceSide = initialStanceSide;
       this.startLeftFootPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), leftFootPose);
       this.startRightFootPose.setIncludingFrame(ReferenceFrame.getWorldFrame(), rightFootPose);
@@ -151,9 +147,8 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
                                                                                                                     startRightFootPose,
                                                                                                                     goalPose,
                                                                                                                     footstepPlannerParameters.getIdealFootstepWidth(),
-                                                                                                                    footStepPlannerToUse); //  FootstepPlannerType.VIS_GRAPH_WITH_A_STAR);
+                                                                                                                    planBodyPath);
             request.setTimeout(timeout);
-            request.setBestEffortTimeout(timeout);
             request.setAssumeFlatGround(assumeFlatGround);
             if (planarRegions.get() != null)
             {
@@ -197,7 +192,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
         	 
         	 System.out.println("***********^^^^^^^^^^^^^^^ "+ planningResult);
         	 
-            return super.isDone() || (planningResult!=null&&planningResult != FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL);
+            return super.isDone() || (planningResult!=null&&planningResult != FootstepPlanningResult.PLANNING);
 
          }
       };
@@ -214,12 +209,12 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
               // footstepPlanningToolboxOutputStatus = footPlanStatusQueue.getLatestPacket();
               // planningResult = FootstepPlanningResult.fromByte(footstepPlanningToolboxOutputStatus.getFootstepPlanningResult());
 
-               if (planningResult == FootstepPlanningResult.OPTIMAL_SOLUTION || planningResult == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION)
+               if (planningResult == FootstepPlanningResult.FOUND_SOLUTION)
                {
                   planningSuccess = true;
                   footstepDataListMessage = footstepPlanningToolboxOutputStatus.getFootstepDataList();
                }
-               else if (planningResult == FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL)
+               else if (planningResult == FootstepPlanningResult.PLANNING)
                {
             	   publishTextToSpeech("PlanPathToLocationBehavior: planner timed out after "+timeout+" seconds");
 
@@ -259,7 +254,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    public boolean planSuccess()
    {
       if (planningResult != null)
-         return (planningResult == FootstepPlanningResult.OPTIMAL_SOLUTION || planningResult == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION);
+         return planningResult == FootstepPlanningResult.FOUND_SOLUTION;
       return false;
    }
 

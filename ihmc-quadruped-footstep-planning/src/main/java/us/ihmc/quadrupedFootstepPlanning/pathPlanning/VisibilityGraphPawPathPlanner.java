@@ -5,13 +5,12 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
-import us.ihmc.pathPlanning.statistics.VisibilityGraphStatistics;
 import us.ihmc.pathPlanning.visibilityGraphs.NavigableRegionsManager;
+import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityGraphHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.VisibilityMapHolder;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAndCliffAvoidanceProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlanningResult;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
@@ -24,7 +23,7 @@ public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawStepPl
    private final NavigableRegionsManager navigableRegionsManager;
    private final PathOrientationCalculator orientationCalculator;
 
-   private final VisibilityGraphStatistics visibilityGraphStatistics = new VisibilityGraphStatistics();
+   private final VisibilityGraphHolder bodyPathPlannerGraph = new VisibilityGraphHolder();
 
    public VisibilityGraphPawPathPlanner(VisibilityGraphsParametersReadOnly visibilityGraphsParameters, YoVariableRegistry registry)
    {
@@ -104,10 +103,10 @@ public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawStepPl
       return yoResult.getEnumValue();
    }
 
-   public VisibilityGraphStatistics getPlannerStatistics()
+   public VisibilityGraphHolder getPlannerStatistics()
    {
-      packVisibilityGraphStatistics(visibilityGraphStatistics);
-      return visibilityGraphStatistics;
+      packVisibilityGraphStatistics(bodyPathPlannerGraph);
+      return bodyPathPlannerGraph;
    }
 
    public void cancelPlanning()
@@ -121,7 +120,7 @@ public class VisibilityGraphPawPathPlanner extends AbstractWaypointsForPawStepPl
    // TODO hack to add start and goal planar regions
 
 
-   private void packVisibilityGraphStatistics(VisibilityGraphStatistics statistics)
+   private void packVisibilityGraphStatistics(VisibilityGraphHolder statistics)
    {
       VisibilityMapHolder startMap = navigableRegionsManager.getStartMap();
       VisibilityMapHolder goalMap = navigableRegionsManager.getGoalMap();

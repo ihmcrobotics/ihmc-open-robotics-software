@@ -93,8 +93,8 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
       FramePose3D swingStartPose = new FramePose3D();
       FramePose3D swingEndPose = new FramePose3D();
 
-      stanceFootPose.setPosition(0.0, -stepWidth, 0.0);
-      swingEndPose.setPosition(0.0, stepWidth, 0.0);
+      stanceFootPose.getPosition().set(0.0, -stepWidth, 0.0);
+      swingEndPose.getPosition().set(0.0, stepWidth, 0.0);
 
       FootstepDataListMessage footsteps = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       double simulationTime = transferTime * steps + 1.0;
@@ -109,7 +109,7 @@ public abstract class AvatarSwingOverPlanarRegionsTest implements MultiRobotTest
 
          swingStartPose.set(stanceFootPose);
          stanceFootPose.set(swingEndPose);
-         swingEndPose.setPosition(footstepX, footstepY, 0.0);
+         swingEndPose.getPosition().set(footstepX, footstepY, 0.0);
          double maxSpeedDimensionless = Double.NaN;
 
          if (LOCAL_MODE)

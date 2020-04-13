@@ -7,6 +7,7 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -44,10 +45,10 @@ public class SteppingStonesEnvironment implements CommonAvatarEnvironmentInterfa
       double yaw = Math.toRadians(45.0);
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setTranslation(0.5, 0.5, blockFaceHeight);
+      transform.getTranslation().set(0.5, 0.5, blockFaceHeight);
       transform.appendYawRotation(yaw);
       transform.invert();
-      baseBlockFrame = ReferenceFrame.constructFrameWithUnchangingTransformFromParent("baseFrame", ReferenceFrame.getWorldFrame(), transform);
+      baseBlockFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformFromParent("baseFrame", ReferenceFrame.getWorldFrame(), transform);
 
       FramePoint3D baseBlockPosition = new FramePoint3D(baseBlockFrame);
       FramePoint3D block1Position = new FramePoint3D(baseBlockFrame, 0.925, 0.125, 0.0);

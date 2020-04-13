@@ -8,7 +8,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector;
 import us.ihmc.robotics.math.filters.SimpleMovingAverageFilteredYoFrameVector;
 
@@ -21,7 +21,7 @@ public class PositionVelocity3DConsistencyChecker implements DiagnosticUpdatable
    private final SimpleMovingAverageFilteredYoFrameVector localVelocityFiltered;
    private final SimpleMovingAverageFilteredYoFrameVector filteredVelocityToCheck;
 
-   private final EnumMap<Axis, DelayEstimatorBetweenTwoSignals> delayEstimators = new EnumMap<>(Axis.class);
+   private final EnumMap<Axis3D, DelayEstimatorBetweenTwoSignals> delayEstimators = new EnumMap<>(Axis3D.class);
 
    private final YoDouble dummyAlpha;
 
@@ -43,9 +43,9 @@ public class PositionVelocity3DConsistencyChecker implements DiagnosticUpdatable
       DelayEstimatorBetweenTwoSignals zVelocityDelayEstimator = new DelayEstimatorBetweenTwoSignals(namePrefix + "Z", localVelocityFiltered.getYoZ(),
             filteredVelocityToCheck.getYoZ(), updateDT, registry);
 
-      delayEstimators.put(Axis.X, xVelocityDelayEstimator);
-      delayEstimators.put(Axis.Y, yVelocityDelayEstimator);
-      delayEstimators.put(Axis.Z, zVelocityDelayEstimator);
+      delayEstimators.put(Axis3D.X, xVelocityDelayEstimator);
+      delayEstimators.put(Axis3D.Y, yVelocityDelayEstimator);
+      delayEstimators.put(Axis3D.Z, zVelocityDelayEstimator);
 
       parentRegistry.addChild(registry);
    }
@@ -53,14 +53,14 @@ public class PositionVelocity3DConsistencyChecker implements DiagnosticUpdatable
    @Override
    public void enable()
    {
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
          delayEstimators.get(axis).enable();
    }
 
    @Override
    public void disable()
    {
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
          delayEstimators.get(axis).disable();
    }
 
@@ -74,7 +74,7 @@ public class PositionVelocity3DConsistencyChecker implements DiagnosticUpdatable
       if (!localVelocityFiltered.getHasBufferWindowFilled())
          return;
 
-      for (Axis axis : Axis.values)
+      for (Axis3D axis : Axis3D.values)
          delayEstimators.get(axis).update();
    }
 }

@@ -59,7 +59,7 @@ public class ConvexPolygonToolsTest
    {
       Random random = new Random(1776L);
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame");
+      ReferenceFrame zUpFrame = ReferenceFrameTools.constructARootFrame("someFrame");
       double xMin1 = 0.0, xMax1 = 1.0, yMin1 = 0.0, yMax1 = 1.0;
       ArrayList<FramePoint2D> points1 = ConvexPolygon2dTestHelpers.generateRandomCircularFramePoints(random, zUpFrame, xMin1, xMax1, yMin1, yMax1, 100);
 
@@ -1235,7 +1235,7 @@ public class ConvexPolygonToolsTest
       ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
       Random random = new Random(1886L);
 
-      ReferenceFrame zUpFrame = ReferenceFrame.constructARootFrame("someFrame");
+      ReferenceFrame zUpFrame = ReferenceFrameTools.constructARootFrame("someFrame");
 
       double xMin = 0.0, xMax = 1.0, yMin = 0.0, yMax = 1.0;
       double widthMax = 0.5, heightMax = 0.5;

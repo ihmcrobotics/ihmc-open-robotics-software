@@ -107,7 +107,7 @@ public class HexapodBodySpatialManager
 
       desiredPosition.setIncludingFrame(yoDesiredBodyPosition);
       desiredLinearVelocity.setIncludingFrame(yoDesiredBodyLinearVelocity);
-      yoDesiredBodyOrientation.getFrameOrientationIncludingFrame(desiredOrientation);
+      desiredOrientation.setIncludingFrame(yoDesiredBodyOrientation);
       desiredAngularVelocity.setIncludingFrame(yoDesiredBodyAngularVelocity);
 
       desiredAngularVelocity.changeFrame(ReferenceFrame.getWorldFrame());

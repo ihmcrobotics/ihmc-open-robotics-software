@@ -5,6 +5,7 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -24,9 +25,9 @@ public class IMUBasedPelvisRotationalStateUpdaterTest
       {
          ReferenceFrame rootJointFrame = EuclidFrameRandomTools.nextReferenceFrame("rootJointFrame" + i, random, worldFrame);
          ReferenceFrame measurementFrame = EuclidFrameRandomTools.nextReferenceFrame("measurementFrame" + i, random, rootJointFrame);
-         RotationMatrix expectedOrientation = new RotationMatrix(rootJointFrame.getTransformToRoot().getRotationMatrix());
+         RotationMatrix expectedOrientation = new RotationMatrix((RotationMatrixReadOnly) rootJointFrame.getTransformToRoot().getRotation());
 
-         RotationMatrix imuOrientationMeasurement = new RotationMatrix(measurementFrame.getTransformToRoot().getRotationMatrix());
+         RotationMatrix imuOrientationMeasurement = new RotationMatrix((RotationMatrixReadOnly) measurementFrame.getTransformToRoot().getRotation());
 
          RotationMatrix actualOrientation = new RotationMatrix();
          IMUBasedPelvisRotationalStateUpdater.computeOrientationAtEstimateFrame(measurementFrame, imuOrientationMeasurement, rootJointFrame, actualOrientation);

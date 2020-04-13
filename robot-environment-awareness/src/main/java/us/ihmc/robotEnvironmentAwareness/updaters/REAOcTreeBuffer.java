@@ -223,8 +223,8 @@ public class REAOcTreeBuffer
          scanCollection.addScan(toScan(lidarMessage.getScan(), lidarMessage.getLidarPosition()));
 
          Pose3D sensorPose = new Pose3D();
-         sensorPose.setPosition(lidarMessage.getLidarPosition());
-         sensorPose.setOrientation(lidarMessage.getLidarOrientation());
+         sensorPose.getPosition().set(lidarMessage.getLidarPosition());
+         sensorPose.getOrientation().set(lidarMessage.getLidarOrientation());
          newSensorPoseReference.set(sensorPose);
       }
 
@@ -238,8 +238,8 @@ public class REAOcTreeBuffer
          // TODO: make NormalOctree constructor with octreeDepth.get().
 
          Pose3D sensorPose = new Pose3D();
-         sensorPose.setPosition(stereoMessage.getSensorPosition());
-         sensorPose.setOrientation(stereoMessage.getSensorOrientation());
+         sensorPose.getPosition().set(stereoMessage.getSensorPosition());
+         sensorPose.getOrientation().set(stereoMessage.getSensorOrientation());
          newSensorPoseReference.set(sensorPose);
       }
    }

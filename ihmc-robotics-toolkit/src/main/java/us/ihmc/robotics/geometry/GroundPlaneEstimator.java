@@ -1,26 +1,20 @@
 package us.ihmc.robotics.geometry;
 
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFramePoint3D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
-import us.ihmc.yoVariables.variable.YoFrameYawPitchRoll;
-import us.ihmc.robotics.geometry.LeastSquaresZPlaneFitter;
-import us.ihmc.robotics.robotSide.QuadrantDependentList;
-import us.ihmc.robotics.robotSide.RobotQuadrant;
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-
-import java.util.ArrayList;
-import java.util.List;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.robotSide.QuadrantDependentList;
+import us.ihmc.robotics.robotSide.RobotQuadrant;
 
 public class GroundPlaneEstimator
 {
@@ -45,7 +39,7 @@ public class GroundPlaneEstimator
    public double getPitch()
    {
       // reproducing for speed
-      groundPlane.getNormal(groundPlaneNormal);
+      groundPlaneNormal.set(groundPlane.getNormal());
       return Math.atan2(groundPlaneNormal.getX(), groundPlaneNormal.getZ());
 //      return getPitch(0.0);
    }
@@ -56,7 +50,7 @@ public class GroundPlaneEstimator
    public double getRoll()
    {
       // reproducing for speed
-      groundPlane.getNormal(groundPlaneNormal);
+      groundPlaneNormal.set(groundPlane.getNormal());
       return Math.atan2(-groundPlaneNormal.getY(), groundPlaneNormal.getZ());
 //      return getRoll(0.0);
    }
@@ -67,7 +61,7 @@ public class GroundPlaneEstimator
     */
    public double getPitch(double yaw)
    {
-      groundPlane.getNormal(groundPlaneNormal);
+      groundPlaneNormal.set(groundPlane.getNormal());
       return Math.atan2(Math.cos(yaw) * groundPlaneNormal.getX() + Math.sin(yaw) * groundPlaneNormal.getY(), groundPlaneNormal.getZ());
    }
 
@@ -77,7 +71,7 @@ public class GroundPlaneEstimator
     */
    public double getRoll(double yaw)
    {
-      groundPlane.getNormal(groundPlaneNormal);
+      groundPlaneNormal.set(groundPlane.getNormal());
       return Math.atan2(Math.sin(yaw) * groundPlaneNormal.getX() - Math.cos(yaw) * groundPlaneNormal.getY(), groundPlaneNormal.getZ());
    }
 
@@ -95,7 +89,7 @@ public class GroundPlaneEstimator
    public void getPlanePoint(FramePoint3D point)
    {
       point.changeFrame(ReferenceFrame.getWorldFrame());
-      groundPlane.getPoint(point);
+      point.set(groundPlane.getPoint());
    }
 
    /**
@@ -104,7 +98,7 @@ public class GroundPlaneEstimator
    public void getPlaneNormal(FrameVector3D normal)
    {
       normal.changeFrame(ReferenceFrame.getWorldFrame());
-      groundPlane.getNormal(normal);
+      normal.set(groundPlane.getNormal());
    }
 
    /**
@@ -164,15 +158,15 @@ public class GroundPlaneEstimator
    public void compute()
    {
       planeFitter.fitPlaneToPoints(groundPlanePoints, groundPlane);
-      groundPlane.getNormal(groundPlaneNormal);
+      groundPlaneNormal.set(groundPlane.getNormal());
       groundPlaneFrameNormal.set(groundPlaneNormal);
-      groundPlane.getPoint(groundPlanePoint);
+      groundPlanePoint.set(groundPlane.getPoint());
 
       groundPlaneFramePoint.set(groundPlanePoint);
       groundPlaneOrientation.setYawPitchRoll(0.0, getPitch(), getRoll());
 
-      groundPlanePose.setPosition(groundPlaneFramePoint);
-      groundPlanePose.setOrientation(groundPlaneOrientation);
+      groundPlanePose.getPosition().set(groundPlaneFramePoint);
+      groundPlanePose.getOrientation().set(groundPlaneOrientation);
       groundPlaneFrame.setPoseAndUpdate(groundPlanePose);
    }
 
