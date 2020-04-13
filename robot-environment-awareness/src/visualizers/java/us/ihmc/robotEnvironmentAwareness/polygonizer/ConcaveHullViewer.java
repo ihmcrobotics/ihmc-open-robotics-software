@@ -1,7 +1,12 @@
 package us.ihmc.robotEnvironmentAwareness.polygonizer;
 
-import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryGraphicsTools.*;
-import static us.ihmc.robotEnvironmentAwareness.geometry.REAGraphics3DTools.*;
+import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryGraphicsTools.borderEdgesToMultiLine;
+import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryGraphicsTools.borderTrianglesToRainbowMultiTriangles;
+import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryGraphicsTools.borderVerticesToMultiSpheres;
+import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryGraphicsTools.constraintEdgesToMultiLine;
+import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryGraphicsTools.delaunayTrianglesToRainbowTriangles;
+import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryGraphicsTools.orderedBorderEdgesToRainbowMultiLine;
+import static us.ihmc.robotEnvironmentAwareness.geometry.REAGraphics3DTools.multiLine;
 
 import java.util.Arrays;
 import java.util.List;
@@ -20,6 +25,7 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.MeshView;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullCollection;
 import us.ihmc.robotEnvironmentAwareness.geometry.SimpleConcaveHullFactory.ConcaveHullFactoryResult;
 
 public class ConcaveHullViewer extends AnimationTimer
@@ -32,8 +38,9 @@ public class ConcaveHullViewer extends AnimationTimer
    private final ViewerGraphicObject graphicConstraintEdges = new ViewerGraphicObject("viewConstraintEdges", false);
    private final ViewerGraphicObject graphicOrderedBorderEdges = new ViewerGraphicObject("viewOrderedBorderEdges", true);
    private final ViewerGraphicObject graphicPriorityQueue = new ViewerGraphicObject("viewPriorityQueue", false);
-   private final ViewerGraphicObject graphicConcaveHull = new ViewerGraphicObject("viewConcaveHull", false);
+   private final ViewerGraphicObject graphicRawConcaveHull = new ViewerGraphicObject("viewRawConcaveHull", false);
    private final ViewerGraphicObject graphicConcavePockets = new ViewerGraphicObject("viewConcavePockets", false);
+   private final ViewerGraphicObject graphicProcessedConcaveHull = new ViewerGraphicObject("viewProcessedConcaveHull", false);
    private final List<ViewerGraphicObject> graphics = Arrays.asList(graphicDelaunayTriangulation,
                                                                     graphicBorderVertices,
                                                                     graphicBorderEdges,
@@ -41,8 +48,9 @@ public class ConcaveHullViewer extends AnimationTimer
                                                                     graphicConstraintEdges,
                                                                     graphicOrderedBorderEdges,
                                                                     graphicPriorityQueue,
-                                                                    graphicConcaveHull,
-                                                                    graphicConcavePockets);
+                                                                    graphicRawConcaveHull,
+                                                                    graphicConcavePockets,
+                                                                    graphicProcessedConcaveHull);
 
    private final Group rootNode = new Group();
 
@@ -61,7 +69,8 @@ public class ConcaveHullViewer extends AnimationTimer
       graphicBorderEdges.setMouseTransparent(true);
       graphicOrderedBorderEdges.setMouseTransparent(true);
       graphicPriorityQueue.setMouseTransparent(true);
-      graphicConcaveHull.setMouseTransparent(true);
+      graphicRawConcaveHull.setMouseTransparent(true);
+      graphicProcessedConcaveHull.setMouseTransparent(true);
    }
 
    @Override
@@ -76,9 +85,10 @@ public class ConcaveHullViewer extends AnimationTimer
       refreshMeshes();
    }
 
-   public void submit(Color defaultColor, RigidBodyTransform transformToWorld, ConcaveHullFactoryResult concaveHullFactoryResult)
+   public void submit(Color defaultColor, RigidBodyTransform transformToWorld, ConcaveHullFactoryResult concaveHullFactoryResult,
+                      ConcaveHullCollection processedConcaveHullCollection)
    {
-      latestInputReference.set(new ConcaveHullViewerInput(defaultColor, transformToWorld, concaveHullFactoryResult));
+      latestInputReference.set(new ConcaveHullViewerInput(defaultColor, transformToWorld, concaveHullFactoryResult, processedConcaveHullCollection));
       refreshMeshes();
    }
 
@@ -91,6 +101,7 @@ public class ConcaveHullViewer extends AnimationTimer
       Color defaultColor = latestInput.defaultColor;
       RigidBodyTransform transformToWorld = latestInput.transformToWorld;
       ConcaveHullFactoryResult concaveHullFactoryResult = latestInput.concaveHullFactoryResult;
+      ConcaveHullCollection processedConcaveHullCollection = latestInput.processedConcaveHullCollection;
 
       graphicDelaunayTriangulation.submitForRendering(delaunayTrianglesToRainbowTriangles(transformToWorld, concaveHullFactoryResult, random));
       graphicBorderVertices.submitForRendering(borderVerticesToMultiSpheres(transformToWorld,
@@ -106,11 +117,20 @@ public class ConcaveHullViewer extends AnimationTimer
       graphicOrderedBorderEdges.submitForRendering(orderedBorderEdgesToRainbowMultiLine(transformToWorld, concaveHullFactoryResult));
       // TODO Implement priority queue viz
       if (concaveHullFactoryResult != null)
-         graphicConcaveHull.submitForRendering(multiLine(transformToWorld,
-                                                         concaveHullFactoryResult.getConcaveHullCollection(),
-                                                         defaultColor,
-                                                         borderEdgesSize.get()));
+      {
+         graphicRawConcaveHull.submitForRendering(multiLine(transformToWorld,
+                                                            concaveHullFactoryResult.getConcaveHullCollection(),
+                                                            defaultColor,
+                                                            0.99 * borderEdgesSize.get()));
+      }
       // TODO Implement concave pockets viz
+      if (processedConcaveHullCollection != null)
+      {
+         graphicProcessedConcaveHull.submitForRendering(multiLine(transformToWorld,
+                                                                  processedConcaveHullCollection,
+                                                                  defaultColor.deriveColor(0.0, 1.25, 1.25, 1.0),
+                                                                  borderEdgesSize.get()));
+      }
    }
 
    public Node getRootNode()
@@ -158,14 +178,19 @@ public class ConcaveHullViewer extends AnimationTimer
       return graphicPriorityQueue.viewGraphic;
    }
 
-   public BooleanProperty viewConcaveHullProperty()
+   public BooleanProperty viewRawConcaveHullProperty()
    {
-      return graphicConcaveHull.viewGraphic;
+      return graphicRawConcaveHull.viewGraphic;
    }
 
    public BooleanProperty viewConcavePocketsProperty()
    {
       return graphicConcavePockets.viewGraphic;
+   }
+
+   public BooleanProperty viewProcessedConcaveHullProperty()
+   {
+      return graphicProcessedConcaveHull.viewGraphic;
    }
 
    private class ViewerGraphicObject
@@ -209,15 +234,18 @@ public class ConcaveHullViewer extends AnimationTimer
 
    public static class ConcaveHullViewerInput
    {
-      private Color defaultColor;
-      private RigidBodyTransform transformToWorld;
-      private ConcaveHullFactoryResult concaveHullFactoryResult;
+      private final Color defaultColor;
+      private final RigidBodyTransform transformToWorld;
+      private final ConcaveHullFactoryResult concaveHullFactoryResult;
+      private final ConcaveHullCollection processedConcaveHullCollection;
 
-      public ConcaveHullViewerInput(Color defaultColor, RigidBodyTransform transformToWorld, ConcaveHullFactoryResult input)
+      public ConcaveHullViewerInput(Color defaultColor, RigidBodyTransform transformToWorld, ConcaveHullFactoryResult input,
+                                    ConcaveHullCollection processedConcaveHullCollection)
       {
          this.defaultColor = defaultColor;
          this.transformToWorld = transformToWorld;
          this.concaveHullFactoryResult = input;
+         this.processedConcaveHullCollection = processedConcaveHullCollection;
       }
    }
 }
