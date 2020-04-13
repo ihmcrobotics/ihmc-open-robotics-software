@@ -215,6 +215,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
       return current_alignment - initial_alignment;
    }
 
@@ -460,6 +463,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
 
 
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+
       return current_alignment - initial_alignment;
    }
 
@@ -638,6 +645,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
 
       cdr.write_type_6(data.getDeltaYawFromReferenceTolerance());
+
+
+      cdr.write_type_2(data.getMaximumBranchFactor());
 
    }
 
@@ -818,6 +828,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setDeltaYawFromReferenceTolerance(cdr.read_type_6());
       	
 
+      data.setMaximumBranchFactor(cdr.read_type_2());
+      	
+
    }
 
    @Override
@@ -939,6 +952,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("distance_from_path_tolerance", data.getDistanceFromPathTolerance());
 
       ser.write_type_6("delta_yaw_from_reference_tolerance", data.getDeltaYawFromReferenceTolerance());
+
+      ser.write_type_2("maximum_branch_factor", data.getMaximumBranchFactor());
    }
 
    @Override
@@ -1060,6 +1075,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setDistanceFromPathTolerance(ser.read_type_6("distance_from_path_tolerance"));
 
       data.setDeltaYawFromReferenceTolerance(ser.read_type_6("delta_yaw_from_reference_tolerance"));
+
+      data.setMaximumBranchFactor(ser.read_type_2("maximum_branch_factor"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlannerParametersPacket src, controller_msgs.msg.dds.FootstepPlannerParametersPacket dest)

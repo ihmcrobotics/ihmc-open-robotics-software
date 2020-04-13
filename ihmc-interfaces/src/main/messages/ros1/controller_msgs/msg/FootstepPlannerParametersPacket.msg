@@ -233,6 +233,9 @@
 
 
 
+
+
+
 float64 DEFAULT_NO_VALUE=-11.1
 
 
@@ -1211,6 +1214,12 @@ float64 maximum_2d_distance_from_bounding_box_to_penalize
 
 
 
+# If the robot's mid-foot pose is within this distance of the body path, it will match the body path heading.
+
+# Otherwise, it will turn towards the body path
+
+
+
 # Field default value -11.1
 
 float64 distance_from_path_tolerance
@@ -1219,9 +1228,29 @@ float64 distance_from_path_tolerance
 
 
 
+# If the robot's mid-foot pose oriented within this threshold of the body path's heading, it will match the body path heading.
+
+# Otherwise, it will turn in plance towards the body path
+
+
+
 # Field default value -11.1
 
 float64 delta_yaw_from_reference_tolerance
+
+
+
+
+
+# Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
+
+# ideal step are considered and the others are ignored. Set to non-positive number to disable
+
+
+
+# Field default value -1
+
+int32 maximum_branch_factor
 
 
 
