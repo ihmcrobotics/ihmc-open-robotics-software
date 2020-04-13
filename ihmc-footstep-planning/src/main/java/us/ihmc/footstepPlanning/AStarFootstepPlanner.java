@@ -31,8 +31,8 @@ import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
-import us.ihmc.pathPlanning.graph.search.AStarIterationData;
-import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
+import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
+import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -40,7 +40,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class AStarFootstepPlanner
 {
-   private final AStarPathPlanner<FootstepNode> footstepPlanner;
+   private final AStarFootstepPlannerIterationConductor footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final SimplePlanarRegionFootstepNodeSnapper snapper;
    private final FootstepNodeSnapAndWiggler snapAndWiggler;
@@ -82,7 +82,7 @@ public class AStarFootstepPlanner
       this.distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(snapper, footstepPlannerParameters, bodyPathPlanHolder, edgeData);
       FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator::computeIdealStep, distanceAndYawHeuristics::compute, footPolygons, edgeData);
 
-      this.footstepPlanner = new AStarPathPlanner<>(expansion::expandNode, checker::isNodeValid, stepCostCalculator::computeCost, distanceAndYawHeuristics::compute);
+      this.footstepPlanner = new AStarFootstepPlannerIterationConductor(expansion::expandNode, checker::isNodeValid, stepCostCalculator::computeCost, distanceAndYawHeuristics::compute);
       checker.setParentNodeSupplier(node -> footstepPlanner.getGraph().getParentNode(node));
       footstepPlanner.getGraph().setGraphExpansionCallback(edge ->
                                                            {
@@ -401,7 +401,7 @@ public class AStarFootstepPlanner
       return checker;
    }
 
-   public AStarPathPlanner<FootstepNode> getLowLevelStepPlanner()
+   public AStarFootstepPlannerIterationConductor getLowLevelStepPlanner()
    {
       return footstepPlanner;
    }
