@@ -1,7 +1,8 @@
-package us.ihmc.pathPlanning.graph.search;
+package us.ihmc.footstepPlanning.graphSearch;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 
 public class AStarIterationDataTest
 {

@@ -1,5 +1,7 @@
-package us.ihmc.pathPlanning.graph.search;
+package us.ihmc.footstepPlanning.graphSearch;
 
+import us.ihmc.footstepPlanning.AStarFootstepPlanner;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.NodeComparator;
 
@@ -9,21 +11,19 @@ import java.util.PriorityQueue;
 import java.util.function.*;
 
 /**
- * Generic A* planner class that performs a search given generic node expansion, checker, cost and heuristic calculators.
- * API is set up to perform single iterations at a time so that termination conditions can be determined externally
- *
- * @param <N> node type and input to the expansion, validity and cost calculators
+ * Class that performs planning iterations given generic node expansion, checker, cost and heuristic calculators.
+ * Interfaces between {@link AStarFootstepPlanner} and {@link DirectedGraph}
  */
-public class AStarPathPlanner<N>
+public class AStarFootstepPlannerIterationConductor
 {
-   private final HashSet<N> expandedNodeSet = new HashSet<>();
-   private final DirectedGraph<N> graph = new DirectedGraph<>();
-   private final AStarIterationData<N> iterationData = new AStarIterationData<>();
+   private final HashSet<FootstepNode> expandedNodeSet = new HashSet<>();
+   private final DirectedGraph<FootstepNode> graph = new DirectedGraph<>();
+   private final AStarIterationData<FootstepNode> iterationData = new AStarIterationData<>();
 
-   private final PriorityQueue<N> stack;
-   private final Function<N, List<N>> nodeExpansion;
-   private final BiPredicate<N, N> edgeChecker;
-   private final ToDoubleBiFunction<N, N> edgeCostCalculator;
+   private final PriorityQueue<FootstepNode> stack;
+   private final Function<FootstepNode, List<FootstepNode>> nodeExpansion;
+   private final BiPredicate<FootstepNode, FootstepNode> edgeChecker;
+   private final ToDoubleBiFunction<FootstepNode, FootstepNode> edgeCostCalculator;
 
    /**
     * @param nodeExpansion edge calculator. Calling {@code nodeExpansion.apply} returns all possible neighbor nodes
@@ -31,16 +31,16 @@ public class AStarPathPlanner<N>
     * @param edgeCostCalculator calculates the cost of an edge (nodes are assumed zero cost), the arguments are {@code edgeCostCalculator.applyAsDouble(parentNode, childNode)}
     * @param heuristicsCalculator calling {@code heuristicsCalculator.applyAsDouble(node)} returns the heuristic cost from the node to the goal
     */
-   public AStarPathPlanner(Function<N, List<N>> nodeExpansion,
-                           BiPredicate<N, N> edgeChecker,
-                           ToDoubleBiFunction<N, N> edgeCostCalculator,
-                           ToDoubleFunction<N> heuristicsCalculator)
+   public AStarFootstepPlannerIterationConductor(Function<FootstepNode, List<FootstepNode>> nodeExpansion,
+                                                 BiPredicate<FootstepNode, FootstepNode> edgeChecker,
+                                                 ToDoubleBiFunction<FootstepNode, FootstepNode> edgeCostCalculator,
+                                                 ToDoubleFunction<FootstepNode> heuristicsCalculator)
    {
       this.nodeExpansion = nodeExpansion;
       this.edgeChecker = edgeChecker;
       this.edgeCostCalculator = edgeCostCalculator;
 
-      NodeComparator<N> nodeComparator = new NodeComparator<>(graph, heuristicsCalculator);
+      NodeComparator<FootstepNode> nodeComparator = new NodeComparator<>(graph, heuristicsCalculator);
       this.stack = new PriorityQueue<>(nodeComparator);
    }
 
@@ -48,7 +48,7 @@ public class AStarPathPlanner<N>
     * Clears the stack and search graph and adds the given node
     * @param startNode
     */
-   public void initialize(N startNode)
+   public void initialize(FootstepNode startNode)
    {
       stack.clear();
       stack.add(startNode);
@@ -63,12 +63,12 @@ public class AStarPathPlanner<N>
     *
     * @return the node that was expanded and all child nodes that were added to the graph
     */
-   public AStarIterationData<N> doPlanningIteration()
+   public AStarIterationData<FootstepNode> doPlanningIteration()
    {
       if (stack.isEmpty())
          return iterationData;
 
-      N nodeToExpand = getNextNode();
+      FootstepNode nodeToExpand = getNextNode();
       if(nodeToExpand == null)
          return iterationData;
 
@@ -80,15 +80,15 @@ public class AStarPathPlanner<N>
     * @param nodeToExpand the node that will be expanded
     * @return the node that was expanded and all child nodes that were added to the graph
     */
-   public AStarIterationData<N> doPlanningIteration(N nodeToExpand)
+   public AStarIterationData<FootstepNode> doPlanningIteration(FootstepNode nodeToExpand)
    {
       iterationData.clear();
 
       iterationData.setParentNode(nodeToExpand);
       expandedNodeSet.add(nodeToExpand);
 
-      List<N> neighbors = nodeExpansion.apply(nodeToExpand);
-      for(N neighbor : neighbors)
+      List<FootstepNode> neighbors = nodeExpansion.apply(nodeToExpand);
+      for(FootstepNode neighbor : neighbors)
       {
          if(edgeChecker.test(neighbor, nodeToExpand))
          {
@@ -107,11 +107,11 @@ public class AStarPathPlanner<N>
       return iterationData;
    }
 
-   private N getNextNode()
+   private FootstepNode getNextNode()
    {
       while (!stack.isEmpty())
       {
-         N nextNode = stack.poll();
+         FootstepNode nextNode = stack.poll();
          if (!expandedNodeSet.contains(nextNode))
             return nextNode;
       }
@@ -119,17 +119,17 @@ public class AStarPathPlanner<N>
       return null;
    }
 
-   public DirectedGraph<N> getGraph()
+   public DirectedGraph<FootstepNode> getGraph()
    {
       return graph;
    }
 
-   public PriorityQueue<N> getStack()
+   public PriorityQueue<FootstepNode> getStack()
    {
       return stack;
    }
 
-   public AStarIterationData<N> getIterationData()
+   public AStarIterationData<FootstepNode> getIterationData()
    {
       return iterationData;
    }
