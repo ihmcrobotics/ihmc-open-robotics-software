@@ -4,20 +4,15 @@ import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.StringStretcher2d;
-import us.ihmc.robotics.math.trajectories.YoConfigurablePolynomial;
+import us.ihmc.robotics.math.trajectories.YoOptimizedPolynomial;
 import us.ihmc.tools.lists.ListSorter;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
@@ -35,7 +30,7 @@ public class SplinedHeightTrajectory
    private final YoFramePoint3D contactFrameOnePosition;
 
    private final BagOfBalls bagOfBalls;
-   private final YoConfigurablePolynomial spline;
+   private final YoOptimizedPolynomial polynomial;
 
    private ReferenceFrame referenceFrame;
 
@@ -50,8 +45,9 @@ public class SplinedHeightTrajectory
 
    public SplinedHeightTrajectory(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-
-      spline = new YoConfigurablePolynomial("height", 9, registry);
+      polynomial = new YoOptimizedPolynomial("height", 7, registry);
+      polynomial.setAccelerationMinimizationWeight(1.0e-3);
+      polynomial.setJerkMinimizationWeight(1.0);
 
       contactFrameZeroPosition = new YoFramePoint3D("contactFrameZeroPosition", worldFrame, registry);
       contactFrameOnePosition = new YoFramePoint3D("contactFrameOnePosition", worldFrame, registry);
@@ -91,13 +87,15 @@ public class SplinedHeightTrajectory
    {
       ListSorter.sort(waypoints, sorter);
       computeHeightsToUseByStretchingString(waypoints);
+//      removeUnnecessaryWaypoints(waypoints);
 
       int numberOfWaypoints = waypoints.size();
 
-      spline.reshape(numberOfWaypoints);
       for (int i = 0; i < waypoints.size(); i++)
-         spline.addPositionConstraint(waypoints.get(i).getX(), waypoints.get(i).getHeight());
-      spline.solve();
+      {
+         polynomial.addPositionPoint(waypoints.get(i).getX(), waypoints.get(i).getHeight());
+      }
+      polynomial.fit();
 
       contactFrameZeroPosition.setMatchingFrame(waypoints.get(0).getWaypoint());
       contactFrameOnePosition.setMatchingFrame(waypoints.get(waypoints.size() - 1).getWaypoint());
@@ -151,6 +149,44 @@ public class SplinedHeightTrajectory
       }
    }
 
+   private void removeUnnecessaryWaypoints(List<CoMHeightTrajectoryWaypoint> waypoints)
+   {
+      int nextIndex = 2;
+
+      while (nextIndex < waypoints.size())
+      {
+         int prevIndex = nextIndex - 2;
+         int index = nextIndex - 1;
+
+         if (isOnLine(waypoints.get(prevIndex), waypoints.get(nextIndex), waypoints.get(index)))
+         {
+            waypoints.remove(index);
+         }
+         else
+         {
+            nextIndex++;
+         }
+      }
+   }
+
+   private static boolean isOnLine(CoMHeightTrajectoryWaypoint start, CoMHeightTrajectoryWaypoint end, CoMHeightTrajectoryWaypoint query)
+   {
+      double startX = start.getX();
+      double endX = end.getX();
+      double startZ = start.getHeight();
+      double endZ = end.getHeight();
+
+      double queryX = query.getX();
+      double queryZ = query.getHeight();
+
+      double alpha = (queryX - startX) / (endX - startX);
+
+      double heightOnLine = alpha * (endZ - startZ) + startZ;
+
+      return MathTools.epsilonEquals(heightOnLine, queryZ, 1e-3);
+   }
+
+
    public double solve(CoMHeightPartialDerivativesData comHeightPartialDerivativesDataToPack, FramePoint3DBasics queryPoint, Point2DBasics pointOnSplineToPack)
    {
       EuclidGeometryTools.orthogonalProjectionOnLineSegment3D(queryPoint, contactFrameZeroPosition, contactFrameOnePosition, queryPoint);
@@ -161,11 +197,20 @@ public class SplinedHeightTrajectory
 
       double splineQuery = InterpolationTools.linearInterpolate(startWaypoint.getX(), endWaypoint.getX(), percentAlongSegment);
 
+      polynomial.compute(splineQuery);
+
+      double z = polynomial.getPosition();
+      double dzds = polynomial.getVelocity();
+      double ddzdds = polynomial.getAcceleration();
+
+      /*
       spline.compute(splineQuery);
 
       double z = spline.getPosition();
       double dzds = spline.getVelocity();
       double ddzdds = spline.getAcceleration();
+
+       */
 
       double length = contactFrameZeroPosition.distance(contactFrameOnePosition);
       double dsdx = (contactFrameOnePosition.getX() - contactFrameZeroPosition.getX()) / length;
@@ -198,6 +243,6 @@ public class SplinedHeightTrajectory
 
    public double getHeightSplineSetpoint()
    {
-      return spline.getPosition();
+      return polynomial.getPosition();
    }
 }
