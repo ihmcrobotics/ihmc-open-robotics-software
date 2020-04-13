@@ -385,7 +385,7 @@ public class OneStepCaptureRegionCalculatorTest
       protected void updateTransformToParent(RigidBodyTransform transformToParent)
       {
          transformToParent.setIdentity();
-         transformToParent.setTranslation(offset);
+         transformToParent.getTranslation().set(offset);
       }
    }
 
@@ -430,7 +430,7 @@ public class OneStepCaptureRegionCalculatorTest
             @Override
             protected void updateTransformToParent(RigidBodyTransform transformToParent)
             {
-               transformToParent.setTranslation(new Vector3D(0.0, robotSide.negateIfRightSide(0.15), 0.0));
+               transformToParent.getTranslation().set(new Vector3D(0.0, robotSide.negateIfRightSide(0.15), 0.0));
             }
          };
          ankleZUpFrame.update();

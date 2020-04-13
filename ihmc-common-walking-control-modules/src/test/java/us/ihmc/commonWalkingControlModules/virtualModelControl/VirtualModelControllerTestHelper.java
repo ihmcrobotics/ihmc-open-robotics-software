@@ -10,7 +10,7 @@ import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -228,8 +228,8 @@ public class VirtualModelControllerTestHelper
 
       Vector3D leftHipYawOffset = new Vector3D(0.0, HIP_WIDTH, 0.0);
       Vector3D rightHipYawOffset = new Vector3D(0.0, -HIP_WIDTH, 0.0);
-      PinJoint l_hip_yaw = new PinJoint("l_leg_hpz", leftHipYawOffset, robotLeg, Axis.Z);
-      PinJoint r_hip_yaw = new PinJoint("r_leg_hpz", rightHipYawOffset, robotLeg, Axis.Z);
+      PinJoint l_hip_yaw = new PinJoint("l_leg_hpz", leftHipYawOffset, robotLeg, Axis3D.Z);
+      PinJoint r_hip_yaw = new PinJoint("r_leg_hpz", rightHipYawOffset, robotLeg, Axis3D.Z);
       l_hip_yaw.setQ(random.nextDouble());
       r_hip_yaw.setQ(random.nextDouble());
 
@@ -249,8 +249,8 @@ public class VirtualModelControllerTestHelper
 
       Vector3D leftHipRollOffset = new Vector3D();
       Vector3D rightHipRollOffset = new Vector3D();
-      PinJoint l_hip_roll = new PinJoint("l_leg_hpx", leftHipRollOffset, robotLeg, Axis.X);
-      PinJoint r_hip_roll = new PinJoint("r_leg_hpx", rightHipRollOffset, robotLeg, Axis.X);
+      PinJoint l_hip_roll = new PinJoint("l_leg_hpx", leftHipRollOffset, robotLeg, Axis3D.X);
+      PinJoint r_hip_roll = new PinJoint("r_leg_hpx", rightHipRollOffset, robotLeg, Axis3D.X);
       l_hip_roll.setQ(random.nextDouble());
       r_hip_roll.setQ(random.nextDouble());
 
@@ -270,8 +270,8 @@ public class VirtualModelControllerTestHelper
 
       Vector3D leftHipPitchOffset = new Vector3D();
       Vector3D rightHipPitchOffset = new Vector3D();
-      PinJoint l_hip_pitch = new PinJoint("l_leg_hpy", leftHipPitchOffset, robotLeg, Axis.Y);
-      PinJoint r_hip_pitch = new PinJoint("r_leg_hpy", rightHipPitchOffset, robotLeg, Axis.Y);
+      PinJoint l_hip_pitch = new PinJoint("l_leg_hpy", leftHipPitchOffset, robotLeg, Axis3D.Y);
+      PinJoint r_hip_pitch = new PinJoint("r_leg_hpy", rightHipPitchOffset, robotLeg, Axis3D.Y);
       l_hip_pitch.setQ(random.nextDouble());
       r_hip_pitch.setQ(random.nextDouble());
 
@@ -291,8 +291,8 @@ public class VirtualModelControllerTestHelper
 
       Vector3D leftKneePitchOffset = new Vector3D(0.0, 0.0, -THIGH_LENGTH);
       Vector3D rightKneePitchOffset = new Vector3D(0.0, 0.0, -THIGH_LENGTH);
-      PinJoint l_knee_pitch = new PinJoint("l_leg_kny", leftKneePitchOffset, robotLeg, Axis.Y);
-      PinJoint r_knee_pitch = new PinJoint("r_leg_kny", rightKneePitchOffset, robotLeg, Axis.Y);
+      PinJoint l_knee_pitch = new PinJoint("l_leg_kny", leftKneePitchOffset, robotLeg, Axis3D.Y);
+      PinJoint r_knee_pitch = new PinJoint("r_leg_kny", rightKneePitchOffset, robotLeg, Axis3D.Y);
       l_knee_pitch.setQ(random.nextDouble());
       r_knee_pitch.setQ(random.nextDouble());
 
@@ -312,8 +312,8 @@ public class VirtualModelControllerTestHelper
 
       Vector3D leftAnklePitchOffset = new Vector3D(0.0, 0.0, -SHIN_LENGTH);
       Vector3D rightAnklePitchOffset = new Vector3D(0.0, 0.0, -SHIN_LENGTH);
-      PinJoint l_ankle_pitch = new PinJoint("l_leg_aky", leftAnklePitchOffset, robotLeg, Axis.Y);
-      PinJoint r_ankle_pitch = new PinJoint("r_leg_aky", rightAnklePitchOffset, robotLeg, Axis.Y);
+      PinJoint l_ankle_pitch = new PinJoint("l_leg_aky", leftAnklePitchOffset, robotLeg, Axis3D.Y);
+      PinJoint r_ankle_pitch = new PinJoint("r_leg_aky", rightAnklePitchOffset, robotLeg, Axis3D.Y);
       l_ankle_pitch.setQ(random.nextDouble());
       r_ankle_pitch.setQ(random.nextDouble());
 
@@ -333,8 +333,8 @@ public class VirtualModelControllerTestHelper
 
       Vector3D leftAnkleRollOffset = new Vector3D();
       Vector3D rightAnkleRollOffset = new Vector3D();
-      PinJoint l_ankle_roll = new PinJoint("l_leg_akx", leftAnkleRollOffset, robotLeg, Axis.X);
-      PinJoint r_ankle_roll = new PinJoint("r_leg_akx", rightAnkleRollOffset, robotLeg, Axis.X);
+      PinJoint l_ankle_roll = new PinJoint("l_leg_akx", leftAnkleRollOffset, robotLeg, Axis3D.X);
+      PinJoint r_ankle_roll = new PinJoint("r_leg_akx", rightAnkleRollOffset, robotLeg, Axis3D.X);
       l_ankle_roll.setQ(random.nextDouble());
       r_ankle_roll.setQ(random.nextDouble());
 

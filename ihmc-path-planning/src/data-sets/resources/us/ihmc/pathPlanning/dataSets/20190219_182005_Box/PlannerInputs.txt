@@ -2,7 +2,6 @@ start_position 0.0 0.15 0.0
 goal_position 4.0 0.0 0.0
 start_yaw 0.0
 goal_yaw 0.0
-planar_region_bipedal_timeout 10.0 
-vis_graph_with_a_star_timeout 7.0
-plan_then_snap_timeout 2.0 
+plan_then_snap_status test
+vis_graph_with_a_star_iteration_limit 600
 vis_graph_status test

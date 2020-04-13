@@ -6,7 +6,7 @@ import java.util.List;
 import org.apache.commons.math3.util.Precision;
 
 import gnu.trove.list.array.TDoubleArrayList;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
@@ -18,7 +18,7 @@ import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanT
 
 public class EuclideanTrajectoryPointCalculator
 {
-   private static final int dimension = Axis.values.length;
+   private static final int dimension = Axis3D.values.length;
    private static final int maxIterations = 2000;
    private final TrajectoryPointOptimizer trajectoryPointOptimizer = new TrajectoryPointOptimizer(dimension);
 

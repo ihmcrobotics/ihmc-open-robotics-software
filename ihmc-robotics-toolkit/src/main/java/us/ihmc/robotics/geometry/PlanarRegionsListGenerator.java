@@ -2,7 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -34,27 +34,27 @@ public class PlanarRegionsListGenerator
       transformGeneratorTwo.translate(0.0, 0.0, heightZ / 2.0);
       addRectangle(transformGeneratorTwo, lengthX, widthY);
       transformGeneratorTwo.translate(0.0, 0.0, -heightZ);
-      transformGeneratorTwo.rotate(Math.PI, Axis.Y);
+      transformGeneratorTwo.rotate(Math.PI, Axis3D.Y);
       addRectangle(transformGeneratorTwo, lengthX, widthY);
-      transformGeneratorTwo.rotate(Math.PI, Axis.Y);
+      transformGeneratorTwo.rotate(Math.PI, Axis3D.Y);
 
       transformGeneratorTwo.set(transformGenerator);
-      transformGeneratorTwo.rotate(Math.PI / 2.0, Axis.Y);
+      transformGeneratorTwo.rotate(Math.PI / 2.0, Axis3D.Y);
       transformGeneratorTwo.translate(0.0, 0.0, lengthX / 2.0);
       addRectangle(transformGeneratorTwo, heightZ, widthY);
       transformGeneratorTwo.translate(0.0, 0.0, -lengthX);
-      transformGeneratorTwo.rotate(Math.PI, Axis.Y);
+      transformGeneratorTwo.rotate(Math.PI, Axis3D.Y);
       addRectangle(transformGeneratorTwo, heightZ, widthY);
-      transformGeneratorTwo.rotate(Math.PI, Axis.Y);
+      transformGeneratorTwo.rotate(Math.PI, Axis3D.Y);
 
       transformGeneratorTwo.set(transformGenerator);
-      transformGeneratorTwo.rotate(Math.PI / 2.0, Axis.X);
+      transformGeneratorTwo.rotate(Math.PI / 2.0, Axis3D.X);
       transformGeneratorTwo.translate(0.0, 0.0, widthY / 2.0);
       addRectangle(transformGeneratorTwo, lengthX, heightZ);
       transformGeneratorTwo.translate(0.0, 0.0, -widthY);
-      transformGeneratorTwo.rotate(Math.PI, Axis.X);
+      transformGeneratorTwo.rotate(Math.PI, Axis3D.X);
       addRectangle(transformGeneratorTwo, lengthX, heightZ);
-      transformGeneratorTwo.rotate(Math.PI, Axis.X);
+      transformGeneratorTwo.rotate(Math.PI, Axis3D.X);
    }
 
    public void addCubeReferencedAtBottomMiddle(double lengthX, double widthY, double heightZ)
@@ -87,7 +87,7 @@ public class PlanarRegionsListGenerator
 
       transformGeneratorTwo.set(transformGenerator);
       transformGeneratorTwo.translate(lengthX / 2.0, 0.0, heightZ / 2.0);
-      transformGeneratorTwo.rotate(-slope, Axis.Y);
+      transformGeneratorTwo.rotate(-slope, Axis3D.Y);
       addRectangle(transformGeneratorTwo, EuclidGeometryTools.pythagorasGetHypotenuse(lengthX, heightZ), widthY);
 
       ConvexPolygon2D leftSide = new ConvexPolygon2D();
@@ -104,13 +104,13 @@ public class PlanarRegionsListGenerator
 
       transformGeneratorTwo.set(transformGenerator);
       transformGeneratorTwo.translate(0.0, 0.5 * widthY, 0.0);
-      transformGeneratorTwo.rotate(0.5 * Math.PI, Axis.X);
-      transformGeneratorTwo.rotate(Math.PI, Axis.Y);
+      transformGeneratorTwo.rotate(0.5 * Math.PI, Axis3D.X);
+      transformGeneratorTwo.rotate(Math.PI, Axis3D.Y);
       addPolygon(transformGeneratorTwo, leftSide);
 
       transformGeneratorTwo.set(transformGenerator);
       transformGeneratorTwo.translate(0.0, -0.5 * widthY, 0.0);
-      transformGeneratorTwo.rotate(0.5 * Math.PI, Axis.X);
+      transformGeneratorTwo.rotate(0.5 * Math.PI, Axis3D.X);
       addPolygon(transformGeneratorTwo, rightSide);
    }
 
@@ -197,7 +197,7 @@ public class PlanarRegionsListGenerator
       transformGenerator.rotate(rotation);
    }
 
-   public void rotate(double rotationAngle, Axis axis)
+   public void rotate(double rotationAngle, Axis3D axis)
    {
       transformGenerator.rotate(rotationAngle, axis);
    }

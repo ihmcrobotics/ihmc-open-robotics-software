@@ -6,16 +6,11 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
-import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
-import us.ihmc.footstepPlanning.graphSearch.listeners.BipedalFootstepPlannerListener;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -27,7 +22,6 @@ import java.util.function.DoubleSupplier;
 
 public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {
-   private final List<BipedalFootstepPlannerListener> listeners = new ArrayList<>();
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
 
    private final BooleanSupplier wiggleIntoConvexHullOfPlanarRegions;
@@ -65,11 +59,6 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       this.maximumZPenetrationOnValleyRegions = maximumZPenetrationOnValleyRegions;
    }
 
-   public void addPlannerListener(BipedalFootstepPlannerListener listener)
-   {
-      listeners.add(listener);
-   }
-
    @Override
    public FootstepNodeSnapData snapInternal(FootstepNode footstepNode)
    {
@@ -96,7 +85,22 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       if (footholdPolygonInLocalFrame.isEmpty())
          return FootstepNodeSnapData.emptyData();
 
-      RigidBodyTransform wiggleTransformLocalToLocal = getWiggleTransformInPlanarRegionFrame(footholdPolygonInLocalFrame);
+      boolean doWiggle = false;
+      for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly vertex = footPolygon.getVertex(i);
+         if (planarRegionToPack.getConvexHull().signedDistance(vertex) > - wiggleInsideDelta.getAsDouble())
+         {
+            doWiggle = true;
+            break;
+         }
+      }
+
+      RigidBodyTransform wiggleTransformLocalToLocal = null;
+      if (doWiggle)
+      {
+         wiggleTransformLocalToLocal = getWiggleTransformInPlanarRegionFrame(footholdPolygonInLocalFrame);
+      }
 
       if (wiggleTransformLocalToLocal == null)
       {
@@ -158,7 +162,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       }
    }
 
-   private RigidBodyTransform getWiggleTransformInPlanarRegionFrame(ConvexPolygon2D footholdPolygon)
+   RigidBodyTransform getWiggleTransformInPlanarRegionFrame(ConvexPolygon2D footholdPolygon)
    {
       updateWiggleParameters();
 
@@ -224,7 +228,6 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
                   if (zPenetration > maximumZPenetrationOnValleyRegions.getAsDouble())
                   {
-                     rejectNode(node, BipedalFootstepPlannerNodeRejectionReason.TOO_MUCH_PENETRATION_AFTER_WIGGLE);
                      return true;
                   }
                }
@@ -233,11 +236,5 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       }
 
       return false;
-   }
-
-   private void rejectNode(FootstepNode nodeToExpand, BipedalFootstepPlannerNodeRejectionReason reason)
-   {
-      for (BipedalFootstepPlannerListener listener : listeners)
-         listener.rejectNode(nodeToExpand, null, reason);
    }
 }

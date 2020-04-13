@@ -94,7 +94,7 @@ public abstract class AvatarWalkingPathGeneratorTest implements MultiRobotTestIn
          EnvSet.addSphere(goalState.getX(), goalState.getY(), goalState.getZ(), 0.1, YoAppearance.Blue());
 
          RigidBodyTransform location = new RigidBodyTransform();
-         location.setTranslation(initialState);
+         location.getTranslation().set(initialState);
 
          // EnvSet.addCylinder(location, 1.0, 0.4, YoAppearance.Wheat());
       }

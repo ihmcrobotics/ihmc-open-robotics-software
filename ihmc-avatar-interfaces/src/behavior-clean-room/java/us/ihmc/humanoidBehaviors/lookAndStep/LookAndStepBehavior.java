@@ -178,7 +178,6 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.get(LookAndStepBehaviorParameters.idealFootstepLengthOverride));
       footstepPlannerParameters.setWiggleInsideDelta(lookAndStepParameters.get(LookAndStepBehaviorParameters.wiggleInsideDeltaOverride));
-      footstepPlannerParameters.setReturnBestEffortPlan(lookAndStepParameters.get(LookAndStepBehaviorParameters.returnBestEffortPlanOverride));
       footstepPlannerParameters.setCliffHeightToAvoid(lookAndStepParameters.get(LookAndStepBehaviorParameters.cliffHeightToAvoidOverride));
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
@@ -195,6 +194,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private void footstepPlanningThread(FootstepPlannerRequest footstepPlannerRequest)
    {
+      footstepPlanningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= 1);
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.handleRequest(footstepPlannerRequest);
       footstepPlannerOutputNotification.add(footstepPlannerOutput);
 

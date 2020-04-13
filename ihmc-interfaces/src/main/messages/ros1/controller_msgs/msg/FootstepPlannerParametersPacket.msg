@@ -45,6 +45,14 @@ float64 ideal_footstep_width
 # Field default value -11.1
 float64 ideal_footstep_length
 
+# Returns the ideal step side step width when "shuffling" sideways.
+# Field default value -11.1
+float64 ideal_side_step_width
+
+# Returns the ideal length when walking backwards. This value is negative.
+# Field default value -11.1
+float64 ideal_back_step_length
+
 # If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
 # regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
 # edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
@@ -277,16 +285,6 @@ float64 cliff_height_to_avoid
 # Field default value -11.1
 float64 minimum_distance_from_cliff_bottoms
 
-# When the planner is done planning and cannot find a path to the goal, this flag indicates whether the
-# planner should return the best plan that it found. If this value is false, the planner will return
-# a {@link FootstepPlan} of type {@link FootstepPlanningResult#NO_PATH_EXISTS}. Otherwise it will return
-# "best" is determined by the planner.
-bool return_best_effort_plan
-
-# When {@link #getReturnBestEffortPlan()} is true, the planner will return the best effort plan if the plan
-# contains at least this many footsteps.
-uint32 minimum_steps_for_best_effort_plan
-
 # Some node checkers will check if a bounding box that describes the body of the robot will move
 # through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
 # collisions, this defines the box height.
@@ -339,17 +337,6 @@ float64 min_y_clearance_from_stance
 # Field default value -11.1
 float64 final_turn_proximity
 
-# Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
-# Field default value -11.1
-float64 final_turn_body_path_proximity
-
-# Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
-# final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
-# the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
-# the desired orientation is the final orientation.
-# Field default value -11.1
-float64 final_turn_proximity_blend_factor
-
 # When using a cost based planning approach this value defined how the yaw of a footstep will be
 # weighted in comparison to its position.
 # Field default value -11.1
@@ -398,27 +385,9 @@ float64 foothold_area_weight
 # Field default value -11.1
 float64 cost_per_step
 
-# Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
-bool use_quadratic_distance_cost
-
-# Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
-bool use_quadratic_height_cost
-
 # Gets the weight for the heuristics in the A Star planner.
 # Field default value -11.1
 float64 a_star_heuristics_weight
-
-# Gets the weight for the heuristics in the Visibility graph with A star planner.
-# Field default value -11.1
-float64 vis_graph_with_a_star_heuristics_weight
-
-# Gets the weight for the heuristics in the Depth First planner.
-# Field default value -11.1
-float64 depth_first_heuristics_weight
-
-# Gets the weight for the heuristics in the Body path based planner.
-# Field default value -11.1
-float64 body_path_based_heuristics_weight
 
 # This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
 # Additional checks are done by interpolating between the start and end steps
@@ -429,15 +398,6 @@ uint32 number_of_bounding_box_checks
 # @see FootstepPlannerCostParameters#getBoundingBoxCost
 # Field default value -11.1
 float64 maximum_2d_distance_from_bounding_box_to_penalize
-
-# If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
-# where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
-# {@code c * (1 - d / d_max)}, where d_max is this value.
-# Field default value -11.1
-float64 bounding_box_cost
-
-# Field default value -11.1
-float64 body_path_violation_weight
 
 # Field default value -11.1
 float64 distance_from_path_tolerance

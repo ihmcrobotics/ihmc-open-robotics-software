@@ -2327,8 +2327,8 @@ public class FootstepGeneratorsTest
       Vector3D positionInFrame = new Vector3D();
 
 
-      lastStep.getSoleReferenceFrame().getTransformToWorldFrame().getTranslation(lastStepPosition);
-      nextLastStep.getSoleReferenceFrame().getTransformToWorldFrame().getTranslation(nextLastStepPosition);
+      lastStepPosition.set(lastStep.getSoleReferenceFrame().getTransformToWorldFrame().getTranslation());
+      nextLastStepPosition.set(nextLastStep.getSoleReferenceFrame().getTransformToWorldFrame().getTranslation());
       positionInFrame.interpolate(nextLastStepPosition, lastStepPosition, 0.5);
       Point2D positionInFrame2d = new Point2D(positionInFrame.getX(), positionInFrame.getY());
 

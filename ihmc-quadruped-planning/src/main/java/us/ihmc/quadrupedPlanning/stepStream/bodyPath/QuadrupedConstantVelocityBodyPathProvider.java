@@ -218,7 +218,7 @@ public class QuadrupedConstantVelocityBodyPathProvider implements QuadrupedPlana
 
                footStartPoints.get(depth - 1).set(soleDesiredPosition);
                tempPose.set(halfStanceLength, halfStanceWidth, 0.0);
-               tempTransform.setRotationYaw(yawAtStatusMessage);
+               tempTransform.getRotation().setToYawOrientation(yawAtStatusMessage);
                tempPose.applyTransform(tempTransform);
                tempPose.prependTranslation(footStartPoints.get(depth - 1));
                extrapolatePose(newStartTime - timeAtStatusMessage, tempPose, tempPose, desiredPlanarVelocity);

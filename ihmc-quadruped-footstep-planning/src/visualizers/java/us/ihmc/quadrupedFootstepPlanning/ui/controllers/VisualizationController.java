@@ -39,14 +39,6 @@ public class VisualizationController
    private CheckBox showClusterPreferredNonNavigableExtrusionsToggleButton;
    @FXML
    private CheckBox showSolution;
-   @FXML
-   public void requestStatistics()
-   {
-      if (verbose)
-         PrintTools.info(this, "Clicked request statistics...");
-
-      messager.submitMessage(PawStepPlannerMessagerAPI.RequestPlannerStatistics, true);
-   }
 
    private JavaFXMessager messager;
 

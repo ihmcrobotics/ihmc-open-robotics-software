@@ -302,7 +302,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
       else
       {
          height = fittedPlane.getZOnPlane(position.getX(), position.getY());
-         surfaceNormal = fittedPlane.getNormalCopy();
+         surfaceNormal = new Vector3D(fittedPlane.getNormal());
       }
 
       // check point fit to plane.
@@ -440,7 +440,7 @@ public class ConvexHullFootstepSnapper implements QuadTreeFootstepSnapper
 
          face.getPlane(facePlane);
          Quaternion newOrientation = new Quaternion();
-         RotationTools.computeQuaternionFromYawAndZNormal(yaw, facePlane.getNormalCopy(), newOrientation);
+         RotationTools.computeQuaternionFromYawAndZNormal(yaw, new Vector3D(facePlane.getNormal()), newOrientation);
          FootstepDataMessage currentFaceFootstep = HumanoidMessageTools.createFootstepDataMessage(RobotSide.fromByte(footstep.getRobotSide()), new Point3D(x, y, facePlane.getZOnPlane(x, y)), newOrientation);
          currentPredictedContactPoints = getPredictedContactPointsForFootstep(currentFaceFootstep, points, distanceTolerance);
 

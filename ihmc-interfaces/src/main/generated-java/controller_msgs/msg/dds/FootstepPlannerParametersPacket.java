@@ -59,6 +59,14 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double ideal_footstep_length_ = -11.1;
    /**
+            * Returns the ideal step side step width when "shuffling" sideways.
+            */
+   public double ideal_side_step_width_ = -11.1;
+   /**
+            * Returns the ideal length when walking backwards. This value is negative.
+            */
+   public double ideal_back_step_length_ = -11.1;
+   /**
             * If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
             * regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
             * edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
@@ -293,18 +301,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double minimum_distance_from_cliff_bottoms_ = -11.1;
    /**
-            * When the planner is done planning and cannot find a path to the goal, this flag indicates whether the
-            * planner should return the best plan that it found. If this value is false, the planner will return
-            * a {@link FootstepPlan} of type {@link FootstepPlanningResult#NO_PATH_EXISTS}. Otherwise it will return
-            * "best" is determined by the planner.
-            */
-   public boolean return_best_effort_plan_;
-   /**
-            * When {@link #getReturnBestEffortPlan()} is true, the planner will return the best effort plan if the plan
-            * contains at least this many footsteps.
-            */
-   public long minimum_steps_for_best_effort_plan_;
-   /**
             * Some node checkers will check if a bounding box that describes the body of the robot will move
             * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
             * collisions, this defines the box height.
@@ -357,17 +353,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double final_turn_proximity_ = -11.1;
    /**
-            * Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
-            */
-   public double final_turn_body_path_proximity_ = -11.1;
-   /**
-            * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
-            * final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
-            * the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
-            * the desired orientation is the final orientation.
-            */
-   public double final_turn_proximity_blend_factor_ = -11.1;
-   /**
             * When using a cost based planning approach this value defined how the yaw of a footstep will be
             * weighted in comparison to its position.
             */
@@ -416,29 +401,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double cost_per_step_ = -11.1;
    /**
-            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
-            */
-   public boolean use_quadratic_distance_cost_;
-   /**
-            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
-            */
-   public boolean use_quadratic_height_cost_;
-   /**
             * Gets the weight for the heuristics in the A Star planner.
             */
    public double a_star_heuristics_weight_ = -11.1;
-   /**
-            * Gets the weight for the heuristics in the Visibility graph with A star planner.
-            */
-   public double vis_graph_with_a_star_heuristics_weight_ = -11.1;
-   /**
-            * Gets the weight for the heuristics in the Depth First planner.
-            */
-   public double depth_first_heuristics_weight_ = -11.1;
-   /**
-            * Gets the weight for the heuristics in the Body path based planner.
-            */
-   public double body_path_based_heuristics_weight_ = -11.1;
    /**
             * This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
             * Additional checks are done by interpolating between the start and end steps
@@ -449,13 +414,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             * @see FootstepPlannerCostParameters#getBoundingBoxCost
             */
    public double maximum_2d_distance_from_bounding_box_to_penalize_ = -11.1;
-   /**
-            * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
-            * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
-            * {@code c * (1 - d / d_max)}, where d_max is this value.
-            */
-   public double bounding_box_cost_ = -11.1;
-   public double body_path_violation_weight_ = -11.1;
    public double distance_from_path_tolerance_ = -11.1;
    public double delta_yaw_from_reference_tolerance_ = -11.1;
 
@@ -480,6 +438,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       ideal_footstep_width_ = other.ideal_footstep_width_;
 
       ideal_footstep_length_ = other.ideal_footstep_length_;
+
+      ideal_side_step_width_ = other.ideal_side_step_width_;
+
+      ideal_back_step_length_ = other.ideal_back_step_length_;
 
       wiggle_inside_delta_ = other.wiggle_inside_delta_;
 
@@ -535,10 +497,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       minimum_distance_from_cliff_bottoms_ = other.minimum_distance_from_cliff_bottoms_;
 
-      return_best_effort_plan_ = other.return_best_effort_plan_;
-
-      minimum_steps_for_best_effort_plan_ = other.minimum_steps_for_best_effort_plan_;
-
       body_box_height_ = other.body_box_height_;
 
       body_box_depth_ = other.body_box_depth_;
@@ -556,10 +514,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       min_y_clearance_from_stance_ = other.min_y_clearance_from_stance_;
 
       final_turn_proximity_ = other.final_turn_proximity_;
-
-      final_turn_body_path_proximity_ = other.final_turn_body_path_proximity_;
-
-      final_turn_proximity_blend_factor_ = other.final_turn_proximity_blend_factor_;
 
       yaw_weight_ = other.yaw_weight_;
 
@@ -581,25 +535,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       cost_per_step_ = other.cost_per_step_;
 
-      use_quadratic_distance_cost_ = other.use_quadratic_distance_cost_;
-
-      use_quadratic_height_cost_ = other.use_quadratic_height_cost_;
-
       a_star_heuristics_weight_ = other.a_star_heuristics_weight_;
-
-      vis_graph_with_a_star_heuristics_weight_ = other.vis_graph_with_a_star_heuristics_weight_;
-
-      depth_first_heuristics_weight_ = other.depth_first_heuristics_weight_;
-
-      body_path_based_heuristics_weight_ = other.body_path_based_heuristics_weight_;
 
       number_of_bounding_box_checks_ = other.number_of_bounding_box_checks_;
 
       maximum_2d_distance_from_bounding_box_to_penalize_ = other.maximum_2d_distance_from_bounding_box_to_penalize_;
-
-      bounding_box_cost_ = other.bounding_box_cost_;
-
-      body_path_violation_weight_ = other.body_path_violation_weight_;
 
       distance_from_path_tolerance_ = other.distance_from_path_tolerance_;
 
@@ -684,6 +624,36 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getIdealFootstepLength()
    {
       return ideal_footstep_length_;
+   }
+
+   /**
+            * Returns the ideal step side step width when "shuffling" sideways.
+            */
+   public void setIdealSideStepWidth(double ideal_side_step_width)
+   {
+      ideal_side_step_width_ = ideal_side_step_width;
+   }
+   /**
+            * Returns the ideal step side step width when "shuffling" sideways.
+            */
+   public double getIdealSideStepWidth()
+   {
+      return ideal_side_step_width_;
+   }
+
+   /**
+            * Returns the ideal length when walking backwards. This value is negative.
+            */
+   public void setIdealBackStepLength(double ideal_back_step_length)
+   {
+      ideal_back_step_length_ = ideal_back_step_length;
+   }
+   /**
+            * Returns the ideal length when walking backwards. This value is negative.
+            */
+   public double getIdealBackStepLength()
+   {
+      return ideal_back_step_length_;
    }
 
    /**
@@ -1344,44 +1314,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
    /**
-            * When the planner is done planning and cannot find a path to the goal, this flag indicates whether the
-            * planner should return the best plan that it found. If this value is false, the planner will return
-            * a {@link FootstepPlan} of type {@link FootstepPlanningResult#NO_PATH_EXISTS}. Otherwise it will return
-            * "best" is determined by the planner.
-            */
-   public void setReturnBestEffortPlan(boolean return_best_effort_plan)
-   {
-      return_best_effort_plan_ = return_best_effort_plan;
-   }
-   /**
-            * When the planner is done planning and cannot find a path to the goal, this flag indicates whether the
-            * planner should return the best plan that it found. If this value is false, the planner will return
-            * a {@link FootstepPlan} of type {@link FootstepPlanningResult#NO_PATH_EXISTS}. Otherwise it will return
-            * "best" is determined by the planner.
-            */
-   public boolean getReturnBestEffortPlan()
-   {
-      return return_best_effort_plan_;
-   }
-
-   /**
-            * When {@link #getReturnBestEffortPlan()} is true, the planner will return the best effort plan if the plan
-            * contains at least this many footsteps.
-            */
-   public void setMinimumStepsForBestEffortPlan(long minimum_steps_for_best_effort_plan)
-   {
-      minimum_steps_for_best_effort_plan_ = minimum_steps_for_best_effort_plan;
-   }
-   /**
-            * When {@link #getReturnBestEffortPlan()} is true, the planner will return the best effort plan if the plan
-            * contains at least this many footsteps.
-            */
-   public long getMinimumStepsForBestEffortPlan()
-   {
-      return minimum_steps_for_best_effort_plan_;
-   }
-
-   /**
             * Some node checkers will check if a bounding box that describes the body of the robot will move
             * through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
             * collisions, this defines the box height.
@@ -1546,42 +1478,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getFinalTurnProximity()
    {
       return final_turn_proximity_;
-   }
-
-   /**
-            * Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
-            */
-   public void setFinalTurnBodyPathProximity(double final_turn_body_path_proximity)
-   {
-      final_turn_body_path_proximity_ = final_turn_body_path_proximity;
-   }
-   /**
-            * Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
-            */
-   public double getFinalTurnBodyPathProximity()
-   {
-      return final_turn_body_path_proximity_;
-   }
-
-   /**
-            * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
-            * final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
-            * the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
-            * the desired orientation is the final orientation.
-            */
-   public void setFinalTurnProximityBlendFactor(double final_turn_proximity_blend_factor)
-   {
-      final_turn_proximity_blend_factor_ = final_turn_proximity_blend_factor;
-   }
-   /**
-            * Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
-            * final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
-            * the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
-            * the desired orientation is the final orientation.
-            */
-   public double getFinalTurnProximityBlendFactor()
-   {
-      return final_turn_proximity_blend_factor_;
    }
 
    /**
@@ -1751,36 +1647,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
    /**
-            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
-            */
-   public void setUseQuadraticDistanceCost(boolean use_quadratic_distance_cost)
-   {
-      use_quadratic_distance_cost_ = use_quadratic_distance_cost;
-   }
-   /**
-            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
-            */
-   public boolean getUseQuadraticDistanceCost()
-   {
-      return use_quadratic_distance_cost_;
-   }
-
-   /**
-            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
-            */
-   public void setUseQuadraticHeightCost(boolean use_quadratic_height_cost)
-   {
-      use_quadratic_height_cost_ = use_quadratic_height_cost;
-   }
-   /**
-            * Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
-            */
-   public boolean getUseQuadraticHeightCost()
-   {
-      return use_quadratic_height_cost_;
-   }
-
-   /**
             * Gets the weight for the heuristics in the A Star planner.
             */
    public void setAStarHeuristicsWeight(double a_star_heuristics_weight)
@@ -1793,51 +1659,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getAStarHeuristicsWeight()
    {
       return a_star_heuristics_weight_;
-   }
-
-   /**
-            * Gets the weight for the heuristics in the Visibility graph with A star planner.
-            */
-   public void setVisGraphWithAStarHeuristicsWeight(double vis_graph_with_a_star_heuristics_weight)
-   {
-      vis_graph_with_a_star_heuristics_weight_ = vis_graph_with_a_star_heuristics_weight;
-   }
-   /**
-            * Gets the weight for the heuristics in the Visibility graph with A star planner.
-            */
-   public double getVisGraphWithAStarHeuristicsWeight()
-   {
-      return vis_graph_with_a_star_heuristics_weight_;
-   }
-
-   /**
-            * Gets the weight for the heuristics in the Depth First planner.
-            */
-   public void setDepthFirstHeuristicsWeight(double depth_first_heuristics_weight)
-   {
-      depth_first_heuristics_weight_ = depth_first_heuristics_weight;
-   }
-   /**
-            * Gets the weight for the heuristics in the Depth First planner.
-            */
-   public double getDepthFirstHeuristicsWeight()
-   {
-      return depth_first_heuristics_weight_;
-   }
-
-   /**
-            * Gets the weight for the heuristics in the Body path based planner.
-            */
-   public void setBodyPathBasedHeuristicsWeight(double body_path_based_heuristics_weight)
-   {
-      body_path_based_heuristics_weight_ = body_path_based_heuristics_weight;
-   }
-   /**
-            * Gets the weight for the heuristics in the Body path based planner.
-            */
-   public double getBodyPathBasedHeuristicsWeight()
-   {
-      return body_path_based_heuristics_weight_;
    }
 
    /**
@@ -1872,34 +1693,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getMaximum2dDistanceFromBoundingBoxToPenalize()
    {
       return maximum_2d_distance_from_bounding_box_to_penalize_;
-   }
-
-   /**
-            * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
-            * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
-            * {@code c * (1 - d / d_max)}, where d_max is this value.
-            */
-   public void setBoundingBoxCost(double bounding_box_cost)
-   {
-      bounding_box_cost_ = bounding_box_cost;
-   }
-   /**
-            * If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
-            * where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
-            * {@code c * (1 - d / d_max)}, where d_max is this value.
-            */
-   public double getBoundingBoxCost()
-   {
-      return bounding_box_cost_;
-   }
-
-   public void setBodyPathViolationWeight(double body_path_violation_weight)
-   {
-      body_path_violation_weight_ = body_path_violation_weight;
-   }
-   public double getBodyPathViolationWeight()
-   {
-      return body_path_violation_weight_;
    }
 
    public void setDistanceFromPathTolerance(double distance_from_path_tolerance)
@@ -1947,6 +1740,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_footstep_width_, other.ideal_footstep_width_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_footstep_length_, other.ideal_footstep_length_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_side_step_width_, other.ideal_side_step_width_, epsilon)) return false;
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.ideal_back_step_length_, other.ideal_back_step_length_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.wiggle_inside_delta_, other.wiggle_inside_delta_, epsilon)) return false;
 
@@ -2002,10 +1799,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_distance_from_cliff_bottoms_, other.minimum_distance_from_cliff_bottoms_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.return_best_effort_plan_, other.return_best_effort_plan_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_steps_for_best_effort_plan_, other.minimum_steps_for_best_effort_plan_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_box_height_, other.body_box_height_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_box_depth_, other.body_box_depth_, epsilon)) return false;
@@ -2023,10 +1816,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_y_clearance_from_stance_, other.min_y_clearance_from_stance_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_turn_proximity_, other.final_turn_proximity_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_turn_body_path_proximity_, other.final_turn_body_path_proximity_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.final_turn_proximity_blend_factor_, other.final_turn_proximity_blend_factor_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.yaw_weight_, other.yaw_weight_, epsilon)) return false;
 
@@ -2048,25 +1837,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cost_per_step_, other.cost_per_step_, epsilon)) return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_quadratic_distance_cost_, other.use_quadratic_distance_cost_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.use_quadratic_height_cost_, other.use_quadratic_height_cost_, epsilon)) return false;
-
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.a_star_heuristics_weight_, other.a_star_heuristics_weight_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.vis_graph_with_a_star_heuristics_weight_, other.vis_graph_with_a_star_heuristics_weight_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.depth_first_heuristics_weight_, other.depth_first_heuristics_weight_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_path_based_heuristics_weight_, other.body_path_based_heuristics_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_bounding_box_checks_, other.number_of_bounding_box_checks_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_2d_distance_from_bounding_box_to_penalize_, other.maximum_2d_distance_from_bounding_box_to_penalize_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.bounding_box_cost_, other.bounding_box_cost_, epsilon)) return false;
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_path_violation_weight_, other.body_path_violation_weight_, epsilon)) return false;
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_from_path_tolerance_, other.distance_from_path_tolerance_, epsilon)) return false;
 
@@ -2094,6 +1869,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.ideal_footstep_width_ != otherMyClass.ideal_footstep_width_) return false;
 
       if(this.ideal_footstep_length_ != otherMyClass.ideal_footstep_length_) return false;
+
+      if(this.ideal_side_step_width_ != otherMyClass.ideal_side_step_width_) return false;
+
+      if(this.ideal_back_step_length_ != otherMyClass.ideal_back_step_length_) return false;
 
       if(this.wiggle_inside_delta_ != otherMyClass.wiggle_inside_delta_) return false;
 
@@ -2149,10 +1928,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.minimum_distance_from_cliff_bottoms_ != otherMyClass.minimum_distance_from_cliff_bottoms_) return false;
 
-      if(this.return_best_effort_plan_ != otherMyClass.return_best_effort_plan_) return false;
-
-      if(this.minimum_steps_for_best_effort_plan_ != otherMyClass.minimum_steps_for_best_effort_plan_) return false;
-
       if(this.body_box_height_ != otherMyClass.body_box_height_) return false;
 
       if(this.body_box_depth_ != otherMyClass.body_box_depth_) return false;
@@ -2170,10 +1945,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.min_y_clearance_from_stance_ != otherMyClass.min_y_clearance_from_stance_) return false;
 
       if(this.final_turn_proximity_ != otherMyClass.final_turn_proximity_) return false;
-
-      if(this.final_turn_body_path_proximity_ != otherMyClass.final_turn_body_path_proximity_) return false;
-
-      if(this.final_turn_proximity_blend_factor_ != otherMyClass.final_turn_proximity_blend_factor_) return false;
 
       if(this.yaw_weight_ != otherMyClass.yaw_weight_) return false;
 
@@ -2195,25 +1966,11 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       if(this.cost_per_step_ != otherMyClass.cost_per_step_) return false;
 
-      if(this.use_quadratic_distance_cost_ != otherMyClass.use_quadratic_distance_cost_) return false;
-
-      if(this.use_quadratic_height_cost_ != otherMyClass.use_quadratic_height_cost_) return false;
-
       if(this.a_star_heuristics_weight_ != otherMyClass.a_star_heuristics_weight_) return false;
-
-      if(this.vis_graph_with_a_star_heuristics_weight_ != otherMyClass.vis_graph_with_a_star_heuristics_weight_) return false;
-
-      if(this.depth_first_heuristics_weight_ != otherMyClass.depth_first_heuristics_weight_) return false;
-
-      if(this.body_path_based_heuristics_weight_ != otherMyClass.body_path_based_heuristics_weight_) return false;
 
       if(this.number_of_bounding_box_checks_ != otherMyClass.number_of_bounding_box_checks_) return false;
 
       if(this.maximum_2d_distance_from_bounding_box_to_penalize_ != otherMyClass.maximum_2d_distance_from_bounding_box_to_penalize_) return false;
-
-      if(this.bounding_box_cost_ != otherMyClass.bounding_box_cost_) return false;
-
-      if(this.body_path_violation_weight_ != otherMyClass.body_path_violation_weight_) return false;
 
       if(this.distance_from_path_tolerance_ != otherMyClass.distance_from_path_tolerance_) return false;
 
@@ -2239,6 +1996,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.ideal_footstep_width_);      builder.append(", ");
       builder.append("ideal_footstep_length=");
       builder.append(this.ideal_footstep_length_);      builder.append(", ");
+      builder.append("ideal_side_step_width=");
+      builder.append(this.ideal_side_step_width_);      builder.append(", ");
+      builder.append("ideal_back_step_length=");
+      builder.append(this.ideal_back_step_length_);      builder.append(", ");
       builder.append("wiggle_inside_delta=");
       builder.append(this.wiggle_inside_delta_);      builder.append(", ");
       builder.append("maximum_step_reach=");
@@ -2293,10 +2054,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.cliff_height_to_avoid_);      builder.append(", ");
       builder.append("minimum_distance_from_cliff_bottoms=");
       builder.append(this.minimum_distance_from_cliff_bottoms_);      builder.append(", ");
-      builder.append("return_best_effort_plan=");
-      builder.append(this.return_best_effort_plan_);      builder.append(", ");
-      builder.append("minimum_steps_for_best_effort_plan=");
-      builder.append(this.minimum_steps_for_best_effort_plan_);      builder.append(", ");
       builder.append("body_box_height=");
       builder.append(this.body_box_height_);      builder.append(", ");
       builder.append("body_box_depth=");
@@ -2315,10 +2072,6 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.min_y_clearance_from_stance_);      builder.append(", ");
       builder.append("final_turn_proximity=");
       builder.append(this.final_turn_proximity_);      builder.append(", ");
-      builder.append("final_turn_body_path_proximity=");
-      builder.append(this.final_turn_body_path_proximity_);      builder.append(", ");
-      builder.append("final_turn_proximity_blend_factor=");
-      builder.append(this.final_turn_proximity_blend_factor_);      builder.append(", ");
       builder.append("yaw_weight=");
       builder.append(this.yaw_weight_);      builder.append(", ");
       builder.append("pitch_weight=");
@@ -2339,26 +2092,12 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.foothold_area_weight_);      builder.append(", ");
       builder.append("cost_per_step=");
       builder.append(this.cost_per_step_);      builder.append(", ");
-      builder.append("use_quadratic_distance_cost=");
-      builder.append(this.use_quadratic_distance_cost_);      builder.append(", ");
-      builder.append("use_quadratic_height_cost=");
-      builder.append(this.use_quadratic_height_cost_);      builder.append(", ");
       builder.append("a_star_heuristics_weight=");
       builder.append(this.a_star_heuristics_weight_);      builder.append(", ");
-      builder.append("vis_graph_with_a_star_heuristics_weight=");
-      builder.append(this.vis_graph_with_a_star_heuristics_weight_);      builder.append(", ");
-      builder.append("depth_first_heuristics_weight=");
-      builder.append(this.depth_first_heuristics_weight_);      builder.append(", ");
-      builder.append("body_path_based_heuristics_weight=");
-      builder.append(this.body_path_based_heuristics_weight_);      builder.append(", ");
       builder.append("number_of_bounding_box_checks=");
       builder.append(this.number_of_bounding_box_checks_);      builder.append(", ");
       builder.append("maximum_2d_distance_from_bounding_box_to_penalize=");
       builder.append(this.maximum_2d_distance_from_bounding_box_to_penalize_);      builder.append(", ");
-      builder.append("bounding_box_cost=");
-      builder.append(this.bounding_box_cost_);      builder.append(", ");
-      builder.append("body_path_violation_weight=");
-      builder.append(this.body_path_violation_weight_);      builder.append(", ");
       builder.append("distance_from_path_tolerance=");
       builder.append(this.distance_from_path_tolerance_);      builder.append(", ");
       builder.append("delta_yaw_from_reference_tolerance=");

@@ -50,8 +50,8 @@ public abstract class AbstractWaypointsForPawStepPlanner implements WaypointsFor
    public void setInitialBodyPose(FramePose3DReadOnly initialPose)
    {
       bodyStartPose.setToZero(ReferenceFrame.getWorldFrame());
-      bodyStartPose.setPosition(initialPose.getX(), initialPose.getY(), 0.0);
-      bodyStartPose.setOrientationYawPitchRoll(initialPose.getYaw(), 0.0, 0.0);
+      bodyStartPose.getPosition().set(initialPose.getX(), initialPose.getY(), 0.0);
+      bodyStartPose.getOrientation().setYawPitchRoll(initialPose.getYaw(), 0.0, 0.0);
    }
 
    @Override

@@ -18,7 +18,7 @@ public class InteriorAngleConeRotationCalculator implements FrictionConeRotation
    @Override
    public double computeConeRotation(YoPlaneContactState yoPlaneContactState, int contactPointIndex)
    {
-      yoPlaneContactState.getContactPoints().get(contactPointIndex).getPosition2d(point2d);
+      point2d.set(yoPlaneContactState.getContactPoints().get(contactPointIndex));
       ConvexPolygon2DReadOnly supportPolygon = yoPlaneContactState.getSupportPolygonInPlaneFrame();
       int vertexIndex = supportPolygon.getClosestVertexIndex(point2d);
 
@@ -26,7 +26,6 @@ public class InteriorAngleConeRotationCalculator implements FrictionConeRotation
       double interiorAngle = getInteriorAngle(supportPolygon, vertexIndex);
       return angleOfEdge - 0.5 * interiorAngle + offset;
    }
-
 
    private final Point2D point2d = new Point2D();
    private final LineSegment2D edge1 = new LineSegment2D();
