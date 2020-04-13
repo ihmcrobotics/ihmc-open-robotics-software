@@ -13,16 +13,19 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.*;
 
-public class ParameterBasedNodeExpansion
+public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 {
-   private final List<FootstepNode> expansion = new ArrayList<>();
+   private final List<FootstepNode> fullExpansion = new ArrayList<>();
    private final FootstepPlannerParametersReadOnly parameters;
    private final IdealStepCalculator idealStepCalculator;
    private final IdealStepProximityComparator idealStepProximityComparator = new IdealStepProximityComparator();
+   private final HashMap<FootstepNode, PartialExpansionManager> expansionManagers = new HashMap<>();
 
    private final TDoubleArrayList xOffsets = new TDoubleArrayList();
    private final TDoubleArrayList yOffsets = new TDoubleArrayList();
    private final TDoubleArrayList yawOffsets = new TDoubleArrayList();
+
+   private boolean partialExpansionEnabled;
 
    public ParameterBasedNodeExpansion(FootstepPlannerParametersReadOnly parameters, IdealStepCalculator idealStepCalculator)
    {
@@ -65,11 +68,37 @@ public class ParameterBasedNodeExpansion
             }
          }
       }
+
+      partialExpansionEnabled = parameters.getMaximumBranchFactor() > 0;
+      expansionManagers.clear();
    }
 
-   public List<FootstepNode> expandNode(FootstepNode stanceNode)
+   @Override
+   public boolean doIterativeExpansion(FootstepNode stanceNode, List<FootstepNode> expansionToPack)
    {
-      expansion.clear();
+      if (partialExpansionEnabled)
+      {
+         PartialExpansionManager partialExpansionManager = expansionManagers.computeIfAbsent(stanceNode, node ->
+         {
+            PartialExpansionManager manager = new PartialExpansionManager(parameters);
+            doFullExpansion(node, fullExpansion);
+            manager.initialize(fullExpansion);
+            return manager;
+         });
+         partialExpansionManager.packPartialExpansion(expansionToPack);
+         return !partialExpansionManager.finishedExpansion();
+      }
+      else
+      {
+         doFullExpansion(stanceNode, expansionToPack);
+         return false;
+      }
+   }
+
+   @Override
+   public void doFullExpansion(FootstepNode stanceNode, List<FootstepNode> fullExpansionToPack)
+   {
+      fullExpansionToPack.clear();
       RobotSide stepSide = stanceNode.getRobotSide().getOppositeSide();
 
       for (int i = 0; i < xOffsets.size(); i++)
@@ -79,25 +108,15 @@ public class ParameterBasedNodeExpansion
          double stepYaw = stepSide.negateIfRightSide(yawOffsets.get(i));
          FootstepNode childNode = constructNodeInPreviousNodeFrame(stepLength, stepWidth, stepYaw, stanceNode);
 
-         if (!expansion.contains(childNode))
-            expansion.add(childNode);
+         if (!fullExpansionToPack.contains(childNode))
+            fullExpansionToPack.add(childNode);
       }
 
       if (idealStepCalculator != null)
       {
          idealStepProximityComparator.update(stanceNode);
-         expansion.sort(idealStepProximityComparator);
-
-         if (parameters.getMaximumBranchFactor() > 0)
-         {
-            while (expansion.size() > parameters.getMaximumBranchFactor())
-            {
-               expansion.remove(expansion.size() - 1);
-            }
-         }
+         fullExpansionToPack.sort(idealStepProximityComparator);
       }
-
-      return expansion;
    }
 
    private class IdealStepProximityComparator implements Comparator<FootstepNode>

@@ -50,7 +50,7 @@ public class FootstepPlanningModuleTimingTest
    //
    // Date				      Time per iteration      # iter   total time		Note
    // 20200427_112554		0.024912095983042597	   59			1.470          before reducing branch factor
-   //
+   // 20200427_112958		0.0223873512068794	   58			1.298          reduced branch factor, no expansion mask
    //
    //
 

@@ -8,10 +8,10 @@ import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Set;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
@@ -24,6 +24,7 @@ public class ParameterBasedNodeExpansionTest
    {
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null);
+      expansion.initialize();
 
       double maxYaw = parameters.getMaximumStepYaw();
       double minYaw = parameters.getMinimumStepYaw();
@@ -32,7 +33,8 @@ public class ParameterBasedNodeExpansionTest
       double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
       double minYawAtFullLength = (1.0 - yawReduction) * minYaw;
 
-      List<FootstepNode> childNodes = expansion.expandNode(new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT));
+      List<FootstepNode> childNodes = new ArrayList<>();
+      expansion.doFullExpansion(new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT), childNodes);
       FootstepNode mostForward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getX()));
       FootstepNode furthestReach = getExtremumNode(childNodes, Comparator.comparingDouble(node -> getReachAtNode(node, parameters.getIdealFootstepWidth())));
       FootstepNode mostBackward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getX()));
@@ -62,6 +64,7 @@ public class ParameterBasedNodeExpansionTest
    {
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null);
+      expansion.initialize();
 
       double maxYaw = parameters.getMaximumStepYaw();
       double minYaw = parameters.getMinimumStepYaw();
@@ -70,7 +73,8 @@ public class ParameterBasedNodeExpansionTest
       double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
       double minYawAtFullLength = (1.0 - yawReduction) * minYaw;
 
-      List<FootstepNode> childNodes = expansion.expandNode(new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT));
+      List<FootstepNode> childNodes = new ArrayList<>();
+      expansion.doFullExpansion(new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT), childNodes);
       FootstepNode mostForward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getX()));
       FootstepNode furthestReach = getExtremumNode(childNodes, Comparator.comparingDouble(node -> getReachAtNode(node, parameters.getIdealFootstepWidth())));
       FootstepNode mostBackward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getX()));
@@ -100,6 +104,7 @@ public class ParameterBasedNodeExpansionTest
    {
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null);
+      expansion.initialize();
 
       double maxYaw = 1.2;
       double minYaw = -0.5;
@@ -111,7 +116,9 @@ public class ParameterBasedNodeExpansionTest
       double maxYawAtFullLength = (1.0 - yawReduction) * maxYaw;
       double minYawAtFullLength = (1.0 - yawReduction) * minYaw;
 
-      List<FootstepNode> childNodes = expansion.expandNode(new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT));
+
+      List<FootstepNode> childNodes = new ArrayList<>();
+      expansion.doFullExpansion(new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT), childNodes);
       FootstepNode mostForward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> node.getX()));
       FootstepNode furthestReach = getExtremumNode(childNodes, Comparator.comparingDouble(node -> getReachAtNode(node, parameters.getIdealFootstepWidth())));
       FootstepNode mostBackward = getExtremumNode(childNodes, Comparator.comparingDouble(node -> -node.getX()));

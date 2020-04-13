@@ -82,7 +82,7 @@ public class AStarFootstepPlanner
       this.distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(snapper, footstepPlannerParameters, bodyPathPlanHolder, edgeData);
       FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator::computeIdealStep, distanceAndYawHeuristics::compute, footPolygons, edgeData);
 
-      this.footstepPlanner = new AStarFootstepPlannerIterationConductor(expansion::expandNode, checker::isNodeValid, stepCostCalculator::computeCost, distanceAndYawHeuristics::compute);
+      this.footstepPlanner = new AStarFootstepPlannerIterationConductor(expansion, checker::isNodeValid, stepCostCalculator::computeCost, distanceAndYawHeuristics::compute);
       checker.setParentNodeSupplier(node -> footstepPlanner.getGraph().getParentNode(node));
       footstepPlanner.getGraph().setGraphExpansionCallback(edge ->
                                                            {
