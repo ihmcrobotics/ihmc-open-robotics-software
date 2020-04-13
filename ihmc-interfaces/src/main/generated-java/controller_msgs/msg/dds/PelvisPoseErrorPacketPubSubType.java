@@ -40,11 +40,15 @@ public class PelvisPoseErrorPacketPubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -61,13 +65,17 @@ public class PelvisPoseErrorPacketPubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -79,11 +87,15 @@ public class PelvisPoseErrorPacketPubSubType implements us.ihmc.pubsub.TopicData
 
    public static void write(controller_msgs.msg.dds.PelvisPoseErrorPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_5(data.getResidualError());
 
+
       cdr.write_type_5(data.getTotalError());
+
 
       cdr.write_type_7(data.getHasMapBeenReset());
 
@@ -91,12 +103,16 @@ public class PelvisPoseErrorPacketPubSubType implements us.ihmc.pubsub.TopicData
 
    public static void read(controller_msgs.msg.dds.PelvisPoseErrorPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setResidualError(cdr.read_type_5());
       	
+
       data.setTotalError(cdr.read_type_5());
       	
+
       data.setHasMapBeenReset(cdr.read_type_7());
       	
 
@@ -105,18 +121,26 @@ public class PelvisPoseErrorPacketPubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void serialize(controller_msgs.msg.dds.PelvisPoseErrorPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_5("residual_error", data.getResidualError());
+
       ser.write_type_5("total_error", data.getTotalError());
+
       ser.write_type_7("has_map_been_reset", data.getHasMapBeenReset());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PelvisPoseErrorPacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setResidualError(ser.read_type_5("residual_error"));
+
       data.setTotalError(ser.read_type_5("total_error"));
+
       data.setHasMapBeenReset(ser.read_type_7("has_map_been_reset"));
    }
 

@@ -40,9 +40,12 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -59,10 +62,13 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPose(), current_alignment);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -73,18 +79,24 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(controller_msgs.msg.dds.DetectedObjectPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
+
       geometry_msgs.msg.dds.PosePubSubType.write(data.getPose(), cdr);
+
       cdr.write_type_2(data.getId());
 
    }
 
    public static void read(controller_msgs.msg.dds.DetectedObjectPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       geometry_msgs.msg.dds.PosePubSubType.read(data.getPose(), cdr);	
+
       data.setId(cdr.read_type_2());
       	
 
@@ -93,8 +105,11 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(controller_msgs.msg.dds.DetectedObjectPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
+
 
       ser.write_type_2("id", data.getId());
    }
@@ -102,8 +117,11 @@ public class DetectedObjectPacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.DetectedObjectPacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
+
 
       data.setId(ser.read_type_2("id"));
    }
