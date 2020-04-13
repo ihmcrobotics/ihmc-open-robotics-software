@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.ui.controller;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.Slider;
 import javafx.scene.control.TextField;
@@ -24,6 +25,9 @@ public class SLAMAnchorPaneController extends REABasicUIController
 
    @FXML
    private ToggleButton octreeMapEnable;
+   
+   @FXML
+   private CheckBox showNormal;
 
    @FXML
    private ToggleButton sensorFrameEnable;
@@ -78,6 +82,7 @@ public class SLAMAnchorPaneController extends REABasicUIController
 
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowLatestFrame, latestFrameEnable.selectedProperty());
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowSLAMOctreeMap, octreeMapEnable.selectedProperty());
+      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowSLAMOctreeNormalMap, showNormal.selectedProperty());
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowSLAMSensorTrajectory, sensorFrameEnable.selectedProperty());
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowPlanarRegionsMap, planarRegionsEnable.selectedProperty());
 
