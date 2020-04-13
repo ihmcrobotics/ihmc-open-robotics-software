@@ -331,7 +331,7 @@ public class YoOptimizedPolynomialTest
       a.set(0, a0);
       a.set(1, a1);
 
-      function.computeSquaredIntegralCostHessian(hessian, 0);
+      function.computeCostHessianOfIntegralSquared(hessian, 0);
 
       NativeCommonOps.multQuad(a, hessian, costMatrix);
 
@@ -350,7 +350,7 @@ public class YoOptimizedPolynomialTest
 
       assertEquals(expectedCost, costMatrix.get(0), EPSILON);
 
-      function.computeSquaredIntegralCostHessian(hessian, 1);
+      function.computeCostHessianOfIntegralSquared(hessian, 1);
 
       NativeCommonOps.multQuad(a, hessian, costMatrix);
 
@@ -363,11 +363,11 @@ public class YoOptimizedPolynomialTest
 
       assertEquals(expectedCost, costMatrix.get(0), EPSILON);
 
-      function.computeSquaredIntegralCostHessian(hessian, 2);
+      function.computeCostHessianOfIntegralSquared(hessian, 2);
       NativeCommonOps.multQuad(a, hessian, costMatrix);
       assertEquals(0.0, costMatrix.get(0), EPSILON);
 
-      function.computeSquaredIntegralCostHessian(hessian, 3);
+      function.computeCostHessianOfIntegralSquared(hessian, 3);
       NativeCommonOps.multQuad(a, hessian, costMatrix);
       assertEquals(0.0, costMatrix.get(0), EPSILON);
    }
@@ -395,7 +395,7 @@ public class YoOptimizedPolynomialTest
       a.set(1, a1);
       a.set(2, a2);
 
-      function.computeSquaredIntegralCostHessian(hessian, 0);
+      function.computeCostHessianOfIntegralSquared(hessian, 0);
 
       NativeCommonOps.multQuad(a, hessian, costMatrix);
 
@@ -424,7 +424,7 @@ public class YoOptimizedPolynomialTest
 
       assertEquals(expectedCost, costMatrix.get(0), EPSILON);
 
-      function.computeSquaredIntegralCostHessian(hessian, 1);
+      function.computeCostHessianOfIntegralSquared(hessian, 1);
 
       NativeCommonOps.multQuad(a, hessian, costMatrix);
 
@@ -452,7 +452,7 @@ public class YoOptimizedPolynomialTest
 
       assertEquals(expectedCost, costMatrix.get(0), EPSILON);
 
-      function.computeSquaredIntegralCostHessian(hessian, 2);
+      function.computeCostHessianOfIntegralSquared(hessian, 2);
       NativeCommonOps.multQuad(a, hessian, costMatrix);
 
       h11 = 0.0;
@@ -473,7 +473,7 @@ public class YoOptimizedPolynomialTest
 
       assertEquals(expectedCost, costMatrix.get(0), EPSILON);
 
-      function.computeSquaredIntegralCostHessian(hessian, 3);
+      function.computeCostHessianOfIntegralSquared(hessian, 3);
       NativeCommonOps.multQuad(a, hessian, costMatrix);
 
       h22 = 0.0;
@@ -517,7 +517,7 @@ public class YoOptimizedPolynomialTest
       a.set(2, a2);
       a.set(3, a3);
 
-      function.computeSquaredIntegralCostHessian(hessian, 0);
+      function.computeCostHessianOfIntegralSquared(hessian, 0);
 
       NativeCommonOps.multQuad(a, hessian, costMatrix);
 
@@ -559,7 +559,7 @@ public class YoOptimizedPolynomialTest
 
       assertEquals(expectedCost, costMatrix.get(0), EPSILON);
 
-      function.computeSquaredIntegralCostHessian(hessian, 1);
+      function.computeCostHessianOfIntegralSquared(hessian, 1);
 
       NativeCommonOps.multQuad(a, hessian, costMatrix);
 
@@ -599,7 +599,7 @@ public class YoOptimizedPolynomialTest
 
       assertEquals(expectedCost, costMatrix.get(0), EPSILON);
 
-      function.computeSquaredIntegralCostHessian(hessian, 2);
+      function.computeCostHessianOfIntegralSquared(hessian, 2);
       NativeCommonOps.multQuad(a, hessian, costMatrix);
 
       h11 = 0.0;
@@ -632,7 +632,7 @@ public class YoOptimizedPolynomialTest
 
       assertEquals(expectedCost, costMatrix.get(0), EPSILON);
 
-      function.computeSquaredIntegralCostHessian(hessian, 3);
+      function.computeCostHessianOfIntegralSquared(hessian, 3);
       NativeCommonOps.multQuad(a, hessian, costMatrix);
 
       h22 = 0.0;

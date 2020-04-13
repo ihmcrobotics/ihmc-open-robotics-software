@@ -23,6 +23,8 @@ public class YoOptimizedPolynomial
    private final YoInteger numberOfCoefficients;
 
    private final DenseMatrix64F H;
+   private final DenseMatrix64F Haccel;
+   private final DenseMatrix64F Hjerk;
    private final DenseMatrix64F g;
    private final DenseMatrix64F x;
 
@@ -36,6 +38,8 @@ public class YoOptimizedPolynomial
 
    private double regularizationWeight = 1.0e-8;
    private double defaultPointWeight = 1.0;
+   private double accelerationMinimizationWeight = Double.NaN;
+   private double jerkMinimizationWeight = Double.NaN;
 
    private double minX = Double.POSITIVE_INFINITY;
    private double maxX = Double.NEGATIVE_INFINITY;
@@ -49,6 +53,8 @@ public class YoOptimizedPolynomial
       coefficients = new YoDouble[maximumNumberOfCoefficients];
 
       H = new DenseMatrix64F(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
+      Haccel = new DenseMatrix64F(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
+      Hjerk = new DenseMatrix64F(maximumNumberOfCoefficients, maximumNumberOfCoefficients);
       g = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
       x = new DenseMatrix64F(maximumNumberOfCoefficients, 1);
 
@@ -76,6 +82,8 @@ public class YoOptimizedPolynomial
                                     + numberOfCoefficientsRequired + " coefficients.");
 
       H.reshape(numberOfCoefficientsRequired, numberOfCoefficientsRequired);
+      Haccel.reshape(numberOfCoefficientsRequired, numberOfCoefficientsRequired);
+      Hjerk.reshape(numberOfCoefficientsRequired, numberOfCoefficientsRequired);
       g.reshape(numberOfCoefficientsRequired, 1);
       x.reshape(numberOfCoefficientsRequired, 1);
 
@@ -98,6 +106,16 @@ public class YoOptimizedPolynomial
    public void setRegularizationWeight(double regularizationWeight)
    {
       this.regularizationWeight = regularizationWeight;
+   }
+
+   public void setAccelerationMinimizationWeight(double weight)
+   {
+      this.accelerationMinimizationWeight = weight;
+   }
+
+   public void setJerkMinimizationWeight(double weight)
+   {
+      this.jerkMinimizationWeight = weight;
    }
 
    public void clear()
@@ -177,10 +195,31 @@ public class YoOptimizedPolynomial
       CommonOps.mult(jtW, jacobian, H);
       CommonOps.mult(jtW, objective, g);
 
+      if (accelerationMinimizationWeight > 0.0)
+      {
+         computeCostHessianOfIntegralSquared(Haccel, 2);
+         CommonOps.addEquals(H, accelerationMinimizationWeight, Haccel);
+      }
+      else
+      {
+         Haccel.zero();
+      }
+
+      if (jerkMinimizationWeight > 0.0)
+      {
+         computeCostHessianOfIntegralSquared(Hjerk, 3);
+         CommonOps.addEquals(H, jerkMinimizationWeight, Hjerk);
+      }
+      else
+      {
+         Hjerk.zero();
+      }
+
       for (int i = 0; i < H.getNumCols(); i++)
       {
          H.add(i, i, regularizationWeight);
       }
+
 
       solver.setA(H);
       solver.solve(g, x);
@@ -325,7 +364,10 @@ public class YoOptimizedPolynomial
       objective.set(row, desiredYDerivative);
    }
 
-   void computeSquaredIntegralCostHessian(DenseMatrix64F hessianToPack, int derivativeToIntegrate)
+   /**
+    * Used to compute the hessian of the cost function defined by the integral of the squared value of the derivative function
+    */
+   void computeCostHessianOfIntegralSquared(DenseMatrix64F hessianToPack, int derivativeToIntegrate)
    {
       for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
       {
