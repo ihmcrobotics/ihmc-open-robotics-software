@@ -116,6 +116,12 @@ public class FootstepNode
                               EuclidCoreRandomTools.nextDouble(random, Math.PI), RobotSide.generateRandomRobotSide(random));
    }
 
+   public static FootstepNode generateRandomFootstepNode(Random random, double minMaxXY, RobotSide robotSide)
+   {
+      return new FootstepNode(EuclidCoreRandomTools.nextDouble(random, minMaxXY), EuclidCoreRandomTools.nextDouble(random, minMaxXY),
+                              EuclidCoreRandomTools.nextDouble(random, Math.PI), robotSide);
+   }
+
    public Point2D getOrComputeMidFootPoint(double stepWidth)
    {
       if (midFootPoint == null)
