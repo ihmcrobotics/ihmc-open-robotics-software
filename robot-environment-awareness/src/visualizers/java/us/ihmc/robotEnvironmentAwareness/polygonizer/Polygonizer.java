@@ -82,11 +82,19 @@ public class Polygonizer
 
    private Output process(Input input)
    {
-      ConcaveHullFactoryResult result = SimpleConcaveHullFactory.createConcaveHull(input.points, input.lineConstraints, parameters.get());
-      if (postProcessor.get() == null)
-         return new Output(input, result, null);
-      else
-         return new Output(input, result, postProcessor.get().apply(result.getConcaveHullCollection()));
+      try
+      {
+         ConcaveHullFactoryResult result = SimpleConcaveHullFactory.createConcaveHull(input.points, input.lineConstraints, parameters.get());
+         if (postProcessor.get() == null)
+            return new Output(input, result, null);
+         else
+            return new Output(input, result, postProcessor.get().apply(result.getConcaveHullCollection()));
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+         return null;
+      }
    }
 
    public static Input toInput(PlanarRegionSegmentationRawData data)

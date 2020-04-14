@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 
 import javafx.animation.AnimationTimer;
 import javafx.beans.property.BooleanProperty;
@@ -126,9 +127,22 @@ public class ConcaveHullViewer extends AnimationTimer
       // TODO Implement concave pockets viz
       if (processedConcaveHullCollection != null)
       {
+         
+         BiFunction<Double, Double, Color> colorFunction = new BiFunction<Double, Double, Color>()
+         {
+            double hue = 180.0;
+
+            @Override
+            public Color apply(Double hullAlpha, Double edgeAlpha)
+            {
+               // Alternating between 2 different distinct hues to distinguish successive edges.
+               hue = hue == 180.0 ? 240.0 : 180.0;
+               return Color.hsb(hue, 1.0, 1.0);
+            }
+         };
          graphicProcessedConcaveHull.submitForRendering(multiLine(transformToWorld,
                                                                   processedConcaveHullCollection,
-                                                                  defaultColor.deriveColor(0.0, 1.25, 1.25, 1.0),
+                                                                  colorFunction,
                                                                   borderEdgesSize.get()));
       }
    }
