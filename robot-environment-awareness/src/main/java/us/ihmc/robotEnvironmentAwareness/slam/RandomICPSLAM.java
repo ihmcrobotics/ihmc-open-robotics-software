@@ -160,9 +160,10 @@ public class RandomICPSLAM extends SLAMBasics
 
       if (sourcePointsToSensor == null)
       {
+         // TODO: this frame would be handled when robot revisit this area.
          if (DEBUG)
             System.out.println("small overlapped area");
-         frame.setConfidenceFactor(0.0);
+         frame.setConfidenceFactor(-1.0);
          return new RigidBodyTransform();
       }
       else
@@ -217,7 +218,7 @@ public class RandomICPSLAM extends SLAMBasics
             }
 
             //TODO: put proper value based on final distance.
-            frame.setConfidenceFactor(1.0);
+            frame.setConfidenceFactor(0.5);
             return transformer;
          }
       }
