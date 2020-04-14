@@ -30,9 +30,14 @@ public class PartialExpansionManager
    {
       expansionToPack.clear();
 
+      if (finishedExpansion())
+      {
+         return;
+      }
+
       int branchFactor = parameters.getMaximumBranchFactor();
+      int startIndex = branchFactor * expansionCount;
       int endIndex = Math.min(branchFactor * (expansionCount + 1), allChildNodes.size());
-      int startIndex = Math.min(branchFactor * expansionCount, endIndex - 1);
 
       for (int i = startIndex; i < endIndex; i++)
       {
@@ -44,6 +49,6 @@ public class PartialExpansionManager
 
    public boolean finishedExpansion()
    {
-      return (expansionCount + 1) * parameters.getMaximumBranchFactor() >= allChildNodes.size();
+      return expansionCount * parameters.getMaximumBranchFactor() >= allChildNodes.size();
    }
 }
