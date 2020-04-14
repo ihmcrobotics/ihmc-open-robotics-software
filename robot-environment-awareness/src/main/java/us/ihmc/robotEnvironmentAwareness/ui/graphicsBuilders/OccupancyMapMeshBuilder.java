@@ -13,8 +13,6 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
-import com.google.common.util.concurrent.AtomicDouble;
-
 import javafx.collections.ObservableList;
 import javafx.scene.Group;
 import javafx.scene.Node;
@@ -38,8 +36,7 @@ public class OccupancyMapMeshBuilder implements Runnable
    /**
     * size ratio to the octree resolution.
     */
-   private static final double DEFAULT_CELL_SIZE_RATIO = 0.7;
-   private AtomicDouble cellSize = new AtomicDouble(0.0);
+   private static final double DEFAULT_CELL_SIZE_RATIO = 1.0;
    private static final int FX_NODE_DEPTH = 8;
 
    private final Group root = new Group();
@@ -63,8 +60,6 @@ public class OccupancyMapMeshBuilder implements Runnable
    private final AtomicReference<Set<UIOcTreeNodeMeshView>> newSubOcTreeMeshViews = new AtomicReference<>(null);
    private final Deque<UIOcTreeNodeMeshView> meshViewsBeingProcessed = new ArrayDeque<>();
 
-   private final Map<OcTreeKey, Double> nodeKeyToConfidenceFactorMap = new HashMap<>();
-
    public OccupancyMapMeshBuilder(REAUIMessager uiMessager)
    {
       this.uiMessager = uiMessager;
@@ -73,7 +68,7 @@ public class OccupancyMapMeshBuilder implements Runnable
       confidenceFactorState = uiMessager.createInput(SLAMModuleAPI.LatestFrameConfidenceFactor, 1.0);
 
       occupancyEnable = uiMessager.createInput(SLAMModuleAPI.ShowSLAMOctreeMap, true);
-      normalVectorEnable = uiMessager.createInput(SLAMModuleAPI.ShowSLAMOctreeNormalMap, true);
+      normalVectorEnable = uiMessager.createInput(SLAMModuleAPI.ShowSLAMOctreeNormalMap, false);
       clear = uiMessager.createInput(SLAMModuleAPI.SLAMClear, false);
 
       meshBuilder = new JavaFXMultiColorMeshBuilder(normalBasedColorPalette1D);
@@ -81,10 +76,6 @@ public class OccupancyMapMeshBuilder implements Runnable
 
    public void render()
    {
-      //TODO: update confidence factor map.
-      //TODO: render occupancy with color.
-      //TODO: render normal vector.
-
       if (clear.getAndSet(false))
       {
          children.clear();
@@ -127,21 +118,13 @@ public class OccupancyMapMeshBuilder implements Runnable
       if (occupancyEnable.get())
       {
          NormalOcTreeMessage newMessage = ocTreeState.get();
-         double confidenceFactor = confidenceFactorState.get();
 
          if (newMessage == null)
             return;
 
-         updateNodeKeyToColorMap(newMessage, confidenceFactor);
-
          uiOcTree.set(new UIOcTree(ocTreeState.getAndSet(null), nodeKeyToColorMap));
          buildUIOcTreeMesh(uiOcTree.get());
       }
-   }
-
-   private void updateNodeKeyToColorMap(NormalOcTreeMessage newMessage, double confidenceFactor)
-   {
-      //nodeKeyToColorMap
    }
 
    private void buildUIOcTreeMesh(UIOcTree ocTree)
@@ -162,11 +145,10 @@ public class OccupancyMapMeshBuilder implements Runnable
       meshBuilder.clear();
 
       Iterable<UIOcTreeNode> iterable = createLeafIterable(subTreeRoot, 16);
-
+      int newFrameColorValue = confidenceFactorToColor(confidenceFactorState.get());
       for (UIOcTreeNode node : iterable)
       {
-         if (!node.isPartOfRegion())
-            addNodeMesh(meshBuilder, node);
+         addNodeMesh(meshBuilder, node, newFrameColorValue);
       }
 
       OcTreeKey rootKey = subTreeRoot.getKeyCopy();
@@ -177,17 +159,43 @@ public class OccupancyMapMeshBuilder implements Runnable
       return meshView;
    }
 
+   /**
+    * 0.0(Red) - 0.5(Yellow) - 1.0(Green),
+    * -1.0(Blue: new Key frame).
+    */
+   private int confidenceFactorToColor(double confidenceFactor)
+   {
+      if(confidenceFactor < 0)
+         return 0x0000FF;
+      
+      int red = (int) ((1 - confidenceFactor) * 0xFF) << 16;
+      int green = (int) (confidenceFactor * 0xFF) << 8;
+
+      return red | green;
+   }
+
    private final Point3D hitLocation = new Point3D();
    private final Vector3D normalVector = new Vector3D();
    private final Point3D normalVectorEnd = new Point3D();
 
-   private void addNodeMesh(JavaFXMultiColorMeshBuilder meshBuilder, UIOcTreeNode node)
+   private void addNodeMesh(JavaFXMultiColorMeshBuilder meshBuilder, UIOcTreeNode node, int newFrameColorValue)
    {
-      Color color = OcTreeMeshBuilder.getRegionColor(node.getRegionId());
+      Color color = null;
+      OcTreeKey keyCopy = node.getKeyCopy();
+      if (nodeKeyToColorMap.containsKey(keyCopy))
+      {
+         color = OcTreeMeshBuilder.getRegionColor(nodeKeyToColorMap.get(keyCopy));
+      }
+      else
+      {
+         nodeKeyToColorMap.put(keyCopy, newFrameColorValue);
+         color = OcTreeMeshBuilder.getRegionColor(newFrameColorValue);
+      }
+
       double size = 0.02 * DEFAULT_CELL_SIZE_RATIO;
       node.getHitLocation(hitLocation);
-      meshBuilder.addCube(size, hitLocation.getX(), hitLocation.getY(), hitLocation.getZ(), color);
-      if(normalVectorEnable.get())
+      meshBuilder.addTetrahedron(size, hitLocation, color);
+      if (normalVectorEnable.get())
       {
          node.getNormal(normalVector);
          normalVectorEnd.set(normalVector);
@@ -200,5 +208,4 @@ public class OccupancyMapMeshBuilder implements Runnable
    {
       return root;
    }
-
 }
