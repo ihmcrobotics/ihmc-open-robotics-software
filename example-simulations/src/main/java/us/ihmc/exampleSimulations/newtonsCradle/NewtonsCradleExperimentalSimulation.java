@@ -23,7 +23,6 @@ import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.ContactParameters;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.robotDescription.CollisionMeshDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
@@ -70,13 +69,6 @@ public class NewtonsCradleExperimentalSimulation
          aliceBlue.setTransparency(0.4);
          linkGraphics.addSphere(ballRadius, aliceBlue);
          link.setLinkGraphics(linkGraphics);
-
-         CollisionMeshDescription collisionMeshDescription = new CollisionMeshDescription();
-         collisionMeshDescription.translate(0.0, 0.0, -stringLength);
-         collisionMeshDescription.addSphere(ballRadius);
-         collisionMeshDescription.setCollisionGroup(0xff);
-         collisionMeshDescription.setCollisionMask(0xff);
-         link.addCollisionMesh(collisionMeshDescription);
 
          pinJoint.setLink(link);
          robotDescription.addRootJoint(pinJoint);
