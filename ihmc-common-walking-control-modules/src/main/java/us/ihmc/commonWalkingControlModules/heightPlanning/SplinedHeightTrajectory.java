@@ -16,6 +16,7 @@ import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.math.trajectories.YoConfigurablePolynomial;
+import us.ihmc.tools.lists.ListSorter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
@@ -88,7 +89,7 @@ public class SplinedHeightTrajectory
 
    public void computeSpline()
    {
-      waypoints.sort(sorter);
+      ListSorter.sort(waypoints, sorter);
       computeHeightsToUseByStretchingString(waypoints);
 
       int numberOfWaypoints = waypoints.size();
