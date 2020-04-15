@@ -539,6 +539,21 @@ public class ConcaveHullPruningFilteringTools
       return numberOfVerticesRemoved;
    }
 
+   /**
+    * This filter searches for narrow passage(s) in each concave hull in the given collection and for
+    * each narrow passage it finds, the concave hull is split into 2 concave hulls.
+    * <p>
+    * Cuts only occurs at a concave vertex meaning that when a cut occurs the resulting 2 concave hulls
+    * are closer to a convex hull than the original concave hull.
+    * </p>
+    * 
+    * @param alphaRadius                   distance threshold used to determine if a passage is narrow
+    *                                      enough to be cut. It represents radius of a circle that
+    *                                      should all way through a narrow passage to preserve it.
+    * @param concaveHullCollectionToFilter the collection of concave hulls to be filtered. Not
+    *                                      modified.
+    * @return the filtered collection of concave hulls.
+    */
    public static ConcaveHullCollection concaveHullNarrowPassageCutter(double alphaRadius, ConcaveHullCollection concaveHullCollectionToFilter)
    {
       ConcaveHullCollection filteredConcaveHullCollection = new ConcaveHullCollection();
@@ -552,6 +567,20 @@ public class ConcaveHullPruningFilteringTools
       return filteredConcaveHullCollection;
    }
 
+   /**
+    * This filter searches for narrow passage(s) in a concave hull and for each narrow passage it
+    * finds, the concave hull is split into 2 concave hulls.
+    * <p>
+    * Cuts only occurs at a concave vertex meaning that when a cut occurs the resulting 2 concave hulls
+    * are closer to a convex hull than the original concave hull.
+    * </p>
+    * 
+    * @param alphaRadius         distance threshold used to determine if a passage is narrow enough to
+    *                            be cut. It represents radius of a circle that should all way through a
+    *                            narrow passage to preserve it.
+    * @param concaveHullToFilter the concave hull to be filtered. Not modified.
+    * @return the resulting collection of concave hulls after applying the filter on the input.
+    */
    public static ConcaveHullCollection concaveHullNarrowPassageCutter(double alphaRadius, ConcaveHull concaveHullToFilter)
    {
       /*
