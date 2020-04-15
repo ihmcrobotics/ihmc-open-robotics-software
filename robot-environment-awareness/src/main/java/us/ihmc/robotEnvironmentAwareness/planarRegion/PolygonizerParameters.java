@@ -33,6 +33,10 @@ public class PolygonizerParameters
     * of a concavity before the concave hull gets split in 2.
     */
    private double depthThreshold;
+   /**
+    * Filter for splitting concave hulls at any narrow passage which width is less than
+    * {@code 2 * lengthThreshold}.
+    */
    private boolean cutNarrowPassage;
 
    public PolygonizerParameters()
