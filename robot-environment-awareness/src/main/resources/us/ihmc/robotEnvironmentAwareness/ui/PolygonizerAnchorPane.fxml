@@ -77,7 +77,7 @@
                   </Label>
                   <ToggleButton fx:id="enableNarrowPassageFilterButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Cut concave hull narrow narrow passage" GridPane.columnSpan="2" GridPane.rowIndex="3">
                      <tooltip>
-                        <Tooltip prefWidth="250.0" text="Enable/disable concave hull narrow passage cutter. The filter splits concave hulls at any passage that is narrower than the minimum edge length. For instance, 2 squares touching at their corner may result in a single hull, with this filter, the hull is splitted at the common corner of the 2 squares resulting in 2 simpler hulls." wrapText="true" />
+                        <Tooltip prefWidth="250.0" text="Enable/disable concave hull narrow passage cutter. The filter splits concave hulls at any passage that is narrower than twice the minimum edge length. For instance, 2 squares touching at their corner may result in a single hull, with this filter, the hull is splitted at the common corner of the 2 squares resulting in 2 simpler hulls." wrapText="true" />
                      </tooltip>
                   </ToggleButton>
                </children>
