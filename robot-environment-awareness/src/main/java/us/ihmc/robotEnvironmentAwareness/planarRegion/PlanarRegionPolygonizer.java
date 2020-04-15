@@ -80,6 +80,9 @@ public abstract class PlanarRegionPolygonizer
 
          for (ConcaveHull concaveHull : concaveHullCollection)
          {
+            if (concaveHull.isEmpty())
+               continue;
+
             // Decompose the concave hulls into convex polygons
             double depthThreshold = polygonizerParameters.getDepthThreshold();
             List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
