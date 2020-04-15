@@ -73,7 +73,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    private final FramePoint3D tempFramePoint = new FramePoint3D();
 
    private final FramePoint3D startCoMPosition = new FramePoint3D();
-   private final FramePoint3D middleCoMPosition = new FramePoint3D();
+   private final FramePoint3D endCoMPosition = new FramePoint3D();
 
    private final SplinedHeightTrajectory splinedHeightTrajectory;
 
@@ -208,20 +208,20 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       startCoMPosition.setIncludingFrame(desiredCoMPosition);
       startCoMPosition.changeFrame(frameOfSupportLeg);
 
-      middleCoMPosition.setIncludingFrame(transferToFootstepPosition);
-      middleCoMPosition.changeFrame(frameOfSupportLeg);
-      double middleAnkleZ = middleCoMPosition.getZ();
-      middleCoMPosition.addZ(nominalHeightAboveGround.getDoubleValue() + offsetFromNominalInPlan.getDoubleValue());
+      endCoMPosition.setIncludingFrame(transferToFootstepPosition);
+      endCoMPosition.changeFrame(frameOfSupportLeg);
+      double middleAnkleZ = endCoMPosition.getZ();
+      endCoMPosition.addZ(nominalHeightAboveGround.getDoubleValue() + offsetFromNominalInPlan.getDoubleValue());
 
       startCoMPosition.setY(midstanceWidth);
-      middleCoMPosition.setY(midstanceWidth);
+      endCoMPosition.setY(midstanceWidth);
 
       if (!transferToAndNextFootstepsData.getCoMAtEndOfState().containsNaN())
       {
-         tempFramePoint.setIncludingFrame(transferToAndNextFootstepsData.getCoMAtEndOfState());
+         tempFramePoint.setIncludingFrame(transferToAndNextFootstepsData.getCoMAtEndOfState(), 0.0);
          tempFramePoint.changeFrame(frameOfSupportLeg);
-         tempFramePoint.addZ(nominalHeightAboveGround.getDoubleValue());
-         double percentIn = EuclidGeometryTools.percentageAlongLineSegment3D(tempFramePoint, startCoMPosition, middleCoMPosition);
+         tempFramePoint.setZ(nominalHeightAboveGround.getDoubleValue());
+         double percentIn = EuclidGeometryTools.percentageAlongLineSegment3D(tempFramePoint, startCoMPosition, endCoMPosition);
          percentIn = MathTools.clamp(percentIn, nominalDoubleSupportPercentageIn.getDoubleValue(), 1.0 - nominalDoubleSupportPercentageIn.getDoubleValue());
          doubleSupportPercentageIn.set(percentIn);
       }
@@ -232,8 +232,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       heightWaypoints.clear();
 
-      computeWaypoints(startCoMPosition,
-                       middleCoMPosition,
+      computeWaypoints(startCoMPosition, endCoMPosition,
                        startAnkleZ,
                        middleAnkleZ,
                        minimumHeightAboveGround.getDoubleValue(),
