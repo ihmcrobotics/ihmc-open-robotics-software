@@ -2,26 +2,22 @@ package us.ihmc.robotEnvironmentAwareness.geometry;
 
 import static us.ihmc.commons.lists.ListWrappingIndexTools.getNext;
 import static us.ihmc.commons.lists.ListWrappingIndexTools.getPrevious;
-import static us.ihmc.commons.lists.ListWrappingIndexTools.getWrap;
 import static us.ihmc.commons.lists.ListWrappingIndexTools.next;
 import static us.ihmc.commons.lists.ListWrappingIndexTools.previous;
 import static us.ihmc.commons.lists.ListWrappingIndexTools.removeAllExclusive;
 import static us.ihmc.commons.lists.ListWrappingIndexTools.subLengthInclusive;
 import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.computeConcaveHullPocket;
 import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.findClosestIntersectionWithRay;
-import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.findInnerClosestEdgeToVertex;
 import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.isConvexAtVertex;
 import static us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools.isVertexPreventingKink;
 
 import java.util.List;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.UnitVector2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 /**
@@ -50,20 +46,17 @@ public class ConcaveHullPruningFilteringTools
    {
       int totalNumberOfVerticesRemoved = 0;
       int vertexRemoved = 0;
-      int counter = 0;
+
       do
       {
-         if (counter++ == 5)
-            System.out.println();
-
          vertexRemoved = 0;
          for (ConcaveHull concaveHullToFilter : concaveHullCollectionToFilter)
             vertexRemoved += filterOutPeaksAndShallowAngles(shallowAngleThreshold, peakAngleThreshold, concaveHullToFilter.getConcaveHullVertices());
 
-         System.out.println("filtered vertices " + vertexRemoved);
          totalNumberOfVerticesRemoved += vertexRemoved;
       }
       while (vertexRemoved != 0);
+
       return totalNumberOfVerticesRemoved;
    }
 
@@ -546,29 +539,73 @@ public class ConcaveHullPruningFilteringTools
       return numberOfVerticesRemoved;
    }
 
-   public static ConcaveHullCollection filterOutNarrowRegions(double alphaRadius, ConcaveHullCollection concaveHullCollectionToFilter)
+   public static ConcaveHullCollection concaveHullNarrowPassageCutter(double alphaRadius, ConcaveHullCollection concaveHullCollectionToFilter)
    {
       ConcaveHullCollection filteredConcaveHullCollection = new ConcaveHullCollection();
 
       for (ConcaveHull concaveHull : concaveHullCollectionToFilter)
       {
-         filteredConcaveHullCollection.addAll(filterOutNarrowRegions(alphaRadius, concaveHull));
+
+         filteredConcaveHullCollection.addAll(concaveHullNarrowPassageCutter(alphaRadius, concaveHull));
       }
 
       return filteredConcaveHullCollection;
    }
 
-   public static ConcaveHullCollection filterOutNarrowRegions(double alphaRadius, ConcaveHull concaveHullToFilter)
+   public static ConcaveHullCollection concaveHullNarrowPassageCutter(double alphaRadius, ConcaveHull concaveHullToFilter)
    {
+      /*
+       * This algorithm is not optimized at all, but should be ok when the concave hull has already been
+       * filtered beforehand so it does not contain a large number of vertices. Invocations to
+       * perimeterDistanceBetweenVertices(...) are costly, and could be avoided by keeping track of the
+       * traveling as we iterate through the vertices. The recursion may also not be the most efficient
+       * approach, but it definitely simplifies the scope of the method.
+       */
+
+      // Degenerate concave hull, let's remove it.
+      if (concaveHullToFilter.getNumberOfVertices() <= 2)
+         return null;
+
+      double perimeter = concaveHullToFilter.computePerimeter();
+
+      if (0.5 * perimeter <= 2.0 * alphaRadius)
+         return null;
+
+      if (concaveHullToFilter.getNumberOfVertices() == 3)
+      {
+         for (int vertexIndex = 0; vertexIndex < 3; vertexIndex++)
+         {
+            Point2D vertex = concaveHullToFilter.getConcaveHullVertices().get(vertexIndex);
+            Point2D nextVertex = getNext(vertexIndex, concaveHullToFilter.getConcaveHullVertices());
+
+            if (vertex.distanceSquared(nextVertex) <= MathTools.square(2.0 * alphaRadius))
+            {
+               return null;
+            }
+         }
+      }
+
       int numberOfVertices = concaveHullToFilter.getNumberOfVertices();
 
       for (int iEdgeStartA = 0, iEdgeEndA = 1; iEdgeStartA < numberOfVertices - 1; iEdgeStartA++, iEdgeEndA++)
       {
+         if (ConcaveHullTools.isConvexAtVertex(iEdgeStartA, concaveHullToFilter.getConcaveHullVertices()))
+         {
+            // We're looking at a local minimum which we'll only find at concave vertex.
+            continue;
+         }
+
          Point2D edgeStartA = concaveHullToFilter.getVertex(iEdgeStartA);
          Point2D edgeEndA = concaveHullToFilter.getVertex(iEdgeEndA);
 
          for (int iEdgeStartB = iEdgeEndA, iEdgeEndB = iEdgeStartB + 1; iEdgeStartB < numberOfVertices; iEdgeStartB++, iEdgeEndB++)
          {
+            if (ConcaveHullTools.isConvexAtVertex(iEdgeStartB, concaveHullToFilter.getConcaveHullVertices()))
+            {
+               // We're looking at a local minimum which we'll only find at concave vertex.
+               continue;
+            }
+
             iEdgeEndB %= numberOfVertices;
 
             Point2D edgeStartB = concaveHullToFilter.getVertex(iEdgeStartB);
@@ -598,89 +635,39 @@ public class ConcaveHullPruningFilteringTools
             ConcaveHull subConcaveHullA = new ConcaveHull(ListWrappingIndexTools.subListInclusive(iEdgeEndA, iEdgeStartB, concaveHullVertices));
             ConcaveHull subConcaveHullB = new ConcaveHull(ListWrappingIndexTools.subListInclusive(iEdgeEndB, iEdgeStartA, concaveHullVertices));
 
-            Point2D newVertexAForSubHullA = new Point2D();
-            Point2D newVertexAForSubHullB = new Point2D();
-
             // The closest point has to either be edgeStartA or edgeEndA
             if (EuclidGeometryTools.percentageAlongLineSegment2D(closestPointOnEdgeA, edgeStartA, edgeEndA) < 0.5)
-            { // Popping the vertex at iEdgeStartA
-               computeSeparatedPointsAroundVertex(2.0 * alphaRadius, iEdgeStartA, concaveHullVertices, newVertexAForSubHullB, newVertexAForSubHullA);
-               subConcaveHullA.getConcaveHullVertices().add(0, newVertexAForSubHullA);
-               subConcaveHullB.getConcaveHullVertices().set(subConcaveHullB.getNumberOfVertices() - 1, newVertexAForSubHullB);
+            { // Closest is edgeStartA
+               subConcaveHullA.getConcaveHullVertices().add(0, edgeStartA);
             }
             else
-            { // Popping the vertex at iEdgeEndA
-               computeSeparatedPointsAroundVertex(2.0 * alphaRadius, iEdgeEndA, concaveHullVertices, newVertexAForSubHullB, newVertexAForSubHullA);
-               subConcaveHullA.getConcaveHullVertices().set(0, newVertexAForSubHullA);
-               subConcaveHullB.getConcaveHullVertices().add(newVertexAForSubHullB);
+            { // Closest is edgeEndA
+               subConcaveHullB.addVertex(edgeEndA);
             }
 
-            Point2D newVertexBForSubHullA = new Point2D();
-            Point2D newVertexBForSubHullB = new Point2D();
-
-            // The closest point has to either be edgeStartB or edgeEndB
             if (EuclidGeometryTools.percentageAlongLineSegment2D(closestPointOnEdgeB, edgeStartB, edgeEndB) < 0.5)
-            { // Popping the vertex at iEdgeStartB
-               computeSeparatedPointsAroundVertex(2.0 * alphaRadius, iEdgeStartB, concaveHullVertices, newVertexBForSubHullA, newVertexBForSubHullB);
-               subConcaveHullA.getConcaveHullVertices().set(subConcaveHullA.getNumberOfVertices() - 1, newVertexBForSubHullA);
-               subConcaveHullB.getConcaveHullVertices().add(0, newVertexBForSubHullB);
+            { // Closest is edgeStartB
+               subConcaveHullB.getConcaveHullVertices().add(0, edgeStartB);
             }
             else
-            { // Popping the vertex at iEdgeEndB
-               computeSeparatedPointsAroundVertex(2.0 * alphaRadius, iEdgeEndB, concaveHullVertices, newVertexBForSubHullA, newVertexBForSubHullB);
-               subConcaveHullA.getConcaveHullVertices().add(newVertexBForSubHullA);
-               subConcaveHullB.getConcaveHullVertices().set(0, newVertexBForSubHullB);
+            { // Closest is edgeEndB
+               subConcaveHullA.addVertex(edgeEndB);
             }
+
+            if (subConcaveHullA.getNumberOfVertices() == 2)
+               return new ConcaveHullCollection(subConcaveHullB);
+            if (subConcaveHullB.getNumberOfVertices() == 2)
+               return new ConcaveHullCollection(subConcaveHullA);
 
             ConcaveHullCollection output = new ConcaveHullCollection();
-            output.addAll(filterOutNarrowRegions(alphaRadius, subConcaveHullA));
-            output.addAll(filterOutNarrowRegions(alphaRadius, subConcaveHullB));
+            output.addAll(concaveHullNarrowPassageCutter(alphaRadius, subConcaveHullA));
+            output.addAll(concaveHullNarrowPassageCutter(alphaRadius, subConcaveHullB));
             return output;
          }
       }
 
       // If we reached here, this indicates that the concave hull was not filtered.
       return new ConcaveHullCollection(concaveHullToFilter);
-   }
-
-   /**
-    * Computes the coordinates of 2 points <tt>A</tt> and <tt>B</tt> that lie on the previous and next
-    * edge of the vertex <tt>V</tt> such that the 2 points at a distance {@code separationDistance}
-    * from each other.
-    * <p>
-    * Uses the inherent property of the problem: the triangle AVB is isosceles with |AV| = |VB| and
-    * |AB| = {@code separationDistance}. Computing &theta;, the inner triangle angle at the vertex V,
-    * the distance |AV| = |VB| = {@code separationDistance} / (2 * sin(&theta;)).
-    * </p>
-    * 
-    * @param separationDistance        the distance that A and B should be from each other.
-    * @param vertexIndex               the index of the vertex <tt>V</tt>.
-    * @param concaveHullVertices       the vertices of the concave hull to which the vertex <tt>V</tt>
-    *                                  belongs to. Not modified.
-    * @param pointOnPreviousEdgeToPack the point in which the coordinates of the point <tt>A</tt> are
-    *                                  stored. Modified.
-    * @param pointOnNextEdgeToPack     the point in which the coordinates of the point <tt>B</tt> are
-    *                                  stored. Modified.
-    */
-   private static void computeSeparatedPointsAroundVertex(double separationDistance, int vertexIndex, List<? extends Point2DReadOnly> concaveHullVertices,
-                                                          Point2DBasics pointOnPreviousEdgeToPack, Point2DBasics pointOnNextEdgeToPack)
-   {
-      UnitVector2D directionToNext = new UnitVector2D();
-      UnitVector2D directionToPrevious = new UnitVector2D();
-
-      Point2DReadOnly vertex = getWrap(vertexIndex, concaveHullVertices);
-      directionToNext.sub(getNext(vertexIndex, concaveHullVertices), vertex);
-      directionToPrevious.sub(getPrevious(vertexIndex, concaveHullVertices), getWrap(vertexIndex, concaveHullVertices));
-
-      double angleAtVertex = Math.abs(directionToPrevious.angle(directionToNext));
-
-      if (angleAtVertex > Math.PI)
-         angleAtVertex = 2.0 * Math.PI - angleAtVertex;
-
-      double distanceAlongEdge = 0.5 * separationDistance / Math.sin(angleAtVertex);
-
-      pointOnPreviousEdgeToPack.scaleAdd(distanceAlongEdge, directionToPrevious, vertex);
-      pointOnNextEdgeToPack.scaleAdd(distanceAlongEdge, directionToNext, vertex);
    }
 
    private static double perimeterDistanceBetweenVertices(int firstVertexIndex, int secondVertexIndex, ConcaveHull concaveHull)
@@ -696,43 +683,4 @@ public class ConcaveHullPruningFilteringTools
 
       return perimeterDistance;
    }
-
-   public static int innerAlphaShapeFiltering(double alpha, int deadIndexRegion, List<Point2D> concaveHullVerticesToFilter)
-   {
-      int numberOfVerticesRemoved = 0;
-      Point2D closestPoint = new Point2D();
-      double alphaSquared = alpha * alpha;
-
-      for (int currentIndex = 0; currentIndex < concaveHullVerticesToFilter.size(); currentIndex++)
-      {
-         Point2D currentVertex = concaveHullVerticesToFilter.get(currentIndex);
-         int closestEdgeFirstVertexIndex = findInnerClosestEdgeToVertex(currentIndex, deadIndexRegion, concaveHullVerticesToFilter, closestPoint);
-
-         if (closestPoint.distanceSquared(currentVertex) < alphaSquared)
-         {
-            int closestEdgeSecondVertexIndex = next(closestEdgeFirstVertexIndex, concaveHullVerticesToFilter);
-            int firstSubLength = subLengthInclusive(currentIndex, closestEdgeFirstVertexIndex, concaveHullVerticesToFilter);
-            int secondSubLength = subLengthInclusive(closestEdgeSecondVertexIndex, currentIndex, concaveHullVerticesToFilter);
-
-            if (firstSubLength <= 1 || secondSubLength <= 1)
-            {
-               continue;
-            }
-
-            if (firstSubLength <= secondSubLength)
-            {
-               concaveHullVerticesToFilter.get(closestEdgeFirstVertexIndex).set(closestPoint);
-               numberOfVerticesRemoved += removeAllExclusive(currentIndex, closestEdgeFirstVertexIndex, concaveHullVerticesToFilter);
-            }
-            else
-            {
-               concaveHullVerticesToFilter.get(closestEdgeSecondVertexIndex).set(closestPoint);
-               numberOfVerticesRemoved += removeAllExclusive(closestEdgeSecondVertexIndex, currentIndex, concaveHullVerticesToFilter);
-            }
-         }
-      }
-
-      return numberOfVerticesRemoved;
-   }
-
 }

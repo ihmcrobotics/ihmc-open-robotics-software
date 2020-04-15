@@ -109,35 +109,44 @@ public class ConcaveHullViewer extends AnimationTimer
                                                                             concaveHullFactoryResult,
                                                                             defaultColor,
                                                                             borderVerticesSize.get()));
-      graphicBorderEdges.submitForRendering(borderEdgesToMultiLine(transformToWorld, concaveHullFactoryResult, defaultColor, borderEdgesSize.get()));
+      graphicBorderEdges.submitForRendering(borderEdgesToMultiLine(transformToWorld, concaveHullFactoryResult, defaultColor, 0.97 * borderEdgesSize.get()));
       graphicBorderTriangles.submitForRendering(borderTrianglesToRainbowMultiTriangles(transformToWorld, concaveHullFactoryResult, random));
       graphicConstraintEdges.submitForRendering(constraintEdgesToMultiLine(transformToWorld,
                                                                            concaveHullFactoryResult,
                                                                            constraintEdgeColor.get(),
                                                                            constraintEdgeSize.get()));
-      graphicOrderedBorderEdges.submitForRendering(orderedBorderEdgesToRainbowMultiLine(transformToWorld, concaveHullFactoryResult));
+      graphicOrderedBorderEdges.submitForRendering(orderedBorderEdgesToRainbowMultiLine(transformToWorld, concaveHullFactoryResult, 0.98 * borderEdgesSize.get()));
       // TODO Implement priority queue viz
       if (concaveHullFactoryResult != null)
       {
+         BiFunction<Double, Double, Color> colorFunction = new BiFunction<Double, Double, Color>()
+         {
+            private final Random random = new Random(87934);
+
+            @Override
+            public Color apply(Double hullAlpha, Double edgeAlpha)
+            {
+               // Randomizing the hue to distinguish successive collinear edges.
+               return Color.hsb(random.nextInt(360), 1.0, 1.0);
+            }
+         };
          graphicRawConcaveHull.submitForRendering(multiLine(transformToWorld,
                                                             concaveHullFactoryResult.getConcaveHullCollection(),
-                                                            defaultColor,
+                                                            colorFunction,
                                                             0.99 * borderEdgesSize.get()));
       }
       // TODO Implement concave pockets viz
       if (processedConcaveHullCollection != null)
       {
-         
          BiFunction<Double, Double, Color> colorFunction = new BiFunction<Double, Double, Color>()
          {
-            double hue = 180.0;
+            private final Random random = new Random(87934);
 
             @Override
             public Color apply(Double hullAlpha, Double edgeAlpha)
             {
-               // Alternating between 2 different distinct hues to distinguish successive edges.
-               hue = hue == 180.0 ? 240.0 : 180.0;
-               return Color.hsb(hue, 1.0, 1.0);
+               // Randomizing the hue to distinguish successive collinear edges.
+               return Color.hsb(random.nextInt(360), 1.0, 1.0);
             }
          };
          graphicProcessedConcaveHull.submitForRendering(multiLine(transformToWorld,
