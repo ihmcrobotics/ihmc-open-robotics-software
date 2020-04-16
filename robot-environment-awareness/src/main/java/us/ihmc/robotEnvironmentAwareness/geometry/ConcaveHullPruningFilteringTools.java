@@ -15,6 +15,8 @@ import java.util.List;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -612,6 +614,14 @@ public class ConcaveHullPruningFilteringTools
                return null;
             }
          }
+      }
+
+      // Dispose of small hulls that are the result of a narrow passage that has been cut at both ends.
+      if (concaveHullToFilter.getNumberOfVertices() <= 6)
+      {
+         double area = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(concaveHullToFilter.getConcaveHullVertices())).getArea();
+         if (area <= Math.PI * MathTools.square(alphaRadius))
+            return null;
       }
 
       int numberOfVertices = concaveHullToFilter.getNumberOfVertices();
