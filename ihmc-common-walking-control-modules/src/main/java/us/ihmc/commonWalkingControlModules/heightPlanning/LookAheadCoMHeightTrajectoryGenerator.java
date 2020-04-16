@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.trajectories;
+package us.ihmc.commonWalkingControlModules.heightPlanning;
 
 import static us.ihmc.communication.packets.Packet.*;
 
@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
+import us.ihmc.commonWalkingControlModules.trajectories.YoFourPointCubicSpline1D;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -18,6 +19,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.BagOfBalls;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -38,6 +40,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -50,6 +53,7 @@ import us.ihmc.yoVariables.variable.YoVariable;
  */
 public class LookAheadCoMHeightTrajectoryGenerator
 {
+   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean CONSIDER_NEXT_FOOTSTEP = false;
 
    private static final boolean DEBUG = false;
@@ -57,23 +61,12 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private boolean visualize = true;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final YoFourPointCubicSpline1D spline = new YoFourPointCubicSpline1D("height", registry);
-
-   private final YoBoolean isTrajectoryOffsetStopped = new YoBoolean("isPelvisOffsetHeightTrajectoryStopped", registry);
 
    private final YoBoolean hasBeenInitializedWithNextStep = new YoBoolean("hasBeenInitializedWithNextStep", registry);
 
-   private final YoDouble offsetHeightAboveGround = new YoDouble("offsetHeightAboveGround", registry);
 
-   private final YoDouble offsetHeightAboveGroundPrevValue = new YoDouble("offsetHeightAboveGroundPrevValue", registry);
-   private final YoDouble offsetHeightAboveGroundChangedTime = new YoDouble("offsetHeightAboveGroundChangedTime", registry);
-   private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryOutput = new YoVariableDoubleProvider("offsetHeightAboveGroundTrajectoryOutput",
-                                                                                                                 registry);
-   private final YoVariableDoubleProvider offsetHeightAboveGroundTrajectoryTimeProvider = new YoVariableDoubleProvider("offsetHeightAboveGroundTrajectoryTimeProvider",
-                                                                                                                       registry);
-   private final MultipleWaypointsTrajectoryGenerator offsetHeightTrajectoryGenerator = new MultipleWaypointsTrajectoryGenerator("pelvisHeightOffset",
-                                                                                                                                 registry);
+   private final HeightOffsetHandler heightOffsetHandler;
 
    private final YoDouble minimumHeightAboveGround = new YoDouble("minimumHeightAboveGround", registry);
    private final YoDouble nominalHeightAboveGround = new YoDouble("nominalHeightAboveGround", registry);
@@ -102,7 +95,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private final BagOfBalls bagOfBalls;
 
-   private final YoDouble yoTime;
+   private final DoubleProvider yoTime;
 
    private ReferenceFrame frameOfLastFoostep;
    private final ReferenceFrame pelvisFrame;
@@ -111,19 +104,13 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    private final SideDependentList<RigidBodyTransform> transformsFromAnkleToSole;
 
-   private final YoLong lastCommandId;
-
-   private final YoBoolean isReadyToHandleQueuedCommands;
-   private final YoLong numberOfQueuedCommands;
-   private final RecyclingArrayDeque<PelvisHeightTrajectoryCommand> commandQueue = new RecyclingArrayDeque<>(PelvisHeightTrajectoryCommand.class,
-                                                                                                             PelvisHeightTrajectoryCommand::set);
 
    private final BooleanProvider processGoHome = new BooleanParameter("ProcessGoHome", registry, false);
 
    public LookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround, double nominalHeightAboveGround, double maximumHeightAboveGround,
                                                 double defaultOffsetHeightAboveGround, double doubleSupportPercentageIn, ReferenceFrame centerOfMassFrame,
                                                 ReferenceFrame pelvisFrame, SideDependentList<? extends ReferenceFrame> ankleZUpFrames,
-                                                SideDependentList<RigidBodyTransform> transformsFromAnkleToSole, final YoDouble yoTime,
+                                                SideDependentList<RigidBodyTransform> transformsFromAnkleToSole, DoubleProvider yoTime,
                                                 YoGraphicsListRegistry yoGraphicsListRegistry, YoVariableRegistry parentRegistry)
    {
       this.pelvisFrame = pelvisFrame;
@@ -132,25 +119,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
       frameOfLastFoostep = ankleZUpFrames.get(RobotSide.LEFT);
       this.yoTime = yoTime;
       this.transformsFromAnkleToSole = transformsFromAnkleToSole;
-      offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
-      offsetHeightAboveGroundTrajectoryTimeProvider.set(0.5);
-      offsetHeightAboveGround.set(defaultOffsetHeightAboveGround);
-      offsetHeightAboveGroundPrevValue.set(defaultOffsetHeightAboveGround);
-      offsetHeightAboveGround.addVariableChangedListener(new VariableChangedListener()
-      {
-         @Override
-         public void notifyOfVariableChange(YoVariable<?> v)
-         {
-            offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
-            double previous = offsetHeightTrajectoryGenerator.getValue();
-            offsetHeightTrajectoryGenerator.clear();
-            offsetHeightTrajectoryGenerator.appendWaypoint(0.0, previous, 0.0);
-            offsetHeightTrajectoryGenerator.appendWaypoint(offsetHeightAboveGroundTrajectoryTimeProvider.getValue(),
-                                                           offsetHeightAboveGround.getDoubleValue(),
-                                                           0.0);
-            offsetHeightTrajectoryGenerator.initialize();
-         }
-      });
+
+      heightOffsetHandler = new HeightOffsetHandler(yoTime, defaultOffsetHeightAboveGround, registry);
 
       setMinimumHeightAboveGround(minimumHeightAboveGround);
       setNominalHeightAboveGround(nominalHeightAboveGround);
@@ -161,13 +131,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
       hasBeenInitializedWithNextStep.set(false);
 
       this.doubleSupportPercentageIn.set(doubleSupportPercentageIn);
-
-      String namePrefix = "pelvisHeight";
-      lastCommandId = new YoLong(namePrefix + "LastCommandId", registry);
-      lastCommandId.set(Packet.INVALID_MESSAGE_ID);
-
-      isReadyToHandleQueuedCommands = new YoBoolean(namePrefix + "IsReadyToHandleQueuedPelvisHeightTrajectoryCommands", registry);
-      numberOfQueuedCommands = new YoLong(namePrefix + "NumberOfQueuedCommands", registry);
 
       parentRegistry.addChild(registry);
 
@@ -255,15 +218,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
    public void reset()
    {
       hasBeenInitializedWithNextStep.set(false);
-      lastCommandId.set(Packet.INVALID_MESSAGE_ID);
-      isReadyToHandleQueuedCommands.set(false);
-      numberOfQueuedCommands.set(0);
-
-      offsetHeightAboveGround.set(0.0, false);
-      offsetHeightAboveGroundChangedTime.set(yoTime.getValue());
-      offsetHeightTrajectoryGenerator.clear();
-      offsetHeightTrajectoryGenerator.appendWaypoint(0.0, 0.0, 0.0);
-      offsetHeightTrajectoryGenerator.initialize();
+      heightOffsetHandler.reset();
    }
 
    public void setMinimumHeightAboveGround(double minimumHeightAboveGround)
@@ -290,23 +245,23 @@ public class LookAheadCoMHeightTrajectoryGenerator
    {
       ReferenceFrame newFrame = ankleZUpFrames.get(supportLeg);
 
-      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, s0.getY());
+      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, startWaypoint.getY());
       tempFramePoint.changeFrame(newFrame);
-      s0.setY(tempFramePoint.getZ());
+      startWaypoint.setY(tempFramePoint.getZ());
 
-      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, d0.getY());
+      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, firstMidpointPosition.getY());
       tempFramePoint.changeFrame(newFrame);
-      d0.setY(tempFramePoint.getZ());
+      firstMidpointPosition.setY(tempFramePoint.getZ());
 
-      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, dF.getY());
+      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, secondMidpointPosition.getY());
       tempFramePoint.changeFrame(newFrame);
-      dF.setY(tempFramePoint.getZ());
+      secondMidpointPosition.setY(tempFramePoint.getZ());
 
-      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, sF.getY());
+      tempFramePoint.setIncludingFrame(frameOfLastFoostep, 0.0, 0.0, endWaypoint.getY());
       tempFramePoint.changeFrame(newFrame);
-      sF.setY(tempFramePoint.getZ());
+      endWaypoint.setY(tempFramePoint.getZ());
 
-      spline.initialize(s0, d0, dF, sF);
+      spline.initialize(startWaypoint, firstMidpointPosition, secondMidpointPosition, endWaypoint);
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -317,33 +272,34 @@ public class LookAheadCoMHeightTrajectoryGenerator
       }
 
       frameOfLastFoostep = newFrame;
+      heightOffsetHandler.setReferenceFrame(frameOfLastFoostep);
    }
 
    private final Point2D tempPoint2dA = new Point2D();
    private final Point2D tempPoint2dB = new Point2D();
 
-   private final Point2D s0Min = new Point2D();
-   private final Point2D d0Min = new Point2D();
-   private final Point2D dFMin = new Point2D();
-   private final Point2D sFMin = new Point2D();
+   private final Point2D startWaypointMinimum = new Point2D();
+   private final Point2D firstMidpointMinimum = new Point2D();
+   private final Point2D secondMidpointMinimum = new Point2D();
+   private final Point2D endWaypointMinimum = new Point2D();
    private final Point2D sNextMin = new Point2D();
 
-   private final Point2D s0Nom = new Point2D();
-   private final Point2D d0Nom = new Point2D();
-   private final Point2D dFNom = new Point2D();
-   private final Point2D sFNom = new Point2D();
+   private final Point2D startWaypointNominal = new Point2D();
+   private final Point2D firstMidpointNominal = new Point2D();
+   private final Point2D secondMidpointNominal = new Point2D();
+   private final Point2D endWaypointNominal = new Point2D();
    private final Point2D sNextNom = new Point2D();
 
-   private final Point2D s0Max = new Point2D();
-   private final Point2D d0Max = new Point2D();
-   private final Point2D dFMax = new Point2D();
-   private final Point2D sFMax = new Point2D();
+   private final Point2D startWaypointMaximum = new Point2D();
+   private final Point2D firstMidpointMaximum = new Point2D();
+   private final Point2D secondMidpointMaximum = new Point2D();
+   private final Point2D endWaypointMaximum = new Point2D();
    private final Point2D sNextMax = new Point2D();
 
-   private final Point2D s0 = new Point2D();
-   private final Point2D d0 = new Point2D();
-   private final Point2D dF = new Point2D();
-   private final Point2D sF = new Point2D();
+   private final Point2D startWaypoint = new Point2D();
+   private final Point2D firstMidpointPosition = new Point2D();
+   private final Point2D secondMidpointPosition = new Point2D();
+   private final Point2D endWaypoint = new Point2D();
    private final Point2D sNext = new Point2D();
 
    private final FramePoint3D framePointS0 = new FramePoint3D();
@@ -355,8 +311,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
    private final FramePoint3D tempFramePointForViz1 = new FramePoint3D();
    private final FramePoint3D tempFramePointForViz2 = new FramePoint3D();
 
-   private final FramePoint3D transferFromContactFramePosition = new FramePoint3D();
-   private final FramePoint3D transferToContactFramePosition = new FramePoint3D();
+   private final FramePoint3D transferFromAnklePosition = new FramePoint3D();
+   private final FramePoint3D transferToAnklePosition = new FramePoint3D();
    private final FramePoint3D transferFromDesiredContactFramePosition = new FramePoint3D();
 
    private final FrameVector3D fromContactFrameDrift = new FrameVector3D();
@@ -389,8 +345,8 @@ public class LookAheadCoMHeightTrajectoryGenerator
          hasBeenInitializedWithNextStep.set(false);
       }
 
-      transferFromFootstep.getAnklePosition(transferFromContactFramePosition, transformsFromAnkleToSole.get(transferFromFootstep.getRobotSide()));
-      transferToFootstep.getAnklePosition(transferToContactFramePosition, transformsFromAnkleToSole.get(transferToFootstep.getRobotSide()));
+      transferFromFootstep.getAnklePosition(transferFromAnklePosition, transformsFromAnkleToSole.get(transferFromFootstep.getRobotSide()));
+      transferToFootstep.getAnklePosition(transferToAnklePosition, transformsFromAnkleToSole.get(transferToFootstep.getRobotSide()));
 
       boolean frameDrifted = false;
       if (correctForCoMHeightDrift.getBooleanValue() && transferToFootstep.getTrustHeight() && (transferFromDesiredFootstep != null))
@@ -406,18 +362,18 @@ public class LookAheadCoMHeightTrajectoryGenerator
          {
             transferFromDesiredFootstep.getAnklePosition(transferFromDesiredContactFramePosition,
                                                          transformsFromAnkleToSole.get(transferFromDesiredFootstep.getRobotSide()));
-            transferFromDesiredContactFramePosition.changeFrame(transferFromContactFramePosition.getReferenceFrame());
+            transferFromDesiredContactFramePosition.changeFrame(transferFromAnklePosition.getReferenceFrame());
 
-            fromContactFrameDrift.setToZero(transferFromContactFramePosition.getReferenceFrame());
-            fromContactFrameDrift.sub(transferFromContactFramePosition, transferFromDesiredContactFramePosition);
-            fromContactFrameDrift.changeFrame(transferToContactFramePosition.getReferenceFrame());
-            transferToContactFramePosition.setZ(transferToContactFramePosition.getZ() + fromContactFrameDrift.getZ());
+            fromContactFrameDrift.setToZero(transferFromAnklePosition.getReferenceFrame());
+            fromContactFrameDrift.sub(transferFromAnklePosition, transferFromDesiredContactFramePosition);
+            fromContactFrameDrift.changeFrame(transferToAnklePosition.getReferenceFrame());
+            transferToAnklePosition.setZ(transferToAnklePosition.getZ() + fromContactFrameDrift.getZ());
             frameDrifted = true;
          }
       }
 
-      transferFromContactFramePosition.changeFrame(worldFrame);
-      transferToContactFramePosition.changeFrame(worldFrame);
+      transferFromAnklePosition.changeFrame(worldFrame);
+      transferToAnklePosition.changeFrame(worldFrame);
 
       FramePoint3D nextContactFramePosition = null;
 
@@ -438,20 +394,20 @@ public class LookAheadCoMHeightTrajectoryGenerator
          }
       }
 
-      contactFrameZeroPosition.set(transferFromContactFramePosition);
-      contactFrameOnePosition.set(transferToContactFramePosition);
+      contactFrameZeroPosition.set(transferFromAnklePosition);
+      contactFrameOnePosition.set(transferToAnklePosition);
 
-      getPoint2d(tempPoint2dA, transferFromContactFramePosition);
-      getPoint2d(tempPoint2dB, transferToContactFramePosition);
+      tempPoint2dA.set(transferFromAnklePosition);
+      tempPoint2dB.set(transferToAnklePosition);
 
       projectionSegment.set(tempPoint2dA, tempPoint2dB);
       setPointXValues(nextContactFramePosition);
 
-      transferFromContactFramePosition.changeFrame(frameOfLastFoostep);
-      transferToContactFramePosition.changeFrame(frameOfLastFoostep);
+      transferFromAnklePosition.changeFrame(frameOfLastFoostep);
+      transferToAnklePosition.changeFrame(frameOfLastFoostep);
 
-      double footHeight0 = transferFromContactFramePosition.getZ();
-      double footHeight1 = transferToContactFramePosition.getZ();
+      double footHeight0 = transferFromAnklePosition.getZ();
+      double footHeight1 = transferToAnklePosition.getZ();
 
       double nextFootHeight = Double.NaN;
 
@@ -464,92 +420,92 @@ public class LookAheadCoMHeightTrajectoryGenerator
          }
       }
 
-      s0Min.setY(footHeight0 + minimumHeightAboveGround.getDoubleValue());
-      s0Nom.setY(footHeight0 + nominalHeightAboveGround.getDoubleValue());
-      s0Max.setY(footHeight0 + maximumHeightAboveGround.getDoubleValue());
+      startWaypointMinimum.setY(footHeight0 + minimumHeightAboveGround.getDoubleValue());
+      startWaypointNominal.setY(footHeight0 + nominalHeightAboveGround.getDoubleValue());
+      startWaypointMaximum.setY(footHeight0 + maximumHeightAboveGround.getDoubleValue());
 
-      sFMin.setY(footHeight1 + minimumHeightAboveGround.getDoubleValue());
-      sFNom.setY(footHeight1 + nominalHeightAboveGround.getDoubleValue());
-      sFMax.setY(footHeight1 + maximumHeightAboveGround.getDoubleValue());
+      endWaypointMinimum.setY(footHeight1 + minimumHeightAboveGround.getDoubleValue());
+      endWaypointNominal.setY(footHeight1 + nominalHeightAboveGround.getDoubleValue());
+      endWaypointMaximum.setY(footHeight1 + maximumHeightAboveGround.getDoubleValue());
 
-      d0Min.setY(findMinimumDoubleSupportHeight(s0.getX(), sF.getX(), d0.getX(), footHeight0, footHeight1));
-      d0Nom.setY(findNominalDoubleSupportHeight(s0.getX(), sF.getX(), d0.getX(), footHeight0, footHeight1));
-      d0Max.setY(findMaximumDoubleSupportHeight(s0.getX(), sF.getX(), d0.getX(), footHeight0, footHeight1));
+      firstMidpointMinimum.setY(findMinimumDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), firstMidpointPosition.getX(), footHeight0, footHeight1));
+      firstMidpointNominal.setY(findNominalDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), firstMidpointPosition.getX(), footHeight0, footHeight1));
+      firstMidpointMaximum.setY(findMaximumDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), firstMidpointPosition.getX(), footHeight0, footHeight1));
 
-      dFMin.setY(findMinimumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
-      dFNom.setY(findNominalDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0, footHeight1));
-      dFMax.setY(findMaximumDoubleSupportHeight(s0.getX(), sF.getX(), dF.getX(), footHeight0 + extraToeOffHeight, footHeight1));
+      secondMidpointMinimum.setY(findMinimumDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), secondMidpointPosition.getX(), footHeight0, footHeight1));
+      secondMidpointNominal.setY(findNominalDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), secondMidpointPosition.getX(), footHeight0, footHeight1));
+      secondMidpointMaximum.setY(findMaximumDoubleSupportHeight(startWaypoint.getX(), endWaypoint.getX(), secondMidpointPosition.getX(), footHeight0 + extraToeOffHeight, footHeight1));
 
       sNextMin.setY(nextFootHeight + minimumHeightAboveGround.getDoubleValue());
       sNextNom.setY(nextFootHeight + nominalHeightAboveGround.getDoubleValue());
       sNextMax.setY(nextFootHeight + maximumHeightAboveGround.getDoubleValue());
 
       computeHeightsToUseByStretchingString(transferFromFootstep.getRobotSide());
-      previousZFinals.get(transferToFootstep.getRobotSide()).set(sF.getY());
+      previousZFinals.get(transferToFootstep.getRobotSide()).set(endWaypoint.getY());
 
-      spline.initialize(s0, d0, dF, sF);
+      spline.initialize(startWaypoint, firstMidpointPosition, secondMidpointPosition, endWaypoint);
 
       if (visualize)
       {
-         framePointS0.setIncludingFrame(transferFromContactFramePosition);
-         framePointS0.setZ(s0.getY() + offsetHeightAboveGround.getDoubleValue());
+         framePointS0.setIncludingFrame(transferFromAnklePosition);
+         framePointS0.setZ(startWaypoint.getY() + heightOffsetHandler.getOffsetHeightAboveGround());
          framePointS0.changeFrame(worldFrame);
          pointS0Viz.setPosition(framePointS0);
 
          framePointS0.changeFrame(frameOfLastFoostep);
-         framePointS0.setZ(s0Min.getY() + offsetHeightAboveGround.getDoubleValue());
+         framePointS0.setZ(startWaypointMinimum.getY() + heightOffsetHandler.getOffsetHeightAboveGround());
          framePointS0.changeFrame(worldFrame);
          pointS0MinViz.setPosition(framePointS0);
 
          framePointS0.changeFrame(frameOfLastFoostep);
-         framePointS0.setZ(s0Max.getY() + offsetHeightAboveGround.getDoubleValue());
+         framePointS0.setZ(startWaypointMaximum.getY() + heightOffsetHandler.getOffsetHeightAboveGround());
          framePointS0.changeFrame(worldFrame);
          pointS0MaxViz.setPosition(framePointS0);
 
-         framePointD0.setToZero(transferFromContactFramePosition.getReferenceFrame());
-         framePointD0.interpolate(transferFromContactFramePosition, transferToContactFramePosition, d0.getX() / sF.getX());
-         framePointD0.setZ(d0.getY() + offsetHeightAboveGround.getDoubleValue());
+         framePointD0.setToZero(transferFromAnklePosition.getReferenceFrame());
+         framePointD0.interpolate(transferFromAnklePosition, transferToAnklePosition, firstMidpointPosition.getX() / endWaypoint.getX());
+         framePointD0.setZ(firstMidpointPosition.getY() + heightOffsetHandler.getOffsetHeightAboveGround());
          framePointD0.changeFrame(worldFrame);
          pointD0Viz.setPosition(framePointD0);
 
          framePointD0.changeFrame(frameOfLastFoostep);
-         framePointD0.setZ(d0Min.getY() + offsetHeightAboveGround.getDoubleValue());
+         framePointD0.setZ(firstMidpointMinimum.getY() + heightOffsetHandler.getOffsetHeightAboveGround());
          framePointD0.changeFrame(worldFrame);
          pointD0MinViz.setPosition(framePointD0);
 
          framePointD0.changeFrame(frameOfLastFoostep);
-         framePointD0.setZ(d0Max.getY() + offsetHeightAboveGround.getDoubleValue());
+         framePointD0.setZ(firstMidpointMaximum.getY() + heightOffsetHandler.getOffsetHeightAboveGround());
          framePointD0.changeFrame(worldFrame);
          pointD0MaxViz.setPosition(framePointD0);
 
-         framePointDF.setToZero(transferFromContactFramePosition.getReferenceFrame());
-         framePointDF.interpolate(transferFromContactFramePosition, transferToContactFramePosition, dF.getX() / sF.getX());
-         framePointDF.setZ(dF.getY() + offsetHeightAboveGround.getDoubleValue());
+         framePointDF.setToZero(transferFromAnklePosition.getReferenceFrame());
+         framePointDF.interpolate(transferFromAnklePosition, transferToAnklePosition, secondMidpointPosition.getX() / endWaypoint.getX());
+         framePointDF.setZ(secondMidpointPosition.getY() + heightOffsetHandler.getOffsetHeightAboveGround());
          framePointDF.changeFrame(worldFrame);
          pointDFViz.setPosition(framePointDF);
 
          framePointDF.changeFrame(frameOfLastFoostep);
-         framePointDF.setZ(dFMin.getY() + offsetHeightAboveGround.getDoubleValue());
+         framePointDF.setZ(secondMidpointMinimum.getY() + heightOffsetHandler.getOffsetHeightAboveGround());
          framePointDF.changeFrame(worldFrame);
          pointDFMinViz.setPosition(framePointDF);
 
          framePointDF.changeFrame(frameOfLastFoostep);
-         framePointDF.setZ(dFMax.getY() + offsetHeightAboveGround.getDoubleValue());
+         framePointDF.setZ(secondMidpointMaximum.getY() + heightOffsetHandler.getOffsetHeightAboveGround());
          framePointDF.changeFrame(worldFrame);
          pointDFMaxViz.setPosition(framePointDF);
 
-         framePointSF.setIncludingFrame(transferToContactFramePosition);
-         framePointSF.setZ(sF.getY() + offsetHeightAboveGround.getDoubleValue());
+         framePointSF.setIncludingFrame(transferToAnklePosition);
+         framePointSF.setZ(endWaypoint.getY() + heightOffsetHandler.getOffsetHeightAboveGround());
          framePointSF.changeFrame(worldFrame);
          pointSFViz.setPosition(framePointSF);
 
          framePointSF.changeFrame(frameOfLastFoostep);
-         framePointSF.setZ(sFMin.getY() + offsetHeightAboveGround.getDoubleValue());
+         framePointSF.setZ(endWaypointMinimum.getY() + heightOffsetHandler.getOffsetHeightAboveGround());
          framePointSF.changeFrame(worldFrame);
          pointSFMinViz.setPosition(framePointSF);
 
          framePointSF.changeFrame(frameOfLastFoostep);
-         framePointSF.setZ(sFMax.getY() + offsetHeightAboveGround.getDoubleValue());
+         framePointSF.setZ(endWaypointMaximum.getY() + heightOffsetHandler.getOffsetHeightAboveGround());
          framePointSF.changeFrame(worldFrame);
          pointSFMaxViz.setPosition(framePointSF);
 
@@ -558,17 +514,17 @@ public class LookAheadCoMHeightTrajectoryGenerator
             if (nextContactFramePosition != null)
             {
                framePointSNext.setIncludingFrame(nextContactFramePosition);
-               framePointSNext.setZ(sNext.getY() + offsetHeightAboveGround.getDoubleValue());
+               framePointSNext.setZ(sNext.getY() + heightOffsetHandler.getOffsetHeightAboveGround());
                framePointSNext.changeFrame(worldFrame);
                pointSNextViz.setPosition(framePointSNext);
 
                framePointSNext.changeFrame(frameOfLastFoostep);
-               framePointSNext.setZ(sNextMin.getY() + offsetHeightAboveGround.getDoubleValue());
+               framePointSNext.setZ(sNextMin.getY() + heightOffsetHandler.getOffsetHeightAboveGround());
                framePointSNext.changeFrame(worldFrame);
                pointSNextMinViz.setPosition(framePointSNext);
 
                framePointSNext.changeFrame(frameOfLastFoostep);
-               framePointSNext.setZ(sNextMax.getY() + offsetHeightAboveGround.getDoubleValue());
+               framePointSNext.setZ(sNextMax.getY() + heightOffsetHandler.getOffsetHeightAboveGround());
                framePointSNext.changeFrame(worldFrame);
                pointSNextMaxViz.setPosition(framePointSNext);
             }
@@ -591,12 +547,13 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
          for (int i = 0; i < numberOfPoints; i++)
          {
-            tempFramePointForViz1.setToZero(transferFromContactFramePosition.getReferenceFrame());
-            tempFramePointForViz1.interpolate(transferFromContactFramePosition, transferToContactFramePosition, ((double) i) / ((double) numberOfPoints));
+            tempFramePointForViz1.setToZero(transferFromAnklePosition.getReferenceFrame());
+            tempFramePointForViz1.interpolate(transferFromAnklePosition, transferToAnklePosition, ((double) i) / ((double) numberOfPoints));
             tempFramePointForViz1.changeFrame(worldFrame);
             queryPoint.set(tempFramePointForViz1);
             this.solve(coMHeightPartialDerivativesData, queryPoint, false);
-            coMHeightPartialDerivativesData.getCoMHeight(tempFramePointForViz2);
+            tempFramePointForViz2.setToZero(coMHeightPartialDerivativesData.getFrameOfCoMHeight());
+            tempFramePointForViz2.setZ(coMHeightPartialDerivativesData.getComHeight());
             tempFramePointForViz2.setX(tempFramePointForViz1.getX());
             tempFramePointForViz2.setY(tempFramePointForViz1.getY());
 
@@ -605,76 +562,77 @@ public class LookAheadCoMHeightTrajectoryGenerator
       }
    }
 
+
    private Point2D tempPoint2dForStringStretching = new Point2D();
 
    private final StringStretcher2d stringStretcher2d = new StringStretcher2d();
-   private final List<Point2D> stretchedStringWaypoints = new ArrayList<>();
+   private final List<Point2DBasics> stretchedStringWaypoints = new ArrayList<>();
 
    private void computeHeightsToUseByStretchingString(RobotSide transferFromSide)
    {
       stringStretcher2d.reset();
-      // s0 is at previous
-      double z0 = MathTools.clamp(previousZFinals.get(transferFromSide).getDoubleValue(), s0Min.getY(), s0Max.getY());
-      s0.setY(z0);
+      // startWaypoint is at previous
+      double z0 = MathTools.clamp(previousZFinals.get(transferFromSide).getDoubleValue(), startWaypointMinimum.getY(), startWaypointMaximum.getY());
+      startWaypoint.setY(z0);
 
-      stringStretcher2d.setStartPoint(s0);
+      stringStretcher2d.setStartPoint(startWaypoint);
 
       if (!Double.isNaN(sNext.getX()))
       {
-         if (sNext.getX() < sF.getX() + 0.01)
+         if (sNext.getX() < endWaypoint.getX() + 0.01)
          {
-            sNext.setX(sF.getX() + 0.01);
+            sNext.setX(endWaypoint.getX() + 0.01);
          }
 
          double zNext;
-         if (sNextMin.getY() > sFNom.getY())
+         if (sNextMin.getY() > endWaypointNominal.getY())
          {
             zNext = sNextMin.getY();
          }
-         else if (sNextMax.getY() < sFNom.getY())
+         else if (sNextMax.getY() < endWaypointNominal.getY())
          {
             zNext = sNextMax.getY();
          }
          else
          {
-            zNext = sFNom.getY();
+            zNext = endWaypointNominal.getY();
          }
 
          sNext.setY(zNext);
 
          stringStretcher2d.setEndPoint(sNext);
 
-         stringStretcher2d.addMinMaxPoints(d0Min, d0Max);
-         stringStretcher2d.addMinMaxPoints(dFMin, dFMax);
-         stringStretcher2d.addMinMaxPoints(sFMin, sFMax);
+         stringStretcher2d.addMinMaxPoints(firstMidpointMinimum, firstMidpointMaximum);
+         stringStretcher2d.addMinMaxPoints(secondMidpointMinimum, secondMidpointMaximum);
+         stringStretcher2d.addMinMaxPoints(endWaypointMinimum, endWaypointMaximum);
       }
       else
       {
-         double sFNomHeight = sFNom.getY();
+         double sFNomHeight = endWaypointNominal.getY();
 
          // If the final single support nominal position is higher than the final double support max position, decrease it
          // but don't decrease it below the final single support minimum height.
-         if (sFNomHeight > dFMax.getY())
+         if (sFNomHeight > secondMidpointMaximum.getY())
          {
-            sFNomHeight = Math.max(dFMax.getY(), sFMin.getY());
-            tempPoint2dForStringStretching.set(sFNom);
+            sFNomHeight = Math.max(secondMidpointMaximum.getY(), endWaypointMinimum.getY());
+            tempPoint2dForStringStretching.set(endWaypointNominal);
             tempPoint2dForStringStretching.setY(sFNomHeight);
             stringStretcher2d.setEndPoint(tempPoint2dForStringStretching);
          }
          else
          {
-            stringStretcher2d.setEndPoint(sFNom);
+            stringStretcher2d.setEndPoint(endWaypointNominal);
          }
 
-         stringStretcher2d.addMinMaxPoints(d0Min, d0Max);
-         stringStretcher2d.addMinMaxPoints(dFMin, dFMax);
+         stringStretcher2d.addMinMaxPoints(firstMidpointMinimum, firstMidpointMaximum);
+         stringStretcher2d.addMinMaxPoints(secondMidpointMinimum, secondMidpointMaximum);
       }
 
       stringStretcher2d.stretchString(stretchedStringWaypoints);
 
-      d0.set(stretchedStringWaypoints.get(1));
-      dF.set(stretchedStringWaypoints.get(2));
-      sF.set(stretchedStringWaypoints.get(3));
+      firstMidpointPosition.set(stretchedStringWaypoints.get(1));
+      secondMidpointPosition.set(stretchedStringWaypoints.get(2));
+      endWaypoint.set(stretchedStringWaypoints.get(3));
    }
 
    private final Point2D nextPoint2d = new Point2D();
@@ -700,28 +658,28 @@ public class LookAheadCoMHeightTrajectoryGenerator
          xSNext = projectionSegment.percentageAlongLineSegment(projectedPoint) * projectionSegment.length();
       }
 
-      s0.setX(xS0);
-      d0.setX(xD0);
-      dF.setX(xDF);
-      sF.setX(xSF);
+      startWaypoint.setX(xS0);
+      firstMidpointPosition.setX(xD0);
+      secondMidpointPosition.setX(xDF);
+      endWaypoint.setX(xSF);
       sNext.setX(xSNext);
 
-      s0Min.setX(xS0);
-      d0Min.setX(xD0);
-      dFMin.setX(xDF);
-      sFMin.setX(xSF);
+      startWaypointMinimum.setX(xS0);
+      firstMidpointMinimum.setX(xD0);
+      secondMidpointMinimum.setX(xDF);
+      endWaypointMinimum.setX(xSF);
       sNextMin.setX(xSNext);
 
-      s0Nom.setX(xS0);
-      d0Nom.setX(xD0);
-      dFNom.setX(xDF);
-      sFNom.setX(xSF);
+      startWaypointNominal.setX(xS0);
+      firstMidpointNominal.setX(xD0);
+      secondMidpointNominal.setX(xDF);
+      endWaypointNominal.setX(xSF);
       sNextNom.setX(xSNext);
 
-      s0Max.setX(xS0);
-      d0Max.setX(xD0);
-      dFMax.setX(xDF);
-      sFMax.setX(xSF);
+      startWaypointMaximum.setX(xS0);
+      firstMidpointMaximum.setX(xD0);
+      secondMidpointMaximum.setX(xDF);
+      endWaypointMaximum.setX(xSF);
       sNextMax.setX(xSNext);
    }
 
@@ -749,11 +707,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
       return z_d0;
    }
 
-   private void getPoint2d(Point2D point2dToPack, FramePoint3D point)
-   {
-      point2dToPack.set(point.getX(), point.getY());
-   }
-
    private final FramePoint3D tempFramePoint = new FramePoint3D();
    private final Point2D solutionPoint = new Point2D();
 
@@ -762,52 +715,29 @@ public class LookAheadCoMHeightTrajectoryGenerator
       getCenterOfMass2d(solutionPoint, centerOfMassFrame);
       solve(coMHeightPartialDerivativesDataToPack, solutionPoint, isInDoubleSupport);
 
-      coMHeightPartialDerivativesDataToPack.getCoMHeight(tempFramePoint);
-      desiredCoMPosition.set(solutionPoint.getX(), solutionPoint.getY(), tempFramePoint.getZ());
+      desiredCoMPosition.set(solutionPoint.getX(), solutionPoint.getY(), coMHeightPartialDerivativesDataToPack.getComHeight());
    }
 
    private final FramePoint3D height = new FramePoint3D();
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final double[] partialDerivativesWithRespectToS = new double[2];
 
-   private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2D queryPoint, boolean isInDoubleSupport)
+   private void solve(CoMHeightPartialDerivativesData coMHeightPartialDerivativesDataToPack, Point2DBasics queryPoint, boolean isInDoubleSupport)
    {
       projectionSegment.orthogonalProjection(queryPoint);
       double splineQuery = projectionSegment.percentageAlongLineSegment(queryPoint) * projectionSegment.length();
 
       // Happens when the robot gets stuck in double support but the ICP is still being dragged in the front support foot.
       if (isInDoubleSupport)
-         splineQuery = Math.min(splineQuery, dF.getX());
+         splineQuery = Math.min(splineQuery, secondMidpointPosition.getX());
 
       spline.compute(splineQuery);
 
       handleInitializeToCurrent();
 
-      if (!isTrajectoryOffsetStopped.getBooleanValue())
-      {
-         double deltaTime = yoTime.getDoubleValue() - offsetHeightAboveGroundChangedTime.getDoubleValue();
+      heightOffsetHandler.update(spline.getY());
 
-         if (!offsetHeightTrajectoryGenerator.isEmpty())
-         {
-            offsetHeightTrajectoryGenerator.compute(deltaTime);
-         }
-
-         if (offsetHeightTrajectoryGenerator.isDone() && !commandQueue.isEmpty())
-         {
-            double firstTrajectoryPointTime = offsetHeightTrajectoryGenerator.getLastWaypointTime();
-            PelvisHeightTrajectoryCommand command = commandQueue.poll();
-            numberOfQueuedCommands.decrement();
-            initializeOffsetTrajectoryGenerator(command, firstTrajectoryPointTime);
-            offsetHeightTrajectoryGenerator.compute(deltaTime);
-         }
-
-         offsetHeightAboveGround.set(offsetHeightTrajectoryGenerator.getValue(), false);
-      }
-      offsetHeightAboveGroundTrajectoryOutput.set(offsetHeightTrajectoryGenerator.getValue());
-
-      offsetHeightAboveGroundPrevValue.set(offsetHeightTrajectoryGenerator.getValue());
-
-      double z = spline.getY() + offsetHeightAboveGroundTrajectoryOutput.getValue();
+      double z = spline.getY() + heightOffsetHandler.getOffsetHeightAboveGroundTrajectoryOutput();
       double dzds = spline.getYDot();
       double ddzdds = spline.getYDDot();
 
@@ -847,13 +777,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
          double heightOffset = desiredPosition.getZ() - spline.getY();
 
-         offsetHeightAboveGround.set(heightOffset);
-         offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
-
-         offsetHeightTrajectoryGenerator.clear();
-         offsetHeightTrajectoryGenerator.appendWaypoint(0.0, heightOffset, 0.0);
-         offsetHeightTrajectoryGenerator.initialize();
-         isTrajectoryOffsetStopped.set(false);
+         heightOffsetHandler.initializeToCurrent(heightOffset);
       }
    }
 
@@ -874,178 +798,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    public boolean handlePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
    {
-      EuclideanTrajectoryControllerCommand euclideanTrajectory = command.getEuclideanTrajectory();
-
-      if (euclideanTrajectory.getExecutionMode() == ExecutionMode.OVERRIDE)
-      {
-         isReadyToHandleQueuedCommands.set(true);
-         clearCommandQueue(euclideanTrajectory.getCommandId());
-         offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
-         initializeOffsetTrajectoryGenerator(command, 0.0);
-         return true;
-      }
-      else if (euclideanTrajectory.getExecutionMode() == ExecutionMode.QUEUE)
-      {
-         boolean success = queuePelvisHeightTrajectoryCommand(command);
-         if (!success)
-         {
-            isReadyToHandleQueuedCommands.set(false);
-            clearCommandQueue(INVALID_MESSAGE_ID);
-            offsetHeightTrajectoryGenerator.clear();
-            offsetHeightTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
-            offsetHeightTrajectoryGenerator.initialize();
-         }
-         return success;
-      }
-      else if (euclideanTrajectory.getExecutionMode() == ExecutionMode.STREAM)
-      {
-         isReadyToHandleQueuedCommands.set(true);
-         clearCommandQueue(euclideanTrajectory.getCommandId());
-         offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
-
-         if (euclideanTrajectory.getNumberOfTrajectoryPoints() != 1)
-         {
-            LogTools.warn("When streaming, trajectories should contain only 1 trajectory point, was: " + euclideanTrajectory.getNumberOfTrajectoryPoints());
-            return false;
-         }
-
-         FrameEuclideanTrajectoryPoint trajectoryPoint = euclideanTrajectory.getTrajectoryPoint(0);
-
-         if (trajectoryPoint.getTime() != 0.0)
-         {
-            LogTools.warn("When streaming, the trajectory point should have a time of zero, was: " + trajectoryPoint.getTime());
-            return false;
-         }
-
-         offsetHeightTrajectoryGenerator.clear();
-
-         double time = trajectoryPoint.getTime();
-         double z = fromAbsoluteToOffset(trajectoryPoint.getPositionZ());
-         double zDot = trajectoryPoint.getLinearVelocityZ();
-         offsetHeightTrajectoryGenerator.appendWaypoint(time, z, zDot);
-
-         time = euclideanTrajectory.getStreamIntegrationDuration();
-         z += time * zDot;
-         offsetHeightTrajectoryGenerator.appendWaypoint(time, z, zDot);
-
-         offsetHeightTrajectoryGenerator.initialize();
-         isTrajectoryOffsetStopped.set(false);
-         return true;
-      }
-      else
-      {
-         LogTools.warn("Unknown {} value: {}. Command ignored.", ExecutionMode.class.getSimpleName(), euclideanTrajectory.getExecutionMode());
-         return false;
-      }
-   }
-
-   private boolean queuePelvisHeightTrajectoryCommand(PelvisHeightTrajectoryCommand command)
-   {
-      if (!isReadyToHandleQueuedCommands.getBooleanValue())
-      {
-         LogTools.warn("The very first {} of a series must be {}. Aborting motion.", command.getClass().getSimpleName(), ExecutionMode.OVERRIDE);
-         return false;
-      }
-
-      long previousCommandId = command.getEuclideanTrajectory().getPreviousCommandId();
-
-      if (previousCommandId != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != INVALID_MESSAGE_ID && lastCommandId.getLongValue() != previousCommandId)
-      {
-         LogTools.warn("Previous command ID mismatch: previous ID from command = {}, last message ID received by the controller = {}. Aborting motion.",
-                       previousCommandId,
-                       lastCommandId.getLongValue());
-         return false;
-      }
-
-      if (command.getEuclideanTrajectory().getTrajectoryPoint(0).getTime() < 1.0e-5)
-      {
-         LogTools.warn("Time of the first trajectory point of a queued command must be greater than zero. Aborting motion.");
-         return false;
-      }
-
-      commandQueue.add(command);
-      numberOfQueuedCommands.increment();
-      lastCommandId.set(command.getEuclideanTrajectory().getCommandId());
-
-      return true;
-   }
-
-   private void initializeOffsetTrajectoryGenerator(PelvisHeightTrajectoryCommand command, double firstTrajectoryPointTime)
-   {
-      command.getEuclideanTrajectory().addTimeOffset(firstTrajectoryPointTime);
-
-      offsetHeightTrajectoryGenerator.clear();
-
-      if (command.getEuclideanTrajectory().getTrajectoryPoint(0).getTime() > firstTrajectoryPointTime + 1.0e-5)
-      {
-         offsetHeightTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
-      }
-
-      int numberOfTrajectoryPoints = queueExceedingTrajectoryPointsIfNeeded(command);
-
-      for (int trajectoryPointIndex = 0; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
-      {
-         appendTrajectoryPoint(command.getEuclideanTrajectory().getTrajectoryPoint(trajectoryPointIndex));
-      }
-
-      offsetHeightTrajectoryGenerator.initialize();
-      isTrajectoryOffsetStopped.set(false);
-   }
-
-   /**
-    * Appends the given trajectory point to the trajectory generator. This method handles the
-    * conversion of absolute coordinate to offset.
-    */
-   private void appendTrajectoryPoint(FrameEuclideanTrajectoryPoint trajectoryPoint)
-   {
-      double time = trajectoryPoint.getTime();
-      double z = fromAbsoluteToOffset(trajectoryPoint.getPositionZ());
-      double zDot = trajectoryPoint.getLinearVelocityZ();
-      offsetHeightTrajectoryGenerator.appendWaypoint(time, z, zDot);
-   }
-
-   private double fromAbsoluteToOffset(double zInWorld)
-   {
-      // TODO (Sylvain) Check if that's the right way to do it
-      // FIXME the given coordinate is always assumed to be in world which doesn't seem right.
-      desiredPosition.setIncludingFrame(worldFrame, 0.0, 0.0, zInWorld);
-      desiredPosition.changeFrame(frameOfLastFoostep);
-
-      double zOffset = desiredPosition.getZ() - spline.getY();
-      return zOffset;
-   }
-
-   private int queueExceedingTrajectoryPointsIfNeeded(PelvisHeightTrajectoryCommand command)
-   {
-      int numberOfTrajectoryPoints = command.getEuclideanTrajectory().getNumberOfTrajectoryPoints();
-
-      int maximumNumberOfWaypoints = offsetHeightTrajectoryGenerator.getMaximumNumberOfWaypoints()
-            - offsetHeightTrajectoryGenerator.getCurrentNumberOfWaypoints();
-
-      if (numberOfTrajectoryPoints <= maximumNumberOfWaypoints)
-         return numberOfTrajectoryPoints;
-
-      PelvisHeightTrajectoryCommand commandForExcedent = commandQueue.addFirst();
-      numberOfQueuedCommands.increment();
-      commandForExcedent.clear();
-      commandForExcedent.getEuclideanTrajectory().setPropertiesOnly(command.getEuclideanTrajectory());
-
-      for (int trajectoryPointIndex = maximumNumberOfWaypoints; trajectoryPointIndex < numberOfTrajectoryPoints; trajectoryPointIndex++)
-      {
-         commandForExcedent.getEuclideanTrajectory().addTrajectoryPoint(command.getEuclideanTrajectory().getTrajectoryPoint(trajectoryPointIndex));
-      }
-
-      double timeOffsetToSubtract = command.getEuclideanTrajectory().getTrajectoryPoint(maximumNumberOfWaypoints - 1).getTime();
-      commandForExcedent.getEuclideanTrajectory().subtractTimeOffset(timeOffsetToSubtract);
-
-      return maximumNumberOfWaypoints;
-   }
-
-   private void clearCommandQueue(long lastCommandId)
-   {
-      commandQueue.clear();
-      numberOfQueuedCommands.set(0);
-      this.lastCommandId.set(lastCommandId);
+      return heightOffsetHandler.handlePelvisHeightTrajectoryCommand(command, spline.getY());
    }
 
    public void goHome(double trajectoryTime)
@@ -1053,18 +806,12 @@ public class LookAheadCoMHeightTrajectoryGenerator
       if (!processGoHome.getValue())
          return;
 
-      offsetHeightAboveGroundChangedTime.set(yoTime.getDoubleValue());
-      offsetHeightTrajectoryGenerator.clear();
-      offsetHeightTrajectoryGenerator.appendWaypoint(0.0, offsetHeightAboveGroundPrevValue.getDoubleValue(), 0.0);
-      offsetHeightTrajectoryGenerator.appendWaypoint(trajectoryTime, 0.0, 0.0);
-      offsetHeightTrajectoryGenerator.initialize();
-      isTrajectoryOffsetStopped.set(false);
+      heightOffsetHandler.goHome(trajectoryTime);
    }
 
    public void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command)
    {
-      isTrajectoryOffsetStopped.set(command.isStopAllTrajectory());
-      offsetHeightAboveGround.set(offsetHeightAboveGroundPrevValue.getDoubleValue());
+      heightOffsetHandler.handleStopAllTrajectoryCommand(command);
    }
 
    public void initializeDesiredHeightToCurrent()
@@ -1088,7 +835,7 @@ public class LookAheadCoMHeightTrajectoryGenerator
       coM.setToZero(centerOfMassFrame);
       coM.changeFrame(worldFrame);
 
-      getPoint2d(point2dToPack, coM);
+      point2dToPack.set(coM);
    }
 
    public boolean hasBeenInitializedWithNextStep()
@@ -1147,6 +894,6 @@ public class LookAheadCoMHeightTrajectoryGenerator
 
    public double getOffsetHeightTimeInTrajectory()
    {
-      return yoTime.getValue() - offsetHeightAboveGroundChangedTime.getValue();
+      return yoTime.getValue() - heightOffsetHandler.getOffsetHeightAboveGroundChangedTime();
    }
 }

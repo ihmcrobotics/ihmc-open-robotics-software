@@ -63,9 +63,14 @@ public class CapturePointCalculator
       centerOfMassVelocityToSet.set(centerOfMassVelocity);
    }
 
+   public CenterOfMassJacobian getCenterOfMassJacobian()
+   {
+      return centerOfMassJacobian;
+   }
+
    /**
     * Deprecated on 6/1/2020.
-    * 
+    *
     * Use {@link CapturePointTools#computeCapturePointPosition(FramePoint2DReadOnly, FrameVector2DReadOnly, double, FixedFramePoint2DBasics)} instead
     */
    @Deprecated

@@ -1,26 +1,30 @@
-package us.ihmc.commonWalkingControlModules.trajectories;
+package us.ihmc.commonWalkingControlModules.heightPlanning;
 
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
-public class CoMHeightPartialDerivativesData
+public class CoMHeightPartialDerivativesData implements CoMHeightPartialDerivativesDataReadOnly
 {
    private ReferenceFrame frameOfCoMHeight;
    private double comHeight, partialDzDx, partialDzDy, partialD2zDx2, partialD2zDy2, partialD2zDxDy;
 
    public void set(CoMHeightPartialDerivativesData centerOfMassHeightPartialDerivativesData)
    {
-      this.comHeight = centerOfMassHeightPartialDerivativesData.comHeight;
-      this.partialDzDx = centerOfMassHeightPartialDerivativesData.partialDzDx;
-      this.partialDzDy = centerOfMassHeightPartialDerivativesData.partialDzDy;
-      this.partialD2zDx2 = centerOfMassHeightPartialDerivativesData.partialD2zDx2;
-      this.partialD2zDy2 = centerOfMassHeightPartialDerivativesData.partialD2zDy2;
-      this.partialD2zDxDy = centerOfMassHeightPartialDerivativesData.partialD2zDxDy;
+      setCoMHeight(centerOfMassHeightPartialDerivativesData.getFrameOfCoMHeight(), centerOfMassHeightPartialDerivativesData.getComHeight());
+      setPartialDzDx(centerOfMassHeightPartialDerivativesData.getPartialDzDx());
+      setPartialDzDy(centerOfMassHeightPartialDerivativesData.getPartialDzDy());
+      setPartialD2zDx2(centerOfMassHeightPartialDerivativesData.getPartialD2zDx2());
+      setPartialD2zDy2(centerOfMassHeightPartialDerivativesData.getPartialD2zDy2());
+      setPartialD2zDxDy(centerOfMassHeightPartialDerivativesData.getPartialD2zDxDy());
    }
 
-   public void getCoMHeight(FramePoint3D framePointToPack)
+   public ReferenceFrame getFrameOfCoMHeight()
    {
-      framePointToPack.setIncludingFrame(frameOfCoMHeight, 0.0, 0.0, comHeight);
+      return frameOfCoMHeight;
+   }
+
+   public double getComHeight()
+   {
+      return comHeight;
    }
 
    public void setCoMHeight(ReferenceFrame referenceFrame, double comHeight)
