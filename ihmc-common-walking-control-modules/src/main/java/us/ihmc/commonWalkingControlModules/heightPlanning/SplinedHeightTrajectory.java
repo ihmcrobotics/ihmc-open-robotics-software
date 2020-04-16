@@ -23,6 +23,7 @@ import java.util.List;
 public class SplinedHeightTrajectory
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+   private static final double constraintWeight = 1000.0;
 
    private final List<CoMHeightTrajectoryWaypoint> waypoints = new ArrayList<>();
    private final Comparator<CoMHeightTrajectoryWaypoint> sorter = Comparator.comparingDouble(CoMHeightTrajectoryWaypoint::getX);
@@ -47,7 +48,7 @@ public class SplinedHeightTrajectory
    {
       polynomial = new YoOptimizedPolynomial("height", 7, registry);
       polynomial.setAccelerationMinimizationWeight(1.0e-3);
-      polynomial.setJerkMinimizationWeight(1.0);
+      polynomial.setJerkMinimizationWeight(1.0e-1);
 
       contactFrameZeroPosition = new YoFramePoint3D("contactFrameZeroPosition", worldFrame, registry);
       contactFrameOnePosition = new YoFramePoint3D("contactFrameOnePosition", worldFrame, registry);
@@ -92,10 +93,21 @@ public class SplinedHeightTrajectory
       int numberOfWaypoints = waypoints.size();
 
       polynomial.clear();
-      polynomial.addPositionPoint(waypoints.get(0).getX(), waypoints.get(0).getHeight(), 1000.0);
+      polynomial.addPositionPoint(waypoints.get(0).getX(), waypoints.get(0).getHeight(), constraintWeight);
       for (int i = 1; i < numberOfWaypoints - 1; i++)
-         polynomial.addPositionPoint(waypoints.get(i).getX(), waypoints.get(i).getHeight());
-      polynomial.addPositionPoint(waypoints.get(numberOfWaypoints - 1).getX(), waypoints.get(numberOfWaypoints - 1).getHeight(), 1000.0);
+      {
+         CoMHeightTrajectoryWaypoint waypoint = waypoints.get(i);
+         if ((waypoint.getMaxHeight() - waypoint.getMinHeight()) < 5.0e-3)
+         {
+            polynomial.addPositionPoint(waypoint.getX(), waypoint.getHeight(), constraintWeight);
+            polynomial.addVelocityPoint(waypoint.getX(), 0.0, 0.5);
+         }
+         else
+         {
+            polynomial.addPositionPoint(waypoint.getX(), waypoint.getHeight());
+         }
+      }
+      polynomial.addPositionPoint(waypoints.get(numberOfWaypoints - 1).getX(), waypoints.get(numberOfWaypoints - 1).getHeight(), constraintWeight);
 
       polynomial.fit();
 
