@@ -29,6 +29,7 @@ import java.util.List;
 
 public class BetterLookAheadCoMHeightTrajectoryGenerator
 {
+   private static final double defaultPercentageInOffset = 0.05;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private boolean visualize = true;
@@ -47,6 +48,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    private final YoDouble nominalDoubleSupportPercentageIn = new YoDouble("nominalDoubleSupportPercentageIn", registry);
    private final YoDouble doubleSupportPercentageIn = new YoDouble("doubleSupportPercentageIn", registry);
+   private final YoDouble doubleSupportPercentageInOffset = new YoDouble("doubleSupportPercentageInOffset", registry);
    private final YoDouble percentageThroughSegment = new YoDouble("percentageThroughSegment", registry);
    private final YoDouble splineQuery = new YoDouble("splineQuery", registry);
 
@@ -95,6 +97,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       this.yoTime = yoTime;
 
       heightOffsetHandler = new HeightOffsetHandler(yoTime, defaultOffsetHeightAboveGround, registry);
+      doubleSupportPercentageInOffset.set(defaultPercentageInOffset);
 
       setMinimumHeightAboveGround(minimumHeightAboveGround);
       setNominalHeightAboveGround(nominalHeightAboveGround);
@@ -227,7 +230,9 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
          tempFramePoint.changeFrame(frameOfSupportLeg);
          tempFramePoint.setZ(nominalHeightAboveGround.getDoubleValue());
          double percentIn = EuclidGeometryTools.percentageAlongLineSegment3D(tempFramePoint, startCoMPosition, endCoMPosition);
-         percentIn = MathTools.clamp(percentIn, nominalDoubleSupportPercentageIn.getDoubleValue(), 1.0 - nominalDoubleSupportPercentageIn.getDoubleValue());
+         percentIn = MathTools.clamp(percentIn - doubleSupportPercentageInOffset.getDoubleValue(),
+                                     nominalDoubleSupportPercentageIn.getDoubleValue(),
+                                     1.0 - nominalDoubleSupportPercentageIn.getDoubleValue());
          doubleSupportPercentageIn.set(percentIn);
       }
       else
@@ -237,7 +242,8 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       heightWaypoints.clear();
 
-      computeWaypoints(startCoMPosition, endCoMPosition,
+      computeWaypoints(startCoMPosition,
+                       endCoMPosition,
                        startAnkleZ,
                        middleAnkleZ,
                        minimumHeightAboveGround.getDoubleValue(),
@@ -348,12 +354,11 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       point.addY(heightOffsetHandler.getOffsetHeightAboveGround() - offsetFromNominalInPlan.getDoubleValue());
       comHeightPartialDerivativesDataToPack.setCoMHeight(worldFrame,
-                                                         comHeightPartialDerivativesDataToPack.getComHeight()
-                                                         + heightOffsetHandler.getOffsetHeightAboveGround() - offsetFromNominalInPlan.getDoubleValue());
+                                                         comHeightPartialDerivativesDataToPack.getComHeight() + heightOffsetHandler.getOffsetHeightAboveGround()
+                                                         - offsetFromNominalInPlan.getDoubleValue());
 
       this.splineQuery.set(point.getX());
       this.desiredCoMHeight.set(point.getY());
-
    }
 
    private void handleInitializeToCurrent(double normalDesiredHeight)
