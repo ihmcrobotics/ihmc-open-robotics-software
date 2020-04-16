@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.trajectories;
+package us.ihmc.commonWalkingControlModules.heightPlanning;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

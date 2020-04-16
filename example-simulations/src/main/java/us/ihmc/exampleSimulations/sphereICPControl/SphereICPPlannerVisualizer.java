@@ -681,7 +681,7 @@ public class SphereICPPlannerVisualizer
 
       SmoothCMPPlannerParameters capturePointPlannerParameters = new SphereSmoothCMPPlannerParameters();
 
-      SmoothCMPBasedICPPlanner icpPlanner = new SmoothCMPBasedICPPlanner(mass, bipedSupportPolygons, soleZUpFrames, contactableFeet, null, yoTime, registry,
+      SmoothCMPBasedICPPlanner icpPlanner = new SmoothCMPBasedICPPlanner(mass, bipedSupportPolygons.getFootPolygonsInSoleZUpFrame(), soleZUpFrames, contactableFeet, null, yoTime, registry,
                                                                          yoGraphicsListRegistry, gravity, capturePointPlannerParameters);
       icpPlanner.setOmega0(omega0);
       icpPlanner.setFinalTransferDuration(1.0);

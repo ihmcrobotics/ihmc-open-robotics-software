@@ -20,7 +20,7 @@ import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.avatar.testTools.EndToEndTestTools;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.CenterOfMassHeightControlState;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
-import us.ihmc.commonWalkingControlModules.trajectories.LookAheadCoMHeightTrajectoryGenerator;
+import us.ihmc.commonWalkingControlModules.heightPlanning.LookAheadCoMHeightTrajectoryGenerator;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
@@ -319,7 +319,7 @@ public abstract class EndToEndPelvisHeightTrajectoryMessageTest implements Multi
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
       Random random = new Random(54651);
       ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-      
+
       YoVariableRegistry testRegistry = new YoVariableRegistry("testStreaming");
 
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundEnvironment());

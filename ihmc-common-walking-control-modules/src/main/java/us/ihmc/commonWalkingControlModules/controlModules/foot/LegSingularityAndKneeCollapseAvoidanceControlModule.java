@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParamet
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
+import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesData;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -759,8 +759,8 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
             doSmoothTransitionOutOfSingularityAvoidance.set(false);
          }
 
-         // If height is lower than filtered and the knee is bent enough, then really want to get out of singularity avoidance faster. So in this case, smooth faster...            
-         else if (desiredCenterOfMassHeightPoint.getZ() <= heightCorrectedFilteredForSingularityAvoidance.getDoubleValue() && 
+         // If height is lower than filtered and the knee is bent enough, then really want to get out of singularity avoidance faster. So in this case, smooth faster...
+         else if (desiredCenterOfMassHeightPoint.getZ() <= heightCorrectedFilteredForSingularityAvoidance.getDoubleValue() &&
                (desiredPercentOfLegLength.getDoubleValue() < percentOfLegLengthThresholdToEnableSingularityAvoidance.getDoubleValue()))
          {
             // Call this twice here to smooth faster. Need to get out of singularity avoidance!
@@ -1001,7 +1001,7 @@ public class LegSingularityAndKneeCollapseAvoidanceControlModule
          isUnreachableFootstepCompensated.set(true);
          unachievedSwingTranslationFiltered.update(unachievedSwingTranslation.getZ());
          desiredCenterOfMassHeightPoint.setZ(desiredCenterOfMassHeightPoint.getZ() + unachievedSwingTranslationFiltered.getDoubleValue());
-          
+
          if (USE_UNREACHABLE_FOOTSTEP_CORRECTION_ON_POSITION)
          {
             comHeightDataToCorrect.setComHeight(worldFrame, desiredCenterOfMassHeightPoint.getZ());
