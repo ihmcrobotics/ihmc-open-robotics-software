@@ -54,6 +54,8 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    private final FramePoint3D transferFromPosition = new FramePoint3D();
    private final FramePoint3D transferToPosition = new FramePoint3D();
+   private final YoFramePoint3D yoTransferFromPosition = new YoFramePoint3D("transferFromPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D yoTransferToPosition = new YoFramePoint3D("transferToPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D desiredCoMPositionAtStart = new YoFramePoint3D("desiredCoMPositionAtStart", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoFramePoint3D desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
@@ -196,12 +198,15 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       offsetFromNominalInPlan.set(heightOffsetHandler.getOffsetHeightAboveGround());
       this.extraToeOffHeight.set(extraToeOffHeight);
 
-      transferToPosition.setToZero(soleFrames.get(transferToAndNextFootstepsData.getTransferToSide()));
+      transferToPosition.setIncludingFrame(transferToFootstepPosition);
       transferFromPosition.setToZero(soleFrames.get(transferToAndNextFootstepsData.getTransferToSide().getOppositeSide()));
       transferToPosition.changeFrame(frameOfSupportLeg);
       transferFromPosition.changeFrame(frameOfSupportLeg);
       double midstanceWidth = 0.5 * (transferToPosition.getY() + transferFromPosition.getY());
       double startAnkleZ = transferFromPosition.getZ();
+
+      yoTransferFromPosition.setMatchingFrame(transferFromPosition);
+      yoTransferToPosition.setMatchingFrame(transferToPosition);
 
       desiredCoMPositionAtStart.set(desiredCoMPosition);
 
