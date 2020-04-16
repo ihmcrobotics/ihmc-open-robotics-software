@@ -91,10 +91,12 @@ public class SplinedHeightTrajectory
 
       int numberOfWaypoints = waypoints.size();
 
-      for (int i = 0; i < waypoints.size(); i++)
-      {
+      polynomial.clear();
+      polynomial.addPositionPoint(waypoints.get(0).getX(), waypoints.get(0).getHeight(), 1000.0);
+      for (int i = 1; i < numberOfWaypoints - 1; i++)
          polynomial.addPositionPoint(waypoints.get(i).getX(), waypoints.get(i).getHeight());
-      }
+      polynomial.addPositionPoint(waypoints.get(numberOfWaypoints - 1).getX(), waypoints.get(numberOfWaypoints - 1).getHeight(), 1000.0);
+
       polynomial.fit();
 
       contactFrameZeroPosition.setMatchingFrame(waypoints.get(0).getWaypoint());
