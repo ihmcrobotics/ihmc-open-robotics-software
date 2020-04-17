@@ -31,9 +31,14 @@ public class CoMHeightTimeDerivativesSmoother
 
    private final YoBoolean hasBeenInitialized = new YoBoolean("hasBeenInitialized", registry);
 
+   private final YoDouble comHeightError = new YoDouble("smoothComHeightError", registry);
+   private final YoDouble comHeightVelocityError = new YoDouble("smoothComHeightVelocityError", registry);
+   private final YoDouble comHeightAccelerationError = new YoDouble("smoothComHeightAccelerationError", registry);
+
    private final YoDouble inputComHeight = new YoDouble("inputComHeight", registry);
    private final YoDouble inputComHeightVelocity = new YoDouble("inputComHeightVelocity", registry);
    private final YoDouble inputComHeightAcceleration = new YoDouble("inputComHeightAcceleration", registry);
+   private final YoDouble inputComHeightJerk = new YoDouble("inputComHeightJerk", registry);
 
    private final YoDouble smoothComHeight = new YoDouble("smoothComHeight", registry);
    private final YoDouble smoothComHeightVelocity = new YoDouble("smoothComHeightVelocity", registry);
@@ -62,8 +67,8 @@ public class CoMHeightTimeDerivativesSmoother
       //      comHeightVelocityGain.set(80.0); // * 0.001/dt); // 80.0;
       //      comHeightAccelerationGain.set(10.0); // * 0.001/dt); // 10.0
 
-      double w0 = 12.0; //15.0;
-      double w1 = 12.0; //15.0;
+      double w0 = 12.0;
+      double w1 = 12.0;
       double zeta1 = 0.9; //0.7;
 
       computeGainsByPolePlacement(w0, w1, zeta1);
@@ -84,8 +89,11 @@ public class CoMHeightTimeDerivativesSmoother
 
    public void computeEigenvalues()
    {
-      double[][] matrixAValues = new double[][] {{0.0, 1.0, 0.0}, {0.0, 0.0, 1.0},
-            {-comHeightGain.getDoubleValue(), -comHeightVelocityGain.getDoubleValue(), -comHeightAccelerationGain.getDoubleValue()}};
+      double[][] matrixAValues = new double[][] {{0.0, 1.0, 0.0},
+                                                 {0.0, 0.0, 1.0},
+                                                 {-comHeightGain.getDoubleValue(),
+                                                  -comHeightVelocityGain.getDoubleValue(),
+                                                  -comHeightAccelerationGain.getDoubleValue()}};
 
       Matrix matrixA = new Matrix(matrixAValues);
       EigenvalueDecomposer eigenvalueDecomposer = new EigenvalueDecomposer(matrixA);
@@ -125,17 +133,20 @@ public class CoMHeightTimeDerivativesSmoother
 
       double heightVelocityIn = heightZDataInput.getComHeightVelocity();
       double heightAccelerationIn = heightZDataInput.getComHeightAcceleration();
+      double heightJerkIn = heightZDataInput.getComHeightJerk();
 
       inputComHeight.set(heightIn);
       inputComHeightVelocity.set(heightVelocityIn);
       inputComHeightAcceleration.set(heightAccelerationIn);
+      inputComHeightJerk.set(heightJerkIn);
 
-      double heightError = heightIn - smoothComHeight.getDoubleValue();
-      double velocityError = heightVelocityIn - smoothComHeightVelocity.getDoubleValue();
-      double accelerationError = heightAccelerationIn - smoothComHeightAcceleration.getDoubleValue();
+      comHeightError.set(heightIn - smoothComHeight.getDoubleValue());
+      comHeightVelocityError.set(heightVelocityIn - smoothComHeightVelocity.getDoubleValue());
+      comHeightAccelerationError.set(heightAccelerationIn - smoothComHeightAcceleration.getDoubleValue());
 
-      double jerk = comHeightAccelerationGain.getDoubleValue() * accelerationError + comHeightVelocityGain.getDoubleValue() * velocityError
-            + comHeightGain.getDoubleValue() * heightError;
+      double jerk = comHeightAccelerationGain.getDoubleValue() * comHeightAccelerationError.getDoubleValue()
+                    + comHeightVelocityGain.getDoubleValue() * comHeightVelocityError.getDoubleValue()
+                    + comHeightGain.getDoubleValue() * comHeightError.getDoubleValue() + heightJerkIn;
       jerk = MathTools.clamp(jerk, gains.getMaximumFeedbackRate());
 
       smoothComHeightJerk.set(jerk);
@@ -156,6 +167,7 @@ public class CoMHeightTimeDerivativesSmoother
       heightZDataOutputToPack.setComHeight(centerOfMassHeightPoint.getReferenceFrame(), smoothComHeight.getDoubleValue());
       heightZDataOutputToPack.setComHeightVelocity(smoothComHeightVelocity.getDoubleValue());
       heightZDataOutputToPack.setComHeightAcceleration(smoothComHeightAcceleration.getDoubleValue());
+      heightZDataOutputToPack.setComHeightJerk(smoothComHeightJerk.getDoubleValue());
    }
 
    public void initialize(CoMHeightTimeDerivativesData comHeightDataIn)
