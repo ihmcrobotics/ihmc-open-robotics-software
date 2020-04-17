@@ -38,7 +38,7 @@ public class CoMHeightTimeDerivativesCalculator
       double yDDot = comAcceleration.getY();
 
       double comHeightVelocity = dzDx * xDot + dzDy * yDot;
-      double comHeightAcceleration = d2zDx2 * xDot * xDot + dzDx * xDDot + d2zDy2 * yDot * yDot + dzDy * yDDot;
+      double comHeightAcceleration = d2zDx2 * xDot * xDot + dzDx * xDDot + d2zDy2 * yDot * yDot + dzDy * yDDot + 2.0 * d2zDxDy * xDot * yDot;
 
       comHeightDataToPack.setComHeight(comPartialDerivatives.getFrameOfCoMHeight(), comPartialDerivatives.getComHeight());
       comHeightDataToPack.setComHeightVelocity(comHeightVelocity);
