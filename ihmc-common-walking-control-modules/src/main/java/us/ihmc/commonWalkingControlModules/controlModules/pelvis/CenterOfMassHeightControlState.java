@@ -126,6 +126,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
                                                              maximumHeightAboveGround,
                                                              defaultOffsetHeightAboveGround,
                                                              doubleSupportPercentageIn,
+                                                             0.2,
                                                              pelvisFrame,
                                                              referenceFrames.getSoleZUpFrames(),
                                                              controllerToolbox.getYoTime(),
