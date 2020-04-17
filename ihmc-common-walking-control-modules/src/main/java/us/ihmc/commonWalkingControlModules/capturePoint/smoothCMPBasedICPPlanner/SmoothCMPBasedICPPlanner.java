@@ -910,10 +910,10 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       referenceCoMGenerator.initializeForSwingOrTransfer();
 
       // If continuous update is enabled the plan will be updated in the compute method. If not, we update the plan here.
-      if (!doContinuousReplanningForTransfer.getValue())
-      {
+//      if (!doContinuousReplanningForTransfer.getValue())
+//      {
          updateTransferPlan(true);
-      }
+//      }
    }
 
    /** {@inheritDoc} */
@@ -943,10 +943,10 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       referenceCoMGenerator.initializeForSwingOrTransfer();
 
       // If continuous update is enabled the plan will be updated in the compute method. If not, we update the plan here.
-      if (!doContinuousReplanningForSwing.getValue())
-      {
+//      if (!doContinuousReplanningForSwing.getValue())
+//      {
          updateSingleSupportPlan(true);
-      }
+//      }
    }
 
    /** {@inheritDoc} */
