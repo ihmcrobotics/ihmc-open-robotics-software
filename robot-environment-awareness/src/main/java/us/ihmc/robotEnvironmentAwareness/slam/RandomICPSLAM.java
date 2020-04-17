@@ -218,7 +218,7 @@ public class RandomICPSLAM extends SLAMBasics
             }
 
             //TODO: put proper value based on final distance.
-            frame.setConfidenceFactor(0.5);
+            frame.setConfidenceFactor(1 - optimizer.getOptimalQuery() / getOctreeResolution() / 1);
             return transformer;
          }
       }
@@ -238,7 +238,7 @@ public class RandomICPSLAM extends SLAMBasics
    {
       this.parameters.set(parameters);
    }
-   
+
    class RandomICPSLAMFrameOptimizerCostFunction implements SingleQueryFunction
    {
       final Point3DReadOnly[] sourcePointsToSensor;
