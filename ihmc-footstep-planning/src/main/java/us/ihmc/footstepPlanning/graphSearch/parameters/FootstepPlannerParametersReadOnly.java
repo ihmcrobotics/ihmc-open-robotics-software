@@ -737,4 +737,12 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    {
       return get(maximumBranchFactor);
    }
+
+   /**
+    * If true, enables a mask that reduces the number of calculated steps away from the ideal step
+    */
+   default boolean getEnabledExpansionMask()
+   {
+      return get(enableExpansionMask);
+   }
 }

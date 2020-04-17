@@ -1157,6 +1157,19 @@ module controller_msgs
         long maximum_branch_factor;
 
 
+    
+    /**
+    
+     * If true, enables a mask that reduces the number of calculated steps away from the ideal step
+    
+     */
+    
+
+    @defaultValue(value=True)
+
+        boolean enable_expansion_mask;
+
+
 
       };
 

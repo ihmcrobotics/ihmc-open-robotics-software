@@ -236,6 +236,9 @@
 
 
 
+
+
+
 float64 DEFAULT_NO_VALUE=-11.1
 
 
@@ -1251,6 +1254,18 @@ float64 delta_yaw_from_reference_tolerance
 # Field default value -1
 
 int32 maximum_branch_factor
+
+
+
+
+
+# If true, enables a mask that reduces the number of calculated steps away from the ideal step
+
+
+
+# Field default value True
+
+bool enable_expansion_mask
 
 
 

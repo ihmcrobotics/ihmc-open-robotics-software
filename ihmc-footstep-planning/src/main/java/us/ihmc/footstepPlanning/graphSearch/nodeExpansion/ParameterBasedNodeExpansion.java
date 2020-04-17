@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.nodeExpansion;
 
 import gnu.trove.list.array.TDoubleArrayList;
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -28,10 +29,28 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 
    private boolean partialExpansionEnabled;
 
+   // List of accepted values for manhattan distance between ideal step and child step
+   private final TIntArrayList xyExpansionMask = new TIntArrayList();
+   private final TIntArrayList yawExpansionMask = new TIntArrayList();
+
    public ParameterBasedNodeExpansion(FootstepPlannerParametersReadOnly parameters, UnaryOperator<FootstepNode> idealStepSupplier)
    {
       this.parameters = parameters;
       this.idealStepSupplier = idealStepSupplier;
+      fillExpansionMask();
+   }
+
+   private void fillExpansionMask()
+   {
+      xyExpansionMask.add(0);
+      xyExpansionMask.add(1);
+      xyExpansionMask.add(3);
+      xyExpansionMask.add(6);
+      xyExpansionMask.add(13);
+
+      yawExpansionMask.add(0);
+      yawExpansionMask.add(1);
+      yawExpansionMask.add(3);
    }
 
    public void initialize()
@@ -113,11 +132,60 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
             fullExpansionToPack.add(childNode);
       }
 
+      if (idealStepSupplier != null && parameters.getEnabledExpansionMask())
+      {
+         applyMask(fullExpansionToPack, stanceNode);
+      }
+
       if (idealStepSupplier != null)
       {
          idealStepProximityComparator.update(stanceNode, idealStepSupplier);
          fullExpansionToPack.sort(idealStepProximityComparator);
       }
+   }
+
+   private void applyMask(List<FootstepNode> listToFilter, FootstepNode stanceNode)
+   {
+      FootstepNode idealStep = idealStepSupplier.apply(stanceNode);
+
+      int minXYManhattanDistance = computeMinXYManhattanDistance(listToFilter, idealStep);
+      int minYawDistance = computeMinYawDistance(listToFilter, idealStep);
+
+      listToFilter.removeIf(node ->
+                            {
+                               int xyManhattanDistance = idealStep.computeXYManhattanDistance(node) - minXYManhattanDistance;
+                               if (!xyExpansionMask.contains(xyManhattanDistance))
+                               {
+                                  return true;
+                               }
+
+                               int yawDistance = idealStep.computeYawIndexDistance(node) - minYawDistance;
+                               return !yawExpansionMask.contains(yawDistance);
+                            });
+   }
+
+   private static int computeMinYawDistance(List<FootstepNode> listToFilter, FootstepNode idealStep)
+   {
+      int minYawDistance = Integer.MAX_VALUE;
+      for (int i = 0; i < listToFilter.size(); i++)
+      {
+         int yawDistance = idealStep.computeYawIndexDistance(listToFilter.get(i));
+         if (yawDistance < minYawDistance)
+            minYawDistance = yawDistance;
+      }
+      return minYawDistance;
+   }
+
+   private static int computeMinXYManhattanDistance(List<FootstepNode> listToFilter, FootstepNode idealStep)
+   {
+      int minXYManhattanDistance = Integer.MAX_VALUE;
+      for (int i = 0; i < listToFilter.size(); i++)
+      {
+         int xyManhattanDistance = idealStep.computeXYManhattanDistance(listToFilter.get(i));
+         if (xyManhattanDistance < minXYManhattanDistance)
+            minXYManhattanDistance = xyManhattanDistance;
+      }
+      return minXYManhattanDistance;
    }
 
    static class IdealStepProximityComparator implements Comparator<FootstepNode>
@@ -143,7 +211,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
       {
          int dX = node1.getXIndex() - node2.getXIndex();
          int dY = node1.getYIndex() - node2.getYIndex();
-         int dYaw = node1.yawIndexDistance(node2);
+         int dYaw = node1.computeYawIndexDistance(node2);
          return Math.abs(dX) + Math.abs(dY) + Math.abs(dYaw);
       }
    }

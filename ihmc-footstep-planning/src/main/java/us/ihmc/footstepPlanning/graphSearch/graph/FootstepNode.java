@@ -99,10 +99,22 @@ public class FootstepNode
       return dx * dx + dy * dy;
    }
 
-   public int yawIndexDistance(FootstepNode other)
+   public int computeYawIndexDistance(FootstepNode other)
    {
       int dYaw = Math.abs(latticeNode.getYawIndex() - other.getYawIndex());
       return Math.min(dYaw, LatticeNode.yawDivisions - dYaw);
+   }
+
+   public int computeXYManhattanDistance(FootstepNode other)
+   {
+      int manhattanDistance = Math.abs(getXIndex() - other.getXIndex());
+      manhattanDistance += Math.abs(getYIndex() - other.getYIndex());
+      return manhattanDistance;
+   }
+
+   public int computeManhattanDistance(FootstepNode other)
+   {
+      return computeXYManhattanDistance(other) + computeYawIndexDistance(other);
    }
 
    public boolean equalPosition(FootstepNode other)
