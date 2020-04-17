@@ -440,7 +440,8 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                                             double queryY,
                                             double extraHeight)
    {
-      double heightSquared = MathTools.square(desiredDistance) - MathTools.square(queryX - ankleX) - MathTools.square(queryY - ankleY - 0.5 * hipWidth);
+      double widthDisplacement = queryY - ankleY - Math.signum(queryY - ankleY) * 0.5 * hipWidth;
+      double heightSquared = MathTools.square(desiredDistance) - MathTools.square(queryX - ankleX) - MathTools.square(widthDisplacement);
       return Math.sqrt(heightSquared) + extraHeight;
    }
 
