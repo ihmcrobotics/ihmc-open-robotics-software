@@ -596,6 +596,9 @@ public class BalanceManager
          }
       }
 
+      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
+      icpPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
+
       icpPlannerDone.set(false);
    }
 
@@ -677,6 +680,9 @@ public class BalanceManager
             dynamicReachabilityCalculator.checkReachabilityOfStep();
          }
       }
+
+      icpPlanner.getFinalDesiredCapturePointPosition(yoFinalDesiredICP);
+      icpPlanner.getFinalDesiredCenterOfMassPosition(yoFinalDesiredCoM);
 
       icpPlannerDone.set(false);
    }
