@@ -178,8 +178,7 @@ public class HighLevelHumanoidControllerToolbox
       {
          referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames,
                                                                                  yoGraphicsListRegistry,
-                                                                                 registry,
-                                                                                 fullRobotModel.getHead().getBodyFixedFrame());
+                                                                                 registry);
       }
       else
       {
