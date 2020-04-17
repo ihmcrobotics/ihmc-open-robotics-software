@@ -261,6 +261,8 @@ public class AStarFootstepPlanner
 
    private void markSolutionEdges()
    {
+      edgeDataMap.values().forEach(data -> data.setSolutionEdge(false));
+
       List<FootstepNode> path = footstepPlanner.getGraph().getPathFromStart(completionChecker.getEndNode());
       for (int i = 1; i < path.size(); i++)
       {

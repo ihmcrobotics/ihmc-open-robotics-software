@@ -92,6 +92,7 @@ public class FootstepPlannerMessageTools
       packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
       packet.setFinalTurnProximity(parameters.getFinalTurnProximity());
       packet.setMaximumBranchFactor(parameters.getMaximumBranchFactor());
+      packet.setEnableExpansionMask(parameters.getEnabledExpansionMask());
 
       packet.setAStarHeuristicsWeight(parameters.getAStarHeuristicsWeight().getValue());
       packet.setYawWeight(parameters.getYawWeight());

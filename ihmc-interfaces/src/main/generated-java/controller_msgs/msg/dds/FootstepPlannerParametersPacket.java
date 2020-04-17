@@ -791,8 +791,16 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
     */
    public int maximum_branch_factor_ = -1;
 
+   /**
+       
+    * If true, enables a mask that reduces the number of calculated steps away from the ideal step
+       
+    */
+   public boolean enable_expansion_mask_ = true;
+
    public FootstepPlannerParametersPacket()
    {
+
 
 
 
@@ -1039,6 +1047,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
       maximum_branch_factor_ = other.maximum_branch_factor_;
+
+
+      enable_expansion_mask_ = other.enable_expansion_mask_;
 
    }
 
@@ -2851,6 +2862,26 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
 
+   /**
+       
+    * If true, enables a mask that reduces the number of calculated steps away from the ideal step
+       
+    */
+   public void setEnableExpansionMask(boolean enable_expansion_mask)
+   {
+      enable_expansion_mask_ = enable_expansion_mask;
+   }
+   /**
+       
+    * If true, enables a mask that reduces the number of calculated steps away from the ideal step
+       
+    */
+   public boolean getEnableExpansionMask()
+   {
+      return enable_expansion_mask_;
+   }
+
+
    public static Supplier<FootstepPlannerParametersPacketPubSubType> getPubSubType()
    {
       return FootstepPlannerParametersPacketPubSubType::new;
@@ -3046,6 +3077,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_branch_factor_, other.maximum_branch_factor_, epsilon)) return false;
 
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_expansion_mask_, other.enable_expansion_mask_, epsilon)) return false;
+
+
       return true;
    }
 
@@ -3236,6 +3270,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.maximum_branch_factor_ != otherMyClass.maximum_branch_factor_) return false;
 
 
+      if(this.enable_expansion_mask_ != otherMyClass.enable_expansion_mask_) return false;
+
+
       return true;
    }
 
@@ -3421,7 +3458,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.delta_yaw_from_reference_tolerance_);      builder.append(", ");
 
       builder.append("maximum_branch_factor=");
-      builder.append(this.maximum_branch_factor_);
+      builder.append(this.maximum_branch_factor_);      builder.append(", ");
+
+      builder.append("enable_expansion_mask=");
+      builder.append(this.enable_expansion_mask_);
       builder.append("}");
       return builder.toString();
    }

@@ -293,6 +293,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.maximumBranchFactor, maximumBranchFactor);
    }
 
+   default void setEnableExpansionMask(boolean enableExpansionMask)
+   {
+      set(FootstepPlannerParameterKeys.enableExpansionMask, enableExpansionMask);
+   }
+
    default void set(FootstepPlannerParametersPacket parametersPacket)
    {
       double noValue = FootstepPlannerParametersPacket.DEFAULT_NO_VALUE;
@@ -377,6 +382,7 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       if (parametersPacket.getFinalTurnProximity() != noValue)
          setFinalTurnProximity(parametersPacket.getFinalTurnProximity());
       setMaximumBranchFactor(parametersPacket.getMaximumBranchFactor());
+      setEnableExpansionMask(parametersPacket.getEnableExpansionMask());
 
       if (parametersPacket.getAStarHeuristicsWeight() != noValue)
          setAStarHeuristicsWeight(parametersPacket.getAStarHeuristicsWeight());
