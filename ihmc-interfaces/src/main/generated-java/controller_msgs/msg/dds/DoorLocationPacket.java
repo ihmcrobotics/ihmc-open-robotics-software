@@ -16,6 +16,7 @@ public class DoorLocationPacket extends Packet<DoorLocationPacket> implements Se
             */
    public long sequence_id_;
    public us.ihmc.euclid.geometry.Pose3D door_transform_to_world_;
+   public boolean trustedPosition = false;
 
    public DoorLocationPacket()
    {
@@ -27,10 +28,28 @@ public class DoorLocationPacket extends Packet<DoorLocationPacket> implements Se
       this();
       set(other);
    }
+   
+   /*some behaviors will average the door location to remove noise, 
+   trustedPosition allows someone to tell the behavior that this is an accurate location and and can does not need to be averaged, 
+   this is usefull for sending door locations manualy from the ui*/
+   public void setIsTrustedPosition(boolean trusted)
+   {
+      trustedPosition = trusted;
+   }
+   
+   /*some behaviors will average the door location to remove noise, 
+   trustedPosition allows someone to tell the behavior that this is an accurate location and and can does not need to be averaged, 
+   this is usefull for sending door locations manualy from the ui*/
+   public boolean isTrustedPosition()
+   {
+      return trustedPosition;
+   }
 
    public void set(DoorLocationPacket other)
    {
       sequence_id_ = other.sequence_id_;
+      trustedPosition = other.trustedPosition;
+      
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.door_transform_to_world_, door_transform_to_world_);
    }
@@ -104,7 +123,11 @@ public class DoorLocationPacket extends Packet<DoorLocationPacket> implements Se
 
       builder.append("DoorLocationPacket {");
       builder.append("sequence_id=");
-      builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
+      builder.append("is _rusted=");
+      builder.append(this.trustedPosition);      
+      builder.append(", ");
       builder.append("door_transform_to_world=");
       builder.append(this.door_transform_to_world_);
       builder.append("}");

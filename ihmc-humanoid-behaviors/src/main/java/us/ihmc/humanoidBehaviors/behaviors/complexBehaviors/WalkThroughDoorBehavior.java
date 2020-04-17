@@ -105,8 +105,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
       this.referenceFrames = referenceFrames;
       doorOpenDetectorBehaviorService = new DoorOpenDetectorBehaviorService(robotName, yoNamePrefix + "DoorOpenService", ros2Node, yoGraphicsListRegistry);
-      doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
-      doorOpenDetectorBehaviorService.setExpectedFiducialSize(0.2032);
+      //doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
+      //doorOpenDetectorBehaviorService.setExpectedFiducialSize(0.2032);
       registry.addChild(doorOpenDetectorBehaviorService.getYoVariableRegistry());
       addBehaviorService(doorOpenDetectorBehaviorService);
 
@@ -149,6 +149,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
       if (doorOpenDetectorBehaviorService.newPose != null)
       {
+         
          Point3D location = new Point3D();
          Quaternion orientation = new Quaternion();
          doorOpenDetectorBehaviorService.newPose.get(location, orientation);
@@ -252,7 +253,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          public void onEntry()
          {
-            publishTextToSpeech("Confirm door location before walking through");
+            publishTextToSpeech("Confirm door location before trying to open");
 
             super.onEntry();
          }
