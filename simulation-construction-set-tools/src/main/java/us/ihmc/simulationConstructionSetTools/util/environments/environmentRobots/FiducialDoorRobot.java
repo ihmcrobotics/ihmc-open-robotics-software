@@ -1,14 +1,10 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots;
 
-import com.jme3.scene.Spatial;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -21,10 +17,7 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
-import us.ihmc.graphicsDescription.structure.Graphics3DNodeType;
-import us.ihmc.jMonkeyEngineToolkit.jme.util.JME3DLoaderUtils;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.FrameBox3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -49,7 +42,7 @@ public class FiducialDoorRobot extends Robot implements SelectableObject, Select
 
    private final RigidBodyTransform originalDoorPose;
    private final PoseReferenceFrame doorFrame;
-   private final FrameBox3d doorBox;
+   private final FrameBox3D doorBox;
 
    private final SideDependentList<PoseReferenceFrame> handlePoses = new SideDependentList<>();
 
@@ -89,7 +82,7 @@ public class FiducialDoorRobot extends Robot implements SelectableObject, Select
       originalDoorPose = new RigidBodyTransform(new AxisAngle(orientationInWorld), new Vector3D(positionInWorld));
       doorFrame = new PoseReferenceFrame("doorFrame",
                                          new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(positionInWorld), new AxisAngle(orientationInWorld)));
-      doorBox = new FrameBox3d(doorFrame, widthX, depthY, heightZ);
+      doorBox = new FrameBox3D(doorFrame, widthX, depthY, heightZ);
 
       for (RobotSide robotSide : RobotSide.values())
       {
@@ -107,7 +100,7 @@ public class FiducialDoorRobot extends Robot implements SelectableObject, Select
    private void createDoor()
    {
       // creating the pinJoint, i.e. door hinge
-      doorHingePinJoint = new PinJoint("doorHingePinJoint", new Vector3D(positionInWorld), this, Axis.Z);
+      doorHingePinJoint = new PinJoint("doorHingePinJoint", new Vector3D(positionInWorld), this, Axis3D.Z);
 
       // door link
       doorLink = new Link("doorLink");
@@ -123,7 +116,7 @@ public class FiducialDoorRobot extends Robot implements SelectableObject, Select
    private void createHandle()
    {
       // create handle
-      handlePinJoint = new PinJoint("handlePinJoint", new Vector3D(handleOffset.getX(), 0.0, handleOffset.getY()), this, Axis.Y);
+      handlePinJoint = new PinJoint("handlePinJoint", new Vector3D(handleOffset.getX(), 0.0, handleOffset.getY()), this, Axis3D.Y);
 
       // handle link
       handleLink = new Link("handleHorizontalLink");
