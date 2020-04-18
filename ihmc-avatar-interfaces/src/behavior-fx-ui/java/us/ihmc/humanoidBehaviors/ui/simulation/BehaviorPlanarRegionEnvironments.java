@@ -1,6 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui.simulation;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
@@ -121,7 +121,7 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
       addTopFlatRegionOld(generator);
       generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
 
-      generator.rotate(Math.PI, Axis.Z);
+      generator.rotate(Math.PI, Axis3D.Z);
       generator.translate(2.0, -1.2, 0.0);
       addTopFlatRegionOld(generator);
       generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
@@ -136,7 +136,7 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
       generator.setId(greenId);
       generator.addRectangle(groundSize, groundSize); // ground TODO form around terrain with no overlap?
 
-      generator.rotate(Math.PI/4, Axis.Z);
+      generator.rotate(Math.PI/4, Axis3D.Z);
 
       double xSize = 0.5;
       double ySize = xSize + 2.0;
@@ -144,17 +144,17 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
       addHighCorner(random, generator);
       generator.translate(-xSize * superGridSize, ySize * superGridSize, 0.0);
 
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
       generator.translate(xSize * superGridSize, -ySize * superGridSize, 0.0);
       addHighCorner(random, generator);
       generator.translate(-xSize * superGridSize, ySize * superGridSize, 0.0);
 
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
       generator.translate(xSize * superGridSize, -ySize * superGridSize, 0.0);
       addHighCorner(random, generator);
       generator.translate(-xSize * superGridSize, ySize * superGridSize, 0.0);
 
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
       generator.translate(xSize * superGridSize, -ySize * superGridSize, 0.0);
       addHighCorner(random, generator);
       generator.translate(-xSize * superGridSize, ySize * superGridSize, 0.0);
@@ -168,25 +168,25 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
 
       generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
       generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
 
       generator.translate(0.0, -superGridSize, 0.0);
       generator.translate(3*superGridSize, 0.0, 0.0);
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
       generator.translate(3*superGridSize, 0.0, 0.0);
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
       generator.translate(3*superGridSize, 0.0, 0.0);
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
       generateCorner(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, 0.0, 0.0);
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
    }
 
    private static void addXFormationSlopes(Random random, PlanarRegionsListGenerator generator)
@@ -194,32 +194,32 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
       generator.translate(0.0, -superGridSize, 0.0);
       generateCorner(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(3*superGridSize, 0.0, 0.0);
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
       generateCorner(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(3*superGridSize, 0.0, 0.0);
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
       generateCorner(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(3*superGridSize, 0.0, 0.0);
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
       generateCorner(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, 0.0, 0.0);
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
    }
 
    private static void addPlusFormationSlopes(Random random, PlanarRegionsListGenerator generator)
    {
       generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
       generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
       generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
       generateAngledCinderBlockStairs(random, generator, cinderSquareSurfaceSize, cinderThickness);
       generator.translate(2*superGridSize, -superGridSize, 0.0);
-      generator.rotate(Math.PI/2, Axis.Z);
+      generator.rotate(Math.PI/2, Axis3D.Z);
    }
 
    private static void addTopFlatRegionOld(PlanarRegionsListGenerator generator)
@@ -292,9 +292,9 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
 
    private static void rotate(PlanarRegionsListGenerator generator, double yaw, Runnable runnable)
    {
-      generator.rotate(yaw, Axis.Z);
+      generator.rotate(yaw, Axis3D.Z);
       runnable.run();
-      generator.rotate(-yaw, Axis.Z);
+      generator.rotate(-yaw, Axis3D.Z);
    }
 
    public static PlanarRegionsList realDataFromAtlasSLAMDataset20190710()

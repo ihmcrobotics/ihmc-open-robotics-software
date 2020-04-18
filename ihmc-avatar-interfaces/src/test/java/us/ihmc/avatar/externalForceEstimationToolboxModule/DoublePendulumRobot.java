@@ -3,7 +3,7 @@ package us.ihmc.avatar.externalForceEstimationToolboxModule;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -63,14 +63,14 @@ import us.ihmc.simulationconstructionset.Robot;
 
       // setup id robot
       elevator = new RigidBody("elevator", worldFrame);
-      joint1 = new RevoluteJoint("joint1", elevator, Axis.X);
+      joint1 = new RevoluteJoint("joint1", elevator, Axis3D.X);
       link1 = new RigidBody("link1", joint1, Ixx1CoM, Ismall, Ismall, mass1, comOffset1);
-      joint2 = new RevoluteJoint("joint2", link1, new Vector3D(0.0, 0.0, -linkLength1), Axis.X);
+      joint2 = new RevoluteJoint("joint2", link1, new Vector3D(0.0, 0.0, -linkLength1), Axis3D.X);
       link2 = new RigidBody("link2", joint2, Ixx2CoM, Ismall, Ismall, mass2, comOffset2);
 
       // setup scs robot
-      scsJoint1 = new PinJoint("joint1", new Vector3D(0.0, 0.0, 0.0), this, Axis.X);
-      scsJoint2 = new PinJoint("joint2", new Vector3D(0.0, 0.0, -linkLength1), this, Axis.X);
+      scsJoint1 = new PinJoint("joint1", new Vector3D(0.0, 0.0, 0.0), this, Axis3D.X);
+      scsJoint2 = new PinJoint("joint2", new Vector3D(0.0, 0.0, -linkLength1), this, Axis3D.X);
 
       scsJoint1.setDamping(damping1);
       scsJoint2.setDamping(damping2);
@@ -80,7 +80,7 @@ import us.ihmc.simulationconstructionset.Robot;
       scsLink1.setMomentOfInertia(Ixx1CoM, 1e-4, 1e-4);
       scsLink1.setComOffset(comOffset1);
       Graphics3DObject graphics3DObject1 = new Graphics3DObject();
-      graphics3DObject1.rotate(Math.PI, Axis.X);
+      graphics3DObject1.rotate(Math.PI, Axis3D.X);
       graphics3DObject1.addCylinder(linkLength1, 0.02, YoAppearance.Red());
       scsLink1.setLinkGraphics(graphics3DObject1);
 
@@ -89,7 +89,7 @@ import us.ihmc.simulationconstructionset.Robot;
       scsLink2.setMomentOfInertia(Ixx2CoM, 1e-4, 1e-4);
       scsLink2.setComOffset(comOffset2);
       Graphics3DObject graphics3DObject2 = new Graphics3DObject();
-      graphics3DObject2.rotate(Math.PI, Axis.X);
+      graphics3DObject2.rotate(Math.PI, Axis3D.X);
       graphics3DObject2.addCylinder(linkLength1, 0.02, YoAppearance.Blue());
       scsLink2.setLinkGraphics(graphics3DObject2);
 

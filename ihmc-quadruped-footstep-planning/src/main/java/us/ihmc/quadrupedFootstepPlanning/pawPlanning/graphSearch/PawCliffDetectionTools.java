@@ -63,7 +63,7 @@ public class PawCliffDetectionTools
                                                Point3DBasics highestNearbyPointToPack, double forward, double backward, double left, double right)
    {
       RigidBodyTransform transformToRegion = new RigidBodyTransform();
-      transformToRegion.setRotationYaw(pawYaw);
+      transformToRegion.getRotation().setToYawOrientation(pawYaw);
 
       ConvexPolygon2D avoidanceRegion = new ConvexPolygon2D();
       avoidanceRegion.addVertex(forward, left);

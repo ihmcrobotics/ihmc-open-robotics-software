@@ -40,9 +40,12 @@ public class AtlasElectricMotorEnablePacketPubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -59,10 +62,13 @@ public class AtlasElectricMotorEnablePacketPubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -74,9 +80,12 @@ public class AtlasElectricMotorEnablePacketPubSubType implements us.ihmc.pubsub.
 
    public static void write(controller_msgs.msg.dds.AtlasElectricMotorEnablePacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
+
       cdr.write_type_9(data.getAtlasElectricMotorPacketEnumEnable());
+
 
       cdr.write_type_7(data.getEnable());
 
@@ -84,10 +93,13 @@ public class AtlasElectricMotorEnablePacketPubSubType implements us.ihmc.pubsub.
 
    public static void read(controller_msgs.msg.dds.AtlasElectricMotorEnablePacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setAtlasElectricMotorPacketEnumEnable(cdr.read_type_9());
       	
+
       data.setEnable(cdr.read_type_7());
       	
 
@@ -96,16 +108,22 @@ public class AtlasElectricMotorEnablePacketPubSubType implements us.ihmc.pubsub.
    @Override
    public final void serialize(controller_msgs.msg.dds.AtlasElectricMotorEnablePacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_9("atlas_electric_motor_packet_enum_enable", data.getAtlasElectricMotorPacketEnumEnable());
+
       ser.write_type_7("enable", data.getEnable());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.AtlasElectricMotorEnablePacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setAtlasElectricMotorPacketEnumEnable(ser.read_type_9("atlas_electric_motor_packet_enum_enable"));
+
       data.setEnable(ser.read_type_7("enable"));
    }
 

@@ -47,7 +47,7 @@ public class PositionGraphic implements PositionEditable
    @Override
    public void setPosition(Point3DReadOnly position)
    {
-      pose.setPosition(position);
+      pose.getPosition().set(position);
       update();
    }
 

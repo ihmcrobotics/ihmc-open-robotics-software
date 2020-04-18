@@ -40,7 +40,7 @@ public class TransformInterpolationCalculator
       interpolatedQuaternion.interpolate(transform1Quaternion, transform2Quaternion, alpha);
       
       result.setRotationAndZeroTranslation(interpolatedQuaternion);
-      result.setTranslation(interpolatedTranslation);
+      result.getTranslation().set(interpolatedTranslation);
    }
 
    public void interpolate(TimeStampedTransform3D timeStampedTransform1, TimeStampedTransform3D timeStampedTransform2, TimeStampedTransform3D resultToPack, long timeStamp)

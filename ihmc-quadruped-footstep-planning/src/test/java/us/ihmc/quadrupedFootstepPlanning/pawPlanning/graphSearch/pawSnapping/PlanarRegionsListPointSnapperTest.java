@@ -42,7 +42,7 @@ public class PlanarRegionsListPointSnapperTest
             .snapPointToPlanarRegionsList(pointToSnap, planarRegionsList.getPlanarRegionsAsList(), planarRegion);
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
-      expectedTransform.setTranslation(0.0, 0.0, 0.7);
+      expectedTransform.getTranslation().set(0.0, 0.0, 0.7);
       EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, snapTransform, epsilon);
    }
 
@@ -159,7 +159,7 @@ public class PlanarRegionsListPointSnapperTest
       EuclidCoreTestTools.assertRigidBodyTransformEquals(identityTransform, polygonSnappingTransform, epsilon);
 
       planarRegionTransformToWorld = new RigidBodyTransform();
-      planarRegionTransformToWorld.setTranslation(1.2, 3.4, 7.6);
+      planarRegionTransformToWorld.getTranslation().set(1.2, 3.4, 7.6);
 
       planarRegionToSnapTo = new PlanarRegion(planarRegionTransformToWorld, planarRegionConvexPolygons);
       planarRegionList.clear();
@@ -167,7 +167,7 @@ public class PlanarRegionsListPointSnapperTest
       polygonSnappingTransform = PlanarRegionsListPointSnapper.snapPointToPlanarRegionsList(pointToSnap, planarRegionList, planarRegion);
 
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
-      expectedTransform.setTranslation(0.0, 0.0, 7.6);
+      expectedTransform.getTranslation().set(0.0, 0.0, 7.6);
       EuclidCoreTestTools.assertRigidBodyTransformEquals(expectedTransform, polygonSnappingTransform, epsilon);
    }
 
@@ -186,7 +186,7 @@ public class PlanarRegionsListPointSnapperTest
       planarRegionConvexPolygons.add(planarRegionPolygon);
 
       RigidBodyTransform planarRegionTransformToWorld = new RigidBodyTransform();
-      planarRegionTransformToWorld.setTranslation(1.2, 3.4, 7.6);
+      planarRegionTransformToWorld.getTranslation().set(1.2, 3.4, 7.6);
       double roll = 0.0;
       double pitch = Math.PI / 3.0;
       double yaw = 0.0;
@@ -226,7 +226,7 @@ public class PlanarRegionsListPointSnapperTest
       planarRegionConvexPolygons.add(planarRegionPolygon);
 
       RigidBodyTransform planarRegionTransformToWorld = new RigidBodyTransform();
-      planarRegionTransformToWorld.setTranslation(1.2, 3.4, 7.6);
+      planarRegionTransformToWorld.getTranslation().set(1.2, 3.4, 7.6);
       double roll = 0.0;
       double pitch = Math.PI / 3.0;
       double yaw = 0.2;
@@ -274,7 +274,7 @@ public class PlanarRegionsListPointSnapperTest
          Point2D pointToSnap = new Point2D(originalPoint);
          nonSnappedTransform = new RigidBodyTransform();
          nonSnappedTransform.setRotationEulerAndZeroTranslation(0.0, 0.0, xyYaw[2]);
-         nonSnappedTransform.setTranslation(xyYaw[0], xyYaw[1], 0.0);
+         nonSnappedTransform.getTranslation().set(xyYaw[0], xyYaw[1], 0.0);
          pointToSnap.applyTransform(nonSnappedTransform, false);
 
          PlanarRegion planarRegionIntersection = new PlanarRegion();

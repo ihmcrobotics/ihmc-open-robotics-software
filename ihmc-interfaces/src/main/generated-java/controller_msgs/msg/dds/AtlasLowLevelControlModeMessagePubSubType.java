@@ -40,7 +40,9 @@ public class AtlasLowLevelControlModeMessagePubSubType implements us.ihmc.pubsub
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -57,7 +59,9 @@ public class AtlasLowLevelControlModeMessagePubSubType implements us.ihmc.pubsub
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -69,7 +73,9 @@ public class AtlasLowLevelControlModeMessagePubSubType implements us.ihmc.pubsub
 
    public static void write(controller_msgs.msg.dds.AtlasLowLevelControlModeMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_9(data.getRequestedAtlasLowLevelControlMode());
 
@@ -77,8 +83,10 @@ public class AtlasLowLevelControlModeMessagePubSubType implements us.ihmc.pubsub
 
    public static void read(controller_msgs.msg.dds.AtlasLowLevelControlModeMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setRequestedAtlasLowLevelControlMode(cdr.read_type_9());
       	
 
@@ -87,14 +95,18 @@ public class AtlasLowLevelControlModeMessagePubSubType implements us.ihmc.pubsub
    @Override
    public final void serialize(controller_msgs.msg.dds.AtlasLowLevelControlModeMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_9("requested_atlas_low_level_control_mode", data.getRequestedAtlasLowLevelControlMode());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.AtlasLowLevelControlModeMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setRequestedAtlasLowLevelControlMode(ser.read_type_9("requested_atlas_low_level_control_mode"));
    }
 

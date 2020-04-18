@@ -1,6 +1,18 @@
 package us.ihmc.robotics.geometry;
 
+import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDouble;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertNull;
+import static us.ihmc.robotics.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commons.MutationTestFacilitator;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.BoundingBox2D;
@@ -23,14 +35,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-
-import java.util.*;
-
-import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDouble;
-import static us.ihmc.euclid.tools.EuclidCoreRandomTools.randomizeAxisAngle;
-import static us.ihmc.robotics.Assert.*;
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public class PlanarRegionToolsTest
 {
@@ -120,7 +124,7 @@ public class PlanarRegionToolsTest
       ConvexPolygon2D convexPolygonA = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(verticesA));
       RigidBodyTransform transformA = new RigidBodyTransform();
       double heightAbove = 3.0;
-      transformA.setTranslation(0.0, 0.0, heightAbove);
+      transformA.getTranslation().set(0.0, 0.0, heightAbove);
       PlanarRegion regionA = new PlanarRegion(transformA, convexPolygonA);
 
       double[][] verticesB = new double[][] {{0.0, 0.0}, {0.0, 1.0}, {1.0, 1.0}, {1.0, 0.0}};
@@ -134,7 +138,7 @@ public class PlanarRegionToolsTest
       // Now rotate the bottom one, lifting the plane and decreasing the height above.
       transformB = new RigidBodyTransform();
       double rotationAngleB = -0.4789;
-      transformB.setRotationEuler(0.0, rotationAngleB, 0.0);
+      transformB.getRotation().setEuler(0.0, rotationAngleB, 0.0);
       regionB = new PlanarRegion(transformB, convexPolygonB);
 
       minHeightOfRegionAAboveRegionB = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(regionA, regionB);
@@ -143,8 +147,8 @@ public class PlanarRegionToolsTest
       // Now rotate the top one, lowering the points and decreasing the height above also.
       transformA = new RigidBodyTransform();
       double rotationAngleA = 0.123;
-      transformA.setTranslation(0.0, 0.0, heightAbove);
-      transformA.setRotationEuler(0.0, rotationAngleA, 0.0);
+      transformA.getTranslation().set(0.0, 0.0, heightAbove);
+      transformA.getRotation().setEuler(0.0, rotationAngleA, 0.0);
       regionA = new PlanarRegion(transformA, convexPolygonA);
 
       minHeightOfRegionAAboveRegionB = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(regionA, regionB);
@@ -155,8 +159,8 @@ public class PlanarRegionToolsTest
 
       transformA = new RigidBodyTransform();
       rotationAngleA = -Math.PI / 2.0;
-      transformA.setTranslation(0.0, 0.0, heightAbove);
-      transformA.setRotationEuler(0.0, rotationAngleA, 0.0);
+      transformA.getTranslation().set(0.0, 0.0, heightAbove);
+      transformA.getRotation().setEuler(0.0, rotationAngleA, 0.0);
       regionA = new PlanarRegion(transformA, convexPolygonA);
 
       minHeightOfRegionAAboveRegionB = PlanarRegionTools.computeMinHeightOfRegionAAboveRegionB(regionA, regionB);
@@ -208,7 +212,7 @@ public class PlanarRegionToolsTest
          Point2DReadOnly[] convexPolygon2DArray = convexPolygon2D.subList(0, hullSize).toArray(new Point2DReadOnly[convexPolygon2D.size()]);
 
          Point2D centroid = new Point2D();
-         EuclidGeometryPolygonTools.computeConvexPolyong2DArea(convexPolygon2D, hullSize, clockwiseOrdered, centroid);
+         EuclidGeometryPolygonTools.computeConvexPolygon2DArea(convexPolygon2D, hullSize, clockwiseOrdered, centroid);
          int vertexIndex = random.nextInt(hullSize);
          int nextVertexIndex = EuclidGeometryPolygonTools.next(vertexIndex, hullSize);
          Point2DReadOnly vertex = convexPolygon2D.get(vertexIndex);
@@ -258,7 +262,7 @@ public class PlanarRegionToolsTest
       for (int i = 0; i < numberOfRegions; i++)
       {
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setTranslation(0.0, 0.0, i * layerSeparation);
+         transform.getTranslation().set(0.0, 0.0, i * layerSeparation);
          PlanarRegion planarRegion = new PlanarRegion(transform, concaveHull, polygons);
          listOfPlanarRegions.add(planarRegion);
       }
@@ -296,8 +300,8 @@ public class PlanarRegionToolsTest
       polygons.add(polygonB);
       RigidBodyTransform transformA = new RigidBodyTransform();
       RigidBodyTransform transformB = new RigidBodyTransform();
-      transformA.setTranslation(new Vector3D(0.4, 0.0, 0.0));
-      transformB.setTranslation(new Vector3D(-0.4, 0.0, 0.1));
+      transformA.getTranslation().set(new Vector3D(0.4, 0.0, 0.0));
+      transformB.getTranslation().set(new Vector3D(-0.4, 0.0, 0.1));
 
       PlanarRegion regionA = new PlanarRegion(transformA, polygonA);
       PlanarRegion regionB = new PlanarRegion(transformB, polygonB);
@@ -371,7 +375,7 @@ public class PlanarRegionToolsTest
             RigidBodyTransform transform = new RigidBodyTransform();
             Vector3D translation = EuclidCoreRandomTools.nextVector3D(random, -0.2 * maxRegionDistance, 0.2 * maxRegionDistance);
             translation.add(randomOrigin);
-            transform.setTranslation(translation);
+            transform.getTranslation().set(translation);
             PlanarRegion planarRegion = new PlanarRegion(transform, concaveHull, polygons);
             regionsWithinDistanceExpected.add(planarRegion);
             allRegions.add(planarRegion);
@@ -390,7 +394,7 @@ public class PlanarRegionToolsTest
             Vector3D translation = new Vector3D(xTranslation, yTranslation, zTranslation);
             translation.add(randomOrigin);
 
-            transform.setTranslation(translation);
+            transform.getTranslation().set(translation);
 
             PlanarRegion planarRegion = new PlanarRegion(transform, concaveHull, polygons);
             regionsOutsideDistance.add(planarRegion);
@@ -469,7 +473,7 @@ public class PlanarRegionToolsTest
       RigidBodyTransform region1Transform = new RigidBodyTransform();
       RigidBodyTransform region2Transform = new RigidBodyTransform();
 
-      region2Transform.setTranslation(0.0, 0.0, 1.0);
+      region2Transform.getTranslation().set(0.0, 0.0, 1.0);
 
       PlanarRegion planarRegion1 = new PlanarRegion(region1Transform, region1ConvexPolygons);
       PlanarRegion planarRegion2 = new PlanarRegion(region2Transform, region2ConvexPolygons);
@@ -569,7 +573,7 @@ public class PlanarRegionToolsTest
             RigidBodyTransform transform = new RigidBodyTransform();
             Vector3D translation = EuclidCoreRandomTools.nextVector3D(random, -0.2 * maxRegionDistance, 0.2 * maxRegionDistance);
             translation.add(midpoint);
-            transform.setTranslation(translation);
+            transform.getTranslation().set(translation);
             PlanarRegion planarRegion = new PlanarRegion(transform, concaveHull, polygons);
             regionsWithinDistanceExpected.add(planarRegion);
             allRegions.add(planarRegion);
@@ -594,7 +598,7 @@ public class PlanarRegionToolsTest
             else
                translation.add(randomOriginEnd);
 
-            transform.setTranslation(translation);
+            transform.getTranslation().set(translation);
 
             PlanarRegion planarRegion = new PlanarRegion(transform, concaveHull, polygons);
             regionsOutsideDistance.add(planarRegion);
@@ -679,7 +683,7 @@ public class PlanarRegionToolsTest
       assertTrue(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionB, regionA, epsilonForCheck));
 
       RigidBodyTransform transformC = new RigidBodyTransform();
-      transformC.setRotationEuler(0.0, Math.PI / 2.0, 0.0);
+      transformC.getRotation().setEuler(0.0, Math.PI / 2.0, 0.0);
       PlanarRegion regionC = new PlanarRegion(transformC, polygonA);
       epsilonForCheck = 0.0;
       assertFalse(PlanarRegionTools.isRegionAOverlappingWithRegionB(regionB, regionC, epsilonForCheck));
@@ -726,7 +730,7 @@ public class PlanarRegionToolsTest
       RigidBodyTransform region1Transform = new RigidBodyTransform();
       RigidBodyTransform region2Transform = new RigidBodyTransform();
 
-      region2Transform.setTranslation(0.0, 0.0, 1.0);
+      region2Transform.getTranslation().set(0.0, 0.0, 1.0);
 
       PlanarRegion planarRegion1 = new PlanarRegion(region1Transform, region1ConvexPolygons);
       PlanarRegion planarRegion2 = new PlanarRegion(region2Transform, region2ConvexPolygons);
@@ -849,38 +853,38 @@ public class PlanarRegionToolsTest
       assertFalse(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionB, regionA, epsilon));
 
       RigidBodyTransform transformOne = new RigidBodyTransform();
-      transformOne.setTranslation(0.0, 0.0, 0.99 * epsilon);
+      transformOne.getTranslation().set(0.0, 0.0, 0.99 * epsilon);
       regionA = new PlanarRegion(transformOne, polygonA);
       regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
       assertFalse(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionA, regionB, epsilon));
       assertFalse(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionB, regionA, epsilon));
 
       transformOne = new RigidBodyTransform();
-      transformOne.setTranslation(0.0, 0.0, 1.01 * epsilon);
+      transformOne.getTranslation().set(0.0, 0.0, 1.01 * epsilon);
       regionA = new PlanarRegion(transformOne, polygonA);
       regionB = new PlanarRegion(new RigidBodyTransform(), polygonB);
       assertTrue(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionA, regionB, epsilon));
       assertFalse(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionB, regionA, epsilon));
 
       transformOne = new RigidBodyTransform();
-      transformOne.setTranslation(0.0, 0.0, 0.0);
-      transformOne.setRotationEuler(0.0, Math.PI / 4.0, 0.0);
+      transformOne.getTranslation().set(0.0, 0.0, 0.0);
+      transformOne.getRotation().setEuler(0.0, Math.PI / 4.0, 0.0);
       RigidBodyTransform transformTwo = new RigidBodyTransform();
-      transformTwo.setTranslation(-10.0, 0.0, 0.0);
+      transformTwo.getTranslation().set(-10.0, 0.0, 0.0);
       regionA = new PlanarRegion(transformOne, polygonA);
       regionB = new PlanarRegion(transformTwo, polygonB);
       assertTrue(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionA, regionB, epsilon));
       assertFalse(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionB, regionA, epsilon));
 
       transformTwo = new RigidBodyTransform();
-      transformTwo.setTranslation(10.0, 0.0, 0.0);
+      transformTwo.getTranslation().set(10.0, 0.0, 0.0);
       regionA = new PlanarRegion(transformOne, polygonA);
       regionB = new PlanarRegion(transformTwo, polygonB);
       assertTrue(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionA, regionB, epsilon));
       assertTrue(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionB, regionA, epsilon));
 
       transformTwo = new RigidBodyTransform();
-      transformTwo.setTranslation(0.0, 0.0, 0.0);
+      transformTwo.getTranslation().set(0.0, 0.0, 0.0);
       regionA = new PlanarRegion(transformOne, polygonA);
       regionB = new PlanarRegion(transformTwo, polygonB);
       assertTrue(PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(regionA, regionB, epsilon));
@@ -898,8 +902,8 @@ public class PlanarRegionToolsTest
       polygonA.update();
 
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      transformToWorld.setRotationYawPitchRoll(1.2, 3.4, 5.6);
-      transformToWorld.setTranslation(-1.0, 2.2, 3.4);
+      transformToWorld.getRotation().setYawPitchRoll(1.2, 3.4, 5.6);
+      transformToWorld.getTranslation().set(-1.0, 2.2, 3.4);
 
       PlanarRegion regionA = new PlanarRegion(transformToWorld, polygonA);
       BoundingBox2D boundingBox2D = PlanarRegionTools.getLocalBoundingBox2DInLocal(regionA);

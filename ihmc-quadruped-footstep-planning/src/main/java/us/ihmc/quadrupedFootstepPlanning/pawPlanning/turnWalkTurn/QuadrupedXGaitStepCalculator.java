@@ -302,7 +302,7 @@ public class QuadrupedXGaitStepCalculator
       waypointBasedPath.getPlanarPose(time, bodyPathPose);
       finalPose.setX(bodyPathPose.getX());
       finalPose.setY(bodyPathPose.getY());
-      finalPose.setOrientationYawPitchRoll(bodyPathPose.getYaw(), finalPose.getPitch(), finalPose.getRoll());
+      finalPose.getOrientation().setYawPitchRoll(bodyPathPose.getYaw(), finalPose.getPitch(), finalPose.getRoll());
    }
 
    private void computeStepTimeInterval(QuadrupedTimedStep thisStep, QuadrupedTimedStep pastStepOnSameEnd, QuadrupedTimedStep pastStepOnOppositeEnd,

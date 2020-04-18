@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.newtonsCradle;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -30,7 +30,7 @@ public class NewtonsCradleRobot extends Robot
       for (int i = 0; i < numberOfBalls; i++)
       {
          Vector3D offset = new Vector3D(i * pinJointSeparation, 1.0, pinJointHeight);
-         PinJoint pinJoint = new PinJoint("pin" + i, offset, this, Axis.Y);
+         PinJoint pinJoint = new PinJoint("pin" + i, offset, this, Axis3D.Y);
 
          Link link = new Link("ball" + i);
          link.setMassAndRadiiOfGyration(ballMass, ballRadiusOfGyration, ballRadiusOfGyration, ballRadiusOfGyration);

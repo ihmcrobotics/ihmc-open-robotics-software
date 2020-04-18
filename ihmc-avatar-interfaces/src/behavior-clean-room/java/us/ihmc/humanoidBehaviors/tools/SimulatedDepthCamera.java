@@ -1,7 +1,13 @@
 package us.ihmc.humanoidBehaviors.tools;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.commons.MathTools;
+
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -19,8 +25,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
-
-import java.util.*;
 
 public class SimulatedDepthCamera
 {
@@ -228,7 +232,7 @@ public class SimulatedDepthCamera
    {
       tempFramePoint3D.setToZero(cameraFrame);
       tempFramePoint3D.changeFrame(ReferenceFrame.getWorldFrame());
-      plane.setPoint(tempFramePoint3D);
+      plane.getPoint().set(tempFramePoint3D);
 
       tempFramePose3D.setToZero();
       tempFramePose3D.setReferenceFrame(cameraFrame);
@@ -237,6 +241,6 @@ public class SimulatedDepthCamera
       tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
       tempNormal.set(0.0, yFace, zFace);
       tempFramePose3D.getOrientation().transform(tempNormal);
-      plane.setNormal(tempNormal);
+      plane.getNormal().set(tempNormal);
    }
 }

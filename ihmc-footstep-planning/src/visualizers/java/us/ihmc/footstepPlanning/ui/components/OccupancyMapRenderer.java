@@ -87,7 +87,7 @@ public class OccupancyMapRenderer extends AnimationTimer
          double y = cell.getYIndex() * LatticeNode.gridSizeXY;
          double z = getHeightAtPoint(x, y) + nodeOffsetZ;
          RigidBodyTransform transform = new RigidBodyTransform();
-         transform.setTranslation(x, y, z);
+         transform.getTranslation().set(x, y, z);
 
          renderedCells.add(cell);
          meshBuilder.addPolygon(transform, cellPolygon, occupancyCellColor);

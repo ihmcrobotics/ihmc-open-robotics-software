@@ -41,7 +41,7 @@ public class TranslationReferenceFrameTest
       expectedTranslation.add(translation2);
       expectedTranslation.add(translation3);
 
-      transformToDesiredFrame.getTranslation(totalTranslation);
+      totalTranslation.set(transformToDesiredFrame.getTranslation());
 
       EuclidCoreTestTools.assertTuple3DEquals(expectedTranslation, totalTranslation, 1e-7);
 
@@ -56,7 +56,7 @@ public class TranslationReferenceFrameTest
       expectedTranslation.add(translation2);
       expectedTranslation.add(translation3);
 
-      transformToDesiredFrame.getTranslation(totalTranslation);
+      totalTranslation.set(transformToDesiredFrame.getTranslation());
 
       EuclidCoreTestTools.assertTuple3DEquals(expectedTranslation, totalTranslation, 1e-7);
    }

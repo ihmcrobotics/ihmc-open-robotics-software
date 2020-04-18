@@ -81,10 +81,10 @@ public class WrapperForPositionAndOrientationTrajectoryGenerators implements Pos
    {
       positionTrajectoryGenerator.getPosition(tempPosition);
       framePoseToPack.changeFrame(tempPosition.getReferenceFrame());
-      framePoseToPack.setPosition(tempPosition);
+      framePoseToPack.getPosition().set(tempPosition);
 
       orientationTrajectoryGenerator.getOrientation(tempOrientation);
-      framePoseToPack.setOrientation(tempOrientation);
+      framePoseToPack.getOrientation().set(tempOrientation);
    }
 
    public void showVisualization()

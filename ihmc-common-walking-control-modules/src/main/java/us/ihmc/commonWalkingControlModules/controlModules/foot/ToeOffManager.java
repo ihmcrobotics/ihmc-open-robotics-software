@@ -756,8 +756,8 @@ public class ToeOffManager
       {
          FrameConvexPolygon2D footDefaultPolygon = footDefaultPolygons.get(supportSide);
          ReferenceFrame referenceFrame = footDefaultPolygon.getReferenceFrame();
-         toeOffLine.setFirstEndpoint(referenceFrame, Double.NEGATIVE_INFINITY, 0.0);
-         toeOffLine.setSecondEndpoint(referenceFrame, Double.NEGATIVE_INFINITY, 0.0);
+         toeOffLine.getFirstEndpoint().set(referenceFrame, Double.NEGATIVE_INFINITY, 0.0);
+         toeOffLine.getSecondEndpoint().set(referenceFrame, Double.NEGATIVE_INFINITY, 0.0);
 
          // gets the leading two toe points
          for (int i = 0; i < footDefaultPolygon.getNumberOfVertices(); i++)
@@ -765,12 +765,12 @@ public class ToeOffManager
             tmpPoint2d.setIncludingFrame(footDefaultPolygon.getVertex(i));
             if (tmpPoint2d.getX() > toeOffLine.getFirstEndpoint().getX())
             { // further ahead than leading point
-               toeOffLine.setSecondEndpoint(toeOffLine.getFirstEndpoint());
-               toeOffLine.setFirstEndpoint(tmpPoint2d);
+               toeOffLine.getSecondEndpoint().set(toeOffLine.getFirstEndpoint());
+               toeOffLine.getFirstEndpoint().set(tmpPoint2d);
             }
             else if (tmpPoint2d.getX() > toeOffLine.getSecondEndpoint().getX())
             { // further ahead than second leading point
-               toeOffLine.setSecondEndpoint(tmpPoint2d);
+               toeOffLine.getSecondEndpoint().set(tmpPoint2d);
             }
          }
 

@@ -5,7 +5,7 @@ import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -107,7 +107,7 @@ public class SimpleWalkerRobot extends Robot
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             bodyJoint.getRotationToWorld(bodyRotation);
-            transformToParent.setRotation(bodyRotation);
+            transformToParent.getRotation().set(bodyRotation);
          }
       };
       bodyZUpFrame = new ZUpFrame(ReferenceFrame.getWorldFrame(), bodyFrame,"bodyZUpFrame");
@@ -117,7 +117,7 @@ public class SimpleWalkerRobot extends Robot
       for (RobotSide robotSide : RobotSide.values())
       {
          PinJoint hipPitchJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "HipPitch", new Vector3D(0.0, 0.0*robotSide.negateIfRightSide(hipOffsetY), 0.0),
-                                               this, Axis.Y);
+                                               this, Axis3D.Y);
          hipPitchJoints.put(robotSide, hipPitchJoint);
          hipPitchJoint.setDynamic(true);
          hipPitchJoint.setLimitStops(-Math.PI, Math.PI, 1e6, 1e3);
@@ -128,7 +128,7 @@ public class SimpleWalkerRobot extends Robot
          if(withYaw)
          {
             PinJoint hipYawJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "HipYaw",
-                                                new Vector3D(0.0, 0.0* robotSide.negateIfRightSide(hipOffsetY), 0.0), this, Axis.Z);
+                                                new Vector3D(0.0, 0.0* robotSide.negateIfRightSide(hipOffsetY), 0.0), this, Axis3D.Z);
             hipYawJoints.put(robotSide, hipYawJoint);
             hipYawJoint.setDynamic(true);
             hipYawJoint.setLimitStops(-Math.PI, Math.PI, 1e6, 1e3);
@@ -137,7 +137,7 @@ public class SimpleWalkerRobot extends Robot
 
          }
          PinJoint hipRollJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "HipRoll", new Vector3D(0.0, 0.0*robotSide.negateIfRightSide(hipOffsetY), 0.0),
-                                              this, Axis.X);
+                                              this, Axis3D.X);
          hipRollJoints.put(robotSide, hipRollJoint);
          hipRollJoint.setDynamic(true);
          hipRollJoint.setLimitStops(-Math.PI, Math.PI, 1e6, 1e3);
@@ -181,7 +181,7 @@ public class SimpleWalkerRobot extends Robot
          {
 
 
-            PinJoint anklePitchJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "AnklePitch", new Vector3D(0.0, 0.0, 0.0), this, Axis.Y);
+            PinJoint anklePitchJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "AnklePitch", new Vector3D(0.0, 0.0, 0.0), this, Axis3D.Y);
             anklePitchJoints.put(robotSide, anklePitchJoint);
             anklePitchJoint.setDynamic(true);
             anklePitchJoint.setLimitStops(-0.15*Math.PI, 0.15*Math.PI, 1e6, 1e3);
@@ -190,7 +190,7 @@ public class SimpleWalkerRobot extends Robot
 
             if (withYaw)
             {
-               PinJoint ankleYawJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "AnkleYaw", new Vector3D(0.0, 0.0, 0.0), this, Axis.Z);
+               PinJoint ankleYawJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "AnkleYaw", new Vector3D(0.0, 0.0, 0.0), this, Axis3D.Z);
                ankleYawJoints.put(robotSide, ankleYawJoint);
                ankleYawJoint.setDynamic(true);
                ankleYawJoint.setLimitStops(-0.2 * Math.PI, 0.2 * Math.PI, 1e6, 1e3);
@@ -199,7 +199,7 @@ public class SimpleWalkerRobot extends Robot
             }
 
             PinJoint ankleRollJoint = new PinJoint(robotSide.getSideNameFirstLetter() + "AnkleRoll", new Vector3D(0.0, 0.0, 0.0),
-                                                   this, Axis.X);
+                                                   this, Axis3D.X);
             ankleRollJoints.put(robotSide, ankleRollJoint);
             ankleRollJoint.setDynamic(true);
             ankleRollJoint.setLimitStops(-0.15*Math.PI, 0.15*Math.PI, 1e6, 1e3);

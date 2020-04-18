@@ -123,7 +123,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
       planeFitter.fitPlaneToPoints(new Point2D(position.getX(), position.getY()), pointList, fittedPlane);
       double height = fittedPlane.getZOnPlane(position.getX(), position.getY());
 
-      Vector3D surfaceNormal = fittedPlane.getNormalCopy();
+      Vector3D surfaceNormal = new Vector3D(fittedPlane.getNormal());
       if (surfaceNormal.containsNaN())
       {
          surfaceNormal.set(0.0, 0.0, 1.0);
@@ -162,7 +162,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
       planeFitter.fitPlaneToPoints(new Point2D(footPose2d.getX(), footPose2d.getY()), pointList, fittedPlane);
       double height = fittedPlane.getZOnPlane(footPose2d.getX(), footPose2d.getY());
 
-      Vector3D surfaceNormal = fittedPlane.getNormalCopy();
+      Vector3D surfaceNormal = new Vector3D(fittedPlane.getNormal());
       if (surfaceNormal.containsNaN())
       {
          surfaceNormal.set(0.0, 0.0, 1.0);

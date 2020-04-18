@@ -37,7 +37,7 @@ public class FootstepPlanState implements Comparable<FootstepPlanState>
       footstepData.getLocation().set(new Point3D(x, y, 0));
       
       Quaternion orientation = new Quaternion();
-      orientation.setToYawQuaternion(theta);
+      orientation.setToYawOrientation(theta);
       footstepData.getOrientation().set(orientation);
       footstepData.setRobotSide(side.toByte());
       this.theta = theta;
