@@ -56,7 +56,8 @@ public class CenterOfMassHeightManager
 
    private final boolean useStateMachine;
 
-   public CenterOfMassHeightManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
+   public CenterOfMassHeightManager(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                    WalkingControllerParameters walkingControllerParameters,
                                     YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
@@ -286,17 +287,31 @@ public class CenterOfMassHeightManager
       }
    }
 
-   public double computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredCoMVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
+   public double computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
+                                                     FrameVector2DReadOnly desiredCoMVelocity,
+                                                     boolean isInDoubleSupport,
+                                                     double omega0,
+                                                     boolean isRecoveringFromPush,
                                                      FeetManager feetManager)
    {
       if (useStateMachine)
       {
-         return stateMachine.getCurrentState().computeDesiredCoMHeightAcceleration(desiredCoMVelocity, isInDoubleSupport, omega0, isRecoveringFromPush,
-                                                                                   feetManager);
+         return stateMachine.getCurrentState()
+                            .computeDesiredCoMHeightAcceleration(desiredICPVelocity,
+                                                                 desiredCoMVelocity,
+                                                                 isInDoubleSupport,
+                                                                 omega0,
+                                                                 isRecoveringFromPush,
+                                                                 feetManager);
       }
       else
       {
-         return pelvisHeightControlState.computeDesiredCoMHeightAcceleration(desiredCoMVelocity, isInDoubleSupport, omega0, isRecoveringFromPush, feetManager);
+         return pelvisHeightControlState.computeDesiredCoMHeightAcceleration(desiredICPVelocity,
+                                                                             desiredCoMVelocity,
+                                                                             isInDoubleSupport,
+                                                                             omega0,
+                                                                             isRecoveringFromPush,
+                                                                             feetManager);
       }
    }
 
@@ -343,7 +358,8 @@ public class CenterOfMassHeightManager
       }
    }
 
-   public void setComHeightGains(PIDGainsReadOnly walkingControllerComHeightGains, DoubleProvider walkingControllerMaxComHeightVelocity,
+   public void setComHeightGains(PIDGainsReadOnly walkingControllerComHeightGains,
+                                 DoubleProvider walkingControllerMaxComHeightVelocity,
                                  PIDGainsReadOnly userModeComHeightGains)
    {
       if (useStateMachine)

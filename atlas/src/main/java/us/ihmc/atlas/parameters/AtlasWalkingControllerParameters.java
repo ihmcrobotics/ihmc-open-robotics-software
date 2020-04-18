@@ -611,4 +611,14 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    {
       this.leapOfFaithParameters = leapOfFaithParameters;
    }
+
+   /**
+    * Maximum velocity of the CoM height. Desired height velocity will be set to this if it is exceeded.
+    * Not a very clean variable and probably should not be here, but here it is...
+    */
+   @Override
+   public double getMaximumVelocityCoMHeight()
+   {
+      return 0.5;
+   }
 }
