@@ -182,7 +182,7 @@ public class FiducialDoorRobot extends Robot implements SelectableObject, Select
       pointToCheck.changeFrame(doorFrame);
       pointToCheck.add(-0.5 * widthX, -0.5 * depthY, -0.5 * heightZ); // since FrameBox3d.isInsideOrOnSurface assumes center of box is origin
 
-      if (doorBox.isInsideOrOnSurface(pointToCheck))
+      if (doorBox.isPointInside(pointToCheck))
       {
          lastInsideHandles = false;
          return true;
@@ -245,7 +245,7 @@ public class FiducialDoorRobot extends Robot implements SelectableObject, Select
       if (!packedByHandles)
       {
          pointToCheck.changeFrame(doorFrame);
-         doorBox.getClosestPointAndNormalAt(frameIntersectionToPack, frameNormalToPack, pointToCheck);
+         doorBox.evaluatePoint3DCollision(pointToCheck, frameIntersectionToPack, frameNormalToPack);
       }
 
       frameNormalToPack.changeFrame(ReferenceFrame.getWorldFrame());
