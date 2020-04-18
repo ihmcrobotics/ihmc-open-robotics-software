@@ -10,6 +10,7 @@ import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextF
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
@@ -285,17 +286,17 @@ public class CenterOfMassHeightManager
       }
    }
 
-   public double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
+   public double computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredCoMVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
                                                      FeetManager feetManager)
    {
       if (useStateMachine)
       {
-         return stateMachine.getCurrentState().computeDesiredCoMHeightAcceleration(desiredICPVelocity, isInDoubleSupport, omega0, isRecoveringFromPush,
+         return stateMachine.getCurrentState().computeDesiredCoMHeightAcceleration(desiredCoMVelocity, isInDoubleSupport, omega0, isRecoveringFromPush,
                                                                                    feetManager);
       }
       else
       {
-         return pelvisHeightControlState.computeDesiredCoMHeightAcceleration(desiredICPVelocity, isInDoubleSupport, omega0, isRecoveringFromPush, feetManager);
+         return pelvisHeightControlState.computeDesiredCoMHeightAcceleration(desiredCoMVelocity, isInDoubleSupport, omega0, isRecoveringFromPush, feetManager);
       }
    }
 

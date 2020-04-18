@@ -13,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
@@ -217,7 +218,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private boolean desiredCMPcontainedNaN = false;
 
    @Override
-   public double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity,
+   public double computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredCoMVelocity,
                                                      boolean isInDoubleSupport,
                                                      double omega0,
                                                      boolean isRecoveringFromPush,
@@ -247,16 +248,16 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       // TODO: use current omega0 instead of previous
       comXYVelocity.setIncludingFrame(comVelocity);
-      if (desiredICPVelocity.containsNaN())
+      if (desiredCoMVelocity.containsNaN())
       {
          if (!desiredCMPcontainedNaN)
             LogTools.error("Desired CMP containes NaN, setting it to the ICP - only showing this error once");
-         comAcceleration.setToZero(desiredICPVelocity.getReferenceFrame());
+         comAcceleration.setToZero(desiredCoMVelocity.getReferenceFrame());
          desiredCMPcontainedNaN = true;
       }
       else
       {
-         comAcceleration.setIncludingFrame(desiredICPVelocity, 0.0);
+         comAcceleration.setIncludingFrame(desiredCoMVelocity, 0.0);
          desiredCMPcontainedNaN = false;
       }
       comAcceleration.sub(comVelocity);
@@ -291,7 +292,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       if (feetManager != null)
       {
          comHeightDataAfterSingularityAvoidance.set(comHeightDataAfterSmoothing);
-         feetManager.correctCoMHeightForSupportSingularityAvoidance(desiredICPVelocity, zCurrent, comHeightDataAfterSingularityAvoidance);
+         feetManager.correctCoMHeightForSupportSingularityAvoidance(desiredCoMVelocity, zCurrent, comHeightDataAfterSingularityAvoidance);
 
          comHeightDataAfterUnreachableFootstep.set(comHeightDataAfterSingularityAvoidance);
          feetManager.correctCoMHeightForUnreachableFootstep(comHeightDataAfterUnreachableFootstep);

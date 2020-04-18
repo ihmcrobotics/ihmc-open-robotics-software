@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
 import us.ihmc.robotics.stateMachine.core.State;
 
@@ -48,7 +49,7 @@ public interface PelvisAndCenterOfMassHeightControlState extends State
 
    public abstract void handleStopAllTrajectoryCommand(StopAllTrajectoryCommand command);
 
-   public abstract double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity, boolean isInDoubleSupport, double omega0,
+   public abstract double computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredCoMVelocity, boolean isInDoubleSupport, double omega0,
                                                               boolean isRecoveringFromPush, FeetManager feetManager);
 
    default TaskspaceTrajectoryStatusMessage pollStatusToReport()
