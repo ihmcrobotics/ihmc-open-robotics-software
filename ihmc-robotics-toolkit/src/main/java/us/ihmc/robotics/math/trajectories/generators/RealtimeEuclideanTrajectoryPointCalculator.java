@@ -13,15 +13,19 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameEuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.EuclideanTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.FrameEuclideanTrajectoryPointList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class RealtimeEuclideanTrajectoryPointCalculator
 {
+   private final YoVariableRegistry registry;
    private static final int dimension = Axis3D.values.length;
-   private static final int maxIterations = 2000;
-   private final TrajectoryPointOptimizer trajectoryPointOptimizer = new TrajectoryPointOptimizer(dimension);
+   private static final int defaultMaxIterations = 2000;
+   private final TrajectoryPointOptimizer trajectoryPointOptimizer;
 
    private final FrameEuclideanTrajectoryPointList trajectoryPoints = new FrameEuclideanTrajectoryPointList();
    private final TDoubleArrayList times = new TDoubleArrayList();
@@ -33,11 +37,31 @@ public class RealtimeEuclideanTrajectoryPointCalculator
    private final TDoubleArrayList finalVelocityArray = new TDoubleArrayList(dimension);
    private final TDoubleArrayList waypointVelocity = new TDoubleArrayList(dimension);
 
+   private final TDoubleArrayList velocityArrayTemp = new TDoubleArrayList();
+   private final Vector3D velocityVectorTemp = new Vector3D();
+
    private final RecyclingArrayList<TDoubleArrayList> waypointPositions;
 
+   private final YoInteger maxIterations;
+   private final YoBoolean hasConverged;
+   private final YoBoolean optimizeInOneTick;
 
-   public RealtimeEuclideanTrajectoryPointCalculator()
+   public RealtimeEuclideanTrajectoryPointCalculator(String namePrefix, YoVariableRegistry parentRegistry)
    {
+      this(namePrefix, defaultMaxIterations, parentRegistry);
+   }
+
+   public RealtimeEuclideanTrajectoryPointCalculator(String namePrefix, int maxIterations, YoVariableRegistry parentRegistry)
+   {
+      registry = new YoVariableRegistry(namePrefix + getClass().getSimpleName());
+
+      trajectoryPointOptimizer = new TrajectoryPointOptimizer(namePrefix, dimension, registry);
+      hasConverged = new YoBoolean(namePrefix + "HasConverged", registry);
+      optimizeInOneTick = new YoBoolean(namePrefix + "OptimizeInOneTick", registry);
+
+      this.maxIterations = new YoInteger(namePrefix + "MaxIterations", registry);
+      this.maxIterations.set(maxIterations);
+
       waypointPositions = new RecyclingArrayList<>(0, () ->
       {
          TDoubleArrayList ret = new TDoubleArrayList(dimension);
@@ -45,6 +69,8 @@ public class RealtimeEuclideanTrajectoryPointCalculator
             ret.add(0.0);
          return ret;
       });
+
+      parentRegistry.addChild(registry);
    }
 
    public void clear()
@@ -77,22 +103,22 @@ public class RealtimeEuclideanTrajectoryPointCalculator
       trajectoryPoints.changeFrame(referenceFrame);
    }
 
-//   public boolean doOptimizationUpdate()
-//   {
-//      if (!hasConverged.getBooleanValue())
-//      {
-//         hasConverged.set(optimizer.doFullTimeUpdate());
-//         updateVariablesFromOptimizer();
-//      }
-//
-//      return !hasConverged();
-//   }
-
-   private final TDoubleArrayList velocityArrayTemp = new TDoubleArrayList();
-   private final Vector3D velocityVectorTemp = new Vector3D();
-
-   public void compute(double trajectoryTime)
+   public boolean doOptimizationUpdate(double trajectoryDuration)
    {
+      if (!hasConverged.getBooleanValue())
+      {
+         hasConverged.set(trajectoryPointOptimizer.doFullTimeUpdate());
+         updateVariablesFromOptimizer(trajectoryDuration);
+      }
+
+      return !hasConverged();
+   }
+
+   public void initialize(double trajectoryDuration)
+   {
+      if (trajectoryPoints.getTrajectoryPoint(0).getPosition().containsNaN())
+         throw new RuntimeException("Does not have valid endpoint conditions. Did you call setEndpointConditions?");
+
       FrameEuclideanTrajectoryPoint first = trajectoryPoints.getTrajectoryPoint(0);
       FrameEuclideanTrajectoryPoint last = trajectoryPoints.getLastTrajectoryPoint();
 
@@ -122,20 +148,41 @@ public class RealtimeEuclideanTrajectoryPointCalculator
       trajectoryPointOptimizer.setEndPoints(initialPositionArray, initialVelocityArray, finalPositionArray, finalVelocityArray);
       trajectoryPointOptimizer.setWaypoints(waypointPositions);
 
-      if (times.size() == 0)
+
+      if (optimizeInOneTick.getBooleanValue())
       {
-         computeIncludingTimes();
+         compute(maxIterations.getIntegerValue(), trajectoryDuration);
+         hasConverged.set(true);
       }
       else
       {
-         computeForFixedTime(trajectoryTime);
+         hasConverged.set(false);
+         compute(0, trajectoryDuration);
+         trajectoryPointOptimizer.compute(0);
       }
 
+      updateVariablesFromOptimizer(trajectoryDuration);
+   }
+
+   private void compute(int maxIterations, double trajectoryDuration)
+   {
+      if (times.size() == 0)
+      {
+         computeIncludingTimes(maxIterations);
+      }
+      else
+      {
+         computeForFixedTime(maxIterations, trajectoryDuration);
+      }
+   }
+
+   private void updateVariablesFromOptimizer(double trajectoryDuration)
+   {
       times.clear();
       times.add(0.0);
       for (int i = 0; i < waypointPositions.size(); i++)
-         times.add(trajectoryPointOptimizer.getWaypointTime(i) * trajectoryTime);
-      times.add(trajectoryTime);
+         times.add(trajectoryPointOptimizer.getWaypointTime(i) * trajectoryDuration);
+      times.add(trajectoryDuration);
 
       for (int i = 0; i < trajectoryPoints.getNumberOfTrajectoryPoints(); i++)
          trajectoryPoints.getTrajectoryPoint(i).setTime(times.get(i));
@@ -146,13 +193,13 @@ public class RealtimeEuclideanTrajectoryPointCalculator
          trajectoryPointOptimizer.getWaypointVelocity(velocityArrayTemp, i);
 
          for (int j = 0; j < velocityArrayTemp.size(); j++)
-            velocityVectorTemp.setElement(j, velocityArrayTemp.get(j) / trajectoryTime);
+            velocityVectorTemp.setElement(j, velocityArrayTemp.get(j) / trajectoryDuration);
 
          trajectoryPoints.getTrajectoryPoint(i + 1).setLinearVelocity(velocityVectorTemp);
       }
    }
 
-   private void computeForFixedTime(double trajectoryTime)
+   private void computeForFixedTime(int maxIterations, double trajectoryTime)
    {
       if (times.size() != trajectoryPoints.getNumberOfTrajectoryPoints())
       {
@@ -174,10 +221,10 @@ public class RealtimeEuclideanTrajectoryPointCalculator
       for (int i = 1; i < times.size() - 1; i++)
          transformedTimes.add(times.get(i));
 
-      trajectoryPointOptimizer.computeForFixedTime(transformedTimes);
+      trajectoryPointOptimizer.compute(maxIterations, transformedTimes);
    }
 
-   private void computeIncludingTimes()
+   private void computeIncludingTimes(int maxIterations)
    {
       trajectoryPointOptimizer.compute(maxIterations);
    }
@@ -195,5 +242,16 @@ public class RealtimeEuclideanTrajectoryPointCalculator
    public FrameEuclideanTrajectoryPointList getTrajectoryPoints()
    {
       return trajectoryPoints;
+   }
+
+   /**
+    * Returns whether the trajectory optimization has converged or not. This is useful when continuously improving
+    * the solution quality instead of waiting for the optimizer to finish in the initialize method.
+    *
+    * @return whether the optimizer has converged or not
+    */
+   public boolean hasConverged()
+   {
+      return hasConverged.getBooleanValue();
    }
 }
