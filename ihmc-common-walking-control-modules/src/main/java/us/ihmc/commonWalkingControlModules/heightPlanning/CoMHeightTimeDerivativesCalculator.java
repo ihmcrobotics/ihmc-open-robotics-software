@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.heightPlanning;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 
 public class CoMHeightTimeDerivativesCalculator
@@ -18,8 +19,8 @@ public class CoMHeightTimeDerivativesCalculator
    }
 
    public static void computeCoMHeightTimeDerivatives(CoMHeightTimeDerivativesData comHeightDataToPack,
-                                                      FrameVector3DReadOnly comVelocity,
-                                                      FrameVector3DReadOnly comAcceleration,
+                                                      FrameVector2DReadOnly comVelocity,
+                                                      FrameVector2DReadOnly comAcceleration,
                                                       CoMHeightPartialDerivativesDataReadOnly comPartialDerivatives)
    {
       comVelocity.checkReferenceFrameMatch(worldFrame);
