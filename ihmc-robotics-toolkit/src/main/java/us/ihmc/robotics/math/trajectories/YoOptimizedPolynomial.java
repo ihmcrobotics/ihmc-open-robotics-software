@@ -14,7 +14,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 public class YoOptimizedPolynomial
 {
    private final int maximumNumberOfCoefficients;
-   private double pos, vel, acc;
+   private double pos, vel, acc, jerk;
    private final double[] xPowers;
 
    private final RecyclingArrayList<PositionPoint1D> positionPoints = new RecyclingArrayList<>(PositionPoint1D::new);
@@ -235,7 +235,7 @@ public class YoOptimizedPolynomial
       double time = normalizeTime(x);
       setXPowers(xPowers, time);
 
-      pos = vel = acc = 0.0;
+      pos = vel = acc = jerk = 0.0;
       for (int i = 0; i < numberOfCoefficients.getIntegerValue(); i++)
       {
          pos += coefficients[i].getDoubleValue() * xPowers[i];
@@ -249,6 +249,11 @@ public class YoOptimizedPolynomial
       for (int i = 2; i < numberOfCoefficients.getIntegerValue(); i++)
       {
          acc += (i - 1) * i * coefficients[i].getDoubleValue() * xPowers[i - 2];
+      }
+
+      for (int i = 3; i < numberOfCoefficients.getIntegerValue(); i++)
+      {
+         jerk += (i - 2) * (i - 1) * i * coefficients[i].getDoubleValue() * xPowers[i - 3];
       }
    }
 
@@ -265,6 +270,11 @@ public class YoOptimizedPolynomial
    public double getAcceleration()
    {
       return acc;
+   }
+
+   public double getJerk()
+   {
+      return jerk;
    }
 
    public double getCoefficient(int i)

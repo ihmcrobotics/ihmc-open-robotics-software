@@ -17,4 +17,12 @@ public interface CoMHeightPartialDerivativesDataReadOnly
    double getPartialD2zDy2();
 
    double getPartialD2zDxDy();
+
+   double getPartialD3zDx3();
+
+   double getPartialD3zDy3();
+
+   double getPartialD3zDx2Dy();
+
+   double getPartialD3zDxDy2();
 }

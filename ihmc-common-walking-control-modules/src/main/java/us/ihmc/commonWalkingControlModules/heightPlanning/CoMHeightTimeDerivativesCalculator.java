@@ -30,10 +30,10 @@ public class CoMHeightTimeDerivativesCalculator
       double d2zDx2 = comPartialDerivatives.getPartialD2zDx2();
       double d2zDy2 = comPartialDerivatives.getPartialD2zDy2();
       double d2zDxDy = comPartialDerivatives.getPartialD2zDxDy();
-      double d3zDx3 = 0.0;
-      double d3zDy3 = 0.0;
-      double d3zDx2Dy = 0.0;
-      double d3zDxDy2 = 0.0;
+      double d3zDx3 = comPartialDerivatives.getPartialD3zDx3();
+      double d3zDy3 = comPartialDerivatives.getPartialD3zDy3();
+      double d3zDx2Dy = comPartialDerivatives.getPartialD3zDx2Dy();
+      double d3zDxDy2 = comPartialDerivatives.getPartialD3zDxDy2();
 
       double xDot = comVelocity.getX();
       double yDot = comVelocity.getY();
