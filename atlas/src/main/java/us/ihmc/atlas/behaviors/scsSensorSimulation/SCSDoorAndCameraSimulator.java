@@ -1,10 +1,7 @@
 package us.ihmc.atlas.behaviors.scsSensorSimulation;
 
-import boofcv.gui.image.ShowImages;
-import boofcv.io.image.UtilImageIO;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.VideoPacket;
-import org.apache.commons.lang3.SystemUtils;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.SCSVideoDataROS2Bridge;
@@ -28,7 +25,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
 import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
-import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.pubsub.DomainFactory;
@@ -39,20 +35,17 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.*;
 import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.simulatedSensors.LidarMount;
-import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
 import us.ihmc.tools.gui.AWTTools;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.util.Objects;
+import java.util.List;
 
 /**
  * Potential improvements:
@@ -61,7 +54,7 @@ import java.util.Objects;
  * - Remove SCS entirely?
  * - Add textures
  */
-public class SCSLidarAndCameraSimulator
+public class SCSDoorAndCameraSimulator
 {
    private final ROS2Input<RobotConfigurationData> robotConfigurationData;
    private final RemoteSyncedHumanoidRobotState remoteSyncedHumanoidFrames;
@@ -69,12 +62,7 @@ public class SCSLidarAndCameraSimulator
    private final SimulationConstructionSet scs;
    private final FloatingJoint floatingHeadJoint;
 
-   public SCSLidarAndCameraSimulator(Ros2Node ros2Node, CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel)
-   {
-      this(ros2Node, environment.getTerrainObject3D(), robotModel);
-   }
-
-   public SCSLidarAndCameraSimulator(Ros2Node ros2Node, TerrainObject3D terrainObject3D, DRCRobotModel robotModel)
+   public SCSDoorAndCameraSimulator(Ros2Node ros2Node, CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel, boolean startMinimized)
    {
       robotConfigurationData = new ROS2Input<>(ros2Node, RobotConfigurationData.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROLLER);
 
@@ -105,7 +93,21 @@ public class SCSLidarAndCameraSimulator
       robot.addRootJoint(floatingHeadJoint);
       robot.setGravity(0.0);
 
-      scs = new SimulationConstructionSet(robot);
+      if (environment.getEnvironmentRobots() != null)
+      {
+         Robot[] robots = new Robot[1 + environment.getEnvironmentRobots().size()];
+         robots[0] = robot;
+         List<? extends Robot> environmentRobots = environment.getEnvironmentRobots();
+         for (int i = 0; i < environmentRobots.size(); i++)
+         {
+            robots[i + 1] = environmentRobots.get(i);
+         }
+         scs = new SimulationConstructionSet(robots);
+      }
+      else
+      {
+        scs = new SimulationConstructionSet(robot);
+      }
       scs.setDT(0.001, 100); // TODO: Check this, might greatly alter performance
 
       FunctionalRobotController controller = new FunctionalRobotController();
@@ -123,6 +125,7 @@ public class SCSLidarAndCameraSimulator
       IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class);
       CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
       cameraConfiguration.setCameraMount(videoCameraMountName);
+      cameraConfiguration.setCameraFieldOfView(80.0);
       scs.setupCamera(cameraConfiguration);
       int width = 1024;
       int height = 544;
@@ -135,10 +138,17 @@ public class SCSLidarAndCameraSimulator
                                   framesPerSecond);
 
       scs.setGroundVisible(false);
-      scs.addStaticLinkGraphics(terrainObject3D.getLinkGraphics());
+      scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
 
-      scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(0.25));
+      scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2.0 / 3.0));
+
       scs.startOnAThread();
+
+      if (startMinimized)
+      {
+         scs.getGUI().getFrame().setState(Frame.ICONIFIED);
+      }
+
       scs.simulate();
    }
 
@@ -158,7 +168,7 @@ public class SCSLidarAndCameraSimulator
       gimbalJoint.addCameraMount(robotCam);
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.getTranslation().set(new Vector3D(radius + 0.001, 0.0, height / 2.0));
+      transform.setTranslation(new Vector3D(radius + 0.001, 0.0, height / 2.0));
       LidarScanParameters lidarScanParameters = new LidarScanParameters(720, (float) (-Math.PI / 2), (float) (Math.PI / 2), 0f, 0.1f, 30.0f, 0f);
       LidarSensorDescription lidarSensorDescription = new LidarSensorDescription("lidar", transform);
       lidarSensorDescription.setPointsPerSweep(lidarScanParameters.getPointsPerSweep());
@@ -224,6 +234,8 @@ public class SCSLidarAndCameraSimulator
       Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, ROS2Tools.REA.getNodeName());
 //      new SCSLidarAndCameraSimulator(ros2Node, DefaultCommonAvatarEnvironment.setUpShortCinderBlockField("CinderBlockField", 0.0, 1.0), createRobotModel());
 //      new SCSLidarAndCameraSimulator(ros2Node, createCommonAvatarEnvironment(), createRobotModel());
-      new SCSLidarAndCameraSimulator(ros2Node, new FiducialEnvironmentForDoorBehavior(), createRobotModel());
+//      new SCSDoorAndCameraSimulator(ros2Node, new FiducialEnvironmentForDoorBehavior(), createRobotModel());
+      boolean startMinimized = false;
+      new SCSDoorAndCameraSimulator(ros2Node, new FiducialDoorEnvironment(), createRobotModel(), startMinimized);
    }
 }

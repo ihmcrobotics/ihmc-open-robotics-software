@@ -118,11 +118,10 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
       super.onBehaviorEntered();
 
    }
+
    @Override
    protected WalkToLocationStates configureStateMachineAndReturnInitialKey(StateMachineFactory<WalkToLocationStates, BehaviorAction> factory)
    {
-      
-      
 
       BehaviorAction waitForGoalToBeSet = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
       {

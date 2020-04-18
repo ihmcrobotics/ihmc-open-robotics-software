@@ -30,6 +30,7 @@ import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
@@ -241,6 +242,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          public void onEntry()
          {
             publishTextToSpeech("Searching For The Door");
+            lookDown();
             super.onEntry();
          }
       };
@@ -384,6 +386,11 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.RESET_ROBOT, resetRobot, WalkThroughDoorBehaviorState.DONE);
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.FAILED, failedState, WalkThroughDoorBehaviorState.DONE);
       factory.addState(WalkThroughDoorBehaviorState.DONE, doneState);
+
+      factory.addStateChangedListener((from, to) -> {
+         publishTextToSpeech((from == null ? null : from.name()) + " -> " + (to == null ? null : to.name()));
+      });
+
 
       return WalkThroughDoorBehaviorState.SETUP_ROBOT;
    }
