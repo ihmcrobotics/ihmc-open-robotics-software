@@ -215,7 +215,8 @@ public class SplinedHeightTrajectory
 
       double z = polynomial.getPosition();
       double dzds = polynomial.getVelocity();
-      double ddzdds = polynomial.getAcceleration();
+      double d2zds2 = polynomial.getAcceleration();
+      double d3zds3 = polynomial.getJerk();
 
       /*
       spline.compute(splineQuery);
@@ -230,15 +231,26 @@ public class SplinedHeightTrajectory
       double dsdx = (contactFrameOnePosition.getX() - contactFrameZeroPosition.getX()) / length;
       double dsdy = (contactFrameOnePosition.getY() - contactFrameZeroPosition.getY()) / length;
 
-      double ddsddx = 0.0;
-      double ddsddy = 0.0;
-      double ddsdxdy = 0.0;
+      double d2sdx2 = 0.0;
+      double d2sdy2 = 0.0;
+      double d2sdxdy = 0.0;
+
+      double d3sdx3 = 0.0;
+      double d3sdy3 = 0.0;
+      double d3sdx2dy = 0.0;
+      double d3sdxdy2 = 0.0;
 
       double dzdx = dsdx * dzds;
       double dzdy = dsdy * dzds;
-      double ddzddx = dzds * ddsddx + ddzdds * dsdx * dsdx;
-      double ddzddy = dzds * ddsddy + ddzdds * dsdy * dsdy;
-      double ddzdxdy = ddzdds * dsdx * dsdy + dzds * ddsdxdy;
+
+      double d2zdx2 = dzds * d2sdx2 + d2zds2 * dsdx * dsdx;
+      double d2zdy2 = dzds * d2sdy2 + d2zds2 * dsdy * dsdy;
+      double d2zdxdy = d2zds2 * dsdx * dsdy + dzds * d2sdxdy;
+
+      double d3zdx3 = d3zds3 * dsdx * dsdx * dsdx + 3.0 * d2zds2 * dsdx * d2sdx2 + dzds * d3sdx3;
+      double d3zdy3 = d3zds3 * dsdy * dsdy * dsdy + 3.0 * d2zds2 * dsdy * d2sdy2 + dzds * d3sdy3;
+      double d3zdx2dy = d3zds3 * dsdx * dsdx * dsdy + 2.0 * d2zds2 * dsdx * d2sdxdy + d2zds2 * d2sdx2 * dsdy + dzds * d3sdx2dy;
+      double d3zdxdy2 = d3zds3 * dsdx * dsdy * dsdy + 2.0 * d2zds2 * dsdy * d2sdxdy + d2zds2 * dsdx * d2sdy2 + dzds * d3sdxdy2;
 
       tempFramePoint.setIncludingFrame(referenceFrame, 0.0, 0.0, z);
       tempFramePoint.changeFrame(worldFrame);
@@ -246,9 +258,13 @@ public class SplinedHeightTrajectory
       comHeightPartialDerivativesDataToPack.setCoMHeight(worldFrame, tempFramePoint.getZ());
       comHeightPartialDerivativesDataToPack.setPartialDzDx(dzdx);
       comHeightPartialDerivativesDataToPack.setPartialDzDy(dzdy);
-      comHeightPartialDerivativesDataToPack.setPartialD2zDxDy(ddzdxdy);
-      comHeightPartialDerivativesDataToPack.setPartialD2zDx2(ddzddx);
-      comHeightPartialDerivativesDataToPack.setPartialD2zDy2(ddzddy);
+      comHeightPartialDerivativesDataToPack.setPartialD2zDxDy(d2zdxdy);
+      comHeightPartialDerivativesDataToPack.setPartialD2zDx2(d2zdx2);
+      comHeightPartialDerivativesDataToPack.setPartialD2zDy2(d2zdy2);
+      comHeightPartialDerivativesDataToPack.setPartialD3zDx3(d3zdx3);
+      comHeightPartialDerivativesDataToPack.setPartialD3zDy3(d3zdy3);
+      comHeightPartialDerivativesDataToPack.setPartialD3zDx2Dy(d3zdx2dy);
+      comHeightPartialDerivativesDataToPack.setPartialD3zDxDy2(d3zdxdy2);
 
       pointOnSplineToPack.set(splineQuery, z);
 
