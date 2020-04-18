@@ -94,7 +94,7 @@ public class FootstepPlannerLogger
       return logSession(defaultLogsDirectory);
    }
 
-   public void deleteOldLogs(int numberOflogsToKeep)
+   public static void deleteOldLogs(int numberOflogsToKeep)
    {
       SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
       PathTools.walkFlat(Paths.get(defaultLogsDirectory), (path, type) -> {
