@@ -40,11 +40,15 @@ public class QuadrupedGaitTimingsPacketPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -61,13 +65,17 @@ public class QuadrupedGaitTimingsPacketPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -79,11 +87,15 @@ public class QuadrupedGaitTimingsPacketPubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(controller_msgs.msg.dds.QuadrupedGaitTimingsPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_6(data.getStepDuration());
 
+
       cdr.write_type_6(data.getEndDoubleSupportDuration());
+
 
       cdr.write_type_6(data.getMaxSpeed());
 
@@ -91,12 +103,16 @@ public class QuadrupedGaitTimingsPacketPubSubType implements us.ihmc.pubsub.Topi
 
    public static void read(controller_msgs.msg.dds.QuadrupedGaitTimingsPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setStepDuration(cdr.read_type_6());
       	
+
       data.setEndDoubleSupportDuration(cdr.read_type_6());
       	
+
       data.setMaxSpeed(cdr.read_type_6());
       	
 
@@ -105,18 +121,26 @@ public class QuadrupedGaitTimingsPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(controller_msgs.msg.dds.QuadrupedGaitTimingsPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_6("step_duration", data.getStepDuration());
+
       ser.write_type_6("end_double_support_duration", data.getEndDoubleSupportDuration());
+
       ser.write_type_6("max_speed", data.getMaxSpeed());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuadrupedGaitTimingsPacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setStepDuration(ser.read_type_6("step_duration"));
+
       data.setEndDoubleSupportDuration(ser.read_type_6("end_double_support_duration"));
+
       data.setMaxSpeed(ser.read_type_6("max_speed"));
    }
 

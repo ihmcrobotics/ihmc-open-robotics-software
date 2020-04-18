@@ -40,28 +40,40 @@ public class RobotDesiredConfigurationDataPubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.JointDesiredOutputMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -78,10 +90,13 @@ public class RobotDesiredConfigurationDataPubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -89,24 +104,33 @@ public class RobotDesiredConfigurationDataPubSubType implements us.ihmc.pubsub.T
       {
           current_alignment += controller_msgs.msg.dds.JointDesiredOutputMessagePubSubType.getCdrSerializedSize(data.getJointDesiredOutputList().get(i0), current_alignment);}
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredRootJointTranslation(), current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getDesiredRootJointOrientation(), current_alignment);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredRootJointLinearVelocity(), current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredRootJointAngularVelocity(), current_alignment);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredRootJointLinearAcceleration(), current_alignment);
+
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getDesiredRootJointAngularAcceleration(), current_alignment);
 
@@ -116,46 +140,70 @@ public class RobotDesiredConfigurationDataPubSubType implements us.ihmc.pubsub.T
 
    public static void write(controller_msgs.msg.dds.RobotDesiredConfigurationData data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_11(data.getWallTime());
 
+
       cdr.write_type_2(data.getJointNameHash());
+
 
       if(data.getJointDesiredOutputList().size() <= 50)
       cdr.write_type_e(data.getJointDesiredOutputList());else
           throw new RuntimeException("joint_desired_output_list field exceeds the maximum length");
 
+
       cdr.write_type_7(data.getHasDesiredRootJointPositionData());
 
+
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootJointTranslation(), cdr);
+
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getDesiredRootJointOrientation(), cdr);
+
       cdr.write_type_7(data.getHasDesiredRootJointVelocityData());
 
+
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootJointLinearVelocity(), cdr);
+
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootJointAngularVelocity(), cdr);
+
       cdr.write_type_7(data.getHasDesiredRootJointAccelerationData());
 
+
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootJointLinearAcceleration(), cdr);
+
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getDesiredRootJointAngularAcceleration(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.RobotDesiredConfigurationData data, us.ihmc.idl.CDR cdr)
    {
+
       data.setWallTime(cdr.read_type_11());
       	
+
       data.setJointNameHash(cdr.read_type_2());
       	
+
       cdr.read_type_e(data.getJointDesiredOutputList());	
+
       data.setHasDesiredRootJointPositionData(cdr.read_type_7());
       	
+
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootJointTranslation(), cdr);	
+
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getDesiredRootJointOrientation(), cdr);	
+
       data.setHasDesiredRootJointVelocityData(cdr.read_type_7());
       	
+
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootJointLinearVelocity(), cdr);	
+
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootJointAngularVelocity(), cdr);	
+
       data.setHasDesiredRootJointAccelerationData(cdr.read_type_7());
       	
+
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootJointLinearAcceleration(), cdr);	
+
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getDesiredRootJointAngularAcceleration(), cdr);	
 
    }
@@ -163,21 +211,33 @@ public class RobotDesiredConfigurationDataPubSubType implements us.ihmc.pubsub.T
    @Override
    public final void serialize(controller_msgs.msg.dds.RobotDesiredConfigurationData data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_11("wall_time", data.getWallTime());
+
       ser.write_type_2("joint_name_hash", data.getJointNameHash());
+
       ser.write_type_e("joint_desired_output_list", data.getJointDesiredOutputList());
+
       ser.write_type_7("has_desired_root_joint_position_data", data.getHasDesiredRootJointPositionData());
+
       ser.write_type_a("desired_root_joint_translation", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootJointTranslation());
+
 
       ser.write_type_a("desired_root_joint_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredRootJointOrientation());
 
+
       ser.write_type_7("has_desired_root_joint_velocity_data", data.getHasDesiredRootJointVelocityData());
+
       ser.write_type_a("desired_root_joint_linear_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootJointLinearVelocity());
+
 
       ser.write_type_a("desired_root_joint_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootJointAngularVelocity());
 
+
       ser.write_type_7("has_desired_root_joint_acceleration_data", data.getHasDesiredRootJointAccelerationData());
+
       ser.write_type_a("desired_root_joint_linear_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootJointLinearAcceleration());
+
 
       ser.write_type_a("desired_root_joint_angular_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootJointAngularAcceleration());
 
@@ -186,21 +246,33 @@ public class RobotDesiredConfigurationDataPubSubType implements us.ihmc.pubsub.T
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.RobotDesiredConfigurationData data)
    {
+
       data.setWallTime(ser.read_type_11("wall_time"));
+
       data.setJointNameHash(ser.read_type_2("joint_name_hash"));
+
       ser.read_type_e("joint_desired_output_list", data.getJointDesiredOutputList());
+
       data.setHasDesiredRootJointPositionData(ser.read_type_7("has_desired_root_joint_position_data"));
+
       ser.read_type_a("desired_root_joint_translation", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootJointTranslation());
+
 
       ser.read_type_a("desired_root_joint_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getDesiredRootJointOrientation());
 
+
       data.setHasDesiredRootJointVelocityData(ser.read_type_7("has_desired_root_joint_velocity_data"));
+
       ser.read_type_a("desired_root_joint_linear_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootJointLinearVelocity());
+
 
       ser.read_type_a("desired_root_joint_angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootJointAngularVelocity());
 
+
       data.setHasDesiredRootJointAccelerationData(ser.read_type_7("has_desired_root_joint_acceleration_data"));
+
       ser.read_type_a("desired_root_joint_linear_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootJointLinearAcceleration());
+
 
       ser.read_type_a("desired_root_joint_angular_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getDesiredRootJointAngularAcceleration());
 

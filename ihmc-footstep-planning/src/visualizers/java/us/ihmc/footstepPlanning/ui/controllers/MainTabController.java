@@ -8,14 +8,13 @@ import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
-import javafx.scene.control.SpinnerValueFactory.IntegerSpinnerValueFactory;
 import javafx.scene.layout.Region;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.idl.IDLSequence.Float;
@@ -49,7 +48,6 @@ public class MainTabController
 {
    private static final boolean verbose = false;
    private static final double safetyRadiusToDiscardSteps = 0.8;
-   private final TimeElapsedManager timeElapsedManager = new TimeElapsedManager();
 
    // control
    @FXML
@@ -67,32 +65,14 @@ public class MainTabController
    @FXML
    private Spinner<Double> timeout;
    @FXML
-   private Spinner<Integer> maxIterations;
-   @FXML
    private Spinner<Double> horizonLength;
 
-   // status
-   @FXML
-   private TextField sentRequestId;
-   @FXML
-   private TextField receivedRequestId;
-   @FXML
-   private Button viewExceptionButton;
-
-   @FXML
-   private TextField timeTaken;
-   @FXML
-   private TextField planningResult;
-   @FXML
-   private TextField plannerStatus;
    @FXML
    private ComboBox<DataSetName> dataSetSelector;
    @FXML
    private TextField logGenerationStatus;
    @FXML
    private TextField logLoadStatus;
-   @FXML
-   private Button loadLogButton;
 
    // goal placement
    @FXML
@@ -119,6 +99,8 @@ public class MainTabController
    private Spinner<Double> goalZPosition;
    @FXML
    private ComboBox<RobotSide> initialSupportSide;
+   @FXML
+   private ComboBox<us.ihmc.footstepPlanning.FootstepPlanHeading> pathHeading;
 
    @FXML
    private Spinner<Double> goalYaw;
@@ -161,7 +143,7 @@ public class MainTabController
       if (verbose)
          LogTools.info("Clicked abort planning...");
 
-      messager.submitMessage(AbortPlanning, true);
+      messager.submitMessage(HaltPlanning, true);
    }
 
    @FXML
@@ -246,7 +228,6 @@ public class MainTabController
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
-
       currentPlannerRequestId = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestId, -1);
       footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanResponse, null);
    }
@@ -277,56 +258,32 @@ public class MainTabController
       overrideSwingHeight.selectedProperty().addListener(s -> swingHeightSpinner.disableProperty().set(!overrideSwingHeight.isSelected()));
 
       timeout.setValueFactory(createTimeoutValueFactory());
-      maxIterations.setValueFactory(new IntegerSpinnerValueFactory(Integer.MIN_VALUE, Integer.MAX_VALUE, -1, 1));
       horizonLength.setValueFactory(createHorizonValueFactory());
 
       initialSupportSide.setItems(FXCollections.observableArrayList(RobotSide.values));
       initialSupportSide.setValue(RobotSide.LEFT);
 
+      pathHeading.setItems(FXCollections.observableArrayList(FootstepPlanHeading.values()));
+      pathHeading.setValue(FootstepPlanHeading.FORWARD);
+
       messager.bindTopic(IgnorePartialFootholds, ignorePartialFootholds.selectedProperty());
       messager.bindTopic(AutoPostProcess, autoPostProcess.selectedProperty());
       messager.bindBidirectional(SnapGoalSteps, snapGoalSteps.selectedProperty(), true);
       messager.bindBidirectional(AbortIfGoalStepSnapFails, abortIfGoalStepSnapFails.selectedProperty(), true);
+
+      dataSetSelector.setItems(FXCollections.observableArrayList(DataSetName.values()));
+      dataSetSelector.valueProperty().addListener(((observable, oldValue, newValue) -> messager.submitMessage(DataSetSelected, dataSetSelector.getValue())));
    }
 
    public void bindControls()
    {
       setupControls();
 
-      // control
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerRequestId, new TextViewerListener<>(sentRequestId));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.ReceivedPlanId, new TextViewerListener<>(receivedRequestId));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlanningResult, new TextViewerListener<>(planningResult));
-      messager.registerJavaFXSyncedTopicListener(FootstepPlannerMessagerAPI.PlannerStatus, new TextViewerListener<>(plannerStatus));
-
-      AtomicReference<String> stackTrace = messager.createInput(PlannerExceptionStackTrace, "No stack trace available");
-      viewExceptionButton.setOnAction(e ->
-                                      {
-                                         TextArea textArea = new TextArea(stackTrace.toString());
-                                         textArea.setEditable(false);
-
-                                         Alert alert = new Alert(Alert.AlertType.NONE);
-                                         alert.getButtonTypes().add(ButtonType.CLOSE);
-                                         alert.setHeaderText("Planner Stack Trace");
-                                         alert.setResizable(true);
-                                         alert.getDialogPane().setMinSize(Region.USE_PREF_SIZE, Region.USE_PREF_SIZE);
-                                         alert.getDialogPane().setContent(textArea);
-                                         alert.show();
-                                      });
-
       messager.bindBidirectional(FootstepPlannerMessagerAPI.AcceptNewPlanarRegions, acceptNewRegions.selectedProperty(), true);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerTimeout, timeout.getValueFactory().valueProperty(), doubleToDoubleConverter, true);
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.PlannerHorizonLength, horizonLength.getValueFactory().valueProperty(), doubleToDoubleConverter,
                                  true);
-
-      messager.registerTopicListener(ComputePath, b -> timeElapsedManager.start());
-      messager.registerTopicListener(AbortPlanning, b -> timeElapsedManager.stop());
-      messager.registerTopicListener(PlanningResult, result ->
-      {
-         if (result.terminalResult())
-            timeElapsedManager.stop();
-      });
 
       // set goal
       messager.bindPropertyToTopic(FootstepPlannerMessagerAPI.EditModeEnabled, placeGoal.disableProperty());
@@ -335,6 +292,7 @@ public class MainTabController
 
       messager.bindBidirectional(FootstepPlannerMessagerAPI.AssumeFlatGround, assumeFlatGround.selectedProperty(), false);
       messager.bindBidirectional(FootstepPlannerMessagerAPI.InitialSupportSide, initialSupportSide.valueProperty(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.RequestedFootstepPlanHeading, pathHeading.valueProperty(), false);
 
       goalPositionProperty.bindBidirectionalX(goalXPosition.getValueFactory().valueProperty());
       goalPositionProperty.bindBidirectionalY(goalYPosition.getValueFactory().valueProperty());
@@ -511,23 +469,6 @@ public class MainTabController
       }
    };
 
-   private class TextViewerListener<T> implements TopicListener<T>
-   {
-      private final TextField textField;
-
-      public TextViewerListener(TextField textField)
-      {
-         this.textField = textField;
-      }
-
-      @Override
-      public void receivedMessageForTopic(T messageContent)
-      {
-         if (messageContent != null)
-            textField.promptTextProperty().setValue(messageContent.toString());
-      }
-   }
-
    private class WalkingPreviewPlaybackManager extends AnimationTimer
    {
       final AtomicReference<WalkingControllerPreviewOutputMessage> walkingPreviewOutput;
@@ -660,36 +601,6 @@ public class MainTabController
 
          previewRobotModel.getRootJoint().setJointPosition(kinematicsToolboxOutputStatus.getDesiredRootTranslation());
          previewRobotModel.getRootJoint().setJointOrientation(kinematicsToolboxOutputStatus.getDesiredRootOrientation());
-      }
-   }
-
-   private class TimeElapsedManager extends AnimationTimer
-   {
-      private boolean active = false;
-      private final Stopwatch stopwatch = new Stopwatch();
-
-      @Override
-      public void start()
-      {
-         if(!active)
-         {
-            active = true;
-            stopwatch.start();
-            super.start();
-         }
-      }
-
-      @Override
-      public void stop()
-      {
-         active = false;
-         super.stop();
-      }
-
-      @Override
-      public void handle(long now)
-      {
-         timeTaken.setText(String.format("%.2f", stopwatch.totalElapsed()));
       }
    }
 }

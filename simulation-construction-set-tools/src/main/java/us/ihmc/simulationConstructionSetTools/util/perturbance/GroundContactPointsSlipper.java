@@ -109,7 +109,7 @@ public class GroundContactPointsSlipper implements RobotController
    
    public void setSlipRotationEulerAngles(Vector3DReadOnly eulerAngles)
    {
-      this.slipRotation.setEulerAngles(eulerAngles);
+      this.slipRotation.setEuler(eulerAngles);
    }
    
    public boolean isDoneSlipping()
@@ -117,7 +117,7 @@ public class GroundContactPointsSlipper implements RobotController
       boolean translationalSlipDone = slipAmount.lengthSquared() < 0.0001 * 0.0001;
       
       Vector3D eulerAngles = new Vector3D();
-      slipRotation.getEulerAngles(eulerAngles);
+      slipRotation.getEuler(eulerAngles);
       boolean rotationalSlipDone = eulerAngles.lengthSquared() < 0.001 * 0.001;
       
       return translationalSlipDone & rotationalSlipDone;
@@ -160,7 +160,7 @@ public class GroundContactPointsSlipper implements RobotController
    private void applyRotationalSlip(double percentOfDelta)
    {
       FrameQuaternion identity = new FrameQuaternion(ReferenceFrame.getWorldFrame());
-      FrameQuaternion desired = slipRotation.getFrameOrientationCopy();
+      FrameQuaternion desired = new FrameQuaternion(slipRotation);
       FrameQuaternion delta = new FrameQuaternion();
 
       delta.interpolate(identity, desired, percentOfDelta);

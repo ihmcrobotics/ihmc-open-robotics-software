@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.simplePendulum;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -51,7 +51,7 @@ public class SimplePendulumRobot extends Robot
       super("pendulum");
 
       // b. Add a joint to the robot
-      PinJoint fulcrumPinJoint = new PinJoint("FulcrumPin", new Vector3D(0.0, 0.0, 1.5), this, Axis.Y);
+      PinJoint fulcrumPinJoint = new PinJoint("FulcrumPin", new Vector3D(0.0, 0.0, 1.5), this, Axis3D.Y);
       fulcrumPinJoint.setInitialState(fulcrumInitialPositionRadians, fulcrumInitialVelocity);
       fulcrumPinJoint.setLink(pendulumLink());// pendulumLink() method defined next.
       fulcrumPinJoint.setDamping(0.3);

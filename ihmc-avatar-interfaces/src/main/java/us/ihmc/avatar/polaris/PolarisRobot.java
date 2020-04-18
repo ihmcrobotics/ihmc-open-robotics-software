@@ -1,6 +1,6 @@
 package us.ihmc.avatar.polaris;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -69,7 +69,7 @@ public class PolarisRobot extends Robot
 
       polarisLink.setMass(1.0);
       polarisLink.setComOffset(new Vector3D());
-      Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(1.0, 1.0, 1.0, Axis.Z);
+      Matrix3D inertia = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(1.0, 1.0, 1.0, Axis3D.Z);
       polarisLink.setMomentOfInertia(inertia);
 
       floatingJoint = new FloatingJoint(name + "Base", name, new Vector3D(), this);
@@ -126,10 +126,10 @@ public class PolarisRobot extends Robot
    
    static
    {
-      wheelToCarTransform.setTranslation(wheelToCarX, wheelToCarY, wheelToCarZ);
+      wheelToCarTransform.getTranslation().set(wheelToCarX, wheelToCarY, wheelToCarZ);
       RotationMatrix rotation = new RotationMatrix();
-      rotation.setToPitchMatrix(Math.toRadians(steeringWheelPitchInDegrees));
-      wheelToCarTransform.setRotation(rotation);
+      rotation.setToPitchOrientation(Math.toRadians(steeringWheelPitchInDegrees));
+      wheelToCarTransform.getRotation().set(rotation);
       
       carToWheelTransform.set(wheelToCarTransform);
       carToWheelTransform.invert();

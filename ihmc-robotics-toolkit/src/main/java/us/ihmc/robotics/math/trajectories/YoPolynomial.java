@@ -557,7 +557,7 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
       setYoVariables();
    }
 
-   private void solveForCoefficients()
+   protected void solveForCoefficients()
    {
       solver.setA(constraintMatrix);
       solver.solve(constraintVector, coefficientVector);
@@ -603,7 +603,7 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
    /**
     * Set a specific coefficient of the polynomial. A sequence of calls to this function should
     * typically be followed by a call to {@code reshape(int)} later.
-    * 
+    *
     * @param power
     * @param coefficient
     */
@@ -685,7 +685,7 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
    /**
     * Returns the order-th derivative of the xPowers vector at value x (Note: does NOT return the
     * YoPolynomials order-th derivative at x)
-    * 
+    *
     * @param order
     * @param x
     * @return
@@ -751,22 +751,22 @@ public class YoPolynomial implements PolynomialReadOnly, PolynomialVariableHolde
       constraintVector.set(row, 0, desiredZDerivative);
    }
 
-   private void setPositionRow(int row, double x, double z)
+   protected void setPositionRow(int row, double x, double z)
    {
       setConstraintRow(row, x, z, 0);
    }
 
-   private void setVelocityRow(int row, double x, double zVelocity)
+   protected void setVelocityRow(int row, double x, double zVelocity)
    {
       setConstraintRow(row, x, zVelocity, 1);
    }
 
-   private void setAccelerationRow(int row, double x, double zAcceleration)
+   protected void setAccelerationRow(int row, double x, double zAcceleration)
    {
       setConstraintRow(row, x, zAcceleration, 2);
    }
 
-   private void setYoVariables()
+   protected void setYoVariables()
    {
       for (int row = 0; row < numberOfCoefficients.getIntegerValue(); row++)
       {

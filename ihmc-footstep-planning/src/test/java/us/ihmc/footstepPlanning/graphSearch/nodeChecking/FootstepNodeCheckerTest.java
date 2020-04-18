@@ -3,7 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -56,7 +56,7 @@ public class FootstepNodeCheckerTest
 
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
       generator.translate(-0.5, 0.5, 0.5);
-      generator.rotate(Math.PI / 2.0, Axis.Y);
+      generator.rotate(Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 2.0);
       PlanarRegionsList planarRegions = generator.getPlanarRegionsList();
 
@@ -135,7 +135,7 @@ public class FootstepNodeCheckerTest
       generator.translate(0.0, 0.0, 0.001);
       generator.addRectangle(1.0, 1.0);
       generator.translate(0.0, 0.0, bodyGroundClearance);
-      generator.rotate(Math.PI / 2.0, Axis.X);
+      generator.rotate(Math.PI / 2.0, Axis3D.X);
       generator.addRectangle(1.0, bodyGroundClearance);
       PlanarRegionsList planarRegions = generator.getPlanarRegionsList();
 
@@ -274,7 +274,7 @@ public class FootstepNodeCheckerTest
       // too high step
       FootstepNode node1 = new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT);
       RigidBodyTransform snapTransform1 = new RigidBodyTransform();
-      snapTransform1.setTranslationZ(parameters.getMaximumStepZ() + 1.0e-10);
+      snapTransform1.getTranslation().setZ(parameters.getMaximumStepZ() + 1.0e-10);
       snapper.addSnapData(node0, new FootstepNodeSnapData(snapTransform0));
       snapper.addSnapData(node1, new FootstepNodeSnapData(snapTransform1));
       Assert.assertFalse(checker.isNodeValid(node0, node1));
@@ -283,7 +283,7 @@ public class FootstepNodeCheckerTest
       // if we add different step-up vs step-down heights this will need to be adjusted
       FootstepNode node2 = new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT);
       RigidBodyTransform snapTransform2 = new RigidBodyTransform();
-      snapTransform2.setTranslationZ(-parameters.getMaximumStepZ() - 1.0e-10);
+      snapTransform2.getTranslation().setZ(-parameters.getMaximumStepZ() - 1.0e-10);
       snapper.addSnapData(node2, new FootstepNodeSnapData(snapTransform2));
       Assert.assertFalse(checker.isNodeValid(node0, node2));
 
@@ -365,9 +365,9 @@ public class FootstepNodeCheckerTest
       RigidBodyTransform t2 = new RigidBodyTransform();
       RigidBodyTransform t3 = new RigidBodyTransform();
 
-      t1.setTranslation(0.0, 0.0, 0.102);
-      t2.setTranslation(0.0, 0.0, 0.193);
-      t3.setTranslation(0.0, 0.0, 0.193);
+      t1.getTranslation().set(0.0, 0.0, 0.102);
+      t2.getTranslation().set(0.0, 0.0, 0.193);
+      t3.getTranslation().set(0.0, 0.0, 0.193);
 
       snapper.addSnapData(node1, new FootstepNodeSnapData(t1, footPolygons.get(RobotSide.LEFT)));
       snapper.addSnapData(node2, new FootstepNodeSnapData(t2, footPolygons.get(RobotSide.RIGHT)));
@@ -522,7 +522,7 @@ public class FootstepNodeCheckerTest
          QuaternionReadOnly orientation3DReadOnly = EuclidCoreRandomTools.nextQuaternion(random);
 
          transformToWorld.setIdentity();
-         transformToWorld.setRotation(orientation3DReadOnly);
+         transformToWorld.getRotation().set(orientation3DReadOnly);
          planarRegion.set(transformToWorld, polygons);
          nodeChecker.setPlanarRegions(planarRegionsList);
          snapper.setPlanarRegions(planarRegionsList);

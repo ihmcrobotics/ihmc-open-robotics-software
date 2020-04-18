@@ -209,7 +209,7 @@ public class PerfectSensorIntoSensorOutputMapReader implements RawSensorReader
    private void readAndUpdateRootJointPositionAndOrientation()
    {
       packRootTransform(robot, temporaryRootToWorldTransform);
-      temporaryRootToWorldTransform.normalizeRotationPart();
+      temporaryRootToWorldTransform.getRotation().normalize();
       sensorOutputMap.setRootJointTransform(temporaryRootToWorldTransform);
       rootJointReferenceFrame.setTransformAndUpdate(temporaryRootToWorldTransform);
    }

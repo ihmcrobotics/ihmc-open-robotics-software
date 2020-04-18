@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.newtonsCradle;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -94,12 +94,12 @@ public class GroundAsABoxRobot
 
       Graphics3DObject baseLinkGraphics = new Graphics3DObject();
       baseLinkGraphics.translate(0.0, 0.0, -groundThickness);
-      baseLinkGraphics.rotate(groundAngle, Axis.Y);
+      baseLinkGraphics.rotate(groundAngle, Axis3D.Y);
       baseLinkGraphics.addCube(groundLength, groundWidth, groundThickness, YoAppearance.Green());
 
       CollisionMeshDescription collisonMeshDescription = new CollisionMeshDescription();
       collisonMeshDescription.translate(0.0, 0.0, -groundThickness);
-      collisonMeshDescription.rotate(groundAngle, Axis.Y);
+      collisonMeshDescription.rotate(groundAngle, Axis3D.Y);
       collisonMeshDescription.addCubeReferencedAtBottomMiddle(groundLength, groundWidth, groundThickness);
       collisonMeshDescription.setIsGround(true);
       collisonMeshDescription.setEstimatedNumberOfContactPoints(estimatedNumberOfContactPoints);
@@ -157,10 +157,10 @@ public class GroundAsABoxRobot
       baseLinkGraphics.identity();
       baseLinkGraphics.translate(new Vector3D(offsetX, offsetY, -floorThickness));
       RotationMatrix rotationMatrixX = new RotationMatrix();
-      rotationMatrixX.setToRollMatrix(xRotation);
+      rotationMatrixX.setToRollOrientation(xRotation);
       baseLinkGraphics.rotate(rotationMatrixX);
       RotationMatrix rotationMatrixY = new RotationMatrix();
-      rotationMatrixY.setToPitchMatrix(yRotation);
+      rotationMatrixY.setToPitchOrientation(yRotation);
       baseLinkGraphics.rotate(rotationMatrixY);
       baseLinkGraphics.addCube(floorLength, floorWidth, floorThickness, YoAppearance.Green());
 

@@ -123,30 +123,30 @@ public class FrameConvexPolygon2dIntersector
          // finding minimum
          if (point3Percentage > point1Percentage && point4Percentage > point1Percentage)
          {
-            intersectionToPack.setFirstEndpoint(point3Percentage < point4Percentage ? point3 : point4);
+            intersectionToPack.getFirstEndpoint().set(point3Percentage < point4Percentage ? point3 : point4);
          }
          else if (point3Percentage >= point1Percentage || point4Percentage >= point1Percentage)
          {
-            intersectionToPack.setFirstEndpoint(point1);
+            intersectionToPack.getFirstEndpoint().set(point1);
          }
 
          // finding maximum
          if (point3Percentage < point2Percentage && point4Percentage < point2Percentage)
          {
-            intersectionToPack.setSecondEndpoint(point3Percentage > point4Percentage ? point3 : point4);
+            intersectionToPack.getSecondEndpoint().set(point3Percentage > point4Percentage ? point3 : point4);
          }
          else if (point3Percentage <= point2Percentage || point4Percentage <= point2Percentage)
          {
-            intersectionToPack.setSecondEndpoint(point2);
+            intersectionToPack.getSecondEndpoint().set(point2);
          }
 
-         if (intersectionToPack.firstEndpointContainsNaN() && !intersectionToPack.secondEndpointContainsNaN())
+         if (intersectionToPack.getFirstEndpoint().containsNaN() && !intersectionToPack.getSecondEndpoint().containsNaN())
          {
-            intersectionToPack.setFirstEndpoint(intersectionToPack.getSecondEndpoint());
+            intersectionToPack.getFirstEndpoint().set(intersectionToPack.getSecondEndpoint());
          }
-         else if (!intersectionToPack.firstEndpointContainsNaN() && intersectionToPack.secondEndpointContainsNaN())
+         else if (!intersectionToPack.getFirstEndpoint().containsNaN() && intersectionToPack.getSecondEndpoint().containsNaN())
          {
-            intersectionToPack.setSecondEndpoint(intersectionToPack.getFirstEndpoint());
+            intersectionToPack.getSecondEndpoint().set(intersectionToPack.getFirstEndpoint());
          }
 
          if (!intersectionToPack.containsNaN())
@@ -159,8 +159,8 @@ public class FrameConvexPolygon2dIntersector
          intersectionToPack.set(point1, point2);
          if (intersectionToPack.isBetweenEndpoints(point3, Epsilons.ONE_TEN_MILLIONTH))
          {
-            intersectionToPack.setFirstEndpoint(point3);
-            intersectionToPack.setSecondEndpoint(point3);
+            intersectionToPack.getFirstEndpoint().set(point3);
+            intersectionToPack.getSecondEndpoint().set(point3);
             return;
          }
       }
@@ -169,8 +169,8 @@ public class FrameConvexPolygon2dIntersector
          intersectionToPack.set(point3, point3);
          if (intersectionToPack.isBetweenEndpoints(point1, Epsilons.ONE_TEN_MILLIONTH))
          {
-            intersectionToPack.setFirstEndpoint(point1);
-            intersectionToPack.setSecondEndpoint(point1);
+            intersectionToPack.getFirstEndpoint().set(point1);
+            intersectionToPack.getSecondEndpoint().set(point1);
             return;
          }
       }
@@ -178,8 +178,8 @@ public class FrameConvexPolygon2dIntersector
       {
          if (point1.epsilonEquals(point3, Epsilons.ONE_TEN_MILLIONTH))
          {
-            intersectionToPack.setFirstEndpoint(point1);
-            intersectionToPack.setSecondEndpoint(point3);
+            intersectionToPack.getFirstEndpoint().set(point1);
+            intersectionToPack.getSecondEndpoint().set(point3);
             return;
          }
       }
@@ -320,8 +320,8 @@ public class FrameConvexPolygon2dIntersector
       if (success)
       {
          intersectionToPack.setToZero(planeOne.getReferenceFrame());
-         intersectionToPack.setPoint(pointOnIntersection);
-         intersectionToPack.setDirection(intersectionDirection);
+         intersectionToPack.getPoint().set(pointOnIntersection);
+         intersectionToPack.getDirection().set(intersectionDirection);
       }
       else
       {

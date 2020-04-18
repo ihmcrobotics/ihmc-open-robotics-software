@@ -1,6 +1,8 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -9,23 +11,22 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
-import us.ihmc.euclid.Axis;
-import us.ihmc.euclid.geometry.*;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Line3D;
+import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -34,7 +35,9 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class PlanarRegionTest
@@ -87,7 +90,7 @@ public class PlanarRegionTest
       polygonsRegion2.add(polygon22);
 
       RigidBodyTransform transform2 = new RigidBodyTransform();
-      transform2.setTranslation(0.5, 0.0, 0.0);
+      transform2.getTranslation().set(0.5, 0.0, 0.0);
       transform2.appendYawRotation(-Math.PI / 4.0);
       transform2.appendRollRotation(Math.PI / 2.0);
       PlanarRegion region2 = new PlanarRegion(transform2, polygonsRegion2);
@@ -250,14 +253,8 @@ public class PlanarRegionTest
 
       assertThatAllPolygonVerticesAreInBoundingBox(regionConvexPolygons, planarRegion, boundingBox3dInWorld);
 
-      Point3D boundingBoxMinPoint = new Point3D();
-      Point3D boundingBoxMaxPoint = new Point3D();
-
-      boundingBox3dInWorld.getMinPoint(boundingBoxMinPoint);
-      boundingBox3dInWorld.getMaxPoint(boundingBoxMaxPoint);
-
-      assertEquals(minPoint, boundingBoxMinPoint);
-      assertEquals(maxPoint, boundingBoxMaxPoint);
+      assertEquals(minPoint, boundingBox3dInWorld.getMinPoint());
+      assertEquals(maxPoint, boundingBox3dInWorld.getMaxPoint());
    }
 
    @Test
@@ -289,14 +286,8 @@ public class PlanarRegionTest
 
       assertThatAllPolygonVerticesAreInBoundingBox(regionConvexPolygons, planarRegion, boundingBox3dInWorld);
 
-      Point3D boundingBoxMinPoint = new Point3D();
-      Point3D boundingBoxMaxPoint = new Point3D();
-
-      boundingBox3dInWorld.getMinPoint(boundingBoxMinPoint);
-      boundingBox3dInWorld.getMaxPoint(boundingBoxMaxPoint);
-
-      assertEquals(minPoint, boundingBoxMinPoint);
-      assertEquals(maxPoint, boundingBoxMaxPoint);
+      assertEquals(minPoint, boundingBox3dInWorld.getMinPoint());
+      assertEquals(maxPoint, boundingBox3dInWorld.getMaxPoint());
    }
 
    @Test
@@ -326,14 +317,8 @@ public class PlanarRegionTest
 
       assertThatAllPolygonVerticesAreInBoundingBox(regionConvexPolygons, planarRegion, boundingBox3dInWorld);
 
-      Point3D boundingBoxMinPoint = new Point3D();
-      Point3D boundingBoxMaxPoint = new Point3D();
-
-      boundingBox3dInWorld.getMinPoint(boundingBoxMinPoint);
-      boundingBox3dInWorld.getMaxPoint(boundingBoxMaxPoint);
-
-      assertEquals(minPoint, boundingBoxMinPoint);
-      assertEquals(maxPoint, boundingBoxMaxPoint);
+      assertEquals(minPoint, boundingBox3dInWorld.getMinPoint());
+      assertEquals(maxPoint, boundingBox3dInWorld.getMaxPoint());
    }
 
    @Test
@@ -579,7 +564,7 @@ public class PlanarRegionTest
    {
       RigidBodyTransform transform = new RigidBodyTransform();
       transform.setRotationEulerAndZeroTranslation(0.1, 0.2, 0.3);
-      transform.setTranslation(1.2, 3.4, 5.6);
+      transform.getTranslation().set(1.2, 3.4, 5.6);
 
       ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
       convexPolygon.addVertex(0.2, 0.2);
@@ -599,7 +584,7 @@ public class PlanarRegionTest
 
       RigidBodyTransform snappingTransform = new RigidBodyTransform();
       snappingTransform.setRotationEulerAndZeroTranslation(0.1, 0.2, 0.3);
-      snappingTransform.setTranslation(1.2, 3.4, 5.6);
+      snappingTransform.getTranslation().set(1.2, 3.4, 5.6);
 
       double intersectionArea = planarRegion.getPolygonIntersectionAreaWhenSnapped(polygonToSnap, snappingTransform);
       assertEquals(0.04, intersectionArea, 1e-7);
@@ -641,7 +626,7 @@ public class PlanarRegionTest
          Quaternion orientation = RandomGeometry.nextQuaternion(random, Math.toRadians(45.0));
          Vector3D translation = RandomGeometry.nextVector3D(random, 10.0);
          RigidBodyTransform regionTransform = new RigidBodyTransform(orientation, translation);
-         ReferenceFrame localFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("local", worldFrame, regionTransform);
+         ReferenceFrame localFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("local", worldFrame, regionTransform);
          PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
 
          assertEquals("Wrong number of convex polygons in the region.", 3, planarRegion.getNumberOfConvexPolygons());
@@ -832,7 +817,7 @@ public class PlanarRegionTest
 
       assertEquals(0.0, planeZGivenXY, 1e-7);
 
-      transformToWorld.setTranslation(1.0, 2.0, 3.0);
+      transformToWorld.getTranslation().set(1.0, 2.0, 3.0);
       planarRegion = new PlanarRegion(transformToWorld, polygonList);
       planeZGivenXY = planarRegion.getPlaneZGivenXY(xWorld, yWorld);
 
@@ -920,37 +905,37 @@ public class PlanarRegionTest
          Vector3D supportDirection = new Vector3D();
 
          // Trivial case #1: supportingVector = +X
-         supportDirection.set(Axis.X);
+         supportDirection.set(Axis3D.X);
          expectedSupportVertex = convexHullVertices.stream().max(Comparator.comparingDouble(Point3D::getX)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
          assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
 
          // Trivial case #2: supportingVector = -X
-         supportDirection.setAndNegate(Axis.X);
+         supportDirection.setAndNegate(Axis3D.X);
          expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(Point3D::getX)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
          assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
 
          // Trivial case #1: supportingVector = +Y
-         supportDirection.set(Axis.Y);
+         supportDirection.set(Axis3D.Y);
          expectedSupportVertex = convexHullVertices.stream().max(Comparator.comparingDouble(Point3D::getY)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
          assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
 
          // Trivial case #2: supportingVector = -Y
-         supportDirection.setAndNegate(Axis.Y);
+         supportDirection.setAndNegate(Axis3D.Y);
          expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(Point3D::getY)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
          assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
 
          // Trivial case #1: supportingVector = +Z
-         supportDirection.set(Axis.Z);
+         supportDirection.set(Axis3D.Z);
          expectedSupportVertex = convexHullVertices.stream().max(Comparator.comparingDouble(Point3D::getZ)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
          assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
 
          // Trivial case #2: supportingVector = -Z
-         supportDirection.setAndNegate(Axis.Z);
+         supportDirection.setAndNegate(Axis3D.Z);
          expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(Point3D::getZ)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
          assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
@@ -965,7 +950,7 @@ public class PlanarRegionTest
          supportDirection.scale(EuclidCoreRandomTools.nextDouble(random, 0.1, 10.0));
 
          Line3D line = new Line3D();
-         line.setDirection(orthogonalDirection);
+         line.getDirection().set(orthogonalDirection);
          line.translate(20.0 * supportDirectionInPlane.getX(), 20.0 * supportDirectionInPlane.getY(), 20.0 * supportDirectionInPlane.getZ());
 
          expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(line::distance)).get();

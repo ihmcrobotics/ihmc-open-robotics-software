@@ -240,7 +240,6 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       FootstepPlannerParametersPacket parametersPacket = new FootstepPlannerParametersPacket();
       FootstepPlannerMessageTools.copyParametersToPacket(parametersPacket, parameters);
       parametersPacket.setCheckForBodyBoxCollisions(true);
-      parametersPacket.setReturnBestEffortPlan(false);
       footstepPlannerParametersPublisher.publish(parametersPacket);
       boolean planBodyPath = false;
 

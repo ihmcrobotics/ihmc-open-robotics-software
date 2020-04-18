@@ -40,17 +40,24 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -67,22 +74,29 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -94,17 +108,24 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void write(controller_msgs.msg.dds.QueueableMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_9(data.getExecutionMode());
 
+
       cdr.write_type_11(data.getMessageId());
+
 
       cdr.write_type_11(data.getPreviousMessageId());
 
+
       cdr.write_type_6(data.getExecutionDelayTime());
 
+
       cdr.write_type_6(data.getStreamIntegrationDuration());
+
 
       cdr.write_type_11(data.getTimestamp());
 
@@ -112,18 +133,25 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void read(controller_msgs.msg.dds.QueueableMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setExecutionMode(cdr.read_type_9());
       	
+
       data.setMessageId(cdr.read_type_11());
       	
+
       data.setPreviousMessageId(cdr.read_type_11());
       	
+
       data.setExecutionDelayTime(cdr.read_type_6());
       	
+
       data.setStreamIntegrationDuration(cdr.read_type_6());
       	
+
       data.setTimestamp(cdr.read_type_11());
       	
 
@@ -132,24 +160,38 @@ public class QueueableMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void serialize(controller_msgs.msg.dds.QueueableMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_9("execution_mode", data.getExecutionMode());
+
       ser.write_type_11("message_id", data.getMessageId());
+
       ser.write_type_11("previous_message_id", data.getPreviousMessageId());
+
       ser.write_type_6("execution_delay_time", data.getExecutionDelayTime());
+
       ser.write_type_6("stream_integration_duration", data.getStreamIntegrationDuration());
+
       ser.write_type_11("timestamp", data.getTimestamp());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QueueableMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setExecutionMode(ser.read_type_9("execution_mode"));
+
       data.setMessageId(ser.read_type_11("message_id"));
+
       data.setPreviousMessageId(ser.read_type_11("previous_message_id"));
+
       data.setExecutionDelayTime(ser.read_type_6("execution_delay_time"));
+
       data.setStreamIntegrationDuration(ser.read_type_6("stream_integration_duration"));
+
       data.setTimestamp(ser.read_type_11("timestamp"));
    }
 

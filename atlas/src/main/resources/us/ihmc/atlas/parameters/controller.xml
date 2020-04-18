@@ -190,6 +190,9 @@
 <registry name="LookAheadCoMHeightTrajectoryGenerator">
     <parameter name="ProcessGoHome" type="BooleanParameter" value="true"/>
 </registry>
+                                <registry name="BetterLookAheadCoMHeightTrajectoryGenerator">
+                                    <parameter name="ProcessGoHome" type="BooleanParameter" value="true"/>
+                                </registry>
                             </registry>
                         </registry>
                         <registry name="FeetManager">

@@ -1,12 +1,17 @@
 package us.ihmc.footstepPlanning.occlusion;
 
+import java.awt.Color;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
+
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -30,7 +35,6 @@ import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.Assert;
-import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.geometry.*;
 import us.ihmc.robotics.graphics.Graphics3DObjectTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -41,12 +45,6 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
-
-import java.awt.*;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 
 public class SimpleOcclusionTests
 {
@@ -69,38 +67,6 @@ public class SimpleOcclusionTests
       FramePose3D goalPose = new FramePose3D();
       PlanarRegionsList regions = createSimpleOcclusionField(startPose, goalPose);
       runTest(testInfo, startPose, goalPose, regions, defaultMaxAllowedSolveTime);
-   }
-
-   @Test
-   @Disabled // Resource file does not seem to exist.
-   public void testOcclusionsFromData(TestInfo testInfo)
-   {
-      FramePose3D startPose = new FramePose3D(worldFrame);
-      startPose.setPosition(0.25, -0.25, 0.0);
-
-      FramePose3D goalPose = new FramePose3D(worldFrame);
-      goalPose.setPosition(2.75, 0.95, 0.0);
-      BestEffortPlannerParameters parameters = new BestEffortPlannerParameters();
-
-      Path path = Paths.get(getClass().getClassLoader().getResource("PlanarRegions_20171114_090937").getPath());
-      PlanarRegionsList regions = PlanarRegionFileTools.importPlanarRegionData(path.toFile());
-
-      runTest(testInfo, startPose, goalPose, regions, parameters, new DefaultVisibilityGraphParameters(), 2.0);
-   }
-
-   private class BestEffortPlannerParameters extends DefaultFootstepPlannerParameters
-   {
-      @Override
-      public boolean getReturnBestEffortPlan()
-      {
-         return true;
-      }
-
-      @Override
-      public int getMinimumStepsForBestEffortPlan()
-      {
-         return 3;
-      }
    }
 
    @Test
@@ -277,14 +243,14 @@ public class SimpleOcclusionTests
                maxSolveTime = seconds;
             }
 
-            if (plannerOutput.getResult().validForExecution())
+            if (plannerOutput.getFootstepPlanningResult().validForExecution())
             {
                haveNewPlan = true;
                plan = plannerOutput.getFootstepPlan();
             }
             else
             {
-               PrintTools.info("Planner failed: " + plannerOutput.getResult());
+               PrintTools.info("Planner failed: " + plannerOutput.getFootstepPlanningResult());
             }
          }
          catch (Exception e)
@@ -445,8 +411,8 @@ public class SimpleOcclusionTests
       footPosition.changeFrame(ReferenceFrame.getWorldFrame());
 
       stancePoseToPack.setToZero(ReferenceFrame.getWorldFrame());
-      stancePoseToPack.setPosition(footPosition);
-      stancePoseToPack.setOrientation(startPose.getOrientation());
+      stancePoseToPack.getPosition().set(footPosition);
+      stancePoseToPack.getOrientation().set(startPose.getOrientation());
 
       return side;
    }
@@ -592,25 +558,25 @@ public class SimpleOcclusionTests
    private PlanarRegionsList createSimpleOcclusionField(FramePose3D startPoseToPack, FramePose3D goalPoseToPack)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.addRectangle(6.0, 6.0);
       generator.translate(-1.0, -1.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 4.0);
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(1.0, 1.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 4.0);
 
       startPoseToPack.setToZero(ReferenceFrame.getWorldFrame());
-      startPoseToPack.setOrientationYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
-      startPoseToPack.setPosition(-2.0, -2.0, 0.0);
+      startPoseToPack.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
+      startPoseToPack.getPosition().set(-2.0, -2.0, 0.0);
       startPoseToPack.prependRollRotation(Math.toRadians(10.0));
 
       goalPoseToPack.setToZero(ReferenceFrame.getWorldFrame());
-      goalPoseToPack.setOrientationYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
-      goalPoseToPack.setPosition(2.0, 2.0, 0.0);
+      goalPoseToPack.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
+      goalPoseToPack.getPosition().set(2.0, 2.0, 0.0);
       goalPoseToPack.prependRollRotation(Math.toRadians(10.0));
 
       return generator.getPlanarRegionsList();
@@ -619,41 +585,41 @@ public class SimpleOcclusionTests
    private PlanarRegionsList createMazeOcclusionField(FramePose3D startPoseToPack, FramePose3D goalPoseToPack)
    {
       PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.addRectangle(6.0, 12.0);
 
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(-1.0, -2.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 8.0);
 
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(1.0, 0.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.Y);
+      generator.rotate(-Math.PI / 2.0, Axis3D.Y);
       generator.addRectangle(1.0, 8.0);
 
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(0.0, -4.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.X);
+      generator.rotate(-Math.PI / 2.0, Axis3D.X);
       generator.addRectangle(2.0, 1.0);
 
       generator.identity();
-      generator.rotate(Math.toRadians(10.0), Axis.X);
+      generator.rotate(Math.toRadians(10.0), Axis3D.X);
       generator.translate(0.0, 4.0, 0.5);
-      generator.rotate(-Math.PI / 2.0, Axis.X);
+      generator.rotate(-Math.PI / 2.0, Axis3D.X);
       generator.addRectangle(2.0, 1.0);
 
       startPoseToPack.setToZero(ReferenceFrame.getWorldFrame());
-      startPoseToPack.setOrientationYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
-      startPoseToPack.setPosition(-2.0, -5.0, 0.0);
+      startPoseToPack.getOrientation().setYawPitchRoll(Math.PI / 2.0, 0.0, 0.0);
+      startPoseToPack.getPosition().set(-2.0, -5.0, 0.0);
       startPoseToPack.prependRollRotation(Math.toRadians(10.0));
 
       goalPoseToPack.setToZero(ReferenceFrame.getWorldFrame());
-      goalPoseToPack.setOrientationYawPitchRoll(-Math.PI / 2.0, 0.0, 0.0);
-      goalPoseToPack.setPosition(0.0, -5.0, 0.0);
+      goalPoseToPack.getOrientation().setYawPitchRoll(-Math.PI / 2.0, 0.0, 0.0);
+      goalPoseToPack.getPosition().set(0.0, -5.0, 0.0);
       goalPoseToPack.prependRollRotation(Math.toRadians(10.0));
 
       return generator.getPlanarRegionsList();

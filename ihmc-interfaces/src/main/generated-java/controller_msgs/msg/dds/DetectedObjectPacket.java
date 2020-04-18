@@ -7,20 +7,31 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC behavior module.
-       */
+   
+ * This message is part of the IHMC behavior module.
+   
+ */
 public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implements Settable<DetectedObjectPacket>, EpsilonComparable<DetectedObjectPacket>
 {
+
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
+
    public us.ihmc.euclid.geometry.Pose3D pose_;
+
    public int id_;
 
    public DetectedObjectPacket()
    {
+
+
       pose_ = new us.ihmc.euclid.geometry.Pose3D();
+
+
    }
 
    public DetectedObjectPacket(DetectedObjectPacket other)
@@ -31,33 +42,43 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
 
    public void set(DetectedObjectPacket other)
    {
+
       sequence_id_ = other.sequence_id_;
 
+
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.pose_, pose_);
+
       id_ = other.id_;
 
    }
 
+
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
    }
 
 
+
    public us.ihmc.euclid.geometry.Pose3D getPose()
    {
       return pose_;
    }
+
 
    public void setId(int id)
    {
@@ -86,9 +107,12 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       if(other == null) return false;
       if(other == this) return true;
 
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
+
       if (!this.pose_.epsilonEquals(other.pose_, epsilon)) return false;
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.id_, other.id_, epsilon)) return false;
 
 
@@ -104,9 +128,12 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
 
       DetectedObjectPacket otherMyClass = (DetectedObjectPacket) other;
 
+
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
+
       if (!this.pose_.equals(otherMyClass.pose_)) return false;
+
       if(this.id_ != otherMyClass.id_) return false;
 
 
@@ -119,10 +146,13 @@ public class DetectedObjectPacket extends Packet<DetectedObjectPacket> implement
       StringBuilder builder = new StringBuilder();
 
       builder.append("DetectedObjectPacket {");
+
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+
       builder.append("pose=");
       builder.append(this.pose_);      builder.append(", ");
+
       builder.append("id=");
       builder.append(this.id_);
       builder.append("}");

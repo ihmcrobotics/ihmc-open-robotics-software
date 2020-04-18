@@ -46,6 +46,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -199,8 +200,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
    {
       //update camera pose display
       RigidBodyTransform imageToCamera = new RigidBodyTransform(new double[]{0, 0, 1, 0, -1, 0, 0, 0, 0, -1, 0, 0, 0, 0, 0, 1});
-      ReferenceFrame cameraImageFrame = ReferenceFrame.
-            constructFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
+      ReferenceFrame cameraImageFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("cameraImage", cameraFrame, imageToCamera);
       FramePose3D poseLeftCamera = new FramePose3D(cameraImageFrame);
       poseLeftCamera.changeFrame(CalibUtil.world);
       yposeLeftCamera.set(poseLeftCamera);
@@ -271,7 +271,7 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
 //      targetToEE.setTranslation(new Vector3d(-0.061, 0.13, 0.205));
 
       ReferenceFrame activeArmEEFrame = fullRobotModel.getEndEffectorFrame(activeSide, LimbName.ARM);
-      ReferenceFrame boardFrame = ReferenceFrame.constructFrameWithUnchangingTransformToParent("boardFrame", activeArmEEFrame, targetToEE);
+      ReferenceFrame boardFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("boardFrame", activeArmEEFrame, targetToEE);
       return boardFrame.getTransformToDesiredFrame(cameraImageFrame);
 
 //      FramePoint leftEEtoCamera=new FramePoint(fullRobotModel.getEndEffectorFrame(RobotSide.LEFT, LimbName.ARM)  ,0, 0.13,0);
@@ -458,10 +458,10 @@ public class AtlasHeadLoopKinematicCalibrator extends AtlasKinematicCalibrator
       //copy Translation and Rotation
       RigidBodyTransform transform = new RigidBodyTransform();
       Vector3D_F64 T = targetToCamera.T;
-      transform.setTranslation(new Vector3D(T.x, T.y, T.z));
+      transform.getTranslation().set(new Vector3D(T.x, T.y, T.z));
 
       RotationMatrix matrix3d = new RotationMatrix(targetToCamera.getR());
-      transform.setRotation(matrix3d);
+      transform.getRotation().set(matrix3d);
       mEntry.put(TARGET_TO_CAMERA_KEY, transform);
 
       //load image

@@ -1,5 +1,6 @@
 package us.ihmc.idl;
 
+import org.apache.commons.io.FileUtils;
 import us.ihmc.commons.nio.BasicPathVisitor;
 import us.ihmc.commons.nio.FileTools;
 import us.ihmc.commons.nio.PathTools;
@@ -21,18 +22,10 @@ public class IHMCInterfacesGenerateMessages
    {
       FileTools.deleteQuietly(Paths.get("src/main/generated-idl"));
       FileTools.deleteQuietly(Paths.get("src/main/generated-java"));
+      FileTools.deleteQuietly(Paths.get("src/main/messages/ros1/controller_msgs/msg"));
+//      FileTools.deleteQuietly(Paths.get("build/tmp/generateMessages")); // this needs to be found and copied via Gradle
 
       RosInterfaceGenerator generator = new RosInterfaceGenerator();
-
-//      generator.addPackageRootToIDLGenerator(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces"));
-//      generator.addPackageRootToIDLGenerator(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/common_interfaces"));
-//      generator.addPackageRootToIDLGenerator(Paths.get("src/main/rosidl/ihmc_interfaces"));
-//
-//      generator.addCustomIDLFiles(Paths.get("build/tmp/generateMessages/ros2-common-interfaces"));
-//
-//      generator.generate(Paths.get("build/tmp/idl"), Paths.get("build/tmp/generateMessages/java"));
-
-      // Temp stuff for Sylvain
       generator.addPackageRootToIDLGenerator(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/rcl_interfaces"));
       generator.addPackageRootToIDLGenerator(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/common_interfaces"));
       generator.addPackageRootToIDLGenerator(Paths.get("src/main/messages/ihmc_interfaces"));
@@ -40,13 +33,20 @@ public class IHMCInterfacesGenerateMessages
 
       generator.addCustomIDLFiles(Paths.get("build/tmp/generateMessages/ros2-common-interfaces/"));
 
-      generator.generate(Paths.get("src/main/generated-idl"), Paths.get("src/main/messages/ros1"), Paths.get("src/main/generated-java"));
+      generator.generate(Paths.get("build/tmp/generateMessages/generated-idl"),
+                         Paths.get("build/tmp/generateMessages/generated-ros1"),
+                         Paths.get("build/tmp/generateMessages/generated-java"));
 
-      deleteDuplicateFiles("src/main/generated-idl");
-      deleteDuplicateFiles("src/main/generated-java");
+      FileUtils.copyDirectory(Paths.get("build/tmp/generateMessages/generated-idl/controller_msgs").toFile(),
+                              Paths.get("src/main/generated-idl/controller_msgs").toFile());
+      FileUtils.copyDirectory(Paths.get("build/tmp/generateMessages/generated-java/controller_msgs").toFile(),
+                              Paths.get("src/main/generated-java/controller_msgs").toFile());
+      FileUtils.copyDirectory(Paths.get("build/tmp/generateMessages/generated-ros1/controller_msgs").toFile(),
+                              Paths.get("src/main/messages/ros1/controller_msgs").toFile());
 
       RosInterfaceGenerator.convertDirectoryToUnixEOL(Paths.get("src/main/generated-idl"));
       RosInterfaceGenerator.convertDirectoryToUnixEOL(Paths.get("src/main/generated-java"));
+      RosInterfaceGenerator.convertDirectoryToUnixEOL(Paths.get("src/main/messages/ros1"));
    }
 
    private static void deleteDuplicateFiles(String outputDirectory)

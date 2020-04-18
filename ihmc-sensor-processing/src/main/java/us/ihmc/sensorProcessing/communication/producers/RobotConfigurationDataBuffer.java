@@ -189,7 +189,7 @@ public class RobotConfigurationDataBuffer implements PacketConsumer<RobotConfigu
       }
 
       Vector3D translation = robotConfigurationData.getRootTranslation();
-      rootJoint.getJointPose().setPosition(translation.getX(), translation.getY(), translation.getZ());
+      rootJoint.getJointPose().getPosition().set(translation.getX(), translation.getY(), translation.getZ());
       Quaternion orientation = robotConfigurationData.getRootOrientation();
       rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
 

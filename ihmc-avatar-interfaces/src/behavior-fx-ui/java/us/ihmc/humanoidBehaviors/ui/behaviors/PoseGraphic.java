@@ -43,13 +43,13 @@ public class PoseGraphic extends Group
 
    public void setPosition(Point3DReadOnly position)
    {
-      pose.setPosition(position);
+      pose.getPosition().set(position);
       updateGraphics();
    }
 
    public void setOrientation(Orientation3DReadOnly orientationPoint)
    {
-      pose.setOrientation(orientationPoint);
+      pose.getOrientation().set(orientationPoint);
       updateGraphics();
    }
 
@@ -113,7 +113,7 @@ public class PoseGraphic extends Group
 
       if (labelGraphic != null)
       {
-         labelGraphic.getPose().setPosition(new Point3D(Double.NaN, Double.NaN, Double.NaN));
+         labelGraphic.getPose().getPosition().set(new Point3D(Double.NaN, Double.NaN, Double.NaN));
       }
 
       updateGraphics();
