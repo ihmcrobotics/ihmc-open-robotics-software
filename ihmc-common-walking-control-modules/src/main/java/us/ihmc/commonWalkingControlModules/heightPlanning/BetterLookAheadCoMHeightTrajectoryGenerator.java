@@ -250,6 +250,8 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       double middleAnkleZ = endCoMPosition.getZ();
       endCoMPosition.addZ(nominalHeightAboveGround.getDoubleValue() + offsetFromNominalInPlan.getDoubleValue());
 
+      double width = Math.abs(transferToPosition.getY() - transferFromPosition.getY());
+
       if (!transferToAndNextFootstepsData.getCoMAtEndOfState().containsNaN())
       {
          desiredCoMPositionAtEnd.set(transferToAndNextFootstepsData.getCoMAtEndOfState());
@@ -257,9 +259,9 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
          tempFramePoint.changeFrame(frameOfSupportLeg);
          tempFramePoint.setZ(nominalHeightAboveGround.getDoubleValue());
 
-         double endY =
-               (tempFramePoint.getY() - startCoMPosition.getY()) *(endCoMPosition.getX() - startCoMPosition
-                     .getX()) /  (tempFramePoint.getX() - startCoMPosition.getX()) + startCoMPosition.getY();
+         double alpha = (endCoMPosition.getX() - startCoMPosition.getX()) / (tempFramePoint.getX() - startCoMPosition.getX());
+         double endY = (tempFramePoint.getY() - startCoMPosition.getY()) * alpha + startCoMPosition.getY();
+         endY = MathTools.clamp(endY, width);
          endCoMPosition.setY(endY);
 
          double percentIn = EuclidGeometryTools.percentageAlongLineSegment3D(tempFramePoint, startCoMPosition, endCoMPosition);
@@ -419,7 +421,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       thirdMidpoint.setMinMax(thirdMinHeight, thirdMaxHeight);
       endWaypoint.setMinMax(endMinHeight, endMaxHeight);
 
-//      startWaypoint.setHeight(MathTools.clamp(startCoMPosition.getZ(), startMinHeight, startMaxHeight));
+      //      startWaypoint.setHeight(MathTools.clamp(startCoMPosition.getZ(), startMinHeight, startMaxHeight));
       startWaypoint.setHeight(startCoMPosition.getZ());
       endWaypoint.setHeight(MathTools.clamp(endCoMPosition.getZ(), endMinHeight, endMaxHeight));
    }
