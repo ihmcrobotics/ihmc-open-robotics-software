@@ -10,6 +10,7 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -84,7 +85,22 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       if (footholdPolygonInLocalFrame.isEmpty())
          return FootstepNodeSnapData.emptyData();
 
-      RigidBodyTransform wiggleTransformLocalToLocal = getWiggleTransformInPlanarRegionFrame(footholdPolygonInLocalFrame);
+      boolean doWiggle = false;
+      for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly vertex = footPolygon.getVertex(i);
+         if (planarRegionToPack.getConvexHull().signedDistance(vertex) > - wiggleInsideDelta.getAsDouble())
+         {
+            doWiggle = true;
+            break;
+         }
+      }
+
+      RigidBodyTransform wiggleTransformLocalToLocal = null;
+      if (doWiggle)
+      {
+         wiggleTransformLocalToLocal = getWiggleTransformInPlanarRegionFrame(footholdPolygonInLocalFrame);
+      }
 
       if (wiggleTransformLocalToLocal == null)
       {
@@ -146,7 +162,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       }
    }
 
-   private RigidBodyTransform getWiggleTransformInPlanarRegionFrame(ConvexPolygon2D footholdPolygon)
+   RigidBodyTransform getWiggleTransformInPlanarRegionFrame(ConvexPolygon2D footholdPolygon)
    {
       updateWiggleParameters();
 

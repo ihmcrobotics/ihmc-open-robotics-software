@@ -180,7 +180,7 @@ public class ConnectionPoint3DTest
       ConnectionPoint3D pointOne = new ConnectionPoint3D(1.0000023, 2.0000028, 3.0000063, 144);
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.setTranslation(4.0, -2.0, 9.0);
+      transform.getTranslation().set(4.0, -2.0, 9.0);
 
       ConnectionPoint3D pointTwo = pointOne.applyTransform(transform);
 

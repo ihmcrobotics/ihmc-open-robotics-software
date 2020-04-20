@@ -346,8 +346,8 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
       // update manager from graphics
       for (Long waypointId : waypointGraphics.keySet())
       {
-         waypointManager.getPoseFromId(waypointId).setPosition(waypointGraphics.get(waypointId).getPosition());
-         waypointManager.getPoseFromId(waypointId).setOrientation(waypointGraphics.get(waypointId).getOrientation());
+         waypointManager.getPoseFromId(waypointId).getPosition().set(waypointGraphics.get(waypointId).getPosition());
+         waypointManager.getPoseFromId(waypointId).getOrientation().set(waypointGraphics.get(waypointId).getOrientation());
       }
 
       updateUIFromWaypointManager();

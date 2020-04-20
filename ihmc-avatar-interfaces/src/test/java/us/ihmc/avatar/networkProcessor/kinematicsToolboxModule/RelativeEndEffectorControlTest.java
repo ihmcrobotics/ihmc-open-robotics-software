@@ -20,7 +20,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -446,7 +446,7 @@ public class RelativeEndEffectorControlTest
    public static FramePoint3D circlePositionAt(double time, double frequency, double radius, Point3DReadOnly center, Vector3DReadOnly centerVelocity)
    {
       double angle = 2.0 * Math.PI * frequency * time;
-      Vector3D offset = new Vector3D(Axis.Z);
+      Vector3D offset = new Vector3D(Axis3D.Z);
       offset.scale(radius);
       RotationMatrixTools.applyRollRotation(angle, offset, offset);
       FramePoint3D position = new FramePoint3D();
@@ -464,7 +464,7 @@ public class RelativeEndEffectorControlTest
    {
       double omega = 2.0 * Math.PI * frequency;
       double angle = omega * time;
-      Vector3D offset = new Vector3D(Axis.Z);
+      Vector3D offset = new Vector3D(Axis3D.Z);
       offset.scale(radius);
       RotationMatrixTools.applyRollRotation(angle, offset, offset);
       FrameVector3D linearVelocity = new FrameVector3D();

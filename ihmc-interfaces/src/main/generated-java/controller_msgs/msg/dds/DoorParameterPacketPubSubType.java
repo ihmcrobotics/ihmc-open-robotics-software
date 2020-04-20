@@ -40,13 +40,18 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -63,14 +68,19 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getHingedPointOnGround(), current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getEndPointOnGround(), current_alignment);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getDoorHandleTransformToWorld(), current_alignment);
@@ -81,23 +91,33 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void write(controller_msgs.msg.dds.DoorParameterPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getHingedPointOnGround(), cdr);
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getEndPointOnGround(), cdr);
+
       cdr.write_type_6(data.getDoorHeight());
+
 
       geometry_msgs.msg.dds.PosePubSubType.write(data.getDoorHandleTransformToWorld(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.DoorParameterPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       geometry_msgs.msg.dds.PointPubSubType.read(data.getHingedPointOnGround(), cdr);	
+
       geometry_msgs.msg.dds.PointPubSubType.read(data.getEndPointOnGround(), cdr);	
+
       data.setDoorHeight(cdr.read_type_6());
       	
+
       geometry_msgs.msg.dds.PosePubSubType.read(data.getDoorHandleTransformToWorld(), cdr);	
 
    }
@@ -105,12 +125,17 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void serialize(controller_msgs.msg.dds.DoorParameterPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_a("hinged_point_on_ground", new geometry_msgs.msg.dds.PointPubSubType(), data.getHingedPointOnGround());
+
 
       ser.write_type_a("end_point_on_ground", new geometry_msgs.msg.dds.PointPubSubType(), data.getEndPointOnGround());
 
+
       ser.write_type_6("door_height", data.getDoorHeight());
+
       ser.write_type_a("door_handle_transform_to_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getDoorHandleTransformToWorld());
 
    }
@@ -118,12 +143,17 @@ public class DoorParameterPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.DoorParameterPacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_a("hinged_point_on_ground", new geometry_msgs.msg.dds.PointPubSubType(), data.getHingedPointOnGround());
+
 
       ser.read_type_a("end_point_on_ground", new geometry_msgs.msg.dds.PointPubSubType(), data.getEndPointOnGround());
 
+
       data.setDoorHeight(ser.read_type_6("door_height"));
+
       ser.read_type_a("door_handle_transform_to_world", new geometry_msgs.msg.dds.PosePubSubType(), data.getDoorHandleTransformToWorld());
 
    }

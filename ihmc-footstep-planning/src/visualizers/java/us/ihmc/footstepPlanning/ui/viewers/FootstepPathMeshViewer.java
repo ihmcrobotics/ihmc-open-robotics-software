@@ -33,6 +33,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -89,7 +90,8 @@ public class FootstepPathMeshViewer extends AnimationTimer
       });
 
       messager.registerTopicListener(IgnorePartialFootholds, b -> processFootstepPath(footstepDataListMessage.get()));
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, data -> reset.set(true));
+      messager.registerTopicListener(ComputePath, data -> reset.set(true));
+      messager.registerTopicListener(GlobalReset, data -> reset.set(true));
 
       showSolution = messager.createInput(ShowFootstepPlan, true);
       showPostProcessingInfo = messager.createInput(ShowPostProcessingInfo, true);
@@ -97,6 +99,11 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
    private synchronized void processFootstepPath(FootstepDataListMessage footstepDataListMessage)
    {
+      if (footstepDataListMessage == null)
+      {
+         return;
+      }
+
       meshBuilder.clear();
 
       FramePose3D footPose = new FramePose3D();
@@ -256,16 +263,14 @@ public class FootstepPathMeshViewer extends AnimationTimer
       }
    }
 
-   public void setDefaultContactPoints(RobotContactPointParameters<RobotSide> defaultContactPointParameters)
+   public void setDefaultContactPoints(SideDependentList<List<Point2D>> defaultContactPoints)
    {
-      SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints = defaultContactPointParameters.getControllerFootGroundContactPoints();
       for(RobotSide robotSide : RobotSide.values)
       {
          ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
-         ArrayList<Point2D> defaultContactPoints = controllerFootGroundContactPoints.get(robotSide);
-         for (int i = 0; i < defaultContactPoints.size(); i++)
+         for (int i = 0; i < defaultContactPoints.get(robotSide).size(); i++)
          {
-            defaultFoothold.addVertex(defaultContactPoints.get(i));
+            defaultFoothold.addVertex(defaultContactPoints.get(robotSide).get(i));
          }
 
          defaultFoothold.update();

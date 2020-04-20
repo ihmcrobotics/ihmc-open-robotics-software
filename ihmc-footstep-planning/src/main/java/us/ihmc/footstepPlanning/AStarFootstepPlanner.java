@@ -1,23 +1,31 @@
 package us.ihmc.footstepPlanning;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.function.Function;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.footstepPlanning.graphSearch.FootstepCostCalculator;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.IdealStepCalculator;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.ParameterBasedNodeExpansion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -26,22 +34,12 @@ import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.search.AStarIterationData;
 import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
-import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 public class AStarFootstepPlanner
 {
-   private static final double defaultStatusPublishPeriod = Double.MAX_VALUE;
-
    private final AStarPathPlanner<FootstepNode> footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final SimplePlanarRegionFootstepNodeSnapper snapper;
@@ -55,7 +53,7 @@ public class AStarFootstepPlanner
    private final FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData();
    private final HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
    private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
-   private double statusPublishPeriod = defaultStatusPublishPeriod;
+   private final List<FootstepPlannerTerminationCondition> customTerminationConditions = new ArrayList<>();
 
    private final FramePose3D goalMidFootPose = new FramePose3D();
    private final AtomicBoolean haltRequested = new AtomicBoolean();
@@ -104,8 +102,8 @@ public class AStarFootstepPlanner
       iterationData.clear();
 
       haltRequested.set(false);
-      result = FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL;
-      outputToPack.setPlanId(request.getRequestId());
+      result = FootstepPlanningResult.PLANNING;
+      outputToPack.setRequestId(request.getRequestId());
 
       // Update planar regions
       boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
@@ -116,31 +114,32 @@ public class AStarFootstepPlanner
       checker.setPlanarRegions(planarRegionsList);
       idealStepCalculator.setPlanarRegionsList(planarRegionsList);
 
-      boolean horizonLengthImposed =
-            request.getPlanBodyPath() && MathTools.intervalContains(bodyPathPlanHolder.computePathLength(0.0), 0.0, request.getHorizonLength());
+      double pathLength = bodyPathPlanHolder.computePathLength(0.0);
+      boolean imposeHorizonLength =
+            request.getPlanBodyPath() && request.getHorizonLength() > 0.0 && !MathTools.intervalContains(pathLength, 0.0, request.getHorizonLength());
       SideDependentList<FootstepNode> goalNodes;
-      if (horizonLengthImposed)
+      if (imposeHorizonLength)
       {
-         bodyPathPlanHolder.getPointAlongPath(1.0, goalMidFootPose);
+         bodyPathPlanHolder.getPointAlongPath(request.getHorizonLength() / pathLength, goalMidFootPose);
          SideDependentList<Pose3D> goalSteps = PlannerTools.createSquaredUpFootsteps(goalMidFootPose, footstepPlannerParameters.getIdealFootstepWidth());
          goalNodes = createGoalNodes(goalSteps::get);
       }
       else
       {
+         goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
          goalNodes = createGoalNodes(request.getGoalFootPoses()::get);
       }
 
       // Setup footstep planner
       FootstepNode startNode = createStartNode(request);
-      goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
       addFootPosesToSnapper(request);
       footstepPlanner.initialize(startNode);
-      distanceAndYawHeuristics.setGoalPose(goalMidFootPose);
-      idealStepCalculator.initialize(goalNodes);
+      distanceAndYawHeuristics.initialize(goalMidFootPose, request.getDesiredHeading());
+      idealStepCalculator.initialize(goalNodes, request.getDesiredHeading());
       completionChecker.initialize(startNode, goalNodes, request.getGoalDistanceProximity(), request.getGoalYawProximity());
 
       // Check valid goal
-      if (!snapAndCheckGoalNodes(goalNodes, horizonLengthImposed, request))
+      if (!snapAndCheckGoalNodes(goalNodes, imposeHorizonLength, request))
       {
          result = FootstepPlanningResult.INVALID_GOAL;
          reportStatus(request, outputToPack);
@@ -150,9 +149,17 @@ public class AStarFootstepPlanner
       // Start planning loop
       while (true)
       {
-         if (stopwatch.totalElapsed() >= request.getTimeout() || haltRequested.get())
+         iterations++;
+         outputToPack.getPlannerTimings().setStepPlanningIterations(iterations);
+
+         if (stopwatch.totalElapsed() >= request.getTimeout())
          {
             result = FootstepPlanningResult.TIMED_OUT_BEFORE_SOLUTION;
+            break;
+         }
+         if (haltRequested.get() || checkCustomTerminationConditions())
+         {
+            result = FootstepPlanningResult.HALTED;
             break;
          }
          if (request.getMaximumIterations() > 0 && iterations > request.getMaximumIterations())
@@ -164,7 +171,6 @@ public class AStarFootstepPlanner
          AStarIterationData<FootstepNode> iterationData = footstepPlanner.doPlanningIteration();
          recordIterationData(iterationData);
          iterationCallback.accept(iterationData);
-         iterations++;
 
          if (iterationData.getParentNode() == null)
          {
@@ -178,10 +184,10 @@ public class AStarFootstepPlanner
             recordIterationData(finalIterationData);
             iterationCallback.accept(finalIterationData);
 
-            result = FootstepPlanningResult.SUB_OPTIMAL_SOLUTION;
+            result = FootstepPlanningResult.FOUND_SOLUTION;
             break;
          }
-         if (stopwatch.lapElapsed() > statusPublishPeriod && !MathTools.epsilonEquals(stopwatch.totalElapsed(), request.getTimeout(), 0.1))
+         if (publishStatus(request))
          {
             reportStatus(request, outputToPack);
             stopwatch.lap();
@@ -192,10 +198,21 @@ public class AStarFootstepPlanner
       reportStatus(request, outputToPack);
    }
 
+   private boolean publishStatus(FootstepPlannerRequest request)
+   {
+      double statusPublishPeriod = request.getStatusPublishPeriod();
+      if (statusPublishPeriod <= 0.0)
+      {
+         return false;
+      }
+
+      return stopwatch.lapElapsed() > statusPublishPeriod && !MathTools.epsilonEquals(stopwatch.totalElapsed(), request.getTimeout(), 0.1);
+   }
+
    private void reportStatus(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
-      outputToPack.setPlanId(request.getRequestId());
-      outputToPack.setResult(result);
+      outputToPack.setRequestId(request.getRequestId());
+      outputToPack.setFootstepPlanningResult(result);
 
       // Pack solution path
       outputToPack.getFootstepPlan().clear();
@@ -208,8 +225,8 @@ public class AStarFootstepPlanner
 
          RigidBodyTransform footstepPose = new RigidBodyTransform();
          footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());
-         footstepPose.setTranslationX(path.get(i).getX());
-         footstepPose.setTranslationY(path.get(i).getY());
+         footstepPose.getTranslation().setX(path.get(i).getX());
+         footstepPose.getTranslation().setY(path.get(i).getY());
 
          FootstepNodeSnapData snapData;
          if (footstepPlannerParameters.getMaximumXYWiggleDistance() > 0.0 || footstepPlannerParameters.getMaximumYawWiggle() > 0.0)
@@ -233,18 +250,6 @@ public class AStarFootstepPlanner
 
          footstep.setFoothold(snapData.getCroppedFoothold());
          outputToPack.getFootstepPlan().addFootstep(footstep);
-      }
-
-      BodyPathPlan bodyPathPlan = bodyPathPlanHolder.getPlan();
-      if (bodyPathPlan.getNumberOfWaypoints() > 0)
-      {
-         outputToPack.getBodyPath().clear();
-         for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
-         {
-            outputToPack.getBodyPath().add(new Pose3D(bodyPathPlan.getWaypoint(i)));
-         }
-
-         outputToPack.getLowLevelGoal().set(goalMidFootPose);
       }
 
       outputToPack.setPlanarRegionsList(request.getPlanarRegionsList());
@@ -276,6 +281,31 @@ public class AStarFootstepPlanner
       this.iterationData.add(loggedData);
    }
 
+   private final Pose2D endNodePose = new Pose2D();
+
+   public boolean checkCustomTerminationConditions()
+   {
+      if (customTerminationConditions.isEmpty())
+      {
+         return false;
+      }
+
+      FootstepNode endNode = completionChecker.getEndNode();
+      endNodePose.set(endNode.getX(), endNode.getY(), endNode.getYaw());
+      int endNodePathSize = completionChecker.getEndNodePathSize();
+
+      for (int i = 0; i < customTerminationConditions.size(); i++)
+      {
+         boolean terminatePlanner = customTerminationConditions.get(i).terminatePlanner(stopwatch.totalElapsed(), iterations, endNodePose, endNodePathSize);
+         if (terminatePlanner)
+         {
+            return true;
+         }
+      }
+
+      return false;
+   }
+
    public void setStatusCallback(Consumer<FootstepPlannerOutput> statusCallback)
    {
       this.statusCallback = statusCallback;
@@ -284,6 +314,16 @@ public class AStarFootstepPlanner
    public void addIterationCallback(Consumer<AStarIterationData<FootstepNode>> callback)
    {
       iterationCallback = iterationCallback.andThen(callback);
+   }
+
+   public void addCustomTerminationCondition(FootstepPlannerTerminationCondition plannerTerminationCondition)
+   {
+      customTerminationConditions.add(plannerTerminationCondition);
+   }
+
+   public void clearCustomTerminationConditions()
+   {
+      customTerminationConditions.clear();
    }
 
    private boolean snapAndCheckGoalNodes(SideDependentList<FootstepNode> goalNodes, boolean horizonLengthImposed, FootstepPlannerRequest request)
@@ -311,11 +351,6 @@ public class AStarFootstepPlanner
       {
          return true;
       }
-   }
-
-   public void setStatusPublishPeriod(double statusPublishPeriod)
-   {
-      this.statusPublishPeriod = statusPublishPeriod;
    }
 
    public void halt()
@@ -381,5 +416,10 @@ public class AStarFootstepPlanner
    public List<FootstepPlannerIterationData> getIterationData()
    {
       return iterationData;
+   }
+
+   public int getIterations()
+   {
+      return iterations;
    }
 }

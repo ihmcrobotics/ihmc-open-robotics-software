@@ -38,6 +38,7 @@ public class FootstepPlannerCompletionChecker
    private double goalYawProximity;
 
    private FootstepNode startNode, endNode;
+   private int endNodePathSize;
    private SideDependentList<FootstepNode> goalNodes;
    private double endNodeCost;
 
@@ -57,6 +58,7 @@ public class FootstepPlannerCompletionChecker
    {
       this.startNode = startNode;
       this.goalNodes = goalNodes;
+      this.endNodePathSize = 0;
 
       this.goalDistanceProximity = goalDistanceProximity;
       this.goalYawProximity = goalYawProximity;
@@ -81,7 +83,7 @@ public class FootstepPlannerCompletionChecker
             FootstepNode childNode = iterationData.getValidChildNodes().get(i);
             midFootPose.set(childNode.getOrComputeMidFootPoint(footstepPlannerParameters.getIdealFootstepWidth()), childNode.getYaw());
 
-            boolean validYawProximity = midFootPose.getOrientationDistance(goalMidFootPose) <= goalYawProximity;
+            boolean validYawProximity = midFootPose.getOrientation().distance(goalMidFootPose.getOrientation()) <= goalYawProximity;
             boolean validDistanceProximity = midFootPose.getPosition().distanceSquared(goalMidFootPose.getPosition()) <= MathTools.square(goalDistanceProximity);
 
             if (validYawProximity && validDistanceProximity && searchForSquaredUpStepInProximity(iterationData.getParentNode(), childNode))
@@ -114,6 +116,7 @@ public class FootstepPlannerCompletionChecker
          {
             endNode = childNode;
             endNodeCost = cost;
+            endNodePathSize = footstepPlanner.getGraph().getPathLengthFromStart(endNode);
          }
       }
 
@@ -171,6 +174,11 @@ public class FootstepPlannerCompletionChecker
    public FootstepNode getEndNode()
    {
       return endNode;
+   }
+
+   public int getEndNodePathSize()
+   {
+      return endNodePathSize;
    }
 
    private class GoalProximityComparator implements Comparator<FootstepNode>

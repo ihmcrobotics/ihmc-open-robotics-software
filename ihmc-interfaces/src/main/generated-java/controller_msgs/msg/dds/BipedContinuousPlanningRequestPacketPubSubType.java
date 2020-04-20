@@ -40,27 +40,42 @@ public class BipedContinuousPlanningRequestPacketPubSubType implements us.ihmc.p
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
-
-      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+
+      current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -77,31 +92,47 @@ public class BipedContinuousPlanningRequestPacketPubSubType implements us.ihmc.p
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getLeftStartPositionInWorld(), current_alignment);
+
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getLeftStartOrientationInWorld(), current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRightStartPositionInWorld(), current_alignment);
+
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getRightStartOrientationInWorld(), current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getGoalPositionInWorld(), current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getGoalOrientationInWorld(), current_alignment);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -113,21 +144,36 @@ public class BipedContinuousPlanningRequestPacketPubSubType implements us.ihmc.p
 
    public static void write(controller_msgs.msg.dds.BipedContinuousPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_9(data.getStartTargetType());
 
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getLeftStartPositionInWorld(), cdr);
+
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getLeftStartOrientationInWorld(), cdr);
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getRightStartPositionInWorld(), cdr);
+
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getRightStartOrientationInWorld(), cdr);
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getGoalPositionInWorld(), cdr);
+
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getGoalOrientationInWorld(), cdr);
+
       cdr.write_type_2(data.getPlannerRequestId());
+
 
       cdr.write_type_6(data.getTimeout());
 
+
       cdr.write_type_6(data.getBestEffortTimeout());
+
+
+      cdr.write_type_2(data.getMaxIterations());
+
 
       cdr.write_type_6(data.getHorizonLength());
 
@@ -135,22 +181,37 @@ public class BipedContinuousPlanningRequestPacketPubSubType implements us.ihmc.p
 
    public static void read(controller_msgs.msg.dds.BipedContinuousPlanningRequestPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setStartTargetType(cdr.read_type_9());
       	
+
       geometry_msgs.msg.dds.PointPubSubType.read(data.getLeftStartPositionInWorld(), cdr);	
+
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getLeftStartOrientationInWorld(), cdr);	
+
       geometry_msgs.msg.dds.PointPubSubType.read(data.getRightStartPositionInWorld(), cdr);	
+
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getRightStartOrientationInWorld(), cdr);	
+
       geometry_msgs.msg.dds.PointPubSubType.read(data.getGoalPositionInWorld(), cdr);	
+
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getGoalOrientationInWorld(), cdr);	
+
       data.setPlannerRequestId(cdr.read_type_2());
       	
+
       data.setTimeout(cdr.read_type_6());
       	
+
       data.setBestEffortTimeout(cdr.read_type_6());
       	
+
+      data.setMaxIterations(cdr.read_type_2());
+      	
+
       data.setHorizonLength(cdr.read_type_6());
       	
 
@@ -159,46 +220,74 @@ public class BipedContinuousPlanningRequestPacketPubSubType implements us.ihmc.p
    @Override
    public final void serialize(controller_msgs.msg.dds.BipedContinuousPlanningRequestPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_9("start_target_type", data.getStartTargetType());
+
       ser.write_type_a("left_start_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getLeftStartPositionInWorld());
+
 
       ser.write_type_a("left_start_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getLeftStartOrientationInWorld());
 
+
       ser.write_type_a("right_start_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getRightStartPositionInWorld());
+
 
       ser.write_type_a("right_start_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRightStartOrientationInWorld());
 
+
       ser.write_type_a("goal_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalPositionInWorld());
+
 
       ser.write_type_a("goal_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getGoalOrientationInWorld());
 
+
       ser.write_type_2("planner_request_id", data.getPlannerRequestId());
+
       ser.write_type_6("timeout", data.getTimeout());
+
       ser.write_type_6("best_effort_timeout", data.getBestEffortTimeout());
+
+      ser.write_type_2("max_iterations", data.getMaxIterations());
+
       ser.write_type_6("horizon_length", data.getHorizonLength());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.BipedContinuousPlanningRequestPacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setStartTargetType(ser.read_type_9("start_target_type"));
+
       ser.read_type_a("left_start_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getLeftStartPositionInWorld());
+
 
       ser.read_type_a("left_start_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getLeftStartOrientationInWorld());
 
+
       ser.read_type_a("right_start_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getRightStartPositionInWorld());
+
 
       ser.read_type_a("right_start_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRightStartOrientationInWorld());
 
+
       ser.read_type_a("goal_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalPositionInWorld());
+
 
       ser.read_type_a("goal_orientation_in_world", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getGoalOrientationInWorld());
 
+
       data.setPlannerRequestId(ser.read_type_2("planner_request_id"));
+
       data.setTimeout(ser.read_type_6("timeout"));
+
       data.setBestEffortTimeout(ser.read_type_6("best_effort_timeout"));
+
+      data.setMaxIterations(ser.read_type_2("max_iterations"));
+
       data.setHorizonLength(ser.read_type_6("horizon_length"));
    }
 

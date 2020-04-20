@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.referenceFrame.FrameCylinder3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -19,7 +20,6 @@ import us.ihmc.graphicsDescription.instructions.CylinderGraphics3DInstruction;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.robotics.geometry.shapes.FrameCylinder3d;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
@@ -34,7 +34,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
 {
    private static final double DEFAULT_MASS = 1000000.0;
 
-   private final FrameCylinder3d cylinder;
+   private final FrameCylinder3D cylinder;
    
    private final RigidBodyTransform cylinderCenterTransformToWorld = new RigidBodyTransform();
    
@@ -55,13 +55,13 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
    public ContactableStaticCylinderRobot(String name, RigidBodyTransform cylinderTransform, double cylinderHeight, double cylinderRadius, AppearanceDefinition appearance)
    {
       super(name);
-      cylinder = new FrameCylinder3d(ReferenceFrame.getWorldFrame(), cylinderHeight, cylinderRadius);
-      cylinder.getCylinder3d().applyTransform(cylinderTransform);
+      cylinder = new FrameCylinder3D(ReferenceFrame.getWorldFrame(), cylinderHeight, cylinderRadius);
+      cylinder.applyTransform(cylinderTransform);
       
       RotationMatrix rotation = new RotationMatrix();
       Vector3D offset = new Vector3D();
-      cylinderTransform.getTranslation(offset);
-      cylinderTransform.getRotation(rotation);
+      offset.set(cylinderTransform.getTranslation());
+      rotation.set(cylinderTransform.getRotation());
       
       FramePoint3D cylinderCenter = new FramePoint3D(new TransformReferenceFrame("cylinderCenter", ReferenceFrame.getWorldFrame(), cylinderTransform), 0.0, 0.0, cylinderHeight / 2.0 );
       cylinderCenter.changeFrame(ReferenceFrame.getWorldFrame());
@@ -69,7 +69,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       
       Vector3D axis = new Vector3D(0.0, 0.0, 1.0);
       RigidBodyTransform rotationTransform = new RigidBodyTransform();
-      rotationTransform.setRotation(rotation);
+      rotationTransform.getRotation().set(rotation);
       rotationTransform.transform(axis);
       
       nullJoint = new RigidJoint(name + "NullJoint", offset, this);
@@ -92,7 +92,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
       linkGraphics.registerSelectedListener(this);
    }
    
-   private void createCylinderGraphics(FrameCylinder3d cylinder, AppearanceDefinition appearance)
+   private void createCylinderGraphics(FrameCylinder3D cylinder, AppearanceDefinition appearance)
    {
       cylinderGraphic = linkGraphics.addCylinder(cylinder.getLength(), cylinder.getRadius(), appearance);
    }
@@ -137,7 +137,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
    @Override
    public synchronized boolean isPointOnOrInside(Point3D pointInWorldToCheck)
    {
-      return cylinder.getCylinder3d().isPointInside(pointInWorldToCheck);
+      return cylinder.isPointInside(pointInWorldToCheck);
    }
    
    @Override
@@ -149,7 +149,7 @@ public class ContactableStaticCylinderRobot extends ContactableStaticRobot imple
    @Override
    public synchronized void closestIntersectionAndNormalAt(Point3D intersectionToPack, Vector3D normalToPack, Point3D pointInWorldToCheck)
    {
-      cylinder.getCylinder3d().evaluatePoint3DCollision(pointInWorldToCheck, intersectionToPack, normalToPack);
+      cylinder.evaluatePoint3DCollision(pointInWorldToCheck, intersectionToPack, normalToPack);
    }
 
 

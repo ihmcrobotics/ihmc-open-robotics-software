@@ -40,7 +40,9 @@ public class WalkingControllerPreviewInputMessagePubSubType implements us.ihmc.p
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += controller_msgs.msg.dds.FootstepDataListMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -57,7 +59,9 @@ public class WalkingControllerPreviewInputMessagePubSubType implements us.ihmc.p
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += controller_msgs.msg.dds.FootstepDataListMessagePubSubType.getCdrSerializedSize(data.getFootsteps(), current_alignment);
@@ -68,15 +72,19 @@ public class WalkingControllerPreviewInputMessagePubSubType implements us.ihmc.p
 
    public static void write(controller_msgs.msg.dds.WalkingControllerPreviewInputMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       controller_msgs.msg.dds.FootstepDataListMessagePubSubType.write(data.getFootsteps(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.WalkingControllerPreviewInputMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       controller_msgs.msg.dds.FootstepDataListMessagePubSubType.read(data.getFootsteps(), cdr);	
 
    }
@@ -84,7 +92,9 @@ public class WalkingControllerPreviewInputMessagePubSubType implements us.ihmc.p
    @Override
    public final void serialize(controller_msgs.msg.dds.WalkingControllerPreviewInputMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_a("footsteps", new controller_msgs.msg.dds.FootstepDataListMessagePubSubType(), data.getFootsteps());
 
    }
@@ -92,7 +102,9 @@ public class WalkingControllerPreviewInputMessagePubSubType implements us.ihmc.p
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WalkingControllerPreviewInputMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_a("footsteps", new controller_msgs.msg.dds.FootstepDataListMessagePubSubType(), data.getFootsteps());
 
    }

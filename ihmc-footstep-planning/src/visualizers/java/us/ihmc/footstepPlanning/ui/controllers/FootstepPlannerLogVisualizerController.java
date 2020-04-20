@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
-import controller_msgs.msg.dds.BodyPathPlanMessage;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -91,7 +90,7 @@ public class FootstepPlannerLogVisualizerController
                                      graphData -> Platform.runLater(() -> updateGraphData(planarRegionData.get(), graphData.getLeft(), graphData.getRight())));
    }
 
-   public void setup()
+   public void onPrimaryStageLoaded()
    {
       parentColumnHolder = new TableColumnHolder(debugParentStepTable, true);
       childColumnHolder = new TableColumnHolder(debugChildStepTable, false);
@@ -141,12 +140,11 @@ public class FootstepPlannerLogVisualizerController
       debugParentStepTable.addEventFilter(ScrollEvent.ANY, Event::consume);
    }
 
-   public void setContactPointParameters(RobotContactPointParameters<RobotSide> contactPointParameters)
+   public void setContactPointParameters(SideDependentList<List<Point2D>> defaultContactPoints)
    {
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side ->
                                                                                 {
-                                                                                   ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints()
-                                                                                                                                         .get(side);
+                                                                                   List<Point2D> footPoints = defaultContactPoints.get(side);
                                                                                    return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
                                                                                 });
       snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
@@ -208,9 +206,9 @@ public class FootstepPlannerLogVisualizerController
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, footstepPlannerLog.getRequestPacket().getPlanBodyPath());
 
       // publish status
-      messager.submitMessage(FootstepPlannerMessagerAPI.PlanningResult, FootstepPlanningResult.fromByte(footstepPlannerLog.getStatusPacket().getFootstepPlanningResult()));
-      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, footstepPlannerLog.getStatusPacket().getLowLevelPlannerGoal().getPosition());
-      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, footstepPlannerLog.getStatusPacket().getLowLevelPlannerGoal().getOrientation());
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, FootstepPlanningResult.fromByte(footstepPlannerLog.getStatusPacket().getFootstepPlanningResult()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, footstepPlannerLog.getStatusPacket().getGoalPose().getPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, footstepPlannerLog.getStatusPacket().getGoalPose().getOrientation());
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepPlannerLog.getStatusPacket().getFootstepDataList());
 
       // publish visibility graph data
@@ -482,7 +480,7 @@ public class FootstepPlannerLogVisualizerController
          if(idealStepSnapData == null || idealStepSnapData.getSnapTransform().containsNaN())
          {
             FootstepNodeTools.getNodeTransform(idealStep, idealStepTransform);
-            idealStepTransform.setTranslationZ(transform.getTranslationZ());
+            idealStepTransform.getTranslation().setZ(transform.getTranslationZ());
          }
          else
          {

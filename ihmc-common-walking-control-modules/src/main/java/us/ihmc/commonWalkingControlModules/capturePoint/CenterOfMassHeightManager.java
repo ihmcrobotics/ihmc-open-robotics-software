@@ -3,12 +3,10 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.CenterOfMassHeightControlState;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisAndCenterOfMassHeightControlState;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlMode;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -279,7 +277,7 @@ public class CenterOfMassHeightManager
       }
    }
 
-   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
+   public void initialize(NewTransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
    {
       if (useStateMachine)
       {
@@ -298,18 +296,6 @@ public class CenterOfMassHeightManager
       else
       {
          return pelvisHeightControlState.computeDesiredCoMHeightAcceleration(desiredICPVelocity, isInDoubleSupport, omega0, isRecoveringFromPush, feetManager);
-      }
-   }
-
-   public boolean hasBeenInitializedWithNextStep()
-   {
-      if (useStateMachine)
-      {
-         return centerOfMassHeightControlState.hasBeenInitializedWithNextStep();
-      }
-      else
-      {
-         return true;
       }
    }
 

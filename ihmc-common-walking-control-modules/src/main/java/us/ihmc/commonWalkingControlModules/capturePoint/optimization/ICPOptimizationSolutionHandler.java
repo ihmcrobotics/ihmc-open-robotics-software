@@ -174,7 +174,7 @@ public class ICPOptimizationSolutionHandler
       clippedFootstepAdjustment.sub(clippedLocationSolution, referenceFootstepLocation2D);
       totalFootstepAdjustment.add(clippedFootstepAdjustment);
 
-      footstepSolutionToPack.setPosition(clippedLocationSolution);
+      footstepSolutionToPack.getPosition().set(clippedLocationSolution);
       unclippedFootstepSolutionToPack.set(locationSolution);
 
       this.footstepWasAdjusted.set(footstepWasAdjusted);

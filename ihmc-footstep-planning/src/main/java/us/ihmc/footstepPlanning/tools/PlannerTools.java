@@ -27,8 +27,8 @@ public class PlannerTools
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final double footLength = 0.2;
-   private static final double footWidth = 0.1;
+   public static final double footLength = 0.2;
+   public static final double footWidth = 0.1;
 
    public static ConvexPolygon2D createFootPolygon(double footLength, double heelWidth, double toeWidth)
    {
@@ -126,7 +126,7 @@ public class PlannerTools
       FramePose3D achievedGoal = new FramePose3D(stepPose);
       Point3D goalPosition = new Point3D(achievedGoal.getPosition());
       goalPosition.add(goalOffset);
-      achievedGoal.setPosition(goalPosition);
+      achievedGoal.getPosition().set(goalPosition);
 
       if (achievedGoal.epsilonEquals(goalPose, epsilon))
          return true;

@@ -4,10 +4,10 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
-import us.ihmc.robotics.kinematics.TransformInterpolationCalculator;
 
 public class YoReferencePose extends ReferenceFrame
 {
@@ -33,9 +33,9 @@ public class YoReferencePose extends ReferenceFrame
    protected void updateTransformToParent(RigidBodyTransform transformToParent)
    {
       rotation.set(yoFramePose.getYawPitchRoll());
-      transformToParent.setRotation(rotation);
+      transformToParent.getRotation().set(rotation);
       YoFramePoint3D yoFramePoint = yoFramePose.getPosition();
-      transformToParent.setTranslation(yoFramePoint.getX(), yoFramePoint.getY(), yoFramePoint.getZ());
+      transformToParent.getTranslation().set(yoFramePoint.getX(), yoFramePoint.getY(), yoFramePoint.getZ());
    }
 
    public void setAndUpdate(RigidBodyTransform transform)

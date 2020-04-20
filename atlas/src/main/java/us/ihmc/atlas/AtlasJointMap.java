@@ -385,9 +385,9 @@ public class AtlasJointMap implements DRCRobotJointMap
       handControlFrameToWristTranform.multiply(attachmentPlateToPalm);
 
       Vector3D translation = new Vector3D();
-      handControlFrameToWristTranform.getTranslation(translation);
+      translation.set(handControlFrameToWristTranform.getTranslation());
       translation.scale(getModelScale());
-      handControlFrameToWristTranform.setTranslation(translation);
+      handControlFrameToWristTranform.getTranslation().set(translation);
 
       return handControlFrameToWristTranform;
    }

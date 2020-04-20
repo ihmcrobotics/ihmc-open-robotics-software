@@ -3,14 +3,11 @@ package us.ihmc.simulationConstructionSetTools.util.environments.environmentRobo
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -24,18 +21,13 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.input.SelectedListener;
 import us.ihmc.graphicsDescription.structure.Graphics3DNode;
 import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
-import us.ihmc.robotics.geometry.shapes.FrameBox3d;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.simulationConstructionSetTools.util.environments.MultiJointArticulatedContactable;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
-import us.ihmc.simulationconstructionset.GroundContactPoint;
-import us.ihmc.simulationconstructionset.Joint;
-import us.ihmc.simulationconstructionset.Link;
-import us.ihmc.simulationconstructionset.PinJoint;
-import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.*;
 import us.ihmc.simulationconstructionset.util.ground.Contactable;
 import us.ihmc.tools.inputDevices.keyboard.Key;
 import us.ihmc.tools.inputDevices.keyboard.ModifierKeyInterface;
@@ -58,7 +50,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    
    private final RigidBodyTransform originalDoorPose;
    private final PoseReferenceFrame doorFrame;
-   private final FrameBox3d doorBox;
+   private final FrameBox3D doorBox;
    
    private final SideDependentList<PoseReferenceFrame> handlePoses = new SideDependentList<PoseReferenceFrame>();
    
@@ -112,7 +104,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       // set up reference frames
       originalDoorPose = new RigidBodyTransform(new AxisAngle(), new Vector3D(positionInWorld)); 
       doorFrame = new PoseReferenceFrame("doorFrame", new FramePose3D(ReferenceFrame.getWorldFrame(), new Point3D(positionInWorld), new AxisAngle()));
-      doorBox = new FrameBox3d(doorFrame, widthX, depthY, heightZ);
+      doorBox = new FrameBox3D(doorFrame, widthX, depthY, heightZ);
       
       for(RobotSide robotSide : RobotSide.values())
       {
@@ -127,7 +119,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    private void createDoor(Vector3D positionInWorld)
    {
       // creating the pinJoint, i.e. door hinge
-      doorHingePinJoint = new PinJoint("doorHingePinJoint", positionInWorld, this, Axis.Z);
+      doorHingePinJoint = new PinJoint("doorHingePinJoint", positionInWorld, this, Axis3D.Z);
       
       // door link
       doorLink = new Link("doorLink");
@@ -143,7 +135,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    private void createHandle()
    {
       // create handle
-      handlePinJoint = new PinJoint("handlePinJoint", new Vector3D(handleOffset.getX(), 0.0, handleOffset.getY()), this, Axis.Y);
+      handlePinJoint = new PinJoint("handlePinJoint", new Vector3D(handleOffset.getX(), 0.0, handleOffset.getY()), this, Axis3D.Y);
       
       // handle link
       handleLink = new Link("handleHorizontalLink");
@@ -171,7 +163,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    {
       // graphics - handle hinge
       RotationMatrix rotX90 = new RotationMatrix();
-      rotX90.setToRollMatrix(Math.PI / 2.0);
+      rotX90.setToRollOrientation(Math.PI / 2.0);
       doorHandleGraphics.rotate(rotX90);
       doorHandleGraphics.translate(new Vector3D(0.0, 0.0, -0.5 * depthY)); // center graphics
       
@@ -206,7 +198,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       pointToCheck.changeFrame(doorFrame);
       pointToCheck.add(-0.5*widthX, -0.5*depthY, -0.5*heightZ); // since FrameBox3d.isInsideOrOnSurface assumes center of box is origin
 
-      if (doorBox.isInsideOrOnSurface(pointToCheck))
+      if (doorBox.isPointInside(pointToCheck))
       {
          lastInsideHandles = false;
          return true;
@@ -269,7 +261,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
       if(!packedByHandles)
       {
          pointToCheck.changeFrame(doorFrame);
-         doorBox.getClosestPointAndNormalAt(frameIntersectionToPack, frameNormalToPack, pointToCheck);         
+         doorBox.evaluatePoint3DCollision(pointToCheck, frameIntersectionToPack, frameNormalToPack);         
       }
       
       frameNormalToPack.changeFrame(ReferenceFrame.getWorldFrame());
@@ -283,15 +275,15 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    public void updateAllGroundContactPointVelocities()
    {
       RotationMatrix hingeRotation = new RotationMatrix();
-      hingeRotation.setToYawMatrix(getHingeYaw());
+      hingeRotation.setToYawOrientation(getHingeYaw());
       RigidBodyTransform newDoorPose = new RigidBodyTransform(originalDoorPose);
-      newDoorPose.setRotation(hingeRotation);
+      newDoorPose.getRotation().set(hingeRotation);
       doorFrame.setPoseAndUpdate(newDoorPose);
       
       for(RobotSide robotSide : RobotSide.values())
       {
          RigidBodyTransform handlePose = handlePoses.get(robotSide).getTransformToDesiredFrame(doorFrame);
-         handlePose.setRotation(new AxisAngle(0.0, 1.0, 0.0, getHandleAngle()));
+         handlePose.getRotation().set(new AxisAngle(0.0, 1.0, 0.0, getHandleAngle()));
          handlePoses.get(robotSide).setPoseAndUpdate(handlePose);
       }
       

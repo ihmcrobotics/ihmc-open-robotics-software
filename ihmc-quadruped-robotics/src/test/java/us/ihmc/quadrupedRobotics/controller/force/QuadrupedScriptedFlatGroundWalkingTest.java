@@ -106,7 +106,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       conductor.addTerminalGoal(QuadrupedTestGoals.timeInFuture(variables, 1.0));
       conductor.simulate();
 
-      Point3D initialPosition = new Point3D(quadrupedTestFactory.getFullRobotModel().getBody().getParentJoint().getFrameAfterJoint().getTransformToRoot().getTranslationVector());
+      Point3D initialPosition = new Point3D(quadrupedTestFactory.getFullRobotModel().getBody().getParentJoint().getFrameAfterJoint().getTransformToRoot().getTranslation());
 
       List<QuadrupedTimedStepMessage> steps = getSteps();
       steps.forEach(step -> step.getQuadrupedStepMessage().getGoalPosition().addZ(stepHeightOffset));
@@ -127,7 +127,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       conductor.simulate();
 
       // Re-execute the same footsteps but shifted to the new robot location
-      Point3D currentPosition = new Point3D(quadrupedTestFactory.getFullRobotModel().getBody().getParentJoint().getFrameAfterJoint().getTransformToRoot().getTranslationVector());
+      Point3D currentPosition = new Point3D(quadrupedTestFactory.getFullRobotModel().getBody().getParentJoint().getFrameAfterJoint().getTransformToRoot().getTranslation());
       Vector3D offset = new Vector3D();
       offset.sub(currentPosition, initialPosition);
       offset.setZ(0.0);

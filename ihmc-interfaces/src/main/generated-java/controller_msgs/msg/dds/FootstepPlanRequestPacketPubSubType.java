@@ -40,17 +40,23 @@ public class FootstepPlanRequestPacketPubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -66,21 +72,27 @@ public class FootstepPlanRequestPacketPubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getCdrSerializedSize(data.getStartFootstep(), current_alignment);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getGoals().size(); ++i0)
       {
           current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getCdrSerializedSize(data.getGoals().get(i0), current_alignment);}
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -91,16 +103,22 @@ public class FootstepPlanRequestPacketPubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(controller_msgs.msg.dds.FootstepPlanRequestPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
+
       controller_msgs.msg.dds.FootstepDataMessagePubSubType.write(data.getStartFootstep(), cdr);
+
       cdr.write_type_6(data.getThetaStart());
 
+
       cdr.write_type_6(data.getMaxSubOptimality());
+
 
       if(data.getGoals().size() <= 100)
       cdr.write_type_e(data.getGoals());else
           throw new RuntimeException("goals field exceeds the maximum length");
+
 
       cdr.write_type_9(data.getFootstepPlanRequestType());
 
@@ -108,14 +126,20 @@ public class FootstepPlanRequestPacketPubSubType implements us.ihmc.pubsub.Topic
 
    public static void read(controller_msgs.msg.dds.FootstepPlanRequestPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       controller_msgs.msg.dds.FootstepDataMessagePubSubType.read(data.getStartFootstep(), cdr);	
+
       data.setThetaStart(cdr.read_type_6());
       	
+
       data.setMaxSubOptimality(cdr.read_type_6());
       	
+
       cdr.read_type_e(data.getGoals());	
+
       data.setFootstepPlanRequestType(cdr.read_type_9());
       	
 
@@ -124,24 +148,36 @@ public class FootstepPlanRequestPacketPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(controller_msgs.msg.dds.FootstepPlanRequestPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_a("start_footstep", new controller_msgs.msg.dds.FootstepDataMessagePubSubType(), data.getStartFootstep());
 
+
       ser.write_type_6("theta_start", data.getThetaStart());
+
       ser.write_type_6("max_sub_optimality", data.getMaxSubOptimality());
+
       ser.write_type_e("goals", data.getGoals());
+
       ser.write_type_9("footstep_plan_request_type", data.getFootstepPlanRequestType());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepPlanRequestPacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_a("start_footstep", new controller_msgs.msg.dds.FootstepDataMessagePubSubType(), data.getStartFootstep());
 
+
       data.setThetaStart(ser.read_type_6("theta_start"));
+
       data.setMaxSubOptimality(ser.read_type_6("max_sub_optimality"));
+
       ser.read_type_e("goals", data.getGoals());
+
       data.setFootstepPlanRequestType(ser.read_type_9("footstep_plan_request_type"));
    }
 
