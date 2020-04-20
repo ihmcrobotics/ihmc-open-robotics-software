@@ -551,7 +551,8 @@ public class ConcaveHullPruningFilteringTools
     * 
     * @param alphaRadius                   distance threshold used to determine if a passage is narrow
     *                                      enough to be cut. It represents radius of a circle that
-    *                                      should all way through a narrow passage to preserve it.
+    *                                      should fit all the way through a narrow passage to preserve
+    *                                      it.
     * @param concaveHullCollectionToFilter the collection of concave hulls to be filtered. Not
     *                                      modified.
     * @return the filtered collection of concave hulls.
@@ -578,8 +579,8 @@ public class ConcaveHullPruningFilteringTools
     * </p>
     * 
     * @param alphaRadius         distance threshold used to determine if a passage is narrow enough to
-    *                            be cut. It represents radius of a circle that should all way through a
-    *                            narrow passage to preserve it.
+    *                            be cut. It represents radius of a circle that should fit all the way
+    *                            through a narrow passage to preserve it.
     * @param concaveHullToFilter the concave hull to be filtered. Not modified.
     * @return the resulting collection of concave hulls after applying the filter on the input.
     */
