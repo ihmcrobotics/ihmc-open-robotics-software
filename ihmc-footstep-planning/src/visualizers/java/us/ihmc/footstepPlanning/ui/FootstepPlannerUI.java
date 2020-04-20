@@ -81,6 +81,8 @@ public class FootstepPlannerUI
    private final JavaFXRobotVisualizer walkingPreviewVisualizer;
    private final FootstepPlannerLogRenderer footstepPlannerLogRenderer;
 
+   private final List<Runnable> shutdownHooks = new ArrayList<>();
+
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
    @FXML
@@ -391,6 +393,8 @@ public class FootstepPlannerUI
 
    public void stop()
    {
+      shutdownHooks.forEach(Runnable::run);
+
       planarRegionViewer.stop();
       startGoalPositionViewer.stop();
       goalOrientationViewer.stop();
@@ -404,6 +408,11 @@ public class FootstepPlannerUI
 
       if(robotVisualizer != null)
          robotVisualizer.stop();
+   }
+
+   public void addShutdownHook(Runnable shutdownHook)
+   {
+      shutdownHooks.add(shutdownHook);
    }
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
