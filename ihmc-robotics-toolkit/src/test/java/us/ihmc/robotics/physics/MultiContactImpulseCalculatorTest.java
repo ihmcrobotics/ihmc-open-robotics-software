@@ -93,7 +93,7 @@ public class MultiContactImpulseCalculatorTest
          multiContactImpulseCalculator.setSingleContactTolerance(SINGLE_CONTACT_GAMMA);
          try
          {
-            multiContactImpulseCalculator.computeImpulses(dt, false);
+            multiContactImpulseCalculator.computeImpulses(0.0, dt, false);
             if (!multiContactImpulseCalculator.hasConverged())
             {
                System.err.println("Did not converge");
@@ -133,7 +133,7 @@ public class MultiContactImpulseCalculatorTest
       {
          RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rigidBody);
          PhysicsEngineRobotData physicsEngineRobotData = new PhysicsEngineRobotData(rigidBody.getName(), rootBody, null, null, null, null);
-         physicsEngineRobotData.getForwardDynamicsPlugin().doScience(dt, gravity);
+         physicsEngineRobotData.getForwardDynamicsPlugin().doScience(0.0, dt, gravity);
          map.put(rootBody, physicsEngineRobotData);
       }
 
