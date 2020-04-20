@@ -63,9 +63,9 @@ public class FootstepNodeChecker
       return rejectionReason == null;
    }
 
-   public void onIterationStart()
+   public void onIterationStart(FootstepNode footstepNode)
    {
-      footstepIndex = -1;
+      footstepIndex = footstepNode.getChildNodes().size() - 1;
    }
 
    private BipedalFootstepPlannerNodeRejectionReason isNodeValidInternal(FootstepNode candidateNode, FootstepNode stanceNode)

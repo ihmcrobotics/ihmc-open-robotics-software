@@ -62,27 +62,10 @@ public class AStarFootstepPlannerIterationConductor
       expandedNodeSet.clear();
    }
 
-   /**
+  /**
     * Performs iteration according to {@link #doPlanningIteration}.
     * The node expanded is the one with the {@code costFromStart + heuristicCostToGoal}
     *
-    * @return the node that was expanded and all child nodes that were added to the graph
-    */
-   public AStarIterationData<FootstepNode> doPlanningIteration()
-   {
-      iterationData.clear();
-      if (stack.isEmpty())
-         return iterationData;
-
-      FootstepNode nodeToExpand = getNextNode();
-      if(nodeToExpand == null)
-         return iterationData;
-
-      return doPlanningIteration(nodeToExpand, true);
-   }
-
-   /**
-    * Does single search iteration. A search iteration consists of expanding a single node and adding the resulting edges to the graph.
     * @param nodeToExpand the node that will be expanded
     * @return the node that was expanded and all child nodes that were added to the graph
     */
@@ -118,6 +101,8 @@ public class AStarFootstepPlannerIterationConductor
          }
       }
 
+      nodeToExpand.getChildNodes().addAll(neighbors);
+
       if (partialExpansion)
       {
          stack.add(nodeToExpand);
@@ -130,13 +115,15 @@ public class AStarFootstepPlannerIterationConductor
       return iterationData;
    }
 
-   private FootstepNode getNextNode()
+   public FootstepNode getNextNode()
    {
       while (!stack.isEmpty())
       {
          FootstepNode nextNode = stack.poll();
          if (!expandedNodeSet.contains(nextNode))
+         {
             return nextNode;
+         }
       }
 
       return null;

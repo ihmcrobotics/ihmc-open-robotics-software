@@ -27,7 +27,7 @@ public class AStarFootstepPlannerIterationConductorTest
 
       for (int i = 0; i < 5; i++)
       {
-         AStarIterationData<FootstepNode> iterationData = planner.doPlanningIteration();
+         AStarIterationData<FootstepNode> iterationData = planner.doPlanningIteration(planner.getNextNode(), true);
          Assertions.assertEquals(iterationData.getParentNode().getXIndex(), i);
          Assertions.assertEquals(iterationData.getParentNode().getYIndex(), 0);
          Assertions.assertEquals(iterationData.getValidChildNodes().size(), 4);
@@ -63,7 +63,7 @@ public class AStarFootstepPlannerIterationConductorTest
       planningLoop:
       while (true)
       {
-         AStarIterationData<FootstepNode> iterationData = planner.doPlanningIteration();
+         AStarIterationData<FootstepNode> iterationData = planner.doPlanningIteration(planner.getNextNode(), true);
          List<FootstepNode> childNodes = iterationData.getValidChildNodes();
          for (int i = 0; i < childNodes.size(); i++)
          {

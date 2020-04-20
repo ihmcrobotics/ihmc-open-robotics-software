@@ -170,16 +170,19 @@ public class AStarFootstepPlanner
             break;
          }
 
-         checker.onIterationStart();
-         AStarIterationData<FootstepNode> iterationData = footstepPlanner.doPlanningIteration();
-         recordIterationData(iterationData);
-         iterationCallback.accept(iterationData);
-
-         if (iterationData.getParentNode() == null)
+         FootstepNode nodeToExpand = footstepPlanner.getNextNode();
+         if (nodeToExpand == null)
          {
             result = FootstepPlanningResult.NO_PATH_EXISTS;
             break;
          }
+
+         checker.onIterationStart(nodeToExpand);
+
+         AStarIterationData<FootstepNode> iterationData = footstepPlanner.doPlanningIteration(nodeToExpand, true);
+         recordIterationData(iterationData);
+         iterationCallback.accept(iterationData);
+
          if (completionChecker.checkIfGoalIsReached(iterationData))
          {
             // the final graph expansion is handled manually
@@ -277,13 +280,27 @@ public class AStarFootstepPlanner
          return;
       }
 
-      FootstepPlannerIterationData loggedData = new FootstepPlannerIterationData();
-      loggedData.setStanceNode(iterationData.getParentNode());
+      FootstepPlannerIterationData loggedData = null;
+      for (int i = 0; i < this.iterationData.size(); i++)
+      {
+         if (this.iterationData.get(i).getStanceNode().equals(iterationData.getParentNode()))
+         {
+            loggedData = this.iterationData.get(i);
+            break;
+         }
+      }
+
+      if (loggedData == null)
+      {
+         loggedData = new FootstepPlannerIterationData();
+         loggedData.setStanceNode(iterationData.getParentNode());
+         loggedData.setIdealStep(idealStepCalculator.computeIdealStep(iterationData.getParentNode()));
+         loggedData.setStanceNodeSnapData(snapper.getSnapData(iterationData.getParentNode()));
+         this.iterationData.add(loggedData);
+      }
+
       iterationData.getValidChildNodes().forEach(loggedData::addChildNode);
       iterationData.getInvalidChildNodes().forEach(loggedData::addChildNode);
-      loggedData.setIdealStep(idealStepCalculator.computeIdealStep(iterationData.getParentNode()));
-      loggedData.setStanceNodeSnapData(snapper.getSnapData(iterationData.getParentNode()));
-      this.iterationData.add(loggedData);
    }
 
    private final Pose2D endNodePose = new Pose2D();
