@@ -41,7 +41,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    public void testUnknownStepDownOneFootOnEachStep() throws SimulationExceededMaximumTimeException
    {
       double stepDownHeight = 0.07;
-      double stepLength = 0.31;
+      double stepLength = 0.32;
       double stairLength = 0.35;
       setStepDownHeight(stepDownHeight);
       setStairLength(stairLength);
@@ -55,7 +55,7 @@ public class AtlasLeapOfFaithTest extends AvatarLeapOfFaithTest
    public void testUnknownStepDownOneFootOnEachStepLong() throws SimulationExceededMaximumTimeException
    {
       double stepDownHeight = 0.08;
-      double stepLength = 0.37;
+      double stepLength = 0.4;
       double stairLength = 0.5;
       setStepDownHeight(stepDownHeight);
       setStairLength(stairLength);
