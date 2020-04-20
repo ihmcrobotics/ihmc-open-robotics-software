@@ -4,6 +4,8 @@ import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class FootstepNode
@@ -13,7 +15,8 @@ public class FootstepNode
 
    private Point2D midFootPoint;
    private final int hashCode;
-   private int nodeIndex = -1;
+
+   private final List<FootstepNode> childNodes = new ArrayList<>();
 
    public FootstepNode(double x, double y)
    {
@@ -35,16 +38,6 @@ public class FootstepNode
       this.latticeNode = latticeNode;
       this.robotSide = robotSide;
       hashCode = computeHashCode(this);
-   }
-
-   public void setNodeIndex(int nodeIndex)
-   {
-      this.nodeIndex = nodeIndex;
-   }
-
-   public int getNodeIndex()
-   {
-      return nodeIndex;
    }
 
    public double getX()
@@ -85,6 +78,19 @@ public class FootstepNode
    public RobotSide getRobotSide()
    {
       return robotSide;
+   }
+
+   public List<FootstepNode> getChildNodes()
+   {
+      return childNodes;
+   }
+
+   public void addChildNode(FootstepNode childNode)
+   {
+      if (!childNodes.contains(childNode))
+      {
+         childNodes.add(childNode);
+      }
    }
 
    public double euclideanDistance(FootstepNode other)
