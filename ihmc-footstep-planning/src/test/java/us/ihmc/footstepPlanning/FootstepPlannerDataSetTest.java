@@ -118,9 +118,6 @@ public abstract class FootstepPlannerDataSetTest
    {
       module.stop();
       messager.closeMessager();
-      if (ui != null)
-         ui.stop();
-      ui = null;
 
       uiFootstepPlanReference = null;
       uiPlanningResultReference = null;
@@ -165,7 +162,19 @@ public abstract class FootstepPlannerDataSetTest
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.testDataSets, dataSets);
          messager.registerTopicListener(FootstepPlannerMessagerAPI.testDataSetSelected, this::runAssertions);
-         ThreadTools.sleepForever();
+
+         ui.addShutdownHook(() ->
+                            {
+                               try
+                               {
+                                  tearDown();
+                               }
+                               catch (Exception e)
+                               {
+                                  e.printStackTrace();
+                                  Platform.exit();
+                               }
+                            });
       }
       else
       {
