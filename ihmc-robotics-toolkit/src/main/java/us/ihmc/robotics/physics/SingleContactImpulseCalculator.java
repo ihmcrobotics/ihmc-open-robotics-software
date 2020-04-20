@@ -156,7 +156,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       this.gamma = gamma;
    }
 
-   public void setContactParameters(ConstraintParametersReadOnly parameters)
+   public void setContactParameters(ContactParametersReadOnly parameters)
    {
       contactParameters.set(parameters);
    }
