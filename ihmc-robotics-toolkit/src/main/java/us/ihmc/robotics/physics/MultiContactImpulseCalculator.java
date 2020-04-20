@@ -2,6 +2,7 @@ package us.ihmc.robotics.physics;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -112,6 +113,16 @@ public class MultiContactImpulseCalculator
          calculator.initialize(dt);
       }
 
+      for (Iterator<RobotJointLimitImpulseBasedCalculator> iterator = jointLimitCalculators.iterator(); iterator.hasNext();)
+      {
+         RobotJointLimitImpulseBasedCalculator calculator = iterator.next();
+         if (calculator.getActiveLimits().isEmpty())
+         {
+            allCalculators.remove(calculator);
+            iterator.remove();
+         }
+      }
+
       for (ImpulseBasedConstraintCalculator calculator : allCalculators)
       {
          List<? extends RigidBodyBasics> rigidBodyTargets = collectRigidBodyTargetsForCalculator(calculator);
@@ -121,7 +132,9 @@ public class MultiContactImpulseCalculator
 
       if (allCalculators.size() == 1)
       {
-         allCalculators.get(0).computeImpulse(dt);
+         ImpulseBasedConstraintCalculator calculator = allCalculators.get(0);
+         calculator.computeImpulse(dt);
+         calculator.finalizeImpulse();
          return 0.0;
       }
       else
