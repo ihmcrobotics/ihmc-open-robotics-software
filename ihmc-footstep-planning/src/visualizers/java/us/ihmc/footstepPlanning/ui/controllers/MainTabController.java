@@ -12,6 +12,7 @@ import javafx.scene.layout.Region;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
@@ -219,7 +220,7 @@ public class MainTabController
    private HumanoidReferenceFrames humanoidReferenceFrames;
    private AtomicReference<FootstepDataListMessage> footstepPlanReference;
    private final ArrayList<List<Point3D>> contactPointHolder = new ArrayList<>();
-   private SideDependentList<ArrayList<Point3D>> defaultContactPoints = new SideDependentList<>();
+   private SideDependentList<List<Point3D>> defaultContactPoints = new SideDependentList<>();
    private final Point3DProperty goalPositionProperty = new Point3DProperty(this, "goalPositionProperty", new Point3D());
    private final YawProperty goalRotationProperty = new YawProperty(this, "goalRotationProperty", 0.0);
 
@@ -398,13 +399,15 @@ public class MainTabController
       transferTimeSpinner.getValueFactory().setValue(transferTime);
    }
 
-   public void setContactPointParameters(RobotContactPointParameters<RobotSide> contactPointParameters)
+   public void setContactPointParameters(SideDependentList<List<Point2D>> defaultContactPoints)
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         ArrayList<Point3D> contactPoints = new ArrayList<>(contactPointParameters.getControllerFootGroundContactPoints().get(robotSide).stream()
-                                                                                  .map(p -> new Point3D(p.getX(), p.getY(), 0.0)).collect(Collectors.toList()));
-         defaultContactPoints.put(robotSide, contactPoints);
+         this.defaultContactPoints.put(robotSide,
+                                       defaultContactPoints.get(robotSide)
+                                                           .stream()
+                                                           .map(p -> new Point3D(p.getX(), p.getY(), 0.0))
+                                                           .collect(Collectors.toList()));
       }
    }
 

@@ -14,6 +14,10 @@
         <fx:include fx:id="footstepPlannerStatusBar" source="FootstepPlannerStatusBar.fxml"/>
     </right>
 
+    <left>
+        <fx:include fx:id="footstepPlannerTestDashboard" source="FootstepPlannerTestDashboard.fxml"/>
+    </left>
+
     <bottom>
         <TabPane prefHeight="320" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
             <tabs>

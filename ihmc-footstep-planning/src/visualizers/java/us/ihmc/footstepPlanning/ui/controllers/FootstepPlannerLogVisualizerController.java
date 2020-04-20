@@ -140,12 +140,11 @@ public class FootstepPlannerLogVisualizerController
       debugParentStepTable.addEventFilter(ScrollEvent.ANY, Event::consume);
    }
 
-   public void setContactPointParameters(RobotContactPointParameters<RobotSide> contactPointParameters)
+   public void setContactPointParameters(SideDependentList<List<Point2D>> defaultContactPoints)
    {
       SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side ->
                                                                                 {
-                                                                                   ArrayList<Point2D> footPoints = contactPointParameters.getFootContactPoints()
-                                                                                                                                         .get(side);
+                                                                                   List<Point2D> footPoints = defaultContactPoints.get(side);
                                                                                    return new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(footPoints));
                                                                                 });
       snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
