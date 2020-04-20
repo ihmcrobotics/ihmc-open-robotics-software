@@ -278,7 +278,7 @@ public abstract class SDFRobotWriter
          {
             Graphics3DRotateInstruction graphics3dRotateInstruction = (Graphics3DRotateInstruction) instruction;
             RigidBodyTransform temp = new RigidBodyTransform();
-            temp.setRotation(graphics3dRotateInstruction.getRotationMatrix());
+            temp.getRotation().set(graphics3dRotateInstruction.getRotationMatrix());
 //            temp.invert();
             visualPose.set(temp);
             visualPose.multiply(visualPose);
@@ -287,7 +287,7 @@ public abstract class SDFRobotWriter
          {
             Graphics3DTranslateInstruction graphics3dTranslateInstruction = (Graphics3DTranslateInstruction) instruction;
             RigidBodyTransform temp = new RigidBodyTransform();
-            temp.setTranslation(graphics3dTranslateInstruction.getTranslation());
+            temp.getTranslation().set(graphics3dTranslateInstruction.getTranslation());
             visualPose.set(temp);
             visualPose.multiply(visualPose);
          }
@@ -366,11 +366,11 @@ public abstract class SDFRobotWriter
    private String getPoseFromTransform3D(RigidBodyTransform scsJointOffset)
    {
       Vector3D translation = new Vector3D();
-      scsJointOffset.getTranslation(translation);
+      translation.set(scsJointOffset.getTranslation());
       RotationMatrix rotation = new RotationMatrix();
-      scsJointOffset.getRotation(rotation);
+      rotation.set(scsJointOffset.getRotation());
       Vector3D eulerAngles = new Vector3D();
-      scsJointOffset.getRotationEuler(eulerAngles);
+      scsJointOffset.getRotation().getEuler(eulerAngles);
 //      eulerAngles.y = Math.asin(rotation.m02);
 //      double cosY = Math.cos(eulerAngles.y);
 //      if (Math.abs(cosY) > 1e-5)

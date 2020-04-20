@@ -40,9 +40,12 @@ public class LocalizationStatusPacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
@@ -58,10 +61,13 @@ public class LocalizationStatusPacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getStatus().length() + 1;
@@ -72,9 +78,12 @@ public class LocalizationStatusPacketPubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(controller_msgs.msg.dds.LocalizationStatusPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
+
       cdr.write_type_6(data.getOverlap());
+
 
       if(data.getStatus().length() <= 255)
       cdr.write_type_d(data.getStatus());else
@@ -84,10 +93,13 @@ public class LocalizationStatusPacketPubSubType implements us.ihmc.pubsub.TopicD
 
    public static void read(controller_msgs.msg.dds.LocalizationStatusPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setOverlap(cdr.read_type_6());
       	
+
       cdr.read_type_d(data.getStatus());	
 
    }
@@ -95,16 +107,22 @@ public class LocalizationStatusPacketPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(controller_msgs.msg.dds.LocalizationStatusPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_6("overlap", data.getOverlap());
+
       ser.write_type_d("status", data.getStatus());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.LocalizationStatusPacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setOverlap(ser.read_type_6("overlap"));
+
       ser.read_type_d("status", data.getStatus());
    }
 

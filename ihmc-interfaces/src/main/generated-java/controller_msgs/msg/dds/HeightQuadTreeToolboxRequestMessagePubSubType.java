@@ -40,9 +40,12 @@ public class HeightQuadTreeToolboxRequestMessagePubSubType implements us.ihmc.pu
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -59,10 +62,13 @@ public class HeightQuadTreeToolboxRequestMessagePubSubType implements us.ihmc.pu
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -74,9 +80,12 @@ public class HeightQuadTreeToolboxRequestMessagePubSubType implements us.ihmc.pu
 
    public static void write(controller_msgs.msg.dds.HeightQuadTreeToolboxRequestMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
+
       cdr.write_type_7(data.getRequestClearQuadTree());
+
 
       cdr.write_type_7(data.getRequestQuadTreeUpdate());
 
@@ -84,10 +93,13 @@ public class HeightQuadTreeToolboxRequestMessagePubSubType implements us.ihmc.pu
 
    public static void read(controller_msgs.msg.dds.HeightQuadTreeToolboxRequestMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setRequestClearQuadTree(cdr.read_type_7());
       	
+
       data.setRequestQuadTreeUpdate(cdr.read_type_7());
       	
 
@@ -96,16 +108,22 @@ public class HeightQuadTreeToolboxRequestMessagePubSubType implements us.ihmc.pu
    @Override
    public final void serialize(controller_msgs.msg.dds.HeightQuadTreeToolboxRequestMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_7("request_clear_quad_tree", data.getRequestClearQuadTree());
+
       ser.write_type_7("request_quad_tree_update", data.getRequestQuadTreeUpdate());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HeightQuadTreeToolboxRequestMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setRequestClearQuadTree(ser.read_type_7("request_clear_quad_tree"));
+
       data.setRequestQuadTreeUpdate(ser.read_type_7("request_quad_tree_update"));
    }
 

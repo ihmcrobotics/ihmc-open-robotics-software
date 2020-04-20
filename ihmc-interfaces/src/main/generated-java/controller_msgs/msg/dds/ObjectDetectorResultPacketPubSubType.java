@@ -40,9 +40,12 @@ public class ObjectDetectorResultPacketPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += controller_msgs.msg.dds.HeatMapPacketPubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       current_alignment += controller_msgs.msg.dds.BoundingBoxesPacketPubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -59,10 +62,13 @@ public class ObjectDetectorResultPacketPubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += controller_msgs.msg.dds.HeatMapPacketPubSubType.getCdrSerializedSize(data.getHeatMap(), current_alignment);
+
 
       current_alignment += controller_msgs.msg.dds.BoundingBoxesPacketPubSubType.getCdrSerializedSize(data.getBoundingBoxes(), current_alignment);
 
@@ -72,17 +78,23 @@ public class ObjectDetectorResultPacketPubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(controller_msgs.msg.dds.ObjectDetectorResultPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
+
       controller_msgs.msg.dds.HeatMapPacketPubSubType.write(data.getHeatMap(), cdr);
+
       controller_msgs.msg.dds.BoundingBoxesPacketPubSubType.write(data.getBoundingBoxes(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.ObjectDetectorResultPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       controller_msgs.msg.dds.HeatMapPacketPubSubType.read(data.getHeatMap(), cdr);	
+
       controller_msgs.msg.dds.BoundingBoxesPacketPubSubType.read(data.getBoundingBoxes(), cdr);	
 
    }
@@ -90,8 +102,11 @@ public class ObjectDetectorResultPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(controller_msgs.msg.dds.ObjectDetectorResultPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_a("heat_map", new controller_msgs.msg.dds.HeatMapPacketPubSubType(), data.getHeatMap());
+
 
       ser.write_type_a("bounding_boxes", new controller_msgs.msg.dds.BoundingBoxesPacketPubSubType(), data.getBoundingBoxes());
 
@@ -100,8 +115,11 @@ public class ObjectDetectorResultPacketPubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ObjectDetectorResultPacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_a("heat_map", new controller_msgs.msg.dds.HeatMapPacketPubSubType(), data.getHeatMap());
+
 
       ser.read_type_a("bounding_boxes", new controller_msgs.msg.dds.BoundingBoxesPacketPubSubType(), data.getBoundingBoxes());
 

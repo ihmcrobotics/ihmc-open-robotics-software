@@ -40,12 +40,15 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       }
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
@@ -62,7 +65,9 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -70,6 +75,7 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
       {
           current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getIds().get(i0).length() + 1;
       }
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getPositions().size(); ++i0)
       {
@@ -81,11 +87,14 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void write(controller_msgs.msg.dds.DetectedFacesPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       if(data.getIds().size() <= 100)
       cdr.write_type_e(data.getIds());else
           throw new RuntimeException("ids field exceeds the maximum length");
+
 
       if(data.getPositions().size() <= 100)
       cdr.write_type_e(data.getPositions());else
@@ -95,9 +104,12 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void read(controller_msgs.msg.dds.DetectedFacesPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       cdr.read_type_e(data.getIds());	
+
       cdr.read_type_e(data.getPositions());	
 
    }
@@ -105,16 +117,22 @@ public class DetectedFacesPacketPubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void serialize(controller_msgs.msg.dds.DetectedFacesPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_e("ids", data.getIds());
+
       ser.write_type_e("positions", data.getPositions());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.DetectedFacesPacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_e("ids", data.getIds());
+
       ser.read_type_e("positions", data.getPositions());
    }
 

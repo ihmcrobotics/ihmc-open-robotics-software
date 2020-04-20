@@ -1,6 +1,8 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,9 +10,10 @@ import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Disabled;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -18,8 +21,6 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.commons.MathTools;
-import us.ihmc.robotics.geometry.GroundPlaneEstimator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.QuadrantDependentList;
 import us.ihmc.robotics.robotSide.RobotEnd;
@@ -56,7 +57,7 @@ public class GroundPlaneEstimatorTest
 
       groundPlaneEstimator.compute(pointListA);
       groundPlaneEstimator.getPlane(plane3dA);
-      Vector3D normalA = plane3dA.getNormalCopy();
+      Vector3D normalA = new Vector3D(plane3dA.getNormal());
 
       List<FramePoint3D> pointListB = new ArrayList<FramePoint3D>();
       Plane3D plane3dB = new Plane3D();
@@ -67,7 +68,7 @@ public class GroundPlaneEstimatorTest
 
       groundPlaneEstimator.compute(pointListB);
       groundPlaneEstimator.getPlane(plane3dB);
-      Vector3D normalB = plane3dB.getNormalCopy();
+      Vector3D normalB = new Vector3D(plane3dB.getNormal());
 
       assertTrue(normalA.epsilonEquals(normalB, 1e-7));
    }
@@ -88,7 +89,7 @@ public class GroundPlaneEstimatorTest
 
       //test random pitch between +-0.25 radians
       double actualPitch = 0.25;//random.nextDouble() * 0.5 - 0.25;
-      centerOfFeetPose.setOrientationYawPitchRoll(centerOfFeetPose.getYaw(), actualPitch, centerOfFeetPose.getRoll());
+      centerOfFeetPose.getOrientation().setYawPitchRoll(centerOfFeetPose.getYaw(), actualPitch, centerOfFeetPose.getRoll());
       centerOfFeetFrame.setPoseAndUpdate(centerOfFeetPose);
       groundPlaneEstimator.compute(contactPoints);
       double computedPitch = groundPlaneEstimator.getPitch();
@@ -101,7 +102,7 @@ public class GroundPlaneEstimatorTest
       double x = random.nextInt(1000) + random.nextDouble();
       double y = random.nextInt(1000) + random.nextDouble();
       double z = random.nextInt(1000) + random.nextDouble();
-      centerOfFeetPose.setPosition(x, y, z);
+      centerOfFeetPose.getPosition().set(x, y, z);
       centerOfFeetFrame.setPoseAndUpdate(centerOfFeetPose);
       groundPlaneEstimator.compute(contactPoints);
       computedPitch = groundPlaneEstimator.getPitch();
@@ -134,7 +135,7 @@ public class GroundPlaneEstimatorTest
       changeFrame(contactPoints, centerOfFeetFrame);
 
       //test pitch of 0.1 doesn't equal 0.0
-      centerOfFeetPose.setOrientationYawPitchRoll(centerOfFeetPose.getYaw(), 0.1, centerOfFeetPose.getRoll());
+      centerOfFeetPose.getOrientation().setYawPitchRoll(centerOfFeetPose.getYaw(), 0.1, centerOfFeetPose.getRoll());
       centerOfFeetFrame.setPoseAndUpdate(centerOfFeetPose);
       groundPlaneEstimator.compute(contactPoints);
       computedPitch = groundPlaneEstimator.getPitch();
@@ -145,7 +146,7 @@ public class GroundPlaneEstimatorTest
 
       //test random pitch between +-0.25 radians
       actualPitch = random.nextDouble() * 0.5 - 0.25;
-      centerOfFeetPose.setOrientationYawPitchRoll(centerOfFeetPose.getYaw(), actualPitch, centerOfFeetPose.getRoll());
+      centerOfFeetPose.getOrientation().setYawPitchRoll(centerOfFeetPose.getYaw(), actualPitch, centerOfFeetPose.getRoll());
       centerOfFeetFrame.setPoseAndUpdate(centerOfFeetPose);
       groundPlaneEstimator.compute(contactPoints);
       computedPitch = groundPlaneEstimator.getPitch();
@@ -162,7 +163,7 @@ public class GroundPlaneEstimatorTest
       double x = random.nextInt(1000) + random.nextDouble();
       double y = random.nextInt(1000) + random.nextDouble();
       double z = random.nextInt(1000) + random.nextDouble();
-      centerOfFeetPose.setPosition(x, y, z);
+      centerOfFeetPose.getPosition().set(x, y, z);
       centerOfFeetFrame.setPoseAndUpdate(centerOfFeetPose);
       groundPlaneEstimator.compute(contactPoints);
       computedPitch = groundPlaneEstimator.getPitch();

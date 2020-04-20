@@ -1618,7 +1618,7 @@ vt 0.9984 0.0257 0.0000
 vt 0.9593 0.5236 0.0000
 # 529 texture coords
 
-o Cylinder_001
+#o Cylinder_001
 g Cylinder_001
 usemtl Material_001
 s off

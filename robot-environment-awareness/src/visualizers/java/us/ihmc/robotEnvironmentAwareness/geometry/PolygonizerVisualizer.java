@@ -497,7 +497,7 @@ public class PolygonizerVisualizer extends Application
             Triangle3D triangle = JTSTools.quadEdgeTriangleToTriangle(edgeAndTriangle.getRight());
             triangle.applyTransform(rawData.getTransformFromLocalToWorld());
 
-            meshBuilder.addPolyon(Arrays.asList(triangle.getA(), triangle.getB(), triangle.getC()), randomColorSupplier.get());
+            meshBuilder.addPolygon(Arrays.asList(triangle.getA(), triangle.getB(), triangle.getC()), randomColorSupplier.get());
          }
       }
 
@@ -534,7 +534,7 @@ public class PolygonizerVisualizer extends Application
    private static Node createOrderedBorderEdgesGraphics(PlanarRegionSegmentationRawData rawData, ConcaveHullFactoryResult concaveHullFactoryResult)
    {
       RigidBodyTransform transformToWorld = rawData.getTransformFromLocalToWorld();
-      MeshView meshView = ConcaveHullFactoryGraphicsTools.orderedBorderEdgesToRainbowMultiLine(transformToWorld, concaveHullFactoryResult);
+      MeshView meshView = ConcaveHullFactoryGraphicsTools.orderedBorderEdgesToRainbowMultiLine(transformToWorld, concaveHullFactoryResult, 0.002);
       meshView.setMouseTransparent(true);
       return meshView;
    }

@@ -47,8 +47,8 @@ public class SplinePawPathPlanner extends AbstractWaypointsForPawStepPlanner
          zPoly.compute(percent);
          yawPoly.compute(percent);
          Pose3D pose = new Pose3D();
-         pose.setPosition(xPoly.getPosition(), yPoly.getPosition(), zPoly.getPosition());
-         pose.setOrientationYawPitchRoll(yawPoly.getPosition(), 0.0, 0.0);
+         pose.getPosition().set(xPoly.getPosition(), yPoly.getPosition(), zPoly.getPosition());
+         pose.getOrientation().setYawPitchRoll(yawPoly.getPosition(), 0.0, 0.0);
          waypoints.add(pose);
       }
 

@@ -78,8 +78,8 @@ public class ScriptedFootstepGenerator
       Point3D position = new Point3D(positionArray);
       Quaternion orientation = new Quaternion(orientationArray);
       RigidBodyTransform anklePose = new RigidBodyTransform();
-      anklePose.setRotation(orientation);
-      anklePose.setTranslation(position);
+      anklePose.getRotation().set(orientation);
+      anklePose.getTranslation().set(position);
       FramePose3D pose = new FramePose3D(ReferenceFrame.getWorldFrame(), anklePose);
 
       footstep.setFromAnklePose(pose, transformsFromAnkleToSole.get(robotSide));

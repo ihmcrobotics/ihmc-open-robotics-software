@@ -175,6 +175,7 @@ public class SwingState extends AbstractFootControlState
    private final YoFrameVector3D yoDesiredSoleAngularVelocity;
    private final SpatialFeedbackControlCommand spatialFeedbackControlCommand = new SpatialFeedbackControlCommand();
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
+   private final WorkspaceLimiterControlModule workspaceLimiterControlModule;
    private final LegJointLimitAvoidanceControlModule legJointLimitAvoidanceControlModule;
    private final YoFramePoint3D yoDesiredPosition;
    private final YoFrameVector3D yoDesiredLinearVelocity;
@@ -201,6 +202,7 @@ public class SwingState extends AbstractFootControlState
       this.gains = gains;
 
       this.legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
+      this.workspaceLimiterControlModule = footControlHelper.getWorkspaceLimiterControlModule();
 
       RigidBodyBasics foot = contactableFoot.getRigidBody();
       String namePrefix = robotSide.getCamelCaseNameForStartOfExpression() + "FootSwing";
@@ -391,7 +393,7 @@ public class SwingState extends AbstractFootControlState
       toeContactPoint.setIncludingFrame(toeContactPoint2d, 0.0);
       toeContactPoint.changeFrame(footFrame);
 
-      transformFromToeToAnkle.setTranslation(toeContactPoint);
+      transformFromToeToAnkle.getTranslation().set(toeContactPoint);
       return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(robotSide.getCamelCaseNameForStartOfExpression() + "ToeFrame", footFrame,
                                                                                transformFromToeToAnkle);
    }
@@ -403,9 +405,9 @@ public class SwingState extends AbstractFootControlState
       currentStateProvider.getOrientation(initialOrientation);
       currentStateProvider.getAngularVelocity(initialAngularVelocity);
       initialPose.changeFrame(initialPosition.getReferenceFrame());
-      initialPose.setPosition(initialPosition);
+      initialPose.getPosition().set(initialPosition);
       initialPose.changeFrame(initialOrientation.getReferenceFrame());
-      initialPose.setOrientation(initialOrientation);
+      initialPose.getOrientation().set(initialOrientation);
       if (ignoreInitialAngularVelocityZ.getBooleanValue())
       {
          initialAngularVelocity.changeFrame(worldFrame);
@@ -430,6 +432,10 @@ public class SwingState extends AbstractFootControlState
       if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
       {
          legSingularityAndKneeCollapseAvoidanceControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
+      }
+      if (workspaceLimiterControlModule != null)
+      {
+         workspaceLimiterControlModule.setCheckVelocityForSwingSingularityAvoidance(true);
       }
 
       YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
@@ -478,18 +484,26 @@ public class SwingState extends AbstractFootControlState
                                                                         desiredLinearAcceleration, desiredAngularAcceleration);
       }
 
-      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      if (legSingularityAndKneeCollapseAvoidanceControlModule != null || workspaceLimiterControlModule != null)
       {
          desiredPose.setIncludingFrame(desiredPosition, desiredOrientation);
          changeDesiredPoseBodyFrame(controlFrame, ankleFrame, desiredPose);
          desiredAnklePosition.setIncludingFrame(desiredPose.getPosition());
 
-         legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+         if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+         {
+            legSingularityAndKneeCollapseAvoidanceControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+         }
+         if (workspaceLimiterControlModule != null)
+         {
+            workspaceLimiterControlModule.correctSwingFootTrajectory(desiredAnklePosition, desiredLinearVelocity, desiredLinearAcceleration);
+         }
 
-         desiredPose.setPosition(desiredAnklePosition);
+         desiredPose.getPosition().set(desiredAnklePosition);
          changeDesiredPoseBodyFrame(ankleFrame, controlFrame, desiredPose);
          desiredPosition.setIncludingFrame(desiredPose.getPosition());
       }
+
 
       if (yoSetDesiredVelocityToZero.getBooleanValue())
       {

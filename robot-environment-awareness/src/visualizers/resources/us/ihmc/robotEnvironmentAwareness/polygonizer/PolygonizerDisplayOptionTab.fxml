@@ -13,6 +13,7 @@
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
             <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+            <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
          </columnConstraints>
          <rowConstraints>
             <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
@@ -27,8 +28,9 @@
             <ToggleButton fx:id="showConstraintEdgesButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Constraint Edges" GridPane.columnIndex="1" GridPane.rowIndex="1" />
             <ToggleButton fx:id="showOrderedBorderEdgesButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Ordered Border Edges" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <ToggleButton fx:id="showPriorityQueueButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Priority Queue" GridPane.columnIndex="2" />
-            <ToggleButton fx:id="showConcaveHullButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Concave Hull" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+            <ToggleButton fx:id="showRawConcaveHullButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Raw Concave Hull" GridPane.columnIndex="2" GridPane.rowIndex="1" />
             <ToggleButton fx:id="showConcavePocketsButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Concave Pockets" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <ToggleButton fx:id="showProcessedConcaveHullButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Proc. Concave Hull" GridPane.columnIndex="3" GridPane.rowIndex="1" />
          </children>
       </GridPane>
    </children>

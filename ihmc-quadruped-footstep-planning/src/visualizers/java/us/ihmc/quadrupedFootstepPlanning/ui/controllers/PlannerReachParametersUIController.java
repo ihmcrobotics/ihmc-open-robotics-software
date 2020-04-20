@@ -11,7 +11,7 @@ import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawS
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersBasics;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.graphSearch.parameters.PawStepPlannerParametersReadOnly;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
-import us.ihmc.robotEnvironmentAwareness.ui.properties.JavaFXStoredPropertyMap;
+import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 
 import java.io.File;
 import java.io.IOException;

@@ -6,6 +6,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -217,6 +219,12 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
    public void getDesiredCenterOfMassPosition(YoFramePoint3D desiredCenterOfMassPositionToPack)
    {
       icpPlanner.getDesiredCenterOfMassPosition(desiredCenterOfMassPositionToPack);
+   }
+
+   @Override
+   public void getDesiredCenterOfMassVelocity(FixedFrameVector2DBasics desiredCenterOfMassVelocityToPack)
+   {
+      icpPlanner.getDesiredCenterOfMassVelocity(desiredCenterOfMassVelocityToPack);
    }
 
    /** {@inheritDoc} */
@@ -452,7 +460,7 @@ public class ICPPlannerWithTimeFreezerWrapper implements ICPPlannerWithTimeFreez
 
    /** {@inheritDoc} */
    @Override
-   public void getFinalDesiredCenterOfMassPosition(FramePoint3D finalDesiredCenterOfMassPositionToPack)
+   public void getFinalDesiredCenterOfMassPosition(FixedFramePoint3DBasics finalDesiredCenterOfMassPositionToPack)
    {
       icpPlanner.getFinalDesiredCenterOfMassPosition(finalDesiredCenterOfMassPositionToPack);
    }

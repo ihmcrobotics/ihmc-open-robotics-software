@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.environments;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -39,7 +39,7 @@ public class FiducialDoorEnvironment implements CommonAvatarEnvironmentInterface
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
 
       Point3D doorPosition = new Point3D(distanceToDoor, doorWidth / 2.0, 0.0);
-      AxisAngle doorOrientation = new AxisAngle(Axis.Z, -Math.PI / 2.0);
+      AxisAngle doorOrientation = new AxisAngle(Axis3D.Z, -Math.PI / 2.0);
       FiducialDoorRobot door = new FiducialDoorRobot("doorRobot", doorPosition, doorOrientation);
       robots.add(door);
       door.createAvailableContactPoints(0, 15, 15, 0.02, true);

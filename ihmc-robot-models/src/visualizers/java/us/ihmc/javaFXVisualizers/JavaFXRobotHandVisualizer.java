@@ -83,8 +83,8 @@ public class JavaFXRobotHandVisualizer
 
       RigidBodyTransform transformToViz = new RigidBodyTransform(transformFromXboxController.getOrientation(), transformFromXboxController.getPosition());
 
-      Affine affine = JavaFXTools.createAffineFromQuaternionAndTuple(new Quaternion(transformToViz.getRotationMatrix()),
-                                                                     new Point3D(transformToViz.getTranslationVector()));
+      Affine affine = JavaFXTools.createAffineFromQuaternionAndTuple(new Quaternion(transformToViz.getRotation()),
+                                                                     new Point3D(transformToViz.getTranslation()));
 
       rootNode.getTransforms().clear();
       rootNode.getTransforms().add(affine);

@@ -8,9 +8,7 @@ import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
@@ -19,7 +17,6 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.footstepPlanning.AStarFootstepPlanner;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
@@ -31,7 +28,6 @@ import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.taskExecutor.PipeLine;
@@ -221,7 +217,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
         	 
 //        	 System.out.println("***********^^^^^^^^^^^^^^^ "+ planningResult);
         	 
-            return super.isDone() || (planningResult!=null&&planningResult != FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL);
+            return super.isDone() || (planningResult!=null&&planningResult != FootstepPlanningResult.PLANNING);
 
          }
       };
@@ -238,12 +234,12 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
               // footstepPlanningToolboxOutputStatus = footPlanStatusQueue.getLatestPacket();
               // planningResult = FootstepPlanningResult.fromByte(footstepPlanningToolboxOutputStatus.getFootstepPlanningResult());
 
-               if (planningResult == FootstepPlanningResult.OPTIMAL_SOLUTION || planningResult == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION)
+               if (planningResult == FootstepPlanningResult.FOUND_SOLUTION)
                {
                   planningSuccess = true;
                   footstepDataListMessage = footstepPlanningToolboxOutputStatus.getFootstepDataList();
                }
-               else if (planningResult == FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL)
+               else if (planningResult == FootstepPlanningResult.PLANNING)
                {
 //            	   publishTextToSpeech("PlanPathToLocationBehavior: planner timed out after "+timeout+" seconds");
 //
@@ -283,7 +279,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
    public boolean planSuccess()
    {
       if (planningResult != null)
-         return (planningResult == FootstepPlanningResult.OPTIMAL_SOLUTION || planningResult == FootstepPlanningResult.SUB_OPTIMAL_SOLUTION);
+         return planningResult == FootstepPlanningResult.FOUND_SOLUTION;
       return false;
    }
 

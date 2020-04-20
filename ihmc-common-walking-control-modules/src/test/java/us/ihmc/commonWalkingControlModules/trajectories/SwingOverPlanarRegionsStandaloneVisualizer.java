@@ -69,9 +69,9 @@ public class SwingOverPlanarRegionsStandaloneVisualizer
       FramePose3D stanceFootPose = new FramePose3D(WORLD);
       FramePose3D swingStartPose = new FramePose3D(WORLD);
       FramePose3D swingEndPose = new FramePose3D(WORLD);
-      stanceFootPose.setPosition(0.4, 0.3, 0.0);
-      swingStartPose.setPosition(0.0, 0.0, 0.0);
-      swingEndPose.setPosition(0.8, 0.0, 0.0);
+      stanceFootPose.getPosition().set(0.4, 0.3, 0.0);
+      swingStartPose.getPosition().set(0.0, 0.0, 0.0);
+      swingEndPose.getPosition().set(0.8, 0.0, 0.0);
 
       swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, terrain);
 

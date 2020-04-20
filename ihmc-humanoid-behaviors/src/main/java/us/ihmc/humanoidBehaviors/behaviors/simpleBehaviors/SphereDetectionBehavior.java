@@ -112,7 +112,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
       {
          id++;
          Pose3D t = new Pose3D();
-         t.setPosition(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
+         t.getPosition().set(ball.getCenter().x, ball.getCenter().y, ball.getCenter().z);
          detectedObjectPublisher.publish(HumanoidMessageTools.createDetectedObjectPacket(t, 4));
       }
 
@@ -184,7 +184,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
       }
 
       // sort large to small
-      humanoidReferenceFrames.getChestFrame().getTransformToWorldFrame().getTranslation(chestPosition);
+      chestPosition.set(humanoidReferenceFrames.getChestFrame().getTransformToWorldFrame().getTranslation());
 
       final List<Shape> spheres = findSpheres.getFound();
       Collections.sort(spheres, new Comparator<Shape>()
@@ -224,7 +224,7 @@ public class SphereDetectionBehavior extends AbstractBehavior
             PrintTools.debug(DEBUG, this, "------Found Soccer Ball radius" + sphereParams.getRadius() + " center " + sphereParams.getCenter());
 
             RigidBodyTransform t = new RigidBodyTransform();
-            t.setTranslation(sphereParams.getCenter().x, sphereParams.getCenter().y, sphereParams.getCenter().z);
+            t.getTranslation().set(sphereParams.getCenter().x, sphereParams.getCenter().y, sphereParams.getCenter().z);
          }
 
       }

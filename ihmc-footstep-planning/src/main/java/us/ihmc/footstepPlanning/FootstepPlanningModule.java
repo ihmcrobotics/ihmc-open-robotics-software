@@ -1,9 +1,9 @@
 package us.ihmc.footstepPlanning;
 
-import controller_msgs.msg.dds.BodyPathPlanMessage;
 import us.ihmc.commons.MathTools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
@@ -45,7 +45,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private Ros2Node ros2Node;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final VisibilityGraphsParametersBasics visibilityGraphParameters;
-   private BodyPathPlanMessage bodyPathPlanMessage;
 
    private final PlanThenSnapPlanner planThenSnapPlanner;
    private final AStarFootstepPlanner aStarFootstepPlanner;
@@ -55,12 +54,12 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final AtomicBoolean isPlanning = new AtomicBoolean();
    private final FootstepPlannerRequest request = new FootstepPlannerRequest();
    private final FootstepPlannerOutput output = new FootstepPlannerOutput();
+   private final Stopwatch stopwatch = new Stopwatch();
 
    private final FramePose3D startMidFootPose = new FramePose3D();
    private final FramePose3D goalMidFootPose = new FramePose3D();
 
    private Consumer<FootstepPlannerRequest> requestCallback = request -> {};
-   private Consumer<BodyPathPlanMessage> bodyPathResultCallback = bodyPathPlanMessage -> {};
    private Consumer<FootstepPlannerOutput> statusCallback = result -> {};
 
    public FootstepPlanningModule(String name)
@@ -78,13 +77,15 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.visibilityGraphParameters = visibilityGraphParameters;
 
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
-      this.bodyPathPlanner = new VisibilityGraphPathPlanner(footstepPlannerParameters,
-                                                            visibilityGraphParameters,
+      this.bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters,
                                                             pathPostProcessor,
                                                             new YoVariableRegistry(getClass().getSimpleName()));
 
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters, footPolygons, bodyPathPlanHolder);
+
+      addStatusCallback(output -> output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lapElapsed()));
+      addStatusCallback(output -> output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed()));
    }
 
    public FootstepPlannerOutput handleRequest(FootstepPlannerRequest request)
@@ -95,57 +96,63 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          return null;
       }
 
+      stopwatch.start();
+      output.clear();
+
       try
       {
-         return handleRequestInternal(request);
+         handleRequestInternal(request);
+         return output;
       }
       catch (Exception exception)
       {
          exception.printStackTrace();
 
          output.clear();
-         output.setPlanId(request.getRequestId());
-         output.setResult(FootstepPlanningResult.EXCEPTION);
+         output.setRequestId(request.getRequestId());
+         output.setFootstepPlanningResult(FootstepPlanningResult.EXCEPTION);
          output.setException(exception);
          statusCallback.accept(output);
          return output;
       }
    }
 
-   private FootstepPlannerOutput handleRequestInternal(FootstepPlannerRequest request)
+   private void handleRequestInternal(FootstepPlannerRequest request) throws Exception
    {
       this.request.set(request);
-      output.setPlanId(request.getRequestId());
+      requestCallback.accept(request);
+      output.setRequestId(request.getRequestId());
       isPlanning.set(true);
-      bodyPathPlanMessage = new BodyPathPlanMessage();
       bodyPathPlanHolder.getPlan().clear();
 
       startMidFootPose.interpolate(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT), 0.5);
       goalMidFootPose.interpolate(request.getGoalFootPoses().get(RobotSide.LEFT), request.getGoalFootPoses().get(RobotSide.RIGHT), 0.5);
-      requestCallback.accept(request);
 
       // Update planar regions
       boolean flatGroundMode = request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty();
       PlanarRegionsList planarRegionsList = flatGroundMode ? null : request.getPlanarRegionsList();
       bodyPathPlanner.setPlanarRegionsList(planarRegionsList);
 
+      // record time
+      output.getPlannerTimings().setTimeBeforePlanningSeconds(stopwatch.lap());
+
       if (request.getPlanBodyPath() && !flatGroundMode)
       {
          bodyPathPlanner.setStanceFootPoses(request.getStartFootPoses().get(RobotSide.LEFT), request.getStartFootPoses().get(RobotSide.RIGHT));
          bodyPathPlanner.setGoal(goalMidFootPose);
 
-         FootstepPlanningResult bodyPathPlannerResult = bodyPathPlanner.planWaypoints();
+         BodyPathPlanningResult bodyPathPlannerResult = bodyPathPlanner.planWaypoints();
          List<Pose3DReadOnly> waypoints = bodyPathPlanner.getWaypoints();
 
-         if (!bodyPathPlannerResult.validForExecution() || (waypoints.size() < 2 && !footstepPlannerParameters.getReturnBestEffortPlan()))
+         if (!bodyPathPlannerResult.validForExecution() || (waypoints.size() < 2 && request.getAbortIfBodyPathPlannerFails()))
          {
             reportBodyPathPlan(bodyPathPlannerResult);
-            output.setResult(bodyPathPlannerResult);
+            output.setBodyPathPlanningResult(bodyPathPlannerResult);
             statusCallback.accept(output);
             isPlanning.set(false);
-            return output;
+            return;
          }
-         else if (waypoints.size() < 2 && footstepPlannerParameters.getReturnBestEffortPlan())
+         else if (waypoints.size() < 2 && !request.getAbortIfBodyPathPlannerFails())
          {
             double horizonLength = Double.POSITIVE_INFINITY;
             bodyPathPlanner.computeBestEffortPlan(horizonLength);
@@ -159,7 +166,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             bodyPathPlanHolder.getPointAlongPath(alphaIntermediateGoal, goalMidFootPose);
          }
 
-         reportBodyPathPlan(FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL);
+         reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
       }
       else
       {
@@ -169,7 +176,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          waypoints.add(goalMidFootPose);
 
          bodyPathPlanHolder.setPoseWaypoints(waypoints);
-         reportBodyPathPlan(FootstepPlanningResult.SOLUTION_DOES_NOT_REACH_GOAL);
+         reportBodyPathPlan(BodyPathPlanningResult.FOUND_SOLUTION);
       }
 
       if (request.getPerformAStarSearch())
@@ -191,38 +198,38 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          FootstepPlanningResult result = planThenSnapPlanner.plan();
 
          FootstepPlan plan = planThenSnapPlanner.getPlan();
-         output.setResult(result);
+         output.setFootstepPlanningResult(result);
          output.getFootstepPlan().clear();
          for (int i = 0; i < plan.getNumberOfSteps(); i++)
          {
             output.getFootstepPlan().addFootstep(plan.getFootstep(i));
          }
 
+         output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lap());
          statusCallback.accept(output);
       }
 
       isPlanning.set(false);
-      return output;
    }
 
-   private void reportBodyPathPlan(FootstepPlanningResult result)
+   private void reportBodyPathPlan(BodyPathPlanningResult bodyPathPlanningResult)
    {
       BodyPathPlan bodyPathPlan = bodyPathPlanHolder.getPlan();
-      for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
+      if (bodyPathPlan.getNumberOfWaypoints() > 0)
       {
-         bodyPathPlanMessage.getBodyPath().add().set(bodyPathPlan.getWaypoint(i));
+         output.getBodyPath().clear();
+         for (int i = 0; i < bodyPathPlan.getNumberOfWaypoints(); i++)
+         {
+            output.getBodyPath().add(new Pose3D(bodyPathPlan.getWaypoint(i)));
+         }
+
+         output.getGoalPose().set(goalMidFootPose);
       }
 
-      bodyPathPlanMessage.getPathPlannerStartPose().set(bodyPathPlan.getStartPose());
-      bodyPathPlanMessage.getPathPlannerGoalPose().set(bodyPathPlan.getGoalPose());
-      bodyPathPlanMessage.setPlanId(request.getRequestId());
-      bodyPathPlanMessage.setFootstepPlanningResult(result.toByte());
-      if (request.getPlanarRegionsList() != null)
-      {
-         bodyPathPlanMessage.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(request.getPlanarRegionsList()));
-      }
-
-      bodyPathResultCallback.accept(bodyPathPlanMessage);
+      output.setBodyPathPlanningResult(bodyPathPlanningResult);
+      output.setFootstepPlanningResult(FootstepPlanningResult.PLANNING);
+      output.getPlannerTimings().setTimePlanningBodyPathSeconds(stopwatch.lap());
+      statusCallback.accept(output);
    }
 
    public void addRequestCallback(Consumer<FootstepPlannerRequest> callback)
@@ -235,14 +242,19 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       aStarFootstepPlanner.addIterationCallback(callback);
    }
 
-   public void addBodyPathPlanCallback(Consumer<BodyPathPlanMessage> callback)
-   {
-      bodyPathResultCallback = bodyPathResultCallback.andThen(callback);
-   }
-
    public void addStatusCallback(Consumer<FootstepPlannerOutput> callback)
    {
       statusCallback = statusCallback.andThen(callback);
+   }
+
+   public void addCustomTerminationCondition(FootstepPlannerTerminationCondition plannerTerminationCondition)
+   {
+      aStarFootstepPlanner.addCustomTerminationCondition(plannerTerminationCondition);
+   }
+
+   public void clearCustomTerminationConditions()
+   {
+      aStarFootstepPlanner.clearCustomTerminationConditions();
    }
 
    public boolean registerRosNode(Ros2Node ros2Node)
@@ -326,11 +338,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public List<FootstepPlannerIterationData> getIterationData()
    {
       return aStarFootstepPlanner.getIterationData();
-   }
-
-   public void setStatusPublishPeriod(double statusPublishPeriod)
-   {
-      this.aStarFootstepPlanner.setStatusPublishPeriod(statusPublishPeriod);
    }
 
    @Override

@@ -7,6 +7,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -17,6 +18,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
 import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 
 public class FootstepPlannerHeuristicCalculator
 {
@@ -25,6 +27,7 @@ public class FootstepPlannerHeuristicCalculator
    private final FootstepPlannerParametersReadOnly parameters;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
    private final FootstepPlannerEdgeData edgeData;
+   private FootstepPlanHeading desiredHeading = FootstepPlanHeading.FORWARD;
 
    private final FramePose3D midFootPose = new FramePose3D();
    private final Point2D midFootPoint = new Point2D();
@@ -44,6 +47,12 @@ public class FootstepPlannerHeuristicCalculator
       this.edgeData = edgeData;
    }
 
+   public void initialize(FramePose3DReadOnly goalPose, FootstepPlanHeading desiredHeading)
+   {
+      this.goalPose.set(goalPose);
+      this.desiredHeading = desiredHeading;
+   }
+
    public double compute(FootstepNode node)
    {
       midfootPoint.set(node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()), 0.0);
@@ -52,8 +61,8 @@ public class FootstepPlannerHeuristicCalculator
       if (snapData != null && !snapData.getSnapTransform().containsNaN())
          snapData.getSnapTransform().transform(midfootPoint);
 
-      midFootPose.setPosition(midfootPoint);
-      midFootPose.setOrientationYawPitchRoll(node.getYaw(), 0.0, 0.0);
+      midFootPose.getPosition().set(midfootPoint);
+      midFootPose.getOrientation().setYawPitchRoll(node.getYaw(), 0.0, 0.0);
 
       double xyDistanceToGoal = EuclidCoreTools.norm(midFootPose.getX() - goalPose.getX(), midFootPose.getY() - goalPose.getY());
 
@@ -70,7 +79,7 @@ public class FootstepPlannerHeuristicCalculator
          midFootPoint.set(midFootPose.getPosition());
          double alphaMidFoot = bodyPathPlanHolder.getClosestPoint(midFootPoint, projectionPose);
          int segmentIndex = bodyPathPlanHolder.getSegmentIndexFromAlpha(alphaMidFoot);
-         double pathHeading = bodyPathPlanHolder.getSegmentYaw(segmentIndex);
+         double pathHeading = EuclidCoreTools.trimAngleMinusPiToPi(bodyPathPlanHolder.getSegmentYaw(segmentIndex) + desiredHeading.getYawOffset());
 
          initialTurnDistance = Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(midFootPose.getYaw(), pathHeading)) * 0.5 * Math.PI * parameters.getIdealFootstepWidth();
          walkDistance = xyDistanceToGoal;
@@ -84,10 +93,5 @@ public class FootstepPlannerHeuristicCalculator
       }
 
       return heuristicCost;
-   }
-
-   public void setGoalPose(FramePose3DReadOnly goalPose)
-   {
-      this.goalPose.set(goalPose);
    }
 }

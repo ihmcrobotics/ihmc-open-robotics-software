@@ -8,7 +8,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.DenseMatrixVector3D;
 import us.ihmc.commonWalkingControlModules.capturePoint.smoothCMPBasedICPPlanner.CoMGeneration.SmoothCoMIntegrationToolbox;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.math.trajectories.FrameTrajectory3D;
@@ -97,7 +97,7 @@ public class SmoothCapturePointToolbox
    public void computeDesiredCapturePointPosition(double omega0, double time, FramePoint3DReadOnly finalCapturePoint, FrameTrajectory3D cmpPolynomial3D,
                                                   FixedFramePoint3DBasics desiredCapturePointToPack)
    {
-      for (Axis dir : Axis.values)
+      for (Axis3D dir : Axis3D.values)
       {
          Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
          double icpPositionDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 0, cmpPolynomial,
@@ -110,7 +110,7 @@ public class SmoothCapturePointToolbox
    public void computeDesiredCapturePointVelocity(double omega0, double time, FramePoint3DReadOnly finalCapturePoint, FrameTrajectory3D cmpPolynomial3D,
                                                   FixedFrameVector3DBasics desiredCapturePointVelocityToPack)
    {
-      for (Axis dir : Axis.values)
+      for (Axis3D dir : Axis3D.values)
       {
          Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
          double icpVelocityDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 1, cmpPolynomial,
@@ -123,7 +123,7 @@ public class SmoothCapturePointToolbox
    public void computeDesiredCapturePointAcceleration(double omega0, double time, FramePoint3DReadOnly finalCapturePoint, FrameTrajectory3D cmpPolynomial3D,
                                                       FixedFrameVector3DBasics desiredCapturePointAccelerationToPack)
    {
-      for (Axis dir : Axis.values)
+      for (Axis3D dir : Axis3D.values)
       {
          Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
          double icpAccelerationDesired = calculateICPQuantityFromCorrespondingCMPPolynomial1D(omega0, time, 2, cmpPolynomial,
@@ -224,7 +224,7 @@ public class SmoothCapturePointToolbox
 
       for (int i = 0; i < numberOfCoefficients; i++)
       {
-         for (Axis dir : Axis.values)
+         for (Axis3D dir : Axis3D.values)
          {
             Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
             DenseMatrix64F geometricSequenceDerivative = cmpPolynomial.evaluateGeometricSequenceDerivative(i + alphaDerivativeOrder, time);
@@ -248,7 +248,7 @@ public class SmoothCapturePointToolbox
    {
       int numberOfCoefficients = cmpPolynomial3D.getNumberOfCoefficients();
 
-      for (Axis dir : Axis.values)
+      for (Axis3D dir : Axis3D.values)
          generalizedAlphaPrimeToPack.getMatrix(dir).reshape(1, cmpPolynomial3D.getNumberOfCoefficients(dir));
 
       generalizedAlphaPrimeToPack.zero();
@@ -257,7 +257,7 @@ public class SmoothCapturePointToolbox
 
       for (int i = 0; i < numberOfCoefficients; i++)
       {
-         for (Axis dir : Axis.values)
+         for (Axis3D dir : Axis3D.values)
          {
             Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
             DenseMatrix64F matrix = generalizedAlphaPrimeToPack.getMatrix(dir);
@@ -309,7 +309,7 @@ public class SmoothCapturePointToolbox
       {
          double scalar = omega0Power * expOmega0Time;
 
-         for (Axis dir : Axis.values)
+         for (Axis3D dir : Axis3D.values)
          {
             Trajectory cmpPolynomial = cmpPolynomial3D.getTrajectory(dir);
             DenseMatrix64F geometricSequenceDerivative = cmpPolynomial.evaluateGeometricSequenceDerivative(i, timeSegmentTotal);
@@ -402,7 +402,7 @@ public class SmoothCapturePointToolbox
    {
       int numRows = cmpPolynomial3D.getNumberOfCoefficients();
       int numCols = 1;
-      for (Axis dir : Axis.values)
+      for (Axis3D dir : Axis3D.values)
       {
          setPolynomialCoefficientVector1D(polynomialCoefficientVector, cmpPolynomial3D.getTrajectory(dir));
          MatrixTools.setMatrixBlock(polynomialCoefficientCombinedVectorToPack, dir.ordinal() * numRows, 0, polynomialCoefficientVector, 0, 0, numRows, numCols,

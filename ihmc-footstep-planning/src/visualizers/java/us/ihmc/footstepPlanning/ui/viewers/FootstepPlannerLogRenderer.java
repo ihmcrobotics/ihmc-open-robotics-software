@@ -19,6 +19,7 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
@@ -41,15 +42,15 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
    private final AtomicReference<Pair<RigidBodyTransform, ConvexPolygon2D>> debugChildStep;
    private final AtomicReference<RigidBodyTransform> debugIdealStep;
 
-   public FootstepPlannerLogRenderer(RobotContactPointParameters<RobotSide> contactPointParameters, Messager messager)
+   public FootstepPlannerLogRenderer(SideDependentList<List<Point2D>> defaultContactPoints, Messager messager)
    {
-      if (contactPointParameters == null)
+      if (defaultContactPoints == null)
       {
          defaultFootPolygon.set(PlannerTools.createDefaultFootPolygon());
       }
       else
       {
-         List<Point2D> contactPoints = contactPointParameters.getFootContactPoints().get(RobotSide.LEFT);
+         List<Point2D> contactPoints = defaultContactPoints.get(RobotSide.LEFT);
          contactPoints.forEach(defaultFootPolygon::addVertex);
          defaultFootPolygon.update();
       }

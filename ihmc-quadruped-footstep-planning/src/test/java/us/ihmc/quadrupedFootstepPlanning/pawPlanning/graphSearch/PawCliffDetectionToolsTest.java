@@ -34,8 +34,8 @@ public class PawCliffDetectionToolsTest
 
       RigidBodyTransform higherCliff = new RigidBodyTransform();
       RigidBodyTransform lowerCliff = new RigidBodyTransform();
-      higherCliff.setTranslation(0.5, 0.0, 0.3);
-      lowerCliff.setTranslation(0.5, 0.0, 0.05);
+      higherCliff.getTranslation().set(0.5, 0.0, 0.3);
+      lowerCliff.getTranslation().set(0.5, 0.0, 0.05);
 
       PlanarRegion ground = new PlanarRegion(new RigidBodyTransform(), groundRegion);
       PlanarRegion higherCliffRegion = new PlanarRegion(higherCliff, cliffRegion);

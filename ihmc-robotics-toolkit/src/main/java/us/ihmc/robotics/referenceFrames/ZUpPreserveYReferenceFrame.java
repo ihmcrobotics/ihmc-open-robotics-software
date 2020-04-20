@@ -41,7 +41,7 @@ public class ZUpPreserveYReferenceFrame extends ReferenceFrame
    {
       //TODO: Combine with RotationTools.removePitchAndRollFromTransform(). 
       origin.getReferenceFrame().getTransformToDesiredFrame(nonZUpToWorld, worldFrame);
-      nonZUpToWorld.getRotation(nonZUpToWorldRotation);
+      nonZUpToWorldRotation.set(nonZUpToWorld.getRotation());
 
       double yAxisX = nonZUpToWorldRotation.getM01();
       double yAxisY = nonZUpToWorldRotation.getM11();
@@ -53,11 +53,11 @@ public class ZUpPreserveYReferenceFrame extends ReferenceFrame
       
       zUpToWorldRotation.setColumns(xAxis, yAxis, zAxis);
      
-      transformToParent.setRotation(zUpToWorldRotation);
+      transformToParent.getRotation().set(zUpToWorldRotation);
 
       originPoint3d.set(origin);
       nonZUpToWorld.transform(originPoint3d);
       translation.set(originPoint3d);
-      transformToParent.setTranslation(translation);
+      transformToParent.getTranslation().set(translation);
    }
 }

@@ -2,15 +2,24 @@
 
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
-<?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.BorderPane?>
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+
     <top>
         <fx:include fx:id="footstepPlannerMenuUI" source="FootstepPlannerMenuUI.fxml" />
     </top>
+
+    <right>
+        <fx:include fx:id="footstepPlannerStatusBar" source="FootstepPlannerStatusBar.fxml"/>
+    </right>
+
+    <left>
+        <fx:include fx:id="footstepPlannerTestDashboard" source="FootstepPlannerTestDashboard.fxml"/>
+    </left>
+
     <bottom>
-        <TabPane prefHeight="337.0" prefWidth="600.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+        <TabPane prefHeight="320" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
             <tabs>
                 <Tab text="Main">
                     <content>
