@@ -158,18 +158,17 @@ public class CoMHeightTimeDerivativesSmoother
       smoothComHeightJerk.add(comHeightAccelerationFeedback.getDoubleValue());
       smoothComHeightJerk.set(MathTools.clamp(smoothComHeightJerk.getDoubleValue(), gains.getMaximumFeedbackRate()));
 
+      double previousAcceleration = smoothComHeightAcceleration.getDoubleValue();
       smoothComHeightAcceleration.add(smoothComHeightJerk.getDoubleValue() * dt);
       smoothComHeightAcceleration.set(MathTools.clamp(smoothComHeightAcceleration.getDoubleValue(), gains.getMaximumFeedback()));
 
-//      double newSmoothComHeightVelocity = smoothComHeightVelocity.getDoubleValue();
-//      newSmoothComHeightVelocity += smoothComHeightAcceleration.getDoubleValue() * dt;
-//      newSmoothComHeightVelocity = MathTools.clamp(newSmoothComHeightVelocity, maximumVelocity.getValue());
+      smoothComHeightJerk.set((smoothComHeightAcceleration.getDoubleValue() - previousAcceleration) / dt);
 
-//      smoothComHeightAcceleration.set(newSmoothCo/mHeightVelocity - smoothComHeightVelocity.getDoubleValue());
-//      smoothComHeightAcceleration.mul(1.0 / dt);
-
+      double previousVelocity = smoothComHeightVelocity.getDoubleValue();
       smoothComHeightVelocity.add(smoothComHeightAcceleration.getDoubleValue() * dt);
       smoothComHeightVelocity.set(MathTools.clamp(smoothComHeightVelocity.getDoubleValue(), maximumVelocity.getValue()));
+
+      smoothComHeightAcceleration.set((smoothComHeightVelocity.getDoubleValue() - previousVelocity) / dt);
 
       smoothComHeight.add(smoothComHeightVelocity.getDoubleValue() * dt);
 
