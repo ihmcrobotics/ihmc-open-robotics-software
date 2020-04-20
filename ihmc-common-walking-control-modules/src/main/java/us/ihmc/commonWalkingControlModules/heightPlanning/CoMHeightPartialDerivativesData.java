@@ -2,27 +2,13 @@ package us.ihmc.commonWalkingControlModules.heightPlanning;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 
-public class CoMHeightPartialDerivativesData implements CoMHeightPartialDerivativesDataReadOnly
+public class CoMHeightPartialDerivativesData implements CoMHeightPartialDerivativesDataBasics
 {
    private ReferenceFrame frameOfCoMHeight;
    private double comHeight;
    private double partialDzDx, partialDzDy;
    private double partialD2zDx2, partialD2zDy2, partialD2zDxDy;
    private double partialD3zDx3, partialD3zDy3, partialD3zDx2Dy, partialD3zDxDy2;
-
-   public void set(CoMHeightPartialDerivativesDataReadOnly centerOfMassHeightPartialDerivativesData)
-   {
-      setCoMHeight(centerOfMassHeightPartialDerivativesData.getFrameOfCoMHeight(), centerOfMassHeightPartialDerivativesData.getComHeight());
-      setPartialDzDx(centerOfMassHeightPartialDerivativesData.getPartialDzDx());
-      setPartialDzDy(centerOfMassHeightPartialDerivativesData.getPartialDzDy());
-      setPartialD2zDx2(centerOfMassHeightPartialDerivativesData.getPartialD2zDx2());
-      setPartialD2zDy2(centerOfMassHeightPartialDerivativesData.getPartialD2zDy2());
-      setPartialD2zDxDy(centerOfMassHeightPartialDerivativesData.getPartialD2zDxDy());
-      setPartialD3zDx3(centerOfMassHeightPartialDerivativesData.getPartialD3zDx3());
-      setPartialD3zDy3(centerOfMassHeightPartialDerivativesData.getPartialD3zDy3());
-      setPartialD3zDx2Dy(centerOfMassHeightPartialDerivativesData.getPartialD3zDx2Dy());
-      setPartialD3zDxDy2(centerOfMassHeightPartialDerivativesData.getPartialD3zDxDy2());
-   }
 
    public ReferenceFrame getFrameOfCoMHeight()
    {
@@ -42,12 +28,6 @@ public class CoMHeightPartialDerivativesData implements CoMHeightPartialDerivati
    public double getPartialDzDy()
    {
       return partialDzDy;
-   }
-
-   public void setCoMHeight(ReferenceFrame referenceFrame, double comHeight)
-   {
-      this.frameOfCoMHeight = referenceFrame;
-      this.comHeight = comHeight;
    }
 
    public double getPartialD2zDx2()
@@ -83,6 +63,12 @@ public class CoMHeightPartialDerivativesData implements CoMHeightPartialDerivati
    public double getPartialD3zDxDy2()
    {
       return partialD3zDxDy2;
+   }
+
+   public void setCoMHeight(ReferenceFrame referenceFrame, double comHeight)
+   {
+      this.frameOfCoMHeight = referenceFrame;
+      this.comHeight = comHeight;
    }
 
    public void setPartialDzDx(double partialDzDx)

@@ -250,7 +250,9 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       double middleAnkleZ = endCoMPosition.getZ();
       endCoMPosition.addZ(nominalHeightAboveGround.getDoubleValue() + offsetFromNominalInPlan.getDoubleValue());
 
-      double width = Math.abs(transferToPosition.getY() - transferFromPosition.getY());
+      double midstanceY = 0.5 * (transferToPosition.getY() + transferFromPosition.getY());
+      startCoMPosition.setY(midstanceY);
+      endCoMPosition.setY(midstanceY);
 
       if (!transferToAndNextFootstepsData.getCoMAtEndOfState().containsNaN())
       {
@@ -258,11 +260,6 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
          tempFramePoint.setIncludingFrame(transferToAndNextFootstepsData.getCoMAtEndOfState(), 0.0);
          tempFramePoint.changeFrame(frameOfSupportLeg);
          tempFramePoint.setZ(nominalHeightAboveGround.getDoubleValue());
-
-         double alpha = (endCoMPosition.getX() - startCoMPosition.getX()) / (tempFramePoint.getX() - startCoMPosition.getX());
-         double endY = (tempFramePoint.getY() - startCoMPosition.getY()) * alpha + startCoMPosition.getY();
-         endY = MathTools.clamp(endY, width);
-         endCoMPosition.setY(endY);
 
          double percentIn = EuclidGeometryTools.percentageAlongLineSegment3D(tempFramePoint, startCoMPosition, endCoMPosition);
 
@@ -447,7 +444,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       return Math.sqrt(heightSquared) + extraHeight;
    }
 
-   public void solve(CoMHeightPartialDerivativesData comHeightPartialDerivativesDataToPack, boolean isInDoubleSupport)
+   public void solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesDataToPack, boolean isInDoubleSupport)
    {
       com.setToZero(centerOfMassFrame);
       com.changeFrame(worldFrame);
@@ -459,7 +456,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    private final Point2D point = new Point2D();
 
-   void solve(CoMHeightPartialDerivativesData comHeightPartialDerivativesDataToPack, FramePoint3DBasics queryPoint, boolean isInDoubleSupport)
+   void solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesDataToPack, FramePoint3DBasics queryPoint, boolean isInDoubleSupport)
    {
       this.queryPosition.set(queryPoint);
 

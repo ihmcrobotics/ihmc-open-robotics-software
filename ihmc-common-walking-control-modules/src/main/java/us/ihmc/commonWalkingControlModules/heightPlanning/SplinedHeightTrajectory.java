@@ -14,6 +14,7 @@ import us.ihmc.robotics.geometry.StringStretcher2d;
 import us.ihmc.robotics.math.trajectories.YoOptimizedPolynomial;
 import us.ihmc.tools.lists.ListSorter;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 
 import java.util.ArrayList;
@@ -44,11 +45,23 @@ public class SplinedHeightTrajectory
    private final FramePoint3D tempFramePoint2 = new FramePoint3D();
    private final Point2D pointToThrowAway = new Point2D();
 
+   private final YoDouble partialDzDs;
+   private final YoDouble partialD2zDs2;
+   private final YoDouble partialD3zDs3;
+   private final YoDouble partialDsDx;
+   private final YoDouble partialDsDy;
+
    public SplinedHeightTrajectory(YoVariableRegistry registry, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       polynomial = new YoOptimizedPolynomial("height", 7, registry);
       polynomial.setAccelerationMinimizationWeight(1.0e-3);
       polynomial.setJerkMinimizationWeight(1.0e-1);
+
+      partialDzDs = new YoDouble("partialDzDs", registry);
+      partialDsDx = new YoDouble("partialDsDx", registry);
+      partialDsDy = new YoDouble("partialDsDy", registry);
+      partialD2zDs2 = new YoDouble("partialD2zDs2", registry);
+      partialD3zDs3 = new YoDouble("partialD3zDs3", registry);
 
       contactFrameZeroPosition = new YoFramePoint3D("contactFrameZeroPosition", worldFrame, registry);
       contactFrameOnePosition = new YoFramePoint3D("contactFrameOnePosition", worldFrame, registry);
@@ -201,7 +214,7 @@ public class SplinedHeightTrajectory
    }
 
 
-   public double solve(CoMHeightPartialDerivativesData comHeightPartialDerivativesDataToPack, FramePoint3DBasics queryPoint, Point2DBasics pointOnSplineToPack)
+   public double solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesDataToPack, FramePoint3DBasics queryPoint, Point2DBasics pointOnSplineToPack)
    {
       EuclidGeometryTools.orthogonalProjectionOnLineSegment3D(queryPoint, contactFrameZeroPosition, contactFrameOnePosition, queryPoint);
       double percentAlongSegment = EuclidGeometryTools.percentageAlongLineSegment3D(queryPoint, contactFrameZeroPosition, contactFrameOnePosition);
@@ -217,19 +230,15 @@ public class SplinedHeightTrajectory
       double dzds = polynomial.getVelocity();
       double d2zds2 = polynomial.getAcceleration();
       double d3zds3 = polynomial.getJerk();
-
-      /*
-      spline.compute(splineQuery);
-
-      double z = spline.getPosition();
-      double dzds = spline.getVelocity();
-      double ddzdds = spline.getAcceleration();
-
-       */
+      partialDzDs.set(dzds);
+      partialD2zDs2.set(d2zds2);
+      partialD3zDs3.set(d3zds3);
 
       double length = contactFrameZeroPosition.distance(contactFrameOnePosition);
       double dsdx = (contactFrameOnePosition.getX() - contactFrameZeroPosition.getX()) / length;
       double dsdy = (contactFrameOnePosition.getY() - contactFrameZeroPosition.getY()) / length;
+      partialDsDx.set(dsdx);
+      partialDsDy.set(dsdy);
 
       double d2sdx2 = 0.0;
       double d2sdy2 = 0.0;
