@@ -113,7 +113,6 @@ public class SplinedHeightTrajectory
          if ((waypoint.getMaxHeight() - waypoint.getMinHeight()) < 5.0e-3)
          {
             polynomial.addPositionPoint(waypoint.getX(), waypoint.getHeight(), constraintWeight);
-            polynomial.addVelocityPoint(waypoint.getX(), 0.0, 0.5);
          }
          else
          {
