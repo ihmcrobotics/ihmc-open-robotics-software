@@ -22,6 +22,11 @@ public interface ImpulseBasedConstraintCalculator
 
    void updateImpulse(double dt, double alpha);
 
+   default void updateTwistModifiers()
+   {
+      
+   }
+
    default void finalizeImpulse()
    {
 

@@ -389,12 +389,34 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
       if (isImpulseZero)
       {
+         if (rootB != null)
+         {
+            impulseB.setToZero(contactingBodyB.getBodyFixedFrame(), impulseA.getReferenceFrame());
+         }
+      }
+      else
+      {
+         if (rootB != null)
+         {
+            impulseB.setIncludingFrame(contactingBodyB.getBodyFixedFrame(), impulseA);
+            impulseB.negate();
+         }
+      }
+
+      impulsePreviousA.set(impulseA.getLinearPart());
+      isFirstUpdate = false;
+   }
+
+   @Override
+   public void updateTwistModifiers()
+   {
+      if (isImpulseZero)
+      {
          rigidBodyTwistModifierA.setImpulseToZero();
          jointTwistModifierA.setImpulseToZero();
 
          if (rootB != null)
          {
-            impulseB.setToZero(contactingBodyB.getBodyFixedFrame(), impulseA.getReferenceFrame());
             rigidBodyTwistModifierB.setImpulseToZero();
             jointTwistModifierB.setImpulseToZero();
          }
@@ -406,15 +428,10 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
          if (rootB != null)
          {
-            impulseB.setIncludingFrame(contactingBodyB.getBodyFixedFrame(), impulseA);
-            impulseB.negate();
             rigidBodyTwistModifierB.setImpulse(impulseB.getLinearPart());
             jointTwistModifierB.setImpulse(impulseB.getLinearPart());
          }
       }
-
-      impulsePreviousA.set(impulseA.getLinearPart());
-      isFirstUpdate = false;
    }
 
    @Override

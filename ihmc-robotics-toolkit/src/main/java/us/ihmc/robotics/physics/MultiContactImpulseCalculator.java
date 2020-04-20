@@ -191,6 +191,11 @@ public class MultiContactImpulseCalculator
                }
                break;
             }
+
+            for (ImpulseBasedConstraintCalculator calculator : allCalculators)
+            {
+               calculator.updateTwistModifiers();
+            }
          }
 
          for (int i = 0; i < allCalculators.size(); i++)
