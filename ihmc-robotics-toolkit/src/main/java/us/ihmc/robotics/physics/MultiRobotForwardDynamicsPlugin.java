@@ -77,14 +77,14 @@ public class MultiRobotForwardDynamicsPlugin
       collisionGroups = MultiRobotCollisionGroup.toCollisionGroups(collisionDetectionPlugin.getAllCollisions());
    }
 
-   public void doScience(double dt, Vector3DReadOnly gravity)
+   public void doScience(double time, double dt, Vector3DReadOnly gravity)
    {
       for (PhysicsEngineRobotData robotPlugin : robots.values())
       { // First pass without the external forces
          SingleRobotForwardDynamicsPlugin forwardDynamicsPlugin = robotPlugin.getForwardDynamicsPlugin();
          forwardDynamicsPlugin.resetExternalWrenches();
          forwardDynamicsPlugin.applyControllerOutput();
-         forwardDynamicsPlugin.doScience(dt, gravity);
+         forwardDynamicsPlugin.doScience(time, dt, gravity);
          forwardDynamicsPlugin.readJointVelocities();
       }
 
@@ -120,7 +120,7 @@ public class MultiRobotForwardDynamicsPlugin
 
       for (MultiContactImpulseCalculator impulseCalculator : impulseCalculators)
       {
-         impulseCalculator.computeImpulses(dt, false);
+         impulseCalculator.computeImpulses(time, dt, false);
          impulseCalculator.applyJointVelocityChanges();
          impulseCalculator.readExternalWrenches(dt, externalWrenchReaders);
       }

@@ -55,6 +55,7 @@ public class ExperimentalPhysicsEngine
    private final CollidableListVisualizer environmentCollidableVisualizers;
    private final List<CollidableListVisualizer> robotCollidableVisualizers = new ArrayList<>();
 
+   private final YoDouble time = new YoDouble("physicsTime", physicsEngineRegistry);
    private final YoDouble rawTickDurationMilliseconds = new YoDouble("rawTickDurationMilliseconds", physicsEngineRegistry);
    private final YoDouble averageTickDurationMilliseconds = new YoDouble("averageTickDurationMilliseconds", physicsEngineRegistry);
    private final YoDouble rawRealTimeRate = new YoDouble("rawRealTimeRate", physicsEngineRegistry);
@@ -148,7 +149,7 @@ public class ExperimentalPhysicsEngine
       environmentCollidables.forEach(Collidable::updateBoundingBox);
       collisionDetectionPlugin.evaluationCollisions(robotList, () -> environmentCollidables);
       multiRobotPhysicsEnginePlugin.submitCollisions(collisionDetectionPlugin);
-      multiRobotPhysicsEnginePlugin.doScience(dt, gravity);
+      multiRobotPhysicsEnginePlugin.doScience(time.getValue(), dt, gravity);
       integrationMethod.integrate(dt);
 
       environmentCollidableVisualizers.update(collisionDetectionPlugin.getAllCollisions());
@@ -160,6 +161,8 @@ public class ExperimentalPhysicsEngine
          robot.updateFrames();
          physicsOutputReaders.get(i).read();
       }
+
+      time.add(dt);
 
       long endTick = System.nanoTime();
 

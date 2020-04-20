@@ -31,7 +31,7 @@ public class SingleRobotForwardDynamicsPlugin
       jointVelocityMatrix = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider()), 1);
    }
 
-   public void doScience(double dt, Vector3DReadOnly gravity)
+   public void doScience(double time, double dt, Vector3DReadOnly gravity)
    {
       forwardDynamicsCalculator.setGravitionalAcceleration(gravity);
       forwardDynamicsCalculator.compute();

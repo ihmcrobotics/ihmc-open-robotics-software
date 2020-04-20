@@ -106,7 +106,7 @@ public class MultiContactImpulseCalculator
       }
    }
 
-   public double computeImpulses(double dt, boolean verbose)
+   public double computeImpulses(double time, double dt, boolean verbose)
    {
       for (ImpulseBasedConstraintCalculator calculator : allCalculators)
       {
