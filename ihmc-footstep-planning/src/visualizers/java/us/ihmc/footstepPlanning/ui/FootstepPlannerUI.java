@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
@@ -12,6 +13,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -45,9 +47,11 @@ import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.ToDoubleFunction;
 
@@ -92,30 +96,62 @@ public class FootstepPlannerUI
    @FXML
    private FootstepPlannerStatusBarController footstepPlannerStatusBarController;
    @FXML
+   private FootstepPlannerTestDashboardController footstepPlannerTestDashboardController;
+   @FXML
    private UIRobotController uiRobotController;
    @FXML
    private VisualizationController visibilityGraphsUIController;
 
-   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
+   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, boolean showTestDashboard, SideDependentList<List<Point2D>> defaultContactPoints)
+         throws Exception
    {
-      this(primaryStage, messager, new DefaultFootstepPlannerParameters(), new DefaultVisibilityGraphParameters(), new DefaultFootstepPostProcessingParameters(),
-           null, null, null);
+      this(primaryStage,
+           messager,
+           new DefaultFootstepPlannerParameters(),
+           new DefaultVisibilityGraphParameters(),
+           new DefaultFootstepPostProcessingParameters(),
+           null,
+           null,
+           showTestDashboard,
+           defaultContactPoints);
    }
 
-   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParametersBasics plannerParameters,
+   public FootstepPlannerUI(Stage primaryStage,
+                            JavaFXMessager messager,
+                            FootstepPlannerParametersBasics plannerParameters,
                             VisibilityGraphsParametersBasics visibilityGraphsParameters,
-                            FootstepPostProcessingParametersBasics footstepPostProcessingParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
-                            RobotContactPointParameters<RobotSide> contactPointParameters, WalkingControllerParameters walkingControllerParameters) throws Exception
+                            FootstepPostProcessingParametersBasics footstepPostProcessingParameters,
+                            FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
+                            WalkingControllerParameters walkingControllerParameters,
+                            boolean showTestDashboard,
+                            SideDependentList<List<Point2D>> defaultContactPoints) throws Exception
    {
-      this(primaryStage, messager, plannerParameters, visibilityGraphsParameters, footstepPostProcessingParameters, fullHumanoidRobotModelFactory, null,
-           contactPointParameters, walkingControllerParameters, null, new Vector3D());
+      this(primaryStage,
+           messager,
+           plannerParameters,
+           visibilityGraphsParameters,
+           footstepPostProcessingParameters,
+           fullHumanoidRobotModelFactory,
+           null,
+           walkingControllerParameters,
+           null,
+           new Vector3D(),
+           showTestDashboard,
+           defaultContactPoints);
    }
 
-   public FootstepPlannerUI(Stage primaryStage, JavaFXMessager messager, FootstepPlannerParametersBasics plannerParameters,
+   public FootstepPlannerUI(Stage primaryStage,
+                            JavaFXMessager messager,
+                            FootstepPlannerParametersBasics plannerParameters,
                             VisibilityGraphsParametersBasics visibilityGraphsParameters,
-                            FootstepPostProcessingParametersBasics footstepPostProcessingParameters, FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
-                            FullHumanoidRobotModelFactory previewModelFactory, RobotContactPointParameters<RobotSide> contactPointParameters,
-                            WalkingControllerParameters walkingControllerParameters, ToDoubleFunction<String> defaultJointSetpoints, Tuple3DReadOnly rootJointToMidFootOffset) throws Exception
+                            FootstepPostProcessingParametersBasics footstepPostProcessingParameters,
+                            FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
+                            FullHumanoidRobotModelFactory previewModelFactory,
+                            WalkingControllerParameters walkingControllerParameters,
+                            ToDoubleFunction<String> defaultJointSetpoints,
+                            Tuple3DReadOnly rootJointToMidFootOffset,
+                            boolean showTestDashboard,
+                            SideDependentList<List<Point2D>> defaultContactPoints) throws Exception
    {
       this.primaryStage = primaryStage;
       this.messager = messager;
@@ -126,12 +162,18 @@ public class FootstepPlannerUI
 
       mainPane = loader.load();
 
+      if (!showTestDashboard)
+      {
+         mainPane.getChildren().remove(mainPane.getLeft());
+      }
+
       footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
       footstepPostProcessingParametersUIController.setPostProcessingParameters(footstepPostProcessingParameters);
 
       mainTabController.attachMessager(messager);
       footstepPlannerStatusBarController.attachMessager(messager);
+      footstepPlannerTestDashboardController.attachMessager(messager);
       footstepPlannerMenuUIController.attachMessager(messager);
       footstepPlannerParametersUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
@@ -144,6 +186,7 @@ public class FootstepPlannerUI
 
       mainTabController.bindControls();
       footstepPlannerStatusBarController.bindControls();
+      footstepPlannerTestDashboardController.bindControls();
       footstepPlannerParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
       footstepPostProcessingParametersUIController.bindControls();
@@ -175,7 +218,7 @@ public class FootstepPlannerUI
       this.bodyPathMeshViewer = new BodyPathMeshViewer(messager);
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
       this.occupancyMapRenderer = new OccupancyMapRenderer(messager);
-      this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(contactPointParameters, messager);
+      this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(defaultContactPoints, messager);
 
       startGoalPositionViewer.setShowStartGoalTopics(ShowStart, ShowGoal, ShowGoal);
 
@@ -224,12 +267,12 @@ public class FootstepPlannerUI
          pathViewer.setDefaultWaypointProportions(walkingControllerParameters.getSwingTrajectoryParameters().getSwingWaypointProportions());
       }
 
-      if(contactPointParameters != null)
+      if(defaultContactPoints != null)
       {
-         mainTabController.setContactPointParameters(contactPointParameters);
-         pathViewer.setDefaultContactPoints(contactPointParameters);
-         goalOrientationViewer.setDefaultContactPoints(contactPointParameters);
-         footstepPlannerLogVisualizerController.setContactPointParameters(contactPointParameters);
+         mainTabController.setContactPointParameters(defaultContactPoints);
+         pathViewer.setDefaultContactPoints(defaultContactPoints);
+         goalOrientationViewer.setDefaultContactPoints(defaultContactPoints);
+         footstepPlannerLogVisualizerController.setContactPointParameters(defaultContactPoints);
       }
 
       planarRegionViewer.start();
@@ -363,10 +406,14 @@ public class FootstepPlannerUI
          robotVisualizer.stop();
    }
 
-
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager) throws Exception
    {
-      return new FootstepPlannerUI(primaryStage, messager);
+      return createMessagerUI(primaryStage, messager, false, null);
+   }
+
+   public static FootstepPlannerUI createMessagerUI(Stage primaryStage, JavaFXMessager messager, boolean showTestDashboard, SideDependentList<List<Point2D>> defaultContactPoints) throws Exception
+   {
+      return new FootstepPlannerUI(primaryStage, messager, showTestDashboard, defaultContactPoints);
    }
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage,
@@ -381,6 +428,12 @@ public class FootstepPlannerUI
                                                     ToDoubleFunction<String> defaultJointSetpoints,
                                                     Tuple3DReadOnly rootJointToMidFootOffset) throws Exception
    {
+      SideDependentList<List<Point2D>> defaultContactPoints = new SideDependentList<>();
+      for (RobotSide side : RobotSide.values)
+      {
+         defaultContactPoints.put(side, contactPointParameters.getControllerFootGroundContactPoints().get(side));
+      }
+
       return new FootstepPlannerUI(primaryStage,
                                    messager,
                                    plannerParameters,
@@ -388,9 +441,10 @@ public class FootstepPlannerUI
                                    postProcessingParameters,
                                    fullHumanoidRobotModelFactory,
                                    previewModelFactory,
-                                   contactPointParameters,
                                    walkingControllerParameters,
                                    defaultJointSetpoints,
-                                   rootJointToMidFootOffset);
+                                   rootJointToMidFootOffset,
+                                   false,
+                                   defaultContactPoints);
    }
 }

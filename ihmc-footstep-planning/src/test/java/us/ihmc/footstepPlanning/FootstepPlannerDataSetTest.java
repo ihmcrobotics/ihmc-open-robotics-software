@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,7 +18,9 @@ import javafx.stage.Stage;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -157,7 +160,17 @@ public abstract class FootstepPlannerDataSetTest
                                                                  return false;
                                                               return dataSet.getPlannerInput().containsIterationLimitFlag(getTestNamePrefix().toLowerCase());
                                                            });
-      runAssertionsOnAllDatasets(this::runAssertions, dataSets);
+
+      if (VISUALIZE)
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.testDataSets, dataSets);
+         messager.registerTopicListener(FootstepPlannerMessagerAPI.testDataSetSelected, this::runAssertions);
+         ThreadTools.sleepForever();
+      }
+      else
+      {
+         runAssertionsOnAllDatasets(this::runAssertions, dataSets);
+      }
    }
 
    @Test
@@ -304,12 +317,16 @@ public abstract class FootstepPlannerDataSetTest
          @Override
          public void start(Stage stage) throws Exception
          {
-            ui = FootstepPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager);
+            SideDependentList<ConvexPolygon2D> defaultFootPolygons = PlannerTools.createDefaultFootPolygons();
+            SideDependentList<List<Point2D>> defaultContactPoints = new SideDependentList<>();
+            defaultContactPoints.set(side -> defaultFootPolygons.get(side).getVertexBufferView().stream().map(Point2D::new).collect(Collectors.toList()));
+
+            ui = FootstepPlannerUI.createMessagerUI(stage, (SharedMemoryJavaFXMessager) messager, true, defaultContactPoints);
             ui.show();
          }
 
          @Override
-         public void stop() throws Exception
+         public void stop()
          {
             ui.stop();
             Platform.exit();

@@ -6,6 +6,7 @@ import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPosition
 import static us.ihmc.pathPlanning.visibilityGraphs.ui.viewers.StartGoalPositionViewer.goalTransparentMaterial;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import javafx.animation.AnimationTimer;
@@ -148,16 +149,14 @@ public class GoalOrientationViewer extends AnimationTimer
       foot.setRotate(Math.toDegrees(footPose.getYaw()));
    }
 
-   public void setDefaultContactPoints(RobotContactPointParameters<RobotSide> defaultContactPointParameters)
+   public void setDefaultContactPoints(SideDependentList<List<Point2D>> defaultContactPoints)
    {
-      SegmentDependentList<RobotSide, ArrayList<Point2D>> controllerFootGroundContactPoints = defaultContactPointParameters.getControllerFootGroundContactPoints();
       for(RobotSide robotSide : RobotSide.values)
       {
          ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
-         ArrayList<Point2D> defaultContactPoints = controllerFootGroundContactPoints.get(robotSide);
-         for (int i = 0; i < defaultContactPoints.size(); i++)
+         for (int i = 0; i < defaultContactPoints.get(robotSide).size(); i++)
          {
-            defaultFoothold.addVertex(defaultContactPoints.get(i));
+            defaultFoothold.addVertex(defaultContactPoints.get(robotSide).get(i));
          }
 
          defaultFoothold.update();
