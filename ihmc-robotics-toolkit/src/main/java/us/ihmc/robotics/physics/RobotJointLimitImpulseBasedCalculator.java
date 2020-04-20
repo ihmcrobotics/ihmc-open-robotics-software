@@ -259,6 +259,13 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
 
       isImpulseZero = NormOps.normP2(impulse) < 1.0e-12;
 
+      impulsePrevious.set(impulse);
+      isFirstUpdate = false;
+   }
+
+   @Override
+   public void updateTwistModifiers()
+   {
       if (isImpulseZero)
       {
          rigidBodyTwistModifier.setImpulseToZero();
@@ -269,9 +276,6 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
          rigidBodyTwistModifier.setImpulse(impulse);
          jointTwistModifier.setImpulse(impulse);
       }
-
-      impulsePrevious.set(impulse);
-      isFirstUpdate = false;
    }
 
    public void setConstraintParameters(ConstraintParametersReadOnly parameters)
