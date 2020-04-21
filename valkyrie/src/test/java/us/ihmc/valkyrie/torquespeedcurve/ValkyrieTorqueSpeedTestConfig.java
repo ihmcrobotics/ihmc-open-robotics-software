@@ -21,10 +21,11 @@ import us.ihmc.valkyrie.testsupport.ModifiableValkyrieRobotConfig;
 
 class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 	enum TestType {
-		STAIRS, STEP, SQUARE_UP_STEP, STEP_DOWN, SLOPE, SPEED, PUSHRECOVERY;
+		STAIRS, STEP, SQUARE_UP_STEP, STEP_DOWN, SLOPE, SPEED, PUSHRECOVERY, DUMMY;
 	}
 
 	public String testCase;             // for push recovery, specifies which case to run
+	public boolean keepUp;              // whether to keep up the GUI after running
 	public double [] forceVector; // for push recovery, specifies direction of force
 	public double forceMagnitude;       // for push recovery, specifies magnitude of the force
 	public double forceDuration;        // for push recovery, specifies the duration of the force
@@ -95,6 +96,7 @@ class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 	
 	// Default constructor
 	public ValkyrieTorqueSpeedTestConfig() {
+		keepUp = false;
 		forceVector = new double [3];
 		forceMagnitude = 0.0;
 		forceDuration = 1.0;

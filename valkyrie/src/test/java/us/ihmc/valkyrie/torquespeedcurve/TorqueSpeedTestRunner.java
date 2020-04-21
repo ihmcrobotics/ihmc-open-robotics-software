@@ -5,8 +5,10 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -20,6 +22,8 @@ import com.fasterxml.jackson.core.Version;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+
+import org.apache.commons.io.FileUtils;
 import org.yaml.snakeyaml.Yaml;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
@@ -67,6 +71,7 @@ import us.ihmc.valkyrie.testsupport.ModifiableValkyrieRobotModel;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieJointTorqueLimitMutator;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieTorqueSpeedCurveEndToEndTestNasa;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieTorqueSpeedTestConfig;
+import us.ihmc.valkyrie.torquespeedcurve.ValkyrieTorqueSpeedTestConfig.TestType;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.ValkyrieSDFDescriptionMutator;
@@ -180,15 +185,25 @@ public class TorqueSpeedTestRunner {
 		// If the config file specifies footsteps, read them in here. Otherwise
 		// recordedFootsteps will be null.
 		FootstepDataListMessage recordedFootsteps = config.getFootsteps();
+		ValkyrieRobotModel robot;
+		
+		if (config.testType == TestType.SPEED) {
+			robot = new ModifiableValkyrieRobotModel(RobotTarget.SCS, config);		
+		} else {
+			robot = new ModifiableValkyrieRobotModel(RobotTarget.REAL_ROBOT, config);		
+		}
 
-		ValkyrieRobotModel robot = new ModifiableValkyrieRobotModel(RobotTarget.REAL_ROBOT, config);		
-
-		// Set walking parameters
-		ValkyrieTorqueSpeedWalkingControllerParameters walkingParameters = new ValkyrieTorqueSpeedWalkingControllerParameters(
+		
+//		ValkyrieTorqueSpeedWalkingControllerParameters walkingParameters = new ValkyrieTorqueSpeedWalkingControllerParameters(
+//				robot.getJointMap(),
+//				robot.getRobotPhysicalProperties(), 
+//				robot.getTarget(),
+//				config.walkingValues);
+		
+		ValkyrieWalkingControllerParameters walkingParameters = new ValkyrieWalkingControllerParameters(
 				robot.getJointMap(),
 				robot.getRobotPhysicalProperties(), 
-				robot.getTarget(),
-				config.walkingValues);
+				robot.getTarget()); 
 
 
 		// Create test runner and test case class
@@ -201,7 +216,7 @@ public class TorqueSpeedTestRunner {
 		// Set up output directories for test results
 		File outputPrefixDirectory = runner.getOutputDirectory("capped_torque");
 		File outputResultsDirectory = null;
-
+		
 		// Run the test
 		try {
 			switch (config.testType) {
@@ -229,7 +244,7 @@ public class TorqueSpeedTestRunner {
 						outputPrefixDirectory);
 				break;
 			case SPEED:
-				outputResultsDirectory = tester.testSpeedWalk(robot, walkingParameters, outputPrefixDirectory);		
+				outputResultsDirectory = tester.testSpeedWalk(robot, walkingParameters, outputPrefixDirectory, config.keepUp);		
 				break;
 			case PUSHRECOVERY:
 				outputResultsDirectory = runPushRecoveryTest(robot, config, outputPrefixDirectory);
@@ -245,8 +260,15 @@ public class TorqueSpeedTestRunner {
 		// Copy the test parameters into the results directory
 		try {
 			if (outputResultsDirectory != null) {
-				Files.copy(paramInput, Paths
-						.get(outputResultsDirectory.toString(), paramInput.toPath().getFileName().toString()).toFile());
+				// For SPEED type, the controller parameters are critical and need to be copied too
+				if (config.testType == TestType.SPEED) {
+					URL controllerParamsUrl = runner.getClass()
+							.getResource("/us/ihmc/valkyrie/parameters/controller_simulation.xml");
+					String controllerParamsFilename = outputResultsDirectory.toString() + "/controller_simulation.xml";
+					File controllerParamsDest = new File(controllerParamsFilename);
+					FileUtils.copyURLToFile(controllerParamsUrl, controllerParamsDest);
+				}
+				Files.copy(paramInput, Paths.get(outputResultsDirectory.toString(), paramInput.toPath().getFileName().toString()).toFile());
 			}
 		} catch (IOException e) {
 			System.err.println("Unable to copy param file to destination: " + e.getMessage());
@@ -255,6 +277,6 @@ public class TorqueSpeedTestRunner {
 		// Without calling System.exit(0), the sim has non-terminating threads.
 		// Specifically, the simulation thread and the intraprocess thread (associated with ROS2 publishing) do not
 		// exit.
-		System.exit(0);
+		if (!config.keepUp) System.exit(0);
 	}
 }
