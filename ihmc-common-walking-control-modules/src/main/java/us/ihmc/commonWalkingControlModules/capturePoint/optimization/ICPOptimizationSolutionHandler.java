@@ -48,8 +48,7 @@ public class ICPOptimizationSolutionHandler
    private final YoDouble cmpFeedbackCostToGo;
 
    private final YoFramePoint2D adjustedICPReferenceLocation;
-   private final YoFramePoint2D footstepSolutionReturned;
-   private final FramePoint2D footstepSolutionInControlPlane = new FramePoint2D();
+   private final YoFramePoint2D footstepSolutionInControlPlane;
 
    private final YoFrameVector2D icpErrorCompensatedFromStepAdjustment;
 
@@ -112,14 +111,15 @@ public class ICPOptimizationSolutionHandler
       totalFootstepAdjustment = new YoFrameVector2D(yoNamePrefix + "TotalFootstepAdjustment", worldFrame, registry);
 
       adjustedICPReferenceLocation = new YoFramePoint2D(yoNamePrefix + "AdjustedICPReferenceLocation", worldFrame, registry);
-      footstepSolutionReturned = new YoFramePoint2D(yoNamePrefix + "FootstepSolutionReturned", worldFrame, registry);
+      footstepSolutionInControlPlane = new YoFramePoint2D(yoNamePrefix + "FootstepSolutionReturned", worldFrame, registry);
    }
 
    public void setupVisualizers(ArtifactList artifactList)
    {
       YoGraphicPosition adjustedICP = new YoGraphicPosition(yoNamePrefix + "AdjustedICPReferenceLocation", adjustedICPReferenceLocation, 0.01, YoAppearance.LightYellow(),
                                                                        YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition footstepPositionInControlPlane = new YoGraphicPosition(yoNamePrefix + "FootstepSolutionInControlPlane", footstepSolutionReturned, 0.005,
+      YoGraphicPosition footstepPositionInControlPlane = new YoGraphicPosition(yoNamePrefix + "FootstepSolutionInControlPlane",
+                                                                               footstepSolutionInControlPlane, 0.005,
                                                                                YoAppearance.DarkRed(), YoGraphicPosition.GraphicType.SOLID_BALL);
 
       artifactList.add(adjustedICP.createArtifact());
@@ -143,17 +143,14 @@ public class ICPOptimizationSolutionHandler
    private final PoseReferenceFrame deadbandFrame = new PoseReferenceFrame("DeadbandFrame", worldFrame);
 
    public void extractFootstepSolution(FixedFramePose3DBasics footstepSolutionToPack, FixedFrameTuple2DBasics unclippedFootstepSolutionToPack,
-                                       FramePose3DReadOnly upcomingFootstep, FrameVector2DReadOnly icpOverrun, PlanarRegion activePlanarRegion,
+                                       FramePose3DReadOnly upcomingFootstep, PlanarRegion activePlanarRegion,
                                        ICPOptimizationQPSolver solver)
    {
       referenceFootstepLocation2D.set(upcomingFootstep.getPosition());
 
-      solver.getFootstepSolutionLocation(0, footstepSolutionReturned);
-      icpErrorCompensatedFromStepAdjustment.sub(footstepSolutionReturned, referenceFootstepLocation2D);
+      solver.getFootstepSolutionLocation(0, footstepSolutionInControlPlane);
+      icpErrorCompensatedFromStepAdjustment.sub(footstepSolutionInControlPlane, referenceFootstepLocation2D);
       icpErrorCompensatedFromStepAdjustment.scale(solver.getFootstepRecursionMultiplier() / solver.getFootstepAdjustmentSafetyFactor());
-
-      footstepSolutionInControlPlane.add(footstepSolutionReturned, icpOverrun);
-
 
       if (useICPControlPolygons.getValue() && icpControlPlane != null)
       {

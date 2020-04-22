@@ -169,7 +169,7 @@ public class ICPOptimizationSolutionHandlerTest
 
       FrameVector2D overrun = new FrameVector2D();
 
-      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), overrun, null, solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), null, solver);
       FrameVector2D copFeedback = new FrameVector2D();
       solver.getCoPFeedbackDifference(copFeedback);
 
@@ -200,7 +200,7 @@ public class ICPOptimizationSolutionHandlerTest
 
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), overrun, null, solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), null, solver);
 
       // new solution should be clipped to the same value
       expectedUnclippedSolution = new FramePoint2D(referenceFootstepPosition);
@@ -256,7 +256,7 @@ public class ICPOptimizationSolutionHandlerTest
 
       FrameVector2D overrun = new FrameVector2D();
 
-      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), overrun, null, solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), null, solver);
       FrameVector2D copFeedback = new FrameVector2D();
       solver.getCoPFeedbackDifference(copFeedback);
 
@@ -287,7 +287,7 @@ public class ICPOptimizationSolutionHandlerTest
 
       solver.compute(currentICPError, perfectCMP);
 
-      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), overrun, null, solver);
+      solutionHandler.extractFootstepSolution(foostepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), null, solver);
 
       // new solution should be clipped to the same value
       expectedUnclippedSolution = new FramePoint2D(referenceFootstepPosition);
@@ -342,7 +342,7 @@ public class ICPOptimizationSolutionHandlerTest
 
       FrameVector2D overrun = new FrameVector2D();
 
-      solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), overrun, null, solver);
+      solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootstep.getFootstepPose(), null, solver);
       FrameVector2D copFeedback = new FrameVector2D();
       solver.getCoPFeedbackDifference(copFeedback);
 

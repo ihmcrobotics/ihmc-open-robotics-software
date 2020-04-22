@@ -124,7 +124,6 @@ public class LinearMomentumRateControlModule
    private RobotSide supportSide = null;
    private RobotSide transferToSide = null;
 
-   private final FramePoint2D desiredICPAtEndOfState = new FramePoint2D();
    private final YoFramePoint2D yoDesiredCMP = new YoFramePoint2D("desiredCMP", worldFrame, registry);
    private final YoFramePoint2D yoAchievedCMP = new YoFramePoint2D("achievedCMP", worldFrame, registry);
    private final YoFramePoint3D yoCenterOfMass = new YoFramePoint3D("centerOfMass", worldFrame, registry);
@@ -241,7 +240,6 @@ public class LinearMomentumRateControlModule
       this.useRecoveryMomentumWeight.set(input.getUseMomentumRecoveryMode());
       this.desiredCapturePoint.setMatchingFrame(input.getDesiredCapturePoint());
       this.desiredCapturePointVelocity.setMatchingFrame(input.getDesiredCapturePointVelocity());
-      this.desiredICPAtEndOfState.setMatchingFrame(input.getDesiredICPAtEndOfState());
       this.desiredCoMHeightAcceleration = input.getDesiredCoMHeightAcceleration();
       this.minimizingAngularMomentumRateZ.set(input.getMinimizeAngularMomentumRateZ());
       this.perfectCMP.setMatchingFrame(input.getPerfectCMP());
@@ -450,13 +448,13 @@ public class LinearMomentumRateControlModule
       if (perfectCoP.containsNaN())
       {
          perfectCMPDelta.setToZero();
-         icpOptimizationController.compute(yoTime.getValue(), desiredCapturePoint, desiredCapturePointVelocity, desiredICPAtEndOfState, perfectCMP,
+         icpOptimizationController.compute(yoTime.getValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP,
                                            capturePoint, capturePointVelocity, omega0);
       }
       else
       {
          perfectCMPDelta.sub(perfectCMP, perfectCoP);
-         icpOptimizationController.compute(yoTime.getValue(), desiredCapturePoint, desiredCapturePointVelocity, desiredICPAtEndOfState, perfectCoP,
+         icpOptimizationController.compute(yoTime.getValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCoP,
                                            perfectCMPDelta, capturePoint, capturePointVelocity, omega0);
       }
       icpOptimizationController.getDesiredCMP(desiredCMP);
