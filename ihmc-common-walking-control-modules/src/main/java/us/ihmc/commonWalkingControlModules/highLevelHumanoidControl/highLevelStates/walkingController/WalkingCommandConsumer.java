@@ -55,8 +55,9 @@ public class WalkingCommandConsumer
 
    private final ManipulationAbortedStatus manipulationAbortedStatus = new ManipulationAbortedStatus();
 
-   public WalkingCommandConsumer(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager, HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
-         WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
+   public WalkingCommandConsumer(CommandInputManager commandInputManager, StatusMessageOutputManager statusMessageOutputManager,
+                                 HighLevelHumanoidControllerToolbox controllerToolbox, HighLevelControlManagerFactory managerFactory,
+                                 WalkingControllerParameters walkingControllerParameters, YoVariableRegistry parentRegistry)
    {
       this.walkingMessageHandler = controllerToolbox.getWalkingMessageHandler();
       yoTime = controllerToolbox.getYoTime();
@@ -71,7 +72,7 @@ public class WalkingCommandConsumer
       ReferenceFrame pelvisZUpFrame = controllerToolbox.getPelvisZUpFrame();
 
       ReferenceFrame chestBodyFrame = null;
-      if(chest != null)
+      if (chest != null)
       {
          chestBodyFrame = chest.getBodyFixedFrame();
          this.chestManager = managerFactory.getOrCreateRigidBodyManager(chest, pelvis, chestBodyFrame, pelvisZUpFrame);
@@ -94,7 +95,7 @@ public class WalkingCommandConsumer
       for (RobotSide robotSide : RobotSide.values)
       {
          RigidBodyBasics hand = controllerToolbox.getFullRobotModel().getHand(robotSide);
-         if(hand != null)
+         if (hand != null)
          {
             ReferenceFrame handControlFrame = controllerToolbox.getFullRobotModel().getHandControlFrame(robotSide);
             RigidBodyControlManager handManager = managerFactory.getOrCreateRigidBodyManager(hand, chest, handControlFrame, chestBodyFrame);
@@ -216,7 +217,7 @@ public class WalkingCommandConsumer
          return;
 
       List<GoHomeCommand> commands = commandConsumerWithDelayBuffers.pollNewCommands(GoHomeCommand.class);
-      for(int i = 0; i < commands.size(); i++)
+      for (int i = 0; i < commands.size(); i++)
       {
          GoHomeCommand command = commands.get(i);
 
@@ -225,7 +226,7 @@ public class WalkingCommandConsumer
             if (command.getRequest(robotSide, HumanoidBodyPart.ARM))
             {
                RigidBodyControlManager handManager = handManagers.get(robotSide);
-               if(handManager != null)
+               if (handManager != null)
                {
                   handManager.goHome(command.getTrajectoryTime());
                }
@@ -443,7 +444,7 @@ public class WalkingCommandConsumer
             handManagers.get(robotSide).handleStopAllTrajectoryCommand(command);
       }
 
-      if(chestManager != null)
+      if (chestManager != null)
       {
          chestManager.handleStopAllTrajectoryCommand(command);
       }
