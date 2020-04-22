@@ -46,7 +46,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private double beta2 = 0.95;
    private double beta3 = 1.15;
    private double gamma = 1.0e-6;
-   private final ContactParameters contactParameters = new ContactParameters(0.7, 0.1, 0.1, 0.99);
+   private final ContactParameters contactParameters = new ContactParameters(0.7, 0.0, 0.0, 1.0);
 
    private boolean isFirstUpdate = false;
    private boolean isImpulseZero = false;
