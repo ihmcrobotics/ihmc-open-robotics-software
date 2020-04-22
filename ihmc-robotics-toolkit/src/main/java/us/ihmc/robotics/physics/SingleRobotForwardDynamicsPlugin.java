@@ -20,15 +20,14 @@ public class SingleRobotForwardDynamicsPlugin
 
    public SingleRobotForwardDynamicsPlugin(MultiBodySystemBasics input)
    {
-      this(input, null);
-   }
-
-   public SingleRobotForwardDynamicsPlugin(MultiBodySystemBasics input, MultiBodySystemStateWriter controllerOutputWriter)
-   {
       this.input = input;
-      this.controllerOutputWriter = controllerOutputWriter;
       forwardDynamicsCalculator = new ForwardDynamicsCalculator(input);
       jointVelocityMatrix = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider()), 1);
+   }
+
+   public void setControllerOutputWriter(MultiBodySystemStateWriter controllerOutputWriter)
+   {
+      this.controllerOutputWriter = controllerOutputWriter;
    }
 
    public void doScience(double time, double dt, Vector3DReadOnly gravity)

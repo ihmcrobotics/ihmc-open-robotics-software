@@ -25,6 +25,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
@@ -69,6 +70,11 @@ public class ExperimentalSimulation extends Simulation
 
    private final List<RigidBodyBasics> rootBodies = new ArrayList<>();
 
+   /** List of tasks to be executed right before executing the physics engine's tick. */
+   private final List<Runnable> preProcessors = new ArrayList<>();
+   /** List of tasks to be executed right after executing the physics engine's tick. */
+   private final List<Runnable> postProcessors = new ArrayList<>();
+
    public ExperimentalSimulation(Robot[] robotArray, int dataBufferSize)
    {
       super(robotArray, dataBufferSize);
@@ -109,9 +115,32 @@ public class ExperimentalSimulation extends Simulation
       externalWrenchReader.addRobot(rootBody, scsRobot);
    }
 
+   public void addPreProcessor(Runnable preProcessor)
+   {
+      preProcessors.add(preProcessor);
+   }
+
+   public void addPostProcessor(Runnable postProcessor)
+   {
+      postProcessors.add(postProcessor);
+   }
+
+   public void addJVMStatistics()
+   {
+      JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(getPhysicsEngineRegistry());
+      postProcessors.add(() -> jvmStatisticsGenerator.runManual());
+   }
+
+   public void addSimulationEnergyStatistics()
+   {
+      SimulationEnergyStatistics.setupSimulationEnergyStatistics(gravity, physicsEngine);
+   }
+
    @Override
    public void simulate()
    {
+      preProcessors.forEach(Runnable::run);
+
       synchronized (getSimulationSynchronizer())
       {
          for (Robot robot : getRobots())
@@ -133,6 +162,8 @@ public class ExperimentalSimulation extends Simulation
             robot.getYoTime().add(getDT());
          }
       }
+
+      postProcessors.forEach(Runnable::run);
    }
 
    @Override

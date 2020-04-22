@@ -133,7 +133,7 @@ public class MultiContactImpulseCalculatorTest
       for (RigidBodyBasics rigidBody : rigidBodies)
       {
          RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rigidBody);
-         PhysicsEngineRobotData physicsEngineRobotData = new PhysicsEngineRobotData(rigidBody.getName(), rootBody, null, null, null, null);
+         PhysicsEngineRobotData physicsEngineRobotData = new PhysicsEngineRobotData(rigidBody.getName(), rootBody, null, null);
          physicsEngineRobotData.getForwardDynamicsPlugin().doScience(0.0, dt, gravity);
          map.put(rootBody, physicsEngineRobotData);
       }
