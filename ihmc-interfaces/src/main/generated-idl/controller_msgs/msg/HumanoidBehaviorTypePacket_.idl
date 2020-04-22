@@ -1,11 +1,5 @@
-
-
-
 #ifndef __controller_msgs__msg__HumanoidBehaviorTypePacket__idl__
 #define __controller_msgs__msg__HumanoidBehaviorTypePacket__idl__
-
-
-
 
 module controller_msgs
 {
@@ -13,244 +7,107 @@ module controller_msgs
   {
     module dds
     {
-
-   
-   const octet STOP =
-
+      const octet STOP =
       0;
 
-
-
-   
-   const octet TEST =
-
+      const octet TEST =
       1;
 
-
-
-   
-   const octet WALK_TO_LOCATION =
-
+      const octet WALK_TO_LOCATION =
       2;
 
-
-
-   
-   const octet WALK_TO_GOAL =
-
+      const octet WALK_TO_GOAL =
       3;
 
-
-
-   
-   const octet DIAGNOSTIC =
-
+      const octet DIAGNOSTIC =
       4;
 
-
-
-   
-   const octet PICK_UP_BALL =
-
+      const octet PICK_UP_BALL =
       5;
 
-
-
-   
-   const octet RESET_ROBOT =
-
+      const octet RESET_ROBOT =
       6;
 
-
-
-   
-   const octet TURN_VALVE =
-
+      const octet TURN_VALVE =
       7;
 
-
-
-   
-   const octet WALK_THROUGH_DOOR =
-
+      const octet WALK_THROUGH_DOOR =
       8;
 
-
-
-   
-   const octet EXAMPLE_BEHAVIOR =
-
+      const octet EXAMPLE_BEHAVIOR =
       9;
 
-
-
-   
-   const octet BALL_DETECTION =
-
+      const octet BALL_DETECTION =
       10;
 
-
-
-   
-   const octet TEST_PIPELINE =
-
+      const octet TEST_PIPELINE =
       11;
 
-
-
-   
-   const octet TEST_STATEMACHINE =
-
+      const octet TEST_STATEMACHINE =
       12;
 
-
-
-   
-   const octet FOLLOW_FIDUCIAL_50 =
-
+      const octet FOLLOW_FIDUCIAL_50 =
       13;
 
-
-
-   
-   const octet LOCATE_FIDUCIAL =
-
+      const octet LOCATE_FIDUCIAL =
       14;
 
-
-
-   
-   const octet WALK_OVER_TERRAIN =
-
+      const octet WALK_OVER_TERRAIN =
       15;
 
-
-
-   
-   const octet FOLLOW_VALVE =
-
+      const octet FOLLOW_VALVE =
       16;
 
-
-
-   
-   const octet LOCATE_VALVE =
-
+      const octet LOCATE_VALVE =
       17;
 
-
-
-   
-   const octet WALK_OVER_TERRAIN_TO_VALVE =
-
+      const octet WALK_OVER_TERRAIN_TO_VALVE =
       18;
 
-
-
-   
-   const octet DEBUG_PARTIAL_FOOTHOLDS =
-
+      const octet DEBUG_PARTIAL_FOOTHOLDS =
       19;
 
-
-
-   
-   const octet WALK_TO_GOAL_ANYTIME_PLANNER =
-
+      const octet WALK_TO_GOAL_ANYTIME_PLANNER =
       20;
 
-
-
-   
-   const octet TEST_ICP_OPTIMIZATION =
-
+      const octet TEST_ICP_OPTIMIZATION =
       21;
 
-
-
-   
-   const octet TEST_GC_GENERATION =
-
+      const octet TEST_GC_GENERATION =
       22;
 
-
-
-   
-   const octet TEST_SMOOTH_ICP_PLANNER =
-
+      const octet TEST_SMOOTH_ICP_PLANNER =
       23;
 
-
-
-   
-   const octet PUSH_AND_WALK =
-
+      const octet PUSH_AND_WALK =
       24;
 
-
-
-   
-   const octet COLLABORATIVE_TASK =
-
+      const octet COLLABORATIVE_TASK =
       25;
 
-
-
-   
-   const octet FIRE_FIGHTING =
-
+      const octet FIRE_FIGHTING =
       26;
 
-
-
-   
-   const octet CUTTING_WALL =
-
+      const octet CUTTING_WALL =
       27;
 
-
-
-   
-   const octet REPEATEDLY_WALK_FOOTSTEP_LIST =
-
+      const octet REPEATEDLY_WALK_FOOTSTEP_LIST =
       28;
 
 
-
-   
-   /**
-   
-    * This message is part of the IHMC humanoid behavior module.
-   
-    */
-   
-   @TypeCode(type="controller_msgs::msg::dds_::HumanoidBehaviorTypePacket_")
+      /**
+       * This message is part of the IHMC humanoid behavior module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::HumanoidBehaviorTypePacket_")
       struct HumanoidBehaviorTypePacket
       {
-
-
-    
-    /**
-    
-     * Unique ID used to identify this message, should preferably be consecutively increasing.
-    
-     */
-    
-
-
-    unsigned long sequence_id;
-
-
-    
-
-    @defaultValue(value=255)
-
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
         octet humanoid_behavior_type;
-
-
-
       };
-
     };
   };
 };

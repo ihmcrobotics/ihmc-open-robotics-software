@@ -7,14 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC whole-body controller API.
-   
- * This message commands the controller to move the hand in both taskspace and jointspace
-   
- * to the desired orientation and joint angles while going through the specified trajectory points.
-   
- */
+       * This message is part of the IHMC whole-body controller API.
+       * This message commands the controller to move the hand in both taskspace and jointspace
+       * to the desired orientation and joint angles while going through the specified trajectory points.
+       */
 public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandHybridJointspaceTaskspaceTrajectoryMessage> implements Settable<HandHybridJointspaceTaskspaceTrajectoryMessage>, EpsilonComparable<HandHybridJointspaceTaskspaceTrajectoryMessage>
 {
 
@@ -23,33 +19,24 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    /**
-       
-    * Specifies the side of the robot that will execute the trajectory.
-       
-    */
+            * Specifies the side of the robot that will execute the trajectory.
+            */
    public byte robot_side_ = (byte) 255;
 
    /**
-       
-    * The taskspace trajectory information.
-       
-    */
+            * The taskspace trajectory information.
+            */
    public controller_msgs.msg.dds.SE3TrajectoryMessage taskspace_trajectory_message_;
 
    /**
-       
-    * The jointspace trajectory information.
-       
-    * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
-       
-    */
+            * The jointspace trajectory information.
+            * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
+            */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_message_;
 
    public HandHybridJointspaceTaskspaceTrajectoryMessage()
@@ -85,19 +72,15 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
 
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -105,19 +88,15 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
 
 
    /**
-       
-    * Specifies the side of the robot that will execute the trajectory.
-       
-    */
+            * Specifies the side of the robot that will execute the trajectory.
+            */
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
    }
    /**
-       
-    * Specifies the side of the robot that will execute the trajectory.
-       
-    */
+            * Specifies the side of the robot that will execute the trajectory.
+            */
    public byte getRobotSide()
    {
       return robot_side_;
@@ -126,10 +105,8 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
 
 
    /**
-       
-    * The taskspace trajectory information.
-       
-    */
+            * The taskspace trajectory information.
+            */
    public controller_msgs.msg.dds.SE3TrajectoryMessage getTaskspaceTrajectoryMessage()
    {
       return taskspace_trajectory_message_;
@@ -138,12 +115,9 @@ public class HandHybridJointspaceTaskspaceTrajectoryMessage extends Packet<HandH
 
 
    /**
-       
-    * The jointspace trajectory information.
-       
-    * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
-       
-    */
+            * The jointspace trajectory information.
+            * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
+            */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage getJointspaceTrajectoryMessage()
    {
       return jointspace_trajectory_message_;
