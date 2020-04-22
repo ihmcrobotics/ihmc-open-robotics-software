@@ -102,7 +102,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
 
    public void updateCollidableBoundingBoxes()
    {
-      collidables.forEach(Collidable::updateBoundingBox);
+      collidables.forEach(collidable -> collidable.updateBoundingBox(multiBodySystem.getInertialFrame()));
    }
 
    public void updateFrames()
@@ -149,7 +149,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
    {
       return environmentContactConstraintCalculatorPool.add();
    }
-   
+
    public SingleContactImpulseCalculator getOrCreateSelfContactConstraintCalculator()
    {
       return selfContactConstraintCalculatorPool.add();
