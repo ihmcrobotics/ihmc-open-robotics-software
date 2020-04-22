@@ -262,9 +262,9 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private final FrameVector3D collisionPositionTerm = new FrameVector3D();
 
    @Override
-   public void updateImpulse(double dt, double alpha)
+   public void updateImpulse(double dt, double alpha, boolean ignoreOtherImpulses)
    {
-      if (externalRigidBodyTwistModifier != null)
+      if (!ignoreOtherImpulses && externalRigidBodyTwistModifier != null)
       {
          // Compute the change in twist due to other impulses.
          velocityDueToOtherImpulseA.setIncludingFrame(externalRigidBodyTwistModifier.getLinearVelocityOfBodyFixedPoint(contactingBodyA, pointA));
@@ -278,7 +278,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
       if (rootB != null)
       {
-         if (externalRigidBodyTwistModifier != null)
+         if (!ignoreOtherImpulses && externalRigidBodyTwistModifier != null)
          {
             // Compute the change in twist due to other impulses.
             velocityDueToOtherImpulseB.setIncludingFrame(externalRigidBodyTwistModifier.getLinearVelocityOfBodyFixedPoint(contactingBodyB, pointB));
