@@ -657,16 +657,16 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    /** {@inheritDoc} */
    @Override
-   public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly perfectCoP,
+   public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly finalDesiredICP, FramePoint2DReadOnly perfectCoP,
                        FramePoint2DReadOnly currentICP, FrameVector2DReadOnly currentICPVelocity, double omega0)
    {
       desiredCMPOffsetToThrowAway.setToZero(worldFrame);
-      compute(currentTime, desiredICP, desiredICPVelocity, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentICPVelocity, omega0);
+      compute(currentTime, desiredICP, desiredICPVelocity, finalDesiredICP, perfectCoP, desiredCMPOffsetToThrowAway, currentICP, currentICPVelocity, omega0);
    }
 
    /** {@inheritDoc} */
    @Override
-   public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly perfectCoP,
+   public void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly finalDesiredICP, FramePoint2DReadOnly perfectCoP,
                        FrameVector2DReadOnly perfectCMPOffset, FramePoint2DReadOnly currentICP, FrameVector2DReadOnly currentICPVelocity, double omega0)
    {
       controllerTimer.startMeasurement();
@@ -702,6 +702,8 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
       if (timeRemainingInState.getDoubleValue() >= 0.0)
          icpAtEndOfState.set(currentICP);
+      else
+         icpAtEndOfState.set(finalDesiredICP);
 
       icpOverrun.sub(currentICP, icpAtEndOfState);
 
