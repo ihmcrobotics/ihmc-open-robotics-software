@@ -7,12 +7,9 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC whole-body controller API.
-   
- * This message commands the controller to move an arm in jointspace to the desired joint angles while going through the specified trajectory points.
-   
- */
+       * This message is part of the IHMC whole-body controller API.
+       * This message commands the controller to move an arm in jointspace to the desired joint angles while going through the specified trajectory points.
+       */
 public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implements Settable<ArmTrajectoryMessage>, EpsilonComparable<ArmTrajectoryMessage>
 {
 
@@ -21,26 +18,19 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    /**
-       
-    * Specifies the side of the robot that will execute the trajectory.
-       
-    */
+            * Specifies the side of the robot that will execute the trajectory.
+            */
    public byte robot_side_ = (byte) 255;
 
    /**
-       
-    * Trajectories for each joint.
-       
-    * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
-       
-    */
+            * Trajectories for each joint.
+            * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
+            */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_;
 
    public ArmTrajectoryMessage()
@@ -72,19 +62,15 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
 
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -92,19 +78,15 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
 
 
    /**
-       
-    * Specifies the side of the robot that will execute the trajectory.
-       
-    */
+            * Specifies the side of the robot that will execute the trajectory.
+            */
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
    }
    /**
-       
-    * Specifies the side of the robot that will execute the trajectory.
-       
-    */
+            * Specifies the side of the robot that will execute the trajectory.
+            */
    public byte getRobotSide()
    {
       return robot_side_;
@@ -113,12 +95,9 @@ public class ArmTrajectoryMessage extends Packet<ArmTrajectoryMessage> implement
 
 
    /**
-       
-    * Trajectories for each joint.
-       
-    * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
-       
-    */
+            * Trajectories for each joint.
+            * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
+            */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage getJointspaceTrajectory()
    {
       return jointspace_trajectory_;
