@@ -2,6 +2,7 @@ package us.ihmc.robotics.physics;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.collision.EuclidFrameShape3DCollisionResult;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
 
 public class CollisionResult
