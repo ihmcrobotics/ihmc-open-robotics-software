@@ -147,6 +147,9 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       drcSimulationTestHelper.createSimulation("DRCWalkingOntoMediumPlatformToesTouchingTest");
 
       footstepPlannerParameters.setMaximumStepZ(height + 0.05);
+      footstepPlannerParameters.setMaximumStepZWhenForwardAndDown(height - 0.05);
+      footstepPlannerParameters.setMaximumStepXWhenForwardAndDown(0.22);
+      footstepPlannerParameters.setIdealFootstepLength(0.28);
       footstepPlanningModule.getVisibilityGraphParameters().setTooHighToStepDistance(height + 0.05);
 
       ThreadTools.sleep(1000);
@@ -433,7 +436,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       FootstepPlannerRequest request = new FootstepPlannerRequest();
       request.setFromPacket(requestPacket);
 
-      footstepPlanningModule.getFootstepPlannerParameters().set(getRobotModel().getFootstepPlannerParameters());
+      footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
       footstepPlanningModule.getFootstepPlannerParameters().setMinimumFootholdPercent(0.99);
       footstepPlanningModule.getFootstepPlannerParameters().setMaximumStepZ(0.32);
       FootstepPlannerOutput plannerOutput = footstepPlanningModule.handleRequest(request);
