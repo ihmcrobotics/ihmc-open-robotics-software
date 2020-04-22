@@ -1,6 +1,7 @@
 package us.ihmc.robotics.physics;
 
-import us.ihmc.euclid.geometry.BoundingBox3D;
+import us.ihmc.euclid.referenceFrame.FrameBoundingBox3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
@@ -43,7 +44,7 @@ public class Collidable
    /**
     * Bounding box for the shape in root frame.
     */
-   private final BoundingBox3D boundingBox = new BoundingBox3D();
+   private final FrameBoundingBox3D boundingBox = new FrameBoundingBox3D();
    /**
     * The root body that is the ancestor of {@code rigidBody}. This is useful to identify the
     * multi-body system this collidable belongs to.
@@ -84,9 +85,9 @@ public class Collidable
       rootBody = rigidBody == null ? null : MultiBodySystemTools.getRootBody(rigidBody);
    }
 
-   public void updateBoundingBox()
+   public void updateBoundingBox(ReferenceFrame boundingBoxFrame)
    {
-      EuclidFrameShapeTools.boundingBox3D(shape.getReferenceFrame(), shape, boundingBox);
+      shape.getBoundingBox(boundingBoxFrame, boundingBox);
    }
 
    /**
