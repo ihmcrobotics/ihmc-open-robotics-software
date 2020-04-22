@@ -113,7 +113,7 @@ public interface ICPOptimizationControllerInterface
     *                           if the robot is "stuck". Can be noisy, so be careful. Not Modified.
     * @param omega0 current natural frequency of the inverted pendulum.
     */
-   void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity,
+   void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly finalDesiredICP,
                 FramePoint2DReadOnly desiredCoP, FramePoint2DReadOnly currentICP, FrameVector2DReadOnly currentICPVelocity, double omega0);
 
    /**
@@ -131,7 +131,7 @@ public interface ICPOptimizationControllerInterface
     *                           if the robot is "stuck". Can be noisy, so be careful. Not Modified.
     * @param omega0 current natural frequency of the inverted pendulum.
     */
-   void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity,
+   void compute(double currentTime, FramePoint2DReadOnly desiredICP, FrameVector2DReadOnly desiredICPVelocity, FramePoint2DReadOnly finalDesiredICP,
                 FramePoint2DReadOnly desiredCoP, FrameVector2DReadOnly desiredCMPOffset,
                 FramePoint2DReadOnly currentICP, FrameVector2DReadOnly currentICPVelocity, double omega0);
 

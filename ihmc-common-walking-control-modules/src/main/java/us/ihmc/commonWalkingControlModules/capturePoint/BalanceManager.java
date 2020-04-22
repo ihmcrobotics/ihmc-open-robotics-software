@@ -431,6 +431,7 @@ public class BalanceManager
       linearMomentumRateControlModuleInput.setUseMomentumRecoveryMode(useMomentumRecoveryModeForBalance.getBooleanValue());
       linearMomentumRateControlModuleInput.setDesiredCapturePoint(desiredCapturePoint2d);
       linearMomentumRateControlModuleInput.setDesiredCapturePointVelocity(desiredCapturePointVelocity2d);
+      linearMomentumRateControlModuleInput.setDesiredICPAtEndOfState(yoFinalDesiredICP);
       linearMomentumRateControlModuleInput.setPerfectCMP(yoPerfectCMP);
       linearMomentumRateControlModuleInput.setPerfectCoP(yoPerfectCoP);
       linearMomentumRateControlModuleInput.setSupportSide(supportSide);
