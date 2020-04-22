@@ -5,7 +5,13 @@ import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOL
 import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
 
 import java.awt.Color;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -25,10 +31,18 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.*;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -37,6 +51,7 @@ import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.collision.EuclidFrameShape3DCollisionResult;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
@@ -60,12 +75,15 @@ import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gain
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollisionResult;
-import us.ihmc.robotics.physics.EuclidFrameShape3DCollisionResult;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * {@code KinematicsToolboxController} is used as a whole-body inverse kinematics solver.

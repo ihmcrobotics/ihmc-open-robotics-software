@@ -8,6 +8,7 @@ import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.collision.EuclidFrameShape3DCollisionResult;
 
 public class SimpleCollisionDetection
 {
@@ -132,10 +133,10 @@ public class SimpleCollisionDetection
 
       collisionAxis.changeFrame(rootFrame);
 
-      pointOnA.changeFrame(collisionData.getFrameA());
-      normalOnA.changeFrame(collisionData.getFrameA());
-      pointOnB.changeFrame(collisionData.getFrameB());
-      normalOnB.changeFrame(collisionData.getFrameB());
+      pointOnA.changeFrame(collisionData.getShapeA().getReferenceFrame());
+      normalOnA.changeFrame(collisionData.getShapeA().getReferenceFrame());
+      pointOnB.changeFrame(collisionData.getShapeB().getReferenceFrame());
+      normalOnB.changeFrame(collisionData.getShapeB().getReferenceFrame());
 
       return true;
    }

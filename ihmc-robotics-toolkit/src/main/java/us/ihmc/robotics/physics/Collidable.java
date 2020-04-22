@@ -142,11 +142,7 @@ public class Collidable
     */
    public void evaluateCollision(Collidable other, CollisionResult resultToPack)
    {
-      EuclidFrameShapeCollisionTools.evaluateShape3DShape3DCollision(shape,
-                                                                     shape.getReferenceFrame(),
-                                                                     other.shape,
-                                                                     other.shape.getReferenceFrame(),
-                                                                     resultToPack.getCollisionData());
+      PhysicsEngineTools.evaluateShape3DShape3DCollision(shape, other.shape, resultToPack.getCollisionData());
       resultToPack.setCollidableA(this);
       resultToPack.setCollidableB(other);
    }

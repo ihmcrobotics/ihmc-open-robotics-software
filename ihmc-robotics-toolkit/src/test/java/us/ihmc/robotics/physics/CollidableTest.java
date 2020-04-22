@@ -2,11 +2,12 @@ package us.ihmc.robotics.physics;
 
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.collision.EuclidFrameShape3DCollisionResult;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
 class CollidableTest
@@ -32,25 +33,26 @@ class CollidableTest
                                                                                                                          0.15528951964594329));
       frameA.update();
 
-      Box3D shapeA = new Box3D(0.3, 0.3, 0.3);
-      Box3D shapeB = new Box3D(new RigidBodyTransform(0.9659258262890683,
-                                                      0.0,
-                                                      0.25881904510252074,
-                                                      -0.06470476127563018,
-                                                      0.0,
-                                                      1.0,
-                                                      0.0,
-                                                      0.0,
-                                                      -0.25881904510252074,
-                                                      0.0,
-                                                      0.9659258262890683,
-                                                      -0.24148145657226708),
-                               10000.000,
-                               10000.000,
-                               0.500);
+      FrameBox3D shapeA = new FrameBox3D(frameA, 0.3, 0.3, 0.3);
+      FrameBox3D shapeB = new FrameBox3D(worldFrame,
+                                         new RigidBodyTransform(0.9659258262890683,
+                                                                0.0,
+                                                                0.25881904510252074,
+                                                                -0.06470476127563018,
+                                                                0.0,
+                                                                1.0,
+                                                                0.0,
+                                                                0.0,
+                                                                -0.25881904510252074,
+                                                                0.0,
+                                                                0.9659258262890683,
+                                                                -0.24148145657226708),
+                                         10000.000,
+                                         10000.000,
+                                         0.500);
 
       EuclidFrameShape3DCollisionResult collisionData = new EuclidFrameShape3DCollisionResult();
-      EuclidFrameShapeCollisionTools.evaluateShape3DShape3DCollision(shapeA, frameA, shapeB, worldFrame, collisionData);
+      PhysicsEngineTools.evaluateShape3DShape3DCollision(shapeA, shapeB, collisionData);
 
       FramePoint3D pointOnA = collisionData.getPointOnA();
       FramePoint3D pointOnB = collisionData.getPointOnB();
