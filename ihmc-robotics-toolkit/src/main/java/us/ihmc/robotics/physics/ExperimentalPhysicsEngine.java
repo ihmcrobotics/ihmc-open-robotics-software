@@ -3,6 +3,7 @@ package us.ihmc.robotics.physics;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import gnu.trove.list.linked.TDoubleLinkedList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -44,7 +45,6 @@ public class ExperimentalPhysicsEngine
    private final YoVariableRegistry physicsEngineRegistry = new YoVariableRegistry("PhysicsPlugins");
    private final YoGraphicsListRegistry physicsEngineGraphicsRegistry = new YoGraphicsListRegistry();
    private final List<PhysicsEngineRobotData> robotList = new ArrayList<>();
-   private final List<MultiBodySystemStateReader> physicsOutputReaders = new ArrayList<>();
 
    private final List<Collidable> environmentCollidables = new ArrayList<>();
 
@@ -77,20 +77,22 @@ public class ExperimentalPhysicsEngine
                                                                       physicsEngineGraphicsRegistry);
    }
 
+   public void addEnvironmentCollidables(Collection<? extends Collidable> collidables)
+   {
+      environmentCollidables.addAll(collidables);
+      collidables.forEach(environmentCollidableVisualizers::addCollidable);
+   }
+
    public void addRobot(String robotName, RigidBodyBasics rootBody, MultiBodySystemStateWriter controllerOutputWriter,
                         MultiBodySystemStateWriter robotInitialStateWriter, RobotCollisionModel robotCollisionModel,
                         MultiBodySystemStateReader physicsOutputReader)
    {
-      PhysicsEngineRobotData robot = new PhysicsEngineRobotData(robotName,
-                                                                rootBody,
-                                                                robotInitialStateWriter,
-                                                                controllerOutputWriter,
-                                                                robotCollisionModel,
-                                                                physicsEngineGraphicsRegistry);
+      PhysicsEngineRobotData robot = new PhysicsEngineRobotData(robotName, rootBody, robotCollisionModel, physicsEngineGraphicsRegistry);
+      robot.setRobotInitialStateWriter(robotInitialStateWriter);
+      robot.setControllerOutputWriter(controllerOutputWriter);
+      robot.addPhysicsOutputReader(physicsOutputReader);
       multiRobotPhysicsEnginePlugin.addRobot(robot);
       integrationMethod.addMultiBodySystem(robot.getMultiBodySystem());
-      physicsOutputReader.setMultiBodySystem(robot.getMultiBodySystem());
-      physicsOutputReaders.add(physicsOutputReader);
       AppearanceDefinition robotCollidableAppearance = YoAppearance.DarkGreen();
       robotCollidableAppearance.setTransparency(0.5);
       CollidableListVisualizer collidableVisualizers = new CollidableListVisualizer(collidableVisualizerGroupName,
@@ -101,6 +103,12 @@ public class ExperimentalPhysicsEngine
       robotCollidableVisualizers.add(collidableVisualizers);
       physicsEngineRegistry.addChild(robot.getRobotRegistry());
       robotList.add(robot);
+   }
+
+   public void addRobotPhysicsOutputReader(String robotName, MultiBodySystemStateReader physicsOutputReader)
+   {
+      PhysicsEngineRobotData physicsEngineRobotData = robotList.stream().filter(robot -> robot.getRobotName().equals(robotName)).findFirst().get();
+      physicsEngineRobotData.addPhysicsOutputReader(physicsOutputReader);
    }
 
    public void addExternalWrenchReader(ExternalWrenchReader externalWrenchReader)
@@ -127,7 +135,7 @@ public class ExperimentalPhysicsEngine
       {
          PhysicsEngineRobotData robot = robotList.get(i);
          robot.initialize();
-         physicsOutputReaders.get(i).read();
+         robot.notifyPhysicsOutputReaders();
       }
       initialize = false;
       return true;
@@ -159,7 +167,7 @@ public class ExperimentalPhysicsEngine
       {
          PhysicsEngineRobotData robot = robotList.get(i);
          robot.updateFrames();
-         physicsOutputReaders.get(i).read();
+         robot.notifyPhysicsOutputReaders();
       }
 
       time.add(dt);
@@ -180,10 +188,9 @@ public class ExperimentalPhysicsEngine
       }
    }
 
-   public void addEnvironmentCollidables(Collection<? extends Collidable> collidables)
+   public List<String> getRobotNames()
    {
-      environmentCollidables.addAll(collidables);
-      collidables.forEach(environmentCollidableVisualizers::addCollidable);
+      return robotList.stream().map(PhysicsEngineRobotData::getRobotName).collect(Collectors.toList());
    }
 
    public YoVariableRegistry getPhysicsEngineRegistry()

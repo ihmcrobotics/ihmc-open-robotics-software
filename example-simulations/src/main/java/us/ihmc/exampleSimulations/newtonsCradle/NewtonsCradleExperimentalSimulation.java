@@ -124,6 +124,7 @@ public class NewtonsCradleExperimentalSimulation
       experimentalSimulation.setGravity(new Vector3D(0.0, 0.0, -9.81));
       experimentalSimulation.getPhysicsEngine().setGlobalContactParameters(contactParameters);
       experimentalSimulation.addRobot(robot.getName(), rootBody, robotCollisionModel, robotInitialStateWriter);
+      experimentalSimulation.addSimulationEnergyStatistics();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(experimentalSimulation,
                                                                     SupportedGraphics3DAdapter.instantiateDefaultGraphicsAdapter(true),
