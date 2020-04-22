@@ -105,6 +105,14 @@ public class ValkyrieEndToEndHandTrajectoryMessageTest extends EndToEndHandTraje
    }
 
    @Tag("controller-api-slow-3")
+   @Test
+   @Override
+   public void testForceExecutionWithSingleTrajectoryPoint() throws Exception
+   {
+      super.testForceExecutionWithSingleTrajectoryPoint();
+   }
+
+   @Tag("controller-api-slow-3")
    @Override
    @Test
    public void testStopAllTrajectory() throws Exception
