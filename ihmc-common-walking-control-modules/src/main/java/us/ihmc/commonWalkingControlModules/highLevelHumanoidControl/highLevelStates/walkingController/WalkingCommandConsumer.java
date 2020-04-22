@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSt
 
 import java.util.List;
 
-import controller_msgs.msg.dds.HandWrenchTrajectoryMessage;
 import controller_msgs.msg.dds.ManipulationAbortedStatus;
 import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
@@ -17,7 +16,42 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmDesiredAccelerationsCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ArmTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AutomaticManipulationAbortCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestHybridJointspaceTaskspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.ChestTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.DesiredAccelerationsCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootLoadBearingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.GoHomeCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandHybridJointspaceTaskspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandLoadBearingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HandWrenchTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadHybridJointspaceTaskspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.HeadTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.JointspaceTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.LoadBearingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckDesiredAccelerationsCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.NeckTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisOrientationTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PrepareForLocomotionCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SE3TrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SO3TrajectoryControllerCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineDesiredAccelerationsCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.SpineTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.StopAllTrajectoryCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.WrenchTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -251,15 +285,15 @@ public class WalkingCommandConsumer
    {
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PelvisOrientationTrajectoryCommand.class))
       {
-         PelvisOrientationTrajectoryCommand newestCommand = commandConsumerWithDelayBuffers.pollNewestCommand(PelvisOrientationTrajectoryCommand.class);
-         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
-            pelvisOrientationManager.handlePelvisOrientationTrajectoryCommands(newestCommand);
+         PelvisOrientationTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(PelvisOrientationTrajectoryCommand.class);
+         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand() || command.getForceExecution())
+            pelvisOrientationManager.handlePelvisOrientationTrajectoryCommands(command);
       }
 
       if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PelvisTrajectoryCommand.class))
       {
          PelvisTrajectoryCommand command = commandConsumerWithDelayBuffers.pollNewestCommand(PelvisTrajectoryCommand.class);
-         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand())
+         if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumePelvisTrajectoryCommand() || command.getForceExecution())
          {
             if (!pelvisOrientationManager.handlePelvisTrajectoryCommand(command))
                return;
@@ -287,66 +321,71 @@ public class WalkingCommandConsumer
       List<ArmDesiredAccelerationsCommand> armDesiredAccelerationCommands = commandConsumerWithDelayBuffers.pollNewCommands(ArmDesiredAccelerationsCommand.class);
       List<HandHybridJointspaceTaskspaceTrajectoryCommand> handHybridCommands = commandConsumerWithDelayBuffers.pollNewCommands(HandHybridJointspaceTaskspaceTrajectoryCommand.class);
 
-      if (allowMotionRegardlessOfState || currentState.isStateSafeToConsumeManipulationCommands())
+      boolean allowCommand = allowMotionRegardlessOfState || currentState.isStateSafeToConsumeManipulationCommands();
+
+      for (int i = 0; i < handTrajectoryCommands.size(); i++)
       {
-         for (int i = 0; i < handTrajectoryCommands.size(); i++)
+         HandTrajectoryCommand command = handTrajectoryCommands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         RigidBodyControlManager handManager = handManagers.get(robotSide);
+         if (handManager != null && (allowCommand || command.getForceExecution()))
          {
-            HandTrajectoryCommand command = handTrajectoryCommands.get(i);
-            RobotSide robotSide = command.getRobotSide();
-            if (handManagers.get(robotSide) != null)
-            {
-               SE3TrajectoryControllerCommand se3Trajectory = command.getSE3Trajectory();
-               se3Trajectory.setSequenceId(command.getSequenceId());
-               handManagers.get(robotSide).handleTaskspaceTrajectoryCommand(se3Trajectory);
-            }
+            SE3TrajectoryControllerCommand se3Trajectory = command.getSE3Trajectory();
+            se3Trajectory.setSequenceId(command.getSequenceId());
+            handManager.handleTaskspaceTrajectoryCommand(se3Trajectory);
          }
-         for (int i = 0; i < handWrenchTrajectoryCommands.size(); i++)
-         {
-            HandWrenchTrajectoryCommand command = handWrenchTrajectoryCommands.get(i);
-            RobotSide robotSide = command.getRobotSide();
-            if (handManagers.get(robotSide) != null)
-            {
-               WrenchTrajectoryControllerCommand wrenchTrajectory = command.getWrenchTrajectory();
-               wrenchTrajectory.setSequenceId(command.getSequenceId());
-               handManagers.get(robotSide).handleWrenchTrajectoryCommand(wrenchTrajectory);
-            }
-         }
-         for (int i = 0; i < armTrajectoryCommands.size(); i++)
-         {
-            ArmTrajectoryCommand command = armTrajectoryCommands.get(i);
-            RobotSide robotSide = command.getRobotSide();
-            if (handManagers.get(robotSide) != null)
-            {
-               JointspaceTrajectoryCommand jointspaceTrajectory = command.getJointspaceTrajectory();
-               jointspaceTrajectory.setSequenceId(command.getSequenceId());
-               handManagers.get(robotSide).handleJointspaceTrajectoryCommand(jointspaceTrajectory);
-            }
-         }
+      }
 
-         for (int i = 0; i < handHybridCommands.size(); i++)
+      for (int i = 0; i < handWrenchTrajectoryCommands.size(); i++)
+      {
+         HandWrenchTrajectoryCommand command = handWrenchTrajectoryCommands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         RigidBodyControlManager handManager = handManagers.get(robotSide);
+         if (handManager != null && (allowCommand || command.getForceExecution()))
          {
-            HandHybridJointspaceTaskspaceTrajectoryCommand command = handHybridCommands.get(i);
-            RobotSide robotSide = command.getRobotSide();
-            if (handManagers.get(robotSide) != null)
-            {
-               SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = command.getTaskspaceTrajectoryCommand();
-               JointspaceTrajectoryCommand jointspaceTrajectoryCommand = command.getJointspaceTrajectoryCommand();
-               taskspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
-               jointspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
-               handManagers.get(robotSide).handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
-            }
+            WrenchTrajectoryControllerCommand wrenchTrajectory = command.getWrenchTrajectory();
+            wrenchTrajectory.setSequenceId(command.getSequenceId());
+            handManager.handleWrenchTrajectoryCommand(wrenchTrajectory);
          }
-
-         for (int i = 0; i < armDesiredAccelerationCommands.size(); i++)
+      }
+      for (int i = 0; i < armTrajectoryCommands.size(); i++)
+      {
+         ArmTrajectoryCommand command = armTrajectoryCommands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         RigidBodyControlManager handManager = handManagers.get(robotSide);
+         if (handManager != null && (allowCommand || command.getForceExecution()))
          {
-            ArmDesiredAccelerationsCommand command = armDesiredAccelerationCommands.get(i);
-            RobotSide robotSide = command.getRobotSide();
-            if (handManagers.get(robotSide) != null)
-            {
-               DesiredAccelerationsCommand desiredAccelerations = command.getDesiredAccelerations();
-               desiredAccelerations.setSequenceId(command.getSequenceId());
-               handManagers.get(robotSide).handleDesiredAccelerationsCommand(desiredAccelerations);
-            }
+            JointspaceTrajectoryCommand jointspaceTrajectory = command.getJointspaceTrajectory();
+            jointspaceTrajectory.setSequenceId(command.getSequenceId());
+            handManager.handleJointspaceTrajectoryCommand(jointspaceTrajectory);
+         }
+      }
+
+      for (int i = 0; i < handHybridCommands.size(); i++)
+      {
+         HandHybridJointspaceTaskspaceTrajectoryCommand command = handHybridCommands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         RigidBodyControlManager handManager = handManagers.get(robotSide);
+         if (handManager != null && (allowCommand || command.getForceExecution()))
+         {
+            SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = command.getTaskspaceTrajectoryCommand();
+            JointspaceTrajectoryCommand jointspaceTrajectoryCommand = command.getJointspaceTrajectoryCommand();
+            taskspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
+            jointspaceTrajectoryCommand.setSequenceId(command.getSequenceId());
+            handManager.handleHybridTrajectoryCommand(taskspaceTrajectoryCommand, jointspaceTrajectoryCommand);
+         }
+      }
+
+      for (int i = 0; i < armDesiredAccelerationCommands.size(); i++)
+      {
+         ArmDesiredAccelerationsCommand command = armDesiredAccelerationCommands.get(i);
+         RobotSide robotSide = command.getRobotSide();
+         RigidBodyControlManager handManager = handManagers.get(robotSide);
+         if (handManager != null && allowCommand)
+         {
+            DesiredAccelerationsCommand desiredAccelerations = command.getDesiredAccelerations();
+            desiredAccelerations.setSequenceId(command.getSequenceId());
+            handManager.handleDesiredAccelerationsCommand(desiredAccelerations);
          }
       }
    }
