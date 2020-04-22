@@ -161,7 +161,7 @@ public class MultiContactImpulseCalculator
             for (int i = 0; i < allCalculators.size(); i++)
             { // Request every calculator to update.
                ImpulseBasedConstraintCalculator calculator = allCalculators.get(i);
-               calculator.updateImpulse(dt, alpha);
+               calculator.updateImpulse(dt, alpha, false);
                double updateMagnitude = calculator.getVelocityUpdate();
                if (verbose)
                {
@@ -207,9 +207,20 @@ public class MultiContactImpulseCalculator
             }
          }
 
-         for (int i = 0; i < allCalculators.size(); i++)
+         if (iterationCounter > maxNumberOfIterations)
+         { // The solver failed.
+            for (ImpulseBasedConstraintCalculator calculator : allCalculators)
+            { // Solving the contacts independently.
+               calculator.computeImpulse(dt);
+               calculator.finalizeImpulse();
+            }
+         }
+         else
          {
-            allCalculators.get(i).finalizeImpulse();
+            for (ImpulseBasedConstraintCalculator calculator : allCalculators)
+            {
+               calculator.finalizeImpulse();
+            }
          }
 
          return maxUpdateMagnitude;

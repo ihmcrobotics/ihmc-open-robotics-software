@@ -199,7 +199,7 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
    }
 
    @Override
-   public void updateImpulse(double dt, double alpha)
+   public void updateImpulse(double dt, double alpha, boolean ignoreOtherImpulses)
    {
       if (jointsAtLimit.isEmpty())
       {
