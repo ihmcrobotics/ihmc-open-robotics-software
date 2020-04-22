@@ -938,7 +938,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       isInitialTransfer.set(false);
       isFinalTransfer.set(false);
       isHoldingPosition.set(false);
-      shouldClampDuration.set(false);
+      shouldClampDuration.set(upcomingFootstepsData.get(0).getFootstep().getIsAdjustable());
 
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
