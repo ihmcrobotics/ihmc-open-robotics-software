@@ -6,6 +6,7 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -450,5 +451,4 @@ public class PolygonWiggler
          b.set(exteriorVertexIndex, -(deltaInside + additionalDistanceInside) + firstPoint.getY() * (tempVector.getX()) - firstPoint.getX() * (tempVector.getY()));
       }
    }
-
 }
