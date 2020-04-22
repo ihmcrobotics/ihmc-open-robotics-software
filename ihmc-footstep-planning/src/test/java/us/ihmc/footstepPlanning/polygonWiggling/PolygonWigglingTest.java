@@ -1929,7 +1929,7 @@ public class PolygonWigglingTest
       yoPlanePolygon.set(polygon);
    }
 
-   private static void showPlotterAndSleep(ArtifactList artifacts)
+   static void showPlotterAndSleep(ArtifactList artifacts)
    {
       Plotter plotter = new Plotter();
       plotter.setViewRange(2.0);
