@@ -7,10 +7,8 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * Message notifying if the IHMC whole-body controller has crashed unexpectedly.
-   
- */
+       * Message notifying if the IHMC whole-body controller has crashed unexpectedly.
+       */
 public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNotificationPacket> implements Settable<ControllerCrashNotificationPacket>, EpsilonComparable<ControllerCrashNotificationPacket>
 {
 
@@ -27,10 +25,8 @@ public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNot
    public static final byte ESTIMATOR_RUN = (byte) 5;
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    public byte controller_crash_location_ = (byte) 255;
@@ -82,19 +78,15 @@ public class ControllerCrashNotificationPacket extends Packet<ControllerCrashNot
 
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
