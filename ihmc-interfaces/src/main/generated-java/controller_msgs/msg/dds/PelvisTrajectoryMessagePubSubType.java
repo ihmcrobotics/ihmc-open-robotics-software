@@ -50,6 +50,9 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
       current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -78,6 +81,10 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
 
 
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+
       current_alignment += controller_msgs.msg.dds.SE3TrajectoryMessagePubSubType.getCdrSerializedSize(data.getSe3Trajectory(), current_alignment);
 
 
@@ -88,6 +95,9 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
 
       cdr.write_type_4(data.getSequenceId());
+
+
+      cdr.write_type_7(data.getForceExecution());
 
 
       cdr.write_type_7(data.getEnableUserPelvisControl());
@@ -103,6 +113,9 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
 
       data.setSequenceId(cdr.read_type_4());
+      	
+
+      data.setForceExecution(cdr.read_type_7());
       	
 
       data.setEnableUserPelvisControl(cdr.read_type_7());
@@ -121,6 +134,8 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
 
       ser.write_type_4("sequence_id", data.getSequenceId());
 
+      ser.write_type_7("force_execution", data.getForceExecution());
+
       ser.write_type_7("enable_user_pelvis_control", data.getEnableUserPelvisControl());
 
       ser.write_type_7("enable_user_pelvis_control_during_walking", data.getEnableUserPelvisControlDuringWalking());
@@ -134,6 +149,8 @@ public class PelvisTrajectoryMessagePubSubType implements us.ihmc.pubsub.TopicDa
    {
 
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
+      data.setForceExecution(ser.read_type_7("force_execution"));
 
       data.setEnableUserPelvisControl(ser.read_type_7("enable_user_pelvis_control"));
 
