@@ -109,12 +109,12 @@ public class MultiContactImpulseCalculator
    public double computeImpulses(double time, double dt, boolean verbose)
    {
       for (ImpulseBasedConstraintCalculator calculator : allCalculators)
-      {
+      { // Request the calculators to predict velocity without applying impulse.
          calculator.initialize(dt);
       }
 
       for (Iterator<RobotJointLimitImpulseBasedCalculator> iterator = jointLimitCalculators.iterator(); iterator.hasNext();)
-      {
+      { // Once initialized, if the a joint limit calculator does not detect joints about to violate their limits, we skip it for this iteration.
          RobotJointLimitImpulseBasedCalculator calculator = iterator.next();
          if (calculator.getActiveLimits().isEmpty())
          {
@@ -125,6 +125,11 @@ public class MultiContactImpulseCalculator
 
       for (ImpulseBasedConstraintCalculator calculator : allCalculators)
       {
+         /*
+          * Request each calculator to compute the apparent inertia coefficients needed for the calculator
+          * itself and also for the other calculators to propagate the twist change from one calculator to
+          * the other.
+          */
          List<? extends RigidBodyBasics> rigidBodyTargets = collectRigidBodyTargetsForCalculator(calculator);
          List<? extends JointBasics> jointTargets = collectJointTargetsForCalculator(calculator);
          calculator.updateInertia(rigidBodyTargets, jointTargets);
@@ -132,13 +137,17 @@ public class MultiContactImpulseCalculator
 
       if (allCalculators.size() == 1)
       {
+         /*
+          * Single calculator => no need to use the successive over-relaxation method, a single update is
+          * enough to evaluate the solution.
+          */
          ImpulseBasedConstraintCalculator calculator = allCalculators.get(0);
          calculator.computeImpulse(dt);
          calculator.finalizeImpulse();
          return 0.0;
       }
       else
-      {
+      { // Successive over-relaxation method to evaluate multiple inter-dependent constraints.
          double alpha = 1.0;
          double maxUpdateMagnitude = Double.POSITIVE_INFINITY;
 
@@ -150,7 +159,7 @@ public class MultiContactImpulseCalculator
             int numberOfClosingContacts = 0;
 
             for (int i = 0; i < allCalculators.size(); i++)
-            {
+            { // Request every calculator to update.
                ImpulseBasedConstraintCalculator calculator = allCalculators.get(i);
                calculator.updateImpulse(dt, alpha);
                double updateMagnitude = calculator.getVelocityUpdate();
@@ -159,14 +168,14 @@ public class MultiContactImpulseCalculator
                   if (calculator instanceof SingleContactImpulseCalculator)
                   {
                      SingleContactImpulseCalculator contactCalculator = (SingleContactImpulseCalculator) calculator;
-                     System.out.println("Iteration " + iterationCounter + ", calc index: " + i + ", active: " + contactCalculator.isConstraintActive() + ", closing: "
-                           + contactCalculator.isContactClosing() + ", impulse update: " + contactCalculator.getImpulseUpdate() + ", velocity update: "
-                           + contactCalculator.getVelocityUpdate());
+                     System.out.println("Iteration " + iterationCounter + ", calc index: " + i + ", active: " + contactCalculator.isConstraintActive()
+                           + ", closing: " + contactCalculator.isContactClosing() + ", impulse update: " + contactCalculator.getImpulseUpdate()
+                           + ", velocity update: " + contactCalculator.getVelocityUpdate());
                   }
                   else
                   {
-                     System.out.println("Iteration " + iterationCounter + ", alc index: " + i + ", active: " + calculator.isConstraintActive() + ", impulse update: "
-                           + calculator.getImpulseUpdate() + ", velocity update: " + calculator.getVelocityUpdate());
+                     System.out.println("Iteration " + iterationCounter + ", alc index: " + i + ", active: " + calculator.isConstraintActive()
+                           + ", impulse update: " + calculator.getImpulseUpdate() + ", velocity update: " + calculator.getVelocityUpdate());
                   }
                }
                maxUpdateMagnitude = Math.max(maxUpdateMagnitude, updateMagnitude);
@@ -193,7 +202,7 @@ public class MultiContactImpulseCalculator
             }
 
             for (ImpulseBasedConstraintCalculator calculator : allCalculators)
-            {
+            { // Update the twist modifiers so next iteration the calculators have access to the twist change due to all the other calculators.
                calculator.updateTwistModifiers();
             }
          }
