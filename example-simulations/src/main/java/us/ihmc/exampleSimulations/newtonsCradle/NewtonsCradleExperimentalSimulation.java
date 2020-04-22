@@ -38,7 +38,7 @@ import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 public class NewtonsCradleExperimentalSimulation
 {
    private static final String NEWTONS_CRADLE = "NewtonsCradle";
-   private final ContactParameters contactParameters = new ContactParameters(0.0, 0.90, 0.2, 1.0);
+   private final ContactParameters contactParameters = new ContactParameters(0.0, 1.0, 0.0, 1.0);
    private final int numberOfBalls = 6;
    private final double ballRadius = 0.05;
 
@@ -132,7 +132,7 @@ public class NewtonsCradleExperimentalSimulation
       scs.getRootRegistry().addChild(experimentalSimulation.getPhysicsEngineRegistry());
       scs.setDT(simDT, 1);
       scs.startOnAThread();
-      scs.simulate(2.0);
+      scs.simulate(5.0);//2.1125);
    }
 
    private String getBallBodyName(int i)
