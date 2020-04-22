@@ -38,7 +38,7 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
       }
    };
 
-   private final ConstraintParameters constraintParameters = new ConstraintParameters(0.1, 0.1, 0.99);
+   private final ConstraintParameters constraintParameters = new ConstraintParameters(0.0, 0.0, 1.0);
 
    private final List<OneDoFJointBasics> jointsAtLimit = new ArrayList<>();
    private final List<ActiveLimit> activeLimits = new ArrayList<>();

@@ -33,6 +33,7 @@ public class MultiContactImpulseCalculator
    private double alphaMin = 0.7;
    private double gamma = 0.99;
    private double tolerance = 1.0e-6;
+   private boolean solveContactsIndependentlyOnFailure = false;
 
    private int maxNumberOfIterations = 100;
    private int iterationCounter = 0;
@@ -162,6 +163,7 @@ public class MultiContactImpulseCalculator
             { // Request every calculator to update.
                ImpulseBasedConstraintCalculator calculator = allCalculators.get(i);
                calculator.updateImpulse(dt, alpha, false);
+               calculator.updateTwistModifiers();
                double updateMagnitude = calculator.getVelocityUpdate();
                if (verbose)
                {
@@ -200,14 +202,9 @@ public class MultiContactImpulseCalculator
                }
                break;
             }
-
-            for (ImpulseBasedConstraintCalculator calculator : allCalculators)
-            { // Update the twist modifiers so next iteration the calculators have access to the twist change due to all the other calculators.
-               calculator.updateTwistModifiers();
-            }
          }
 
-         if (iterationCounter > maxNumberOfIterations)
+         if (solveContactsIndependentlyOnFailure && iterationCounter > maxNumberOfIterations)
          { // The solver failed.
             for (ImpulseBasedConstraintCalculator calculator : allCalculators)
             { // Solving the contacts independently.
@@ -245,6 +242,11 @@ public class MultiContactImpulseCalculator
    public void setMaxNumberOfIterations(int maxNumberOfIterations)
    {
       this.maxNumberOfIterations = maxNumberOfIterations;
+   }
+
+   public void setSolveContactsIndependentlyOnFailure(boolean solveContactsIndependentlyOnFailure)
+   {
+      this.solveContactsIndependentlyOnFailure = solveContactsIndependentlyOnFailure;
    }
 
    public void setSingleContactTolerance(double gamma)
