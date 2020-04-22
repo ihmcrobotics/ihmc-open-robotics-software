@@ -59,7 +59,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private static final boolean DEBUG = true;
    private static final boolean COMPUTE_COST_TO_GO = false;
 
-   private static final boolean CONTINUOUSLY_UPDATE_DESIRED_POSITION = true;
+   private static final boolean CONTINUOUSLY_UPDATE_DESIRED_POSITION = false;
 
    private static final String yoNamePrefix = "controller";
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -94,6 +94,9 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final YoDouble timeInCurrentState = new YoDouble(yoNamePrefix + "TimeInCurrentState", registry);
    private final YoDouble timeRemainingInState = new YoDouble(yoNamePrefix + "TimeRemainingInState", registry);
    private final DoubleProvider minimumTimeRemaining;
+
+   private final YoFramePoint2D icpAtEndOfState = new YoFramePoint2D(yoNamePrefix + "ICPAtEndOfState", "", worldFrame, registry);
+   private final YoFrameVector2D icpOverrun = new YoFrameVector2D(yoNamePrefix + "ICPOverrun", "", worldFrame, registry);
 
    private final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
    private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
@@ -697,6 +700,11 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
 
+      if (timeRemainingInState.getDoubleValue() >= 0.0)
+         icpAtEndOfState.set(currentICP);
+
+      icpOverrun.sub(currentICP, icpAtEndOfState);
+
       boolean includeFootsteps = computeWhetherToIncludeFootsteps();
       // if we are switching between including footsteps and not, the decision variables are changing, so the active set needs resetting
       if (includeFootsteps != this.includeFootsteps.getBooleanValue())
@@ -904,13 +912,13 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
             if (planarRegionConstraintProvider != null)
             {
                PlanarRegion activePlanarRegion = planarRegionConstraintProvider.getActivePlanarRegion();
-               solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootstep, activePlanarRegion, solver);
+               solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootstep, icpOverrun, activePlanarRegion, solver);
                boolean footstepWasAdjustedBySnapper = planarRegionConstraintProvider.snapFootPoseToActivePlanarRegion(footstepSolution);
                solutionHandler.setFootstepWasAdjustedBySnapper(footstepWasAdjustedBySnapper);
             }
             else
             {
-               solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootstep, null, solver);
+               solutionHandler.extractFootstepSolution(footstepSolution, unclippedFootstepSolution, upcomingFootstep, icpOverrun, null, solver);
                solutionHandler.setFootstepWasAdjustedBySnapper(false);
             }
          }
