@@ -328,37 +328,39 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       collisionPositionTerm.changeFrame(velocityRelative.getReferenceFrame());
       velocityRelative.sub(collisionPositionTerm);
 
-      impulseA.setToZero(bodyFrameA, contactFrame);
-
       isContactClosing = velocityRelative.getZ() < 0.0;
+      impulseA.setToZero(bodyFrameA, contactFrame);
 
       if (isContactClosing)
       { // Closing contact, impulse needs to be calculated.
-         velocityRelative.get(c);
-         LinearSolver<DenseMatrix64F> solver;
-         if (CommonOps.det(M_inv) > 1.0e-6)
-            solver = linearSolver;
-         else
-            solver = svdSolver; // TODO This is not enough to cover the degenerate case.
-
-         M_inv_solverCopy.set(M_inv);
-         solver.setA(M_inv_solverCopy);
-         solver.solve(c, lambda_v_0);
-         CommonOps.changeSign(lambda_v_0);
-
          double mu = contactParameters.getCoefficientOfFriction();
 
-         if (lambda_v_0.get(2) > -1.0e-12 && ContactImpulseTools.isInsideFrictionCone(mu, lambda_v_0))
-         { // Contact is sticking, i.e. satisfies Coulomb's friction cone while canceling velocity.
-            impulseA.getLinearPart().set(lambda_v_0);
-         }
-         else if (EuclidCoreTools.isZero(mu, 1.0e-12))
+         if (EuclidCoreTools.isZero(mu, 1.0e-12))
          { // Trivial case, i.e. there is no friction => the impulse is along the collision axis.
-            impulseA.getLinearPart().setZ(lambda_v_0.get(2));
+            impulseA.getLinearPart().setZ(-velocityRelative.getZ() / M_inv.get(2, 2));
          }
          else
-         { // Contact is slipping, that's the though case.
-            ContactImpulseTools.computeSlipLambda(beta1, beta2, beta3, gamma, mu, M_inv, lambda_v_0, c, impulseA.getLinearPart(), false);
+         {
+            velocityRelative.get(c);
+            LinearSolver<DenseMatrix64F> solver;
+            if (CommonOps.det(M_inv) > 1.0e-6)
+               solver = linearSolver;
+            else
+               solver = svdSolver; // TODO This is not enough to cover the degenerate case, need to decompose the problem to work in reduced space, i.e. either 2D or 1D.
+
+            M_inv_solverCopy.set(M_inv);
+            solver.setA(M_inv_solverCopy);
+            solver.solve(c, lambda_v_0);
+            CommonOps.changeSign(lambda_v_0);
+
+            if (lambda_v_0.get(2) > -1.0e-12 && ContactImpulseTools.isInsideFrictionCone(mu, lambda_v_0))
+            { // Contact is sticking, i.e. satisfies Coulomb's friction cone while canceling velocity.
+               impulseA.getLinearPart().set(lambda_v_0);
+            }
+            else
+            { // Contact is slipping, that's the though case.
+               ContactImpulseTools.computeSlipLambda(beta1, beta2, beta3, gamma, mu, M_inv, lambda_v_0, c, impulseA.getLinearPart(), false);
+            }
          }
       }
 
