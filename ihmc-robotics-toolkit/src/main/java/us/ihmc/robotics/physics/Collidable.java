@@ -1,10 +1,9 @@
 package us.ihmc.robotics.physics;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DReadOnly;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
-import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
@@ -34,14 +33,13 @@ public class Collidable
    /**
     * The shape of this collidable. It is strongly recommended to use only {@link Sphere3D} and
     * {@link Capsule3D} as collision evaluations are extremely fast with these shapes.
-    */
-   private final Shape3DReadOnly shape;
-   /**
-    * The frame the shape is expressed in. It has to be a frame that is rigidly attached to the
-    * rigid-body and preferably be the frame after it parent joint as the location of the
+    * <p>
+    * Note that the frame in which the shape is expressed has to be rigidly attached to the rigid-body
+    * and preferably be the frame after its parent joint as the location of the
     * {@link RigidBodyBasics#getBodyFixedFrame()} depends on the mass property of the body.
+    * </p>
     */
-   private final ReferenceFrame shapeFrame;
+   private final FrameShape3DReadOnly shape;
    /**
     * Bounding box for the shape in root frame.
     */
@@ -66,26 +64,29 @@ public class Collidable
     *                       and groups.
     * @param shape          the shape of this collidable. It is strongly recommended to use only
     *                       {@link Sphere3D} and {@link Capsule3D} as collision evaluations are
-    *                       extremely fast with these shapes.
+    *                       extremely fast with these shapes. Note that the frame in which the shape is
+    *                       expressed has to be rigidly attached to the rigid-body and preferably be
+    *                       the frame after its parent joint as the location of the
+    *                       {@link RigidBodyBasics#getBodyFixedFrame()} depends on the mass property of
+    *                       the body.
     * @param shapeFrame     the frame the shape is expressed in. It has to be a frame that is rigidly
     *                       attached to the rigid-body and preferably be the frame after it parent
     *                       joint as the location of the {@link RigidBodyBasics#getBodyFixedFrame()}
     *                       depends on the mass property of the body.
     */
-   public Collidable(RigidBodyBasics rigidBody, long collisionMask, long collisionGroup, Shape3DReadOnly shape, ReferenceFrame shapeFrame)
+   public Collidable(RigidBodyBasics rigidBody, long collisionMask, long collisionGroup, FrameShape3DReadOnly shape)
    {
       this.rigidBody = rigidBody;
       this.collisionMask = collisionMask;
       this.collisionGroup = collisionGroup;
       this.shape = shape;
-      this.shapeFrame = shapeFrame;
 
       rootBody = rigidBody == null ? null : MultiBodySystemTools.getRootBody(rigidBody);
    }
 
    public void updateBoundingBox()
    {
-      EuclidFrameShapeTools.boundingBox3D(shapeFrame, shape, boundingBox);
+      EuclidFrameShapeTools.boundingBox3D(shape.getReferenceFrame(), shape, boundingBox);
    }
 
    /**
@@ -140,7 +141,11 @@ public class Collidable
     */
    public void evaluateCollision(Collidable other, CollisionResult resultToPack)
    {
-      EuclidFrameShapeCollisionTools.evaluateShape3DShape3DCollision(shape, shapeFrame, other.shape, other.shapeFrame, resultToPack.getCollisionData());
+      EuclidFrameShapeCollisionTools.evaluateShape3DShape3DCollision(shape,
+                                                                     shape.getReferenceFrame(),
+                                                                     other.shape,
+                                                                     other.shape.getReferenceFrame(),
+                                                                     resultToPack.getCollisionData());
       resultToPack.setCollidableA(this);
       resultToPack.setCollidableB(other);
    }
@@ -181,19 +186,9 @@ public class Collidable
     *
     * @return the shape.
     */
-   public Shape3DReadOnly getShape()
+   public FrameShape3DReadOnly getShape()
    {
       return shape;
-   }
-
-   /**
-    * The frame the shape is expressed in.
-    *
-    * @return the shape frame.
-    */
-   public ReferenceFrame getShapeFrame()
-   {
-      return shapeFrame;
    }
 
    public RigidBodyBasics getRootBody()
@@ -210,8 +205,6 @@ public class Collidable
          hash = EuclidHashCodeTools.combineHashCode(hash, shape.hashCode());
          hash = EuclidHashCodeTools.combineHashCode(hash, collisionMask);
          hash = EuclidHashCodeTools.combineHashCode(hash, collisionGroup);
-         if (shapeFrame != null)
-            hash = EuclidHashCodeTools.combineHashCode(hash, shapeFrame.hashCode());
          collidableID = EuclidHashCodeTools.toIntHashCode(hash);
       }
       return collidableID;

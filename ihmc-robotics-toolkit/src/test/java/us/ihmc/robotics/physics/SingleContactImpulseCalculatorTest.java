@@ -17,11 +17,11 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameShapeRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
-import us.ihmc.euclid.shape.primitives.interfaces.Shape3DBasics;
-import us.ihmc.euclid.shape.tools.EuclidShapeRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -459,12 +459,14 @@ public class SingleContactImpulseCalculatorTest
 
    static Collidable nextStaticCollidable(Random random)
    {
-      return new Collidable(null, -1, -1, EuclidShapeRandomTools.nextShape3D(random), worldFrame);
+      return new Collidable(null, -1, -1, EuclidFrameShapeRandomTools.nextFrameShape3D(random, worldFrame));
    }
 
    static Collidable nextCollidable(Random random, RigidBodyBasics rigidBody)
    {
-      Shape3DBasics shape = EuclidShapeRandomTools.nextConvexShape3D(random, rigidBody.getInertia().getCenterOfMassOffset());
-      return new Collidable(rigidBody, -1, -1, shape, rigidBody.getBodyFixedFrame());
+      FrameShape3DBasics shape = EuclidFrameShapeRandomTools.nextFrameConvexShape3D(random,
+                                                                               rigidBody.getBodyFixedFrame(),
+                                                                               rigidBody.getInertia().getCenterOfMassOffset());
+      return new Collidable(rigidBody, -1, -1, shape);
    }
 }
