@@ -31,6 +31,7 @@ import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.ExperimentalPhysicsEngine;
 import us.ihmc.robotics.physics.MultiBodySystemStateReader;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
+import us.ihmc.robotics.physics.PhysicsEngineTools;
 import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -296,7 +297,10 @@ public class ExperimentalSimulation extends Simulation
 
       for (Shape3DReadOnly terrainShape : terrainObject3D.getTerrainCollisionShapes())
       {
-         collidables.add(new Collidable(null, collisionMask, collisionGroup, terrainShape, ReferenceFrame.getWorldFrame()));
+         collidables.add(new Collidable(null,
+                                        collisionMask,
+                                        collisionGroup,
+                                        PhysicsEngineTools.toFrameShape3DBasics(ReferenceFrame.getWorldFrame(), terrainShape)));
       }
 
       return collidables;

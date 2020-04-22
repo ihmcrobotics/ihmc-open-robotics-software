@@ -223,9 +223,9 @@ public class MultiContactImpulseCalculatorTest
 
       collisionAxisForA.setIncludingFrame(worldFrame, EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0));
       FrameVector3D supportDirection = new FrameVector3D(collisionAxisForA);
-      supportDirection.changeFrame(collidableA.getShapeFrame());
+      supportDirection.changeFrame(collidableA.getShape().getReferenceFrame());
       supportDirection.negate();
-      pointInBodyFrameA.setIncludingFrame(collidableA.getShapeFrame(), collidableA.getShape().getSupportingVertex(supportDirection));
+      pointInBodyFrameA.setIncludingFrame(collidableA.getShape().getSupportingVertex(supportDirection));
       pointInBodyFrameA.changeFrame(contactingBodyA.getBodyFixedFrame());
       pointOnARootFrame.setIncludingFrame(pointInBodyFrameA);
       pointOnARootFrame.changeFrame(worldFrame);
@@ -235,8 +235,8 @@ public class MultiContactImpulseCalculatorTest
          Collidable collidableB = nextCollidable(random, contactingBodyB);
          collisionResult.setCollidableB(collidableB);
          supportDirection.negate();
-         supportDirection.changeFrame(collidableB.getShapeFrame());
-         pointOnBRootFrame.setIncludingFrame(collidableB.getShapeFrame(), collidableB.getShape().getSupportingVertex(supportDirection));
+         supportDirection.changeFrame(collidableB.getShape().getReferenceFrame());
+         pointOnBRootFrame.setIncludingFrame(collidableB.getShape().getSupportingVertex(supportDirection));
          pointOnBRootFrame.changeFrame(worldFrame);
          FrameVector3D translation = new FrameVector3D();
          translation.sub(pointOnARootFrame, pointOnBRootFrame);
