@@ -24,6 +24,7 @@ import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -52,6 +53,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
    @Test
    public void testSingleWaypoint() throws Exception
    {
+      simulationTestingParameters.setKeepSCSUp(false);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
       Random random = new Random(564574L);
@@ -89,7 +91,7 @@ public abstract class EndToEndWholeBodyTrajectoryMessageTest implements MultiRob
       // Now we can do the usual test.
       double trajectoryTime = 1.0;
       FramePose3D desiredFootPose = new FramePose3D(foot.getBodyFixedFrame());
-      desiredFootPose.getOrientation().set(RandomGeometry.nextQuaternion(random, 1.0));
+      desiredFootPose.getOrientation().set(EuclidCoreRandomTools.nextYawPitchRoll(random, 0.17, 0.4, 0.4));
       desiredFootPose.getPosition().set(RandomGeometry.nextPoint3D(random, -0.1, -0.1, 0.05, 0.1, 0.2, 0.3));
       desiredFootPose.changeFrame(worldFrame);
       desiredFootPose.get(desiredPosition, desiredOrientation);
