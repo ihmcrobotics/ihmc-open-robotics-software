@@ -1,11 +1,5 @@
-
-
-
 #ifndef __controller_msgs__msg__UIConnectedPacket__idl__
 #define __controller_msgs__msg__UIConnectedPacket__idl__
-
-
-
 
 module controller_msgs
 {
@@ -14,33 +8,17 @@ module controller_msgs
     module dds
     {
 
-   
-   /**
-   
-    * TODO: This message is not really used, the feature it provides needs to be fixed or this message needs to be deleted.
-   
-    */
-   
-   @TypeCode(type="controller_msgs::msg::dds_::UIConnectedPacket_")
+      /**
+       * TODO: This message is not really used, the feature it provides needs to be fixed or this message needs to be deleted.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::UIConnectedPacket_")
       struct UIConnectedPacket
       {
-
-
-    
-    /**
-    
-     * Unique ID used to identify this message, should preferably be consecutively increasing.
-    
-     */
-    
-
-
-    unsigned long sequence_id;
-
-
-
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
       };
-
     };
   };
 };
