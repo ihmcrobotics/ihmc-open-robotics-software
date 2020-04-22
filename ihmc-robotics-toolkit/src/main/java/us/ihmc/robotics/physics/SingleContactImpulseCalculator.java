@@ -266,6 +266,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    {
       if (externalRigidBodyTwistModifier != null)
       {
+         // Compute the change in twist due to other impulses.
          velocityDueToOtherImpulseA.setIncludingFrame(externalRigidBodyTwistModifier.getLinearVelocityOfBodyFixedPoint(contactingBodyA, pointA));
          velocityDueToOtherImpulseA.changeFrame(contactFrame);
          velocityA.add(velocityNoImpulseA, velocityDueToOtherImpulseA);
@@ -279,6 +280,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       {
          if (externalRigidBodyTwistModifier != null)
          {
+            // Compute the change in twist due to other impulses.
             velocityDueToOtherImpulseB.setIncludingFrame(externalRigidBodyTwistModifier.getLinearVelocityOfBodyFixedPoint(contactingBodyB, pointB));
             velocityDueToOtherImpulseB.changeFrame(contactFrame);
             velocityB.add(velocityNoImpulseB, velocityDueToOtherImpulseB);
@@ -312,7 +314,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
        * doubled, such that, the post-impact velocity is opposite of the pre-impact velocity along the
        * collision axis.
        */
-      velocityRelative.scale(1.0 + contactParameters.getCoefficientOfRestitution());
+      if (contactParameters.getCoefficientOfRestitution() != 0.0)
+         velocityRelative.scale(1.0 + contactParameters.getCoefficientOfRestitution());
 
       /*
        * Computing the correction term based on the penetration of the two collidables. This assumes that
@@ -322,11 +325,14 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
        * relative velocity that the solver is trying to cancel, this way the calculator will implicitly
        * account for the error.
        */
-      collisionPositionTerm.setIncludingFrame(collisionResult.getPointOnBRootFrame());
-      collisionPositionTerm.sub(collisionResult.getPointOnARootFrame());
-      collisionPositionTerm.scale(contactParameters.getErrorReductionParameter() / dt);
-      collisionPositionTerm.changeFrame(velocityRelative.getReferenceFrame());
-      velocityRelative.sub(collisionPositionTerm);
+      if (contactParameters.getErrorReductionParameter() != 0.0)
+      {
+         collisionPositionTerm.setIncludingFrame(collisionResult.getPointOnBRootFrame());
+         collisionPositionTerm.sub(collisionResult.getPointOnARootFrame());
+         collisionPositionTerm.scale(contactParameters.getErrorReductionParameter() / dt);
+         collisionPositionTerm.changeFrame(velocityRelative.getReferenceFrame());
+         velocityRelative.sub(collisionPositionTerm);
+      }
 
       isContactClosing = velocityRelative.getZ() < 0.0;
       impulseA.setToZero(bodyFrameA, contactFrame);
@@ -367,7 +373,12 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       if (impulseA.getLinearPart().getZ() < 0.0)
          throw new IllegalStateException("Malformed impulse");
 
-      impulseA.getLinearPart().scale(contactParameters.getConstraintForceMixing());
+      /*
+       * Based on the documentation of ODE, this seems to be the way the constraint force mixing should be
+       * applied.
+       */
+      if (contactParameters.getConstraintForceMixing() != 1.0)
+         impulseA.getLinearPart().scale(contactParameters.getConstraintForceMixing());
 
       if (isFirstUpdate)
       {
