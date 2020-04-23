@@ -1,29 +1,34 @@
 package us.ihmc.parameterTuner.remote;
 
+import java.io.IOException;
+
 import javafx.stage.Stage;
+import us.ihmc.javaFXToolkit.starter.ApplicationRunner;
+import us.ihmc.log.LogTools;
 import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
 import us.ihmc.parameterTuner.guiElements.main.ParameterTuningApplication;
+import us.ihmc.robotDataLogger.gui.DataServerSelectorGUI;
+import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnection;
 
 public class ParameterTuner extends ParameterTuningApplication
 {
-   private ParameterGuiInterface inputManager;
+   private final ParameterGuiInterface inputManager;
 
-   public ParameterTuner()
+   public ParameterTuner(boolean enableAutoDiscovery) throws IOException
    {
+      inputManager = new RemoteInputManager(enableAutoDiscovery);
+   }
+
+   public ParameterTuner(HTTPDataServerConnection connection) throws IOException
+   {
+      inputManager = new RemoteInputManager(connection);
    }
 
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      inputManager = new RemoteInputManager(getAutoDiscoveryProperty());
 
       super.start(primaryStage);
-   }
-
-   public boolean getAutoDiscoveryProperty()
-   {
-      String enableAutoDiscoveryParameter = getParameters().getNamed().getOrDefault("enableAutoDiscovery", "true");
-      return Boolean.parseBoolean(enableAutoDiscoveryParameter);
    }
 
    @Override
@@ -34,6 +39,26 @@ public class ParameterTuner extends ParameterTuningApplication
 
    public static void main(String[] args)
    {
-      launch(args);
+      String enableAutoDiscoveryParameter = System.getProperty("enableAutoDiscovery", "true");
+      DataServerSelectorGUI selector = new DataServerSelectorGUI(Boolean.parseBoolean(enableAutoDiscoveryParameter));
+
+      HTTPDataServerConnection connection = selector.select();
+
+      if (connection == null)
+      {
+         LogTools.warn("No host selected. Shutting down.");
+         System.exit(0);
+      }
+      else
+      {
+         try
+         {
+            ApplicationRunner.runApplication(new ParameterTuner(connection));
+         }
+         catch (IOException e)
+         {
+            throw new RuntimeException(e);
+         }
+      }
    }
 }
