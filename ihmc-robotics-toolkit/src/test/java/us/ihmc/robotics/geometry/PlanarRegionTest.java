@@ -11,6 +11,7 @@ import java.util.Random;
 import java.util.stream.Collectors;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MutationTestFacilitator;
@@ -971,7 +972,7 @@ public class PlanarRegionTest
 
       ConvexPolygon2D convexPolygon1 = new ConvexPolygon2D();
       convexPolygon1.addVertex(0.0, 0.0);
-      convexPolygon1.addVertex(-1.0, 1.0);
+      convexPolygon1.addVertex(-1.1, 1.0);
       convexPolygon1.addVertex(-1.0, -1.0);
       convexPolygon1.update();
 
@@ -979,15 +980,36 @@ public class PlanarRegionTest
       polygonList.add(convexPolygon0);
       polygonList.add(convexPolygon1);
 
-      PlanarRegion region = new PlanarRegion(new RigidBodyTransform(), polygonList);
+      PlanarRegion twoTriangleRegion = new PlanarRegion(new RigidBodyTransform(), polygonList);
 
-      List<Point2D> concaveHull = region.getConcaveHull();
-      for (int i = 0; i < concaveHull.size(); i++)
-      {
-         System.out.println(concaveHull.get(i));
-      }
+      List<Point2D> concaveHull = twoTriangleRegion.getConcaveHull();
+      Assertions.assertEquals(twoTriangleRegion.getConcaveHullSize(), 6);
+      double epsilon = 1e-10;
+      Assertions.assertTrue(concaveHull.get(0).epsilonEquals(convexPolygon1.getVertex(0), epsilon));
+      Assertions.assertTrue(concaveHull.get(1).epsilonEquals(convexPolygon1.getVertex(1), epsilon));
+      Assertions.assertTrue(concaveHull.get(2).epsilonEquals(convexPolygon0.getVertex(1), epsilon));
+      Assertions.assertTrue(concaveHull.get(3).epsilonEquals(convexPolygon0.getVertex(2), epsilon));
+      Assertions.assertTrue(concaveHull.get(4).epsilonEquals(convexPolygon0.getVertex(0), epsilon));
+      Assertions.assertTrue(concaveHull.get(5).epsilonEquals(convexPolygon1.getVertex(2), epsilon));
 
-      //      Assertions.assertEquals(region.getConcaveHullSize(), 5);
+      // test three triangles
+      ConvexPolygon2D convexPolygon2 = new ConvexPolygon2D();
+      convexPolygon2.addVertex(0.0, 0.0);
+      convexPolygon2.addVertex(1.0, -1.0);
+      convexPolygon2.addVertex(-1.0, -1.0);
+      convexPolygon2.update();
+
+      polygonList.add(convexPolygon2);
+
+      PlanarRegion threeTriangleRegion = new PlanarRegion(new RigidBodyTransform(), polygonList);
+
+      concaveHull = threeTriangleRegion.getConcaveHull();
+      Assertions.assertEquals(threeTriangleRegion.getConcaveHullSize(), 5);
+      Assertions.assertTrue(concaveHull.get(0).epsilonEquals(convexPolygon1.getVertex(0), epsilon));
+      Assertions.assertTrue(concaveHull.get(1).epsilonEquals(convexPolygon1.getVertex(1), epsilon));
+      Assertions.assertTrue(concaveHull.get(2).epsilonEquals(convexPolygon0.getVertex(1), epsilon));
+      Assertions.assertTrue(concaveHull.get(3).epsilonEquals(convexPolygon0.getVertex(2), epsilon));
+      Assertions.assertTrue(concaveHull.get(4).epsilonEquals(convexPolygon1.getVertex(2), epsilon));
    }
 
    static ConvexPolygon2DBasics translateConvexPolygon(double xTranslation, double yTranslation, ConvexPolygon2DReadOnly convexPolygon)

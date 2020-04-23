@@ -10,6 +10,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.shape.collision.interfaces.SupportingVertexHolder;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -77,8 +78,6 @@ public class PlanarRegion implements SupportingVertexHolder
     */
    public PlanarRegion(RigidBodyTransform transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons)
    {
-      PrintTools.warn("This constructor does not set the concave hull.");
-
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
       convexPolygons = planarRegionConvexPolygons;
@@ -1199,7 +1198,7 @@ public class PlanarRegion implements SupportingVertexHolder
                double ux = nextCandidateVertex.getX() - candidateVertex.getX();
                double uy = nextCandidateVertex.getY() - candidateVertex.getY();
 
-               double dotProduct = ux * vx + uy * vy;
+               double dotProduct = (ux * vx + uy * vy) / EuclidCoreTools.norm(ux, uy);
                double crossProduct = ux * vy - uy * vx;
                if (crossProduct < 0.0)
                {
