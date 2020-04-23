@@ -147,6 +147,7 @@ public class ICPControllerQPInputCalculator
       CommonOps.mult(feedbackJacobian, solution, errorToPack);
 
       CommonOps.addEquals(errorToPack, -1.0, feedbackObjective);
+      CommonOps.scale(-1.0, errorToPack);
    }
 
    private void computeQuadraticTask(int startIndex, ICPQPInput icpQPInputToPack, DenseMatrix64F weight, DenseMatrix64F objective)
