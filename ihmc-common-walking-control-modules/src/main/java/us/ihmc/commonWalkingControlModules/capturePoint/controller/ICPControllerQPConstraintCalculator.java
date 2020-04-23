@@ -14,7 +14,6 @@ import static us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPCon
 public class ICPControllerQPConstraintCalculator
 {
 
-
    /**
     * Computes the inequality constraint for the total feedback (CoP and CMP, if available). This returns a set of 4
     * inequality constraints.
@@ -23,13 +22,20 @@ public class ICPControllerQPConstraintCalculator
     * @param maxXMagnitude the maximum feedback magnitude in X.
     * @param maxYMagnitude the maximum feedback magnitude in Y.
     */
-   public static void calculateMaxFeedbackMagnitudeConstraint(ICPInequalityInput inputToPack, double maxXMagnitude, double maxYMagnitude, boolean useAngularMomentum)
+   public static void calculateMaxFeedbackMagnitudeConstraint(ICPInequalityInput inputToPack,
+                                                              double maxXMagnitude,
+                                                              double maxYMagnitude,
+                                                              boolean useAngularMomentum)
    {
       calculateMaxFeedbackMagnitudeConstraint(inputToPack, -maxXMagnitude, maxXMagnitude, -maxYMagnitude, maxYMagnitude, useAngularMomentum);
    }
 
-   public static void calculateMaxFeedbackMagnitudeConstraint(ICPInequalityInput inputToPack, double minXMagnitude, double maxXMagnitude, double minYMagnitude,
-                                                       double maxYMagnitude, boolean useAngularMomentum)
+   private static void calculateMaxFeedbackMagnitudeConstraint(ICPInequalityInput inputToPack,
+                                                              double minXMagnitude,
+                                                              double maxXMagnitude,
+                                                              double minYMagnitude,
+                                                              double maxYMagnitude,
+                                                              boolean useAngularMomentum)
    {
       inputToPack.reset();
 
@@ -111,8 +117,11 @@ public class ICPControllerQPConstraintCalculator
     * @param previousValue the value of the previous feedback term in X and Y.
     * @param controlDT the time delta at which this solver is run. Should be the control loop DT.
     */
-   public static void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack, double maxRate, DenseMatrix64F previousValue, double controlDT,
-                                                  boolean useAngularMomentum)
+   public static void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack,
+                                                         double maxRate,
+                                                         DenseMatrix64F previousValue,
+                                                         double controlDT,
+                                                         boolean useAngularMomentum)
    {
       calculateMaxFeedbackRateConstraint(inputToPack, maxRate, maxRate, previousValue.get(0), previousValue.get(1), controlDT, useAngularMomentum);
    }
@@ -128,8 +137,13 @@ public class ICPControllerQPConstraintCalculator
     * @param previousYValue the value of the previous feedback term in Y.
     * @param controlDT the time delta at which this solver is run. Should be the control loop DT.
     */
-   public static void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack, double maxXRate, double maxYRate, double previousXValue,
-                                                  double previousYValue, double controlDT, boolean useAngularMomentum)
+   public static void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack,
+                                                         double maxXRate,
+                                                         double maxYRate,
+                                                         double previousXValue,
+                                                         double previousYValue,
+                                                         double controlDT,
+                                                         boolean useAngularMomentum)
    {
       double maxXValue = previousXValue + controlDT * maxXRate;
       double minXValue = previousXValue - controlDT * maxXRate;
