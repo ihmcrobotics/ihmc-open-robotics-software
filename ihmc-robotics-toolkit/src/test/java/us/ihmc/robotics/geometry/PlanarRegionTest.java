@@ -998,7 +998,6 @@ public class PlanarRegionTest
       convexPolygon2.addVertex(1.0, -1.0);
       convexPolygon2.addVertex(-1.0, -1.0);
       convexPolygon2.update();
-
       polygonList.add(convexPolygon2);
 
       PlanarRegion threeTriangleRegion = new PlanarRegion(new RigidBodyTransform(), polygonList);
@@ -1010,6 +1009,60 @@ public class PlanarRegionTest
       Assertions.assertTrue(concaveHull.get(2).epsilonEquals(convexPolygon0.getVertex(1), epsilon));
       Assertions.assertTrue(concaveHull.get(3).epsilonEquals(convexPolygon0.getVertex(2), epsilon));
       Assertions.assertTrue(concaveHull.get(4).epsilonEquals(convexPolygon1.getVertex(2), epsilon));
+
+      // test four triangles
+      ConvexPolygon2D convexPolygon3 = new ConvexPolygon2D();
+      convexPolygon3.addVertex(0.0, 0.0);
+      convexPolygon3.addVertex(-1.1, 1.0);
+      convexPolygon3.addVertex(1.0, 1.0);
+      convexPolygon3.update();
+      polygonList.add(convexPolygon3);
+
+      PlanarRegion fourTriangleRegion = new PlanarRegion(new RigidBodyTransform(), polygonList);
+
+      concaveHull = fourTriangleRegion.getConcaveHull();
+      Assertions.assertEquals(fourTriangleRegion.getConcaveHullSize(), 4);
+      Assertions.assertTrue(concaveHull.get(0).epsilonEquals(convexPolygon1.getVertex(0), epsilon));
+      Assertions.assertTrue(concaveHull.get(1).epsilonEquals(convexPolygon0.getVertex(1), epsilon));
+      Assertions.assertTrue(concaveHull.get(2).epsilonEquals(convexPolygon0.getVertex(2), epsilon));
+      Assertions.assertTrue(concaveHull.get(3).epsilonEquals(convexPolygon1.getVertex(2), epsilon));
+
+      // test ring of points with varying radius
+      Random random = new Random(12390);
+      int numberOfPoints = 3600;
+      double minRadius = 0.1, maxRadius = 2.0;
+      double centerX = 0.2;
+      double centerY = -1.3;
+      List<Point2D> points = new ArrayList<>();
+      points.add(new Point2D(-2.01 + centerX, 0.0 + centerY));
+      for (int i = 1; i < numberOfPoints; i++)
+      {
+         double radius = EuclidCoreRandomTools.nextDouble(random, minRadius, maxRadius);
+         double theta = Math.PI - (2 * Math.PI) * i / ((double) numberOfPoints);
+         double px = centerX + radius * Math.cos(theta);
+         double py = centerY + radius * Math.sin(theta);
+         points.add(new Point2D(px, py));
+      }
+
+      polygonList.clear();
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         ConvexPolygon2D triangle = new ConvexPolygon2D();
+         triangle.addVertex(new Point2D(centerX, centerY));
+         triangle.addVertex(points.get(i));
+         triangle.addVertex(points.get((i + 1) % numberOfPoints));
+         triangle.update();
+         polygonList.add(triangle);
+      }
+
+      PlanarRegion region = new PlanarRegion(new RigidBodyTransform(), polygonList);
+      concaveHull = region.getConcaveHull();
+      Assertions.assertEquals(concaveHull.size(), points.size());
+
+      for (int i = 0; i < points.size(); i++)
+      {
+         Assertions.assertTrue(points.get(i).epsilonEquals(concaveHull.get(i), 1e-10));
+      }
    }
 
    static ConvexPolygon2DBasics translateConvexPolygon(double xTranslation, double yTranslation, ConvexPolygon2DReadOnly convexPolygon)
