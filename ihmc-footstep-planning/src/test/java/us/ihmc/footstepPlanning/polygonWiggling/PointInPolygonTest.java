@@ -2,18 +2,12 @@ package us.ihmc.footstepPlanning.polygonWiggling;
 
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.polygonWiggling.ConcavePolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PointInPolygonSolver;
-import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
@@ -27,7 +21,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static us.ihmc.footstepPlanning.polygonWiggling.ConcavePolygonWigglerTest.addLineSegments;
 import static us.ihmc.footstepPlanning.polygonWiggling.PolygonWigglingTest.showPlotterAndSleep;
 
 public class PointInPolygonTest
@@ -75,6 +68,21 @@ public class PointInPolygonTest
       {
          addLineSegments("Plane", polygon, Color.BLACK, artifacts, registry);
          showPlotterAndSleep(artifacts);
+      }
+   }
+
+
+   static void addLineSegments(String name, Vertex2DSupplier polygon, Color color, ArtifactList artifacts, YoVariableRegistry registry)
+   {
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly vertex = polygon.getVertex(i);
+         Point2DReadOnly nextVertex = polygon.getVertex((i + 1) % polygon.getNumberOfVertices());
+         YoFrameLineSegment2D lineSegment2D = new YoFrameLineSegment2D(name + "LineSegment" + i, worldFrame, registry);
+         lineSegment2D.getFirstEndpoint().set(vertex);
+         lineSegment2D.getSecondEndpoint().set(nextVertex);
+
+         artifacts.add(new YoArtifactLineSegment2d(name + i, lineSegment2D, color));
       }
    }
 

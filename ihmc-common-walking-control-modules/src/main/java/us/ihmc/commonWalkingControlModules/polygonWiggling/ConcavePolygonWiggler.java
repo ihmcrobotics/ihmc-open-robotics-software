@@ -5,17 +5,26 @@ import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
+
+import java.awt.*;
 
 public class ConcavePolygonWiggler
 {
-   private int maximumIterations = 100;
-   private double alpha = 0.05;
-   private double gradientMagnitudeToTerminate = 1e-5;
+   private final String name = getClass().getSimpleName();
+   private int maximumIterations = 1000;
+   private double alpha = 0.06;
+   private double gradientMagnitudeToTerminate = 1e-7;
 
    private final Vector3D previousGradient = new Vector3D();
    private final Vector3D gradient = new Vector3D();
@@ -28,12 +37,43 @@ public class ConcavePolygonWiggler
    private final RecyclingArrayList<Point2D> transformedVertices = new RecyclingArrayList<>(4, Point2D::new);
    private final RecyclingArrayList<Vector2D> rotationVectors = new RecyclingArrayList<>(4, Vector2D::new);
 
+   private final TickAndUpdatable tickAndUpdatable;
+   private final YoFrameLineSegment2D[] initialPolygonToWiggle = new YoFrameLineSegment2D[4];
+   private final YoFrameLineSegment2D[] transformedPolygonToWiggle = new YoFrameLineSegment2D[4];
+   private final YoFrameLineSegment2D[] constraintPolygon = new YoFrameLineSegment2D[100];
+
+   public ConcavePolygonWiggler(TickAndUpdatable tickAndUpdatable, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
+   {
+      this.tickAndUpdatable = tickAndUpdatable;
+
+      for (int i = 0; i < 4; i++)
+      {
+         initialPolygonToWiggle[i] = new YoFrameLineSegment2D("initialFootV" + i, ReferenceFrame.getWorldFrame(), registry);
+         graphicsListRegistry.registerArtifact(name, new YoArtifactLineSegment2d("graphicInitialFootV" + i, initialPolygonToWiggle[i], Color.RED, 0.0, 0.0));
+
+         transformedPolygonToWiggle[i] = new YoFrameLineSegment2D("transformedFootV" + i, ReferenceFrame.getWorldFrame(), registry);
+         graphicsListRegistry.registerArtifact(name, new YoArtifactLineSegment2d("graphicFootV" + i, transformedPolygonToWiggle[i], Color.BLUE.darker(), 0.0, 0.0));
+      }
+
+      for (int i = 0; i < constraintPolygon.length; i++)
+      {
+         constraintPolygon[i] = new YoFrameLineSegment2D("polygonEdge" + i, ReferenceFrame.getWorldFrame(), registry);
+         graphicsListRegistry.registerArtifact(name, new YoArtifactLineSegment2d("graphicPolygonEdge" + i, constraintPolygon[i], Color.BLACK, 0.0, 0.0));
+      }
+   }
+
    public RigidBodyTransform wigglePolygon(ConvexPolygon2DReadOnly polygonToWiggle, Vertex2DSupplier concavePolygonToWiggleInto, WiggleParameters wiggleParameters)
    {
       int iterations = 0;
       accumulatedTransform.setToZero();
       rotationVectors.clear();
       transformedVertices.clear();
+
+      for (int i = 0; i < concavePolygonToWiggleInto.getNumberOfVertices(); i++)
+      {
+         constraintPolygon[i].getFirstEndpoint().set(concavePolygonToWiggleInto.getVertex(i));
+         constraintPolygon[i].getSecondEndpoint().set(concavePolygonToWiggleInto.getVertex((i + 1) % concavePolygonToWiggleInto.getNumberOfVertices()));
+      }
 
       for (int i = 0; i < polygonToWiggle.getNumberOfVertices(); i++)
       {
@@ -42,8 +82,15 @@ public class ConcavePolygonWiggler
 
          rotationVector.sub(vertex, polygonToWiggle.getCentroid());
          rotationVector.set(- rotationVector.getY(), rotationVector.getX());
+         rotationVector.normalize();
          transformedVertices.add().set(vertex);
+
+         initialPolygonToWiggle[i].getFirstEndpoint().set(polygonToWiggle.getVertex(i));
+         initialPolygonToWiggle[i].getSecondEndpoint().set(polygonToWiggle.getVertex((i + 1) % polygonToWiggle.getNumberOfVertices()));
+         transformedPolygonToWiggle[i].set(initialPolygonToWiggle[i]);
       }
+
+      tickAndUpdatable.tickAndUpdate();
 
       while (true)
       {
@@ -65,27 +112,37 @@ public class ConcavePolygonWiggler
          for (int i = 0; i < polygonToWiggle.getNumberOfVertices(); i++)
          {
             Point2DReadOnly vertex = transformedVertices.get(i);
-            boolean pointIsInside = PointInPolygonSolver.isPointInsidePolygon(concavePolygonToWiggleInto, vertex);
-            double distanceFromPerimeter = distanceSquaredFromPerimeter(concavePolygonToWiggleInto, vertex);
+            transformedPolygonToWiggle[i].getFirstEndpoint().set(transformedVertices.get(i));
+            transformedPolygonToWiggle[i].getSecondEndpoint().set(transformedVertices.get((i + 1) % transformedVertices.size()));
 
-            double signedDistance = pointIsInside ? - distanceFromPerimeter : distanceFromPerimeter;
-            boolean pointDoesNotMeetConstraints = signedDistance > - Math.signum(wiggleParameters.deltaInside) * MathTools.square(wiggleParameters.deltaInside);
+            boolean pointIsInside = PointInPolygonSolver.isPointInsidePolygon(concavePolygonToWiggleInto, vertex);
+            double distanceSquaredFromPerimeter = distanceSquaredFromPerimeter(concavePolygonToWiggleInto, vertex);
+
+            double signedDistanceSquared = pointIsInside ? - distanceSquaredFromPerimeter : distanceSquaredFromPerimeter;
+            double deltaOutside = - wiggleParameters.deltaInside;
+            double signedDeltaOutsideSquared = Math.signum(deltaOutside) * MathTools.square(deltaOutside);
+            boolean pointDoesNotMeetConstraints = signedDistanceSquared > signedDeltaOutsideSquared;
 
             if (pointDoesNotMeetConstraints)
             {
                allPointsInside = false;
 
                directionToClosestPoint.sub(closestPerimeterPoint, vertex);
-               if (signedDistance < 0.0)
+               if (signedDistanceSquared < 0.0)
                {
                   directionToClosestPoint.scale(-1.0);
                }
+
+               double distanceSquaredFromConstraint = signedDistanceSquared - signedDeltaOutsideSquared;
+               directionToClosestPoint.scale(Math.sqrt(distanceSquaredFromConstraint / directionToClosestPoint.lengthSquared()));
 
                gradient.addX(directionToClosestPoint.getX());
                gradient.addY(directionToClosestPoint.getY());
                gradient.addZ(directionToClosestPoint.dot(rotationVectors.get(i)) / wiggleParameters.rotationWeight);
             }
          }
+
+         tickAndUpdatable.tickAndUpdate();
 
          if (allPointsInside)
          {
