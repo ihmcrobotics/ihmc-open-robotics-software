@@ -1,39 +1,49 @@
 package us.ihmc.footstepPlanning.polygonWiggling;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.ConcavePolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
-
-import static us.ihmc.footstepPlanning.polygonWiggling.PolygonWigglingTest.showPlotterAndSleep;
 
 public class ConcavePolygonWigglerTest
 {
    private static final boolean visualize = true;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
+   private ConcavePolygonWiggler concavePolygonWiggler;
+   private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final ArtifactList artifacts = new ArtifactList(getClass().getSimpleName());
+   private final SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("testRobot"));
+
+   @BeforeEach
+   private void setup()
+   {
+      concavePolygonWiggler = new ConcavePolygonWiggler(scs, graphicsListRegistry, registry);
+//      graphicsListRegistry.addArtifactListsToPlotter(scs.createSimulationOverheadPlotterFactory().createOverheadPlotter().getPlotter());
+//      scs.addYoGraphicsListRegistry(graphicsListRegistry);
+//      scs.getRootRegistry().addChild(registry);
+//      scs.startOnAThread();
+   }
 
    @Test
    public void testSimpleProjection()
    {
-      ConcavePolygonWiggler concavePolygonWiggler = new ConcavePolygonWiggler();
-
       List<Point2D> vertexList = new ArrayList<>();
       vertexList.add(new Point2D(0.0, 0.0));
       vertexList.add(new Point2D(0.05, 0.25));
@@ -50,34 +60,41 @@ public class ConcavePolygonWigglerTest
       initialFoot.applyTransform(initialFootTransform, false);
 
       WiggleParameters wiggleParameters = new WiggleParameters();
-      wiggleParameters.deltaInside = -0.01;
+      wiggleParameters.deltaInside = 0.01;
 
+      int warmsup = 5;
+      for (int i = 0; i < warmsup; i++)
+      {
+         concavePolygonWiggler.wigglePolygon(initialFoot, polygon, wiggleParameters);
+      }
+
+      int n = 20;
       long start = System.nanoTime();
-      RigidBodyTransform transform = concavePolygonWiggler.wigglePolygon(initialFoot, polygon, wiggleParameters);
+      for (int i = 0; i < n; i++)
+      {
+         concavePolygonWiggler.wigglePolygon(initialFoot, polygon, wiggleParameters);
+      }
       long stop = System.nanoTime();
 
-      ConvexPolygon2D transformedFoothold = new ConvexPolygon2D(initialFoot);
-      transformedFoothold.applyTransform(transform, false);
+      long perRun = (stop - start) / n;
+      System.out.println(perRun);
 
-      long diff = stop - start;
-      System.out.println("time: " + diff + "ns");
-      System.out.println(transform);
+//      ConvexPolygon2D transformedFoothold = new ConvexPolygon2D(initialFoot);
+//      transformedFoothold.applyTransform(transform, false);
+//
+//      long diff = stop - start;
+//      System.out.println("time: " + diff + "ns");
+//      System.out.println(transform);
 
-      if (visualize)
-      {
-         addLineSegments("Plane", polygon, Color.BLACK, artifacts, registry);
-         addLineSegments("InitialFoot", initialFoot, Color.RED, artifacts, registry);
-         addLineSegments("Foot", transformedFoothold, Color.BLUE, artifacts, registry);
-         addLineSegments("SolverFoot", Vertex2DSupplier.asVertex2DSupplier(concavePolygonWiggler.getTransformedVertices()), Color.GREEN, artifacts, registry);
-         showPlotterAndSleep(artifacts);
-      }
+//      if (visualize)
+//      {
+//         ThreadTools.sleepForever();
+//      }
    }
 
    @Test
    public void testSawToothProjection()
    {
-      ConcavePolygonWiggler concavePolygonWiggler = new ConcavePolygonWiggler();
-
       List<Point2D> vertexList = new ArrayList<>();
       vertexList.add(new Point2D(0.0, 0.0));
       vertexList.add(new Point2D(0.0, 0.6));
@@ -105,19 +122,13 @@ public class ConcavePolygonWigglerTest
 
       if (visualize)
       {
-         addLineSegments("Plane", polygon, Color.BLACK, artifacts, registry);
-         addLineSegments("InitialFoot", initialFoot, Color.RED, artifacts, registry);
-         addLineSegments("Foot", transformedFoothold, Color.BLUE, artifacts, registry);
-         addLineSegments("SolverFoot", Vertex2DSupplier.asVertex2DSupplier(concavePolygonWiggler.getTransformedVertices()), Color.GREEN, artifacts, registry);
-         showPlotterAndSleep(artifacts);
+         ThreadTools.sleepForever();
       }
    }
 
    @Test
    public void testCrazyPolygon()
    {
-      ConcavePolygonWiggler concavePolygonWiggler = new ConcavePolygonWiggler();
-
       List<Point2D> vertexList = new ArrayList<>();
       vertexList.add(new Point2D(0.0, 0.0));
       vertexList.add(new Point2D(0.0, 0.6));
@@ -137,8 +148,8 @@ public class ConcavePolygonWigglerTest
 
       ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
-      initialFootTransform.getTranslation().set(0.0, 0.4, 0.0);
-      initialFootTransform.getRotation().setToYawOrientation(Math.toRadians(-40.0));
+      initialFootTransform.getTranslation().set(0.0, 0.5, 0.0);
+      initialFootTransform.getRotation().setToYawOrientation(Math.toRadians(-90.0));
       initialFoot.applyTransform(initialFootTransform, false);
 
       WiggleParameters wiggleParameters = new WiggleParameters();
@@ -149,25 +160,44 @@ public class ConcavePolygonWigglerTest
 
       if (visualize)
       {
-         addLineSegments("Plane", polygon, Color.BLACK, artifacts, registry);
-         addLineSegments("InitialFoot", initialFoot, Color.RED, artifacts, registry);
-         addLineSegments("Foot", transformedFoothold, Color.BLUE, artifacts, registry);
-         addLineSegments("SolverFoot", Vertex2DSupplier.asVertex2DSupplier(concavePolygonWiggler.getTransformedVertices()), Color.GREEN, artifacts, registry);
-         showPlotterAndSleep(artifacts);
+         ThreadTools.sleepForever();
       }
    }
 
-   static void addLineSegments(String name, Vertex2DSupplier polygon, Color color, ArtifactList artifacts, YoVariableRegistry registry)
+   @Test
+   public void testSimpleSquare()
    {
-      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
-      {
-         Point2DReadOnly vertex = polygon.getVertex(i);
-         Point2DReadOnly nextVertex = polygon.getVertex((i + 1) % polygon.getNumberOfVertices());
-         YoFrameLineSegment2D lineSegment2D = new YoFrameLineSegment2D(name + "LineSegment" + i, worldFrame, registry);
-         lineSegment2D.getFirstEndpoint().set(vertex);
-         lineSegment2D.getSecondEndpoint().set(nextVertex);
+      List<Point2D> vertexList = new ArrayList<>();
+      vertexList.add(new Point2D(0.0, 0.0));
+      vertexList.add(new Point2D(0.0, 0.5));
+      vertexList.add(new Point2D(0.5, 0.5));
+      vertexList.add(new Point2D(0.5, 0.0));
+      Vertex2DSupplier polygon = Vertex2DSupplier.asVertex2DSupplier(vertexList);
 
-         artifacts.add(new YoArtifactLineSegment2d(name + i, lineSegment2D, color));
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
+      RigidBodyTransform initialFootTransform = new RigidBodyTransform();
+      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(100.0));
+      initialFootTransform.getTranslation().set(0.055, 0.25, 0.0);
+      initialFoot.applyTransform(initialFootTransform, false);
+
+      WiggleParameters wiggleParameters = new WiggleParameters();
+      wiggleParameters.rotationWeight = 0.1;
+
+      long start = System.nanoTime();
+      RigidBodyTransform transform = concavePolygonWiggler.wigglePolygon(initialFoot, polygon, wiggleParameters);
+      long stop = System.nanoTime();
+
+      ConvexPolygon2D transformedFoothold = new ConvexPolygon2D(initialFoot);
+      transformedFoothold.applyTransform(transform, false);
+
+      long diff = stop - start;
+      System.out.println("time: " + diff + "ns");
+      System.out.println(transform);
+
+      if (visualize)
+      {
+         ThreadTools.sleepForever();
       }
    }
+
 }
