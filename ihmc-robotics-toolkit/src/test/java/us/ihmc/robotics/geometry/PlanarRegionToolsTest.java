@@ -6,10 +6,7 @@ import static us.ihmc.robotics.Assert.assertFalse;
 import static us.ihmc.robotics.Assert.assertNull;
 import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import org.junit.jupiter.api.Test;
 
@@ -263,7 +260,7 @@ public class PlanarRegionToolsTest
       {
          RigidBodyTransform transform = new RigidBodyTransform();
          transform.getTranslation().set(0.0, 0.0, i * layerSeparation);
-         PlanarRegion planarRegion = new PlanarRegion(transform, concaveHull, polygons);
+         PlanarRegion planarRegion = new PlanarRegion(transform, Arrays.asList(concaveHull), polygons);
          listOfPlanarRegions.add(planarRegion);
       }
 
@@ -342,7 +339,7 @@ public class PlanarRegionToolsTest
          int numberOfPoints = 5;
          ConvexPolygon2D planarRegionPolygonA = new ConvexPolygon2D();
          ConvexPolygon2D planarRegionPolygonB = new ConvexPolygon2D();
-         Point2D[] concaveHull = new Point2D[2 * numberOfPoints];
+         List<Point2D> concaveHull = new ArrayList<>();
          for (int i = 0; i < numberOfPoints; i++)
          {
             Point2D pointA = EuclidCoreRandomTools.nextPoint2D(random, maxRegionDimension);
@@ -350,8 +347,8 @@ public class PlanarRegionToolsTest
             planarRegionPolygonA.addVertex(pointA);
             planarRegionPolygonB.addVertex(pointB);
 
-            concaveHull[2 * i] = pointA;
-            concaveHull[2 * i + 1] = pointB;
+            concaveHull.add(pointA);
+            concaveHull.add(pointB);
          }
          planarRegionPolygonA.update();
          planarRegionPolygonB.update();
@@ -428,7 +425,7 @@ public class PlanarRegionToolsTest
       Point2D[] concaveHull = polygon2D.getPolygonVerticesView().toArray(new Point2D[0]);
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      PlanarRegion planarRegion = new PlanarRegion(transform, concaveHull, polygons);
+      PlanarRegion planarRegion = new PlanarRegion(transform, Arrays.asList(concaveHull), polygons);
       List<PlanarRegion> planarRegionList = new ArrayList<>();
       planarRegionList.add(planarRegion);
 
@@ -536,7 +533,7 @@ public class PlanarRegionToolsTest
          int numberOfPoints = 5;
          ConvexPolygon2D planarRegionPolygonA = new ConvexPolygon2D();
          ConvexPolygon2D planarRegionPolygonB = new ConvexPolygon2D();
-         Point2D[] concaveHull = new Point2D[2 * numberOfPoints];
+         List<Point2D> concaveHull = new ArrayList<>();
          for (int i = 0; i < numberOfPoints; i++)
          {
             Point2D pointA = EuclidCoreRandomTools.nextPoint2D(random, maxRegionDimension);
@@ -544,8 +541,8 @@ public class PlanarRegionToolsTest
             planarRegionPolygonA.addVertex(pointA);
             planarRegionPolygonB.addVertex(pointB);
 
-            concaveHull[2 * i] = pointA;
-            concaveHull[2 * i + 1] = pointB;
+            concaveHull.add(pointA);
+            concaveHull.add(pointB);
          }
          planarRegionPolygonA.update();
          planarRegionPolygonB.update();
@@ -631,7 +628,7 @@ public class PlanarRegionToolsTest
       Point2D[] concaveHull = polygon2D.getPolygonVerticesView().toArray(new Point2D[0]);
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      PlanarRegion planarRegion = new PlanarRegion(transform, concaveHull, polygons);
+      PlanarRegion planarRegion = new PlanarRegion(transform, Arrays.asList(concaveHull), polygons);
       List<PlanarRegion> planarRegionList = new ArrayList<>();
       planarRegionList.add(planarRegion);
 
