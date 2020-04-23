@@ -779,12 +779,7 @@ public class PlanarRegion implements SupportingVertexHolder
       return convexPolygons.isEmpty();
    }
 
-   public Point2D[] getConcaveHull()
-   {
-      throw new RuntimeException();
-   }
-
-   public List<Point2D> getConcaveHullList()
+   public List<Point2D> getConcaveHull()
    {
       return concaveHullsVertices;
    }
