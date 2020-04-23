@@ -118,13 +118,6 @@ public class ICPControllerQPSolver
    private final DenseMatrix64F previousCMPFeedbackDeltaSolution;
    private final DenseMatrix64F previousCoPFeedbackDeltaSolution;
 
-   /** Cost to go for the entire quadratic program. */
-   private final DenseMatrix64F costToGo;
-   /** Cost to go for the cop feedback minimization objective. */
-   private final DenseMatrix64F copFeedbackCostToGo;
-   /** Cost to go for the cmp feedback minimization objective. */
-   private final DenseMatrix64F cmpFeedbackCostToGo;
-   private final DenseMatrix64F dynamicsCostToGo;
 
    /** Number of iterations required for the active set solver to find a solution. */
    private int numberOfIterations;
@@ -132,7 +125,6 @@ public class ICPControllerQPSolver
    private int currentInequalityConstraintIndex;
 
    /** boolean to determine whether or not to compute the cost to go. specified at compile time. */
-   private final boolean computeCostToGo;
    private final boolean autoSetPreviousSolution;
 
    /** boolean indicating whether or not the feedback rate term has been added and can be used. */
@@ -143,9 +135,6 @@ public class ICPControllerQPSolver
    private double maximumFeedbackRate = Double.POSITIVE_INFINITY;
    private double controlDT = Double.POSITIVE_INFINITY;
 
-   private final DenseMatrix64F tmpCost;
-   private final DenseMatrix64F tmpFeedbackCost;
-
    private double copSafeDistanceToEdge = 0.0001;
    private double cmpSafeDistanceFromEdge = Double.POSITIVE_INFINITY;
 
@@ -153,16 +142,14 @@ public class ICPControllerQPSolver
     * Creates the ICP Optimization Solver. Refer to the class documentation: {@link ICPControllerQPSolver}.
     *
     * @param maximumNumberOfCMPVertices maximum number of vertices to be considered by the CoP location constraint.
-    * @param computeCostToGo whether or not to compute the cost to go.
     */
-   public ICPControllerQPSolver(int maximumNumberOfCMPVertices, boolean computeCostToGo)
+   public ICPControllerQPSolver(int maximumNumberOfCMPVertices)
    {
-      this(maximumNumberOfCMPVertices, computeCostToGo, true, null);
+      this(maximumNumberOfCMPVertices, true, null);
    }
 
-   public ICPControllerQPSolver(int maximumNumberOfCMPVertices, boolean computeCostToGo, boolean autoSetPreviousSolution, YoVariableRegistry registry)
+   public ICPControllerQPSolver(int maximumNumberOfCMPVertices, boolean autoSetPreviousSolution, YoVariableRegistry registry)
    {
-      this.computeCostToGo = computeCostToGo;
       this.autoSetPreviousSolution = autoSetPreviousSolution;
 
       hasFeedbackRateTerm = new YoBoolean("icpQPHasFeedbackRateTerm", registry);
@@ -210,13 +197,6 @@ public class ICPControllerQPSolver
       previousFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
       previousCoPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
       previousCMPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
-
-      tmpCost = new DenseMatrix64F(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
-      tmpFeedbackCost = new DenseMatrix64F(2, 1);
-      costToGo = new DenseMatrix64F(1, 1);
-      copFeedbackCostToGo = new DenseMatrix64F(1, 1);
-      cmpFeedbackCostToGo = new DenseMatrix64F(1, 1);
-      dynamicsCostToGo = new DenseMatrix64F(1, 1);
 
 //      solver.setConvergenceThreshold(convergenceThreshold);
       solver.setMaxNumberOfIterations(maxNumberOfIterations);
@@ -583,10 +563,6 @@ public class ICPControllerQPSolver
 
          if (autoSetPreviousSolution)
             setPreviousFeedbackDeltaSolution(copDeltaSolution, cmpDeltaSolution);
-
-         computeWholeCostToGo();
-         if (computeCostToGo)
-            computeCostToGo();
       }
 
       return foundSolution;
@@ -822,60 +798,6 @@ public class ICPControllerQPSolver
       CommonOps.add(cmpFeedbackSolution, copFeedbackSolution, previousFeedbackDeltaSolution);
    }
 
-   /**
-    * Internal method to compute the cost to go of all the tasks.
-    */
-   private void computeWholeCostToGo()
-   {
-      tmpCost.zero();
-      tmpCost.reshape(indexHandler.getNumberOfFreeVariables(), 1);
-
-      costToGo.zero();
-
-      CommonOps.mult(solverInput_H, solution, tmpCost);
-      CommonOps.multTransA(0.5, solution, tmpCost, costToGo);
-
-      CommonOps.multAddTransA(solverInput_h, solution, costToGo); // already scaled by -1.0
-      CommonOps.addEquals(costToGo, solverInputResidualCost);
-   }
-
-   /**
-    * Internal method to compute the cost to go of all the tasks.
-    */
-   private void computeCostToGo()
-   {
-      tmpFeedbackCost.zero();
-      tmpCost.zero();
-
-      tmpFeedbackCost.reshape(2, 1);
-
-      copFeedbackCostToGo.zero();
-      cmpFeedbackCostToGo.zero();
-      dynamicsCostToGo.zero();
-
-      // feedback cost:
-      CommonOps.mult(copFeedbackTaskInput.quadraticTerm, copDeltaSolution, tmpFeedbackCost);
-      CommonOps.multTransA(0.5, copDeltaSolution, tmpFeedbackCost, copFeedbackCostToGo);
-
-      CommonOps.multAddTransA(-1.0, copFeedbackTaskInput.linearTerm, copDeltaSolution, copFeedbackCostToGo);
-      CommonOps.addEquals(copFeedbackCostToGo, copFeedbackTaskInput.residualCost);
-
-      // dynamics cost:
-      CommonOps.mult(dynamicsTaskInput.quadraticTerm, solution, tmpCost);
-      CommonOps.multTransA(0.5, solution, tmpCost, dynamicsCostToGo);
-
-      CommonOps.multAddTransA(-1.0, dynamicsTaskInput.linearTerm, solution, dynamicsCostToGo);
-      CommonOps.addEquals(dynamicsCostToGo, dynamicsTaskInput.residualCost);
-
-      if (indexHandler.hasCMPFeedbackTask())
-      { // cmp feedback cost:
-         CommonOps.mult(cmpFeedbackTaskInput.quadraticTerm, cmpDeltaSolution, tmpFeedbackCost);
-         CommonOps.multTransA(0.5, cmpDeltaSolution, tmpFeedbackCost, cmpFeedbackCostToGo);
-
-         CommonOps.multAddTransA(-1.0, cmpFeedbackTaskInput.linearTerm, cmpDeltaSolution, cmpFeedbackCostToGo);
-         CommonOps.addEquals(cmpFeedbackCostToGo, cmpFeedbackTaskInput.residualCost);
-      }
-   }
 
    /**
     * Gets the CMP Feedback difference solution for the ICP Proportional feedback problem.
@@ -902,41 +824,7 @@ public class ICPControllerQPSolver
       differenceToPack.setY(cmpDeltaSolution.get(1, 0));
    }
 
-   /**
-    * Gets the total cost to go of the optimization problem.
-    * @return cost to go
-    */
-   public double getCostToGo()
-   {
-      return costToGo.get(0);
-   }
 
-   /**
-    * Gets the cost to go of the cop feedback minimization task.
-    * @return cost to go
-    */
-   public double getCoPFeedbackCostToGo()
-   {
-      return copFeedbackCostToGo.get(0);
-   }
-
-   /**
-    * Gets the cost to go of the cmp feedback minimization task.
-    * @return cost to go
-    */
-   public double getCMPFeedbackCostToGo()
-   {
-      return cmpFeedbackCostToGo.get(0);
-   }
-
-   /**
-    * Gets the total cost to go of the optimization problem.
-    * @return cost to go
-    */
-   public double getDynamicsCostToGo()
-   {
-      return dynamicsCostToGo.get(0);
-   }
 
    public void getDynamicsError(FixedFrameVector2DBasics errorToPack)
    {
