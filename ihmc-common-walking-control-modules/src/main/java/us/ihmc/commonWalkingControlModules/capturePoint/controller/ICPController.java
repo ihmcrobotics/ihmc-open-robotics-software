@@ -22,7 +22,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -63,7 +62,7 @@ public class ICPController
    private final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
    private final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
 
-   private final YoFrameVector2D dynamicsError = new YoFrameVector2D(yoNamePrefix + "DynamicsError", worldFrame, registry);
+   private final YoFrameVector2D residualDynamicsError = new YoFrameVector2D(yoNamePrefix + "ResidualDynamicsError", worldFrame, registry);
 
    private final DoubleProvider copFeedbackForwardWeight;
    private final DoubleProvider copFeedbackLateralWeight;
@@ -355,7 +354,7 @@ public class ICPController
       {
          solver.getCoPFeedbackDifference(feedbackCoPDelta);
          solver.getCMPFeedbackDifference(feedbackCMPDelta);
-         solver.getDynamicsError(dynamicsError);
+         solver.getResidualDynamicsError(residualDynamicsError);
       }
 
       boolean checkIfStuck = !isInDoubleSupport.getBooleanValue() || isStationary.getBooleanValue();
