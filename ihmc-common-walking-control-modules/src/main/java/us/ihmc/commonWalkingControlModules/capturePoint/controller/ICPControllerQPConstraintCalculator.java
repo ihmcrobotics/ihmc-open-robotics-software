@@ -5,23 +5,15 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPInequalityInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPIndexHandler;
 
+import static us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerQPSolver.cmpFeedbackIndex;
+import static us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerQPSolver.copFeedbackIndex;
+
 /**
  * This class is used by the {@link ICPOptimizationQPSolver} to calculate variable constraints for the QP Solver
  */
 public class ICPControllerQPConstraintCalculator
 {
-   /** Input calculator that formulates the different objectives and handles adding them to the full program. */
-   private final ICPControllerQPIndexHandler indexHandler;
 
-   /**
-    * Creates the ICP Quadratic Problem Constraint Calculator. Refer to the class documentation: {@link ICPControllerQPConstraintCalculator}.
-    *
-    * @param indexHandler holder of the indices for the different optimization terms.
-    */
-   public ICPControllerQPConstraintCalculator(ICPControllerQPIndexHandler indexHandler)
-   {
-      this.indexHandler = indexHandler;
-   }
 
    /**
     * Computes the inequality constraint for the total feedback (CoP and CMP, if available). This returns a set of 4
@@ -31,13 +23,13 @@ public class ICPControllerQPConstraintCalculator
     * @param maxXMagnitude the maximum feedback magnitude in X.
     * @param maxYMagnitude the maximum feedback magnitude in Y.
     */
-   public void calculateMaxFeedbackMagnitudeConstraint(ICPInequalityInput inputToPack, double maxXMagnitude, double maxYMagnitude)
+   public static void calculateMaxFeedbackMagnitudeConstraint(ICPInequalityInput inputToPack, double maxXMagnitude, double maxYMagnitude, boolean useAngularMomentum)
    {
-      calculateMaxFeedbackMagnitudeConstraint(inputToPack, -maxXMagnitude, maxXMagnitude, -maxYMagnitude, maxYMagnitude);
+      calculateMaxFeedbackMagnitudeConstraint(inputToPack, -maxXMagnitude, maxXMagnitude, -maxYMagnitude, maxYMagnitude, useAngularMomentum);
    }
 
-   public void calculateMaxFeedbackMagnitudeConstraint(ICPInequalityInput inputToPack, double minXMagnitude, double maxXMagnitude, double minYMagnitude,
-                                                       double maxYMagnitude)
+   public static void calculateMaxFeedbackMagnitudeConstraint(ICPInequalityInput inputToPack, double minXMagnitude, double maxXMagnitude, double minYMagnitude,
+                                                       double maxYMagnitude, boolean useAngularMomentum)
    {
       inputToPack.reset();
 
@@ -55,16 +47,17 @@ public class ICPControllerQPConstraintCalculator
       if (hasYMin)
          size += 1;
 
-      inputToPack.reshape(size, indexHandler.getNumberOfFreeVariables());
+      int numberOfFreeVariables = useAngularMomentum ? 4 : 2;
+      inputToPack.reshape(size, numberOfFreeVariables);
 
       int offset = 0;
       if (hasXMax)
       { // set X CoP upper bound
-         inputToPack.Aineq.set(offset, indexHandler.getCoPFeedbackIndex(), 1.0);
+         inputToPack.Aineq.set(offset, copFeedbackIndex, 1.0);
 
-         if (indexHandler.hasCMPFeedbackTask())
+         if (useAngularMomentum)
          { // add in the CMP effects
-            inputToPack.Aineq.set(offset, indexHandler.getCMPFeedbackIndex(), 1.0);
+            inputToPack.Aineq.set(offset, cmpFeedbackIndex, 1.0);
          }
          inputToPack.bineq.set(offset, maxXMagnitude);
 
@@ -73,11 +66,11 @@ public class ICPControllerQPConstraintCalculator
 
       if (hasXMin)
       { // set X CoP lower bound
-         inputToPack.Aineq.set(offset, indexHandler.getCoPFeedbackIndex(), -1.0);
+         inputToPack.Aineq.set(offset, copFeedbackIndex, -1.0);
 
-         if (indexHandler.hasCMPFeedbackTask())
+         if (useAngularMomentum)
          { // add in the CMP effects
-            inputToPack.Aineq.set(offset, indexHandler.getCMPFeedbackIndex(), -1.0);
+            inputToPack.Aineq.set(offset, cmpFeedbackIndex, -1.0);
          }
          inputToPack.bineq.set(offset, -minXMagnitude);
 
@@ -86,11 +79,11 @@ public class ICPControllerQPConstraintCalculator
 
       if (hasYMax)
       { // set X CoP upper and lower bound in the multiplier
-         inputToPack.Aineq.set(offset, indexHandler.getCoPFeedbackIndex() + 1, 1.0);
+         inputToPack.Aineq.set(offset, copFeedbackIndex + 1, 1.0);
 
-         if (indexHandler.hasCMPFeedbackTask())
+         if (useAngularMomentum)
          { // add in the CMP effects
-            inputToPack.Aineq.set(offset, indexHandler.getCMPFeedbackIndex() + 1, 1.0);
+            inputToPack.Aineq.set(offset, cmpFeedbackIndex + 1, 1.0);
          }
          inputToPack.bineq.set(offset, maxYMagnitude);
 
@@ -99,11 +92,11 @@ public class ICPControllerQPConstraintCalculator
 
       if (hasYMin)
       { // set X CoP upper and lower bound in the multiplier
-         inputToPack.Aineq.set(offset, indexHandler.getCoPFeedbackIndex() + 1, -1.0);
+         inputToPack.Aineq.set(offset, copFeedbackIndex + 1, -1.0);
 
-         if (indexHandler.hasCMPFeedbackTask())
+         if (useAngularMomentum)
          { // add in the CMP effects
-            inputToPack.Aineq.set(offset, indexHandler.getCMPFeedbackIndex() + 1, -1.0);
+            inputToPack.Aineq.set(offset, cmpFeedbackIndex + 1, -1.0);
          }
          inputToPack.bineq.set(offset, -minYMagnitude);
       }
@@ -118,9 +111,10 @@ public class ICPControllerQPConstraintCalculator
     * @param previousValue the value of the previous feedback term in X and Y.
     * @param controlDT the time delta at which this solver is run. Should be the control loop DT.
     */
-   public void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack, double maxRate, DenseMatrix64F previousValue, double controlDT)
+   public static void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack, double maxRate, DenseMatrix64F previousValue, double controlDT,
+                                                  boolean useAngularMomentum)
    {
-      calculateMaxFeedbackRateConstraint(inputToPack, maxRate, maxRate, previousValue.get(0), previousValue.get(1), controlDT);
+      calculateMaxFeedbackRateConstraint(inputToPack, maxRate, maxRate, previousValue.get(0), previousValue.get(1), controlDT, useAngularMomentum);
    }
 
    /**
@@ -134,14 +128,14 @@ public class ICPControllerQPConstraintCalculator
     * @param previousYValue the value of the previous feedback term in Y.
     * @param controlDT the time delta at which this solver is run. Should be the control loop DT.
     */
-   public void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack, double maxXRate, double maxYRate, double previousXValue,
-                                                  double previousYValue, double controlDT)
+   public static void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack, double maxXRate, double maxYRate, double previousXValue,
+                                                  double previousYValue, double controlDT, boolean useAngularMomentum)
    {
       double maxXValue = previousXValue + controlDT * maxXRate;
       double minXValue = previousXValue - controlDT * maxXRate;
       double maxYValue = previousYValue + controlDT * maxYRate;
       double minYValue = previousYValue - controlDT * maxYRate;
 
-      calculateMaxFeedbackMagnitudeConstraint(inputToPack, minXValue, maxXValue, minYValue, maxYValue);
+      calculateMaxFeedbackMagnitudeConstraint(inputToPack, minXValue, maxXValue, minYValue, maxYValue, useAngularMomentum);
    }
 }

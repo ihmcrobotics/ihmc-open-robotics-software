@@ -479,7 +479,6 @@ public class ICPController
    {
       double cmpFeedbackWeight = this.scaledCMPFeedbackWeight.getDoubleValue();
 
-      solver.resetCMPFeedbackConditions();
       solver.setCMPFeedbackConditions(cmpFeedbackWeight, useAngularMomentum.getValue());
    }
 
