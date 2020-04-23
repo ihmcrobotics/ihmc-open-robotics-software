@@ -384,4 +384,9 @@ public class ICPController
    {
       this.copConstraintHandler.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
    }
+
+   public FrameVector2DReadOnly getResidualError()
+   {
+      return residualDynamicsError;
+   }
 }
