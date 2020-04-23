@@ -32,15 +32,16 @@ public class ICPControllerQPSolver
    private static final boolean useWarmStart = true;
    private static final int maxNumberOfIterations = 100;
 
+   /** Index for the CoP Feedback action term. */
+   static final int copFeedbackIndex = 0;
+   /** Index for the CMP feedback term. */
+   static final int cmpFeedbackIndex = 2;
+
    private boolean resetActiveSet;
    private boolean previousTickFailed = false;
 
-   /** Index handler that manages the indices for the objectives and solutions in the quadratic program. */
-   private final ICPControllerQPIndexHandler indexHandler;
    /** Input calculator that formulates the different objectives and handles adding them to the full program. */
    private final ICPControllerQPInputCalculator inputCalculator;
-   /** Constraint calculator that formulates the different constraints and handles adding them to the full program. */
-   private final ICPControllerQPConstraintCalculator constraintCalculator;
 
    /**
     * Has the form 0.5 x<sup>T</sup> H x + h x
@@ -129,6 +130,9 @@ public class ICPControllerQPSolver
 
    /** boolean indicating whether or not the feedback rate term has been added and can be used. */
    private final YoBoolean hasFeedbackRateTerm;
+   /** Whether or not to use angular momentum during feedback. This means the CMP will be constrained to being in the support polygon. */
+   private final YoBoolean useAngularMomentum;
+
 
    private double maxFeedbackXMagnitude = Double.POSITIVE_INFINITY;
    private double maxFeedbackYMagnitude = Double.POSITIVE_INFINITY;
@@ -154,10 +158,10 @@ public class ICPControllerQPSolver
 
       hasFeedbackRateTerm = new YoBoolean("icpQPHasFeedbackRateTerm", registry);
       hasFeedbackRateTerm.set(false);
+      useAngularMomentum = new YoBoolean("icpQPUseAngularMomentum", registry);
+      useAngularMomentum.set(false);
 
-      indexHandler = new ICPControllerQPIndexHandler(registry);
-      inputCalculator = new ICPControllerQPInputCalculator(indexHandler);
-      constraintCalculator = new ICPControllerQPConstraintCalculator(indexHandler);
+      inputCalculator = new ICPControllerQPInputCalculator();
 
       int maximumNumberOfFreeVariables = 6;
       int maximumNumberOfLagrangeMultipliers = 8;
@@ -329,17 +333,16 @@ public class ICPControllerQPSolver
     */
    private void reshape()
    {
-      int problemSize = indexHandler.getNumberOfFreeVariables();
+      int problemSize = useAngularMomentum.getBooleanValue() ? 4 : 2;
       int numberOfInequalityConstraints;
 
       copLocationConstraint.setPolygon();
       cmpLocationConstraint.setPolygon();
 
       numberOfInequalityConstraints = copLocationConstraint.getInequalityConstraintSize();
-      if (indexHandler.hasCMPFeedbackTask())
+      if (useAngularMomentum.getBooleanValue() && Double.isFinite(cmpSafeDistanceFromEdge))
       {
-         if (!indexHandler.useAngularMomentum() || Double.isFinite(cmpSafeDistanceFromEdge))
-            numberOfInequalityConstraints += cmpLocationConstraint.getInequalityConstraintSize();
+         numberOfInequalityConstraints += cmpLocationConstraint.getInequalityConstraintSize();
       }
 
       solverInput_H.reshape(problemSize, problemSize);
@@ -374,17 +377,6 @@ public class ICPControllerQPSolver
    }
 
    /**
-    * Resets the controller conditions for the minimization of CMP feedback task, and also sets it so that the controller will not attempt to utilize
-    * angular momentum to stabilize the ICP dynamics.
-    */
-   public void resetCMPFeedbackConditions()
-   {
-      cmpFeedbackWeight.zero();
-      indexHandler.setHasCMPFeedbackTask(false);
-   }
-
-
-   /**
     * Sets the conditions for the minimization of the cmp feedback task. This includes whether or not to utilize angular momentum to help stabilize
     * the ICP dynamics, as well as the weight on its minimization.
     *
@@ -395,8 +387,7 @@ public class ICPControllerQPSolver
    {
       MatrixTools.setDiagonal(this.cmpFeedbackWeight, cmpFeedbackWeight);
 
-      indexHandler.setHasCMPFeedbackTask(true);
-      indexHandler.setUseAngularMomentum(useAngularMomentum);
+      this.useAngularMomentum.set(useAngularMomentum);
    }
 
    /**
@@ -515,8 +506,6 @@ public class ICPControllerQPSolver
     */
    public boolean compute(FrameVector2DReadOnly currentICPError, FramePoint2DReadOnly desiredCoP, FrameVector2DReadOnly desiredCMPOffset)
    {
-      indexHandler.computeProblemSize();
-
       reset();
       reshape();
 
@@ -531,7 +520,7 @@ public class ICPControllerQPSolver
 
       addCoPFeedbackTask();
 
-      if (indexHandler.hasCMPFeedbackTask())
+      if (useAngularMomentum.getBooleanValue())
          addCMPFeedbackTask();
 
       if (hasFeedbackRateTerm.getBooleanValue())
@@ -542,7 +531,7 @@ public class ICPControllerQPSolver
       if (copLocationConstraint.getInequalityConstraintSize() > 0)
          addCoPLocationConstraint();
 
-      if (indexHandler.hasCMPFeedbackTask() && cmpLocationConstraint.getInequalityConstraintSize() > 0)
+      if (useAngularMomentum.getBooleanValue() && cmpLocationConstraint.getInequalityConstraintSize() > 0)
          addCMPLocationConstraint();
 
       if (!previousTickFailed)
@@ -599,8 +588,10 @@ public class ICPControllerQPSolver
    private void addFeedbackRateTask()
    {
       inputCalculator.computeCoPFeedbackRateTask(feedbackRateTaskInput, copCMPFeedbackRateWeight, previousCoPFeedbackDeltaSolution);
-      inputCalculator.computeCMPFeedbackRateTask(feedbackRateTaskInput, copCMPFeedbackRateWeight, previousCMPFeedbackDeltaSolution);
-      inputCalculator.computeFeedbackRateTask(feedbackRateTaskInput, feedbackRateWeight, previousFeedbackDeltaSolution);
+      if (useAngularMomentum.getBooleanValue())
+         inputCalculator.computeCMPFeedbackRateTask(feedbackRateTaskInput, copCMPFeedbackRateWeight, previousCMPFeedbackDeltaSolution);
+
+      inputCalculator.computeFeedbackRateTask(feedbackRateTaskInput, feedbackRateWeight, previousFeedbackDeltaSolution, useAngularMomentum.getBooleanValue());
       inputCalculator.submitFeedbackRateTask(feedbackRateTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
@@ -618,7 +609,7 @@ public class ICPControllerQPSolver
       copLocationConstraint.formulateConstraint();
 
       int constraintSize = copLocationConstraint.getInequalityConstraintSize();
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getCoPFeedbackIndex(), copLocationConstraint.Aineq, 0, 0,
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, copFeedbackIndex, copLocationConstraint.Aineq, 0, 0,
                                  constraintSize, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, copLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
@@ -635,7 +626,7 @@ public class ICPControllerQPSolver
    private void addCMPLocationConstraint()
    {
       double cmpConstraintBound;
-      if (indexHandler.useAngularMomentum())
+      if (useAngularMomentum.getBooleanValue())
          cmpConstraintBound = -cmpSafeDistanceFromEdge;
       else
          cmpConstraintBound = copSafeDistanceToEdge;
@@ -648,9 +639,9 @@ public class ICPControllerQPSolver
       cmpLocationConstraint.formulateConstraint();
 
       int constraintSize = cmpLocationConstraint.getInequalityConstraintSize();
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getCoPFeedbackIndex(), cmpLocationConstraint.Aineq, 0, 0,
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, copFeedbackIndex, cmpLocationConstraint.Aineq, 0, 0,
                                  constraintSize, 2, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, indexHandler.getCMPFeedbackIndex(), cmpLocationConstraint.Aineq, 0, 0,
+      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, cmpFeedbackIndex, cmpLocationConstraint.Aineq, 0, 0,
                                  constraintSize, 2, 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, cmpLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
@@ -681,7 +672,7 @@ public class ICPControllerQPSolver
    private void addDynamicConstraintTask()
    {
       inputCalculator
-            .computeDynamicsTask(dynamicsTaskInput, currentICPError, feedbackGain, dynamicsWeight);
+            .computeDynamicsTask(dynamicsTaskInput, currentICPError, feedbackGain, dynamicsWeight, useAngularMomentum.getBooleanValue());
       inputCalculator.submitDynamicsTask(dynamicsTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
@@ -690,7 +681,7 @@ public class ICPControllerQPSolver
     */
    private void addMaximumFeedbackMagnitudeConstraint()
    {
-      constraintCalculator.calculateMaxFeedbackMagnitudeConstraint(feedbackLimitConstraint, maxFeedbackXMagnitude, maxFeedbackYMagnitude);
+      ICPControllerQPConstraintCalculator.calculateMaxFeedbackMagnitudeConstraint(feedbackLimitConstraint, maxFeedbackXMagnitude, maxFeedbackYMagnitude, useAngularMomentum.getBooleanValue());
 
       int feedbackMagnitudeConstraintSize = feedbackLimitConstraint.getNumberOfConstraints();
       int numberOfVariables = feedbackLimitConstraint.getNumberOfVariables();
@@ -709,7 +700,7 @@ public class ICPControllerQPSolver
     */
    private void addMaximumFeedbackRateConstraint()
    {
-      constraintCalculator.calculateMaxFeedbackRateConstraint(feedbackRateLimitConstraint, maximumFeedbackRate, previousFeedbackDeltaSolution, controlDT);
+      ICPControllerQPConstraintCalculator.calculateMaxFeedbackRateConstraint(feedbackRateLimitConstraint, maximumFeedbackRate, previousFeedbackDeltaSolution, controlDT, useAngularMomentum.getBooleanValue());
 
       int feedbackRateConstraintSize = feedbackRateLimitConstraint.getNumberOfConstraints();
       int numberOfVariables = feedbackLimitConstraint.getNumberOfVariables();
@@ -770,7 +761,7 @@ public class ICPControllerQPSolver
     */
    private void extractCoPFeedbackDeltaSolution(DenseMatrix64F copFeedbackSolutionToPack)
    {
-      MatrixTools.setMatrixBlock(copFeedbackSolutionToPack, 0, 0, solution, indexHandler.getCoPFeedbackIndex(), 0, 2, 1, 1.0);
+      MatrixTools.setMatrixBlock(copFeedbackSolutionToPack, 0, 0, solution, copFeedbackIndex, 0, 2, 1, 1.0);
    }
 
    /**
@@ -780,8 +771,8 @@ public class ICPControllerQPSolver
     */
    private void extractCMPFeedbackDeltaSolution(DenseMatrix64F cmpDeltaSolutionToPack)
    {
-      if (indexHandler.hasCMPFeedbackTask())
-         MatrixTools.setMatrixBlock(cmpDeltaSolutionToPack, 0, 0, solution, indexHandler.getCMPFeedbackIndex(), 0, 2, 1, 1.0);
+      if (useAngularMomentum.getBooleanValue())
+         MatrixTools.setMatrixBlock(cmpDeltaSolutionToPack, 0, 0, solution, cmpFeedbackIndex, 0, 2, 1, 1.0);
       else
          cmpDeltaSolutionToPack.zero();
    }
