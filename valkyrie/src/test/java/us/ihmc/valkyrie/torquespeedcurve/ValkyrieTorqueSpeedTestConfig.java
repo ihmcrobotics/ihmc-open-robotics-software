@@ -26,6 +26,7 @@ class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 
 	public String testCase;             // for push recovery, specifies which case to run
 	public boolean keepUp;              // whether to keep up the GUI after running
+	public boolean createVideo;         // whether to create a video (requires that showGui should be set to true)
 	public double [] forceVector; // for push recovery, specifies direction of force
 	public double forceMagnitude;       // for push recovery, specifies magnitude of the force
 	public double forceDuration;        // for push recovery, specifies the duration of the force
@@ -108,6 +109,7 @@ class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 		velocityLimits = new HashMap<String, Double>();
 		positionLimits = new HashMap<String, ArrayList<Double> >();
 		showGui = true;
+		createVideo = true;
 		minimizeJointTorques = false;
 		testType = TestType.STAIRS;
 		footstepsFile = null;

@@ -30,6 +30,7 @@ import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.valkyrie.testsupport.ValkyrieTestExporter;
+import us.ihmc.valkyrie.torquespeedcurve.TorqueSpeedTestResult;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 
@@ -60,7 +61,7 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 		return testSucceeded;
 	}
 
-	public File PushICPOptimiWhileInSwing(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
+	public TorqueSpeedTestResult PushICPOptimiWhileInSwing(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
 	{
 		String dataNameSuffix = "PushICPOptimiWhileInSwing";
 		String info = "PushICPOptimiWhileInSwing";
@@ -68,7 +69,7 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 
 		setupTest(getScriptFilePath(), true, false);
 		if (!runSim(drcSimulationTestHelper, 1.0)) {
-			return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, false);	
+			return new TorqueSpeedTestResult(info, dataNameSuffix, false);			
 		}
 
 		// push timing:
@@ -82,11 +83,11 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 		forceDirection.normalize();
 		pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
 		
-		testSucceeded = runSim(drcSimulationTestHelper, simulationTime);		
-		return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, testSucceeded);
+		testSucceeded = runSim(drcSimulationTestHelper, simulationTime);	
+		return new TorqueSpeedTestResult(info, dataNameSuffix, testSucceeded);		
 	}
 
-	public File PushWhileInSwing(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
+	public TorqueSpeedTestResult PushWhileInSwing(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
 	{
 		String dataNameSuffix = "PushWhileInSwing";
 		String info = "PushWhileInSwing";
@@ -94,7 +95,7 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 
 		setupTest(getScriptFilePath(), true, false);
 		if (!runSim(drcSimulationTestHelper, 1.0)) {
-			return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, false);	
+			return new TorqueSpeedTestResult(info, dataNameSuffix, false);	
 		}		
 		
 		// push timing:
@@ -111,10 +112,10 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 		
         testSucceeded = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(simulationTime);
 		
-		return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, testSucceeded);	
+		return new TorqueSpeedTestResult(info, dataNameSuffix, testSucceeded);			
 	}
 
-	public File RecoveringWithSwingSpeedUpWhileInSwing(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
+	public TorqueSpeedTestResult RecoveringWithSwingSpeedUpWhileInSwing(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
 	{
 		String dataNameSuffix = "RecoveringWithSwingSpeedUpWhileInSwing";
 		String info = "RecoveringWithSwingSpeedUpWhileInSwing";
@@ -122,7 +123,7 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 
 		setupTest(getScriptFilePath(), false, false);
 		if (!runSim(drcSimulationTestHelper, 1.0)) {
-			return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, false);	
+			return new TorqueSpeedTestResult(info, dataNameSuffix, false);			
 		}		
 
 		// push timing:
@@ -137,10 +138,10 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 		pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
    		testSucceeded = runSim(drcSimulationTestHelper, simulationTime);
 		
-		return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, testSucceeded);
+		return new TorqueSpeedTestResult(info, dataNameSuffix, testSucceeded);		
 	}
 
-	public File PushWhileInTransfer(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
+	public TorqueSpeedTestResult PushWhileInTransfer(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
 	{
 		setupTest(getScriptFilePath(), true, false);
 		String dataNameSuffix = "PushWhileInTransfer";
@@ -148,7 +149,7 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 		boolean testSucceeded = false;
 
 		if (!runSim(drcSimulationTestHelper, 1.0)) {
-			return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, false);	
+			return new TorqueSpeedTestResult(info, dataNameSuffix, false);			
 		}		
 
 		// push timing:
@@ -163,10 +164,10 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 		pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
    		testSucceeded = runSim(drcSimulationTestHelper, simulationTime);
 		
-		return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, testSucceeded);
+		return new TorqueSpeedTestResult(info, dataNameSuffix, testSucceeded);		
 	}
 
-	public File PushWhileStanding(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
+	public TorqueSpeedTestResult PushWhileStanding(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
 	{
 		String dataNameSuffix = "PushWhileStanding";
 		String info = "PushWhileStanding";
@@ -174,7 +175,7 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 
 		setupTest(null, true, false);
 		if (!runSim(drcSimulationTestHelper, 1.0)) {
-			return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, false);	
+			return new TorqueSpeedTestResult(info, dataNameSuffix, false);			
 		}		
 
 		// push timing:
@@ -189,10 +190,10 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 		pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
    		testSucceeded = runSim(drcSimulationTestHelper, simulationTime);
 		
-		return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, testSucceeded);	
+		return new TorqueSpeedTestResult(info, dataNameSuffix, testSucceeded);			
 	}
 
-	public File PushWhileStandingRecoveringAfterControllerFailureKickedIn(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
+	public TorqueSpeedTestResult PushWhileStandingRecoveringAfterControllerFailureKickedIn(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
 	{
 		String dataNameSuffix = "PushWhileStandingRecoveringAfterControllerFailureKickedIn";
 		String info = "PushWhileStandingRecoveringAfterControllerFailureKickedIn";
@@ -200,7 +201,7 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 
 		setupTest(null, false, true);
 		if (!runSim(drcSimulationTestHelper, 1.0)) {
-			return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, false);	
+			return new TorqueSpeedTestResult(info, dataNameSuffix, false);			
 		}		
 
 		// push timing:
@@ -215,10 +216,10 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 		pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
    		testSucceeded = runSim(drcSimulationTestHelper, simulationTime);
 		
-		return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, testSucceeded);	
+		return new TorqueSpeedTestResult(info, dataNameSuffix, testSucceeded);			
 	}
 
-	public File LongForwardPushWhileStanding(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
+	public TorqueSpeedTestResult LongForwardPushWhileStanding(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
 	{
 		String dataNameSuffix = "LongForwardPushWhileStanding";
 		String info = "LongForwardPushWhileStanding";
@@ -226,7 +227,7 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 
 		setupTest(null, true, false);
 		if (!runSim(drcSimulationTestHelper, 1.0)) {
-			return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, false);	
+			return new TorqueSpeedTestResult(info, dataNameSuffix, false);		
 		}		
 		
 		// push timing:
@@ -241,10 +242,10 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 		pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
     	testSucceeded = runSim(drcSimulationTestHelper, duration + 2.0);
 
-    	return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, testSucceeded);	
+		return new TorqueSpeedTestResult(info, dataNameSuffix, testSucceeded);		
 	}
 
-	public File LongBackwardPushWhileStanding(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
+	public TorqueSpeedTestResult LongBackwardPushWhileStanding(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
 	{
 		String dataNameSuffix = "LongBackwardPushWhileStanding";
 		String info = "LongBackwardPushWhileStanding";
@@ -253,7 +254,7 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 		setupTest(null, true, false);
 		
 		if (!runSim(drcSimulationTestHelper, 1.0)) {
-			return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, false);	
+			return new TorqueSpeedTestResult(info, dataNameSuffix, false);		
 		}		
 
 		// push timing:
@@ -268,17 +269,17 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 		pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
    		testSucceeded = runSim(drcSimulationTestHelper, duration + 2.0);
 		
-		return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, testSucceeded);	
+		return new TorqueSpeedTestResult(info, dataNameSuffix, testSucceeded);		
 	}
 
-	public File RecoveryWhileInFlamingoStance(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
+	public TorqueSpeedTestResult RecoveryWhileInFlamingoStance(Vector3D forceDirection, double magnitude, double duration, File outputDir) throws SimulationExceededMaximumTimeException
 	{
 		String dataNameSuffix = "RecoveryWhileInFlamingoStance";
 		String info = "RecoveryWhileInFlamingoStance";
 
 		setupTest(null, false, false);
 		if (!runSim(drcSimulationTestHelper, 1.0)) {
-			return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, false);	
+			return new TorqueSpeedTestResult(info, dataNameSuffix, false);		
 		}		
 		RobotSide footSide = RobotSide.LEFT;
 		FramePose3D footPose = new FramePose3D(
@@ -291,7 +292,7 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 		FootTrajectoryMessage footPosePacket = HumanoidMessageTools.createFootTrajectoryMessage(footSide, 0.6, desiredFootPosition, desiredFootOrientation);
 		drcSimulationTestHelper.publishToController(footPosePacket);
 		if (!runSim(drcSimulationTestHelper, 2.0)) {
-			return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, false);	
+			return new TorqueSpeedTestResult(info, dataNameSuffix, false);			
 		}		
 
 		// push timing:
@@ -305,7 +306,7 @@ public class ModifiableValkyriePushRecoveryTest extends ValkyriePushRecoveryTest
 		forceDirection.normalize();      
 		pushRobotController.applyForceDelayed(pushCondition, delay, forceDirection, magnitude, duration);
 		boolean testSucceeded = runSim(drcSimulationTestHelper, 1.5);
-		return ValkyrieTestExporter.exportSimData(drcSimulationTestHelper.getSimulationConstructionSet(), outputDir, dataNameSuffix, info, testSucceeded);	
+		return new TorqueSpeedTestResult(info, dataNameSuffix, testSucceeded);			
 	}
 
 	private void setupTest(String scriptName, boolean enablePushRecoveryControlModule, boolean enablePushRecoveryOnFailure) throws SimulationExceededMaximumTimeException

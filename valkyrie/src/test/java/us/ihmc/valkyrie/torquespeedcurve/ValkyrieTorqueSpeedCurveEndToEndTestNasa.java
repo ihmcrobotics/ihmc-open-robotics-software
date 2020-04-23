@@ -98,6 +98,14 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 		MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
 	}
 
+	public SimulationConstructionSet getScsInstance() {
+		if (drcSimulationTestHelper != null) {
+			return drcSimulationTestHelper.getSimulationConstructionSet();
+		} else {
+			return null;
+		}
+	}
+
 	public void destroySimulationAndRecycleMemory() {
 		if (simulationTestingParameters.getKeepSCSUp()) {
 			LogTools.info("Sleeping forever!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
@@ -123,13 +131,12 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 		}
 	}
 
-	public File testStepUpWithSquareUp(DRCRobotModel robotModel, double stepStartInches, double stepHeightInches,
+	public TorqueSpeedTestResult testStepUpWithSquareUp(DRCRobotModel robotModel, double stepStartInches, double stepHeightInches,
 			WalkingControllerParameters walkingControllerParameters, File dataOutputFolder)
 			throws SimulationExceededMaximumTimeException {
 		showMemoryUsageBeforeTest();
 		BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-		try {
 			final double inchesToMeters = 2.54 / 100.0;
 			double stepStart = inchesToMeters * stepStartInches;
 			double stepHeight = inchesToMeters * stepHeightInches;
@@ -177,20 +184,15 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 			String dataNameSuffix = "StepUpWithSquareUp" + stepHeightInches;
 			String info = "Square up -> step up a " + stepHeightInches + " inches high step -> square up.";
 
-			return ValkyrieTestExporter.exportSimData(scs, dataOutputFolder, dataNameSuffix, info, success);
-		} finally {
-			BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
-			destroySimulationAndRecycleMemory();
-		}
+			return new TorqueSpeedTestResult(info, dataNameSuffix, success);
 	}
 
-	public File testStepUpWithoutSquareUp(DRCRobotModel robotModel, double stepStartInches, double stepHeightInches,
+	public TorqueSpeedTestResult testStepUpWithoutSquareUp(DRCRobotModel robotModel, double stepStartInches, double stepHeightInches,
 			WalkingControllerParameters walkingControllerParameters, FootstepDataListMessage recordedFootsteps,
 			File dataOutputFolder) throws SimulationExceededMaximumTimeException {
 		showMemoryUsageBeforeTest();
 		BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-		try {
 			SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
 			double stepLength = steppingParameters.getDefaultStepLength();
 			double stepWidth = steppingParameters.getInPlaceWidth();
@@ -257,11 +259,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 			String dataNameSuffix = "StepUpWithoutSquareUp";
 			String info = "Step up a " + stepHeightInches + " inches high step while walking";
 
-			return ValkyrieTestExporter.exportSimData(scs, dataOutputFolder, dataNameSuffix, info, success);
-		} finally {
-			BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
-			destroySimulationAndRecycleMemory();
-		}
+			return new TorqueSpeedTestResult(info, dataNameSuffix, success);
 	}
 
 	/**
@@ -276,13 +274,12 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 		maxStepHeightChange.setValueFromDouble(0.5);
 	}
 
-	public File testStepDown(DRCRobotModel robotModel, double stepStartInches, double stepHeightInches,
+	public TorqueSpeedTestResult testStepDown(DRCRobotModel robotModel, double stepStartInches, double stepHeightInches,
 			WalkingControllerParameters walkingControllerParameters, FootstepDataListMessage recordedFootsteps,
 			File dataOutputFolder) throws SimulationExceededMaximumTimeException {
 		showMemoryUsageBeforeTest();
 		BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-		try {
 			SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
 			double stepLength = steppingParameters.getDefaultStepLength();
 			double stepWidth = steppingParameters.getInPlaceWidth();
@@ -357,74 +354,72 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 			String dataNameSuffix = "StepUpWithoutSquareUp";
 			String info = "Step up a " + stepHeightInches + " inches high step while walking";
 
-			return ValkyrieTestExporter.exportSimData(scs, dataOutputFolder, dataNameSuffix, info, success);
-		} finally {
-			BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
-			destroySimulationAndRecycleMemory();
-		}
+			return new TorqueSpeedTestResult(info, dataNameSuffix, success);
 	}
-	
-	public File testSpeedWalk(DRCRobotModel robotModel, WalkingControllerParameters walkingControllerParameters,
-			File dataOutputFolder, boolean keepUp) throws SimulationExceededMaximumTimeException
-	{
+
+	public TorqueSpeedTestResult testSpeedWalk(DRCRobotModel robotModel,
+			WalkingControllerParameters walkingControllerParameters, File dataOutputFolder, boolean keepUp)
+			throws SimulationExceededMaximumTimeException {
 		showMemoryUsageBeforeTest();
 		BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-		
-		try {
+
 			SlopeEnvironment ground = new SlopeEnvironment(0.0);
 			HeightMapWithNormals heightMap = ground.getTerrainObject3D().getHeightMapIfAvailable();
 
 			// Enable perfect sensors
 			simulationTestingParameters.setUsePefectSensors(true);
 			simulationTestingParameters.setRunMultiThreaded(true);
-			
+
 			drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, ground);
 			drcSimulationTestHelper.setInitialSetup(initialSetupForFlat(robotModel));
 			drcSimulationTestHelper.createSimulation("Walking");
 			setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
 			SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
 			final double courseLength = 5.0; // Length of course in meters. Should be long enough that course time
-			                                 // is not dominated by startup time, and short enough that tests
-			                                 // don't take forever to run.
-			
-			double cameraX = courseLength/2.0;
+												// is not dominated by startup time, and short enough that tests
+												// don't take forever to run.
+
+			double cameraX = courseLength / 2.0;
 			double cameraZ = 0.8 + heightMap.heightAt(cameraX, 0.0, 0.0);
 			scs.setCameraFix(cameraX, 0.0, cameraZ);
 			scs.setCameraPosition(cameraX, -8.0, cameraZ);
 			setCustomSteppingParams(scs);
-			
+
 			// Enable push recovery
 			YoBoolean enable = (YoBoolean) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
 			enable.set(true);
-			YoBoolean enableOnFailure = (YoBoolean) scs.getVariable(WalkingHighLevelHumanoidController.class.getSimpleName(),
-					"enablePushRecoveryOnFailure");
+			YoBoolean enableOnFailure = (YoBoolean) scs.getVariable(
+					WalkingHighLevelHumanoidController.class.getSimpleName(), "enablePushRecoveryOnFailure");
 			enableOnFailure.set(true);
-			
 
 			boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 			double walkingDuration = -1.0;
+
+			SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+			final double swingHeight = steppingParameters.getDefaultSwingHeightFromStanceFoot() * 0.6;
+			final double swingDuration = 0.35;
+			final double transferDuration = 0.15;
+			final double stepLength = steppingParameters.getMaxStepLength();
 
 			if (success) {
 				scs.setInPoint();
 
 				FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
-				SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
 				double stepWidth = steppingParameters.getInPlaceWidth();
 
-				double stepLength = steppingParameters.getMaxStepLength();
-				final double swingHeight = steppingParameters.getDefaultSwingHeightFromStanceFoot()*0.6;
 				// Set up the steps. Initial step is at the robot location.
-				stepTo(0.0, courseLength, stepLength, stepWidth, 
-						RobotSide.LEFT, heightMap, footsteps, false, false);
+				stepTo(0.0, courseLength, stepLength, stepWidth, RobotSide.LEFT, heightMap, footsteps, false, false);
 				setTimings(footsteps, walkingControllerParameters);
-				//footsteps.getFootstepDataList().forEach(footstep -> footstep.setTrajectoryType(TrajectoryType.CUSTOM.toByte()));
+				// footsteps.getFootstepDataList().forEach(footstep ->
+				// footstep.setTrajectoryType(TrajectoryType.CUSTOM.toByte()));
 				footsteps.getFootstepDataList().forEach(footstep -> footstep.setSwingHeight(swingHeight));
-				footsteps.getFootstepDataList().forEach(footstep -> footstep.setSwingDuration(0.35));
-				footsteps.getFootstepDataList().forEach(footstep -> footstep.setTransferDuration(0.15));
-				//computeDefaultWaypointPrositions(footsteps, new double[] {0.15, 0.75}, swingHeight);
-				//footsteps.setOffsetFootstepsHeightWithExecutionError(true);
-				
+				footsteps.getFootstepDataList().forEach(footstep -> footstep.setSwingDuration(swingDuration));
+				footsteps.getFootstepDataList().forEach(footstep -> footstep.setTransferDuration(transferDuration));
+				// computeDefaultWaypointPrositions(footsteps, new double[] {0.15, 0.75},
+				// swingHeight);
+				// footsteps.setOffsetFootstepsHeightWithExecutionError(true);
+
 				System.out.println(footsteps.toString());
 
 				drcSimulationTestHelper.publishToController(footsteps);
@@ -435,33 +430,28 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 
 			String dataNameSuffix = "Flat_Ground_Walking";
 			final double metersPerSecToMilesPerHour = 2.23694;
-			
+
 			String info = "Speed walking\n";
 
 			if (success) {
-				info += String.format("\nWalking time: %f s for %f m = %f mph\n", 
-						walkingDuration, courseLength, metersPerSecToMilesPerHour*courseLength/walkingDuration);
+				info += String.format(
+						"\nWalking time: %f s for %f m = %f mph\nStep length = %f\nSwing height = %f\nSwing duration = %f\nTransfer duration = %f\n",
+						walkingDuration, courseLength, metersPerSecToMilesPerHour * courseLength / walkingDuration,
+						stepLength, swingHeight, swingDuration, transferDuration);
 				System.out.println(info);
 			}
-			
-			return ValkyrieTestExporter.exportSimData(scs, dataOutputFolder, dataNameSuffix, info, success);
-		}
-		finally
-		{
-			if (!keepUp) {
-				BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
-				destroySimulationAndRecycleMemory();
-			}
-		}
+
+			return new TorqueSpeedTestResult(info, dataNameSuffix, success);
+			// return ValkyrieTestExporter.exportSimData(scs, dataOutputFolder,
+			// dataNameSuffix, info, success);
 	}
 
-	public File testWalkSlope(DRCRobotModel robotModel, double slopeAngle, double stepLength,
+	public TorqueSpeedTestResult testWalkSlope(DRCRobotModel robotModel, double slopeAngle, double stepLength,
 			WalkingControllerParameters walkingControllerParameters, FootstepDataListMessage recordedFootsteps,
 			File dataOutputFolder) throws SimulationExceededMaximumTimeException {
 		showMemoryUsageBeforeTest();
 		BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-		try {
 			SlopeEnvironment slope = new SlopeEnvironment(slopeAngle);
 
 			drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, slope);
@@ -509,85 +499,76 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 			String info = "Walking " + (slopeAngle < 0.0 ? "up" : "down") + " slope of "
 					+ Math.round(Math.toDegrees(Math.abs(slopeAngle))) + " degrees";
 
-			return ValkyrieTestExporter.exportSimData(scs, dataOutputFolder, dataNameSuffix, info, success);
-		} finally {
-			BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
-			destroySimulationAndRecycleMemory();
-		}
+			return new TorqueSpeedTestResult(info, dataNameSuffix, success);
 	}
 
-	public File testUpstairs(DRCRobotModel robotModel, double stairStepHeightInches, int numberOfStairSteps,
-			WalkingControllerParameters walkingControllerParameters, File dataOutputFolder)
+	public TorqueSpeedTestResult testUpstairs(DRCRobotModel robotModel, double stairStepHeightInches,
+			int numberOfStairSteps, WalkingControllerParameters walkingControllerParameters, File dataOutputFolder)
 			throws SimulationExceededMaximumTimeException {
+
 		showMemoryUsageBeforeTest();
 		BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
-		try {
-			double stairStepHeight = 2.54 / 100.0 * stairStepHeightInches;
-			double stairStepLength = 1.5 * walkingControllerParameters.getSteppingParameters().getActualFootLength();
-			StaircaseEnvironment staircase = new StaircaseEnvironment(numberOfStairSteps, stairStepHeight,
-					stairStepLength);
 
-			drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, staircase);
-			drcSimulationTestHelper.setInitialSetup(initialSetupForFlat(robotModel));
-			drcSimulationTestHelper.createSimulation("Stairs");
-			setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
-			SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
-			setCustomSteppingParams(scs);
+		double stairStepHeight = 2.54 / 100.0 * stairStepHeightInches;
+		double stairStepLength = 1.5 * walkingControllerParameters.getSteppingParameters().getActualFootLength();
+		StaircaseEnvironment staircase = new StaircaseEnvironment(numberOfStairSteps, stairStepHeight, stairStepLength);
 
-			double xGoal = 0.6 + numberOfStairSteps * stairStepLength + 1.0e-3;
-			double cameraX = xGoal / 2.0;
-			double cameraZ = 0.8
-					+ staircase.getCombinedTerrainObject3D().getHeightMapIfAvailable().heightAt(cameraX, 0.0, 10.0);
-			scs.setCameraFix(cameraX, 0.0, cameraZ);
-			scs.setCameraPosition(cameraX, -8.0, cameraZ);
+		drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, staircase);
+		drcSimulationTestHelper.setInitialSetup(initialSetupForFlat(robotModel));
+		drcSimulationTestHelper.createSimulation("Stairs");
+		setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
+		SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+		setCustomSteppingParams(scs);
 
-			boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+		double xGoal = 0.6 + numberOfStairSteps * stairStepLength + 1.0e-3;
+		double cameraX = xGoal / 2.0;
+		double cameraZ = 0.8
+				+ staircase.getCombinedTerrainObject3D().getHeightMapIfAvailable().heightAt(cameraX, 0.0, 10.0);
+		scs.setCameraFix(cameraX, 0.0, cameraZ);
+		scs.setCameraPosition(cameraX, -8.0, cameraZ);
 
-			if (success) {
+		boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
 
-				FramePoint3D pelvisPosition = new FramePoint3D(
-						drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint());
-				pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
-				double desiredHeight = pelvisPosition.getZ() + 0.01;
-				PelvisHeightTrajectoryMessage pelvisHeightMessage = HumanoidMessageTools
-						.createPelvisHeightTrajectoryMessage(0.2, desiredHeight);
-				drcSimulationTestHelper.publishToController(pelvisHeightMessage);
-				success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
-				assertTrue(success);
-				scs.setInPoint();
+		if (success) {
 
-				FootstepDataListMessage footsteps = new FootstepDataListMessage();
+			FramePoint3D pelvisPosition = new FramePoint3D(
+					drcSimulationTestHelper.getControllerFullRobotModel().getRootJoint().getFrameAfterJoint());
+			pelvisPosition.changeFrame(ReferenceFrame.getWorldFrame());
+			double desiredHeight = pelvisPosition.getZ() + 0.01;
+			PelvisHeightTrajectoryMessage pelvisHeightMessage = HumanoidMessageTools
+					.createPelvisHeightTrajectoryMessage(0.2, desiredHeight);
+			drcSimulationTestHelper.publishToController(pelvisHeightMessage);
+			success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+			assertTrue(success);
+			scs.setInPoint();
 
-				SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
-				double stepLength = steppingParameters.getDefaultStepLength();
-				double stepWidth = steppingParameters.getInPlaceWidth();
+			FootstepDataListMessage footsteps = new FootstepDataListMessage();
 
-				HeightMapWithNormals heightMap = staircase.getTerrainObject3D().getHeightMapIfAvailable();
+			SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+			double stepLength = steppingParameters.getDefaultStepLength();
+			double stepWidth = steppingParameters.getInPlaceWidth();
 
-				double firstStep = 0.6;
-				stepTo(0.0, firstStep - 0.5 * stairStepLength, stepLength, stepWidth, RobotSide.LEFT, heightMap,
-						footsteps, false, false);
-				RobotSide firstSide = RobotSide.fromByte(footsteps.getFootstepDataList().getLast().getRobotSide())
-						.getOppositeSide();
-				stepTo(firstStep + 0.5 * stairStepLength, xGoal, stairStepLength, stepWidth, firstSide, heightMap,
-						footsteps, false, true);
-				setTimings(footsteps, walkingControllerParameters);
+			HeightMapWithNormals heightMap = staircase.getTerrainObject3D().getHeightMapIfAvailable();
 
-				drcSimulationTestHelper.publishToController(footsteps);
+			double firstStep = 0.6;
+			stepTo(0.0, firstStep - 0.5 * stairStepLength, stepLength, stepWidth, RobotSide.LEFT, heightMap, footsteps,
+					false, false);
+			RobotSide firstSide = RobotSide.fromByte(footsteps.getFootstepDataList().getLast().getRobotSide())
+					.getOppositeSide();
+			stepTo(firstStep + 0.5 * stairStepLength, xGoal, stairStepLength, stepWidth, firstSide, heightMap,
+					footsteps, false, true);
+			setTimings(footsteps, walkingControllerParameters);
 
-				double walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps,
-						walkingControllerParameters);
-				success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 1.0);
-			}
+			drcSimulationTestHelper.publishToController(footsteps);
 
-			String dataNameSuffix = "Upstairs" + stairStepHeightInches + "StepHeight";
-			String info = "Walking upstairs with " + stairStepHeightInches + " inches high steps";
-
-			return ValkyrieTestExporter.exportSimData(scs, dataOutputFolder, dataNameSuffix, info, success);
-		} finally {
-			BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
-			destroySimulationAndRecycleMemory();
+			double walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
+			success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 1.0);
 		}
+
+		String dataNameSuffix = "Upstairs" + stairStepHeightInches + "StepHeight";
+		String info = "Walking upstairs with " + stairStepHeightInches + " inches high steps";
+
+		return new TorqueSpeedTestResult(info, dataNameSuffix, success);
 	}
 
 	private static ValkyrieModifiableInitialSetup initialSetupForSlope(double slopeAngle, HeightMap heightMap,

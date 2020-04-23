@@ -68,6 +68,7 @@ import us.ihmc.valkyrie.parameters.ValkyrieJointMap;
 import us.ihmc.valkyrie.parameters.ValkyrieWalkingControllerParameters;
 import us.ihmc.valkyrie.pushRecovery.ModifiableValkyriePushRecoveryTest;
 import us.ihmc.valkyrie.testsupport.ModifiableValkyrieRobotModel;
+import us.ihmc.valkyrie.testsupport.ValkyrieTestExporter;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieJointTorqueLimitMutator;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieTorqueSpeedCurveEndToEndTestNasa;
 import us.ihmc.valkyrie.torquespeedcurve.ValkyrieTorqueSpeedTestConfig;
@@ -114,13 +115,12 @@ public class TorqueSpeedTestRunner {
 		return argumentParser;
 	}
 	
-	public static File runPushRecoveryTest(ValkyrieRobotModel robot, ValkyrieTorqueSpeedTestConfig config, File outputPrefixDirectory)
+	public static TorqueSpeedTestResult runPushRecoveryTest(ValkyrieRobotModel robot, ValkyrieTorqueSpeedTestConfig config, File outputPrefixDirectory)
 	{
 		ModifiableValkyriePushRecoveryTest tester = new ModifiableValkyriePushRecoveryTest(robot);
 		String testCase = config.testCase;
 		Vector3D forceDirection = new Vector3D(config.forceVector);
-		boolean testFailed = false;
-		File outputDir = null;
+		TorqueSpeedTestResult result = null;
 		
 		java.lang.reflect.Method method = null;
 		try {
@@ -135,7 +135,7 @@ public class TorqueSpeedTestRunner {
 		}
 		
 		try {
-			outputDir = (File) method.invoke(tester, forceDirection, config.forceMagnitude, config.forceDuration, outputPrefixDirectory);
+			result = (TorqueSpeedTestResult) method.invoke(tester, forceDirection, config.forceMagnitude, config.forceDuration, outputPrefixDirectory);
 
 		} catch (IllegalArgumentException e) {
 			System.out.println("Illegal argument to push recovery case: " + e.toString());
@@ -148,7 +148,7 @@ public class TorqueSpeedTestRunner {
 			System.exit(1);
 		}
 
-		return outputDir;
+		return result;
 	}
 
 	public static void main(String[] args) {
@@ -216,38 +216,39 @@ public class TorqueSpeedTestRunner {
 		// Set up output directories for test results
 		File outputPrefixDirectory = runner.getOutputDirectory("capped_torque");
 		File outputResultsDirectory = null;
+		TorqueSpeedTestResult result = null;
 		
 		// Run the test
 		try {
 			switch (config.testType) {
 			case STAIRS:
-				outputResultsDirectory = tester.testUpstairs(robot, config.stepHeight, config.numberOfSteps,
+				result = tester.testUpstairs(robot, config.stepHeight, config.numberOfSteps,
 						walkingParameters, outputPrefixDirectory);
 				break;
 			case SQUARE_UP_STEP:
-				outputResultsDirectory = tester.testStepUpWithSquareUp(robot, config.stepStartingDistance,
+				result = tester.testStepUpWithSquareUp(robot, config.stepStartingDistance,
 						config.stepHeight, walkingParameters, outputPrefixDirectory);
 				break;
 			case STEP:
-				outputResultsDirectory = tester.testStepUpWithoutSquareUp(robot, config.stepStartingDistance,
+				result = tester.testStepUpWithoutSquareUp(robot, config.stepStartingDistance,
 						config.stepHeight, walkingParameters, recordedFootsteps, outputPrefixDirectory);
 				break;
 			case STEP_DOWN:
-				outputResultsDirectory = tester.testStepDown(robot, config.stepStartingDistance, config.stepHeight,
+				result = tester.testStepDown(robot, config.stepStartingDistance, config.stepHeight,
 						walkingParameters, recordedFootsteps, outputPrefixDirectory);
 				break;
 			case SLOPE:
-				outputResultsDirectory = tester.testWalkSlope(robot, Math.toRadians(-config.slopeDegrees),
+				result = tester.testWalkSlope(robot, Math.toRadians(-config.slopeDegrees),
 						runner.inchesToMeters(config.stepLengthInches), 
 						walkingParameters, 
 						recordedFootsteps,
 						outputPrefixDirectory);
 				break;
 			case SPEED:
-				outputResultsDirectory = tester.testSpeedWalk(robot, walkingParameters, outputPrefixDirectory, config.keepUp);		
+				result = tester.testSpeedWalk(robot, walkingParameters, outputPrefixDirectory, config.keepUp);		
 				break;
 			case PUSHRECOVERY:
-				outputResultsDirectory = runPushRecoveryTest(robot, config, outputPrefixDirectory);
+				result = runPushRecoveryTest(robot, config, outputPrefixDirectory);
 				break;
 				
 			}
@@ -256,6 +257,8 @@ public class TorqueSpeedTestRunner {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+
+		outputResultsDirectory = ValkyrieTestExporter.exportSimData(tester.getScsInstance(), outputPrefixDirectory, result, config.createVideo);			
 
 		// Copy the test parameters into the results directory
 		try {
@@ -272,11 +275,15 @@ public class TorqueSpeedTestRunner {
 			}
 		} catch (IOException e) {
 			System.err.println("Unable to copy param file to destination: " + e.getMessage());
+		} finally {
 		}
 
 		// Without calling System.exit(0), the sim has non-terminating threads.
 		// Specifically, the simulation thread and the intraprocess thread (associated with ROS2 publishing) do not
 		// exit.
-		if (!config.keepUp) System.exit(0);
+		if (!config.keepUp) {
+			tester.destroySimulationAndRecycleMemory();
+			System.exit(0);
+		}
 	}
 }

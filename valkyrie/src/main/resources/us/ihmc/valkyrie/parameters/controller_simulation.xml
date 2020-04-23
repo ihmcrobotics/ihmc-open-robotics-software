@@ -920,7 +920,7 @@
                         <!-- Bumped up to get good foot landing position -->
                         <parameter name="kpXSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="500"/>
                         <parameter name="kpYSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="500"/>
-                        <parameter name="kpZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1500"/>
+                        <parameter name="kpZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="2500"/>
                         <parameter name="zetaXSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                         <parameter name="zetaYSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                         <parameter name="zetaZSwingFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
@@ -937,7 +937,7 @@
                         <parameter name="maximumFeedbackHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
                         <parameter name="maximumFeedbackRateHoldFootPosition" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
                         <parameter name="kpXYHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
-                        <parameter name="kpZHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="200.0"/>
+                        <parameter name="kpZHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="212.0"/>
                         <parameter name="zetaXYHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                         <parameter name="zetaZHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
                         <parameter name="maxDerivativeErrorHoldFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>

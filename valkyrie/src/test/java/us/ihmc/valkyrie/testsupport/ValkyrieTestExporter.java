@@ -10,6 +10,7 @@ import us.ihmc.simulationConstructionSetTools.dataExporter.DataExporterExcelWork
 import us.ihmc.simulationConstructionSetTools.dataExporter.TorqueSpeedDataExporterGraphCreator;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
+import us.ihmc.valkyrie.torquespeedcurve.TorqueSpeedTestResult;
 
 public class ValkyrieTestExporter {
 	
@@ -29,18 +30,18 @@ public class ValkyrieTestExporter {
 	}	
 	
 	// Export sim data, graphs and video, if available
-	public static File exportSimData(SimulationConstructionSet scs, File dataParentFolder, String dataNameSuffix, String info, boolean simSucceeded)
+	public static File exportSimData(SimulationConstructionSet scs, File dataParentFolder, TorqueSpeedTestResult result, boolean createVideo)
 	{
 		Robot robot = scs.getRobots()[0];
 		TorqueSpeedDataExporterGraphCreator graphCreator = new TorqueSpeedDataExporterGraphCreator(robot, scs.getDataBuffer());
 		DataExporterExcelWorkbookCreator excelWorkbookCreator = new DataExporterExcelWorkbookCreator(robot, scs.getDataBuffer());
 		
-		if (!simSucceeded) {
-			info += "_FAILED";
-			dataNameSuffix += "_FAILED";
+		if (!result.testSucceeded) {
+			result.testInfo += "_FAILED";
+			result.testSuffix += "_FAILED";
 		}
 
-		// Stop the sim and disable the GUI:
+		// Stop the sim and disable the GUI to prevent accidental user interaction during recording
 		scs.stop();
 		scs.disableGUIComponents();
 
@@ -55,13 +56,13 @@ public class ValkyrieTestExporter {
 		scs.gotoInPointNow();
 
 		String timeStamp = FormattingTools.getDateString() + "_" + FormattingTools.getTimeStringWithSeconds();
-		String tagName = timeStamp + "_" + robot.getName() + "_" + dataNameSuffix;
+		String tagName = timeStamp + "_" + robot.getName() + "_" + result.testSuffix;
 
 		File dataFolder = new File(dataParentFolder, tagName);
 		dataFolder.mkdir();
 
 		System.out.println("Saving ReadMe");
-		writeReadme(new File(dataFolder, tagName + ".txt"), info);
+		writeReadme(new File(dataFolder, tagName + ".txt"), result.testInfo);
 		System.out.println("Done Saving ReadMe");
 
 		System.out.println("Saving data");
@@ -91,7 +92,7 @@ public class ValkyrieTestExporter {
 		graphCreator.createJointTorqueSpeedGraphs(graphDirectory, tagName, true, false);
 		System.out.println("done creating torque and speed graphs");
 
-		if (scs.getSimulationConstructionSetParameters().getCreateGUI()) {
+		if (scs.getSimulationConstructionSetParameters().getCreateGUI() && createVideo) {
 			System.out.println("creating video");
 			scs.getStandardSimulationGUI().getViewportPanel().getStandardGUIActions().createVideo(new File(dataFolder, tagName + "_Video.mov"));
 			System.out.println("done creating video");
