@@ -959,6 +959,37 @@ public class PlanarRegionTest
       }
    }
 
+   @Test
+   public void testConcaveHullGeneration()
+   {
+      // test two triangles
+      ConvexPolygon2D convexPolygon0 = new ConvexPolygon2D();
+      convexPolygon0.addVertex(0.0, 0.0);
+      convexPolygon0.addVertex(1.0, 1.0);
+      convexPolygon0.addVertex(1.0, -1.0);
+      convexPolygon0.update();
+
+      ConvexPolygon2D convexPolygon1 = new ConvexPolygon2D();
+      convexPolygon1.addVertex(0.0, 0.0);
+      convexPolygon1.addVertex(-1.0, 1.0);
+      convexPolygon1.addVertex(-1.0, -1.0);
+      convexPolygon1.update();
+
+      ArrayList<ConvexPolygon2D> polygonList = new ArrayList<>();
+      polygonList.add(convexPolygon0);
+      polygonList.add(convexPolygon1);
+
+      PlanarRegion region = new PlanarRegion(new RigidBodyTransform(), polygonList);
+
+      List<Point2D> concaveHull = region.getConcaveHull();
+      for (int i = 0; i < concaveHull.size(); i++)
+      {
+         System.out.println(concaveHull.get(i));
+      }
+
+      //      Assertions.assertEquals(region.getConcaveHullSize(), 5);
+   }
+
    static ConvexPolygon2DBasics translateConvexPolygon(double xTranslation, double yTranslation, ConvexPolygon2DReadOnly convexPolygon)
    {
       Vector2D translation = new Vector2D(xTranslation, yTranslation);

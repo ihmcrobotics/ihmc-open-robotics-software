@@ -1,17 +1,8 @@
 package us.ihmc.robotics.geometry;
 
-import java.util.*;
-
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.lists.ListWrappingIndexTools;
-import us.ihmc.euclid.geometry.BoundingBox3D;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Line2D;
-import us.ihmc.euclid.geometry.Line3D;
-import us.ihmc.euclid.geometry.LineSegment2D;
-import us.ihmc.euclid.geometry.LineSegment3D;
-import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
@@ -33,6 +24,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.random.RandomGeometry;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class PlanarRegion implements SupportingVertexHolder
 {
@@ -91,7 +86,7 @@ public class PlanarRegion implements SupportingVertexHolder
       updateConvexHull();
 
       concaveHullsVertices = new ArrayList<>();
-      // TODO set concave hull from convex sub-polygons
+      updateConcaveHull();
    }
    
    /**
@@ -1125,6 +1120,112 @@ public class PlanarRegion implements SupportingVertexHolder
             convexHull.addVertex(convexPolygon.getVertex(j));
       }
       convexHull.update();
+   }
+
+   private void updateConcaveHull()
+   {
+      this.concaveHullsVertices.clear();
+
+      double minX = Double.MAX_VALUE;
+      int minXPolygonIndex = -1;
+
+      for (int i = 0; i < convexPolygons.size(); i++)
+      {
+         ConvexPolygon2D polygon = convexPolygons.get(i);
+         if (polygon.getVertex(0).getX() < minX)
+         {
+            minX = polygon.getVertex(0).getX();
+            minXPolygonIndex = i;
+         }
+      }
+
+      concaveHullsVertices.add(new Point2D(convexPolygons.get(minXPolygonIndex).getVertex(0)));
+      int polygonIndex = minXPolygonIndex;
+      int vertexIndex = 0;
+
+      while (true)
+      {
+         int[] neighborRegionAndVertexIndices = findNeighborRegionSharingConcaveHullVertex(polygonIndex, vertexIndex);
+         if (neighborRegionAndVertexIndices == null)
+         {
+            vertexIndex = convexPolygons.get(polygonIndex).getNextVertexIndex(vertexIndex);
+         }
+         else
+         {
+            polygonIndex = neighborRegionAndVertexIndices[0];
+            vertexIndex = convexPolygons.get(polygonIndex).getNextVertexIndex(neighborRegionAndVertexIndices[1]);
+         }
+
+         if (polygonIndex == minXPolygonIndex && vertexIndex == 0)
+         {
+            break;
+         }
+         else
+         {
+            concaveHullsVertices.add(new Point2D(convexPolygons.get(polygonIndex).getVertex(vertexIndex)));
+         }
+      }
+   }
+
+   private int[] findNeighborRegionSharingConcaveHullVertex(int polygonIndex, int vertexIndex)
+   {
+      ConvexPolygon2D inputPolygon = convexPolygons.get(polygonIndex);
+      Point2DReadOnly vertex = inputPolygon.getVertex(vertexIndex);
+      Point2DReadOnly previousVertex = inputPolygon.getPreviousVertex(vertexIndex);
+
+      double vx = previousVertex.getX() - vertex.getX();
+      double vy = previousVertex.getY() - vertex.getY();
+
+      double maxDotProduct = Double.NEGATIVE_INFINITY;
+      int neighborPolygonIndex = -1;
+      int neighborPolygonVertexIndex = -1;
+      double epsilon = 1e-7;
+
+      convexPolygonLoop:
+      for (int i = 0; i < convexPolygons.size(); i++)
+      {
+         if (i == polygonIndex)
+         {
+            continue;
+         }
+
+         ConvexPolygon2D polygon = convexPolygons.get(i);
+         for (int j = 0; j < polygon.getNumberOfVertices(); j++)
+         {
+            Point2DReadOnly candidateVertex = polygon.getVertex(j);
+            if (candidateVertex.epsilonEquals(vertex, epsilon))
+            {
+               Point2DReadOnly nextCandidateVertex = polygon.getNextVertex(j);
+               double ux = nextCandidateVertex.getX() - candidateVertex.getX();
+               double uy = nextCandidateVertex.getY() - candidateVertex.getY();
+
+               double dotProduct = ux * vx + uy * vy;
+               double crossProduct = ux * vy - uy * vx;
+               if (crossProduct < 0.0)
+               {
+                  dotProduct = -2.0 - dotProduct;
+               }
+
+               if (dotProduct > maxDotProduct)
+               {
+                  maxDotProduct = dotProduct;
+                  neighborPolygonIndex = i;
+                  neighborPolygonVertexIndex = j;
+               }
+
+               continue convexPolygonLoop;
+            }
+         }
+      }
+
+      if (neighborPolygonIndex >= 0)
+      {
+         return new int[]{neighborPolygonIndex, neighborPolygonVertexIndex};
+      }
+      else
+      {
+         return null;
+      }
    }
 
    /**
