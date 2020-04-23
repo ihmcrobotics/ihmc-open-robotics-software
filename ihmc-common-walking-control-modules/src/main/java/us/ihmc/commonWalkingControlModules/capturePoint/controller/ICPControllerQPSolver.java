@@ -6,9 +6,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.*;
 import us.ihmc.convexOptimization.quadraticProgram.AbstractSimpleActiveSetQPSolver;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
@@ -62,15 +60,15 @@ public class ICPControllerQPSolver
    private final DenseMatrix64F solverInput_bineq;
 
    /** QP Objective to minimize the amount of feedback action. Also contains feedback rate. */
-   private final ICPQPInput copFeedbackTaskInput;
+   private final ICPQPInput copFeedbackMinimizationTask;
    /** QP Objective to minimize the cmp feedback magnitude. */
-   private final ICPQPInput cmpFeedbackTaskInput;
+   private final ICPQPInput cmpFeedbackMinimizationTask;
    /** QP Objective to minimize the amount of feedback action. Also contains feedback rate. */
-   private final ICPQPInput feedbackRateTaskInput;
+   private final ICPQPInput feedbackRateMinimizationTask;
    /** QP Objective to minimize the difference between the dynamics */
    private final ICPQPInput dynamicsTaskInput;
 
-   private final List<ICPQPInput> inputList = new ArrayList<>();
+   private final List<ICPQPInput> taskList = new ArrayList<>();
 
    /** QP Inequality constraints to limit the total amount of feedback action. */
    private final ICPInequalityInput feedbackRateLimitConstraint;
@@ -112,7 +110,7 @@ public class ICPControllerQPSolver
    private final DenseMatrix64F copDeltaSolution;
    /** CMP different from the CoP solution to the quadratic program. */
    private final DenseMatrix64F cmpDeltaSolution;
-   private final DenseMatrix64F dynamicsError;
+   private final DenseMatrix64F residualDynamicsError;
 
    /** Previous solution for the feedback action, used in the feedback rate objective. */
    private final DenseMatrix64F previousFeedbackDeltaSolution;
@@ -164,15 +162,15 @@ public class ICPControllerQPSolver
       solverInput_h = new DenseMatrix64F(maximumNumberOfFreeVariables, 1);
       solverInputResidualCost = new DenseMatrix64F(1, 1);
 
-      copFeedbackTaskInput = new ICPQPInput(2);
-      cmpFeedbackTaskInput = new ICPQPInput(2);
+      copFeedbackMinimizationTask = new ICPQPInput(2);
+      cmpFeedbackMinimizationTask = new ICPQPInput(2);
       dynamicsTaskInput = new ICPQPInput(6);
-      feedbackRateTaskInput = new ICPQPInput(4);
+      feedbackRateMinimizationTask = new ICPQPInput(4);
 
-      inputList.add(copFeedbackTaskInput);
-      inputList.add(cmpFeedbackTaskInput);
-      inputList.add(dynamicsTaskInput);
-      inputList.add(feedbackRateTaskInput);
+      taskList.add(copFeedbackMinimizationTask);
+      taskList.add(cmpFeedbackMinimizationTask);
+      taskList.add(dynamicsTaskInput);
+      taskList.add(feedbackRateMinimizationTask);
 
       feedbackLimitConstraint = new ICPInequalityInput(0, 6);
       feedbackRateLimitConstraint = new ICPInequalityInput(0, 6);
@@ -189,7 +187,7 @@ public class ICPControllerQPSolver
       solution = new DenseMatrix64F(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
       copDeltaSolution = new DenseMatrix64F(2, 1);
       cmpDeltaSolution = new DenseMatrix64F(2, 1);
-      dynamicsError = new DenseMatrix64F(2, 1);
+      residualDynamicsError = new DenseMatrix64F(2, 1);
 
       previousFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
       previousCoPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
@@ -302,9 +300,9 @@ public class ICPControllerQPSolver
       solverInput_Aineq.zero();
       solverInput_bineq.zero();
 
-      for (int i = 0; i < inputList.size(); i++)
+      for (int i = 0; i < taskList.size(); i++)
       {
-         inputList.get(i).reset();
+         taskList.get(i).reset();
       }
 
       for (int i = 0; i < constraintList.size(); i++)
@@ -315,7 +313,7 @@ public class ICPControllerQPSolver
       solution.zero();
       copDeltaSolution.zero();
       cmpDeltaSolution.zero();
-      dynamicsError.zero();
+      residualDynamicsError.zero();
 
       currentInequalityConstraintIndex = 0;
    }
@@ -341,9 +339,9 @@ public class ICPControllerQPSolver
       solverInput_H.reshape(problemSize, problemSize);
       solverInput_h.reshape(problemSize, 1);
 
-      copFeedbackTaskInput.reshape(2);
+      copFeedbackMinimizationTask.reshape(2);
       dynamicsTaskInput.reshape(problemSize);
-      cmpFeedbackTaskInput.reshape(2);
+      cmpFeedbackMinimizationTask.reshape(2);
 
       numberOfInequalityConstraints += (Double.isFinite(maximumFeedbackRate) && Double.isFinite(controlDT)) ? 4 : 0;
       numberOfInequalityConstraints += Double.isFinite(maxFeedbackXMagnitude) ? 2 : 0;
@@ -534,7 +532,7 @@ public class ICPControllerQPSolver
          extractCoPFeedbackDeltaSolution(copDeltaSolution);
          extractCMPFeedbackDeltaSolution(cmpDeltaSolution);
 
-         inputCalculator.computeDynamicConstraintError(solution, dynamicsError);
+         inputCalculator.computeResidualDynamicsError(solution, residualDynamicsError);
 
          if (autoSetPreviousSolution)
             setPreviousFeedbackDeltaSolution(copDeltaSolution, cmpDeltaSolution);
@@ -554,8 +552,8 @@ public class ICPControllerQPSolver
     */
    private void addCoPFeedbackTask()
    {
-      ICPQPInputCalculator.computeCoPFeedbackTask(copFeedbackTaskInput, copFeedbackWeight);
-      inputCalculator.submitCoPFeedbackTask(copFeedbackTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
+      ICPControllerQPInputCalculator.computeCoPFeedbackMinimizationTask(copFeedbackMinimizationTask, copFeedbackWeight);
+      ICPControllerQPInputCalculator.submitCoPFeedbackMinimizationTask(copFeedbackMinimizationTask, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
    /**
@@ -563,8 +561,8 @@ public class ICPControllerQPSolver
     */
    private void addCMPFeedbackTask()
    {
-      inputCalculator.computeCMPFeedbackTask(cmpFeedbackTaskInput, cmpFeedbackWeight);
-      inputCalculator.submitCMPFeedbackTask(cmpFeedbackTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
+      ICPControllerQPInputCalculator.computeCMPFeedbackMinimizationTask(cmpFeedbackMinimizationTask, cmpFeedbackWeight);
+      ICPControllerQPInputCalculator.submitCMPFeedbackMinimizationTask(cmpFeedbackMinimizationTask, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
    /**
@@ -572,12 +570,14 @@ public class ICPControllerQPSolver
     */
    private void addFeedbackRateTask()
    {
-      inputCalculator.computeCoPFeedbackRateTask(feedbackRateTaskInput, copCMPFeedbackRateWeight, previousCoPFeedbackDeltaSolution);
+      inputCalculator.computeCoPFeedbackRateMinimizationTask(feedbackRateMinimizationTask, copCMPFeedbackRateWeight, previousCoPFeedbackDeltaSolution);
       if (useAngularMomentum.getBooleanValue())
-         inputCalculator.computeCMPFeedbackRateTask(feedbackRateTaskInput, copCMPFeedbackRateWeight, previousCMPFeedbackDeltaSolution);
+      {
+         inputCalculator.computeCMPFeedbackRateMinimizationTask(feedbackRateMinimizationTask, copCMPFeedbackRateWeight, previousCMPFeedbackDeltaSolution);
+         inputCalculator.computeTotalFeedbackRateMinimizationTask(feedbackRateMinimizationTask, feedbackRateWeight, previousFeedbackDeltaSolution);
+      }
 
-      inputCalculator.computeFeedbackRateTask(feedbackRateTaskInput, feedbackRateWeight, previousFeedbackDeltaSolution, useAngularMomentum.getBooleanValue());
-      inputCalculator.submitFeedbackRateTask(feedbackRateTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
+      ICPControllerQPInputCalculator.submitFeedbackRateMinimizationTask(feedbackRateMinimizationTask, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
    /**
@@ -676,7 +676,7 @@ public class ICPControllerQPSolver
    private void addDynamicConstraintTask()
    {
       inputCalculator.computeDynamicsTask(dynamicsTaskInput, currentICPError, feedbackGain, dynamicsWeight, useAngularMomentum.getBooleanValue());
-      inputCalculator.submitDynamicsTask(dynamicsTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
+      ICPControllerQPInputCalculator.submitDynamicsTask(dynamicsTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
    /**
@@ -840,10 +840,10 @@ public class ICPControllerQPSolver
       differenceToPack.set(cmpDeltaSolution);
    }
 
-   public void getDynamicsError(FixedFrameVector2DBasics errorToPack)
+   public void getResidualDynamicsError(FixedFrameVector2DBasics errorToPack)
    {
       errorToPack.checkReferenceFrameMatch(worldFrame);
-      errorToPack.set(dynamicsError);
+      errorToPack.set(residualDynamicsError);
    }
 
    /**
