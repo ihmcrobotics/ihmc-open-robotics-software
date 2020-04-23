@@ -262,6 +262,9 @@ public class StepAdjustmentController
       adjustedSolutionInControlPlane.set(referencePositionInControlPlane);
       adjustedSolutionInControlPlane.add(deadbandedAdjustment);
 
+      FrameConvexPolygon2DReadOnly reachabilityConstraintRegion = reachabilityConstraintHandler.updateReachabilityConstraint();
+      reachabilityConstraintRegion.orthogonalProjection(adjustedSolutionInControlPlane);
+
       icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, adjustedSolutionInControlPlane, tempPoint, upcomingFootstep.getPosition().getZ());
 
       footstepSolution.getPosition().set(tempPoint);
