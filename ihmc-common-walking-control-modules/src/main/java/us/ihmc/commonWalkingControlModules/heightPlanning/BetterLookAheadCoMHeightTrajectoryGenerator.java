@@ -29,6 +29,7 @@ import java.util.List;
 
 public class BetterLookAheadCoMHeightTrajectoryGenerator
 {
+   private static final double defaultPercentageInOffset = 0.05;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private boolean visualize = true;
@@ -39,14 +40,17 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
    private final BooleanProvider processGoHome = new BooleanParameter("ProcessGoHome", registry, false);
 
    private final HeightOffsetHandler heightOffsetHandler;
+   private final YoEnum<RobotSide> supportLegSide = new YoEnum<>("supportLegSide", registry, RobotSide.class);
 
    private final YoDouble minimumHeightAboveGround = new YoDouble("minimumHeightAboveGround", registry);
    private final YoDouble nominalHeightAboveGround = new YoDouble("nominalHeightAboveGround", registry);
    private final YoDouble maximumHeightAboveGround = new YoDouble("maximumHeightAboveGround", registry);
+   private final YoDouble hipWidth = new YoDouble("hipWidth", registry);
    private final YoDouble extraToeOffHeight = new YoDouble("extraToeOffHeight", registry);
 
    private final YoDouble nominalDoubleSupportPercentageIn = new YoDouble("nominalDoubleSupportPercentageIn", registry);
    private final YoDouble doubleSupportPercentageIn = new YoDouble("doubleSupportPercentageIn", registry);
+   private final YoDouble doubleSupportPercentageInOffset = new YoDouble("doubleSupportPercentageInOffset", registry);
    private final YoDouble percentageThroughSegment = new YoDouble("percentageThroughSegment", registry);
    private final YoDouble splineQuery = new YoDouble("splineQuery", registry);
 
@@ -54,7 +58,10 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    private final FramePoint3D transferFromPosition = new FramePoint3D();
    private final FramePoint3D transferToPosition = new FramePoint3D();
+   private final YoFramePoint3D yoTransferFromPosition = new YoFramePoint3D("transferFromPosition", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D yoTransferToPosition = new YoFramePoint3D("transferToPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D desiredCoMPositionAtStart = new YoFramePoint3D("desiredCoMPositionAtStart", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFramePoint3D desiredCoMPositionAtEnd = new YoFramePoint3D("desiredCoMPositionAtEnd", ReferenceFrame.getWorldFrame(), registry);
 
    private final YoFramePoint3D desiredCoMPosition = new YoFramePoint3D("desiredCoMPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoDouble desiredCoMHeight = new YoDouble("desiredCoMHeight", registry);
@@ -88,15 +95,42 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                                                       YoGraphicsListRegistry yoGraphicsListRegistry,
                                                       YoVariableRegistry parentRegistry)
    {
+      this(minimumHeightAboveGround,
+           nominalHeightAboveGround,
+           maximumHeightAboveGround,
+           defaultOffsetHeightAboveGround,
+           doubleSupportPercentageIn,
+           0.0,
+           centerOfMassFrame,
+           soleFrames,
+           yoTime,
+           yoGraphicsListRegistry,
+           parentRegistry);
+   }
+
+   public BetterLookAheadCoMHeightTrajectoryGenerator(double minimumHeightAboveGround,
+                                                      double nominalHeightAboveGround,
+                                                      double maximumHeightAboveGround,
+                                                      double defaultOffsetHeightAboveGround,
+                                                      double doubleSupportPercentageIn,
+                                                      double hipWidth,
+                                                      ReferenceFrame centerOfMassFrame,
+                                                      SideDependentList<? extends ReferenceFrame> soleFrames,
+                                                      DoubleProvider yoTime,
+                                                      YoGraphicsListRegistry yoGraphicsListRegistry,
+                                                      YoVariableRegistry parentRegistry)
+   {
       this.centerOfMassFrame = centerOfMassFrame;
       this.soleFrames = soleFrames;
       this.yoTime = yoTime;
 
       heightOffsetHandler = new HeightOffsetHandler(yoTime, defaultOffsetHeightAboveGround, registry);
+      doubleSupportPercentageInOffset.set(defaultPercentageInOffset);
 
       setMinimumHeightAboveGround(minimumHeightAboveGround);
       setNominalHeightAboveGround(nominalHeightAboveGround);
       setMaximumHeightAboveGround(maximumHeightAboveGround);
+      this.hipWidth.set(hipWidth);
 
       heightWaypoints = new RecyclingArrayList<>(5, SupplierBuilder.indexedSupplier(this::createHeightWaypoint));
 
@@ -185,6 +219,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    public void setSupportLeg(RobotSide supportLeg)
    {
+      supportLegSide.set(supportLeg);
       frameOfSupportLeg = soleFrames.get(supportLeg);
       splinedHeightTrajectory.setReferenceFrame(frameOfSupportLeg);
       heightOffsetHandler.setReferenceFrame(frameOfSupportLeg);
@@ -196,12 +231,14 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       offsetFromNominalInPlan.set(heightOffsetHandler.getOffsetHeightAboveGround());
       this.extraToeOffHeight.set(extraToeOffHeight);
 
-      transferToPosition.setToZero(soleFrames.get(transferToAndNextFootstepsData.getTransferToSide()));
+      transferToPosition.setIncludingFrame(transferToFootstepPosition);
       transferFromPosition.setToZero(soleFrames.get(transferToAndNextFootstepsData.getTransferToSide().getOppositeSide()));
       transferToPosition.changeFrame(frameOfSupportLeg);
       transferFromPosition.changeFrame(frameOfSupportLeg);
-      double midstanceWidth = 0.5 * (transferToPosition.getY() + transferFromPosition.getY());
       double startAnkleZ = transferFromPosition.getZ();
+
+      yoTransferFromPosition.setMatchingFrame(transferFromPosition);
+      yoTransferToPosition.setMatchingFrame(transferToPosition);
 
       desiredCoMPositionAtStart.set(desiredCoMPosition);
 
@@ -213,26 +250,34 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       double middleAnkleZ = endCoMPosition.getZ();
       endCoMPosition.addZ(nominalHeightAboveGround.getDoubleValue() + offsetFromNominalInPlan.getDoubleValue());
 
-      startCoMPosition.setY(midstanceWidth);
-      endCoMPosition.setY(midstanceWidth);
+      double midstanceY = 0.5 * (transferToPosition.getY() + transferFromPosition.getY());
+      startCoMPosition.setY(midstanceY);
+      endCoMPosition.setY(midstanceY);
 
       if (!transferToAndNextFootstepsData.getCoMAtEndOfState().containsNaN())
       {
+         desiredCoMPositionAtEnd.set(transferToAndNextFootstepsData.getCoMAtEndOfState());
          tempFramePoint.setIncludingFrame(transferToAndNextFootstepsData.getCoMAtEndOfState(), 0.0);
          tempFramePoint.changeFrame(frameOfSupportLeg);
          tempFramePoint.setZ(nominalHeightAboveGround.getDoubleValue());
+
          double percentIn = EuclidGeometryTools.percentageAlongLineSegment3D(tempFramePoint, startCoMPosition, endCoMPosition);
-         percentIn = MathTools.clamp(percentIn, nominalDoubleSupportPercentageIn.getDoubleValue(), 1.0 - nominalDoubleSupportPercentageIn.getDoubleValue());
+
+         percentIn = MathTools.clamp(percentIn - doubleSupportPercentageInOffset.getDoubleValue(),
+                                     nominalDoubleSupportPercentageIn.getDoubleValue(),
+                                     1.0 - nominalDoubleSupportPercentageIn.getDoubleValue());
          doubleSupportPercentageIn.set(percentIn);
       }
       else
       {
+         desiredCoMPositionAtEnd.setToNaN();
          doubleSupportPercentageIn.set(nominalDoubleSupportPercentageIn.getDoubleValue());
       }
 
       heightWaypoints.clear();
 
-      computeWaypoints(startCoMPosition, endCoMPosition,
+      computeWaypoints(startCoMPosition,
+                       endCoMPosition,
                        startAnkleZ,
                        middleAnkleZ,
                        minimumHeightAboveGround.getDoubleValue(),
@@ -247,6 +292,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       splinedHeightTrajectory.computeSpline();
    }
 
+   // FIXME this doesn't work well during transfer.
    private void computeWaypoints(FramePoint3DReadOnly startCoMPosition,
                                  FramePoint3DReadOnly endCoMPosition,
                                  double startGroundHeight,
@@ -255,18 +301,27 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
                                  double maximumHeight,
                                  double extraToeOffHeight)
    {
-      double midstanceWidth = 0.5 * (startCoMPosition.getY() + endCoMPosition.getY());
+      double startAnkleX = transferFromPosition.getX();
+      double startAnkleY = transferFromPosition.getY();
+      double endAnkleX = transferToPosition.getX();
+      double endAnkleY = transferToPosition.getY();
 
-      double startX = startCoMPosition.getX();
-      double endX = endCoMPosition.getX();
+      double startWaypointX = startCoMPosition.getX();
+      double endWaypointX = endCoMPosition.getX();
+      double startWaypointY = startCoMPosition.getY();
+      double endWaypointY = endCoMPosition.getY();
 
       double firstAlpha = 0.5 * doubleSupportPercentageIn.getDoubleValue();
       double secondAlpha = doubleSupportPercentageIn.getDoubleValue();
       double thirdAlpha = 0.5 * (1.0 + doubleSupportPercentageIn.getDoubleValue());
 
-      double firstMidpointX = InterpolationTools.linearInterpolate(startX, endX, firstAlpha);
-      double secondMidpointX = InterpolationTools.linearInterpolate(startX, endX, secondAlpha);
-      double thirdMidpointX = InterpolationTools.linearInterpolate(startX, endX, thirdAlpha);
+      double firstMidpointX = InterpolationTools.linearInterpolate(startWaypointX, endWaypointX, firstAlpha);
+      double secondMidpointX = InterpolationTools.linearInterpolate(startWaypointX, endWaypointX, secondAlpha);
+      double thirdMidpointX = InterpolationTools.linearInterpolate(startWaypointX, endWaypointX, thirdAlpha);
+
+      double firstMidpointY = InterpolationTools.linearInterpolate(startWaypointY, endWaypointY, firstAlpha);
+      double secondMidpointY = InterpolationTools.linearInterpolate(startWaypointY, endWaypointY, secondAlpha);
+      double thirdMidpointY = InterpolationTools.linearInterpolate(startWaypointY, endWaypointY, thirdAlpha);
 
       CoMHeightTrajectoryWaypoint startWaypoint = heightWaypoints.size() > 0 ? heightWaypoints.getLast() : getWaypointInFrame(frameOfSupportLeg);
       CoMHeightTrajectoryWaypoint firstMidpoint = getWaypointInFrame(frameOfSupportLeg);
@@ -274,25 +329,86 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       CoMHeightTrajectoryWaypoint thirdMidpoint = getWaypointInFrame(frameOfSupportLeg);
       CoMHeightTrajectoryWaypoint endWaypoint = getWaypointInFrame(frameOfSupportLeg);
 
-      startWaypoint.setXY(startX, midstanceWidth);
-      firstMidpoint.setXY(firstMidpointX, midstanceWidth);
-      secondMidpoint.setXY(secondMidpointX, midstanceWidth);
-      thirdMidpoint.setXY(thirdMidpointX, midstanceWidth);
-      endWaypoint.setXY(endX, midstanceWidth);
+      startWaypoint.setXY(startWaypointX, startWaypointY);
+      firstMidpoint.setXY(firstMidpointX, firstMidpointY);
+      secondMidpoint.setXY(secondMidpointX, secondMidpointY);
+      thirdMidpoint.setXY(thirdMidpointX, thirdMidpointY);
+      endWaypoint.setXY(endWaypointX, endWaypointY);
 
-      double startMinHeight = findWaypointHeight(minimumHeight, 0.0, startX, startGroundHeight);
-      double startMaxHeight = findWaypointHeight(maximumHeight + extraToeOffHeight, 0.0, startX, startGroundHeight);
-      double firstMinHeight = findWaypointHeight(minimumHeight, 0.0, firstMidpointX, startGroundHeight);
-      double firstMaxHeight = findWaypointHeight(maximumHeight, 0.0, firstMidpointX, startGroundHeight);
+      double startMinHeight = findWaypointHeight(minimumHeight,
+                                                 hipWidth.getDoubleValue(),
+                                                 startAnkleX,
+                                                 startAnkleY,
+                                                 startWaypointX,
+                                                 startWaypointY,
+                                                 startGroundHeight);
+      double startMaxHeight = findWaypointHeight(maximumHeight + extraToeOffHeight,
+                                                 hipWidth.getDoubleValue(),
+                                                 startAnkleX,
+                                                 startAnkleY,
+                                                 startWaypointX,
+                                                 startWaypointY,
+                                                 startGroundHeight);
+      double firstMinHeight = findWaypointHeight(minimumHeight,
+                                                 hipWidth.getDoubleValue(),
+                                                 startAnkleX,
+                                                 startAnkleY,
+                                                 firstMidpointX,
+                                                 firstMidpointY,
+                                                 startGroundHeight);
+      double firstMaxHeight = findWaypointHeight(maximumHeight,
+                                                 hipWidth.getDoubleValue(),
+                                                 startAnkleX,
+                                                 startAnkleY,
+                                                 firstMidpointX,
+                                                 firstMidpointY,
+                                                 startGroundHeight);
 
-      double exchangeFromMinHeight = findWaypointHeight(minimumHeight, 0.0, secondMidpointX, startGroundHeight);
-      double exchangeToMinHeight = findWaypointHeight(minimumHeight, endX, secondMidpointX, endGroundHeight);
-      double exchangeFromMaxHeight = findWaypointHeight(maximumHeight + extraToeOffHeight, 0.0, secondMidpointX, startGroundHeight);
-      double exchangeToMaxHeight = findWaypointHeight(maximumHeight, endX, secondMidpointX, endGroundHeight);
+      double exchangeFromMinHeight = findWaypointHeight(minimumHeight,
+                                                        hipWidth.getDoubleValue(),
+                                                        startAnkleX,
+                                                        startAnkleY,
+                                                        secondMidpointX,
+                                                        secondMidpointY,
+                                                        startGroundHeight);
+      double exchangeToMinHeight = findWaypointHeight(minimumHeight,
+                                                      hipWidth.getDoubleValue(),
+                                                      endAnkleX,
+                                                      endAnkleY,
+                                                      secondMidpointX,
+                                                      secondMidpointY,
+                                                      endGroundHeight);
+      double exchangeFromMaxHeight = findWaypointHeight(maximumHeight + extraToeOffHeight,
+                                                        hipWidth.getDoubleValue(),
+                                                        startAnkleX,
+                                                        startAnkleY,
+                                                        secondMidpointX,
+                                                        secondMidpointY,
+                                                        startGroundHeight);
+      double exchangeToMaxHeight = findWaypointHeight(maximumHeight,
+                                                      hipWidth.getDoubleValue(),
+                                                      endAnkleX,
+                                                      endAnkleY,
+                                                      secondMidpointX,
+                                                      secondMidpointY,
+                                                      endGroundHeight);
       double secondMinHeight = Math.min(Math.max(exchangeFromMinHeight, exchangeToMinHeight), Math.min(exchangeFromMaxHeight, exchangeToMaxHeight));
       double secondMaxHeight = Math.min(exchangeFromMaxHeight, exchangeToMaxHeight);
-      double thirdMinHeight = findWaypointHeight(minimumHeight, endX, thirdMidpointX, endGroundHeight);
-      double thirdMaxHeight = findWaypointHeight(maximumHeight, endX, thirdMidpointX, endGroundHeight);
+
+      double thirdMinHeight = findWaypointHeight(minimumHeight,
+                                                 hipWidth.getDoubleValue(),
+                                                 endAnkleX,
+                                                 endAnkleY,
+                                                 thirdMidpointX,
+                                                 thirdMidpointY,
+                                                 endGroundHeight);
+      double thirdMaxHeight = findWaypointHeight(maximumHeight,
+                                                 hipWidth.getDoubleValue(),
+                                                 endAnkleX,
+                                                 endAnkleY,
+                                                 thirdMidpointX,
+                                                 thirdMidpointY,
+                                                 endGroundHeight);
       double endMinHeight = minimumHeight + endGroundHeight;
       double endMaxHeight = maximumHeight + endGroundHeight;
 
@@ -302,7 +418,8 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       thirdMidpoint.setMinMax(thirdMinHeight, thirdMaxHeight);
       endWaypoint.setMinMax(endMinHeight, endMaxHeight);
 
-      startWaypoint.setHeight(MathTools.clamp(startCoMPosition.getZ(), startMinHeight, startMaxHeight));
+      //      startWaypoint.setHeight(MathTools.clamp(startCoMPosition.getZ(), startMinHeight, startMaxHeight));
+      startWaypoint.setHeight(startCoMPosition.getZ());
       endWaypoint.setHeight(MathTools.clamp(endCoMPosition.getZ(), endMinHeight, endMaxHeight));
    }
 
@@ -314,12 +431,20 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
       return waypoint;
    }
 
-   private static double findWaypointHeight(double desiredDistanceFromFoot, double startAnkleX, double queryX, double extraHeight)
+   private static double findWaypointHeight(double desiredDistance,
+                                            double hipWidth,
+                                            double ankleX,
+                                            double ankleY,
+                                            double queryX,
+                                            double queryY,
+                                            double extraHeight)
    {
-      return Math.sqrt(MathTools.square(desiredDistanceFromFoot) - MathTools.square(queryX - startAnkleX)) + extraHeight;
+      double widthDisplacement = queryY - ankleY - Math.signum(queryY - ankleY) * 0.5 * hipWidth;
+      double heightSquared = MathTools.square(desiredDistance) - MathTools.square(queryX - ankleX) - MathTools.square(widthDisplacement);
+      return Math.sqrt(heightSquared) + extraHeight;
    }
 
-   public void solve(CoMHeightPartialDerivativesData comHeightPartialDerivativesDataToPack, boolean isInDoubleSupport)
+   public void solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesDataToPack, boolean isInDoubleSupport)
    {
       com.setToZero(centerOfMassFrame);
       com.changeFrame(worldFrame);
@@ -331,7 +456,7 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
    private final Point2D point = new Point2D();
 
-   void solve(CoMHeightPartialDerivativesData comHeightPartialDerivativesDataToPack, FramePoint3DBasics queryPoint, boolean isInDoubleSupport)
+   void solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesDataToPack, FramePoint3DBasics queryPoint, boolean isInDoubleSupport)
    {
       this.queryPosition.set(queryPoint);
 
@@ -343,12 +468,11 @@ public class BetterLookAheadCoMHeightTrajectoryGenerator
 
       point.addY(heightOffsetHandler.getOffsetHeightAboveGround() - offsetFromNominalInPlan.getDoubleValue());
       comHeightPartialDerivativesDataToPack.setCoMHeight(worldFrame,
-                                                         comHeightPartialDerivativesDataToPack.getComHeight()
-                                                         + heightOffsetHandler.getOffsetHeightAboveGround() - offsetFromNominalInPlan.getDoubleValue());
+                                                         comHeightPartialDerivativesDataToPack.getComHeight() + heightOffsetHandler.getOffsetHeightAboveGround()
+                                                         - offsetFromNominalInPlan.getDoubleValue());
 
       this.splineQuery.set(point.getX());
       this.desiredCoMHeight.set(point.getY());
-
    }
 
    private void handleInitializeToCurrent(double normalDesiredHeight)

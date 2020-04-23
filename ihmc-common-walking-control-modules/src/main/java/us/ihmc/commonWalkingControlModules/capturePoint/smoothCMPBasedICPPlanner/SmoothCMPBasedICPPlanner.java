@@ -188,6 +188,8 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    /** Desired velocity for the Center of Pressure (CoP) */
    private final YoFrameVector3D desiredCoPVelocity = new YoFrameVector3D(namePrefix + "DesiredCoPVelocity", worldFrame, registry);
 
+   private final YoBoolean skipNextUpdate = new YoBoolean(namePrefix + "SkipNextUpdate", registry);
+
    /** Desired Centroidal Angular Momentum (CAM) */
    final YoFrameVector3D desiredCentroidalAngularMomentum = new YoFrameVector3D(namePrefix + "DesiredCentroidalAngularMomentum", worldFrame, registry);
    /** Desired Centroidal Torque (CT) */
@@ -668,6 +670,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       if (duration < Epsilons.ONE_HUNDREDTH)
          return;
 
+      finalTransferDuration.set(duration);
       defaultFinalTransferDuration.set(duration);
    }
 
@@ -883,11 +886,8 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       referenceICPGenerator.setInitialConditionsForAdjustment();
       referenceCoMGenerator.initializeForSwingOrTransfer();
 
-      // If continuous update is enabled the plan will be updated in the compute method. If not, we update the plan here.
-      if (!doContinuousReplanningForStanding.getValue())
-      {
-         updateTransferPlan(adjustPlanForStandingContinuity.getBooleanValue());
-      }
+      updateTransferPlan(adjustPlanForStandingContinuity.getBooleanValue());
+      skipNextUpdate.set(true);
    }
 
    /** {@inheritDoc} */
@@ -909,11 +909,8 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       referenceICPGenerator.setInitialConditionsForAdjustment();
       referenceCoMGenerator.initializeForSwingOrTransfer();
 
-      // If continuous update is enabled the plan will be updated in the compute method. If not, we update the plan here.
-      if (!doContinuousReplanningForTransfer.getValue())
-      {
-         updateTransferPlan(true);
-      }
+      updateTransferPlan(true);
+      skipNextUpdate.set(true);
    }
 
    /** {@inheritDoc} */
@@ -942,11 +939,8 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       referenceCoPGenerator.initializeForSwing();
       referenceCoMGenerator.initializeForSwingOrTransfer();
 
-      // If continuous update is enabled the plan will be updated in the compute method. If not, we update the plan here.
-      if (!doContinuousReplanningForSwing.getValue())
-      {
-         updateSingleSupportPlan(true);
-      }
+      updateSingleSupportPlan(true);
+      skipNextUpdate.set(true);
    }
 
    /** {@inheritDoc} */
@@ -959,17 +953,24 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    @Override
    public void updateCurrentPlan()
    {
-      if (isInStanding() && !doContinuousReplanningForStanding.getValue())
+      if (skipNextUpdate.getBooleanValue())
       {
-         updateTransferPlan(true);
+         skipNextUpdate.set(false);
       }
-      else if (isInDoubleSupport() && !isInStanding() && !doContinuousReplanningForTransfer.getValue())
+      else
       {
-         updateTransferPlan(true);
-      }
-      else if (!isInDoubleSupport() && !doContinuousReplanningForSwing.getValue())
-      {
-         updateSingleSupportPlan(true);
+         if (isInStanding() && !doContinuousReplanningForStanding.getValue())
+         {
+            updateTransferPlan(true);
+         }
+         else if (isInDoubleSupport() && !isInStanding() && !doContinuousReplanningForTransfer.getValue())
+         {
+            updateTransferPlan(true);
+         }
+         else if (!isInDoubleSupport() && !doContinuousReplanningForSwing.getValue())
+         {
+            updateSingleSupportPlan(true);
+         }
       }
    }
 
@@ -1112,12 +1113,19 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    {
       timer.startMeasurement();
 
-      if (isInStanding() && doContinuousReplanningForStanding.getBooleanValue())
-         updateTransferPlan(true);
-      else if (isInDoubleSupport() && !isInStanding() && doContinuousReplanningForTransfer.getBooleanValue())
-         updateTransferPlan(true);
-      else if (!isInDoubleSupport() && doContinuousReplanningForSwing.getBooleanValue())
-         updateSingleSupportPlan(true);
+      if (skipNextUpdate.getBooleanValue())
+      {
+         skipNextUpdate.set(false);
+      }
+      else
+      {
+         if (isInStanding() && doContinuousReplanningForStanding.getBooleanValue())
+            updateTransferPlan(true);
+         else if (isInDoubleSupport() && !isInStanding() && doContinuousReplanningForTransfer.getBooleanValue())
+            updateTransferPlan(true);
+         else if (!isInDoubleSupport() && doContinuousReplanningForSwing.getBooleanValue())
+            updateSingleSupportPlan(true);
+      }
 
       if (referenceCoPGenerator.getIsPlanAvailable())
       {
@@ -1365,9 +1373,9 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       return angularMomentumTrajectoryGenerator;
    }
 
-   private static final boolean printTracesIfComputedSeveralTimes = false;
+   private static final boolean printTracesIfComputedSeveralTimes = true;
    private int icpComputeCount = 0;
-   private final YoInteger icpPlannerComputeCount = new YoInteger("ICPPlannnerComputeCount", registry);
+   private final YoInteger icpPlannerComputeCount = new YoInteger("ICPPlannerComputeCount", registry);
    private final List<Throwable> traces = printTracesIfComputedSeveralTimes ? new ArrayList<>() : null;
 
    public void endTick()

@@ -132,6 +132,8 @@ public class WalkingSingleSupportState extends SingleSupportState
             feetManager.adjustSwingTrajectory(swingSide, nextFootstep, swingTime);
 
             balanceManager.updateCurrentICPPlan();
+
+            updateHeightManager();
          }
       }
       else if (balanceManager.isPushRecoveryEnabled())
@@ -163,6 +165,8 @@ public class WalkingSingleSupportState extends SingleSupportState
             balanceManager.addFootstepToPlan(nextFootstep, footstepTiming, footstepShiftFraction);
             balanceManager.setICPPlanSupportSide(supportSide);
             balanceManager.initializeICPPlanForSingleSupport(swingDuration, transferDuration, finalTransferTime);
+
+            updateHeightManager();
          }
       }
       else
@@ -180,6 +184,8 @@ public class WalkingSingleSupportState extends SingleSupportState
 
             balanceManager.updateCurrentICPPlan();
             //legConfigurationManager.prepareForLegBracing(swingSide);
+
+            updateHeightManager();
          }
 
          // if the footstep was adjusted, shift the CoM plan, if there is one.
@@ -271,6 +277,8 @@ public class WalkingSingleSupportState extends SingleSupportState
 
       balanceManager.setICPPlanSupportSide(supportSide);
       balanceManager.initializeICPPlanForSingleSupport(footstepTiming.getSwingTime(), footstepTiming.getTransferTime(), finalTransferTime);
+
+      updateHeightManager();
 
       if (balanceManager.wasTimingAdjustedForReachability())
       {
@@ -445,6 +453,11 @@ public class WalkingSingleSupportState extends SingleSupportState
       pelvisOrientationManager.setTrajectoryTime(swingTime);
       pelvisOrientationManager.setUpcomingFootstep(nextFootstep);
       pelvisOrientationManager.updateTrajectoryFromFootstep(); // fixme this shouldn't be called when the footstep is updated
+
+   }
+
+   private void updateHeightManager()
+   {
       balanceManager.getFinalDesiredCoMPosition(desiredCoM);
 
       NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = walkingMessageHandler.createTransferToAndNextFootstepDataForSingleSupport(nextFootstep,
