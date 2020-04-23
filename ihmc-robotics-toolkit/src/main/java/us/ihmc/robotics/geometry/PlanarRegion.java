@@ -93,12 +93,7 @@ public class PlanarRegion implements SupportingVertexHolder
       concaveHullsVertices = new ArrayList<>();
       // TODO set concave hull from convex sub-polygons
    }
-
-   public PlanarRegion(RigidBodyTransformReadOnly transformToWorld, Point2D[] concaveHullVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
-   {
-      throw new RuntimeException();
-   }
-
+   
    /**
     * Create a new planar region.
     *

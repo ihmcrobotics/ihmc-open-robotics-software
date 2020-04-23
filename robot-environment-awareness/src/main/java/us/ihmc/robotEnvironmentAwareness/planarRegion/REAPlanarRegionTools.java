@@ -155,9 +155,7 @@ public class REAPlanarRegionTools
       ConcaveHullDecomposition.recursiveApproximateDecomposition(new ArrayList<>(truncatedConcaveHullVertices), depthThresholdForConvexDecomposition,
                                                                  truncatedConvexPolygons);
 
-      Point2D[] concaveHullVertices = new Point2D[truncatedConcaveHullVertices.size()];
-      truncatedConcaveHullVertices.toArray(concaveHullVertices);
-      PlanarRegion truncatedRegion = new PlanarRegion(transformFromRegionToWorld, concaveHullVertices, truncatedConvexPolygons);
+      PlanarRegion truncatedRegion = new PlanarRegion(transformFromRegionToWorld, truncatedConcaveHullVertices, truncatedConvexPolygons);
       truncatedRegion.setRegionId(planarRegionToTruncate.getRegionId());
       if (filter == null || filter.isPlanarRegionRelevant(truncatedRegion))
          return truncatedRegion;

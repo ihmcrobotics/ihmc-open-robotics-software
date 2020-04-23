@@ -96,10 +96,7 @@ public class ConcaveHullMerger
       RigidBodyTransform transformOneToWorld = new RigidBodyTransform();
       regionOne.getTransformToWorld(transformOneToWorld);
 
-      Point2D[] mergedConcaveHullArray = new Point2D[mergedConcaveHull.size()];
-      mergedConcaveHull.toArray(mergedConcaveHullArray);
-
-      PlanarRegion planarRegion = new PlanarRegion(transformOneToWorld, mergedConcaveHullArray, newPolygonsFromConcaveHull);
+      PlanarRegion planarRegion = new PlanarRegion(transformOneToWorld, mergedConcaveHull, newPolygonsFromConcaveHull);
       planarRegion.setRegionId(regionOne.getRegionId());
 
       ArrayList<PlanarRegion> planarRegions = new ArrayList<PlanarRegion>();

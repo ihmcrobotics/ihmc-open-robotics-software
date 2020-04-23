@@ -5,6 +5,7 @@ import static us.ihmc.robotics.Assert.*;
 import static us.ihmc.euclid.tools.EuclidCoreRandomTools.nextDouble;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -92,7 +93,7 @@ public class REAPlanarRegionToolsTest
       Point2D[] concaveHullVertices = {new Point2D(-squareSide/2.0, squareSide/2.0), new Point2D(squareSide/2.0, squareSide/2.0), new Point2D(squareSide/2.0, -squareSide/2.0), new Point2D(-squareSide/2.0, -squareSide/2.0)};
       List<ConvexPolygon2D> convexPolygons = new ArrayList<>();
       convexPolygons.add(new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(concaveHullVertices)));
-      PlanarRegion rotatedSquare = new PlanarRegion(squarePose, concaveHullVertices, convexPolygons);
+      PlanarRegion rotatedSquare = new PlanarRegion(squarePose, Arrays.asList(concaveHullVertices), convexPolygons);
 
       PlanarRegion truncatedSquare = REAPlanarRegionTools.truncatePlanarRegionIfIntersectingWithPlane(groundOrigin, groundNormal, rotatedSquare, 0.05, null);
 
