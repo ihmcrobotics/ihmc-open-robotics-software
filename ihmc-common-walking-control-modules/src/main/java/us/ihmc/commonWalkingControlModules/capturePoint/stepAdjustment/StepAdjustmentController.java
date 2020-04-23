@@ -273,8 +273,18 @@ public class StepAdjustmentController
          upcomingFootstep.set(footstepSolution);
    }
 
+   public FramePose3DReadOnly getFootstepSolution()
+   {
+      return footstepSolution;
+   }
+
    public boolean wasFootstepAdjusted()
    {
       return footstepWasAdjusted.getBooleanValue();
+   }
+
+   public boolean useStepAdjustment()
+   {
+      return useStepAdjustment.getBooleanValue();
    }
 }
