@@ -64,12 +64,17 @@ public class REAPlanarRegionToolsTest
 
       double squareSide = 4.0;
 
-      Point2D[] concaveHullVertices = {new Point2D(0.0, 0.0), new Point2D(0.0, squareSide), new Point2D(squareSide, squareSide), new Point2D(squareSide, 0.0)};
+      List<Point2D> concaveHullVertices = new ArrayList<>();
+      concaveHullVertices.add(new Point2D(0.0, 0.0));
+      concaveHullVertices.add(new Point2D(0.0, squareSide));
+      concaveHullVertices.add(new Point2D(squareSide, squareSide));
+      concaveHullVertices.add(new Point2D(squareSide, 0.0));
+
       List<ConvexPolygon2D> convexPolygons = new ArrayList<>();
       convexPolygons.add(new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(concaveHullVertices)));
       PlanarRegion verticalSquare = new PlanarRegion(squarePose, concaveHullVertices, convexPolygons);
 
-      Point3D[] expectedVerticesInWorld = Arrays.stream(concaveHullVertices).map(p -> toWorld(p, squarePose)).toArray(Point3D[]::new);
+      Point3D[] expectedVerticesInWorld = concaveHullVertices.stream().map(p -> toWorld(p, squarePose)).toArray(Point3D[]::new);
       expectedVerticesInWorld[0].addZ(0.001);
       expectedVerticesInWorld[3].addZ(0.001);
 
