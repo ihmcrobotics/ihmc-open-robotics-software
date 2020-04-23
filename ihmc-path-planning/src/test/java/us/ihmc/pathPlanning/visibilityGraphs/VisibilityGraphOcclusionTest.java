@@ -1,7 +1,6 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -252,7 +251,7 @@ public class VisibilityGraphOcclusionTest
 
          if (planarRegion.getNumberOfConvexPolygons() == 0)
          {
-            List<Point2DReadOnly> concaveHullVertices = new ArrayList<>(Arrays.asList(planarRegion.getConcaveHull()));
+            List<Point2DReadOnly> concaveHullVertices = new ArrayList<>(planarRegion.getConcaveHull());
             double depthThreshold = 0.05;
             List<ConvexPolygon2D> convexPolygons = new ArrayList<>();
             ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHullVertices, depthThreshold, convexPolygons);
