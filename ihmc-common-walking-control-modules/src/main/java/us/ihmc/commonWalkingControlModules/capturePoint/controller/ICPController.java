@@ -68,7 +68,6 @@ public class ICPController
    private final DoubleProvider copFeedbackForwardWeight;
    private final DoubleProvider copFeedbackLateralWeight;
    private final DoubleProvider cmpFeedbackWeight;
-   private final YoMatrix yoScaledCoPFeedbackWeight = new YoMatrix(yoNamePrefix + "ScaledCoPFeedbackWeight", 2, 2, registry);
    private final DenseMatrix64F scaledCoPFeedbackWeight = new DenseMatrix64F(2, 2);
 
    private final DoubleProvider maxAllowedDistanceCMPSupport;
@@ -79,9 +78,6 @@ public class ICPController
    private final DoubleProvider dynamicsObjectiveWeight;
 
    private final AngularMomentumIntegrator integrator;
-
-   private final BooleanProvider useICPControlPolygons;
-   private final boolean hasICPControlPolygons;
 
    private final ICPControlGainsReadOnly feedbackGains;
    private final DenseMatrix64F transformedGains = new DenseMatrix64F(2, 2);
@@ -141,7 +137,6 @@ public class ICPController
       this.controlDT = controlDT;
       this.controlDTSquare = controlDT * controlDT;
 
-      hasICPControlPolygons = icpControlPolygons != null;
 
       useCMPFeedback = new BooleanParameter(yoNamePrefix + "UseCMPFeedback", registry, icpOptimizationParameters.useCMPFeedback());
       useAngularMomentum = new BooleanParameter(yoNamePrefix + "UseAngularMomentum", registry, icpOptimizationParameters.useAngularMomentum());
@@ -164,7 +159,8 @@ public class ICPController
 
       cmpFeedbackWeight = new DoubleParameter(yoNamePrefix + "CMPFeedbackWeight", registry, icpOptimizationParameters.getAngularMomentumMinimizationWeight());
 
-      useICPControlPolygons = new BooleanParameter(yoNamePrefix + "UseICPControlPolygons", registry, icpOptimizationParameters.getUseICPControlPolygons());
+      BooleanProvider useICPControlPolygons = new BooleanParameter(yoNamePrefix + "UseICPControlPolygons", registry, icpOptimizationParameters.getUseICPControlPolygons());
+      boolean hasICPControlPolygons = icpControlPolygons != null;
 
       safeCoPDistanceToEdge = new DoubleParameter(yoNamePrefix + "SafeCoPDistanceToEdge", registry, icpOptimizationParameters.getSafeCoPDistanceToEdge());
       double defaultMaxAllowedDistanceCMPSupport =
@@ -318,7 +314,6 @@ public class ICPController
                                         feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
                                         feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
 
-      yoScaledCoPFeedbackWeight.get(scaledCoPFeedbackWeight);
       solver.resetCoPFeedbackConditions();
       solver.setFeedbackConditions(scaledCoPFeedbackWeight, transformedGains, dynamicsObjectiveWeight.getValue());
       solver.setMaxCMPDistanceFromEdge(maxAllowedDistanceCMPSupport.getValue());
@@ -375,7 +370,6 @@ public class ICPController
    private void scaleFeedbackWeightWithGain()
    {
       helper.transformFromDynamicsFrame(scaledCoPFeedbackWeight, desiredICPVelocity, copFeedbackForwardWeight.getValue(), copFeedbackLateralWeight.getValue());
-      yoScaledCoPFeedbackWeight.set(scaledCoPFeedbackWeight);
 
       if (scaleFeedbackWeightWithGain.getValue())
       {
@@ -384,8 +378,6 @@ public class ICPController
          double magnitude = helper.transformGainsFromDynamicsFrame(transformedGains, desiredICPVelocity, parallel, orthogonal);
          CommonOps.scale(1.0 / magnitude, scaledCoPFeedbackWeight);
       }
-
-      yoScaledCoPFeedbackWeight.set(scaledCoPFeedbackWeight);
    }
 
    /** {@inheritDoc} */
