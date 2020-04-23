@@ -1,20 +1,29 @@
 package us.ihmc.parameterTuner.remote;
 
+import javafx.stage.Stage;
 import us.ihmc.parameterTuner.guiElements.main.ParameterGuiInterface;
 import us.ihmc.parameterTuner.guiElements.main.ParameterTuningApplication;
 
 public class ParameterTuner extends ParameterTuningApplication
 {
-   private final ParameterGuiInterface inputManager;
+   private ParameterGuiInterface inputManager;
 
    public ParameterTuner()
    {
-      inputManager = new RemoteInputManager();
    }
 
-   public ParameterTuner(String serverAddress)
+   @Override
+   public void start(Stage primaryStage) throws Exception
    {
-      inputManager = new RemoteInputManager(serverAddress);
+      inputManager = new RemoteInputManager(getAutoDiscoveryProperty());
+
+      super.start(primaryStage);
+   }
+
+   public boolean getAutoDiscoveryProperty()
+   {
+      String enableAutoDiscoveryParameter = getParameters().getNamed().getOrDefault("enableAutoDiscovery", "true");
+      return Boolean.parseBoolean(enableAutoDiscoveryParameter);
    }
 
    @Override

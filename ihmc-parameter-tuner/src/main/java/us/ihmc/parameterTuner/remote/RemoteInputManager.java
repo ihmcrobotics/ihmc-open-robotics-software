@@ -40,12 +40,12 @@ public class RemoteInputManager implements ParameterGuiInterface
 
    private ChangeCollector changeCollector = new ChangeCollector();
 
-   public RemoteInputManager()
+   public RemoteInputManager(boolean enableAutoDiscovery)
    {
-      this(null);
+      this(null, enableAutoDiscovery);
    }
 
-   public RemoteInputManager(String serverAddress)
+   public RemoteInputManager(String serverAddress, boolean enableAutoDiscovery)
    {
       updateListener = new ParameterUpdateListener();
       updateListener.addConnectionListener(connected -> {
@@ -56,7 +56,7 @@ public class RemoteInputManager implements ParameterGuiInterface
       YoVariableClient client = new YoVariableClient(updateListener);
       if (serverAddress == null)
       {
-         client.startWithHostSelector();
+         client.startWithHostSelector(enableAutoDiscovery);
       }
       else
       {
