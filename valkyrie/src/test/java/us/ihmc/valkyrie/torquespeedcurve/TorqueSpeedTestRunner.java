@@ -126,7 +126,7 @@ public class TorqueSpeedTestRunner {
 		try {
 		  method = tester.getClass().getMethod(testCase, Vector3D.class, double.class, double.class, File.class);
 		} catch (SecurityException e) { 
-			System.out.println("Security exception attempt to execute test case " + testCase);
+			System.out.println("Security exception while attempting to execute test case " + testCase);
 			System.exit(1);
 		}
 		  catch (NoSuchMethodException e) {
@@ -187,7 +187,7 @@ public class TorqueSpeedTestRunner {
 		FootstepDataListMessage recordedFootsteps = config.getFootsteps();
 		ValkyrieRobotModel robot;
 		
-		if (config.testType == TestType.SPEED) {
+		if (config.testType == TestType.SPEED || config.testType == TestType.PUSHRECOVERY) {
 			robot = new ModifiableValkyrieRobotModel(RobotTarget.SCS, config);		
 		} else {
 			robot = new ModifiableValkyrieRobotModel(RobotTarget.REAL_ROBOT, config);		
@@ -258,7 +258,8 @@ public class TorqueSpeedTestRunner {
 			e.printStackTrace();
 		}
 
-		outputResultsDirectory = ValkyrieTestExporter.exportSimData(tester.getScsInstance(), outputPrefixDirectory, result, config.createVideo);			
+		outputResultsDirectory = ValkyrieTestExporter.exportSimData(result.testHelper.getSimulationConstructionSet(), 
+				                                                    outputPrefixDirectory, result, config.createVideo);			
 
 		// Copy the test parameters into the results directory
 		try {
@@ -282,7 +283,7 @@ public class TorqueSpeedTestRunner {
 		// Specifically, the simulation thread and the intraprocess thread (associated with ROS2 publishing) do not
 		// exit.
 		if (!config.keepUp) {
-			tester.destroySimulationAndRecycleMemory();
+			result.testHelper.destroySimulation();
 			System.exit(0);
 		}
 	}

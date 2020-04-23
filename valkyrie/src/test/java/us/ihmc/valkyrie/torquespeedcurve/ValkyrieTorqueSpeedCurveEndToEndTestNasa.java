@@ -184,7 +184,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 			String dataNameSuffix = "StepUpWithSquareUp" + stepHeightInches;
 			String info = "Square up -> step up a " + stepHeightInches + " inches high step -> square up.";
 
-			return new TorqueSpeedTestResult(info, dataNameSuffix, success);
+			return new TorqueSpeedTestResult(drcSimulationTestHelper, info, dataNameSuffix, success);
 	}
 
 	public TorqueSpeedTestResult testStepUpWithoutSquareUp(DRCRobotModel robotModel, double stepStartInches, double stepHeightInches,
@@ -259,7 +259,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 			String dataNameSuffix = "StepUpWithoutSquareUp";
 			String info = "Step up a " + stepHeightInches + " inches high step while walking";
 
-			return new TorqueSpeedTestResult(info, dataNameSuffix, success);
+			return new TorqueSpeedTestResult(drcSimulationTestHelper, info, dataNameSuffix, success);
 	}
 
 	/**
@@ -354,7 +354,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 			String dataNameSuffix = "StepUpWithoutSquareUp";
 			String info = "Step up a " + stepHeightInches + " inches high step while walking";
 
-			return new TorqueSpeedTestResult(info, dataNameSuffix, success);
+			return new TorqueSpeedTestResult(drcSimulationTestHelper, info, dataNameSuffix, success);
 	}
 
 	public TorqueSpeedTestResult testSpeedWalk(DRCRobotModel robotModel,
@@ -441,7 +441,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 				System.out.println(info);
 			}
 
-			return new TorqueSpeedTestResult(info, dataNameSuffix, success);
+			return new TorqueSpeedTestResult(drcSimulationTestHelper, info, dataNameSuffix, success);
 			// return ValkyrieTestExporter.exportSimData(scs, dataOutputFolder,
 			// dataNameSuffix, info, success);
 	}
@@ -499,7 +499,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 			String info = "Walking " + (slopeAngle < 0.0 ? "up" : "down") + " slope of "
 					+ Math.round(Math.toDegrees(Math.abs(slopeAngle))) + " degrees";
 
-			return new TorqueSpeedTestResult(info, dataNameSuffix, success);
+			return new TorqueSpeedTestResult(drcSimulationTestHelper, info, dataNameSuffix, success);
 	}
 
 	public TorqueSpeedTestResult testUpstairs(DRCRobotModel robotModel, double stairStepHeightInches,
@@ -568,7 +568,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 		String dataNameSuffix = "Upstairs" + stairStepHeightInches + "StepHeight";
 		String info = "Walking upstairs with " + stairStepHeightInches + " inches high steps";
 
-		return new TorqueSpeedTestResult(info, dataNameSuffix, success);
+		return new TorqueSpeedTestResult(drcSimulationTestHelper, info, dataNameSuffix, success);
 	}
 
 	private static ValkyrieModifiableInitialSetup initialSetupForSlope(double slopeAngle, HeightMap heightMap,
