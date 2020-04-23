@@ -12,7 +12,7 @@ import us.ihmc.robotDataLogger.websocket.client.discovery.HTTPDataServerConnecti
 
 public class ParameterTuner extends ParameterTuningApplication
 {
-   private ParameterGuiInterface inputManager;
+   private final ParameterGuiInterface inputManager;
 
    public ParameterTuner(boolean enableAutoDiscovery) throws IOException
    {
