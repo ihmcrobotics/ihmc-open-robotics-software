@@ -119,7 +119,6 @@ public class ICPControllerQPSolver
    private final DenseMatrix64F previousCMPFeedbackDeltaSolution;
    private final DenseMatrix64F previousCoPFeedbackDeltaSolution;
 
-
    /** Number of iterations required for the active set solver to find a solution. */
    private int numberOfIterations;
 
@@ -128,11 +127,8 @@ public class ICPControllerQPSolver
    /** boolean to determine whether or not to compute the cost to go. specified at compile time. */
    private final boolean autoSetPreviousSolution;
 
-   /** boolean indicating whether or not the feedback rate term has been added and can be used. */
-   private final YoBoolean hasFeedbackRateTerm;
    /** Whether or not to use angular momentum during feedback. This means the CMP will be constrained to being in the support polygon. */
    private final YoBoolean useAngularMomentum;
-
 
    private double maxFeedbackXMagnitude = Double.POSITIVE_INFINITY;
    private double maxFeedbackYMagnitude = Double.POSITIVE_INFINITY;
@@ -156,8 +152,6 @@ public class ICPControllerQPSolver
    {
       this.autoSetPreviousSolution = autoSetPreviousSolution;
 
-      hasFeedbackRateTerm = new YoBoolean("icpQPHasFeedbackRateTerm", registry);
-      hasFeedbackRateTerm.set(false);
       useAngularMomentum = new YoBoolean("icpQPUseAngularMomentum", registry);
       useAngularMomentum.set(false);
 
@@ -189,8 +183,7 @@ public class ICPControllerQPSolver
       copLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
       cmpLocationConstraint = new ConstraintToConvexRegion(maximumNumberOfCMPVertices);
 
-      solverInput_Aineq = new DenseMatrix64F(maximumNumberOfCMPVertices,
-                                             maximumNumberOfCMPVertices);
+      solverInput_Aineq = new DenseMatrix64F(maximumNumberOfCMPVertices, maximumNumberOfCMPVertices);
       solverInput_bineq = new DenseMatrix64F(maximumNumberOfCMPVertices, 1);
 
       solution = new DenseMatrix64F(maximumNumberOfFreeVariables + maximumNumberOfLagrangeMultipliers, 1);
@@ -202,7 +195,7 @@ public class ICPControllerQPSolver
       previousCoPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
       previousCMPFeedbackDeltaSolution = new DenseMatrix64F(2, 1);
 
-//      solver.setConvergenceThreshold(convergenceThreshold);
+      //      solver.setConvergenceThreshold(convergenceThreshold);
       solver.setMaxNumberOfIterations(maxNumberOfIterations);
       solver.setUseWarmStart(useWarmStart);
    }
@@ -372,8 +365,6 @@ public class ICPControllerQPSolver
       copFeedbackWeight.zero();
       feedbackGain.zero();
       dynamicsWeight.zero();
-
-      hasFeedbackRateTerm.set(false);
    }
 
    /**
@@ -416,7 +407,6 @@ public class ICPControllerQPSolver
       this.setFeedbackConditions(copFeedbackWeight, copFeedbackWeight, feedbackGain, feedbackGain, dynamicsWeight);
    }
 
-
    private final DenseMatrix64F tempCoPFeedbackWeight = new DenseMatrix64F(2, 2);
    private final DenseMatrix64F tempFeedbackGains = new DenseMatrix64F(2, 2);
 
@@ -441,7 +431,6 @@ public class ICPControllerQPSolver
 
       this.setFeedbackConditions(tempCoPFeedbackWeight, tempFeedbackGains, dynamicsWeight);
    }
-
 
    /**
     * Sets the conditions for the feedback minimization task and the dynamic relaxation minimization task. This task minimizes the difference between
@@ -471,8 +460,6 @@ public class ICPControllerQPSolver
    {
       MatrixTools.setDiagonal(this.feedbackRateWeight, feedbackRateWeight);
       MatrixTools.setDiagonal(this.copCMPFeedbackRateWeight, copCMPFeedbackRateWeight);
-
-      hasFeedbackRateTerm.set(true);
    }
 
    private final FrameVector2D cmpOffsetToThrowAway = new FrameVector2D();
@@ -523,8 +510,7 @@ public class ICPControllerQPSolver
       if (useAngularMomentum.getBooleanValue())
          addCMPFeedbackTask();
 
-      if (hasFeedbackRateTerm.getBooleanValue())
-         addFeedbackRateTask();
+      addFeedbackRateTask();
 
       addDynamicConstraintTask();
 
@@ -561,7 +547,6 @@ public class ICPControllerQPSolver
    {
       return previousTickFailed;
    }
-
 
    /**
     * Adds the minimization of cop feedback task to the quadratic program's cost objectives.<br>
@@ -609,8 +594,15 @@ public class ICPControllerQPSolver
       copLocationConstraint.formulateConstraint();
 
       int constraintSize = copLocationConstraint.getInequalityConstraintSize();
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, copFeedbackIndex, copLocationConstraint.Aineq, 0, 0,
-                                 constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq,
+                                 currentInequalityConstraintIndex,
+                                 copFeedbackIndex,
+                                 copLocationConstraint.Aineq,
+                                 0,
+                                 0,
+                                 constraintSize,
+                                 2,
+                                 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, copLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
       currentInequalityConstraintIndex += constraintSize;
@@ -639,16 +631,28 @@ public class ICPControllerQPSolver
       cmpLocationConstraint.formulateConstraint();
 
       int constraintSize = cmpLocationConstraint.getInequalityConstraintSize();
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, copFeedbackIndex, cmpLocationConstraint.Aineq, 0, 0,
-                                 constraintSize, 2, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, cmpFeedbackIndex, cmpLocationConstraint.Aineq, 0, 0,
-                                 constraintSize, 2, 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq,
+                                 currentInequalityConstraintIndex,
+                                 copFeedbackIndex,
+                                 cmpLocationConstraint.Aineq,
+                                 0,
+                                 0,
+                                 constraintSize,
+                                 2,
+                                 1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq,
+                                 currentInequalityConstraintIndex,
+                                 cmpFeedbackIndex,
+                                 cmpLocationConstraint.Aineq,
+                                 0,
+                                 0,
+                                 constraintSize,
+                                 2,
+                                 1.0);
       MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, cmpLocationConstraint.bineq, 0, 0, constraintSize, 1, 1.0);
 
       currentInequalityConstraintIndex += constraintSize;
    }
-
-
 
    /**
     * Adds the recursive dynamics as an equality constraint to the optimization. Takes the form
@@ -671,8 +675,7 @@ public class ICPControllerQPSolver
     */
    private void addDynamicConstraintTask()
    {
-      inputCalculator
-            .computeDynamicsTask(dynamicsTaskInput, currentICPError, feedbackGain, dynamicsWeight, useAngularMomentum.getBooleanValue());
+      inputCalculator.computeDynamicsTask(dynamicsTaskInput, currentICPError, feedbackGain, dynamicsWeight, useAngularMomentum.getBooleanValue());
       inputCalculator.submitDynamicsTask(dynamicsTaskInput, solverInput_H, solverInput_h, solverInputResidualCost);
    }
 
@@ -681,16 +684,32 @@ public class ICPControllerQPSolver
     */
    private void addMaximumFeedbackMagnitudeConstraint()
    {
-      ICPControllerQPConstraintCalculator.calculateMaxFeedbackMagnitudeConstraint(feedbackLimitConstraint, maxFeedbackXMagnitude, maxFeedbackYMagnitude, useAngularMomentum.getBooleanValue());
+      ICPControllerQPConstraintCalculator.calculateMaxFeedbackMagnitudeConstraint(feedbackLimitConstraint,
+                                                                                  maxFeedbackXMagnitude,
+                                                                                  maxFeedbackYMagnitude,
+                                                                                  useAngularMomentum.getBooleanValue());
 
       int feedbackMagnitudeConstraintSize = feedbackLimitConstraint.getNumberOfConstraints();
       int numberOfVariables = feedbackLimitConstraint.getNumberOfVariables();
 
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, 0, feedbackLimitConstraint.Aineq, 0, 0, feedbackMagnitudeConstraintSize,
-                                 numberOfVariables, 1.0);
-      MatrixTools
-            .setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, feedbackLimitConstraint.bineq, 0, 0, feedbackMagnitudeConstraintSize, 1,
-                            1.0);
+      MatrixTools.setMatrixBlock(solverInput_Aineq,
+                                 currentInequalityConstraintIndex,
+                                 0,
+                                 feedbackLimitConstraint.Aineq,
+                                 0,
+                                 0,
+                                 feedbackMagnitudeConstraintSize,
+                                 numberOfVariables,
+                                 1.0);
+      MatrixTools.setMatrixBlock(solverInput_bineq,
+                                 currentInequalityConstraintIndex,
+                                 0,
+                                 feedbackLimitConstraint.bineq,
+                                 0,
+                                 0,
+                                 feedbackMagnitudeConstraintSize,
+                                 1,
+                                 1.0);
 
       currentInequalityConstraintIndex += feedbackMagnitudeConstraintSize;
    }
@@ -700,14 +719,32 @@ public class ICPControllerQPSolver
     */
    private void addMaximumFeedbackRateConstraint()
    {
-      ICPControllerQPConstraintCalculator.calculateMaxFeedbackRateConstraint(feedbackRateLimitConstraint, maximumFeedbackRate, previousFeedbackDeltaSolution, controlDT, useAngularMomentum.getBooleanValue());
+      ICPControllerQPConstraintCalculator.calculateMaxFeedbackRateConstraint(feedbackRateLimitConstraint,
+                                                                             maximumFeedbackRate,
+                                                                             previousFeedbackDeltaSolution,
+                                                                             controlDT,
+                                                                             useAngularMomentum.getBooleanValue());
 
       int feedbackRateConstraintSize = feedbackRateLimitConstraint.getNumberOfConstraints();
       int numberOfVariables = feedbackLimitConstraint.getNumberOfVariables();
 
-      MatrixTools.setMatrixBlock(solverInput_Aineq, currentInequalityConstraintIndex, 0, feedbackRateLimitConstraint.Aineq, 0, 0, feedbackRateConstraintSize,
-                                 numberOfVariables, 1.0);
-      MatrixTools.setMatrixBlock(solverInput_bineq, currentInequalityConstraintIndex, 0, feedbackRateLimitConstraint.bineq, 0, 0, feedbackRateConstraintSize, 1,
+      MatrixTools.setMatrixBlock(solverInput_Aineq,
+                                 currentInequalityConstraintIndex,
+                                 0,
+                                 feedbackRateLimitConstraint.Aineq,
+                                 0,
+                                 0,
+                                 feedbackRateConstraintSize,
+                                 numberOfVariables,
+                                 1.0);
+      MatrixTools.setMatrixBlock(solverInput_bineq,
+                                 currentInequalityConstraintIndex,
+                                 0,
+                                 feedbackRateLimitConstraint.bineq,
+                                 0,
+                                 0,
+                                 feedbackRateConstraintSize,
+                                 1,
                                  1.0);
 
       currentInequalityConstraintIndex += feedbackRateConstraintSize;
@@ -722,12 +759,6 @@ public class ICPControllerQPSolver
    private boolean solve(DenseMatrix64F solutionToPack)
    {
       CommonOps.scale(-1.0, solverInput_h);
-
-      for (int i = 0; i < solverInput_H.numCols; i++)
-      {
-         if (solverInput_H.get(i, i) < 0.0)
-            throw new RuntimeException("Hey this is bad.");
-      }
 
       solver.clear();
 
@@ -744,9 +775,6 @@ public class ICPControllerQPSolver
       catch (Exception e)
       {
          e.printStackTrace();
-         // GW: observed this sometimes when the robot was close to falling (see related issue FB-155).
-         // This seems to happen only after the solver failed to find a solution for a few ticks anyway and the
-         // robot will probably fall. That is just a suspicion though.
          LogTools.warn("ICP optimization crashed with exception.");
          return false;
       }
@@ -789,7 +817,6 @@ public class ICPControllerQPSolver
       CommonOps.add(cmpFeedbackSolution, copFeedbackSolution, previousFeedbackDeltaSolution);
    }
 
-
    /**
     * Gets the CMP Feedback difference solution for the ICP Proportional feedback problem.
     *
@@ -798,8 +825,7 @@ public class ICPControllerQPSolver
    public void getCoPFeedbackDifference(FixedFrameVector2DBasics cmpFeedbackDifferenceToPack)
    {
       cmpFeedbackDifferenceToPack.checkReferenceFrameMatch(worldFrame);
-      cmpFeedbackDifferenceToPack.setX(copDeltaSolution.get(0, 0));
-      cmpFeedbackDifferenceToPack.setY(copDeltaSolution.get(1, 0));
+      cmpFeedbackDifferenceToPack.set(copDeltaSolution);
    }
 
    /**
@@ -811,17 +837,13 @@ public class ICPControllerQPSolver
    public void getCMPFeedbackDifference(FixedFrameVector2DBasics differenceToPack)
    {
       differenceToPack.checkReferenceFrameMatch(worldFrame);
-      differenceToPack.setX(cmpDeltaSolution.get(0, 0));
-      differenceToPack.setY(cmpDeltaSolution.get(1, 0));
+      differenceToPack.set(cmpDeltaSolution);
    }
-
-
 
    public void getDynamicsError(FixedFrameVector2DBasics errorToPack)
    {
       errorToPack.checkReferenceFrameMatch(worldFrame);
-      errorToPack.setX(dynamicsError.get(0));
-      errorToPack.setY(dynamicsError.get(1));
+      errorToPack.set(dynamicsError);
    }
 
    /**
