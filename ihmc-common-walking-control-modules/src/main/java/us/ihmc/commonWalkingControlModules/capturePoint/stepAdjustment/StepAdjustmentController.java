@@ -244,7 +244,7 @@ public class StepAdjustmentController
 
       footstepMultiplier.set(computeFootstepAdjustmentMultiplier(omega0));
       footstepAdjustmentInControlPlane.set(residualICPError);
-      footstepAdjustmentInControlPlane.scale(footstepMultiplier.getDoubleValue());
+      footstepAdjustmentInControlPlane.scale(1.0 / footstepMultiplier.getDoubleValue());
 
       if (footstepAdjustmentInControlPlane.length() < footstepDeadband.getValue())
       {
