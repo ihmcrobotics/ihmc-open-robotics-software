@@ -734,8 +734,13 @@ public class ClusterToolsTest
 
       Point2D[] region1_1Points = new Point2D[] {new Point2D(0.0, 0.0), new Point2D(0.0, 0.2), new Point2D(0.1, 0.2), new Point2D(0.1, 0.0)};
       Point2D[] region1_2Points = new Point2D[] {new Point2D(0.1, 0.0), new Point2D(0.1, 0.4), new Point2D(0.2, 0.4), new Point2D(0.2, 0.0)};
-      Point2D[] concaveHull = new Point2D[] {new Point2D(0.0, 0.0), new Point2D(0.0, 0.2), new Point2D(0.1, 0.2), new Point2D(0.1, 0.4), new Point2D(0.2, 0.4),
-            new Point2D(0.2, 0.0)};
+      List<Point2D> concaveHull = new ArrayList<>();
+      concaveHull.add(new Point2D(0.0, 0.0));
+      concaveHull.add(new Point2D(0.0, 0.2));
+      concaveHull.add(new Point2D(0.1, 0.2));
+      concaveHull.add(new Point2D(0.1, 0.4));
+      concaveHull.add(new Point2D(0.2, 0.4));
+      concaveHull.add(new Point2D(0.2, 0.0));
       Vector3D normal1_1 = new Vector3D(0.0, -1.0, 0.0);
       normal1_1.normalize();
       RigidBodyTransform transform1_1 = createTransformFromPointAndZAxis(new Point3D(0.0, 0.0, 0.014), normal1_1);
@@ -1085,7 +1090,7 @@ public class ClusterToolsTest
       return planarRegion;
    }
 
-   private PlanarRegion createPlanarRegionFromSeveralPolygons(Point2D[] concaveHullVertices, RigidBodyTransform transform, Point2D[]... listOfPoints)
+   private PlanarRegion createPlanarRegionFromSeveralPolygons(List<Point2D> concaveHullVertices, RigidBodyTransform transform, Point2D[]... listOfPoints)
    {
       ArrayList<ConvexPolygon2D> polygons = new ArrayList<>();
 

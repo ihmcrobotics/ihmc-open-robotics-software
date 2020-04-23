@@ -1,11 +1,10 @@
 package us.ihmc.robotics.geometry;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
@@ -47,7 +46,7 @@ public class PlanarRegion implements SupportingVertexHolder
     */
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
-   private final Point2D[] concaveHullsVertices;
+   private final List<Point2D> concaveHullsVertices;
    /**
     * List of the convex polygons representing this planar region. They are in the local frame of
     * the plane.
@@ -68,8 +67,8 @@ public class PlanarRegion implements SupportingVertexHolder
     */
    public PlanarRegion()
    {
-      concaveHullsVertices = new Point2D[0];
       convexPolygons = new ArrayList<>();
+      concaveHullsVertices = new ArrayList<>();
       updateBoundingBox();
       updateConvexHull();
    }
@@ -87,10 +86,17 @@ public class PlanarRegion implements SupportingVertexHolder
 
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
-      concaveHullsVertices = new Point2D[0];
       convexPolygons = planarRegionConvexPolygons;
       updateBoundingBox();
       updateConvexHull();
+
+      concaveHullsVertices = new ArrayList<>();
+      // TODO set concave hull from convex sub-polygons
+   }
+
+   public PlanarRegion(RigidBodyTransformReadOnly transformToWorld, Point2D[] concaveHullVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
+   {
+      throw new RuntimeException();
    }
 
    /**
@@ -101,10 +107,11 @@ public class PlanarRegion implements SupportingVertexHolder
     * @param planarRegionConvexPolygons the list of convex polygon that represents the planar
     *           region. Expressed in local coordinate system.
     */
-   public PlanarRegion(RigidBodyTransformReadOnly transformToWorld, Point2D[] concaveHullVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
+   public PlanarRegion(RigidBodyTransformReadOnly transformToWorld, List<Point2D> concaveHullVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
+
       this.concaveHullsVertices = concaveHullVertices;
       //TODO: Remove repeat vertices if you have them, or fix upstream so they don't create them.
       checkConcaveHullRepeatVertices(false);
@@ -125,10 +132,11 @@ public class PlanarRegion implements SupportingVertexHolder
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
-      concaveHullsVertices = new Point2D[convexPolygon.getNumberOfVertices()];
+
+      concaveHullsVertices = new ArrayList<>();
       for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
       {
-         concaveHullsVertices[i] = new Point2D(convexPolygon.getVertex(i));
+         concaveHullsVertices.add(new Point2D(convexPolygon.getVertex(i)));
       }
       checkConcaveHullRepeatVertices(false);
 
@@ -773,20 +781,25 @@ public class PlanarRegion implements SupportingVertexHolder
 
    public Point2D[] getConcaveHull()
    {
+      throw new RuntimeException();
+   }
+
+   public List<Point2D> getConcaveHullList()
+   {
       return concaveHullsVertices;
    }
 
    private void checkConcaveHullRepeatVertices(boolean throwException)
    {
-      if (concaveHullsVertices.length < 2)
+      if (concaveHullsVertices.size() < 2)
          return;
 
-      for (int i=0; i<concaveHullsVertices.length; i++)
+      for (int i=0; i< concaveHullsVertices.size(); i++)
       {
-         int nextIndex = (i + 1) % concaveHullsVertices.length;
+         int nextIndex = (i + 1) % concaveHullsVertices.size();
 
-         Point2D vertex = concaveHullsVertices[i];
-         Point2D nextVertex = concaveHullsVertices[nextIndex];
+         Point2D vertex = concaveHullsVertices.get(i);
+         Point2D nextVertex = concaveHullsVertices.get(nextIndex);
 
          if (vertex.distance(nextVertex) < 1e-7)
          {
@@ -801,12 +814,12 @@ public class PlanarRegion implements SupportingVertexHolder
 
    public Point2D getConcaveHullVertex(int i)
    {
-      return concaveHullsVertices[i];
+      return concaveHullsVertices.get(i);
    }
 
    public int getConcaveHullSize()
    {
-      return concaveHullsVertices.length;
+      return concaveHullsVertices.size();
    }
 
    /** Returns the number of convex polygons representing this region. */
@@ -1131,9 +1144,9 @@ public class PlanarRegion implements SupportingVertexHolder
    public PlanarRegion copy()
    {
       RigidBodyTransform transformToWorldCopy = new RigidBodyTransform(fromLocalToWorldTransform);
-      Point2D[] concaveHullCopy = new Point2D[concaveHullsVertices.length];
-      for (int i = 0; i < concaveHullsVertices.length; i++)
-         concaveHullCopy[i] = new Point2D(concaveHullsVertices[i]);
+      List<Point2D> concaveHullCopy = new ArrayList<>();
+      for (int i = 0; i < concaveHullsVertices.size(); i++)
+         concaveHullCopy.add(new Point2D(concaveHullsVertices.get(i)));
 
       List<ConvexPolygon2D> convexPolygonsCopy = new ArrayList<>();
       for (int i = 0; i < getNumberOfConvexPolygons(); i++)
@@ -1176,7 +1189,7 @@ public class PlanarRegion implements SupportingVertexHolder
    /**
     * Transforms the planar region
     *
-    * @param fromDesiredToCurrentTransform transform from current frame to desired frame
+    * @param transform transform from current frame to desired frame
     */
    public void applyTransform(RigidBodyTransform transform)
    {
