@@ -8,6 +8,7 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -82,7 +83,7 @@ public class ICPControlPlane
    }
 
 
-   public void projectPointFromPlaneOntoSurface(ReferenceFrame desiredReferenceFrame, FramePoint2DReadOnly pointToProject, FramePoint3D projectionToPack, double surfaceHeightInWorld)
+   public void projectPointFromPlaneOntoSurface(ReferenceFrame desiredReferenceFrame, FramePoint2DReadOnly pointToProject, FramePoint3DBasics projectionToPack, double surfaceHeightInWorld)
    {
       tempFramePoint2D.setIncludingFrame(pointToProject);
       tempFramePoint2D.changeFrameAndProjectToXYPlane(worldFrame);
@@ -220,12 +221,12 @@ public class ICPControlPlane
       projectPoint(pointToProject, projectionToPack, planeHeight, unprojectedHeight);
    }
 
-   private static void projectPointFromControlPlaneOntoSurface(FramePoint3DReadOnly pointToProject, FramePoint3D projectionToPack, double planeHeight, double surfaceHeight)
+   private static void projectPointFromControlPlaneOntoSurface(FramePoint3DReadOnly pointToProject, FramePoint3DBasics projectionToPack, double planeHeight, double surfaceHeight)
    {
       projectPoint(pointToProject, projectionToPack, surfaceHeight, planeHeight);
    }
 
-   private static void projectPoint(FramePoint3DReadOnly pointToProject, FramePoint3D projectionToPack, double projectedHeight, double unprojectedHeight)
+   private static void projectPoint(FramePoint3DReadOnly pointToProject, FramePoint3DBasics projectionToPack, double projectedHeight, double unprojectedHeight)
    {
       projectionToPack.setIncludingFrame(pointToProject);
       projectionToPack.scale(projectedHeight / unprojectedHeight);
