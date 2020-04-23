@@ -1124,6 +1124,7 @@ public class PlanarRegion implements SupportingVertexHolder
    private void updateConcaveHull()
    {
       this.concaveHullsVertices.clear();
+      int maximumIterations = 0;
 
       double minX = Double.MAX_VALUE;
       int minXPolygonIndex = -1;
@@ -1136,13 +1137,35 @@ public class PlanarRegion implements SupportingVertexHolder
             minX = polygon.getVertex(0).getX();
             minXPolygonIndex = i;
          }
+
+         maximumIterations += polygon.getNumberOfVertices();
+      }
+
+      // Loop through again in case multiple convex polygons share this vertex. We want to start on the one whose edge between this vertex
+      // and it's previous vertex is along the concave perimeter. Find by taking largest dot product with y-axis
+      Point2DReadOnly vertex = convexPolygons.get(minXPolygonIndex).getVertex(0);
+      double maxDotProduct = Double.NEGATIVE_INFINITY;
+      for (int i = 0; i < convexPolygons.size(); i++)
+      {
+         if (convexPolygons.get(i).getVertex(0).epsilonEquals(vertex, 1e-7))
+         {
+            double vx = vertex.getX() - convexPolygons.get(i).getPreviousVertex(0).getX();
+            double vy = vertex.getY() - convexPolygons.get(i).getPreviousVertex(0).getY();
+            double dotProduct = vy / EuclidCoreTools.norm(vx, vy);
+            if (dotProduct > maxDotProduct)
+            {
+               maxDotProduct = dotProduct;
+               minXPolygonIndex = i;
+            }
+         }
       }
 
       concaveHullsVertices.add(new Point2D(convexPolygons.get(minXPolygonIndex).getVertex(0)));
       int polygonIndex = minXPolygonIndex;
       int vertexIndex = 0;
+      int iterations = 0;
 
-      while (true)
+      while (iterations < maximumIterations)
       {
          int[] neighborRegionAndVertexIndices = findNeighborRegionSharingConcaveHullVertex(polygonIndex, vertexIndex);
          if (neighborRegionAndVertexIndices == null)
@@ -1163,9 +1186,21 @@ public class PlanarRegion implements SupportingVertexHolder
          {
             concaveHullsVertices.add(new Point2D(convexPolygons.get(polygonIndex).getVertex(vertexIndex)));
          }
+
+         iterations++;
+      }
+
+      if (iterations == maximumIterations)
+      {
+         LogTools.error("Unable to solve for concave hull. region " + regionId);
+         concaveHullsVertices.clear();
       }
    }
 
+   /**
+    * Finds the index of the convex polygon that shares the given vertex. If multiple matches are found, the one with the smallest clockwise
+    * angle from the given vertex and it's previous vertex is returned. If no match is found, null is returned.
+    */
    private int[] findNeighborRegionSharingConcaveHullVertex(int polygonIndex, int vertexIndex)
    {
       ConvexPolygon2D inputPolygon = convexPolygons.get(polygonIndex);
