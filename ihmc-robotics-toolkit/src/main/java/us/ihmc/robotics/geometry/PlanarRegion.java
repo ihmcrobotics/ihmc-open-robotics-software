@@ -1068,6 +1068,9 @@ public class PlanarRegion implements SupportingVertexHolder
       convexPolygons.clear();
       for (int i = 0; i < other.getNumberOfConvexPolygons(); i++)
          convexPolygons.add(new ConvexPolygon2D(other.convexPolygons.get(i)));
+      concaveHullsVertices.clear();
+      for (int i = 0; i < other.getConcaveHullSize(); i++)
+         concaveHullsVertices.add(new Point2D(other.getConcaveHull().get(i)));
 
       updateBoundingBox();
       convexHull.set(other.convexHull);
