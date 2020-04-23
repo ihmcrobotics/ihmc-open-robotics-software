@@ -13,8 +13,8 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.EuclideanTrajectoryControllerCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisTrajectoryCommand;
@@ -28,7 +28,6 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.PDControllerWithGainSetter;
 import us.ihmc.robotics.controllers.pidGains.PDGainsReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -48,6 +47,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final YoDouble desiredCoMHeightFromTrajectory = new YoDouble("desiredCoMHeightFromTrajectory", registry);
    private final YoDouble desiredCoMHeightVelocityFromTrajectory = new YoDouble("desiredCoMHeightVelocityFromTrajectory", registry);
    private final YoDouble desiredCoMHeightAccelerationFromTrajectory = new YoDouble("desiredCoMHeightAccelerationFromTrajectory", registry);
+   private final YoDouble desiredCoMHeightJerkFromTrajectory = new YoDouble("desiredCoMHeightJerkFromTrajectory", registry);
    //   private final YoDouble desiredCoMHeightBeforeSmoothing = new YoDouble("desiredCoMHeightBeforeSmoothing", registry);
    //   private final YoDouble desiredCoMHeightVelocityBeforeSmoothing = new YoDouble("desiredCoMHeightVelocityBeforeSmoothing", registry);
    //   private final YoDouble desiredCoMHeightAccelerationBeforeSmoothing = new YoDouble("desiredCoMHeightAccelerationBeforeSmoothing", registry);
@@ -57,6 +57,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private final YoDouble desiredCoMHeightAfterSmoothing = new YoDouble("desiredCoMHeightAfterSmoothing", registry);
    private final YoDouble desiredCoMHeightVelocityAfterSmoothing = new YoDouble("desiredCoMHeightVelocityAfterSmoothing", registry);
    private final YoDouble desiredCoMHeightAccelerationAfterSmoothing = new YoDouble("desiredCoMHeightAccelerationAfterSmoothing", registry);
+   private final YoDouble desiredCoMHeightJerkAfterSmoothing = new YoDouble("desiredCoMHeightJerkAfterSmoothing", registry);
 
    private final YoDouble zDesired = new YoDouble("zDesired", registry);
    private final YoDouble zdDesired = new YoDouble("zdDesired", registry);
@@ -126,6 +127,7 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
                                                              maximumHeightAboveGround,
                                                              defaultOffsetHeightAboveGround,
                                                              doubleSupportPercentageIn,
+                                                             0.2,
                                                              pelvisFrame,
                                                              referenceFrames.getSoleZUpFrames(),
                                                              controllerToolbox.getYoTime(),
@@ -190,17 +192,17 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       centerOfMassTrajectoryGenerator.setSupportLeg(supportLeg);
    }
 
-   private void solve(CoMHeightPartialDerivativesData comHeightPartialDerivativesToPack, boolean isInDoubleSupport)
+   private void solve(CoMHeightPartialDerivativesDataBasics comHeightPartialDerivativesToPack, boolean isInDoubleSupport)
    {
       centerOfMassTrajectoryGenerator.solve(comHeightPartialDerivativesToPack, isInDoubleSupport);
    }
 
    // Temporary objects to reduce garbage collection.
-   private final CoMHeightPartialDerivativesData comHeightPartialDerivatives = new CoMHeightPartialDerivativesData();
+   private final CoMHeightPartialDerivativesDataBasics comHeightPartialDerivatives = new YoCoMHeightPartialDerivativesData(registry);
    private final FramePoint3D comPosition = new FramePoint3D();
    private final FrameVector3D comVelocity = new FrameVector3D(worldFrame);
    private final FrameVector2D comXYVelocity = new FrameVector2D();
-   private final FrameVector3D comAcceleration = new FrameVector3D();
+   private final FrameVector2D desiredComAcceleration = new FrameVector2D();
    private final CoMHeightTimeDerivativesData comHeightDataBeforeSmoothing = new CoMHeightTimeDerivativesData("beforeSmoothing", registry);
    private final CoMHeightTimeDerivativesData comHeightDataAfterSmoothing = new CoMHeightTimeDerivativesData("afterSmoothing", registry);
    private final CoMHeightTimeDerivativesData comHeightDataAfterSingularityAvoidance = new CoMHeightTimeDerivativesData("afterSingularityAvoidance", registry);
@@ -214,7 +216,8 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
    private boolean desiredCMPcontainedNaN = false;
 
    @Override
-   public double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity,
+   public double computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
+                                                     FrameVector2DReadOnly desiredCoMVelocity,
                                                      boolean isInDoubleSupport,
                                                      double omega0,
                                                      boolean isRecoveringFromPush,
@@ -244,30 +247,30 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
 
       // TODO: use current omega0 instead of previous
       comXYVelocity.setIncludingFrame(comVelocity);
-      if (desiredICPVelocity.containsNaN())
+      if (desiredCoMVelocity.containsNaN())
       {
          if (!desiredCMPcontainedNaN)
             LogTools.error("Desired CMP containes NaN, setting it to the ICP - only showing this error once");
-         comAcceleration.setToZero(desiredICPVelocity.getReferenceFrame());
+         desiredComAcceleration.setToZero(desiredICPVelocity.getReferenceFrame());
          desiredCMPcontainedNaN = true;
       }
       else
       {
-         comAcceleration.setIncludingFrame(desiredICPVelocity, 0.0);
+         desiredComAcceleration.setIncludingFrame(desiredICPVelocity);
          desiredCMPcontainedNaN = false;
       }
-      comAcceleration.sub(comVelocity);
-      comAcceleration.scale(omega0); // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
+      desiredComAcceleration.sub(desiredCoMVelocity);
+      desiredComAcceleration.scale(omega0); // MathTools.square(omega0.getDoubleValue()) * (com.getX() - copX);
 
       CoMHeightTimeDerivativesCalculator.computeCoMHeightTimeDerivatives(comHeightDataBeforeSmoothing,
-                                                                         comVelocity,
-                                                                         comAcceleration,
+                                                                         desiredCoMVelocity, desiredComAcceleration,
                                                                          comHeightPartialDerivatives);
 
       comHeightDataBeforeSmoothing.getComHeight(desiredCenterOfMassHeightPoint);
       desiredCoMHeightFromTrajectory.set(desiredCenterOfMassHeightPoint.getZ());
       desiredCoMHeightVelocityFromTrajectory.set(comHeightDataBeforeSmoothing.getComHeightVelocity());
       desiredCoMHeightAccelerationFromTrajectory.set(comHeightDataBeforeSmoothing.getComHeightAcceleration());
+      desiredCoMHeightJerkFromTrajectory.set(comHeightDataBeforeSmoothing.getComHeightJerk());
 
       //    correctCoMHeight(desiredICPVelocity, zCurrent, comHeightDataBeforeSmoothing, false, false);
 
@@ -282,11 +285,12 @@ public class CenterOfMassHeightControlState implements PelvisAndCenterOfMassHeig
       desiredCoMHeightAfterSmoothing.set(desiredCenterOfMassHeightPoint.getZ());
       desiredCoMHeightVelocityAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightVelocity());
       desiredCoMHeightAccelerationAfterSmoothing.set(comHeightDataAfterSmoothing.getComHeightAcceleration());
+      desiredCoMHeightJerkAfterSmoothing.set(comHeightDataBeforeSmoothing.getComHeightJerk());
 
       if (feetManager != null)
       {
          comHeightDataAfterSingularityAvoidance.set(comHeightDataAfterSmoothing);
-         feetManager.correctCoMHeightForSupportSingularityAvoidance(desiredICPVelocity, zCurrent, comHeightDataAfterSingularityAvoidance);
+         feetManager.correctCoMHeightForSupportSingularityAvoidance(desiredCoMVelocity, zCurrent, comHeightDataAfterSingularityAvoidance);
 
          comHeightDataAfterUnreachableFootstep.set(comHeightDataAfterSingularityAvoidance);
          feetManager.correctCoMHeightForUnreachableFootstep(comHeightDataAfterUnreachableFootstep);

@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativ
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
@@ -380,7 +381,7 @@ public class FootControlModule
       }
    }
 
-   public void correctCoMHeightTrajectoryForSupportSingularityAvoidance(FrameVector2D comXYVelocity,
+   public void correctCoMHeightTrajectoryForSupportSingularityAvoidance(FrameVector2DReadOnly comXYVelocity,
                                                                         CoMHeightTimeDerivativesData comHeightDataToCorrect,
                                                                         double zCurrent,
                                                                         ReferenceFrame pelvisZUpFrame)
