@@ -7,6 +7,7 @@ import static us.ihmc.graphicsDescription.appearance.YoAppearance.Purple;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
+import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -58,6 +59,8 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class LinearMomentumRateControlModule
 {
+   private static final boolean USE_COMBINED_STEP_ADJUSTMENT = false;
+
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -112,7 +115,8 @@ public class LinearMomentumRateControlModule
    private boolean desiredCMPcontainedNaN = false;
    private boolean desiredCoPcontainedNaN = false;
 
-   private final ICPOptimizationControllerInterface icpOptimizationController;
+   private final ICPController icpController;
+   private final ICPOptimizationController icpOptimizationController;
    private final ICPControlPlane icpControlPlane;
    private final BipedSupportPolygons bipedSupportPolygons;
    private final ICPControlPolygons icpControlPolygons;
@@ -204,8 +208,23 @@ public class LinearMomentumRateControlModule
       icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
       icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, yoGraphicsListRegistry);
       bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null); // TODO: This is not being visualized since it is a duplicate for now.
-      icpOptimizationController = new ICPOptimizationController(walkingControllerParameters, soleZUpFrames, bipedSupportPolygons, icpControlPolygons,
-                                                                contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+      if (USE_COMBINED_STEP_ADJUSTMENT)
+      {
+         icpOptimizationController = new ICPOptimizationController(walkingControllerParameters, soleZUpFrames, bipedSupportPolygons, icpControlPolygons,
+                                                                   contactableFeet, controlDT, registry, yoGraphicsListRegistry);
+         icpController = null;
+      }
+      else
+      {
+         icpOptimizationController = null;
+         icpController = new ICPController(walkingControllerParameters,
+                                           bipedSupportPolygons,
+                                           icpControlPolygons,
+                                           contactableFeet,
+                                           controlDT,
+                                           registry,
+                                           yoGraphicsListRegistry);
+      }
 
       parentRegistry.addChild(registry);
    }
@@ -407,58 +426,96 @@ public class LinearMomentumRateControlModule
          throw new RuntimeException("Can only initialize once per compute.");
       }
 
-      if (initializeForStanding || initializeForTransfer || initializeForSingleSupport)
+      if (USE_COMBINED_STEP_ADJUSTMENT)
       {
-         icpOptimizationController.clearPlan();
-         icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
-         for (int i = 0; i < footsteps.size(); i++)
+         if (initializeForStanding || initializeForTransfer || initializeForSingleSupport)
          {
-            icpOptimizationController.addFootstepToPlan(footsteps.get(i), swingDurations.get(i), transferDurations.get(i));
+            icpOptimizationController.clearPlan();
+            icpOptimizationController.setFinalTransferDuration(finalTransferDuration);
+            for (int i = 0; i < footsteps.size(); i++)
+            {
+               icpOptimizationController.addFootstepToPlan(footsteps.get(i), swingDurations.get(i), transferDurations.get(i));
+            }
+         }
+
+         if (initializeForStanding)
+         {
+            icpOptimizationController.initializeForStanding(yoTime.getValue());
+         }
+         if (initializeForSingleSupport)
+         {
+            icpOptimizationController.initializeForSingleSupport(yoTime.getValue(), supportSide, omega0);
+         }
+         if (initializeForTransfer)
+         {
+            icpOptimizationController.initializeForTransfer(yoTime.getValue(), transferToSide);
+         }
+
+         icpOptimizationController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
+
+         if (!Double.isNaN(remainingTimeInSwingUnderDisturbance) && remainingTimeInSwingUnderDisturbance > 0.0)
+         {
+            icpOptimizationController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
+         }
+
+         if (planarRegionsListHandler != null && planarRegionsListHandler.hasNewPlanarRegions())
+         {
+            icpOptimizationController.submitCurrentPlanarRegions(planarRegionsListHandler.pollHasNewPlanarRegionsList());
          }
       }
+      else
+      {
+         if (initializeForStanding)
+         {
+            icpController.initializeForStanding();
+         }
+         if (initializeForSingleSupport)
+         {
+            icpController.initializeForSingleSupport(supportSide);
+         }
+         if (initializeForTransfer)
+         {
+            icpController.initializeForTransfer();
+         }
 
-      if (initializeForStanding)
-      {
-         icpOptimizationController.initializeForStanding(yoTime.getValue());
-      }
-      if (initializeForSingleSupport)
-      {
-         icpOptimizationController.initializeForSingleSupport(yoTime.getValue(), supportSide, omega0);
-      }
-      if (initializeForTransfer)
-      {
-         icpOptimizationController.initializeForTransfer(yoTime.getValue(), transferToSide);
-      }
-
-      icpOptimizationController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
-
-      if (!Double.isNaN(remainingTimeInSwingUnderDisturbance) && remainingTimeInSwingUnderDisturbance > 0.0)
-      {
-         icpOptimizationController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
-      }
-
-      if (planarRegionsListHandler != null && planarRegionsListHandler.hasNewPlanarRegions())
-      {
-         icpOptimizationController.submitCurrentPlanarRegions(planarRegionsListHandler.pollHasNewPlanarRegionsList());
+         icpController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
       }
    }
 
    private void computeICPController()
    {
-      if (perfectCoP.containsNaN())
+      if (USE_COMBINED_STEP_ADJUSTMENT)
       {
-         perfectCMPDelta.setToZero();
-         icpOptimizationController.compute(yoTime.getValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP,
-                                           capturePoint, capturePointVelocity, omega0);
+         if (perfectCoP.containsNaN())
+         {
+            perfectCMPDelta.setToZero();
+            icpOptimizationController.compute(yoTime.getValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint,
+                                              capturePointVelocity, omega0);
+         }
+         else
+         {
+            perfectCMPDelta.sub(perfectCMP, perfectCoP);
+            icpOptimizationController.compute(yoTime.getValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint,
+                                              capturePointVelocity, omega0);
+         }
+         icpOptimizationController.getDesiredCMP(desiredCMP);
+         icpOptimizationController.getDesiredCoP(desiredCoP);
       }
       else
       {
-         perfectCMPDelta.sub(perfectCMP, perfectCoP);
-         icpOptimizationController.compute(yoTime.getValue(), desiredCapturePoint, desiredCapturePointVelocity, perfectCoP,
-                                           perfectCMPDelta, capturePoint, capturePointVelocity, omega0);
+         if (perfectCoP.containsNaN())
+         {
+            perfectCMPDelta.setToZero();
+            icpController.compute(desiredCapturePoint, desiredCapturePointVelocity, perfectCMP, capturePoint, capturePointVelocity);
+         }
+         else
+         {
+            perfectCMPDelta.sub(perfectCMP, perfectCoP);
+            icpController.compute(desiredCapturePoint, desiredCapturePointVelocity, perfectCoP, perfectCMPDelta, capturePoint, capturePointVelocity);
+         }
+         icpController.getDesiredCMP(desiredCMP);
+         icpController.getDesiredCoP(desiredCoP);
       }
-      icpOptimizationController.getDesiredCMP(desiredCMP);
-      icpOptimizationController.getDesiredCoP(desiredCoP);
    }
 
    private void checkAndPackOutputs()
@@ -488,10 +545,18 @@ public class LinearMomentumRateControlModule
       }
 
       output.setDesiredCMP(desiredCMP);
-      output.setEffectiveICPAdjustment(icpOptimizationController.getICPShiftFromStepAdjustment());
-      output.setFootstepSolution(icpOptimizationController.getFootstepSolution());
-      output.setFootstepWasAdjusted(icpOptimizationController.wasFootstepAdjusted());
-      output.setUsingStepAdjustment(icpOptimizationController.useStepAdjustment());
+      if (USE_COMBINED_STEP_ADJUSTMENT)
+      {
+         output.setEffectiveICPAdjustment(icpOptimizationController.getICPShiftFromStepAdjustment());
+         output.setFootstepSolution(icpOptimizationController.getFootstepSolution());
+         output.setFootstepWasAdjusted(icpOptimizationController.wasFootstepAdjusted());
+         output.setUsingStepAdjustment(icpOptimizationController.useStepAdjustment());
+      }
+      else
+      {
+         output.setFootstepWasAdjusted(false);
+         output.setUsingStepAdjustment(false);
+      }
    }
 
    private boolean computeDesiredLinearMomentumRateOfChange()
