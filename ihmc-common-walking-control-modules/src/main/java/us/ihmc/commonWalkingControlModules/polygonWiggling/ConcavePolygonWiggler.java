@@ -42,6 +42,11 @@ public class ConcavePolygonWiggler
    private final YoFrameLineSegment2D[] transformedPolygonToWiggle = new YoFrameLineSegment2D[4];
    private final YoFrameLineSegment2D[] constraintPolygon = new YoFrameLineSegment2D[100];
 
+   public ConcavePolygonWiggler()
+   {
+      this.tickAndUpdatable = null;
+   }
+
    public ConcavePolygonWiggler(TickAndUpdatable tickAndUpdatable, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
       this.tickAndUpdatable = tickAndUpdatable;
@@ -69,11 +74,7 @@ public class ConcavePolygonWiggler
       rotationVectors.clear();
       transformedVertices.clear();
 
-      for (int i = 0; i < concavePolygonToWiggleInto.getNumberOfVertices(); i++)
-      {
-         constraintPolygon[i].getFirstEndpoint().set(concavePolygonToWiggleInto.getVertex(i));
-         constraintPolygon[i].getSecondEndpoint().set(concavePolygonToWiggleInto.getVertex((i + 1) % concavePolygonToWiggleInto.getNumberOfVertices()));
-      }
+      initializeConstraintGraphics(polygonToWiggle, concavePolygonToWiggleInto);
 
       for (int i = 0; i < polygonToWiggle.getNumberOfVertices(); i++)
       {
@@ -84,13 +85,12 @@ public class ConcavePolygonWiggler
          rotationVector.set(- rotationVector.getY(), rotationVector.getX());
          rotationVector.normalize();
          transformedVertices.add().set(vertex);
-
-         initialPolygonToWiggle[i].getFirstEndpoint().set(polygonToWiggle.getVertex(i));
-         initialPolygonToWiggle[i].getSecondEndpoint().set(polygonToWiggle.getVertex((i + 1) % polygonToWiggle.getNumberOfVertices()));
-         transformedPolygonToWiggle[i].set(initialPolygonToWiggle[i]);
       }
 
-      tickAndUpdatable.tickAndUpdate();
+      if (tickAndUpdatable != null)
+      {
+         tickAndUpdatable.tickAndUpdate();
+      }
 
       while (true)
       {
@@ -109,11 +109,10 @@ public class ConcavePolygonWiggler
          boolean allPointsInside = true;
          gradient.setToZero();
 
+         updateGraphics();
          for (int i = 0; i < polygonToWiggle.getNumberOfVertices(); i++)
          {
             Point2DReadOnly vertex = transformedVertices.get(i);
-            transformedPolygonToWiggle[i].getFirstEndpoint().set(transformedVertices.get(i));
-            transformedPolygonToWiggle[i].getSecondEndpoint().set(transformedVertices.get((i + 1) % transformedVertices.size()));
 
             boolean pointIsInside = PointInPolygonSolver.isPointInsidePolygon(concavePolygonToWiggleInto, vertex);
             double distanceSquaredFromPerimeter = distanceSquaredFromPerimeter(concavePolygonToWiggleInto, vertex);
@@ -142,7 +141,10 @@ public class ConcavePolygonWiggler
             }
          }
 
-         tickAndUpdatable.tickAndUpdate();
+         if (tickAndUpdatable != null)
+         {
+            tickAndUpdatable.tickAndUpdate();
+         }
 
          if (allPointsInside)
          {
@@ -183,6 +185,41 @@ public class ConcavePolygonWiggler
       transform.getRotation().setToYawOrientation(accumulatedTransform.getZ());
 
       return transform;
+   }
+
+   private void initializeConstraintGraphics(ConvexPolygon2DReadOnly polygonToWiggle, Vertex2DSupplier concavePolygonToWiggleInto)
+   {
+      if (tickAndUpdatable == null)
+      {
+         return;
+      }
+
+      for (int i = 0; i < polygonToWiggle.getNumberOfVertices(); i++)
+      {
+         initialPolygonToWiggle[i].getFirstEndpoint().set(polygonToWiggle.getVertex(i));
+         initialPolygonToWiggle[i].getSecondEndpoint().set(polygonToWiggle.getVertex((i + 1) % polygonToWiggle.getNumberOfVertices()));
+         transformedPolygonToWiggle[i].set(initialPolygonToWiggle[i]);
+      }
+
+      for (int i = 0; i < concavePolygonToWiggleInto.getNumberOfVertices(); i++)
+      {
+         constraintPolygon[i].getFirstEndpoint().set(concavePolygonToWiggleInto.getVertex(i));
+         constraintPolygon[i].getSecondEndpoint().set(concavePolygonToWiggleInto.getVertex((i + 1) % concavePolygonToWiggleInto.getNumberOfVertices()));
+      }
+   }
+
+   private void updateGraphics()
+   {
+      if (tickAndUpdatable == null)
+      {
+         return;
+      }
+
+      for (int i = 0; i < transformedVertices.size(); i++)
+      {
+         transformedPolygonToWiggle[i].getFirstEndpoint().set(transformedVertices.get(i));
+         transformedPolygonToWiggle[i].getSecondEndpoint().set(transformedVertices.get((i + 1) % transformedVertices.size()));
+      }
    }
 
    private double distanceSquaredFromPerimeter(Vertex2DSupplier polygon, Point2DReadOnly queryPoint)
