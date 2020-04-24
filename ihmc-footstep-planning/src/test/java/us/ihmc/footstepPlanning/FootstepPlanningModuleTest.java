@@ -1,7 +1,9 @@
 package us.ihmc.footstepPlanning;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import org.apache.commons.lang3.mutable.MutableInt;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -17,11 +19,14 @@ import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
 public class FootstepPlanningModuleTest
 {
    @Test
+   @Disabled // flaky - test is based on CPU time
+   // TODO expose NowSupplier in Stopwatch or base planner timing on some manual time source for unit testing
    public void testStreamingOutput()
    {
       FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName());
@@ -280,12 +285,24 @@ public class FootstepPlanningModuleTest
 
       // test time
       double customTimeout = 1.65;
+      AtomicDouble timestampPrev = new AtomicDouble();
+      AtomicDouble timestamp = new AtomicDouble();
+      AtomicBoolean firstTick = new AtomicBoolean(true);
       planningModule.addCustomTerminationCondition((time, iterations, finalStep, pathSize) -> time >= customTimeout);
-      stopwatch.start();
+      planningModule.addIterationCallback(iteration ->
+                                          {
+                                             if (firstTick.getAndSet(false))
+                                             {
+                                                stopwatch.start();
+                                             }
+
+                                             timestampPrev.set(timestamp.get());
+                                             timestamp.set(stopwatch.totalElapsed());
+                                          });
       FootstepPlannerOutput output = planningModule.handleRequest(request);
-      double planTime = stopwatch.totalElapsed();
       Assertions.assertEquals(output.getFootstepPlanningResult(), FootstepPlanningResult.HALTED);
-      Assertions.assertTrue(MathTools.epsilonEquals(customTimeout, planTime, 0.075));
+      Assertions.assertTrue(timestampPrev.get() < customTimeout);
+      Assertions.assertTrue(output.getPlannerTimings().getTimePlanningStepsSeconds() >= customTimeout + 0.01);
 
       // test iteration limit
       int iterationLimit = 29;
