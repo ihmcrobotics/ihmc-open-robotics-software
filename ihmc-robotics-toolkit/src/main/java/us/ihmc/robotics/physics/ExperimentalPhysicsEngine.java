@@ -77,10 +77,15 @@ public class ExperimentalPhysicsEngine
                                                                       physicsEngineGraphicsRegistry);
    }
 
+   public void addEnvironmentCollidable(Collidable collidable)
+   {
+      environmentCollidables.add(collidable);
+      environmentCollidableVisualizers.addCollidable(collidable);
+   }
+
    public void addEnvironmentCollidables(Collection<? extends Collidable> collidables)
    {
-      environmentCollidables.addAll(collidables);
-      collidables.forEach(environmentCollidableVisualizers::addCollidable);
+      collidables.forEach(this::addEnvironmentCollidable);
    }
 
    public void addRobot(String robotName, RigidBodyBasics rootBody, MultiBodySystemStateWriter controllerOutputWriter,
