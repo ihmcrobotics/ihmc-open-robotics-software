@@ -15,6 +15,7 @@ import org.opentest4j.AssertionFailedError;
 
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameUnitVector3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
@@ -189,7 +190,7 @@ public class SingleContactImpulseCalculatorTest
          throws Throwable
    {
       CollisionResult collisionResult = impulseCalculator.getCollisionResult();
-      FrameVector3D collisionAxisForA = collisionResult.getCollisionAxisForA();
+      FrameUnitVector3D collisionAxisForA = collisionResult.getCollisionAxisForA();
       RigidBodyBasics bodyA = collisionResult.getCollidableA().getRigidBody();
       RigidBodyBasics bodyB = collisionResult.getCollidableB().getRigidBody();
       DMatrixRMaj jointVelocityChangeA = impulseCalculator.getJointVelocityChangeA();
@@ -284,7 +285,7 @@ public class SingleContactImpulseCalculatorTest
    {
       CollisionResult collisionResult = new CollisionResult();
       collisionResult.setCollidableA(nextCollidable(random, contactingBodyA));
-      FrameVector3D collisionAxisForA = collisionResult.getCollisionAxisForA();
+      FrameUnitVector3D collisionAxisForA = collisionResult.getCollisionAxisForA();
       FramePoint3D pointInBodyFrameA = collisionResult.getCollisionData().getPointOnA();
       FramePoint3D pointInBodyFrameB = collisionResult.getCollisionData().getPointOnB();
       FramePoint3D pointOnARootFrame = collisionResult.getPointOnARootFrame();
