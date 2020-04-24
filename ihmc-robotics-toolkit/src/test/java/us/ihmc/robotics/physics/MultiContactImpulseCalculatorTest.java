@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameUnitVector3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -215,7 +216,7 @@ public class MultiContactImpulseCalculatorTest
       CollisionResult collisionResult = new CollisionResult();
       Collidable collidableA = nextCollidable(random, contactingBodyA);
       collisionResult.setCollidableA(collidableA);
-      FrameVector3D collisionAxisForA = collisionResult.getCollisionAxisForA();
+      FrameUnitVector3D collisionAxisForA = collisionResult.getCollisionAxisForA();
       FramePoint3D pointInBodyFrameA = collisionResult.getCollisionData().getPointOnA();
       FramePoint3D pointInBodyFrameB = collisionResult.getCollisionData().getPointOnB();
       FramePoint3D pointOnARootFrame = collisionResult.getPointOnARootFrame();
