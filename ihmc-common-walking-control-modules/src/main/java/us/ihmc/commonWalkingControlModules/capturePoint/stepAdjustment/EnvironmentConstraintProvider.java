@@ -1,39 +1,19 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
-import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 
 public class EnvironmentConstraintProvider
@@ -44,7 +24,8 @@ public class EnvironmentConstraintProvider
    private final DoubleProvider maxAngleForSteppable;
    private final DoubleProvider minimumAreaForSteppable;
 
-   private final RecyclingArrayList<PlanarRegion> planarRegionsList = new RecyclingArrayList<>(PlanarRegion.class);
+   private final RecyclingArrayList<PlanarRegion> allPlanarRegionsThatAreSteppable = new RecyclingArrayList<>(PlanarRegion.class);
+   private final List<PlanarRegion> regionsUnderFoot = new ArrayList<>();
    private final YoInteger numberOfPlanarListsToConsider;
 
    private final YoBoolean switchPlanarRegionConstraintsAutomatically;
@@ -67,7 +48,7 @@ public class EnvironmentConstraintProvider
 
    public void setPlanarRegions(List<PlanarRegion> planarRegions)
    {
-      planarRegionsList.clear();
+      allPlanarRegionsThatAreSteppable.clear();
       numberOfPlanarListsToConsider.set(0);
 
       for (int i = 0; i < planarRegions.size(); i++)
@@ -76,7 +57,7 @@ public class EnvironmentConstraintProvider
 
          if (isRegionValidForStepping(planarRegion))
          {
-            planarRegionsList.add().set(planarRegions.get(i));
+            allPlanarRegionsThatAreSteppable.add().set(planarRegions.get(i));
             numberOfPlanarListsToConsider.increment();
          }
       }
@@ -93,5 +74,28 @@ public class EnvironmentConstraintProvider
 
       // TODO switch to the concave hull
       return planarRegion.getConvexHull().getArea() > minimumAreaForSteppable.getValue();
+   }
+
+
+   private PlanarRegion findPlanarRegionUnderFoothold(FramePose3DReadOnly foothold)
+   {
+      PlanarRegion highestRegionUnderFoot = null;
+      double highestPoint = Double.NEGATIVE_INFINITY;
+      for (int regionIndex = 0; regionIndex < regionsUnderFoot.size(); regionIndex++)
+      {
+         PlanarRegion planarRegion = regionsUnderFoot.get(regionIndex);
+
+         if (!planarRegion.isPointInWorld2DInside(foothold.getPosition()))
+            continue;
+
+         double height = planarRegion.getPlaneZGivenXY(foothold.getPosition().getX(), foothold.getPosition().getY());
+         if (height >= highestPoint)
+         {
+            highestPoint = height;
+            highestRegionUnderFoot = planarRegion;
+         }
+      }
+
+      return highestRegionUnderFoot;
    }
 }
