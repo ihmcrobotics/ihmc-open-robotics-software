@@ -5,18 +5,10 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameSphere3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.mecano.multiBodySystem.Joint;
-import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
-import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -25,15 +17,11 @@ import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.ContactParameters;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.robotDescription.FloatingJointDescription;
-import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
@@ -99,9 +87,6 @@ public class NewtonsCradleExperimentalSimulation
          }
       };
 
-      RobotFromDescription robot = new RobotFromDescription(robotDescription);
-      RigidBodyBasics rootBody = toInverseDynamicsRobot(robotDescription);
-
       MultiBodySystemStateWriter robotInitialStateWriter = new MultiBodySystemStateWriter()
       {
          private List<OneDoFJointBasics> joints;
@@ -122,11 +107,11 @@ public class NewtonsCradleExperimentalSimulation
 
       double simDT = 0.0001;
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
-      ExperimentalSimulation experimentalSimulation = new ExperimentalSimulation(new Robot[] {robot}, 1 << 16);
+      ExperimentalSimulation experimentalSimulation = new ExperimentalSimulation(1 << 16);
       experimentalSimulation.setDT(simDT, 1);
       experimentalSimulation.setGravity(new Vector3D(0.0, 0.0, -9.81));
       experimentalSimulation.getPhysicsEngine().setGlobalContactParameters(contactParameters);
-      experimentalSimulation.addRobot(robot.getName(), rootBody, robotCollisionModel, robotInitialStateWriter);
+      experimentalSimulation.addRobot(robotDescription, robotCollisionModel, robotInitialStateWriter);
       experimentalSimulation.addSimulationEnergyStatistics();
 
       SimulationConstructionSet scs = new SimulationConstructionSet(experimentalSimulation,
@@ -154,51 +139,6 @@ public class NewtonsCradleExperimentalSimulation
             otherNames[index++] = getBallBodyName(j);
       }
       return otherNames;
-   }
-
-   static RigidBodyBasics toInverseDynamicsRobot(RobotDescription description)
-   {
-      RigidBody rootBody = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
-      for (JointDescription rootJoint : description.getRootJoints())
-         addJointRecursive(rootJoint, rootBody);
-      return rootBody;
-   }
-
-   static void addJointRecursive(JointDescription jointDescription, RigidBodyBasics parentBody)
-   {
-      Joint joint;
-      String name = jointDescription.getName();
-      Vector3D jointOffset = new Vector3D();
-      jointDescription.getOffsetFromParentJoint(jointOffset);
-
-      if (jointDescription instanceof PinJointDescription)
-      {
-         Vector3D jointAxis = new Vector3D();
-         ((PinJointDescription) jointDescription).getJointAxis(jointAxis);
-         joint = new RevoluteJoint(name, parentBody, jointOffset, jointAxis);
-      }
-      else if (jointDescription instanceof FloatingJointDescription)
-      {
-         RigidBodyTransform transformToParent = new RigidBodyTransform();
-         transformToParent.getTranslation().set(jointOffset);
-         joint = new SixDoFJoint(name, parentBody, transformToParent);
-      }
-      else
-      {
-         throw new IllegalStateException("Joint type not handled.");
-      }
-
-      LinkDescription linkDescription = jointDescription.getLink();
-
-      String bodyName = linkDescription.getName();
-      Matrix3DReadOnly momentOfInertia = linkDescription.getMomentOfInertiaCopy();
-      double mass = linkDescription.getMass();
-      Tuple3DReadOnly centerOfMassOffset = linkDescription.getCenterOfMassOffset();
-      RigidBody successor = new RigidBody(bodyName, joint, momentOfInertia, mass, centerOfMassOffset);
-      joint.setSuccessor(successor);
-
-      for (JointDescription childJoint : jointDescription.getChildrenJoints())
-         addJointRecursive(childJoint, successor);
    }
 
    public static void main(String[] args)
