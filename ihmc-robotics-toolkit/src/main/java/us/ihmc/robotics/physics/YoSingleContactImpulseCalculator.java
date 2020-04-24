@@ -28,6 +28,7 @@ import us.ihmc.yoVariables.variable.YoFrameVector3D;
 public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalculator
 {
    private final YoFrameVector3D collisionAxis;
+   private final YoFrameVector3D accumulatedSlip;
    private final YoFrameVector3D impulseA, impulseB;
    private final YoFramePoint3D pointA, pointB;
    private final YoFrameVector3D velocityRelative;
@@ -45,6 +46,7 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
       super(rootFrame, rootBodyA, forwardDynamicsCalculatorA, rootBodyB, forwardDynamicsCalculatorB);
 
       collisionAxis = new YoFrameVector3D(prefix + "CollisionAxis" + identifier, rootFrame, registry);
+      accumulatedSlip = new YoFrameVector3D(prefix + "AccumulatedSlip" + identifier, rootFrame, registry);
       pointA = new YoFramePoint3D(prefix + "PointA" + identifier, rootFrame, registry);
       pointB = new YoFramePoint3D(prefix + "PointB" + identifier, rootFrame, registry);
 
@@ -106,6 +108,7 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
    public void clear()
    {
       collisionAxis.setToNaN();
+      accumulatedSlip.setToNaN();
 
       pointA.setToNaN();
       pointB.setToNaN();
@@ -136,8 +139,12 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
       super.setCollision(collisionResult);
 
       collisionAxis.set(collisionResult.getCollisionAxisForA());
-      pointA.setMatchingFrame(getPointA());
-      pointB.setMatchingFrame(getPointB());
+      if (collisionResult.getAccumulatedSlipForA() != null)
+         accumulatedSlip.set(collisionResult.getAccumulatedSlipForA());
+      else
+         accumulatedSlip.setToZero();
+      pointA.setMatchingFrame(collisionResult.getPointOnARootFrame());
+      pointB.setMatchingFrame(collisionResult.getPointOnBRootFrame());
    }
 
    private final FrameVector3D mutableFrameVector = new FrameVector3D();
