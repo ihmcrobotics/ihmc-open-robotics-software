@@ -61,7 +61,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
 
       environmentContactConstraintCalculatorPool = new RecyclingArrayList<>(20, SupplierBuilder.indexedSupplier(identifier ->
       {
-         YoSingleContactImpulseCalculator calculator = new YoSingleContactImpulseCalculator("Single",
+         YoSingleContactImpulseCalculator calculator = new YoSingleContactImpulseCalculator(robotName + "Single",
                                                                                             identifier,
                                                                                             multiBodySystem.getInertialFrame(),
                                                                                             rootBody,
@@ -76,7 +76,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
 
       selfContactConstraintCalculatorPool = new RecyclingArrayList<>(8, SupplierBuilder.indexedSupplier(identifier ->
       {
-         YoSingleContactImpulseCalculator calculator = new YoSingleContactImpulseCalculator("Self",
+         YoSingleContactImpulseCalculator calculator = new YoSingleContactImpulseCalculator(robotName + "Self",
                                                                                             identifier,
                                                                                             multiBodySystem.getInertialFrame(),
                                                                                             rootBody,
@@ -197,7 +197,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
       {
          calculators = new RecyclingArrayList<>(8, SupplierBuilder.indexedSupplier(identifier ->
          {
-            return new YoSingleContactImpulseCalculator("Dual",
+            return new YoSingleContactImpulseCalculator(robotName + "Dual",
                                                         identifier,
                                                         multiBodySystem.getInertialFrame(),
                                                         rootBody,
