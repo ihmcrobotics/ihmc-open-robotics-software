@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.newtonsCradle;
+package us.ihmc.exampleSimulations.experimentalPhysicsEngine;
 
 import java.util.Collections;
 
