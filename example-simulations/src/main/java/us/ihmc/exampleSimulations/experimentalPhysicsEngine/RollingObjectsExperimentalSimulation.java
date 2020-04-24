@@ -1,6 +1,5 @@
 package us.ihmc.exampleSimulations.experimentalPhysicsEngine;
 
-import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.FrameCylinder3D;
@@ -15,9 +14,6 @@ import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.ContactParameters;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.robotDescription.FloatingJointDescription;
-import us.ihmc.robotics.robotDescription.LinkDescription;
-import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -58,14 +54,14 @@ public class RollingObjectsExperimentalSimulation
       boolean addStripes = true;
       AppearanceDefinition stripesAppearance = YoAppearance.Gold();
 
-      RobotDescription ballRobot = createASingleBallRobot(BALL_NAME,
+      RobotDescription ballRobot = ExampleExperimentalSimulationTools.createASingleBallRobot(BALL_NAME,
                                                           ballRadius,
                                                           ballMass,
                                                           ballRadiusOfGyrationPercent,
                                                           appearance,
                                                           addStripes,
                                                           stripesAppearance);
-      RobotDescription cylinderRobot = createASingleCylinderRobot(CYLINDER_NAME,
+      RobotDescription cylinderRobot = ExampleExperimentalSimulationTools.createASingleCylinderRobot(CYLINDER_NAME,
                                                                   cylinderRadius,
                                                                   cylinderHeight,
                                                                   cylinderMass,
@@ -73,7 +69,7 @@ public class RollingObjectsExperimentalSimulation
                                                                   appearance,
                                                                   addStripes,
                                                                   stripesAppearance);
-      RobotDescription capsuleRobot = createASingleCapsuleRobot(CAPSULE_NAME,
+      RobotDescription capsuleRobot = ExampleExperimentalSimulationTools.createASingleCapsuleRobot(CAPSULE_NAME,
                                                                 capsuleRadius,
                                                                 capsuleHeight,
                                                                 capsuleMass,
@@ -133,90 +129,6 @@ public class RollingObjectsExperimentalSimulation
       scs.setDT(simDT, 1);
       scs.startOnAThread();
       scs.simulate(2.0);
-   }
-
-   static RobotDescription createASingleBallRobot(String name, double radius, double mass, double radiusOfGyrationPercent, AppearanceDefinition appearance,
-                                                  boolean addStripes, AppearanceDefinition stripesAppearance)
-   {
-      RobotDescription robotDescription = new RobotDescription(name);
-      FloatingJointDescription rootJoint = new FloatingJointDescription(name, name);
-      LinkDescription ballLink = new LinkDescription(name + "Link");
-      double radiusOfGyration = radiusOfGyrationPercent * radius;
-      ballLink.setMassAndRadiiOfGyration(mass, radiusOfGyration, radiusOfGyration, radiusOfGyration);
-
-      LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
-      linkGraphics.addSphere(radius, appearance);
-
-      if (addStripes)
-      {
-         double stripePercent = 0.05;
-         linkGraphics.addArcTorus(0.0, 2.0 * Math.PI, (1.01 - stripePercent) * radius, radius * stripePercent, stripesAppearance);
-         linkGraphics.rotate(Math.PI / 2.0, Axis3D.X);
-         linkGraphics.addArcTorus(0.0, 2.0 * Math.PI, (1.01 - stripePercent) * radius, radius * stripePercent, stripesAppearance);
-      }
-
-      ballLink.setLinkGraphics(linkGraphics);
-      rootJoint.setLink(ballLink);
-      robotDescription.addRootJoint(rootJoint);
-
-      return robotDescription;
-   }
-
-   private static RobotDescription createASingleCylinderRobot(String name, double radius, double height, double mass, double radiusOfGyrationPercent,
-                                                              AppearanceDefinition appearance, boolean addStripes, AppearanceDefinition stripesAppearance)
-   {
-      RobotDescription robotDescription = new RobotDescription(name);
-
-      FloatingJointDescription rootJoint = new FloatingJointDescription(name, name);
-      LinkDescription ballLink = new LinkDescription(name + "Link");
-      ballLink.setMassAndRadiiOfGyration(mass, radiusOfGyrationPercent * radius, radiusOfGyrationPercent * radius, radiusOfGyrationPercent * height);
-
-      LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
-      linkGraphics.translate(0.0, 0.0, -height / 2.0);
-      linkGraphics.addCylinder(height, radius, appearance);
-
-      if (addStripes)
-      {
-         double stripePercent = 0.05;
-         linkGraphics.translate(0.0, 0.0, -height * 0.01);
-         linkGraphics.addCube(2.0 * radius * 1.01, radius * stripePercent, height * 1.02, stripesAppearance);
-         linkGraphics.rotate(Math.PI / 2.0, Axis3D.Z);
-         linkGraphics.addCube(2.0 * radius * 1.01, radius * stripePercent, height * 1.02, stripesAppearance);
-      }
-
-      ballLink.setLinkGraphics(linkGraphics);
-      rootJoint.setLink(ballLink);
-      robotDescription.addRootJoint(rootJoint);
-
-      return robotDescription;
-   }
-
-   private static RobotDescription createASingleCapsuleRobot(String name, double radius, double height, double mass, double radiusOfGyrationPercent,
-                                                             AppearanceDefinition appearance, boolean addStripes, AppearanceDefinition stripesAppearance)
-   {
-      RobotDescription robotDescription = new RobotDescription(name);
-
-      FloatingJointDescription rootJoint = new FloatingJointDescription(name, name);
-      LinkDescription capsuleLink = new LinkDescription(name + "Link");
-      capsuleLink.setMassAndRadiiOfGyration(mass, radiusOfGyrationPercent * radius, radiusOfGyrationPercent * radius, radiusOfGyrationPercent * height);
-
-      LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
-      linkGraphics.addCapsule(radius, height + 2.0 * radius, appearance);
-
-      if (addStripes)
-      {
-         double stripePercent = 0.05;
-         linkGraphics.translate(0.0, 0.0, -height / 2.0 + radius);
-         linkGraphics.addCube(2.0 * radius * 1.01, radius * stripePercent, height - 2.0 * radius, stripesAppearance);
-         linkGraphics.rotate(Math.PI / 2.0, Axis3D.Z);
-         linkGraphics.addCube(2.0 * radius * 1.01, radius * stripePercent, height - 2.0 * radius, stripesAppearance);
-      }
-
-      capsuleLink.setLinkGraphics(linkGraphics);
-      rootJoint.setLink(capsuleLink);
-      robotDescription.addRootJoint(rootJoint);
-
-      return robotDescription;
    }
 
    public static void main(String[] args)
