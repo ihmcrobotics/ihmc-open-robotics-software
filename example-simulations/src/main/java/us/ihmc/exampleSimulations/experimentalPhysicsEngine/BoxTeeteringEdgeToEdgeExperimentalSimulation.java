@@ -5,16 +5,12 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
-import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.ContactParameters;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.robotDescription.FloatingJointDescription;
-import us.ihmc.robotics.robotDescription.LinkDescription;
-import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -40,7 +36,7 @@ public class BoxTeeteringEdgeToEdgeExperimentalSimulation
       double groundWidth = 1.0;
       double groundLength = 1.0;
 
-      RobotDescription boxRobot = createASingleBoxRobot("box", boxXLength, boxYWidth, boxZHeight, boxMass, boxRadiusOfGyrationPercent, YoAppearance.DarkCyan());
+      RobotDescription boxRobot = ExampleExperimentalSimulationTools.createASingleBoxRobot("box", boxXLength, boxYWidth, boxZHeight, boxMass, boxRadiusOfGyrationPercent, YoAppearance.DarkCyan());
 
       MultiBodySystemStateWriter boxInitialStateWriter = MultiBodySystemStateWriter.singleJointStateWriter("box", (FloatingJointBasics joint) ->
       {
@@ -80,26 +76,6 @@ public class BoxTeeteringEdgeToEdgeExperimentalSimulation
       scs.setDT(simDT, 1);
       scs.startOnAThread();
       scs.simulate(2.0);
-   }
-
-   private static RobotDescription createASingleBoxRobot(String name, double sizeX, double sizeY, double sizeZ, double mass, double radiusOfGyrationPercent,
-                                                         AppearanceDefinition appearance)
-   {
-      RobotDescription robotDescription = new RobotDescription(name);
-
-      FloatingJointDescription rootJoint = new FloatingJointDescription(name, name);
-      LinkDescription link = new LinkDescription(name + "Link");
-      link.setMassAndRadiiOfGyration(mass, radiusOfGyrationPercent * sizeX, radiusOfGyrationPercent * sizeY, radiusOfGyrationPercent * sizeZ);
-
-      LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
-      linkGraphics.translate(0.0, 0.0, -sizeZ / 2.0);
-      linkGraphics.addCube(sizeX, sizeY, sizeZ, appearance);
-      link.setLinkGraphics(linkGraphics);
-
-      rootJoint.setLink(link);
-      robotDescription.addRootJoint(rootJoint);
-
-      return robotDescription;
    }
 
    public static void main(String[] args)
