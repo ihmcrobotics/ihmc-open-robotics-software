@@ -1103,6 +1103,87 @@ public class PlanarRegionTest
       Assertions.assertTrue(region.getConcaveHull().get(9).epsilonEquals(new Point2D(1.5, -1.5), epsilon));
       Assertions.assertTrue(region.getConcaveHull().get(10).epsilonEquals(new Point2D(0.5, -1.5), epsilon));
       Assertions.assertTrue(region.getConcaveHull().get(11).epsilonEquals(new Point2D(-0.5, -1.5), epsilon));
+
+      // test complex region
+      convexPolygon0 = new ConvexPolygon2D();
+      convexPolygon1 = new ConvexPolygon2D();
+      convexPolygon2 = new ConvexPolygon2D();
+      convexPolygon3 = new ConvexPolygon2D();
+      ConvexPolygon2D convexPolygon4 = new ConvexPolygon2D();
+      ConvexPolygon2D convexPolygon5 = new ConvexPolygon2D();
+      ConvexPolygon2D convexPolygon6 = new ConvexPolygon2D();
+
+      convexPolygon0.addVertex(5.0, 9.0);
+      convexPolygon0.addVertex(6.0, 8.0);
+      convexPolygon0.addVertex(6.0, 10.0);
+      convexPolygon0.addVertex(7.0, 10.0);
+      convexPolygon0.addVertex(8.0, 8.0);
+      convexPolygon0.addVertex(8.0, 9.0);
+
+      convexPolygon1.addVertex(5.0, 9.0);
+      convexPolygon1.addVertex(5.5, 6.0);
+      convexPolygon1.addVertex(6.0, 8.0);
+
+      convexPolygon2.addVertex(6.0, 4.0);
+      convexPolygon2.addVertex(5.5, 6.0);
+      convexPolygon2.addVertex(6.0, 8.0);
+      convexPolygon2.addVertex(7.0, 2.0);
+      convexPolygon2.addVertex(8.0, 1.0);
+      convexPolygon2.addVertex(8.5, 4.0);
+      convexPolygon2.addVertex(8.0, 8.0);
+
+      convexPolygon3.addVertex(8.0, 1.0);
+      convexPolygon3.addVertex(8.5, 4.0);
+      convexPolygon3.addVertex(9.0, 2.0);
+      convexPolygon3.addVertex(9.0, 6.0);
+
+      convexPolygon4.addVertex(3.0, 4.0);
+      convexPolygon4.addVertex(6.0, 4.0);
+      convexPolygon4.addVertex(5.5, 6.0);
+
+      convexPolygon5.addVertex(3.0, 4.0);
+      convexPolygon5.addVertex(4.0, 3.0);
+      convexPolygon5.addVertex(6.0, 4.0);
+
+      convexPolygon6.addVertex(3.0, 4.0);
+      convexPolygon6.addVertex(4.0, 0.0);
+      convexPolygon6.addVertex(4.0, 3.0);
+
+      convexPolygon0.update();
+      convexPolygon1.update();
+      convexPolygon2.update();
+      convexPolygon3.update();
+      convexPolygon4.update();
+      convexPolygon5.update();
+      convexPolygon6.update();
+
+      polygonList.clear();
+      polygonList.add(convexPolygon0);
+      polygonList.add(convexPolygon1);
+      polygonList.add(convexPolygon2);
+      polygonList.add(convexPolygon3);
+      polygonList.add(convexPolygon4);
+      polygonList.add(convexPolygon5);
+      polygonList.add(convexPolygon6);
+
+      region = new PlanarRegion(new RigidBodyTransform(), polygonList);
+      Assertions.assertEquals(region.getConcaveHull().size(), 15);
+
+      region.getConcaveHull().get(0).epsilonEquals(new Point2D(3.0,4.0), epsilon);
+      region.getConcaveHull().get(1).epsilonEquals(new Point2D(5.5,6.0), epsilon);
+      region.getConcaveHull().get(2).epsilonEquals(new Point2D(5.0,9.0), epsilon);
+      region.getConcaveHull().get(3).epsilonEquals(new Point2D(6.0,10.0), epsilon);
+      region.getConcaveHull().get(4).epsilonEquals(new Point2D(7.0,10.0), epsilon);
+      region.getConcaveHull().get(5).epsilonEquals(new Point2D(8.0,9.0), epsilon);
+      region.getConcaveHull().get(6).epsilonEquals(new Point2D(8.0,8.0), epsilon);
+      region.getConcaveHull().get(7).epsilonEquals(new Point2D(8.5,4.0), epsilon);
+      region.getConcaveHull().get(8).epsilonEquals(new Point2D(9.0,6.0), epsilon);
+      region.getConcaveHull().get(9).epsilonEquals(new Point2D(9.0,2.0), epsilon);
+      region.getConcaveHull().get(10).epsilonEquals(new Point2D(8.0,1.0), epsilon);
+      region.getConcaveHull().get(11).epsilonEquals(new Point2D(7.0,2.0), epsilon);
+      region.getConcaveHull().get(12).epsilonEquals(new Point2D(6.0,4.0), epsilon);
+      region.getConcaveHull().get(13).epsilonEquals(new Point2D(4.0,3.0), epsilon);
+      region.getConcaveHull().get(14).epsilonEquals(new Point2D(4.0,0.0), epsilon);
    }
 
    static ConvexPolygon2DBasics translateConvexPolygon(double xTranslation, double yTranslation, ConvexPolygon2DReadOnly convexPolygon)
