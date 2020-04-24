@@ -605,7 +605,7 @@ public class EndToEndTestTools
    {
       FootstepDataListMessage footstepDataListMessage = new FootstepDataListMessage();
 
-      SideDependentList<FramePose3D> stepPositions = new SideDependentList<>(FramePose3D::new);
+      SideDependentList<FramePose3D> stepPositions = new SideDependentList<>(new FramePose3D(), new FramePose3D());
       stepPositions.forEach((side, position) -> position.setFromReferenceFrame(fullRobotModel.getSoleFrame(side)));
 
       RobotSide side = RobotSide.LEFT;
