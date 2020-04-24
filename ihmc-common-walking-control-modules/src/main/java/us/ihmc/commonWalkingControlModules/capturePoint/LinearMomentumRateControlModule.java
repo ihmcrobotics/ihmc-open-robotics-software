@@ -517,6 +517,8 @@ public class LinearMomentumRateControlModule
          }
 
          icpController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
+         if (!Double.isNaN(remainingTimeInSwingUnderDisturbance) && remainingTimeInSwingUnderDisturbance > 0.0)
+            stepAdjustmentController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
       }
    }
 
