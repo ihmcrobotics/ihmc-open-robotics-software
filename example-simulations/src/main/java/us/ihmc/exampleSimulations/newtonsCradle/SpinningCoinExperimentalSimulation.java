@@ -8,8 +8,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
-import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.ContactParameters;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
@@ -55,30 +53,16 @@ public class SpinningCoinExperimentalSimulation
       floatingJointDescription.setLink(linkDescription);
       robotDescription.addRootJoint(floatingJointDescription);
 
-      RobotCollisionModel robotCollisionModel = multiBodySystem ->
+      RobotCollisionModel robotCollisionModel = RobotCollisionModel.singleBodyCollisionModel("coin", coinBody ->
       {
-         RigidBodyBasics coinBody = RobotCollisionModel.findRigidBody("coin", multiBodySystem);
-         FrameCylinder3D coinShape = new FrameCylinder3D(coinBody.getBodyFixedFrame(), coinWidth, coinRadius);
-         return Collections.singletonList(new Collidable(coinBody, -1, -1, coinShape));
-      };
+         return new Collidable(coinBody, -1, -1, new FrameCylinder3D(coinBody.getBodyFixedFrame(), coinWidth, coinRadius));
+      });
 
-      MultiBodySystemStateWriter robotInitialStateWriter = new MultiBodySystemStateWriter()
+      MultiBodySystemStateWriter robotInitialStateWriter = MultiBodySystemStateWriter.singleJointStateWriter("root", (FloatingJointBasics joint) ->
       {
-         private FloatingJointBasics rootJoint;
-
-         @Override
-         public void setMultiBodySystem(MultiBodySystemBasics multiBodySystem)
-         {
-            rootJoint = (FloatingJointBasics) multiBodySystem.getAllJoints().get(0);
-         }
-
-         @Override
-         public void write()
-         {
-            rootJoint.getJointPose().set(0.1, 0.1, coinRadius + 0.04, 0.0, 0.0, 1.2);
-            rootJoint.getJointTwist().getAngularPart().set(0.0, spinningAngularVelocity, 0.0);
-         }
-      };
+         joint.getJointPose().set(0.1, 0.1, coinRadius + 0.04, 0.0, 0.0, 1.2);
+         joint.getJointTwist().getAngularPart().set(0.0, spinningAngularVelocity, 0.0);
+      });
 
       FrameBox3D groundShape = new FrameBox3D(ReferenceFrame.getWorldFrame(), 1000.0, 1000.0, 0.1);
       groundShape.getPosition().subZ(0.05);
@@ -97,7 +81,6 @@ public class SpinningCoinExperimentalSimulation
                                                                     SupportedGraphics3DAdapter.instantiateDefaultGraphicsAdapter(true),
                                                                     parameters);
       scs.addYoGraphicsListRegistry(experimentalSimulation.getPhysicsEngineGraphicsRegistry());
-      //      experimentalSimulation.simulate();
       scs.getRootRegistry().addChild(experimentalSimulation.getPhysicsEngineRegistry());
       scs.setDT(simDT, 1);
       scs.startOnAThread();
