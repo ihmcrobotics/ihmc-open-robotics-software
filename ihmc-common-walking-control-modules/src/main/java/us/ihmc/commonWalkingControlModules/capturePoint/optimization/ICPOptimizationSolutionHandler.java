@@ -118,7 +118,8 @@ public class ICPOptimizationSolutionHandler
    {
       YoGraphicPosition adjustedICP = new YoGraphicPosition(yoNamePrefix + "AdjustedICPReferenceLocation", adjustedICPReferenceLocation, 0.01, YoAppearance.LightYellow(),
                                                                        YoGraphicPosition.GraphicType.BALL_WITH_CROSS);
-      YoGraphicPosition footstepPositionInControlPlane = new YoGraphicPosition(yoNamePrefix + "FootstepSolutionInControlPlane", footstepSolutionInControlPlane, 0.005,
+      YoGraphicPosition footstepPositionInControlPlane = new YoGraphicPosition(yoNamePrefix + "FootstepSolutionInControlPlane",
+                                                                               footstepSolutionInControlPlane, 0.005,
                                                                                YoAppearance.DarkRed(), YoGraphicPosition.GraphicType.SOLID_BALL);
 
       artifactList.add(adjustedICP.createArtifact());
@@ -142,7 +143,8 @@ public class ICPOptimizationSolutionHandler
    private final PoseReferenceFrame deadbandFrame = new PoseReferenceFrame("DeadbandFrame", worldFrame);
 
    public void extractFootstepSolution(FixedFramePose3DBasics footstepSolutionToPack, FixedFrameTuple2DBasics unclippedFootstepSolutionToPack,
-                                       FramePose3DReadOnly upcomingFootstep, PlanarRegion activePlanarRegion, ICPOptimizationQPSolver solver)
+                                       FramePose3DReadOnly upcomingFootstep, PlanarRegion activePlanarRegion,
+                                       ICPOptimizationQPSolver solver)
    {
       referenceFootstepLocation2D.set(upcomingFootstep.getPosition());
 
@@ -168,6 +170,7 @@ public class ICPOptimizationSolutionHandler
       clippedLocationSolution.set(locationSolution);
       boolean footstepWasAdjusted = applyLocationDeadband(clippedLocationSolution, previousLocationSolution, referenceFootstepLocation2D,
                                                           deadbandFrame, footstepDeadband.getValue(), footstepSolutionResolution.getValue());
+
 
       footstepAdjustment.set(locationSolution);
       footstepAdjustment.sub(referenceFootstepLocation2D);

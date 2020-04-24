@@ -44,6 +44,8 @@ public class LinearMomentumRateControlModuleInput
     */
    private final FrameVector2D desiredCapturePointVelocity = new FrameVector2D();
 
+   private final FramePoint2D desiredICPAtEndOfState = new FramePoint2D();
+
    /**
     * Assuming to tracking error for the ICP this is the location that the CMP should be placed at according to the ICP
     * plan.
@@ -212,6 +214,17 @@ public class LinearMomentumRateControlModuleInput
    {
       return desiredCapturePointVelocity;
    }
+
+   public void setDesiredICPAtEndOfState(FramePoint2DReadOnly desiredICPAtEndOfState)
+   {
+      this.desiredICPAtEndOfState.set(desiredICPAtEndOfState);
+   }
+
+   public FramePoint2D getDesiredICPAtEndOfState()
+   {
+      return desiredICPAtEndOfState;
+   }
+
 
    @Deprecated // TODO: This should not be coming from the walking controller.
    public void setDesiredCenterOfMassHeightAcceleration(double desiredCoMHeightAcceleration)
