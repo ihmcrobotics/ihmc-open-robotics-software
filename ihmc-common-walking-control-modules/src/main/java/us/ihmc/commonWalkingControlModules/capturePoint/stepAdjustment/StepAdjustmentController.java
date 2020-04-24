@@ -4,9 +4,11 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPoly
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
+import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -86,7 +88,11 @@ public class StepAdjustmentController
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraintHandler;
 
+   private final OneStepCaptureRegionCalculator captureRegionCalculator;
+   private final FrameConvexPolygon2D captureRegionInWorld = new FrameConvexPolygon2D();
+
    private final ICPControlPlane icpControlPlane;
+   private final BipedSupportPolygons bipedSupportPolygons;
 
    public StepAdjustmentController(WalkingControllerParameters walkingControllerParameters,
                                    SideDependentList<ReferenceFrame> soleZUpFrames,
@@ -119,6 +125,7 @@ public class StepAdjustmentController
                                    YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.icpControlPlane = icpControlPolygons.getIcpControlPlane();
+      this.bipedSupportPolygons = bipedSupportPolygons;
 
       allowStepAdjustment = new BooleanParameter(yoNamePrefix + "AllowStepAdjustment", registry, icpOptimizationParameters.allowStepAdjustment());
 
@@ -141,6 +148,8 @@ public class StepAdjustmentController
                                                                                VISUALIZE,
                                                                                registry,
                                                                                yoGraphicsListRegistry);
+
+      captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, yoNamePrefix, registry, yoGraphicsListRegistry);
 
       if (walkingControllerParameters != null)
          swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
@@ -175,6 +184,7 @@ public class StepAdjustmentController
       upcomingFootstep.setToNaN();
       footstepSolution.setToNaN();
       footstepWasAdjusted.set(false);
+      captureRegionCalculator.hideCaptureRegion();
    }
 
    public void setFootstepToAdjust(SimpleAdjustableFootstep footstep, double swingDuration, double nextTransferDuration)
@@ -231,6 +241,9 @@ public class StepAdjustmentController
       if (!isInSwing.getBooleanValue())
          return;
 
+      captureRegionCalculator.calculateCaptureRegion(upcomingFootstepSide.getEnumValue(), timeRemainingInState.getDoubleValue(), currentICP, omega0,
+                                                     bipedSupportPolygons.getFootPolygonInWorldFrame(upcomingFootstepSide.getEnumValue().getOppositeSide()));
+
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
 
@@ -267,8 +280,11 @@ public class StepAdjustmentController
       adjustedSolutionInControlPlane.set(referencePositionInControlPlane);
       adjustedSolutionInControlPlane.add(deadbandedAdjustment);
 
-      FrameConvexPolygon2DReadOnly reachabilityConstraintRegion = reachabilityConstraintHandler.updateReachabilityConstraint();
-      reachabilityConstraintRegion.orthogonalProjection(adjustedSolutionInControlPlane);
+      captureRegionInWorld.setIncludingFrame(captureRegionCalculator.getCaptureRegion());
+      captureRegionInWorld.changeFrameAndProjectToXYPlane(worldFrame);
+
+      captureRegionInWorld.orthogonalProjection(adjustedSolutionInControlPlane);
+      reachabilityConstraintHandler.updateReachabilityConstraint().orthogonalProjection(adjustedSolutionInControlPlane);
 
       icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, adjustedSolutionInControlPlane, tempPoint, upcomingFootstep.getPosition().getZ());
 
