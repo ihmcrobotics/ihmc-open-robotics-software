@@ -1,4 +1,4 @@
-package us.ihmc.exampleSimulations.newtonsCradle;
+package us.ihmc.exampleSimulations.experimentalPhysicsEngine;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
