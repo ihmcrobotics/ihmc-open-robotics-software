@@ -8,6 +8,7 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameSphere3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -15,6 +16,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.mecano.multiBodySystem.Joint;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -23,6 +25,7 @@ import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.ContactParameters;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.robotDescription.FloatingJointDescription;
 import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
@@ -153,7 +156,7 @@ public class NewtonsCradleExperimentalSimulation
       return otherNames;
    }
 
-   private RigidBodyBasics toInverseDynamicsRobot(RobotDescription description)
+   static RigidBodyBasics toInverseDynamicsRobot(RobotDescription description)
    {
       RigidBody rootBody = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
       for (JointDescription rootJoint : description.getRootJoints())
@@ -161,18 +164,24 @@ public class NewtonsCradleExperimentalSimulation
       return rootBody;
    }
 
-   private void addJointRecursive(JointDescription jointDescription, RigidBodyBasics parentBody)
+   static void addJointRecursive(JointDescription jointDescription, RigidBodyBasics parentBody)
    {
       Joint joint;
+      String name = jointDescription.getName();
+      Vector3D jointOffset = new Vector3D();
+      jointDescription.getOffsetFromParentJoint(jointOffset);
 
       if (jointDescription instanceof PinJointDescription)
       {
-         String name = jointDescription.getName();
-         Vector3D jointOffset = new Vector3D();
-         jointDescription.getOffsetFromParentJoint(jointOffset);
          Vector3D jointAxis = new Vector3D();
          ((PinJointDescription) jointDescription).getJointAxis(jointAxis);
          joint = new RevoluteJoint(name, parentBody, jointOffset, jointAxis);
+      }
+      else if (jointDescription instanceof FloatingJointDescription)
+      {
+         RigidBodyTransform transformToParent = new RigidBodyTransform();
+         transformToParent.getTranslation().set(jointOffset);
+         joint = new SixDoFJoint(name, parentBody, transformToParent);
       }
       else
       {
