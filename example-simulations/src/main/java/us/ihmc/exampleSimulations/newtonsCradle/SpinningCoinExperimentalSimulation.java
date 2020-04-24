@@ -19,8 +19,6 @@ import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.simulationToolkit.physicsEngine.ExperimentalSimulation;
-import us.ihmc.simulationconstructionset.Robot;
-import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
@@ -86,15 +84,12 @@ public class SpinningCoinExperimentalSimulation
       groundShape.getPosition().subZ(0.05);
       Collidable groundCollidable = new Collidable(null, -1, -1, groundShape);
 
-      RobotFromDescription robot = new RobotFromDescription(robotDescription);
-      RigidBodyBasics rootBody = NewtonsCradleExperimentalSimulation.toInverseDynamicsRobot(robotDescription);
-
       double simDT = 0.0001;
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
-      ExperimentalSimulation experimentalSimulation = new ExperimentalSimulation(new Robot[] {robot}, 1 << 16);
+      ExperimentalSimulation experimentalSimulation = new ExperimentalSimulation(1 << 16);
       experimentalSimulation.setGravity(new Vector3D(0.0, 0.0, -9.81));
       experimentalSimulation.getPhysicsEngine().setGlobalContactParameters(contactParameters);
-      experimentalSimulation.addRobot(robot.getName(), rootBody, robotCollisionModel, robotInitialStateWriter);
+      experimentalSimulation.addRobot(robotDescription, robotCollisionModel, robotInitialStateWriter);
       experimentalSimulation.addEnvironmentCollidables(Collections.singletonList(groundCollidable));
       experimentalSimulation.addSimulationEnergyStatistics();
 
@@ -102,7 +97,7 @@ public class SpinningCoinExperimentalSimulation
                                                                     SupportedGraphics3DAdapter.instantiateDefaultGraphicsAdapter(true),
                                                                     parameters);
       scs.addYoGraphicsListRegistry(experimentalSimulation.getPhysicsEngineGraphicsRegistry());
-//      experimentalSimulation.simulate();
+      //      experimentalSimulation.simulate();
       scs.getRootRegistry().addChild(experimentalSimulation.getPhysicsEngineRegistry());
       scs.setDT(simDT, 1);
       scs.startOnAThread();
