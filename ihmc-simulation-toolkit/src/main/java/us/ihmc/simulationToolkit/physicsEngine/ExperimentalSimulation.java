@@ -92,12 +92,13 @@ public class ExperimentalSimulation extends Simulation
 
    public ExperimentalSimulation(int dataBufferSize)
    {
-      super((Robot) null, dataBufferSize);
+      this(null, dataBufferSize);
    }
 
    public ExperimentalSimulation(Robot[] robotArray, int dataBufferSize)
    {
       super(robotArray, dataBufferSize);
+      physicsEngine.addExternalWrenchReader(externalWrenchReader);
    }
 
    public void setGravity(Vector3DReadOnly gravity)
@@ -111,10 +112,14 @@ public class ExperimentalSimulation extends Simulation
       addEnvironmentCollidables(toCollidables(helper.getCollisionMask(environmentCollisionMask), helper.createCollisionGroup(robotCollisionMask), environment));
    }
 
-   public void addEnvironmentCollidables(Collection<? extends Collidable> environmentCollidable)
+   public void addEnvironmentCollidable(Collidable environmentCollidable)
    {
-      physicsEngine.addEnvironmentCollidables(environmentCollidable);
-      physicsEngine.addExternalWrenchReader(externalWrenchReader);
+      physicsEngine.addEnvironmentCollidable(environmentCollidable);
+   }
+
+   public void addEnvironmentCollidables(Collection<? extends Collidable> environmentCollidables)
+   {
+      physicsEngine.addEnvironmentCollidables(environmentCollidables);
    }
 
    /**
@@ -135,7 +140,8 @@ public class ExperimentalSimulation extends Simulation
    }
 
    /**
-    * Configures the physics for a robot that was already added via the constructor or {@link #addRobot(Robot)}.
+    * Configures the physics for a robot that was already added via the constructor or
+    * {@link #addRobot(Robot)}.
     */
    public void configureRobot(FullRobotModelFactory robotFactory, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter)
    {
@@ -145,7 +151,8 @@ public class ExperimentalSimulation extends Simulation
    }
 
    /**
-    * Configures the physics for a robot that was already added via the constructor or {@link #addRobot(Robot)}.
+    * Configures the physics for a robot that was already added via the constructor or
+    * {@link #addRobot(Robot)}.
     */
    public void configureRobot(String robotName, RigidBodyBasics rootBody, RobotCollisionModel robotCollisionModel,
                               MultiBodySystemStateWriter robotInitialStateWriter)
