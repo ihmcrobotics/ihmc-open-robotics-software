@@ -61,6 +61,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    private static final RobotSide defaultTransferToSide = RobotSide.LEFT;
 
    private static final double ZERO_TIME = 0.0;
+   public static final double SUFFICIENTLY_LARGE = 100.0;
 
    protected final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    protected final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -138,6 +139,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    protected final YoDouble initialTime = new YoDouble(namePrefix + "CurrentStateInitialTime", registry);
    /** Time spent in the current state. */
    protected final YoDouble timeInCurrentState = new YoDouble(namePrefix + "TimeInCurrentState", registry);
+   protected final YoDouble clampedTimeInCurrentState = new YoDouble(namePrefix + "ClampedTimeInCurrentState", registry);
    /** Time remaining before the end of the current state. */
    protected final YoDouble timeInCurrentStateRemaining = new YoDouble(namePrefix + "RemainingTime", registry);
 
@@ -178,6 +180,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
    protected final List<YoDouble> transferDurations = new ArrayList<>();
    protected final YoDouble defaultFinalTransferDuration = new YoDouble(namePrefix + "DefaultFinalTransferDuration", registry);
    protected final YoDouble finalTransferDuration = new YoDouble(namePrefix + "FinalTransferDuration", registry);
+   private final YoBoolean shouldClampDuration = new YoBoolean(namePrefix + "ShouldClampDuration", registry);
 
    /** Desired velocity for the Center of Mass (CoM) */
    final YoFrameVector3D desiredCoMVelocity = new YoFrameVector3D(namePrefix + "DesiredCoMVelocity", worldFrame, registry);
@@ -833,8 +836,10 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       double swingDuration = timing.getSwingTime();
       double transferTime = timing.getTransferTime();
 
-      if (!Double.isFinite(swingDuration) || swingDuration < 0.0)
+      if (Double.isNaN(swingDuration) || swingDuration < 0.0)
          swingDuration = 1.0;
+      if (Double.isInfinite(swingDuration))
+         swingDuration = SUFFICIENTLY_LARGE;
 
       if (!Double.isFinite(transferTime) || transferTime < 0.0)
          transferTime = 1.0;
@@ -885,6 +890,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       transferDurationAlphas.get(0).set(finalTransferDurationAlpha.getDoubleValue());
       referenceICPGenerator.setInitialConditionsForAdjustment();
       referenceCoMGenerator.initializeForSwingOrTransfer();
+      shouldClampDuration.set(true);
 
       updateTransferPlan(adjustPlanForStandingContinuity.getBooleanValue());
       skipNextUpdate.set(true);
@@ -897,6 +903,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       this.initialTime.set(initialTime);
       isDoubleSupport.set(true);
       isInitialTransfer.set(isStanding.getBooleanValue());
+      shouldClampDuration.set(true);
 
       if (isInitialTransfer.getBooleanValue() || isFinalTransfer.getValue())
          previousTransferToSide.set(null);
@@ -931,6 +938,7 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
       isInitialTransfer.set(false);
       isFinalTransfer.set(false);
       isHoldingPosition.set(false);
+      shouldClampDuration.set(upcomingFootstepsData.get(0).getFootstep().getIsAdjustable());
 
       int numberOfFootstepRegistered = getNumberOfFootstepsRegistered();
       transferDurations.get(numberOfFootstepRegistered).set(finalTransferDuration.getDoubleValue());
@@ -1132,12 +1140,13 @@ public class SmoothCMPBasedICPPlanner implements ICPPlannerInterface
          timeInCurrentState.set(time - initialTime.getDoubleValue());
          timeInCurrentStateRemaining.set(getCurrentStateDuration() - timeInCurrentState.getDoubleValue());
 
-         double timeInCurrentState = MathTools.clamp(this.timeInCurrentState.getDoubleValue(), 0.0, referenceCoPGenerator.getCurrentStateFinalTime());
+         double maxValue = shouldClampDuration.getValue() ? referenceCoPGenerator.getCurrentStateFinalTime() : SUFFICIENTLY_LARGE;
+         clampedTimeInCurrentState.set(MathTools.clamp(this.timeInCurrentState.getDoubleValue(), 0.0, maxValue));
 
-         referenceICPGenerator.compute(timeInCurrentState);
-         referenceCoMGenerator.compute(timeInCurrentState);
-         referenceCoPGenerator.update(timeInCurrentState);
-         referenceCMPGenerator.update(timeInCurrentState);
+         referenceICPGenerator.compute(clampedTimeInCurrentState.getDoubleValue());
+         referenceCoMGenerator.compute(clampedTimeInCurrentState.getDoubleValue());
+         referenceCoPGenerator.update(clampedTimeInCurrentState.getDoubleValue());
+         referenceCMPGenerator.update(clampedTimeInCurrentState.getDoubleValue());
 
          referenceCoPGenerator.getDesiredCenterOfPressure(desiredCoPPosition, desiredCoPVelocity);
          referenceCMPGenerator.getLinearData(desiredCMPPosition, desiredCMPVelocity);
