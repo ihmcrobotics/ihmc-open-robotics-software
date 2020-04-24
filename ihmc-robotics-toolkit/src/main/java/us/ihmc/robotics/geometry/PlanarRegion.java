@@ -1127,6 +1127,18 @@ public class PlanarRegion implements SupportingVertexHolder
    private void updateConcaveHull()
    {
       this.concaveHullsVertices.clear();
+
+      if (convexPolygons.isEmpty())
+      {
+         return;
+      }
+      else if (convexPolygons.size() == 1)
+      {
+         for (int i = 0; i < convexPolygons.get(0).getNumberOfVertices(); i++)
+            concaveHullsVertices.add(new Point2D(convexPolygons.get(0).getVertex(i)));
+         return;
+      }
+
       int maximumIterations = 0;
 
       double minX = Double.MAX_VALUE;
