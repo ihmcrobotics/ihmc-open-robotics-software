@@ -11,12 +11,14 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
 {
    private long sequenceId;
    private RobotSide robotSide;
+   private boolean forceExecution = false;
    private final JointspaceTrajectoryCommand jointspaceTrajectory;
 
    public ArmTrajectoryCommand()
    {
       sequenceId = 0;
       robotSide = null;
+      setForceExecution(false);
       jointspaceTrajectory = new JointspaceTrajectoryCommand();
    }
 
@@ -24,6 +26,7 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    {
       sequenceId = random.nextInt();
       robotSide = random.nextBoolean() ? RobotSide.LEFT : RobotSide.RIGHT;
+      setForceExecution(random.nextBoolean());
       jointspaceTrajectory = new JointspaceTrajectoryCommand(random);
    }
 
@@ -32,24 +35,22 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    {
       sequenceId = 0;
       robotSide = null;
+      setForceExecution(false);
       jointspaceTrajectory.clear();
    }
 
    public void clear(RobotSide robotSide)
    {
       this.robotSide = robotSide;
+      setForceExecution(false);
       jointspaceTrajectory.clear();
-   }
-
-   public void setRobotSide(RobotSide robotSide)
-   {
-      this.robotSide = robotSide;
    }
 
    @Override
    public void setFromMessage(ArmTrajectoryMessage message)
    {
       clear(RobotSide.fromByte(message.getRobotSide()));
+      setForceExecution(message.getForceExecution());
       sequenceId = message.getSequenceId();
       jointspaceTrajectory.setFromMessage(message.getJointspaceTrajectory());
    }
@@ -58,13 +59,29 @@ public class ArmTrajectoryCommand implements Command<ArmTrajectoryCommand, ArmTr
    public void set(ArmTrajectoryCommand other)
    {
       clear(other.getRobotSide());
+      setForceExecution(other.getForceExecution());
       sequenceId = other.sequenceId;
       jointspaceTrajectory.set(other.getJointspaceTrajectory());
+   }
+
+   public void setRobotSide(RobotSide robotSide)
+   {
+      this.robotSide = robotSide;
    }
 
    public RobotSide getRobotSide()
    {
       return robotSide;
+   }
+
+   public void setForceExecution(boolean forceExecution)
+   {
+      this.forceExecution = forceExecution;
+   }
+
+   public boolean getForceExecution()
+   {
+      return forceExecution;
    }
 
    public JointspaceTrajectoryCommand getJointspaceTrajectory()
