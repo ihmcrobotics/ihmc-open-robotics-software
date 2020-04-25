@@ -155,9 +155,9 @@ public class ICPOptimizationSolutionHandler
       if (useICPControlPolygons.getValue() && icpControlPlane != null)
       {
          if (activePlanarRegion == null)
-            icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, footstepSolutionInControlPlane, locationSolution, upcomingFootstep.getPosition().getZ());
+            icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, footstepSolutionInControlPlane, locationSolution, upcomingFootstep.getPosition().getZ());
          else
-            icpControlPlane.projectPointFromPlaneOntoPlanarRegion(worldFrame, footstepSolutionInControlPlane, locationSolution, activePlanarRegion);
+            icpControlPlane.projectPointFromControlPlaneOntoPlanarRegion(worldFrame, footstepSolutionInControlPlane, locationSolution, activePlanarRegion);
       }
       else
       {
