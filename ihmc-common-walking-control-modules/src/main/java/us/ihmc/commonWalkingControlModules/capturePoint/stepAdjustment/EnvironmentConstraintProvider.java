@@ -11,17 +11,22 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +41,7 @@ public class EnvironmentConstraintProvider
 
    private final DoubleProvider maxAngleForSteppable;
    private final DoubleProvider minimumAreaForSteppable;
+   private final BooleanProvider usePlanarRegionConstraints;
 
    private final RecyclingArrayList<PlanarRegion> allPlanarRegionsThatAreSteppable = new RecyclingArrayList<>(PlanarRegion.class);
    private final YoInteger numberOfPlanarListsToConsider;
@@ -46,7 +52,6 @@ public class EnvironmentConstraintProvider
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
    private final YoBoolean constraintRegionChanged;
-   private final YoBoolean usePlanarRegionConstraints;
 
    private final YoFrameConvexPolygon2D convexHullConstraint;
 
@@ -55,7 +60,8 @@ public class EnvironmentConstraintProvider
    public EnvironmentConstraintProvider(ICPOptimizationParameters optimizationParameters,
                                         OneStepCaptureRegionCalculator captureRegionCalculator,
                                         String yoNamePrefix,
-                                        YoVariableRegistry registry)
+                                        YoVariableRegistry registry,
+                                        YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.captureRegionCalculator = captureRegionCalculator;
 
@@ -64,12 +70,19 @@ public class EnvironmentConstraintProvider
 
       numberOfPlanarListsToConsider = new YoInteger(yoNamePrefix + "NumberOfPlanarListsToConsider", registry);
       constraintRegionChanged = new YoBoolean(yoNamePrefix + "ConstraintRegionChanged", registry);
-      usePlanarRegionConstraints = new YoBoolean(yoNamePrefix + "UsePlanarRegionConstraints", registry);
+      usePlanarRegionConstraints = new BooleanParameter(yoNamePrefix + "UsePlanarRegionConstraints", registry, optimizationParameters.allowUsePlanarRegionConstraints());
 
       switchPlanarRegionConstraintsAutomatically = new YoBoolean(yoNamePrefix + "SwitchPlanarRegionConstraintsAutomatically", registry);
       switchPlanarRegionConstraintsAutomatically.set(optimizationParameters.switchPlanarRegionConstraintsAutomatically());
 
       convexHullConstraint = new YoFrameConvexPolygon2D(yoNamePrefix + "ConvexHullConstraint", "", worldFrame, 12, registry);
+
+      if (yoGraphicsListRegistry != null)
+      {
+         YoArtifactPolygon activePlanarRegionViz = new YoArtifactPolygon("ConvexHullConstraint", convexHullConstraint, Color.RED, false, true);
+
+         yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), activePlanarRegionViz);
+      }
    }
 
    private final Vector3D planeNormal = new Vector3D();
@@ -102,10 +115,10 @@ public class EnvironmentConstraintProvider
    {
       constraintRegionChanged.set(false);
 
-      if (!usePlanarRegionConstraints.getBooleanValue())
+      if (!usePlanarRegionConstraints.getValue())
          return null;
 
-      boolean planarRegionNeedsUpdating = true;
+      boolean planarRegionIsValid = false;
 
       if (planarRegionToConstrainTo == null)
       {
@@ -117,9 +130,9 @@ public class EnvironmentConstraintProvider
       if (switchPlanarRegionConstraintsAutomatically.getBooleanValue())
       {
          if (planarRegionToConstrainTo != null)
-            planarRegionNeedsUpdating = checkIfCurrentPlanarRegionIsValid();
+            planarRegionIsValid = checkIfCurrentPlanarRegionIsValid();
 
-         if (planarRegionNeedsUpdating)
+         if (!planarRegionIsValid)
          {
             PlanarRegion betterRegion = findBestPlanarRegionToStepTo();
             if (betterRegion != null)
