@@ -7,21 +7,29 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * Notifies the user that a MessageCollection has been received.
-       * This is used to know when the controller is ready to start collecting the actual collection of messages.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * Notifies the user that a MessageCollection has been received.
+   
+ * This is used to know when the controller is ready to start collecting the actual collection of messages.
+   
+ */
 public class MessageCollectionNotification extends Packet<MessageCollectionNotification> implements Settable<MessageCollectionNotification>, EpsilonComparable<MessageCollectionNotification>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * This is the sequence ID of the MessageCollection that has just been received.
-            */
+       
+    * This is the sequence ID of the MessageCollection that has just been received.
+       
+    */
    public long message_collection_sequence_id_;
 
    public MessageCollectionNotification()
@@ -49,15 +57,19 @@ public class MessageCollectionNotification extends Packet<MessageCollectionNotif
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -65,15 +77,19 @@ public class MessageCollectionNotification extends Packet<MessageCollectionNotif
 
 
    /**
-            * This is the sequence ID of the MessageCollection that has just been received.
-            */
+       
+    * This is the sequence ID of the MessageCollection that has just been received.
+       
+    */
    public void setMessageCollectionSequenceId(long message_collection_sequence_id)
    {
       message_collection_sequence_id_ = message_collection_sequence_id;
    }
    /**
-            * This is the sequence ID of the MessageCollection that has just been received.
-            */
+       
+    * This is the sequence ID of the MessageCollection that has just been received.
+       
+    */
    public long getMessageCollectionSequenceId()
    {
       return message_collection_sequence_id_;

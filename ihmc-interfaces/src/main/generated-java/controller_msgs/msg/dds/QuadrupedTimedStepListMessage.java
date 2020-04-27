@@ -10,33 +10,45 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Defines the list of steps to perform
-            */
+       
+    * Defines the list of steps to perform
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.QuadrupedTimedStepMessage>  quadruped_step_list_;
 
    /**
-            * If true, the times are expressed in absolute time relative to the robot start
-            */
+       
+    * If true, the times are expressed in absolute time relative to the robot start
+       
+    */
    public boolean is_expressed_in_absolute_time_ = true;
 
    /**
-            * Properties for queueing footstep lists.
-            */
+       
+    * Properties for queueing footstep lists.
+       
+    */
    public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
 
    /**
-            * Defines if the step list is adjustable
-            */
+       
+    * Defines if the step list is adjustable
+       
+    */
    public boolean are_steps_adjustable_ = true;
 
    /**
-            * If true the controller will adjust the z coordinate of the upcoming footsteps with the location error of previous steps.
-            */
+       
+    * If true the controller will adjust the z coordinate of the upcoming footsteps with the location error of previous steps.
+       
+    */
    public boolean offset_steps_height_with_execution_error_;
 
    public QuadrupedTimedStepListMessage()
@@ -80,15 +92,19 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -97,8 +113,10 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
 
 
    /**
-            * Defines the list of steps to perform
-            */
+       
+    * Defines the list of steps to perform
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.QuadrupedTimedStepMessage>  getQuadrupedStepList()
    {
       return quadruped_step_list_;
@@ -106,15 +124,19 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
 
 
    /**
-            * If true, the times are expressed in absolute time relative to the robot start
-            */
+       
+    * If true, the times are expressed in absolute time relative to the robot start
+       
+    */
    public void setIsExpressedInAbsoluteTime(boolean is_expressed_in_absolute_time)
    {
       is_expressed_in_absolute_time_ = is_expressed_in_absolute_time;
    }
    /**
-            * If true, the times are expressed in absolute time relative to the robot start
-            */
+       
+    * If true, the times are expressed in absolute time relative to the robot start
+       
+    */
    public boolean getIsExpressedInAbsoluteTime()
    {
       return is_expressed_in_absolute_time_;
@@ -123,8 +145,10 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
 
 
    /**
-            * Properties for queueing footstep lists.
-            */
+       
+    * Properties for queueing footstep lists.
+       
+    */
    public controller_msgs.msg.dds.QueueableMessage getQueueingProperties()
    {
       return queueing_properties_;
@@ -132,15 +156,19 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
 
 
    /**
-            * Defines if the step list is adjustable
-            */
+       
+    * Defines if the step list is adjustable
+       
+    */
    public void setAreStepsAdjustable(boolean are_steps_adjustable)
    {
       are_steps_adjustable_ = are_steps_adjustable;
    }
    /**
-            * Defines if the step list is adjustable
-            */
+       
+    * Defines if the step list is adjustable
+       
+    */
    public boolean getAreStepsAdjustable()
    {
       return are_steps_adjustable_;
@@ -148,15 +176,19 @@ public class QuadrupedTimedStepListMessage extends Packet<QuadrupedTimedStepList
 
 
    /**
-            * If true the controller will adjust the z coordinate of the upcoming footsteps with the location error of previous steps.
-            */
+       
+    * If true the controller will adjust the z coordinate of the upcoming footsteps with the location error of previous steps.
+       
+    */
    public void setOffsetStepsHeightWithExecutionError(boolean offset_steps_height_with_execution_error)
    {
       offset_steps_height_with_execution_error_ = offset_steps_height_with_execution_error;
    }
    /**
-            * If true the controller will adjust the z coordinate of the upcoming footsteps with the location error of previous steps.
-            */
+       
+    * If true the controller will adjust the z coordinate of the upcoming footsteps with the location error of previous steps.
+       
+    */
    public boolean getOffsetStepsHeightWithExecutionError()
    {
       return offset_steps_height_with_execution_error_;

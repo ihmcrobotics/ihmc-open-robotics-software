@@ -7,14 +7,18 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Old message used for the VRC? Needs to be revised, maybe deleted?
-       */
+   
+ * Old message used for the VRC? Needs to be revised, maybe deleted?
+   
+ */
 public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Settable<VehiclePosePacket>, EpsilonComparable<VehiclePosePacket>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public us.ihmc.euclid.tuple3D.Point3D position_;
@@ -56,15 +60,19 @@ public class VehiclePosePacket extends Packet<VehiclePosePacket> implements Sett
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

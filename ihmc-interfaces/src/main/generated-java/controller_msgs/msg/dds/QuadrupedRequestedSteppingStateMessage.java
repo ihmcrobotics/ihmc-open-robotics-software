@@ -7,9 +7,12 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC quadruped controller API.
-       * This message is used to switch the control scheme between different stepping modes.
-       */
+   
+ * This message is part of the IHMC quadruped controller API.
+   
+ * This message is used to switch the control scheme between different stepping modes.
+   
+ */
 public class QuadrupedRequestedSteppingStateMessage extends Packet<QuadrupedRequestedSteppingStateMessage> implements Settable<QuadrupedRequestedSteppingStateMessage>, EpsilonComparable<QuadrupedRequestedSteppingStateMessage>
 {
 
@@ -20,13 +23,17 @@ public class QuadrupedRequestedSteppingStateMessage extends Packet<QuadrupedRequ
    public static final byte REQUEST_SOLE_WAYPOINT = (byte) 2;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Specifies the which state the controller should transition into.
-            */
+       
+    * Specifies the which state the controller should transition into.
+       
+    */
    public byte quadruped_stepping_requested_event_ = (byte) 255;
 
    public QuadrupedRequestedSteppingStateMessage()
@@ -54,15 +61,19 @@ public class QuadrupedRequestedSteppingStateMessage extends Packet<QuadrupedRequ
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -70,15 +81,19 @@ public class QuadrupedRequestedSteppingStateMessage extends Packet<QuadrupedRequ
 
 
    /**
-            * Specifies the which state the controller should transition into.
-            */
+       
+    * Specifies the which state the controller should transition into.
+       
+    */
    public void setQuadrupedSteppingRequestedEvent(byte quadruped_stepping_requested_event)
    {
       quadruped_stepping_requested_event_ = quadruped_stepping_requested_event;
    }
    /**
-            * Specifies the which state the controller should transition into.
-            */
+       
+    * Specifies the which state the controller should transition into.
+       
+    */
    public byte getQuadrupedSteppingRequestedEvent()
    {
       return quadruped_stepping_requested_event_;

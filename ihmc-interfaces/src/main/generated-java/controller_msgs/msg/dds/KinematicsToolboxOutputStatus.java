@@ -7,41 +7,57 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * General purpose message normally used to report the solution of a whole-body inverse kinematics solver.
-       * Main usage is for the IHMC KinematicsToolbox.
-       */
+   
+ * General purpose message normally used to report the solution of a whole-body inverse kinematics solver.
+   
+ * Main usage is for the IHMC KinematicsToolbox.
+   
+ */
 public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutputStatus> implements Settable<KinematicsToolboxOutputStatus>, EpsilonComparable<KinematicsToolboxOutputStatus>
 {
 
    /**
-          * Nothing reported by the toolbox.
-          */
+      
+    * Nothing reported by the toolbox.
+      
+    */
    public static final byte CURRENT_TOOLBOX_STATE_NO_STATUS = (byte) 0;
 
    /**
-          * The toolbox just initialized successfully and is about to start running.
-          */
+      
+    * The toolbox just initialized successfully and is about to start running.
+      
+    */
    public static final byte CURRENT_TOOLBOX_STATE_INITIALIZE_SUCCESSFUL = (byte) 1;
 
    /**
-          * The toolbox failed its initialization and cannot run until it succeeds.
-          * This failure specifies that the toolbox has not received RobotConfigurationData from the IHMC walking controller.
-          */
+      
+    * The toolbox failed its initialization and cannot run until it succeeds.
+      
+    * This failure specifies that the toolbox has not received RobotConfigurationData from the IHMC walking controller.
+      
+    */
    public static final byte CURRENT_TOOLBOX_STATE_INITIALIZE_FAILURE_MISSING_RCD = (byte) 2;
 
    /**
-          * The toolbox has been initialized properly and is running.
-          */
+      
+    * The toolbox has been initialized properly and is running.
+      
+    */
    public static final byte CURRENT_TOOLBOX_STATE_RUNNING = (byte) 3;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Provides insight about the current state of the toolbox, e.g. waiting for user input or waiting for controller input.
-            */
+       
+    * Provides insight about the current state of the toolbox, e.g. waiting for user input or waiting for controller input.
+       
+    */
    public byte current_toolbox_state_;
 
    public int joint_name_hash_;
@@ -53,13 +69,17 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
    public us.ihmc.euclid.tuple4D.Quaternion desired_root_orientation_;
 
    /**
-            * Desired joint velocities might be empty.
-            */
+       
+    * Desired joint velocities might be empty.
+       
+    */
    public us.ihmc.idl.IDLSequence.Float  desired_joint_velocities_;
 
    /**
-            * Desired twist of root might be empty.
-            */
+       
+    * Desired twist of root might be empty.
+       
+    */
    public us.ihmc.euclid.tuple3D.Vector3D desired_root_linear_velocity_;
 
    public us.ihmc.euclid.tuple3D.Vector3D desired_root_angular_velocity_;
@@ -125,15 +145,19 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -141,15 +165,19 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
 
    /**
-            * Provides insight about the current state of the toolbox, e.g. waiting for user input or waiting for controller input.
-            */
+       
+    * Provides insight about the current state of the toolbox, e.g. waiting for user input or waiting for controller input.
+       
+    */
    public void setCurrentToolboxState(byte current_toolbox_state)
    {
       current_toolbox_state_ = current_toolbox_state;
    }
    /**
-            * Provides insight about the current state of the toolbox, e.g. waiting for user input or waiting for controller input.
-            */
+       
+    * Provides insight about the current state of the toolbox, e.g. waiting for user input or waiting for controller input.
+       
+    */
    public byte getCurrentToolboxState()
    {
       return current_toolbox_state_;
@@ -189,8 +217,10 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
 
    /**
-            * Desired joint velocities might be empty.
-            */
+       
+    * Desired joint velocities might be empty.
+       
+    */
    public us.ihmc.idl.IDLSequence.Float  getDesiredJointVelocities()
    {
       return desired_joint_velocities_;
@@ -199,8 +229,10 @@ public class KinematicsToolboxOutputStatus extends Packet<KinematicsToolboxOutpu
 
 
    /**
-            * Desired twist of root might be empty.
-            */
+       
+    * Desired twist of root might be empty.
+       
+    */
    public us.ihmc.euclid.tuple3D.Vector3D getDesiredRootLinearVelocity()
    {
       return desired_root_linear_velocity_;

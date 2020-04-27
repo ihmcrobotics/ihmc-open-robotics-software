@@ -7,8 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Atlas specific message
-       */
+   
+ * Atlas specific message
+   
+ */
 public class ManualHandControlPacket extends Packet<ManualHandControlPacket> implements Settable<ManualHandControlPacket>, EpsilonComparable<ManualHandControlPacket>
 {
 
@@ -21,8 +23,10 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket> imp
    public static final int POSITION = 1;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public byte robot_side_ = (byte) 255;
@@ -82,15 +86,19 @@ public class ManualHandControlPacket extends Packet<ManualHandControlPacket> imp
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

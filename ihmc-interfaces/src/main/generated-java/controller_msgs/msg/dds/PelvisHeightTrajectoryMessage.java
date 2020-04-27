@@ -7,34 +7,49 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message commands the controller to move the pelvis to a new height in the trajectory frame while going through the specified trajectory points.
-       * Sending this command will not affect the pelvis horizontal position.
-       * To control the pelvis 3D position use the PelvisTrajectoryMessage instead.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message commands the controller to move the pelvis to a new height in the trajectory frame while going through the specified trajectory points.
+   
+ * Sending this command will not affect the pelvis horizontal position.
+   
+ * To control the pelvis 3D position use the PelvisTrajectoryMessage instead.
+   
+ */
 public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectoryMessage> implements Settable<PelvisHeightTrajectoryMessage>, EpsilonComparable<PelvisHeightTrajectoryMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
-            */
+       
+    * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
+       
+    */
    public boolean enable_user_pelvis_control_;
 
    /**
-            * If enable_user_pelvis_control is true then enable_user_pelvis_height_control_during_walking
-            * will keep the height manager in user mode while walking.
-            * If this is false the height manager will switch back to controller mode when walking.
-            */
+       
+    * If enable_user_pelvis_control is true then enable_user_pelvis_height_control_during_walking
+       
+    * will keep the height manager in user mode while walking.
+       
+    * If this is false the height manager will switch back to controller mode when walking.
+       
+    */
    public boolean enable_user_pelvis_control_during_walking_;
 
    /**
-            * The position trajectory information.
-            */
+       
+    * The position trajectory information.
+       
+    */
    public controller_msgs.msg.dds.EuclideanTrajectoryMessage euclidean_trajectory_;
 
    public PelvisHeightTrajectoryMessage()
@@ -70,15 +85,19 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -86,15 +105,19 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
 
 
    /**
-            * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
-            */
+       
+    * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
+       
+    */
    public void setEnableUserPelvisControl(boolean enable_user_pelvis_control)
    {
       enable_user_pelvis_control_ = enable_user_pelvis_control;
    }
    /**
-            * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
-            */
+       
+    * Execute this trajectory in user mode. User mode tries to achieve the desired regardless of the leg kinematics.
+       
+    */
    public boolean getEnableUserPelvisControl()
    {
       return enable_user_pelvis_control_;
@@ -102,19 +125,27 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
 
 
    /**
-            * If enable_user_pelvis_control is true then enable_user_pelvis_height_control_during_walking
-            * will keep the height manager in user mode while walking.
-            * If this is false the height manager will switch back to controller mode when walking.
-            */
+       
+    * If enable_user_pelvis_control is true then enable_user_pelvis_height_control_during_walking
+       
+    * will keep the height manager in user mode while walking.
+       
+    * If this is false the height manager will switch back to controller mode when walking.
+       
+    */
    public void setEnableUserPelvisControlDuringWalking(boolean enable_user_pelvis_control_during_walking)
    {
       enable_user_pelvis_control_during_walking_ = enable_user_pelvis_control_during_walking;
    }
    /**
-            * If enable_user_pelvis_control is true then enable_user_pelvis_height_control_during_walking
-            * will keep the height manager in user mode while walking.
-            * If this is false the height manager will switch back to controller mode when walking.
-            */
+       
+    * If enable_user_pelvis_control is true then enable_user_pelvis_height_control_during_walking
+       
+    * will keep the height manager in user mode while walking.
+       
+    * If this is false the height manager will switch back to controller mode when walking.
+       
+    */
    public boolean getEnableUserPelvisControlDuringWalking()
    {
       return enable_user_pelvis_control_during_walking_;
@@ -123,8 +154,10 @@ public class PelvisHeightTrajectoryMessage extends Packet<PelvisHeightTrajectory
 
 
    /**
-            * The position trajectory information.
-            */
+       
+    * The position trajectory information.
+       
+    */
    public controller_msgs.msg.dds.EuclideanTrajectoryMessage getEuclideanTrajectory()
    {
       return euclidean_trajectory_;

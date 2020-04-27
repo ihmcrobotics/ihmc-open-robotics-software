@@ -7,8 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC quadruped controller API.
-       */
+   
+ * This message is part of the IHMC quadruped controller API.
+   
+ */
 public class ComPositionPacket extends Packet<ComPositionPacket> implements Settable<ComPositionPacket>, EpsilonComparable<ComPositionPacket>
 {
 

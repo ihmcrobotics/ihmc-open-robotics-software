@@ -24,8 +24,10 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
    public static final byte VIDEO_SOURCE_AWARE_FACE_TRACKER = (byte) 6;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public byte video_source_ = (byte) 255;
@@ -86,15 +88,19 @@ public class VideoPacket extends Packet<VideoPacket> implements Settable<VideoPa
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

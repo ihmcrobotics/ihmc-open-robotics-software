@@ -7,10 +7,14 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message notifies the user of a change in the high level state.
-       * This message's primary use is to signal a requested state change is completed.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message notifies the user of a change in the high level state.
+   
+ * This message's primary use is to signal a requested state change is completed.
+   
+ */
 public class HighLevelStateChangeStatusMessage extends Packet<HighLevelStateChangeStatusMessage> implements Settable<HighLevelStateChangeStatusMessage>, EpsilonComparable<HighLevelStateChangeStatusMessage>
 {
 
@@ -37,18 +41,24 @@ public class HighLevelStateChangeStatusMessage extends Packet<HighLevelStateChan
    public static final byte FALLING_STATE = (byte) 10;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Specifies the controller's state prior to transition.
-            */
+       
+    * Specifies the controller's state prior to transition.
+       
+    */
    public byte initial_high_level_controller_name_ = (byte) 255;
 
    /**
-            * Specifies the state the controller has transitioned into.
-            */
+       
+    * Specifies the state the controller has transitioned into.
+       
+    */
    public byte end_high_level_controller_name_ = (byte) 255;
 
    public HighLevelStateChangeStatusMessage()
@@ -80,15 +90,19 @@ public class HighLevelStateChangeStatusMessage extends Packet<HighLevelStateChan
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -96,15 +110,19 @@ public class HighLevelStateChangeStatusMessage extends Packet<HighLevelStateChan
 
 
    /**
-            * Specifies the controller's state prior to transition.
-            */
+       
+    * Specifies the controller's state prior to transition.
+       
+    */
    public void setInitialHighLevelControllerName(byte initial_high_level_controller_name)
    {
       initial_high_level_controller_name_ = initial_high_level_controller_name;
    }
    /**
-            * Specifies the controller's state prior to transition.
-            */
+       
+    * Specifies the controller's state prior to transition.
+       
+    */
    public byte getInitialHighLevelControllerName()
    {
       return initial_high_level_controller_name_;
@@ -112,15 +130,19 @@ public class HighLevelStateChangeStatusMessage extends Packet<HighLevelStateChan
 
 
    /**
-            * Specifies the state the controller has transitioned into.
-            */
+       
+    * Specifies the state the controller has transitioned into.
+       
+    */
    public void setEndHighLevelControllerName(byte end_high_level_controller_name)
    {
       end_high_level_controller_name_ = end_high_level_controller_name;
    }
    /**
-            * Specifies the state the controller has transitioned into.
-            */
+       
+    * Specifies the state the controller has transitioned into.
+       
+    */
    public byte getEndHighLevelControllerName()
    {
       return end_high_level_controller_name_;

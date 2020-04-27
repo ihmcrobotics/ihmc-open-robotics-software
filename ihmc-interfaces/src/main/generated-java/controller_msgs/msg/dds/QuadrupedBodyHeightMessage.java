@@ -7,31 +7,43 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC quadruped controller API.
-       * This message commands the controller to move in taskspace the body to the desired height while going through the specified trajectory points.
-       * Sending this command will not affect the pelvis horizontal position.
-       */
+   
+ * This message is part of the IHMC quadruped controller API.
+   
+ * This message commands the controller to move in taskspace the body to the desired height while going through the specified trajectory points.
+   
+ * Sending this command will not affect the pelvis horizontal position.
+   
+ */
 public class QuadrupedBodyHeightMessage extends Packet<QuadrupedBodyHeightMessage> implements Settable<QuadrupedBodyHeightMessage>, EpsilonComparable<QuadrupedBodyHeightMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * If true, the times are expressed in absolute time relative to the robot start
-            */
+       
+    * If true, the times are expressed in absolute time relative to the robot start
+       
+    */
    public boolean is_expressed_in_absolute_time_;
 
    /**
-            * If true, the body height is controlled, rather than the center of mass height
-            */
+       
+    * If true, the body height is controlled, rather than the center of mass height
+       
+    */
    public boolean control_body_height_;
 
    /**
-            * The orientation trajectory information.
-            */
+       
+    * The orientation trajectory information.
+       
+    */
    public controller_msgs.msg.dds.EuclideanTrajectoryMessage euclidean_trajectory_;
 
    public QuadrupedBodyHeightMessage()
@@ -67,15 +79,19 @@ public class QuadrupedBodyHeightMessage extends Packet<QuadrupedBodyHeightMessag
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -83,15 +99,19 @@ public class QuadrupedBodyHeightMessage extends Packet<QuadrupedBodyHeightMessag
 
 
    /**
-            * If true, the times are expressed in absolute time relative to the robot start
-            */
+       
+    * If true, the times are expressed in absolute time relative to the robot start
+       
+    */
    public void setIsExpressedInAbsoluteTime(boolean is_expressed_in_absolute_time)
    {
       is_expressed_in_absolute_time_ = is_expressed_in_absolute_time;
    }
    /**
-            * If true, the times are expressed in absolute time relative to the robot start
-            */
+       
+    * If true, the times are expressed in absolute time relative to the robot start
+       
+    */
    public boolean getIsExpressedInAbsoluteTime()
    {
       return is_expressed_in_absolute_time_;
@@ -99,15 +119,19 @@ public class QuadrupedBodyHeightMessage extends Packet<QuadrupedBodyHeightMessag
 
 
    /**
-            * If true, the body height is controlled, rather than the center of mass height
-            */
+       
+    * If true, the body height is controlled, rather than the center of mass height
+       
+    */
    public void setControlBodyHeight(boolean control_body_height)
    {
       control_body_height_ = control_body_height;
    }
    /**
-            * If true, the body height is controlled, rather than the center of mass height
-            */
+       
+    * If true, the body height is controlled, rather than the center of mass height
+       
+    */
    public boolean getControlBodyHeight()
    {
       return control_body_height_;
@@ -116,8 +140,10 @@ public class QuadrupedBodyHeightMessage extends Packet<QuadrupedBodyHeightMessag
 
 
    /**
-            * The orientation trajectory information.
-            */
+       
+    * The orientation trajectory information.
+       
+    */
    public controller_msgs.msg.dds.EuclideanTrajectoryMessage getEuclideanTrajectory()
    {
       return euclidean_trajectory_;

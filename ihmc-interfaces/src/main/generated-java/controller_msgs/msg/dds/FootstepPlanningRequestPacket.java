@@ -7,8 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC footstep planning module.
-       */
+   
+ * This message is part of the IHMC footstep planning module.
+   
+ */
 public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningRequestPacket> implements Settable<FootstepPlanningRequestPacket>, EpsilonComparable<FootstepPlanningRequestPacket>
 {
 
@@ -27,119 +29,166 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public static final int NO_PLAN_ID = -1;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Starting left foot pose
-            */
+       
+    * Starting left foot pose
+       
+    */
    public us.ihmc.euclid.geometry.Pose3D start_left_foot_pose_;
 
    /**
-            * Starting right foot pose
-            */
+       
+    * Starting right foot pose
+       
+    */
    public us.ihmc.euclid.geometry.Pose3D start_right_foot_pose_;
 
    /**
-            * Goal left foot pose
-            */
+       
+    * Goal left foot pose
+       
+    */
    public us.ihmc.euclid.geometry.Pose3D goal_left_foot_pose_;
 
    /**
-            * Goal right foot pose
-            */
+       
+    * Goal right foot pose
+       
+    */
    public us.ihmc.euclid.geometry.Pose3D goal_right_foot_pose_;
 
    /**
-            * Requested initial stance side. If not specified the planner will choose
-            */
+       
+    * Requested initial stance side. If not specified the planner will choose
+       
+    */
    public byte requested_initial_stance_side_ = (byte) 255;
 
    /**
-            * If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
-            */
+       
+    * If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
+       
+    */
    public boolean snap_goal_steps_ = true;
 
    /**
-            * If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
-            */
+       
+    * If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
+       
+    */
    public boolean abort_if_goal_step_snapping_fails_;
 
    /**
-            * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
-            */
+       
+    * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+       
+    */
    public boolean abort_if_body_path_planner_fails_;
 
    /**
-            * If true, will plan a body path. If false, will follow a straight-line path to the goal
-            */
+       
+    * If true, will plan a body path. If false, will follow a straight-line path to the goal
+       
+    */
    public boolean plan_body_path_;
 
    /**
-            * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
-            */
+       
+    * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+       
+    */
    public boolean perform_a_star_search_ = true;
 
    /**
-            * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
-            */
+       
+    * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_waypoints_;
 
    /**
-            * (In beta) acceptable xy distance from the given goal for the planner to terminate
-            */
+       
+    * (In beta) acceptable xy distance from the given goal for the planner to terminate
+       
+    */
    public double goal_distance_proximity_ = -1.0;
 
    /**
-            * (In beta) acceptable yaw offset from the given goal for the planner to terminate
-            */
+       
+    * (In beta) acceptable yaw offset from the given goal for the planner to terminate
+       
+    */
    public double goal_yaw_proximity_ = -1.0;
 
    /**
-            * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
-            */
+       
+    * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+       
+    */
    public byte requested_path_heading_ = (byte) 255;
 
    /**
-            * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
-            */
+       
+    * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
+       
+    */
    public double timeout_ = 5.0;
 
    /**
-            * Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
-            */
+       
+    * Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
+       
+    */
    public int max_iterations_ = -1;
 
    /**
-            * Max body path length if using body path
-            */
+       
+    * Max body path length if using body path
+       
+    */
    public double horizon_length_;
 
    /**
-            * Planar regions to use, if you don't want to assume flat ground
-            */
+       
+    * Planar regions to use, if you don't want to assume flat ground
+       
+    */
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_message_;
 
    /**
-            * Explicitly tell the planner to use flat ground
-            */
+       
+    * Explicitly tell the planner to use flat ground
+       
+    */
    public boolean assume_flat_ground_;
 
    /**
-            * Set this id to keep track of your request
-            */
+       
+    * Set this id to keep track of your request
+       
+    */
    public int planner_request_id_ = -1;
 
    /**
-            * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
-            */
+       
+    * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+       
+    */
    public double status_publish_period_ = 1.0;
 
    /**
-            * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
-            * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
-            */
+       
+    * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
+       
+    * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
+       
+    */
    public boolean generate_log_;
 
    public FootstepPlanningRequestPacket()
@@ -251,15 +300,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -268,8 +321,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Starting left foot pose
-            */
+       
+    * Starting left foot pose
+       
+    */
    public us.ihmc.euclid.geometry.Pose3D getStartLeftFootPose()
    {
       return start_left_foot_pose_;
@@ -278,8 +333,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Starting right foot pose
-            */
+       
+    * Starting right foot pose
+       
+    */
    public us.ihmc.euclid.geometry.Pose3D getStartRightFootPose()
    {
       return start_right_foot_pose_;
@@ -288,8 +345,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Goal left foot pose
-            */
+       
+    * Goal left foot pose
+       
+    */
    public us.ihmc.euclid.geometry.Pose3D getGoalLeftFootPose()
    {
       return goal_left_foot_pose_;
@@ -298,8 +357,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Goal right foot pose
-            */
+       
+    * Goal right foot pose
+       
+    */
    public us.ihmc.euclid.geometry.Pose3D getGoalRightFootPose()
    {
       return goal_right_foot_pose_;
@@ -307,15 +368,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Requested initial stance side. If not specified the planner will choose
-            */
+       
+    * Requested initial stance side. If not specified the planner will choose
+       
+    */
    public void setRequestedInitialStanceSide(byte requested_initial_stance_side)
    {
       requested_initial_stance_side_ = requested_initial_stance_side;
    }
    /**
-            * Requested initial stance side. If not specified the planner will choose
-            */
+       
+    * Requested initial stance side. If not specified the planner will choose
+       
+    */
    public byte getRequestedInitialStanceSide()
    {
       return requested_initial_stance_side_;
@@ -323,15 +388,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
-            */
+       
+    * If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
+       
+    */
    public void setSnapGoalSteps(boolean snap_goal_steps)
    {
       snap_goal_steps_ = snap_goal_steps;
    }
    /**
-            * If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
-            */
+       
+    * If true, the planner will snap the provided goal steps. Otherwise the provided poses will be trusted as valid footholds.
+       
+    */
    public boolean getSnapGoalSteps()
    {
       return snap_goal_steps_;
@@ -339,15 +408,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
-            */
+       
+    * If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
+       
+    */
    public void setAbortIfGoalStepSnappingFails(boolean abort_if_goal_step_snapping_fails)
    {
       abort_if_goal_step_snapping_fails_ = abort_if_goal_step_snapping_fails;
    }
    /**
-            * If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
-            */
+       
+    * If snap_goal_steps is true and the goal steps can't be snapped, this specifies whether to abort or go ahead and plan.
+       
+    */
    public boolean getAbortIfGoalStepSnappingFails()
    {
       return abort_if_goal_step_snapping_fails_;
@@ -355,15 +428,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
-            */
+       
+    * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+       
+    */
    public void setAbortIfBodyPathPlannerFails(boolean abort_if_body_path_planner_fails)
    {
       abort_if_body_path_planner_fails_ = abort_if_body_path_planner_fails;
    }
    /**
-            * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
-            */
+       
+    * If plan_body_path is true and the planner fails, this specifies whether to abort or use a straight-line body path
+       
+    */
    public boolean getAbortIfBodyPathPlannerFails()
    {
       return abort_if_body_path_planner_fails_;
@@ -371,15 +448,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * If true, will plan a body path. If false, will follow a straight-line path to the goal
-            */
+       
+    * If true, will plan a body path. If false, will follow a straight-line path to the goal
+       
+    */
    public void setPlanBodyPath(boolean plan_body_path)
    {
       plan_body_path_ = plan_body_path;
    }
    /**
-            * If true, will plan a body path. If false, will follow a straight-line path to the goal
-            */
+       
+    * If true, will plan a body path. If false, will follow a straight-line path to the goal
+       
+    */
    public boolean getPlanBodyPath()
    {
       return plan_body_path_;
@@ -387,15 +468,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
-            */
+       
+    * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+       
+    */
    public void setPerformAStarSearch(boolean perform_a_star_search)
    {
       perform_a_star_search_ = perform_a_star_search;
    }
    /**
-            * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
-            */
+       
+    * If true, does A* search. If false, a simple turn-walk-turn path is returned with no checks on step feasibility.
+       
+    */
    public boolean getPerformAStarSearch()
    {
       return perform_a_star_search_;
@@ -404,8 +489,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
-            */
+       
+    * Requested body path waypoints. If non-empty, planner will follow this path and will not plan a body path
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getBodyPathWaypoints()
    {
       return body_path_waypoints_;
@@ -413,15 +500,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * (In beta) acceptable xy distance from the given goal for the planner to terminate
-            */
+       
+    * (In beta) acceptable xy distance from the given goal for the planner to terminate
+       
+    */
    public void setGoalDistanceProximity(double goal_distance_proximity)
    {
       goal_distance_proximity_ = goal_distance_proximity;
    }
    /**
-            * (In beta) acceptable xy distance from the given goal for the planner to terminate
-            */
+       
+    * (In beta) acceptable xy distance from the given goal for the planner to terminate
+       
+    */
    public double getGoalDistanceProximity()
    {
       return goal_distance_proximity_;
@@ -429,15 +520,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * (In beta) acceptable yaw offset from the given goal for the planner to terminate
-            */
+       
+    * (In beta) acceptable yaw offset from the given goal for the planner to terminate
+       
+    */
    public void setGoalYawProximity(double goal_yaw_proximity)
    {
       goal_yaw_proximity_ = goal_yaw_proximity;
    }
    /**
-            * (In beta) acceptable yaw offset from the given goal for the planner to terminate
-            */
+       
+    * (In beta) acceptable yaw offset from the given goal for the planner to terminate
+       
+    */
    public double getGoalYawProximity()
    {
       return goal_yaw_proximity_;
@@ -445,15 +540,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
-            */
+       
+    * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+       
+    */
    public void setRequestedPathHeading(byte requested_path_heading)
    {
       requested_path_heading_ = requested_path_heading;
    }
    /**
-            * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
-            */
+       
+    * Specifies the desired robot heading. The planner generates turn-walk-turn plans and this describes the robot's orientation during the walk portion.
+       
+    */
    public byte getRequestedPathHeading()
    {
       return requested_path_heading_;
@@ -461,15 +560,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
-            */
+       
+    * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
+       
+    */
    public void setTimeout(double timeout)
    {
       timeout_ = timeout;
    }
    /**
-            * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
-            */
+       
+    * Planner timeout in seconds. If max_iterations is set also, the planner terminates whenever either is reached
+       
+    */
    public double getTimeout()
    {
       return timeout_;
@@ -477,15 +580,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
-            */
+       
+    * Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
+       
+    */
    public void setMaxIterations(int max_iterations)
    {
       max_iterations_ = max_iterations;
    }
    /**
-            * Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
-            */
+       
+    * Maximum iterations. Set to a non-positive number to disable. If timeout is also set, the planner terminates whener either is reached.
+       
+    */
    public int getMaxIterations()
    {
       return max_iterations_;
@@ -493,15 +600,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Max body path length if using body path
-            */
+       
+    * Max body path length if using body path
+       
+    */
    public void setHorizonLength(double horizon_length)
    {
       horizon_length_ = horizon_length;
    }
    /**
-            * Max body path length if using body path
-            */
+       
+    * Max body path length if using body path
+       
+    */
    public double getHorizonLength()
    {
       return horizon_length_;
@@ -510,8 +621,10 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Planar regions to use, if you don't want to assume flat ground
-            */
+       
+    * Planar regions to use, if you don't want to assume flat ground
+       
+    */
    public controller_msgs.msg.dds.PlanarRegionsListMessage getPlanarRegionsListMessage()
    {
       return planar_regions_list_message_;
@@ -519,15 +632,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Explicitly tell the planner to use flat ground
-            */
+       
+    * Explicitly tell the planner to use flat ground
+       
+    */
    public void setAssumeFlatGround(boolean assume_flat_ground)
    {
       assume_flat_ground_ = assume_flat_ground;
    }
    /**
-            * Explicitly tell the planner to use flat ground
-            */
+       
+    * Explicitly tell the planner to use flat ground
+       
+    */
    public boolean getAssumeFlatGround()
    {
       return assume_flat_ground_;
@@ -535,15 +652,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Set this id to keep track of your request
-            */
+       
+    * Set this id to keep track of your request
+       
+    */
    public void setPlannerRequestId(int planner_request_id)
    {
       planner_request_id_ = planner_request_id;
    }
    /**
-            * Set this id to keep track of your request
-            */
+       
+    * Set this id to keep track of your request
+       
+    */
    public int getPlannerRequestId()
    {
       return planner_request_id_;
@@ -551,15 +672,19 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
-            */
+       
+    * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+       
+    */
    public void setStatusPublishPeriod(double status_publish_period)
    {
       status_publish_period_ = status_publish_period;
    }
    /**
-            * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
-            */
+       
+    * Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
+       
+    */
    public double getStatusPublishPeriod()
    {
       return status_publish_period_;
@@ -567,17 +692,23 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
-            * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
-            * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
-            */
+       
+    * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
+       
+    * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
+       
+    */
    public void setGenerateLog(boolean generate_log)
    {
       generate_log_ = generate_log;
    }
    /**
-            * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
-            * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
-            */
+       
+    * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
+       
+    * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
+       
+    */
    public boolean getGenerateLog()
    {
       return generate_log_;

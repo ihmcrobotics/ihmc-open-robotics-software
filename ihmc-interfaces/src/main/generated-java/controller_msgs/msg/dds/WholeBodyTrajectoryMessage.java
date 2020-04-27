@@ -7,70 +7,97 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * Send whole body trajectories to the robot. A best effort is made to execute the trajectory while balance is kept.
+   
+ */
 public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessage> implements Settable<WholeBodyTrajectoryMessage>, EpsilonComparable<WholeBodyTrajectoryMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Trajectory for the left hand
-            */
+       
+    * Trajectory for the left hand
+       
+    */
    public controller_msgs.msg.dds.HandTrajectoryMessage left_hand_trajectory_message_;
 
    /**
-            * Trajectory for the right hand
-            */
+       
+    * Trajectory for the right hand
+       
+    */
    public controller_msgs.msg.dds.HandTrajectoryMessage right_hand_trajectory_message_;
 
    /**
-            * Trajectory for the left arm joints
-            */
+       
+    * Trajectory for the left arm joints
+       
+    */
    public controller_msgs.msg.dds.ArmTrajectoryMessage left_arm_trajectory_message_;
 
    /**
-            * Trajectory for the right arm joints
-            */
+       
+    * Trajectory for the right arm joints
+       
+    */
    public controller_msgs.msg.dds.ArmTrajectoryMessage right_arm_trajectory_message_;
 
    /**
-            * Trajectory for the chest
-            */
+       
+    * Trajectory for the chest
+       
+    */
    public controller_msgs.msg.dds.ChestTrajectoryMessage chest_trajectory_message_;
 
    /**
-            * Trajectory for the spine joints
-            */
+       
+    * Trajectory for the spine joints
+       
+    */
    public controller_msgs.msg.dds.SpineTrajectoryMessage spine_trajectory_message_;
 
    /**
-            * Trajectory for the pelvis
-            */
+       
+    * Trajectory for the pelvis
+       
+    */
    public controller_msgs.msg.dds.PelvisTrajectoryMessage pelvis_trajectory_message_;
 
    /**
-            * Trajectory for the left foot
-            */
+       
+    * Trajectory for the left foot
+       
+    */
    public controller_msgs.msg.dds.FootTrajectoryMessage left_foot_trajectory_message_;
 
    /**
-            * Trajectory for the right foot
-            */
+       
+    * Trajectory for the right foot
+       
+    */
    public controller_msgs.msg.dds.FootTrajectoryMessage right_foot_trajectory_message_;
 
    /**
-            * Trajectory for the neck joints
-            */
+       
+    * Trajectory for the neck joints
+       
+    */
    public controller_msgs.msg.dds.NeckTrajectoryMessage neck_trajectory_message_;
 
    /**
-            * Trajectory for the head
-            */
+       
+    * Trajectory for the head
+       
+    */
    public controller_msgs.msg.dds.HeadTrajectoryMessage head_trajectory_message_;
 
    public WholeBodyTrajectoryMessage()
@@ -138,15 +165,19 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -155,8 +186,10 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
 
    /**
-            * Trajectory for the left hand
-            */
+       
+    * Trajectory for the left hand
+       
+    */
    public controller_msgs.msg.dds.HandTrajectoryMessage getLeftHandTrajectoryMessage()
    {
       return left_hand_trajectory_message_;
@@ -165,8 +198,10 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
 
    /**
-            * Trajectory for the right hand
-            */
+       
+    * Trajectory for the right hand
+       
+    */
    public controller_msgs.msg.dds.HandTrajectoryMessage getRightHandTrajectoryMessage()
    {
       return right_hand_trajectory_message_;
@@ -175,8 +210,10 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
 
    /**
-            * Trajectory for the left arm joints
-            */
+       
+    * Trajectory for the left arm joints
+       
+    */
    public controller_msgs.msg.dds.ArmTrajectoryMessage getLeftArmTrajectoryMessage()
    {
       return left_arm_trajectory_message_;
@@ -185,8 +222,10 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
 
    /**
-            * Trajectory for the right arm joints
-            */
+       
+    * Trajectory for the right arm joints
+       
+    */
    public controller_msgs.msg.dds.ArmTrajectoryMessage getRightArmTrajectoryMessage()
    {
       return right_arm_trajectory_message_;
@@ -195,8 +234,10 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
 
    /**
-            * Trajectory for the chest
-            */
+       
+    * Trajectory for the chest
+       
+    */
    public controller_msgs.msg.dds.ChestTrajectoryMessage getChestTrajectoryMessage()
    {
       return chest_trajectory_message_;
@@ -205,8 +246,10 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
 
    /**
-            * Trajectory for the spine joints
-            */
+       
+    * Trajectory for the spine joints
+       
+    */
    public controller_msgs.msg.dds.SpineTrajectoryMessage getSpineTrajectoryMessage()
    {
       return spine_trajectory_message_;
@@ -215,8 +258,10 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
 
    /**
-            * Trajectory for the pelvis
-            */
+       
+    * Trajectory for the pelvis
+       
+    */
    public controller_msgs.msg.dds.PelvisTrajectoryMessage getPelvisTrajectoryMessage()
    {
       return pelvis_trajectory_message_;
@@ -225,8 +270,10 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
 
    /**
-            * Trajectory for the left foot
-            */
+       
+    * Trajectory for the left foot
+       
+    */
    public controller_msgs.msg.dds.FootTrajectoryMessage getLeftFootTrajectoryMessage()
    {
       return left_foot_trajectory_message_;
@@ -235,8 +282,10 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
 
    /**
-            * Trajectory for the right foot
-            */
+       
+    * Trajectory for the right foot
+       
+    */
    public controller_msgs.msg.dds.FootTrajectoryMessage getRightFootTrajectoryMessage()
    {
       return right_foot_trajectory_message_;
@@ -245,8 +294,10 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
 
    /**
-            * Trajectory for the neck joints
-            */
+       
+    * Trajectory for the neck joints
+       
+    */
    public controller_msgs.msg.dds.NeckTrajectoryMessage getNeckTrajectoryMessage()
    {
       return neck_trajectory_message_;
@@ -255,8 +306,10 @@ public class WholeBodyTrajectoryMessage extends Packet<WholeBodyTrajectoryMessag
 
 
    /**
-            * Trajectory for the head
-            */
+       
+    * Trajectory for the head
+       
+    */
    public controller_msgs.msg.dds.HeadTrajectoryMessage getHeadTrajectoryMessage()
    {
       return head_trajectory_message_;

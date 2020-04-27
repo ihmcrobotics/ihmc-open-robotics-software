@@ -7,19 +7,25 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC footstep planning module.
-       */
+   
+ * This message is part of the IHMC footstep planning module.
+   
+ */
 public class FootstepPlannerActionMessage extends Packet<FootstepPlannerActionMessage> implements Settable<FootstepPlannerActionMessage>, EpsilonComparable<FootstepPlannerActionMessage>
 {
 
    /**
-          * Halts the footstep planner
-          */
+      
+    * Halts the footstep planner
+      
+    */
    public static final byte FOOTSTEP_PLANNER_REQUESTED_ACTION_HALT = (byte) 0;
 
    /**
-          * Planner will publish it's current parameters
-          */
+      
+    * Planner will publish it's current parameters
+      
+    */
    public static final byte FOOTSTEP_PLANNER_REQUESTED_ACTION_PUBLISH_PARAMETERS = (byte) 1;
 
    public byte requested_action_ = (byte) 255;

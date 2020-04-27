@@ -16,34 +16,48 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
    public static final byte KINEMATICS_PLANNING_RESULT_UNREACHABLE_KEYFRAME = (byte) 2;
 
    /**
-            * This message is part of the IHMC whole-body inverse kinematics module.
-            * This output status will be converted into the WholeBodyTrajectoryMessage.
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * This message is part of the IHMC whole-body inverse kinematics module.
+       
+    * This output status will be converted into the WholeBodyTrajectoryMessage.
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public int plan_id_ = -1;
 
    /**
-            * List of times for each key frames.
-            * The length of this should be same with the length of the configurations.
-            */
+       
+    * List of times for each key frames.
+       
+    * The length of this should be same with the length of the configurations.
+       
+    */
    public us.ihmc.idl.IDLSequence.Double  key_frame_times_;
 
    /**
-            * List of configurations for each key frames.
-            */
+       
+    * List of configurations for each key frames.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus>  robot_configurations_;
 
    /**
-            * Solution quality.
-            * The total summation of the all solution quality for each key frames.
-            */
+       
+    * Solution quality.
+       
+    * The total summation of the all solution quality for each key frames.
+       
+    */
    public double solution_quality_ = -1.0;
 
    /**
-            * Suggested message to send to the IHMC walking controller to request the robot to go through the key frames.
-            */
+       
+    * Suggested message to send to the IHMC walking controller to request the robot to go through the key frames.
+       
+    */
    public controller_msgs.msg.dds.WholeBodyTrajectoryMessage suggested_controller_message_;
 
    public KinematicsPlanningToolboxOutputStatus()
@@ -88,19 +102,27 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
 
 
    /**
-            * This message is part of the IHMC whole-body inverse kinematics module.
-            * This output status will be converted into the WholeBodyTrajectoryMessage.
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * This message is part of the IHMC whole-body inverse kinematics module.
+       
+    * This output status will be converted into the WholeBodyTrajectoryMessage.
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * This message is part of the IHMC whole-body inverse kinematics module.
-            * This output status will be converted into the WholeBodyTrajectoryMessage.
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * This message is part of the IHMC whole-body inverse kinematics module.
+       
+    * This output status will be converted into the WholeBodyTrajectoryMessage.
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -119,9 +141,12 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
 
 
    /**
-            * List of times for each key frames.
-            * The length of this should be same with the length of the configurations.
-            */
+       
+    * List of times for each key frames.
+       
+    * The length of this should be same with the length of the configurations.
+       
+    */
    public us.ihmc.idl.IDLSequence.Double  getKeyFrameTimes()
    {
       return key_frame_times_;
@@ -130,8 +155,10 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
 
 
    /**
-            * List of configurations for each key frames.
-            */
+       
+    * List of configurations for each key frames.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus>  getRobotConfigurations()
    {
       return robot_configurations_;
@@ -139,17 +166,23 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
 
 
    /**
-            * Solution quality.
-            * The total summation of the all solution quality for each key frames.
-            */
+       
+    * Solution quality.
+       
+    * The total summation of the all solution quality for each key frames.
+       
+    */
    public void setSolutionQuality(double solution_quality)
    {
       solution_quality_ = solution_quality;
    }
    /**
-            * Solution quality.
-            * The total summation of the all solution quality for each key frames.
-            */
+       
+    * Solution quality.
+       
+    * The total summation of the all solution quality for each key frames.
+       
+    */
    public double getSolutionQuality()
    {
       return solution_quality_;
@@ -158,8 +191,10 @@ public class KinematicsPlanningToolboxOutputStatus extends Packet<KinematicsPlan
 
 
    /**
-            * Suggested message to send to the IHMC walking controller to request the robot to go through the key frames.
-            */
+       
+    * Suggested message to send to the IHMC walking controller to request the robot to go through the key frames.
+       
+    */
    public controller_msgs.msg.dds.WholeBodyTrajectoryMessage getSuggestedControllerMessage()
    {
       return suggested_controller_message_;

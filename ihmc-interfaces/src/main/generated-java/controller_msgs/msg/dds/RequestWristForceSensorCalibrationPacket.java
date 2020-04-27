@@ -7,16 +7,22 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message will request a calibration the wrist force sensors to the IHMC controller (does not do hardware calibration).
-       * It is strongly suggested to perform the calibration when the hands are not moving nor interacting with the environment.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message will request a calibration the wrist force sensors to the IHMC controller (does not do hardware calibration).
+   
+ * It is strongly suggested to perform the calibration when the hands are not moving nor interacting with the environment.
+   
+ */
 public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWristForceSensorCalibrationPacket> implements Settable<RequestWristForceSensorCalibrationPacket>, EpsilonComparable<RequestWristForceSensorCalibrationPacket>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public RequestWristForceSensorCalibrationPacket()
@@ -40,15 +46,19 @@ public class RequestWristForceSensorCalibrationPacket extends Packet<RequestWris
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

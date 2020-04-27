@@ -7,19 +7,26 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC robot environment awareness module.
-       * This message contains a single planar region.
-       * It is defined by an origin, a normal, and a concave hull.
-       * For easier processing, a set of convex polygons approximating the concave hull are also provided.
-       */
+   
+ * This message is part of the IHMC robot environment awareness module.
+   
+ * This message contains a single planar region.
+   
+ * It is defined by an origin, a normal, and a concave hull.
+   
+ * For easier processing, a set of convex polygons approximating the concave hull are also provided.
+   
+ */
 public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements Settable<PlanarRegionMessage>, EpsilonComparable<PlanarRegionMessage>
 {
 
    public static final int NO_REGION_ID = -1;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public int region_id_ = -1;
@@ -92,15 +99,19 @@ public class PlanarRegionMessage extends Packet<PlanarRegionMessage> implements 
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

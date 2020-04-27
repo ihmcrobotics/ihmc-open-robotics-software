@@ -7,15 +7,20 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message is sent by the controller to notify the user that the current manipulation task has been aborted.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message is sent by the controller to notify the user that the current manipulation task has been aborted.
+   
+ */
 public class ManipulationAbortedStatus extends Packet<ManipulationAbortedStatus> implements Settable<ManipulationAbortedStatus>, EpsilonComparable<ManipulationAbortedStatus>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public ManipulationAbortedStatus()
@@ -39,15 +44,19 @@ public class ManipulationAbortedStatus extends Packet<ManipulationAbortedStatus>
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
