@@ -46,7 +46,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private double beta2 = 0.95;
    private double beta3 = 1.15;
    private double gamma = 1.0e-6;
-   private final ContactParameters contactParameters = new ContactParameters(0.7, 0.0, 0.01, 0.0, 0.8);
+   private final ContactParameters contactParameters = new ContactParameters(0.7, 0.0, 0.0, 0.01, 0.0, 0.8);
 
    private boolean isFirstUpdate = false;
    private boolean isImpulseZero = false;
@@ -314,7 +314,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
        * doubled, such that, the post-impact velocity is opposite of the pre-impact velocity along the
        * collision axis.
        */
-      if (contactParameters.getCoefficientOfRestitution() != 0.0)
+      if (contactParameters.getCoefficientOfRestitution() != 0.0 && velocityRelative.getZ() <= -contactParameters.getRestitutionThreshold())
          velocityRelative.scale(1.0 + contactParameters.getCoefficientOfRestitution());
 
       /*

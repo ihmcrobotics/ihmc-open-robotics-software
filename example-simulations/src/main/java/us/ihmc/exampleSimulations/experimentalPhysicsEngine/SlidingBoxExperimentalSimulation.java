@@ -20,7 +20,7 @@ import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 public class SlidingBoxExperimentalSimulation
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final ContactParameters contactParameters = new ContactParameters(0.7, 0.0, 0.001, 0.5, 1.0);
+   private final ContactParameters contactParameters = new ContactParameters(0.7, 0.0, 0.0, 0.001, 0.5, 1.0);
 
    public SlidingBoxExperimentalSimulation()
    {

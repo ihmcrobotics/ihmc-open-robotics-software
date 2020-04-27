@@ -29,7 +29,7 @@ import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 public class NewtonsCradleExperimentalSimulation
 {
    private static final String NEWTONS_CRADLE = "NewtonsCradle";
-   private final ContactParameters contactParameters = new ContactParameters(0.0, 1.0, 0.0, 0.0, 1.0);
+   private final ContactParameters contactParameters = new ContactParameters(0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
    private final int numberOfBalls = 6;
    private final double ballRadius = 0.05;
 
@@ -42,7 +42,7 @@ public class NewtonsCradleExperimentalSimulation
       RobotDescription robotDescription = new RobotDescription(NEWTONS_CRADLE);
       double ballRadiusOfGyration = ballRadius * 0.6;
       double pinJointHeight = 1.1 * stringLength;
-      double pinJointSeparation = 2.001 * ballRadius;
+      double pinJointSeparation = 2.00 * ballRadius;
 
       for (int i = 0; i < numberOfBalls; i++)
       {
