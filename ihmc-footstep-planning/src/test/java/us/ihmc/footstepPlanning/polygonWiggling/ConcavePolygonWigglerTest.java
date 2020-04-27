@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.polygonWiggling;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.ConcavePolygonWiggler;
@@ -23,22 +24,36 @@ import java.util.List;
 public class ConcavePolygonWigglerTest
 {
    private static final boolean visualize = true;
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private ConcavePolygonWiggler concavePolygonWiggler;
    private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-   private final ArtifactList artifacts = new ArtifactList(getClass().getSimpleName());
    private final SimulationConstructionSet scs = new SimulationConstructionSet(new Robot("testRobot"));
 
    @BeforeEach
    private void setup()
    {
-      concavePolygonWiggler = new ConcavePolygonWiggler(scs, graphicsListRegistry, registry);
-//      graphicsListRegistry.addArtifactListsToPlotter(scs.createSimulationOverheadPlotterFactory().createOverheadPlotter().getPlotter());
-//      scs.addYoGraphicsListRegistry(graphicsListRegistry);
-//      scs.getRootRegistry().addChild(registry);
-//      scs.startOnAThread();
+      if (visualize)
+      {
+         concavePolygonWiggler = new ConcavePolygonWiggler(scs, graphicsListRegistry, registry);
+         graphicsListRegistry.addArtifactListsToPlotter(scs.createSimulationOverheadPlotterFactory().createOverheadPlotter().getPlotter());
+         scs.addYoGraphicsListRegistry(graphicsListRegistry);
+         scs.getRootRegistry().addChild(registry);
+         scs.startOnAThread();
+      }
+      else
+      {
+         concavePolygonWiggler = new ConcavePolygonWiggler();
+      }
+   }
+
+   @AfterEach
+   private void after()
+   {
+      if (visualize)
+      {
+         ThreadTools.sleepForever();
+      }
    }
 
    @Test
@@ -62,34 +77,7 @@ public class ConcavePolygonWigglerTest
       WiggleParameters wiggleParameters = new WiggleParameters();
       wiggleParameters.deltaInside = 0.01;
 
-      int warmsup = 5;
-      for (int i = 0; i < warmsup; i++)
-      {
-         concavePolygonWiggler.wigglePolygon(initialFoot, polygon, wiggleParameters);
-      }
-
-      int n = 20;
-      long start = System.nanoTime();
-      for (int i = 0; i < n; i++)
-      {
-         concavePolygonWiggler.wigglePolygon(initialFoot, polygon, wiggleParameters);
-      }
-      long stop = System.nanoTime();
-
-      long perRun = (stop - start) / n;
-      System.out.println(perRun);
-
-//      ConvexPolygon2D transformedFoothold = new ConvexPolygon2D(initialFoot);
-//      transformedFoothold.applyTransform(transform, false);
-//
-//      long diff = stop - start;
-//      System.out.println("time: " + diff + "ns");
-//      System.out.println(transform);
-
-//      if (visualize)
-//      {
-//         ThreadTools.sleepForever();
-//      }
+      RigidBodyTransform transform = concavePolygonWiggler.wigglePolygon(initialFoot, polygon, wiggleParameters);
    }
 
    @Test
@@ -119,11 +107,6 @@ public class ConcavePolygonWigglerTest
 
       ConvexPolygon2D transformedFoothold = new ConvexPolygon2D(initialFoot);
       transformedFoothold.applyTransform(transform, false);
-
-      if (visualize)
-      {
-         ThreadTools.sleepForever();
-      }
    }
 
    @Test
@@ -157,11 +140,6 @@ public class ConcavePolygonWigglerTest
 
       ConvexPolygon2D transformedFoothold = new ConvexPolygon2D(initialFoot);
       transformedFoothold.applyTransform(transform, false);
-
-      if (visualize)
-      {
-         ThreadTools.sleepForever();
-      }
    }
 
    @Test
@@ -181,23 +159,83 @@ public class ConcavePolygonWigglerTest
       initialFoot.applyTransform(initialFootTransform, false);
 
       WiggleParameters wiggleParameters = new WiggleParameters();
-      wiggleParameters.rotationWeight = 0.1;
-
-      long start = System.nanoTime();
       RigidBodyTransform transform = concavePolygonWiggler.wigglePolygon(initialFoot, polygon, wiggleParameters);
-      long stop = System.nanoTime();
+
+      ConvexPolygon2D transformedFoothold = new ConvexPolygon2D(initialFoot);
+      transformedFoothold.applyTransform(transform, false);
+   }
+
+   @Test
+   public void testCrazyPolygon2()
+   {
+      List<Point2D> concaveHull = new ArrayList<>();
+      concaveHull.add(new Point2D( 1.050,  0.030 ));
+      concaveHull.add(new Point2D( 0.790,  0.160 ));
+      concaveHull.add(new Point2D( 0.990,  0.460 ));
+      concaveHull.add(new Point2D( 0.800,  0.660 ));
+      concaveHull.add(new Point2D( 0.620,  0.730 ));
+      concaveHull.add(new Point2D( 0.410,  0.820 ));
+      concaveHull.add(new Point2D( 0.390,  1.110 ));
+      concaveHull.add(new Point2D( 0.090,  0.910 ));
+      concaveHull.add(new Point2D(-0.130,  1.320 ));
+      concaveHull.add(new Point2D(-0.250,  0.900 ));
+      concaveHull.add(new Point2D(-0.310,  0.650 ));
+      concaveHull.add(new Point2D(-0.740,  1.100 ));
+      concaveHull.add(new Point2D(-0.550,  0.500 ));
+      concaveHull.add(new Point2D(-0.870,  0.470 ));
+      concaveHull.add(new Point2D(-0.910,  0.260 ));
+      concaveHull.add(new Point2D(-0.640,  0.080 ));
+      concaveHull.add(new Point2D(-1.110,  0.000 ));
+      concaveHull.add(new Point2D(-1.390, -0.180 ));
+      concaveHull.add(new Point2D(-1.330, -0.510 ));
+      concaveHull.add(new Point2D(-0.550, -0.350 ));
+      concaveHull.add(new Point2D(-0.660, -0.640 ));
+      concaveHull.add(new Point2D(-0.590, -0.840 ));
+      concaveHull.add(new Point2D(-0.270, -0.570 ));
+      concaveHull.add(new Point2D(-0.260, -1.140 ));
+      concaveHull.add(new Point2D(-0.050, -0.730 ));
+      concaveHull.add(new Point2D( 0.180, -1.180 ));
+      concaveHull.add(new Point2D( 0.230, -0.720 ));
+      concaveHull.add(new Point2D( 0.410, -0.660 ));
+      concaveHull.add(new Point2D( 0.640, -0.630 ));
+      concaveHull.add(new Point2D( 1.040, -0.650 ));
+      concaveHull.add(new Point2D( 1.000, -0.470 ));
+      concaveHull.add(new Point2D( 0.830, -0.180 ));
+
+      WiggleParameters wiggleParameters = new WiggleParameters();
+      wiggleParameters.rotationWeight = 0.02;
+
+      // foot position 1
+      ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
+      RigidBodyTransform initialFootTransform = new RigidBodyTransform();
+      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(100.0));
+      initialFootTransform.getTranslation().set(-1.0, 0.5, 0.0);
+      initialFoot.applyTransform(initialFootTransform, false);
+      RigidBodyTransform transform = concavePolygonWiggler.wigglePolygon(initialFoot, Vertex2DSupplier.asVertex2DSupplier(concaveHull), wiggleParameters);
+
+      // foot position 2
+      initialFoot = PlannerTools.createDefaultFootPolygon();
+      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(80.0));
+      initialFootTransform.getTranslation().set(-0.3, 0.8, 0.0);
+      initialFoot.applyTransform(initialFootTransform, false);
+      transform = concavePolygonWiggler.wigglePolygon(initialFoot, Vertex2DSupplier.asVertex2DSupplier(concaveHull), wiggleParameters);
+
+      // foot position 3
+      initialFoot = PlannerTools.createDefaultFootPolygon();
+      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(0.0));
+      initialFootTransform.getTranslation().set(0.8, 0.15, 0.0);
+      initialFoot.applyTransform(initialFootTransform, false);
+      transform = concavePolygonWiggler.wigglePolygon(initialFoot, Vertex2DSupplier.asVertex2DSupplier(concaveHull), wiggleParameters);
+
+      // foot position 4
+      initialFoot = PlannerTools.createDefaultFootPolygon();
+      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(0.0));
+      initialFootTransform.getTranslation().set(-0.65, -0.42, 0.0);
+      initialFoot.applyTransform(initialFootTransform, false);
+      transform = concavePolygonWiggler.wigglePolygon(initialFoot, Vertex2DSupplier.asVertex2DSupplier(concaveHull), wiggleParameters);
 
       ConvexPolygon2D transformedFoothold = new ConvexPolygon2D(initialFoot);
       transformedFoothold.applyTransform(transform, false);
 
-      long diff = stop - start;
-      System.out.println("time: " + diff + "ns");
-      System.out.println(transform);
-
-      if (visualize)
-      {
-         ThreadTools.sleepForever();
-      }
    }
-
 }
