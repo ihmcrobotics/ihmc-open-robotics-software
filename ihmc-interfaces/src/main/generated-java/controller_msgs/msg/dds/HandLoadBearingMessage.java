@@ -7,9 +7,12 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * Request the controller to use a hand to help supporting the robot weight.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * Request the controller to use a hand to help supporting the robot weight.
+   
+ */
 public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> implements Settable<HandLoadBearingMessage>, EpsilonComparable<HandLoadBearingMessage>
 {
 
@@ -18,34 +21,47 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * The robot side of the hand that will be load bearing.
-            */
+       
+    * The robot side of the hand that will be load bearing.
+       
+    */
    public byte robot_side_ = (byte) 255;
 
    /**
-            * Determines whether hybrid load bearing and jointspace control will be used.
-            */
+       
+    * Determines whether hybrid load bearing and jointspace control will be used.
+       
+    */
    public boolean use_jointspace_command_;
 
    /**
-            * The arm desired jointspace trajectory that will be used for hybrid control if use_jointspace_command is true.
-            * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
-            */
+       
+    * The arm desired jointspace trajectory that will be used for hybrid control if use_jointspace_command is true.
+       
+    * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
+       
+    */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_;
 
    /**
-            * The time to delay this message on the controller side before being executed.
-            */
+       
+    * The time to delay this message on the controller side before being executed.
+       
+    */
    public double execution_delay_time_;
 
    /**
-            * Information specific to the load bearing properties.
-            */
+       
+    * Information specific to the load bearing properties.
+       
+    */
    public controller_msgs.msg.dds.LoadBearingMessage load_bearing_message_;
 
    public HandLoadBearingMessage()
@@ -89,15 +105,19 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -105,15 +125,19 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
 
 
    /**
-            * The robot side of the hand that will be load bearing.
-            */
+       
+    * The robot side of the hand that will be load bearing.
+       
+    */
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
    }
    /**
-            * The robot side of the hand that will be load bearing.
-            */
+       
+    * The robot side of the hand that will be load bearing.
+       
+    */
    public byte getRobotSide()
    {
       return robot_side_;
@@ -121,15 +145,19 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
 
 
    /**
-            * Determines whether hybrid load bearing and jointspace control will be used.
-            */
+       
+    * Determines whether hybrid load bearing and jointspace control will be used.
+       
+    */
    public void setUseJointspaceCommand(boolean use_jointspace_command)
    {
       use_jointspace_command_ = use_jointspace_command;
    }
    /**
-            * Determines whether hybrid load bearing and jointspace control will be used.
-            */
+       
+    * Determines whether hybrid load bearing and jointspace control will be used.
+       
+    */
    public boolean getUseJointspaceCommand()
    {
       return use_jointspace_command_;
@@ -138,9 +166,12 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
 
 
    /**
-            * The arm desired jointspace trajectory that will be used for hybrid control if use_jointspace_command is true.
-            * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
-            */
+       
+    * The arm desired jointspace trajectory that will be used for hybrid control if use_jointspace_command is true.
+       
+    * The indexing for the joints goes increasingly from the first shoulder joint to the last arm joint.
+       
+    */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage getJointspaceTrajectory()
    {
       return jointspace_trajectory_;
@@ -148,15 +179,19 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
 
 
    /**
-            * The time to delay this message on the controller side before being executed.
-            */
+       
+    * The time to delay this message on the controller side before being executed.
+       
+    */
    public void setExecutionDelayTime(double execution_delay_time)
    {
       execution_delay_time_ = execution_delay_time;
    }
    /**
-            * The time to delay this message on the controller side before being executed.
-            */
+       
+    * The time to delay this message on the controller side before being executed.
+       
+    */
    public double getExecutionDelayTime()
    {
       return execution_delay_time_;
@@ -165,8 +200,10 @@ public class HandLoadBearingMessage extends Packet<HandLoadBearingMessage> imple
 
 
    /**
-            * Information specific to the load bearing properties.
-            */
+       
+    * Information specific to the load bearing properties.
+       
+    */
    public controller_msgs.msg.dds.LoadBearingMessage getLoadBearingMessage()
    {
       return load_bearing_message_;

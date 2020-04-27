@@ -7,14 +7,18 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC height quad tree module
-       */
+   
+ * This message is part of the IHMC height quad tree module
+   
+ */
 public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> implements Settable<HeightQuadTreeMessage>, EpsilonComparable<HeightQuadTreeMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public float default_height_;
@@ -68,15 +72,19 @@ public class HeightQuadTreeMessage extends Packet<HeightQuadTreeMessage> impleme
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

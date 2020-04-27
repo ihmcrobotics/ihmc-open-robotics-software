@@ -7,8 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC footstep planning module.
-       */
+   
+ * This message is part of the IHMC footstep planning module.
+   
+ */
 public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanningToolboxOutputStatus> implements Settable<FootstepPlanningToolboxOutputStatus>, EpsilonComparable<FootstepPlanningToolboxOutputStatus>
 {
 
@@ -37,53 +39,73 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    public static final int NO_PLAN_ID = -1;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * ID of the request this output corresponds to
-            */
+       
+    * ID of the request this output corresponds to
+       
+    */
    public int plan_id_ = -1;
 
    /**
-            * Footstep plan, may be empty depending on the state of the planner, according to footstep_planning_result
-            */
+       
+    * Footstep plan, may be empty depending on the state of the planner, according to footstep_planning_result
+       
+    */
    public controller_msgs.msg.dds.FootstepDataListMessage footstep_data_list_;
 
    /**
-            * Body path plan result. Null if no result is available
-            */
+       
+    * Body path plan result. Null if no result is available
+       
+    */
    public byte body_path_planning_result_ = (byte) 255;
 
    /**
-            * Footstep planner result. Null if no result is available
-            */
+       
+    * Footstep planner result. Null if no result is available
+       
+    */
    public byte footstep_planning_result_ = (byte) 255;
 
    /**
-            * (deprecated) Regions that correspond to the request message. Originally used for debugging networking
-            */
+       
+    * (deprecated) Regions that correspond to the request message. Originally used for debugging networking
+       
+    */
    public controller_msgs.msg.dds.PlanarRegionsListMessage planar_regions_list_;
 
    /**
-            * Planned body path. Empty if planner failed
-            */
+       
+    * Planned body path. Empty if planner failed
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  body_path_;
 
    /**
-            * Goal pose used by the planner. This will be different from the requested goal pose if it's beyond the horizon length.
-            */
+       
+    * Goal pose used by the planner. This will be different from the requested goal pose if it's beyond the horizon length.
+       
+    */
    public us.ihmc.euclid.geometry.Pose3D goal_pose_;
 
    /**
-            * Object to record various planner timings, helpful for debugging
-            */
+       
+    * Object to record various planner timings, helpful for debugging
+       
+    */
    public controller_msgs.msg.dds.FootstepPlanningTimingsMessage planner_timings_;
 
    /**
-            * Contains planner stack trace if failure is due to an exception
-            */
+       
+    * Contains planner stack trace if failure is due to an exception
+       
+    */
    public java.lang.StringBuilder exception_message_;
 
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  stacktrace_;
@@ -151,15 +173,19 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -167,15 +193,19 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
 
    /**
-            * ID of the request this output corresponds to
-            */
+       
+    * ID of the request this output corresponds to
+       
+    */
    public void setPlanId(int plan_id)
    {
       plan_id_ = plan_id;
    }
    /**
-            * ID of the request this output corresponds to
-            */
+       
+    * ID of the request this output corresponds to
+       
+    */
    public int getPlanId()
    {
       return plan_id_;
@@ -184,8 +214,10 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
 
    /**
-            * Footstep plan, may be empty depending on the state of the planner, according to footstep_planning_result
-            */
+       
+    * Footstep plan, may be empty depending on the state of the planner, according to footstep_planning_result
+       
+    */
    public controller_msgs.msg.dds.FootstepDataListMessage getFootstepDataList()
    {
       return footstep_data_list_;
@@ -193,15 +225,19 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
 
    /**
-            * Body path plan result. Null if no result is available
-            */
+       
+    * Body path plan result. Null if no result is available
+       
+    */
    public void setBodyPathPlanningResult(byte body_path_planning_result)
    {
       body_path_planning_result_ = body_path_planning_result;
    }
    /**
-            * Body path plan result. Null if no result is available
-            */
+       
+    * Body path plan result. Null if no result is available
+       
+    */
    public byte getBodyPathPlanningResult()
    {
       return body_path_planning_result_;
@@ -209,15 +245,19 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
 
    /**
-            * Footstep planner result. Null if no result is available
-            */
+       
+    * Footstep planner result. Null if no result is available
+       
+    */
    public void setFootstepPlanningResult(byte footstep_planning_result)
    {
       footstep_planning_result_ = footstep_planning_result;
    }
    /**
-            * Footstep planner result. Null if no result is available
-            */
+       
+    * Footstep planner result. Null if no result is available
+       
+    */
    public byte getFootstepPlanningResult()
    {
       return footstep_planning_result_;
@@ -226,8 +266,10 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
 
    /**
-            * (deprecated) Regions that correspond to the request message. Originally used for debugging networking
-            */
+       
+    * (deprecated) Regions that correspond to the request message. Originally used for debugging networking
+       
+    */
    public controller_msgs.msg.dds.PlanarRegionsListMessage getPlanarRegionsList()
    {
       return planar_regions_list_;
@@ -236,8 +278,10 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
 
    /**
-            * Planned body path. Empty if planner failed
-            */
+       
+    * Planned body path. Empty if planner failed
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.geometry.Pose3D>  getBodyPath()
    {
       return body_path_;
@@ -246,8 +290,10 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
 
    /**
-            * Goal pose used by the planner. This will be different from the requested goal pose if it's beyond the horizon length.
-            */
+       
+    * Goal pose used by the planner. This will be different from the requested goal pose if it's beyond the horizon length.
+       
+    */
    public us.ihmc.euclid.geometry.Pose3D getGoalPose()
    {
       return goal_pose_;
@@ -256,8 +302,10 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
 
    /**
-            * Object to record various planner timings, helpful for debugging
-            */
+       
+    * Object to record various planner timings, helpful for debugging
+       
+    */
    public controller_msgs.msg.dds.FootstepPlanningTimingsMessage getPlannerTimings()
    {
       return planner_timings_;
@@ -265,8 +313,10 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
 
 
    /**
-            * Contains planner stack trace if failure is due to an exception
-            */
+       
+    * Contains planner stack trace if failure is due to an exception
+       
+    */
    public void setExceptionMessage(java.lang.String exception_message)
    {
       exception_message_.setLength(0);
@@ -274,15 +324,19 @@ public class FootstepPlanningToolboxOutputStatus extends Packet<FootstepPlanning
    }
 
    /**
-            * Contains planner stack trace if failure is due to an exception
-            */
+       
+    * Contains planner stack trace if failure is due to an exception
+       
+    */
    public java.lang.String getExceptionMessageAsString()
    {
       return getExceptionMessage().toString();
    }
    /**
-            * Contains planner stack trace if failure is due to an exception
-            */
+       
+    * Contains planner stack trace if failure is due to an exception
+       
+    */
    public java.lang.StringBuilder getExceptionMessage()
    {
       return exception_message_;

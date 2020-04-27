@@ -7,14 +7,18 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Message used for simulated LIDAR
-       */
+   
+ * Message used for simulated LIDAR
+   
+ */
 public class LidarScanParametersMessage extends Packet<LidarScanParametersMessage> implements Settable<LidarScanParametersMessage>, EpsilonComparable<LidarScanParametersMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public long timestamp_;
@@ -104,15 +108,19 @@ public class LidarScanParametersMessage extends Packet<LidarScanParametersMessag
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

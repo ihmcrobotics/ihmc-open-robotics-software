@@ -7,28 +7,40 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * General purpose message that holds onto information to execute a trajectory in jointspace.
-       * A third order polynomial function is used to interpolate between trajectory points.
-       * The joint_trajectory_messages can have different waypoint times and different number of waypoints.
-       * If a joint trajectory message is empty, the controller will hold the last desired joint position while executing the other joint trajectories.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * General purpose message that holds onto information to execute a trajectory in jointspace.
+   
+ * A third order polynomial function is used to interpolate between trajectory points.
+   
+ * The joint_trajectory_messages can have different waypoint times and different number of waypoints.
+   
+ * If a joint trajectory message is empty, the controller will hold the last desired joint position while executing the other joint trajectories.
+   
+ */
 public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMessage> implements Settable<JointspaceTrajectoryMessage>, EpsilonComparable<JointspaceTrajectoryMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Trajectory for each joint.
-            */
+       
+    * Trajectory for each joint.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage>  joint_trajectory_messages_;
 
    /**
-            * Properties for queueing trajectories.
-            */
+       
+    * Properties for queueing trajectories.
+       
+    */
    public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
 
    public JointspaceTrajectoryMessage()
@@ -60,15 +72,19 @@ public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMess
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -77,8 +93,10 @@ public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMess
 
 
    /**
-            * Trajectory for each joint.
-            */
+       
+    * Trajectory for each joint.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.OneDoFJointTrajectoryMessage>  getJointTrajectoryMessages()
    {
       return joint_trajectory_messages_;
@@ -87,8 +105,10 @@ public class JointspaceTrajectoryMessage extends Packet<JointspaceTrajectoryMess
 
 
    /**
-            * Properties for queueing trajectories.
-            */
+       
+    * Properties for queueing trajectories.
+       
+    */
    public controller_msgs.msg.dds.QueueableMessage getQueueingProperties()
    {
       return queueing_properties_;

@@ -7,10 +7,14 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * The intent of this message is to adjust a footstep when the robot is executing it
-       * (a foot is currently swinging to reach the footstep to be adjusted).
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * The intent of this message is to adjust a footstep when the robot is executing it
+   
+ * (a foot is currently swinging to reach the footstep to be adjusted).
+   
+ */
 public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> implements Settable<AdjustFootstepMessage>, EpsilonComparable<AdjustFootstepMessage>
 {
 
@@ -19,41 +23,61 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Specifies which foot is expected to be executing the footstep to be adjusted.
-            */
+       
+    * Specifies which foot is expected to be executing the footstep to be adjusted.
+       
+    */
    public byte robot_side_ = (byte) 255;
 
    /**
-            * Specifies the adjusted position of the footstep. It is expressed in world frame.
-            */
+       
+    * Specifies the adjusted position of the footstep. It is expressed in world frame.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D location_;
 
    /**
-            * Specifies the adjusted orientation of the footstep. It is expressed in world frame.
-            */
+       
+    * Specifies the adjusted orientation of the footstep. It is expressed in world frame.
+       
+    */
    public us.ihmc.euclid.tuple4D.Quaternion orientation_;
 
    /**
-            * Predicted contact points represent the vertices of the expected contact polygon between the foot and the world.
-            * An empty list will request the controller to use the default foot support polygon.
-            * Contact points  are expressed in sole frame. The ordering does not matter.
-            * For example: to tell the controller to use the entire foot, the predicted contact points would be:
-            * - x: 0.5 * foot_length, y: -0.5 * toe_width
-            * - x: 0.5 * foot_length, y: 0.5 * toe_width
-            * - x: -0.5 * foot_length, y: -0.5 * heel_width
-            * - x: -0.5 * foot_length, y: 0.5 * heel_width
-            * Note: The z coordinate of each point is ignored.
-            */
+       
+    * Predicted contact points represent the vertices of the expected contact polygon between the foot and the world.
+       
+    * An empty list will request the controller to use the default foot support polygon.
+       
+    * Contact points  are expressed in sole frame. The ordering does not matter.
+       
+    * For example: to tell the controller to use the entire foot, the predicted contact points would be:
+       
+    * - x: 0.5 * foot_length, y: -0.5 * toe_width
+       
+    * - x: 0.5 * foot_length, y: 0.5 * toe_width
+       
+    * - x: -0.5 * foot_length, y: -0.5 * heel_width
+       
+    * - x: -0.5 * foot_length, y: 0.5 * heel_width
+       
+    * Note: The z coordinate of each point is ignored.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  predicted_contact_points_2d_;
 
    /**
-            * The time to delay this command on the controller side before being executed.
-            */
+       
+    * The time to delay this command on the controller side before being executed.
+       
+    */
    public double execution_delay_time_;
 
    public AdjustFootstepMessage()
@@ -97,15 +121,19 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -113,15 +141,19 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
 
 
    /**
-            * Specifies which foot is expected to be executing the footstep to be adjusted.
-            */
+       
+    * Specifies which foot is expected to be executing the footstep to be adjusted.
+       
+    */
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
    }
    /**
-            * Specifies which foot is expected to be executing the footstep to be adjusted.
-            */
+       
+    * Specifies which foot is expected to be executing the footstep to be adjusted.
+       
+    */
    public byte getRobotSide()
    {
       return robot_side_;
@@ -130,8 +162,10 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
 
 
    /**
-            * Specifies the adjusted position of the footstep. It is expressed in world frame.
-            */
+       
+    * Specifies the adjusted position of the footstep. It is expressed in world frame.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D getLocation()
    {
       return location_;
@@ -140,8 +174,10 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
 
 
    /**
-            * Specifies the adjusted orientation of the footstep. It is expressed in world frame.
-            */
+       
+    * Specifies the adjusted orientation of the footstep. It is expressed in world frame.
+       
+    */
    public us.ihmc.euclid.tuple4D.Quaternion getOrientation()
    {
       return orientation_;
@@ -150,16 +186,26 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
 
 
    /**
-            * Predicted contact points represent the vertices of the expected contact polygon between the foot and the world.
-            * An empty list will request the controller to use the default foot support polygon.
-            * Contact points  are expressed in sole frame. The ordering does not matter.
-            * For example: to tell the controller to use the entire foot, the predicted contact points would be:
-            * - x: 0.5 * foot_length, y: -0.5 * toe_width
-            * - x: 0.5 * foot_length, y: 0.5 * toe_width
-            * - x: -0.5 * foot_length, y: -0.5 * heel_width
-            * - x: -0.5 * foot_length, y: 0.5 * heel_width
-            * Note: The z coordinate of each point is ignored.
-            */
+       
+    * Predicted contact points represent the vertices of the expected contact polygon between the foot and the world.
+       
+    * An empty list will request the controller to use the default foot support polygon.
+       
+    * Contact points  are expressed in sole frame. The ordering does not matter.
+       
+    * For example: to tell the controller to use the entire foot, the predicted contact points would be:
+       
+    * - x: 0.5 * foot_length, y: -0.5 * toe_width
+       
+    * - x: 0.5 * foot_length, y: 0.5 * toe_width
+       
+    * - x: -0.5 * foot_length, y: -0.5 * heel_width
+       
+    * - x: -0.5 * foot_length, y: 0.5 * heel_width
+       
+    * Note: The z coordinate of each point is ignored.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getPredictedContactPoints2d()
    {
       return predicted_contact_points_2d_;
@@ -167,15 +213,19 @@ public class AdjustFootstepMessage extends Packet<AdjustFootstepMessage> impleme
 
 
    /**
-            * The time to delay this command on the controller side before being executed.
-            */
+       
+    * The time to delay this command on the controller side before being executed.
+       
+    */
    public void setExecutionDelayTime(double execution_delay_time)
    {
       execution_delay_time_ = execution_delay_time;
    }
    /**
-            * The time to delay this command on the controller side before being executed.
-            */
+       
+    * The time to delay this command on the controller side before being executed.
+       
+    */
    public double getExecutionDelayTime()
    {
       return execution_delay_time_;

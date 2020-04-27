@@ -7,9 +7,12 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message is used to switch the control scheme between different control mode.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message is used to switch the control scheme between different control mode.
+   
+ */
 public class HighLevelStateMessage extends Packet<HighLevelStateMessage> implements Settable<HighLevelStateMessage>, EpsilonComparable<HighLevelStateMessage>
 {
 
@@ -36,13 +39,17 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
    public static final byte FALLING_STATE = (byte) 10;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Specifies the which state the controller should transition into.
-            */
+       
+    * Specifies the which state the controller should transition into.
+       
+    */
    public byte high_level_controller_name_ = (byte) 255;
 
    public HighLevelStateMessage()
@@ -70,15 +77,19 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -86,15 +97,19 @@ public class HighLevelStateMessage extends Packet<HighLevelStateMessage> impleme
 
 
    /**
-            * Specifies the which state the controller should transition into.
-            */
+       
+    * Specifies the which state the controller should transition into.
+       
+    */
    public void setHighLevelControllerName(byte high_level_controller_name)
    {
       high_level_controller_name_ = high_level_controller_name;
    }
    /**
-            * Specifies the which state the controller should transition into.
-            */
+       
+    * Specifies the which state the controller should transition into.
+       
+    */
    public byte getHighLevelControllerName()
    {
       return high_level_controller_name_;
