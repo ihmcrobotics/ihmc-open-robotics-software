@@ -17,18 +17,15 @@ public class SimpleCollisionDetection
 
    private final CollisionListResult allCollisions = new CollisionListResult();
    private final TIntObjectMap<CollisionListResult> previousCollisionMap = new TIntObjectHashMap<>();
-   private final CollisionSlipEstimatorMap collisionSlipEstimator;
 
    public SimpleCollisionDetection(ReferenceFrame rootFrame)
    {
       this.rootFrame = rootFrame;
-      collisionSlipEstimator = new CollisionSlipEstimatorMap(rootFrame);
    }
 
    public CollisionListResult evaluationCollisions(List<? extends CollidableHolder> dynamicCollidableHolders, CollidableHolder staticCollidableHolder)
    {
       allCollisions.clear();
-      collisionSlipEstimator.processPreCollisionDetection();
 
       for (int i = 0; i < dynamicCollidableHolders.size(); i++)
       {
@@ -70,7 +67,6 @@ public class SimpleCollisionDetection
          }
       }
 
-      collisionSlipEstimator.processPostCollisionDetection(allCollisions);
       return allCollisions;
    }
 

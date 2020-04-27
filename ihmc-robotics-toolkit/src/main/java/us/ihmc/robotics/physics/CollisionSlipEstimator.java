@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.collision.EuclidFrameShape3DCollisionResult;
 
-public class CollisionSlipEstimator
+public class CollisionSlipEstimator implements CollisionSlipHolder
 {
    private final ReferenceFrame rootFrame;
    private Collidable collidableA, collidableB;
@@ -96,7 +96,7 @@ public class CollisionSlipEstimator
       pointOnA.setIncludingFrame(collisionData.getPointOnA());
       pointOnB.setIncludingFrame(collisionData.getPointOnB());
       collisionAxis.set(collisionResult.getCollisionAxisForA());
-      collisionResult.getAccumulatedSlipForA().setIncludingFrame(estimatedSlipFromBToA);
+      collisionResult.setCollisionSlipHolder(this);
       // Reset counter;
       numberOfTicksSinceLastContact = 0;
    }
@@ -111,16 +111,19 @@ public class CollisionSlipEstimator
       return numberOfTicksSinceLastContact;
    }
 
+   @Override
    public Collidable getCollidableA()
    {
       return collidableA;
    }
 
+   @Override
    public Collidable getCollidableB()
    {
       return collidableB;
    }
 
+   @Override
    public FrameVector3D getEstimatedSlipFromBToA()
    {
       return estimatedSlipFromBToA;

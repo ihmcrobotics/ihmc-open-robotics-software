@@ -4,7 +4,6 @@ import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.robotics.physics.Collidable;
@@ -36,7 +35,13 @@ public class BoxTeeteringEdgeToEdgeExperimentalSimulation
       double groundWidth = 1.0;
       double groundLength = 1.0;
 
-      RobotDescription boxRobot = ExampleExperimentalSimulationTools.createASingleBoxRobot("box", boxXLength, boxYWidth, boxZHeight, boxMass, boxRadiusOfGyrationPercent, YoAppearance.DarkCyan());
+      RobotDescription boxRobot = ExampleExperimentalSimulationTools.createASingleBoxRobot("box",
+                                                                                           boxXLength,
+                                                                                           boxYWidth,
+                                                                                           boxZHeight,
+                                                                                           boxMass,
+                                                                                           boxRadiusOfGyrationPercent,
+                                                                                           YoAppearance.DarkCyan());
 
       MultiBodySystemStateWriter boxInitialStateWriter = MultiBodySystemStateWriter.singleJointStateWriter("box", (FloatingJointBasics joint) ->
       {
@@ -50,7 +55,6 @@ public class BoxTeeteringEdgeToEdgeExperimentalSimulation
          return new Collidable(body, -1, -1, new FrameBox3D(body.getBodyFixedFrame(), boxXLength, boxYWidth, boxZHeight));
       });
 
-
       double simDT = 0.0001;
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       ExperimentalSimulation experimentalSimulation = new ExperimentalSimulation(1 << 16);
@@ -62,16 +66,13 @@ public class BoxTeeteringEdgeToEdgeExperimentalSimulation
       groundShape.getPosition().subZ(0.05);
       Collidable groundCollidable = new Collidable(null, -1, -1, groundShape);
       experimentalSimulation.addEnvironmentCollidable(groundCollidable);
-      Graphics3DObject groundGraphics = new Graphics3DObject();
-      groundGraphics.translate(0, 0, -0.1);
-      groundGraphics.addCube(groundLength, groundWidth, 0.1, YoAppearance.DarkKhaki());
 
       SimulationConstructionSet scs = new SimulationConstructionSet(experimentalSimulation,
                                                                     SupportedGraphics3DAdapter.instantiateDefaultGraphicsAdapter(true),
                                                                     parameters);
       scs.addYoGraphicsListRegistry(experimentalSimulation.getPhysicsEngineGraphicsRegistry());
       scs.setGroundVisible(false);
-      scs.addStaticLinkGraphics(groundGraphics);
+      scs.addStaticLinkGraphics(ExampleExperimentalSimulationTools.toGraphics3DObject(groundShape, worldFrame, YoAppearance.DarkKhaki()));
       scs.getRootRegistry().addChild(experimentalSimulation.getPhysicsEngineRegistry());
       scs.setDT(simDT, 1);
       scs.startOnAThread();
