@@ -3,7 +3,6 @@ package us.ihmc.pathPlanning.visibilityGraphs;
 import static us.ihmc.robotics.Assert.assertFalse;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
@@ -1073,7 +1072,7 @@ public class NavigableRegionsManagerTest
 
          if (planarRegion.getNumberOfConvexPolygons() == 0)
          {
-            List<Point2DReadOnly> concaveHullVertices = new ArrayList<>(Arrays.asList(planarRegion.getConcaveHull()));
+            List<Point2DReadOnly> concaveHullVertices = new ArrayList<>(planarRegion.getConcaveHull());
             double depthThreshold = 0.05;
             List<ConvexPolygon2D> convexPolygons = new ArrayList<>();
             ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHullVertices, depthThreshold, convexPolygons);

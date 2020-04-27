@@ -1,12 +1,10 @@
 package us.ihmc.robotEnvironmentAwareness.planarRegion;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -25,12 +23,12 @@ public class CustomPlanarRegionHandler
    {
       if (customRegion.getNumberOfConvexPolygons() > 0)
          return;
-      if (customRegion.getConcaveHull() == null || customRegion.getConcaveHull().length == 0)
+      if (customRegion.getConcaveHull().isEmpty())
          throw new IllegalArgumentException("Invalid planar region: missing the concave hull information.");
 
       List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
       double depthThreshold = 0.01;
-      ConcaveHullDecomposition.recursiveApproximateDecomposition(Arrays.asList(customRegion.getConcaveHull()), depthThreshold, decomposedPolygons);
+      ConcaveHullDecomposition.recursiveApproximateDecomposition(customRegion.getConcaveHull(), depthThreshold, decomposedPolygons);
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       customRegion.getTransformToWorld(transformToWorld);
       customRegion.set(transformToWorld, decomposedPolygons);
@@ -87,7 +85,7 @@ public class CustomPlanarRegionHandler
          RigidBodyTransform transformToWorld = new RigidBodyTransform();
          customRegion.getTransformToWorld(transformToWorld);
 
-         List<Point3D> vertices = Stream.of(customRegion.getConcaveHull()).map(Point3D::new).peek(transformToWorld::transform).collect(Collectors.toList());
+         List<Point3D> vertices = customRegion.getConcaveHull().stream().map(Point3D::new).peek(transformToWorld::transform).collect(Collectors.toList());
 
          Point3D previousVertex = vertices.get(vertices.size() - 1);
 

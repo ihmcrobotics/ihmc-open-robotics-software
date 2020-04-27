@@ -5,7 +5,6 @@ import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.isPoint2DOnSideO
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.signedDistanceFromPoint3DToPlane3D;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import us.ihmc.euclid.geometry.*;
@@ -31,7 +30,7 @@ public class REAPlanarRegionTools
       for (PlanarRegion planarRegion : planarRegions)
       {
          PlanarRegion copy = planarRegion.copy();
-         List<Point2DReadOnly> concaveHullVertices = Arrays.asList(copy.getConcaveHull());
+         List<? extends Point2DReadOnly> concaveHullVertices = copy.getConcaveHull();
          ConcaveHullTools.ensureClockwiseOrdering(concaveHullVertices);
          copies.add(copy);
       }
@@ -156,9 +155,7 @@ public class REAPlanarRegionTools
       ConcaveHullDecomposition.recursiveApproximateDecomposition(new ArrayList<>(truncatedConcaveHullVertices), depthThresholdForConvexDecomposition,
                                                                  truncatedConvexPolygons);
 
-      Point2D[] concaveHullVertices = new Point2D[truncatedConcaveHullVertices.size()];
-      truncatedConcaveHullVertices.toArray(concaveHullVertices);
-      PlanarRegion truncatedRegion = new PlanarRegion(transformFromRegionToWorld, concaveHullVertices, truncatedConvexPolygons);
+      PlanarRegion truncatedRegion = new PlanarRegion(transformFromRegionToWorld, truncatedConcaveHullVertices, truncatedConvexPolygons);
       truncatedRegion.setRegionId(planarRegionToTruncate.getRegionId());
       if (filter == null || filter.isPlanarRegionRelevant(truncatedRegion))
          return truncatedRegion;

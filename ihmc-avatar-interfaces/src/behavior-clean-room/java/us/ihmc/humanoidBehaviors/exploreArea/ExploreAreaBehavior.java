@@ -321,17 +321,17 @@ public class ExploreAreaBehavior implements BehaviorInterface
       boolean savedOutTroublesomeRegions = false;
 
       @Override
-      public void originalHulls(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+      public void originalHulls(List<Point2D> hullOne, List<Point2D> hullTwo)
       {
       }
 
       @Override
-      public void preprocessedHull(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+      public void preprocessedHull(List<Point2D> hullOne, List<Point2D> hullTwo)
       {
       }
 
       @Override
-      public void hullGotLooped(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo, ArrayList<Point2D> mergedVertices)
+      public void hullGotLooped(List<Point2D> hullOne, List<Point2D> hullTwo, List<Point2D> mergedVertices)
       {
          hullGotLooped.set(true);
 
@@ -365,7 +365,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       }
 
       @Override
-      public void foundStartingVertexAndWorkingHull(Point2D startingVertex, ArrayList<Point2D> workingHull, boolean workingHullIsOne)
+      public void foundStartingVertexAndWorkingHull(Point2D startingVertex, List<Point2D> workingHull, boolean workingHullIsOne)
       {
       }
 
@@ -380,12 +380,12 @@ public class ExploreAreaBehavior implements BehaviorInterface
       }
 
       @Override
-      public void hullIsInvalid(ArrayList<Point2D> invalidHull)
+      public void hullIsInvalid(List<Point2D> invalidHull)
       {
       }
 
       @Override
-      public void hullsAreInvalid(ArrayList<Point2D> invalidHullA, ArrayList<Point2D> invalidHullB)
+      public void hullsAreInvalid(List<Point2D> invalidHullA, List<Point2D> invalidHullB)
       {
       }
    };

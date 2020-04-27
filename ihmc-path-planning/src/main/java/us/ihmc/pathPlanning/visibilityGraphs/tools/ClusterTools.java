@@ -26,12 +26,10 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
-import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.NavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.robotics.geometry.ConvexPolygonConstructorFromInteriorOfRays;
@@ -577,16 +575,16 @@ public class ClusterTools
                                                 RigidBodyTransformReadOnly transformFromHomeRegionToWorld, double zThresholdBeforeOrthogonal,
                                                 PlanarRegion obstacleRegion, boolean includePreferredExtrusions)
    {
-      Point2D[] concaveHull = obstacleRegion.getConcaveHull();
+      List<Point2D> concaveHull = obstacleRegion.getConcaveHull();
 
       RigidBodyTransformReadOnly transformFromObstacleToWorld = obstacleRegion.getTransformToWorld();
 
       // Transform the obstacle to world and also Project the obstacle to z = 0:
       List<Point3DReadOnly> obstacleConcaveHullInWorld = new ArrayList<>();
       List<Point3DReadOnly> obstacleClusterPointsWithZeroZ = new ArrayList<>();
-      for (int i = 0; i < concaveHull.length; i++)
+      for (int i = 0; i < concaveHull.size(); i++)
       {
-         Point2DReadOnly obstacleConcaveHullVertexInLocal = concaveHull[i];
+         Point2DReadOnly obstacleConcaveHullVertexInLocal = concaveHull.get(i);
          Point3D obstacleConcaveHullVertexInWorld = new Point3D(obstacleConcaveHullVertexInLocal);
          obstacleConcaveHullVertexInWorld.applyTransform(transformFromObstacleToWorld);
 

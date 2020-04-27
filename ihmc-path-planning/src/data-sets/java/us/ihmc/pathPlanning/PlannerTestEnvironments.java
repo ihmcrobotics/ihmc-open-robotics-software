@@ -74,15 +74,15 @@ public class PlannerTestEnvironments
       polygon3.addVertex(5.0, -3.99);
       polygon3.update();
 
-      Point2D[] concaveHullVertices = new Point2D[8];
-      concaveHullVertices[0] = new Point2D(10.0, 4.0);
-      concaveHullVertices[1] = new Point2D(10.0, -4.0);
-      concaveHullVertices[2] = new Point2D(5.0, -3.99);
-      concaveHullVertices[3] = new Point2D(-5.0, -3.99);
-      concaveHullVertices[4] = new Point2D(-10.0, -4.0);
-      concaveHullVertices[5] = new Point2D(-10.0, 4.0);
-      concaveHullVertices[6] = new Point2D(-5.0, 3.99);
-      concaveHullVertices[7] = new Point2D(5.0, 3.99);
+      List<Point2D> concaveHullVertices = new ArrayList<>();
+      concaveHullVertices.add(new Point2D(10.0, 4.0));
+      concaveHullVertices.add(new Point2D(10.0, -4.0));
+      concaveHullVertices.add(new Point2D(5.0, -3.99));
+      concaveHullVertices.add(new Point2D(-5.0, -3.99));
+      concaveHullVertices.add(new Point2D(-10.0, -4.0));
+      concaveHullVertices.add(new Point2D(-10.0, 4.0));
+      concaveHullVertices.add(new Point2D(-5.0, 3.99));
+      concaveHullVertices.add(new Point2D(5.0, 3.99));
 
       PlanarRegion groundRegion = new PlanarRegion(new RigidBodyTransform(), concaveHullVertices, polygons);
       PlanarRegionsList regions = new PlanarRegionsList();
