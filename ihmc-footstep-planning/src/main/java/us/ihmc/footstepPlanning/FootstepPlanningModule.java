@@ -112,6 +112,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          output.setFootstepPlanningResult(FootstepPlanningResult.EXCEPTION);
          output.setException(exception);
          statusCallback.accept(output);
+         isPlanning.set(false);
          return output;
       }
    }

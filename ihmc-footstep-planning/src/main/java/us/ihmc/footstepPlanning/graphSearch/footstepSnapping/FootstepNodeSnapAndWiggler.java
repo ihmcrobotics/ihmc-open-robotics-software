@@ -1,8 +1,10 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
+import us.ihmc.commonWalkingControlModules.polygonWiggling.ConcavePolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -22,14 +24,17 @@ import java.util.function.DoubleSupplier;
 
 public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {
-   private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
+   /** enables experimental concave hull wiggler, don't commit as true**/
+   private final static boolean enableConcaveHullWiggler = false;
 
+   private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
    private final BooleanSupplier wiggleIntoConvexHullOfPlanarRegions;
    private final DoubleSupplier wiggleInsideDelta;
    private final DoubleSupplier maximumXYWiggleDistance;
    private final DoubleSupplier maximumYawWiggle;
    private final DoubleSupplier maximumZPenetrationOnValleyRegions;
 
+   private final ConcavePolygonWiggler concavePolygonWiggler = new ConcavePolygonWiggler();
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private final PlanarRegion planarRegionToPack = new PlanarRegion();
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
@@ -166,7 +171,9 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    {
       updateWiggleParameters();
 
-      if (wiggleIntoConvexHullOfPlanarRegions.getAsBoolean())
+      if (enableConcaveHullWiggler && !planarRegionToPack.getConcaveHull().isEmpty())
+         return concavePolygonWiggler.wigglePolygon(footholdPolygon, Vertex2DSupplier.asVertex2DSupplier(planarRegionToPack.getConcaveHull()), wiggleParameters);
+      else if (wiggleIntoConvexHullOfPlanarRegions.getAsBoolean())
          return PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footholdPolygon, planarRegionToPack, wiggleParameters);
       else
          return PolygonWiggler.wigglePolygonIntoRegion(footholdPolygon, planarRegionToPack, wiggleParameters);
