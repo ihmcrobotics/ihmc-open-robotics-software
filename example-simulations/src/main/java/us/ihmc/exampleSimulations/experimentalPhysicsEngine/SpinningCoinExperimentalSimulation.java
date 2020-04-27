@@ -24,7 +24,7 @@ import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 public class SpinningCoinExperimentalSimulation
 {
    private static final String SPINNING_COIN = "SpinningCoin";
-   private final ContactParameters contactParameters = new ContactParameters(0.7, 0.0, 1.0e-3, 0.5);
+   private final ContactParameters contactParameters = new ContactParameters(0.7, 0.0, 1.0e-3, 0.0, 0.5);
    private final double coinWidth = 0.00175; //quarter //0.1    
    private final double coinRadius = 0.01213; //0.5; //         
    private final double coinMass = 0.00567; //1.0; //

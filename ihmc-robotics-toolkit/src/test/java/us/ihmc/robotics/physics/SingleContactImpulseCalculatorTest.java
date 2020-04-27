@@ -123,7 +123,7 @@ public class SingleContactImpulseCalculatorTest
          SingleContactImpulseCalculator impulseCalculator = new SingleContactImpulseCalculator(worldFrame, rootBodyA, forwardDynamicsCalculatorA, null, null);
          impulseCalculator.setCollision(collisionResult);
          impulseCalculator.setTolerance(GAMMA);
-         impulseCalculator.setContactParameters(new ContactParameters(0.7, 0.0, 0.0, 1.0));
+         impulseCalculator.setContactParameters(new ContactParameters(0.7, 0.0, 0.0, 0.0, 1.0));
          impulseCalculator.initialize(dt);
          impulseCalculator.updateInertia(null, null);
          impulseCalculator.computeImpulse(dt);
@@ -164,7 +164,7 @@ public class SingleContactImpulseCalculatorTest
                                                                                                forwardDynamicsCalculatorB);
          impulseCalculator.setCollision(collisionResult);
          impulseCalculator.setTolerance(GAMMA);
-         impulseCalculator.setContactParameters(new ContactParameters(0.7, 0.0, 0.0, 1.0));
+         impulseCalculator.setContactParameters(new ContactParameters(0.7, 0.0, 0.0, 0.0, 1.0));
          impulseCalculator.initialize(dt);
          impulseCalculator.updateInertia(null, null);
 
