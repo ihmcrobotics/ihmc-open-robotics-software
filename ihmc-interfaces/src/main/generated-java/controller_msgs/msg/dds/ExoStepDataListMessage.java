@@ -7,10 +7,14 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message commands the controller to execute a list of footsteps.
-       * See FootstepDataMessage for more information about defining a footstep.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message commands the controller to execute a list of footsteps.
+   
+ * See FootstepDataMessage for more information about defining a footstep.
+   
+ */
 public class ExoStepDataListMessage extends Packet<ExoStepDataListMessage> implements Settable<ExoStepDataListMessage>, EpsilonComparable<ExoStepDataListMessage>
 {
 
@@ -23,34 +27,50 @@ public class ExoStepDataListMessage extends Packet<ExoStepDataListMessage> imple
    public static final byte STEP_TYPE_SLOPES = (byte) 3;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Defines the list of footstep to perform.
-            */
+       
+    * Defines the list of footstep to perform.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.ExoStepDataMessage>  step_data_list_;
 
    /**
-            * The swing_duration is the time a foot is not in ground contact during a step.
-            * Each step in a list of footsteps might have a different swing duration.
-            * The value specified here is a default value, used if a footstep in this list was created without a swing_duration.
-            * When set to zero or a negative value, the controller will its own default value.
-            */
+       
+    * The swing_duration is the time a foot is not in ground contact during a step.
+       
+    * Each step in a list of footsteps might have a different swing duration.
+       
+    * The value specified here is a default value, used if a footstep in this list was created without a swing_duration.
+       
+    * When set to zero or a negative value, the controller will its own default value.
+       
+    */
    public double default_swing_duration_ = -1.0;
 
    /**
-            * The transfer_duration is the time spent with the feet in ground contact before a step.
-            * Each step in a list of footsteps might have a different transfer duration.
-            * The value specified here is a default value, used if a footstep in this list was created without a transfer-duration.
-            * When set to zero or a negative value, the controller will its own default value.
-            */
+       
+    * The transfer_duration is the time spent with the feet in ground contact before a step.
+       
+    * Each step in a list of footsteps might have a different transfer duration.
+       
+    * The value specified here is a default value, used if a footstep in this list was created without a transfer-duration.
+       
+    * When set to zero or a negative value, the controller will its own default value.
+       
+    */
    public double default_transfer_duration_ = -1.0;
 
    /**
-            * Properties for queueing footstep lists.
-            */
+       
+    * Properties for queueing footstep lists.
+       
+    */
    public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
 
    public byte step_type_;
@@ -96,15 +116,19 @@ public class ExoStepDataListMessage extends Packet<ExoStepDataListMessage> imple
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -113,8 +137,10 @@ public class ExoStepDataListMessage extends Packet<ExoStepDataListMessage> imple
 
 
    /**
-            * Defines the list of footstep to perform.
-            */
+       
+    * Defines the list of footstep to perform.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.ExoStepDataMessage>  getStepDataList()
    {
       return step_data_list_;
@@ -122,21 +148,31 @@ public class ExoStepDataListMessage extends Packet<ExoStepDataListMessage> imple
 
 
    /**
-            * The swing_duration is the time a foot is not in ground contact during a step.
-            * Each step in a list of footsteps might have a different swing duration.
-            * The value specified here is a default value, used if a footstep in this list was created without a swing_duration.
-            * When set to zero or a negative value, the controller will its own default value.
-            */
+       
+    * The swing_duration is the time a foot is not in ground contact during a step.
+       
+    * Each step in a list of footsteps might have a different swing duration.
+       
+    * The value specified here is a default value, used if a footstep in this list was created without a swing_duration.
+       
+    * When set to zero or a negative value, the controller will its own default value.
+       
+    */
    public void setDefaultSwingDuration(double default_swing_duration)
    {
       default_swing_duration_ = default_swing_duration;
    }
    /**
-            * The swing_duration is the time a foot is not in ground contact during a step.
-            * Each step in a list of footsteps might have a different swing duration.
-            * The value specified here is a default value, used if a footstep in this list was created without a swing_duration.
-            * When set to zero or a negative value, the controller will its own default value.
-            */
+       
+    * The swing_duration is the time a foot is not in ground contact during a step.
+       
+    * Each step in a list of footsteps might have a different swing duration.
+       
+    * The value specified here is a default value, used if a footstep in this list was created without a swing_duration.
+       
+    * When set to zero or a negative value, the controller will its own default value.
+       
+    */
    public double getDefaultSwingDuration()
    {
       return default_swing_duration_;
@@ -144,21 +180,31 @@ public class ExoStepDataListMessage extends Packet<ExoStepDataListMessage> imple
 
 
    /**
-            * The transfer_duration is the time spent with the feet in ground contact before a step.
-            * Each step in a list of footsteps might have a different transfer duration.
-            * The value specified here is a default value, used if a footstep in this list was created without a transfer-duration.
-            * When set to zero or a negative value, the controller will its own default value.
-            */
+       
+    * The transfer_duration is the time spent with the feet in ground contact before a step.
+       
+    * Each step in a list of footsteps might have a different transfer duration.
+       
+    * The value specified here is a default value, used if a footstep in this list was created without a transfer-duration.
+       
+    * When set to zero or a negative value, the controller will its own default value.
+       
+    */
    public void setDefaultTransferDuration(double default_transfer_duration)
    {
       default_transfer_duration_ = default_transfer_duration;
    }
    /**
-            * The transfer_duration is the time spent with the feet in ground contact before a step.
-            * Each step in a list of footsteps might have a different transfer duration.
-            * The value specified here is a default value, used if a footstep in this list was created without a transfer-duration.
-            * When set to zero or a negative value, the controller will its own default value.
-            */
+       
+    * The transfer_duration is the time spent with the feet in ground contact before a step.
+       
+    * Each step in a list of footsteps might have a different transfer duration.
+       
+    * The value specified here is a default value, used if a footstep in this list was created without a transfer-duration.
+       
+    * When set to zero or a negative value, the controller will its own default value.
+       
+    */
    public double getDefaultTransferDuration()
    {
       return default_transfer_duration_;
@@ -167,8 +213,10 @@ public class ExoStepDataListMessage extends Packet<ExoStepDataListMessage> imple
 
 
    /**
-            * Properties for queueing footstep lists.
-            */
+       
+    * Properties for queueing footstep lists.
+       
+    */
    public controller_msgs.msg.dds.QueueableMessage getQueueingProperties()
    {
       return queueing_properties_;

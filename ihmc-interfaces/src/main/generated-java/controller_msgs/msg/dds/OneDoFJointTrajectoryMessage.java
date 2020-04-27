@@ -7,32 +7,48 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This class is used to build trajectory messages in jointspace
-       * It holds all the trajectory points to go through with a one-dimensional trajectory.
-       * A third order polynomial function is used to interpolate between trajectory points.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This class is used to build trajectory messages in jointspace
+   
+ * It holds all the trajectory points to go through with a one-dimensional trajectory.
+   
+ * A third order polynomial function is used to interpolate between trajectory points.
+   
+ */
 public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMessage> implements Settable<OneDoFJointTrajectoryMessage>, EpsilonComparable<OneDoFJointTrajectoryMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * The list of trajectory points to go through while executing the trajectory.
-            * The time has to be strictly increasing.
-            */
+       
+    * The list of trajectory points to go through while executing the trajectory.
+       
+    * The time has to be strictly increasing.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.TrajectoryPoint1DMessage>  trajectory_points_;
 
    /**
-            * Weight used to encode the priority for achieving this trajectory:
-            * - if too low, in the event the controller can't achieve all of the objectives it may lower the trajectory tracking quality.
-            * - if too high, the controller will favor this trajectory over other objectives.
-            * - if set to NaN or to a negative value, the controller will use the default weight for that trajectory.
-            * The priority of this trajectory is determined from the relative weight of this trajectory and the weight of the other objectives.
-            */
+       
+    * Weight used to encode the priority for achieving this trajectory:
+       
+    * - if too low, in the event the controller can't achieve all of the objectives it may lower the trajectory tracking quality.
+       
+    * - if too high, the controller will favor this trajectory over other objectives.
+       
+    * - if set to NaN or to a negative value, the controller will use the default weight for that trajectory.
+       
+    * The priority of this trajectory is determined from the relative weight of this trajectory and the weight of the other objectives.
+       
+    */
    public double weight_ = -1.0;
 
    public OneDoFJointTrajectoryMessage()
@@ -64,15 +80,19 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -81,9 +101,12 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
 
 
    /**
-            * The list of trajectory points to go through while executing the trajectory.
-            * The time has to be strictly increasing.
-            */
+       
+    * The list of trajectory points to go through while executing the trajectory.
+       
+    * The time has to be strictly increasing.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.TrajectoryPoint1DMessage>  getTrajectoryPoints()
    {
       return trajectory_points_;
@@ -91,23 +114,35 @@ public class OneDoFJointTrajectoryMessage extends Packet<OneDoFJointTrajectoryMe
 
 
    /**
-            * Weight used to encode the priority for achieving this trajectory:
-            * - if too low, in the event the controller can't achieve all of the objectives it may lower the trajectory tracking quality.
-            * - if too high, the controller will favor this trajectory over other objectives.
-            * - if set to NaN or to a negative value, the controller will use the default weight for that trajectory.
-            * The priority of this trajectory is determined from the relative weight of this trajectory and the weight of the other objectives.
-            */
+       
+    * Weight used to encode the priority for achieving this trajectory:
+       
+    * - if too low, in the event the controller can't achieve all of the objectives it may lower the trajectory tracking quality.
+       
+    * - if too high, the controller will favor this trajectory over other objectives.
+       
+    * - if set to NaN or to a negative value, the controller will use the default weight for that trajectory.
+       
+    * The priority of this trajectory is determined from the relative weight of this trajectory and the weight of the other objectives.
+       
+    */
    public void setWeight(double weight)
    {
       weight_ = weight;
    }
    /**
-            * Weight used to encode the priority for achieving this trajectory:
-            * - if too low, in the event the controller can't achieve all of the objectives it may lower the trajectory tracking quality.
-            * - if too high, the controller will favor this trajectory over other objectives.
-            * - if set to NaN or to a negative value, the controller will use the default weight for that trajectory.
-            * The priority of this trajectory is determined from the relative weight of this trajectory and the weight of the other objectives.
-            */
+       
+    * Weight used to encode the priority for achieving this trajectory:
+       
+    * - if too low, in the event the controller can't achieve all of the objectives it may lower the trajectory tracking quality.
+       
+    * - if too high, the controller will favor this trajectory over other objectives.
+       
+    * - if set to NaN or to a negative value, the controller will use the default weight for that trajectory.
+       
+    * The priority of this trajectory is determined from the relative weight of this trajectory and the weight of the other objectives.
+       
+    */
    public double getWeight()
    {
       return weight_;

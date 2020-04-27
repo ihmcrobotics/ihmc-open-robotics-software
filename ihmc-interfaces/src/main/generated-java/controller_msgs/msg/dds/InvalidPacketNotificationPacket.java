@@ -7,14 +7,18 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message notifies the user that a previously sent message was rejected by the whole-body controller.
-       */
+   
+ * This message notifies the user that a previously sent message was rejected by the whole-body controller.
+   
+ */
 public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotificationPacket> implements Settable<InvalidPacketNotificationPacket>, EpsilonComparable<InvalidPacketNotificationPacket>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public java.lang.StringBuilder packet_class_simple_name_;
@@ -54,15 +58,19 @@ public class InvalidPacketNotificationPacket extends Packet<InvalidPacketNotific
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

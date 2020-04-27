@@ -7,8 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC footstep planning module.
-       */
+   
+ * This message is part of the IHMC footstep planning module.
+   
+ */
 public class BodyPathPlanMessage extends Packet<BodyPathPlanMessage> implements Settable<BodyPathPlanMessage>, EpsilonComparable<BodyPathPlanMessage>
 {
 
@@ -27,8 +29,10 @@ public class BodyPathPlanMessage extends Packet<BodyPathPlanMessage> implements 
    public static final int NO_PLAN_ID = -1;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public byte footstep_planning_result_ = (byte) 255;
@@ -88,15 +92,19 @@ public class BodyPathPlanMessage extends Packet<BodyPathPlanMessage> implements 
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

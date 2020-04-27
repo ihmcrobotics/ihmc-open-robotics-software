@@ -7,20 +7,27 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * The controller will send this message when detecting a fall.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * The controller will send this message when detecting a fall.
+   
+ */
 public class WalkingControllerFailureStatusMessage extends Packet<WalkingControllerFailureStatusMessage> implements Settable<WalkingControllerFailureStatusMessage>, EpsilonComparable<WalkingControllerFailureStatusMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Specifies the estimated falling direction in 2D
-            */
+       
+    * Specifies the estimated falling direction in 2D
+       
+    */
    public us.ihmc.euclid.tuple3D.Vector3D falling_direction_;
 
    public WalkingControllerFailureStatusMessage()
@@ -48,15 +55,19 @@ public class WalkingControllerFailureStatusMessage extends Packet<WalkingControl
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -65,8 +76,10 @@ public class WalkingControllerFailureStatusMessage extends Packet<WalkingControl
 
 
    /**
-            * Specifies the estimated falling direction in 2D
-            */
+       
+    * Specifies the estimated falling direction in 2D
+       
+    */
    public us.ihmc.euclid.tuple3D.Vector3D getFallingDirection()
    {
       return falling_direction_;

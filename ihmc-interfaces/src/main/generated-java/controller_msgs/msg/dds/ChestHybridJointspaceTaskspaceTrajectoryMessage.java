@@ -7,27 +7,38 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message commands the controller to move the chest in both taskspace and jointspace
-       * to the desired orientation and joint angles while going through the specified trajectory points.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message commands the controller to move the chest in both taskspace and jointspace
+   
+ * to the desired orientation and joint angles while going through the specified trajectory points.
+   
+ */
 public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<ChestHybridJointspaceTaskspaceTrajectoryMessage> implements Settable<ChestHybridJointspaceTaskspaceTrajectoryMessage>, EpsilonComparable<ChestHybridJointspaceTaskspaceTrajectoryMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * The taskspace trajectory information.
-            */
+       
+    * The taskspace trajectory information.
+       
+    */
    public controller_msgs.msg.dds.SO3TrajectoryMessage taskspace_trajectory_message_;
 
    /**
-            * The jointspace trajectory information.
-            * The indexing for the joints goes increasingly from the joint the closest to the pelvis to the joint the closest to the chest.
-            */
+       
+    * The jointspace trajectory information.
+       
+    * The indexing for the joints goes increasingly from the joint the closest to the pelvis to the joint the closest to the chest.
+       
+    */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_message_;
 
    public ChestHybridJointspaceTaskspaceTrajectoryMessage()
@@ -59,15 +70,19 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -76,8 +91,10 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
 
 
    /**
-            * The taskspace trajectory information.
-            */
+       
+    * The taskspace trajectory information.
+       
+    */
    public controller_msgs.msg.dds.SO3TrajectoryMessage getTaskspaceTrajectoryMessage()
    {
       return taskspace_trajectory_message_;
@@ -86,9 +103,12 @@ public class ChestHybridJointspaceTaskspaceTrajectoryMessage extends Packet<Ches
 
 
    /**
-            * The jointspace trajectory information.
-            * The indexing for the joints goes increasingly from the joint the closest to the pelvis to the joint the closest to the chest.
-            */
+       
+    * The jointspace trajectory information.
+       
+    * The indexing for the joints goes increasingly from the joint the closest to the pelvis to the joint the closest to the chest.
+       
+    */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage getJointspaceTrajectoryMessage()
    {
       return jointspace_trajectory_message_;

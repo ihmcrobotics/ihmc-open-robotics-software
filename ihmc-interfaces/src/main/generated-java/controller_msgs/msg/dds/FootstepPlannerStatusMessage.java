@@ -7,9 +7,12 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC footstep planner API.
-       * The footstep planner sends this message to notify the user of the status of planning.
-       */
+   
+ * This message is part of the IHMC footstep planner API.
+   
+ * The footstep planner sends this message to notify the user of the status of planning.
+   
+ */
 public class FootstepPlannerStatusMessage extends Packet<FootstepPlannerStatusMessage> implements Settable<FootstepPlannerStatusMessage>, EpsilonComparable<FootstepPlannerStatusMessage>
 {
 
@@ -20,8 +23,10 @@ public class FootstepPlannerStatusMessage extends Packet<FootstepPlannerStatusMe
    public static final byte FOOTSTEP_PLANNER_STATUS_PLANNING_STEPS = (byte) 2;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public byte footstep_planner_status_ = (byte) 255;
@@ -51,15 +56,19 @@ public class FootstepPlannerStatusMessage extends Packet<FootstepPlannerStatusMe
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

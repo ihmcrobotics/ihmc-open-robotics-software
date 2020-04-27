@@ -7,8 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Specifies a specific electric motor in the Atlas forearm to power on or off.
-       */
+   
+ * Specifies a specific electric motor in the Atlas forearm to power on or off.
+   
+ */
 public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEnablePacket> implements Settable<AtlasElectricMotorEnablePacket>, EpsilonComparable<AtlasElectricMotorEnablePacket>
 {
 
@@ -25,18 +27,24 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
    public static final byte R_ARM_WRY2 = (byte) 5;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * The Enum value of the motor to enable
-            */
+       
+    * The Enum value of the motor to enable
+       
+    */
    public byte atlas_electric_motor_packet_enum_enable_ = (byte) 255;
 
    /**
-            * Boolean for enable state; true for enable, false for disable.
-            */
+       
+    * Boolean for enable state; true for enable, false for disable.
+       
+    */
    public boolean enable_;
 
    public AtlasElectricMotorEnablePacket()
@@ -68,15 +76,19 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -84,15 +96,19 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
 
 
    /**
-            * The Enum value of the motor to enable
-            */
+       
+    * The Enum value of the motor to enable
+       
+    */
    public void setAtlasElectricMotorPacketEnumEnable(byte atlas_electric_motor_packet_enum_enable)
    {
       atlas_electric_motor_packet_enum_enable_ = atlas_electric_motor_packet_enum_enable;
    }
    /**
-            * The Enum value of the motor to enable
-            */
+       
+    * The Enum value of the motor to enable
+       
+    */
    public byte getAtlasElectricMotorPacketEnumEnable()
    {
       return atlas_electric_motor_packet_enum_enable_;
@@ -100,15 +116,19 @@ public class AtlasElectricMotorEnablePacket extends Packet<AtlasElectricMotorEna
 
 
    /**
-            * Boolean for enable state; true for enable, false for disable.
-            */
+       
+    * Boolean for enable state; true for enable, false for disable.
+       
+    */
    public void setEnable(boolean enable)
    {
       enable_ = enable;
    }
    /**
-            * Boolean for enable state; true for enable, false for disable.
-            */
+       
+    * Boolean for enable state; true for enable, false for disable.
+       
+    */
    public boolean getEnable()
    {
       return enable_;

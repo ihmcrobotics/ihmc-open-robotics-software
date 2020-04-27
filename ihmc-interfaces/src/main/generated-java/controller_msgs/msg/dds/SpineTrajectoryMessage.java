@@ -7,21 +7,29 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message commands the controller to move the spine in jointspace to the desired joint angles while going through the specified trajectory points.
-       * A third order polynomial function is used to interpolate between trajectory points.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message commands the controller to move the spine in jointspace to the desired joint angles while going through the specified trajectory points.
+   
+ * A third order polynomial function is used to interpolate between trajectory points.
+   
+ */
 public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage> implements Settable<SpineTrajectoryMessage>, EpsilonComparable<SpineTrajectoryMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * The trajectories for each joint in order from the one closest to the pelvis to the one the closest to the chest.
-            */
+       
+    * The trajectories for each joint in order from the one closest to the pelvis to the one the closest to the chest.
+       
+    */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_;
 
    public SpineTrajectoryMessage()
@@ -49,15 +57,19 @@ public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage> imple
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -66,8 +78,10 @@ public class SpineTrajectoryMessage extends Packet<SpineTrajectoryMessage> imple
 
 
    /**
-            * The trajectories for each joint in order from the one closest to the pelvis to the one the closest to the chest.
-            */
+       
+    * The trajectories for each joint in order from the one closest to the pelvis to the one the closest to the chest.
+       
+    */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage getJointspaceTrajectory()
    {
       return jointspace_trajectory_;
