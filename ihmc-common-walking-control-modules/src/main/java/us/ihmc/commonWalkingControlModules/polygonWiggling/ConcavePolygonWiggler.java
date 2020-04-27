@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
+import us.ihmc.log.LogTools;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -190,7 +191,14 @@ public class ConcavePolygonWiggler
       }
 
       RigidBodyTransform transform = new RigidBodyTransform();
-      packWorldFrameTransform(polygonToWiggle, transform);
+      if (accumulatedTransform.containsNaN())
+      {
+         LogTools.warn(name + ": NaN found in solution for concave hull constraint. returning identity transform");
+      }
+      else
+      {
+         packWorldFrameTransform(polygonToWiggle, transform);
+      }
 
       return transform;
    }
