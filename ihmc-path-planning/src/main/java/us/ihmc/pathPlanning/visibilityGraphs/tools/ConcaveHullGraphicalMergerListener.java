@@ -2,6 +2,7 @@ package us.ihmc.pathPlanning.visibilityGraphs.tools;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.referenceFrame.FrameLineSegment2D;
@@ -41,7 +42,7 @@ public class ConcaveHullGraphicalMergerListener implements ConcaveHullMergerList
    }
 
    @Override
-   public void originalHulls(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+   public void originalHulls(List<Point2D> hullOne, List<Point2D> hullTwo)
    {
       drawAFrameWithTheHulls("Original Hulls", hullOne, hullTwo);
 
@@ -50,7 +51,7 @@ public class ConcaveHullGraphicalMergerListener implements ConcaveHullMergerList
    }
 
    @Override
-   public void preprocessedHull(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+   public void preprocessedHull(List<Point2D> hullOne, List<Point2D> hullTwo)
    {
       drawAFrameWithTheHulls("Hulls after preprocessing", hullOne, hullTwo);
 
@@ -59,7 +60,7 @@ public class ConcaveHullGraphicalMergerListener implements ConcaveHullMergerList
    }
 
 
-   private void drawAFrameWithTheHulls(String name, ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+   private void drawAFrameWithTheHulls(String name, List<Point2D> hullOne, List<Point2D> hullTwo)
    {
       FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame(name, xMin, xMax, yMin, yMax);
       FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
@@ -73,7 +74,7 @@ public class ConcaveHullGraphicalMergerListener implements ConcaveHullMergerList
 
    }
    
-   private void drawTheEdges(FrameGeometry2dPlotter plotter, ArrayList<Point2D> hull, Color color)
+   private void drawTheEdges(FrameGeometry2dPlotter plotter, List<Point2D> hull, Color color)
    {
       Point2D previousPoint = hull.get(hull.size() - 1);
       
@@ -89,7 +90,7 @@ public class ConcaveHullGraphicalMergerListener implements ConcaveHullMergerList
       
    }
 
-   private static void drawThePoints(FrameGeometry2dPlotter plotter, ArrayList<Point2D> hull, Color color)
+   private static void drawThePoints(FrameGeometry2dPlotter plotter, List<Point2D> hull, Color color)
    {
       for (Point2D point : hull)
       {
@@ -99,7 +100,7 @@ public class ConcaveHullGraphicalMergerListener implements ConcaveHullMergerList
 
 
    @Override
-   public void foundStartingVertexAndWorkingHull(Point2D startingVertex, ArrayList<Point2D> workingHull, boolean workingHullIsOne)
+   public void foundStartingVertexAndWorkingHull(Point2D startingVertex, List<Point2D> workingHull, boolean workingHullIsOne)
    {
       if (workingHullIsOne)
       {
@@ -139,7 +140,7 @@ public class ConcaveHullGraphicalMergerListener implements ConcaveHullMergerList
    }
 
    @Override
-   public void hullGotLooped(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo, ArrayList<Point2D> mergedVertices)
+   public void hullGotLooped(List<Point2D> hullOne, List<Point2D> hullTwo, List<Point2D> mergedVertices)
    {
       FrameGeometryTestFrame testFrame = new FrameGeometryTestFrame("Caught Loop!", xMin, xMax, yMin, yMax);
       FrameGeometry2dPlotter plotter = testFrame.getFrameGeometry2dPlotter();
@@ -169,13 +170,13 @@ public class ConcaveHullGraphicalMergerListener implements ConcaveHullMergerList
    }
 
    @Override
-   public void hullIsInvalid(ArrayList<Point2D> invalidHull)
+   public void hullIsInvalid(List<Point2D> invalidHull)
    {
       LogTools.error("Got an invalid hull.");
    }
 
    @Override
-   public void hullsAreInvalid(ArrayList<Point2D> invalidHullA, ArrayList<Point2D> invalidHullB)
+   public void hullsAreInvalid(List<Point2D> invalidHullA, List<Point2D> invalidHullB)
    {
       LogTools.error("Got two invalid hulls.");
    }

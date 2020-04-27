@@ -90,10 +90,8 @@ public abstract class PlanarRegionPolygonizer
 
             // Pack the data in PlanarRegion
             RigidBodyTransform transformToWorld = rawData.getTransformFromLocalToWorld();
-            Point2D[] concaveHullsVertices = new Point2D[concaveHull.getNumberOfVertices()];
-            concaveHull.getConcaveHullVertices().toArray(concaveHullsVertices);
 
-            PlanarRegion planarRegion = new PlanarRegion(transformToWorld, concaveHullsVertices, decomposedPolygons);
+            PlanarRegion planarRegion = new PlanarRegion(transformToWorld, concaveHull.getConcaveHullVertices(), decomposedPolygons);
             planarRegion.setRegionId(regionId);
             planarRegions.add(planarRegion);
 

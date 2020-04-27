@@ -80,10 +80,7 @@ public class PlanarRegionsListCutter
          List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
          ConcaveHullDecomposition.recursiveApproximateDecomposition(resultingConcaveHull, 0.0, decomposedPolygons); // TODO: tune depth threshold?
 
-         Point2D[] concaveHullsVertices = new Point2D[resultingConcaveHull.getNumberOfVertices()];
-         resultingConcaveHull.getConcaveHullVertices().toArray(concaveHullsVertices);
-
-         PlanarRegion resultingRegion = new PlanarRegion(region.getTransformToWorld(), concaveHullsVertices, decomposedPolygons);
+         PlanarRegion resultingRegion = new PlanarRegion(region.getTransformToWorld(), resultingConcaveHull.getConcaveHullVertices(), decomposedPolygons);
          resultingRegion.setRegionId(region.getRegionId());
          resultingRegions.add(resultingRegion);
       }

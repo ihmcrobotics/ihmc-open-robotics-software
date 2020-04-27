@@ -2,7 +2,6 @@ package us.ihmc.robotics.geometry;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.*;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
@@ -173,56 +172,6 @@ public class PlanarRegionTools
    }
 
    /**
-    * Return true if the given point is contained inside the boundary.
-    * https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
-    *
-    * Also check https://en.wikipedia.org/wiki/Point_in_polygon.
-    *
-    * @param test The point to check
-    * @return true if the point is inside the boundary, false otherwise
-    *
-    */
-   public static boolean isPointInsideConcaveHull(Point2D[] polygon, double testX, double testY)
-   {
-      return isPointInsideConcaveHull(polygon, testX, testY, 1e-7);
-   }
-
-   // FIXME this is currently private, because the epsilon feature is untested.
-   private static boolean isPointInsideConcaveHull(Point2D[] polygon, double testX, double testY, double epsilon)
-   {
-      int numberOfVertices = polygon.length;
-
-      int i;
-      int j;
-      boolean result = false;
-
-      for (i = 0, j = numberOfVertices - 1; i < numberOfVertices; j = i++)
-      {
-         Point2DReadOnly vertex = polygon[i];
-         Point2DReadOnly previousVertex = polygon[j];
-
-         if (rayIntersectsWithEdge(vertex, previousVertex, testX, testY))
-         {
-            result = !result;
-         }
-      }
-
-      if (result)
-         return true;
-
-      for (i = 0, j = numberOfVertices - 1; i < numberOfVertices; j = i++)
-      {
-         Point2DReadOnly vertex = polygon[i];
-         Point2DReadOnly previousVertex = polygon[j];
-
-         if (EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(testX, testY, vertex, previousVertex) <= epsilon)
-            return true;
-      }
-
-      return false;
-   }
-
-   /**
     * Checks to see if a ray starting at {@param startOfRayX} and {@param startOfRayY} and casting in the positive X direction intersects with the edge
     * going from {@param previousVertex} to {@param vertex}.
     */
@@ -301,7 +250,7 @@ public class PlanarRegionTools
                                                                    Point3DBasics closestPointOnSegmentToPack,
                                                                    Point3DBasics closestPointOnRegionToPack)
    {
-      List<Point3D> vertices = Arrays.stream(planarRegion.getConcaveHull()).map(Point3D::new).collect(Collectors.toList());
+      List<Point3D> vertices = planarRegion.getConcaveHull().stream().map(Point3D::new).collect(Collectors.toList());
       int numberOfVertices = vertices.size();
       double minDistanceToEdge = Double.POSITIVE_INFINITY;
 
@@ -556,11 +505,11 @@ public class PlanarRegionTools
       firstEndPointInLocal.applyTransform(transformToLocal);
       secondEndPointInLocal.applyTransform(transformToLocal);
 
-      Point2D[] concaveHull = query.getConcaveHull();
+      List<Point2D> concaveHull = query.getConcaveHull();
 
       List<Point3D> convexPolygon3D = new ArrayList<>();
-      for (int i = 0; i < concaveHull.length; i++)
-         convexPolygon3D.add(new Point3D(concaveHull[i]));
+      for (int i = 0; i < concaveHull.size(); i++)
+         convexPolygon3D.add(new Point3D(concaveHull.get(i)));
 
       double minDistanceToEdge = getDistanceFromLineSegment3DToConvexPolygon(firstEndPointInLocal, secondEndPointInLocal, convexPolygon3D);
 
@@ -620,7 +569,7 @@ public class PlanarRegionTools
       if (minNumberOfVertices <= 0)
          return planarRegions;
 
-      return planarRegions.stream().filter(region -> region.getConcaveHull().length >= minNumberOfVertices).collect(Collectors.toList());
+      return planarRegions.stream().filter(region -> region.getConcaveHull().size() >= minNumberOfVertices).collect(Collectors.toList());
    }
 
    public static List<PlanarRegion> filterPlanarRegionsByArea(double minArea, List<PlanarRegion> planarRegions)
