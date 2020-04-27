@@ -5,17 +5,20 @@ public class ContactParameters implements ContactParametersBasics
    private double coefficientOfFriction;
    private double coefficientOfRestitution;
    private double errorReductionParameter;
+   private double slipErrorReductionParameter;
    private double constraintForceMixing;
 
    public ContactParameters()
    {
    }
 
-   public ContactParameters(double coefficientOfFriction, double coefficientOfRestitution, double errorReductionParameter, double constraintForceMixing)
+   public ContactParameters(double coefficientOfFriction, double coefficientOfRestitution, double errorReductionParameter, double slipErrorReductionParameter,
+                            double constraintForceMixing)
    {
       this.coefficientOfFriction = coefficientOfFriction;
       this.coefficientOfRestitution = coefficientOfRestitution;
       this.errorReductionParameter = errorReductionParameter;
+      this.slipErrorReductionParameter = slipErrorReductionParameter;
       this.constraintForceMixing = constraintForceMixing;
    }
 
@@ -35,6 +38,12 @@ public class ContactParameters implements ContactParametersBasics
    public void setErrorReductionParameter(double errorReductionParameter)
    {
       this.errorReductionParameter = errorReductionParameter;
+   }
+
+   @Override
+   public void setSlipErrorReductionParameter(double slipErrorReductionParameter)
+   {
+      this.slipErrorReductionParameter = slipErrorReductionParameter;
    }
 
    @Override
@@ -59,6 +68,12 @@ public class ContactParameters implements ContactParametersBasics
    public double getErrorReductionParameter()
    {
       return errorReductionParameter;
+   }
+
+   @Override
+   public double getSlipErrorReductionParameter()
+   {
+      return slipErrorReductionParameter;
    }
 
    @Override

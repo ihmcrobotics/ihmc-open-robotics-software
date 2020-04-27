@@ -46,7 +46,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private double beta2 = 0.95;
    private double beta3 = 1.15;
    private double gamma = 1.0e-6;
-   private final ContactParameters contactParameters = new ContactParameters(0.7, 0.0, 0.0, 1.0);
+   private final ContactParameters contactParameters = new ContactParameters(0.7, 0.0, 0.01, 0.0, 0.8);
 
    private boolean isFirstUpdate = false;
    private boolean isImpulseZero = false;
@@ -259,7 +259,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       linearVelocityToPack.add(vx, vy, vz);
    }
 
-   private final FrameVector3D collisionPositionTerm = new FrameVector3D();
+   private final FrameVector3D collisionErrorReductionTerm = new FrameVector3D();
 
    @Override
    public void updateImpulse(double dt, double alpha, boolean ignoreOtherImpulses)
@@ -327,11 +327,25 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
        */
       if (contactParameters.getErrorReductionParameter() != 0.0)
       {
-         collisionPositionTerm.setIncludingFrame(collisionResult.getPointOnBRootFrame());
-         collisionPositionTerm.sub(collisionResult.getPointOnARootFrame());
-         collisionPositionTerm.scale(contactParameters.getErrorReductionParameter() / dt);
-         collisionPositionTerm.changeFrame(velocityRelative.getReferenceFrame());
-         velocityRelative.sub(collisionPositionTerm);
+         collisionErrorReductionTerm.setIncludingFrame(collisionResult.getPointOnBRootFrame());
+         collisionErrorReductionTerm.sub(collisionResult.getPointOnARootFrame());
+         collisionErrorReductionTerm.scale(contactParameters.getErrorReductionParameter() / dt);
+
+         if (contactParameters.getSlipErrorReductionParameter() != 0.0)
+         {
+            collisionErrorReductionTerm.scaleAdd(-contactParameters.getSlipErrorReductionParameter() / dt,
+                                                 collisionResult.getAccumulatedSlipForA(),
+                                                 collisionErrorReductionTerm);
+         }
+         collisionErrorReductionTerm.changeFrame(contactFrame);
+         velocityRelative.sub(collisionErrorReductionTerm);
+      }
+      else if (contactParameters.getSlipErrorReductionParameter() != 0.0)
+      {
+         collisionErrorReductionTerm.setIncludingFrame(collisionResult.getAccumulatedSlipForA());
+         collisionErrorReductionTerm.scale(-contactParameters.getSlipErrorReductionParameter() / dt);
+         collisionErrorReductionTerm.changeFrame(contactFrame);
+         velocityRelative.sub(collisionErrorReductionTerm);
       }
 
       isContactClosing = velocityRelative.getZ() < 0.0;
@@ -366,6 +380,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
             else
             { // Contact is slipping, that's the though case.
                ContactImpulseTools.computeSlipLambda(beta1, beta2, beta3, gamma, mu, M_inv, lambda_v_0, c, impulseA.getLinearPart(), false);
+               collisionResult.getAccumulatedSlipForA().scale(0.995);
             }
          }
       }

@@ -1,5 +1,6 @@
 package us.ihmc.exampleSimulations.experimentalPhysicsEngine;
 
+import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -16,43 +17,31 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 
-public class BoxTeeteringEdgeToEdgeExperimentalSimulation
+public class SlidingBoxExperimentalSimulation
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final ContactParameters contactParameters = new ContactParameters(0.7, 0.0, 0.001, 0.0, 1.0);
+   private final ContactParameters contactParameters = new ContactParameters(0.7, 0.0, 0.001, 0.5, 1.0);
 
-   public BoxTeeteringEdgeToEdgeExperimentalSimulation()
+   public SlidingBoxExperimentalSimulation()
    {
-      double boxXLength = 0.2;
-      double boxYWidth = 0.12;
-      double boxZHeight = 0.4;
-      double boxMass = 1.0;
-      double boxRadiusOfGyrationPercent = 0.8;
+      Vector3D boxSize = new Vector3D(0.4, 0.4, 0.4);
 
-      double initialBoxRoll = -Math.PI / 64.0;
-      double initialVelocity = 0.0;
+      double groundPitch = Math.toRadians(34.0);
 
-      double groundWidth = 1.0;
-      double groundLength = 1.0;
-
-      RobotDescription boxRobot = ExampleExperimentalSimulationTools.createASingleBoxRobot("box",
-                                                                                           boxXLength,
-                                                                                           boxYWidth,
-                                                                                           boxZHeight,
-                                                                                           boxMass,
-                                                                                           boxRadiusOfGyrationPercent,
-                                                                                           YoAppearance.DarkCyan());
+      RobotDescription boxRobot = ExampleExperimentalSimulationTools.createASingleBoxRobot("box", boxSize, 150.0, 0.8, YoAppearance.DarkCyan());
 
       MultiBodySystemStateWriter boxInitialStateWriter = MultiBodySystemStateWriter.singleJointStateWriter("box", (FloatingJointBasics joint) ->
       {
-         joint.getJointPose().getPosition().set(0.0, groundWidth / 2.0 - 0.002, boxZHeight / 2.0 * 1.05 + boxYWidth / 2.0 * Math.sin(Math.abs(initialBoxRoll)));
-         joint.getJointPose().getOrientation().setToRollOrientation(initialBoxRoll);
-         joint.getJointTwist().getLinearPart().setMatchingFrame(new FrameVector3D(worldFrame, initialVelocity, 0, 0));
+         Pose3DBasics jointPose = joint.getJointPose();
+         jointPose.getOrientation().setToPitchOrientation(groundPitch);
+         jointPose.appendTranslation(0.0, 0.0, 0.6 * boxSize.getZ());
+         joint.getJointTwist().getAngularPart().set(0, 0, 0.0);
+         joint.getJointTwist().getLinearPart().setMatchingFrame(new FrameVector3D(worldFrame, 0, 0, 0));
       });
 
       RobotCollisionModel boxCollision = RobotCollisionModel.singleBodyCollisionModel("boxLink", body ->
       {
-         return new Collidable(body, -1, -1, new FrameBox3D(body.getBodyFixedFrame(), boxXLength, boxYWidth, boxZHeight));
+         return new Collidable(body, -1, -1, new FrameBox3D(body.getBodyFixedFrame(), boxSize.getX(), boxSize.getY(), boxSize.getZ()));
       });
 
       double simDT = 0.0001;
@@ -62,14 +51,16 @@ public class BoxTeeteringEdgeToEdgeExperimentalSimulation
       experimentalSimulation.getPhysicsEngine().setGlobalContactParameters(contactParameters);
       experimentalSimulation.addRobot(boxRobot, boxCollision, boxInitialStateWriter);
 
-      FrameBox3D groundShape = new FrameBox3D(worldFrame, groundLength, groundWidth, 0.1);
-      groundShape.getPosition().subZ(0.05);
+      FrameBox3D groundShape = new FrameBox3D(worldFrame, 100.0, 100.0, 0.1);
+      groundShape.getOrientation().setToPitchOrientation(groundPitch);
+      groundShape.getPose().appendTranslation(0.0, 0.0, -0.05);
       Collidable groundCollidable = new Collidable(null, -1, -1, groundShape);
       experimentalSimulation.addEnvironmentCollidable(groundCollidable);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(experimentalSimulation,
                                                                     SupportedGraphics3DAdapter.instantiateDefaultGraphicsAdapter(true),
                                                                     parameters);
+      ExampleExperimentalSimulationTools.configureSCSToTrackRobotRootJoint(scs, boxRobot);
       scs.addYoGraphicsListRegistry(experimentalSimulation.getPhysicsEngineGraphicsRegistry());
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(ExampleExperimentalSimulationTools.toGraphics3DObject(groundShape, worldFrame, YoAppearance.DarkKhaki()));
@@ -81,6 +72,6 @@ public class BoxTeeteringEdgeToEdgeExperimentalSimulation
 
    public static void main(String[] args)
    {
-      new BoxTeeteringEdgeToEdgeExperimentalSimulation();
+      new SlidingBoxExperimentalSimulation();
    }
 }
