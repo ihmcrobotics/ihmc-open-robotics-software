@@ -306,7 +306,7 @@ public class ICPController
    private void submitSolverTaskConditions()
    {
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraint());
 
       if (copConstraintHandler.hasSupportPolygonChanged())
          solver.notifyResetActiveSet();

@@ -222,7 +222,7 @@ public class LinearMomentumRateControlModule
       ReferenceFrame midFeetZUpFrame = referenceFrames.getMidFeetZUpFrame();
       SideDependentList<ReferenceFrame> soleZUpFrames = new SideDependentList<>(referenceFrames.getSoleZUpFrames());
       icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
-      icpControlPolygons = new ICPControlPolygons(icpControlPlane, midFeetZUpFrame, registry, yoGraphicsListRegistry);
+      icpControlPolygons = new ICPControlPolygons(icpControlPlane,  registry, yoGraphicsListRegistry);
       bipedSupportPolygons = new BipedSupportPolygons(referenceFrames, registry, null); // TODO: This is not being visualized since it is a duplicate for now.
       if (USE_COMBINED_STEP_ADJUSTMENT)
       {
