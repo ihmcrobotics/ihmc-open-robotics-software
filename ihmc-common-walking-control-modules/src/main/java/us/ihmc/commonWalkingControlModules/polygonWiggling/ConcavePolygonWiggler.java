@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.polygonWiggling;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.robotics.EuclidCoreMissingTools;
@@ -16,31 +17,36 @@ import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import java.awt.*;
 
 public class ConcavePolygonWiggler
 {
    private final String name = getClass().getSimpleName();
+   private final YoVariableRegistry registry = new YoVariableRegistry(name);
+
    private int maximumIterations = 1000;
-   private double alpha = 0.06;
-   private double gradientMagnitudeToTerminate = 1e-7;
+   private double alpha = 0.075;
+   private double gradientMagnitudeToTerminate = 1e-5;
 
    private final Vector3D previousGradient = new Vector3D();
-   private final Vector3D gradient = new Vector3D();
+   private final YoFrameVector3D gradient = new YoFrameVector3D("gradient", ReferenceFrame.getWorldFrame(), registry);
    private final Vector3D gradientDelta = new Vector3D();
-   private final Vector3D accumulatedTransform = new Vector3D();
+   private final YoFrameVector3D accumulatedTransform = new YoFrameVector3D("accumulatedTransformient", ReferenceFrame.getWorldFrame(), registry);
 
    private final Point2D tempPoint = new Point2D();
    private final Point2D closestPerimeterPoint = new Point2D();
    private final Vector2D directionToClosestPoint = new Vector2D();
-   private final RecyclingArrayList<Point2D> transformedVertices = new RecyclingArrayList<>(4, Point2D::new);
-   private final RecyclingArrayList<Vector2D> rotationVectors = new RecyclingArrayList<>(4, Vector2D::new);
+   private final RecyclingArrayList<Point2D> transformedVertices = new RecyclingArrayList<>(5, Point2D::new);
+   private final RecyclingArrayList<Vector2D> rotationVectors = new RecyclingArrayList<>(5, Vector2D::new);
 
    private final TickAndUpdatable tickAndUpdatable;
-   private final YoFrameLineSegment2D[] initialPolygonToWiggle = new YoFrameLineSegment2D[4];
-   private final YoFrameLineSegment2D[] transformedPolygonToWiggle = new YoFrameLineSegment2D[4];
+   private final YoFrameLineSegment2D[] initialPolygonToWiggle = new YoFrameLineSegment2D[5];
+   private final YoFrameLineSegment2D[] linearizedTransformedPolygonToWiggle = new YoFrameLineSegment2D[5];
+   private final YoFrameLineSegment2D[] transformedPolygonToWiggle = new YoFrameLineSegment2D[5];
    private final YoFrameLineSegment2D[] constraintPolygon = new YoFrameLineSegment2D[100];
+   private final YoFrameLineSegment2D[] yoRotationVectors = new YoFrameLineSegment2D[5];
 
    public ConcavePolygonWiggler()
    {
@@ -49,15 +55,22 @@ public class ConcavePolygonWiggler
 
    public ConcavePolygonWiggler(TickAndUpdatable tickAndUpdatable, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
+      registry.addChild(this.registry);
       this.tickAndUpdatable = tickAndUpdatable;
 
-      for (int i = 0; i < 4; i++)
+      for (int i = 0; i < 5; i++)
       {
          initialPolygonToWiggle[i] = new YoFrameLineSegment2D("initialFootV" + i, ReferenceFrame.getWorldFrame(), registry);
          graphicsListRegistry.registerArtifact(name, new YoArtifactLineSegment2d("graphicInitialFootV" + i, initialPolygonToWiggle[i], Color.RED, 0.0, 0.0));
 
          transformedPolygonToWiggle[i] = new YoFrameLineSegment2D("transformedFootV" + i, ReferenceFrame.getWorldFrame(), registry);
-         graphicsListRegistry.registerArtifact(name, new YoArtifactLineSegment2d("graphicFootV" + i, transformedPolygonToWiggle[i], Color.BLUE.darker(), 0.0, 0.0));
+         graphicsListRegistry.registerArtifact(name, new YoArtifactLineSegment2d("graphicFootV" + i, transformedPolygonToWiggle[i], Color.GREEN.darker(), 0.0, 0.0));
+
+         linearizedTransformedPolygonToWiggle[i] = new YoFrameLineSegment2D("linearizedTransformedFootV" + i, ReferenceFrame.getWorldFrame(), registry);
+         graphicsListRegistry.registerArtifact(name, new YoArtifactLineSegment2d("linearizedGraphicFootV" + i, linearizedTransformedPolygonToWiggle[i], Color.BLUE.darker(), 0.0, 0.0));
+
+         yoRotationVectors[i] = new YoFrameLineSegment2D("rotationVector" + i, ReferenceFrame.getWorldFrame(), registry);
+         graphicsListRegistry.registerArtifact(name, new YoArtifactLineSegment2d("rotationVectorGraphic" + i, yoRotationVectors[i], Color.ORANGE.darker(), 0.01, 0.01));
       }
 
       for (int i = 0; i < constraintPolygon.length; i++)
@@ -74,8 +87,6 @@ public class ConcavePolygonWiggler
       rotationVectors.clear();
       transformedVertices.clear();
 
-      initializeConstraintGraphics(polygonToWiggle, concavePolygonToWiggleInto);
-
       for (int i = 0; i < polygonToWiggle.getNumberOfVertices(); i++)
       {
          Point2DReadOnly vertex = polygonToWiggle.getVertex(i);
@@ -83,12 +94,12 @@ public class ConcavePolygonWiggler
 
          rotationVector.sub(vertex, polygonToWiggle.getCentroid());
          rotationVector.set(- rotationVector.getY(), rotationVector.getX());
-         rotationVector.normalize();
          transformedVertices.add().set(vertex);
       }
 
       if (tickAndUpdatable != null)
       {
+         initializeConstraintGraphics(polygonToWiggle, concavePolygonToWiggleInto);
          tickAndUpdatable.tickAndUpdate();
       }
 
@@ -99,9 +110,11 @@ public class ConcavePolygonWiggler
             break;
          }
 
-         if (!MathTools.intervalContains(accumulatedTransform.getX(), wiggleParameters.minX, wiggleParameters.maxX)
-             || !MathTools.intervalContains(accumulatedTransform.getY(), wiggleParameters.minY, wiggleParameters.maxY)
-             || !MathTools.intervalContains(accumulatedTransform.getZ(), wiggleParameters.minYaw, wiggleParameters.maxYaw))
+         boolean xTranslationAllowed = MathTools.intervalContains(accumulatedTransform.getX(), wiggleParameters.minX, wiggleParameters.maxX);
+         boolean yTranslationAllowed = MathTools.intervalContains(accumulatedTransform.getY(), wiggleParameters.minY, wiggleParameters.maxY);
+         boolean rotationAllowed = MathTools.intervalContains(accumulatedTransform.getZ(), wiggleParameters.minYaw, wiggleParameters.maxYaw);
+
+         if (!xTranslationAllowed && !yTranslationAllowed && !rotationAllowed)
          {
             break;
          }
@@ -109,7 +122,7 @@ public class ConcavePolygonWiggler
          boolean allPointsInside = true;
          gradient.setToZero();
 
-         updateGraphics();
+         updateGraphics(polygonToWiggle);
          for (int i = 0; i < polygonToWiggle.getNumberOfVertices(); i++)
          {
             Point2DReadOnly vertex = transformedVertices.get(i);
@@ -134,10 +147,19 @@ public class ConcavePolygonWiggler
 
                double distanceSquaredFromConstraint = signedDistanceSquared - signedDeltaOutsideSquared;
                directionToClosestPoint.scale(Math.sqrt(distanceSquaredFromConstraint / directionToClosestPoint.lengthSquared()));
-
-               gradient.addX(directionToClosestPoint.getX());
-               gradient.addY(directionToClosestPoint.getY());
-               gradient.addZ(directionToClosestPoint.dot(rotationVectors.get(i)) / wiggleParameters.rotationWeight);
+               
+               if (xTranslationAllowed)
+               {
+                  gradient.addX(directionToClosestPoint.getX());
+               }
+               if (yTranslationAllowed)
+               {
+                  gradient.addY(directionToClosestPoint.getY());
+               }
+               if (rotationAllowed)
+               {
+                  gradient.addZ(directionToClosestPoint.dot(rotationVectors.get(i)) / wiggleParameters.rotationWeight);
+               }
             }
          }
 
@@ -175,16 +197,18 @@ public class ConcavePolygonWiggler
          iterations++;
       }
 
-      System.out.println("Iterations: " + iterations);
-      System.out.println("x:   " + accumulatedTransform.getX());
-      System.out.println("y:   " + accumulatedTransform.getY());
-      System.out.println("yaw: " + Math.toDegrees(accumulatedTransform.getZ()) + " (deg)");
-
       RigidBodyTransform transform = new RigidBodyTransform();
-      transform.getTranslation().set(accumulatedTransform.getX(), accumulatedTransform.getY(), 0.0);
-      transform.getRotation().setToYawOrientation(accumulatedTransform.getZ());
+      packWorldFrameTransform(polygonToWiggle, transform);
 
       return transform;
+   }
+
+   private void packWorldFrameTransform(ConvexPolygon2DReadOnly polygonToWiggle, RigidBodyTransform transform)
+   {
+      transform.getTranslation().set(accumulatedTransform.getX(), accumulatedTransform.getY(), 0.0);
+      transform.getRotation().setToYawOrientation(accumulatedTransform.getZ());
+      transform.prependTranslation(polygonToWiggle.getCentroid().getX(), polygonToWiggle.getCentroid().getY(), 0.0);
+      transform.appendTranslation(-polygonToWiggle.getCentroid().getX(), -polygonToWiggle.getCentroid().getY(), 0.0);
    }
 
    private void initializeConstraintGraphics(ConvexPolygon2DReadOnly polygonToWiggle, Vertex2DSupplier concavePolygonToWiggleInto)
@@ -198,7 +222,10 @@ public class ConcavePolygonWiggler
       {
          initialPolygonToWiggle[i].getFirstEndpoint().set(polygonToWiggle.getVertex(i));
          initialPolygonToWiggle[i].getSecondEndpoint().set(polygonToWiggle.getVertex((i + 1) % polygonToWiggle.getNumberOfVertices()));
-         transformedPolygonToWiggle[i].set(initialPolygonToWiggle[i]);
+         linearizedTransformedPolygonToWiggle[i].set(initialPolygonToWiggle[i]);
+         yoRotationVectors[i].getFirstEndpoint().set(polygonToWiggle.getVertex(i));
+         yoRotationVectors[i].getSecondEndpoint().set(rotationVectors.get(i));
+         yoRotationVectors[i].getSecondEndpoint().add(polygonToWiggle.getVertex(i));
       }
 
       for (int i = 0; i < concavePolygonToWiggleInto.getNumberOfVertices(); i++)
@@ -208,7 +235,7 @@ public class ConcavePolygonWiggler
       }
    }
 
-   private void updateGraphics()
+   private void updateGraphics(ConvexPolygon2DReadOnly polygonToWiggle)
    {
       if (tickAndUpdatable == null)
       {
@@ -217,8 +244,17 @@ public class ConcavePolygonWiggler
 
       for (int i = 0; i < transformedVertices.size(); i++)
       {
-         transformedPolygonToWiggle[i].getFirstEndpoint().set(transformedVertices.get(i));
-         transformedPolygonToWiggle[i].getSecondEndpoint().set(transformedVertices.get((i + 1) % transformedVertices.size()));
+         linearizedTransformedPolygonToWiggle[i].getFirstEndpoint().set(transformedVertices.get(i));
+         linearizedTransformedPolygonToWiggle[i].getSecondEndpoint().set(transformedVertices.get((i + 1) % transformedVertices.size()));
+      }
+
+      RigidBodyTransform transform = new RigidBodyTransform();
+      packWorldFrameTransform(polygonToWiggle, transform);
+
+      for (int i = 0; i < initialPolygonToWiggle.length; i++)
+      {
+         transformedPolygonToWiggle[i].set(initialPolygonToWiggle[i]);
+         transformedPolygonToWiggle[i].applyTransform(transform);
       }
    }
 
