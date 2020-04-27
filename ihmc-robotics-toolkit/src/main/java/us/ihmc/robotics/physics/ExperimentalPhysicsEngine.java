@@ -48,8 +48,9 @@ public class ExperimentalPhysicsEngine
 
    private final List<Collidable> environmentCollidables = new ArrayList<>();
 
-   private final SimpleCollisionDetection collisionDetectionPlugin;
-   private final MultiRobotForwardDynamicsPlugin multiRobotPhysicsEnginePlugin;
+   private final SimpleCollisionDetection collisionDetectionPlugin = new SimpleCollisionDetection(rootFrame);
+   private final CollisionSlipEstimatorMap collisionSlipEstimator = new CollisionSlipEstimatorMap(rootFrame);
+   private final MultiRobotForwardDynamicsPlugin multiRobotPhysicsEnginePlugin = new MultiRobotForwardDynamicsPlugin(rootFrame, physicsEngineRegistry);
    private final MultiRobotFirstOrderIntegrator integrationMethod = new MultiRobotFirstOrderIntegrator();
 
    private final CollidableListVisualizer environmentCollidableVisualizers;
@@ -67,8 +68,6 @@ public class ExperimentalPhysicsEngine
 
    public ExperimentalPhysicsEngine()
    {
-      collisionDetectionPlugin = new SimpleCollisionDetection(rootFrame);
-      multiRobotPhysicsEnginePlugin = new MultiRobotForwardDynamicsPlugin(rootFrame, physicsEngineRegistry);
       AppearanceDefinition environmentCollidableAppearance = YoAppearance.AluminumMaterial();
       environmentCollidableAppearance.setTransparency(0.5);
       environmentCollidableVisualizers = new CollidableListVisualizer(collidableVisualizerGroupName,
@@ -160,8 +159,12 @@ public class ExperimentalPhysicsEngine
       }
 
       environmentCollidables.forEach(collidable -> collidable.updateBoundingBox(rootFrame));
+
+      collisionSlipEstimator.processPreCollisionDetection();
       collisionDetectionPlugin.evaluationCollisions(robotList, () -> environmentCollidables);
-      multiRobotPhysicsEnginePlugin.submitCollisions(collisionDetectionPlugin);
+      collisionSlipEstimator.processPostCollisionDetection(collisionDetectionPlugin.getAllCollisions());
+
+      multiRobotPhysicsEnginePlugin.submitCollisions(collisionDetectionPlugin.getAllCollisions());
       multiRobotPhysicsEnginePlugin.doScience(time.getValue(), dt, gravity);
       integrationMethod.integrate(dt);
 

@@ -72,9 +72,9 @@ public class MultiRobotForwardDynamicsPlugin
       hasGlobalContactParameters.set(true);
    }
 
-   public void submitCollisions(SimpleCollisionDetection collisionDetectionPlugin)
+   public void submitCollisions(CollisionListResult allCollisions)
    {
-      collisionGroups = MultiRobotCollisionGroup.toCollisionGroups(collisionDetectionPlugin.getAllCollisions());
+      collisionGroups = MultiRobotCollisionGroup.toCollisionGroups(allCollisions);
    }
 
    public void doScience(double time, double dt, Vector3DReadOnly gravity)

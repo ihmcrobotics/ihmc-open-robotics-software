@@ -2,8 +2,8 @@ package us.ihmc.robotics.physics;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameUnitVector3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.collision.EuclidFrameShape3DCollisionResult;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
 
 public class CollisionResult
 {
@@ -15,7 +15,7 @@ public class CollisionResult
    private final FramePoint3D pointOnARootFrame = new FramePoint3D();
    private final FramePoint3D pointOnBRootFrame = new FramePoint3D();
 
-   private final FrameVector3D accumulatedSlipForA = new FrameVector3D();
+   private CollisionSlipHolder collisionSlipHolder;
 
    /**
     * The collision direction (normalized) for the shape A:
@@ -64,6 +64,11 @@ public class CollisionResult
       this.collidableB = collidableB;
    }
 
+   public void setCollisionSlipHolder(CollisionSlipHolder collisionSlipHolder)
+   {
+      this.collisionSlipHolder = collisionSlipHolder;
+   }
+
    public void swapCollidables()
    {
       collisionData.swapShapes();
@@ -109,9 +114,9 @@ public class CollisionResult
       return collisionAxisForA;
    }
 
-   public FrameVector3D getAccumulatedSlipForA()
+   public FrameVector3DBasics getAccumulatedSlipForA()
    {
-      return accumulatedSlipForA;
+      return collisionSlipHolder.getEstimatedSlipFromBToA();
    }
 
    @Override
