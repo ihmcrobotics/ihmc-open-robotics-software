@@ -197,7 +197,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
       {
          calculators = new RecyclingArrayList<>(8, SupplierBuilder.indexedSupplier(identifier ->
          {
-            return new YoSingleContactImpulseCalculator(robotName + "Dual",
+            return new YoSingleContactImpulseCalculator(robotName + otherRobot.getRobotName() + "Dual",
                                                         identifier,
                                                         multiBodySystem.getInertialFrame(),
                                                         rootBody,
