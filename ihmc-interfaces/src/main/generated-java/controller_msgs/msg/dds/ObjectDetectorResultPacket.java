@@ -7,14 +7,18 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC behavior module
-       */
+   
+ * This message is part of the IHMC behavior module
+   
+ */
 public class ObjectDetectorResultPacket extends Packet<ObjectDetectorResultPacket> implements Settable<ObjectDetectorResultPacket>, EpsilonComparable<ObjectDetectorResultPacket>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public controller_msgs.msg.dds.HeatMapPacket heat_map_;
@@ -50,15 +54,19 @@ public class ObjectDetectorResultPacket extends Packet<ObjectDetectorResultPacke
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

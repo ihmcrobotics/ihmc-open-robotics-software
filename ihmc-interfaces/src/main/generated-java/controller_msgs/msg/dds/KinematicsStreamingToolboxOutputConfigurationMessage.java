@@ -7,62 +7,93 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the KinematicsStreamingToolbox API.
-       * Allows to specify the messages the toolbox should stream to the controller.
-       */
+   
+ * This message is part of the KinematicsStreamingToolbox API.
+   
+ * Allows to specify the messages the toolbox should stream to the controller.
+   
+ */
 public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet<KinematicsStreamingToolboxOutputConfigurationMessage> implements Settable<KinematicsStreamingToolboxOutputConfigurationMessage>, EpsilonComparable<KinematicsStreamingToolboxOutputConfigurationMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Whether the left arm should be controller in joint-space.
-            * This is compatible with the hand task-space control.
-            * Default value is true.
-            */
+       
+    * Whether the left arm should be controller in joint-space.
+       
+    * This is compatible with the hand task-space control.
+       
+    * Default value is true.
+       
+    */
    public boolean enable_left_arm_jointspace_ = true;
 
    /**
-            * Whether the right arm should be controller in joint-space.
-            * This is compatible with the hand task-space control.
-            * Default value is true.
-            */
+       
+    * Whether the right arm should be controller in joint-space.
+       
+    * This is compatible with the hand task-space control.
+       
+    * Default value is true.
+       
+    */
    public boolean enable_right_arm_jointspace_ = true;
 
    /**
-            * Whether the neck should be controller in joint-space.
-            * Default value is true.
-            * Whether the neck should be controller in joint-space.
-            */
+       
+    * Whether the neck should be controller in joint-space.
+       
+    * Default value is true.
+       
+    * Whether the neck should be controller in joint-space.
+       
+    */
    public boolean enable_neck_jointspace_ = true;
 
    /**
-            * Whether the left hand should be controlled in task-space.
-            * This is compatible with the arm task-space control.
-            * Default value is true.
-            */
+       
+    * Whether the left hand should be controlled in task-space.
+       
+    * This is compatible with the arm task-space control.
+       
+    * Default value is true.
+       
+    */
    public boolean enable_left_hand_taskspace_ = true;
 
    /**
-            * Whether the right hand should be controlled in task-space.
-            * This is compatible with the arm task-space control.
-            * Default value is true.
-            */
+       
+    * Whether the right hand should be controlled in task-space.
+       
+    * This is compatible with the arm task-space control.
+       
+    * Default value is true.
+       
+    */
    public boolean enable_right_hand_taskspace_ = true;
 
    /**
-            * Whether the chest orientation should be controlled.
-            * Default value is true.
-            */
+       
+    * Whether the chest orientation should be controlled.
+       
+    * Default value is true.
+       
+    */
    public boolean enable_chest_taskspace_ = true;
 
    /**
-            * Whether the pelvis should be controlled in task-space.
-            * Default value is true.
-            */
+       
+    * Whether the pelvis should be controlled in task-space.
+       
+    * Default value is true.
+       
+    */
    public boolean enable_pelvis_taskspace_ = true;
 
    public KinematicsStreamingToolboxOutputConfigurationMessage()
@@ -114,15 +145,19 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -130,19 +165,27 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
 
 
    /**
-            * Whether the left arm should be controller in joint-space.
-            * This is compatible with the hand task-space control.
-            * Default value is true.
-            */
+       
+    * Whether the left arm should be controller in joint-space.
+       
+    * This is compatible with the hand task-space control.
+       
+    * Default value is true.
+       
+    */
    public void setEnableLeftArmJointspace(boolean enable_left_arm_jointspace)
    {
       enable_left_arm_jointspace_ = enable_left_arm_jointspace;
    }
    /**
-            * Whether the left arm should be controller in joint-space.
-            * This is compatible with the hand task-space control.
-            * Default value is true.
-            */
+       
+    * Whether the left arm should be controller in joint-space.
+       
+    * This is compatible with the hand task-space control.
+       
+    * Default value is true.
+       
+    */
    public boolean getEnableLeftArmJointspace()
    {
       return enable_left_arm_jointspace_;
@@ -150,19 +193,27 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
 
 
    /**
-            * Whether the right arm should be controller in joint-space.
-            * This is compatible with the hand task-space control.
-            * Default value is true.
-            */
+       
+    * Whether the right arm should be controller in joint-space.
+       
+    * This is compatible with the hand task-space control.
+       
+    * Default value is true.
+       
+    */
    public void setEnableRightArmJointspace(boolean enable_right_arm_jointspace)
    {
       enable_right_arm_jointspace_ = enable_right_arm_jointspace;
    }
    /**
-            * Whether the right arm should be controller in joint-space.
-            * This is compatible with the hand task-space control.
-            * Default value is true.
-            */
+       
+    * Whether the right arm should be controller in joint-space.
+       
+    * This is compatible with the hand task-space control.
+       
+    * Default value is true.
+       
+    */
    public boolean getEnableRightArmJointspace()
    {
       return enable_right_arm_jointspace_;
@@ -170,19 +221,27 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
 
 
    /**
-            * Whether the neck should be controller in joint-space.
-            * Default value is true.
-            * Whether the neck should be controller in joint-space.
-            */
+       
+    * Whether the neck should be controller in joint-space.
+       
+    * Default value is true.
+       
+    * Whether the neck should be controller in joint-space.
+       
+    */
    public void setEnableNeckJointspace(boolean enable_neck_jointspace)
    {
       enable_neck_jointspace_ = enable_neck_jointspace;
    }
    /**
-            * Whether the neck should be controller in joint-space.
-            * Default value is true.
-            * Whether the neck should be controller in joint-space.
-            */
+       
+    * Whether the neck should be controller in joint-space.
+       
+    * Default value is true.
+       
+    * Whether the neck should be controller in joint-space.
+       
+    */
    public boolean getEnableNeckJointspace()
    {
       return enable_neck_jointspace_;
@@ -190,19 +249,27 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
 
 
    /**
-            * Whether the left hand should be controlled in task-space.
-            * This is compatible with the arm task-space control.
-            * Default value is true.
-            */
+       
+    * Whether the left hand should be controlled in task-space.
+       
+    * This is compatible with the arm task-space control.
+       
+    * Default value is true.
+       
+    */
    public void setEnableLeftHandTaskspace(boolean enable_left_hand_taskspace)
    {
       enable_left_hand_taskspace_ = enable_left_hand_taskspace;
    }
    /**
-            * Whether the left hand should be controlled in task-space.
-            * This is compatible with the arm task-space control.
-            * Default value is true.
-            */
+       
+    * Whether the left hand should be controlled in task-space.
+       
+    * This is compatible with the arm task-space control.
+       
+    * Default value is true.
+       
+    */
    public boolean getEnableLeftHandTaskspace()
    {
       return enable_left_hand_taskspace_;
@@ -210,19 +277,27 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
 
 
    /**
-            * Whether the right hand should be controlled in task-space.
-            * This is compatible with the arm task-space control.
-            * Default value is true.
-            */
+       
+    * Whether the right hand should be controlled in task-space.
+       
+    * This is compatible with the arm task-space control.
+       
+    * Default value is true.
+       
+    */
    public void setEnableRightHandTaskspace(boolean enable_right_hand_taskspace)
    {
       enable_right_hand_taskspace_ = enable_right_hand_taskspace;
    }
    /**
-            * Whether the right hand should be controlled in task-space.
-            * This is compatible with the arm task-space control.
-            * Default value is true.
-            */
+       
+    * Whether the right hand should be controlled in task-space.
+       
+    * This is compatible with the arm task-space control.
+       
+    * Default value is true.
+       
+    */
    public boolean getEnableRightHandTaskspace()
    {
       return enable_right_hand_taskspace_;
@@ -230,17 +305,23 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
 
 
    /**
-            * Whether the chest orientation should be controlled.
-            * Default value is true.
-            */
+       
+    * Whether the chest orientation should be controlled.
+       
+    * Default value is true.
+       
+    */
    public void setEnableChestTaskspace(boolean enable_chest_taskspace)
    {
       enable_chest_taskspace_ = enable_chest_taskspace;
    }
    /**
-            * Whether the chest orientation should be controlled.
-            * Default value is true.
-            */
+       
+    * Whether the chest orientation should be controlled.
+       
+    * Default value is true.
+       
+    */
    public boolean getEnableChestTaskspace()
    {
       return enable_chest_taskspace_;
@@ -248,17 +329,23 @@ public class KinematicsStreamingToolboxOutputConfigurationMessage extends Packet
 
 
    /**
-            * Whether the pelvis should be controlled in task-space.
-            * Default value is true.
-            */
+       
+    * Whether the pelvis should be controlled in task-space.
+       
+    * Default value is true.
+       
+    */
    public void setEnablePelvisTaskspace(boolean enable_pelvis_taskspace)
    {
       enable_pelvis_taskspace_ = enable_pelvis_taskspace;
    }
    /**
-            * Whether the pelvis should be controlled in task-space.
-            * Default value is true.
-            */
+       
+    * Whether the pelvis should be controlled in task-space.
+       
+    * Default value is true.
+       
+    */
    public boolean getEnablePelvisTaskspace()
    {
       return enable_pelvis_taskspace_;

@@ -7,58 +7,88 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the KinematicsStreamingToolbox API.
-       */
+   
+ * This message is part of the KinematicsStreamingToolbox API.
+   
+ */
 public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStreamingToolboxInputMessage> implements Settable<KinematicsStreamingToolboxInputMessage>, EpsilonComparable<KinematicsStreamingToolboxInputMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * The timestamp (in nanoseconds) at which this message was generated.
-            * This is used on the toolbox side to estimate things such as desired end-effector velocities.
-            */
+       
+    * The timestamp (in nanoseconds) at which this message was generated.
+       
+    * This is used on the toolbox side to estimate things such as desired end-effector velocities.
+       
+    */
    public long timestamp_;
 
    /**
-            * When false, the toolbox will only publish a status with KinematicsToolboxOutputStatus such that the user can validate
-            * that the solver is working properly.
-            * When true, the toolbox will stream to the IHMC walking controller the desired robot configuration. The status mentioned is
-            * still published so the user can compare the solver desired state against the actual robot state.
-            */
+       
+    * When false, the toolbox will only publish a status with KinematicsToolboxOutputStatus such that the user can validate
+       
+    * that the solver is working properly.
+       
+    * When true, the toolbox will stream to the IHMC walking controller the desired robot configuration. The status mentioned is
+       
+    * still published so the user can compare the solver desired state against the actual robot state.
+       
+    */
    public boolean stream_to_controller_;
 
    /**
-            * When starting to stream to controller, a blending is initiated over a fixed duration so the IHMC walking controller smoothly
-            * reaches for the current IK configuration.
-            * A larger value will result in a smoother initial transition, while a shorter duration will result in a quicker response when starting to stream.
-            * Set to <= 0.0 to use the default value.
-            */
+       
+    * When starting to stream to controller, a blending is initiated over a fixed duration so the IHMC walking controller smoothly
+       
+    * reaches for the current IK configuration.
+       
+    * A larger value will result in a smoother initial transition, while a shorter duration will result in a quicker response when starting to stream.
+       
+    * Set to <= 0.0 to use the default value.
+       
+    */
    public double stream_initial_blend_duration_ = -1.0;
 
    /**
-            * Constraint on the maximum angular velocity resulting from any user inputs.
-            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
-            * Set to <= 0.0 to use the default value.
-            */
+       
+    * Constraint on the maximum angular velocity resulting from any user inputs.
+       
+    * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+       
+    * Set to <= 0.0 to use the default value.
+       
+    */
    public double angular_rate_limitation_ = -1.0;
 
    /**
-            * Constraint on the maximum linear velocity resulting from any user inputs.
-            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
-            * Set to <= 0.0 to use the default value.
-            */
+       
+    * Constraint on the maximum linear velocity resulting from any user inputs.
+       
+    * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+       
+    * Set to <= 0.0 to use the default value.
+       
+    */
    public double linear_rate_limitation_ = -1.0;
 
    /**
-            * The list of inputs the solver is to be tracking.
-            * When streaming inputs from a VR UI environment, it is convenient to use the fields control_frame_position_in_end_effector and
-            * control_frame_orientation_in_end_effector from KinematicsToolboxRigidBodyMessage to adjust the user's controllers with respect
-            * to the robot's end-effectors.
-            */
+       
+    * The list of inputs the solver is to be tracking.
+       
+    * When streaming inputs from a VR UI environment, it is convenient to use the fields control_frame_position_in_end_effector and
+       
+    * control_frame_orientation_in_end_effector from KinematicsToolboxRigidBodyMessage to adjust the user's controllers with respect
+       
+    * to the robot's end-effectors.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage>  inputs_;
 
    public KinematicsStreamingToolboxInputMessage()
@@ -106,15 +136,19 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -122,17 +156,23 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
 
 
    /**
-            * The timestamp (in nanoseconds) at which this message was generated.
-            * This is used on the toolbox side to estimate things such as desired end-effector velocities.
-            */
+       
+    * The timestamp (in nanoseconds) at which this message was generated.
+       
+    * This is used on the toolbox side to estimate things such as desired end-effector velocities.
+       
+    */
    public void setTimestamp(long timestamp)
    {
       timestamp_ = timestamp;
    }
    /**
-            * The timestamp (in nanoseconds) at which this message was generated.
-            * This is used on the toolbox side to estimate things such as desired end-effector velocities.
-            */
+       
+    * The timestamp (in nanoseconds) at which this message was generated.
+       
+    * This is used on the toolbox side to estimate things such as desired end-effector velocities.
+       
+    */
    public long getTimestamp()
    {
       return timestamp_;
@@ -140,21 +180,31 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
 
 
    /**
-            * When false, the toolbox will only publish a status with KinematicsToolboxOutputStatus such that the user can validate
-            * that the solver is working properly.
-            * When true, the toolbox will stream to the IHMC walking controller the desired robot configuration. The status mentioned is
-            * still published so the user can compare the solver desired state against the actual robot state.
-            */
+       
+    * When false, the toolbox will only publish a status with KinematicsToolboxOutputStatus such that the user can validate
+       
+    * that the solver is working properly.
+       
+    * When true, the toolbox will stream to the IHMC walking controller the desired robot configuration. The status mentioned is
+       
+    * still published so the user can compare the solver desired state against the actual robot state.
+       
+    */
    public void setStreamToController(boolean stream_to_controller)
    {
       stream_to_controller_ = stream_to_controller;
    }
    /**
-            * When false, the toolbox will only publish a status with KinematicsToolboxOutputStatus such that the user can validate
-            * that the solver is working properly.
-            * When true, the toolbox will stream to the IHMC walking controller the desired robot configuration. The status mentioned is
-            * still published so the user can compare the solver desired state against the actual robot state.
-            */
+       
+    * When false, the toolbox will only publish a status with KinematicsToolboxOutputStatus such that the user can validate
+       
+    * that the solver is working properly.
+       
+    * When true, the toolbox will stream to the IHMC walking controller the desired robot configuration. The status mentioned is
+       
+    * still published so the user can compare the solver desired state against the actual robot state.
+       
+    */
    public boolean getStreamToController()
    {
       return stream_to_controller_;
@@ -162,21 +212,31 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
 
 
    /**
-            * When starting to stream to controller, a blending is initiated over a fixed duration so the IHMC walking controller smoothly
-            * reaches for the current IK configuration.
-            * A larger value will result in a smoother initial transition, while a shorter duration will result in a quicker response when starting to stream.
-            * Set to <= 0.0 to use the default value.
-            */
+       
+    * When starting to stream to controller, a blending is initiated over a fixed duration so the IHMC walking controller smoothly
+       
+    * reaches for the current IK configuration.
+       
+    * A larger value will result in a smoother initial transition, while a shorter duration will result in a quicker response when starting to stream.
+       
+    * Set to <= 0.0 to use the default value.
+       
+    */
    public void setStreamInitialBlendDuration(double stream_initial_blend_duration)
    {
       stream_initial_blend_duration_ = stream_initial_blend_duration;
    }
    /**
-            * When starting to stream to controller, a blending is initiated over a fixed duration so the IHMC walking controller smoothly
-            * reaches for the current IK configuration.
-            * A larger value will result in a smoother initial transition, while a shorter duration will result in a quicker response when starting to stream.
-            * Set to <= 0.0 to use the default value.
-            */
+       
+    * When starting to stream to controller, a blending is initiated over a fixed duration so the IHMC walking controller smoothly
+       
+    * reaches for the current IK configuration.
+       
+    * A larger value will result in a smoother initial transition, while a shorter duration will result in a quicker response when starting to stream.
+       
+    * Set to <= 0.0 to use the default value.
+       
+    */
    public double getStreamInitialBlendDuration()
    {
       return stream_initial_blend_duration_;
@@ -184,19 +244,27 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
 
 
    /**
-            * Constraint on the maximum angular velocity resulting from any user inputs.
-            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
-            * Set to <= 0.0 to use the default value.
-            */
+       
+    * Constraint on the maximum angular velocity resulting from any user inputs.
+       
+    * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+       
+    * Set to <= 0.0 to use the default value.
+       
+    */
    public void setAngularRateLimitation(double angular_rate_limitation)
    {
       angular_rate_limitation_ = angular_rate_limitation;
    }
    /**
-            * Constraint on the maximum angular velocity resulting from any user inputs.
-            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
-            * Set to <= 0.0 to use the default value.
-            */
+       
+    * Constraint on the maximum angular velocity resulting from any user inputs.
+       
+    * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+       
+    * Set to <= 0.0 to use the default value.
+       
+    */
    public double getAngularRateLimitation()
    {
       return angular_rate_limitation_;
@@ -204,19 +272,27 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
 
 
    /**
-            * Constraint on the maximum linear velocity resulting from any user inputs.
-            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
-            * Set to <= 0.0 to use the default value.
-            */
+       
+    * Constraint on the maximum linear velocity resulting from any user inputs.
+       
+    * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+       
+    * Set to <= 0.0 to use the default value.
+       
+    */
    public void setLinearRateLimitation(double linear_rate_limitation)
    {
       linear_rate_limitation_ = linear_rate_limitation;
    }
    /**
-            * Constraint on the maximum linear velocity resulting from any user inputs.
-            * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
-            * Set to <= 0.0 to use the default value.
-            */
+       
+    * Constraint on the maximum linear velocity resulting from any user inputs.
+       
+    * A lower value will reduce the speed at which the robot can move, while a higher value will improve response.
+       
+    * Set to <= 0.0 to use the default value.
+       
+    */
    public double getLinearRateLimitation()
    {
       return linear_rate_limitation_;
@@ -225,11 +301,16 @@ public class KinematicsStreamingToolboxInputMessage extends Packet<KinematicsStr
 
 
    /**
-            * The list of inputs the solver is to be tracking.
-            * When streaming inputs from a VR UI environment, it is convenient to use the fields control_frame_position_in_end_effector and
-            * control_frame_orientation_in_end_effector from KinematicsToolboxRigidBodyMessage to adjust the user's controllers with respect
-            * to the robot's end-effectors.
-            */
+       
+    * The list of inputs the solver is to be tracking.
+       
+    * When streaming inputs from a VR UI environment, it is convenient to use the fields control_frame_position_in_end_effector and
+       
+    * control_frame_orientation_in_end_effector from KinematicsToolboxRigidBodyMessage to adjust the user's controllers with respect
+       
+    * to the robot's end-effectors.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage>  getInputs()
    {
       return inputs_;

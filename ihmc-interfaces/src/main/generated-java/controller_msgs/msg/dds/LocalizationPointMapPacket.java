@@ -7,14 +7,18 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Message part of the localization module
-       */
+   
+ * Message part of the localization module
+   
+ */
 public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacket> implements Settable<LocalizationPointMapPacket>, EpsilonComparable<LocalizationPointMapPacket>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public long timestamp_;
@@ -51,15 +55,19 @@ public class LocalizationPointMapPacket extends Packet<LocalizationPointMapPacke
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

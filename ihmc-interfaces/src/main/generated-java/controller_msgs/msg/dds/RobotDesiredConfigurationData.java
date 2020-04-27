@@ -7,25 +7,34 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message contains a list of joint-level desired values that are output from the whole-body controller
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message contains a list of joint-level desired values that are output from the whole-body controller
+   
+ */
 public class RobotDesiredConfigurationData extends Packet<RobotDesiredConfigurationData> implements Settable<RobotDesiredConfigurationData>, EpsilonComparable<RobotDesiredConfigurationData>
 {
 
    /**
-            * Wall-time in nanoseconds
-            */
+       
+    * Wall-time in nanoseconds
+       
+    */
    public long wall_time_;
 
    /**
-            * Hash of the joint names included in joint_desired_output_list
-            */
+       
+    * Hash of the joint names included in joint_desired_output_list
+       
+    */
    public int joint_name_hash_;
 
    /**
-            * Contains list of joint desireds, ordered according
-            */
+       
+    * Contains list of joint desireds, ordered according
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.JointDesiredOutputMessage>  joint_desired_output_list_;
 
    public boolean has_desired_root_joint_position_data_;
@@ -111,15 +120,19 @@ public class RobotDesiredConfigurationData extends Packet<RobotDesiredConfigurat
 
 
    /**
-            * Wall-time in nanoseconds
-            */
+       
+    * Wall-time in nanoseconds
+       
+    */
    public void setWallTime(long wall_time)
    {
       wall_time_ = wall_time;
    }
    /**
-            * Wall-time in nanoseconds
-            */
+       
+    * Wall-time in nanoseconds
+       
+    */
    public long getWallTime()
    {
       return wall_time_;
@@ -127,15 +140,19 @@ public class RobotDesiredConfigurationData extends Packet<RobotDesiredConfigurat
 
 
    /**
-            * Hash of the joint names included in joint_desired_output_list
-            */
+       
+    * Hash of the joint names included in joint_desired_output_list
+       
+    */
    public void setJointNameHash(int joint_name_hash)
    {
       joint_name_hash_ = joint_name_hash;
    }
    /**
-            * Hash of the joint names included in joint_desired_output_list
-            */
+       
+    * Hash of the joint names included in joint_desired_output_list
+       
+    */
    public int getJointNameHash()
    {
       return joint_name_hash_;
@@ -144,8 +161,10 @@ public class RobotDesiredConfigurationData extends Packet<RobotDesiredConfigurat
 
 
    /**
-            * Contains list of joint desireds, ordered according
-            */
+       
+    * Contains list of joint desireds, ordered according
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.JointDesiredOutputMessage>  getJointDesiredOutputList()
    {
       return joint_desired_output_list_;

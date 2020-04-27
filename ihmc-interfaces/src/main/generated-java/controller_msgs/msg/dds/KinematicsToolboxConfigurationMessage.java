@@ -7,98 +7,144 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body inverse kinematics module.
-       * It contains auxiliary information that allows to further customized the behavior of the solver.
-       */
+   
+ * This message is part of the IHMC whole-body inverse kinematics module.
+   
+ * It contains auxiliary information that allows to further customized the behavior of the solver.
+   
+ */
 public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsToolboxConfigurationMessage> implements Settable<KinematicsToolboxConfigurationMessage>, EpsilonComparable<KinematicsToolboxConfigurationMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Indicates whether the privileged_root_joint_position is to be used or not.
-            */
+       
+    * Indicates whether the privileged_root_joint_position is to be used or not.
+       
+    */
    public boolean use_privileged_root_joint_position_;
 
    /**
-            * Indicates whether the privileged_root_joint_orientation is to be used or not.
-            */
+       
+    * Indicates whether the privileged_root_joint_orientation is to be used or not.
+       
+    */
    public boolean use_privileged_root_joint_orientation_;
 
    /**
-            * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
-            */
+       
+    * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D privileged_root_joint_position_;
 
    /**
-            * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
-            */
+       
+    * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
+       
+    */
    public us.ihmc.euclid.tuple4D.Quaternion privileged_root_joint_orientation_;
 
    /**
-            * This array is used to identify to which joint each angle in privileged_joint_angles belongs to.
-            * See Joint.hashCode() for the computation of a joint hash code.
-            */
+       
+    * This array is used to identify to which joint each angle in privileged_joint_angles belongs to.
+       
+    * See Joint.hashCode() for the computation of a joint hash code.
+       
+    */
    public us.ihmc.idl.IDLSequence.Integer  privileged_joint_hash_codes_;
 
    /**
-            * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
-            */
+       
+    * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
+       
+    */
    public us.ihmc.idl.IDLSequence.Float  privileged_joint_angles_;
 
    /**
-            * The weight to use in the optimization for the privileged configuration.
-            * When remaining close to the privileged configuration is important, raise this weight to a value higher than the
-            * weight of the main objectives.
-            * Any value less than zero will be ignored.
-            * A value of -1 will result in the solver using its default value.
-            */
+       
+    * The weight to use in the optimization for the privileged configuration.
+       
+    * When remaining close to the privileged configuration is important, raise this weight to a value higher than the
+       
+    * weight of the main objectives.
+       
+    * Any value less than zero will be ignored.
+       
+    * A value of -1 will result in the solver using its default value.
+       
+    */
    public double privileged_weight_ = -1.0;
 
    /**
-            * The feedback proportional gain to use for the privileged configuration.
-            * It is coupled to some extent to the privileged_weight
-            * A value of -1 will result in the solver using its default value.
-            */
+       
+    * The feedback proportional gain to use for the privileged configuration.
+       
+    * It is coupled to some extent to the privileged_weight
+       
+    * A value of -1 will result in the solver using its default value.
+       
+    */
    public double privileged_gain_ = -1.0;
 
    /**
-            * Specifies how much high joint velocity values should be penalized in the optimization problem.
-            * A low value generally results in a reduce number of iterations before convergence but it also decreases the general stability of the solver.
-            * A value of -1 will result in the solver using its default value.
-            */
+       
+    * Specifies how much high joint velocity values should be penalized in the optimization problem.
+       
+    * A low value generally results in a reduce number of iterations before convergence but it also decreases the general stability of the solver.
+       
+    * A value of -1 will result in the solver using its default value.
+       
+    */
    public double joint_velocity_weight_ = -1.0;
 
    /**
-            * Specifying how much high joint acceleration values should be penalized in the optimization problem.
-            * A value of -1 will result in the solver using its default value.
-            */
+       
+    * Specifying how much high joint acceleration values should be penalized in the optimization problem.
+       
+    * A value of -1 will result in the solver using its default value.
+       
+    */
    public double joint_acceleration_weight_ = -1.0;
 
    /**
-            * When true, the solver will enforce the joint velocity limits as defined in the robot model.
-            * Enabling this restriction will augment the number of iteration before converging to a robot configuration for a given set of end-effector positions.
-            */
+       
+    * When true, the solver will enforce the joint velocity limits as defined in the robot model.
+       
+    * Enabling this restriction will augment the number of iteration before converging to a robot configuration for a given set of end-effector positions.
+       
+    */
    public boolean enable_joint_velocity_limits_;
 
    /**
-            * When true, the solver will ignore the joint velocity limits.
-            * Enabling this restriction will reduce the number of iteration before converging to a robot configuration for a given set of end-effector positions.
-            */
+       
+    * When true, the solver will ignore the joint velocity limits.
+       
+    * Enabling this restriction will reduce the number of iteration before converging to a robot configuration for a given set of end-effector positions.
+       
+    */
    public boolean disable_joint_velocity_limits_;
 
    /**
-            * If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
-            * In case it has undesirable effects, use this flag to disable it.
-            */
+       
+    * If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
+       
+    * In case it has undesirable effects, use this flag to disable it.
+       
+    */
    public boolean disable_collision_avoidance_;
 
    /**
-            * In case collision avoidance has been disabled, use this flag to re-enable it while leaving disable_collision_avoidance to false.
-            */
+       
+    * In case collision avoidance has been disabled, use this flag to re-enable it while leaving disable_collision_avoidance to false.
+       
+    */
    public boolean enable_collision_avoidance_;
 
    public KinematicsToolboxConfigurationMessage()
@@ -180,15 +226,19 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -196,15 +246,19 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
 
    /**
-            * Indicates whether the privileged_root_joint_position is to be used or not.
-            */
+       
+    * Indicates whether the privileged_root_joint_position is to be used or not.
+       
+    */
    public void setUsePrivilegedRootJointPosition(boolean use_privileged_root_joint_position)
    {
       use_privileged_root_joint_position_ = use_privileged_root_joint_position;
    }
    /**
-            * Indicates whether the privileged_root_joint_position is to be used or not.
-            */
+       
+    * Indicates whether the privileged_root_joint_position is to be used or not.
+       
+    */
    public boolean getUsePrivilegedRootJointPosition()
    {
       return use_privileged_root_joint_position_;
@@ -212,15 +266,19 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
 
    /**
-            * Indicates whether the privileged_root_joint_orientation is to be used or not.
-            */
+       
+    * Indicates whether the privileged_root_joint_orientation is to be used or not.
+       
+    */
    public void setUsePrivilegedRootJointOrientation(boolean use_privileged_root_joint_orientation)
    {
       use_privileged_root_joint_orientation_ = use_privileged_root_joint_orientation;
    }
    /**
-            * Indicates whether the privileged_root_joint_orientation is to be used or not.
-            */
+       
+    * Indicates whether the privileged_root_joint_orientation is to be used or not.
+       
+    */
    public boolean getUsePrivilegedRootJointOrientation()
    {
       return use_privileged_root_joint_orientation_;
@@ -229,8 +287,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
 
    /**
-            * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
-            */
+       
+    * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D getPrivilegedRootJointPosition()
    {
       return privileged_root_joint_position_;
@@ -239,8 +299,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
 
    /**
-            * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
-            */
+       
+    * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
+       
+    */
    public us.ihmc.euclid.tuple4D.Quaternion getPrivilegedRootJointOrientation()
    {
       return privileged_root_joint_orientation_;
@@ -249,9 +311,12 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
 
    /**
-            * This array is used to identify to which joint each angle in privileged_joint_angles belongs to.
-            * See Joint.hashCode() for the computation of a joint hash code.
-            */
+       
+    * This array is used to identify to which joint each angle in privileged_joint_angles belongs to.
+       
+    * See Joint.hashCode() for the computation of a joint hash code.
+       
+    */
    public us.ihmc.idl.IDLSequence.Integer  getPrivilegedJointHashCodes()
    {
       return privileged_joint_hash_codes_;
@@ -260,8 +325,10 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
 
    /**
-            * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
-            */
+       
+    * When provided, the solver will attempt to find the solution that is the closest to the privileged configuration.
+       
+    */
    public us.ihmc.idl.IDLSequence.Float  getPrivilegedJointAngles()
    {
       return privileged_joint_angles_;
@@ -269,23 +336,35 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
 
    /**
-            * The weight to use in the optimization for the privileged configuration.
-            * When remaining close to the privileged configuration is important, raise this weight to a value higher than the
-            * weight of the main objectives.
-            * Any value less than zero will be ignored.
-            * A value of -1 will result in the solver using its default value.
-            */
+       
+    * The weight to use in the optimization for the privileged configuration.
+       
+    * When remaining close to the privileged configuration is important, raise this weight to a value higher than the
+       
+    * weight of the main objectives.
+       
+    * Any value less than zero will be ignored.
+       
+    * A value of -1 will result in the solver using its default value.
+       
+    */
    public void setPrivilegedWeight(double privileged_weight)
    {
       privileged_weight_ = privileged_weight;
    }
    /**
-            * The weight to use in the optimization for the privileged configuration.
-            * When remaining close to the privileged configuration is important, raise this weight to a value higher than the
-            * weight of the main objectives.
-            * Any value less than zero will be ignored.
-            * A value of -1 will result in the solver using its default value.
-            */
+       
+    * The weight to use in the optimization for the privileged configuration.
+       
+    * When remaining close to the privileged configuration is important, raise this weight to a value higher than the
+       
+    * weight of the main objectives.
+       
+    * Any value less than zero will be ignored.
+       
+    * A value of -1 will result in the solver using its default value.
+       
+    */
    public double getPrivilegedWeight()
    {
       return privileged_weight_;
@@ -293,19 +372,27 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
 
    /**
-            * The feedback proportional gain to use for the privileged configuration.
-            * It is coupled to some extent to the privileged_weight
-            * A value of -1 will result in the solver using its default value.
-            */
+       
+    * The feedback proportional gain to use for the privileged configuration.
+       
+    * It is coupled to some extent to the privileged_weight
+       
+    * A value of -1 will result in the solver using its default value.
+       
+    */
    public void setPrivilegedGain(double privileged_gain)
    {
       privileged_gain_ = privileged_gain;
    }
    /**
-            * The feedback proportional gain to use for the privileged configuration.
-            * It is coupled to some extent to the privileged_weight
-            * A value of -1 will result in the solver using its default value.
-            */
+       
+    * The feedback proportional gain to use for the privileged configuration.
+       
+    * It is coupled to some extent to the privileged_weight
+       
+    * A value of -1 will result in the solver using its default value.
+       
+    */
    public double getPrivilegedGain()
    {
       return privileged_gain_;
@@ -313,19 +400,27 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
 
    /**
-            * Specifies how much high joint velocity values should be penalized in the optimization problem.
-            * A low value generally results in a reduce number of iterations before convergence but it also decreases the general stability of the solver.
-            * A value of -1 will result in the solver using its default value.
-            */
+       
+    * Specifies how much high joint velocity values should be penalized in the optimization problem.
+       
+    * A low value generally results in a reduce number of iterations before convergence but it also decreases the general stability of the solver.
+       
+    * A value of -1 will result in the solver using its default value.
+       
+    */
    public void setJointVelocityWeight(double joint_velocity_weight)
    {
       joint_velocity_weight_ = joint_velocity_weight;
    }
    /**
-            * Specifies how much high joint velocity values should be penalized in the optimization problem.
-            * A low value generally results in a reduce number of iterations before convergence but it also decreases the general stability of the solver.
-            * A value of -1 will result in the solver using its default value.
-            */
+       
+    * Specifies how much high joint velocity values should be penalized in the optimization problem.
+       
+    * A low value generally results in a reduce number of iterations before convergence but it also decreases the general stability of the solver.
+       
+    * A value of -1 will result in the solver using its default value.
+       
+    */
    public double getJointVelocityWeight()
    {
       return joint_velocity_weight_;
@@ -333,17 +428,23 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
 
    /**
-            * Specifying how much high joint acceleration values should be penalized in the optimization problem.
-            * A value of -1 will result in the solver using its default value.
-            */
+       
+    * Specifying how much high joint acceleration values should be penalized in the optimization problem.
+       
+    * A value of -1 will result in the solver using its default value.
+       
+    */
    public void setJointAccelerationWeight(double joint_acceleration_weight)
    {
       joint_acceleration_weight_ = joint_acceleration_weight;
    }
    /**
-            * Specifying how much high joint acceleration values should be penalized in the optimization problem.
-            * A value of -1 will result in the solver using its default value.
-            */
+       
+    * Specifying how much high joint acceleration values should be penalized in the optimization problem.
+       
+    * A value of -1 will result in the solver using its default value.
+       
+    */
    public double getJointAccelerationWeight()
    {
       return joint_acceleration_weight_;
@@ -351,17 +452,23 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
 
    /**
-            * When true, the solver will enforce the joint velocity limits as defined in the robot model.
-            * Enabling this restriction will augment the number of iteration before converging to a robot configuration for a given set of end-effector positions.
-            */
+       
+    * When true, the solver will enforce the joint velocity limits as defined in the robot model.
+       
+    * Enabling this restriction will augment the number of iteration before converging to a robot configuration for a given set of end-effector positions.
+       
+    */
    public void setEnableJointVelocityLimits(boolean enable_joint_velocity_limits)
    {
       enable_joint_velocity_limits_ = enable_joint_velocity_limits;
    }
    /**
-            * When true, the solver will enforce the joint velocity limits as defined in the robot model.
-            * Enabling this restriction will augment the number of iteration before converging to a robot configuration for a given set of end-effector positions.
-            */
+       
+    * When true, the solver will enforce the joint velocity limits as defined in the robot model.
+       
+    * Enabling this restriction will augment the number of iteration before converging to a robot configuration for a given set of end-effector positions.
+       
+    */
    public boolean getEnableJointVelocityLimits()
    {
       return enable_joint_velocity_limits_;
@@ -369,17 +476,23 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
 
    /**
-            * When true, the solver will ignore the joint velocity limits.
-            * Enabling this restriction will reduce the number of iteration before converging to a robot configuration for a given set of end-effector positions.
-            */
+       
+    * When true, the solver will ignore the joint velocity limits.
+       
+    * Enabling this restriction will reduce the number of iteration before converging to a robot configuration for a given set of end-effector positions.
+       
+    */
    public void setDisableJointVelocityLimits(boolean disable_joint_velocity_limits)
    {
       disable_joint_velocity_limits_ = disable_joint_velocity_limits;
    }
    /**
-            * When true, the solver will ignore the joint velocity limits.
-            * Enabling this restriction will reduce the number of iteration before converging to a robot configuration for a given set of end-effector positions.
-            */
+       
+    * When true, the solver will ignore the joint velocity limits.
+       
+    * Enabling this restriction will reduce the number of iteration before converging to a robot configuration for a given set of end-effector positions.
+       
+    */
    public boolean getDisableJointVelocityLimits()
    {
       return disable_joint_velocity_limits_;
@@ -387,17 +500,23 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
 
    /**
-            * If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
-            * In case it has undesirable effects, use this flag to disable it.
-            */
+       
+    * If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
+       
+    * In case it has undesirable effects, use this flag to disable it.
+       
+    */
    public void setDisableCollisionAvoidance(boolean disable_collision_avoidance)
    {
       disable_collision_avoidance_ = disable_collision_avoidance;
    }
    /**
-            * If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
-            * In case it has undesirable effects, use this flag to disable it.
-            */
+       
+    * If the toolbox has been setup with the collision model of the robot, it will by default handle self-collision avoidance.
+       
+    * In case it has undesirable effects, use this flag to disable it.
+       
+    */
    public boolean getDisableCollisionAvoidance()
    {
       return disable_collision_avoidance_;
@@ -405,15 +524,19 @@ public class KinematicsToolboxConfigurationMessage extends Packet<KinematicsTool
 
 
    /**
-            * In case collision avoidance has been disabled, use this flag to re-enable it while leaving disable_collision_avoidance to false.
-            */
+       
+    * In case collision avoidance has been disabled, use this flag to re-enable it while leaving disable_collision_avoidance to false.
+       
+    */
    public void setEnableCollisionAvoidance(boolean enable_collision_avoidance)
    {
       enable_collision_avoidance_ = enable_collision_avoidance;
    }
    /**
-            * In case collision avoidance has been disabled, use this flag to re-enable it while leaving disable_collision_avoidance to false.
-            */
+       
+    * In case collision avoidance has been disabled, use this flag to re-enable it while leaving disable_collision_avoidance to false.
+       
+    */
    public boolean getEnableCollisionAvoidance()
    {
       return enable_collision_avoidance_;

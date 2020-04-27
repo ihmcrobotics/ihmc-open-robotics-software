@@ -7,14 +7,18 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is used to provides additional properties for cameras.
-       */
+   
+ * This message is used to provides additional properties for cameras.
+   
+ */
 public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessage> implements Settable<IntrinsicParametersMessage>, EpsilonComparable<IntrinsicParametersMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public int width_;
@@ -99,15 +103,19 @@ public class IntrinsicParametersMessage extends Packet<IntrinsicParametersMessag
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
