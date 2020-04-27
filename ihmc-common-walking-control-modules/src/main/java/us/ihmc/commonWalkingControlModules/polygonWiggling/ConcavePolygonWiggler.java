@@ -16,6 +16,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
@@ -27,12 +28,12 @@ public class ConcavePolygonWiggler
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
 
    private int maximumIterations = 1000;
-   private double alpha = 0.075;
+   private double alpha = 0.125;
    private double gradientMagnitudeToTerminate = 1e-5;
+   private final YoDouble gradientMagnitude = new YoDouble("gradientMagnitude", registry);
 
    private final Vector3D previousGradient = new Vector3D();
    private final YoFrameVector3D gradient = new YoFrameVector3D("gradient", ReferenceFrame.getWorldFrame(), registry);
-   private final Vector3D gradientDelta = new Vector3D();
    private final YoFrameVector3D accumulatedTransform = new YoFrameVector3D("accumulatedTransformient", ReferenceFrame.getWorldFrame(), registry);
 
    private final Point2D tempPoint = new Point2D();
@@ -119,10 +120,9 @@ public class ConcavePolygonWiggler
             break;
          }
 
-         boolean allPointsInside = true;
          gradient.setToZero();
-
          updateGraphics(polygonToWiggle);
+
          for (int i = 0; i < polygonToWiggle.getNumberOfVertices(); i++)
          {
             Point2DReadOnly vertex = transformedVertices.get(i);
@@ -137,8 +137,6 @@ public class ConcavePolygonWiggler
 
             if (pointDoesNotMeetConstraints)
             {
-               allPointsInside = false;
-
                directionToClosestPoint.sub(closestPerimeterPoint, vertex);
                if (signedDistanceSquared < 0.0)
                {
@@ -165,13 +163,8 @@ public class ConcavePolygonWiggler
 
          if (tickAndUpdatable != null)
          {
+            gradientMagnitude.set(gradient.length());
             tickAndUpdatable.tickAndUpdate();
-         }
-
-         if (allPointsInside)
-         {
-            System.out.println("All points inside");
-            break;
          }
 
          gradient.scale(alpha);
@@ -186,8 +179,7 @@ public class ConcavePolygonWiggler
 
          if (iterations > 0)
          {
-            gradientDelta.sub(gradient, previousGradient);
-            if (gradientDelta.lengthSquared() < MathTools.square(gradientMagnitudeToTerminate))
+            if (gradient.lengthSquared() < MathTools.square(gradientMagnitudeToTerminate))
             {
                break;
             }
@@ -289,11 +281,6 @@ public class ConcavePolygonWiggler
       return transformedVertices;
    }
 
-   public void setGradientMagnitudeToTerminate(double gradientMagnitudeToTerminate)
-   {
-      this.gradientMagnitudeToTerminate = gradientMagnitudeToTerminate;
-   }
-
    public void setMaximumIterations(int maximumIterations)
    {
       this.maximumIterations = maximumIterations;
@@ -302,5 +289,20 @@ public class ConcavePolygonWiggler
    public void setAlpha(double alpha)
    {
       this.alpha = alpha;
+   }
+
+   public void setGradientMagnitudeToTerminate(double gradientMagnitudeToTerminate)
+   {
+      this.gradientMagnitudeToTerminate = gradientMagnitudeToTerminate;
+   }
+
+   public double getGradientMagnitudeToTerminate()
+   {
+      return gradientMagnitudeToTerminate;
+   }
+
+   public double getAlpha()
+   {
+      return alpha;
    }
 }
