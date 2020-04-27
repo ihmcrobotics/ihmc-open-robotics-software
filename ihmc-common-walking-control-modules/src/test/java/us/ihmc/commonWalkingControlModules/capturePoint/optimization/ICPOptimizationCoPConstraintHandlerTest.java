@@ -16,8 +16,6 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -25,7 +23,6 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.humanoidRobotics.footstep.FootSpoof;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -65,7 +62,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
 
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForDoubleSupport());
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
 
       solver.setMaxCMPDistanceFromEdge(0.05);
       solver.setCopSafeDistanceToEdge(0.01);
@@ -129,7 +126,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
 
       // test left support
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.LEFT));
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
 
       solver.setMaxCMPDistanceFromEdge(0.05);
       solver.setCopSafeDistanceToEdge(0.01);
@@ -172,7 +169,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
 
       // test right support
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.RIGHT));
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
 
       solver.setFeedbackConditions(0.2, 2.0, 10000.0);
       solver.setCMPFeedbackConditions(10.0, true);
@@ -229,7 +226,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
 
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForDoubleSupport());
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
 
       solver.setMaxCMPDistanceFromEdge(0.05);
       solver.setCopSafeDistanceToEdge(0.01);
@@ -284,7 +281,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
 
       // test left support
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.LEFT));
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
 
       solver.setMaxCMPDistanceFromEdge(0.05);
       solver.setCopSafeDistanceToEdge(0.01);
@@ -321,7 +318,7 @@ public class ICPOptimizationCoPConstraintHandlerTest
 
       // test right support
       solver.resetCoPLocationConstraint();
-      solver.addSupportPolygon(constraintHandler.updateCoPConstraintForSingleSupport(RobotSide.RIGHT));
+      solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
 
       solver.setFeedbackConditions(0.2, 2.0, 10000.0);
       currentICPError = new FrameVector2D(worldFrame, 0.01, 0.02);
