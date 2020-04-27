@@ -4,6 +4,7 @@ public class ContactParameters implements ContactParametersBasics
 {
    private double coefficientOfFriction;
    private double coefficientOfRestitution;
+   private double restitutionThreshold;
    private double errorReductionParameter;
    private double slipErrorReductionParameter;
    private double constraintForceMixing;
@@ -12,11 +13,12 @@ public class ContactParameters implements ContactParametersBasics
    {
    }
 
-   public ContactParameters(double coefficientOfFriction, double coefficientOfRestitution, double errorReductionParameter, double slipErrorReductionParameter,
-                            double constraintForceMixing)
+   public ContactParameters(double coefficientOfFriction, double coefficientOfRestitution, double restitutionThreshold, double errorReductionParameter,
+                            double slipErrorReductionParameter, double constraintForceMixing)
    {
       this.coefficientOfFriction = coefficientOfFriction;
       this.coefficientOfRestitution = coefficientOfRestitution;
+      this.restitutionThreshold = restitutionThreshold;
       this.errorReductionParameter = errorReductionParameter;
       this.slipErrorReductionParameter = slipErrorReductionParameter;
       this.constraintForceMixing = constraintForceMixing;
@@ -32,6 +34,12 @@ public class ContactParameters implements ContactParametersBasics
    public void setCoefficientOfRestitution(double coefficientOfRestitution)
    {
       this.coefficientOfRestitution = coefficientOfRestitution;
+   }
+
+   @Override
+   public void setRestitutionThreshold(double restitutionThreshold)
+   {
+      this.restitutionThreshold = restitutionThreshold;
    }
 
    @Override
@@ -62,6 +70,12 @@ public class ContactParameters implements ContactParametersBasics
    public double getCoefficientOfRestitution()
    {
       return coefficientOfRestitution;
+   }
+
+   @Override
+   public double getRestitutionThreshold()
+   {
+      return restitutionThreshold;
    }
 
    @Override

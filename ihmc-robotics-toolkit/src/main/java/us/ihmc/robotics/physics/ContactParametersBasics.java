@@ -63,7 +63,7 @@ public interface ContactParametersBasics extends ContactParametersReadOnly, Cons
     * result, 2 shapes may slowly over-time slip with respect to each other.
     * </p>
     * 
-    * @return the error reduction parameter to use for slip.
+    * @param slipErrorReductionParameter the error reduction parameter to use for slip.
     */
    void setSlipErrorReductionParameter(double slipErrorReductionParameter);
 }
