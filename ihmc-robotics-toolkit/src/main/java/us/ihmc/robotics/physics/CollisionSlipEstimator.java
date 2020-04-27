@@ -41,7 +41,6 @@ public class CollisionSlipEstimator implements CollisionSlipHolder
 
    public void clear()
    {
-      System.out.println("Clearing!");
       numberOfTicksSinceLastContact = Long.MAX_VALUE;
       estimatedSlipFromBToA.setToZero();
    }
