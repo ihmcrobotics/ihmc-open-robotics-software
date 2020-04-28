@@ -239,6 +239,9 @@
 
 
 
+
+
+
 float64 DEFAULT_NO_VALUE=-11.1
 
 
@@ -740,6 +743,18 @@ float64 minimum_foothold_percent
 # Field default value -11.1
 
 float64 minimum_surface_incline_radians
+
+
+
+
+
+# The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
+
+# If true, this wiggles each candidate step, which will slow down plan times but resulting plans will be guarunteed to match step constraints.
+
+
+
+bool wiggle_while_planning
 
 
 

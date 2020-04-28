@@ -203,6 +203,10 @@ float64 minimum_foothold_percent 0.9
 # z-value less than cos(minimumSurfaceInclineRadians), it will be rejected.
 float64 minimum_surface_incline_radians -11.1
 
+# The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
+# If true, this wiggles each candidate step, which will slow down plan times but resulting plans will be guarunteed to match step constraints.
+bool wiggle_while_planning false
+
 # There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
 # this toggles between them.
 bool enable_concave_hull_wiggler false

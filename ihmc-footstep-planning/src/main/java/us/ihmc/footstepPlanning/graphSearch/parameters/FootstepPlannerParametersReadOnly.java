@@ -416,6 +416,14 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
+    */
+   default boolean getWiggleWhilePlanning()
+   {
+      return get(wiggleWhilePlanning);
+   }
+
+   /**
     * When wiggling a candidate footstep into a planar region, this is the maximum distance xy-distance
     * distance the planner will use
     */
