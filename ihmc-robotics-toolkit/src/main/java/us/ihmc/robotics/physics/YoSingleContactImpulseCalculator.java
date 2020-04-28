@@ -21,12 +21,14 @@ import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalculator
 {
+   private final YoBoolean isContactClosing;
    private final YoFrameVector3D collisionAxis;
    private final YoFrameVector3D accumulatedSlip;
    private final YoFrameVector3D impulseA, impulseB;
@@ -45,6 +47,7 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
    {
       super(rootFrame, rootBodyA, forwardDynamicsCalculatorA, rootBodyB, forwardDynamicsCalculatorB);
 
+      isContactClosing = new YoBoolean(prefix + "IsContactClosing" + identifier, registry);
       collisionAxis = new YoFrameVector3D(prefix + "CollisionAxis" + identifier, rootFrame, registry);
       accumulatedSlip = new YoFrameVector3D(prefix + "AccumulatedSlip" + identifier, rootFrame, registry);
       pointA = new YoFramePoint3D(prefix + "PointA" + identifier, rootFrame, registry);
@@ -107,6 +110,7 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
 
    public void clear()
    {
+      isContactClosing.set(false);
       collisionAxis.setToNaN();
       accumulatedSlip.setToNaN();
 
@@ -171,6 +175,7 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
    {
       super.finalizeImpulse();
 
+      isContactClosing.set(isContactClosing());
       impulseA.setMatchingFrame(getImpulseA().getLinearPart());
 
       velocityRelative.setMatchingFrame(getVelocityRelative());
