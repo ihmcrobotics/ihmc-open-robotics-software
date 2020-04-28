@@ -1113,6 +1113,14 @@ module controller_msgs
 
 
     
+    /**
+    
+     * If the robot's mid-foot pose is within this distance of the body path, it will match the body path heading.
+    
+     * Otherwise, it will turn towards the body path
+    
+     */
+    
 
     @defaultValue(value=-11.1)
 
@@ -1120,10 +1128,46 @@ module controller_msgs
 
 
     
+    /**
+    
+     * If the robot's mid-foot pose oriented within this threshold of the body path's heading, it will match the body path heading.
+    
+     * Otherwise, it will turn in plance towards the body path
+    
+     */
+    
 
     @defaultValue(value=-11.1)
 
         double delta_yaw_from_reference_tolerance;
+
+
+    
+    /**
+    
+     * Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
+    
+     * ideal step are considered and the others are ignored. Set to non-positive number to disable
+    
+     */
+    
+
+    @defaultValue(value=-1)
+
+        long maximum_branch_factor;
+
+
+    
+    /**
+    
+     * If true, enables a mask that reduces the number of calculated steps away from the ideal step
+    
+     */
+    
+
+    @defaultValue(value=True)
+
+        boolean enable_expansion_mask;
 
 
 

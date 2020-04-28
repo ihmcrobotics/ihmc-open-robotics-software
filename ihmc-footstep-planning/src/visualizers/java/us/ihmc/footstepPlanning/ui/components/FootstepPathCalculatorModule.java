@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.ui.components;
 
 import controller_msgs.msg.dds.FootstepPlanningTimingsMessage;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -77,6 +78,8 @@ public class FootstepPathCalculatorModule
       messager.registerTopicListener(ComputePath, request -> computePathOnThread());
       new FootPoseFromMidFootUpdater(messager).start();
       new FootstepCompletionListener(messager).start();
+
+      messager.registerTopicListener(HaltPlanning, halt -> planningModule.halt());
    }
 
    public void clear()
@@ -183,6 +186,14 @@ public class FootstepPathCalculatorModule
          FootstepPlanningTimingsMessage timingsMessage = new FootstepPlanningTimingsMessage();
          output.getPlannerTimings().setPacket(timingsMessage);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimings, timingsMessage);
+
+         // broadcast log data
+         messager.submitMessage(FootstepPlannerMessagerAPI.GraphData,
+                                Pair.of(planningModule.getEdgeDataMap(), planningModule.getIterationData()));
+         messager.submitMessage(FootstepPlannerMessagerAPI.StartVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getStartMap());
+         messager.submitMessage(FootstepPlannerMessagerAPI.GoalVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getGoalMap());
+         messager.submitMessage(FootstepPlannerMessagerAPI.InterRegionVisibilityMap, planningModule.getBodyPathPlanner().getSolution().getInterRegionVisibilityMap());
+         messager.submitMessage(FootstepPlannerMessagerAPI.VisibilityMapWithNavigableRegionData, planningModule.getBodyPathPlanner().getSolution().getVisibilityMapsWithNavigableRegions());
       }
       catch (Exception e)
       {

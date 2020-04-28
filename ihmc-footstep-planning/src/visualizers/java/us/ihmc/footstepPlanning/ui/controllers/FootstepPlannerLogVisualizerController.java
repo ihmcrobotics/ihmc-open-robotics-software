@@ -378,6 +378,7 @@ public class FootstepPlannerLogVisualizerController
 
    private class TableColumnHolder
    {
+      private final TableColumn<ChildStepProperty, Integer> stepIndex = new TableColumn<>("Index");
       private final TableColumn<ChildStepProperty, String> xColumn = new TableColumn<>("X");
       private final TableColumn<ChildStepProperty, String> yColumn = new TableColumn<>("Y");
       private final TableColumn<ChildStepProperty, String> zColumn = new TableColumn<>("Z");
@@ -399,6 +400,7 @@ public class FootstepPlannerLogVisualizerController
 
       public TableColumnHolder(TableView<ChildStepProperty> table, boolean parentTable)
       {
+         stepIndex.setCellValueFactory(new PropertyValueFactory<>("index"));
          xColumn.setCellValueFactory(new PropertyValueFactory<>("x"));
          yColumn.setCellValueFactory(new PropertyValueFactory<>("y"));
          zColumn.setCellValueFactory(new PropertyValueFactory<>("z"));
@@ -418,6 +420,7 @@ public class FootstepPlannerLogVisualizerController
          expandedColumn.setCellValueFactory(new PropertyValueFactory<>("expanded"));
          solutionStep.setCellValueFactory(new PropertyValueFactory<>("solution"));
 
+         table.getColumns().add(stepIndex);
          table.getColumns().add(xColumn);
          table.getColumns().add(yColumn);
          table.getColumns().add(zColumn);
@@ -441,6 +444,7 @@ public class FootstepPlannerLogVisualizerController
             table.getColumns().add(solutionStep);
          }
 
+         stepIndex.setMaxWidth(60);
          xColumn.setMaxWidth(60);
          yColumn.setMaxWidth(60);
          zColumn.setMaxWidth(60);
@@ -486,6 +490,11 @@ public class FootstepPlannerLogVisualizerController
          {
             FootstepNodeTools.getSnappedNodeTransform(idealStep, idealStepSnapData.getSnapTransform(), idealStepTransform);
          }
+      }
+
+      public int getIndex()
+      {
+         return 0;
       }
 
       public String getX()
@@ -545,6 +554,11 @@ public class FootstepPlannerLogVisualizerController
             FootstepNodeTools.getSnappedNodeTransform(candidateNode, edgeData.getCandidateNodeSnapData().getSnapTransform(), transform);
             stepYaw = candidateNode.getRobotSide().negateIfLeftSide(AngleTools.computeAngleDifferenceMinusPiToPi(candidateNode.getYaw(), stanceNode.getYaw()));
          }
+      }
+
+      public int getIndex()
+      {
+         return edgeData.getStepIndex();
       }
 
       public String getX()
