@@ -2,7 +2,6 @@ package us.ihmc.commonWalkingControlModules.polygonWiggling;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.robotics.EuclidCoreMissingTools;
@@ -30,14 +29,15 @@ public class ConcavePolygonWiggler
 
    private int maximumIterations = 1000;
    private double alpha = 0.125;
+   private double alphaForSmallGradient = 0.35;
    private double gradientMagnitudeToTerminate = 1e-5;
+   private double gradientMagnitudeToApplyStandardAlpha = 1e-3;
    private final YoDouble gradientMagnitude = new YoDouble("gradientMagnitude", registry);
 
    private final Vector3D previousGradient = new Vector3D();
    private final YoFrameVector3D gradient = new YoFrameVector3D("gradient", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D accumulatedTransform = new YoFrameVector3D("accumulatedTransformient", ReferenceFrame.getWorldFrame(), registry);
 
-   private final Point2D tempPoint = new Point2D();
    private final Point2D closestPerimeterPoint = new Point2D();
    private final Vector2D directionToClosestPoint = new Vector2D();
    private final RecyclingArrayList<Point2D> transformedVertices = new RecyclingArrayList<>(5, Point2D::new);
@@ -129,7 +129,7 @@ public class ConcavePolygonWiggler
             Point2DReadOnly vertex = transformedVertices.get(i);
 
             boolean pointIsInside = PointInPolygonSolver.isPointInsidePolygon(concavePolygonToWiggleInto, vertex);
-            double distanceSquaredFromPerimeter = distanceSquaredFromPerimeter(concavePolygonToWiggleInto, vertex);
+            double distanceSquaredFromPerimeter = distanceSquaredFromPerimeter(concavePolygonToWiggleInto, vertex, closestPerimeterPoint);
 
             double signedDistanceSquared = pointIsInside ? - distanceSquaredFromPerimeter : distanceSquaredFromPerimeter;
             double deltaOutside = - wiggleParameters.deltaInside;
@@ -168,9 +168,17 @@ public class ConcavePolygonWiggler
             tickAndUpdatable.tickAndUpdate();
          }
 
-         gradient.scale(alpha);
-         accumulatedTransform.add(gradient);
 
+         if (gradient.lengthSquared() > MathTools.square(gradientMagnitudeToApplyStandardAlpha))
+         {
+            gradient.scale(alpha);
+         }
+         else
+         {
+            gradient.scale(alphaForSmallGradient);
+         }
+
+         accumulatedTransform.add(gradient);
          for (int i = 0; i < polygonToWiggle.getNumberOfVertices(); i++)
          {
             transformedVertices.get(i).add(gradient.getX(), gradient.getY());
@@ -258,9 +266,10 @@ public class ConcavePolygonWiggler
       }
    }
 
-   private double distanceSquaredFromPerimeter(Vertex2DSupplier polygon, Point2DReadOnly queryPoint)
+   private static double distanceSquaredFromPerimeter(Vertex2DSupplier polygon, Point2DReadOnly queryPoint, Point2D closestPointToPack)
    {
       double minimumDistanceSquared = Double.MAX_VALUE;
+      Point2D tempPoint = new Point2D();
 
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
@@ -277,7 +286,7 @@ public class ConcavePolygonWiggler
          if (distanceSquared < minimumDistanceSquared)
          {
             minimumDistanceSquared = distanceSquared;
-            closestPerimeterPoint.set(tempPoint);
+            closestPointToPack.set(tempPoint);
          }
       }
 

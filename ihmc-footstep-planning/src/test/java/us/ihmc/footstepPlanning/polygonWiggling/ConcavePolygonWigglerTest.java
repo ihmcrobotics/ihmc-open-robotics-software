@@ -6,19 +6,23 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.ConcavePolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PointInPolygonSolver;
+import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
+import us.ihmc.pathPlanning.DataSet;
+import us.ihmc.pathPlanning.DataSetIOTools;
+import us.ihmc.pathPlanning.DataSetName;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -129,22 +133,7 @@ public class ConcavePolygonWigglerTest
    @Test
    public void testCrazyPolygon()
    {
-      List<Point2D> vertexList = new ArrayList<>();
-      vertexList.add(new Point2D(0.0, 0.0));
-      vertexList.add(new Point2D(0.0, 0.6));
-      vertexList.add(new Point2D(0.05, 0.65));
-      vertexList.add(new Point2D(0.25, 0.2));
-      vertexList.add(new Point2D(0.1, 0.65));
-      vertexList.add(new Point2D(0.7, 0.75));
-      vertexList.add(new Point2D(0.2, 0.6));
-      vertexList.add(new Point2D(0.4, 0.6));
-      vertexList.add(new Point2D(0.35, 0.5));
-      vertexList.add(new Point2D(0.4, 0.4));
-      vertexList.add(new Point2D(0.35, 0.3));
-      vertexList.add(new Point2D(0.4, 0.2));
-      vertexList.add(new Point2D(0.35, 0.1));
-      vertexList.add(new Point2D(0.4, 0.0));
-      Vertex2DSupplier polygon = Vertex2DSupplier.asVertex2DSupplier(vertexList);
+      Vertex2DSupplier polygon = getCrazyPolygon1();
 
       RigidBodyTransform initialFootTransform = new RigidBodyTransform();
       initialFootTransform.getTranslation().set(0.0, 0.4, 0.0);
@@ -155,6 +144,57 @@ public class ConcavePolygonWigglerTest
 
    @Test
    public void testCrazyPolygon2()
+   {
+      Vertex2DSupplier polygon = getCrazyPolygon2();
+
+      WiggleParameters wiggleParameters = new WiggleParameters();
+      wiggleParameters.rotationWeight = 0.02;
+
+      // foot position 1
+      RigidBodyTransform initialFootTransform = new RigidBodyTransform();
+      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(100.0));
+      initialFootTransform.getTranslation().set(-1.0, 0.5, 0.0);
+      runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
+
+      // foot position 2
+      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(80.0));
+      initialFootTransform.getTranslation().set(-0.3, 0.8, 0.0);
+      runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
+
+      // foot position 3
+      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(0.0));
+      initialFootTransform.getTranslation().set(0.8, 0.15, 0.0);
+      runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
+
+      // foot position 4
+      concavePolygonWiggler.setAlpha(0.25);
+      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(0.0));
+      initialFootTransform.getTranslation().set(0.3, -0.8, 0.0);
+      runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
+   }
+
+   private static Vertex2DSupplier getCrazyPolygon1()
+   {
+      List<Point2D> concaveHull = new ArrayList<>();
+      concaveHull.add(new Point2D(0.0, 0.0));
+      concaveHull.add(new Point2D(0.0, 0.6));
+      concaveHull.add(new Point2D(0.05, 0.65));
+      concaveHull.add(new Point2D(0.25, 0.2));
+      concaveHull.add(new Point2D(0.1, 0.65));
+      concaveHull.add(new Point2D(0.7, 0.75));
+      concaveHull.add(new Point2D(0.2, 0.6));
+      concaveHull.add(new Point2D(0.4, 0.6));
+      concaveHull.add(new Point2D(0.35, 0.5));
+      concaveHull.add(new Point2D(0.4, 0.4));
+      concaveHull.add(new Point2D(0.35, 0.3));
+      concaveHull.add(new Point2D(0.4, 0.2));
+      concaveHull.add(new Point2D(0.35, 0.1));
+      concaveHull.add(new Point2D(0.4, 0.0));
+
+      return Vertex2DSupplier.asVertex2DSupplier(concaveHull);
+   }
+
+   private static Vertex2DSupplier getCrazyPolygon2()
    {
       List<Point2D> concaveHull = new ArrayList<>();
       concaveHull.add(new Point2D(1.050, 0.030));
@@ -189,32 +229,8 @@ public class ConcavePolygonWigglerTest
       concaveHull.add(new Point2D(1.040, -0.650));
       concaveHull.add(new Point2D(1.000, -0.470));
       concaveHull.add(new Point2D(0.830, -0.180));
-      Vertex2DSupplier polygon = Vertex2DSupplier.asVertex2DSupplier(concaveHull);
 
-      WiggleParameters wiggleParameters = new WiggleParameters();
-      wiggleParameters.rotationWeight = 0.02;
-
-      // foot position 1
-      RigidBodyTransform initialFootTransform = new RigidBodyTransform();
-      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(100.0));
-      initialFootTransform.getTranslation().set(-1.0, 0.5, 0.0);
-      runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
-
-      // foot position 2
-      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(80.0));
-      initialFootTransform.getTranslation().set(-0.3, 0.8, 0.0);
-      runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
-
-      // foot position 3
-      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(0.0));
-      initialFootTransform.getTranslation().set(0.8, 0.15, 0.0);
-      runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
-
-      // foot position 4
-      concavePolygonWiggler.setAlpha(0.25);
-      initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(0.0));
-      initialFootTransform.getTranslation().set(0.3, -0.8, 0.0);
-      runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
+      return Vertex2DSupplier.asVertex2DSupplier(concaveHull);
    }
 
    private void runTests(Vertex2DSupplier polygon, RigidBodyTransform initialFootTransform, double... insideDeltas)
@@ -264,5 +280,123 @@ public class ConcavePolygonWigglerTest
       }
 
       return minDistance;
+   }
+
+   public static void main(String[] args)
+   {
+      runTimingTest();
+   }
+
+   private static void runTimingTest()
+   {
+      List<TimingTestConfiguration> testConfigs = new ArrayList<>();
+      testConfigs.add(new TimingTestConfiguration(getCrazyPolygon1(), 0.0, 0.4, Math.toRadians(-110.0), -0.01));
+      testConfigs.add(new TimingTestConfiguration(getCrazyPolygon1(), 0.0, 0.4, Math.toRadians(-110.0), 0.0));
+      testConfigs.add(new TimingTestConfiguration(getCrazyPolygon1(), 0.0, 0.4, Math.toRadians(-110.0), 0.01));
+      testConfigs.add(new TimingTestConfiguration(getCrazyPolygon2(), -1.0, 0.5, Math.toRadians(100.0), -0.01));
+      testConfigs.add(new TimingTestConfiguration(getCrazyPolygon2(), -1.0, 0.5, Math.toRadians(100.0), 0.0));
+      testConfigs.add(new TimingTestConfiguration(getCrazyPolygon2(), -1.0, 0.5, Math.toRadians(100.0), 0.01));
+      testConfigs.add(new TimingTestConfiguration(getCrazyPolygon2(), -0.3, 1.4, Math.toRadians(80.0), -0.01));
+      testConfigs.add(new TimingTestConfiguration(getCrazyPolygon2(), -0.3, 1.4, Math.toRadians(80.0), 0.0));
+      testConfigs.add(new TimingTestConfiguration(getCrazyPolygon2(), -0.3, 1.4, Math.toRadians(80.0), 0.01));
+      testConfigs.add(new TimingTestConfiguration(getCrazyPolygon2(), 1.1, 0.15, Math.toRadians(0.0), -0.01));
+      testConfigs.add(new TimingTestConfiguration(getCrazyPolygon2(), 1.1, 0.15, Math.toRadians(0.0), 0.0));
+      testConfigs.add(new TimingTestConfiguration(getCrazyPolygon2(), 1.1, 0.15, Math.toRadians(0.0), 0.01));
+      testConfigs.add(new TimingTestConfiguration(getCrazyPolygon2(), 0.9, -0.9, Math.toRadians(0.0), -0.01));
+      testConfigs.add(new TimingTestConfiguration(getCrazyPolygon2(), 0.9, -0.9, Math.toRadians(0.0), 0.0));
+      testConfigs.add(new TimingTestConfiguration(getCrazyPolygon2(), 0.9, -0.9, Math.toRadians(0.0), 0.01));
+
+      ConcavePolygonWiggler wiggler = new ConcavePolygonWiggler();
+      int numWarmupLoops = 5;
+      int numTestLoops = 1;
+
+      long[] concaveTimes = new long[testConfigs.size()];
+      long[] convexTimes = new long[testConfigs.size()];
+
+      // warmup
+      for (int i = 0; i < numWarmupLoops; i++)
+      {
+         for (int j = 0; j < testConfigs.size(); j++)
+         {
+            TimingTestConfiguration testConfig = testConfigs.get(j);
+            wiggler.wigglePolygon(testConfig.initialPolygon, testConfig.concavePolygon, testConfig.wiggleParameters);
+         }
+      }
+
+      long start = System.nanoTime();
+      for (int i = 0; i < numTestLoops; i++)
+      {
+         for (int j = 0; j < testConfigs.size(); j++)
+         {
+            TimingTestConfiguration testConfig = testConfigs.get(j);
+            long s = System.nanoTime();
+            wiggler.wigglePolygon(testConfig.initialPolygon, testConfig.concavePolygon, testConfig.wiggleParameters);
+            concaveTimes[j]  = System.nanoTime() - s;
+         }
+      }
+      long diff = System.nanoTime() - start;
+
+      long perTest = diff / testConfigs.size();
+      long perTestUs = perTest / (numTestLoops * 1000);
+      System.out.println("Concave polygon wiggler microseconds per run: " + perTestUs);
+
+      // warmup
+      for (int i = 0; i < numWarmupLoops; i++)
+      {
+         for (int j = 0; j < testConfigs.size(); j++)
+         {
+            TimingTestConfiguration testConfig = testConfigs.get(j);
+            PolygonWiggler.findWiggleTransform(testConfig.initialPolygon, testConfig.convexPolygon, testConfig.wiggleParameters);
+         }
+      }
+
+      start = System.nanoTime();
+      for (int i = 0; i < numTestLoops; i++)
+      {
+         for (int j = 0; j < testConfigs.size(); j++)
+         {
+            TimingTestConfiguration testConfig = testConfigs.get(j);
+            long s = System.nanoTime();
+            PolygonWiggler.findWiggleTransform(testConfig.initialPolygon, testConfig.convexPolygon, testConfig.wiggleParameters);
+            convexTimes[j]  = System.nanoTime() - s;
+         }
+      }
+      diff = System.nanoTime() - start;
+
+      for (int i = 0; i < testConfigs.size(); i++)
+      {
+         System.out.println(( i + 1 ) + "\t " + concaveTimes[i] + " \t " + convexTimes[i]);
+      }
+
+      perTest = diff / testConfigs.size();
+      perTestUs = perTest /  (numTestLoops * 1000);
+      System.out.println("Convex polygon wiggler microseconds per run: " + perTestUs);
+   }
+
+   private static class TimingTestConfiguration
+   {
+      Vertex2DSupplier concavePolygon;
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      ConvexPolygon2D initialPolygon;
+      WiggleParameters wiggleParameters = new WiggleParameters();
+
+      public TimingTestConfiguration(Vertex2DSupplier concavePolygon, double dx, double dy, double dYaw, double deltaInside)
+      {
+         this.concavePolygon = concavePolygon;
+         initialPolygon = PlannerTools.createDefaultFootPolygon();
+
+         RigidBodyTransform transform = new RigidBodyTransform();
+         transform.setRotationYawAndZeroTranslation(dYaw);
+         transform.getTranslation().set(dx, dy, 0.0);
+         initialPolygon.applyTransform(transform, false);
+         wiggleParameters.deltaInside = deltaInside;
+         wiggleParameters.rotationWeight = 0.05;
+
+         for (int i = 0; i < concavePolygon.getNumberOfVertices(); i++)
+         {
+            convexPolygon.addVertex(concavePolygon.getVertex(i));
+         }
+         convexPolygon.update();
+      }
    }
 }
