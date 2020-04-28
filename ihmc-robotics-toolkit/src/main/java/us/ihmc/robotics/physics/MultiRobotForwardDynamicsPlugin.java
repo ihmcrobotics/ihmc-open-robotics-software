@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -18,7 +16,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 public class MultiRobotForwardDynamicsPlugin
 {
    private final Map<RigidBodyBasics, PhysicsEngineRobotData> robots = new HashMap<>();
-   private final RecyclingArrayList<YoMultiContactImpulseCalculator> multiContactImpulseCalculators;
+   private final YoMultiContactImpulseCalculatorPool multiContactImpulseCalculatorPool;
    private final List<ExternalWrenchReader> externalWrenchReaders = new ArrayList<>();
 
    private List<MultiRobotCollisionGroup> collisionGroups;
@@ -37,12 +35,7 @@ public class MultiRobotForwardDynamicsPlugin
       globalContactParameters = new YoContactParameters("globalContact", registry);
       hasGlobalConstraintParameters = new YoBoolean("hasGlobalConstraintParameters", registry);
       globalConstraintParameters = new YoConstraintParameters("globalConstraint", registry);
-
-      multiContactImpulseCalculators = new RecyclingArrayList<>(1, SupplierBuilder.indexedSupplier(identifier ->
-      {
-         return new YoMultiContactImpulseCalculator(identifier++, rootFrame, multiContactCalculatorRegistry);
-      }));
-      multiContactImpulseCalculators.clear();
+      multiContactImpulseCalculatorPool = new YoMultiContactImpulseCalculatorPool(1, rootFrame, multiContactCalculatorRegistry);
    }
 
    public void addRobot(PhysicsEngineRobotData robot)
@@ -91,11 +84,11 @@ public class MultiRobotForwardDynamicsPlugin
       Set<RigidBodyBasics> uncoveredRobotsRootBody = new HashSet<>(robots.keySet());
       List<MultiContactImpulseCalculator> impulseCalculators = new ArrayList<>();
 
-      multiContactImpulseCalculators.clear();
+      multiContactImpulseCalculatorPool.clear();
 
       for (MultiRobotCollisionGroup collisionGroup : collisionGroups)
       {
-         MultiContactImpulseCalculator calculator = multiContactImpulseCalculators.add();
+         MultiContactImpulseCalculator calculator = multiContactImpulseCalculatorPool.nextAvailable();
 
          calculator.configure(robots, collisionGroup);
 

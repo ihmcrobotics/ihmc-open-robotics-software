@@ -43,6 +43,36 @@ public class YoMultiContactImpulseCalculator extends MultiContactImpulseCalculat
    }
 
    @Override
+   public void setAlphaMin(double alphaMin)
+   {
+      this.alphaMin.set(alphaMin);
+   }
+
+   @Override
+   public void setGamma(double gamma)
+   {
+      this.gamma.set(gamma);
+   }
+
+   @Override
+   public void setTolerance(double tolerance)
+   {
+      this.tolerance.set(tolerance);
+   }
+
+   @Override
+   public void setMaxNumberOfIterations(int maxNumberOfIterations)
+   {
+      this.maxNumberOfIterations.set(maxNumberOfIterations);
+   }
+
+   public void clear()
+   {
+      numberOfCollisions.set(-1);
+      iterationCounter.set(-1);
+   }
+
+   @Override
    public void configure(Map<RigidBodyBasics, PhysicsEngineRobotData> robots, MultiRobotCollisionGroup collisionGroup)
    {
       super.configure(robots, collisionGroup);
@@ -53,11 +83,10 @@ public class YoMultiContactImpulseCalculator extends MultiContactImpulseCalculat
    @Override
    public double computeImpulses(double time, double dt, boolean verbose)
    {
-      setAlphaMin(alphaMin.getValue());
-      setGamma(gamma.getValue());
-      setTolerance(tolerance.getValue());
-
-      setMaxNumberOfIterations(maxNumberOfIterations.getValue());
+      super.setAlphaMin(alphaMin.getValue());
+      super.setGamma(gamma.getValue());
+      super.setTolerance(tolerance.getValue());
+      super.setMaxNumberOfIterations(maxNumberOfIterations.getValue());
 
       maxUpdateMagnitude.set(super.computeImpulses(time, dt, verbose));
 
