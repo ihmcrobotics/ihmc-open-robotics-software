@@ -304,7 +304,7 @@ public class FootstepPlanningModuleTest
       FootstepPlannerOutput output = planningModule.handleRequest(request);
       Assertions.assertEquals(output.getFootstepPlanningResult(), FootstepPlanningResult.HALTED);
       Assertions.assertTrue(timestampPrev.get() < customTimeout);
-      Assertions.assertTrue(output.getPlannerTimings().getTimePlanningStepsSeconds() >= customTimeout + 0.01);
+      Assertions.assertTrue(output.getPlannerTimings().getTimePlanningStepsSeconds() >= customTimeout - 0.01);
 
       // test iteration limit
       int iterationLimit = 29;
