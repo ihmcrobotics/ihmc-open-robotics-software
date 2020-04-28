@@ -442,6 +442,15 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
    /**
        
+    * The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
+       
+    * If true, this wiggles each candidate step, which will slow down plan times but resulting plans will be guarunteed to match step constraints.
+       
+    */
+   public boolean wiggle_while_planning_;
+
+   /**
+       
     * There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
        
     * this toggles between them.
@@ -851,6 +860,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
 
+
    }
 
    public FootstepPlannerParametersPacket(FootstepPlannerParametersPacket other)
@@ -938,6 +948,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
       minimum_surface_incline_radians_ = other.minimum_surface_incline_radians_;
+
+
+      wiggle_while_planning_ = other.wiggle_while_planning_;
 
 
       enable_concave_hull_wiggler_ = other.enable_concave_hull_wiggler_;
@@ -1954,6 +1967,30 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
    /**
        
+    * The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
+       
+    * If true, this wiggles each candidate step, which will slow down plan times but resulting plans will be guarunteed to match step constraints.
+       
+    */
+   public void setWiggleWhilePlanning(boolean wiggle_while_planning)
+   {
+      wiggle_while_planning_ = wiggle_while_planning;
+   }
+   /**
+       
+    * The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
+       
+    * If true, this wiggles each candidate step, which will slow down plan times but resulting plans will be guarunteed to match step constraints.
+       
+    */
+   public boolean getWiggleWhilePlanning()
+   {
+      return wiggle_while_planning_;
+   }
+
+
+   /**
+       
     * There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
        
     * this toggles between them.
@@ -2948,6 +2985,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_surface_incline_radians_, other.minimum_surface_incline_radians_, epsilon)) return false;
 
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.wiggle_while_planning_, other.wiggle_while_planning_, epsilon)) return false;
+
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_concave_hull_wiggler_, other.enable_concave_hull_wiggler_, epsilon)) return false;
 
 
@@ -3141,6 +3181,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.minimum_surface_incline_radians_ != otherMyClass.minimum_surface_incline_radians_) return false;
 
 
+      if(this.wiggle_while_planning_ != otherMyClass.wiggle_while_planning_) return false;
+
+
       if(this.enable_concave_hull_wiggler_ != otherMyClass.enable_concave_hull_wiggler_) return false;
 
 
@@ -3330,6 +3373,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       builder.append("minimum_surface_incline_radians=");
       builder.append(this.minimum_surface_incline_radians_);      builder.append(", ");
+
+      builder.append("wiggle_while_planning=");
+      builder.append(this.wiggle_while_planning_);      builder.append(", ");
 
       builder.append("enable_concave_hull_wiggler=");
       builder.append(this.enable_concave_hull_wiggler_);      builder.append(", ");
