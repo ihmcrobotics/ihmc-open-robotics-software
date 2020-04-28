@@ -203,14 +203,9 @@ float64 minimum_foothold_percent 0.9
 # z-value less than cos(minimumSurfaceInclineRadians), it will be rejected.
 float64 minimum_surface_incline_radians -11.1
 
-# There are two methods of wiggling a polygon into a planar region:
-#    Wiggle the polygon into the planar region itself, which isn't necessarily convex
-#    Wiggle the polygon into the convex hull of the planar region
-# The first method is not implemented completely. Instead it will wiggle into the sub polygon of the planar region that
-# has the biggest overlap with the foothold.
-#
-# If this parameter is set to true (recommended), the second wiggle method will be used.
-bool wiggle_into_convex_hull_of_planar_regions true
+# There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
+# this toggles between them.
+bool enable_concave_hull_wiggler false
 
 # If the planner uses footstep wiggling it attempts to move a candidate footstep inside its associated planar region.
 # This attempt is parametrized by {@link #getWiggleIntoConvexHullOfPlanarRegions()}, {@link #getWiggleInsideDelta},

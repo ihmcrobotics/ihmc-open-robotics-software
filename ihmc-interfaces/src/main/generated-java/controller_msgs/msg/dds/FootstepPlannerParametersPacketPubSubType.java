@@ -558,7 +558,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       cdr.write_type_6(data.getMinimumSurfaceInclineRadians());
 
 
-      cdr.write_type_7(data.getWiggleIntoConvexHullOfPlanarRegions());
+      cdr.write_type_7(data.getEnableConcaveHullWiggler());
 
 
       cdr.write_type_7(data.getRejectIfCannotFullyWiggleInside());
@@ -742,7 +742,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setMinimumSurfaceInclineRadians(cdr.read_type_6());
       	
 
-      data.setWiggleIntoConvexHullOfPlanarRegions(cdr.read_type_7());
+      data.setEnableConcaveHullWiggler(cdr.read_type_7());
       	
 
       data.setRejectIfCannotFullyWiggleInside(cdr.read_type_7());
@@ -902,7 +902,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       ser.write_type_6("minimum_surface_incline_radians", data.getMinimumSurfaceInclineRadians());
 
-      ser.write_type_7("wiggle_into_convex_hull_of_planar_regions", data.getWiggleIntoConvexHullOfPlanarRegions());
+      ser.write_type_7("enable_concave_hull_wiggler", data.getEnableConcaveHullWiggler());
 
       ser.write_type_7("reject_if_cannot_fully_wiggle_inside", data.getRejectIfCannotFullyWiggleInside());
 
@@ -1027,7 +1027,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       data.setMinimumSurfaceInclineRadians(ser.read_type_6("minimum_surface_incline_radians"));
 
-      data.setWiggleIntoConvexHullOfPlanarRegions(ser.read_type_7("wiggle_into_convex_hull_of_planar_regions"));
+      data.setEnableConcaveHullWiggler(ser.read_type_7("enable_concave_hull_wiggler"));
 
       data.setRejectIfCannotFullyWiggleInside(ser.read_type_7("reject_if_cannot_fully_wiggle_inside"));
 
