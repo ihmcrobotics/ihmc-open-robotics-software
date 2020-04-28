@@ -146,7 +146,7 @@ public class ExperimentalPhysicsEngine
          robot.updateCollidableBoundingBoxes();
       }
 
-      environmentCollidables.forEach(Collidable::updateBoundingBox);
+      environmentCollidables.forEach(collidable -> collidable.updateBoundingBox(rootFrame));
       collisionDetectionPlugin.evaluationCollisions(robotList, () -> environmentCollidables);
       multiRobotPhysicsEnginePlugin.submitCollisions(collisionDetectionPlugin);
       multiRobotPhysicsEnginePlugin.doScience(time.getValue(), dt, gravity);
