@@ -140,6 +140,22 @@ public class ExperimentalSimulation extends Simulation
    }
 
    /**
+    * Adds and configures a new robot to the simulation.
+    */
+   public void addRobot(RobotDescription robotDescription, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter, MultiBodySystemStateWriter controllerOutputWriter)
+   {
+      RobotFromDescription scsRobot = new RobotFromDescription(robotDescription);
+      RigidBodyBasics rootBody = toInverseDynamicsRobot(robotDescription);
+
+      MultiBodySystemStateReader physicsOutputWriter = createPhysicsOutputWriter(scsRobot);
+
+      rootBodies.add(rootBody);
+      physicsEngine.addRobot(robotDescription.getName(), rootBody, controllerOutputWriter, robotInitialStateWriter, robotCollisionModel, physicsOutputWriter);
+      externalWrenchReader.addRobot(rootBody, scsRobot);
+      addRobot(scsRobot);
+   }
+
+   /**
     * Configures the physics for a robot that was already added via the constructor or
     * {@link #addRobot(Robot)}.
     */
