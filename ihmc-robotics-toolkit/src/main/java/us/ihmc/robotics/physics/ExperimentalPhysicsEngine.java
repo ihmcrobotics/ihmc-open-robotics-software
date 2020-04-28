@@ -201,6 +201,11 @@ public class ExperimentalPhysicsEngine
       return robotList.stream().map(PhysicsEngineRobotData::getRobotName).collect(Collectors.toList());
    }
 
+   public double getTime()
+   {
+      return time.getValue();
+   }
+
    public YoVariableRegistry getPhysicsEngineRegistry()
    {
       return physicsEngineRegistry;
