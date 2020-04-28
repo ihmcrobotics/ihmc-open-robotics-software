@@ -1147,6 +1147,13 @@ public class PlanarRegion implements SupportingVertexHolder
       for (int i = 0; i < convexPolygons.size(); i++)
       {
          ConvexPolygon2D polygon = convexPolygons.get(i);
+
+         // Concave hull generation breaks regions contain empty, point or line sub-polygons
+         if (polygon.getNumberOfVertices() < 3)
+         {
+            return;
+         }
+
          if (polygon.getVertex(0).getX() < minX)
          {
             minX = polygon.getVertex(0).getX();
