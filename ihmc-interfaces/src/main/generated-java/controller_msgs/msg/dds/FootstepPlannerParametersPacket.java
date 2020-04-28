@@ -442,22 +442,12 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
    /**
        
-    * There are two methods of wiggling a polygon into a planar region:
+    * There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
        
-    * Wiggle the polygon into the planar region itself, which isn't necessarily convex
-       
-    * Wiggle the polygon into the convex hull of the planar region
-       
-    * The first method is not implemented completely. Instead it will wiggle into the sub polygon of the planar region that
-       
-    * has the biggest overlap with the foothold.
-       
-    * 
-       
-    * If this parameter is set to true (recommended), the second wiggle method will be used.
+    * this toggles between them.
        
     */
-   public boolean wiggle_into_convex_hull_of_planar_regions_ = true;
+   public boolean enable_concave_hull_wiggler_;
 
    /**
        
@@ -950,7 +940,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       minimum_surface_incline_radians_ = other.minimum_surface_incline_radians_;
 
 
-      wiggle_into_convex_hull_of_planar_regions_ = other.wiggle_into_convex_hull_of_planar_regions_;
+      enable_concave_hull_wiggler_ = other.enable_concave_hull_wiggler_;
 
 
       reject_if_cannot_fully_wiggle_inside_ = other.reject_if_cannot_fully_wiggle_inside_;
@@ -1964,45 +1954,25 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
    /**
        
-    * There are two methods of wiggling a polygon into a planar region:
+    * There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
        
-    * Wiggle the polygon into the planar region itself, which isn't necessarily convex
-       
-    * Wiggle the polygon into the convex hull of the planar region
-       
-    * The first method is not implemented completely. Instead it will wiggle into the sub polygon of the planar region that
-       
-    * has the biggest overlap with the foothold.
-       
-    * 
-       
-    * If this parameter is set to true (recommended), the second wiggle method will be used.
+    * this toggles between them.
        
     */
-   public void setWiggleIntoConvexHullOfPlanarRegions(boolean wiggle_into_convex_hull_of_planar_regions)
+   public void setEnableConcaveHullWiggler(boolean enable_concave_hull_wiggler)
    {
-      wiggle_into_convex_hull_of_planar_regions_ = wiggle_into_convex_hull_of_planar_regions;
+      enable_concave_hull_wiggler_ = enable_concave_hull_wiggler;
    }
    /**
        
-    * There are two methods of wiggling a polygon into a planar region:
+    * There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
        
-    * Wiggle the polygon into the planar region itself, which isn't necessarily convex
-       
-    * Wiggle the polygon into the convex hull of the planar region
-       
-    * The first method is not implemented completely. Instead it will wiggle into the sub polygon of the planar region that
-       
-    * has the biggest overlap with the foothold.
-       
-    * 
-       
-    * If this parameter is set to true (recommended), the second wiggle method will be used.
+    * this toggles between them.
        
     */
-   public boolean getWiggleIntoConvexHullOfPlanarRegions()
+   public boolean getEnableConcaveHullWiggler()
    {
-      return wiggle_into_convex_hull_of_planar_regions_;
+      return enable_concave_hull_wiggler_;
    }
 
 
@@ -2978,7 +2948,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_surface_incline_radians_, other.minimum_surface_incline_radians_, epsilon)) return false;
 
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.wiggle_into_convex_hull_of_planar_regions_, other.wiggle_into_convex_hull_of_planar_regions_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_concave_hull_wiggler_, other.enable_concave_hull_wiggler_, epsilon)) return false;
 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.reject_if_cannot_fully_wiggle_inside_, other.reject_if_cannot_fully_wiggle_inside_, epsilon)) return false;
@@ -3171,7 +3141,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.minimum_surface_incline_radians_ != otherMyClass.minimum_surface_incline_radians_) return false;
 
 
-      if(this.wiggle_into_convex_hull_of_planar_regions_ != otherMyClass.wiggle_into_convex_hull_of_planar_regions_) return false;
+      if(this.enable_concave_hull_wiggler_ != otherMyClass.enable_concave_hull_wiggler_) return false;
 
 
       if(this.reject_if_cannot_fully_wiggle_inside_ != otherMyClass.reject_if_cannot_fully_wiggle_inside_) return false;
@@ -3361,8 +3331,8 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("minimum_surface_incline_radians=");
       builder.append(this.minimum_surface_incline_radians_);      builder.append(", ");
 
-      builder.append("wiggle_into_convex_hull_of_planar_regions=");
-      builder.append(this.wiggle_into_convex_hull_of_planar_regions_);      builder.append(", ");
+      builder.append("enable_concave_hull_wiggler=");
+      builder.append(this.enable_concave_hull_wiggler_);      builder.append(", ");
 
       builder.append("reject_if_cannot_fully_wiggle_inside=");
       builder.append(this.reject_if_cannot_fully_wiggle_inside_);      builder.append(", ");
