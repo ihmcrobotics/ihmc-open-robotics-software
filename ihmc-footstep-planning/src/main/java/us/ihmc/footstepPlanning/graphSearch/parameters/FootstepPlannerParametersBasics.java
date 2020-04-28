@@ -173,9 +173,9 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.idealBackStepLength, idealBackStepLength);
    }
 
-   default void setWiggleIntoConvexHullOfPlanarRegions(boolean wiggleIntoConvexHullOfPlanarRegions)
+   default void setEnableConcaveHullWiggler(boolean enableConcaveHullWiggler)
    {
-      set(FootstepPlannerParameterKeys.wiggleIntoConvexHullOfPlanarRegions, wiggleIntoConvexHullOfPlanarRegions);
+      set(FootstepPlannerParameterKeys.enableConcaveHullWiggler, enableConcaveHullWiggler);
    }
 
    default void setMaximumZPenetrationOnValleyRegions(double maximumZPenetrationOnValleyRegions)
@@ -350,7 +350,7 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinimumFootholdPercent(parametersPacket.getMinimumFootholdPercent());
       if (parametersPacket.getMinimumSurfaceInclineRadians() != noValue)
          setMinimumSurfaceInclineRadians(parametersPacket.getMinimumSurfaceInclineRadians());
-      setWiggleIntoConvexHullOfPlanarRegions(parametersPacket.getWiggleIntoConvexHullOfPlanarRegions());
+      setEnableConcaveHullWiggler(parametersPacket.getEnableConcaveHullWiggler());
       if (parametersPacket.getMaximumXyWiggleDistance() != noValue)
          setMaximumXYWiggleDistance(parametersPacket.getMaximumXyWiggleDistance());
       if (parametersPacket.getMaximumYawWiggle() != noValue)
