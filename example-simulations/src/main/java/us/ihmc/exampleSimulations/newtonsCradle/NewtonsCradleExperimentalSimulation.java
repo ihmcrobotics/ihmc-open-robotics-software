@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FrameSphere3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.shape.primitives.Sphere3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -88,8 +88,8 @@ public class NewtonsCradleExperimentalSimulation
                long collisionMask = helper.getCollisionMask(getBallBodyName(i));
                long collisionGroup = helper.createCollisionGroup(getOtherBallBodyNames(i));
                RigidBodyBasics ballBody = RobotCollisionModel.findRigidBody(getBallBodyName(i), multiBodySystem);
-               Sphere3D ballShape = new Sphere3D(ballRadius);
-               collidables.add(new Collidable(ballBody, collisionMask, collisionGroup, ballShape, ballBody.getBodyFixedFrame()));
+               FrameSphere3D ballShape = new FrameSphere3D(ballBody.getBodyFixedFrame(), ballRadius);
+               collidables.add(new Collidable(ballBody, collisionMask, collisionGroup, ballShape));
             }
 
             return collidables;

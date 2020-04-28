@@ -4,10 +4,10 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.shape.primitives.interfaces.Box3DReadOnly;
-import us.ihmc.euclid.shape.primitives.interfaces.Capsule3DReadOnly;
-import us.ihmc.euclid.shape.primitives.interfaces.PointShape3DReadOnly;
-import us.ihmc.euclid.shape.primitives.interfaces.Sphere3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameBox3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameCapsule3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePointShape3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameSphere3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphic;
@@ -30,37 +30,21 @@ public class CollidableVisualizer
    {
       this.collidable = collidable;
 
-      if (collidable.getShape() instanceof Sphere3DReadOnly)
+      if (collidable.getShape() instanceof FrameSphere3DReadOnly)
       {
-         shape3DGraphicUpdater = new Sphere3DGraphicUpdater(name,
-                                                            (Sphere3DReadOnly) collidable.getShape(),
-                                                            collidable.getShapeFrame(),
-                                                            registry,
-                                                            appearanceDefinition);
+         shape3DGraphicUpdater = new Sphere3DGraphicUpdater(name, (FrameSphere3DReadOnly) collidable.getShape(), registry, appearanceDefinition);
       }
-      else if (collidable.getShape() instanceof Box3DReadOnly)
+      else if (collidable.getShape() instanceof FrameBox3DReadOnly)
       {
-         shape3DGraphicUpdater = new Box3DGraphicUpdater(name,
-                                                         (Box3DReadOnly) collidable.getShape(),
-                                                         collidable.getShapeFrame(),
-                                                         registry,
-                                                         appearanceDefinition);
+         shape3DGraphicUpdater = new Box3DGraphicUpdater(name, (FrameBox3DReadOnly) collidable.getShape(), registry, appearanceDefinition);
       }
-      else if (collidable.getShape() instanceof Capsule3DReadOnly)
+      else if (collidable.getShape() instanceof FrameCapsule3DReadOnly)
       {
-         shape3DGraphicUpdater = new Capsule3DGraphicUpdater(name,
-                                                             (Capsule3DReadOnly) collidable.getShape(),
-                                                             collidable.getShapeFrame(),
-                                                             registry,
-                                                             appearanceDefinition);
+         shape3DGraphicUpdater = new Capsule3DGraphicUpdater(name, (FrameCapsule3DReadOnly) collidable.getShape(), registry, appearanceDefinition);
       }
-      else if (collidable.getShape() instanceof PointShape3DReadOnly)
+      else if (collidable.getShape() instanceof FramePointShape3DReadOnly)
       {
-         shape3DGraphicUpdater = new Point3DGraphicUpdater(name,
-                                                           (PointShape3DReadOnly) collidable.getShape(),
-                                                           collidable.getShapeFrame(),
-                                                           registry,
-                                                           appearanceDefinition);
+         shape3DGraphicUpdater = new Point3DGraphicUpdater(name, (FramePointShape3DReadOnly) collidable.getShape(), registry, appearanceDefinition);
       }
       else
       {
@@ -98,14 +82,11 @@ public class CollidableVisualizer
    {
       private final YoFramePoint3D position;
       private final YoGraphicPosition graphicSphere;
-      private Sphere3DReadOnly shape;
-      private ReferenceFrame shapeFrame;
+      private final FrameSphere3DReadOnly shape;
 
-      public Sphere3DGraphicUpdater(String name, Sphere3DReadOnly shape, ReferenceFrame shapeFrame, YoVariableRegistry registry,
-                                    AppearanceDefinition appearanceDefinition)
+      public Sphere3DGraphicUpdater(String name, FrameSphere3DReadOnly shape, YoVariableRegistry registry, AppearanceDefinition appearanceDefinition)
       {
          this.shape = shape;
-         this.shapeFrame = shapeFrame;
          position = new YoFramePoint3D(name, worldFrame, registry);
          double radius = shape.getRadius();
          graphicSphere = new YoGraphicPosition(name, position, radius, appearanceDefinition);
@@ -122,7 +103,7 @@ public class CollidableVisualizer
       @Override
       public void update()
       {
-         tempPoint.setIncludingFrame(shapeFrame, shape.getPosition());
+         tempPoint.setIncludingFrame(shape.getPosition());
          position.setMatchingFrame(tempPoint);
       }
 
@@ -137,14 +118,11 @@ public class CollidableVisualizer
    {
       private final YoFramePoseUsingYawPitchRoll pose;
       private final YoGraphicShape graphicBox;
-      private final Box3DReadOnly shape;
-      private final ReferenceFrame shapeFrame;
+      private final FrameBox3DReadOnly shape;
 
-      public Box3DGraphicUpdater(String name, Box3DReadOnly shape, ReferenceFrame shapeFrame, YoVariableRegistry registry,
-                                 AppearanceDefinition appearanceDefinition)
+      public Box3DGraphicUpdater(String name, FrameBox3DReadOnly shape, YoVariableRegistry registry, AppearanceDefinition appearanceDefinition)
       {
          this.shape = shape;
-         this.shapeFrame = shapeFrame;
          pose = new YoFramePoseUsingYawPitchRoll(name, worldFrame, registry);
          Graphics3DObject boxGraphicDefinition = new Graphics3DObject();
          boxGraphicDefinition.addCube(shape.getSizeX(), shape.getSizeY(), shape.getSizeZ(), true, appearanceDefinition);
@@ -162,7 +140,7 @@ public class CollidableVisualizer
       @Override
       public void update()
       {
-         tempPose.setIncludingFrame(shapeFrame, shape.getPose());
+         tempPose.setIncludingFrame(shape.getReferenceFrame(), shape.getPose());
          pose.setMatchingFrame(tempPose);
       }
 
@@ -177,14 +155,11 @@ public class CollidableVisualizer
    {
       private final YoFramePoseUsingYawPitchRoll pose;
       private final YoGraphicShape graphicBox;
-      private final Capsule3DReadOnly shape;
-      private final ReferenceFrame shapeFrame;
+      private final FrameCapsule3DReadOnly shape;
 
-      public Capsule3DGraphicUpdater(String name, Capsule3DReadOnly shape, ReferenceFrame shapeFrame, YoVariableRegistry registry,
-                                     AppearanceDefinition appearanceDefinition)
+      public Capsule3DGraphicUpdater(String name, FrameCapsule3DReadOnly shape, YoVariableRegistry registry, AppearanceDefinition appearanceDefinition)
       {
          this.shape = shape;
-         this.shapeFrame = shapeFrame;
          pose = new YoFramePoseUsingYawPitchRoll(name, worldFrame, registry);
          Graphics3DObject capsuleGraphicDefinition = new Graphics3DObject();
          double radius = shape.getRadius();
@@ -204,7 +179,7 @@ public class CollidableVisualizer
       @Override
       public void update()
       {
-         tempPose.setReferenceFrame(shapeFrame);
+         tempPose.setReferenceFrame(shape.getReferenceFrame());
          tempPose.getPosition().set(shape.getPosition());
          EuclidGeometryTools.orientation3DFromZUpToVector3D(shape.getAxis(), tempPose.getOrientation());
          pose.setMatchingFrame(tempPose);
@@ -221,14 +196,11 @@ public class CollidableVisualizer
    {
       private final YoFramePoint3D position;
       private final YoGraphicPosition graphicSphere;
-      private PointShape3DReadOnly shape;
-      private ReferenceFrame shapeFrame;
+      private final FramePointShape3DReadOnly shape;
 
-      public Point3DGraphicUpdater(String name, PointShape3DReadOnly shape, ReferenceFrame shapeFrame, YoVariableRegistry registry,
-                                   AppearanceDefinition appearanceDefinition)
+      public Point3DGraphicUpdater(String name, FramePointShape3DReadOnly shape, YoVariableRegistry registry, AppearanceDefinition appearanceDefinition)
       {
          this.shape = shape;
-         this.shapeFrame = shapeFrame;
          position = new YoFramePoint3D(name, worldFrame, registry);
          graphicSphere = new YoGraphicPosition(name, position, 0.01, appearanceDefinition);
       }
@@ -239,13 +211,10 @@ public class CollidableVisualizer
          position.setToNaN();
       }
 
-      FramePoint3D tempPoint = new FramePoint3D();
-
       @Override
       public void update()
       {
-         tempPoint.setIncludingFrame(shapeFrame, shape);
-         position.setMatchingFrame(tempPoint);
+         position.setMatchingFrame(shape);
       }
 
       @Override

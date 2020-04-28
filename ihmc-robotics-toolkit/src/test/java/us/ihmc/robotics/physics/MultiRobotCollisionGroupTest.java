@@ -236,13 +236,13 @@ public class MultiRobotCollisionGroupTest
 
    private static Collidable emptyCollidable()
    {
-      return new Collidable(null, -1, -1, null, null);
+      return new Collidable(null, -1, -1, null);
    }
 
    private static Collidable nextCollidable(Random random, RigidBodyBasics rootBody)
    {
       RigidBodyBasics rigidBody = nextElementIn(random, rootBody.subtreeList());
-      return new Collidable(rigidBody, -1, -1, null, null);
+      return new Collidable(rigidBody, -1, -1, null);
    }
 
    @SafeVarargs
