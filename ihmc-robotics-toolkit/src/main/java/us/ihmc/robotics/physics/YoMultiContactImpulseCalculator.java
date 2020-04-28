@@ -51,7 +51,7 @@ public class YoMultiContactImpulseCalculator extends MultiContactImpulseCalculat
    }
 
    @Override
-   public double computeImpulses(double dt, boolean verbose)
+   public double computeImpulses(double time, double dt, boolean verbose)
    {
       setAlphaMin(alphaMin.getValue());
       setGamma(gamma.getValue());
@@ -59,7 +59,7 @@ public class YoMultiContactImpulseCalculator extends MultiContactImpulseCalculat
 
       setMaxNumberOfIterations(maxNumberOfIterations.getValue());
 
-      maxUpdateMagnitude.set(super.computeImpulses(dt, verbose));
+      maxUpdateMagnitude.set(super.computeImpulses(time, dt, verbose));
 
       iterationCounter.set(getNumberOfIterations());
 

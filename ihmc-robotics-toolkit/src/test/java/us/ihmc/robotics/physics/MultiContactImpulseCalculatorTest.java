@@ -1,9 +1,17 @@
 package us.ihmc.robotics.physics;
 
-import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.*;
+import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.computeContactVelocity;
+import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.nextCollidable;
+import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.nextSingleFloatingRigidBody;
+import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.nextStaticCollidable;
+import static us.ihmc.robotics.physics.SingleContactImpulseCalculatorTest.setupForwardDynamicsCalculator;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -81,12 +89,12 @@ public class MultiContactImpulseCalculatorTest
 
          MultiContactImpulseCalculator multiContactImpulseCalculator = new MultiContactImpulseCalculator(worldFrame);
          multiContactImpulseCalculator.configure(physicsEngineRobotDataMap, collisionGroup);
+         multiContactImpulseCalculator.setContactParameters(new ContactParameters(0.7, 0.0, 0.0, 1.0));
          multiContactImpulseCalculator.setTolerance(TERMINAL_TOLERANCE);
          multiContactImpulseCalculator.setSingleContactTolerance(SINGLE_CONTACT_GAMMA);
-         multiContactImpulseCalculator.setSpringConstant(0.0);
          try
          {
-            multiContactImpulseCalculator.computeImpulses(dt, false);
+            multiContactImpulseCalculator.computeImpulses(0.0, dt, false);
             if (!multiContactImpulseCalculator.hasConverged())
             {
                System.err.println("Did not converge");
@@ -126,7 +134,7 @@ public class MultiContactImpulseCalculatorTest
       {
          RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rigidBody);
          PhysicsEngineRobotData physicsEngineRobotData = new PhysicsEngineRobotData(rigidBody.getName(), rootBody, null, null, null, null);
-         physicsEngineRobotData.getForwardDynamicsPlugin().doScience(dt, gravity);
+         physicsEngineRobotData.getForwardDynamicsPlugin().doScience(0.0, dt, gravity);
          map.put(rootBody, physicsEngineRobotData);
       }
 

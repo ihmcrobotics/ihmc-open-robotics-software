@@ -38,7 +38,8 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
       }
    };
 
-   private double springConstant = 0.0;
+   private final ConstraintParameters constraintParameters = new ConstraintParameters(0.0, 0.0, 1.0);
+
    private final List<OneDoFJointBasics> jointsAtLimit = new ArrayList<>();
    private final List<ActiveLimit> activeLimits = new ArrayList<>();
 
@@ -116,16 +117,17 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
          ActiveLimit activeLimit = activeLimits.get(i);
 
          double qd = joint.getQd() + dt * forwardDynamicsCalculator.getComputedJointAcceleration(joint).get(0);
+         qd *= 1.0 + constraintParameters.getCoefficientOfRestitution();
 
          if (activeLimit == ActiveLimit.LOWER)
          {
             double distanceToLowerLimit = joint.getQ() - joint.getJointLimitLower();
-            qd += springConstant * distanceToLowerLimit;
+            qd += distanceToLowerLimit * constraintParameters.getErrorReductionParameter() / dt;
          }
          else
          {
             double distanceToUpperLimit = joint.getQ() - joint.getJointLimitUpper();
-            qd += springConstant * distanceToUpperLimit;
+            qd += distanceToUpperLimit * constraintParameters.getErrorReductionParameter() / dt;
          }
          jointVelocityNoImpulse.set(i, qd);
       }
@@ -197,7 +199,7 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
    }
 
    @Override
-   public void updateImpulse(double dt, double alpha)
+   public void updateImpulse(double dt, double alpha, boolean ignoreOtherImpulses)
    {
       if (jointsAtLimit.isEmpty())
       {
@@ -243,6 +245,8 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
          ActiveLimit activeLimit = activeLimits.get(i);
          impulse.set(i, activeLimit.transform(solverOutput_f.get(i)));
       }
+      
+      CommonOps.scale(constraintParameters.getConstraintForceMixing(), impulse);
 
       if (isFirstUpdate)
       {
@@ -255,6 +259,13 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
 
       isImpulseZero = NormOps.normP2(impulse) < 1.0e-12;
 
+      impulsePrevious.set(impulse);
+      isFirstUpdate = false;
+   }
+
+   @Override
+   public void updateTwistModifiers()
+   {
       if (isImpulseZero)
       {
          rigidBodyTwistModifier.setImpulseToZero();
@@ -265,14 +276,11 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
          rigidBodyTwistModifier.setImpulse(impulse);
          jointTwistModifier.setImpulse(impulse);
       }
-
-      impulsePrevious.set(impulse);
-      isFirstUpdate = false;
    }
 
-   public void setSpringConstant(double springConstant)
+   public void setConstraintParameters(ConstraintParametersReadOnly parameters)
    {
-      this.springConstant = springConstant;
+      constraintParameters.set(parameters);
    }
 
    @Override
@@ -370,5 +378,10 @@ public class RobotJointLimitImpulseBasedCalculator implements ImpulseBasedConstr
    public MultiBodyResponseCalculator getResponseCalculator()
    {
       return responseCalculator;
+   }
+
+   public ConstraintParametersBasics getConstraintParameters()
+   {
+      return constraintParameters;
    }
 }

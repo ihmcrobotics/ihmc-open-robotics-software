@@ -1,6 +1,11 @@
 package us.ihmc.robotics.physics;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.lists.SupplierBuilder;
@@ -8,6 +13,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 
 public class MultiRobotForwardDynamicsPlugin
 {
@@ -17,10 +23,20 @@ public class MultiRobotForwardDynamicsPlugin
 
    private List<MultiRobotCollisionGroup> collisionGroups;
 
+   private final YoBoolean hasGlobalContactParameters;
+   private final YoContactParameters globalContactParameters;
+   private final YoBoolean hasGlobalConstraintParameters;
+   private final YoConstraintParameters globalConstraintParameters;
+
    public MultiRobotForwardDynamicsPlugin(ReferenceFrame rootFrame, YoVariableRegistry registry)
    {
       YoVariableRegistry multiContactCalculatorRegistry = new YoVariableRegistry(MultiContactImpulseCalculator.class.getSimpleName());
       registry.addChild(multiContactCalculatorRegistry);
+
+      hasGlobalContactParameters = new YoBoolean("hasGlobalContactParameters", registry);
+      globalContactParameters = new YoContactParameters("globalContact", registry);
+      hasGlobalConstraintParameters = new YoBoolean("hasGlobalConstraintParameters", registry);
+      globalConstraintParameters = new YoConstraintParameters("globalConstraint", registry);
 
       multiContactImpulseCalculators = new RecyclingArrayList<>(1, SupplierBuilder.indexedSupplier(identifier ->
       {
@@ -44,19 +60,31 @@ public class MultiRobotForwardDynamicsPlugin
       externalWrenchReaders.add(externalWrenchReader);
    }
 
+   public void setGlobalConstraintParameters(ConstraintParametersReadOnly parameters)
+   {
+      globalConstraintParameters.set(parameters);
+      hasGlobalConstraintParameters.set(true);
+   }
+
+   public void setGlobalContactParameters(ContactParametersReadOnly parameters)
+   {
+      globalContactParameters.set(parameters);
+      hasGlobalContactParameters.set(true);
+   }
+
    public void submitCollisions(SimpleCollisionDetection collisionDetectionPlugin)
    {
       collisionGroups = MultiRobotCollisionGroup.toCollisionGroups(collisionDetectionPlugin.getAllCollisions());
    }
 
-   public void doScience(double dt, Vector3DReadOnly gravity)
+   public void doScience(double time, double dt, Vector3DReadOnly gravity)
    {
       for (PhysicsEngineRobotData robotPlugin : robots.values())
       { // First pass without the external forces
          SingleRobotForwardDynamicsPlugin forwardDynamicsPlugin = robotPlugin.getForwardDynamicsPlugin();
          forwardDynamicsPlugin.resetExternalWrenches();
          forwardDynamicsPlugin.applyControllerOutput();
-         forwardDynamicsPlugin.doScience(dt, gravity);
+         forwardDynamicsPlugin.doScience(time, dt, gravity);
          forwardDynamicsPlugin.readJointVelocities();
       }
 
@@ -68,7 +96,14 @@ public class MultiRobotForwardDynamicsPlugin
       for (MultiRobotCollisionGroup collisionGroup : collisionGroups)
       {
          MultiContactImpulseCalculator calculator = multiContactImpulseCalculators.add();
+
          calculator.configure(robots, collisionGroup);
+
+         if (hasGlobalConstraintParameters.getValue())
+            calculator.setConstraintParameters(globalConstraintParameters);
+         if (hasGlobalContactParameters.getValue())
+            calculator.setContactParameters(globalContactParameters);
+
          impulseCalculators.add(calculator);
          uncoveredRobotsRootBody.removeAll(collisionGroup.getRootBodies());
       }
@@ -85,8 +120,8 @@ public class MultiRobotForwardDynamicsPlugin
 
       for (MultiContactImpulseCalculator impulseCalculator : impulseCalculators)
       {
-         impulseCalculator.computeImpulses(dt, false);
-         robots.forEach((rootBody, robot) -> impulseCalculator.applyJointVelocityChange(rootBody, robot.getForwardDynamicsPlugin()::addJointVelocities));
+         impulseCalculator.computeImpulses(time, dt, false);
+         impulseCalculator.applyJointVelocityChanges();
          impulseCalculator.readExternalWrenches(dt, externalWrenchReaders);
       }
 
