@@ -34,6 +34,7 @@ public class FootstepNodeChecker
    // Variables to log
    private final FootstepNodeSnapData candidateNodeSnapData = FootstepNodeSnapData.identityData();
    private double footAreaPercentage;
+   private int footstepIndex = -1;
 
    public FootstepNodeChecker(FootstepPlannerParametersReadOnly parameters,
                               SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapper snapper, FootstepPlannerEdgeData edgeData)
@@ -62,8 +63,14 @@ public class FootstepNodeChecker
       return rejectionReason == null;
    }
 
+   public void onIterationStart(FootstepNode footstepNode)
+   {
+      footstepIndex = footstepNode.getChildNodes().size() - 1;
+   }
+
    private BipedalFootstepPlannerNodeRejectionReason isNodeValidInternal(FootstepNode candidateNode, FootstepNode stanceNode)
    {
+      footstepIndex++;
       candidateNodeSnapData.set(snapper.snapFootstepNode(candidateNode));
       
       if (planarRegionsList == null || planarRegionsList.isEmpty())
@@ -176,6 +183,7 @@ public class FootstepNodeChecker
          edgeData.setCandidateNodeSnapData(candidateNodeSnapData);
          edgeData.setFootAreaPercentage(footAreaPercentage);
          edgeData.setRejectionReason(rejectionReason);
+         edgeData.setStepIndex(footstepIndex);
          goodPositionChecker.logVariables();
       }
    }

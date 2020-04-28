@@ -288,6 +288,16 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(deltaYawFromReferenceTolerance, tolerance);
    }
 
+   default void setMaximumBranchFactor(int maximumBranchFactor)
+   {
+      set(FootstepPlannerParameterKeys.maximumBranchFactor, maximumBranchFactor);
+   }
+
+   default void setEnableExpansionMask(boolean enableExpansionMask)
+   {
+      set(FootstepPlannerParameterKeys.enableExpansionMask, enableExpansionMask);
+   }
+
    default void set(FootstepPlannerParametersPacket parametersPacket)
    {
       double noValue = FootstepPlannerParametersPacket.DEFAULT_NO_VALUE;
@@ -371,6 +381,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinYClearanceFromStance(parametersPacket.getMinYClearanceFromStance());
       if (parametersPacket.getFinalTurnProximity() != noValue)
          setFinalTurnProximity(parametersPacket.getFinalTurnProximity());
+      setMaximumBranchFactor(parametersPacket.getMaximumBranchFactor());
+      setEnableExpansionMask(parametersPacket.getEnableExpansionMask());
 
       if (parametersPacket.getAStarHeuristicsWeight() != noValue)
          setAStarHeuristicsWeight(parametersPacket.getAStarHeuristicsWeight());

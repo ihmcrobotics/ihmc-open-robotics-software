@@ -728,4 +728,21 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    {
       return get(deltaYawFromReferenceTolerance);
    }
+
+   /**
+    * Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
+    * ideal step are considered and the others are ignored. Set to non-positive number to disable
+    */
+   default int getMaximumBranchFactor()
+   {
+      return get(maximumBranchFactor);
+   }
+
+   /**
+    * If true, enables a mask that reduces the number of calculated steps away from the ideal step
+    */
+   default boolean getEnabledExpansionMask()
+   {
+      return get(enableExpansionMask);
+   }
 }

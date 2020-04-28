@@ -1,20 +1,13 @@
 package us.ihmc.footstepPlanning;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
@@ -38,6 +31,13 @@ import us.ihmc.pathPlanning.PlannerInput;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
@@ -163,10 +163,12 @@ public abstract class FootstepPlannerDataSetTest
          messager.submitMessage(FootstepPlannerMessagerAPI.testDataSets, dataSets);
          messager.registerTopicListener(FootstepPlannerMessagerAPI.testDataSetSelected, this::runAssertions);
 
+         AtomicBoolean uiHasClosed = new AtomicBoolean();
          ui.addShutdownHook(() ->
                             {
                                try
                                {
+                                  uiHasClosed.set(true);
                                   tearDown();
                                }
                                catch (Exception e)
@@ -175,6 +177,11 @@ public abstract class FootstepPlannerDataSetTest
                                   Platform.exit();
                                }
                             });
+
+         while (!uiHasClosed.get())
+         {
+            ThreadTools.sleep(1000);
+         }
       }
       else
       {

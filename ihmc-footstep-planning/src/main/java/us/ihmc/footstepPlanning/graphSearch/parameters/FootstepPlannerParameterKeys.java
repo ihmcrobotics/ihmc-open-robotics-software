@@ -54,6 +54,8 @@ public class FootstepPlannerParameterKeys
    public static final IntegerStoredPropertyKey numberOfBoundingBoxChecks                  = keys.addIntegerKey("Number of bounding box checks", 1);
    public static final DoubleStoredPropertyKey distanceFromPathTolerance                   = keys.addDoubleKey("Distance from path tolerance", 0.3);
    public static final DoubleStoredPropertyKey deltaYawFromReferenceTolerance              = keys.addDoubleKey("Delta yaw from reference tolerance", 0.35);
+   public static final IntegerStoredPropertyKey maximumBranchFactor                        = keys.addIntegerKey ("Max branch factor", -1);
+   public static final BooleanStoredPropertyKey enableExpansionMask                        = keys.addBooleanKey("Enable expansion mask", true);
 
    // cost parameters
    public static final DoubleStoredPropertyKey  aStarHeuristicsWeight                      = keys.addDoubleKey ("AStar heuristics weight", 1.5);
