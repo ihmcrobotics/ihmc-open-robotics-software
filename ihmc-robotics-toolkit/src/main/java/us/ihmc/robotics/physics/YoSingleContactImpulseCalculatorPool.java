@@ -31,6 +31,7 @@ public class YoSingleContactImpulseCalculatorPool
             calculator.setupGraphics(yoGraphicsListRegistry);
          return calculator;
       }));
+      clear();
    }
 
    public YoSingleContactImpulseCalculator nextAvailable()
