@@ -158,6 +158,7 @@ public class StepAdjustmentController
       captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, yoNamePrefix, registry, yoGraphicsListRegistry);
       environmentConstraintProvider = new EnvironmentConstraintProvider(icpOptimizationParameters,
                                                                         captureRegionCalculator,
+                                                                        reachabilityConstraintHandler,
                                                                         icpControlPlane,
                                                                         contactableFeet,
                                                                         yoNamePrefix,
@@ -249,6 +250,7 @@ public class StepAdjustmentController
       isInSwing.set(true);
       this.initialTime.set(initialTime);
       reachabilityConstraintHandler.initializeReachabilityConstraint(supportSide, upcomingFootstep);
+      speedUpTime.set(0.0);
    }
 
    public void compute(double currentTime,
@@ -306,7 +308,7 @@ public class StepAdjustmentController
       captureRegionInWorld.changeFrameAndProjectToXYPlane(worldFrame);
 
       captureRegionInWorld.orthogonalProjection(adjustedSolutionInControlPlane);
-      reachabilityConstraintHandler.updateReachabilityConstraint().orthogonalProjection(adjustedSolutionInControlPlane);
+      reachabilityConstraintHandler.getReachabilityConstraint().orthogonalProjection(adjustedSolutionInControlPlane);
 
       FrameConvexPolygon2DReadOnly constraintRegion = environmentConstraintProvider.updatePlanarRegionConstraintForStep(upcomingFootstepSide.getEnumValue(),
                                                                                                                         upcomingFootstep,

@@ -5,10 +5,8 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -22,7 +20,6 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -48,6 +45,7 @@ public class EnvironmentConstraintProvider
 
    private static final double distanceFromEdgeOfPolygonForStepping = 0.06;
 
+   private final ConvexPolygonTools polygonTools = new ConvexPolygonTools();
    private final ConvexPolygonScaler scaler = new ConvexPolygonScaler();
 
    private final DoubleProvider maxAngleForSteppable;
@@ -62,7 +60,10 @@ public class EnvironmentConstraintProvider
    private final YoBoolean switchPlanarRegionConstraintsAutomatically;
 
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
+   private final StepAdjustmentReachabilityConstraint reachabilityConstraint;
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+
+   private final FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D();
 
    private final YoBoolean constraintRegionChanged;
 
@@ -81,6 +82,7 @@ public class EnvironmentConstraintProvider
 
    public EnvironmentConstraintProvider(ICPOptimizationParameters optimizationParameters,
                                         OneStepCaptureRegionCalculator captureRegionCalculator,
+                                        StepAdjustmentReachabilityConstraint reachabilityConstraint,
                                         ICPControlPlane icpControlPlane,
                                         SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                         String yoNamePrefix,
@@ -88,6 +90,7 @@ public class EnvironmentConstraintProvider
                                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.captureRegionCalculator = captureRegionCalculator;
+      this.reachabilityConstraint = reachabilityConstraint;
       this.icpControlPlane = icpControlPlane;
       this.contactableFeet = contactableFeet;
 
@@ -159,6 +162,8 @@ public class EnvironmentConstraintProvider
 
       boolean planarRegionIsValid = false;
 
+      computeValidCaptureRegion();
+
       if (planarRegionToConstrainTo == null)
       {
          planarRegionToConstrainTo = findPlanarRegionUnderFoothold(footstepPose);
@@ -200,16 +205,16 @@ public class EnvironmentConstraintProvider
       yoConvexHullConstraint.set(planarRegion.getConvexHull());
       yoConvexHullConstraint.applyTransform(planarRegion.getTransformToWorld(), false);
 
-      icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion, yoConvexHullConstraintInControlPlane);
+      icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion.getConvexHull(), planarRegion.getTransformToWorld(), yoConvexHullConstraintInControlPlane);
 
       scaler.scaleConvexPolygonToContainInteriorPolygon(yoConvexHullConstraint, footstepPolygon, distanceFromEdgeOfPolygonForStepping, yoShrunkConvexHullConstraint);
 
-      icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(yoShrunkConvexHullConstraint, planarRegion.getTransformToWorld(), yoShrunkConvexHullConstraintInControlPlane);
+      icpControlPlane.projectPlanarRegionConvexHullInWorldOntoControlPlane(yoShrunkConvexHullConstraint, planarRegion, yoShrunkConvexHullConstraintInControlPlane);
    }
 
    private void computeFootstepPolygon(RobotSide upcomingFootstepSide, List<? extends Point2DBasics> predictedContactPoints, Orientation3DReadOnly orientation)
    {
-      if (!predictedContactPoints.isEmpty())
+      if (predictedContactPoints.isEmpty())
          predictedContactPoints = contactableFeet.get(upcomingFootstepSide).getContactPoints2d();
 
       footstepPolygon.clear();
@@ -220,6 +225,16 @@ public class EnvironmentConstraintProvider
       orientationTransform.getRotation().set(orientation);
 
       footstepPolygon.applyTransform(orientationTransform);
+   }
+
+   private void computeValidCaptureRegion()
+   {
+      FrameConvexPolygon2D fullCaptureRegion = captureRegionCalculator.getCaptureRegion();
+      fullCaptureRegion.changeFrameAndProjectToXYPlane(worldFrame);
+
+      reachabilityConstraint.getReachabilityConstraint();
+
+      polygonTools.computeIntersectionOfPolygons(fullCaptureRegion, reachabilityConstraint.getReachabilityConstraint(), captureRegion);
    }
 
    private boolean isRegionValidForStepping(PlanarRegion planarRegion)
@@ -259,9 +274,6 @@ public class EnvironmentConstraintProvider
 
    private boolean checkIfCurrentPlanarRegionIsValid()
    {
-      FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
-      captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
-
       double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, yoConvexHullConstraintInControlPlane);
 
       return intersectionArea > minimumIntersectionForSearch;
@@ -270,9 +282,6 @@ public class EnvironmentConstraintProvider
 
    private PlanarRegion findBestPlanarRegionToStepTo()
    {
-      FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
-      captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
-
       double maxArea = 0.0;
       PlanarRegion activePlanarRegion = null;
 
