@@ -156,7 +156,13 @@ public class StepAdjustmentController
                                                                                yoGraphicsListRegistry);
 
       captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, yoNamePrefix, registry, yoGraphicsListRegistry);
-      environmentConstraintProvider = new EnvironmentConstraintProvider(icpOptimizationParameters, captureRegionCalculator, yoNamePrefix, registry, yoGraphicsListRegistry);
+      environmentConstraintProvider = new EnvironmentConstraintProvider(icpOptimizationParameters,
+                                                                        captureRegionCalculator,
+                                                                        icpControlPlane,
+                                                                        contactableFeet,
+                                                                        yoNamePrefix,
+                                                                        registry,
+                                                                        yoGraphicsListRegistry);
 
       if (walkingControllerParameters != null)
          swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
@@ -257,7 +263,10 @@ public class StepAdjustmentController
       computeTimeInCurrentState(currentTime);
       computeTimeRemainingInState();
 
-      captureRegionCalculator.calculateCaptureRegion(upcomingFootstepSide.getEnumValue(), timeRemainingInState.getDoubleValue(), currentICP, omega0,
+      captureRegionCalculator.calculateCaptureRegion(upcomingFootstepSide.getEnumValue(),
+                                                     timeRemainingInState.getDoubleValue(),
+                                                     currentICP,
+                                                     omega0,
                                                      bipedSupportPolygons.getFootPolygonInWorldFrame(upcomingFootstepSide.getEnumValue().getOppositeSide()));
 
       if (!useStepAdjustment.getBooleanValue())
@@ -301,7 +310,9 @@ public class StepAdjustmentController
 
       icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, adjustedSolutionInControlPlane, tempPoint, upcomingFootstep.getPosition().getZ());
 
-      FrameConvexPolygon2DReadOnly constraintRegion = environmentConstraintProvider.updatePlanarRegionConstraintForStep(upcomingFootstep);
+      FrameConvexPolygon2DReadOnly constraintRegion = environmentConstraintProvider.updatePlanarRegionConstraintForStep(upcomingFootstepSide.getEnumValue(),
+                                                                                                                        upcomingFootstep,
+                                                                                                                        upcomingFootstepContactPoints);
       if (constraintRegion != null)
       {
          constraintRegion.orthogonalProjection(adjustedSolutionInControlPlane);
