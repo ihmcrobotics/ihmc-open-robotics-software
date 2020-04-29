@@ -92,6 +92,7 @@ public class ExperimentalPhysicsEngine
                         MultiBodySystemStateReader physicsOutputReader)
    {
       PhysicsEngineRobotData robot = new PhysicsEngineRobotData(robotName, rootBody, robotCollisionModel, physicsEngineGraphicsRegistry);
+      YoVariableRegistry robotRegistry = robot.getRobotRegistry();
       robot.setRobotInitialStateWriter(robotInitialStateWriter);
       robot.setControllerOutputWriter(controllerOutputWriter);
       robot.addPhysicsOutputReader(physicsOutputReader);
@@ -101,11 +102,11 @@ public class ExperimentalPhysicsEngine
       robotCollidableAppearance.setTransparency(0.5);
       CollidableListVisualizer collidableVisualizers = new CollidableListVisualizer(collidableVisualizerGroupName,
                                                                                     robotCollidableAppearance,
-                                                                                    robot.getRobotRegistry(),
+                                                                                    robotRegistry,
                                                                                     physicsEngineGraphicsRegistry);
       robot.getCollidables().forEach(collidableVisualizers::addCollidable);
       robotCollidableVisualizers.add(collidableVisualizers);
-      physicsEngineRegistry.addChild(robot.getRobotRegistry());
+      physicsEngineRegistry.addChild(robotRegistry);
       robotList.add(robot);
    }
 
