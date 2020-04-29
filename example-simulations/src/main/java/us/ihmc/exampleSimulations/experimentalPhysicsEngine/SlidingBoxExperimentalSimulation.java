@@ -28,7 +28,7 @@ public class SlidingBoxExperimentalSimulation
 
       double groundPitch = Math.toRadians(34.0);
 
-      RobotDescription boxRobot = ExampleExperimentalSimulationTools.createASingleBoxRobot("box", boxSize, 150.0, 0.8, YoAppearance.DarkCyan());
+      RobotDescription boxRobot = ExampleExperimentalSimulationTools.newBoxRobot("box", boxSize, 150.0, 0.8, YoAppearance.DarkCyan());
 
       MultiBodySystemStateWriter boxInitialStateWriter = MultiBodySystemStateWriter.singleJointStateWriter("box", (FloatingJointBasics joint) ->
       {

@@ -24,14 +24,14 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class ExampleExperimentalSimulationTools
 {
-   static RobotDescription createASingleBallRobot(String name, double radius, double mass, double radiusOfGyrationPercent, AppearanceDefinition appearance,
-                                                  boolean addStripes, AppearanceDefinition stripesAppearance)
+   static RobotDescription newSphereRobot(String name, double radius, double mass, double radiusOfGyrationPercent, AppearanceDefinition appearance,
+                                          boolean addStripes, AppearanceDefinition stripesAppearance)
    {
       RobotDescription robotDescription = new RobotDescription(name);
       FloatingJointDescription rootJoint = new FloatingJointDescription(name, name);
-      LinkDescription ballLink = new LinkDescription(name + "Link");
+      LinkDescription link = new LinkDescription(name + "Link");
       double radiusOfGyration = radiusOfGyrationPercent * radius;
-      ballLink.setMassAndRadiiOfGyration(mass, radiusOfGyration, radiusOfGyration, radiusOfGyration);
+      link.setMassAndRadiiOfGyration(mass, radiusOfGyration, radiusOfGyration, radiusOfGyration);
 
       LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
       linkGraphics.addSphere(radius, appearance);
@@ -44,21 +44,21 @@ public class ExampleExperimentalSimulationTools
          linkGraphics.addArcTorus(0.0, 2.0 * Math.PI, (1.01 - stripePercent) * radius, radius * stripePercent, stripesAppearance);
       }
 
-      ballLink.setLinkGraphics(linkGraphics);
-      rootJoint.setLink(ballLink);
+      link.setLinkGraphics(linkGraphics);
+      rootJoint.setLink(link);
       robotDescription.addRootJoint(rootJoint);
 
       return robotDescription;
    }
 
-   static RobotDescription createASingleCylinderRobot(String name, double radius, double height, double mass, double radiusOfGyrationPercent,
-                                                      AppearanceDefinition appearance, boolean addStripes, AppearanceDefinition stripesAppearance)
+   static RobotDescription newCylinderRobot(String name, double radius, double height, double mass, double radiusOfGyrationPercent,
+                                            AppearanceDefinition appearance, boolean addStripes, AppearanceDefinition stripesAppearance)
    {
       RobotDescription robotDescription = new RobotDescription(name);
 
       FloatingJointDescription rootJoint = new FloatingJointDescription(name, name);
-      LinkDescription ballLink = new LinkDescription(name + "Link");
-      ballLink.setMassAndRadiiOfGyration(mass, radiusOfGyrationPercent * radius, radiusOfGyrationPercent * radius, radiusOfGyrationPercent * height);
+      LinkDescription link = new LinkDescription(name + "Link");
+      link.setMassAndRadiiOfGyration(mass, radiusOfGyrationPercent * radius, radiusOfGyrationPercent * radius, radiusOfGyrationPercent * height);
 
       LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
       linkGraphics.translate(0.0, 0.0, -height / 2.0);
@@ -73,21 +73,21 @@ public class ExampleExperimentalSimulationTools
          linkGraphics.addCube(2.0 * radius * 1.01, radius * stripePercent, height * 1.02, stripesAppearance);
       }
 
-      ballLink.setLinkGraphics(linkGraphics);
-      rootJoint.setLink(ballLink);
+      link.setLinkGraphics(linkGraphics);
+      rootJoint.setLink(link);
       robotDescription.addRootJoint(rootJoint);
 
       return robotDescription;
    }
 
-   static RobotDescription createASingleCapsuleRobot(String name, double radius, double height, double mass, double radiusOfGyrationPercent,
-                                                     AppearanceDefinition appearance, boolean addStripes, AppearanceDefinition stripesAppearance)
+   static RobotDescription newCapsuleRobot(String name, double radius, double height, double mass, double radiusOfGyrationPercent,
+                                           AppearanceDefinition appearance, boolean addStripes, AppearanceDefinition stripesAppearance)
    {
       RobotDescription robotDescription = new RobotDescription(name);
 
       FloatingJointDescription rootJoint = new FloatingJointDescription(name, name);
-      LinkDescription capsuleLink = new LinkDescription(name + "Link");
-      capsuleLink.setMassAndRadiiOfGyration(mass, radiusOfGyrationPercent * radius, radiusOfGyrationPercent * radius, radiusOfGyrationPercent * height);
+      LinkDescription link = new LinkDescription(name + "Link");
+      link.setMassAndRadiiOfGyration(mass, radiusOfGyrationPercent * radius, radiusOfGyrationPercent * radius, radiusOfGyrationPercent * height);
 
       LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
       linkGraphics.addCapsule(radius, height + 2.0 * radius, appearance);
@@ -101,21 +101,20 @@ public class ExampleExperimentalSimulationTools
          linkGraphics.addCube(2.0 * radius * 1.01, radius * stripePercent, height - 2.0 * radius, stripesAppearance);
       }
 
-      capsuleLink.setLinkGraphics(linkGraphics);
-      rootJoint.setLink(capsuleLink);
+      link.setLinkGraphics(linkGraphics);
+      rootJoint.setLink(link);
       robotDescription.addRootJoint(rootJoint);
 
       return robotDescription;
    }
 
-   static RobotDescription createASingleBoxRobot(String name, Tuple3DReadOnly size, double mass, double radiusOfGyrationPercent,
-                                                 AppearanceDefinition appearance)
+   static RobotDescription newBoxRobot(String name, Tuple3DReadOnly size, double mass, double radiusOfGyrationPercent, AppearanceDefinition appearance)
    {
-      return createASingleBoxRobot(name, size.getX(), size.getY(), size.getZ(), mass, radiusOfGyrationPercent, appearance);
+      return newBoxRobot(name, size.getX(), size.getY(), size.getZ(), mass, radiusOfGyrationPercent, appearance);
    }
 
-   static RobotDescription createASingleBoxRobot(String name, double sizeX, double sizeY, double sizeZ, double mass, double radiusOfGyrationPercent,
-                                                 AppearanceDefinition appearance)
+   static RobotDescription newBoxRobot(String name, double sizeX, double sizeY, double sizeZ, double mass, double radiusOfGyrationPercent,
+                                       AppearanceDefinition appearance)
    {
       RobotDescription robotDescription = new RobotDescription(name);
 

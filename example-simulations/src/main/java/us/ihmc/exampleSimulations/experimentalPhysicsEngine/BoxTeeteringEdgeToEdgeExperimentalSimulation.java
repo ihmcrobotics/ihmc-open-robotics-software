@@ -35,13 +35,13 @@ public class BoxTeeteringEdgeToEdgeExperimentalSimulation
       double groundWidth = 1.0;
       double groundLength = 1.0;
 
-      RobotDescription boxRobot = ExampleExperimentalSimulationTools.createASingleBoxRobot("box",
-                                                                                           boxXLength,
-                                                                                           boxYWidth,
-                                                                                           boxZHeight,
-                                                                                           boxMass,
-                                                                                           boxRadiusOfGyrationPercent,
-                                                                                           YoAppearance.DarkCyan());
+      RobotDescription boxRobot = ExampleExperimentalSimulationTools.newBoxRobot("box",
+                                                                                 boxXLength,
+                                                                                 boxYWidth,
+                                                                                 boxZHeight,
+                                                                                 boxMass,
+                                                                                 boxRadiusOfGyrationPercent,
+                                                                                 YoAppearance.DarkCyan());
 
       MultiBodySystemStateWriter boxInitialStateWriter = MultiBodySystemStateWriter.singleJointStateWriter("box", (FloatingJointBasics joint) ->
       {
