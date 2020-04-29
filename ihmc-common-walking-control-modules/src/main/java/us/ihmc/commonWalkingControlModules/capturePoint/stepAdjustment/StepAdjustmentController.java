@@ -308,8 +308,6 @@ public class StepAdjustmentController
       captureRegionInWorld.orthogonalProjection(adjustedSolutionInControlPlane);
       reachabilityConstraintHandler.updateReachabilityConstraint().orthogonalProjection(adjustedSolutionInControlPlane);
 
-      icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, adjustedSolutionInControlPlane, tempPoint, upcomingFootstep.getPosition().getZ());
-
       FrameConvexPolygon2DReadOnly constraintRegion = environmentConstraintProvider.updatePlanarRegionConstraintForStep(upcomingFootstepSide.getEnumValue(),
                                                                                                                         upcomingFootstep,
                                                                                                                         upcomingFootstepContactPoints);
@@ -317,6 +315,8 @@ public class StepAdjustmentController
       {
          constraintRegion.orthogonalProjection(adjustedSolutionInControlPlane);
       }
+
+      icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, adjustedSolutionInControlPlane, tempPoint, upcomingFootstep.getPosition().getZ());
 
       footstepSolution.getPosition().set(tempPoint);
 

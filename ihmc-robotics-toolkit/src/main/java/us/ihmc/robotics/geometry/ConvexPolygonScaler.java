@@ -216,7 +216,7 @@ public class ConvexPolygonScaler
     * represents an interior offset, and negative represents an exterior offset.
     */
    public boolean scaleConvexPolygonToContainInteriorPolygon(ConvexPolygon2DReadOnly exteriorPolygon, ConvexPolygon2DReadOnly interiorPolygon, double distanceInside,
-                                                             ConvexPolygon2D scaledPolygonToPack)
+                                                             ConvexPolygon2DBasics scaledPolygonToPack)
    {
       if (Math.abs(distanceInside) < 1.0e-10 && interiorPolygon.getArea() <= 1.0e-10)
       {
