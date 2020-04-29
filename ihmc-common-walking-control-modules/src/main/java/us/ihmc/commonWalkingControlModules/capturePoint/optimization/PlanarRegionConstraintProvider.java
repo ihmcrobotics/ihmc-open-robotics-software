@@ -308,7 +308,7 @@ public class PlanarRegionConstraintProvider
          }
          footstepPolygon.update();
       }
-      icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, footstepPolygon, projectedAndShrunkConvexHull, distanceFromEdgeForStepping);
+      icpControlPlane.scaleToFootAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, footstepPolygon, projectedAndShrunkConvexHull, distanceFromEdgeForStepping);
       yoShrunkActivePlanarRegion.set(projectedAndShrunkConvexHull);
 
       return projectedAndShrunkConvexHull;

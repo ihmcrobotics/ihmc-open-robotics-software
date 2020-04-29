@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -125,15 +126,19 @@ public class ICPControlPlane
 
    public void projectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
    {
-      ConvexPolygon2DReadOnly convexHull = planarRegion.getConvexHull();
-      convexPolygonInControlPlaneToPack.clear();
 
+      projectPlanarRegionConvexHullOntoControlPlane(planarRegion.getConvexHull(), planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
+   }
+
+   public void projectPlanarRegionConvexHullOntoControlPlane(ConvexPolygon2DReadOnly convexHull, RigidBodyTransformReadOnly transformToWorld,
+                                                             ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
+   {
       convexHullInWorld.clear();
       for (int i = 0; i < convexHull.getNumberOfVertices(); i++)
       {
          Point3D vertexInWorld = convexHullInWorld.add();
-         vertexInWorld.set(convexHull.getVertex(i));
-         planarRegion.getTransformToWorld().transform(vertexInWorld);
+         vertexInWorld.set(convexHull.getVertex(i), 0.0);
+         transformToWorld.transform(vertexInWorld);
       }
 
       projectPointsInWorldOntoControlPlane(convexHullInWorld, pointsInPlane);
@@ -149,26 +154,25 @@ public class ICPControlPlane
                                                                      double distanceInside)
    {
       ConvexPolygon2DReadOnly convexHull = planarRegion.getConvexHull();
-      convexPolygonInControlPlaneToPack.clear();
 
       scaler.scaleConvexPolygon(convexHull, distanceInside, scaledConvexHull);
 
-      for (int i = 0; i < scaledConvexHull.getNumberOfVertices(); i++)
-      {
-         Point3D vertexInWorld = convexHullInWorld.add();
-         vertexInWorld.set(scaledConvexHull.getVertex(i));
-         planarRegion.getTransformToWorld().transform(vertexInWorld);
-      }
-
-      projectPointsInWorldOntoControlPlane(convexHullInWorld, pointsInPlane);
-
-      convexPolygonInControlPlaneToPack.clear();
-      for (int i = 0; i < pointsInPlane.size(); i++)
-         convexPolygonInControlPlaneToPack.addVertex(pointsInPlane.get(i));
-      convexPolygonInControlPlaneToPack.update();
+      projectPlanarRegionConvexHullOntoControlPlane(scaledConvexHull, planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
    }
 
    public void scaleAndProjectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion,
+                                                                     ConvexPolygon2DBasics scaledConvexPolygonToPack,
+                                                                     ConvexPolygon2DBasics convexPolygonInControlPlaneToPack,
+                                                                     double distanceInside)
+   {
+      ConvexPolygon2DReadOnly convexHull = planarRegion.getConvexHull();
+
+      scaler.scaleConvexPolygon(convexHull, distanceInside, scaledConvexPolygonToPack);
+
+      projectPlanarRegionConvexHullOntoControlPlane(scaledConvexPolygonToPack, planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
+   }
+
+   public void scaleToFootAndProjectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion,
                                                                      ConvexPolygon2DReadOnly footstepPolygon,
                                                                      ConvexPolygon2DBasics convexPolygonInControlPlaneToPack,
                                                                      double distanceInside)
@@ -177,22 +181,10 @@ public class ICPControlPlane
 
       scaler.scaleConvexPolygonToContainInteriorPolygon(convexHull, footstepPolygon, distanceInside, scaledConvexHull);
 
-      for (int i = 0; i < scaledConvexHull.getNumberOfVertices(); i++)
-      {
-         Point3D vertexInWorld = convexHullInWorld.add();
-         vertexInWorld.set(scaledConvexHull.getVertex(i));
-         planarRegion.getTransformToWorld().transform(vertexInWorld);
-      }
-
-      projectPointsInWorldOntoControlPlane(convexHullInWorld, pointsInPlane);
-
-      convexPolygonInControlPlaneToPack.clear();
-      for (int i = 0; i < pointsInPlane.size(); i++)
-         convexPolygonInControlPlaneToPack.addVertex(pointsInPlane.get(i));
-      convexPolygonInControlPlaneToPack.update();
+      projectPlanarRegionConvexHullOntoControlPlane(scaledConvexHull, planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
    }
 
-   private void projectPointsInWorldOntoControlPlane(List<? extends Point3DReadOnly> convexHullInWorld, RecyclingArrayList<? extends Point2DBasics> pointsInControlPlane)
+   public void projectPointsInWorldOntoControlPlane(List<? extends Point3DReadOnly> convexHullInWorld, RecyclingArrayList<? extends Point2DBasics> pointsInControlPlane)
    {
       pointsInControlPlane.clear();
 
