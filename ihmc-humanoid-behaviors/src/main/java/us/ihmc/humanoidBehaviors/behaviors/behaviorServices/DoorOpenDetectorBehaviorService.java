@@ -80,7 +80,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
    {
 
       //super.doThreadAction();
-      if (run)
+      if (true)
       {
          latestDoorLocationPacketRecieved = doorLocationQueue.getAndSet(null);
          if (latestDoorLocationPacketRecieved != null)
