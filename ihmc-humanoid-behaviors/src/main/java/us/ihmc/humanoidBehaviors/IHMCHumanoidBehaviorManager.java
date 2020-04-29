@@ -303,13 +303,13 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
       YoFrameConvexPolygon2D yoSupportPolygon = capturePointUpdatable.getYoSupportPolygon();
 
       // CREATE SERVICES
-      FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(robotName,
-                                                                                                            FiducialDetectorBehaviorService.class.getSimpleName(),
-                                                                                                            ros2Node,
-                                                                                                            yoGraphicsListRegistry);
-      fiducialDetectorBehaviorService.setTargetIDToLocate(50);
-      fiducialDetectorBehaviorService.setExpectedFiducialSize(0.2032);
-      dispatcher.addBehaviorService(fiducialDetectorBehaviorService);
+//      FiducialDetectorBehaviorService fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(robotName,
+//                                                                                                            FiducialDetectorBehaviorService.class.getSimpleName(),
+//                                                                                                            ros2Node,
+//                                                                                                            yoGraphicsListRegistry);
+//      fiducialDetectorBehaviorService.setTargetIDToLocate(50);
+//      fiducialDetectorBehaviorService.setExpectedFiducialSize(0.2032);
+//      dispatcher.addBehaviorService(fiducialDetectorBehaviorService);
 
       //      ObjectDetectorBehaviorService objectDetectorBehaviorService = null;
       //      try
@@ -326,15 +326,15 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
       //      dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
       //            new PickUpBallBehavior(behaviorCommunicationBridge, yoTime, yoDoubleSupport, fullRobotModel, referenceFrames, wholeBodyControllerParameters));
 
-//      dispatcher.addBehavior(HumanoidBehaviorType.FIRE_FIGHTING,
-//                             new FireFighterStanceBehavior(robotName,
-//                                                           "fireFighting",
-//                                                           yoTime,
-//                                                           ros2Node,
-//                                                           fullRobotModel,
-//                                                           referenceFrames,
-//                                                           wholeBodyControllerParameters,
-//                                                           atlasPrimitiveActions));
+      dispatcher.addBehavior(HumanoidBehaviorType.FIRE_FIGHTING,
+                             new FireFighterStanceBehavior(robotName,
+                                                           "fireFighting",
+                                                           yoTime,
+                                                           ros2Node,
+                                                           fullRobotModel,
+                                                           referenceFrames,
+                                                           wholeBodyControllerParameters,
+                                                           atlasPrimitiveActions));
 //
 //      dispatcher.addBehavior(HumanoidBehaviorType.PICK_UP_BALL,
 //                             new PickUpBallBehaviorStateMachine(robotName,
@@ -428,8 +428,8 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 //
 //      dispatcher.addBehavior(HumanoidBehaviorType.EXAMPLE_BEHAVIOR, new ExampleComplexBehaviorStateMachine(robotName, ros2Node, yoTime, atlasPrimitiveActions));
 //
-//      dispatcher.addBehavior(HumanoidBehaviorType.TEST_OPENDOORDETECTOR,
-//                             new TestDoorOpenBehaviorService(robotName, "doorOpen", ros2Node, yoGraphicsListRegistry));
+      dispatcher.addBehavior(HumanoidBehaviorType.TEST_OPENDOORDETECTOR,
+                             new TestDoorOpenBehaviorService(robotName, "doorOpen", ros2Node, yoGraphicsListRegistry));
 //
 //      dispatcher.addBehavior(HumanoidBehaviorType.LOCATE_FIDUCIAL, new LocateGoalBehavior(robotName, ros2Node, fiducialDetectorBehaviorService));
 //      dispatcher.addBehavior(HumanoidBehaviorType.FOLLOW_FIDUCIAL_50,
