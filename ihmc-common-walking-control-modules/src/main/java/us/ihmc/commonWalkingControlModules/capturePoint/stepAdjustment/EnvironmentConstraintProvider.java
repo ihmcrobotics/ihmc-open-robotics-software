@@ -1,22 +1,25 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
+import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.BooleanProvider;
@@ -27,7 +30,6 @@ import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.awt.*;
-import java.util.ArrayList;
 import java.util.List;
 
 public class EnvironmentConstraintProvider
@@ -39,9 +41,13 @@ public class EnvironmentConstraintProvider
 
    private static final double minimumIntersectionForSearch = 0.01;
 
+   private static final double distanceFromEdgeForStepping = 0.04;
+
    private final DoubleProvider maxAngleForSteppable;
    private final DoubleProvider minimumAreaForSteppable;
    private final BooleanProvider usePlanarRegionConstraints;
+
+   private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
 
    private final RecyclingArrayList<PlanarRegion> allPlanarRegionsThatAreSteppable = new RecyclingArrayList<>(PlanarRegion.class);
    private final YoInteger numberOfPlanarListsToConsider;
@@ -53,17 +59,29 @@ public class EnvironmentConstraintProvider
 
    private final YoBoolean constraintRegionChanged;
 
-   private final YoFrameConvexPolygon2D convexHullConstraint;
+   private final ConvexPolygon2D convexHullConstraint = new ConvexPolygon2D();
+   private final ConvexPolygon2D convexHullConstraintInControlPlane = new ConvexPolygon2D();
+
+   private final YoFrameConvexPolygon2D yoConvexHullConstraint;
+   private final YoFrameConvexPolygon2D yoConvexHullConstraintInControlPlane;
+   private final YoFrameConvexPolygon2D yoShrunkConvexHullConstraintInControlPlane;
+
+   private final ICPControlPlane icpControlPlane;
+
 
    private PlanarRegion planarRegionToConstrainTo = null;
 
    public EnvironmentConstraintProvider(ICPOptimizationParameters optimizationParameters,
                                         OneStepCaptureRegionCalculator captureRegionCalculator,
+                                        ICPControlPlane icpControlPlane,
+                                        SideDependentList<? extends ContactablePlaneBody> contactableFeet,
                                         String yoNamePrefix,
                                         YoVariableRegistry registry,
                                         YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.captureRegionCalculator = captureRegionCalculator;
+      this.icpControlPlane = icpControlPlane;
+      this.contactableFeet = contactableFeet;
 
       maxAngleForSteppable = new DoubleParameter(yoNamePrefix + "MaxAngleForSteppable", registry, maxNormalAngleFromVertical);
       minimumAreaForSteppable = new DoubleParameter(yoNamePrefix + "MinimumAreaForSteppable", registry, minimumAreaToConsider);
@@ -75,13 +93,21 @@ public class EnvironmentConstraintProvider
       switchPlanarRegionConstraintsAutomatically = new YoBoolean(yoNamePrefix + "SwitchPlanarRegionConstraintsAutomatically", registry);
       switchPlanarRegionConstraintsAutomatically.set(optimizationParameters.switchPlanarRegionConstraintsAutomatically());
 
-      convexHullConstraint = new YoFrameConvexPolygon2D(yoNamePrefix + "ConvexHullConstraint", "", worldFrame, 12, registry);
+      yoConvexHullConstraint = new YoFrameConvexPolygon2D(yoNamePrefix + "ConvexHullConstraint", "", worldFrame, 12, registry);
+      yoConvexHullConstraintInControlPlane = new YoFrameConvexPolygon2D(yoNamePrefix + "ConvexHullConstraintInControlPlane", "", worldFrame, 12, registry);
+      yoShrunkConvexHullConstraintInControlPlane = new YoFrameConvexPolygon2D(yoNamePrefix + "ShrunkConvexHullConstraintInControlPlane", "", worldFrame, 12, registry);
 
       if (yoGraphicsListRegistry != null)
       {
-         YoArtifactPolygon activePlanarRegionViz = new YoArtifactPolygon("ConvexHullConstraint", convexHullConstraint, Color.RED, false, true);
+         YoArtifactPolygon activePlanarRegionViz = new YoArtifactPolygon("ConvexHullConstraint", yoConvexHullConstraint, Color.RED, false, true);
+         YoArtifactPolygon activePlanarRegionInControlPlaneViz = new YoArtifactPolygon("ConvexHullConstraintInControlPlane",
+                                                                                       yoConvexHullConstraintInControlPlane, Color.RED, false);
+         YoArtifactPolygon shrunkActivePlanarRegionInControlPlaneViz = new YoArtifactPolygon("ShrunkConvexHullConstraintInControlPlane",
+                                                                                             yoShrunkConvexHullConstraintInControlPlane, Color.PINK, false);
 
          yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), activePlanarRegionViz);
+         yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), activePlanarRegionInControlPlaneViz);
+         yoGraphicsListRegistry.registerArtifact(getClass().getSimpleName(), shrunkActivePlanarRegionInControlPlaneViz);
       }
    }
 
@@ -108,10 +134,11 @@ public class EnvironmentConstraintProvider
    public void reset()
    {
       planarRegionToConstrainTo = null;
-      convexHullConstraint.clear();
+      yoConvexHullConstraint.clear();
    }
 
-   public FrameConvexPolygon2DReadOnly updatePlanarRegionConstraintForStep(FramePose3DReadOnly footPosition)
+   public FrameConvexPolygon2DReadOnly updatePlanarRegionConstraintForStep(RobotSide upcomingFootstepSide, FramePose3DReadOnly footPosition,
+                                                                           List<Point2D> predictedContactPoints)
    {
       constraintRegionChanged.set(false);
 
@@ -123,8 +150,7 @@ public class EnvironmentConstraintProvider
       if (planarRegionToConstrainTo == null)
       {
          planarRegionToConstrainTo = findPlanarRegionUnderFoothold(footPosition);
-         convexHullConstraint.set(planarRegionToConstrainTo.getConvexHull());
-         convexHullConstraint.applyTransform(planarRegionToConstrainTo.getTransformToWorld(), false);
+         computeShrunkAndProjectedConvexHulls(planarRegionToConstrainTo, upcomingFootstepSide, predictedContactPoints, yoShrunkConvexHullConstraintInControlPlane);
       }
 
       if (switchPlanarRegionConstraintsAutomatically.getBooleanValue())
@@ -138,14 +164,51 @@ public class EnvironmentConstraintProvider
             if (betterRegion != null)
             {
                planarRegionToConstrainTo = betterRegion;
+               computeShrunkAndProjectedConvexHulls(planarRegionToConstrainTo, upcomingFootstepSide, predictedContactPoints, yoShrunkConvexHullConstraintInControlPlane);
                constraintRegionChanged.set(true);
-               convexHullConstraint.set(planarRegionToConstrainTo.getConvexHull());
-               convexHullConstraint.applyTransform(planarRegionToConstrainTo.getTransformToWorld(), false);
             }
          }
       }
 
-      return planarRegionToConstrainTo != null ? convexHullConstraint : null;
+      if (planarRegionToConstrainTo != null)
+      {
+         return yoShrunkConvexHullConstraintInControlPlane;
+      }
+
+      return null;
+   }
+
+   private final ConvexPolygon2D footstepPolygon = new ConvexPolygon2D();
+
+   private void computeShrunkAndProjectedConvexHulls(PlanarRegion planarRegion, RobotSide upcomingFootstepSide, List<Point2D> predictedContactPoints,
+                                                     ConvexPolygon2DBasics convexHullConstraintInControlPlane)
+   {
+      yoConvexHullConstraint.set(planarRegion.getConvexHull());
+      yoConvexHullConstraint.applyTransform(planarRegion.getTransformToWorld(), false);
+
+      icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion, yoConvexHullConstraintInControlPlane);
+
+      if (!predictedContactPoints.isEmpty())
+      {
+         footstepPolygon.clear();
+         for (int i = 0; i < predictedContactPoints.size(); i++)
+            footstepPolygon.addVertex(predictedContactPoints.get(i));
+         footstepPolygon.update();
+      }
+      else
+      {
+         footstepPolygon.clear();
+         List<FramePoint2D> contactPoints = contactableFeet.get(upcomingFootstepSide).getContactPoints2d();
+         //these are in the sole frame
+         for (int i = 0; i < contactPoints.size(); i++)
+         {
+            FramePoint2D contactPoint = contactPoints.get(i);
+            footstepPolygon.addVertex(contactPoint);
+         }
+         footstepPolygon.update();
+
+         icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, footstepPolygon, convexHullConstraintInControlPlane, distanceFromEdgeForStepping);
+      }
    }
 
    private boolean isRegionValidForStepping(PlanarRegion planarRegion)
@@ -188,12 +251,11 @@ public class EnvironmentConstraintProvider
       FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
       captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
-      double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, convexHullConstraint);
+      double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, yoConvexHullConstraintInControlPlane);
 
       return intersectionArea > minimumIntersectionForSearch;
    }
 
-   private final ConvexPolygon2D convexHullInWorld = new ConvexPolygon2D();
 
    private PlanarRegion findBestPlanarRegionToStepTo()
    {
@@ -206,10 +268,12 @@ public class EnvironmentConstraintProvider
       for (int regionIndex = 0; regionIndex < allPlanarRegionsThatAreSteppable.size(); regionIndex++)
       {
          PlanarRegion planarRegion = allPlanarRegionsThatAreSteppable.get(regionIndex);
-         convexHullInWorld.set(planarRegion.getConvexHull());
-         convexHullInWorld.applyTransform(planarRegion.getTransformToWorld(), false);
+         convexHullConstraint.set(planarRegion.getConvexHull());
+         convexHullConstraint.applyTransform(planarRegion.getTransformToWorld(), false);
 
-         double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, convexHullInWorld);
+         icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion, convexHullConstraintInControlPlane);
+
+         double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, convexHullConstraintInControlPlane);
 
          if (intersectionArea > maxArea)
          {

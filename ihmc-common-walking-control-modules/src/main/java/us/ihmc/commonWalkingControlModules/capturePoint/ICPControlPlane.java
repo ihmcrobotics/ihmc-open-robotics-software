@@ -123,7 +123,7 @@ public class ICPControlPlane
       projectionToPack.changeFrame(desiredReferenceFrame);
    }
 
-   public void projectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2D convexPolygonInControlPlaneToPack)
+   public void projectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
    {
       ConvexPolygon2DReadOnly convexHull = planarRegion.getConvexHull();
       convexPolygonInControlPlaneToPack.clear();
@@ -145,7 +145,7 @@ public class ICPControlPlane
    }
 
    public void scaleAndProjectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion,
-                                                                     ConvexPolygon2D convexPolygonInControlPlaneToPack,
+                                                                     ConvexPolygon2DBasics convexPolygonInControlPlaneToPack,
                                                                      double distanceInside)
    {
       ConvexPolygon2DReadOnly convexHull = planarRegion.getConvexHull();
