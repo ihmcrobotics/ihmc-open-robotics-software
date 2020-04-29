@@ -31,7 +31,7 @@ public class ICPControlPlane
    private final YoDouble controlPlaneHeight;
    private final ReferenceFrame centerOfMassFrame;
 
-   private final RecyclingArrayList<Point3D> convexHullInWorld = new RecyclingArrayList<>(Point3D::new);
+   private final RecyclingArrayList<Point3D> vertexInWorldProvider = new RecyclingArrayList<>(Point3D::new);
    private final RecyclingArrayList<Point2DBasics> pointsInPlane = new RecyclingArrayList<>(Point2D::new);
 
    private final FramePoint3D tempFramePoint = new FramePoint3D();
@@ -42,10 +42,6 @@ public class ICPControlPlane
 
    private final FramePoint3D centerOfMassPosition = new FramePoint3D();
    private final FrameVector3D rayDirection = new FrameVector3D();
-
-   private final ConvexPolygonScaler scaler = new ConvexPolygonScaler();
-
-   private final ConvexPolygon2D scaledConvexHull = new ConvexPolygon2D();
 
    private final double gravityZ;
 
@@ -128,39 +124,21 @@ public class ICPControlPlane
    public void projectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
    {
 
-      projectPlanarRegionConvexHullOntoControlPlane(planarRegion.getConvexHull(), planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
+      projectConvexHullOntoControlPlane(planarRegion.getConvexHull(), planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
    }
 
-   public void projectPlanarRegionConvexHullOntoControlPlane(ConvexPolygon2DReadOnly convexHull, RigidBodyTransformReadOnly transformToWorld,
-                                                             ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
+   public void projectPlanarRegionConvexHullInWorldOntoControlPlane(ConvexPolygon2DReadOnly convexHullInWorld, PlanarRegion heightProvider,
+                                                                    ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
    {
-      convexHullInWorld.clear();
-      for (int i = 0; i < convexHull.getNumberOfVertices(); i++)
-      {
-         Point3D vertexInWorld = convexHullInWorld.add();
-         vertexInWorld.set(convexHull.getVertex(i), 0.0);
-         transformToWorld.transform(vertexInWorld);
-      }
-
-      projectPointsInWorldOntoControlPlane(convexHullInWorld, pointsInPlane);
-
-      convexPolygonInControlPlaneToPack.clear();
-      for (int i = 0; i < pointsInPlane.size(); i++)
-         convexPolygonInControlPlaneToPack.addVertex(pointsInPlane.get(i));
-      convexPolygonInControlPlaneToPack.update();
-   }
-   public void projectPlanarRegionConvexHullInWorldOntoControlPlane(ConvexPolygon2DReadOnly convexHullInWorld, PlanarRegion planarRegion,
-                                                             ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
-   {
-      this.convexHullInWorld.clear();
+      vertexInWorldProvider.clear();
       for (int i = 0; i < convexHullInWorld.getNumberOfVertices(); i++)
       {
-         Point3D vertexInWorld = this.convexHullInWorld.add();
+         Point3D vertexInWorld = vertexInWorldProvider.add();
          Point2DReadOnly vertex = convexHullInWorld.getVertex(i);
-         vertexInWorld.set(vertex, planarRegion.getPlaneZGivenXY(vertex.getX(), vertex.getY()));
+         vertexInWorld.set(vertex, heightProvider.getPlaneZGivenXY(vertex.getX(), vertex.getY()));
       }
 
-      projectPointsInWorldOntoControlPlane(this.convexHullInWorld, pointsInPlane);
+      projectPointsInWorldOntoControlPlane(vertexInWorldProvider, pointsInPlane);
 
       convexPolygonInControlPlaneToPack.clear();
       for (int i = 0; i < pointsInPlane.size(); i++)
@@ -168,27 +146,23 @@ public class ICPControlPlane
       convexPolygonInControlPlaneToPack.update();
    }
 
-   public void scaleAndProjectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion,
-                                                                     ConvexPolygon2DBasics convexPolygonInControlPlaneToPack,
-                                                                     double distanceInside)
+   public void projectConvexHullOntoControlPlane(ConvexPolygon2DReadOnly convexHullInLocal, RigidBodyTransformReadOnly transformFromLocalToWorld,
+                                                 ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
    {
-      ConvexPolygon2DReadOnly convexHull = planarRegion.getConvexHull();
+      vertexInWorldProvider.clear();
+      for (int i = 0; i < convexHullInLocal.getNumberOfVertices(); i++)
+      {
+         Point3D vertexInWorld = vertexInWorldProvider.add();
+         vertexInWorld.set(convexHullInLocal.getVertex(i), 0.0);
+         transformFromLocalToWorld.transform(vertexInWorld);
+      }
 
-      scaler.scaleConvexPolygon(convexHull, distanceInside, scaledConvexHull);
+      projectPointsInWorldOntoControlPlane(vertexInWorldProvider, pointsInPlane);
 
-      projectPlanarRegionConvexHullOntoControlPlane(scaledConvexHull, planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
-   }
-
-   public void scaleToFootAndProjectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion,
-                                                                     ConvexPolygon2DReadOnly footstepPolygon,
-                                                                     ConvexPolygon2DBasics convexPolygonInControlPlaneToPack,
-                                                                     double distanceInside)
-   {
-      ConvexPolygon2DReadOnly convexHull = planarRegion.getConvexHull();
-
-      scaler.scaleConvexPolygonToContainInteriorPolygon(convexHull, footstepPolygon, distanceInside, scaledConvexHull);
-
-      projectPlanarRegionConvexHullOntoControlPlane(scaledConvexHull, planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
+      convexPolygonInControlPlaneToPack.clear();
+      for (int i = 0; i < pointsInPlane.size(); i++)
+         convexPolygonInControlPlaneToPack.addVertex(pointsInPlane.get(i));
+      convexPolygonInControlPlaneToPack.update();
    }
 
    public void projectPointsInWorldOntoControlPlane(List<? extends Point3DReadOnly> convexHullInWorld, RecyclingArrayList<? extends Point2DBasics> pointsInControlPlane)
