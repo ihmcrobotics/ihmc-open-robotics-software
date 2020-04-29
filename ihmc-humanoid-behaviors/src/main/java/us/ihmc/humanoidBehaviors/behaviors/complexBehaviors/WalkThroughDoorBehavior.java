@@ -489,7 +489,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, 0.8);
       Quaternion headOrientation = new Quaternion();
       headOrientation.set(orientationAxisAngle);
-      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0, headOrientation, ReferenceFrame.getWorldFrame(),
+      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0, headOrientation, atlasPrimitiveActions.referenceFrames.getChestFrame(),
                                                                                                      atlasPrimitiveActions.referenceFrames.getChestFrame());
       headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       headTrajectoryPublisher.publish(headTrajectoryMessage);
@@ -500,7 +500,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, 0);
       Quaternion headOrientation = new Quaternion();
       headOrientation.set(orientationAxisAngle);
-      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0, headOrientation, ReferenceFrame.getWorldFrame(),
+      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0, headOrientation,atlasPrimitiveActions.referenceFrames.getChestFrame(),
                                                                                                      atlasPrimitiveActions.referenceFrames.getChestFrame());
       headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       headTrajectoryPublisher.publish(headTrajectoryMessage);
