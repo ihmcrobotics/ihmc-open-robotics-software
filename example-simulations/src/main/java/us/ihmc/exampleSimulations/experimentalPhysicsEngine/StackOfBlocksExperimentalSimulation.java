@@ -24,7 +24,7 @@ import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 
 public class StackOfBlocksExperimentalSimulation
 {
-   private final ContactParameters contactParameters = new ContactParameters(0.7, 0.3, 0.15, 0.01, 0.0, 1.0);
+   private final ContactParameters contactParameters = new ContactParameters(5.0e-5, 0.7, 0.3, 0.15, 0.01, 0.0, 1.0);
 
    public StackOfBlocksExperimentalSimulation()
    {

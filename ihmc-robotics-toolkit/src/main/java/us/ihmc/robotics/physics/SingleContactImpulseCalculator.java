@@ -46,7 +46,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private double beta2 = 0.95;
    private double beta3 = 1.15;
    private double gamma = 1.0e-6;
-   private final ContactParameters contactParameters = new ContactParameters(0.7, 0.0, 0.0, 0.01, 0.0, 0.8);
+   private final ContactParameters contactParameters = new ContactParameters(5.0e-5, 0.7, 0.0, 0.0, 0.01, 1.0, 1.0);
 
    private boolean isFirstUpdate = false;
    private boolean isImpulseZero = false;
@@ -329,23 +329,21 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       {
          collisionErrorReductionTerm.setIncludingFrame(collisionResult.getPointOnBRootFrame());
          collisionErrorReductionTerm.sub(collisionResult.getPointOnARootFrame());
-         collisionErrorReductionTerm.scale(contactParameters.getErrorReductionParameter() / dt);
-
-         if (contactParameters.getSlipErrorReductionParameter() != 0.0)
-         {
-            collisionErrorReductionTerm.scaleAdd(-contactParameters.getSlipErrorReductionParameter() / dt,
-                                                 collisionResult.getAccumulatedSlipForA(),
-                                                 collisionErrorReductionTerm);
-         }
          collisionErrorReductionTerm.changeFrame(contactFrame);
-         velocityRelative.sub(collisionErrorReductionTerm);
+         double normalError = collisionErrorReductionTerm.getZ() - contactParameters.getMinimumPenetration();
+         if (normalError > 0.0)
+         {
+            normalError *= contactParameters.getErrorReductionParameter() / dt;
+            velocityRelative.subZ(normalError);
+         }
       }
-      else if (contactParameters.getSlipErrorReductionParameter() != 0.0)
+      if (contactParameters.getSlipErrorReductionParameter() != 0.0)
       {
          collisionErrorReductionTerm.setIncludingFrame(collisionResult.getAccumulatedSlipForA());
          collisionErrorReductionTerm.scale(-contactParameters.getSlipErrorReductionParameter() / dt);
          collisionErrorReductionTerm.changeFrame(contactFrame);
-         velocityRelative.sub(collisionErrorReductionTerm);
+         // Ensure slip error is only tangential to the contact.
+         velocityRelative.sub(collisionErrorReductionTerm.getX(), collisionErrorReductionTerm.getY(), 0.0);
       }
 
       isContactClosing = velocityRelative.getZ() < 0.0;
