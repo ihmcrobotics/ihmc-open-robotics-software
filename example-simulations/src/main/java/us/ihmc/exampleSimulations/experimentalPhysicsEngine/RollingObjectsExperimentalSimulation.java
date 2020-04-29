@@ -54,29 +54,29 @@ public class RollingObjectsExperimentalSimulation
       boolean addStripes = true;
       AppearanceDefinition stripesAppearance = YoAppearance.Gold();
 
-      RobotDescription ballRobot = ExampleExperimentalSimulationTools.createASingleBallRobot(BALL_NAME,
-                                                          ballRadius,
-                                                          ballMass,
-                                                          ballRadiusOfGyrationPercent,
-                                                          appearance,
-                                                          addStripes,
-                                                          stripesAppearance);
-      RobotDescription cylinderRobot = ExampleExperimentalSimulationTools.createASingleCylinderRobot(CYLINDER_NAME,
-                                                                  cylinderRadius,
-                                                                  cylinderHeight,
-                                                                  cylinderMass,
-                                                                  cylinderRadiusOfGyrationPercent,
-                                                                  appearance,
-                                                                  addStripes,
-                                                                  stripesAppearance);
-      RobotDescription capsuleRobot = ExampleExperimentalSimulationTools.createASingleCapsuleRobot(CAPSULE_NAME,
-                                                                capsuleRadius,
-                                                                capsuleHeight,
-                                                                capsuleMass,
-                                                                capsuleRadiusOfGyrationPercent,
-                                                                appearance,
-                                                                addStripes,
-                                                                stripesAppearance);
+      RobotDescription ballRobot = ExampleExperimentalSimulationTools.newSphereRobot(BALL_NAME,
+                                                                                     ballRadius,
+                                                                                     ballMass,
+                                                                                     ballRadiusOfGyrationPercent,
+                                                                                     appearance,
+                                                                                     addStripes,
+                                                                                     stripesAppearance);
+      RobotDescription cylinderRobot = ExampleExperimentalSimulationTools.newCylinderRobot(CYLINDER_NAME,
+                                                                                           cylinderRadius,
+                                                                                           cylinderHeight,
+                                                                                           cylinderMass,
+                                                                                           cylinderRadiusOfGyrationPercent,
+                                                                                           appearance,
+                                                                                           addStripes,
+                                                                                           stripesAppearance);
+      RobotDescription capsuleRobot = ExampleExperimentalSimulationTools.newCapsuleRobot(CAPSULE_NAME,
+                                                                                         capsuleRadius,
+                                                                                         capsuleHeight,
+                                                                                         capsuleMass,
+                                                                                         capsuleRadiusOfGyrationPercent,
+                                                                                         appearance,
+                                                                                         addStripes,
+                                                                                         stripesAppearance);
 
       MultiBodySystemStateWriter ballInitialStateWriter = MultiBodySystemStateWriter.singleJointStateWriter(BALL_NAME, (FloatingJointBasics joint) ->
       {

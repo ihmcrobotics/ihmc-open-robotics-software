@@ -43,7 +43,7 @@ public class StackOfBlocksExperimentalSimulation
       for (int i = 0; i < numberOfBlocks; i++)
       {
          AppearanceDefinition appearance = YoAppearance.randomColor(random);
-         robotDescriptions.add(ExampleExperimentalSimulationTools.createASingleBoxRobot("Block" + i, boxSizeX, boxSizeY, boxSizeZ, mass, 0.5, appearance));
+         robotDescriptions.add(ExampleExperimentalSimulationTools.newBoxRobot("Block" + i, boxSizeX, boxSizeY, boxSizeZ, mass, 0.5, appearance));
 
          robotCollisionModels.add(RobotCollisionModel.singleBodyCollisionModel("Block" + i + "Link", body ->
          {
