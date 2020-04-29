@@ -205,7 +205,7 @@ public class EnvironmentConstraintProvider
       yoConvexHullConstraint.set(planarRegion.getConvexHull());
       yoConvexHullConstraint.applyTransform(planarRegion.getTransformToWorld(), false);
 
-      icpControlPlane.projectPlanarRegionConvexHullOntoControlPlane(planarRegion.getConvexHull(), planarRegion.getTransformToWorld(), yoConvexHullConstraintInControlPlane);
+      icpControlPlane.projectConvexHullOntoControlPlane(planarRegion.getConvexHull(), planarRegion.getTransformToWorld(), yoConvexHullConstraintInControlPlane);
 
       scaler.scaleConvexPolygonToContainInteriorPolygon(yoConvexHullConstraint, footstepPolygon, distanceFromEdgeOfPolygonForStepping, yoShrunkConvexHullConstraint);
 
