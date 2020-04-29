@@ -30,9 +30,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FlatGroundFootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
@@ -315,15 +312,6 @@ public class AtlasCorridorNavigationTest
          boolean useFastFlatInvalidFootsteps = true;
          footstepPlannerParameters.setMaximumStepYaw(1.5);
          FootstepNodeBodyCollisionDetector collisionDetector = new FootstepNodeBodyCollisionDetector(footstepPlannerParameters);
-         FootstepNodeSnapper snapper;
-         if (useFastFlatInvalidFootsteps)
-         {
-            snapper = new FlatGroundFootstepNodeSnapper();
-         }
-         else
-         {
-            snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
-         }
 
          LogTools.info("Creating planner");
          LogTools.info("Running footstep planner");
