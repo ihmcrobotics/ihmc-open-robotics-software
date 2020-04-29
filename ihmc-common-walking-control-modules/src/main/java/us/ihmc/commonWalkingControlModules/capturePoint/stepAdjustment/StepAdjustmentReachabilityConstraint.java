@@ -214,10 +214,8 @@ public class StepAdjustmentReachabilityConstraint
    /**
     * Get the polygon that describes the reachable region for the step position.
     */
-   public FrameConvexPolygon2DReadOnly updateReachabilityConstraint()
+   public FrameConvexPolygon2DReadOnly getReachabilityConstraint()
    {
-      contractedReachabilityPolygon.update();
-
       return contractedReachabilityPolygon;
    }
 }
