@@ -2,6 +2,7 @@ package us.ihmc.robotics.physics;
 
 public class ContactParameters implements ContactParametersBasics
 {
+   private double minimumPenetration;
    private double coefficientOfFriction;
    private double coefficientOfRestitution;
    private double restitutionThreshold;
@@ -13,15 +14,22 @@ public class ContactParameters implements ContactParametersBasics
    {
    }
 
-   public ContactParameters(double coefficientOfFriction, double coefficientOfRestitution, double restitutionThreshold, double errorReductionParameter,
-                            double slipErrorReductionParameter, double constraintForceMixing)
+   public ContactParameters(double minimumPenetration, double coefficientOfFriction, double coefficientOfRestitution, double restitutionThreshold,
+                            double errorReductionParameter, double slipErrorReductionParameter, double constraintForceMixing)
    {
+      this.minimumPenetration = minimumPenetration;
       this.coefficientOfFriction = coefficientOfFriction;
       this.coefficientOfRestitution = coefficientOfRestitution;
       this.restitutionThreshold = restitutionThreshold;
       this.errorReductionParameter = errorReductionParameter;
       this.slipErrorReductionParameter = slipErrorReductionParameter;
       this.constraintForceMixing = constraintForceMixing;
+   }
+
+   @Override
+   public void setMinimumPenetration(double minimumPenetration)
+   {
+      this.minimumPenetration = minimumPenetration;
    }
 
    @Override
@@ -58,6 +66,12 @@ public class ContactParameters implements ContactParametersBasics
    public void setConstraintForceMixing(double constraintForceMixing)
    {
       this.constraintForceMixing = constraintForceMixing;
+   }
+
+   @Override
+   public double getMinimumPenetration()
+   {
+      return minimumPenetration;
    }
 
    @Override

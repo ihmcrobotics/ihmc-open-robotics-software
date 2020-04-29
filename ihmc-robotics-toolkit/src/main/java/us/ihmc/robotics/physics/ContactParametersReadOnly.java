@@ -9,6 +9,21 @@ package us.ihmc.robotics.physics;
 public interface ContactParametersReadOnly extends ConstraintParametersReadOnly
 {
    /**
+    * Returns the minimum distance by which two collidable should be penetrating each other before
+    * resolving the contact.
+    * <p>
+    * Ideally the contact should be resolved when the collidables are touching. However, when only
+    * touching, it is impossible to estimate the contact normal which is essential to solving the
+    * problem. By letting the collidables penetrate a little, this allows to estimate the contact
+    * normal. A larger minimum penetration implies greater robustness to numerical errors when
+    * estimating the normal.
+    * </p>
+    * 
+    * @return the minimum penetration distance before resolving the contact.
+    */
+   double getMinimumPenetration();
+
+   /**
     * Returns the value of the coefficient of friction.
     * <p>
     * Assuming the Coulomb friction model is used, the coefficient of friction <tt>&mu;</tt> defines

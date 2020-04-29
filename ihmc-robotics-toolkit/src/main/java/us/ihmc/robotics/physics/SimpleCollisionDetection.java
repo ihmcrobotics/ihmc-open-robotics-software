@@ -15,12 +15,19 @@ public class SimpleCollisionDetection
 {
    private final ReferenceFrame rootFrame;
 
+   private double minimumPenetration = 5.0e-5;
+
    private final CollisionListResult allCollisions = new CollisionListResult();
    private final TIntObjectMap<CollisionListResult> previousCollisionMap = new TIntObjectHashMap<>();
 
    public SimpleCollisionDetection(ReferenceFrame rootFrame)
    {
       this.rootFrame = rootFrame;
+   }
+
+   public void setMinimumPenetration(double minimumPenetration)
+   {
+      this.minimumPenetration = minimumPenetration;
    }
 
    public CollisionListResult evaluationCollisions(List<? extends CollidableHolder> dynamicCollidableHolders, CollidableHolder staticCollidableHolder)
@@ -96,7 +103,7 @@ public class SimpleCollisionDetection
    {
       EuclidFrameShape3DCollisionResult collisionData = collisionResult.getCollisionData();
 
-      if (collisionData.getDistance() < 5.0e-5)
+      if (collisionData.getDistance() < minimumPenetration)
          return false;
 
       FramePoint3D pointOnA = collisionData.getPointOnA();

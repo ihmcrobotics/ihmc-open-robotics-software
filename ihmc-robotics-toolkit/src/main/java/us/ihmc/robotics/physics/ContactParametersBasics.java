@@ -11,9 +11,25 @@ public interface ContactParametersBasics extends ContactParametersReadOnly, Cons
    default void set(ContactParametersReadOnly other)
    {
       ConstraintParametersBasics.super.set(other);
+      setMinimumPenetration(other.getMinimumPenetration());
       setCoefficientOfFriction(other.getCoefficientOfFriction());
       setSlipErrorReductionParameter(other.getSlipErrorReductionParameter());
    }
+
+   /**
+    * Sets the minimum distance by which two collidable should be penetrating each other before
+    * resolving the contact.
+    * <p>
+    * Ideally the contact should be resolved when the collidables are touching. However, when only
+    * touching, it is impossible to estimate the contact normal which is essential to solving the
+    * problem. By letting the collidables penetrate a little, this allows to estimate the contact
+    * normal. A larger minimum penetration implies greater robustness to numerical errors when
+    * estimating the normal.
+    * </p>
+    * 
+    * @param minimumPenetration the distance before resolving the contact, recommended ~1.0e-5.
+    */
+   void setMinimumPenetration(double minimumPenetration);
 
    /**
     * Sets the coefficient of friction.

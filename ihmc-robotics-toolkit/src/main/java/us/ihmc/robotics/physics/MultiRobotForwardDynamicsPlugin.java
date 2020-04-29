@@ -125,4 +125,14 @@ public class MultiRobotForwardDynamicsPlugin
          forwardDynamicsPlugin.writeJointAccelerations();
       }
    }
+
+   public boolean hasGlobalContactParameters()
+   {
+      return hasGlobalContactParameters.getValue();
+   }
+
+   public ContactParametersReadOnly getGlobalContactParameters()
+   {
+      return globalContactParameters;
+   }
 }
