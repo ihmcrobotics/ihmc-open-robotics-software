@@ -95,7 +95,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
 
                originPoses.add(newPose);
 
-               if (latestDoorLocationPacketRecieved.trustedPosition)
+               if (latestDoorLocationPacketRecieved.getTrustedPosition())
                {
                   averageOrigin = newPose;
                }
@@ -114,10 +114,10 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
                if (doorPoses.size() > numberToAverage)
                   doorPoses.remove(0);
 
-               if (doorPoses.size() >= numberToAverage || latestDoorLocationPacketRecieved.trustedPosition)
+               if (doorPoses.size() >= numberToAverage || latestDoorLocationPacketRecieved.getTrustedPosition())
                {
 
-                  if (latestDoorLocationPacketRecieved.trustedPosition)
+                  if (latestDoorLocationPacketRecieved.getTrustedPosition())
                   {
                      averageCurrentDoorLocation = newPose;
                   }

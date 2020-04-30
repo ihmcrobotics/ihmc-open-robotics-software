@@ -1,11 +1,5 @@
-
-
-
 #ifndef __controller_msgs__msg__BehaviorControlModePacket__idl__
 #define __controller_msgs__msg__BehaviorControlModePacket__idl__
-
-
-
 
 module controller_msgs
 {
@@ -13,62 +7,29 @@ module controller_msgs
   {
     module dds
     {
-
-   
-   const octet STOP =
-
+      const octet STOP =
       0;
 
-
-
-   
-   const octet PAUSE =
-
+      const octet PAUSE =
       1;
 
-
-
-   
-   const octet RESUME =
-
+      const octet RESUME =
       2;
 
 
-
-   
-   /**
-   
-    * This message is part of the IHMC humanoid behavior module.
-   
-    */
-   
-   @TypeCode(type="controller_msgs::msg::dds_::BehaviorControlModePacket_")
+      /**
+       * This message is part of the IHMC humanoid behavior module.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::BehaviorControlModePacket_")
       struct BehaviorControlModePacket
       {
-
-
-    
-    /**
-    
-     * Unique ID used to identify this message, should preferably be consecutively increasing.
-    
-     */
-    
-
-
-    unsigned long sequence_id;
-
-
-    
-
-    @defaultValue(value=255)
-
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
         octet behavior_control_mode_enum_request;
-
-
-
       };
-
     };
   };
 };
