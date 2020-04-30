@@ -1,39 +1,32 @@
 package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
-import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentReachabilityConstraint;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
+import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
-import us.ihmc.yoVariables.variable.YoInteger;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class CapturabilityPlanarRegionDecider
 {
@@ -44,18 +37,17 @@ public class CapturabilityPlanarRegionDecider
 
    private static final double minimumIntersectionForSearch = 0.01;
 
+   private static final Vector3D verticalAxis = new Vector3D(0.0, 0.0, 1.0);
+
    private final DoubleProvider maxAngleForSteppable;
    private final DoubleProvider minimumAreaForSteppable;
 
-   private final RecyclingArrayList<PlanarRegion> allPlanarRegionsThatAreSteppable = new RecyclingArrayList<>(PlanarRegion.class);
-   private final YoInteger numberOfPlanarListsToConsider;
+   private List<PlanarRegion> steppableRegions = new ArrayList<>();
 
    private final YoBoolean switchPlanarRegionConstraintsAutomatically;
 
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
-
-   private final FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D();
 
    private final YoBoolean constraintRegionChanged;
 
@@ -71,24 +63,22 @@ public class CapturabilityPlanarRegionDecider
 
    public CapturabilityPlanarRegionDecider(OneStepCaptureRegionCalculator captureRegionCalculator,
                                            ICPControlPlane icpControlPlane,
-                                           String yoNamePrefix,
                                            YoVariableRegistry registry,
                                            YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       this.captureRegionCalculator = captureRegionCalculator;
       this.icpControlPlane = icpControlPlane;
 
-      maxAngleForSteppable = new DoubleParameter(yoNamePrefix + "MaxAngleForSteppable", registry, maxNormalAngleFromVertical);
-      minimumAreaForSteppable = new DoubleParameter(yoNamePrefix + "MinimumAreaForSteppable", registry, minimumAreaToConsider);
+      maxAngleForSteppable = new DoubleParameter("maxAngleForSteppable", registry, maxNormalAngleFromVertical);
+      minimumAreaForSteppable = new DoubleParameter("minimumAreaForSteppable", registry, minimumAreaToConsider);
 
-      numberOfPlanarListsToConsider = new YoInteger(yoNamePrefix + "NumberOfPlanarListsToConsider", registry);
-      constraintRegionChanged = new YoBoolean(yoNamePrefix + "ConstraintRegionChanged", registry);
+      constraintRegionChanged = new YoBoolean("constraintRegionChanged", registry);
 
-      switchPlanarRegionConstraintsAutomatically = new YoBoolean(yoNamePrefix + "SwitchPlanarRegionConstraintsAutomatically", registry);
+      switchPlanarRegionConstraintsAutomatically = new YoBoolean("switchPlanarRegionConstraintsAutomatically", registry);
       switchPlanarRegionConstraintsAutomatically.set(true);
 
-      yoConvexHullConstraint = new YoFrameConvexPolygon2D(yoNamePrefix + "ConvexHullConstraint", "", worldFrame, 12, registry);
-      yoConvexHullConstraintInControlPlane = new YoFrameConvexPolygon2D(yoNamePrefix + "ConvexHullConstraintInControlPlane", "", worldFrame, 12, registry);
+      yoConvexHullConstraint = new YoFrameConvexPolygon2D("convexHullConstraint", "", worldFrame, 12, registry);
+      yoConvexHullConstraintInControlPlane = new YoFrameConvexPolygon2D("convexHullConstraintInControlPlane", "", worldFrame, 12, registry);
 
       if (yoGraphicsListRegistry != null)
       {
@@ -103,30 +93,16 @@ public class CapturabilityPlanarRegionDecider
       }
    }
 
-   private final Vector3D planeNormal = new Vector3D();
-   private final Vector3D verticalAxis = new Vector3D(0.0, 0.0, 1.0);
-
    public void setPlanarRegions(java.util.List<PlanarRegion> planarRegions)
    {
-      allPlanarRegionsThatAreSteppable.clear();
-      numberOfPlanarListsToConsider.set(0);
-
-      for (int i = 0; i < planarRegions.size(); i++)
-      {
-         PlanarRegion planarRegion = planarRegions.get(i);
-
-         if (isRegionValidForStepping(planarRegion))
-         {
-            allPlanarRegionsThatAreSteppable.add().set(planarRegions.get(i));
-            numberOfPlanarListsToConsider.increment();
-         }
-      }
+      steppableRegions = planarRegions.stream().filter(this::isRegionValidForStepping).collect(Collectors.toList());
    }
 
    public void reset()
    {
       planarRegionToConstrainTo = null;
       yoConvexHullConstraint.clear();
+      yoConvexHullConstraintInControlPlane.clear();
    }
 
    private void computeShrunkAndProjectedConvexHulls(PlanarRegion planarRegion)
@@ -141,51 +117,34 @@ public class CapturabilityPlanarRegionDecider
    {
       constraintRegionChanged.set(false);
 
-      boolean planarRegionIsValid = false;
-
-      computeValidCaptureRegion();
+      FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
+      captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
       if (planarRegionToConstrainTo == null)
       {
-         planarRegionToConstrainTo = findPlanarRegionUnderFoothold(footstepPose);
-         computeShrunkAndProjectedConvexHulls(planarRegionToConstrainTo);
+         planarRegionToConstrainTo = findPlanarRegionUnderFoothold(footstepPose.getPosition());
+
+         if (planarRegionToConstrainTo != null)
+            computeShrunkAndProjectedConvexHulls(planarRegionToConstrainTo);
       }
 
-      if (switchPlanarRegionConstraintsAutomatically.getBooleanValue())
+      if (switchPlanarRegionConstraintsAutomatically.getBooleanValue() && !checkIfCurrentPlanarRegionIsValid(captureRegion))
       {
-         if (planarRegionToConstrainTo != null)
-            planarRegionIsValid = checkIfCurrentPlanarRegionIsValid();
-
-         if (!planarRegionIsValid)
+         PlanarRegion betterRegion = findBestPlanarRegionToStepTo(captureRegion);
+         if (betterRegion != null)
          {
-            PlanarRegion betterRegion = findBestPlanarRegionToStepTo();
-            if (betterRegion != null)
-            {
-               planarRegionToConstrainTo = betterRegion;
-               computeShrunkAndProjectedConvexHulls(planarRegionToConstrainTo);
-               constraintRegionChanged.set(true);
-            }
+            planarRegionToConstrainTo = betterRegion;
+            computeShrunkAndProjectedConvexHulls(planarRegionToConstrainTo);
+            constraintRegionChanged.set(true);
          }
       }
 
       return planarRegionToConstrainTo;
    }
 
-   private void computeValidCaptureRegion()
-   {
-      FrameConvexPolygon2D fullCaptureRegion = captureRegionCalculator.getCaptureRegion();
-      fullCaptureRegion.changeFrameAndProjectToXYPlane(worldFrame);
-
-      captureRegion.clear();
-      captureRegion.addVertices(fullCaptureRegion);
-      captureRegion.update();
-   }
-
    private boolean isRegionValidForStepping(PlanarRegion planarRegion)
    {
-      planarRegion.getNormal(planeNormal);
-
-      double angle = planeNormal.angle(verticalAxis);
+      double angle = planarRegion.getNormal().angle(verticalAxis);
 
       if (angle > maxAngleForSteppable.getValue())
          return false;
@@ -194,43 +153,29 @@ public class CapturabilityPlanarRegionDecider
       return planarRegion.getConvexHull().getArea() > minimumAreaForSteppable.getValue();
    }
 
-   private PlanarRegion findPlanarRegionUnderFoothold(FramePose3DReadOnly foothold)
+   private PlanarRegion findPlanarRegionUnderFoothold(FramePoint3DReadOnly foothold)
    {
-      PlanarRegion highestRegionUnderFoot = null;
-      double highestPoint = Double.NEGATIVE_INFINITY;
-      for (int regionIndex = 0; regionIndex < allPlanarRegionsThatAreSteppable.size(); regionIndex++)
-      {
-         PlanarRegion planarRegion = allPlanarRegionsThatAreSteppable.get(regionIndex);
+      PlanarRegion highestRegionUnderFoot = new PlanarRegion();
+      Point3D projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(foothold, steppableRegions, highestRegionUnderFoot);
 
-         if (!planarRegion.isPointInWorld2DInside(foothold.getPosition()))
-            continue;
-
-         double height = planarRegion.getPlaneZGivenXY(foothold.getPosition().getX(), foothold.getPosition().getY());
-         if (height >= highestPoint)
-         {
-            highestPoint = height;
-            highestRegionUnderFoot = planarRegion;
-         }
-      }
-
-      return highestRegionUnderFoot;
+      return projectedPoint == null ? null : highestRegionUnderFoot;
    }
 
-   private boolean checkIfCurrentPlanarRegionIsValid()
+   private boolean checkIfCurrentPlanarRegionIsValid(FrameConvexPolygon2DReadOnly captureRegion)
    {
       double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, yoConvexHullConstraintInControlPlane);
 
       return intersectionArea > minimumIntersectionForSearch;
    }
 
-   private PlanarRegion findBestPlanarRegionToStepTo()
+   private PlanarRegion findBestPlanarRegionToStepTo(FrameConvexPolygon2DReadOnly captureRegion)
    {
       double maxArea = 0.0;
       PlanarRegion activePlanarRegion = null;
 
-      for (int regionIndex = 0; regionIndex < allPlanarRegionsThatAreSteppable.size(); regionIndex++)
+      for (int regionIndex = 0; regionIndex < steppableRegions.size(); regionIndex++)
       {
-         PlanarRegion planarRegion = allPlanarRegionsThatAreSteppable.get(regionIndex);
+         PlanarRegion planarRegion = steppableRegions.get(regionIndex);
          convexHullConstraint.set(planarRegion.getConvexHull());
          convexHullConstraint.applyTransform(planarRegion.getTransformToWorld(), false);
 

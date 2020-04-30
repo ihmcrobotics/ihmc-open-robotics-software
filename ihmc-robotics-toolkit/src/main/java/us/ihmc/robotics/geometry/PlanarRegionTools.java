@@ -1205,6 +1205,11 @@ public class PlanarRegionTools
     */
    public static Point3D projectPointToPlanesVertically(Point3DReadOnly pointInWorld, List<PlanarRegion> regions)
    {
+      return projectPointToPlanesVertically(pointInWorld, regions, null);
+   }
+
+   public static Point3D projectPointToPlanesVertically(Point3DReadOnly pointInWorld, List<PlanarRegion> regions, PlanarRegion highestRegionToPack)
+   {
       Point3D highestIntersection = null;
 
       Line3D verticalLine = new Line3D();
@@ -1223,6 +1228,8 @@ public class PlanarRegionTools
          {
             highestIntersection = new Point3D(pointInWorld);
             highestIntersection.setZ(Double.NEGATIVE_INFINITY);
+            if (highestRegionToPack != null)
+               highestRegionToPack.set(region);
          }
 
          double height = intersection.getZ();
@@ -1230,6 +1237,8 @@ public class PlanarRegionTools
          if (highestIntersection.getZ() < height)
          {
             highestIntersection.setZ(height);
+            if (highestRegionToPack != null)
+               highestRegionToPack.set(region);
          }
       }
 

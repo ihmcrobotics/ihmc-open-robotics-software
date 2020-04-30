@@ -43,12 +43,13 @@ public class StepConstraintToolboxController extends ToolboxController
    public StepConstraintToolboxController(StatusMessageOutputManager statusOutputManager,
                                           WalkingControllerParameters walkingControllerParameters,
                                           FullHumanoidRobotModel fullRobotModel,
+                                          double gravityZ,
                                           YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
 
       this.fullRobotModel = fullRobotModel;
-      stepConstraintCalculator = new StepConstraintCalculator(walkingControllerParameters, fullRobotModel, time);
+      stepConstraintCalculator = new StepConstraintCalculator(walkingControllerParameters, fullRobotModel, time, gravityZ);
 
       isDone.set(false);
    }

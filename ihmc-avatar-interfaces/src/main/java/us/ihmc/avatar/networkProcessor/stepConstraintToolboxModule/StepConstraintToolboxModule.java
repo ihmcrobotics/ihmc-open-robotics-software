@@ -38,7 +38,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
 
    protected final StepConstraintToolboxController controller;
 
-   public StepConstraintToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation)
+   public StepConstraintToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation, double gravityZ)
    {
       super(robotModel.getSimpleRobotName(),
             robotModel.createFullRobotModel(),
@@ -48,7 +48,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
             pubSubImplementation);
 
       setTimeWithoutInputsBeforeGoingToSleep(3.0);
-      controller = new StepConstraintToolboxController(statusOutputManager, robotModel.getWalkingControllerParameters(), fullRobotModel, registry);
+      controller = new StepConstraintToolboxController(statusOutputManager, robotModel.getWalkingControllerParameters(), fullRobotModel, gravityZ, registry);
 
       startYoVariableServer();
       if (yoVariableServer != null)
