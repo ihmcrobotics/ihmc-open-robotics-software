@@ -568,7 +568,10 @@ public class SwingState extends AbstractFootControlState
       }
 
       if (activeTrajectoryType.getEnumValue() != TrajectoryType.WAYPOINTS && swingTrajectoryOptimizer.doOptimizationUpdate()) // haven't finished original planning
+      {
          fillAndInitializeTrajectories(false);
+         swingVisualizer.visualize();
+      }
       else if (replanTrajectory.getBooleanValue()) // need to update the beginning and end blending
          fillAndInitializeBlendedTrajectories();
       replanTrajectory.set(false);
