@@ -35,14 +35,12 @@ public class QuixHighLevelStateMessage extends Packet<QuixHighLevelStateMessage>
    public static final byte CALL_BEHAVIOR = (byte) 9;
 
    /**
-
     * Unique ID used to identify this message, should preferably be consecutively increasing.
 
     */
    public long sequence_id_;
 
    /**
-
     * Specifies the which state the controller should transition into.
 
     */
@@ -50,8 +48,6 @@ public class QuixHighLevelStateMessage extends Packet<QuixHighLevelStateMessage>
 
    public QuixHighLevelStateMessage()
    {
-
-
 
    }
 
@@ -66,14 +62,10 @@ public class QuixHighLevelStateMessage extends Packet<QuixHighLevelStateMessage>
 
       sequence_id_ = other.sequence_id_;
 
-
       high_level_state_name_ = other.high_level_state_name_;
-
    }
 
-
    /**
-
     * Unique ID used to identify this message, should preferably be consecutively increasing.
 
     */
@@ -81,8 +73,8 @@ public class QuixHighLevelStateMessage extends Packet<QuixHighLevelStateMessage>
    {
       sequence_id_ = sequence_id;
    }
-   /**
 
+   /**
     * Unique ID used to identify this message, should preferably be consecutively increasing.
 
     */
@@ -91,9 +83,7 @@ public class QuixHighLevelStateMessage extends Packet<QuixHighLevelStateMessage>
       return sequence_id_;
    }
 
-
    /**
-
     * Specifies the which state the controller should transition into.
 
     */
@@ -101,8 +91,8 @@ public class QuixHighLevelStateMessage extends Packet<QuixHighLevelStateMessage>
    {
       high_level_state_name_ = high_level_state_name;
    }
-   /**
 
+   /**
     * Specifies the which state the controller should transition into.
 
     */
@@ -110,7 +100,6 @@ public class QuixHighLevelStateMessage extends Packet<QuixHighLevelStateMessage>
    {
       return high_level_state_name_;
    }
-
 
    public static Supplier<QuixHighLevelStateMessagePubSubType> getPubSubType()
    {
@@ -126,15 +115,16 @@ public class QuixHighLevelStateMessage extends Packet<QuixHighLevelStateMessage>
    @Override
    public boolean epsilonEquals(QuixHighLevelStateMessage other, double epsilon)
    {
-      if(other == null) return false;
-      if(other == this) return true;
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon))
+         return false;
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
-
-
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.high_level_state_name_, other.high_level_state_name_, epsilon)) return false;
-
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.high_level_state_name_, other.high_level_state_name_, epsilon))
+         return false;
 
       return true;
    }
@@ -142,18 +132,20 @@ public class QuixHighLevelStateMessage extends Packet<QuixHighLevelStateMessage>
    @Override
    public boolean equals(Object other)
    {
-      if(other == null) return false;
-      if(other == this) return true;
-      if(!(other instanceof QuixHighLevelStateMessage)) return false;
+      if (other == null)
+         return false;
+      if (other == this)
+         return true;
+      if (!(other instanceof QuixHighLevelStateMessage))
+         return false;
 
       QuixHighLevelStateMessage otherMyClass = (QuixHighLevelStateMessage) other;
 
+      if (this.sequence_id_ != otherMyClass.sequence_id_)
+         return false;
 
-      if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
-
-
-      if(this.high_level_state_name_ != otherMyClass.high_level_state_name_) return false;
-
+      if (this.high_level_state_name_ != otherMyClass.high_level_state_name_)
+         return false;
 
       return true;
    }
@@ -166,7 +158,8 @@ public class QuixHighLevelStateMessage extends Packet<QuixHighLevelStateMessage>
       builder.append("QuixHighLevelStateMessage {");
 
       builder.append("sequence_id=");
-      builder.append(this.sequence_id_);      builder.append(", ");
+      builder.append(this.sequence_id_);
+      builder.append(", ");
 
       builder.append("high_level_state_name=");
       builder.append(this.high_level_state_name_);

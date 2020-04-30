@@ -40,12 +40,9 @@ public class QuixHighLevelStateMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       return current_alignment - initial_alignment;
    }
@@ -59,14 +56,9 @@ public class QuixHighLevelStateMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
-
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
 
       return current_alignment - initial_alignment;
    }
@@ -76,9 +68,7 @@ public class QuixHighLevelStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       cdr.write_type_4(data.getSequenceId());
 
-
       cdr.write_type_9(data.getHighLevelStateName());
-
    }
 
    public static void read(controller_msgs.msg.dds.QuixHighLevelStateMessage data, us.ihmc.idl.CDR cdr)
@@ -86,10 +76,7 @@ public class QuixHighLevelStateMessagePubSubType implements us.ihmc.pubsub.Topic
 
       data.setSequenceId(cdr.read_type_4());
 
-
       data.setHighLevelStateName(cdr.read_type_9());
-
-
    }
 
    @Override
@@ -120,6 +107,7 @@ public class QuixHighLevelStateMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       return new controller_msgs.msg.dds.QuixHighLevelStateMessage();
    }
+
    @Override
    public int getTypeSize()
    {
