@@ -142,6 +142,16 @@ public class CapturabilityPlanarRegionDecider
       return planarRegionToConstrainTo;
    }
 
+   public boolean constraintRegionChanged()
+   {
+      return constraintRegionChanged.getBooleanValue();
+   }
+
+   public PlanarRegion getConstraintRegion()
+   {
+      return planarRegionToConstrainTo;
+   }
+
    private boolean isRegionValidForStepping(PlanarRegion planarRegion)
    {
       double angle = planarRegion.getNormal().angle(verticalAxis);

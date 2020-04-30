@@ -19,6 +19,7 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -145,6 +146,16 @@ public class StepConstraintCalculator
          captureRegionCalculator.calculateCaptureRegion(swingSide, timeRemaining, capturePoint, capturabilityBasedStatus.getOmega(),
                                                         leftFootSupportPolygon);
       }
+   }
+
+   public boolean constraintRegionChanged()
+   {
+      return planarRegionDecider.constraintRegionChanged();
+   }
+
+   public PlanarRegion getConstraintRegion()
+   {
+      return planarRegionDecider.getConstraintRegion();
    }
 
    private class SimpleStep
