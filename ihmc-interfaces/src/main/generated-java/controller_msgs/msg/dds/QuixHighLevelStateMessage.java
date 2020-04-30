@@ -7,82 +7,84 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
+
  * This message is part of the IHMC whole-body controller API.
-   
+
  * This message is used to switch the control scheme between different control mode.
-   
+
  */
-public class QuixMotionStateMessage extends Packet<QuixMotionStateMessage> implements Settable<QuixMotionStateMessage>, EpsilonComparable<QuixMotionStateMessage>
+public class QuixHighLevelStateMessage extends Packet<QuixHighLevelStateMessage> implements Settable<QuixHighLevelStateMessage>, EpsilonComparable<QuixHighLevelStateMessage>
 {
 
-   public static final byte HOLD_POSITION = (byte) 1;
+   public static final byte INITIALIZING = (byte) 1;
 
-   public static final byte SIT_DOWN = (byte) 2;
+   public static final byte WAIT_FOR_USER = (byte) 2;
 
-   public static final byte STAND_UP = (byte) 3;
+   public static final byte RECOVERABLE_FAULT = (byte) 3;
 
-   public static final byte MOVE_TO_FLAT_GROUND = (byte) 4;
+   public static final byte FATAL_FAULT = (byte) 4;
 
-   public static final byte FLAT_GROUND_WALKING = (byte) 5;
+   public static final byte LIMP = (byte) 5;
 
-   public static final byte MOVE_TO_SLOPE = (byte) 6;
+   public static final byte WIGGLE = (byte) 6;
 
-   public static final byte SLOPE_WALKING = (byte) 7;
+   public static final byte HOLD_ALL_READY = (byte) 7;
 
-   public static final byte OLD_FLAT_GROUND_WALKING = (byte) 8;
+   public static final byte HOLD_SOME_LOCKED = (byte) 8;
+
+   public static final byte CALL_BEHAVIOR = (byte) 9;
 
    /**
-       
+
     * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
+
     */
    public long sequence_id_;
 
    /**
-       
-    * Specifies the which state the controller should transition into.
-       
-    */
-   public byte motion_state_name_ = (byte) 255;
 
-   public QuixMotionStateMessage()
+    * Specifies the which state the controller should transition into.
+
+    */
+   public byte high_level_state_name_ = (byte) 255;
+
+   public QuixHighLevelStateMessage()
    {
 
 
 
    }
 
-   public QuixMotionStateMessage(QuixMotionStateMessage other)
+   public QuixHighLevelStateMessage(QuixHighLevelStateMessage other)
    {
       this();
       set(other);
    }
 
-   public void set(QuixMotionStateMessage other)
+   public void set(QuixHighLevelStateMessage other)
    {
 
       sequence_id_ = other.sequence_id_;
 
 
-      motion_state_name_ = other.motion_state_name_;
+      high_level_state_name_ = other.high_level_state_name_;
 
    }
 
 
    /**
-       
+
     * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
+
     */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
+
     * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
+
     */
    public long getSequenceId()
    {
@@ -91,38 +93,38 @@ public class QuixMotionStateMessage extends Packet<QuixMotionStateMessage> imple
 
 
    /**
-       
+
     * Specifies the which state the controller should transition into.
-       
+
     */
-   public void setMotionStateName(byte motion_state_name)
+   public void setHighLevelStateName(byte high_level_state_name)
    {
-      motion_state_name_ = motion_state_name;
+      high_level_state_name_ = high_level_state_name;
    }
    /**
-       
+
     * Specifies the which state the controller should transition into.
-       
+
     */
-   public byte getMotionStateName()
+   public byte getHighLevelStateName()
    {
-      return motion_state_name_;
+      return high_level_state_name_;
    }
 
 
-   public static Supplier<QuixMotionStateMessagePubSubType> getPubSubType()
+   public static Supplier<QuixHighLevelStateMessagePubSubType> getPubSubType()
    {
-      return QuixMotionStateMessagePubSubType::new;
+      return QuixHighLevelStateMessagePubSubType::new;
    }
 
    @Override
    public Supplier<TopicDataType> getPubSubTypePacket()
    {
-      return QuixMotionStateMessagePubSubType::new;
+      return QuixHighLevelStateMessagePubSubType::new;
    }
 
    @Override
-   public boolean epsilonEquals(QuixMotionStateMessage other, double epsilon)
+   public boolean epsilonEquals(QuixHighLevelStateMessage other, double epsilon)
    {
       if(other == null) return false;
       if(other == this) return true;
@@ -131,7 +133,7 @@ public class QuixMotionStateMessage extends Packet<QuixMotionStateMessage> imple
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.motion_state_name_, other.motion_state_name_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.high_level_state_name_, other.high_level_state_name_, epsilon)) return false;
 
 
       return true;
@@ -142,15 +144,15 @@ public class QuixMotionStateMessage extends Packet<QuixMotionStateMessage> imple
    {
       if(other == null) return false;
       if(other == this) return true;
-      if(!(other instanceof QuixMotionStateMessage)) return false;
+      if(!(other instanceof QuixHighLevelStateMessage)) return false;
 
-      QuixMotionStateMessage otherMyClass = (QuixMotionStateMessage) other;
+      QuixHighLevelStateMessage otherMyClass = (QuixHighLevelStateMessage) other;
 
 
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
 
-      if(this.motion_state_name_ != otherMyClass.motion_state_name_) return false;
+      if(this.high_level_state_name_ != otherMyClass.high_level_state_name_) return false;
 
 
       return true;
@@ -161,13 +163,13 @@ public class QuixMotionStateMessage extends Packet<QuixMotionStateMessage> imple
    {
       StringBuilder builder = new StringBuilder();
 
-      builder.append("QuixMotionStateMessage {");
+      builder.append("QuixHighLevelStateMessage {");
 
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
 
-      builder.append("motion_state_name=");
-      builder.append(this.motion_state_name_);
+      builder.append("high_level_state_name=");
+      builder.append(this.high_level_state_name_);
       builder.append("}");
       return builder.toString();
    }
