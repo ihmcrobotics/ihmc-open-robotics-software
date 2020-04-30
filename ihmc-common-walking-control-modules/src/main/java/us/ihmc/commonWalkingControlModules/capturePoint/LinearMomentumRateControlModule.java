@@ -9,13 +9,13 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPController;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationController;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationControllerInterface;
 import us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment.StepAdjustmentController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionsListHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -29,7 +29,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
@@ -39,6 +38,7 @@ import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
@@ -159,6 +159,7 @@ public class LinearMomentumRateControlModule
    private final LinearMomentumRateControlModuleOutput output = new LinearMomentumRateControlModuleOutput();
 
    private PlanarRegionsListHandler planarRegionsListHandler;
+   private PlanarRegionHandler planarRegionStepConstraintHandler;
 
    public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames,
                                           SideDependentList<ContactableFoot> contactableFeet,
@@ -271,6 +272,11 @@ public class LinearMomentumRateControlModule
       yoAchievedCMP.setToNaN();
       yoCenterOfMass.setToNaN();
       yoCapturePoint.setToNaN();
+   }
+
+   public void setPlanarRegionStepConstraintHandler(PlanarRegionHandler planarRegionStepConstraint)
+   {
+      this.planarRegionStepConstraintHandler = planarRegionStepConstraint;
    }
 
    public void setPlanarRegionsListHandler(PlanarRegionsListHandler planarRegionsListHandler)
@@ -519,8 +525,8 @@ public class LinearMomentumRateControlModule
          icpController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
          if (!Double.isNaN(remainingTimeInSwingUnderDisturbance) && remainingTimeInSwingUnderDisturbance > 0.0)
             stepAdjustmentController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
-         if (planarRegionsListHandler != null && planarRegionsListHandler.hasNewPlanarRegions())
-            stepAdjustmentController.setPlanarRegions(planarRegionsListHandler.pollHasNewPlanarRegionsList());
+         if (planarRegionStepConstraintHandler != null && planarRegionStepConstraintHandler.hasNewPlanarRegion())
+            stepAdjustmentController.setPlanarRegionConstraint(planarRegionStepConstraintHandler.pollHasNewPlanarRegion());
       }
    }
 

@@ -156,10 +156,7 @@ public class StepAdjustmentController
                                                                                yoGraphicsListRegistry);
 
       captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, yoNamePrefix, registry, yoGraphicsListRegistry);
-      environmentConstraintProvider = new EnvironmentConstraintProvider(icpOptimizationParameters,
-                                                                        captureRegionCalculator,
-                                                                        reachabilityConstraintHandler,
-                                                                        icpControlPlane,
+      environmentConstraintProvider = new EnvironmentConstraintProvider(icpControlPlane,
                                                                         contactableFeet,
                                                                         yoNamePrefix,
                                                                         registry,
@@ -240,9 +237,9 @@ public class StepAdjustmentController
       }
    }
 
-   public void setPlanarRegions(List<PlanarRegion> planarRegions)
+   public void setPlanarRegionConstraint(PlanarRegion planarRegion)
    {
-      environmentConstraintProvider.setPlanarRegions(planarRegions);
+      environmentConstraintProvider.setPlanarRegionConstraint(planarRegion);
    }
 
    public void initialize(double initialTime, RobotSide supportSide)
