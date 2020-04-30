@@ -142,7 +142,8 @@ public class ExperimentalSimulation extends Simulation
    /**
     * Adds and configures a new robot to the simulation.
     */
-   public void addRobot(RobotDescription robotDescription, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter, MultiBodySystemStateWriter controllerOutputWriter)
+   public void addRobot(RobotDescription robotDescription, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter,
+                        MultiBodySystemStateWriter controllerOutputWriter)
    {
       RobotFromDescription scsRobot = new RobotFromDescription(robotDescription);
       RigidBodyBasics rootBody = toInverseDynamicsRobot(robotDescription);
@@ -301,18 +302,24 @@ public class ExperimentalSimulation extends Simulation
 
                   stateCopiers.add(new Runnable()
                   {
+                     private final FrameVector3D linearVelocity = new FrameVector3D();
+                     private final FrameVector3D linearAcceleration = new FrameVector3D();
+
                      @Override
                      public void run()
                      {
                         scsJoint.setPosition(idJoint.getJointPose().getPosition());
                         scsJoint.setQuaternion(idJoint.getJointPose().getOrientation());
+
+                        linearVelocity.setMatchingFrame(idJoint.getJointTwist().getLinearPart());
+
                         scsJoint.setAngularVelocityInBody(idJoint.getJointTwist().getAngularPart());
-                        FrameVector3D linearVelocity = new FrameVector3D(idJoint.getJointTwist().getLinearPart());
-                        linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
                         scsJoint.setVelocity(linearVelocity);
-                        scsJoint.setAngularAccelerationInBody(idJoint.getJointAcceleration().getAngularPart());
-                        FrameVector3D linearAcceleration = new FrameVector3D(idJoint.getJointAcceleration().getLinearPart());
+
+                        idJoint.getJointAcceleration().getLinearAccelerationAtBodyOrigin(idJoint.getJointTwist(), linearAcceleration);
                         linearAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
+
+                        scsJoint.setAngularAccelerationInBody(idJoint.getJointAcceleration().getAngularPart());
                         scsJoint.setAcceleration(linearAcceleration);
                      }
                   });

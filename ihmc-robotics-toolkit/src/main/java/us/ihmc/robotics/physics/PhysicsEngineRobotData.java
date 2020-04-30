@@ -34,6 +34,8 @@ public class PhysicsEngineRobotData implements CollidableHolder
    private final YoSingleContactImpulseCalculatorPool selfContactConstraintCalculatorPool;
    private final Map<RigidBodyBasics, YoSingleContactImpulseCalculatorPool> interRobotContactConstraintCalculatorPools = new HashMap<>();
 
+   private final SingleRobotFirstOrderIntegrator integrator;
+
    public PhysicsEngineRobotData(String robotName, RigidBodyBasics rootBody, RobotCollisionModel robotCollisionModel,
                                  YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -76,7 +78,8 @@ public class PhysicsEngineRobotData implements CollidableHolder
                                                                                      forwardDynamicsPlugin.getForwardDynamicsCalculator(),
                                                                                      yoGraphicsListRegistry,
                                                                                      selfContactCalculatorRegistry);
-      resetCalculators();
+
+      integrator = new SingleRobotFirstOrderIntegrator(multiBodySystem);
    }
 
    public void setControllerOutputWriter(MultiBodySystemStateWriter controllerOutputWriter)
@@ -145,6 +148,11 @@ public class PhysicsEngineRobotData implements CollidableHolder
    public SingleRobotForwardDynamicsPlugin getForwardDynamicsPlugin()
    {
       return forwardDynamicsPlugin;
+   }
+
+   public SingleRobotFirstOrderIntegrator getIntegrator()
+   {
+      return integrator;
    }
 
    public void resetCalculators()

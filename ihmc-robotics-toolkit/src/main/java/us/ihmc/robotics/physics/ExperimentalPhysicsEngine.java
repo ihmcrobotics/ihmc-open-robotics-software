@@ -51,7 +51,6 @@ public class ExperimentalPhysicsEngine
    private final SimpleCollisionDetection collisionDetectionPlugin = new SimpleCollisionDetection(rootFrame);
    private final CollisionSlipEstimatorMap collisionSlipEstimator = new CollisionSlipEstimatorMap(rootFrame);
    private final MultiRobotForwardDynamicsPlugin multiRobotPhysicsEnginePlugin = new MultiRobotForwardDynamicsPlugin(rootFrame, physicsEngineRegistry);
-   private final MultiRobotFirstOrderIntegrator integrationMethod = new MultiRobotFirstOrderIntegrator();
 
    private final CollidableListVisualizer environmentCollidableVisualizers;
    private final List<CollidableListVisualizer> robotCollidableVisualizers = new ArrayList<>();
@@ -97,7 +96,6 @@ public class ExperimentalPhysicsEngine
       robot.setControllerOutputWriter(controllerOutputWriter);
       robot.addPhysicsOutputReader(physicsOutputReader);
       multiRobotPhysicsEnginePlugin.addRobot(robot);
-      integrationMethod.addMultiBodySystem(robot.getMultiBodySystem());
       AppearanceDefinition robotCollidableAppearance = YoAppearance.DarkGreen();
       robotCollidableAppearance.setTransparency(0.5);
       CollidableListVisualizer collidableVisualizers = new CollidableListVisualizer(collidableVisualizerGroupName,
@@ -169,7 +167,6 @@ public class ExperimentalPhysicsEngine
 
       multiRobotPhysicsEnginePlugin.submitCollisions(collisionDetectionPlugin.getAllCollisions());
       multiRobotPhysicsEnginePlugin.doScience(time.getValue(), dt, gravity);
-      integrationMethod.integrate(dt);
 
       environmentCollidableVisualizers.update(collisionDetectionPlugin.getAllCollisions());
       robotCollidableVisualizers.forEach(visualizer -> visualizer.update(collisionDetectionPlugin.getAllCollisions()));
