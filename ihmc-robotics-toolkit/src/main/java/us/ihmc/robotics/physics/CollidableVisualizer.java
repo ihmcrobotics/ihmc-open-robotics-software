@@ -56,6 +56,7 @@ public class CollidableVisualizer
          throw new UnsupportedOperationException("Unsupported type of shape: " + collidable.getShape().getClass().getSimpleName());
       }
 
+      hide();
       yoGraphicsListRegistry.registerYoGraphic(groupName, shape3DGraphicUpdater.getYoGraphic());
    }
 

@@ -90,6 +90,8 @@ public class ExperimentalSimulation extends Simulation
    /** List of tasks to be executed right after executing the physics engine's tick. */
    private final List<Runnable> postProcessors = new ArrayList<>();
 
+   private boolean initialize = true;
+
    public ExperimentalSimulation(int dataBufferSize)
    {
       this(null, dataBufferSize);
@@ -204,9 +206,38 @@ public class ExperimentalSimulation extends Simulation
       SimulationEnergyStatistics.setupSimulationEnergyStatistics(gravity, physicsEngine);
    }
 
+   public void initialize()
+   {
+      initialize = false;
+
+      synchronized (getSimulationSynchronizer())
+      {
+         for (Robot robot : getRobots())
+         {
+            robot.update();
+         }
+
+         physicsEngine.initialize();
+         externalWrenchReader.updateSCSGroundContactPoints();
+
+         Robot[] robots = getRobots();
+
+         for (int i = 0; i < robots.length; i++)
+         {
+            Robot robot = robots[i];
+            updateGroundContactPointsVelocity(rootBodies.get(i), robot);
+         }
+
+         getDataBuffer().copyValuesThrough();
+      }
+   }
+
    @Override
    public void simulate()
    {
+      if (initialize)
+         initialize();
+
       preProcessors.forEach(Runnable::run);
 
       synchronized (getSimulationSynchronizer())
