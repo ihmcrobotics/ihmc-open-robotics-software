@@ -11,6 +11,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
@@ -73,6 +74,10 @@ public class StepConstraintToolboxController extends ToolboxController
          time.set(Conversions.nanosecondsToSeconds(System.nanoTime() - initialTimestamp));
 
          stepConstraintCalculator.update();
+
+         if (stepConstraintCalculator.constraintRegionChanged())
+            statusOutputManager.reportStatusMessage(PlanarRegionMessageConverter.convertToPlanarRegionMessage(stepConstraintCalculator.getConstraintRegion()));
+
       }
       catch (Throwable e)
       {
