@@ -7,12 +7,9 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC whole-body controller API.
-   
- * This message contains joint-level desired values that are output from the whole-body controller
-   
- */
+       * This message is part of the IHMC whole-body controller API.
+       * This message contains joint-level desired values that are output from the whole-body controller
+       */
 public class JointDesiredOutputMessage extends Packet<JointDesiredOutputMessage> implements Settable<JointDesiredOutputMessage>, EpsilonComparable<JointDesiredOutputMessage>
 {
 
@@ -25,10 +22,8 @@ public class JointDesiredOutputMessage extends Packet<JointDesiredOutputMessage>
    public static final byte CONTROL_DISABLED = (byte) 3;
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    public java.lang.StringBuilder joint_name_;
@@ -234,19 +229,15 @@ public class JointDesiredOutputMessage extends Packet<JointDesiredOutputMessage>
 
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;

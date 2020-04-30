@@ -7,10 +7,8 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * Atlas specific message
-   
- */
+       * Atlas specific message
+       */
 public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket> implements Settable<BlackFlyParameterPacket>, EpsilonComparable<BlackFlyParameterPacket>
 {
 
@@ -19,10 +17,8 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket> imp
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    public boolean auto_exposure_;
@@ -100,19 +96,15 @@ public class BlackFlyParameterPacket extends Packet<BlackFlyParameterPacket> imp
 
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
