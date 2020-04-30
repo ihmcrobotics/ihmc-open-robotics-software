@@ -35,4 +35,7 @@ geometry_msgs/Point actual_foot_position_in_world
 # Specifies the orientation of where the foot actually landed.
 geometry_msgs/Quaternion actual_foot_orientation_in_world
 
+# This is the swing duration of the step.
+float64 swing_duration
+
 
