@@ -91,14 +91,25 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
 
    private final AtomicBoolean dirtyGraphic = new AtomicBoolean(false);
 
-   public YoGraphicTrajectory3D(String name, PositionTrajectoryGenerator trajectoryGenerator, YoDouble trajectoryDuration, double radius, int resolution,
-                                int radialResolution, YoVariableRegistry registry)
+   public YoGraphicTrajectory3D(String name,
+                                PositionTrajectoryGenerator trajectoryGenerator,
+                                YoDouble trajectoryDuration,
+                                double radius,
+                                int resolution,
+                                int radialResolution,
+                                YoVariableRegistry registry)
    {
       this(name, null, trajectoryGenerator, trajectoryDuration, radius, resolution, radialResolution, registry);
    }
 
-   public YoGraphicTrajectory3D(String name, YoFramePose3D poseFromTrajectoryFrameToWorldFrame, PositionTrajectoryGenerator trajectoryGenerator,
-                                DoubleProvider trajectoryDuration, double radius, int resolution, int radialResolution, YoVariableRegistry registry)
+   public YoGraphicTrajectory3D(String name,
+                                YoFramePose3D poseFromTrajectoryFrameToWorldFrame,
+                                PositionTrajectoryGenerator trajectoryGenerator,
+                                DoubleProvider trajectoryDuration,
+                                double radius,
+                                int resolution,
+                                int radialResolution,
+                                YoVariableRegistry registry)
    {
       super(name);
 
@@ -113,7 +124,6 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
 
       hasPoseDefined = poseFromTrajectoryFrameToWorldFrame != null;
       poseToWorldFrame = poseFromTrajectoryFrameToWorldFrame;
-
 
       currentGraphicType = new YoEnum<>(name + "CurrentGraphicType", registry, TrajectoryGraphicType.class, false);
       currentColorType = new YoEnum<>(name + "CurrentColorType", registry, TrajectoryColorType.class, false);
@@ -141,13 +151,10 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
       setupDirtyGraphicListener();
    }
 
-
    private void setupDirtyGraphicListener()
    {
       getVariablesDefiningGraphic().forEach(variable -> variable.addVariableChangedListener(v -> dirtyGraphic.set(true)));
    }
-
-
 
    /**
     * Changes the current coloring used for the trajectory, see {@link TrajectoryColorType}.
@@ -247,7 +254,6 @@ public class YoGraphicTrajectory3D extends YoGraphic implements RemoteYoGraphic,
          velocity.setToZero();
       for (FrameVector3D acceleration : intermediateAccelerations)
          acceleration.setToZero();
-
 
       double maxVelocity = 0.0;
       double maxAcceleration = 0.0;

@@ -17,13 +17,7 @@ public class MultipleWaypointsBlendedPoseTrajectoryGenerator extends BlendedPose
    public MultipleWaypointsBlendedPoseTrajectoryGenerator(String prefix, MultipleWaypointsPoseTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
                                                           YoVariableRegistry parentRegistry)
    {
-      this(prefix, trajectory, trajectoryFrame, parentRegistry, null);
-   }
-
-   public MultipleWaypointsBlendedPoseTrajectoryGenerator(String prefix, MultipleWaypointsPoseTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame,
-                                                          YoVariableRegistry parentRegistry, YoGraphicsListRegistry graphicsListRegistry)
-   {
-      super(prefix, trajectory, trajectoryFrame, parentRegistry, graphicsListRegistry);
+      super(prefix, trajectory, trajectoryFrame, parentRegistry);
 
       this.trajectory = trajectory;
    }
