@@ -13,4 +13,3 @@ int32 number_of_holes_in_region
 
 int32[] hole_polygons_size
 
-
