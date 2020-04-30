@@ -19,6 +19,11 @@ public class ParameterTuner extends ParameterTuningApplication
       inputManager = new RemoteInputManager(enableAutoDiscovery);
    }
 
+   public ParameterTuner(String serverAddress) throws IOException
+   {
+      inputManager = new RemoteInputManager(serverAddress);
+   }
+
    public ParameterTuner(HTTPDataServerConnection connection) throws IOException
    {
       inputManager = new RemoteInputManager(connection);
