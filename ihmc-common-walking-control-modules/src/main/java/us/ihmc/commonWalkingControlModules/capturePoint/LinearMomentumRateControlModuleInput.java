@@ -217,7 +217,7 @@ public class LinearMomentumRateControlModuleInput
 
    public void setDesiredICPAtEndOfState(FramePoint2DReadOnly desiredICPAtEndOfState)
    {
-      this.desiredICPAtEndOfState.set(desiredICPAtEndOfState);
+      this.desiredICPAtEndOfState.setIncludingFrame(desiredICPAtEndOfState);
    }
 
    public FramePoint2D getDesiredICPAtEndOfState()
@@ -432,6 +432,7 @@ public class LinearMomentumRateControlModuleInput
       useMomentumRecoveryMode = other.useMomentumRecoveryMode;
       desiredCapturePoint.setIncludingFrame(other.desiredCapturePoint);
       desiredCapturePointVelocity.setIncludingFrame(other.desiredCapturePointVelocity);
+      desiredICPAtEndOfState.setIncludingFrame(other.desiredICPAtEndOfState);
       perfectCMP.setIncludingFrame(other.perfectCMP);
       perfectCoP.setIncludingFrame(other.perfectCoP);
       controlHeightWithMomentum = other.controlHeightWithMomentum;
@@ -471,6 +472,8 @@ public class LinearMomentumRateControlModuleInput
          if (!desiredCapturePoint.equals(other.desiredCapturePoint))
             return false;
          if (!desiredCapturePointVelocity.equals(other.desiredCapturePointVelocity))
+            return false;
+         if (!desiredICPAtEndOfState.equals(other.desiredICPAtEndOfState))
             return false;
          if (!perfectCMP.equals(other.perfectCMP))
             return false;
