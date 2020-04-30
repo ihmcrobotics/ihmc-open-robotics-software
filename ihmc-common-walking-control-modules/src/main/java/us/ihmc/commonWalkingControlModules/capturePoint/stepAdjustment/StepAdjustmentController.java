@@ -242,6 +242,11 @@ public class StepAdjustmentController
       environmentConstraintProvider.setPlanarRegionConstraint(planarRegion);
    }
 
+   public void setPlanarRegions(List<PlanarRegion> planarRegions)
+   {
+      environmentConstraintProvider.setPlanarRegions(planarRegions);
+   }
+
    public void initialize(double initialTime, RobotSide supportSide)
    {
       isInSwing.set(true);

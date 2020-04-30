@@ -47,6 +47,8 @@ public class EnvironmentConstraintProvider
 
    private final SideDependentList<? extends ContactablePlaneBody> contactableFeet;
 
+   private final DoubleProvider maxAngleForSteppable;
+   private final DoubleProvider minimumAreaForSteppable;
 
    private final YoFrameConvexPolygon2D yoConvexHullConstraint;
    private final YoFrameConvexPolygon2D yoShrunkConvexHullConstraint;
@@ -55,6 +57,7 @@ public class EnvironmentConstraintProvider
 
    private final ICPControlPlane icpControlPlane;
 
+   private final RecyclingArrayList<PlanarRegion> allPlanarRegionsThatAreSteppable = new RecyclingArrayList<>(PlanarRegion.class);
 
    private PlanarRegion planarRegionToConstrainTo = null;
 
@@ -66,6 +69,9 @@ public class EnvironmentConstraintProvider
    {
       this.icpControlPlane = icpControlPlane;
       this.contactableFeet = contactableFeet;
+
+      maxAngleForSteppable = new DoubleParameter(yoNamePrefix + "MaxAngleForSteppable", registry, maxNormalAngleFromVertical);
+      minimumAreaForSteppable = new DoubleParameter(yoNamePrefix + "MinimumAreaForSteppable", registry, minimumAreaToConsider);
 
       yoConvexHullConstraint = new YoFrameConvexPolygon2D(yoNamePrefix + "ConvexHullConstraint", "", worldFrame, 12, registry);
       yoShrunkConvexHullConstraint = new YoFrameConvexPolygon2D(yoNamePrefix + "ShrunkConvexHullConstraint", "", worldFrame, 12, registry);
@@ -94,6 +100,37 @@ public class EnvironmentConstraintProvider
       this.planarRegionToConstrainTo = planarRegionToConstrainTo;
    }
 
+   public void setPlanarRegions(java.util.List<PlanarRegion> planarRegions)
+   {
+      allPlanarRegionsThatAreSteppable.clear();
+
+      for (int i = 0; i < planarRegions.size(); i++)
+      {
+         PlanarRegion planarRegion = planarRegions.get(i);
+
+         if (isRegionValidForStepping(planarRegion))
+         {
+            allPlanarRegionsThatAreSteppable.add().set(planarRegions.get(i));
+         }
+      }
+   }
+
+   private final Vector3D planeNormal = new Vector3D();
+   private final Vector3D verticalAxis = new Vector3D(0.0, 0.0, 1.0);
+
+   private boolean isRegionValidForStepping(PlanarRegion planarRegion)
+   {
+      planarRegion.getNormal(planeNormal);
+
+      double angle = planeNormal.angle(verticalAxis);
+
+      if (angle > maxAngleForSteppable.getValue())
+         return false;
+
+      return planarRegion.getConvexHull().getArea() > minimumAreaForSteppable.getValue();
+   }
+
+
    public void reset()
    {
       planarRegionToConstrainTo = null;
@@ -106,6 +143,11 @@ public class EnvironmentConstraintProvider
    public FrameConvexPolygon2DReadOnly updatePlanarRegionConstraintForStep(RobotSide upcomingFootstepSide, FramePose3DReadOnly footstepPose,
                                                                            List<Point2D> predictedContactPoints)
    {
+      if (planarRegionToConstrainTo == null)
+      {
+         planarRegionToConstrainTo = findPlanarRegionUnderFoothold(footstepPose);
+      }
+
       if (planarRegionToConstrainTo != null)
       {
          computeShrunkAndProjectedConvexHulls(planarRegionToConstrainTo, upcomingFootstepSide, predictedContactPoints, footstepPose.getOrientation());
@@ -145,5 +187,27 @@ public class EnvironmentConstraintProvider
       orientationTransform.getRotation().set(orientation);
 
       footstepPolygon.applyTransform(orientationTransform);
+   }
+
+   private PlanarRegion findPlanarRegionUnderFoothold(FramePose3DReadOnly foothold)
+   {
+      PlanarRegion highestRegionUnderFoot = null;
+      double highestPoint = Double.NEGATIVE_INFINITY;
+      for (int regionIndex = 0; regionIndex < allPlanarRegionsThatAreSteppable.size(); regionIndex++)
+      {
+         PlanarRegion planarRegion = allPlanarRegionsThatAreSteppable.get(regionIndex);
+
+         if (!planarRegion.isPointInWorld2DInside(foothold.getPosition()))
+            continue;
+
+         double height = planarRegion.getPlaneZGivenXY(foothold.getPosition().getX(), foothold.getPosition().getY());
+         if (height >= highestPoint)
+         {
+            highestPoint = height;
+            highestRegionUnderFoot = planarRegion;
+         }
+      }
+
+      return highestRegionUnderFoot;
    }
 }
