@@ -1,13 +1,12 @@
 package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
 
-import controller_msgs.msg.dds.CapturabilityBasedStatus;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.WholeBodyTrajectoryMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTSleepState;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTStreamingState;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTools;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -42,13 +41,14 @@ public class StepConstraintToolboxController extends ToolboxController
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
    public StepConstraintToolboxController(StatusMessageOutputManager statusOutputManager,
+                                          WalkingControllerParameters walkingControllerParameters,
                                           FullHumanoidRobotModel fullRobotModel,
                                           YoVariableRegistry parentRegistry)
    {
       super(statusOutputManager, parentRegistry);
 
       this.fullRobotModel = fullRobotModel;
-      stepConstraintCalculator = new StepConstraintCalculator(fullRobotModel.getRootJoint(), getAllJointsExcludingHands(fullRobotModel));
+      stepConstraintCalculator = new StepConstraintCalculator(walkingControllerParameters, fullRobotModel, time);
 
       isDone.set(false);
    }
@@ -109,6 +109,16 @@ public class StepConstraintToolboxController extends ToolboxController
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
    {
       stepConstraintCalculator.updateCapturabilityBasedStatus(newStatus);
+   }
+
+   public void updateFootstepStatus(FootstepStatusMessage footstepStatusMessage)
+   {
+      stepConstraintCalculator.updateFootstepStatus(footstepStatusMessage);
+   }
+
+   public void updatePlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
+   {
+      stepConstraintCalculator.updatePlanarRegions(planarRegionsListMessage);
    }
 
    public double getTime()
