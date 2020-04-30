@@ -23,6 +23,7 @@ import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToo
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeRos2Node;
 
@@ -47,9 +48,8 @@ public class StepConstraintToolboxModule extends ToolboxModule
             pubSubImplementation);
 
       setTimeWithoutInputsBeforeGoingToSleep(3.0);
-      controller = new StepConstraintToolboxController(statusOutputManager, fullRobotModel, registry);
+      controller = new StepConstraintToolboxController(statusOutputManager, robotModel.getWalkingControllerParameters(), fullRobotModel, registry);
 
-      commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(fullRobotModel));
       startYoVariableServer();
       if (yoVariableServer != null)
       {
@@ -63,25 +63,35 @@ public class StepConstraintToolboxModule extends ToolboxModule
    {
       MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
 
-      RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
-
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
       {
          if (controller != null)
          {
-            s.takeNextData(robotConfigurationData, null);
-            controller.updateRobotConfigurationData(robotConfigurationData);
+            controller.updateRobotConfigurationData(s.takeNextData());
          }
       });
-
-      CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
       {
          if (controller != null)
          {
-            s.takeNextData(capturabilityBasedStatus, null);
-            controller.updateCapturabilityBasedStatus(capturabilityBasedStatus);
+            controller.updateCapturabilityBasedStatus(s.takeNextData());
+         }
+      });
+
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
+      {
+         if (controller != null)
+         {
+            controller.updateFootstepStatus(s.takeNextData());
+         }
+      });
+
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, s ->
+      {
+         if (controller != null)
+         {
+            controller.updatePlanarRegions(s.takeNextData());
          }
       });
    }
