@@ -22,24 +22,11 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
 
    private final PoseTrajectoryGenerator trajectory;
 
-   private final BlendedPoseTrajectoryGeneratorVisualizer visualizer;
-
    public BlendedPoseTrajectoryGenerator(String prefix, PoseTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame, YoVariableRegistry parentRegistry)
-   {
-      this(prefix, trajectory, trajectoryFrame, parentRegistry, null);
-   }
-
-   public BlendedPoseTrajectoryGenerator(String prefix, PoseTrajectoryGenerator trajectory, ReferenceFrame trajectoryFrame, YoVariableRegistry parentRegistry,
-                                         YoGraphicsListRegistry graphicsListRegistry)
    {
       this.trajectory = trajectory;
       this.blendedPositionTrajectory = new BlendedPositionTrajectoryGenerator(prefix + "Position", trajectory, trajectoryFrame, parentRegistry);
       this.blendedOrientationTrajectory = new BlendedOrientationTrajectoryGenerator(prefix + "Orientation", trajectory, trajectoryFrame, parentRegistry);
-
-      if (graphicsListRegistry != null)
-         visualizer = new BlendedPoseTrajectoryGeneratorVisualizer(prefix, this, parentRegistry, graphicsListRegistry);
-      else
-         visualizer = null;
    }
 
    public BlendedPositionTrajectoryGenerator getPositionTrajectoryGenerator()
@@ -51,9 +38,6 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    {
       blendedPositionTrajectory.clear();
       blendedOrientationTrajectory.clear();
-
-      if (visualizer != null)
-         visualizer.hideVisualization();
    }
 
    public void clearInitialConstraint()
@@ -99,9 +83,6 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    public void initializeTrajectory()
    {
       trajectory.initialize();
-
-      if (visualizer != null)
-         visualizer.visualize();
    }
 
 
@@ -166,9 +147,6 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
    {
       blendedPositionTrajectory.initialize();
       blendedOrientationTrajectory.initialize();
-
-      if (visualizer != null)
-         visualizer.visualize();
    }
 
    @Override
