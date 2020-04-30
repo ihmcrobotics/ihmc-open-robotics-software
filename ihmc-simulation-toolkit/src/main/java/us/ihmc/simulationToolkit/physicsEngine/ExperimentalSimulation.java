@@ -217,6 +217,7 @@ public class ExperimentalSimulation extends Simulation
             robot.update();
          }
 
+         externalWrenchReader.initialize();
          physicsEngine.initialize();
          externalWrenchReader.updateSCSGroundContactPoints();
 
