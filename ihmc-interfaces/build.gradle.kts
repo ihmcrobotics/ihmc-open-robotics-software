@@ -43,6 +43,7 @@ testDependencies {
 }
 
 generatorDependencies {
+   api("us.ihmc:euclid:0.13.1")
    api("us.ihmc:ihmc-commons:0.28.2")
    api("us.ihmc:ros2-msg-to-pubsub-generator:0.16.1")
 }
