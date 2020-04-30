@@ -504,7 +504,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       {
          RobotSide side = RobotSide.values[i % 2];
          Pose3D footPose = new Pose3D(footPoses.get(side));
-         footPose.prependTranslation(0.10, 0.0, 0.0);
+         footPose.prependTranslation(0.10, 0.0, -0.01); // Lowering the footstep to trigger touchdown earlier on the controller side.
          footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(side, footPose));
       }
 
