@@ -27,7 +27,7 @@ mainDependencies {
    api("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
    api("org.apache.commons:commons-lang3:3.8.1")
    
-   api("us.ihmc:euclid-shape:0.13.1")
+   api("us.ihmc:euclid-shape:0.14.0")
    api("us.ihmc:joctomap:1.8.0")
    api("us.ihmc:ihmc-yovariables:0.5.0")
    api("us.ihmc:ihmc-javafx-toolkit:0.15.0")
