@@ -1,22 +1,44 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.BodyPathPlanForUI;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.CurrentState;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.FootstepPlanForUI;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.FootstepPlannerParameters;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.LookAndStepParameters;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.MapRegionsForUI;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.OperatorReviewEnabled;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.RePlan;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.SubGoalForUI;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.TakeStep;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.BodyPathPlanInput;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
-import javafx.scene.Node;
 import javafx.scene.SubScene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.input.MouseEvent;
-import javafx.scene.input.PickResult;
 import javafx.scene.paint.Color;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.communication.ROS2Callback;
+import us.ihmc.communication.RemoteREAInterface;
+import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
-import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
+import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
@@ -29,8 +51,12 @@ import us.ihmc.humanoidBehaviors.ui.model.FXUIActionMap;
 import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
-
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.*;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.Ros2NodeInterface;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class LookAndStepBehaviorUI extends BehaviorUIInterface
 {
@@ -45,6 +71,8 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private PositionGraphic subGoalGraphic;
    private BodyPathPlanGraphic bodyPathPlanGraphic;
    private PoseGraphic goalGraphic;
+   
+   private VisibilityGraphPathPlanner bodyPathPlanner;
 
    private SnappedPositionEditor snappedPositionEditor;
    private OrientationYawEditor orientationYawEditor;
@@ -57,8 +85,13 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @FXML private TableView lookAndStepParameterTable;
    @FXML private TableView footstepPlannerParameterTable;
 
+   private RemoteREAInterface rea;
+   private RemoteHumanoidRobotInterface robot;
+   private FramePose3D leftFootPoseTemp = new FramePose3D();
+   private FramePose3D rightFootPoseTemp = new FramePose3D();
+
    @Override
-   public void init(SubScene sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
+   public void init(SubScene sceneNode, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
 
@@ -87,6 +120,14 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       JavaFXStoredPropertyTable footstepPlannerJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(footstepPlannerParameterTable);
       footstepPlannerJavaFXStoredPropertyTable.setup(footstepPlannerParameters, FootstepPlannerParameterKeys.keys, this::footstepPlanningParameters);
 
+      VisibilityGraphsParametersBasics visibilityGraphParameters = robotModel.getVisibilityGraphsParameters();
+      BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
+      bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor,
+                                                            new YoVariableRegistry(getClass().getSimpleName()));
+      
+      rea = new RemoteREAInterface(ros2Node); // maybe instead subscribe to all regions (Visible regions)
+      robot = new RemoteHumanoidRobotInterface(ros2Node, robotModel);
+
       behaviorMessager.registerTopicListener(CurrentState, state -> Platform.runLater(() -> behaviorState.setText(state)));
 
       snappedPositionEditor = new SnappedPositionEditor(sceneNode);
@@ -107,6 +148,21 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       placeGoalActionMap.mapAction(FXUITrigger.ORIENTATION_LEFT_CLICK, trigger ->
       {
          // calculate and send body path plan
+         bodyPathPlanner.setGoal(goalGraphic.getPose());
+         bodyPathPlanner.setPlanarRegionsList(rea.getLatestPlanarRegionsList());
+         HumanoidRobotState humanoidRobotState = robot.pollHumanoidRobotState();
+         leftFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.LEFT));
+         rightFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.RIGHT));
+         leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
+         rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
+         bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
+         bodyPathPlanner.planWaypoints();
+         ArrayList<Point3D> waypointsAsPoints = new ArrayList<>();
+         for (Pose3DReadOnly poseWaypoint : bodyPathPlanner.getWaypoints())
+         {
+            waypointsAsPoints.add(new Point3D(poseWaypoint.getPosition()));
+         }
+         behaviorMessager.submitMessage(BodyPathPlanInput, (List<Point3D>) waypointsAsPoints);
 
          placeGoalButton.setDisable(false);
       });

@@ -99,7 +99,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       stateMachineFactory.addTransition(PERCEPT, PLAN, this::transitionFromPercept);
       stateMachineFactory.setOnEntry(PLAN, this::onPlanStateEntry);
       stateMachineFactory.addTransition(PLAN, Lists.newArrayList(REVIEW, STEP, PLAN_FAILED), this::transitionFromPlan);
-      stateMachineFactory.addTransition(REVIEW, Lists.newArrayList(STEP, PERCEPT), this::transitionFromReview);
+      stateMachineFactory.addTransition(REVIEW, Lists.newArrayList(STEP, AQUIRE_PATH), this::transitionFromReview);
       stateMachineFactory.setOnEntry(STEP, this::onStepStateEntry);
       stateMachineFactory.addTransition(STEP, AQUIRE_PATH, this::transitionFromStep);
       stateMachineFactory.setOnEntry(PLAN_FAILED, this::onPlanFailedStateEntry);

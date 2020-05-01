@@ -27,6 +27,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.Ros2NodeInterface;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,7 +53,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    private HashMap<Integer, Integer> numberOfPolygonsMap = new HashMap<>();
    private HashMap<Integer, ArrayList<ConvexPolygon2D>> polygonsMap = new HashMap<>();
 
-   public void init(SubScene sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
+   public void init(SubScene sceneNode, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ObservationPosition,

@@ -102,7 +102,7 @@ public class BehaviorUI
 
          for (BehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces.values())
          {
-            behaviorUIInterface.init(subScene, behaviorMessager, robotModel);
+            behaviorUIInterface.init(subScene, ros2Node, behaviorMessager, robotModel);
             view3dFactory.addNodeToView(behaviorUIInterface);
          }
 

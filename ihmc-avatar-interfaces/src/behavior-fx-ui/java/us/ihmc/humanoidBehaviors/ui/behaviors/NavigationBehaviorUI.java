@@ -10,6 +10,7 @@ import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.messager.Messager;
+import us.ihmc.ros2.Ros2NodeInterface;
 
 import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.*;
 
@@ -22,7 +23,7 @@ public class NavigationBehaviorUI extends BehaviorUIInterface
    private BodyPathPlanGraphic bodyPathPlanGraphic;
 
    @Override
-   public void init(SubScene sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
+   public void init(SubScene sceneNode, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
 
