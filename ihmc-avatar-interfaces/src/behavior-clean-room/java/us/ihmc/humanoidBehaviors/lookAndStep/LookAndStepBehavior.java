@@ -10,12 +10,14 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidBehaviors.tools.RemoteEnvironmentMapInterface;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.*;
@@ -77,6 +79,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final Stopwatch planFailedWait = new Stopwatch();
    private final FramePose3D goalPoseBetweenFeet = new FramePose3D();
    private final TypedNotification<List<Point3D>> bodyPathPlanNotificationInput;
+   private List<Point3D> bodyPathPlan;
 
    public LookAndStepBehavior(BehaviorHelper helper)
    {
@@ -131,17 +134,20 @@ public class LookAndStepBehavior implements BehaviorInterface
       // check for new body path plans
       bodyPathPlanNotificationInput.poll();
       
-      helper.publishToUI(BodyPathPlanForUI, bodyPathPlanNotificationInput.peek());
+      if (bodyPathPlanNotificationInput.hasNext())
+      {
+         bodyPathPlan = bodyPathPlanNotificationInput.peek();
+      }
 
       boolean transition = true;
       // check there is a path
-      List<? extends Point3DReadOnly> bodyPathPlan = bodyPathPlanNotificationInput.peek();
       boolean hasAtLeastTwoPoints = bodyPathPlan != null && !bodyPathPlan.isEmpty() && bodyPathPlan.size() >= 2;
       transition &= hasAtLeastTwoPoints;
 
       if (hasAtLeastTwoPoints)
       {
          // visualize the body path in UI
+         helper.publishToUI(BodyPathPlanForUI, bodyPathPlan);
 
          FramePose3DReadOnly midFeetUnderPelvis = robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
 
@@ -172,6 +178,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       PlanarRegionsList latestPlanarRegionList = environmentMap.getLatestCombinedRegionsList();
       helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
 
+      List<Point3D> bodyPathWaypoints = bodyPathPlanNotificationInput.peek();
+      
       FramePose3D initialPoseBetweenFeet = new FramePose3D();
       initialPoseBetweenFeet.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
       initialPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
@@ -179,9 +187,70 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       goalPoseBetweenFeet.setIncludingFrame(robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getPelvisFrame));
       goalPoseBetweenFeet.setZ(midFeetZ);
-      double trailingBy = goalPoseBetweenFeet.getPositionDistance(initialPoseBetweenFeet);
-      goalPoseBetweenFeet.getOrientation().setYawPitchRoll(lookAndStepParameters.get(LookAndStepBehaviorParameters.direction), 0.0, 0.0);
-      goalPoseBetweenFeet.appendTranslation(lookAndStepParameters.get(LookAndStepBehaviorParameters.stepLength) - trailingBy, 0.0, 0.0);
+      
+      // find closest point along body path plan
+      Point3D closestPointAlongPath = bodyPathWaypoints.get(0);
+      double closestDistance = closestPointAlongPath.distance(goalPoseBetweenFeet.getPosition());
+      int closestSegmentIndex = 0;
+      for (int i = 0; i < bodyPathWaypoints.size() - 1; i++)
+      {
+         LineSegment3D lineSegment = new LineSegment3D();
+         lineSegment.set(bodyPathWaypoints.get(i), bodyPathWaypoints.get(i + 1));
+         
+         Point3D closestPointOnBodyPathSegment = new Point3D();
+         EuclidGeometryTools.closestPoint3DsBetweenTwoLineSegment3Ds(lineSegment.getFirstEndpoint(), 
+                                                                     lineSegment.getSecondEndpoint(), 
+                                                                     goalPoseBetweenFeet.getPosition(), 
+                                                                     goalPoseBetweenFeet.getPosition(), 
+                                                                     closestPointOnBodyPathSegment, 
+                                                                     new Point3D()); // TODO find a better way to do this
+         
+         double distance = closestPointOnBodyPathSegment.distance(goalPoseBetweenFeet.getPosition());
+         if (distance < closestDistance)
+         {
+            closestPointAlongPath = closestPointOnBodyPathSegment;
+            closestDistance = distance;
+            closestSegmentIndex = i;
+         }
+      }
+      
+      // move point along body path plan by plan horizon
+      Point3D goalPoint = new Point3D(closestPointAlongPath);
+      
+      double moveAmountToGo = lookAndStepParameters.get(LookAndStepBehaviorParameters.planHorizon);
+      
+      Point3D previousComparisonPoint = closestPointAlongPath;
+      for (int i = closestSegmentIndex; i < bodyPathWaypoints.size() - 1 && moveAmountToGo > 0; i++)
+      {
+         Point3D endOfSegment = bodyPathWaypoints.get(i + 1);
+         
+         double distanceToEndOfSegment = endOfSegment.distance(previousComparisonPoint);
+         
+         if (distanceToEndOfSegment < moveAmountToGo)
+         {
+            goalPoint.interpolate(previousComparisonPoint, endOfSegment, moveAmountToGo / distanceToEndOfSegment);
+            moveAmountToGo = 0;
+         }
+         else
+         {
+            previousComparisonPoint = bodyPathWaypoints.get(i + 1);
+            moveAmountToGo -= distanceToEndOfSegment;
+         }
+         
+         goalPoint.set(previousComparisonPoint);
+      }
+      
+//      double trailingBy = goalPoseBetweenFeet.getPositionDistance(initialPoseBetweenFeet);
+//      goalPoseBetweenFeet.getOrientation().setYawPitchRoll(lookAndStepParameters.get(LookAndStepBehaviorParameters.direction), 0.0, 0.0);
+//      goalPoseBetweenFeet.appendTranslation(lookAndStepParameters.get(LookAndStepBehaviorParameters.planHorizon) - trailingBy, 0.0, 0.0);
+
+      Vector2D headingVector = new Vector2D();
+      headingVector.set(goalPoint.getX(), goalPoint.getY());
+      headingVector.sub(goalPoseBetweenFeet.getPosition().getX(), goalPoseBetweenFeet.getPosition().getY());
+      
+      goalPoseBetweenFeet.getPosition().set(goalPoint);
+      
+      goalPoseBetweenFeet.getOrientation().setYawPitchRoll(Math.atan2(headingVector.getX(), headingVector.getY()), 0.0, 0.0);
 
       RobotSide initialStanceFootSide = null;
       FramePose3D initialStanceFootPose = null;
