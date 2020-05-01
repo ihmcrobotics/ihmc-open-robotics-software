@@ -1,11 +1,5 @@
-
-
-
 #ifndef __controller_msgs__msg__HighLevelStateMessage__idl__
 #define __controller_msgs__msg__HighLevelStateMessage__idl__
-
-
-
 
 module controller_msgs
 {
@@ -13,126 +7,57 @@ module controller_msgs
   {
     module dds
     {
-
-   
-   const octet DO_NOTHING_BEHAVIOR =
-
+      const octet DO_NOTHING_BEHAVIOR =
       0;
 
-
-
-   
-   const octet STAND_PREP_STATE =
-
+      const octet STAND_PREP_STATE =
       1;
 
-
-
-   
-   const octet STAND_READY =
-
+      const octet STAND_READY =
       2;
 
-
-
-   
-   const octet FREEZE_STATE =
-
+      const octet FREEZE_STATE =
       3;
 
-
-
-   
-   const octet STAND_TRANSITION_STATE =
-
+      const octet STAND_TRANSITION_STATE =
       4;
 
-
-
-   
-   const octet WALKING =
-
+      const octet WALKING =
       5;
 
-
-
-   
-   const octet EXIT_WALKING =
-
+      const octet EXIT_WALKING =
       6;
 
-
-
-   
-   const octet DIAGNOSTICS =
-
+      const octet DIAGNOSTICS =
       7;
 
-
-
-   
-   const octet CALIBRATION =
-
+      const octet CALIBRATION =
       8;
 
-
-
-   
-   const octet CUSTOM1 =
-
+      const octet CUSTOM1 =
       9;
 
-
-
-   
-   const octet FALLING_STATE =
-
+      const octet FALLING_STATE =
       10;
 
 
-
-   
-   /**
-   
-    * This message is part of the IHMC whole-body controller API.
-   
-    * This message is used to switch the control scheme between different control mode.
-   
-    */
-   
-   @TypeCode(type="controller_msgs::msg::dds_::HighLevelStateMessage_")
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message is used to switch the control scheme between different control mode.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::HighLevelStateMessage_")
       struct HighLevelStateMessage
       {
-
-
-    
-    /**
-    
-     * Unique ID used to identify this message, should preferably be consecutively increasing.
-    
-     */
-    
-
-
-    unsigned long sequence_id;
-
-
-    
-    /**
-    
-     * Specifies the which state the controller should transition into.
-    
-     */
-    
-
-    @defaultValue(value=255)
-
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Specifies the which state the controller should transition into.
+         */
+        @defaultValue(value=255)
         octet high_level_controller_name;
-
-
-
       };
-
     };
   };
 };
