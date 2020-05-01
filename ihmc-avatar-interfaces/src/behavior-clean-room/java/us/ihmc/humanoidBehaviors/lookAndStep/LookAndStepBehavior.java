@@ -8,7 +8,11 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.euclid.geometry.Line3D;
+import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidBehaviors.tools.RemoteEnvironmentMapInterface;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -38,6 +42,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.TypedNotification;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -47,32 +52,32 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndS
 public class LookAndStepBehavior implements BehaviorInterface
 {
    public static final BehaviorDefinition DEFINITION = new BehaviorDefinition("Look and Step", LookAndStepBehavior::new, create());
-   private TypedNotification<WalkingStatusMessage> walkingStatusNotification;
 
    public enum LookAndStepBehaviorState
    {
-      PERCEPT, PLAN, USER, STEP, PLAN_FAILED
+      AQUIRE_PATH, PERCEPT, PLAN, REVIEW, STEP, PLAN_FAILED
    }
 
    private final LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
 
    private final BehaviorHelper helper;
-   private final AtomicReference<Boolean> operatorReviewEnabledInput;
    private final StateMachine<LookAndStepBehaviorState, State> stateMachine;
    private final PausablePeriodicThread mainThread;
    private final RemoteREAInterface rea;
    private final RemoteEnvironmentMapInterface environmentMap;
-
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final RemoteHumanoidRobotInterface robot;
    private final FootstepPlanningModule footstepPlanningModule;
 
+   private final AtomicReference<Boolean> operatorReviewEnabledInput;
    private AtomicReference<FootstepPlannerOutput> latestFootstepPlannerOutput = new AtomicReference<>();
    private final TypedNotification<FootstepPlannerOutput> footstepPlannerOutputNotification = new TypedNotification<>();
+   private TypedNotification<WalkingStatusMessage> walkingStatusNotification;
    private final Notification takeStepNotification;
    private final Notification rePlanNotification;
    private final Stopwatch planFailedWait = new Stopwatch();
    private final FramePose3D goalPoseBetweenFeet = new FramePose3D();
+   private final TypedNotification<List<? extends Point3DReadOnly>> bodyPathPlanNotificationInput;
 
    public LookAndStepBehavior(BehaviorHelper helper)
    {
@@ -83,6 +88,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
       rePlanNotification = helper.createUINotification(RePlan);
       takeStepNotification = helper.createUINotification(TakeStep);
+      bodyPathPlanNotificationInput = helper.createUITypedNotification(BodyPathPlanInput);
       helper.createUICallback(LookAndStepParameters, lookAndStepParameters::setAllFromStrings);
       footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
       helper.createUICallback(FootstepPlannerParameters, footstepPlannerParameters::setAllFromStrings);
@@ -90,21 +96,18 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
 
       EnumBasedStateMachineFactory<LookAndStepBehaviorState> stateMachineFactory = new EnumBasedStateMachineFactory<>(LookAndStepBehaviorState.class);
-      stateMachineFactory.setDoAction(PERCEPT, this::pollInterrupts);
+      stateMachineFactory.addTransition(AQUIRE_PATH, PERCEPT, this::transitionFromAquirePath);
       stateMachineFactory.addTransition(PERCEPT, PLAN, this::transitionFromPercept);
       stateMachineFactory.setOnEntry(PLAN, this::onPlanStateEntry);
-      stateMachineFactory.setDoAction(PLAN, this::pollInterrupts);
-      stateMachineFactory.addTransition(PLAN, Lists.newArrayList(USER, STEP, PLAN_FAILED), this::transitionFromPlan);
-      stateMachineFactory.setDoAction(USER, this::pollInterrupts);
-      stateMachineFactory.addTransition(USER, Lists.newArrayList(STEP, PERCEPT), this::transitionFromUser);
+      stateMachineFactory.addTransition(PLAN, Lists.newArrayList(REVIEW, STEP, PLAN_FAILED), this::transitionFromPlan);
+      stateMachineFactory.addTransition(REVIEW, Lists.newArrayList(STEP, PERCEPT), this::transitionFromReview);
       stateMachineFactory.setOnEntry(STEP, this::onStepStateEntry);
-      stateMachineFactory.setDoAction(STEP, this::pollInterrupts);
-      stateMachineFactory.addTransition(STEP, PERCEPT, this::transitionFromStep);
+      stateMachineFactory.addTransition(STEP, AQUIRE_PATH, this::transitionFromStep);
       stateMachineFactory.setOnEntry(PLAN_FAILED, this::onPlanFailedStateEntry);
-      stateMachineFactory.setDoAction(PLAN_FAILED, this::pollInterrupts);
-      stateMachineFactory.addTransition(PLAN_FAILED, PERCEPT, this::transitionFromPlanFailed);
+      stateMachineFactory.addTransition(PLAN_FAILED, AQUIRE_PATH, this::transitionFromPlanFailed);
+      Arrays.stream(values()).forEach(state -> stateMachineFactory.setDoAction(state, this::pollInterrupts));
       stateMachineFactory.getFactory().addStateChangedListener(this::stateChanged);
-      stateMachine = stateMachineFactory.getFactory().build(PERCEPT);
+      stateMachine = stateMachineFactory.getFactory().build(AQUIRE_PATH);
 
       mainThread = helper.createPausablePeriodicThread(getClass(), 0.1, stateMachine::doActionAndTransition);
    }
@@ -121,10 +124,41 @@ public class LookAndStepBehavior implements BehaviorInterface
    private void stateChanged(LookAndStepBehaviorState from, LookAndStepBehaviorState to)
    {
       helper.publishToUI(CurrentState, to.name());
-      LogTools.debug("{} -> {}", from == null ? null : from.name(), to == null ? null : to.name());
+      LogTools.debug(2, "{} -> {}", from == null ? null : from.name(), to.name());
    }
 
-   private boolean transitionFromPercept(double timeInState)
+   private boolean transitionFromAquirePath()
+   {
+      // check for new body path plans
+      bodyPathPlanNotificationInput.poll();
+
+      boolean transition = true;
+      // check there is a path
+      List<? extends Point3DReadOnly> bodyPathPlan = bodyPathPlanNotificationInput.peek();
+      boolean hasAtLeastTwoPoints = bodyPathPlan != null && !bodyPathPlan.isEmpty() && bodyPathPlan.size() >= 2;
+      transition &= hasAtLeastTwoPoints;
+
+      if (hasAtLeastTwoPoints)
+      {
+         FramePose3DReadOnly midFeetUnderPelvis = robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
+
+         // check you are within radius of path
+         for (int i = 0; i < bodyPathPlan.size() - 1; i++)
+         {
+            LineSegment3D lineSegment = new LineSegment3D();
+            lineSegment.set(bodyPathPlan.get(i), bodyPathPlan.get(i + 1));
+
+            transition &= lineSegment.distance(midFeetUnderPelvis.getPosition()) < lookAndStepParameters.getMaxPlanStrayDistance();
+         }
+
+         // check you aren't close to end of path
+         transition &= bodyPathPlan.get(bodyPathPlan.size() - 1).distance(midFeetUnderPelvis.getPosition()) > lookAndStepParameters.getGoalSatisfactionRadius();
+      }
+
+      return transition;
+   }
+
+   private boolean transitionFromPercept()
    {
       return !arePlanarRegionsExpired() && !environmentMap.getLatestCombinedRegionsList().isEmpty();
    }
@@ -143,7 +177,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       goalPoseBetweenFeet.setIncludingFrame(robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getPelvisFrame));
       goalPoseBetweenFeet.setZ(midFeetZ);
       double trailingBy = goalPoseBetweenFeet.getPositionDistance(initialPoseBetweenFeet);
-      goalPoseBetweenFeet.setOrientationYawPitchRoll(lookAndStepParameters.get(LookAndStepBehaviorParameters.direction), 0.0, 0.0);
+      goalPoseBetweenFeet.getOrientation().setYawPitchRoll(lookAndStepParameters.get(LookAndStepBehaviorParameters.direction), 0.0, 0.0);
       goalPoseBetweenFeet.appendTranslation(lookAndStepParameters.get(LookAndStepBehaviorParameters.stepLength) - trailingBy, 0.0, 0.0);
 
       RobotSide initialStanceFootSide = null;
@@ -202,12 +236,12 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
       footstepPlannerLogger.logSession();
-      footstepPlannerLogger.deleteOldLogs(10);
+      FootstepPlannerLogger.deleteOldLogs(10);
 
       helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan()));
    }
 
-   private LookAndStepBehaviorState transitionFromPlan(double timeInState)
+   private LookAndStepBehaviorState transitionFromPlan()
    {
       if (footstepPlannerOutputNotification.hasNext())
       {
@@ -215,7 +249,7 @@ public class LookAndStepBehavior implements BehaviorInterface
          {
             if (operatorReviewEnabledInput.get())
             {
-               return USER;
+               return REVIEW;
             }
             else
             {
@@ -236,16 +270,16 @@ public class LookAndStepBehavior implements BehaviorInterface
       planFailedWait.start();
    }
 
-   private boolean transitionFromPlanFailed(double timeInState)
+   private boolean transitionFromPlanFailed()
    {
       return planFailedWait.lapElapsed() > lookAndStepParameters.get(LookAndStepBehaviorParameters.waitTimeAfterPlanFailed);
    }
 
-   private LookAndStepBehaviorState transitionFromUser(double timeInState)
+   private LookAndStepBehaviorState transitionFromReview()
    {
       if (rePlanNotification.read())
       {
-         return PERCEPT;
+         return AQUIRE_PATH;
       }
       else if (takeStepNotification.read())
       {
@@ -277,12 +311,12 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepDataListMessage));
    }
 
-   private boolean transitionFromStep(double timeInState)
+   private boolean transitionFromStep()
    {
       return walkingStatusNotification.hasNext(); // use rea.isRobotWalking?
    }
 
-   private void pollInterrupts(double timeInState)
+   private void pollInterrupts()
    {
       if (walkingStatusNotification != null)
       {
@@ -314,13 +348,14 @@ public class LookAndStepBehavior implements BehaviorInterface
       public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
       public static final Topic<List<String>> LookAndStepParameters = topic("LookAndStepParameters");
       public static final Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");
+      public static final Topic<List<Point3D>> BodyPathPlanInput = topic("BodyPathPlanInput");
 
-      private static final <T> Topic<T> topic(String name)
+      private static <T> Topic<T> topic(String name)
       {
          return RootCategory.child(LookAndStepTheme).topic(apiFactory.createTypedTopicTheme(name));
       }
 
-      public static final MessagerAPIFactory.MessagerAPI create()
+      public static MessagerAPIFactory.MessagerAPI create()
       {
          return apiFactory.getAPIAndCloseFactory();
       }
