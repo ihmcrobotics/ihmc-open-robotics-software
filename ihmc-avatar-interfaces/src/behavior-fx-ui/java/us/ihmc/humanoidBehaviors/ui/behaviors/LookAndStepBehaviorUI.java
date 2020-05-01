@@ -44,7 +44,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
    private PositionGraphic subGoalGraphic;
    private BodyPathPlanGraphic bodyPathPlanGraphic;
-   private PoseGraphic goalGraphic = new PoseGraphic("Goal", Color.CADETBLUE, 0.03);
+   private PoseGraphic goalGraphic;
 
    private SnappedPositionEditor snappedPositionEditor;
    private OrientationYawEditor orientationYawEditor;
@@ -70,6 +70,9 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       getChildren().add(livePlanarRegionsGraphic);
       behaviorMessager.registerTopicListener(MapRegionsForUI, livePlanarRegionsGraphic::acceptPlanarRegions);
 
+      goalGraphic = new PoseGraphic("Goal", Color.CADETBLUE, 0.03);
+      getChildren().add(goalGraphic);
+      
       subGoalGraphic = new PositionGraphic(Color.GREEN, 0.02);
       behaviorMessager.registerTopicListener(SubGoalForUI, position -> Platform.runLater(() -> subGoalGraphic.setPosition(position)));
 
@@ -92,7 +95,6 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       placeGoalActionMap = new FXUIActionMap(startAction ->
       {
          placeGoalButton.setDisable(true);
-         goalGraphic.setVisible(false);
          snappedPositionEditor.edit(SnappedPositionEditor.EditMode.XY_PLANE, goalGraphic, exitType ->
          {
             placeGoalActionMap.triggerAction(exitType);
@@ -100,7 +102,6 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       });
       placeGoalActionMap.mapAction(FXUITrigger.POSITION_LEFT_CLICK, trigger ->
       {
-         goalGraphic.setVisible(true);
          orientationYawEditor.edit(goalGraphic, exitType -> placeGoalActionMap.triggerAction(exitType));
       });
       placeGoalActionMap.mapAction(FXUITrigger.ORIENTATION_LEFT_CLICK, trigger ->
@@ -151,7 +152,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
    @FXML public void placeGoalButton()
    {
-
+      placeGoalActionMap.start();
    }
 
    @FXML public void takeStep()
