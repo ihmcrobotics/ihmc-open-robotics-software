@@ -7,16 +7,11 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC whole-body controller API.
-   
- * This message commands the controller to move in taskspace a hand to the desired pose (position & orientation) while going through the specified trajectory points.
-   
- * A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations.
-   
- * To execute a single straight line trajectory to reach a desired hand pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
-   
- */
+       * This message is part of the IHMC whole-body controller API.
+       * This message commands the controller to move in taskspace a hand to the desired pose (position & orientation) while going through the specified trajectory points.
+       * A third order polynomial function is used to interpolate positions and a hermite based curve (third order) is used to interpolate the orientations.
+       * To execute a single straight line trajectory to reach a desired hand pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
+       */
 public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> implements Settable<HandTrajectoryMessage>, EpsilonComparable<HandTrajectoryMessage>
 {
 
@@ -25,33 +20,24 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    /**
-       
-    * When the robot is walking, restrictions on upper-body motion may be applied.
-       
-    * To by-pass the safety check and force the execution of this message, set this field to true.
-       
-    */
+            * When the robot is walking, restrictions on upper-body motion may be applied.
+            * To by-pass the safety check and force the execution of this message, set this field to true.
+            */
    public boolean force_execution_;
 
    /**
-       
-    * Specifies which hand will execute the trajectory.
-       
-    */
+            * Specifies which hand will execute the trajectory.
+            */
    public byte robot_side_ = (byte) 255;
 
    /**
-       
-    * The position/orientation trajectory information.
-       
-    */
+            * The position/orientation trajectory information.
+            */
    public controller_msgs.msg.dds.SE3TrajectoryMessage se3_trajectory_;
 
    public HandTrajectoryMessage()
@@ -87,19 +73,15 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
 
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -107,23 +89,17 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
 
 
    /**
-       
-    * When the robot is walking, restrictions on upper-body motion may be applied.
-       
-    * To by-pass the safety check and force the execution of this message, set this field to true.
-       
-    */
+            * When the robot is walking, restrictions on upper-body motion may be applied.
+            * To by-pass the safety check and force the execution of this message, set this field to true.
+            */
    public void setForceExecution(boolean force_execution)
    {
       force_execution_ = force_execution;
    }
    /**
-       
-    * When the robot is walking, restrictions on upper-body motion may be applied.
-       
-    * To by-pass the safety check and force the execution of this message, set this field to true.
-       
-    */
+            * When the robot is walking, restrictions on upper-body motion may be applied.
+            * To by-pass the safety check and force the execution of this message, set this field to true.
+            */
    public boolean getForceExecution()
    {
       return force_execution_;
@@ -131,19 +107,15 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
 
 
    /**
-       
-    * Specifies which hand will execute the trajectory.
-       
-    */
+            * Specifies which hand will execute the trajectory.
+            */
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
    }
    /**
-       
-    * Specifies which hand will execute the trajectory.
-       
-    */
+            * Specifies which hand will execute the trajectory.
+            */
    public byte getRobotSide()
    {
       return robot_side_;
@@ -152,10 +124,8 @@ public class HandTrajectoryMessage extends Packet<HandTrajectoryMessage> impleme
 
 
    /**
-       
-    * The position/orientation trajectory information.
-       
-    */
+            * The position/orientation trajectory information.
+            */
    public controller_msgs.msg.dds.SE3TrajectoryMessage getSe3Trajectory()
    {
       return se3_trajectory_;
