@@ -76,7 +76,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final Notification rePlanNotification;
    private final Stopwatch planFailedWait = new Stopwatch();
    private final FramePose3D goalPoseBetweenFeet = new FramePose3D();
-   private final TypedNotification<List<? extends Point3DReadOnly>> bodyPathPlanNotificationInput;
+   private final TypedNotification<List<Point3D>> bodyPathPlanNotificationInput;
 
    public LookAndStepBehavior(BehaviorHelper helper)
    {
@@ -130,6 +130,8 @@ public class LookAndStepBehavior implements BehaviorInterface
    {
       // check for new body path plans
       bodyPathPlanNotificationInput.poll();
+      
+      helper.publishToUI(BodyPathPlanForUI, bodyPathPlanNotificationInput.peek());
 
       boolean transition = true;
       // check there is a path
