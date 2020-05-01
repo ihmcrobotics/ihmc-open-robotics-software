@@ -20,11 +20,23 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet
    public static final DoubleStoredPropertyKey transferTime = keys.addDoubleKey("Transfer time");
    public static final DoubleStoredPropertyKey waitTimeAfterPlanFailed = keys.addDoubleKey("Wait time after plan failed");
    public static final BooleanStoredPropertyKey returnBestEffortPlanOverride = keys.addBooleanKey("Return best effort plan override");
+   public static final DoubleStoredPropertyKey maxPlanStrayDistance = keys.addDoubleKey("Max allowed stray from body path");
+   public static final DoubleStoredPropertyKey goalSatisfactionRadius = keys.addDoubleKey("Goal satisfaction radius");
 
    public LookAndStepBehaviorParameters()
    {
       super(keys, LookAndStepBehaviorParameters.class, "ihmc-open-robotics-software", "ihmc-avatar-interfaces/src/behavior-clean-room/resources");
       load();
+   }
+
+   public double getMaxPlanStrayDistance()
+   {
+      return get(maxPlanStrayDistance);
+   }
+
+   public double getGoalSatisfactionRadius()
+   {
+      return get(goalSatisfactionRadius);
    }
 
    public double getPlanarRegionsExpiration()

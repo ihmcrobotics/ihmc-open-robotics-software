@@ -131,9 +131,9 @@ public class BehaviorHelper
       return notification;
    }
 
-   public <T> TypedNotification<T> createUITypedNotification(Topic<T> topic)
+   public <T extends K, K> TypedNotification<K> createUITypedNotification(Topic<T> topic)
    {
-      TypedNotification<T> typedNotification = new TypedNotification<>();
+      TypedNotification<K> typedNotification = new TypedNotification<>();
       createUICallback(topic, message -> typedNotification.add(message));
       return typedNotification;
    }
