@@ -8,7 +8,6 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.euclid.geometry.Line3D;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -140,6 +139,8 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       if (hasAtLeastTwoPoints)
       {
+         // visualize the body path in UI
+
          FramePose3DReadOnly midFeetUnderPelvis = robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
 
          // check you are within radius of path
@@ -200,7 +201,7 @@ public class LookAndStepBehavior implements BehaviorInterface
          initialStanceFootPose = rightSolePose;
       }
 
-      helper.publishToUI(GoalForUI, new Point3D(goalPoseBetweenFeet.getPosition()));
+      helper.publishToUI(SubGoalForUI, new Point3D(goalPoseBetweenFeet.getPosition()));
 
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
@@ -344,11 +345,12 @@ public class LookAndStepBehavior implements BehaviorInterface
       public static final Topic<Object> RePlan = topic("RePlan");
       public static final Topic<Boolean> OperatorReviewEnabled = topic("OperatorReview");
       public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlan");
-      public static final Topic<Point3D> GoalForUI = topic("GoalForUI");
+      public static final Topic<Point3D> SubGoalForUI = topic("GoalForUI");
       public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
       public static final Topic<List<String>> LookAndStepParameters = topic("LookAndStepParameters");
       public static final Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");
       public static final Topic<List<Point3D>> BodyPathPlanInput = topic("BodyPathPlanInput");
+      public static final Topic<List<Point3D>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
 
       private static <T> Topic<T> topic(String name)
       {

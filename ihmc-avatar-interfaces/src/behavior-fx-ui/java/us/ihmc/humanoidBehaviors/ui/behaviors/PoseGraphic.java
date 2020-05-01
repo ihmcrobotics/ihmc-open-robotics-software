@@ -11,9 +11,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidBehaviors.ui.graphics.OrientationGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
+import us.ihmc.humanoidBehaviors.ui.model.interfaces.PoseEditable;
 import us.ihmc.javafx.graphics.LabelGraphic;
 
-public class PoseGraphic extends Group
+public class PoseGraphic extends Group implements PoseEditable
 {
    public static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final FramePose3D pose = new FramePose3D();
@@ -29,7 +30,12 @@ public class PoseGraphic extends Group
 
    public PoseGraphic(String label)
    {
-      snappedPositionGraphic = new PositionGraphic(Color.YELLOW, 0.05);
+      this(label, Color.YELLOW, 0.05);
+   }
+
+   public PoseGraphic(String label, Color color, double radius)
+   {
+      snappedPositionGraphic = new PositionGraphic(color, radius);
       orientationGraphic = new OrientationGraphic();
       if (label != null)
       {
@@ -41,12 +47,14 @@ public class PoseGraphic extends Group
       getChildren().add(orientationGraphic.getNode());
    }
 
+   @Override
    public void setPosition(Point3DReadOnly position)
    {
       pose.getPosition().set(position);
       updateGraphics();
    }
 
+   @Override
    public void setOrientation(Orientation3DReadOnly orientationPoint)
    {
       pose.getOrientation().set(orientationPoint);
@@ -81,6 +89,7 @@ public class PoseGraphic extends Group
       updateGraphics();
    }
 
+   @Override
    public Point3DBasics getPosition()
    {
       return pose.getPosition();
