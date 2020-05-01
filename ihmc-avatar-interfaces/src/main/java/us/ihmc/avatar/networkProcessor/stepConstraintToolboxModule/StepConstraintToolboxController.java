@@ -7,7 +7,11 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTStre
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTools;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.IHMCRealtimeROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -21,6 +25,9 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
+import us.ihmc.ros2.RealtimeRos2Node;
+import us.ihmc.ros2.Ros2Node;
+import us.ihmc.ros2.Ros2Publisher;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -41,7 +48,10 @@ public class StepConstraintToolboxController extends ToolboxController
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
+   private final IHMCRealtimeROS2Publisher<PlanarRegionMessage> planarRegionConstraintPublisher;
+
    public StepConstraintToolboxController(StatusMessageOutputManager statusOutputManager,
+                                          IHMCRealtimeROS2Publisher<PlanarRegionMessage> planarRegionConstraintPublisher,
                                           WalkingControllerParameters walkingControllerParameters,
                                           FullHumanoidRobotModel fullRobotModel,
                                           double gravityZ,
@@ -49,8 +59,10 @@ public class StepConstraintToolboxController extends ToolboxController
    {
       super(statusOutputManager, parentRegistry);
 
+      this.planarRegionConstraintPublisher = planarRegionConstraintPublisher;
       this.fullRobotModel = fullRobotModel;
       stepConstraintCalculator = new StepConstraintCalculator(walkingControllerParameters, fullRobotModel, time, gravityZ);
+
 
       isDone.set(false);
    }
@@ -76,7 +88,7 @@ public class StepConstraintToolboxController extends ToolboxController
          stepConstraintCalculator.update();
 
          if (stepConstraintCalculator.constraintRegionChanged())
-            statusOutputManager.reportStatusMessage(PlanarRegionMessageConverter.convertToPlanarRegionMessage(stepConstraintCalculator.getConstraintRegion()));
+            planarRegionConstraintPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionMessage(stepConstraintCalculator.getConstraintRegion()));
 
       }
       catch (Throwable e)

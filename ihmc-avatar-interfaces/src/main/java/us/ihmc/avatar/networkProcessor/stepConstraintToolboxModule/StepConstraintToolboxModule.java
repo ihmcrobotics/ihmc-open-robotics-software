@@ -37,6 +37,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
    private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 5;
 
    protected final StepConstraintToolboxController controller;
+   private IHMCRealtimeROS2Publisher<PlanarRegionMessage> planarRegionConstraintPublisher;
 
    public StepConstraintToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation, double gravityZ)
    {
@@ -48,8 +49,9 @@ public class StepConstraintToolboxModule extends ToolboxModule
             pubSubImplementation);
 
       setTimeWithoutInputsBeforeGoingToSleep(3.0);
-      controller = new StepConstraintToolboxController(statusOutputManager, robotModel.getWalkingControllerParameters(), fullRobotModel, gravityZ, registry);
+      controller = new StepConstraintToolboxController(statusOutputManager, planarRegionConstraintPublisher, robotModel.getWalkingControllerParameters(), fullRobotModel, gravityZ, registry);
 
+      setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
       startYoVariableServer();
       if (yoVariableServer != null)
       {
@@ -87,13 +89,20 @@ public class StepConstraintToolboxModule extends ToolboxModule
          }
       });
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, s ->
+      ROS2Tools.createCallbackSubscription(realtimeRos2Node,
+                                           PlanarRegionsListMessage.class,
+                                           REACommunicationProperties.publisherTopicNameGenerator,
+                                           s -> updatePlanarRegion(s.takeNextData()));
+
+      planarRegionConstraintPublisher = ROS2Tools.createPublisher(realtimeRos2Node, PlanarRegionMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
+   }
+
+   public void updatePlanarRegion(PlanarRegionsListMessage planarRegionsListMessage)
+   {
+      if (controller != null)
       {
-         if (controller != null)
-         {
-            controller.updatePlanarRegions(s.takeNextData());
-         }
-      });
+         controller.updatePlanarRegions(planarRegionsListMessage);
+      }
    }
 
    @Override
@@ -105,7 +114,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
    @Override
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
-      return null;
+      return new ArrayList<>();
    }
 
    @Override

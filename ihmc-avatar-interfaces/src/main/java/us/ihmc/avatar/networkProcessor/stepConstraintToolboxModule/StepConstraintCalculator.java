@@ -125,6 +125,8 @@ public class StepConstraintCalculator
       capturePoint.set(capturabilityBasedStatus.getCapturePoint2d());
       leftFootSupportPolygon.addVertices(Vertex3DSupplier.asVertex3DSupplier(capturabilityBasedStatus.getLeftFootSupportPolygon2d()));
       rightFootSupportPolygon.addVertices(Vertex3DSupplier.asVertex3DSupplier(capturabilityBasedStatus.getRightFootSupportPolygon2d()));
+      leftFootSupportPolygon.update();
+      rightFootSupportPolygon.update();
 
       if (simpleStep == null)
       {

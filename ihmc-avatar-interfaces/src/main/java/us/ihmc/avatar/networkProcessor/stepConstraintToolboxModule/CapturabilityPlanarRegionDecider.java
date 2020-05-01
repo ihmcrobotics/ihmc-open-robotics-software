@@ -21,6 +21,7 @@ import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 import java.awt.*;
@@ -39,8 +40,8 @@ public class CapturabilityPlanarRegionDecider
 
    private static final Vector3D verticalAxis = new Vector3D(0.0, 0.0, 1.0);
 
-   private final DoubleProvider maxAngleForSteppable;
-   private final DoubleProvider minimumAreaForSteppable;
+   private final YoDouble maxAngleForSteppable;
+   private final YoDouble minimumAreaForSteppable;
 
    private List<PlanarRegion> steppableRegions = new ArrayList<>();
 
@@ -69,8 +70,10 @@ public class CapturabilityPlanarRegionDecider
       this.captureRegionCalculator = captureRegionCalculator;
       this.icpControlPlane = icpControlPlane;
 
-      maxAngleForSteppable = new DoubleParameter("maxAngleForSteppable", registry, maxNormalAngleFromVertical);
-      minimumAreaForSteppable = new DoubleParameter("minimumAreaForSteppable", registry, minimumAreaToConsider);
+      maxAngleForSteppable = new YoDouble("maxAngleForSteppable", registry);
+      minimumAreaForSteppable = new YoDouble("minimumAreaForSteppable", registry);
+      maxAngleForSteppable.set(maxNormalAngleFromVertical);
+      minimumAreaForSteppable.set(minimumAreaToConsider);
 
       constraintRegionChanged = new YoBoolean("constraintRegionChanged", registry);
 
