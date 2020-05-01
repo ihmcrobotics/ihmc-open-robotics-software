@@ -126,7 +126,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private void stateChanged(LookAndStepBehaviorState from, LookAndStepBehaviorState to)
    {
       helper.publishToUI(CurrentState, to.name());
-      LogTools.debug(2, "{} -> {}", from == null ? null : from.name(), to.name());
+      LogTools.debug("{} -> {}", from == null ? null : from.name(), to.name());
    }
 
    private boolean transitionFromAquirePath()
@@ -174,12 +174,11 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private void onPlanStateEntry()
    {
+      LogTools.info("Entering plan state");
       HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
       PlanarRegionsList latestPlanarRegionList = environmentMap.getLatestCombinedRegionsList();
       helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
 
-      List<Point3D> bodyPathWaypoints = bodyPathPlanNotificationInput.peek();
-      
       FramePose3D initialPoseBetweenFeet = new FramePose3D();
       initialPoseBetweenFeet.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
       initialPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
@@ -189,14 +188,14 @@ public class LookAndStepBehavior implements BehaviorInterface
       goalPoseBetweenFeet.setZ(midFeetZ);
       
       // find closest point along body path plan
-      Point3D closestPointAlongPath = bodyPathWaypoints.get(0);
+      Point3D closestPointAlongPath = bodyPathPlan.get(0);
       double closestDistance = closestPointAlongPath.distance(goalPoseBetweenFeet.getPosition());
       int closestSegmentIndex = 0;
-      for (int i = 0; i < bodyPathWaypoints.size() - 1; i++)
+      for (int i = 0; i < bodyPathPlan.size() - 1; i++)
       {
          LogTools.info("Finding closest point along body path. Segment: {}, closestDistance: {}", i, closestDistance);
          LineSegment3D lineSegment = new LineSegment3D();
-         lineSegment.set(bodyPathWaypoints.get(i), bodyPathWaypoints.get(i + 1));
+         lineSegment.set(bodyPathPlan.get(i), bodyPathPlan.get(i + 1));
          
          Point3D closestPointOnBodyPathSegment = new Point3D();
          EuclidGeometryTools.closestPoint3DsBetweenTwoLineSegment3Ds(lineSegment.getFirstEndpoint(), 
@@ -222,16 +221,16 @@ public class LookAndStepBehavior implements BehaviorInterface
       double moveAmountToGo = lookAndStepParameters.get(LookAndStepBehaviorParameters.planHorizon);
       
       Point3D previousComparisonPoint = closestPointAlongPath;
-      for (int i = closestSegmentIndex; i < bodyPathWaypoints.size() - 1 && moveAmountToGo > 0; i++)
+      for (int i = closestSegmentIndex; i < bodyPathPlan.size() - 1 && moveAmountToGo > 0; i++)
       {
-         Point3D endOfSegment = bodyPathWaypoints.get(i + 1);
+         Point3D endOfSegment = bodyPathPlan.get(i + 1);
          
          double distanceToEndOfSegment = endOfSegment.distance(previousComparisonPoint);
          LogTools.info("Evaluating segment {}, moveAmountToGo: {}, distanceToEndOfSegment: {}", i, moveAmountToGo, distanceToEndOfSegment);
          
          if (distanceToEndOfSegment < moveAmountToGo)
          {
-            previousComparisonPoint = bodyPathWaypoints.get(i + 1);
+            previousComparisonPoint = bodyPathPlan.get(i + 1);
             moveAmountToGo -= distanceToEndOfSegment;
          }
          else
@@ -308,7 +307,11 @@ public class LookAndStepBehavior implements BehaviorInterface
    private void footstepPlanningThread(FootstepPlannerRequest footstepPlannerRequest)
    {
       footstepPlanningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= 1);
+      LogTools.info("Footstep planner started");
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.handleRequest(footstepPlannerRequest);
+      
+      LogTools.info("Footstep planner completed!");
+      
       footstepPlannerOutputNotification.add(footstepPlannerOutput);
 
       latestFootstepPlannerOutput.set(footstepPlannerOutput);
