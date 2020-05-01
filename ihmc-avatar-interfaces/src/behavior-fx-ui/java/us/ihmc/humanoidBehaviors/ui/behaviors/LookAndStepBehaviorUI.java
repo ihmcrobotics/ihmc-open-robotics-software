@@ -15,7 +15,6 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndS
 import java.util.ArrayList;
 import java.util.List;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.SubScene;
@@ -25,9 +24,7 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.communication.ROS2Callback;
 import us.ihmc.communication.RemoteREAInterface;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -50,6 +47,7 @@ import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIActionMap;
 import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
@@ -96,15 +94,12 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       this.behaviorMessager = behaviorMessager;
 
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
-      getChildren().add(footstepPlanGraphic);
       behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
 
       livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(false);
-      getChildren().add(livePlanarRegionsGraphic);
       behaviorMessager.registerTopicListener(MapRegionsForUI, livePlanarRegionsGraphic::acceptPlanarRegions);
 
       goalGraphic = new PoseGraphic("Goal", Color.CADETBLUE, 0.03);
-      getChildren().add(goalGraphic);
       
       subGoalGraphic = new PositionGraphic(Color.GREEN, 0.02);
       behaviorMessager.registerTopicListener(SubGoalForUI, position -> Platform.runLater(() -> subGoalGraphic.setPosition(position)));
@@ -162,6 +157,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
          {
             waypointsAsPoints.add(new Point3D(poseWaypoint.getPosition()));
          }
+
          behaviorMessager.submitMessage(BodyPathPlanInput, (List<Point3D>) waypointsAsPoints);
 
          placeGoalButton.setDisable(false);
@@ -189,10 +185,18 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
          livePlanarRegionsGraphic.clear();
          footstepPlanGraphic.clear();
          Platform.runLater(() -> getChildren().remove(subGoalGraphic.getNode()));
+         Platform.runLater(() -> getChildren().remove(goalGraphic));
+         Platform.runLater(() -> getChildren().remove(bodyPathPlanGraphic));
+         Platform.runLater(() -> getChildren().remove(livePlanarRegionsGraphic));
+         Platform.runLater(() -> getChildren().remove(footstepPlanGraphic));
       }
       else
       {
          Platform.runLater(() -> getChildren().add(subGoalGraphic.getNode()));
+         Platform.runLater(() -> getChildren().add(goalGraphic));
+         Platform.runLater(() -> getChildren().add(bodyPathPlanGraphic));
+         Platform.runLater(() -> getChildren().add(livePlanarRegionsGraphic));
+         Platform.runLater(() -> getChildren().add(footstepPlanGraphic));
       }
    }
 
