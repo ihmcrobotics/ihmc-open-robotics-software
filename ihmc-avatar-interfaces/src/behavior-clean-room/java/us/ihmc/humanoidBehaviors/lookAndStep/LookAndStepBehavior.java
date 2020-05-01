@@ -194,6 +194,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       int closestSegmentIndex = 0;
       for (int i = 0; i < bodyPathWaypoints.size() - 1; i++)
       {
+         LogTools.info("Finding closest point along body path. Segment: {}, closestDistance: {}", i, closestDistance);
          LineSegment3D lineSegment = new LineSegment3D();
          lineSegment.set(bodyPathWaypoints.get(i), bodyPathWaypoints.get(i + 1));
          
@@ -213,6 +214,7 @@ public class LookAndStepBehavior implements BehaviorInterface
             closestSegmentIndex = i;
          }
       }
+      LogTools.info("closestPointAlongPath: {}, closestDistance: {}, closestLineSegmentIndex: {}", closestPointAlongPath, closestDistance, closestSegmentIndex);
       
       // move point along body path plan by plan horizon
       Point3D goalPoint = new Point3D(closestPointAlongPath);
@@ -225,20 +227,22 @@ public class LookAndStepBehavior implements BehaviorInterface
          Point3D endOfSegment = bodyPathWaypoints.get(i + 1);
          
          double distanceToEndOfSegment = endOfSegment.distance(previousComparisonPoint);
+         LogTools.info("Evaluating segment {}, moveAmountToGo: {}, distanceToEndOfSegment: {}", i, moveAmountToGo, distanceToEndOfSegment);
          
          if (distanceToEndOfSegment < moveAmountToGo)
-         {
-            goalPoint.interpolate(previousComparisonPoint, endOfSegment, moveAmountToGo / distanceToEndOfSegment);
-            moveAmountToGo = 0;
-         }
-         else
          {
             previousComparisonPoint = bodyPathWaypoints.get(i + 1);
             moveAmountToGo -= distanceToEndOfSegment;
          }
+         else
+         {
+            goalPoint.interpolate(previousComparisonPoint, endOfSegment, moveAmountToGo / distanceToEndOfSegment);
+            moveAmountToGo = 0;
+         }
          
          goalPoint.set(previousComparisonPoint);
       }
+      LogTools.info("previousComparisonPoint: {}, goalPoint: {}", previousComparisonPoint, goalPoint);
       
 //      double trailingBy = goalPoseBetweenFeet.getPositionDistance(initialPoseBetweenFeet);
 //      goalPoseBetweenFeet.getOrientation().setYawPitchRoll(lookAndStepParameters.get(LookAndStepBehaviorParameters.direction), 0.0, 0.0);
@@ -248,9 +252,12 @@ public class LookAndStepBehavior implements BehaviorInterface
       headingVector.set(goalPoint.getX(), goalPoint.getY());
       headingVector.sub(goalPoseBetweenFeet.getPosition().getX(), goalPoseBetweenFeet.getPosition().getY());
       
+      LogTools.info("Setting goalPoint: {}", goalPoint);
       goalPoseBetweenFeet.getPosition().set(goalPoint);
       
-      goalPoseBetweenFeet.getOrientation().setYawPitchRoll(Math.atan2(headingVector.getX(), headingVector.getY()), 0.0, 0.0);
+      double yaw = Math.atan2(headingVector.getX(), headingVector.getY());
+      LogTools.info("Setting yaw: {}", yaw);
+      goalPoseBetweenFeet.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
 
       RobotSide initialStanceFootSide = null;
       FramePose3D initialStanceFootPose = null;
