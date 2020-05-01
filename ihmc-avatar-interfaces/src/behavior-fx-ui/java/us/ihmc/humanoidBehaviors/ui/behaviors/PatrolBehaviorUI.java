@@ -35,6 +35,7 @@ import us.ihmc.humanoidBehaviors.waypoints.Waypoint;
 import us.ihmc.humanoidBehaviors.waypoints.WaypointManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.ros2.Ros2NodeInterface;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -79,7 +80,7 @@ public class PatrolBehaviorUI extends BehaviorUIInterface
    private int currentInsertIndex; // TODO this should be in extracted functionality
 
    @Override
-   public void init(SubScene sceneNode, Messager behaviorMessager, DRCRobotModel robotModel)
+   public void init(SubScene sceneNode, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
 

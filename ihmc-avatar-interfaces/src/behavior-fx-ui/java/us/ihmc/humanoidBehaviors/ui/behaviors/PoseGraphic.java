@@ -6,6 +6,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -98,6 +99,11 @@ public class PoseGraphic extends Group implements PoseEditable
    public Orientation3DReadOnly getOrientation()
    {
       return pose.getOrientation();
+   }
+   
+   public FramePose3DReadOnly getPose()
+   {
+      return pose;
    }
 
    private void updateGraphics()
