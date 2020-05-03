@@ -7,45 +7,71 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC robot environment awareness module (REA).
-       * This provides access to a few filters used in REA.
-       */
+   
+ * This message is part of the IHMC robot environment awareness module (REA).
+   
+ * This provides access to a few filters used in REA.
+   
+ */
 public class REASensorDataFilterParametersMessage extends Packet<REASensorDataFilterParametersMessage> implements Settable<REASensorDataFilterParametersMessage>, EpsilonComparable<REASensorDataFilterParametersMessage>
 {
 
    /**
-            * Lower-bound of the bounding box inside which sensor data will be processed into planar regions.
-            * Note that the coordinates are relative to the sensor position and yaw:
-            * - x-coordinate: represents the distance in front (positive) or in the back (negative) of the sensor.
-            * - y-coordinate: represents the distance to the left (positive) or to the right (negative) of the sensor.
-            * - z-coordinate: represents the distance above (positive) or below (negative) of the sensor.
-            * Sensor data collected outside this bounding box is still used to help estimating empty space inside it.
-            * If any of the lower-bound coordinates is NaN, the bounding box parameters will be ignored.
-            */
+       
+    * Lower-bound of the bounding box inside which sensor data will be processed into planar regions.
+       
+    * Note that the coordinates are relative to the sensor position and yaw:
+       
+    * - x-coordinate: represents the distance in front (positive) or in the back (negative) of the sensor.
+       
+    * - y-coordinate: represents the distance to the left (positive) or to the right (negative) of the sensor.
+       
+    * - z-coordinate: represents the distance above (positive) or below (negative) of the sensor.
+       
+    * Sensor data collected outside this bounding box is still used to help estimating empty space inside it.
+       
+    * If any of the lower-bound coordinates is NaN, the bounding box parameters will be ignored.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D bounding_box_min_;
 
    /**
-            * Upper-bound of the bounding box inside which sensor data will be processed into planar regions.
-            * Note that the coordinates are relative to the sensor position and yaw:
-            * - x-coordinate: represents the distance in front (positive) or in the back (negative) of the sensor.
-            * - y-coordinate: represents the distance to the left (positive) or to the right (negative) of the sensor.
-            * - z-coordinate: represents the distance above (positive) or below (negative) of the sensor.
-            * Sensor data collected outside this bounding box is still used to help estimating empty space inside it.
-            * If any of the upper-bound coordinates is NaN, the bounding box parameters will be ignored.
-            */
+       
+    * Upper-bound of the bounding box inside which sensor data will be processed into planar regions.
+       
+    * Note that the coordinates are relative to the sensor position and yaw:
+       
+    * - x-coordinate: represents the distance in front (positive) or in the back (negative) of the sensor.
+       
+    * - y-coordinate: represents the distance to the left (positive) or to the right (negative) of the sensor.
+       
+    * - z-coordinate: represents the distance above (positive) or below (negative) of the sensor.
+       
+    * Sensor data collected outside this bounding box is still used to help estimating empty space inside it.
+       
+    * If any of the upper-bound coordinates is NaN, the bounding box parameters will be ignored.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D bounding_box_max_;
 
    /**
-            * Defines a bounding sphere centered at the sensor within which sensor data will be processed into planar regions.
-            * Sensor data collected outside this bounding sphere is still used to help estimating empty space inside it.
-            * A negative value will be ignored.
-            */
+       
+    * Defines a bounding sphere centered at the sensor within which sensor data will be processed into planar regions.
+       
+    * Sensor data collected outside this bounding sphere is still used to help estimating empty space inside it.
+       
+    * A negative value will be ignored.
+       
+    */
    public double sensor_max_range_;
 
    /**
-            * Defines a bounding sphere centered at the sensor within which sensor data is to be ignored.
-            * A negative value will be ignored.
-            */
+       
+    * Defines a bounding sphere centered at the sensor within which sensor data is to be ignored.
+       
+    * A negative value will be ignored.
+       
+    */
    public double sensor_min_range_;
 
    public REASensorDataFilterParametersMessage()
@@ -82,14 +108,22 @@ public class REASensorDataFilterParametersMessage extends Packet<REASensorDataFi
 
 
    /**
-            * Lower-bound of the bounding box inside which sensor data will be processed into planar regions.
-            * Note that the coordinates are relative to the sensor position and yaw:
-            * - x-coordinate: represents the distance in front (positive) or in the back (negative) of the sensor.
-            * - y-coordinate: represents the distance to the left (positive) or to the right (negative) of the sensor.
-            * - z-coordinate: represents the distance above (positive) or below (negative) of the sensor.
-            * Sensor data collected outside this bounding box is still used to help estimating empty space inside it.
-            * If any of the lower-bound coordinates is NaN, the bounding box parameters will be ignored.
-            */
+       
+    * Lower-bound of the bounding box inside which sensor data will be processed into planar regions.
+       
+    * Note that the coordinates are relative to the sensor position and yaw:
+       
+    * - x-coordinate: represents the distance in front (positive) or in the back (negative) of the sensor.
+       
+    * - y-coordinate: represents the distance to the left (positive) or to the right (negative) of the sensor.
+       
+    * - z-coordinate: represents the distance above (positive) or below (negative) of the sensor.
+       
+    * Sensor data collected outside this bounding box is still used to help estimating empty space inside it.
+       
+    * If any of the lower-bound coordinates is NaN, the bounding box parameters will be ignored.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D getBoundingBoxMin()
    {
       return bounding_box_min_;
@@ -98,14 +132,22 @@ public class REASensorDataFilterParametersMessage extends Packet<REASensorDataFi
 
 
    /**
-            * Upper-bound of the bounding box inside which sensor data will be processed into planar regions.
-            * Note that the coordinates are relative to the sensor position and yaw:
-            * - x-coordinate: represents the distance in front (positive) or in the back (negative) of the sensor.
-            * - y-coordinate: represents the distance to the left (positive) or to the right (negative) of the sensor.
-            * - z-coordinate: represents the distance above (positive) or below (negative) of the sensor.
-            * Sensor data collected outside this bounding box is still used to help estimating empty space inside it.
-            * If any of the upper-bound coordinates is NaN, the bounding box parameters will be ignored.
-            */
+       
+    * Upper-bound of the bounding box inside which sensor data will be processed into planar regions.
+       
+    * Note that the coordinates are relative to the sensor position and yaw:
+       
+    * - x-coordinate: represents the distance in front (positive) or in the back (negative) of the sensor.
+       
+    * - y-coordinate: represents the distance to the left (positive) or to the right (negative) of the sensor.
+       
+    * - z-coordinate: represents the distance above (positive) or below (negative) of the sensor.
+       
+    * Sensor data collected outside this bounding box is still used to help estimating empty space inside it.
+       
+    * If any of the upper-bound coordinates is NaN, the bounding box parameters will be ignored.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D getBoundingBoxMax()
    {
       return bounding_box_max_;
@@ -113,19 +155,27 @@ public class REASensorDataFilterParametersMessage extends Packet<REASensorDataFi
 
 
    /**
-            * Defines a bounding sphere centered at the sensor within which sensor data will be processed into planar regions.
-            * Sensor data collected outside this bounding sphere is still used to help estimating empty space inside it.
-            * A negative value will be ignored.
-            */
+       
+    * Defines a bounding sphere centered at the sensor within which sensor data will be processed into planar regions.
+       
+    * Sensor data collected outside this bounding sphere is still used to help estimating empty space inside it.
+       
+    * A negative value will be ignored.
+       
+    */
    public void setSensorMaxRange(double sensor_max_range)
    {
       sensor_max_range_ = sensor_max_range;
    }
    /**
-            * Defines a bounding sphere centered at the sensor within which sensor data will be processed into planar regions.
-            * Sensor data collected outside this bounding sphere is still used to help estimating empty space inside it.
-            * A negative value will be ignored.
-            */
+       
+    * Defines a bounding sphere centered at the sensor within which sensor data will be processed into planar regions.
+       
+    * Sensor data collected outside this bounding sphere is still used to help estimating empty space inside it.
+       
+    * A negative value will be ignored.
+       
+    */
    public double getSensorMaxRange()
    {
       return sensor_max_range_;
@@ -133,17 +183,23 @@ public class REASensorDataFilterParametersMessage extends Packet<REASensorDataFi
 
 
    /**
-            * Defines a bounding sphere centered at the sensor within which sensor data is to be ignored.
-            * A negative value will be ignored.
-            */
+       
+    * Defines a bounding sphere centered at the sensor within which sensor data is to be ignored.
+       
+    * A negative value will be ignored.
+       
+    */
    public void setSensorMinRange(double sensor_min_range)
    {
       sensor_min_range_ = sensor_min_range;
    }
    /**
-            * Defines a bounding sphere centered at the sensor within which sensor data is to be ignored.
-            * A negative value will be ignored.
-            */
+       
+    * Defines a bounding sphere centered at the sensor within which sensor data is to be ignored.
+       
+    * A negative value will be ignored.
+       
+    */
    public double getSensorMinRange()
    {
       return sensor_min_range_;

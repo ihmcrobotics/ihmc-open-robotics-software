@@ -7,15 +7,20 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Message that carries all the information required to configure the IHMC whole-body trajectory planner.
-       * Main usage is the IHMC WholeBodyTrajectoryToolbox.
-       */
+   
+ * Message that carries all the information required to configure the IHMC whole-body trajectory planner.
+   
+ * Main usage is the IHMC WholeBodyTrajectoryToolbox.
+   
+ */
 public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajectoryToolboxMessage> implements Settable<WholeBodyTrajectoryToolboxMessage>, EpsilonComparable<WholeBodyTrajectoryToolboxMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public controller_msgs.msg.dds.WholeBodyTrajectoryToolboxConfigurationMessage configuration_;
@@ -63,15 +68,19 @@ public class WholeBodyTrajectoryToolboxMessage extends Packet<WholeBodyTrajector
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

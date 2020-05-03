@@ -7,22 +7,29 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC humanoid behavior module.
-       */
+   
+ * This message is part of the IHMC humanoid behavior module.
+   
+ */
 public class DoorLocationPacket extends Packet<DoorLocationPacket> implements Settable<DoorLocationPacket>, EpsilonComparable<DoorLocationPacket>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public us.ihmc.euclid.geometry.Pose3D door_transform_to_world_;
 
    /**
-            * Some behaviors will average the door location to remove noise,
-            * trustedPosition allows someone to tell the behavior that this is an accurate location and and can does not need to be averaged,
-            * this is useful for sending door locations manually from the ui*/
+       
+    * Some behaviors will average the door location to remove noise,
+       
+    * trustedPosition allows someone to tell the behavior that this is an accurate location and and can does not need to be averaged,
+       
+    * this is useful for sending door locations manually from the ui*/
    public boolean trusted_position_;
 
    public DoorLocationPacket()
@@ -54,15 +61,19 @@ public class DoorLocationPacket extends Packet<DoorLocationPacket> implements Se
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -77,17 +88,23 @@ public class DoorLocationPacket extends Packet<DoorLocationPacket> implements Se
 
 
    /**
-            * Some behaviors will average the door location to remove noise,
-            * trustedPosition allows someone to tell the behavior that this is an accurate location and and can does not need to be averaged,
-            * this is useful for sending door locations manually from the ui*/
+       
+    * Some behaviors will average the door location to remove noise,
+       
+    * trustedPosition allows someone to tell the behavior that this is an accurate location and and can does not need to be averaged,
+       
+    * this is useful for sending door locations manually from the ui*/
    public void setTrustedPosition(boolean trusted_position)
    {
       trusted_position_ = trusted_position;
    }
    /**
-            * Some behaviors will average the door location to remove noise,
-            * trustedPosition allows someone to tell the behavior that this is an accurate location and and can does not need to be averaged,
-            * this is useful for sending door locations manually from the ui*/
+       
+    * Some behaviors will average the door location to remove noise,
+       
+    * trustedPosition allows someone to tell the behavior that this is an accurate location and and can does not need to be averaged,
+       
+    * this is useful for sending door locations manually from the ui*/
    public boolean getTrustedPosition()
    {
       return trusted_position_;

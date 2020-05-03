@@ -7,20 +7,27 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * Request the whole-body controller to track a desired trajectory for the center of mass.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * Request the whole-body controller to track a desired trajectory for the center of mass.
+   
+ */
 public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectoryMessage> implements Settable<CenterOfMassTrajectoryMessage>, EpsilonComparable<CenterOfMassTrajectoryMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * List of center of mass trajectory waypoints. Each waypoint contains the center of mass position and velocity at a given time.
-            */
+       
+    * List of center of mass trajectory waypoints. Each waypoint contains the center of mass position and velocity at a given time.
+       
+    */
    public controller_msgs.msg.dds.EuclideanTrajectoryMessage euclidean_trajectory_;
 
    public CenterOfMassTrajectoryMessage()
@@ -48,15 +55,19 @@ public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectory
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -65,8 +76,10 @@ public class CenterOfMassTrajectoryMessage extends Packet<CenterOfMassTrajectory
 
 
    /**
-            * List of center of mass trajectory waypoints. Each waypoint contains the center of mass position and velocity at a given time.
-            */
+       
+    * List of center of mass trajectory waypoints. Each waypoint contains the center of mass position and velocity at a given time.
+       
+    */
    public controller_msgs.msg.dds.EuclideanTrajectoryMessage getEuclideanTrajectory()
    {
       return euclidean_trajectory_;

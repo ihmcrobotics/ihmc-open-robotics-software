@@ -7,52 +7,73 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message carries the information to execute a trajectory in taskspace (position only) by defining trajectory points.
-       * A third order polynomial function is used to interpolate positions.
-       * To execute a single straight line trajectory to reach a desired position, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message carries the information to execute a trajectory in taskspace (position only) by defining trajectory points.
+   
+ * A third order polynomial function is used to interpolate positions.
+   
+ * To execute a single straight line trajectory to reach a desired position, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
+   
+ */
 public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessage> implements Settable<EuclideanTrajectoryMessage>, EpsilonComparable<EuclideanTrajectoryMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * List of trajectory points (in taskpsace) to go through while executing the trajectory.
-            */
+       
+    * List of trajectory points (in taskpsace) to go through while executing the trajectory.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage>  taskspace_trajectory_points_;
 
    /**
-            * The selection matrix for each axis.
-            */
+       
+    * The selection matrix for each axis.
+       
+    */
    public controller_msgs.msg.dds.SelectionMatrix3DMessage selection_matrix_;
 
    /**
-            * Frame information for this message.
-            */
+       
+    * Frame information for this message.
+       
+    */
    public controller_msgs.msg.dds.FrameInformation frame_information_;
 
    /**
-            * The weight matrix for each axis.
-            */
+       
+    * The weight matrix for each axis.
+       
+    */
    public controller_msgs.msg.dds.WeightMatrix3DMessage weight_matrix_;
 
    /**
-            * Flag that tells the controller whether the use of a custom control frame is requested.
-            */
+       
+    * Flag that tells the controller whether the use of a custom control frame is requested.
+       
+    */
    public boolean use_custom_control_frame_;
 
    /**
-            * Pose of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.
-            */
+       
+    * Pose of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.
+       
+    */
    public us.ihmc.euclid.geometry.Pose3D control_frame_pose_;
 
    /**
-            * Properties for queueing trajectories.
-            */
+       
+    * Properties for queueing trajectories.
+       
+    */
    public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
 
    public EuclideanTrajectoryMessage()
@@ -104,15 +125,19 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -121,8 +146,10 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
 
 
    /**
-            * List of trajectory points (in taskpsace) to go through while executing the trajectory.
-            */
+       
+    * List of trajectory points (in taskpsace) to go through while executing the trajectory.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage>  getTaskspaceTrajectoryPoints()
    {
       return taskspace_trajectory_points_;
@@ -131,8 +158,10 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
 
 
    /**
-            * The selection matrix for each axis.
-            */
+       
+    * The selection matrix for each axis.
+       
+    */
    public controller_msgs.msg.dds.SelectionMatrix3DMessage getSelectionMatrix()
    {
       return selection_matrix_;
@@ -141,8 +170,10 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
 
 
    /**
-            * Frame information for this message.
-            */
+       
+    * Frame information for this message.
+       
+    */
    public controller_msgs.msg.dds.FrameInformation getFrameInformation()
    {
       return frame_information_;
@@ -151,8 +182,10 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
 
 
    /**
-            * The weight matrix for each axis.
-            */
+       
+    * The weight matrix for each axis.
+       
+    */
    public controller_msgs.msg.dds.WeightMatrix3DMessage getWeightMatrix()
    {
       return weight_matrix_;
@@ -160,15 +193,19 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
 
 
    /**
-            * Flag that tells the controller whether the use of a custom control frame is requested.
-            */
+       
+    * Flag that tells the controller whether the use of a custom control frame is requested.
+       
+    */
    public void setUseCustomControlFrame(boolean use_custom_control_frame)
    {
       use_custom_control_frame_ = use_custom_control_frame;
    }
    /**
-            * Flag that tells the controller whether the use of a custom control frame is requested.
-            */
+       
+    * Flag that tells the controller whether the use of a custom control frame is requested.
+       
+    */
    public boolean getUseCustomControlFrame()
    {
       return use_custom_control_frame_;
@@ -177,8 +214,10 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
 
 
    /**
-            * Pose of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.
-            */
+       
+    * Pose of custom control frame. This is the frame attached to the rigid body that the taskspace trajectory is defined for.
+       
+    */
    public us.ihmc.euclid.geometry.Pose3D getControlFramePose()
    {
       return control_frame_pose_;
@@ -187,8 +226,10 @@ public class EuclideanTrajectoryMessage extends Packet<EuclideanTrajectoryMessag
 
 
    /**
-            * Properties for queueing trajectories.
-            */
+       
+    * Properties for queueing trajectories.
+       
+    */
    public controller_msgs.msg.dds.QueueableMessage getQueueingProperties()
    {
       return queueing_properties_;

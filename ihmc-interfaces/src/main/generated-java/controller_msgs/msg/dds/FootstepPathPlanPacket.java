@@ -7,14 +7,18 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * (Obsolete) This message is part of the old IHMC footstep planning module.
-       */
+   
+ * (Obsolete) This message is part of the old IHMC footstep planning module.
+   
+ */
 public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket> implements Settable<FootstepPathPlanPacket>, EpsilonComparable<FootstepPathPlanPacket>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public boolean goals_valid_;
@@ -81,15 +85,19 @@ public class FootstepPathPlanPacket extends Packet<FootstepPathPlanPacket> imple
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

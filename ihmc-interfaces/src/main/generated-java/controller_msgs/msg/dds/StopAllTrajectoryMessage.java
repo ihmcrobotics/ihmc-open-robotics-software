@@ -7,15 +7,20 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * Stop the execution of any trajectory being executed.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * Stop the execution of any trajectory being executed.
+   
+ */
 public class StopAllTrajectoryMessage extends Packet<StopAllTrajectoryMessage> implements Settable<StopAllTrajectoryMessage>, EpsilonComparable<StopAllTrajectoryMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public StopAllTrajectoryMessage()
@@ -39,15 +44,19 @@ public class StopAllTrajectoryMessage extends Packet<StopAllTrajectoryMessage> i
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

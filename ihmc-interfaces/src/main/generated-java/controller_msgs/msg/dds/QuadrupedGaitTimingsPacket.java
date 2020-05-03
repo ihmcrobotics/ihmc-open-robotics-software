@@ -7,15 +7,20 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC quadruped controller API.
-       * This message sends the x gait settings used for determining gait.
-       */
+   
+ * This message is part of the IHMC quadruped controller API.
+   
+ * This message sends the x gait settings used for determining gait.
+   
+ */
 public class QuadrupedGaitTimingsPacket extends Packet<QuadrupedGaitTimingsPacket> implements Settable<QuadrupedGaitTimingsPacket>, EpsilonComparable<QuadrupedGaitTimingsPacket>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public double step_duration_ = -1.0;
@@ -57,15 +62,19 @@ public class QuadrupedGaitTimingsPacket extends Packet<QuadrupedGaitTimingsPacke
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

@@ -7,34 +7,46 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC footstep planning module.
-       */
+   
+ * This message is part of the IHMC footstep planning module.
+   
+ */
 public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimingsMessage> implements Settable<FootstepPlanningTimingsMessage>, EpsilonComparable<FootstepPlanningTimingsMessage>
 {
 
    /**
-            * Total time measured in the planner process between receiving request message and publishing output message
-            */
+       
+    * Total time measured in the planner process between receiving request message and publishing output message
+       
+    */
    public double total_elapsed_seconds_;
 
    /**
-            * Elapsed time between receiving request message and starting to plan body path
-            */
+       
+    * Elapsed time between receiving request message and starting to plan body path
+       
+    */
    public double time_before_planning_seconds_;
 
    /**
-            * Elapsed time for planning body path
-            */
+       
+    * Elapsed time for planning body path
+       
+    */
    public double time_planning_body_path_seconds_;
 
    /**
-            * Elapsed time for step planning
-            */
+       
+    * Elapsed time for step planning
+       
+    */
    public double time_planning_steps_seconds_;
 
    /**
-            * Number of iterations performed during step planning
-            */
+       
+    * Number of iterations performed during step planning
+       
+    */
    public long step_planning_iterations_;
 
    public FootstepPlanningTimingsMessage()
@@ -74,15 +86,19 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
 
 
    /**
-            * Total time measured in the planner process between receiving request message and publishing output message
-            */
+       
+    * Total time measured in the planner process between receiving request message and publishing output message
+       
+    */
    public void setTotalElapsedSeconds(double total_elapsed_seconds)
    {
       total_elapsed_seconds_ = total_elapsed_seconds;
    }
    /**
-            * Total time measured in the planner process between receiving request message and publishing output message
-            */
+       
+    * Total time measured in the planner process between receiving request message and publishing output message
+       
+    */
    public double getTotalElapsedSeconds()
    {
       return total_elapsed_seconds_;
@@ -90,15 +106,19 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
 
 
    /**
-            * Elapsed time between receiving request message and starting to plan body path
-            */
+       
+    * Elapsed time between receiving request message and starting to plan body path
+       
+    */
    public void setTimeBeforePlanningSeconds(double time_before_planning_seconds)
    {
       time_before_planning_seconds_ = time_before_planning_seconds;
    }
    /**
-            * Elapsed time between receiving request message and starting to plan body path
-            */
+       
+    * Elapsed time between receiving request message and starting to plan body path
+       
+    */
    public double getTimeBeforePlanningSeconds()
    {
       return time_before_planning_seconds_;
@@ -106,15 +126,19 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
 
 
    /**
-            * Elapsed time for planning body path
-            */
+       
+    * Elapsed time for planning body path
+       
+    */
    public void setTimePlanningBodyPathSeconds(double time_planning_body_path_seconds)
    {
       time_planning_body_path_seconds_ = time_planning_body_path_seconds;
    }
    /**
-            * Elapsed time for planning body path
-            */
+       
+    * Elapsed time for planning body path
+       
+    */
    public double getTimePlanningBodyPathSeconds()
    {
       return time_planning_body_path_seconds_;
@@ -122,15 +146,19 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
 
 
    /**
-            * Elapsed time for step planning
-            */
+       
+    * Elapsed time for step planning
+       
+    */
    public void setTimePlanningStepsSeconds(double time_planning_steps_seconds)
    {
       time_planning_steps_seconds_ = time_planning_steps_seconds;
    }
    /**
-            * Elapsed time for step planning
-            */
+       
+    * Elapsed time for step planning
+       
+    */
    public double getTimePlanningStepsSeconds()
    {
       return time_planning_steps_seconds_;
@@ -138,15 +166,19 @@ public class FootstepPlanningTimingsMessage extends Packet<FootstepPlanningTimin
 
 
    /**
-            * Number of iterations performed during step planning
-            */
+       
+    * Number of iterations performed during step planning
+       
+    */
    public void setStepPlanningIterations(long step_planning_iterations)
    {
       step_planning_iterations_ = step_planning_iterations;
    }
    /**
-            * Number of iterations performed during step planning
-            */
+       
+    * Number of iterations performed during step planning
+       
+    */
    public long getStepPlanningIterations()
    {
       return step_planning_iterations_;

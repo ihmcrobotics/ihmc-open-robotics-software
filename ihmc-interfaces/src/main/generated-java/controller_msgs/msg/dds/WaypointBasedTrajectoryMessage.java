@@ -7,15 +7,20 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Configure a constrained trajectory for a given end-effector.
-       * Main usage is the IHMC WholeBodyTrajectoryToolbox.
-       */
+   
+ * Configure a constrained trajectory for a given end-effector.
+   
+ * Main usage is the IHMC WholeBodyTrajectoryToolbox.
+   
+ */
 public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajectoryMessage> implements Settable<WaypointBasedTrajectoryMessage>, EpsilonComparable<WaypointBasedTrajectoryMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public int end_effector_hash_code_;
@@ -88,15 +93,19 @@ public class WaypointBasedTrajectoryMessage extends Packet<WaypointBasedTrajecto
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
