@@ -7,20 +7,27 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC footstep planning module.
-       * This message is sent from the planner in order to visualize and debug planner progress
-       */
+   
+ * This message is part of the IHMC footstep planning module.
+   
+ * This message is sent from the planner in order to visualize and debug planner progress
+   
+ */
 public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessage> implements Settable<FootstepPlannerCellMessage>, EpsilonComparable<FootstepPlannerCellMessage>
 {
 
    /**
-            * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
-            */
+       
+    * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+       
+    */
    public int x_index_;
 
    /**
-            * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
-            */
+       
+    * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+       
+    */
    public int y_index_;
 
    public FootstepPlannerCellMessage()
@@ -48,15 +55,19 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
 
 
    /**
-            * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
-            */
+       
+    * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+       
+    */
    public void setXIndex(int x_index)
    {
       x_index_ = x_index;
    }
    /**
-            * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
-            */
+       
+    * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+       
+    */
    public int getXIndex()
    {
       return x_index_;
@@ -64,15 +75,19 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
 
 
    /**
-            * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
-            */
+       
+    * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+       
+    */
    public void setYIndex(int y_index)
    {
       y_index_ = y_index;
    }
    /**
-            * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
-            */
+       
+    * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+       
+    */
    public int getYIndex()
    {
       return y_index_;

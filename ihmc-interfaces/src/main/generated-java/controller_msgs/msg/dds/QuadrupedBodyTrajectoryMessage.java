@@ -7,28 +7,40 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message commands the controller to move in taskspace the body to the desired pose (position & orientation) while going through the specified trajectory points.
-       * A third order polynomial function is used to interpolate positions and a Hermite based curve (third order) is used to interpolate the orientations.
-       * To execute a single straight line trajectory to reach a desired body pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
-       * Note that the body position is limited keep the robot's balance (center of mass has to remain inside the support polygon).
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message commands the controller to move in taskspace the body to the desired pose (position & orientation) while going through the specified trajectory points.
+   
+ * A third order polynomial function is used to interpolate positions and a Hermite based curve (third order) is used to interpolate the orientations.
+   
+ * To execute a single straight line trajectory to reach a desired body pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
+   
+ * Note that the body position is limited keep the robot's balance (center of mass has to remain inside the support polygon).
+   
+ */
 public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajectoryMessage> implements Settable<QuadrupedBodyTrajectoryMessage>, EpsilonComparable<QuadrupedBodyTrajectoryMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * If true, the times are expressed in absolute time relative to the robot start
-            */
+       
+    * If true, the times are expressed in absolute time relative to the robot start
+       
+    */
    public boolean is_expressed_in_absolute_time_ = true;
 
    /**
-            * The position/orientation trajectory information.
-            */
+       
+    * The position/orientation trajectory information.
+       
+    */
    public controller_msgs.msg.dds.SE3TrajectoryMessage se3_trajectory_;
 
    public QuadrupedBodyTrajectoryMessage()
@@ -60,15 +72,19 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -76,15 +92,19 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
 
 
    /**
-            * If true, the times are expressed in absolute time relative to the robot start
-            */
+       
+    * If true, the times are expressed in absolute time relative to the robot start
+       
+    */
    public void setIsExpressedInAbsoluteTime(boolean is_expressed_in_absolute_time)
    {
       is_expressed_in_absolute_time_ = is_expressed_in_absolute_time;
    }
    /**
-            * If true, the times are expressed in absolute time relative to the robot start
-            */
+       
+    * If true, the times are expressed in absolute time relative to the robot start
+       
+    */
    public boolean getIsExpressedInAbsoluteTime()
    {
       return is_expressed_in_absolute_time_;
@@ -93,8 +113,10 @@ public class QuadrupedBodyTrajectoryMessage extends Packet<QuadrupedBodyTrajecto
 
 
    /**
-            * The position/orientation trajectory information.
-            */
+       
+    * The position/orientation trajectory information.
+       
+    */
    public controller_msgs.msg.dds.SE3TrajectoryMessage getSe3Trajectory()
    {
       return se3_trajectory_;

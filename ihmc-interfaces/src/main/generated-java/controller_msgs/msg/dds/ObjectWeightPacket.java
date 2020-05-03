@@ -7,8 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part the IHMC humanoid behavior module.
-       */
+   
+ * This message is part the IHMC humanoid behavior module.
+   
+ */
 public class ObjectWeightPacket extends Packet<ObjectWeightPacket> implements Settable<ObjectWeightPacket>, EpsilonComparable<ObjectWeightPacket>
 {
 
@@ -17,8 +19,10 @@ public class ObjectWeightPacket extends Packet<ObjectWeightPacket> implements Se
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public byte robot_side_ = (byte) 255;
@@ -54,15 +58,19 @@ public class ObjectWeightPacket extends Packet<ObjectWeightPacket> implements Se
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

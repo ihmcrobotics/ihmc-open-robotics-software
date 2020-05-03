@@ -7,25 +7,34 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC external force estimation module.
-       * It provides the result from the estimator
-       */
+   
+ * This message is part of the IHMC external force estimation module.
+   
+ * It provides the result from the estimator
+   
+ */
 public class ExternalForceEstimationOutputStatus extends Packet<ExternalForceEstimationOutputStatus> implements Settable<ExternalForceEstimationOutputStatus>, EpsilonComparable<ExternalForceEstimationOutputStatus>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Estimated external force in world frame
-            */
+       
+    * Estimated external force in world frame
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  estimated_external_forces_;
 
    /**
-            * Estimated root joint wrench, if requested. Will be set to NaN if root joint was not included in the solver
-            */
+       
+    * Estimated root joint wrench, if requested. Will be set to NaN if root joint was not included in the solver
+       
+    */
    public geometry_msgs.msg.dds.Wrench estimated_root_joint_wrench_;
 
    public ExternalForceEstimationOutputStatus()
@@ -57,15 +66,19 @@ public class ExternalForceEstimationOutputStatus extends Packet<ExternalForceEst
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -74,8 +87,10 @@ public class ExternalForceEstimationOutputStatus extends Packet<ExternalForceEst
 
 
    /**
-            * Estimated external force in world frame
-            */
+       
+    * Estimated external force in world frame
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  getEstimatedExternalForces()
    {
       return estimated_external_forces_;
@@ -84,8 +99,10 @@ public class ExternalForceEstimationOutputStatus extends Packet<ExternalForceEst
 
 
    /**
-            * Estimated root joint wrench, if requested. Will be set to NaN if root joint was not included in the solver
-            */
+       
+    * Estimated root joint wrench, if requested. Will be set to NaN if root joint was not included in the solver
+       
+    */
    public geometry_msgs.msg.dds.Wrench getEstimatedRootJointWrench()
    {
       return estimated_root_joint_wrench_;

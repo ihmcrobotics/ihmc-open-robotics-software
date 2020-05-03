@@ -7,16 +7,22 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC quadruped controller API.
-       * This message contains the controller's estimate of the ground plane.
-       * It is defined by an origin and a normal
-       */
+   
+ * This message is part of the IHMC quadruped controller API.
+   
+ * This message contains the controller's estimate of the ground plane.
+   
+ * It is defined by an origin and a normal
+   
+ */
 public class QuadrupedGroundPlaneMessage extends Packet<QuadrupedGroundPlaneMessage> implements Settable<QuadrupedGroundPlaneMessage>, EpsilonComparable<QuadrupedGroundPlaneMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public us.ihmc.euclid.tuple3D.Point3D region_origin_;
@@ -52,15 +58,19 @@ public class QuadrupedGroundPlaneMessage extends Packet<QuadrupedGroundPlaneMess
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

@@ -7,8 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC humanoid behavior module.
-       */
+   
+ * This message is part of the IHMC humanoid behavior module.
+   
+ */
 public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacket> implements Settable<HumanoidBehaviorTypePacket>, EpsilonComparable<HumanoidBehaviorTypePacket>
 {
 
@@ -71,8 +73,10 @@ public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacke
    public static final byte REPEATEDLY_WALK_FOOTSTEP_LIST = (byte) 28;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public byte humanoid_behavior_type_ = (byte) 255;
@@ -102,15 +106,19 @@ public class HumanoidBehaviorTypePacket extends Packet<HumanoidBehaviorTypePacke
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

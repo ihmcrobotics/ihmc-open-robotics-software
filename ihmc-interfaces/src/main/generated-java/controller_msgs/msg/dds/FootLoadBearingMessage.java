@@ -7,10 +7,14 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message commands the controller to start loading a foot that was unloaded to support the robot weight.
-       * When the robot is performing a 'flamingo stance' (one foot in the air not actually walking) and the user wants the robot to switch back to double support.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message commands the controller to start loading a foot that was unloaded to support the robot weight.
+   
+ * When the robot is performing a 'flamingo stance' (one foot in the air not actually walking) and the user wants the robot to switch back to double support.
+   
+ */
 public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage> implements Settable<FootLoadBearingMessage>, EpsilonComparable<FootLoadBearingMessage>
 {
 
@@ -23,23 +27,31 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage> imple
    public static final byte LOAD_BEARING_REQUEST_UNLOAD = (byte) 1;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Needed to identify a side dependent end-effector.
-            */
+       
+    * Needed to identify a side dependent end-effector.
+       
+    */
    public byte robot_side_ = (byte) 255;
 
    /**
-            * Whether the end-effector should be loaded or unloaded.
-            */
+       
+    * Whether the end-effector should be loaded or unloaded.
+       
+    */
    public byte load_bearing_request_;
 
    /**
-            * The time to delay this command on the controller side before being executed.
-            */
+       
+    * The time to delay this command on the controller side before being executed.
+       
+    */
    public double execution_delay_time_;
 
    public FootLoadBearingMessage()
@@ -75,15 +87,19 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage> imple
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -91,15 +107,19 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage> imple
 
 
    /**
-            * Needed to identify a side dependent end-effector.
-            */
+       
+    * Needed to identify a side dependent end-effector.
+       
+    */
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
    }
    /**
-            * Needed to identify a side dependent end-effector.
-            */
+       
+    * Needed to identify a side dependent end-effector.
+       
+    */
    public byte getRobotSide()
    {
       return robot_side_;
@@ -107,15 +127,19 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage> imple
 
 
    /**
-            * Whether the end-effector should be loaded or unloaded.
-            */
+       
+    * Whether the end-effector should be loaded or unloaded.
+       
+    */
    public void setLoadBearingRequest(byte load_bearing_request)
    {
       load_bearing_request_ = load_bearing_request;
    }
    /**
-            * Whether the end-effector should be loaded or unloaded.
-            */
+       
+    * Whether the end-effector should be loaded or unloaded.
+       
+    */
    public byte getLoadBearingRequest()
    {
       return load_bearing_request_;
@@ -123,15 +147,19 @@ public class FootLoadBearingMessage extends Packet<FootLoadBearingMessage> imple
 
 
    /**
-            * The time to delay this command on the controller side before being executed.
-            */
+       
+    * The time to delay this command on the controller side before being executed.
+       
+    */
    public void setExecutionDelayTime(double execution_delay_time)
    {
       execution_delay_time_ = execution_delay_time;
    }
    /**
-            * The time to delay this command on the controller side before being executed.
-            */
+       
+    * The time to delay this command on the controller side before being executed.
+       
+    */
    public double getExecutionDelayTime()
    {
       return execution_delay_time_;

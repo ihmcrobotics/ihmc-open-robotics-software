@@ -7,50 +7,69 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * The walking controller uses this message to report when it completed the execution of a trajectory message.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * The walking controller uses this message to report when it completed the execution of a trajectory message.
+   
+ */
 public class JointspaceTrajectoryStatusMessage extends Packet<JointspaceTrajectoryStatusMessage> implements Settable<JointspaceTrajectoryStatusMessage>, EpsilonComparable<JointspaceTrajectoryStatusMessage>
 {
 
    /**
-          * The trajectory input was received and accepted, the execution just started.
-          */
+      
+    * The trajectory input was received and accepted, the execution just started.
+      
+    */
    public static final byte TRAJECTORY_EXECUTION_STATUS_STARTED = (byte) 0;
 
    /**
-          * The trajectory input was received, accepted, and its execution just finished.
-          */
+      
+    * The trajectory input was received, accepted, and its execution just finished.
+      
+    */
    public static final byte TRAJECTORY_EXECUTION_STATUS_COMPLETED = (byte) 1;
 
    /**
-            * Unique ID of the trajectory message this status refers to.
-            */
+       
+    * Unique ID of the trajectory message this status refers to.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Refers to the names of the joints that executed the trajectory.
-            */
+       
+    * Refers to the names of the joints that executed the trajectory.
+       
+    */
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  joint_names_;
 
    /**
-            * The current status for the trajectory execution.
-            */
+       
+    * The current status for the trajectory execution.
+       
+    */
    public byte trajectory_execution_status_ = (byte) 255;
 
    /**
-            * Time in trajectory in seconds.
-            */
+       
+    * Time in trajectory in seconds.
+       
+    */
    public double timestamp_;
 
    /**
-            * The desired positions of the joints as sent to the controller.
-            */
+       
+    * The desired positions of the joints as sent to the controller.
+       
+    */
    public us.ihmc.idl.IDLSequence.Double  desired_joint_positions_;
 
    /**
-            * The positions of where the joints actually arrived when the trajectory finished.
-            */
+       
+    * The positions of where the joints actually arrived when the trajectory finished.
+       
+    */
    public us.ihmc.idl.IDLSequence.Double  actual_joint_positions_;
 
    public JointspaceTrajectoryStatusMessage()
@@ -96,15 +115,19 @@ public class JointspaceTrajectoryStatusMessage extends Packet<JointspaceTrajecto
 
 
    /**
-            * Unique ID of the trajectory message this status refers to.
-            */
+       
+    * Unique ID of the trajectory message this status refers to.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID of the trajectory message this status refers to.
-            */
+       
+    * Unique ID of the trajectory message this status refers to.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -113,8 +136,10 @@ public class JointspaceTrajectoryStatusMessage extends Packet<JointspaceTrajecto
 
 
    /**
-            * Refers to the names of the joints that executed the trajectory.
-            */
+       
+    * Refers to the names of the joints that executed the trajectory.
+       
+    */
    public us.ihmc.idl.IDLSequence.StringBuilderHolder  getJointNames()
    {
       return joint_names_;
@@ -122,15 +147,19 @@ public class JointspaceTrajectoryStatusMessage extends Packet<JointspaceTrajecto
 
 
    /**
-            * The current status for the trajectory execution.
-            */
+       
+    * The current status for the trajectory execution.
+       
+    */
    public void setTrajectoryExecutionStatus(byte trajectory_execution_status)
    {
       trajectory_execution_status_ = trajectory_execution_status;
    }
    /**
-            * The current status for the trajectory execution.
-            */
+       
+    * The current status for the trajectory execution.
+       
+    */
    public byte getTrajectoryExecutionStatus()
    {
       return trajectory_execution_status_;
@@ -138,15 +167,19 @@ public class JointspaceTrajectoryStatusMessage extends Packet<JointspaceTrajecto
 
 
    /**
-            * Time in trajectory in seconds.
-            */
+       
+    * Time in trajectory in seconds.
+       
+    */
    public void setTimestamp(double timestamp)
    {
       timestamp_ = timestamp;
    }
    /**
-            * Time in trajectory in seconds.
-            */
+       
+    * Time in trajectory in seconds.
+       
+    */
    public double getTimestamp()
    {
       return timestamp_;
@@ -155,8 +188,10 @@ public class JointspaceTrajectoryStatusMessage extends Packet<JointspaceTrajecto
 
 
    /**
-            * The desired positions of the joints as sent to the controller.
-            */
+       
+    * The desired positions of the joints as sent to the controller.
+       
+    */
    public us.ihmc.idl.IDLSequence.Double  getDesiredJointPositions()
    {
       return desired_joint_positions_;
@@ -165,8 +200,10 @@ public class JointspaceTrajectoryStatusMessage extends Packet<JointspaceTrajecto
 
 
    /**
-            * The positions of where the joints actually arrived when the trajectory finished.
-            */
+       
+    * The positions of where the joints actually arrived when the trajectory finished.
+       
+    */
    public us.ihmc.idl.IDLSequence.Double  getActualJointPositions()
    {
       return actual_joint_positions_;

@@ -7,8 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * (Obsolete) This message is part of the old IHMC footstep planning module.
-       */
+   
+ * (Obsolete) This message is part of the old IHMC footstep planning module.
+   
+ */
 public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket> implements Settable<FootstepPlanRequestPacket>, EpsilonComparable<FootstepPlanRequestPacket>
 {
 
@@ -19,8 +21,10 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
    public static final byte FOOTSTEP_PLAN_REQUEST_TYPE_UPDATE_START = (byte) 2;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public controller_msgs.msg.dds.FootstepDataMessage start_footstep_;
@@ -74,15 +78,19 @@ public class FootstepPlanRequestPacket extends Packet<FootstepPlanRequestPacket>
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

@@ -10,8 +10,10 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
 {
 
    /**
-          * This message commands the finger controller to move robot valkyrie finger.
-          */
+      
+    * This message commands the finger controller to move robot valkyrie finger.
+      
+    */
    public static final byte ROBOT_SIDE_LEFT = (byte) 0;
 
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
@@ -29,23 +31,31 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
    public static final byte PINKY_MOTOR_PITCH1 = (byte) 5;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Specifies the side of the robot that will execute the trajectory.
-            */
+       
+    * Specifies the side of the robot that will execute the trajectory.
+       
+    */
    public byte robot_side_ = (byte) 255;
 
    /**
-            * Specifies the list of finger motor names that we want to control.
-            */
+       
+    * Specifies the list of finger motor names that we want to control.
+       
+    */
    public us.ihmc.idl.IDLSequence.Byte  valkyrie_finger_motor_names_;
 
    /**
-            * The indexing for the joints refers the list of finger motor names.
-            */
+       
+    * The indexing for the joints refers the list of finger motor names.
+       
+    */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage jointspace_trajectory_;
 
    public ValkyrieHandFingerTrajectoryMessage()
@@ -82,15 +92,19 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -98,15 +112,19 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
 
 
    /**
-            * Specifies the side of the robot that will execute the trajectory.
-            */
+       
+    * Specifies the side of the robot that will execute the trajectory.
+       
+    */
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
    }
    /**
-            * Specifies the side of the robot that will execute the trajectory.
-            */
+       
+    * Specifies the side of the robot that will execute the trajectory.
+       
+    */
    public byte getRobotSide()
    {
       return robot_side_;
@@ -115,8 +133,10 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
 
 
    /**
-            * Specifies the list of finger motor names that we want to control.
-            */
+       
+    * Specifies the list of finger motor names that we want to control.
+       
+    */
    public us.ihmc.idl.IDLSequence.Byte  getValkyrieFingerMotorNames()
    {
       return valkyrie_finger_motor_names_;
@@ -125,8 +145,10 @@ public class ValkyrieHandFingerTrajectoryMessage extends Packet<ValkyrieHandFing
 
 
    /**
-            * The indexing for the joints refers the list of finger motor names.
-            */
+       
+    * The indexing for the joints refers the list of finger motor names.
+       
+    */
    public controller_msgs.msg.dds.JointspaceTrajectoryMessage getJointspaceTrajectory()
    {
       return jointspace_trajectory_;
