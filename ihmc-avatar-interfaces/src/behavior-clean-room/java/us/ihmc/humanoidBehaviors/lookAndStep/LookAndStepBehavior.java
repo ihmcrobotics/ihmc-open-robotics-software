@@ -111,7 +111,9 @@ public class LookAndStepBehavior implements BehaviorInterface
       stateMachineFactory.getFactory().addStateChangedListener(this::stateChanged);
       stateMachine = stateMachineFactory.getFactory().build(AQUIRE_PATH);
 
-      mainThread = helper.createPausablePeriodicThread(getClass(), 0.1, stateMachine::doActionAndTransition);
+      double period = 0.1;
+      int crashesBeforeGivingUp = 1;
+      mainThread = helper.createPausablePeriodicThread(getClass(), period, crashesBeforeGivingUp, stateMachine::doActionAndTransition);
    }
 
    @Override
