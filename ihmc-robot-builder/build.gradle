@@ -2,7 +2,7 @@ plugins {
    id("us.ihmc.ihmc-build") version "0.20.1"
    id("us.ihmc.ihmc-ci") version "5.3"
    id("us.ihmc.ihmc-cd") version "1.14"
-   id("us.ihmc.log-tools") version "0.4.1"
+   id("us.ihmc.log-tools") version "0.4.2"
 }
 
 ihmc {
