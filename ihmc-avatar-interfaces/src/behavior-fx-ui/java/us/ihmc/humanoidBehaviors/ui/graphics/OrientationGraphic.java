@@ -17,14 +17,16 @@ import us.ihmc.javaFXVisualizers.JavaFXGraphicTools;
 public class OrientationGraphic
 {
    private final MeshView arrow;
-   private final double cylinderLength;
    private final FramePose3D pose = new FramePose3D();
 
    public OrientationGraphic()
    {
-      cylinderLength = 0.25;
-      double radius = 0.01;
-      Color color = Color.GREEN;
+      this(Color.GREEN, 0.25);
+   }
+
+   public OrientationGraphic(Color color, double cylinderLength)
+   {
+      double radius = cylinderLength / 20.06;
 
       TextureColorPalette1D colorPalette = new TextureColorPalette1D();
       colorPalette.setHueBased(1.0, 1.0);
