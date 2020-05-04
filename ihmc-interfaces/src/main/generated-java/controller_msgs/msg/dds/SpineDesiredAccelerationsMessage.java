@@ -7,21 +7,29 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message gives the user the option to bypass IHMC feedback controllers for the spine joints by sending desired spine joint accelerations.
-       * One needs experience in control when activating the bypass as it can result in unexpected behaviors for unreasonable accelerations.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message gives the user the option to bypass IHMC feedback controllers for the spine joints by sending desired spine joint accelerations.
+   
+ * One needs experience in control when activating the bypass as it can result in unexpected behaviors for unreasonable accelerations.
+   
+ */
 public class SpineDesiredAccelerationsMessage extends Packet<SpineDesiredAccelerationsMessage> implements Settable<SpineDesiredAccelerationsMessage>, EpsilonComparable<SpineDesiredAccelerationsMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * The desired joint acceleration information.
-            */
+       
+    * The desired joint acceleration information.
+       
+    */
    public controller_msgs.msg.dds.DesiredAccelerationsMessage desired_accelerations_;
 
    public SpineDesiredAccelerationsMessage()
@@ -49,15 +57,19 @@ public class SpineDesiredAccelerationsMessage extends Packet<SpineDesiredAcceler
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -66,8 +78,10 @@ public class SpineDesiredAccelerationsMessage extends Packet<SpineDesiredAcceler
 
 
    /**
-            * The desired joint acceleration information.
-            */
+       
+    * The desired joint acceleration information.
+       
+    */
    public controller_msgs.msg.dds.DesiredAccelerationsMessage getDesiredAccelerations()
    {
       return desired_accelerations_;

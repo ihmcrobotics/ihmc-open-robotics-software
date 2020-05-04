@@ -7,9 +7,12 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message carries the general robot information such as the joints' state and IMU and force sensors' measurement.
-       * It is published frequently from the IHMC state estimator.
-       */
+   
+ * This message carries the general robot information such as the joints' state and IMU and force sensors' measurement.
+   
+ * It is published frequently from the IHMC state estimator.
+   
+ */
 public class RobotConfigurationData extends Packet<RobotConfigurationData> implements Settable<RobotConfigurationData>, EpsilonComparable<RobotConfigurationData>
 {
 
@@ -20,28 +23,41 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
    public static final byte ROBOT_MOTION_STATUS_IN_MOTION = (byte) 2;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Time in nanoseconds of the clock hanging on the wall.
-            * Takes into account leap seconds/years and is updated by the NTP server (thus can jump backwards).
-            * The wall time is usually used in ROS1 for synchronizing timestamps of different time sources (computers, sensors, etc.)
-            */
+       
+    * Time in nanoseconds of the clock hanging on the wall.
+       
+    * Takes into account leap seconds/years and is updated by the NTP server (thus can jump backwards).
+       
+    * The wall time is usually used in ROS1 for synchronizing timestamps of different time sources (computers, sensors, etc.)
+       
+    */
    public long wall_time_;
 
    /**
-            * Time in nanoseconds that represents the absolute elapsed wall-clock time since some arbitrary, fixed point in the past.
-            * It is not affected by changes in the system time-of-day clock.
-            * This time is usually computed from a real-time process and can be used for reliably computing the time elapsed between two events.
-            */
+       
+    * Time in nanoseconds that represents the absolute elapsed wall-clock time since some arbitrary, fixed point in the past.
+       
+    * It is not affected by changes in the system time-of-day clock.
+       
+    * This time is usually computed from a real-time process and can be used for reliably computing the time elapsed between two events.
+       
+    */
    public long monotonic_time_;
 
    /**
-            * Platform dependent.
-            * Time signal in nanoseconds that can be used to synchronize two time sources.
-            */
+       
+    * Platform dependent.
+       
+    * Time signal in nanoseconds that can be used to synchronize two time sources.
+       
+    */
    public long sync_timestamp_;
 
    public int joint_name_hash_;
@@ -170,15 +186,19 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -186,19 +206,27 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
 
 
    /**
-            * Time in nanoseconds of the clock hanging on the wall.
-            * Takes into account leap seconds/years and is updated by the NTP server (thus can jump backwards).
-            * The wall time is usually used in ROS1 for synchronizing timestamps of different time sources (computers, sensors, etc.)
-            */
+       
+    * Time in nanoseconds of the clock hanging on the wall.
+       
+    * Takes into account leap seconds/years and is updated by the NTP server (thus can jump backwards).
+       
+    * The wall time is usually used in ROS1 for synchronizing timestamps of different time sources (computers, sensors, etc.)
+       
+    */
    public void setWallTime(long wall_time)
    {
       wall_time_ = wall_time;
    }
    /**
-            * Time in nanoseconds of the clock hanging on the wall.
-            * Takes into account leap seconds/years and is updated by the NTP server (thus can jump backwards).
-            * The wall time is usually used in ROS1 for synchronizing timestamps of different time sources (computers, sensors, etc.)
-            */
+       
+    * Time in nanoseconds of the clock hanging on the wall.
+       
+    * Takes into account leap seconds/years and is updated by the NTP server (thus can jump backwards).
+       
+    * The wall time is usually used in ROS1 for synchronizing timestamps of different time sources (computers, sensors, etc.)
+       
+    */
    public long getWallTime()
    {
       return wall_time_;
@@ -206,19 +234,27 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
 
 
    /**
-            * Time in nanoseconds that represents the absolute elapsed wall-clock time since some arbitrary, fixed point in the past.
-            * It is not affected by changes in the system time-of-day clock.
-            * This time is usually computed from a real-time process and can be used for reliably computing the time elapsed between two events.
-            */
+       
+    * Time in nanoseconds that represents the absolute elapsed wall-clock time since some arbitrary, fixed point in the past.
+       
+    * It is not affected by changes in the system time-of-day clock.
+       
+    * This time is usually computed from a real-time process and can be used for reliably computing the time elapsed between two events.
+       
+    */
    public void setMonotonicTime(long monotonic_time)
    {
       monotonic_time_ = monotonic_time;
    }
    /**
-            * Time in nanoseconds that represents the absolute elapsed wall-clock time since some arbitrary, fixed point in the past.
-            * It is not affected by changes in the system time-of-day clock.
-            * This time is usually computed from a real-time process and can be used for reliably computing the time elapsed between two events.
-            */
+       
+    * Time in nanoseconds that represents the absolute elapsed wall-clock time since some arbitrary, fixed point in the past.
+       
+    * It is not affected by changes in the system time-of-day clock.
+       
+    * This time is usually computed from a real-time process and can be used for reliably computing the time elapsed between two events.
+       
+    */
    public long getMonotonicTime()
    {
       return monotonic_time_;
@@ -226,17 +262,23 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
 
 
    /**
-            * Platform dependent.
-            * Time signal in nanoseconds that can be used to synchronize two time sources.
-            */
+       
+    * Platform dependent.
+       
+    * Time signal in nanoseconds that can be used to synchronize two time sources.
+       
+    */
    public void setSyncTimestamp(long sync_timestamp)
    {
       sync_timestamp_ = sync_timestamp;
    }
    /**
-            * Platform dependent.
-            * Time signal in nanoseconds that can be used to synchronize two time sources.
-            */
+       
+    * Platform dependent.
+       
+    * Time signal in nanoseconds that can be used to synchronize two time sources.
+       
+    */
    public long getSyncTimestamp()
    {
       return sync_timestamp_;

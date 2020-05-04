@@ -7,9 +7,12 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Message used to encode the manifold of an object to be used as input by a reaching motion planner.
-       * Main usage is the IHMC WholeBodyTrajectoryToolbox.
-       */
+   
+ * Message used to encode the manifold of an object to be used as input by a reaching motion planner.
+   
+ * Main usage is the IHMC WholeBodyTrajectoryToolbox.
+   
+ */
 public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage> implements Settable<ReachingManifoldMessage>, EpsilonComparable<ReachingManifoldMessage>
 {
 
@@ -28,8 +31,10 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage> imp
    public static final byte CONFIGURATION_SPACE_NAME_SO3 = (byte) 6;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public int end_effector_hash_code_;
@@ -92,15 +97,19 @@ public class ReachingManifoldMessage extends Packet<ReachingManifoldMessage> imp
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

@@ -7,8 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC humanoid behavior module.
-       */
+   
+ * This message is part of the IHMC humanoid behavior module.
+   
+ */
 public class BehaviorControlModePacket extends Packet<BehaviorControlModePacket> implements Settable<BehaviorControlModePacket>, EpsilonComparable<BehaviorControlModePacket>
 {
 
@@ -19,8 +21,10 @@ public class BehaviorControlModePacket extends Packet<BehaviorControlModePacket>
    public static final byte RESUME = (byte) 2;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public byte behavior_control_mode_enum_request_ = (byte) 255;
@@ -50,15 +54,19 @@ public class BehaviorControlModePacket extends Packet<BehaviorControlModePacket>
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

@@ -7,15 +7,20 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Message used to configure the IHMC whole-body trajetory planner.
-       * Main usage is the IHMC WholeBodyTrajectoryToolbox.
-       */
+   
+ * Message used to configure the IHMC whole-body trajetory planner.
+   
+ * Main usage is the IHMC WholeBodyTrajectoryToolbox.
+   
+ */
 public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<WholeBodyTrajectoryToolboxConfigurationMessage> implements Settable<WholeBodyTrajectoryToolboxConfigurationMessage>, EpsilonComparable<WholeBodyTrajectoryToolboxConfigurationMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public int number_of_initial_guesses_ = -1;
@@ -57,15 +62,19 @@ public class WholeBodyTrajectoryToolboxConfigurationMessage extends Packet<Whole
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

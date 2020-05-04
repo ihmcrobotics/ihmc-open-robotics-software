@@ -7,25 +7,34 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * Configure the controller manipulation and pelvis managers.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * Configure the controller manipulation and pelvis managers.
+   
+ */
 public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMessage> implements Settable<PrepareForLocomotionMessage>, EpsilonComparable<PrepareForLocomotionMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * When true, the controller will cancel any arm trajectory in progress, if any, before starting to walk.
-            */
+       
+    * When true, the controller will cancel any arm trajectory in progress, if any, before starting to walk.
+       
+    */
    public boolean prepare_manipulation_ = true;
 
    /**
-            * When true, the controller will cancel any pelvis trajectory in progress, if any, before starting to walk.
-            */
+       
+    * When true, the controller will cancel any pelvis trajectory in progress, if any, before starting to walk.
+       
+    */
    public boolean prepare_pelvis_ = true;
 
    public PrepareForLocomotionMessage()
@@ -57,15 +66,19 @@ public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMess
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -73,15 +86,19 @@ public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMess
 
 
    /**
-            * When true, the controller will cancel any arm trajectory in progress, if any, before starting to walk.
-            */
+       
+    * When true, the controller will cancel any arm trajectory in progress, if any, before starting to walk.
+       
+    */
    public void setPrepareManipulation(boolean prepare_manipulation)
    {
       prepare_manipulation_ = prepare_manipulation;
    }
    /**
-            * When true, the controller will cancel any arm trajectory in progress, if any, before starting to walk.
-            */
+       
+    * When true, the controller will cancel any arm trajectory in progress, if any, before starting to walk.
+       
+    */
    public boolean getPrepareManipulation()
    {
       return prepare_manipulation_;
@@ -89,15 +106,19 @@ public class PrepareForLocomotionMessage extends Packet<PrepareForLocomotionMess
 
 
    /**
-            * When true, the controller will cancel any pelvis trajectory in progress, if any, before starting to walk.
-            */
+       
+    * When true, the controller will cancel any pelvis trajectory in progress, if any, before starting to walk.
+       
+    */
    public void setPreparePelvis(boolean prepare_pelvis)
    {
       prepare_pelvis_ = prepare_pelvis;
    }
    /**
-            * When true, the controller will cancel any pelvis trajectory in progress, if any, before starting to walk.
-            */
+       
+    * When true, the controller will cancel any pelvis trajectory in progress, if any, before starting to walk.
+       
+    */
    public boolean getPreparePelvis()
    {
       return prepare_pelvis_;

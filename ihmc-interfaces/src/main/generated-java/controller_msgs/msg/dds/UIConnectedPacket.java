@@ -7,14 +7,18 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * TODO: This message is not really used, the feature it provides needs to be fixed or this message needs to be deleted.
-       */
+   
+ * TODO: This message is not really used, the feature it provides needs to be fixed or this message needs to be deleted.
+   
+ */
 public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Settable<UIConnectedPacket>, EpsilonComparable<UIConnectedPacket>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public UIConnectedPacket()
@@ -38,15 +42,19 @@ public class UIConnectedPacket extends Packet<UIConnectedPacket> implements Sett
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

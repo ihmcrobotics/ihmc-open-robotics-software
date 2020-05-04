@@ -7,14 +7,18 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * General purpose message that contains vertices to represent a 2D polygon (z ignored).
-       */
+   
+ * General purpose message that contains vertices to represent a 2D polygon (z ignored).
+   
+ */
 public class Polygon2DMessage extends Packet<Polygon2DMessage> implements Settable<Polygon2DMessage>, EpsilonComparable<Polygon2DMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  vertices_;
@@ -44,15 +48,19 @@ public class Polygon2DMessage extends Packet<Polygon2DMessage> implements Settab
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

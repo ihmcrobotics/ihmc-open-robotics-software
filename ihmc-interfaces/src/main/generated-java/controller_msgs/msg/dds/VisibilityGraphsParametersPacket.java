@@ -7,16 +7,20 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC footstep planning module.
-       */
+   
+ * This message is part of the IHMC footstep planning module.
+   
+ */
 public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsParametersPacket> implements Settable<VisibilityGraphsParametersPacket>, EpsilonComparable<VisibilityGraphsParametersPacket>
 {
 
    public static final double DEFAULT_NO_VALUE = -11.1;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public double max_inter_region_connection_length_ = -11.1;
@@ -46,18 +50,27 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
    public long planar_region_min_size_;
 
    /**
-            * Defines the angle from which two regions are considered orthogonal.
-            * It is used to determine if a region should be projected onto another as a polygon or a line.
-            * It should be close to 90 degrees.
-            * Returns the angle threshold to use to determine if a line or polygon projection method should be used.
-            */
+       
+    * Defines the angle from which two regions are considered orthogonal.
+       
+    * It is used to determine if a region should be projected onto another as a polygon or a line.
+       
+    * It should be close to 90 degrees.
+       
+    * Returns the angle threshold to use to determine if a line or polygon projection method should be used.
+       
+    */
    public double region_orthogonal_angle_ = -11.1;
 
    /**
-            * This epsilon is is used when searching to which region the start/goal belongs to.
-            * A positive value corresponds to growing all the regions before testing if the start/goal is inside.
-            * Returns the value of the epsilon to use.
-            */
+       
+    * This epsilon is is used when searching to which region the start/goal belongs to.
+       
+    * A positive value corresponds to growing all the regions before testing if the start/goal is inside.
+       
+    * Returns the value of the epsilon to use.
+       
+    */
    public double search_host_region_epsilon_ = 0.03;
 
    public double can_duck_under_height_ = -11.1;
@@ -225,15 +238,19 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -371,21 +388,31 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
 
    /**
-            * Defines the angle from which two regions are considered orthogonal.
-            * It is used to determine if a region should be projected onto another as a polygon or a line.
-            * It should be close to 90 degrees.
-            * Returns the angle threshold to use to determine if a line or polygon projection method should be used.
-            */
+       
+    * Defines the angle from which two regions are considered orthogonal.
+       
+    * It is used to determine if a region should be projected onto another as a polygon or a line.
+       
+    * It should be close to 90 degrees.
+       
+    * Returns the angle threshold to use to determine if a line or polygon projection method should be used.
+       
+    */
    public void setRegionOrthogonalAngle(double region_orthogonal_angle)
    {
       region_orthogonal_angle_ = region_orthogonal_angle;
    }
    /**
-            * Defines the angle from which two regions are considered orthogonal.
-            * It is used to determine if a region should be projected onto another as a polygon or a line.
-            * It should be close to 90 degrees.
-            * Returns the angle threshold to use to determine if a line or polygon projection method should be used.
-            */
+       
+    * Defines the angle from which two regions are considered orthogonal.
+       
+    * It is used to determine if a region should be projected onto another as a polygon or a line.
+       
+    * It should be close to 90 degrees.
+       
+    * Returns the angle threshold to use to determine if a line or polygon projection method should be used.
+       
+    */
    public double getRegionOrthogonalAngle()
    {
       return region_orthogonal_angle_;
@@ -393,19 +420,27 @@ public class VisibilityGraphsParametersPacket extends Packet<VisibilityGraphsPar
 
 
    /**
-            * This epsilon is is used when searching to which region the start/goal belongs to.
-            * A positive value corresponds to growing all the regions before testing if the start/goal is inside.
-            * Returns the value of the epsilon to use.
-            */
+       
+    * This epsilon is is used when searching to which region the start/goal belongs to.
+       
+    * A positive value corresponds to growing all the regions before testing if the start/goal is inside.
+       
+    * Returns the value of the epsilon to use.
+       
+    */
    public void setSearchHostRegionEpsilon(double search_host_region_epsilon)
    {
       search_host_region_epsilon_ = search_host_region_epsilon;
    }
    /**
-            * This epsilon is is used when searching to which region the start/goal belongs to.
-            * A positive value corresponds to growing all the regions before testing if the start/goal is inside.
-            * Returns the value of the epsilon to use.
-            */
+       
+    * This epsilon is is used when searching to which region the start/goal belongs to.
+       
+    * A positive value corresponds to growing all the regions before testing if the start/goal is inside.
+       
+    * Returns the value of the epsilon to use.
+       
+    */
    public double getSearchHostRegionEpsilon()
    {
       return search_host_region_epsilon_;
