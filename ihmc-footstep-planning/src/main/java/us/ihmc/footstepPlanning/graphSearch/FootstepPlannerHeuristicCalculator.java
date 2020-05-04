@@ -17,6 +17,10 @@ import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
+import us.ihmc.yoVariables.providers.DoubleProvider;
+
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 

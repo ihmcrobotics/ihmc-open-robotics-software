@@ -7,16 +7,13 @@ import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerTools;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -37,7 +34,7 @@ public class GoodFootstepPositionCheckerTest
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
 
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
       GoodFootstepPositionChecker checker = new GoodFootstepPositionChecker(parameters, snapper, edgeData);
       parameters.setMaximumStepXWhenFullyPitched(0.3);
       parameters.setMinimumStepZWhenFullyPitched(0.05);
@@ -84,8 +81,8 @@ public class GoodFootstepPositionCheckerTest
    public void testMaxMinYawOnLeftFootAtOrigin()
    {
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
@@ -120,8 +117,8 @@ public class GoodFootstepPositionCheckerTest
    public void testMaxMinYawOnRightFootAtOrigin()
    {
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
@@ -156,8 +153,8 @@ public class GoodFootstepPositionCheckerTest
    public void testMaxMinYawOnLeftFootAtOriginWithParentYaw()
    {
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
@@ -201,8 +198,8 @@ public class GoodFootstepPositionCheckerTest
    public void testMaxMinYawOnRightFootAtOriginWithParentYaw()
    {
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
@@ -246,8 +243,8 @@ public class GoodFootstepPositionCheckerTest
    public void testMaxMinYawOnLeftFootAtOriginSteppingUp()
    {
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-      FootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
       double maxYaw = 1.2;
       double minYaw = -0.5;
       double yawReduction = 0.5;
