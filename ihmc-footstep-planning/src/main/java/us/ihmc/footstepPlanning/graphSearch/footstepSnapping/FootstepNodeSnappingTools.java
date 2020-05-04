@@ -22,22 +22,21 @@ public class FootstepNodeSnappingTools
    /**
     * Computes the snapped polygon using the given snap transform
     */
-   public static ConvexPolygon2D computeSnappedVerticesAlongXYPlane(ConvexPolygon2DReadOnly initialPolygon, RigidBodyTransformReadOnly snapTransform)
+   public static ConvexPolygon2D computeTransformedPolygon(ConvexPolygon2DReadOnly initialPolygon, RigidBodyTransformReadOnly transform)
    {
-      ConvexPolygon2D footPolygonInXYPlane = new ConvexPolygon2D();
+      ConvexPolygon2D footPolygonInRegionFrame = new ConvexPolygon2D();
       Vector4D transformedVertex = new Vector4D();
 
       for (int i = 0; i < initialPolygon.getNumberOfVertices(); i++)
       {
          Point2DReadOnly vertex = initialPolygon.getVertex(i);
          transformedVertex.set(vertex.getX(), vertex.getY(), 0.0, 1.0);
-         snapTransform.transform(transformedVertex);
-         transformedVertex.setZ(0.0);
-         footPolygonInXYPlane.addVertex(transformedVertex.getX() + 1e-10, transformedVertex.getY() + 1e-10);
+         transform.transform(transformedVertex);
+         footPolygonInRegionFrame.addVertex(transformedVertex.getX() + 1e-10, transformedVertex.getY() + 1e-10);
       }
 
-      footPolygonInXYPlane.update();
-      return footPolygonInXYPlane;
+      footPolygonInRegionFrame.update();
+      return footPolygonInRegionFrame;
    }
 
    /**

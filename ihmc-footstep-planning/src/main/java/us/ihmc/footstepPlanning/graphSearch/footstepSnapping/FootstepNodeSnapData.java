@@ -93,7 +93,7 @@ public class FootstepNodeSnapData
       return snapTransform;
    }
 
-   public RigidBodyTransform getWiggleTransform()
+   public RigidBodyTransform getWiggleTransformInWorld()
    {
       return wiggleTransformInWorld;
    }
@@ -173,7 +173,7 @@ public class FootstepNodeSnapData
    {
       FootstepNodeSnapData snapData = new FootstepNodeSnapData();
       snapData.getSnapTransform().setIdentity();
-      snapData.getWiggleTransform().setIdentity();
+      snapData.getWiggleTransformInWorld().setIdentity();
       snapData.getCroppedFoothold().clearAndUpdate();
       return snapData;
    }
