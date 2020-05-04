@@ -1,13 +1,11 @@
 package us.ihmc.tools.thread;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -28,7 +26,7 @@ public class ExceptionHandlingThreadScheduler
 
    private volatile ScheduledExecutorService executorService;
    private final ExceptionHandler exceptionHandler;
-   private final Long crashesBeforeGivingUp;
+   private final long crashesBeforeGivingUp;
    private long crashCount = 0;
    private Runnable runnable;
    private ScheduledFuture<?> scheduledFuture;
@@ -53,19 +51,19 @@ public class ExceptionHandlingThreadScheduler
     */
    public ExceptionHandlingThreadScheduler(String name, ExceptionHandler exceptionHandler)
    {
-      this(name, exceptionHandler, Long.MIN_VALUE);
+      this(name, exceptionHandler, 0);
    }
 
    /**
     * Try to handle the exception but give up after N tries.
     *
-    * @param name thread name
+    * @param prefix thread name prefix
     * @param exceptionHandler
     * @param crashesBeforeGivingUp
     */
-   public ExceptionHandlingThreadScheduler(String name, ExceptionHandler exceptionHandler, long crashesBeforeGivingUp)
+   public ExceptionHandlingThreadScheduler(String prefix, ExceptionHandler exceptionHandler, long crashesBeforeGivingUp)
    {
-      executorService = Executors.newSingleThreadScheduledExecutor(ThreadTools.getNamedThreadFactory(name));
+      executorService = ThreadTools.newSingleThreadScheduledExecutor(prefix);
       this.exceptionHandler = exceptionHandler;
       this.crashesBeforeGivingUp = crashesBeforeGivingUp;
    }
@@ -104,7 +102,7 @@ public class ExceptionHandlingThreadScheduler
          exceptionHandler.handleException(t);
 
          ++crashCount;
-         if (crashesBeforeGivingUp.longValue() != Long.MIN_VALUE // if do not always continue
+         if (crashesBeforeGivingUp > 0 // if do not always continue
                && crashCount > crashesBeforeGivingUp) // crash count has now surpassed allowable amount, so give up
          {
             throw t;
