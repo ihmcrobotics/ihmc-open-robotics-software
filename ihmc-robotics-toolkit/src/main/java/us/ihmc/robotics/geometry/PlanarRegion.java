@@ -363,7 +363,7 @@ public class PlanarRegion implements SupportingVertexHolder
     * @param convexPolygonInWorld Polygon to project
     * @return new projected ConvexPolygon2d
     */
-   private ConvexPolygon2D projectPolygonVerticallyToRegion(ConvexPolygon2DReadOnly convexPolygonInWorld)
+   public ConvexPolygon2D projectPolygonVerticallyToRegion(ConvexPolygon2DReadOnly convexPolygonInWorld)
    {
       ConvexPolygon2D projectedPolygon = new ConvexPolygon2D();
 
@@ -1063,6 +1063,7 @@ public class PlanarRegion implements SupportingVertexHolder
 
    public void set(PlanarRegion other)
    {
+      regionId = other.regionId;
       fromLocalToWorldTransform.set(other.fromLocalToWorldTransform);
       fromWorldToLocalTransform.set(other.fromWorldToLocalTransform);
       convexPolygons.clear();
