@@ -372,7 +372,7 @@ public class AStarFootstepPlanner
       FootstepNode footstepNode = new FootstepNode(footstepPose.getX(), footstepPose.getY(), footstepPose.getYaw(), side);
       FootstepNodeSnapData snapData = new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(footstepNode, footstepPose));
       snapData.getCroppedFoothold().set(footPolygons.get(side));
-      snapData.getWiggleTransform().setIdentity();
+      snapData.getWiggleTransformInWorld().setIdentity();
       snapper.addSnapData(footstepNode, snapData);
    }
 
