@@ -7,28 +7,40 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message is used to clear the delay buffers on the controller, if you sent a message with a
-       * delay and now you do not want them executed, use this command.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message is used to clear the delay buffers on the controller, if you sent a message with a
+   
+ * delay and now you do not want them executed, use this command.
+   
+ */
 public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> implements Settable<ClearDelayQueueMessage>, EpsilonComparable<ClearDelayQueueMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * If only a specific message type is to be cleared, use this field.
-            * The integer represents the hash code of the message simple name.
-            * The hash code of a string should be computed as in java.lang.String.hashCode().
-            */
+       
+    * If only a specific message type is to be cleared, use this field.
+       
+    * The integer represents the hash code of the message simple name.
+       
+    * The hash code of a string should be computed as in java.lang.String.hashCode().
+       
+    */
    public int class_simple_name_based_hash_code_;
 
    /**
-            * If all the messages should be cleared, then this field should be set to true.
-            */
+       
+    * If all the messages should be cleared, then this field should be set to true.
+       
+    */
    public boolean clear_all_delay_buffers_;
 
    public ClearDelayQueueMessage()
@@ -60,15 +72,19 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -76,19 +92,27 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
 
 
    /**
-            * If only a specific message type is to be cleared, use this field.
-            * The integer represents the hash code of the message simple name.
-            * The hash code of a string should be computed as in java.lang.String.hashCode().
-            */
+       
+    * If only a specific message type is to be cleared, use this field.
+       
+    * The integer represents the hash code of the message simple name.
+       
+    * The hash code of a string should be computed as in java.lang.String.hashCode().
+       
+    */
    public void setClassSimpleNameBasedHashCode(int class_simple_name_based_hash_code)
    {
       class_simple_name_based_hash_code_ = class_simple_name_based_hash_code;
    }
    /**
-            * If only a specific message type is to be cleared, use this field.
-            * The integer represents the hash code of the message simple name.
-            * The hash code of a string should be computed as in java.lang.String.hashCode().
-            */
+       
+    * If only a specific message type is to be cleared, use this field.
+       
+    * The integer represents the hash code of the message simple name.
+       
+    * The hash code of a string should be computed as in java.lang.String.hashCode().
+       
+    */
    public int getClassSimpleNameBasedHashCode()
    {
       return class_simple_name_based_hash_code_;
@@ -96,15 +120,19 @@ public class ClearDelayQueueMessage extends Packet<ClearDelayQueueMessage> imple
 
 
    /**
-            * If all the messages should be cleared, then this field should be set to true.
-            */
+       
+    * If all the messages should be cleared, then this field should be set to true.
+       
+    */
    public void setClearAllDelayBuffers(boolean clear_all_delay_buffers)
    {
       clear_all_delay_buffers_ = clear_all_delay_buffers;
    }
    /**
-            * If all the messages should be cleared, then this field should be set to true.
-            */
+       
+    * If all the messages should be cleared, then this field should be set to true.
+       
+    */
    public boolean getClearAllDelayBuffers()
    {
       return clear_all_delay_buffers_;

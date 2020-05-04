@@ -7,60 +7,83 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * The walking controller uses this message to report when it completed the execution of a trajectory message.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * The walking controller uses this message to report when it completed the execution of a trajectory message.
+   
+ */
 public class TaskspaceTrajectoryStatusMessage extends Packet<TaskspaceTrajectoryStatusMessage> implements Settable<TaskspaceTrajectoryStatusMessage>, EpsilonComparable<TaskspaceTrajectoryStatusMessage>
 {
 
    /**
-          * The trajectory input was received and accepted, the execution just started.
-          */
+      
+    * The trajectory input was received and accepted, the execution just started.
+      
+    */
    public static final byte TRAJECTORY_EXECUTION_STATUS_STARTED = (byte) 0;
 
    /**
-          * The trajectory input was received, accepted, and its execution just finished.
-          */
+      
+    * The trajectory input was received, accepted, and its execution just finished.
+      
+    */
    public static final byte TRAJECTORY_EXECUTION_STATUS_COMPLETED = (byte) 1;
 
    /**
-            * Unique ID of the trajectory message this status refers to.
-            */
+       
+    * Unique ID of the trajectory message this status refers to.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Refers to the name of the end-effector that executed the trajectory.
-            */
+       
+    * Refers to the name of the end-effector that executed the trajectory.
+       
+    */
    public java.lang.StringBuilder end_effector_name_;
 
    /**
-            * The current status for the trajectory execution.
-            */
+       
+    * The current status for the trajectory execution.
+       
+    */
    public byte trajectory_execution_status_ = (byte) 255;
 
    /**
-            * Time in trajectory in seconds.
-            */
+       
+    * Time in trajectory in seconds.
+       
+    */
    public double timestamp_;
 
    /**
-            * The desired position (in world coordinates) of the end-effector sent to the controller.
-            */
+       
+    * The desired position (in world coordinates) of the end-effector sent to the controller.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D desired_end_effector_position_;
 
    /**
-            * The desired orientation (in world coordinates) of the end-effector sent to the controller.
-            */
+       
+    * The desired orientation (in world coordinates) of the end-effector sent to the controller.
+       
+    */
    public us.ihmc.euclid.tuple4D.Quaternion desired_end_effector_orientation_;
 
    /**
-            * The position (in world coordinates) of where the end-effector actually arrived when the trajectory finished.
-            */
+       
+    * The position (in world coordinates) of where the end-effector actually arrived when the trajectory finished.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D actual_end_effector_position_;
 
    /**
-            * The orientation (in world coordinates) of where the end-effector actually arrived when the trajectory finished.
-            */
+       
+    * The orientation (in world coordinates) of where the end-effector actually arrived when the trajectory finished.
+       
+    */
    public us.ihmc.euclid.tuple4D.Quaternion actual_end_effector_orientation_;
 
    public TaskspaceTrajectoryStatusMessage()
@@ -114,15 +137,19 @@ public class TaskspaceTrajectoryStatusMessage extends Packet<TaskspaceTrajectory
 
 
    /**
-            * Unique ID of the trajectory message this status refers to.
-            */
+       
+    * Unique ID of the trajectory message this status refers to.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID of the trajectory message this status refers to.
-            */
+       
+    * Unique ID of the trajectory message this status refers to.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -130,8 +157,10 @@ public class TaskspaceTrajectoryStatusMessage extends Packet<TaskspaceTrajectory
 
 
    /**
-            * Refers to the name of the end-effector that executed the trajectory.
-            */
+       
+    * Refers to the name of the end-effector that executed the trajectory.
+       
+    */
    public void setEndEffectorName(java.lang.String end_effector_name)
    {
       end_effector_name_.setLength(0);
@@ -139,15 +168,19 @@ public class TaskspaceTrajectoryStatusMessage extends Packet<TaskspaceTrajectory
    }
 
    /**
-            * Refers to the name of the end-effector that executed the trajectory.
-            */
+       
+    * Refers to the name of the end-effector that executed the trajectory.
+       
+    */
    public java.lang.String getEndEffectorNameAsString()
    {
       return getEndEffectorName().toString();
    }
    /**
-            * Refers to the name of the end-effector that executed the trajectory.
-            */
+       
+    * Refers to the name of the end-effector that executed the trajectory.
+       
+    */
    public java.lang.StringBuilder getEndEffectorName()
    {
       return end_effector_name_;
@@ -155,15 +188,19 @@ public class TaskspaceTrajectoryStatusMessage extends Packet<TaskspaceTrajectory
 
 
    /**
-            * The current status for the trajectory execution.
-            */
+       
+    * The current status for the trajectory execution.
+       
+    */
    public void setTrajectoryExecutionStatus(byte trajectory_execution_status)
    {
       trajectory_execution_status_ = trajectory_execution_status;
    }
    /**
-            * The current status for the trajectory execution.
-            */
+       
+    * The current status for the trajectory execution.
+       
+    */
    public byte getTrajectoryExecutionStatus()
    {
       return trajectory_execution_status_;
@@ -171,15 +208,19 @@ public class TaskspaceTrajectoryStatusMessage extends Packet<TaskspaceTrajectory
 
 
    /**
-            * Time in trajectory in seconds.
-            */
+       
+    * Time in trajectory in seconds.
+       
+    */
    public void setTimestamp(double timestamp)
    {
       timestamp_ = timestamp;
    }
    /**
-            * Time in trajectory in seconds.
-            */
+       
+    * Time in trajectory in seconds.
+       
+    */
    public double getTimestamp()
    {
       return timestamp_;
@@ -188,8 +229,10 @@ public class TaskspaceTrajectoryStatusMessage extends Packet<TaskspaceTrajectory
 
 
    /**
-            * The desired position (in world coordinates) of the end-effector sent to the controller.
-            */
+       
+    * The desired position (in world coordinates) of the end-effector sent to the controller.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D getDesiredEndEffectorPosition()
    {
       return desired_end_effector_position_;
@@ -198,8 +241,10 @@ public class TaskspaceTrajectoryStatusMessage extends Packet<TaskspaceTrajectory
 
 
    /**
-            * The desired orientation (in world coordinates) of the end-effector sent to the controller.
-            */
+       
+    * The desired orientation (in world coordinates) of the end-effector sent to the controller.
+       
+    */
    public us.ihmc.euclid.tuple4D.Quaternion getDesiredEndEffectorOrientation()
    {
       return desired_end_effector_orientation_;
@@ -208,8 +253,10 @@ public class TaskspaceTrajectoryStatusMessage extends Packet<TaskspaceTrajectory
 
 
    /**
-            * The position (in world coordinates) of where the end-effector actually arrived when the trajectory finished.
-            */
+       
+    * The position (in world coordinates) of where the end-effector actually arrived when the trajectory finished.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D getActualEndEffectorPosition()
    {
       return actual_end_effector_position_;
@@ -218,8 +265,10 @@ public class TaskspaceTrajectoryStatusMessage extends Packet<TaskspaceTrajectory
 
 
    /**
-            * The orientation (in world coordinates) of where the end-effector actually arrived when the trajectory finished.
-            */
+       
+    * The orientation (in world coordinates) of where the end-effector actually arrived when the trajectory finished.
+       
+    */
    public us.ihmc.euclid.tuple4D.Quaternion getActualEndEffectorOrientation()
    {
       return actual_end_effector_orientation_;

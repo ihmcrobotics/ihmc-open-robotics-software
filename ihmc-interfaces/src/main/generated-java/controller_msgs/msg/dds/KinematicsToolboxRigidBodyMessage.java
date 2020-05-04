@@ -7,84 +7,131 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body inverse kinematics module.
-       * This message contains all the information needed to configure the objectives/constraints to apply on
-       * a given end-effector in the solver.
-       */
+   
+ * This message is part of the IHMC whole-body inverse kinematics module.
+   
+ * This message contains all the information needed to configure the objectives/constraints to apply on
+   
+ * a given end-effector in the solver.
+   
+ */
 public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxRigidBodyMessage> implements Settable<KinematicsToolboxRigidBodyMessage>, EpsilonComparable<KinematicsToolboxRigidBodyMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * The is the unique hash code of the end-effector to be solved for.
-            * It is used on the solver side to retrieve the desired end-effector to be controlled.
-            * See RigidBody.hashCode() for the computation of a rigid-body hash code.
-            */
+       
+    * The is the unique hash code of the end-effector to be solved for.
+       
+    * It is used on the solver side to retrieve the desired end-effector to be controlled.
+       
+    * See RigidBody.hashCode() for the computation of a rigid-body hash code.
+       
+    */
    public int end_effector_hash_code_;
 
    /**
-            * This is the desired position of the control frame's origin.
-            * If the control frame has not been defined, it represents the desired position endEffector.getBodyFixedFrame().
-            * The data is assumed to be expressed in world frame.
-            */
+       
+    * This is the desired position of the control frame's origin.
+       
+    * If the control frame has not been defined, it represents the desired position endEffector.getBodyFixedFrame().
+       
+    * The data is assumed to be expressed in world frame.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D desired_position_in_world_;
 
    /**
-            * This is the desired orientation of the control frame.
-            * I the control frame has not been defined, it represents the desired orientation of endEffector.getBodyFixedFrame().
-            * The data is assumed to be expressed in world frame.
-            */
+       
+    * This is the desired orientation of the control frame.
+       
+    * I the control frame has not been defined, it represents the desired orientation of endEffector.getBodyFixedFrame().
+       
+    * The data is assumed to be expressed in world frame.
+       
+    */
    public us.ihmc.euclid.tuple4D.Quaternion desired_orientation_in_world_;
 
    /**
-            * This is the position of the control frame's origin expressed in endEffector.getBodyFixedFrame().
-            * By default, the control frame is coincident to endEffector.getBodyFixedFrame().
-            * The control frame is rigidly attached to the end-effector.
-            */
+       
+    * This is the position of the control frame's origin expressed in endEffector.getBodyFixedFrame().
+       
+    * By default, the control frame is coincident to endEffector.getBodyFixedFrame().
+       
+    * The control frame is rigidly attached to the end-effector.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D control_frame_position_in_end_effector_;
 
    /**
-            * This is the orientation of the control frame expressed in endEffector.getBodyFixedFrame().
-            * By default, the control frame is coincident to endEffector.getBodyFixedFrame().
-            */
+       
+    * This is the orientation of the control frame expressed in endEffector.getBodyFixedFrame().
+       
+    * By default, the control frame is coincident to endEffector.getBodyFixedFrame().
+       
+    */
    public us.ihmc.euclid.tuple4D.Quaternion control_frame_orientation_in_end_effector_;
 
    /**
-            * The selection matrix is used to determinate which degree of freedom of the end-effector should
-            * be controlled.
-            * The selection frames coming along with the given selection matrix are used to determine to
-            * what reference frame the selected axes are referring to. For instance, if only the hand height
-            * in world should be controlled on the linear z component of the selection matrix should be
-            * selected and the reference frame should be world frame. When no reference frame is provided
-            * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
-            * frame if not defined otherwise.
-            */
+       
+    * The selection matrix is used to determinate which degree of freedom of the end-effector should
+       
+    * be controlled.
+       
+    * The selection frames coming along with the given selection matrix are used to determine to
+       
+    * what reference frame the selected axes are referring to. For instance, if only the hand height
+       
+    * in world should be controlled on the linear z component of the selection matrix should be
+       
+    * selected and the reference frame should be world frame. When no reference frame is provided
+       
+    * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
+       
+    * frame if not defined otherwise.
+       
+    */
    public controller_msgs.msg.dds.SelectionMatrix3DMessage angular_selection_matrix_;
 
    /**
-            * The selection matrix is used to determinate which degree of freedom of the end-effector should
-            * be controlled.
-            * The selection frames coming along with the given selection matrix are used to determine to
-            * what reference frame the selected axes are referring to. For instance, if only the hand height
-            * in world should be controlled on the linear z component of the selection matrix should be
-            * selected and the reference frame should be world frame. When no reference frame is provided
-            * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
-            * frame if not defined otherwise.
-            */
+       
+    * The selection matrix is used to determinate which degree of freedom of the end-effector should
+       
+    * be controlled.
+       
+    * The selection frames coming along with the given selection matrix are used to determine to
+       
+    * what reference frame the selected axes are referring to. For instance, if only the hand height
+       
+    * in world should be controlled on the linear z component of the selection matrix should be
+       
+    * selected and the reference frame should be world frame. When no reference frame is provided
+       
+    * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
+       
+    * frame if not defined otherwise.
+       
+    */
    public controller_msgs.msg.dds.SelectionMatrix3DMessage linear_selection_matrix_;
 
    /**
-            * Weight matrix used to define the priority of controlling the rotation around each axis on the solver side.
-            */
+       
+    * Weight matrix used to define the priority of controlling the rotation around each axis on the solver side.
+       
+    */
    public controller_msgs.msg.dds.WeightMatrix3DMessage angular_weight_matrix_;
 
    /**
-            * Weight matrix used to define the priority of controlling the translation around each axis on the solver side.
-            */
+       
+    * Weight matrix used to define the priority of controlling the translation around each axis on the solver side.
+       
+    */
    public controller_msgs.msg.dds.WeightMatrix3DMessage linear_weight_matrix_;
 
    public KinematicsToolboxRigidBodyMessage()
@@ -144,15 +191,19 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -160,19 +211,27 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
 
    /**
-            * The is the unique hash code of the end-effector to be solved for.
-            * It is used on the solver side to retrieve the desired end-effector to be controlled.
-            * See RigidBody.hashCode() for the computation of a rigid-body hash code.
-            */
+       
+    * The is the unique hash code of the end-effector to be solved for.
+       
+    * It is used on the solver side to retrieve the desired end-effector to be controlled.
+       
+    * See RigidBody.hashCode() for the computation of a rigid-body hash code.
+       
+    */
    public void setEndEffectorHashCode(int end_effector_hash_code)
    {
       end_effector_hash_code_ = end_effector_hash_code;
    }
    /**
-            * The is the unique hash code of the end-effector to be solved for.
-            * It is used on the solver side to retrieve the desired end-effector to be controlled.
-            * See RigidBody.hashCode() for the computation of a rigid-body hash code.
-            */
+       
+    * The is the unique hash code of the end-effector to be solved for.
+       
+    * It is used on the solver side to retrieve the desired end-effector to be controlled.
+       
+    * See RigidBody.hashCode() for the computation of a rigid-body hash code.
+       
+    */
    public int getEndEffectorHashCode()
    {
       return end_effector_hash_code_;
@@ -181,10 +240,14 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
 
    /**
-            * This is the desired position of the control frame's origin.
-            * If the control frame has not been defined, it represents the desired position endEffector.getBodyFixedFrame().
-            * The data is assumed to be expressed in world frame.
-            */
+       
+    * This is the desired position of the control frame's origin.
+       
+    * If the control frame has not been defined, it represents the desired position endEffector.getBodyFixedFrame().
+       
+    * The data is assumed to be expressed in world frame.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D getDesiredPositionInWorld()
    {
       return desired_position_in_world_;
@@ -193,10 +256,14 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
 
    /**
-            * This is the desired orientation of the control frame.
-            * I the control frame has not been defined, it represents the desired orientation of endEffector.getBodyFixedFrame().
-            * The data is assumed to be expressed in world frame.
-            */
+       
+    * This is the desired orientation of the control frame.
+       
+    * I the control frame has not been defined, it represents the desired orientation of endEffector.getBodyFixedFrame().
+       
+    * The data is assumed to be expressed in world frame.
+       
+    */
    public us.ihmc.euclid.tuple4D.Quaternion getDesiredOrientationInWorld()
    {
       return desired_orientation_in_world_;
@@ -205,10 +272,14 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
 
    /**
-            * This is the position of the control frame's origin expressed in endEffector.getBodyFixedFrame().
-            * By default, the control frame is coincident to endEffector.getBodyFixedFrame().
-            * The control frame is rigidly attached to the end-effector.
-            */
+       
+    * This is the position of the control frame's origin expressed in endEffector.getBodyFixedFrame().
+       
+    * By default, the control frame is coincident to endEffector.getBodyFixedFrame().
+       
+    * The control frame is rigidly attached to the end-effector.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D getControlFramePositionInEndEffector()
    {
       return control_frame_position_in_end_effector_;
@@ -217,9 +288,12 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
 
    /**
-            * This is the orientation of the control frame expressed in endEffector.getBodyFixedFrame().
-            * By default, the control frame is coincident to endEffector.getBodyFixedFrame().
-            */
+       
+    * This is the orientation of the control frame expressed in endEffector.getBodyFixedFrame().
+       
+    * By default, the control frame is coincident to endEffector.getBodyFixedFrame().
+       
+    */
    public us.ihmc.euclid.tuple4D.Quaternion getControlFrameOrientationInEndEffector()
    {
       return control_frame_orientation_in_end_effector_;
@@ -228,15 +302,24 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
 
    /**
-            * The selection matrix is used to determinate which degree of freedom of the end-effector should
-            * be controlled.
-            * The selection frames coming along with the given selection matrix are used to determine to
-            * what reference frame the selected axes are referring to. For instance, if only the hand height
-            * in world should be controlled on the linear z component of the selection matrix should be
-            * selected and the reference frame should be world frame. When no reference frame is provided
-            * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
-            * frame if not defined otherwise.
-            */
+       
+    * The selection matrix is used to determinate which degree of freedom of the end-effector should
+       
+    * be controlled.
+       
+    * The selection frames coming along with the given selection matrix are used to determine to
+       
+    * what reference frame the selected axes are referring to. For instance, if only the hand height
+       
+    * in world should be controlled on the linear z component of the selection matrix should be
+       
+    * selected and the reference frame should be world frame. When no reference frame is provided
+       
+    * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
+       
+    * frame if not defined otherwise.
+       
+    */
    public controller_msgs.msg.dds.SelectionMatrix3DMessage getAngularSelectionMatrix()
    {
       return angular_selection_matrix_;
@@ -245,15 +328,24 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
 
    /**
-            * The selection matrix is used to determinate which degree of freedom of the end-effector should
-            * be controlled.
-            * The selection frames coming along with the given selection matrix are used to determine to
-            * what reference frame the selected axes are referring to. For instance, if only the hand height
-            * in world should be controlled on the linear z component of the selection matrix should be
-            * selected and the reference frame should be world frame. When no reference frame is provided
-            * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
-            * frame if not defined otherwise.
-            */
+       
+    * The selection matrix is used to determinate which degree of freedom of the end-effector should
+       
+    * be controlled.
+       
+    * The selection frames coming along with the given selection matrix are used to determine to
+       
+    * what reference frame the selected axes are referring to. For instance, if only the hand height
+       
+    * in world should be controlled on the linear z component of the selection matrix should be
+       
+    * selected and the reference frame should be world frame. When no reference frame is provided
+       
+    * with the selection matrix, it will be used as it is in the control frame, i.e. the body-fixed
+       
+    * frame if not defined otherwise.
+       
+    */
    public controller_msgs.msg.dds.SelectionMatrix3DMessage getLinearSelectionMatrix()
    {
       return linear_selection_matrix_;
@@ -262,8 +354,10 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
 
    /**
-            * Weight matrix used to define the priority of controlling the rotation around each axis on the solver side.
-            */
+       
+    * Weight matrix used to define the priority of controlling the rotation around each axis on the solver side.
+       
+    */
    public controller_msgs.msg.dds.WeightMatrix3DMessage getAngularWeightMatrix()
    {
       return angular_weight_matrix_;
@@ -272,8 +366,10 @@ public class KinematicsToolboxRigidBodyMessage extends Packet<KinematicsToolboxR
 
 
    /**
-            * Weight matrix used to define the priority of controlling the translation around each axis on the solver side.
-            */
+       
+    * Weight matrix used to define the priority of controlling the translation around each axis on the solver side.
+       
+    */
    public controller_msgs.msg.dds.WeightMatrix3DMessage getLinearWeightMatrix()
    {
       return linear_weight_matrix_;

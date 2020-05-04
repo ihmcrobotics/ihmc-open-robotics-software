@@ -7,9 +7,12 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message gives the status of the current footstep from the quadruped controller as well as the position of the footstep in world coordinates.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message gives the status of the current footstep from the quadruped controller as well as the position of the footstep in world coordinates.
+   
+ */
 public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStatusMessage> implements Settable<QuadrupedFootstepStatusMessage>, EpsilonComparable<QuadrupedFootstepStatusMessage>
 {
 
@@ -26,43 +29,59 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
    public static final byte HIND_LEFT = (byte) 3;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * The current footstep status enum value.
-            */
+       
+    * The current footstep status enum value.
+       
+    */
    public byte footstep_status_ = (byte) 255;
 
    /**
-            * footstep_index starts at 0 and monotonically increases during a controller session
-            */
+       
+    * footstep_index starts at 0 and monotonically increases during a controller session
+       
+    */
    public int footstep_index_;
 
    /**
-            * The robot quadrant that this footstep status correlates to.
-            */
+       
+    * The robot quadrant that this footstep status correlates to.
+       
+    */
    public byte robot_quadrant_ = (byte) 255;
 
    /**
-            * Specifies the desired position of the foot sent to the controller as opposed to where the foot actually landed.
-            */
+       
+    * Specifies the desired position of the foot sent to the controller as opposed to where the foot actually landed.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D desired_touchdown_position_in_world_;
 
    /**
-            * Specifies the position of where the foot actually landed, only valid when the status is FOOTSTEP_STATUS_COMPLETED
-            */
+       
+    * Specifies the position of where the foot actually landed, only valid when the status is FOOTSTEP_STATUS_COMPLETED
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D actual_touchdown_position_in_world_;
 
    /**
-            * Specifies the desired timing of the step
-            */
+       
+    * Specifies the desired timing of the step
+       
+    */
    public controller_msgs.msg.dds.TimeIntervalMessage desired_step_interval_;
 
    /**
-            * Specifies the achieved timing of the step, the end time is only valid when the status is FOOTSTEP_STATUS_COMPLETED
-            */
+       
+    * Specifies the achieved timing of the step, the end time is only valid when the status is FOOTSTEP_STATUS_COMPLETED
+       
+    */
    public controller_msgs.msg.dds.TimeIntervalMessage actual_step_interval_;
 
    public QuadrupedFootstepStatusMessage()
@@ -114,15 +133,19 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -130,15 +153,19 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
 
 
    /**
-            * The current footstep status enum value.
-            */
+       
+    * The current footstep status enum value.
+       
+    */
    public void setFootstepStatus(byte footstep_status)
    {
       footstep_status_ = footstep_status;
    }
    /**
-            * The current footstep status enum value.
-            */
+       
+    * The current footstep status enum value.
+       
+    */
    public byte getFootstepStatus()
    {
       return footstep_status_;
@@ -146,15 +173,19 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
 
 
    /**
-            * footstep_index starts at 0 and monotonically increases during a controller session
-            */
+       
+    * footstep_index starts at 0 and monotonically increases during a controller session
+       
+    */
    public void setFootstepIndex(int footstep_index)
    {
       footstep_index_ = footstep_index;
    }
    /**
-            * footstep_index starts at 0 and monotonically increases during a controller session
-            */
+       
+    * footstep_index starts at 0 and monotonically increases during a controller session
+       
+    */
    public int getFootstepIndex()
    {
       return footstep_index_;
@@ -162,15 +193,19 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
 
 
    /**
-            * The robot quadrant that this footstep status correlates to.
-            */
+       
+    * The robot quadrant that this footstep status correlates to.
+       
+    */
    public void setRobotQuadrant(byte robot_quadrant)
    {
       robot_quadrant_ = robot_quadrant;
    }
    /**
-            * The robot quadrant that this footstep status correlates to.
-            */
+       
+    * The robot quadrant that this footstep status correlates to.
+       
+    */
    public byte getRobotQuadrant()
    {
       return robot_quadrant_;
@@ -179,8 +214,10 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
 
 
    /**
-            * Specifies the desired position of the foot sent to the controller as opposed to where the foot actually landed.
-            */
+       
+    * Specifies the desired position of the foot sent to the controller as opposed to where the foot actually landed.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D getDesiredTouchdownPositionInWorld()
    {
       return desired_touchdown_position_in_world_;
@@ -189,8 +226,10 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
 
 
    /**
-            * Specifies the position of where the foot actually landed, only valid when the status is FOOTSTEP_STATUS_COMPLETED
-            */
+       
+    * Specifies the position of where the foot actually landed, only valid when the status is FOOTSTEP_STATUS_COMPLETED
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D getActualTouchdownPositionInWorld()
    {
       return actual_touchdown_position_in_world_;
@@ -199,8 +238,10 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
 
 
    /**
-            * Specifies the desired timing of the step
-            */
+       
+    * Specifies the desired timing of the step
+       
+    */
    public controller_msgs.msg.dds.TimeIntervalMessage getDesiredStepInterval()
    {
       return desired_step_interval_;
@@ -209,8 +250,10 @@ public class QuadrupedFootstepStatusMessage extends Packet<QuadrupedFootstepStat
 
 
    /**
-            * Specifies the achieved timing of the step, the end time is only valid when the status is FOOTSTEP_STATUS_COMPLETED
-            */
+       
+    * Specifies the achieved timing of the step, the end time is only valid when the status is FOOTSTEP_STATUS_COMPLETED
+       
+    */
    public controller_msgs.msg.dds.TimeIntervalMessage getActualStepInterval()
    {
       return actual_step_interval_;

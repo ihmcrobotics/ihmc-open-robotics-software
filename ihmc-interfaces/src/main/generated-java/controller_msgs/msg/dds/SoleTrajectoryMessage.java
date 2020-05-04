@@ -7,10 +7,14 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message commands the controller to move in taskspace a foot to the desired position  while going through the specified trajectory points.
-       * To execute a single straight line trajectory to reach a desired foot pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message commands the controller to move in taskspace a foot to the desired position  while going through the specified trajectory points.
+   
+ * To execute a single straight line trajectory to reach a desired foot pose, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
+   
+ */
 public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> implements Settable<SoleTrajectoryMessage>, EpsilonComparable<SoleTrajectoryMessage>
 {
 
@@ -23,18 +27,24 @@ public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> impleme
    public static final byte HIND_LEFT = (byte) 3;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Specifies which foot will execute the trajectory.
-            */
+       
+    * Specifies which foot will execute the trajectory.
+       
+    */
    public byte robot_quadrant_ = (byte) 255;
 
    /**
-            * The position trajectory information.
-            */
+       
+    * The position trajectory information.
+       
+    */
    public controller_msgs.msg.dds.EuclideanTrajectoryMessage position_trajectory_;
 
    public SoleTrajectoryMessage()
@@ -66,15 +76,19 @@ public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> impleme
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -82,15 +96,19 @@ public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> impleme
 
 
    /**
-            * Specifies which foot will execute the trajectory.
-            */
+       
+    * Specifies which foot will execute the trajectory.
+       
+    */
    public void setRobotQuadrant(byte robot_quadrant)
    {
       robot_quadrant_ = robot_quadrant;
    }
    /**
-            * Specifies which foot will execute the trajectory.
-            */
+       
+    * Specifies which foot will execute the trajectory.
+       
+    */
    public byte getRobotQuadrant()
    {
       return robot_quadrant_;
@@ -99,8 +117,10 @@ public class SoleTrajectoryMessage extends Packet<SoleTrajectoryMessage> impleme
 
 
    /**
-            * The position trajectory information.
-            */
+       
+    * The position trajectory information.
+       
+    */
    public controller_msgs.msg.dds.EuclideanTrajectoryMessage getPositionTrajectory()
    {
       return position_trajectory_;

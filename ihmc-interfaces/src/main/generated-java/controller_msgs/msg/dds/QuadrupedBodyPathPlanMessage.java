@@ -7,27 +7,38 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message commands the quadruped planner to execute a path composed of the given sequence of waypoints.
-       * A waypoint represents a desired (x, y, yaw) position which the robot should pass through.
-       * A Hermite based curve (third order) is used to interpolate the waypoints.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message commands the quadruped planner to execute a path composed of the given sequence of waypoints.
+   
+ * A waypoint represents a desired (x, y, yaw) position which the robot should pass through.
+   
+ * A Hermite based curve (third order) is used to interpolate the waypoints.
+   
+ */
 public class QuadrupedBodyPathPlanMessage extends Packet<QuadrupedBodyPathPlanMessage> implements Settable<QuadrupedBodyPathPlanMessage>, EpsilonComparable<QuadrupedBodyPathPlanMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * If true, the times are expressed in absolute time relative to the robot start
-            */
+       
+    * If true, the times are expressed in absolute time relative to the robot start
+       
+    */
    public boolean is_expressed_in_absolute_time_ = true;
 
    /**
-            * List of body path waypoint
-            */
+       
+    * List of body path waypoint
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage>  body_path_points_;
 
    public QuadrupedBodyPathPlanMessage()
@@ -59,15 +70,19 @@ public class QuadrupedBodyPathPlanMessage extends Packet<QuadrupedBodyPathPlanMe
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -75,15 +90,19 @@ public class QuadrupedBodyPathPlanMessage extends Packet<QuadrupedBodyPathPlanMe
 
 
    /**
-            * If true, the times are expressed in absolute time relative to the robot start
-            */
+       
+    * If true, the times are expressed in absolute time relative to the robot start
+       
+    */
    public void setIsExpressedInAbsoluteTime(boolean is_expressed_in_absolute_time)
    {
       is_expressed_in_absolute_time_ = is_expressed_in_absolute_time;
    }
    /**
-            * If true, the times are expressed in absolute time relative to the robot start
-            */
+       
+    * If true, the times are expressed in absolute time relative to the robot start
+       
+    */
    public boolean getIsExpressedInAbsoluteTime()
    {
       return is_expressed_in_absolute_time_;
@@ -92,8 +111,10 @@ public class QuadrupedBodyPathPlanMessage extends Packet<QuadrupedBodyPathPlanMe
 
 
    /**
-            * List of body path waypoint
-            */
+       
+    * List of body path waypoint
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.EuclideanTrajectoryPointMessage>  getBodyPathPoints()
    {
       return body_path_points_;
