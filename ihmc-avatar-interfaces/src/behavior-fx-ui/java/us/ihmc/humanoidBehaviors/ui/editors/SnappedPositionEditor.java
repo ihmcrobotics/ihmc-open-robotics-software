@@ -40,8 +40,8 @@ public class SnappedPositionEditor
    private PositionEditable selectedGraphic;
    private Consumer<FXUITrigger> onExit;
 
-   public enum EditMode { REGION_SNAP, XY_PLANE}
-   private EditMode editMode = EditMode.REGION_SNAP;
+   public enum EditMode { REGION_SNAP, XY_PLANE, BOTH }
+   private EditMode editMode = EditMode.BOTH;
 
    public SnappedPositionEditor(SubScene sceneNode)
    {
@@ -143,7 +143,7 @@ public class SnappedPositionEditor
    {
       PickResult pickResult = event.getPickResult();
 
-      if (editMode == EditMode.REGION_SNAP)
+      if (editMode == EditMode.REGION_SNAP || editMode == EditMode.BOTH)
       {
          Node intersectedNode = pickResult.getIntersectedNode();
 
@@ -159,12 +159,8 @@ public class SnappedPositionEditor
 
             return intersection;
          }
-         else
-         {
-            return null;
-         }
       }
-      else // XY_SNAP
+      if (editMode == EditMode.XY_PLANE || editMode == EditMode.BOTH)
       {
          Point3D point1 = new Point3D();
          point1.setX(sceneNode.getCamera().getLocalToSceneTransform().getTx());
@@ -185,5 +181,7 @@ public class SnappedPositionEditor
 
          return pickDirection;
       }
+
+      return null;
    }
 }

@@ -26,7 +26,7 @@ public class OrientationGraphic
 
    public OrientationGraphic(Color color, double cylinderLength)
    {
-      double radius = cylinderLength / 20.06;
+      double radius = cylinderLength / 20.0;
 
       TextureColorPalette1D colorPalette = new TextureColorPalette1D();
       colorPalette.setHueBased(1.0, 1.0);

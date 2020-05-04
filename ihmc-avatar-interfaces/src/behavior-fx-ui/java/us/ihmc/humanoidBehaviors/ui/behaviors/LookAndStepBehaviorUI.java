@@ -40,6 +40,7 @@ import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
+import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor.EditMode;
 import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
@@ -132,7 +133,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       placeGoalActionMap = new FXUIActionMap(startAction ->
       {
          placeGoalButton.setDisable(true);
-         snappedPositionEditor.edit(SnappedPositionEditor.EditMode.XY_PLANE, goalGraphic, exitType ->
+         snappedPositionEditor.edit(EditMode.BOTH, goalGraphic, exitType ->
          {
             placeGoalActionMap.triggerAction(exitType);
          });
