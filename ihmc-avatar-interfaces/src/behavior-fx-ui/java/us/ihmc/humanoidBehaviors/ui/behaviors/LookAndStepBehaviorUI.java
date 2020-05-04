@@ -100,6 +100,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       behaviorMessager.registerTopicListener(MapRegionsForUI, livePlanarRegionsGraphic::acceptPlanarRegions);
 
       goalGraphic = new PoseGraphic("Goal", Color.CADETBLUE, 0.03);
+      goalGraphic.getOrientationGraphic().setVisible(true);
       
       subGoalGraphic = new PositionGraphic(Color.GREEN, 0.02);
       behaviorMessager.registerTopicListener(SubGoalForUI, position -> Platform.runLater(() -> subGoalGraphic.setPosition(position)));
@@ -142,40 +143,17 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       });
       placeGoalActionMap.mapAction(FXUITrigger.ORIENTATION_LEFT_CLICK, trigger ->
       {
-         // calculate and send body path plan
-         bodyPathPlanner.setGoal(goalGraphic.getPose());
-         bodyPathPlanner.setPlanarRegionsList(rea.getLatestPlanarRegionsList());
-         HumanoidRobotState humanoidRobotState = robot.pollHumanoidRobotState();
-         leftFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.LEFT));
-         rightFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.RIGHT));
-         leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
-         rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
-         bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
-         bodyPathPlanner.planWaypoints();
-         ArrayList<Point3D> waypointsAsPoints = new ArrayList<>();
-         for (Pose3DReadOnly poseWaypoint : bodyPathPlanner.getWaypoints())
-         {
-            waypointsAsPoints.add(new Point3D(poseWaypoint.getPosition()));
-         }
-
-         behaviorMessager.submitMessage(BodyPathPlanInput, (List<Point3D>) waypointsAsPoints);
+         calculateAndSendBodyPathPlan();
 
          placeGoalButton.setDisable(false);
       });
-
-//      sceneNode.addEventHandler(MouseEvent.MOUSE_CLICKED, this::mouseClicked);
+      placeGoalActionMap.mapAction(FXUITrigger.RIGHT_CLICK, trigger ->
+      {
+         placeGoalButton.setDisable(false);
+      });
 
       // TODO Add joystick support
    }
-
-//   private final void mouseClicked(MouseEvent event)
-//   {
-//      if (!event.isConsumed() && event.isStillSincePress() && BehaviorUI.ACTIVE_EDITOR == null)
-//      {
-//         PickResult pickResult = event.getPickResult();
-//         Node intersectedNode = pickResult.getIntersectedNode();
-//      }
-//   }
 
    @Override
    public void setEnabled(boolean enabled)
@@ -198,6 +176,27 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
          Platform.runLater(() -> getChildren().add(livePlanarRegionsGraphic));
          Platform.runLater(() -> getChildren().add(footstepPlanGraphic));
       }
+   }
+
+   private void calculateAndSendBodyPathPlan()
+   {
+      // calculate and send body path plan
+      bodyPathPlanner.setGoal(goalGraphic.getPose());
+      bodyPathPlanner.setPlanarRegionsList(rea.getLatestPlanarRegionsList());
+      HumanoidRobotState humanoidRobotState = robot.pollHumanoidRobotState();
+      leftFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.LEFT));
+      rightFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.RIGHT));
+      leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
+      rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
+      bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
+      bodyPathPlanner.planWaypoints();
+      ArrayList<Point3D> waypointsAsPoints = new ArrayList<>();
+      for (Pose3DReadOnly poseWaypoint : bodyPathPlanner.getWaypoints())
+      {
+         waypointsAsPoints.add(new Point3D(poseWaypoint.getPosition()));
+      }
+
+      behaviorMessager.submitMessage(BodyPathPlanInput, waypointsAsPoints);
    }
 
    private void publishLookAndStepParameters()

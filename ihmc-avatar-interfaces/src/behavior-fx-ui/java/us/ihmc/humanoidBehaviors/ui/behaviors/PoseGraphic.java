@@ -37,7 +37,7 @@ public class PoseGraphic extends Group implements PoseEditable
    public PoseGraphic(String label, Color color, double radius)
    {
       snappedPositionGraphic = new PositionGraphic(color, radius);
-      orientationGraphic = new OrientationGraphic();
+      orientationGraphic = new OrientationGraphic(color, radius * 6.0);
       if (label != null)
       {
          labelGraphic = new LabelGraphic(label);
