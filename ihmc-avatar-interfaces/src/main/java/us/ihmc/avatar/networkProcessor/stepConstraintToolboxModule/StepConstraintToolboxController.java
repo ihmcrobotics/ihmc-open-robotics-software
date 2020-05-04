@@ -1,42 +1,25 @@
 package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
 
 import controller_msgs.msg.dds.*;
-import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTSleepState;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTStreamingState;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KSTTools;
+import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
-import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
+import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.robotics.stateMachine.core.State;
-import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.ros2.Ros2Node;
-import us.ihmc.ros2.Ros2Publisher;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.SLEEP;
-import static us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController.KSTState.STREAMING;
 import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
 
 public class StepConstraintToolboxController extends ToolboxController
@@ -50,6 +33,14 @@ public class StepConstraintToolboxController extends ToolboxController
 
    private final IHMCRealtimeROS2Publisher<PlanarRegionMessage> planarRegionConstraintPublisher;
 
+   private final OneDoFJointBasics[] oneDoFJoints;
+   private final HumanoidReferenceFrames referenceFrames;
+
+   private final AtomicReference<RobotConfigurationData> configurationData = new AtomicReference<>();
+   private final AtomicReference<CapturabilityBasedStatus> capturabilityBasedStatus = new AtomicReference<>();
+   private final AtomicReference<FootstepStatusMessage> footstepStatusMessage = new AtomicReference<>();
+   private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
+
    public StepConstraintToolboxController(StatusMessageOutputManager statusOutputManager,
                                           IHMCRealtimeROS2Publisher<PlanarRegionMessage> planarRegionConstraintPublisher,
                                           WalkingControllerParameters walkingControllerParameters,
@@ -61,8 +52,15 @@ public class StepConstraintToolboxController extends ToolboxController
 
       this.planarRegionConstraintPublisher = planarRegionConstraintPublisher;
       this.fullRobotModel = fullRobotModel;
-      stepConstraintCalculator = new StepConstraintCalculator(walkingControllerParameters, fullRobotModel, time, gravityZ);
+      this.referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
+      stepConstraintCalculator = new StepConstraintCalculator(walkingControllerParameters,
+                                                              referenceFrames.getSoleZUpFrames(),
+                                                              referenceFrames.getCenterOfMassFrame(),
+                                                              time,
+                                                              gravityZ);
+
+      this.oneDoFJoints = getAllJointsExcludingHands(fullRobotModel);
 
       isDone.set(false);
    }
@@ -85,11 +83,46 @@ public class StepConstraintToolboxController extends ToolboxController
             initialTimestamp = System.nanoTime();
          time.set(Conversions.nanosecondsToSeconds(System.nanoTime() - initialTimestamp));
 
+         RobotConfigurationData configurationData = this.configurationData.getAndSet(null);
+         if (configurationData != null)
+         {
+            KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(configurationData, fullRobotModel.getRootJoint(), oneDoFJoints);
+            referenceFrames.updateFrames();
+         }
+
+         CapturabilityBasedStatus capturabilityBasedStatus = this.capturabilityBasedStatus.getAndSet(null);
+         if (capturabilityBasedStatus != null)
+         {
+            stepConstraintCalculator.setRightFootSupportPolygon(capturabilityBasedStatus.getRightFootSupportPolygon2d());
+            stepConstraintCalculator.setLeftFootSupportPolygon(capturabilityBasedStatus.getLeftFootSupportPolygon2d());
+            stepConstraintCalculator.setOmega(capturabilityBasedStatus.getOmega());
+            stepConstraintCalculator.setCapturePoint(capturabilityBasedStatus.getCapturePoint2d());
+         }
+
+         FootstepStatusMessage footstepStatusMessage = this.footstepStatusMessage.getAndSet(null);
+         if (footstepStatusMessage != null)
+         {
+            if (FootstepStatus.fromByte(footstepStatusMessage.getFootstepStatus()) == FootstepStatus.STARTED)
+            {
+               SimpleStep simpleStep = new SimpleStep(footstepStatusMessage, time.getDoubleValue());
+               stepConstraintCalculator.setCurrentStep(simpleStep);
+            }
+            else
+            {
+               stepConstraintCalculator.reset();
+            }
+         }
+
+         PlanarRegionsListMessage planarRegions = this.planarRegions.getAndSet(null);
+         if (planarRegions != null)
+         {
+            stepConstraintCalculator.setPlanarRegions(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegions));
+         }
+
          stepConstraintCalculator.update();
 
          if (stepConstraintCalculator.constraintRegionChanged())
             planarRegionConstraintPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionMessage(stepConstraintCalculator.getConstraintRegion()));
-
       }
       catch (Throwable e)
       {
@@ -121,22 +154,22 @@ public class StepConstraintToolboxController extends ToolboxController
 
    public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
-      stepConstraintCalculator.updateRobotConfigurationData(newConfigurationData);
+      this.configurationData.set(newConfigurationData);
    }
 
    public void updateCapturabilityBasedStatus(CapturabilityBasedStatus newStatus)
    {
-      stepConstraintCalculator.updateCapturabilityBasedStatus(newStatus);
+      this.capturabilityBasedStatus.set(newStatus);
    }
 
    public void updateFootstepStatus(FootstepStatusMessage footstepStatusMessage)
    {
-      stepConstraintCalculator.updateFootstepStatus(footstepStatusMessage);
+      this.footstepStatusMessage.set(footstepStatusMessage);
    }
 
    public void updatePlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
    {
-      stepConstraintCalculator.updatePlanarRegions(planarRegionsListMessage);
+      this.planarRegions.set(planarRegionsListMessage);
    }
 
    public double getTime()
