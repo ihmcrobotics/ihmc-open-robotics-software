@@ -11,7 +11,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2TopicQualifier;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.common.SampleInfo;
@@ -68,7 +68,7 @@ public class RobotTimeBasedExecutorService
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, createTopicNameGenerator(robotName), robotConfigurationDataListener);
    }
 
-   private static MessageTopicNameGenerator createTopicNameGenerator(String robotName)
+   private static ROS2MessageTopicNameGenerator createTopicNameGenerator(String robotName)
    {
       return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.HUMANOID_CONTROL_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
    }
@@ -165,7 +165,7 @@ public class RobotTimeBasedExecutorService
       AtomicDouble estimatedRealtimeRate = new AtomicDouble(1.0);
 
       // Create a thread that estimates the current realtime rate.
-      MessageTopicNameGenerator topicNameGenerator = createTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator topicNameGenerator = createTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, topicNameGenerator, new NewMessageListener<RobotConfigurationData>()
       {
          private final SampleInfo sampleInfo = new SampleInfo();

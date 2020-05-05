@@ -7,7 +7,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.ros2.RealtimeRos2Node;
@@ -48,7 +48,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
     * @param publishPeriod               period in nanoseconds to publish.
     */
    public RobotConfigurationDataPublisher(RealtimeRos2Node realtimeRos2Node,
-                                          MessageTopicNameGenerator publisherTopicNameGenerator,
+                                          ROS2MessageTopicNameGenerator publisherTopicNameGenerator,
                                           FloatingJointStateReadOnly rootJointSensorData,
                                           List<? extends OneDoFJointStateReadOnly> jointSensorData,
                                           List<? extends IMUSensorReadOnly> imuSensorData,

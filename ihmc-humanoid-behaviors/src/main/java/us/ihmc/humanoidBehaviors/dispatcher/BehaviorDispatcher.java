@@ -14,7 +14,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -99,7 +99,7 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       SimpleDoNothingBehavior simpleForwardingBehavior = new SimpleDoNothingBehavior(robotName, ros2Node);
       addBehavior(stopBehavior, simpleForwardingBehavior);
 
-      MessageTopicNameGenerator publisherTopicNameGenerator = IHMCHumanoidBehaviorManager.getPublisherTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator publisherTopicNameGenerator = IHMCHumanoidBehaviorManager.getPublisherTopicNameGenerator(robotName);
       behaviorStatusPublisher = ROS2Tools.createPublisher(ros2Node, BehaviorStatusPacket.class, publisherTopicNameGenerator);
       behaviorControlModeResponsePublisher = ROS2Tools.createPublisher(ros2Node, BehaviorControlModeResponsePacket.class, publisherTopicNameGenerator);
 

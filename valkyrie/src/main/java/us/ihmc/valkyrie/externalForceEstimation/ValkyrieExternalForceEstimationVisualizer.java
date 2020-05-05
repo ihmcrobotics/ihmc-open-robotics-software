@@ -9,7 +9,7 @@ import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.Exte
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -38,8 +38,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerStateListener
 {
    private final RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "valkyrie_wrench_estimation_visualizer");
-   private final MessageTopicNameGenerator subTopicNameGenerator;
-   private final MessageTopicNameGenerator pubTopicNameGenerator;
+   private final ROS2MessageTopicNameGenerator subTopicNameGenerator;
+   private final ROS2MessageTopicNameGenerator pubTopicNameGenerator;
    private final int endEffectorHashCode;
    private final Vector3D externalForcePointOffset = new Vector3D();
    private String endEffectorName;

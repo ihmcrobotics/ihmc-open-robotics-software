@@ -13,7 +13,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.humanoidRobotics.communication.subscribers.ValkyrieHandFingerTrajectoryMessageSubscriber;
@@ -56,7 +56,7 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
    private final MirroredYoVariableRegistry registry;
 
    public SimulatedValkyrieFingerController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node, DRCRobotModel robotModel,
-                                            MessageTopicNameGenerator pubTopicNameGenerator, MessageTopicNameGenerator subTopicNameGenerator)
+                                            ROS2MessageTopicNameGenerator pubTopicNameGenerator, ROS2MessageTopicNameGenerator subTopicNameGenerator)
    {
       super((int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
 

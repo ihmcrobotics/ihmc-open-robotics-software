@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
@@ -64,7 +64,7 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
       variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
-      MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(quadrupedTestFactory.getRobotName());
+      ROS2MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(quadrupedTestFactory.getRobotName());
       soleTrajectoryPublisher = ROS2Tools.createPublisher(stepTeleopManager.getRos2Node(), SoleTrajectoryMessage.class, controllerSubGenerator);
 
       QuadrupedTestBehaviors.standUp(conductor, variables);
@@ -99,7 +99,7 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
       variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
-      MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(quadrupedTestFactory.getRobotName());
+      ROS2MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(quadrupedTestFactory.getRobotName());
       soleTrajectoryPublisher = ROS2Tools.createPublisher(stepTeleopManager.getRos2Node(), SoleTrajectoryMessage.class, controllerSubGenerator);
 
       QuadrupedTestBehaviors.standUp(conductor, variables);

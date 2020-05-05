@@ -11,6 +11,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Callback;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 
@@ -29,13 +30,13 @@ class ROS2ToolsTest
       assertEquals("/ihmc/atlas/rea/input/rea_state_request",
                    ROS2Tools.generateDefaultTopicName(REAStateRequestMessage.class, "atlas", "rea", ROS2TopicQualifier.INPUT));
 
-      MessageTopicNameGenerator defaultTopicNameGenerator = ROS2Tools.getDefaultTopicNameGenerator();
+      ROS2MessageTopicNameGenerator defaultTopicNameGenerator = ROS2Tools.getDefaultTopicNameGenerator();
       assertEquals("/ihmc/rea_state_request", defaultTopicNameGenerator.generateTopicName(REAStateRequestMessage.class));
 
-      MessageTopicNameGenerator defaultTopicNameGeneratorWithRobot = ROS2Tools.getDefaultTopicNameGenerator("atlas");
+      ROS2MessageTopicNameGenerator defaultTopicNameGeneratorWithRobot = ROS2Tools.getDefaultTopicNameGenerator("atlas");
       assertEquals("/ihmc/atlas/rea_state_request", defaultTopicNameGeneratorWithRobot.generateTopicName(REAStateRequestMessage.class));
 
-      MessageTopicNameGenerator defaultTopicNameGenerator3 = ROS2Tools.getTopicNameGenerator("atlas", "rea", ROS2TopicQualifier.OUTPUT);
+      ROS2MessageTopicNameGenerator defaultTopicNameGenerator3 = ROS2Tools.getTopicNameGenerator("atlas", "rea", ROS2TopicQualifier.OUTPUT);
       assertEquals("/ihmc/atlas/rea/output/rea_state_request", defaultTopicNameGenerator3.generateTopicName(REAStateRequestMessage.class));
    }
 

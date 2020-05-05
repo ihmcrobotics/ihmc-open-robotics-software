@@ -41,7 +41,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -116,10 +116,10 @@ public abstract class KinematicsStreamingToolboxControllerTest
    protected Ros2Node ros2Node;
    protected IHMCROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
    protected IHMCROS2Publisher<ToolboxStateMessage> statePublisher;
-   protected MessageTopicNameGenerator controllerSubGenerator;
-   protected MessageTopicNameGenerator controllerPubGenerator;
-   protected MessageTopicNameGenerator toolboxSubGenerator;
-   protected MessageTopicNameGenerator toolboxPubGenerator;
+   protected ROS2MessageTopicNameGenerator controllerSubGenerator;
+   protected ROS2MessageTopicNameGenerator controllerPubGenerator;
+   protected ROS2MessageTopicNameGenerator toolboxSubGenerator;
+   protected ROS2MessageTopicNameGenerator toolboxPubGenerator;
    protected ScheduledExecutorService executor;
 
    /**

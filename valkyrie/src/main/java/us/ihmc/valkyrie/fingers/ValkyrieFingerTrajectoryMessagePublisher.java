@@ -5,7 +5,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.handControl.HandFingerTrajectoryMessagePublisher;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.valkyrie.network.ValkyrieMessageTools;
@@ -14,7 +14,7 @@ public class ValkyrieFingerTrajectoryMessagePublisher implements HandFingerTraje
 {
    private final IHMCROS2Publisher<ValkyrieHandFingerTrajectoryMessage> publisher;
 
-   public ValkyrieFingerTrajectoryMessagePublisher(Ros2Node ros2Node, MessageTopicNameGenerator subscriberTopicNameGenerator)
+   public ValkyrieFingerTrajectoryMessagePublisher(Ros2Node ros2Node, ROS2MessageTopicNameGenerator subscriberTopicNameGenerator)
    {
       publisher = ROS2Tools.createPublisher(ros2Node, ValkyrieHandFingerTrajectoryMessage.class, subscriberTopicNameGenerator);
    }

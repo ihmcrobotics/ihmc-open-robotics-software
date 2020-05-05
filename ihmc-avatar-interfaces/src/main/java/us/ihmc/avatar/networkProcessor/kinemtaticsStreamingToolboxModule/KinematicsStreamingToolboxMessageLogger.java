@@ -18,7 +18,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
@@ -72,14 +72,14 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation,
                                                   "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "KinematicsStreamingToolboxMessageLogger"));
 
-      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotConfigurationData.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            CapturabilityBasedStatus.class,
                                            controllerPubGenerator,
                                            s -> capturabilityBasedStatus.set(s.takeNextData()));
 
-      MessageTopicNameGenerator toolboxSubTopicNameGenerator = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator toolboxSubTopicNameGenerator = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            ToolboxStateMessage.class,
                                            toolboxSubTopicNameGenerator,
@@ -93,7 +93,7 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
                                            toolboxSubTopicNameGenerator,
                                            s -> kinematicsStreamingToolboxInputMessage.set(s.takeNextData()));
 
-      MessageTopicNameGenerator toolboxPubTopicNameGenerator = KinematicsStreamingToolboxModule.getPublisherTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator toolboxPubTopicNameGenerator = KinematicsStreamingToolboxModule.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            KinematicsToolboxOutputStatus.class,
                                            toolboxPubTopicNameGenerator,

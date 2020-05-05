@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -45,7 +45,7 @@ public class RobotConfigurationDataPublisherFactory
    private final OptionalFactoryField<RobotMotionStatusHolder> robotMotionStatusHolderField = new OptionalFactoryField<>("robotMotionStatusHolder");
 
    private final RequiredFactoryField<RealtimeRos2Node> realtimeRos2NodeField = new RequiredFactoryField<>("realtimeRos2Node");
-   private final RequiredFactoryField<MessageTopicNameGenerator> publisherTopicNameGeneratorField = new RequiredFactoryField<>("publisherTopicNameGenerator");
+   private final RequiredFactoryField<ROS2MessageTopicNameGenerator> publisherTopicNameGeneratorField = new RequiredFactoryField<>("publisherTopicNameGenerator");
 
    public RobotConfigurationDataPublisherFactory()
    {
@@ -177,7 +177,7 @@ public class RobotConfigurationDataPublisherFactory
     * @param ros2Node                    the real-time node to create the publisher with.
     * @param publisherTopicNameGenerator the generator to use for creating the topic name.
     */
-   public void setROS2Info(RealtimeRos2Node ros2Node, MessageTopicNameGenerator publisherTopicNameGenerator)
+   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2MessageTopicNameGenerator publisherTopicNameGenerator)
    {
       realtimeRos2NodeField.set(ros2Node);
       publisherTopicNameGeneratorField.set(publisherTopicNameGenerator);

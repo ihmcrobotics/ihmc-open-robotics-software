@@ -8,7 +8,7 @@ import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraBri
 import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraBridge.SensorFrameInitializationTransformer;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -34,12 +34,12 @@ public class AtlasPointCloudSensorManager
    public AtlasPointCloudSensorManager(FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node, String rcdTopicName,
                                        RobotROSClockCalculator rosClockCalculator, boolean useTrackingData)
    {
-      MessageTopicNameGenerator depthCloudTopicNameGenerator;
+      ROS2MessageTopicNameGenerator depthCloudTopicNameGenerator;
       depthCloudTopicNameGenerator = (Class<?> T) -> ROS2Tools.IHMC_ROOT.type(T).toString() + depthTopicNameSuffixToPublish;
       realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName, depthCloudTopicNameGenerator);
       realsenseDepthPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
 
-      MessageTopicNameGenerator trackingCameraTopicNameGenerator;
+      ROS2MessageTopicNameGenerator trackingCameraTopicNameGenerator;
       trackingCameraTopicNameGenerator = (Class<?> T) -> ROS2Tools.IHMC_ROOT.type(T).toString() + trackingTopicNameSuffixToPublish;
       trackingCameraPublisher = new TrackingCameraBridge(modelFactory, ros2Node, rcdTopicName, trackingCameraTopicNameGenerator);
       trackingCameraPublisher.setROSClockCalculator(rosClockCalculator);

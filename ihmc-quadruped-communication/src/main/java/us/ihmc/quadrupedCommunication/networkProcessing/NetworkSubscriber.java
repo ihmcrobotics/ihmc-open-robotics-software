@@ -8,7 +8,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.net.PacketConsumer;
@@ -61,10 +61,10 @@ public class NetworkSubscriber
 
    private final RealtimeRos2Node realtimeRos2Node;
 
-   private final MessageTopicNameGenerator subscriberTopicNameGenerator;
+   private final ROS2MessageTopicNameGenerator subscriberTopicNameGenerator;
 
-   public NetworkSubscriber(MessageTopicNameGenerator subscriberTopicNameGenerator, CommandInputManager controllerCommandInputManager,
-                            MessageTopicNameGenerator publisherTopicNameGenerator, OutputManager messageOutputManager, RealtimeRos2Node realtimeRos2Node)
+   public NetworkSubscriber(ROS2MessageTopicNameGenerator subscriberTopicNameGenerator, CommandInputManager controllerCommandInputManager,
+                            ROS2MessageTopicNameGenerator publisherTopicNameGenerator, OutputManager messageOutputManager, RealtimeRos2Node realtimeRos2Node)
    {
       this.subscriberTopicNameGenerator = subscriberTopicNameGenerator;
       this.controllerCommandInputManager = controllerCommandInputManager;
@@ -105,7 +105,7 @@ public class NetworkSubscriber
    }
 
    public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
-                                                                            MessageTopicNameGenerator subscriberTopicNameGenerator, int expectedMessageSize,
+                                                                            ROS2MessageTopicNameGenerator subscriberTopicNameGenerator, int expectedMessageSize,
                                                                             MessageUnpacker<T> messageUnpacker)
    {
       final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
@@ -142,12 +142,12 @@ public class NetworkSubscriber
       }
    }
 
-   public void addMessageCollector(MessageIDExtractor messageIDExtractor, MessageTopicNameGenerator messageTopicNameGenerator)
+   public void addMessageCollector(MessageIDExtractor messageIDExtractor, ROS2MessageTopicNameGenerator messageTopicNameGenerator)
    {
       addMessageCollectors(messageIDExtractor, 1, messageTopicNameGenerator);
    }
 
-   public void addMessageCollectors(MessageIDExtractor messageIDExtractor, int numberOfSimultaneousCollectionsToSupport, MessageTopicNameGenerator messageTopicNameGenerator)
+   public void addMessageCollectors(MessageIDExtractor messageIDExtractor, int numberOfSimultaneousCollectionsToSupport, ROS2MessageTopicNameGenerator messageTopicNameGenerator)
    {
       IHMCRealtimeROS2Publisher<MessageCollectionNotification> publisher = createPublisher(MessageCollectionNotification.class, messageTopicNameGenerator);
       listOfSupportedOutputMessages.add(MessageCollectionNotification.class);
@@ -220,7 +220,7 @@ public class NetworkSubscriber
       }
    }
 
-   private <T extends Settable<T>> IHMCRealtimeROS2Publisher<T> createPublisher(Class<T> messageClass, MessageTopicNameGenerator topicNameGenerator)
+   private <T extends Settable<T>> IHMCRealtimeROS2Publisher<T> createPublisher(Class<T> messageClass, ROS2MessageTopicNameGenerator topicNameGenerator)
    {
       String topicName = topicNameGenerator.generateTopicName(messageClass);
       IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisher(realtimeRos2Node, messageClass, topicName);
