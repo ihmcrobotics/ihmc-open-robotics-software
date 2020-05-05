@@ -60,7 +60,7 @@ public class TrackingCameraBridge
    public TrackingCameraBridge(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
-           ROS2Tools.getDefaultTopicNameGenerator());
+           ROS2Tools.IHMC_ROOT);
    }
 
    public TrackingCameraBridge(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName,

@@ -18,7 +18,7 @@ public class ObjectWeightBehavior extends AbstractBehavior
    {
       super(robotName, ros2Node);
 
-      publisher = createPublisher(ObjectWeightPacket.class, ROS2Tools.getDefaultTopicNameGenerator());
+      publisher = createPublisher(ObjectWeightPacket.class, ROS2Tools.IHMC_ROOT);
    }
 
    @Override

@@ -37,7 +37,7 @@ public class BlobFilteredSphereDetectionBehavior extends SphereDetectionBehavior
    {
       super(robotName, ros2Node, referenceFrames);
 
-      createSubscriber(PointCloudWorldPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), pointCloudQueue::put); // FIXME That stream is no more
+      createSubscriber(PointCloudWorldPacket.class, ROS2Tools.IHMC_ROOT, pointCloudQueue::put); // FIXME That stream is no more
 
       coloredCircularBlobDetectorBehaviorService = new ColoredCircularBlobDetectorBehaviorService(robotName, ros2Node);
 

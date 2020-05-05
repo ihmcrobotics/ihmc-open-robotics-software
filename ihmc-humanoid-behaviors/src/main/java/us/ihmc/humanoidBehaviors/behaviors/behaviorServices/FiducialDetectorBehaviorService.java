@@ -30,7 +30,7 @@ public class FiducialDetectorBehaviorService extends GoalDetectorBehaviorService
    {
       super(robotName, ThreadName, ros2Node);
 
-      createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), videoPacketQueue::put);
+      createSubscriber(VideoPacket.class, ROS2Tools.IHMC_ROOT, videoPacketQueue::put);
 
       transformFromReportedToFiducialFrame = new RigidBodyTransform();
       fiducialDetectorFromCameraImages = new FiducialDetectorFromCameraImages(transformFromReportedToFiducialFrame, getYoVariableRegistry(),

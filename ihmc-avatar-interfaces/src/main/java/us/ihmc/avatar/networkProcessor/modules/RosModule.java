@@ -141,8 +141,7 @@ public class RosModule implements CloseableAndDisposable
       new IHMCETHRosLocalizationUpdateSubscriber(robotName, rosMainNode, ros2Node, rosClockCalculator::computeRobotMonotonicTime);
       RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
       ROS2Tools.createCallbackSubscription(ros2Node,
-                                           LocalizationPacket.class,
-                                           ROS2Tools.getDefaultTopicNameGenerator(),
+                                           LocalizationPacket.class, ROS2Tools.IHMC_ROOT,
                                            s -> rosLocalizationServiceClient.receivedPacket(s.takeNextData()));
    }
 
