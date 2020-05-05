@@ -6,8 +6,6 @@ import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.util.function.Supplier;
 
-import org.apache.commons.lang3.StringUtils;
-
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
@@ -50,7 +48,7 @@ public class ROS2Tools
    public static final String REA_MODULE_NAME = "/rea";
    public static final String STEREO_REA_MODULE_NAME = "/srea";
    public static final String MAPPING_MODULE_NAME = "/map";
-   public static final String REALSENSE_SLAM_MODULE_NAME = "/planar_regions_list_slam";
+   public static final String REALSENSE_SLAM_MODULE_NAME = "/slam";
 
    public static final String REA_CUSTOM_REGION_NAME = "/custom_region";
 
@@ -78,12 +76,17 @@ public class ROS2Tools
 
    public static final ROS2TopicName REA_SUPPORT_REGIONS = REA.name(REA_CUSTOM_REGION_NAME);
 
+   @Deprecated
    public enum ROS2TopicQualifier
    {
-      INPUT(INPUT_TOPIC_QUALIFIER), OUTPUT(OUTPUT_TOPIC_QUALIFIER);
+      @Deprecated
+      INPUT(INPUT_TOPIC_QUALIFIER),
+      @Deprecated
+      OUTPUT(OUTPUT_TOPIC_QUALIFIER);
 
       private final String name;
 
+      @Deprecated
       ROS2TopicQualifier(String name)
       {
          this.name = name;
@@ -99,8 +102,10 @@ public class ROS2Tools
    /**
     * Generator to automatically generate a topic name based on the type of message to send.
     */
+   @Deprecated
    public static interface MessageTopicNameGenerator
    {
+      @Deprecated
       String generateTopicName(Class<?> messageType);
    }
 
@@ -199,21 +204,29 @@ public class ROS2Tools
       }
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator,
+   @Deprecated
+   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node,
+                                                                    Class<T> messageType,
+                                                                    MessageTopicNameGenerator topicNameGenerator,
                                                                     NewMessageListener<T> newMessageListener)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
       return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener);
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName,
+   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node,
+                                                                    Class<T> messageType,
+                                                                    String topicName,
                                                                     NewMessageListener<T> newMessageListener)
    {
       return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener, RUNTIME_EXCEPTION);
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName,
-                                                                    NewMessageListener<T> newMessageListener, ExceptionHandler exceptionHandler)
+   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node,
+                                                                    Class<T> messageType,
+                                                                    String topicName,
+                                                                    NewMessageListener<T> newMessageListener,
+                                                                    ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -227,20 +240,24 @@ public class ROS2Tools
       }
    }
 
-   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2NodeInterface ros2Node, Class<T> messageType,
+   @Deprecated
+   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2NodeInterface ros2Node,
+                                                                        Class<T> messageType,
                                                                         MessageTopicNameGenerator topicNameGenerator)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
       return createQueuedSubscription(ros2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2NodeInterface ros2Node, Class<T> messageType,
-                                                                        String topicName)
+   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName)
    {
       return createQueuedSubscription(ros2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
+   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2NodeInterface ros2Node,
+                                                                        Class<T> messageType,
+                                                                        String topicName,
+                                                                        ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -256,21 +273,29 @@ public class ROS2Tools
       }
    }
 
-   public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator,
+   @Deprecated
+   public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node,
+                                                     Class<T> messageType,
+                                                     MessageTopicNameGenerator topicNameGenerator,
                                                      NewMessageListener<T> newMessageListener)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
       createCallbackSubscription(realtimeRos2Node, messageType, topicName, newMessageListener);
    }
 
-   public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName,
+   public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node,
+                                                     Class<T> messageType,
+                                                     String topicName,
                                                      NewMessageListener<T> newMessageListener)
    {
       createCallbackSubscription(realtimeRos2Node, messageType, topicName, newMessageListener, RUNTIME_EXCEPTION);
    }
 
-   public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName,
-                                                     NewMessageListener<T> newMessageListener, ExceptionHandler exceptionHandler)
+   public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node,
+                                                     Class<T> messageType,
+                                                     String topicName,
+                                                     NewMessageListener<T> newMessageListener,
+                                                     ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -283,7 +308,10 @@ public class ROS2Tools
       }
    }
 
-   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
+   @Deprecated
+   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node,
+                                                                          Class<T> messageType,
+                                                                          MessageTopicNameGenerator topicNameGenerator)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
       return createQueuedSubscription(realtimeRos2Node, messageType, topicName, RUNTIME_EXCEPTION);
@@ -294,7 +322,10 @@ public class ROS2Tools
       return createQueuedSubscription(realtimeRos2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName, ExceptionHandler exceptionHandler)
+   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node,
+                                                                          Class<T> messageType,
+                                                                          String topicName,
+                                                                          ExceptionHandler exceptionHandler)
    {
       try
       {
@@ -308,7 +339,9 @@ public class ROS2Tools
       }
    }
 
-   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, Class<T> messageType,
+   @Deprecated
+   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node,
+                                                                  Class<T> messageType,
                                                                   MessageTopicNameGenerator topicNameGenerator)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
@@ -320,7 +353,9 @@ public class ROS2Tools
       return createPublisher(realtimeRos2Node, messageType, topicName, RUNTIME_EXCEPTION);
    }
 
-   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName,
+   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node,
+                                                                  Class<T> messageType,
+                                                                  String topicName,
                                                                   ExceptionHandler exceptionHandler)
    {
       try
@@ -335,6 +370,7 @@ public class ROS2Tools
       }
    }
 
+   @Deprecated
    public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
@@ -377,6 +413,7 @@ public class ROS2Tools
     * </ul>
     * </p>
     *
+    * @deprecated
     * @return the default generator.
     */
    public static MessageTopicNameGenerator getDefaultTopicNameGenerator()
@@ -401,6 +438,7 @@ public class ROS2Tools
     * </ul>
     * </p>
     *
+    * @deprecated
     * @return the default generator.
     */
    public static MessageTopicNameGenerator getDefaultTopicNameGenerator(String robotName)
@@ -425,6 +463,7 @@ public class ROS2Tools
     * </ul>
     * </p>
     *
+    * @deprecated
     * @return the generator.
     */
    public static MessageTopicNameGenerator getTopicNameGenerator(String robotName, String moduleName, ROS2TopicQualifier qualifier)
@@ -436,6 +475,7 @@ public class ROS2Tools
     * Generates a default topic name using the class name of the message, for instance:<br>
     * For {@code TextToSpeechPacket} this generates the topic name: {@code "/ihmc/text_to_speech"}.
     *
+    * @deprecated
     * @param messageClass the class of the message to generate the topic name for.
     * @return the topic name.
     */
@@ -449,6 +489,7 @@ public class ROS2Tools
     * For {@code TextToSpeechPacket} when running Valkyrie this generates the topic name:
     * {@code "/ihmc/valkyrie/text_to_speech"}.
     *
+    * @deprecated
     * @param messageClass the class of the message to generate the topic name for.
     * @return the topic name.
     */
@@ -464,55 +505,27 @@ public class ROS2Tools
     * {@code "/ihmc/valkyrie/" + moduleName.toLowerCase() + qualifier + "/text_to_speech"}.
     *
     *
+    * @deprecated
     * @param messageClass the class of the message to generate the topic name for.
     * @return the topic name.
     */
    public static String generateDefaultTopicName(Class<?> messageClass, String robotName, String moduleName, ROS2TopicQualifier qualifier)
    {
-      String prefix = IHMC_TOPIC_PREFIX;
-
-      if (robotName != null && !robotName.isEmpty())
-      {
-         if (!robotName.startsWith("/"))
-            prefix += "/" + robotName.toLowerCase();
-         else
-            prefix += robotName.toLowerCase();
-      }
-
-      if (moduleName != null && !moduleName.isEmpty())
-      {
-         if (!moduleName.startsWith("/"))
-            prefix += "/" + moduleName.toLowerCase();
-         else
-            prefix += moduleName.toLowerCase();
-      }
+      ROS2TopicName topicName = IHMC_ROOT.type(messageClass).robot(robotName).module(moduleName);
 
       if (qualifier != null)
-         prefix += qualifier.toString();
+      {
+         if (qualifier.equals(ROS2TopicQualifier.INPUT)) // TODO fix this if ROS2TopicName gets a better API
+         {
+            topicName = topicName.input();
+         }
+         else
+         {
+            topicName = topicName.output();
+         }
+      }
 
-      return appendTypeToTopicName(prefix, messageClass);
-   }
-
-   /**
-    * Appends to the given prefix, the simple name of the message class in a ROS topic fashion, for
-    * instance:
-    * <ul>
-    * <li>{@code MessageCollection} becomes: {@code "/message_collection"}.
-    * <li>{@code TextToSpeechPacket} becomes: {@code "/text_to_speech"}.
-    * <li>{@code WholeBodyTrajectoryMessage} becomes: {@code "/whole_body_trajectory"}.
-    * </ul>
-    *
-    * @param prefix the prefix of the returned {@code String}.
-    * @param messageClass used for its simple name to generate a suffix.
-    * @return the composed {@code String}.
-    */
-   public static String appendTypeToTopicName(String prefix, Class<?> messageClass)
-   {
-      String topicName = messageClass.getSimpleName();
-      topicName = StringUtils.removeEnd(topicName, "Packet"); // This makes BehaviorControlModePacket => BehaviorControlMode
-      topicName = StringUtils.removeEnd(topicName, "Message"); // This makes ArmTrajectoryMessage => ArmTrajectory
-      topicName = "/" + ROS2TopicNameTools.toROSTopicFormat(topicName); // This makes ArmTrajectory => arm_trajectory & handle acronyms as follows: REAStateRequest => rea_state_request
-      return prefix + topicName;
+      return topicName.toString();
    }
 
    public static final String pubSubTypeGetterName = "getPubSubType";
