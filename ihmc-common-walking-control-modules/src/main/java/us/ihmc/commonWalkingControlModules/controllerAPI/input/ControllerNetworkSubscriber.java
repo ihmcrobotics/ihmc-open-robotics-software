@@ -20,6 +20,7 @@ import us.ihmc.communication.net.PacketConsumer;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.log.LogTools;
+import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 /**
@@ -209,7 +210,7 @@ public class ControllerNetworkSubscriber
       for (int i = 0; i < listOfSupportedControlMessages.size(); i++)
       { // Creating the subscribers
          Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
-         T messageLocalInstance = ROS2Tools.newMessageInstance(messageClass);
+         T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
          String topicName = subscriberTopicNameGenerator.generateTopicName(messageClass);
 
          ROS2Tools.createCallbackSubscription(realtimeRos2Node, messageClass, topicName, s ->

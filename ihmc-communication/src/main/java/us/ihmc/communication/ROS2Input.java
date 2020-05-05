@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.tools.thread.TypedNotification;
 
@@ -35,7 +36,7 @@ public class ROS2Input<T>
 
    public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName)
    {
-      this(ros2Node, messageType, topicName, ROS2Tools.newMessageInstance(messageType), message -> true);
+      this(ros2Node, messageType, topicName, ROS2TopicNameTools.newMessageInstance(messageType), message -> true);
    }
 
    public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName, T initialValue, MessageFilter<T> messageFilter)

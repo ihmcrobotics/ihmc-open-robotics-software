@@ -18,6 +18,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression.PointCoordinateConsumer;
 import us.ihmc.robotEnvironmentAwareness.fusion.tools.PointCloudProjectionHelper;
+import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.Ros2Node;
 
 public abstract class AbstractObjectParameterCalculator<T extends Packet<?>>
@@ -35,7 +36,7 @@ public abstract class AbstractObjectParameterCalculator<T extends Packet<?>>
       this.messageType = messageType;
       pointCloudToCalculate = new ArrayList<Point3DBasics>();
       packetPublisher = ROS2Tools.createPublisher(ros2Node, messageType, ROS2Tools.getDefaultTopicNameGenerator());
-      newPacket.set(ROS2Tools.newMessageInstance(messageType));
+      newPacket.set(ROS2TopicNameTools.newMessageInstance(messageType));
    }
 
    public void trimPointCloudInROI(StereoVisionPointCloudMessage pointCloudMessage, RegionOfInterest roi)
@@ -64,7 +65,7 @@ public abstract class AbstractObjectParameterCalculator<T extends Packet<?>>
 
    public void initialize()
    {
-      newPacket.set(ROS2Tools.newMessageInstance(messageType));
+      newPacket.set(ROS2TopicNameTools.newMessageInstance(messageType));
       pointCloudToCalculate.clear();
    }
 

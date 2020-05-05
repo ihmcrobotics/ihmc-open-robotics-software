@@ -24,6 +24,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.partNames.NeckJointName;
+import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.Ros2Node;
 
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -78,7 +79,7 @@ public class DirectRobotUIController extends Group
       }
 
       goHomePublisher = ROS2Tools.createPublisher(ros2Node,
-                                                  ROS2Tools.newMessageInstance(GoHomeCommand.class).getMessageClass(),
+                                                  ROS2TopicNameTools.newMessageInstance(GoHomeCommand.class).getMessageClass(),
                                                   ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
 
       supportRegionsParametersPublisher = ROS2Tools.createPublisher(ros2Node,
