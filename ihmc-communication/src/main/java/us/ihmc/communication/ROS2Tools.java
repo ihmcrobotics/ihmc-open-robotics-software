@@ -341,11 +341,6 @@ public class ROS2Tools
       return createPublisher(ros2Node, messageType, topicName);
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
-   {
-      return new IHMCROS2Publisher<>(ros2Node, messageType, robotName, identifier);
-   }
-
    public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName)
    {
       return createPublisher(ros2Node, messageType, topicName, RUNTIME_EXCEPTION);
