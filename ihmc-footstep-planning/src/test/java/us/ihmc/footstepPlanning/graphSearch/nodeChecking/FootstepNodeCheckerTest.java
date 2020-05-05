@@ -17,6 +17,7 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAnd
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -387,15 +388,21 @@ public class FootstepNodeCheckerTest
    private static final int iters = 10000;
 
    @Test
-   public void testSnappingToInclineWithSimpleSnapper()
+   public void testSnappingToIncline()
    {
-      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters()
+      FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters()
       {
          // don't use 45
          @Override
          public double getMinimumSurfaceInclineRadians()
          {
             return Math.toRadians(37.0);
+         }
+
+         @Override
+         public boolean getWiggleWhilePlanning()
+         {
+            return true;
          }
       };
 
@@ -404,9 +411,9 @@ public class FootstepNodeCheckerTest
    }
 
    @Test
-   public void testSnappingToInclineWithSnapAndWiggler()
+   public void testSnapAndWiggleOnIncline()
    {
-      FootstepPlannerParametersReadOnly parameters = new DefaultFootstepPlannerParameters()
+      FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters()
       {
          // don't use 45
          @Override
@@ -414,14 +421,19 @@ public class FootstepNodeCheckerTest
          {
             return Math.toRadians(37.0);
          }
+
+         @Override
+         public boolean getWiggleWhilePlanning()
+         {
+            return true;
+         }
       };
 
-      // TODO
-//      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
-//      testSnappingToInclinedPlane(parameters, snapper);
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
+      testSnappingToInclinedPlane(parameters, snapper);
    }
 
-   public void testSnappingToInclinedPlane(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapAndWiggler snapper)
+   public void testSnappingToInclinedPlane(FootstepPlannerParametersBasics parameters, FootstepNodeSnapAndWiggler snapper)
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       ConvexPolygon2D polygon = new ConvexPolygon2D();
