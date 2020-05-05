@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.tools.thread.TypedNotification;
@@ -23,28 +22,6 @@ public class ROS2Input<T>
    private ROS2Callback<T> ros2Callback;
    private TypedNotification<T> messageNotification = new TypedNotification<>();
    private List<Consumer<T>> userCallbacks = new ArrayList<>();
-
-   @Deprecated
-   public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType)
-   {
-      this(ros2Node, messageType, null, null, null, ROS2Tools.newMessageInstance(messageType), message -> true);
-   }
-
-   @Deprecated
-   public ROS2Input(Ros2NodeInterface ros2Node,
-                    Class<T> messageType,
-                    String robotName,
-                    String moduleTopicQualifier,
-                    ROS2TopicQualifier ioTopicQualifier,
-                    T initialValue,
-                    MessageFilter<T> messageFilter)
-   {
-      this(ros2Node,
-           messageType,
-           ROS2Tools.generateDefaultTopicName(messageType, robotName, moduleTopicQualifier, ioTopicQualifier),
-           initialValue,
-           messageFilter);
-   }
 
    public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2TopicName topicName)
    {

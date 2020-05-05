@@ -2,7 +2,6 @@ package us.ihmc.communication;
 
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.ROS2TopicName;
@@ -28,17 +27,7 @@ public class ROS2Callback<T>
    @Deprecated
    public ROS2Callback(Ros2NodeInterface ros2Node, Class<T> messageType, Consumer<T> messageCallback)
    {
-      this(ros2Node, messageType, null, null, null, messageCallback);
-   }
-
-   public ROS2Callback(Ros2NodeInterface ros2Node,
-                       Class<T> messageType,
-                       String robotName,
-                       String moduleTopicQualifier,
-                       ROS2TopicQualifier ioTopicQualifier,
-                       Consumer<T> messageCallback)
-   {
-      this(ros2Node, messageType, ROS2Tools.generateDefaultTopicName(messageType, robotName, moduleTopicQualifier, ioTopicQualifier), messageCallback);
+      this(ros2Node, messageType, ROS2Tools.IHMC_ROOT, messageCallback);
    }
 
    public ROS2Callback(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2TopicName topicName, Consumer<T> messageCallback)
