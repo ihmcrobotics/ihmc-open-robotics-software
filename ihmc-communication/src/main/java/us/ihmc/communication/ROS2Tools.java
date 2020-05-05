@@ -71,7 +71,8 @@ public class ROS2Tools
 
    public static final ROS2TopicName REA_SUPPORT_REGIONS = REA.name(REA_CUSTOM_REGION_NAME);
 
-   public final static ExceptionHandler RUNTIME_EXCEPTION = e -> {
+   public final static ExceptionHandler RUNTIME_EXCEPTION = e ->
+   {
       throw new RuntimeException(e);
    };
 
@@ -119,7 +120,8 @@ public class ROS2Tools
     * @return the ROS node.
     */
    public static RealtimeRos2Node createRealtimeRos2Node(PubSubImplementation pubSubImplementation,
-                                                         PeriodicThreadSchedulerFactory periodicThreadSchedulerFactory, String nodeName)
+                                                         PeriodicThreadSchedulerFactory periodicThreadSchedulerFactory,
+                                                         String nodeName)
    {
       return createRealtimeRos2Node(pubSubImplementation, periodicThreadSchedulerFactory, nodeName, RUNTIME_EXCEPTION);
    }
@@ -135,7 +137,8 @@ public class ROS2Tools
     * @return the ROS node.
     */
    public static RealtimeRos2Node createRealtimeRos2Node(PubSubImplementation pubSubImplementation,
-                                                         PeriodicThreadSchedulerFactory periodicThreadSchedulerFactory, String nodeName,
+                                                         PeriodicThreadSchedulerFactory periodicThreadSchedulerFactory,
+                                                         String nodeName,
                                                          ExceptionHandler exceptionHandler)
    {
       try
@@ -376,8 +379,8 @@ public class ROS2Tools
     * </ul>
     * </p>
     *
-    * @deprecated
     * @return the default generator.
+    * @deprecated
     */
    public static ROS2MessageTopicNameGenerator getDefaultTopicNameGenerator()
    {
@@ -401,8 +404,8 @@ public class ROS2Tools
     * </ul>
     * </p>
     *
-    * @deprecated
     * @return the default generator.
+    * @deprecated
     */
    public static ROS2MessageTopicNameGenerator getDefaultTopicNameGenerator(String robotName)
    {
@@ -426,8 +429,8 @@ public class ROS2Tools
     * </ul>
     * </p>
     *
-    * @deprecated
     * @return the generator.
+    * @deprecated
     */
    public static ROS2MessageTopicNameGenerator getTopicNameGenerator(String robotName, String moduleName, ROS2TopicQualifier qualifier)
    {
@@ -438,9 +441,9 @@ public class ROS2Tools
     * Generates a default topic name using the class name of the message, for instance:<br>
     * For {@code TextToSpeechPacket} this generates the topic name: {@code "/ihmc/text_to_speech"}.
     *
-    * @deprecated
     * @param messageClass the class of the message to generate the topic name for.
     * @return the topic name.
+    * @deprecated
     */
    public static String generateDefaultTopicName(Class<?> messageClass)
    {
@@ -452,9 +455,9 @@ public class ROS2Tools
     * For {@code TextToSpeechPacket} when running Valkyrie this generates the topic name:
     * {@code "/ihmc/valkyrie/text_to_speech"}.
     *
-    * @deprecated
     * @param messageClass the class of the message to generate the topic name for.
     * @return the topic name.
+    * @deprecated
     */
    public static String generateDefaultTopicName(Class<?> messageClass, String robotName)
    {
@@ -467,10 +470,9 @@ public class ROS2Tools
     * For {@code TextToSpeechPacket} when running Valkyrie this generates the topic name:<br>
     * {@code "/ihmc/valkyrie/" + moduleName.toLowerCase() + qualifier + "/text_to_speech"}.
     *
-    *
-    * @deprecated
     * @param messageClass the class of the message to generate the topic name for.
     * @return the topic name.
+    * @deprecated
     */
    public static String generateDefaultTopicName(Class<?> messageClass, String robotName, String moduleName, ROS2TopicQualifier qualifier)
    {
