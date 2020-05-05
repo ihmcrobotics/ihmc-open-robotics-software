@@ -14,8 +14,6 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
 public class ROS2Tools
 {
    public static final String IHMC_TOPIC_PREFIX = "/ihmc";
-   public static final String OUTPUT_TOPIC_QUALIFIER = "/output";
-   public static final String INPUT_TOPIC_QUALIFIER = "/input";
 
    public static final String HUMANOID_CONTROLLER_NODE_NAME = "ihmc_controller";
    public static final String HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME = "kinematics_ihmc_controller";
