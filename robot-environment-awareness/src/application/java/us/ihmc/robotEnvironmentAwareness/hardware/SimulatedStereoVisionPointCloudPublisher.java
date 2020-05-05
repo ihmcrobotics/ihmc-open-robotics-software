@@ -26,7 +26,7 @@ public class SimulatedStereoVisionPointCloudPublisher extends Application
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                                                                     StereoVisionPointCloudMessage.class,
-                                                                                                                    ROS2Tools.getDefaultTopicNameGenerator());
+                                                                                                                    ROS2Tools.IHMC_ROOT);
 
    private int indexToPublish = 0;
    private final List<StereoVisionPointCloudMessage> stereoVisionPointCloudMessagesToPublish = new ArrayList<>();

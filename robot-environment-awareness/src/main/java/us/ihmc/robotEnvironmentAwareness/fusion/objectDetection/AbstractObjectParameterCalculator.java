@@ -35,7 +35,7 @@ public abstract class AbstractObjectParameterCalculator<T extends Packet<?>>
    {
       this.messageType = messageType;
       pointCloudToCalculate = new ArrayList<Point3DBasics>();
-      packetPublisher = ROS2Tools.createPublisher(ros2Node, messageType, ROS2Tools.getDefaultTopicNameGenerator());
+      packetPublisher = ROS2Tools.createPublisher(ros2Node, messageType, ROS2Tools.IHMC_ROOT);
       newPacket.set(ROS2TopicNameTools.newMessageInstance(messageType));
    }
 

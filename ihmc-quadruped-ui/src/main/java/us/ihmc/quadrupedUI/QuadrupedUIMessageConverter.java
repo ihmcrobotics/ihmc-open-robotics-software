@@ -155,7 +155,7 @@ public class QuadrupedUIMessageConverter
       ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
                                            s -> processIncomingPlanarRegionMessage(s.takeNextData()));
 
-      ROS2Tools.createCallbackSubscription(ros2Node, VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscription(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT,
                                            s -> messager.submitMessage(QuadrupedUIMessagerAPI.LeftCameraVideo, s.takeNextData()));
 
       /* TODO
