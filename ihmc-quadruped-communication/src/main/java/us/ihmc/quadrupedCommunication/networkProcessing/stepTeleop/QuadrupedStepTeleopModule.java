@@ -3,7 +3,7 @@ package us.ihmc.quadrupedCommunication.networkProcessing.stepTeleop;
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2TopicQualifier;
+import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;

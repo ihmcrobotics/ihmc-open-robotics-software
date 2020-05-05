@@ -12,7 +12,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2TopicQualifier;
+import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;

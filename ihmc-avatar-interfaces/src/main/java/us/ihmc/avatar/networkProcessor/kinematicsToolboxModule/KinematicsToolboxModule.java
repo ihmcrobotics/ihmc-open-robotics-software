@@ -12,7 +12,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2TopicQualifier;
+import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;

@@ -19,7 +19,7 @@ import geometry_msgs.msg.dds.Vector3PubSubType;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2TopicQualifier;
+import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple2D.Point2D;

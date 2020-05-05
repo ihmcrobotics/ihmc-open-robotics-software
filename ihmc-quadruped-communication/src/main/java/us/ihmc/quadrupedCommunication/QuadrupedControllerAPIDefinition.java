@@ -14,7 +14,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2TopicQualifier;
+import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;

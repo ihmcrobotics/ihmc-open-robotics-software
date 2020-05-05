@@ -11,7 +11,7 @@ import controller_msgs.msg.dds.PawStepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.QuadrupedBodyOrientationMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2TopicQualifier;
+import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.quadrupedCommunication.teleop.RemoteQuadrupedTeleopManager;
 import us.ihmc.quadrupedFootstepPlanning.pawPlanning.PawStepPlannerType;
 import us.ihmc.quadrupedRobotics.QuadrupedMultiRobotTestInterface;
