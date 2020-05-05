@@ -4,6 +4,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.ros2.Ros2PublisherBasics;
 
@@ -33,7 +34,7 @@ public class IHMCROS2Publisher<T>
 
    public IHMCROS2Publisher(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName)
    {
-      ExceptionTools.handle(() -> publisher = ros2Node.createPublisher(ROS2Tools.newMessageTopicDataTypeInstance(messageType), topicName),
+      ExceptionTools.handle(() -> publisher = ros2Node.createPublisher(ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType), topicName),
                             DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 

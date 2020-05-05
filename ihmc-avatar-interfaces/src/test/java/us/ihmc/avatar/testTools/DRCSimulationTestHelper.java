@@ -54,6 +54,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -142,7 +143,7 @@ public class DRCSimulationTestHelper
 
       for (Class<? extends Command<?, ?>> command : controllerSupportedCommands)
       {
-         Class<?> messageClass = ROS2Tools.newMessageInstance(command).getMessageClass();
+         Class<?> messageClass = ROS2TopicNameTools.newMessageInstance(command).getMessageClass();
          IHMCROS2Publisher<?> defaultPublisher = createPublisherForController(messageClass);
          defaultControllerPublishers.put(messageClass, defaultPublisher);
       }

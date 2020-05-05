@@ -5,6 +5,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.ros2.Ros2Subscription;
 
@@ -40,7 +41,7 @@ public class ROS2Callback<T>
       this.messageCallback = messageCallback;
       ExceptionTools.handle(() ->
       {
-         subscription = ros2Node.createSubscription(ROS2Tools.newMessageTopicDataTypeInstance(messageType), this::nullOmissionCallback, topicName);
+         subscription = ros2Node.createSubscription(ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType), this::nullOmissionCallback, topicName);
       }, DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 

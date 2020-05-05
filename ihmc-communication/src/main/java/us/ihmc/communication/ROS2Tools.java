@@ -1,10 +1,7 @@
 package us.ihmc.communication;
 
 import java.io.IOException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.InetAddress;
-import java.util.function.Supplier;
 
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -230,7 +227,7 @@ public class ROS2Tools
    {
       try
       {
-         TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
+         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
          return ros2Node.createSubscription(topicDataType, newMessageListener, topicName, Ros2QosProfile.DEFAULT());
       }
       catch (IOException e)
@@ -261,7 +258,7 @@ public class ROS2Tools
    {
       try
       {
-         TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
+         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
          Ros2QueuedSubscription<T> ros2QueuedSubscription = new Ros2QueuedSubscription<>(topicDataType, 10);
          ros2QueuedSubscription.setRos2Subscription(ros2Node.createSubscription(topicDataType, ros2QueuedSubscription, topicName, Ros2QosProfile.DEFAULT()));
          return ros2QueuedSubscription;
@@ -299,7 +296,7 @@ public class ROS2Tools
    {
       try
       {
-         TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
+         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
          realtimeRos2Node.createCallbackSubscription(topicDataType, topicName, newMessageListener, Ros2QosProfile.DEFAULT());
       }
       catch (IOException e)
@@ -329,7 +326,7 @@ public class ROS2Tools
    {
       try
       {
-         TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
+         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
          return realtimeRos2Node.createQueuedSubscription(topicDataType, topicName, Ros2QosProfile.DEFAULT(), 10);
       }
       catch (IOException e)
@@ -360,7 +357,7 @@ public class ROS2Tools
    {
       try
       {
-         TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
+         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
          return new IHMCRealtimeROS2Publisher<T>(realtimeRos2Node.createPublisher(topicDataType, topicName, Ros2QosProfile.DEFAULT(), 10));
       }
       catch (IOException e)
@@ -386,7 +383,7 @@ public class ROS2Tools
    {
       try
       {
-         TopicDataType<T> topicDataType = newMessageTopicDataTypeInstance(messageType);
+         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
          return new IHMCROS2Publisher<T>(ros2Node.createPublisher(topicDataType, topicName, Ros2QosProfile.DEFAULT()));
       }
       catch (IOException e)
@@ -526,47 +523,5 @@ public class ROS2Tools
       }
 
       return topicName.toString();
-   }
-
-   public static final String pubSubTypeGetterName = "getPubSubType";
-
-   public static <T> T newMessageInstance(Class<T> messageType)
-   {
-      try
-      {
-         return messageType.newInstance();
-      }
-      catch (InstantiationException | IllegalAccessException e)
-      {
-         throw new RuntimeException("Something went wrong when invoking " + messageType.getSimpleName() + "'s empty constructor.", e);
-      }
-   }
-
-   @SuppressWarnings({"unchecked", "rawtypes"})
-   public static <T> TopicDataType<T> newMessageTopicDataTypeInstance(Class<T> messageType)
-   {
-      Method pubSubTypeGetter;
-
-      try
-      {
-         pubSubTypeGetter = messageType.getDeclaredMethod(pubSubTypeGetterName);
-      }
-      catch (NoSuchMethodException | SecurityException e)
-      {
-         throw new RuntimeException("Something went wrong when looking up for the method " + messageType.getSimpleName() + "." + pubSubTypeGetterName + "().",
-                                    e);
-      }
-
-      TopicDataType<T> topicDataType;
-
-      try
-      {
-         topicDataType = (TopicDataType<T>) ((Supplier) pubSubTypeGetter.invoke(newMessageInstance(messageType))).get();
-      }
-      catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e)
-      {
-         throw new RuntimeException("Something went wrong when invoking the method " + messageType.getSimpleName() + "." + pubSubTypeGetterName + "().", e);
-      }
-      return topicDataType;
    }
 }
