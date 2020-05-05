@@ -25,36 +25,6 @@ public class ROS2Input<T>
    private List<Consumer<T>> userCallbacks = new ArrayList<>();
 
    @Deprecated
-   public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
-   {
-      this(ros2Node, messageType, robotName, identifier, ROS2Tools.newMessageInstance(messageType), message -> true);
-   }
-
-   @Deprecated
-   public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, T initialValue)
-   {
-      this(ros2Node, messageType, robotName, identifier, initialValue, message -> true);
-   }
-
-   @Deprecated
-   public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, MessageFilter<T> messageFilter)
-   {
-      this(ros2Node, messageType, robotName, identifier, ROS2Tools.newMessageInstance(messageType), messageFilter);
-   }
-
-   @Deprecated
-   public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, T initialValue, MessageFilter<T> messageFilter)
-   {
-      this(ros2Node,
-           messageType,
-           robotName,
-           identifier.getModuleTopicQualifier(),
-           identifier.deriveIOTopicQualifierForSubscriber(ros2Node.getName()),
-           initialValue,
-           messageFilter);
-   }
-
-   @Deprecated
    public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType)
    {
       this(ros2Node, messageType, null, null, null, ROS2Tools.newMessageInstance(messageType), message -> true);

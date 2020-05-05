@@ -22,17 +22,6 @@ public class ROS2Callback<T>
    private Ros2Subscription<T> subscription;
    private volatile boolean enabled = true;
 
-   @Deprecated
-   public ROS2Callback(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, Consumer<T> messageCallback)
-   {
-      this(ros2Node,
-           messageType,
-           robotName,
-           identifier.getModuleTopicQualifier(),
-           identifier.deriveIOTopicQualifierForSubscriber(ros2Node.getName()),
-           messageCallback);
-   }
-
    /**
     *  For topics that use the default /ihmc/topic_name.
     */

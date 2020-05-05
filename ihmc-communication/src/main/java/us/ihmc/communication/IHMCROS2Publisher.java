@@ -28,12 +28,6 @@ public class IHMCROS2Publisher<T>
    }
 
    @Deprecated
-   public IHMCROS2Publisher(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
-   {
-      this(ros2Node, messageType, robotName, identifier.getModuleTopicQualifier(), identifier.deriveIOTopicQualifierForPublisher(ros2Node.getName()));
-   }
-
-   @Deprecated
    public IHMCROS2Publisher(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, String moduleTopicQualifier, ROS2TopicQualifier ioTopicQualifier)
    {
       this(ros2Node, messageType, ROS2Tools.generateDefaultTopicName(messageType, robotName, moduleTopicQualifier, ioTopicQualifier));
