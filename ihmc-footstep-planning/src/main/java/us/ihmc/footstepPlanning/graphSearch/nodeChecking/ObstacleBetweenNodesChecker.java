@@ -62,7 +62,7 @@ public class ObstacleBetweenNodesChecker
       if (previousNode == null || !checkForPathCollisions.getAsBoolean() || !hasPlanarRegions())
          return true;
 
-      FootstepNodeSnapData snapData = snapper.getSnapData(node);
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
       if (snapData == null)
       {
          return true;

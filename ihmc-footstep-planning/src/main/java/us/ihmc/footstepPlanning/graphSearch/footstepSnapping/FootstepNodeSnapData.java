@@ -1,8 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
-import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
-import us.ihmc.commonWalkingControlModules.polygonWiggling.ConcavePolygonWiggler;
-import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -11,46 +8,13 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
-public class FootstepNodeSnapData
+public class FootstepNodeSnapData implements FootstepNodeSnapDataReadOnly
 {
-   /**
-    * Snap transform describing the projection of a 2D step onto a planar region.
-    * The relationship between the unsnapped planar footstep transform T_planar, snapped step transform T_snapped and this transform S is:
-    * T_snapped = S * T_planar
-    *
-    * {@link FootstepNodeTools#getSnappedNodeTransform}
-    * {@link PlanarRegionsListPolygonSnapper#snapPolygonToPlanarRegionsList}
-    */
    private final RigidBodyTransform snapTransform = new RigidBodyTransform();
-
-   /**
-    * Transform for wiggling a step inside a planar region.
-    * The relationship between the unsnapped planar footstep transform T_planar, snapped step transform T_snapped, snap transform S,
-    * the planar region's transform from local to world P, the wiggler solver output W_local, and this transform W_world:
-    * T_snapped = (P * W_local * P_inv) * S * T_planar = W_world * S * T_planar
-    *
-    * The wiggle transform is set to NaN by default.
-    * {@link PolygonWiggler#findWiggleTransform}
-    * {@link ConcavePolygonWiggler#wigglePolygon}
-    */
    private final RigidBodyTransform wiggleTransformInWorld = new RigidBodyTransform();
-
-   /**
-    * Transform of the snapped footstep, T_snapped in the formaulas above
-    * This transform includes the wiggle transform if it's available.
-    */
    private final RigidBodyTransform snappedNodeTransform = new RigidBodyTransform();
-
-   /**
-    * Cropped foothold polygon in sole frame.
-    */
    private final ConvexPolygon2D croppedFoothold = new ConvexPolygon2D();
-
-   /**
-    * Planar region ID that the step is snapped to
-    */
    private int planarRegionId = PlanarRegion.NO_REGION_ID;
-
    private boolean snappedNodeTransformIncludesWiggleTransform = false;
 
    public FootstepNodeSnapData()
@@ -83,44 +47,45 @@ public class FootstepNodeSnapData
       }
    }
 
+   /** {@inheritDoc} */
+   @Override
    public ConvexPolygon2D getCroppedFoothold()
    {
       return croppedFoothold;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public RigidBodyTransform getSnapTransform()
    {
       return snapTransform;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public RigidBodyTransform getWiggleTransformInWorld()
    {
       return wiggleTransformInWorld;
    }
 
-   public void setPlanarRegionId(int planarRegionId)
-   {
-      this.planarRegionId = planarRegionId;
-   }
-
+   /** {@inheritDoc} */
+   @Override
    public int getPlanarRegionId()
    {
       return planarRegionId;
    }
 
+   /** {@inheritDoc} */
+   @Override
    public RigidBodyTransform getSnappedNodeTransform(FootstepNode node)
    {
       updateSnappedNodeTransform(node);
       return snappedNodeTransform;
    }
 
-   public void packSnapAndWiggleTransform(RigidBodyTransform transformToPack)
+   public void setPlanarRegionId(int planarRegionId)
    {
-      transformToPack.set(snapTransform);
-      if (!wiggleTransformInWorld.containsNaN())
-      {
-         transformToPack.preMultiply(wiggleTransformInWorld);
-      }
+      this.planarRegionId = planarRegionId;
    }
 
    private void updateSnappedNodeTransform(FootstepNode node)

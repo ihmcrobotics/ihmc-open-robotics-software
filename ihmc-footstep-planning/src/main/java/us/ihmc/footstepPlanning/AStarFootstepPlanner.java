@@ -276,7 +276,7 @@ public class AStarFootstepPlanner
          loggedData = new FootstepPlannerIterationData();
          loggedData.setStanceNode(iterationData.getParentNode());
          loggedData.setIdealStep(idealStepCalculator.computeIdealStep(iterationData.getParentNode()));
-         loggedData.setStanceNodeSnapData(snapper.getSnapData(iterationData.getParentNode()));
+         loggedData.setStanceNodeSnapData(snapper.snapFootstepNode(iterationData.getParentNode()));
          this.iterationData.add(loggedData);
       }
 

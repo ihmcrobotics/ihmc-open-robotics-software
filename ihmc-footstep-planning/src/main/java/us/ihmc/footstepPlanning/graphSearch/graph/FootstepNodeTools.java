@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -45,7 +46,7 @@ public class FootstepNodeTools
     * @param snapTransform pre-snap to post-snap transform
     * @param transformToPack
     */
-   public static void getSnappedNodeTransform(FootstepNode node, RigidBodyTransform snapTransform, RigidBodyTransform transformToPack)
+   public static void getSnappedNodeTransform(FootstepNode node, RigidBodyTransformReadOnly snapTransform, RigidBodyTransform transformToPack)
    {
       getNodeTransform(node, transformToPack);
       snapTransform.transform(transformToPack);

@@ -11,7 +11,6 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -64,6 +63,7 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       return snapFootstepNode(footstepNode, false);
    }
 
+   @Override
    public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode, boolean computeWiggleTransform)
    {
       if (snapDataHolder.containsKey(footstepNode))
@@ -108,23 +108,6 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
    public void addSnapData(FootstepNode footstepNode, FootstepNodeSnapData snapData)
    {
       snapDataHolder.put(footstepNode, snapData);
-   }
-
-   @Override
-   public FootstepNodeSnapData getSnapData(FootstepNode footstepNode)
-   {
-      if(snapDataHolder.containsKey(footstepNode))
-      {
-         return snapDataHolder.get(footstepNode);
-      }
-      else if(flatGroundMode())
-      {
-         return FootstepNodeSnapData.identityData();
-      }
-      else
-      {
-         return null;
-      }
    }
 
    protected FootstepNodeSnapData computeSnapTransform(FootstepNode footstepNode)
