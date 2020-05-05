@@ -35,7 +35,7 @@ import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2NodeInterface;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 // TODO: Clean this up by using DRCUserInterfaceNetworkingManager (After cleaning that up first...)

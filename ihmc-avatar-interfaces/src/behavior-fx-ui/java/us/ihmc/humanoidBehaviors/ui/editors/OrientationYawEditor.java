@@ -19,7 +19,7 @@ import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PoseEditable;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 
 import java.util.function.Consumer;
 

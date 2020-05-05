@@ -47,7 +47,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 
 import java.util.ArrayList;
 import java.util.List;
