@@ -62,7 +62,6 @@ public class SLAMModule
 
    private final AtomicReference<RandomICPSLAMParameters> ihmcSLAMParameters;
 
-   private static final String PLANAR_REGIONS_LIST_TOPIC_SURFIX = "_slam";
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
@@ -93,7 +92,7 @@ public class SLAMModule
       reaMessager.registerTopicListener(REAModuleAPI.SLAMClear, (content) -> clearSLAM());
 
       MessageTopicNameGenerator publisherTopicNameGenerator;
-      publisherTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(ROS2Tools.IHMC_TOPIC_PREFIX, T) + PLANAR_REGIONS_LIST_TOPIC_SURFIX;
+      publisherTopicNameGenerator = (Class<?> T) -> ROS2Tools.IHMC_ROOT.type(T).toString() + "_slam";
       planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
    }
 

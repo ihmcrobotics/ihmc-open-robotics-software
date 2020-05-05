@@ -2,11 +2,13 @@ package us.ihmc.communication;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import controller_msgs.msg.dds.REAStateRequestMessage;
 import org.junit.jupiter.api.Test;
 
 import std_msgs.msg.dds.Int64;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.Ros2Node;
@@ -19,13 +21,31 @@ class ROS2ToolsTest
       new ROS2ToolsTest().testROS2Communication();
    }
 
+   @Test
+   public void testTopicNameStuff()
+   {
+      assertEquals("/ihmc/rea_state_request", ROS2Tools.generateDefaultTopicName(REAStateRequestMessage.class));
+      assertEquals("/ihmc/atlas/rea_state_request", ROS2Tools.generateDefaultTopicName(REAStateRequestMessage.class, "atlas"));
+      assertEquals("/ihmc/atlas/rea/input/rea_state_request",
+                   ROS2Tools.generateDefaultTopicName(REAStateRequestMessage.class, "atlas", "rea", ROS2Tools.ROS2TopicQualifier.INPUT));
+
+      MessageTopicNameGenerator defaultTopicNameGenerator = ROS2Tools.getDefaultTopicNameGenerator();
+      assertEquals("/ihmc/rea_state_request", defaultTopicNameGenerator.generateTopicName(REAStateRequestMessage.class));
+
+      MessageTopicNameGenerator defaultTopicNameGeneratorWithRobot = ROS2Tools.getDefaultTopicNameGenerator("atlas");
+      assertEquals("/ihmc/atlas/rea_state_request", defaultTopicNameGeneratorWithRobot.generateTopicName(REAStateRequestMessage.class));
+
+      MessageTopicNameGenerator defaultTopicNameGenerator3 = ROS2Tools.getTopicNameGenerator("atlas", "rea", ROS2Tools.ROS2TopicQualifier.OUTPUT);
+      assertEquals("/ihmc/atlas/rea/output/rea_state_request", defaultTopicNameGenerator3.generateTopicName(REAStateRequestMessage.class));
+   }
+
    public void testROS2Communication()
    {
       Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
 
-      IHMCROS2Publisher intPublisher = new IHMCROS2Publisher(ros2Node, Int64.class);
+      IHMCROS2Publisher intPublisher = new IHMCROS2Publisher(ros2Node, Int64.class, ROS2Tools.IHMC_ROOT);
 
-      new ROS2Callback<>(ros2Node, Int64.class, this::acceptMessage);
+      new ROS2Callback<>(ros2Node, Int64.class, ROS2Tools.IHMC_ROOT, this::acceptMessage);
 
       new ExceptionHandlingThreadScheduler(getClass().getSimpleName()).schedule(() ->
       {
