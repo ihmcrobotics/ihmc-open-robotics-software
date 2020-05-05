@@ -56,7 +56,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
       YoVariableRegistry registry = new YoVariableRegistry("robert");
 
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
-      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
+      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry, contactStates);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
@@ -119,7 +120,11 @@ public class ICPOptimizationCoPConstraintHandlerTest
       YoVariableRegistry registry = new YoVariableRegistry("robert");
 
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
-      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
+      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry, contactStates);
+      contactStates.get(RobotSide.RIGHT).getContactPoints().forEach(point -> point.setInContact(false));
+      bipedSupportPolygons.updateUsingContactStates(contactStates);
+
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
@@ -160,14 +165,19 @@ public class ICPOptimizationCoPConstraintHandlerTest
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
       CommonOps.multAdd(-1.0, cmpAin, perfectCMPMatrix, cmpBin);
 
-      assertTrue(MatrixFeatures.isEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7));
-      assertTrue(MatrixFeatures.isEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7));
+      EjmlUnitTests.assertEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7);
+      EjmlUnitTests.assertEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7);
 
-      assertTrue(MatrixFeatures.isEquals(cmpAin, solver.getCMPLocationConstraint().Aineq, 1e-7));
-      assertTrue(MatrixFeatures.isEquals(cmpBin, solver.getCMPLocationConstraint().bineq, 1e-7));
+      EjmlUnitTests.assertEquals(cmpAin, solver.getCMPLocationConstraint().Aineq, 1e-7);
+      EjmlUnitTests.assertEquals(cmpBin, solver.getCMPLocationConstraint().bineq, 1e-7);
 
 
       // test right support
+      contactStates.get(RobotSide.RIGHT).setFullyConstrained();
+      contactStates.get(RobotSide.LEFT).getContactPoints().forEach(point -> point.setInContact(false));
+      bipedSupportPolygons.updateUsingContactStates(contactStates);
+
+
       solver.resetCoPLocationConstraint();
       solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
 
@@ -207,11 +217,11 @@ public class ICPOptimizationCoPConstraintHandlerTest
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
       CommonOps.multAdd(-1.0, cmpAin, perfectCMPMatrix, cmpBin);
 
-      assertTrue(MatrixFeatures.isEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7));
-      assertTrue(MatrixFeatures.isEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7));
+      EjmlUnitTests.assertEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7);
+      EjmlUnitTests.assertEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7);
 
-      assertTrue(MatrixFeatures.isEquals(cmpAin, solver.getCMPLocationConstraint().Aineq, 1e-7));
-      assertTrue(MatrixFeatures.isEquals(cmpBin, solver.getCMPLocationConstraint().bineq, 1e-7));
+      EjmlUnitTests.assertEquals(cmpAin, solver.getCMPLocationConstraint().Aineq, 1e-7);
+      EjmlUnitTests.assertEquals(cmpBin, solver.getCMPLocationConstraint().bineq, 1e-7);
    }
 
    @Test
@@ -220,7 +230,8 @@ public class ICPOptimizationCoPConstraintHandlerTest
       YoVariableRegistry registry = new YoVariableRegistry("robert");
 
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
-      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
+      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry, contactStates);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
@@ -274,10 +285,14 @@ public class ICPOptimizationCoPConstraintHandlerTest
       YoVariableRegistry registry = new YoVariableRegistry("robert");
 
       SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
-      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
+      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry, contactStates);
       YoBoolean useControlPolygons = new YoBoolean("useControlPolygons", registry);
       ICPOptimizationCoPConstraintHandler constraintHandler = new ICPOptimizationCoPConstraintHandler(bipedSupportPolygons, null, useControlPolygons, false, registry);
       ICPOptimizationQPSolver solver = new ICPOptimizationQPSolver(5, false);
+
+      contactStates.get(RobotSide.RIGHT).getContactPoints().forEach(point -> point.setInContact(false));
+      bipedSupportPolygons.updateUsingContactStates(contactStates);
 
       // test left support
       solver.resetCoPLocationConstraint();
@@ -309,14 +324,18 @@ public class ICPOptimizationCoPConstraintHandlerTest
       PolygonWiggler.convertToInequalityConstraints(copConstraint, copAin, copBin, 0.01);
       CommonOps.multAdd(-1.0, copAin, perfectCMPMatrix, copBin);
 
-      assertTrue(MatrixFeatures.isEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7));
-      assertTrue(MatrixFeatures.isEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7));
+      EjmlUnitTests.assertEquals(copAin, solver.getCoPLocationConstraint().Aineq, 1e-7);
+      EjmlUnitTests.assertEquals(copBin, solver.getCoPLocationConstraint().bineq, 1e-7);
 
       assertEquals(CommonOps.elementSum(solver.getCMPLocationConstraint().Aineq), 0.0, 1e-7);
       assertEquals(CommonOps.elementSum(solver.getCMPLocationConstraint().bineq), 0.0, 1e-7);
 
 
       // test right support
+      contactStates.get(RobotSide.RIGHT).setFullyConstrained();
+      contactStates.get(RobotSide.LEFT).getContactPoints().forEach(point -> point.setInContact(false));
+      bipedSupportPolygons.updateUsingContactStates(contactStates);
+
       solver.resetCoPLocationConstraint();
       solver.addSupportPolygon(constraintHandler.updateCoPConstraint());
 
@@ -386,11 +405,11 @@ public class ICPOptimizationCoPConstraintHandlerTest
       return contactableFeet;
    }
 
-   private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet, YoVariableRegistry registry)
+   private BipedSupportPolygons setupBipedSupportPolygons(SideDependentList<FootSpoof> contactableFeet, YoVariableRegistry registry,
+                                                          SideDependentList<YoPlaneContactState> contactStatesToPack)
    {
       SideDependentList<ReferenceFrame> ankleZUpFrames = new SideDependentList<>();
       SideDependentList<ReferenceFrame> soleFrames = new SideDependentList<>();
-      SideDependentList<YoPlaneContactState> contactStates = new SideDependentList<>();
 
       for (RobotSide robotSide : RobotSide.values)
       {
@@ -407,14 +426,14 @@ public class ICPOptimizationCoPConstraintHandlerTest
          double coefficientOfFriction = contactableFoot.getCoefficientOfFriction();
          YoPlaneContactState yoPlaneContactState = new YoPlaneContactState(sidePrefix + "Foot", foot, soleFrame, contactFramePoints, coefficientOfFriction, registry);
          yoPlaneContactState.setFullyConstrained();
-         contactStates.put(robotSide, yoPlaneContactState);
+         contactStatesToPack.put(robotSide, yoPlaneContactState);
       }
 
       ReferenceFrame midFeetZUpFrame = new MidFrameZUpFrame("midFeetZupFrame", worldFrame, ankleZUpFrames.get(RobotSide.LEFT), ankleZUpFrames.get(RobotSide.RIGHT));
       midFeetZUpFrame.update();
 
       BipedSupportPolygons bipedSupportPolygons = new BipedSupportPolygons(midFeetZUpFrame, ankleZUpFrames, soleFrames, registry, null);
-      bipedSupportPolygons.updateUsingContactStates(contactStates);
+      bipedSupportPolygons.updateUsingContactStates(contactStatesToPack);
 
       return bipedSupportPolygons;
    }
