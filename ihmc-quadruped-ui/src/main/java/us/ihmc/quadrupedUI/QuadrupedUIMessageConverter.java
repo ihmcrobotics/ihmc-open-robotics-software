@@ -5,7 +5,8 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2TopicQualifier;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
@@ -175,7 +176,7 @@ public class QuadrupedUIMessageConverter
       /* publishers */
       MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
 
-      MessageTopicNameGenerator stepTeleopInputTopicGenerator = getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME, ROS2Tools.ROS2TopicQualifier.INPUT);
+      MessageTopicNameGenerator stepTeleopInputTopicGenerator = getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
 
       desiredHighLevelStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);
       desiredSteppingStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);

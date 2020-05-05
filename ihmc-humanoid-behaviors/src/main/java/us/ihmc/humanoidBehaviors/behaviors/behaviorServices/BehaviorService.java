@@ -6,7 +6,7 @@ import java.util.Map;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.MessageTopicNameGenerator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior.MessageTopicPair;

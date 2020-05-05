@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
+import us.ihmc.communication.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -32,9 +33,6 @@ import us.ihmc.robotics.testing.YoVariableTestGoal;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
-
-import static controller_msgs.msg.dds.QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_COMPLETED;
-import static controller_msgs.msg.dds.QuadrupedFootstepStatusMessage.FOOTSTEP_STATUS_STARTED;
 
 public abstract class QuadrupedScriptedFlatGroundWalkingTest implements QuadrupedMultiRobotTestInterface
 {
@@ -261,7 +259,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       List<QuadrupedTimedStepMessage> steps = getSteps();
       int initialSize = steps.size();
 
-      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(stepTeleopManager.getRobotName());
+      MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(stepTeleopManager.getRobotName());
       ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedFootstepStatusMessage.class, controllerPubGenerator,
                                            s ->
                                            {

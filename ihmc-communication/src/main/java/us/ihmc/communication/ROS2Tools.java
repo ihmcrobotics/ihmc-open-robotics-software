@@ -73,42 +73,10 @@ public class ROS2Tools
 
    public static final ROS2TopicName REA_SUPPORT_REGIONS = REA.name(REA_CUSTOM_REGION_NAME);
 
-   @Deprecated
-   public enum ROS2TopicQualifier
-   {
-      @Deprecated
-      INPUT(INPUT_TOPIC_QUALIFIER),
-      @Deprecated
-      OUTPUT(OUTPUT_TOPIC_QUALIFIER);
-
-      private final String name;
-
-      @Deprecated
-      ROS2TopicQualifier(String name)
-      {
-         this.name = name;
-      }
-
-      @Override
-      public String toString()
-      {
-         return name;
-      }
-   };
-
-   /**
-    * Generator to automatically generate a topic name based on the type of message to send.
-    */
-   @Deprecated
-   public static interface MessageTopicNameGenerator
-   {
-      @Deprecated
-      String generateTopicName(Class<?> messageType);
-   }
-
    public final static ExceptionHandler RUNTIME_EXCEPTION = e -> {
       throw new RuntimeException(e);
    };
+
    public final static String NAMESPACE = "/us/ihmc"; // ? no idea what this does
 
    private static final RTPSCommunicationFactory FACTORY = new RTPSCommunicationFactory();

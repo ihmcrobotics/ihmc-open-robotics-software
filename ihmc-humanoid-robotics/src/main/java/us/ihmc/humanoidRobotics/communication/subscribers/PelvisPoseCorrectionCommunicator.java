@@ -7,7 +7,7 @@ import controller_msgs.msg.dds.PelvisPoseErrorPacket;
 import controller_msgs.msg.dds.StampedPosePacket;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.MessageTopicNameGenerator;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.ros2.RealtimeRos2Node;
 

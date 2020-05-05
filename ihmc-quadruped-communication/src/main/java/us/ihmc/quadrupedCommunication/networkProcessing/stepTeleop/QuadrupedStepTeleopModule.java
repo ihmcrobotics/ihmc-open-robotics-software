@@ -2,7 +2,8 @@ package us.ihmc.quadrupedCommunication.networkProcessing.stepTeleop;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -48,7 +49,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
    {
       // status messages from the controller
-      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
                                            s -> processTimestamp(s.takeNextData().getMonotonicTime()));
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> setPaused(true));
@@ -149,7 +150,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    {
       Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> messages = new HashMap<>();
 
-      ROS2Tools.MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
       messages.put(QuadrupedTimedStepListMessage.class, controllerSubGenerator);
       messages.put(QuadrupedBodyOrientationMessage.class, controllerSubGenerator);
       messages.put(AbortWalkingMessage.class, controllerSubGenerator);
@@ -160,13 +161,13 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    @Override
    public MessageTopicNameGenerator getPublisherTopicNameGenerator()
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME, ROS2Tools.ROS2TopicQualifier.OUTPUT);
+      return getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
    public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME, ROS2Tools.ROS2TopicQualifier.INPUT);
+      return getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
    }
 
    @Override

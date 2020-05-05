@@ -10,8 +10,8 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
+import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2TopicQualifier;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;

@@ -20,7 +20,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.MessageTopicNameGenerator;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;

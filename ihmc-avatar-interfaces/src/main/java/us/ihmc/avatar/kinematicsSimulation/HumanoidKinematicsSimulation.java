@@ -23,6 +23,7 @@ import us.ihmc.commonWalkingControlModules.sensors.footSwitch.SettableFootSwitch
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
@@ -232,8 +233,8 @@ public class HumanoidKinematicsSimulation
       // create controller network subscriber here!!
       RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(kinematicsSimulationParameters.getPubSubImplementation(),
                                                                            ROS2Tools.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
-      ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-      ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(subscriberTopicNameGenerator,
                                                                                                 walkingInputManager,
                                                                                                 publisherTopicNameGenerator,

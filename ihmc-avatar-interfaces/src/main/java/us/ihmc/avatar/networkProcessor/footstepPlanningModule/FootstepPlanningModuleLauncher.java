@@ -5,7 +5,8 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.footstepPlanning.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2TopicQualifier;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -91,12 +92,12 @@ public class FootstepPlanningModuleLauncher
       FootstepPlanningModule footstepPlanningModule = createModule(robotModel);
       footstepPlanningModule.registerRosNode(ros2Node);
       String name = footstepPlanningModule.getName();
-      ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name,
-                                                                                                         ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME,
-                                                                                                         ROS2Tools.ROS2TopicQualifier.INPUT);
-      ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name,
-                                                                                                        ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME,
-                                                                                                        ROS2Tools.ROS2TopicQualifier.OUTPUT);
+      MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name,
+                                                                                               ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME,
+                                                                                               ROS2TopicQualifier.INPUT);
+      MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name,
+                                                                                              ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME,
+                                                                                              ROS2TopicQualifier.OUTPUT);
 
       AtomicBoolean generateLog = new AtomicBoolean();
 

@@ -7,12 +7,11 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;

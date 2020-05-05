@@ -5,7 +5,7 @@ import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.avatar.handControl.HandFingerTrajectoryMessagePublisher;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.MessageTopicNameGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.valkyrie.network.ValkyrieMessageTools;

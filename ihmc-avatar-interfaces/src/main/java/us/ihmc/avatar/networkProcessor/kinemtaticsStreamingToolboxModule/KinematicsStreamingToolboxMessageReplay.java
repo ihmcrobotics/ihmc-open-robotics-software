@@ -9,7 +9,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;

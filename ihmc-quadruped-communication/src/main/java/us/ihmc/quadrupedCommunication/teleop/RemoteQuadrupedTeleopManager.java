@@ -4,7 +4,8 @@ import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2TopicQualifier;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
@@ -84,9 +85,9 @@ public class RemoteQuadrupedTeleopManager
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotConfigurationData.set(s.takeNextData()));
 
       MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-      MessageTopicNameGenerator stepTeleopSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME, ROS2Tools.ROS2TopicQualifier.INPUT);
+      MessageTopicNameGenerator stepTeleopSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
       MessageTopicNameGenerator footstepPlannerSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME,
-                                                                                    ROS2Tools.ROS2TopicQualifier.INPUT);
+                                                                                    ROS2TopicQualifier.INPUT);
 
       controllerStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);
       steppingStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);

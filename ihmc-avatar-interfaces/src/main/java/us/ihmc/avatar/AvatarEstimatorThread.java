@@ -11,7 +11,7 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;

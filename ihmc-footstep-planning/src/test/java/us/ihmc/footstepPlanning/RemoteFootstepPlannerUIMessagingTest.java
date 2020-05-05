@@ -29,6 +29,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2TopicQualifier;
 import us.ihmc.communication.packets.ExecutionTiming;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -216,7 +217,7 @@ public class RemoteFootstepPlannerUIMessagingTest
    {
       Random random = new Random(1738L);
       ROS2Tools.createCallbackSubscription(localNode, FootstepPlanningRequestPacket.class,
-                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2Tools.ROS2TopicQualifier.INPUT),
+                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.INPUT),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       localNode.spin();
 
@@ -291,7 +292,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       Random random = new Random(1738L);
       IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher = ROS2Tools
             .createPublisher(localNode, FootstepPlanningRequestPacket.class,
-                             ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2Tools.ROS2TopicQualifier.INPUT));
+                             ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.INPUT));
       localNode.spin();
 
       AtomicReference<Pose3DReadOnly> leftFootPoseReference = messager.createInput(FootstepPlannerMessagerAPI.LeftFootPose);
@@ -372,10 +373,10 @@ public class RemoteFootstepPlannerUIMessagingTest
    {
       Random random = new Random(1738L);
       ROS2Tools.createCallbackSubscription(localNode, FootstepPlannerParametersPacket.class,
-                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2Tools.ROS2TopicQualifier.INPUT),
+                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.INPUT),
                                            s -> processFootstepPlannerParametersPacket(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(localNode, VisibilityGraphsParametersPacket.class,
-                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2Tools.ROS2TopicQualifier.INPUT),
+                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.INPUT),
                                            s -> processVisibilityGraphsParametersPacket(s.takeNextData()));
       localNode.spin();
 
@@ -442,7 +443,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       Random random = new Random(1738L);
       IHMCRealtimeROS2Publisher<FootstepPlanningToolboxOutputStatus> footstepOutputStatusPublisher = ROS2Tools
             .createPublisher(localNode, FootstepPlanningToolboxOutputStatus.class,
-                             ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2Tools.ROS2TopicQualifier.OUTPUT));
+                             ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.OUTPUT));
 
       localNode.spin();
       AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);

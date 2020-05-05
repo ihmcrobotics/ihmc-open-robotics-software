@@ -12,7 +12,7 @@ import controller_msgs.msg.dds.MessageCollectionNotification;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools.MessageUnpacker;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -60,11 +60,11 @@ public class ControllerNetworkSubscriber
 
    private final RealtimeRos2Node realtimeRos2Node;
 
-   private final ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator;
-   private final ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator;
+   private final MessageTopicNameGenerator subscriberTopicNameGenerator;
+   private final MessageTopicNameGenerator publisherTopicNameGenerator;
 
-   public ControllerNetworkSubscriber(ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator, CommandInputManager controllerCommandInputManager,
-                                      ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator, StatusMessageOutputManager controllerStatusOutputManager,
+   public ControllerNetworkSubscriber(MessageTopicNameGenerator subscriberTopicNameGenerator, CommandInputManager controllerCommandInputManager,
+                                      MessageTopicNameGenerator publisherTopicNameGenerator, StatusMessageOutputManager controllerStatusOutputManager,
                                       RealtimeRos2Node realtimeRos2Node)
    {
       this.subscriberTopicNameGenerator = subscriberTopicNameGenerator;
