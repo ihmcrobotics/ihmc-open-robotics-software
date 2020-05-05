@@ -4,6 +4,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
@@ -48,8 +49,8 @@ public class FootstepCostCalculator
    {
       FootstepNode idealStep = idealStepCalculator.apply(stanceNode);
 
-      FootstepNodeTools.getSnappedNodeTransform(stanceNode, snapper.getSnapData(stanceNode).getSnapTransform(), stanceNodeTransform);
-      FootstepNodeTools.getSnappedNodeTransform(candidateNode, snapper.getSnapData(candidateNode).getSnapTransform(), candidateNodeTransform);
+      FootstepNodeTools.getSnappedNodeTransform(stanceNode, snapper.snapFootstepNode(stanceNode).getSnapTransform(), stanceNodeTransform);
+      FootstepNodeTools.getSnappedNodeTransform(candidateNode, snapper.snapFootstepNode(candidateNode).getSnapTransform(), candidateNodeTransform);
       idealStepTransform.getTranslation().set(idealStep.getX(), idealStep.getY(), stanceNodeTransform.getTranslationZ());
       idealStepTransform.getRotation().setToYawOrientation(idealStep.getYaw());
 
@@ -91,10 +92,10 @@ public class FootstepCostCalculator
 
    private double computeAreaCost(FootstepNode footstepNode)
    {
-      FootstepNodeSnapData snapData = snapper.getSnapData(footstepNode);
+      FootstepNodeSnapDataReadOnly snapData = snapper.snapFootstepNode(footstepNode);
       if (snapData != null)
       {
-         ConvexPolygon2D footholdAfterSnap = snapData.getCroppedFoothold();
+         ConvexPolygon2DReadOnly footholdAfterSnap = snapData.getCroppedFoothold();
          if(footholdAfterSnap.isEmpty() || footholdAfterSnap.containsNaN())
          {
             return 0.0;

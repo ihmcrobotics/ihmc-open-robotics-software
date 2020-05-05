@@ -58,8 +58,8 @@ public class GoodFootstepPositionChecker
    {
       RobotSide stepSide = candidateNode.getRobotSide();
 
-      FootstepNodeSnapData candidateNodeSnapData = snapper.getSnapData(candidateNode);
-      FootstepNodeSnapData stanceNodeSnapData = snapper.getSnapData(stanceNode);
+      FootstepNodeSnapData candidateNodeSnapData = snapper.snapFootstepNode(candidateNode);
+      FootstepNodeSnapData stanceNodeSnapData = snapper.snapFootstepNode(stanceNode);
 
       candidateFootFrame.setTransformAndUpdate(candidateNodeSnapData.getSnappedNodeTransform(candidateNode));
       stanceFootFrame.setTransformAndUpdate(stanceNodeSnapData.getSnappedNodeTransform(stanceNode));
@@ -172,7 +172,7 @@ public class GoodFootstepPositionChecker
       FootstepNodeSnapData grandparentNodeSnapData;
       double alphaSoS = parameters.getTranslationScaleFromGrandparentNode();
       if (alphaSoS > 0.0 && parentNodeSupplier != null && (grandParentNode = parentNodeSupplier.apply(stanceNode)) != null
-          && (grandparentNodeSnapData = snapper.getSnapData(grandParentNode)) != null)
+          && (grandparentNodeSnapData = snapper.snapFootstepNode(grandParentNode)) != null)
       {
          startOfSwingFrame.setTransformAndUpdate(grandparentNodeSnapData.getSnappedNodeTransform(grandParentNode));
          startOfSwingZUpFrame.update();

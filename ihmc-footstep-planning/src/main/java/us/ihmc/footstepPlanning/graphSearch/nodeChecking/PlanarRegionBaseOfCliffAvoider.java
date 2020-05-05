@@ -56,7 +56,7 @@ public class PlanarRegionBaseOfCliffAvoider
       if(minimumDistanceFromCliffBottoms <= 0.0 || Double.isInfinite(cliffHeightToAvoid) || (cliffHeightToAvoid <= 0.0))
          return true;
 
-      RigidBodyTransformReadOnly soleTransform = snapper.getSnapData(node).getSnappedNodeTransform(node);
+      RigidBodyTransformReadOnly soleTransform = snapper.snapFootstepNode(node).getSnappedNodeTransform(node);
 
       ArrayList<LineSegment2D> lineSegmentsInSoleFrame = new ArrayList<>();
       ConvexPolygon2D footPolygon = footPolygons.get(node.getRobotSide());
