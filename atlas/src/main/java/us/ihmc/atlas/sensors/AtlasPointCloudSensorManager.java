@@ -24,7 +24,7 @@ public class AtlasPointCloudSensorManager
    private final StereoVisionPointCloudPublisher realsenseDepthPointCloudPublisher;
    private final TrackingCameraBridge trackingCameraPublisher;
 
-   private static final String topicNamePrefixToPublish = ROS2Tools.IHMC_ROS_TOPIC_PREFIX;
+   private static final String topicNamePrefixToPublish = ROS2Tools.IHMC_TOPIC_PREFIX;
 
    private static final String depthTopicNameSurfixToPublish = "_D435";
    private static final String depthTopicNameToSubscribe = AtlasSensorInformation.depthCameraTopic;

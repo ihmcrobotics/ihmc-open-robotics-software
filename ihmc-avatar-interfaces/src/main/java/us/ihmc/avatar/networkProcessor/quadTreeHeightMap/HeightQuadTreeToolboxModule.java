@@ -94,7 +94,7 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
 
    public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.HEIGHT_QUADTREE_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.HEIGHT_QUADTREE_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
@@ -105,6 +105,6 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
 
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.HEIGHT_QUADTREE_TOOLBOX, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.HEIGHT_QUADTREE_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
    }
 }

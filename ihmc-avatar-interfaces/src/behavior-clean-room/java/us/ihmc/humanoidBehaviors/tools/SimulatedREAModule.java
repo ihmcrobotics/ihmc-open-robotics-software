@@ -48,10 +48,10 @@ public class SimulatedREAModule
    {
       this.map = map;
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.REA.getNodeName());
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.REA_NODE_NAME);
 
-      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
-      realsenseSLAMPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME);
+      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.output());
+      realsenseSLAMPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.output());
 
       mode = robotModel == null ? REPUBLISH_FULL_MAP : REDUCE_TO_VIEWABLE_AREA;
 
@@ -64,11 +64,7 @@ public class SimulatedREAModule
          simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, neckFrame);
       }
 
-      new ROS2Callback<>(ros2Node,
-                         PlanarRegionsListMessage.class,
-                         null,
-                         ROS2Tools.REA.qualifyMore(ROS2Tools.REA_CUSTOM_REGION_QUALIFIER),
-                         this::acceptSupportRegionsList);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA_SUPPORT_REGIONS.input(), this::acceptSupportRegionsList);
 
       thread = new PausablePeriodicThread(getClass().getSimpleName(), 0.5, this::process);
    }

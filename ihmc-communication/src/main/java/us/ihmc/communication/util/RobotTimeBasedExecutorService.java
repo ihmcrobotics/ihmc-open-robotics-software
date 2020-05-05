@@ -70,7 +70,7 @@ public class RobotTimeBasedExecutorService
 
    private static MessageTopicNameGenerator createTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.HUMANOID_CONTROL_MODULE, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.HUMANOID_CONTROL_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
    }
 
    private static NewMessageListener<RobotConfigurationData> createListener(long period, TimeUnit timeUnit, Runnable runnable)

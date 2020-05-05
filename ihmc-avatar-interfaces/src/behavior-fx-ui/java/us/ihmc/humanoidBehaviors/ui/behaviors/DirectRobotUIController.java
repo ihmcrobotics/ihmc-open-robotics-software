@@ -54,7 +54,7 @@ public class DirectRobotUIController extends Group
       {
          robotLowLevelMessenger = new AtlasDirectRobotInterface(ros2Node, robotModel);
 
-         neckTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node, NeckTrajectoryMessage.class, robotName, ROS2Tools.HUMANOID_CONTROLLER);
+         neckTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node, NeckTrajectoryMessage.class, ROS2Tools.HUMANOID_CONTROLLER.robot(robotName).input());
          OneDoFJointBasics neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
          setupSlider(neckSlider, () ->
          {
@@ -84,7 +84,7 @@ public class DirectRobotUIController extends Group
       supportRegionsParametersPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                     BipedalSupportPlanarRegionParametersMessage.class,
                                                                     ROS2Tools.getTopicNameGenerator(robotName,
-                                                                                                    ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER,
+                                                                                                    ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME,
                                                                                                     ROS2TopicQualifier.INPUT));
 
       pumpPSI.setItems(new ImmutableObservableList<>(1500, 2300, 2500, 2800));
@@ -94,7 +94,7 @@ public class DirectRobotUIController extends Group
       livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, false);
       livePlanarRegionsGraphic.setEnabled(false);
       getChildren().add(livePlanarRegionsGraphic);
-      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, null, ROS2Tools.REA);
+      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.input());
 
       supportRegionScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, BipedalSupportPlanarRegionPublisher.defaultScaleFactor, 0.1));
       enableSupportRegions.setSelected(true);

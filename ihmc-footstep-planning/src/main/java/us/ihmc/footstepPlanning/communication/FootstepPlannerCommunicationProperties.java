@@ -10,11 +10,11 @@ public class FootstepPlannerCommunicationProperties
 {
    public static MessageTopicNameGenerator publisherTopicNameGenerator(String robotName)
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2TopicQualifier.OUTPUT);
+      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
    }
 
    public static MessageTopicNameGenerator subscriberTopicNameGenerator(String robotName)
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2TopicQualifier.INPUT);
+      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.INPUT);
    }
 }

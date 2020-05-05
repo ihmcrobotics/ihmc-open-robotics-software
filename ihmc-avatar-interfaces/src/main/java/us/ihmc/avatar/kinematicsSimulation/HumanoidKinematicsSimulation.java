@@ -127,12 +127,11 @@ public class HumanoidKinematicsSimulation
       this.kinematicsSimulationParameters = kinematicsSimulationParameters;
 
       // instantiate some existing controller ROS2 API?
-      ros2Node = ROS2Tools.createRos2Node(kinematicsSimulationParameters.getPubSubImplementation(), ROS2Tools.HUMANOID_CONTROLLER.getNodeName("kinematic"));
+      ros2Node = ROS2Tools.createRos2Node(kinematicsSimulationParameters.getPubSubImplementation(), ROS2Tools.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME);
 
       robotConfigurationDataPublisher = new IHMCROS2Publisher<>(ros2Node,
                                                                 RobotConfigurationData.class,
-                                                                robotModel.getSimpleRobotName(),
-                                                                ROS2Tools.HUMANOID_CONTROLLER);
+                                                                ROS2Tools.HUMANOID_CONTROLLER.robot(robotModel.getSimpleRobotName()).output());
 
       String robotName = robotModel.getSimpleRobotName();
       fullRobotModel = robotModel.createFullRobotModel();
@@ -232,7 +231,7 @@ public class HumanoidKinematicsSimulation
 
       // create controller network subscriber here!!
       RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(kinematicsSimulationParameters.getPubSubImplementation(),
-                                                                           ROS2Tools.HUMANOID_CONTROLLER.getNodeName("atlas"));
+                                                                           ROS2Tools.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
       ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
       ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(subscriberTopicNameGenerator,

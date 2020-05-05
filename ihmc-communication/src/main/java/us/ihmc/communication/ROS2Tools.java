@@ -18,47 +18,69 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 public class ROS2Tools
 {
-   public static final ROS2ModuleIdentifier HUMANOID_CONTROLLER = new ROS2ModuleIdentifier("ihmc_controller", "/humanoid_control");
-   public static final ROS2ModuleIdentifier REA = new ROS2ModuleIdentifier("REA_module", "/rea");
-   public static final ROS2ModuleIdentifier MAPPING_MODULE = new ROS2ModuleIdentifier("mapping_module", "/map");
-   public static final ROS2ModuleIdentifier STEREO_REA = new ROS2ModuleIdentifier("SREA_module", "/srea");
-   public static final ROS2ModuleIdentifier LLAMA = new ROS2ModuleIdentifier("llama_network", "/quadruped_control");
-   public static final ROS2ModuleIdentifier FOOTSTEP_PLANNER = new ROS2ModuleIdentifier("ihmc_multi_stage_footstep_planning_module", "/toolbox/footstep_plan");
-   public static final ROS2ModuleIdentifier BEHAVIOR_MODULE = new ROS2ModuleIdentifier("behavior_module", "/behavior");
+   public static final String IHMC_TOPIC_PREFIX = "/ihmc";
+   public static final String OUTPUT_TOPIC_QUALIFIER = "/output";
+   public static final String INPUT_TOPIC_QUALIFIER = "/input";
 
-   public static final String IHMC_ROS_TOPIC_PREFIX = "/ihmc";
-   public static final String OUTPUT_ROS_TOPIC_PREFIX = "/output";
-   public static final String INPUT_ROS_TOPIC_PREFIX = "/input";
+   public static final String HUMANOID_CONTROLLER_NODE_NAME = "ihmc_controller";
+   public static final String HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME = "kinematics_ihmc_controller";
+   public static final String REA_NODE_NAME = "REA_module";
+   public static final String MAPPING_MODULE_NODE_NAME = "mapping_module";
+   public static final String STEREO_REA_NODE_NAME = "SREA_module";
+   public static final String LLAMA_NODE_NAME = "llama_network";
+   public static final String FOOTSTEP_PLANNER_NODE_NAME = "ihmc_multi_stage_footstep_planning_module";
+   public static final String BEHAVIOR_MODULE_NODE_NAME = "behavior_module";
 
-   public static final String HUMANOID_CONTROL_MODULE = HUMANOID_CONTROLLER.getModuleTopicQualifier();
-   public static final String QUADRUPED_CONTROL_MODULE = LLAMA.getModuleTopicQualifier();
+   public static final String HUMANOID_CONTROL_MODULE_NAME = "/humanoid_control";
+   public static final String QUADRUPED_CONTROL_MODULE_NAME = "/quadruped_control";
+   public static final String FOOTSTEP_PLANNER_MODULE_NAME = "/toolbox/footstep_plan";
+   public static final String CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME = "/toolbox/continuous_planning";
+   public static final String FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME = "/toolbox/footstep_postprocessing";
+   public static final String HEIGHT_QUADTREE_TOOLBOX_MODULE_NAME = "/toolbox/height_quad_tree";
+   public static final String KINEMATICS_TOOLBOX_MODULE_NAME = "/toolbox/ik";
+   public static final String KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME = "/toolbox/ik_planning";
+   public static final String KINEMATICS_STREAMING_TOOLBOX_MODULE_NAME = "/toolbox/ik_streaming";
+   public static final String WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE_NAME = "/toolbox/ik_trajectory";
+   public static final String WALKING_PREVIEW_TOOLBOX_MODULE_NAME = "/toolbox/walking_controller_preview";
+   public static final String EXTERNAL_FORCE_ESTIMATION_TOOLBOX_MODULE_NAME = "/toolbox/external_force_estimation";
+   public static final String STEP_TELEOP_TOOLBOX_MODULE_NAME = "/toolbox/teleop/step_teleop";
+   public static final String QUADRUPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME = "/quadruped_support_region_publisher";
+   public static final String BIPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME = "/bipedal_support_region_publisher";
+   public static final String BEHAVIOR_MODULE_NAME = "/behavior";
+   public static final String REA_MODULE_NAME = "/rea";
+   public static final String STEREO_REA_MODULE_NAME = "/srea";
+   public static final String MAPPING_MODULE_NAME = "/map";
+   public static final String REALSENSE_SLAM_MODULE_NAME = "/planar_regions_list_slam";
 
-   public static final String FOOTSTEP_PLANNER_MODULE = FOOTSTEP_PLANNER.getModuleTopicQualifier();
-   public static final String CONTINUOUS_PLANNING_TOOLBOX = "/toolbox/continuous_planning";
-   public static final String FOOTSTEP_POSTPROCESSING_TOOLBOX = "/toolbox/footstep_postprocessing";
-   public static final String HEIGHT_QUADTREE_TOOLBOX = "/toolbox/height_quad_tree";
-   public static final String KINEMATICS_TOOLBOX = "/toolbox/ik";
-   public static final String KINEMATICS_PLANNING_TOOLBOX = "/toolbox/ik_planning";
-   public static final String KINEMATICS_STREAMING_TOOLBOX = "/toolbox/ik_streaming";
-   public static final String WHOLE_BODY_TRAJECTORY_TOOLBOX = "/toolbox/ik_trajectory";
-   public static final String WALKING_PREVIEW_TOOLBOX = "/toolbox/walking_controller_preview";
-   public static final String EXTERNAL_FORCE_ESTIMATION_TOOLBOX = "/toolbox/external_force_estimation";
+   public static final String REA_CUSTOM_REGION_NAME = "/custom_region";
 
-   public static final String STEP_TELEOP_TOOLBOX = "/toolbox/teleop/step_teleop";
-   public static final String QUADRUPED_SUPPORT_REGION_PUBLISHER = "/quadruped_support_region_publisher";
+   public static final ROS2TopicName IHMC_ROOT = new ROS2TopicName().prefix(IHMC_TOPIC_PREFIX);
+   public static final ROS2TopicName HUMANOID_CONTROLLER = IHMC_ROOT.module(HUMANOID_CONTROL_MODULE_NAME);
+   public static final ROS2TopicName QUADRUPED_CONTROLLER = IHMC_ROOT.module(QUADRUPED_CONTROL_MODULE_NAME);
+   public static final ROS2TopicName FOOTSTEP_PLANNER = IHMC_ROOT.module(FOOTSTEP_PLANNER_MODULE_NAME);
+   public static final ROS2TopicName CONTINUOUS_PLANNING_TOOLBOX = IHMC_ROOT.module(CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME);
+   public static final ROS2TopicName FOOTSTEP_POSTPROCESSING_TOOLBOX = IHMC_ROOT.module(FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME);
+   public static final ROS2TopicName HEIGHT_QUADTREE_TOOLBOX = IHMC_ROOT.module(HEIGHT_QUADTREE_TOOLBOX_MODULE_NAME);
+   public static final ROS2TopicName KINEMATICS_TOOLBOX = IHMC_ROOT.module(KINEMATICS_TOOLBOX_MODULE_NAME);
+   public static final ROS2TopicName KINEMATICS_PLANNING_TOOLBOX = IHMC_ROOT.module(KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME);
+   public static final ROS2TopicName KINEMATICS_STREAMING_TOOLBOX = IHMC_ROOT.module(KINEMATICS_STREAMING_TOOLBOX_MODULE_NAME);
+   public static final ROS2TopicName WHOLE_BODY_TRAJECTORY_TOOLBOX = IHMC_ROOT.module(WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE_NAME);
+   public static final ROS2TopicName WALKING_PREVIEW_TOOLBOX = IHMC_ROOT.module(WALKING_PREVIEW_TOOLBOX_MODULE_NAME);
+   public static final ROS2TopicName EXTERNAL_FORCE_ESTIMATION_TOOLBOX = IHMC_ROOT.module(EXTERNAL_FORCE_ESTIMATION_TOOLBOX_MODULE_NAME);
+   public static final ROS2TopicName STEP_TELEOP_TOOLBOX = IHMC_ROOT.module(STEP_TELEOP_TOOLBOX_MODULE_NAME);
+   public static final ROS2TopicName QUADRUPED_SUPPORT_REGION_PUBLISHER = IHMC_ROOT.module(QUADRUPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME);
+   public static final ROS2TopicName BIPED_SUPPORT_REGION_PUBLISHER = IHMC_ROOT.module(BIPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME);
+   public static final ROS2TopicName BEHAVIOR_MODULE = IHMC_ROOT.module(BEHAVIOR_MODULE_NAME);
+   public static final ROS2TopicName REA = IHMC_ROOT.module(REA_MODULE_NAME);
+   public static final ROS2TopicName STEREO_REA = IHMC_ROOT.module(STEREO_REA_MODULE_NAME);
+   public static final ROS2TopicName MAPPING_MODULE = IHMC_ROOT.module(MAPPING_MODULE_NAME);
+   public static final ROS2TopicName REALSENSE_SLAM_MAP = IHMC_ROOT.module(REALSENSE_SLAM_MODULE_NAME);
 
-   public static final String BIPED_SUPPORT_REGION_PUBLISHER = "/bipedal_support_region_publisher";
-   public static final String BEHAVIOR_MODULE_QUALIFIER = BEHAVIOR_MODULE.getModuleTopicQualifier();
-   public static final String REA_MODULE = REA.getModuleTopicQualifier();
-   public static final String REA_CUSTOM_REGION_QUALIFIER = "/custom_region";
-
-   public static final String STEREO_REA_MODULE = STEREO_REA.getModuleTopicQualifier();
-   public static final String REALSENSE_SLAM_MAP_TOPIC_NAME = IHMC_ROS_TOPIC_PREFIX + "/planar_regions_list_slam";
-   public static final String REA_SUPPORT_REGIONS_TOPIC_NAME = IHMC_ROS_TOPIC_PREFIX + "/rea/custom_region/input/planar_regions_list";
+   public static final ROS2TopicName REA_SUPPORT_REGIONS = REA.name(REA_CUSTOM_REGION_NAME);
 
    public enum ROS2TopicQualifier
    {
-      INPUT(INPUT_ROS_TOPIC_PREFIX), OUTPUT(OUTPUT_ROS_TOPIC_PREFIX);
+      INPUT(INPUT_TOPIC_QUALIFIER), OUTPUT(OUTPUT_TOPIC_QUALIFIER);
 
       private final String name;
 
@@ -344,7 +366,7 @@ public class ROS2Tools
    }
 
    /**
-    * Creates a default topic name generator that uses {@value #IHMC_ROS_TOPIC_PREFIX} as prefix.
+    * Creates a default topic name generator that uses {@value #IHMC_TOPIC_PREFIX} as prefix.
     * <p>
     * This generator is not great at all as the topic name does not include the name of the robot,
     * the name of the module, nor info about whether the topic is an input or output of the module
@@ -368,7 +390,7 @@ public class ROS2Tools
    }
 
    /**
-    * Creates a default topic name generator that uses {@value #IHMC_ROS_TOPIC_PREFIX} plus the name
+    * Creates a default topic name generator that uses {@value #IHMC_TOPIC_PREFIX} plus the name
     * of the robot as prefix.
     * <p>
     * This generator is not great as the topic name does not include the name of the module, nor
@@ -392,7 +414,7 @@ public class ROS2Tools
    }
 
    /**
-    * Creates a default topic name generator that uses {@value #IHMC_ROS_TOPIC_PREFIX} plus the name
+    * Creates a default topic name generator that uses {@value #IHMC_TOPIC_PREFIX} plus the name
     * of the robot as prefix.
     * <p>
     * This generator is not great as the topic name does not include the name of the module, nor
@@ -452,7 +474,7 @@ public class ROS2Tools
     */
    public static String generateDefaultTopicName(Class<?> messageClass, String robotName, String moduleName, ROS2TopicQualifier qualifier)
    {
-      String prefix = IHMC_ROS_TOPIC_PREFIX;
+      String prefix = IHMC_TOPIC_PREFIX;
 
       if (robotName != null && !robotName.isEmpty())
       {

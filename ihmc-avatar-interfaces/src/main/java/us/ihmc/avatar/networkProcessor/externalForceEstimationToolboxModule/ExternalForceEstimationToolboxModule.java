@@ -92,7 +92,7 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
 
    public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.EXTERNAL_FORCE_ESTIMATION_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.EXTERNAL_FORCE_ESTIMATION_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
@@ -103,6 +103,6 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
 
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.EXTERNAL_FORCE_ESTIMATION_TOOLBOX, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.EXTERNAL_FORCE_ESTIMATION_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
    }
 }
