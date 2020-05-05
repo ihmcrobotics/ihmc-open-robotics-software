@@ -6,7 +6,9 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2TopicQualifier;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -40,10 +42,10 @@ public class FootstepPlanPostProcessingModuleLauncher
       postProcessingModule.registerRosNode(ros2Node);
       String name = postProcessingModule.getName();
 
-      ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools
-            .getTopicNameGenerator(name, ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME, ROS2Tools.ROS2TopicQualifier.INPUT);
-      ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools
-            .getTopicNameGenerator(name, ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME, ROS2Tools.ROS2TopicQualifier.OUTPUT);
+      MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools
+            .getTopicNameGenerator(name, ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
+      MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools
+            .getTopicNameGenerator(name, ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
 
       // Parameters callback
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPostProcessingParametersPacket.class, subscriberTopicNameGenerator,

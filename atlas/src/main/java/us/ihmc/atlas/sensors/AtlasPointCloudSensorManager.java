@@ -8,7 +8,7 @@ import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraBri
 import us.ihmc.avatar.networkProcessor.trackingCameraPublisher.TrackingCameraBridge.SensorFrameInitializationTransformer;
 import us.ihmc.avatar.ros.RobotROSClockCalculator;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.MessageTopicNameGenerator;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;

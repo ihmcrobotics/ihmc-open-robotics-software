@@ -1,7 +1,7 @@
 package us.ihmc.quadrupedCommunication.networkProcessing;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.communication.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.euclid.interfaces.Settable;

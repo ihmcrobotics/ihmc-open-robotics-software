@@ -1,8 +1,8 @@
 package us.ihmc.footstepPlanning.communication;
 
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
+import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.communication.ROS2TopicQualifier;
 
 import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
