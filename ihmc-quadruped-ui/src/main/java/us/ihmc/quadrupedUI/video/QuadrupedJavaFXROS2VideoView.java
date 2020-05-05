@@ -47,7 +47,7 @@ public class QuadrupedJavaFXROS2VideoView extends ImageView
       }
 
       running = true;
-      new ROS2Callback<>(ros2Node, VideoPacket.class, null, null, null, this::acceptVideo);
+      new ROS2Callback<>(ros2Node, VideoPacket.class, this::acceptVideo);
       animationTimer.start();
    }
 
