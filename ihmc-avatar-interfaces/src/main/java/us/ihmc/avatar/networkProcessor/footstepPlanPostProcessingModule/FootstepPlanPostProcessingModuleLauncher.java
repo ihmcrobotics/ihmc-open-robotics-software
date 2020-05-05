@@ -41,9 +41,9 @@ public class FootstepPlanPostProcessingModuleLauncher
       String name = postProcessingModule.getName();
 
       ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools
-            .getTopicNameGenerator(name, ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
+            .getTopicNameGenerator(name, ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME, ROS2Tools.ROS2TopicQualifier.INPUT);
       ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools
-            .getTopicNameGenerator(name, ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
+            .getTopicNameGenerator(name, ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME, ROS2Tools.ROS2TopicQualifier.OUTPUT);
 
       // Parameters callback
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPostProcessingParametersPacket.class, subscriberTopicNameGenerator,

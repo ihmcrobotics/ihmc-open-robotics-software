@@ -31,11 +31,11 @@ public class PlanarRegionsMappingModule
 
    public PlanarRegionsMappingModule(DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.MAPPING_MODULE.getNodeName());
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.MAPPING_MODULE_NODE_NAME);
 
-      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME);
+      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.output());
 
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA, this::process);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.output(), this::process);
    }
 
    private void process(PlanarRegionsListMessage visibleRegionsMessage)

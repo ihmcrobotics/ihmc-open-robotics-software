@@ -76,7 +76,9 @@ public class SCSLidarAndCameraSimulator
 
    public SCSLidarAndCameraSimulator(Ros2Node ros2Node, TerrainObject3D terrainObject3D, DRCRobotModel robotModel)
    {
-      robotConfigurationData = new ROS2Input<>(ros2Node, RobotConfigurationData.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROLLER);
+      robotConfigurationData = new ROS2Input<>(ros2Node,
+                                               RobotConfigurationData.class,
+                                               ROS2Tools.HUMANOID_CONTROLLER.robot(robotModel.getSimpleRobotName()).input());
 
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
 
@@ -118,9 +120,8 @@ public class SCSLidarAndCameraSimulator
       // required for timestamp
       ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
                                                                                  RobotConfigurationData.class,
-                                                                                 robotModel.getSimpleRobotName(),
-                                                                                 ROS2Tools.HUMANOID_CONTROLLER);
-      IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class);
+                                                                                 ROS2Tools.HUMANOID_CONTROLLER.robot(robotModel.getSimpleRobotName()).output());
+      IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT);
       CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
       cameraConfiguration.setCameraMount(videoCameraMountName);
       scs.setupCamera(cameraConfiguration);
@@ -221,7 +222,7 @@ public class SCSLidarAndCameraSimulator
 //      ImageIO.read(
 //            UtilImageIO.loadImage()loadImage(new File(f, "leftEyeImage.png").getAbsolutePath());
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, ROS2Tools.REA.getNodeName());
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, ROS2Tools.REA_NODE_NAME);
 //      new SCSLidarAndCameraSimulator(ros2Node, DefaultCommonAvatarEnvironment.setUpShortCinderBlockField("CinderBlockField", 0.0, 1.0), createRobotModel());
 //      new SCSLidarAndCameraSimulator(ros2Node, createCommonAvatarEnvironment(), createRobotModel());
       new SCSLidarAndCameraSimulator(ros2Node, new FiducialEnvironmentForDoorBehavior(), createRobotModel());

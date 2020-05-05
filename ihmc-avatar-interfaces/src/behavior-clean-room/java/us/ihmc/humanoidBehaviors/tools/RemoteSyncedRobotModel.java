@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.tools;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Input;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
@@ -30,13 +31,13 @@ public class RemoteSyncedRobotModel
 
       robotConfigurationDataInput = new ROS2Input<RobotConfigurationData>(ros2Node,
                                                                           RobotConfigurationData.class,
-                                                                          robotModel.getSimpleRobotName(), HUMANOID_CONTROLLER,
-                                                                     message ->
-                                                                     {
-                                                                        FullRobotModelUtils.checkJointNameHash(jointNameHash,
-                                                                                                               message.getJointNameHash());
-                                                                        return true;
-                                                                     });
+                                                                          HUMANOID_CONTROLLER.robot(robotModel.getSimpleRobotName()).output(),
+                                                                          ROS2Tools.newMessageInstance(RobotConfigurationData.class),
+                                                                          message ->
+                                                                          {
+                                                                             FullRobotModelUtils.checkJointNameHash(jointNameHash, message.getJointNameHash());
+                                                                             return true;
+                                                                          });
    }
 
    public FullHumanoidRobotModel pollFullRobotModel()

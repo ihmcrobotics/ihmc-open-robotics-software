@@ -102,12 +102,12 @@ public abstract class AbstractBehavior implements RobotController
 
       behaviorsServices = new ArrayList<>();
 
-      footstepPlanningToolboxSubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2TopicQualifier.INPUT);
-      footstepPlanningToolboxPubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2TopicQualifier.OUTPUT);
-      kinematicsToolboxSubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX, ROS2TopicQualifier.INPUT);
-      kinematicsToolboxPubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX, ROS2TopicQualifier.OUTPUT);
-      kinematicsPlanningToolboxSubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_PLANNING_TOOLBOX, ROS2TopicQualifier.INPUT);
-      kinematicsPlanningToolboxPubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_PLANNING_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+      footstepPlanningToolboxSubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.INPUT);
+      footstepPlanningToolboxPubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
+      kinematicsToolboxSubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
+      kinematicsToolboxPubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
+      kinematicsPlanningToolboxSubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
+      kinematicsPlanningToolboxPubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
 
       controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
       controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);

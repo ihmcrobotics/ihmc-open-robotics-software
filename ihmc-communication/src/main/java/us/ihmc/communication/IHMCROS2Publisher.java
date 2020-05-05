@@ -4,6 +4,7 @@ import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.log.LogTools;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.ros2.Ros2PublisherBasics;
 
@@ -20,19 +21,27 @@ public class IHMCROS2Publisher<T>
       this.publisher = ros2Publisher;
    }
 
+   @Deprecated
    public IHMCROS2Publisher(Ros2NodeInterface ros2Node, Class<T> messageType)
    {
       this(ros2Node, messageType, null, null, null);
    }
 
+   @Deprecated
    public IHMCROS2Publisher(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
    {
       this(ros2Node, messageType, robotName, identifier.getModuleTopicQualifier(), identifier.deriveIOTopicQualifierForPublisher(ros2Node.getName()));
    }
 
+   @Deprecated
    public IHMCROS2Publisher(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, String moduleTopicQualifier, ROS2TopicQualifier ioTopicQualifier)
    {
       this(ros2Node, messageType, ROS2Tools.generateDefaultTopicName(messageType, robotName, moduleTopicQualifier, ioTopicQualifier));
+   }
+
+   public IHMCROS2Publisher(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2TopicName topicName)
+   {
+      this(ros2Node, messageType, topicName.type(messageType).toString());
    }
 
    public IHMCROS2Publisher(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName)

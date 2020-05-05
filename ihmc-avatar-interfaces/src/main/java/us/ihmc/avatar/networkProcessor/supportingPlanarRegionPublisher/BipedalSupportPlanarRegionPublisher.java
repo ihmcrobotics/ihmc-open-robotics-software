@@ -93,7 +93,7 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
                                                   REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator);
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            BipedalSupportPlanarRegionParametersMessage.class,
-                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER, ROS2TopicQualifier.INPUT),
+                                           ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME, ROS2TopicQualifier.INPUT),
                                            s -> latestParametersMessage.set(s.takeNextData()));
 
       BipedalSupportPlanarRegionParametersMessage defaultParameters = new BipedalSupportPlanarRegionParametersMessage();

@@ -14,35 +14,11 @@ import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicPipeLineBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.BasicStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.FireFighterStanceBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.PickUpBallBehaviorStateMachine;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.RepeatedlyWalkFootstepListBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.ResetRobotBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.SimplifiedWalkThroughDoorBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TestDoorOpenBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TurnValveBehaviorStateMachine;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.debug.PartialFootholdBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.debug.TestGarbageGenerationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.debug.TestICPOptimizationBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.debug.TestSmoothICPPlannerBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehaviorAutomated;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.RoughTerrainTimingBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.WalkTimingBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.examples.ExampleComplexBehaviorStateMachine;
-import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.FollowFiducialBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.fiducialLocation.WalkToFiducialAndTurnBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.goalLocation.LocateGoalBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.TimingBehaviorHelper;
-import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationPlannedBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.CollaborativeBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.roughTerrain.WalkOverTerrainStateMachineBehavior;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.dispatcher.HumanoidBehaviorTypeSubscriber;
@@ -565,7 +541,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
    public static String getBehaviorRosTopicPrefix(String robotName, ROS2TopicQualifier qualifier)
    {
-      return ROS2Tools.IHMC_ROS_TOPIC_PREFIX + "/" + robotName.toLowerCase() + ROS2Tools.BEHAVIOR_MODULE + qualifier.toString();
+      return ROS2Tools.IHMC_TOPIC_PREFIX + "/" + robotName.toLowerCase() + ROS2Tools.BEHAVIOR_MODULE + qualifier.toString();
    }
 
    public static String getBehaviorOutputRosTopicPrefix(String robotName)
@@ -580,12 +556,12 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
    public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BEHAVIOR_MODULE_QUALIFIER, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BEHAVIOR_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
    }
 
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BEHAVIOR_MODULE_QUALIFIER, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BEHAVIOR_MODULE_NAME, ROS2TopicQualifier.INPUT);
    }
 
    @Override

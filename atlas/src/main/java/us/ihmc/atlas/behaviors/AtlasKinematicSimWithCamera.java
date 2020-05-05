@@ -49,7 +49,7 @@ public class AtlasKinematicSimWithCamera
 
       if (SHOW_ROBOT_VIEWER) ThreadTools.startAThread(this::robotViewer, "RobotViewer");
 
-      scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class);
+      scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT);
 
       RemoteSyncedHumanoidRobotState remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
       remoteSyncedHumanoidFrames.pollHumanoidRobotState().getNeckFrame(NeckJointName.PROXIMAL_NECK_PITCH);
@@ -62,8 +62,7 @@ public class AtlasKinematicSimWithCamera
 
       ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
                                                                                  RobotConfigurationData.class,
-                                                                                 robotModel.getSimpleRobotName(),
-                                                                                 ROS2Tools.HUMANOID_CONTROLLER);
+                                                                                 ROS2Tools.HUMANOID_CONTROLLER.robot(robotModel.getSimpleRobotName()).output());
 
       String cameraName = "camera";
 

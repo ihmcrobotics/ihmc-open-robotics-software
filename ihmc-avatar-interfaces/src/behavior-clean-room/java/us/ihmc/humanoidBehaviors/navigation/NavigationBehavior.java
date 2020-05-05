@@ -86,7 +86,7 @@ public class NavigationBehavior implements BehaviorInterface
       this.helper = helper;
 
       // create map subscriber
-      mapRegionsInput = new ROS2Input<>(helper.getManagedROS2Node(), PlanarRegionsListMessage.class, null, ROS2Tools.MAPPING_MODULE);
+      mapRegionsInput = new ROS2Input<>(helper.getManagedROS2Node(), PlanarRegionsListMessage.class, ROS2Tools.MAPPING_MODULE.output());
 
       robot = helper.getOrCreateRobotInterface();
 

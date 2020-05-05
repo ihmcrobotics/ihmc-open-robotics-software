@@ -5,6 +5,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.subscriber.Subscriber;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.ros2.Ros2Subscription;
 
@@ -21,6 +22,7 @@ public class ROS2Callback<T>
    private Ros2Subscription<T> subscription;
    private volatile boolean enabled = true;
 
+   @Deprecated
    public ROS2Callback(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, Consumer<T> messageCallback)
    {
       this(ros2Node,
@@ -34,6 +36,7 @@ public class ROS2Callback<T>
    /**
     *  For topics that use the default /ihmc/topic_name.
     */
+   @Deprecated
    public ROS2Callback(Ros2NodeInterface ros2Node, Class<T> messageType, Consumer<T> messageCallback)
    {
       this(ros2Node, messageType, null, null, null, messageCallback);
@@ -47,6 +50,11 @@ public class ROS2Callback<T>
                        Consumer<T> messageCallback)
    {
       this(ros2Node, messageType, ROS2Tools.generateDefaultTopicName(messageType, robotName, moduleTopicQualifier, ioTopicQualifier), messageCallback);
+   }
+
+   public ROS2Callback(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2TopicName topicName, Consumer<T> messageCallback)
+   {
+      this(ros2Node, messageType, topicName.type(messageType).toString(), messageCallback);
    }
 
    public ROS2Callback(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName, Consumer<T> messageCallback)

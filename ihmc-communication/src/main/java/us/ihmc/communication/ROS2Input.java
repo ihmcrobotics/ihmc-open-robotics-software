@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.tools.thread.TypedNotification;
 
@@ -23,21 +24,25 @@ public class ROS2Input<T>
    private TypedNotification<T> messageNotification = new TypedNotification<>();
    private List<Consumer<T>> userCallbacks = new ArrayList<>();
 
+   @Deprecated
    public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
    {
       this(ros2Node, messageType, robotName, identifier, ROS2Tools.newMessageInstance(messageType), message -> true);
    }
 
+   @Deprecated
    public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, T initialValue)
    {
       this(ros2Node, messageType, robotName, identifier, initialValue, message -> true);
    }
 
+   @Deprecated
    public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, MessageFilter<T> messageFilter)
    {
       this(ros2Node, messageType, robotName, identifier, ROS2Tools.newMessageInstance(messageType), messageFilter);
    }
 
+   @Deprecated
    public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier, T initialValue, MessageFilter<T> messageFilter)
    {
       this(ros2Node,
@@ -49,11 +54,13 @@ public class ROS2Input<T>
            messageFilter);
    }
 
+   @Deprecated
    public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType)
    {
       this(ros2Node, messageType, null, null, null, ROS2Tools.newMessageInstance(messageType), message -> true);
    }
 
+   @Deprecated
    public ROS2Input(Ros2NodeInterface ros2Node,
                     Class<T> messageType,
                     String robotName,
@@ -67,6 +74,16 @@ public class ROS2Input<T>
            ROS2Tools.generateDefaultTopicName(messageType, robotName, moduleTopicQualifier, ioTopicQualifier),
            initialValue,
            messageFilter);
+   }
+
+   public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2TopicName topicName)
+   {
+      this(ros2Node, messageType, topicName.type(messageType).toString());
+   }
+
+   public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2TopicName topicName, T initialValue, MessageFilter<T> messageFilter)
+   {
+      this(ros2Node, messageType, topicName.type(messageType).toString(), initialValue, messageFilter);
    }
 
    public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName)

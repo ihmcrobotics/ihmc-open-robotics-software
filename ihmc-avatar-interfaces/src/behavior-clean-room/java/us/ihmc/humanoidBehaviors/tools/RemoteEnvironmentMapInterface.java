@@ -24,12 +24,10 @@ public class RemoteEnvironmentMapInterface
 
    public RemoteEnvironmentMapInterface(Ros2NodeInterface ros2Node)
    {
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME, this::acceptRealsenseSLAMRegions);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.output(), this::acceptRealsenseSLAMRegions);
 
-      new ROS2Callback<>(ros2Node,
-                         PlanarRegionsListMessage.class,
-                         ROS2Tools.REA_SUPPORT_REGIONS_TOPIC_NAME,
-                         this::acceptAdditionalRegionList);
+      // used to be "/ihmc/rea/custom_region/input/planar_regions_list"
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA_SUPPORT_REGIONS.output(), this::acceptAdditionalRegionList);
    }
 
    public synchronized PlanarRegionsList getLatestCombinedRegionsList()

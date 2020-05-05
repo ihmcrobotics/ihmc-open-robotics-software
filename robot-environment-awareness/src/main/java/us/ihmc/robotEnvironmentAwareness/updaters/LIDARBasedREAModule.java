@@ -58,7 +58,7 @@ public class LIDARBasedREAModule
 
    protected static final boolean DEBUG = true;
 
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
+   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
    private final AtomicReference<Double> octreeResolution;
 

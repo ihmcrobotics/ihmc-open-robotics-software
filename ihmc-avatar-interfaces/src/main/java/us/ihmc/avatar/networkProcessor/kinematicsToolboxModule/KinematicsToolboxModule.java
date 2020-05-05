@@ -122,7 +122,7 @@ public class KinematicsToolboxModule extends ToolboxModule
 
    public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
@@ -133,6 +133,6 @@ public class KinematicsToolboxModule extends ToolboxModule
 
    public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
    }
 }

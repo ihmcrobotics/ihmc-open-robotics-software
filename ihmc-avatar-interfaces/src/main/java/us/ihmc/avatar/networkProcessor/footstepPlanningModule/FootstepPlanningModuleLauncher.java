@@ -6,7 +6,6 @@ import us.ihmc.avatar.footstepPlanning.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -14,7 +13,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlannerRequestedAction;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.FootstepPlannerOccupancyMapAssembler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
@@ -29,7 +27,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
-import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -95,10 +92,10 @@ public class FootstepPlanningModuleLauncher
       footstepPlanningModule.registerRosNode(ros2Node);
       String name = footstepPlanningModule.getName();
       ROS2Tools.MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name,
-                                                                                                         ROS2Tools.FOOTSTEP_PLANNER_MODULE,
+                                                                                                         ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME,
                                                                                                          ROS2Tools.ROS2TopicQualifier.INPUT);
       ROS2Tools.MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name,
-                                                                                                        ROS2Tools.FOOTSTEP_PLANNER_MODULE,
+                                                                                                        ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME,
                                                                                                         ROS2Tools.ROS2TopicQualifier.OUTPUT);
 
       AtomicBoolean generateLog = new AtomicBoolean();

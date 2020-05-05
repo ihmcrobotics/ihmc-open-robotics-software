@@ -3,6 +3,7 @@ package us.ihmc.communication;
 import com.google.common.base.CaseFormat;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 
+@Deprecated
 public class ROS2ModuleIdentifier
 {
    public static final String NODE_NAME_PREFIX = "ihmc_";
