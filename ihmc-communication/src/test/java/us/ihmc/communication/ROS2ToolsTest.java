@@ -11,6 +11,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
 

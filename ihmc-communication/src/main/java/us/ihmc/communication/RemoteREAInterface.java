@@ -5,6 +5,7 @@ import controller_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.Ros2NodeInterface;
 
 import java.util.function.Consumer;

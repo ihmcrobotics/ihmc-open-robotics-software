@@ -1,10 +1,7 @@
 package us.ihmc.atlas.behaviors.scsSensorSimulation;
 
-import boofcv.gui.image.ShowImages;
-import boofcv.io.image.UtilImageIO;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.VideoPacket;
-import org.apache.commons.lang3.SystemUtils;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.atlas.behaviors.SCSVideoDataROS2Bridge;
@@ -13,7 +10,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
 import us.ihmc.euclid.Axis3D;
@@ -28,7 +25,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteSyncedHumanoidRobotState;
 import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
-import us.ihmc.ihmcPerception.OpenCVTools;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
 import us.ihmc.jMonkeyEngineToolkit.camera.CameraConfiguration;
 import us.ihmc.pubsub.DomainFactory;
@@ -47,12 +43,7 @@ import us.ihmc.wholeBodyController.FootContactPoints;
 
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
-import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.util.Objects;
 
 /**
  * Potential improvements:

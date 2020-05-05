@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;

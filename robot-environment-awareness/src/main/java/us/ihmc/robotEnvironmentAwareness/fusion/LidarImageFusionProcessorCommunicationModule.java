@@ -16,7 +16,7 @@ import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import controller_msgs.msg.dds.VideoPacket;
-import us.ihmc.communication.ROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.producers.JPEGDecompressor;
@@ -64,11 +64,11 @@ public class LidarImageFusionProcessorCommunicationModule
       moduleStateReporter = new REAModuleStateReporter(reaMessager);
       stereoREAModule = new StereoREAModule(ros2Node, reaMessager, messager);
 
-      new ROS2Callback<>(ros2Node, LidarScanMessage.class, this::dispatchLidarScanMessage);
-      new ROS2Callback<>(ros2Node, StereoVisionPointCloudMessage.class, this::dispatchStereoVisionPointCloudMessage);
-      new ROS2Callback<>(ros2Node, Image32.class, this::dispatchImage32);
-      new ROS2Callback<>(ros2Node, VideoPacket.class, this::dispatchVideoPacket);
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, this::dispatchCustomPlanarRegion);
+      new ROS2Callback<>(ros2Node, LidarScanMessage.class, ROS2Tools.IHMC_ROOT, this::dispatchLidarScanMessage);
+      new ROS2Callback<>(ros2Node, StereoVisionPointCloudMessage.class, ROS2Tools.IHMC_ROOT, this::dispatchStereoVisionPointCloudMessage);
+      new ROS2Callback<>(ros2Node, Image32.class, ROS2Tools.IHMC_ROOT, this::dispatchImage32);
+      new ROS2Callback<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, this::dispatchVideoPacket);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.IHMC_ROOT, this::dispatchCustomPlanarRegion);
 
       ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicNameGenerator,
                                            this::dispatchCustomPlanarRegion);

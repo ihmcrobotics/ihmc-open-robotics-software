@@ -1,5 +1,6 @@
 package us.ihmc.communication;
 
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2NodeInterface;
 

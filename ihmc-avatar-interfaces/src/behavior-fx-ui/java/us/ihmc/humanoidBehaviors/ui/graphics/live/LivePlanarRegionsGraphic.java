@@ -5,7 +5,7 @@ import java.util.concurrent.Executors;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
