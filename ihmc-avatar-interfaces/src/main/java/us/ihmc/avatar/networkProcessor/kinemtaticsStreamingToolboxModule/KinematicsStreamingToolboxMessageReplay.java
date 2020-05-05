@@ -9,7 +9,7 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -57,11 +57,11 @@ public class KinematicsStreamingToolboxMessageReplay
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + name);
 
-      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       robotConfigurationDataPublisher = ROS2Tools.createPublisher(ros2Node, RobotConfigurationData.class, controllerPubGenerator);
       capturabilityBasedStatusPublisher = ROS2Tools.createPublisher(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator);
 
-      MessageTopicNameGenerator toolboxSubTopicNameGenerator = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator toolboxSubTopicNameGenerator = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
       kinematicsToolboxConfigurationPublisher = ROS2Tools.createPublisher(ros2Node, KinematicsToolboxConfigurationMessage.class, toolboxSubTopicNameGenerator);
       kinematicsStreamingToolboxInputPublisher = ROS2Tools.createPublisher(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxSubTopicNameGenerator);
       toolboxStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, toolboxSubTopicNameGenerator);

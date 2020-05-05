@@ -18,7 +18,7 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageFilter;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.CommandInputManager.HasReceivedInputListener;
@@ -458,7 +458,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       return Collections.emptySet();
    }
 
-   public abstract MessageTopicNameGenerator getPublisherTopicNameGenerator();
+   public abstract ROS2MessageTopicNameGenerator getPublisherTopicNameGenerator();
 
-   public abstract MessageTopicNameGenerator getSubscriberTopicNameGenerator();
+   public abstract ROS2MessageTopicNameGenerator getSubscriberTopicNameGenerator();
 }

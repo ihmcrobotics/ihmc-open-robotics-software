@@ -23,7 +23,7 @@ import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolbox
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
@@ -149,10 +149,10 @@ public class JavaFXArmController
       messager.registerTopicListener(XBoxOneJavaFXController.ButtonXState, state -> submitReachingManifoldsToToolbox(state));
       messager.registerTopicListener(XBoxOneJavaFXController.ButtonYState, state -> confirmReachingMotion(state));
 
-      MessageTopicNameGenerator toolboxRequestTopicNameGenerator = KinematicsToolboxModule.getSubscriberTopicNameGenerator(robotName);
-      MessageTopicNameGenerator toolboxResponseTopicNameGenerator = KinematicsToolboxModule.getPublisherTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator toolboxRequestTopicNameGenerator = KinematicsToolboxModule.getSubscriberTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator toolboxResponseTopicNameGenerator = KinematicsToolboxModule.getPublisherTopicNameGenerator(robotName);
 
-      MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
 
       wholeBodyTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, WholeBodyTrajectoryMessage.class, subscriberTopicNameGenerator);
       toolboxStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, toolboxRequestTopicNameGenerator);

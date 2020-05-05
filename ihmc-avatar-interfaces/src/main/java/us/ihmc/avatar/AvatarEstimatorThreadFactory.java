@@ -20,7 +20,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -91,8 +91,8 @@ public class AvatarEstimatorThreadFactory
    private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisPoseSubscriberField = new OptionalFactoryField<>("externalPelvisPoseSubscriberField");
 
    private final OptionalFactoryField<RealtimeRos2Node> realtimeRos2NodeField = new OptionalFactoryField<>("realtimeRos2Node");
-   private final OptionalFactoryField<MessageTopicNameGenerator> publisherTopicNameGeneratorField = new OptionalFactoryField<>("publisherTopicNameGenerator");
-   private final OptionalFactoryField<MessageTopicNameGenerator> subscriberTopicNameGeneratorField = new OptionalFactoryField<>("subscriberTopicNameGenerator");
+   private final OptionalFactoryField<ROS2MessageTopicNameGenerator> publisherTopicNameGeneratorField = new OptionalFactoryField<>("publisherTopicNameGenerator");
+   private final OptionalFactoryField<ROS2MessageTopicNameGenerator> subscriberTopicNameGeneratorField = new OptionalFactoryField<>("subscriberTopicNameGenerator");
 
    private final OptionalFactoryField<SensorDataContext> sensorDataContextField = new OptionalFactoryField<>("sensorDataContext");
    private final OptionalFactoryField<HumanoidRobotContextData> humanoidRobotContextDataField = new OptionalFactoryField<>("humanoidRobotContextData");
@@ -217,8 +217,8 @@ public class AvatarEstimatorThreadFactory
     * @param subscriberTopicNameGenerator the generator to use for creating the topic name for
     *                                     subscribers.
     */
-   public void setROS2Info(RealtimeRos2Node ros2Node, MessageTopicNameGenerator publisherTopicNameGenerator,
-                           MessageTopicNameGenerator subscriberTopicNameGenerator)
+   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2MessageTopicNameGenerator publisherTopicNameGenerator,
+                           ROS2MessageTopicNameGenerator subscriberTopicNameGenerator)
    {
       realtimeRos2NodeField.set(ros2Node);
       publisherTopicNameGeneratorField.set(publisherTopicNameGenerator);
@@ -484,7 +484,7 @@ public class AvatarEstimatorThreadFactory
          return null;
    }
 
-   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   public ROS2MessageTopicNameGenerator getPublisherTopicNameGenerator()
    {
       if (publisherTopicNameGeneratorField.hasValue())
          return publisherTopicNameGeneratorField.get();
@@ -492,7 +492,7 @@ public class AvatarEstimatorThreadFactory
          return null;
    }
 
-   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   public ROS2MessageTopicNameGenerator getSubscriberTopicNameGenerator()
    {
       if (subscriberTopicNameGeneratorField.hasValue())
          return subscriberTopicNameGeneratorField.get();

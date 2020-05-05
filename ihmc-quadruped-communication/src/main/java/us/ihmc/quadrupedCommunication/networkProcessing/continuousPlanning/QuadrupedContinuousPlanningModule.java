@@ -2,7 +2,7 @@ package us.ihmc.quadrupedCommunication.networkProcessing.continuousPlanning;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -59,12 +59,12 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
    {
       // status messages from the controller
-      MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator,
                                            s -> processFootstepStatusMessage(s.takeNextData()));
 
       // status messages from the planner
-      MessageTopicNameGenerator plannerPubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
+      ROS2MessageTopicNameGenerator plannerPubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, PawStepPlanningToolboxOutputStatus.class, plannerPubGenerator,
                                            s -> processFootstepPlannerOutputMessage(s.takeNextData()));
 
@@ -78,15 +78,15 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> createMapOfSupportedOutputMessages()
+   public Map<Class<? extends Settable<?>>, ROS2MessageTopicNameGenerator> createMapOfSupportedOutputMessages()
    {
-      Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> messages = new HashMap<>();
+      Map<Class<? extends Settable<?>>, ROS2MessageTopicNameGenerator> messages = new HashMap<>();
 
       messages.put(PawStepPlanningToolboxOutputStatus.class, getPublisherTopicNameGenerator());
       messages.put(BodyPathPlanMessage.class, getPublisherTopicNameGenerator());
       messages.put(QuadrupedTimedStepListMessage.class, getPublisherTopicNameGenerator());
 
-      MessageTopicNameGenerator plannerSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.INPUT);
+      ROS2MessageTopicNameGenerator plannerSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.INPUT);
       messages.put(PawStepPlanningRequestPacket.class, plannerSubGenerator);
       messages.put(ToolboxStateMessage.class, plannerSubGenerator);
 
@@ -141,13 +141,13 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
 
 
    @Override
-   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   public ROS2MessageTopicNameGenerator getPublisherTopicNameGenerator()
    {
       return getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
-   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   public ROS2MessageTopicNameGenerator getSubscriberTopicNameGenerator()
    {
       return getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
    }

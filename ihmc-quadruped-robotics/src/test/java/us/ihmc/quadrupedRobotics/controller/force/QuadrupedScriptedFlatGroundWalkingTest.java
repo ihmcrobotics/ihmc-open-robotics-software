@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.QuadrupedTimedStepListMessage;
 import controller_msgs.msg.dds.QuadrupedTimedStepMessage;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -259,7 +259,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       List<QuadrupedTimedStepMessage> steps = getSteps();
       int initialSize = steps.size();
 
-      MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(stepTeleopManager.getRobotName());
+      ROS2MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(stepTeleopManager.getRobotName());
       ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedFootstepStatusMessage.class, controllerPubGenerator,
                                            s ->
                                            {

@@ -6,7 +6,7 @@ import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.CommandInputManager.HasReceivedInputListener;
@@ -120,7 +120,7 @@ public abstract class QuadrupedToolboxModule
          }
       });
 
-      MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       if (fullRobotModel != null)
       {
          robotDataReceiver = new QuadrupedRobotDataReceiver(fullRobotModel, null);
@@ -385,7 +385,7 @@ public abstract class QuadrupedToolboxModule
    /**
     * @return used to create the {@link StatusMessageOutputManager} and to defines the output API.
     */
-   abstract public Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> createMapOfSupportedOutputMessages();
+   abstract public Map<Class<? extends Settable<?>>, ROS2MessageTopicNameGenerator> createMapOfSupportedOutputMessages();
 
    /**
     * @return the collection of commands that cannot wake up this module.
@@ -403,7 +403,7 @@ public abstract class QuadrupedToolboxModule
       return Collections.emptySet();
    }
 
-   public abstract MessageTopicNameGenerator getPublisherTopicNameGenerator();
+   public abstract ROS2MessageTopicNameGenerator getPublisherTopicNameGenerator();
 
-   public abstract MessageTopicNameGenerator getSubscriberTopicNameGenerator();
+   public abstract ROS2MessageTopicNameGenerator getSubscriberTopicNameGenerator();
 }

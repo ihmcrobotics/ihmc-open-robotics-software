@@ -5,7 +5,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.footstepPlanning.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2TopicQualifier;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -92,12 +92,12 @@ public class FootstepPlanningModuleLauncher
       FootstepPlanningModule footstepPlanningModule = createModule(robotModel);
       footstepPlanningModule.registerRosNode(ros2Node);
       String name = footstepPlanningModule.getName();
-      MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name,
-                                                                                               ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME,
-                                                                                               ROS2TopicQualifier.INPUT);
-      MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name,
-                                                                                              ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME,
-                                                                                              ROS2TopicQualifier.OUTPUT);
+      ROS2MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name,
+                                                                                                   ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME,
+                                                                                                   ROS2TopicQualifier.INPUT);
+      ROS2MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.getTopicNameGenerator(name,
+                                                                                                  ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME,
+                                                                                                  ROS2TopicQualifier.OUTPUT);
 
       AtomicBoolean generateLog = new AtomicBoolean();
 
@@ -113,7 +113,7 @@ public class FootstepPlanningModuleLauncher
 
    private static void createParametersCallbacks(Ros2Node ros2Node,
                                                  FootstepPlanningModule footstepPlanningModule,
-                                                 MessageTopicNameGenerator subscriberTopicNameGenerator)
+                                                 ROS2MessageTopicNameGenerator subscriberTopicNameGenerator)
    {
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlannerParametersPacket.class, subscriberTopicNameGenerator, s ->
       {
@@ -129,7 +129,7 @@ public class FootstepPlanningModuleLauncher
 
    private static void createRequestCallback(Ros2Node ros2Node,
                                              FootstepPlanningModule footstepPlanningModule,
-                                             MessageTopicNameGenerator subscriberTopicNameGenerator,
+                                             ROS2MessageTopicNameGenerator subscriberTopicNameGenerator,
                                              AtomicBoolean generateLog)
    {
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningRequestPacket.class, subscriberTopicNameGenerator, s ->
@@ -146,7 +146,7 @@ public class FootstepPlanningModuleLauncher
                                              DRCRobotModel robotModel,
                                              AdaptiveSwingParameters swingParameters,
                                              FootstepPlanningModule footstepPlanningModule,
-                                             MessageTopicNameGenerator publisherTopicNameGenerator)
+                                             ROS2MessageTopicNameGenerator publisherTopicNameGenerator)
    {
       IHMCROS2Publisher<FootstepPlanningToolboxOutputStatus> resultPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                                                          FootstepPlanningToolboxOutputStatus.class,
@@ -172,7 +172,7 @@ public class FootstepPlanningModuleLauncher
 
    private static void createOccupancyGridCallback(Ros2Node ros2Node,
                                                    FootstepPlanningModule footstepPlanningModule,
-                                                   MessageTopicNameGenerator publisherTopicNameGenerator)
+                                                   ROS2MessageTopicNameGenerator publisherTopicNameGenerator)
    {
       IHMCROS2Publisher<FootstepPlannerOccupancyMapMessage> occupancyMapPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                                                               FootstepPlannerOccupancyMapMessage.class,
@@ -193,8 +193,8 @@ public class FootstepPlanningModuleLauncher
 
    private static void createPlannerActionCallback(Ros2Node ros2Node,
                                                    FootstepPlanningModule footstepPlanningModule,
-                                                   MessageTopicNameGenerator subscriberTopicNameGenerator,
-                                                   MessageTopicNameGenerator publisherTopicNameGenerator)
+                                                   ROS2MessageTopicNameGenerator subscriberTopicNameGenerator,
+                                                   ROS2MessageTopicNameGenerator publisherTopicNameGenerator)
    {
       IHMCROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                                                FootstepPlannerParametersPacket.class,

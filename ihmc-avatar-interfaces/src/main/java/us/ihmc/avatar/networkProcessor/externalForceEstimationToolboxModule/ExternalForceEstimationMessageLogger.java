@@ -5,7 +5,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
@@ -65,11 +65,11 @@ public class ExternalForceEstimationMessageLogger
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation,
                                                   "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ExternalForceEstimationMessageLogger"));
 
-      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotConfigurationData.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, RobotDesiredConfigurationData.class, controllerPubGenerator, s -> robotDesiredConfigurationData.set(s.takeNextData()));
 
-      MessageTopicNameGenerator toolboxSubTopicNameGenerator = ExternalForceEstimationToolboxModule.getSubscriberTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator toolboxSubTopicNameGenerator = ExternalForceEstimationToolboxModule.getSubscriberTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            ToolboxStateMessage.class,
                                            toolboxSubTopicNameGenerator,

@@ -6,7 +6,7 @@ import java.util.Map;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior.MessageTopicPair;
@@ -20,7 +20,7 @@ public abstract class BehaviorService
    private final Map<MessageTopicPair<?>, IHMCROS2Publisher<?>> publishers = new HashMap<>();
    private final YoVariableRegistry registry;
    protected final String robotName;
-   private final MessageTopicNameGenerator controllerSubGenerator, controllerPubGenerator;
+   private final ROS2MessageTopicNameGenerator controllerSubGenerator, controllerPubGenerator;
 
    public BehaviorService(String robotName, String name, Ros2Node ros2Node)
    {
@@ -73,7 +73,7 @@ public abstract class BehaviorService
       createSubscriber(messageType, topicName, consumer);
    }
 
-   public <T> void createSubscriber(Class<T> messageType, MessageTopicNameGenerator topicNameGenerator, ObjectConsumer<T> consumer)
+   public <T> void createSubscriber(Class<T> messageType, ROS2MessageTopicNameGenerator topicNameGenerator, ObjectConsumer<T> consumer)
    {
       ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicNameGenerator, s -> consumer.consumeObject(s.takeNextData()));
    }

@@ -4,7 +4,7 @@ import controller_msgs.msg.dds.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -125,7 +125,7 @@ public abstract class AStarPawStepSimulationTest implements QuadrupedMultiRobotT
 
       conductor.getScs().setCameraTracking(true, true, true, false);
 
-      MessageTopicNameGenerator footstepPlannerPubGenerator = PawStepPlannerCommunicationProperties.publisherTopicNameGenerator(quadrupedTestFactory.getRobotName());
+      ROS2MessageTopicNameGenerator footstepPlannerPubGenerator = PawStepPlannerCommunicationProperties.publisherTopicNameGenerator(quadrupedTestFactory.getRobotName());
 
       ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), PawStepPlanningToolboxOutputStatus.class, footstepPlannerPubGenerator,
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData(), stepsAreAdjustable));

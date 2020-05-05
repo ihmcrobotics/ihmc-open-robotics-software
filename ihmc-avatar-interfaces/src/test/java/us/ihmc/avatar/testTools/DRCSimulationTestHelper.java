@@ -36,7 +36,7 @@ import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
@@ -697,7 +697,7 @@ public class DRCSimulationTestHelper
       return createPublisher(messageType, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
    }
 
-   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, MessageTopicNameGenerator generator)
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2MessageTopicNameGenerator generator)
    {
       return ROS2Tools.createPublisher(ros2Node, messageType, generator);
    }
@@ -712,7 +712,7 @@ public class DRCSimulationTestHelper
       createSubscriber(messageType, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName), consumer);
    }
 
-   public <T> void createSubscriber(Class<T> messageType, MessageTopicNameGenerator generator, ObjectConsumer<T> consumer)
+   public <T> void createSubscriber(Class<T> messageType, ROS2MessageTopicNameGenerator generator, ObjectConsumer<T> consumer)
    {
       ROS2Tools.createCallbackSubscription(ros2Node, messageType, generator, s -> consumer.consumeObject(s.takeNextData()));
    }

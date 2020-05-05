@@ -5,7 +5,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2TopicQualifier;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -127,9 +127,9 @@ public class QuadrupedUIMessageConverter
    private void registerPubSubs()
    {
       /* subscribers */
-      MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      MessageTopicNameGenerator footstepPlannerPubGenerator = PawStepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName);
-      MessageTopicNameGenerator footstepPlannerInputTopicGenerator = PawStepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator footstepPlannerPubGenerator = PawStepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator footstepPlannerInputTopicGenerator = PawStepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName);
 
       ROS2Tools
             .createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> processRobotConfigurationData(s.takeNextData()));
@@ -174,9 +174,9 @@ public class QuadrupedUIMessageConverter
 
 
       /* publishers */
-      MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      ROS2MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
 
-      MessageTopicNameGenerator stepTeleopInputTopicGenerator = getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
+      ROS2MessageTopicNameGenerator stepTeleopInputTopicGenerator = getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
 
       desiredHighLevelStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);
       desiredSteppingStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);

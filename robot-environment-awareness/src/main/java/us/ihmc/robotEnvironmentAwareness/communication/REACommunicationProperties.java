@@ -18,7 +18,7 @@ import geometry_msgs.msg.dds.QuaternionPubSubType;
 import geometry_msgs.msg.dds.Vector3PubSubType;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2TopicQualifier;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.PacketDestination;
@@ -51,10 +51,10 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
  */
 public class REACommunicationProperties
 {
-   public static final MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
-   public static final MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE_NAME, ROS2TopicQualifier.INPUT);
-   public static final MessageTopicNameGenerator subscriberCustomRegionsTopicNameGenerator = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE_NAME
-                                                                                                                                   + "/custom_region", ROS2TopicQualifier.INPUT);
+   public static final ROS2MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
+   public static final ROS2MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE_NAME, ROS2TopicQualifier.INPUT);
+   public static final ROS2MessageTopicNameGenerator subscriberCustomRegionsTopicNameGenerator = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE_NAME
+                                                                                                                                       + "/custom_region", ROS2TopicQualifier.INPUT);
 
    private static final NetClassList privateNetClassList = new NetClassList();
    static

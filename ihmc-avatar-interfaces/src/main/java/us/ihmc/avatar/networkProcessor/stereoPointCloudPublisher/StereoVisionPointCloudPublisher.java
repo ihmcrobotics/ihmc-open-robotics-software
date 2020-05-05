@@ -21,7 +21,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -90,14 +90,14 @@ public class StereoVisionPointCloudPublisher
    }
 
    public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName,
-                                          MessageTopicNameGenerator defaultTopicNameGenerator)
+                                          ROS2MessageTopicNameGenerator defaultTopicNameGenerator)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
            defaultTopicNameGenerator);
    }
 
    public StereoVisionPointCloudPublisher(String robotName, FullRobotModel fullRobotModel, Ros2Node ros2Node, RealtimeRos2Node realtimeRos2Node,
-                                          String robotConfigurationDataTopicName, MessageTopicNameGenerator defaultTopicNameGenerator)
+                                          String robotConfigurationDataTopicName, ROS2MessageTopicNameGenerator defaultTopicNameGenerator)
    {
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;

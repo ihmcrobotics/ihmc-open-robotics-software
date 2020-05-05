@@ -172,7 +172,7 @@ public class ROS2Tools
    @Deprecated
    public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node,
                                                                     Class<T> messageType,
-                                                                    MessageTopicNameGenerator topicNameGenerator,
+                                                                    ROS2MessageTopicNameGenerator topicNameGenerator,
                                                                     NewMessageListener<T> newMessageListener)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
@@ -208,7 +208,7 @@ public class ROS2Tools
    @Deprecated
    public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2NodeInterface ros2Node,
                                                                         Class<T> messageType,
-                                                                        MessageTopicNameGenerator topicNameGenerator)
+                                                                        ROS2MessageTopicNameGenerator topicNameGenerator)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
       return createQueuedSubscription(ros2Node, messageType, topicName, RUNTIME_EXCEPTION);
@@ -241,7 +241,7 @@ public class ROS2Tools
    @Deprecated
    public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node,
                                                      Class<T> messageType,
-                                                     MessageTopicNameGenerator topicNameGenerator,
+                                                     ROS2MessageTopicNameGenerator topicNameGenerator,
                                                      NewMessageListener<T> newMessageListener)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
@@ -276,7 +276,7 @@ public class ROS2Tools
    @Deprecated
    public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node,
                                                                           Class<T> messageType,
-                                                                          MessageTopicNameGenerator topicNameGenerator)
+                                                                          ROS2MessageTopicNameGenerator topicNameGenerator)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
       return createQueuedSubscription(realtimeRos2Node, messageType, topicName, RUNTIME_EXCEPTION);
@@ -307,7 +307,7 @@ public class ROS2Tools
    @Deprecated
    public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node,
                                                                   Class<T> messageType,
-                                                                  MessageTopicNameGenerator topicNameGenerator)
+                                                                  ROS2MessageTopicNameGenerator topicNameGenerator)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
       return createPublisher(realtimeRos2Node, messageType, topicName);
@@ -336,7 +336,7 @@ public class ROS2Tools
    }
 
    @Deprecated
-   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
+   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2MessageTopicNameGenerator topicNameGenerator)
    {
       String topicName = topicNameGenerator.generateTopicName(messageType);
       return createPublisher(ros2Node, messageType, topicName);
@@ -381,7 +381,7 @@ public class ROS2Tools
     * @deprecated
     * @return the default generator.
     */
-   public static MessageTopicNameGenerator getDefaultTopicNameGenerator()
+   public static ROS2MessageTopicNameGenerator getDefaultTopicNameGenerator()
    {
       return ROS2Tools::generateDefaultTopicName;
    }
@@ -406,7 +406,7 @@ public class ROS2Tools
     * @deprecated
     * @return the default generator.
     */
-   public static MessageTopicNameGenerator getDefaultTopicNameGenerator(String robotName)
+   public static ROS2MessageTopicNameGenerator getDefaultTopicNameGenerator(String robotName)
    {
       return messageType -> generateDefaultTopicName(messageType, robotName);
    }
@@ -431,7 +431,7 @@ public class ROS2Tools
     * @deprecated
     * @return the generator.
     */
-   public static MessageTopicNameGenerator getTopicNameGenerator(String robotName, String moduleName, ROS2TopicQualifier qualifier)
+   public static ROS2MessageTopicNameGenerator getTopicNameGenerator(String robotName, String moduleName, ROS2TopicQualifier qualifier)
    {
       return messageType -> generateDefaultTopicName(messageType, robotName, moduleName, qualifier);
    }

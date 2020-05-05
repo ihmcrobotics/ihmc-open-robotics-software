@@ -7,7 +7,7 @@ import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
 import controller_msgs.msg.dds.REAStatusMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
@@ -28,7 +28,7 @@ public class REAPlanarRegionPublicNetworkProvider
    private final REAStatusMessage currentState = new REAStatusMessage();
 
    public REAPlanarRegionPublicNetworkProvider(Messager messager, RegionFeaturesProvider regionFeaturesProvider, Ros2Node ros2Node,
-                                               MessageTopicNameGenerator publisherTopicNameGenerator, MessageTopicNameGenerator subscriberTopicNameGenerator)
+                                               ROS2MessageTopicNameGenerator publisherTopicNameGenerator, ROS2MessageTopicNameGenerator subscriberTopicNameGenerator)
    {
       this.regionFeaturesProvider = regionFeaturesProvider;
       planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
