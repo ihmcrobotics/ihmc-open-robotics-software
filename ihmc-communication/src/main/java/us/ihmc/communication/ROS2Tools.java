@@ -205,36 +205,6 @@ public class ROS2Tools
       }
    }
 
-   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2TopicName topicName)
-   {
-      String fixedUpTopicName = topicName.setInputOrOutputForSubscriber().type(messageType).toString();
-      return createQueuedSubscription(ros2Node, messageType, fixedUpTopicName, RUNTIME_EXCEPTION);
-   }
-
-   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName)
-   {
-      return createQueuedSubscription(ros2Node, messageType, topicName, RUNTIME_EXCEPTION);
-   }
-
-   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2NodeInterface ros2Node,
-                                                                        Class<T> messageType,
-                                                                        String topicName,
-                                                                        ExceptionHandler exceptionHandler)
-   {
-      try
-      {
-         TopicDataType<T> topicDataType = ROS2TopicNameTools.newMessageTopicDataTypeInstance(messageType);
-         Ros2QueuedSubscription<T> ros2QueuedSubscription = new Ros2QueuedSubscription<>(topicDataType, 10);
-         ros2QueuedSubscription.setRos2Subscription(ros2Node.createSubscription(topicDataType, ros2QueuedSubscription, topicName, Ros2QosProfile.DEFAULT()));
-         return ros2QueuedSubscription;
-      }
-      catch (IOException e)
-      {
-         exceptionHandler.handleException(e);
-         return null;
-      }
-   }
-
    public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node,
                                                      Class<T> messageType,
                                                      ROS2TopicName topicName,
@@ -304,7 +274,7 @@ public class ROS2Tools
                                                                   ROS2TopicName topicName)
    {
       String fixedUpTopicName = topicName.setInputOrOutputForPublisher().type(messageType).toString();
-      return createPublisher(realtimeRos2Node, messageType, topicName);
+      return createPublisher(realtimeRos2Node, messageType, fixedUpTopicName);
    }
 
    public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, String topicName)
