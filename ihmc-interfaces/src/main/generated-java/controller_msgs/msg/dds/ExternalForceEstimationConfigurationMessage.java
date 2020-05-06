@@ -7,41 +7,57 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC external force estimation module.
-       * It specifies where an expected external force will be applied.
-       */
+   
+ * This message is part of the IHMC external force estimation module.
+   
+ * It specifies where an expected external force will be applied.
+   
+ */
 public class ExternalForceEstimationConfigurationMessage extends Packet<ExternalForceEstimationConfigurationMessage> implements Settable<ExternalForceEstimationConfigurationMessage>, EpsilonComparable<ExternalForceEstimationConfigurationMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Estimator gain, usually in the range of 0.25 - 5.0. If the system is noisy or prone to oscillation, a lower gain is suggested.
-            */
+       
+    * Estimator gain, usually in the range of 0.25 - 5.0. If the system is noisy or prone to oscillation, a lower gain is suggested.
+       
+    */
    public double estimator_gain_ = 0.5;
 
    /**
-            * Specifies the alpha value used by the damped least-squares solver, usually in the range (1e-6 - 1e-2). For long joint paths, smaller alphas are recommended.
-            */
+       
+    * Specifies the alpha value used by the damped least-squares solver, usually in the range (1e-6 - 1e-2). For long joint paths, smaller alphas are recommended.
+       
+    */
    public double solver_alpha_ = 0.005;
 
    /**
-            * Indicates whether the wrench at the root joint should be included in the solver
-            */
+       
+    * Indicates whether the wrench at the root joint should be included in the solver
+       
+    */
    public boolean calculate_root_joint_wrench_ = true;
 
    /**
-            * List of unique hash codes corresponding to the rigid bodies at which the solver will calculate external forces.
-            * See RigidBody.hashCode() for calculation of the hash code
-            */
+       
+    * List of unique hash codes corresponding to the rigid bodies at which the solver will calculate external forces.
+       
+    * See RigidBody.hashCode() for calculation of the hash code
+       
+    */
    public us.ihmc.idl.IDLSequence.Integer  rigid_body_hash_codes_;
 
    /**
-            * List of contact positions for each rigid body, expressed in RigidBody.getParentJoint().getFrameAfterJoint()
-            */
+       
+    * List of contact positions for each rigid body, expressed in RigidBody.getParentJoint().getFrameAfterJoint()
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  contact_point_positions_;
 
    public ExternalForceEstimationConfigurationMessage()
@@ -86,15 +102,19 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -102,15 +122,19 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
 
    /**
-            * Estimator gain, usually in the range of 0.25 - 5.0. If the system is noisy or prone to oscillation, a lower gain is suggested.
-            */
+       
+    * Estimator gain, usually in the range of 0.25 - 5.0. If the system is noisy or prone to oscillation, a lower gain is suggested.
+       
+    */
    public void setEstimatorGain(double estimator_gain)
    {
       estimator_gain_ = estimator_gain;
    }
    /**
-            * Estimator gain, usually in the range of 0.25 - 5.0. If the system is noisy or prone to oscillation, a lower gain is suggested.
-            */
+       
+    * Estimator gain, usually in the range of 0.25 - 5.0. If the system is noisy or prone to oscillation, a lower gain is suggested.
+       
+    */
    public double getEstimatorGain()
    {
       return estimator_gain_;
@@ -118,15 +142,19 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
 
    /**
-            * Specifies the alpha value used by the damped least-squares solver, usually in the range (1e-6 - 1e-2). For long joint paths, smaller alphas are recommended.
-            */
+       
+    * Specifies the alpha value used by the damped least-squares solver, usually in the range (1e-6 - 1e-2). For long joint paths, smaller alphas are recommended.
+       
+    */
    public void setSolverAlpha(double solver_alpha)
    {
       solver_alpha_ = solver_alpha;
    }
    /**
-            * Specifies the alpha value used by the damped least-squares solver, usually in the range (1e-6 - 1e-2). For long joint paths, smaller alphas are recommended.
-            */
+       
+    * Specifies the alpha value used by the damped least-squares solver, usually in the range (1e-6 - 1e-2). For long joint paths, smaller alphas are recommended.
+       
+    */
    public double getSolverAlpha()
    {
       return solver_alpha_;
@@ -134,15 +162,19 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
 
    /**
-            * Indicates whether the wrench at the root joint should be included in the solver
-            */
+       
+    * Indicates whether the wrench at the root joint should be included in the solver
+       
+    */
    public void setCalculateRootJointWrench(boolean calculate_root_joint_wrench)
    {
       calculate_root_joint_wrench_ = calculate_root_joint_wrench;
    }
    /**
-            * Indicates whether the wrench at the root joint should be included in the solver
-            */
+       
+    * Indicates whether the wrench at the root joint should be included in the solver
+       
+    */
    public boolean getCalculateRootJointWrench()
    {
       return calculate_root_joint_wrench_;
@@ -151,9 +183,12 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
 
    /**
-            * List of unique hash codes corresponding to the rigid bodies at which the solver will calculate external forces.
-            * See RigidBody.hashCode() for calculation of the hash code
-            */
+       
+    * List of unique hash codes corresponding to the rigid bodies at which the solver will calculate external forces.
+       
+    * See RigidBody.hashCode() for calculation of the hash code
+       
+    */
    public us.ihmc.idl.IDLSequence.Integer  getRigidBodyHashCodes()
    {
       return rigid_body_hash_codes_;
@@ -162,8 +197,10 @@ public class ExternalForceEstimationConfigurationMessage extends Packet<External
 
 
    /**
-            * List of contact positions for each rigid body, expressed in RigidBody.getParentJoint().getFrameAfterJoint()
-            */
+       
+    * List of contact positions for each rigid body, expressed in RigidBody.getParentJoint().getFrameAfterJoint()
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getContactPointPositions()
    {
       return contact_point_positions_;

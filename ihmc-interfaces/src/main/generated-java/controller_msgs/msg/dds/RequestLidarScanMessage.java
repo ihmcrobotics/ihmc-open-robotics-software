@@ -7,14 +7,18 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Message used to request a new LIDAR scan, and also enable some filters.
-       */
+   
+ * Message used to request a new LIDAR scan, and also enable some filters.
+   
+ */
 public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage> implements Settable<RequestLidarScanMessage>, EpsilonComparable<RequestLidarScanMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public boolean remove_shadows_ = true;
@@ -50,15 +54,19 @@ public class RequestLidarScanMessage extends Packet<RequestLidarScanMessage> imp
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

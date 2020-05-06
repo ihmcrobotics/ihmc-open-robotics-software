@@ -35,7 +35,7 @@ mainDependencies {
    api("us.ihmc:euclid-geometry:0.13.1")
    api("us.ihmc:ihmc-pub-sub:0.12.0")
    api("us.ihmc:ros2-common-interfaces:0.16.1")
-   api("us.ihmc:ihmc-commons:0.28.2")
+   api("us.ihmc:ihmc-commons:0.29.0")
 }
 
 testDependencies {
@@ -44,7 +44,7 @@ testDependencies {
 
 generatorDependencies {
    api("us.ihmc:euclid:0.13.1")
-   api("us.ihmc:ihmc-commons:0.28.2")
+   api("us.ihmc:ihmc-commons:0.29.0")
    api("us.ihmc:ros2-msg-to-pubsub-generator:0.16.1")
 }
 

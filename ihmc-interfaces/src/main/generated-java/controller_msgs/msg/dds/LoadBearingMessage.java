@@ -7,36 +7,50 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * Message carrying the information needed to enable load bearing for a end-effector.
-       * A contact point will be used to enable this feature. This point is attached to the end-effector.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * Message carrying the information needed to enable load bearing for a end-effector.
+   
+ * A contact point will be used to enable this feature. This point is attached to the end-effector.
+   
+ */
 public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Settable<LoadBearingMessage>, EpsilonComparable<LoadBearingMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * If set to true this will load the contact point. Otherwise the rigid body will stop bearing load.
-            */
+       
+    * If set to true this will load the contact point. Otherwise the rigid body will stop bearing load.
+       
+    */
    public boolean load_;
 
    /**
-            * Sets the coefficient of friction that the controller will use for the contact point.
-            */
+       
+    * Sets the coefficient of friction that the controller will use for the contact point.
+       
+    */
    public double coefficient_of_friction_;
 
    /**
-            * Sets the pose of the contact frame in the frame of the end effector body.
-            */
+       
+    * Sets the pose of the contact frame in the frame of the end effector body.
+       
+    */
    public us.ihmc.euclid.geometry.Pose3D body_frame_to_contact_frame_;
 
    /**
-            * Sets the contact normal used by the controller to load the contact point.
-            */
+       
+    * Sets the contact normal used by the controller to load the contact point.
+       
+    */
    public us.ihmc.euclid.tuple3D.Vector3D contact_normal_in_world_frame_;
 
    public LoadBearingMessage()
@@ -76,15 +90,19 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -92,15 +110,19 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
 
 
    /**
-            * If set to true this will load the contact point. Otherwise the rigid body will stop bearing load.
-            */
+       
+    * If set to true this will load the contact point. Otherwise the rigid body will stop bearing load.
+       
+    */
    public void setLoad(boolean load)
    {
       load_ = load;
    }
    /**
-            * If set to true this will load the contact point. Otherwise the rigid body will stop bearing load.
-            */
+       
+    * If set to true this will load the contact point. Otherwise the rigid body will stop bearing load.
+       
+    */
    public boolean getLoad()
    {
       return load_;
@@ -108,15 +130,19 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
 
 
    /**
-            * Sets the coefficient of friction that the controller will use for the contact point.
-            */
+       
+    * Sets the coefficient of friction that the controller will use for the contact point.
+       
+    */
    public void setCoefficientOfFriction(double coefficient_of_friction)
    {
       coefficient_of_friction_ = coefficient_of_friction;
    }
    /**
-            * Sets the coefficient of friction that the controller will use for the contact point.
-            */
+       
+    * Sets the coefficient of friction that the controller will use for the contact point.
+       
+    */
    public double getCoefficientOfFriction()
    {
       return coefficient_of_friction_;
@@ -125,8 +151,10 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
 
 
    /**
-            * Sets the pose of the contact frame in the frame of the end effector body.
-            */
+       
+    * Sets the pose of the contact frame in the frame of the end effector body.
+       
+    */
    public us.ihmc.euclid.geometry.Pose3D getBodyFrameToContactFrame()
    {
       return body_frame_to_contact_frame_;
@@ -135,8 +163,10 @@ public class LoadBearingMessage extends Packet<LoadBearingMessage> implements Se
 
 
    /**
-            * Sets the contact normal used by the controller to load the contact point.
-            */
+       
+    * Sets the contact normal used by the controller to load the contact point.
+       
+    */
    public us.ihmc.euclid.tuple3D.Vector3D getContactNormalInWorldFrame()
    {
       return contact_normal_in_world_frame_;

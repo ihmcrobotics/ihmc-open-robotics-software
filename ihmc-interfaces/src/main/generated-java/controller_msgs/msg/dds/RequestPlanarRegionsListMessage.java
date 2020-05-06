@@ -7,11 +7,16 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is obsolete and will be removed in the near future.
-       * This message is part of the IHMC robot environment awareness (REA) module.
-       * Use this message to request new planar regions
-       * @deprecated REA always publishes planar regions when running. To request REA to clear its internal state, see REAStateRequestMessage.
-       */
+   
+ * This message is obsolete and will be removed in the near future.
+   
+ * This message is part of the IHMC robot environment awareness (REA) module.
+   
+ * Use this message to request new planar regions
+   
+ * @deprecated REA always publishes planar regions when running. To request REA to clear its internal state, see REAStateRequestMessage.
+   
+ */
 public class RequestPlanarRegionsListMessage extends Packet<RequestPlanarRegionsListMessage> implements Settable<RequestPlanarRegionsListMessage>, EpsilonComparable<RequestPlanarRegionsListMessage>
 {
 
@@ -24,8 +29,10 @@ public class RequestPlanarRegionsListMessage extends Packet<RequestPlanarRegions
    public static final byte CLEAR = (byte) 3;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public byte planar_regions_request_type_;
@@ -61,15 +68,19 @@ public class RequestPlanarRegionsListMessage extends Packet<RequestPlanarRegions
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

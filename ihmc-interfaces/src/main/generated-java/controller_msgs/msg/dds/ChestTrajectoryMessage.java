@@ -7,22 +7,31 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message commands the controller to move in taskspace the chest to the desired orientation while going through the specified trajectory points.
-       * A Hermite based curve (third order) is used to interpolate the orientations.
-       * To execute a simple trajectory to reach a desired chest orientation, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message commands the controller to move in taskspace the chest to the desired orientation while going through the specified trajectory points.
+   
+ * A Hermite based curve (third order) is used to interpolate the orientations.
+   
+ * To execute a simple trajectory to reach a desired chest orientation, set only one trajectory point with zero velocity and its time to be equal to the desired trajectory time.
+   
+ */
 public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage> implements Settable<ChestTrajectoryMessage>, EpsilonComparable<ChestTrajectoryMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * The orientation trajectory information.
-            */
+       
+    * The orientation trajectory information.
+       
+    */
    public controller_msgs.msg.dds.SO3TrajectoryMessage so3_trajectory_;
 
    public ChestTrajectoryMessage()
@@ -50,15 +59,19 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage> imple
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -67,8 +80,10 @@ public class ChestTrajectoryMessage extends Packet<ChestTrajectoryMessage> imple
 
 
    /**
-            * The orientation trajectory information.
-            */
+       
+    * The orientation trajectory information.
+       
+    */
    public controller_msgs.msg.dds.SO3TrajectoryMessage getSo3Trajectory()
    {
       return so3_trajectory_;

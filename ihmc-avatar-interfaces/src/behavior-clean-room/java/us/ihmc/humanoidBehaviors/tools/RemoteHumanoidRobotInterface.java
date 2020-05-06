@@ -115,7 +115,7 @@ public class RemoteHumanoidRobotInterface
       {
          while (!walkingCompletedNotifications.isEmpty())
          {
-            walkingCompletedNotifications.remove(0).add(message);
+            walkingCompletedNotifications.remove(0).set(message);
          }
       }
    }

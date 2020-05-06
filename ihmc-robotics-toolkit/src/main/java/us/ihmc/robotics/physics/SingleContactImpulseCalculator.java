@@ -397,7 +397,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       {
          impulseA.getLinearPart().interpolate(impulsePreviousA, impulseA.getLinearPart(), alpha);
          impulseChangeA.sub(impulseA.getLinearPart(), impulsePreviousA);
-         isImpulseZero = impulseA.getLinearPart().length() < 1.0e-10;
+         isImpulseZero = impulseA.getLinearPart().length() < 1.0e-6;
       }
 
       if (isImpulseZero)

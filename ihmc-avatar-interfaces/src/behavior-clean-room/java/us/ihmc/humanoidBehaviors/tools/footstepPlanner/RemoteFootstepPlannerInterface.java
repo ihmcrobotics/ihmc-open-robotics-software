@@ -129,7 +129,7 @@ public class RemoteFootstepPlannerInterface
             }
          }
 
-         resultNotifications.remove(footstepPlanningToolboxOutputStatus.getPlanId()).add(result);
+         resultNotifications.remove(footstepPlanningToolboxOutputStatus.getPlanId()).set(result);
       }
    }
 
