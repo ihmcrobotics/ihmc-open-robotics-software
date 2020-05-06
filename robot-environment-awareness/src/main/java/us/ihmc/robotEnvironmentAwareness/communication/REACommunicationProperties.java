@@ -51,15 +51,12 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
  */
 public class REACommunicationProperties
 {
-   public static final ROS2MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.IHMC_ROOT.robot(null)
-                                                                                                      .module(ROS2Tools.REA_MODULE_NAME)
+   public static final ROS2MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.REA.robot(null)
                                                                                                       .qualifier(ROS2TopicQualifier.OUTPUT);
-   public static final ROS2MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.IHMC_ROOT.robot(null)
-                                                                                                       .module(ROS2Tools.REA_MODULE_NAME)
+   public static final ROS2MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.REA.robot(null)
                                                                                                        .qualifier(ROS2TopicQualifier.INPUT);
-   public static final ROS2MessageTopicNameGenerator subscriberCustomRegionsTopicNameGenerator = ROS2Tools.IHMC_ROOT.robot(null)
-                                                                                                                    .module(ROS2Tools.REA_MODULE_NAME
-                                                                                                                            + "/custom_region")
+   public static final ROS2MessageTopicNameGenerator subscriberCustomRegionsTopicNameGenerator = ROS2Tools.REA.robot(null)
+                                                                                                                    .name("custom_region")
                                                                                                                     .qualifier(ROS2TopicQualifier.INPUT);
 
    private static final NetClassList privateNetClassList = new NetClassList();

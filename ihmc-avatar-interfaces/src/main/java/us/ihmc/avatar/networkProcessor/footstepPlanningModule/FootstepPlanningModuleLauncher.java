@@ -92,11 +92,9 @@ public class FootstepPlanningModuleLauncher
       FootstepPlanningModule footstepPlanningModule = createModule(robotModel);
       footstepPlanningModule.registerRosNode(ros2Node);
       String name = footstepPlanningModule.getName();
-      ROS2MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.IHMC_ROOT.robot(name)
-                                                                                      .module(ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME)
+      ROS2MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.FOOTSTEP_PLANNER.robot(name)
                                                                                       .qualifier(ROS2TopicQualifier.INPUT);
-      ROS2MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.IHMC_ROOT.robot(name)
-                                                                                     .module(ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME)
+      ROS2MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.FOOTSTEP_PLANNER.robot(name)
                                                                                      .qualifier(ROS2TopicQualifier.OUTPUT);
 
       AtomicBoolean generateLog = new AtomicBoolean();

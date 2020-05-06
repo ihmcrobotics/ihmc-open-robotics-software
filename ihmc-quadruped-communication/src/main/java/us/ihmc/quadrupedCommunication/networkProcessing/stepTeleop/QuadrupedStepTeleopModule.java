@@ -159,13 +159,13 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    @Override
    public ROS2MessageTopicNameGenerator getPublisherTopicNameGenerator()
    {
-      return ROS2Tools.IHMC_ROOT.robot(robotName).module(ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME).qualifier(ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.STEP_TELEOP_TOOLBOX.robot(robotName).qualifier(ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
    public ROS2MessageTopicNameGenerator getSubscriberTopicNameGenerator()
    {
-      return ROS2Tools.IHMC_ROOT.robot(robotName).module(ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME).qualifier(ROS2TopicQualifier.INPUT);
+      return ROS2Tools.STEP_TELEOP_TOOLBOX.robot(robotName).qualifier(ROS2TopicQualifier.INPUT);
    }
 
    @Override
