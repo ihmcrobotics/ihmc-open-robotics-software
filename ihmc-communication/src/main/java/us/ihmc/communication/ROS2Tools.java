@@ -47,6 +47,8 @@ public class ROS2Tools
    public static final String REA_CUSTOM_REGION_NAME = "custom_region";
    public static final String D435_NAME = "d435";
    public static final String T265_NAME = "t265";
+   public static final String INPUT = "input";
+   public static final String OUTPUT = "output";
 
    public static final ROS2TopicName IHMC_ROOT = new ROS2TopicName().prefix(IHMC_TOPIC_PREFIX);
    public static final ROS2TopicName HUMANOID_CONTROLLER = IHMC_ROOT.module(HUMANOID_CONTROL_MODULE_NAME);

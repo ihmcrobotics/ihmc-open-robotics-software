@@ -6,7 +6,6 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2NodeInterface;
 
 import java.util.function.Consumer;
@@ -20,8 +19,8 @@ public class RemoteREAInterface
 
    public RemoteREAInterface(Ros2NodeInterface ros2Node)
    {
-      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.suffix(ROS2TopicName.INPUT));
-      planarRegionsListInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.suffix(ROS2TopicName.OUTPUT));
+      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.suffix(ROS2Tools.INPUT));
+      planarRegionsListInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.suffix(ROS2Tools.OUTPUT));
 
       planarRegionsListInput.addCallback(planarRegionsListMessage -> stopwatch.start());
    }

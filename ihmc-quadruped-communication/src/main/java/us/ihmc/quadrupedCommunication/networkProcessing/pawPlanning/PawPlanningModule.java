@@ -3,7 +3,6 @@ package us.ihmc.quadrupedCommunication.networkProcessing.pawPlanning;
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2TopicName;
-import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -74,7 +73,7 @@ public class PawPlanningModule extends QuadrupedToolboxModule
 
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSupportPlanarRegionParametersMessage.class,
                                            ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER.robot(robotName)
-                                                              .qualifier(ROS2TopicQualifier.INPUT),
+                                                              .suffix(ROS2Tools.INPUT),
                                            s -> processSupportRegionParameters(s.takeNextData()));
 
       // inputs to this module
@@ -159,13 +158,13 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    @Override
    public ROS2TopicName getPublisherTopicNameGenerator()
    {
-      return ROS2Tools.FOOTSTEP_PLANNER.robot(robotName).qualifier(ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.FOOTSTEP_PLANNER.robot(robotName).suffix(ROS2Tools.OUTPUT);
    }
 
    @Override
    public ROS2TopicName getSubscriberTopicNameGenerator()
    {
-      return ROS2Tools.FOOTSTEP_PLANNER.robot(robotName).qualifier(ROS2TopicQualifier.INPUT);
+      return ROS2Tools.FOOTSTEP_PLANNER.robot(robotName).suffix(ROS2Tools.INPUT);
    }
 
    @Override

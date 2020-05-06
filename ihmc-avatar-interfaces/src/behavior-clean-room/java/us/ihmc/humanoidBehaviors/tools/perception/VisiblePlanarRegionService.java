@@ -7,7 +7,6 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
@@ -27,7 +26,7 @@ public class VisiblePlanarRegionService
    public VisiblePlanarRegionService(Ros2NodeInterface ros2Node, Supplier<PlanarRegionsList>... planarRegionSuppliers)
    {
       this.planarRegionSuppliers = planarRegionSuppliers;
-      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.suffix(ROS2TopicName.OUTPUT)); // TODO add name "visible"
+      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.suffix(ROS2Tools.OUTPUT)); // TODO add name "visible"
       thread = new PausablePeriodicThread(getClass().getSimpleName(), 0.5, this::process);
    }
 

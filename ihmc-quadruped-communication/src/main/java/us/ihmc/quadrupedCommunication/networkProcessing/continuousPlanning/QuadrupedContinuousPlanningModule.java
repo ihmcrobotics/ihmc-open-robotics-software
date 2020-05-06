@@ -3,7 +3,6 @@ package us.ihmc.quadrupedCommunication.networkProcessing.continuousPlanning;
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2TopicName;
-import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -64,7 +63,7 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
 
       // status messages from the planner
       ROS2TopicName plannerPubGenerator = ROS2Tools.FOOTSTEP_PLANNER.robot(robotName)
-                                                                    .qualifier(ROS2TopicQualifier.OUTPUT);
+                                                                    .suffix(ROS2Tools.OUTPUT);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, PawStepPlanningToolboxOutputStatus.class, plannerPubGenerator,
                                            s -> processFootstepPlannerOutputMessage(s.takeNextData()));
 
@@ -87,7 +86,7 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
       messages.put(QuadrupedTimedStepListMessage.class, getPublisherTopicNameGenerator());
 
       ROS2TopicName plannerSubGenerator = ROS2Tools.FOOTSTEP_PLANNER.robot(robotName)
-                                                                             .qualifier(ROS2TopicQualifier.INPUT);
+                                                                             .suffix(ROS2Tools.INPUT);
       messages.put(PawStepPlanningRequestPacket.class, plannerSubGenerator);
       messages.put(ToolboxStateMessage.class, plannerSubGenerator);
 
@@ -144,13 +143,13 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    @Override
    public ROS2TopicName getPublisherTopicNameGenerator()
    {
-      return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.robot(robotName).qualifier(ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.robot(robotName).suffix(ROS2Tools.OUTPUT);
    }
 
    @Override
    public ROS2TopicName getSubscriberTopicNameGenerator()
    {
-      return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.robot(robotName).qualifier(ROS2TopicQualifier.INPUT);
+      return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.robot(robotName).suffix(ROS2Tools.INPUT);
    }
 
    @Override

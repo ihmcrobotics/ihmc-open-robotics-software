@@ -32,7 +32,6 @@ import us.ihmc.robotics.lidar.LidarScanParameters;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotDescription.LidarSensorDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.*;
 import us.ihmc.simulationconstructionset.*;
@@ -67,7 +66,7 @@ public class SCSDoorAndCameraSimulator
    {
       robotConfigurationData = new ROS2Input<>(ros2Node,
                                                RobotConfigurationData.class,
-                                               ROS2Tools.HUMANOID_CONTROLLER.robot(robotModel.getSimpleRobotName()).suffix(ROS2TopicName.OUTPUT));
+                                               ROS2Tools.HUMANOID_CONTROLLER.robot(robotModel.getSimpleRobotName()).suffix(ROS2Tools.OUTPUT));
 
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
 
@@ -124,7 +123,7 @@ public class SCSDoorAndCameraSimulator
       ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
                                                                                  RobotConfigurationData.class,
                                                                                  ROS2Tools.HUMANOID_CONTROLLER.robot(robotModel.getSimpleRobotName())
-                                                                                                              .suffix(ROS2TopicName.OUTPUT));
+                                                                                                              .suffix(ROS2Tools.OUTPUT));
       IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT);
       CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
       cameraConfiguration.setCameraMount(videoCameraMountName);

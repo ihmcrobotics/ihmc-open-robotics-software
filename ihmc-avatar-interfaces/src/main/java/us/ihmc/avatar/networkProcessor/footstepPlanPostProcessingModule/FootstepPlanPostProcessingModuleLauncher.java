@@ -8,7 +8,6 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2TopicName;
-import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -43,9 +42,9 @@ public class FootstepPlanPostProcessingModuleLauncher
       String name = postProcessingModule.getName();
 
       ROS2TopicName subscriberTopicNameGenerator = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.robot(name)
-                                                                                            .qualifier(ROS2TopicQualifier.INPUT);
+                                                                                            .suffix(ROS2Tools.INPUT);
       ROS2TopicName publisherTopicNameGenerator = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.robot(name)
-                                                                                     .qualifier(ROS2TopicQualifier.OUTPUT);
+                                                                                     .suffix(ROS2Tools.OUTPUT);
 
       // Parameters callback
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPostProcessingParametersPacket.class, subscriberTopicNameGenerator,

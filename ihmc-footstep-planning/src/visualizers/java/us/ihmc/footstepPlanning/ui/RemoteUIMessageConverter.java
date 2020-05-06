@@ -9,7 +9,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2TopicName;
-import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -180,7 +179,7 @@ public class RemoteUIMessageConverter
       // we want to list to the footstep plan post processing result from the toolbox
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPostProcessingPacket.class,
                                            ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.robot(robotName)
-                                                              .qualifier(ROS2TopicQualifier.OUTPUT),
+                                                              .suffix(ROS2Tools.OUTPUT),
                                            s -> processFootstepPostProcessingResult(s.takeNextData()));
       // we want to also listen to incoming REA planar region data.
       ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
@@ -202,7 +201,7 @@ public class RemoteUIMessageConverter
                                            });
 
       ROS2TopicName controllerPreviewOutputTopicNameGenerator = ROS2Tools.WALKING_PREVIEW_TOOLBOX.robot(robotName)
-                                                                                                   .qualifier(ROS2TopicQualifier.OUTPUT);
+                                                                                                   .suffix(ROS2Tools.OUTPUT);
       ROS2Tools.createCallbackSubscription(ros2Node, WalkingControllerPreviewOutputMessage.class, controllerPreviewOutputTopicNameGenerator, s -> messager.submitMessage(FootstepPlannerMessagerAPI.WalkingPreviewOutput, s.takeNextData()));
 
       // publishers
@@ -218,17 +217,17 @@ public class RemoteUIMessageConverter
       postProcessingParametersPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                     FootstepPostProcessingParametersPacket.class,
                                                                     ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.robot(robotName)
-                                                                                       .qualifier(ROS2TopicQualifier.INPUT));
+                                                                                       .suffix(ROS2Tools.INPUT));
       footstepPlanningRequestPublisher = ROS2Tools
             .createPublisher(ros2Node, FootstepPlanningRequestPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
       footstepPostProcessingRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPostProcessingPacket.class,
                                                                          ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.robot(robotName)
-                                                                                            .qualifier(ROS2TopicQualifier.INPUT));
+                                                                                            .suffix(ROS2Tools.INPUT));
       footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
       goHomePublisher = ROS2Tools.createPublisher(ros2Node, GoHomeMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
 
       ROS2TopicName controllerPreviewInputTopicNameGenerator = ROS2Tools.WALKING_PREVIEW_TOOLBOX.robot(robotName)
-                                                                                                .qualifier(ROS2TopicQualifier.INPUT);
+                                                                                                .suffix(ROS2Tools.INPUT);
       walkingPreviewToolboxStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, controllerPreviewInputTopicNameGenerator);
       walkingPreviewRequestPublisher = ROS2Tools.createPublisher(ros2Node, WalkingControllerPreviewInputMessage.class, controllerPreviewInputTopicNameGenerator);
 
@@ -259,7 +258,7 @@ public class RemoteUIMessageConverter
       IHMCRealtimeROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher = ROS2Tools
             .createPublisher(ros2Node, BipedalSupportPlanarRegionParametersMessage.class,
                              ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.robot(robotName)
-                                                .qualifier(ROS2TopicQualifier.INPUT));
+                                                .suffix(ROS2Tools.INPUT));
       messager.registerTopicListener(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters, supportRegionsParametersPublisher::publish);
    }
 

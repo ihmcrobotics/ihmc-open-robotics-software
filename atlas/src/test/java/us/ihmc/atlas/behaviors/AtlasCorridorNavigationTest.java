@@ -60,7 +60,6 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
@@ -187,7 +186,7 @@ public class AtlasCorridorNavigationTest
 
       // create map subscriber
       ROS2Input<PlanarRegionsListMessage> mapRegionsInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class,
-                                                                            ROS2Tools.REALSENSE_SLAM_MAP.suffix(ROS2TopicName.OUTPUT));
+                                                                            ROS2Tools.REALSENSE_SLAM_MAP.suffix(ROS2Tools.OUTPUT));
 
       // subscribe to robot pose
       RemoteHumanoidRobotInterface robot = new RemoteHumanoidRobotInterface(ros2Node, createRobotModel());

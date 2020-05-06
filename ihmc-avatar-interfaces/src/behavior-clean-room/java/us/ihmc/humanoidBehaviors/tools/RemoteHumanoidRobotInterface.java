@@ -73,26 +73,26 @@ public class RemoteHumanoidRobotInterface
       jointMap = robotModel.getJointMap();
       topicName = ROS2Tools.HUMANOID_CONTROLLER.robot(robotName);
 
-      footTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, FootTrajectoryMessage.class, topicName.suffix(ROS2TopicName.INPUT));
-      footLoadBearingMessagePublisher = new IHMCROS2Publisher<>(ros2Node, FootLoadBearingMessage.class, topicName.suffix(ROS2TopicName.INPUT));
-      armTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, ArmTrajectoryMessage.class, topicName.suffix(ROS2TopicName.INPUT));
-      chestOrientationTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, ChestTrajectoryMessage.class, topicName.suffix(ROS2TopicName.INPUT));
-      headOrientationTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, HeadTrajectoryMessage.class, topicName.suffix(ROS2TopicName.INPUT));
+      footTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, FootTrajectoryMessage.class, topicName.suffix(ROS2Tools.INPUT));
+      footLoadBearingMessagePublisher = new IHMCROS2Publisher<>(ros2Node, FootLoadBearingMessage.class, topicName.suffix(ROS2Tools.INPUT));
+      armTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, ArmTrajectoryMessage.class, topicName.suffix(ROS2Tools.INPUT));
+      chestOrientationTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, ChestTrajectoryMessage.class, topicName.suffix(ROS2Tools.INPUT));
+      headOrientationTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, HeadTrajectoryMessage.class, topicName.suffix(ROS2Tools.INPUT));
       pelvisOrientationTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, PelvisOrientationTrajectoryMessage.class,
-                                                                            topicName.suffix(ROS2TopicName.INPUT));
-      pelvisTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, PelvisTrajectoryMessage.class, topicName.suffix(ROS2TopicName.INPUT));
-      goHomeMessagePublisher = new IHMCROS2Publisher<>(ros2Node, GoHomeMessage.class, topicName.suffix(ROS2TopicName.INPUT));
-      footstepDataListPublisher = new IHMCROS2Publisher<>(ros2Node, FootstepDataListMessage.class, topicName.suffix(ROS2TopicName.INPUT));
-      pausePublisher = new IHMCROS2Publisher<>(ros2Node, PauseWalkingMessage.class, topicName.suffix(ROS2TopicName.INPUT));
-      stampedPosePublisher = new IHMCROS2Publisher<>(ros2Node, StampedPosePacket.class, topicName.suffix(ROS2TopicName.INPUT));
+                                                                            topicName.suffix(ROS2Tools.INPUT));
+      pelvisTrajectoryMessagePublisher = new IHMCROS2Publisher<>(ros2Node, PelvisTrajectoryMessage.class, topicName.suffix(ROS2Tools.INPUT));
+      goHomeMessagePublisher = new IHMCROS2Publisher<>(ros2Node, GoHomeMessage.class, topicName.suffix(ROS2Tools.INPUT));
+      footstepDataListPublisher = new IHMCROS2Publisher<>(ros2Node, FootstepDataListMessage.class, topicName.suffix(ROS2Tools.INPUT));
+      pausePublisher = new IHMCROS2Publisher<>(ros2Node, PauseWalkingMessage.class, topicName.suffix(ROS2Tools.INPUT));
+      stampedPosePublisher = new IHMCROS2Publisher<>(ros2Node, StampedPosePacket.class, topicName.suffix(ROS2Tools.INPUT));
 
-      new ROS2Callback<>(ros2Node, WalkingStatusMessage.class, topicName.suffix(ROS2TopicName.OUTPUT), this::acceptWalkingStatus);
+      new ROS2Callback<>(ros2Node, WalkingStatusMessage.class, topicName.suffix(ROS2Tools.OUTPUT), this::acceptWalkingStatus);
 
       HighLevelStateChangeStatusMessage initialState = new HighLevelStateChangeStatusMessage();
       initialState.setInitialHighLevelControllerName(HighLevelControllerName.DO_NOTHING_BEHAVIOR.toByte());
       initialState.setEndHighLevelControllerName(HighLevelControllerName.WALKING.toByte());
-      controllerStateInput = new ROS2Input<>(ros2Node, HighLevelStateChangeStatusMessage.class, topicName.suffix(ROS2TopicName.OUTPUT), initialState, this::acceptStatusChange);
-      capturabilityBasedStatusInput = new ROS2Input<>(ros2Node, CapturabilityBasedStatus.class, topicName.suffix(ROS2TopicName.OUTPUT));
+      controllerStateInput = new ROS2Input<>(ros2Node, HighLevelStateChangeStatusMessage.class, topicName.suffix(ROS2Tools.OUTPUT), initialState, this::acceptStatusChange);
+      capturabilityBasedStatusInput = new ROS2Input<>(ros2Node, CapturabilityBasedStatus.class, topicName.suffix(ROS2Tools.OUTPUT));
 
       footstepPlanPostProcessingModule = FootstepPlanPostProcessingModuleLauncher.createModule(robotModel);
 
@@ -124,7 +124,7 @@ public class RemoteHumanoidRobotInterface
    public ROS2Callback createFootstepStatusCallback(Consumer<FootstepStatusMessage> consumer)
    {
       ROS2Callback<FootstepStatusMessage> ros2Callback = new ROS2Callback<>(ros2Node,
-                                                                            FootstepStatusMessage.class, topicName.suffix(ROS2TopicName.OUTPUT),
+                                                                            FootstepStatusMessage.class, topicName.suffix(ROS2Tools.OUTPUT),
                                                                             consumer);
       //      ros2Callbacks.add(ros2Callback); // TODO: Use ManagedROS2Node
       return ros2Callback;

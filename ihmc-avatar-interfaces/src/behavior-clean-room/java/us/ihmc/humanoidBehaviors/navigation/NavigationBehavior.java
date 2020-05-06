@@ -45,7 +45,6 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalcu
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.commons.thread.TypedNotification;
@@ -87,7 +86,7 @@ public class NavigationBehavior implements BehaviorInterface
       this.helper = helper;
 
       // create map subscriber
-      mapRegionsInput = new ROS2Input<>(helper.getManagedROS2Node(), PlanarRegionsListMessage.class, ROS2Tools.MAPPING_MODULE.suffix(ROS2TopicName.OUTPUT));
+      mapRegionsInput = new ROS2Input<>(helper.getManagedROS2Node(), PlanarRegionsListMessage.class, ROS2Tools.MAPPING_MODULE.suffix(ROS2Tools.OUTPUT));
 
       robot = helper.getOrCreateRobotInterface();
 
