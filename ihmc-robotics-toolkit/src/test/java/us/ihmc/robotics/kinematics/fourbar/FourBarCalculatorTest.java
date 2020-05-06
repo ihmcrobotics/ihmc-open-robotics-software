@@ -4,26 +4,25 @@ import static java.lang.Math.PI;
 import static java.lang.Math.abs;
 import static java.lang.Math.atan2;
 import static java.lang.Math.sqrt;
-import static us.ihmc.robotics.Assert.*;
-
 import static us.ihmc.commons.MathTools.square;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-public class ConstantSideFourBarCalculatorWithDerivativesTest
+
+public class FourBarCalculatorTest
 {
    private static final double eps = 1e-7;
    private static final boolean PRINT = false;
 
-	@Test
+   @Test
    public void testSquare()
    {
-      ConstantSideFourBarCalculatorWithDerivatives fourBar = new ConstantSideFourBarCalculatorWithDerivatives(1.0, 1.0, 1.0, 1.0);
+      FourBarCalculator fourBar = new FourBarCalculator();
+      fourBar.setSideLengths(1.0, 1.0, 1.0, 1.0);
       fourBar.updateAnglesGivenAngleDAB(PI / 2);
       assertEquals(PI / 2, fourBar.getAngleDAB(), eps);
       assertEquals(PI / 2, fourBar.getAngleABC(), eps);
@@ -40,17 +39,19 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
       double BC = random.nextDouble();
       double CD = random.nextDouble();
 
-      ConstantSideFourBarCalculatorWithDerivatives fourBar = new ConstantSideFourBarCalculatorWithDerivatives(DA, AB, BC, CD);
+      FourBarCalculator fourBar = new FourBarCalculator();
+      fourBar.setSideLengths(DA, AB, BC, CD);
       assertEquals(AB, fourBar.getAB(), eps);
       assertEquals(BC, fourBar.getBC(), eps);
       assertEquals(CD, fourBar.getCD(), eps);
       assertEquals(DA, fourBar.getDA(), eps);
    }
 
-	@Test
+   @Test
    public void testSquareDer()
    {
-      ConstantSideFourBarCalculatorWithDerivatives fourBar = new ConstantSideFourBarCalculatorWithDerivatives(1.0, 1.0, 1.0, 1.0);
+      FourBarCalculator fourBar = new FourBarCalculator();
+      fourBar.setSideLengths(1.0, 1.0, 1.0, 1.0);
       fourBar.updateAnglesAndVelocitiesGivenAngleDAB(PI / 2, 1);
       assertEquals(PI / 2, fourBar.getAngleDAB(), eps);
       assertEquals(PI / 2, fourBar.getAngleABC(), eps);
@@ -62,10 +63,11 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
       assertEquals(-1, fourBar.getAngleDtCDA(), eps);
    }
 
-	@Test
+   @Test
    public void testParallelogram()
    {
-      ConstantSideFourBarCalculatorWithDerivatives fourBar = new ConstantSideFourBarCalculatorWithDerivatives(1.0, 1.0, 1.0, 1.0);
+      FourBarCalculator fourBar = new FourBarCalculator();
+      fourBar.setSideLengths(1.0, 1.0, 1.0, 1.0);
       fourBar.updateAnglesAndVelocitiesGivenAngleDAB(PI / 3, 1);
       assertEquals(PI / 3, fourBar.getAngleDAB(), eps);
       assertEquals(2 * PI / 3, fourBar.getAngleABC(), eps);
@@ -77,8 +79,8 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
       assertEquals(-1, fourBar.getAngleDtCDA(), eps);
    }
 
-	@Test
-   public void testRandomQuadrilatteral()
+   @Test
+   public void testRandomQuadrilateral()
    {
       Random rand = new Random(1986L);
       for (int i = 0; i < 10000; i++)
@@ -105,13 +107,14 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
       if (PRINT)
       {
          String[] names = "a,b,c,d,A,B,C,D".split(",");
-         double[] vals = new double[] { a, b, c, d, A, B, C, D };
+         double[] vals = new double[] {a, b, c, d, A, B, C, D};
          for (int i = 0; i < vals.length; i++)
          {
             System.out.println(names[i] + " = " + vals[i]);
          }
       }
-      ConstantSideFourBarCalculatorWithDerivatives fourBar = new ConstantSideFourBarCalculatorWithDerivatives(a, b, c, d);
+      FourBarCalculator fourBar = new FourBarCalculator();
+      fourBar.setSideLengths(a, b, c, d);
       fourBar.updateAnglesAndVelocitiesGivenAngleDAB(A, 0.0);
       assertEquals(A, fourBar.getAngleDAB(), eps);
       assertEquals(B, fourBar.getAngleABC(), eps);
@@ -119,7 +122,7 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
       assertEquals(D, fourBar.getAngleCDA(), eps);
    }
 
-	@Test
+   @Test
    public void testRandomConvenientLinkageDerivatives()
    {
       Random rand = new Random(1986L);
@@ -142,7 +145,8 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
          double dADC = -dBAD;
          double dBCD = -dABC;
 
-         ConstantSideFourBarCalculatorWithDerivatives fourBar = new ConstantSideFourBarCalculatorWithDerivatives(AD, AB, BC, CD);
+         FourBarCalculator fourBar = new FourBarCalculator();
+         fourBar.setSideLengths(AD, AB, BC, CD);
          fourBar.updateAnglesAndVelocitiesGivenAngleDAB(BAD, dBAD);
          assertEquals(BAD, fourBar.getAngleDAB(), eps);
          assertEquals(ABC, fourBar.getAngleABC(), eps);
@@ -158,13 +162,13 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
       }
    }
 
-	@Test
+   @Test
    public void testVelocitiesWithRandomQuadrilateral()
    {
       double eps = 1.0e-6;
       Random rand = new Random(1976L);
       double DA, AB, BC, CD;
-      ConstantSideFourBarCalculatorWithDerivatives fourBar;
+      FourBarCalculator fourBar;
       boolean isQuadrilateralOK;
       int k;
 
@@ -187,7 +191,8 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
          BC = RandomNumbers.nextDouble(rand, 0.1, 2.0);
          CD = RandomNumbers.nextDouble(rand, 0.1, 2.0);
          DA = RandomNumbers.nextDouble(rand, 0.1, 2.0);
-         fourBar = new ConstantSideFourBarCalculatorWithDerivatives(DA, AB, BC, CD);
+         fourBar = new FourBarCalculator();
+         fourBar.setSideLengths(DA, AB, BC, CD);
          isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
          k = 0;
@@ -198,7 +203,8 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
             BC = RandomNumbers.nextDouble(rand, 0.1, 2.0);
             CD = RandomNumbers.nextDouble(rand, 0.1, 2.0);
             DA = RandomNumbers.nextDouble(rand, 0.1, 2.0);
-            fourBar = new ConstantSideFourBarCalculatorWithDerivatives(DA, AB, BC, CD);
+            fourBar = new FourBarCalculator();
+            fourBar.setSideLengths(DA, AB, BC, CD);
             isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
             k++;
@@ -269,13 +275,13 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
       }
    }
 
-	@Test
+   @Test
    public void testAccelerationsWithRandomQuadrilateral()
    {
       double eps = 1.0e-5;
       Random random = new Random(1984L);
       double AD, BA, CB, DC;
-      ConstantSideFourBarCalculatorWithDerivatives fourBar;
+      FourBarCalculator fourBar;
       boolean isQuadrilateralOK;
       int k;
 
@@ -297,7 +303,8 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
          CB = RandomNumbers.nextDouble(random, 0.1, 2.0);
          DC = RandomNumbers.nextDouble(random, 0.1, 2.0);
          AD = RandomNumbers.nextDouble(random, 0.1, 2.0);
-         fourBar = new ConstantSideFourBarCalculatorWithDerivatives(AD, BA, CB, DC);
+         fourBar = new FourBarCalculator();
+         fourBar.setSideLengths(AD, BA, CB, DC);
          isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
          k = 0;
@@ -308,7 +315,8 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
             CB = RandomNumbers.nextDouble(random, 0.1, 2.0);
             DC = RandomNumbers.nextDouble(random, 0.1, 2.0);
             AD = RandomNumbers.nextDouble(random, 0.1, 2.0);
-            fourBar = new ConstantSideFourBarCalculatorWithDerivatives(AD, BA, CB, DC);
+            fourBar = new FourBarCalculator();
+            fourBar.setSideLengths(AD, BA, CB, DC);
             isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
             k++;
@@ -356,11 +364,11 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
          assertEquals(BCD_numerical_tf, BCD_fourbar_tf, eps);
       }
    }
-	
+
    @Test
    public void testMasterAngleComputations()
    {
-	   Random rand = new Random(1986L);
+      Random rand = new Random(1986L);
       for (int i = 0; i < 10000; i++)
       {
          double e = 100 * (rand.nextDouble() + 0.001);
@@ -375,18 +383,19 @@ public class ConstantSideFourBarCalculatorWithDerivativesTest
          double CD = sqrt(CF * CF + DF * DF), CDF = atan2(CF, DF), DCF = atan2(DF, CF);
          double BC = sqrt(BF * BF + CF * CF), CBF = atan2(CF, BF), BCF = atan2(BF, CF);
          double BAD = DAE + BAE, ABC = ABE + CBF, BCD = BCF + DCF, ADC = ADE + CDF;
-         
-         ConstantSideFourBarCalculatorWithDerivatives calculator = new ConstantSideFourBarCalculatorWithDerivatives(AD, AB, BC, CD);
-         
-         calculator.computeMasterJointAngleGivenAngleABC(ABC);    
-         assertEquals(BAD, calculator.getAngleDAB(), eps); 
-         
+
+         FourBarCalculator calculator = new FourBarCalculator();
+         calculator.setSideLengths(AD, AB, BC, CD);
+
+         calculator.computeMasterJointAngleGivenAngleABC(ABC);
+         assertEquals(BAD, calculator.getAngleDAB(), eps);
+
          calculator.computeMasterJointAngleGivenAngleBCD(BCD);
-         assertEquals(BAD, calculator.getAngleDAB(), eps); 
-         
+         assertEquals(BAD, calculator.getAngleDAB(), eps);
+
          calculator.computeMasterJointAngleGivenAngleCDA(ADC);
-         assertEquals(BAD, calculator.getAngleDAB(), eps); 
+         assertEquals(BAD, calculator.getAngleDAB(), eps);
       }
-      
+
    }
 }

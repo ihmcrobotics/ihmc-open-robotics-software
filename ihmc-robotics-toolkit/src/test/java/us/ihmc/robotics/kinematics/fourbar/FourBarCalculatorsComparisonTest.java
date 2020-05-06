@@ -3,14 +3,11 @@ package us.ihmc.robotics.kinematics.fourbar;
 import static java.lang.Math.abs;
 import static java.lang.Math.atan2;
 import static java.lang.Math.sqrt;
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.Random;
 
 import org.junit.jupiter.api.Test;
-
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 /**
  * It makes sure that the four bar calculator including derivatives and the calculator used in Beast, Steppr, and Wanderer give the same result
  */
@@ -72,7 +69,8 @@ public class FourBarCalculatorsComparisonTest
    private void testCalculators(double AD, double AB, double BC, double CD, double knownAngle)
    {
       // (1) Fast runner calculations
-      ConstantSideFourBarCalculatorWithDerivatives fastRunnerCalculator = new ConstantSideFourBarCalculatorWithDerivatives(AD, AB, BC, CD);
+      FourBarCalculator fastRunnerCalculator = new FourBarCalculator();
+      fastRunnerCalculator.setSideLengths(AD, AB, BC, CD);
       fastRunnerCalculator.updateAnglesGivenAngleDAB(knownAngle);
       double outputFastRunnerCalculator = fastRunnerCalculator.getAngleABC();
 

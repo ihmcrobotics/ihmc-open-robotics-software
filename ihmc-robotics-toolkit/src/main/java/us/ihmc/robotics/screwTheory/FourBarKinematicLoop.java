@@ -18,11 +18,12 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.kinematics.fourbar.ConstantSideFourBarCalculatorWithDerivatives;
+import us.ihmc.robotics.kinematics.fourbar.FourBarCalculator;
 
 public class FourBarKinematicLoop
 {
    /*
+    * @formatter:off
     * Representation of the four bar with name correspondences. This name
     * convention matches the one used in the ConstantSideFourBarCalculatorWithDerivatives
     * 
@@ -38,7 +39,8 @@ public class FourBarKinematicLoop
     *            |/      \|
     *            D--------C
     *            
-    * Note: zero configuration corresponds to vertical links. Positive angles clockwise.             
+    * Note: zero configuration corresponds to vertical links. Positive angles clockwise.
+    * @formatter:on             
     */
 
    private static final boolean DEBUG = false;
@@ -49,7 +51,7 @@ public class FourBarKinematicLoop
    private final PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD, fourBarOutputJoint;
    private final Vector3D jointDInJointABeforeFrame;
 
-   private final ConstantSideFourBarCalculatorWithDerivatives fourBarCalculator;
+   private final FourBarCalculator fourBarCalculator;
 
    private final FourBarKinematicLoopJacobianSolver fourBarJacobianSolver;
    private final DMatrixRMaj columnJacobian = new DMatrixRMaj(6, 1);
@@ -69,14 +71,16 @@ public class FourBarKinematicLoop
     * @param passiveJointD
     * @param jointDInJointABeforeFrame The position in A's frame to which D is rigidly attached
     * @param recomputeJointLimits
-    *
-    * <dt><b>Precondition:</b><dd>
-    * The cartesian positions of masterJointA, passiveJointB, passiveJointC, and passiveJointD must form a convex quadrilateral when their joint angles are 0. <br>
-    * Additionally, the cartesian positions of masterJointA, passiveJointB, passiveJointC and jointDInJointABeforeFrame must form a convex quadrilateral when their joint angles are 0
-    *
+    *                                  <dt><b>Precondition:</b>
+    *                                  <dd>The cartesian positions of masterJointA, passiveJointB,
+    *                                  passiveJointC, and passiveJointD must form a convex
+    *                                  quadrilateral when their joint angles are 0. <br>
+    *                                  Additionally, the cartesian positions of masterJointA,
+    *                                  passiveJointB, passiveJointC and jointDInJointABeforeFrame must
+    *                                  form a convex quadrilateral when their joint angles are 0
     */
    public FourBarKinematicLoop(String name, RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC,
-         PassiveRevoluteJoint passiveJointD, Vector3DReadOnly jointDInJointABeforeFrame, boolean recomputeJointLimits)
+                               PassiveRevoluteJoint passiveJointD, Vector3DReadOnly jointDInJointABeforeFrame, boolean recomputeJointLimits)
    {
       this.name = name;
       this.masterJointA = masterJointA;
@@ -88,9 +92,10 @@ public class FourBarKinematicLoop
       // Rotation axis
       FrameVector3D masterJointAxis = new FrameVector3D(masterJointA.getJointAxis());
       masterJointAxis.changeFrame(masterJointA.getFrameBeforeJoint());
-      frameBeforeFourBarWithZAlongJointAxis = GeometryTools
-            .constructReferenceFrameFromPointAndAxis(name + "FrameWithZAlongJointAxis", new FramePoint3D(masterJointA.getFrameBeforeJoint()), Axis3D.Z,
-                  masterJointAxis);
+      frameBeforeFourBarWithZAlongJointAxis = GeometryTools.constructReferenceFrameFromPointAndAxis(name + "FrameWithZAlongJointAxis",
+                                                                                                    new FramePoint3D(masterJointA.getFrameBeforeJoint()),
+                                                                                                    Axis3D.Z,
+                                                                                                    masterJointAxis);
 
       FrameVector3D masterAxis = new FrameVector3D(masterJointA.getJointAxis());
       FrameVector3D jointBAxis = new FrameVector3D(passiveJointB.getJointAxis());
@@ -118,14 +123,22 @@ public class FourBarKinematicLoop
       FrameVector2D vectorABProjected = new FrameVector2D();
       FrameVector2D vectorDAClosurePointProjected = new FrameVector2D();
       FrameVector2D vectorCDClosurePointProjected = new FrameVector2D();
-      computeJointToJointVectorProjectedOntoFourBarPlane(vectorBCProjected, vectorCDProjected, vectorDAProjected, vectorABProjected,
-            vectorDAClosurePointProjected, vectorCDClosurePointProjected);
+      computeJointToJointVectorProjectedOntoFourBarPlane(vectorBCProjected,
+                                                         vectorCDProjected,
+                                                         vectorDAProjected,
+                                                         vectorABProjected,
+                                                         vectorDAClosurePointProjected,
+                                                         vectorCDClosurePointProjected);
 
       // Check that the fourbar is convex in its zero angle configuration and it's orientation (CW or CCW)
-      FourBarKinematicLoopTools
-            .checkFourBarConvexityAndOrientation(vectorABProjected, vectorBCProjected, vectorCDClosurePointProjected, vectorDAClosurePointProjected);
-      fourBarIsClockwise = FourBarKinematicLoopTools
-            .checkFourBarConvexityAndOrientation(vectorABProjected, vectorBCProjected, vectorCDProjected, vectorDAProjected);
+      FourBarKinematicLoopTools.checkFourBarConvexityAndOrientation(vectorABProjected,
+                                                                    vectorBCProjected,
+                                                                    vectorCDClosurePointProjected,
+                                                                    vectorDAClosurePointProjected);
+      fourBarIsClockwise = FourBarKinematicLoopTools.checkFourBarConvexityAndOrientation(vectorABProjected,
+                                                                                         vectorBCProjected,
+                                                                                         vectorCDProjected,
+                                                                                         vectorDAProjected);
 
       // Calculator
       fourBarCalculator = createFourBarCalculator(vectorBCProjected, vectorCDProjected, vectorDAClosurePointProjected, vectorABProjected);
@@ -143,9 +156,11 @@ public class FourBarKinematicLoop
       if (recomputeJointLimits)
       {
          /*
+          * @formatter:off
           * - If the limits for B, C, and/or D are given and are more restrictive than those of A crop the value of Amax and/or Amin. 
           * - Else if the limits given for A are the most restrictive of all, keep them. 
           * - Else set the limits to the value given by the calculator.
+          * @formatter:on
           */
          double[] masterJointBounds = computeMinAndMaxValidMasterJointAngles(masterJointA, passiveJointB, passiveJointC, passiveJointD);
 
@@ -171,8 +186,9 @@ public class FourBarKinematicLoop
    }
 
    private void computeJointToJointVectorProjectedOntoFourBarPlane(FrameVector2D vectorBCProjectedToPack, FrameVector2D vectorCDProjectedToPack,
-         FrameVector2D vectorDAProjectedToPack, FrameVector2D vectorABProjectedToPack, FrameVector2D vectorDAClosurePointProjectedToPack,
-         FrameVector2D vectorCDClosurePointProjectedToPack)
+                                                                   FrameVector2D vectorDAProjectedToPack, FrameVector2D vectorABProjectedToPack,
+                                                                   FrameVector2D vectorDAClosurePointProjectedToPack,
+                                                                   FrameVector2D vectorCDClosurePointProjectedToPack)
    {
       FramePoint3D masterJointAPosition = new FramePoint3D(masterJointA.getFrameAfterJoint());
       FramePoint3D jointBPosition = new FramePoint3D(passiveJointB.getFrameAfterJoint());
@@ -219,8 +235,8 @@ public class FourBarKinematicLoop
       }
    }
 
-   private ConstantSideFourBarCalculatorWithDerivatives createFourBarCalculator(FrameVector2D vectorBCProjected, FrameVector2D vectorCDProjected,
-         FrameVector2D vectorDAProjected, FrameVector2D vectorABProjected)
+   private FourBarCalculator createFourBarCalculator(FrameVector2D vectorBCProjected, FrameVector2D vectorCDProjected, FrameVector2D vectorDAProjected,
+                                                     FrameVector2D vectorABProjected)
    {
       double masterLinkAB = vectorABProjected.length();
       double BC = vectorBCProjected.length();
@@ -233,13 +249,14 @@ public class FourBarKinematicLoop
          System.out.println("masterLinkAB BC CD DA : " + masterLinkAB + ", " + BC + ", " + CD + ", " + DA);
       }
 
-      ConstantSideFourBarCalculatorWithDerivatives fourBarCalculator = new ConstantSideFourBarCalculatorWithDerivatives(DA, masterLinkAB, BC, CD);
+      FourBarCalculator fourBarCalculator = new FourBarCalculator();
+      fourBarCalculator.setSideLengths(DA, masterLinkAB, BC, CD);
 
       return fourBarCalculator;
    }
 
    private void initializeInteriorAnglesAtZeroConfigurationAndJointSigns(FrameVector2D vectorDAProjected, FrameVector2D vectorABProjected,
-         FrameVector2D vectorBCProjected, FrameVector2D vectorCDProjected)
+                                                                         FrameVector2D vectorBCProjected, FrameVector2D vectorCDProjected)
    {
       FrameVector3D jointBAxis = new FrameVector3D(passiveJointB.getJointAxis());
       FrameVector3D jointCAxis = new FrameVector3D(passiveJointC.getJointAxis());
@@ -289,10 +306,11 @@ public class FourBarKinematicLoop
    }
 
    /**
-    * Clips the min/max master joint angles if the lower/upper limit for any of the joints that are passed in is more restrictive
+    * Clips the min/max master joint angles if the lower/upper limit for any of the joints that are
+    * passed in is more restrictive
     */
    private double[] computeMinAndMaxValidMasterJointAngles(RevoluteJoint masterJointA, PassiveRevoluteJoint jointB, PassiveRevoluteJoint jointC,
-         PassiveRevoluteJoint jointD)
+                                                           PassiveRevoluteJoint jointD)
    {
       ArrayList<Double> lowerBounds = new ArrayList<Double>();
       ArrayList<Double> upperBounds = new ArrayList<Double>();
@@ -329,7 +347,7 @@ public class FourBarKinematicLoop
    }
 
    private void addJointLimitToBoundsIfValid(ArrayList<Double> lowerBoundsList, ArrayList<Double> upperBoundsList, double jointAngleLimit, int jointIndex,
-         boolean isAnUpperBound)
+                                             boolean isAnUpperBound)
    {
       if (jointAngleLimit != Double.POSITIVE_INFINITY && jointAngleLimit != Double.NEGATIVE_INFINITY)
       {
@@ -341,23 +359,23 @@ public class FourBarKinematicLoop
 
          switch (jointIndex)
          {
-         case 0:
-            masterJointLimit = convertInteriorAngleToJointAngle(interiorAngle, 0);
-            break;
-         case 1:
-            fourBarCalculator.computeMasterJointAngleGivenAngleABC(interiorAngle);
-            masterJointLimit = convertInteriorAngleToJointAngle(fourBarCalculator.getAngleDAB(), 0);
-            break;
-         case 2:
-            fourBarCalculator.computeMasterJointAngleGivenAngleBCD(interiorAngle);
-            masterJointLimit = convertInteriorAngleToJointAngle(fourBarCalculator.getAngleDAB(), 0);
-            break;
-         case 3:
-            fourBarCalculator.computeMasterJointAngleGivenAngleCDA(interiorAngle);
-            masterJointLimit = convertInteriorAngleToJointAngle(fourBarCalculator.getAngleDAB(), 0);
-            break;
-         default:
-            throw new RuntimeException("Invalid joint index " + jointIndex + " in four bar kinematic loop");
+            case 0:
+               masterJointLimit = convertInteriorAngleToJointAngle(interiorAngle, 0);
+               break;
+            case 1:
+               fourBarCalculator.computeMasterJointAngleGivenAngleABC(interiorAngle);
+               masterJointLimit = convertInteriorAngleToJointAngle(fourBarCalculator.getAngleDAB(), 0);
+               break;
+            case 2:
+               fourBarCalculator.computeMasterJointAngleGivenAngleBCD(interiorAngle);
+               masterJointLimit = convertInteriorAngleToJointAngle(fourBarCalculator.getAngleDAB(), 0);
+               break;
+            case 3:
+               fourBarCalculator.computeMasterJointAngleGivenAngleCDA(interiorAngle);
+               masterJointLimit = convertInteriorAngleToJointAngle(fourBarCalculator.getAngleDAB(), 0);
+               break;
+            default:
+               throw new RuntimeException("Invalid joint index " + jointIndex + " in four bar kinematic loop");
          }
 
          boolean isAMasterJointUpperBound = isAnUpperBound ^ !jointMaxCorrespondsToMasterJointMax(jointIndex);
@@ -383,19 +401,16 @@ public class FourBarKinematicLoop
 
    public void verifyMasterJointLimits()
    {
-      double maxValidMasterJointAngle = fourBarIsClockwise ?
-            convertInteriorAngleToJointAngle(fourBarCalculator.getMaxDAB(), 0) :
-            convertInteriorAngleToJointAngle(fourBarCalculator.getMinDAB(), 0);
-      double minValidMasterJointAngle = fourBarIsClockwise ?
-            convertInteriorAngleToJointAngle(fourBarCalculator.getMinDAB(), 0) :
-            convertInteriorAngleToJointAngle(fourBarCalculator.getMaxDAB(), 0);
+      double maxValidMasterJointAngle = fourBarIsClockwise ? convertInteriorAngleToJointAngle(fourBarCalculator.getMaxDAB(), 0)
+            : convertInteriorAngleToJointAngle(fourBarCalculator.getMinDAB(), 0);
+      double minValidMasterJointAngle = fourBarIsClockwise ? convertInteriorAngleToJointAngle(fourBarCalculator.getMinDAB(), 0)
+            : convertInteriorAngleToJointAngle(fourBarCalculator.getMaxDAB(), 0);
 
       // A) Angle limits not set
       if (masterJointA.getJointLimitLower() == Double.NEGATIVE_INFINITY || masterJointA.getJointLimitUpper() == Double.POSITIVE_INFINITY)
       {
-         throw new RuntimeException(
-               "Must set the joint limits for the master joint of the " + name + " four bar.\nNote that for the given link lengths max angle is "
-                     + maxValidMasterJointAngle + "and min angle is" + minValidMasterJointAngle);
+         throw new RuntimeException("Must set the joint limits for the master joint of the " + name
+               + " four bar.\nNote that for the given link lengths max angle is " + maxValidMasterJointAngle + "and min angle is" + minValidMasterJointAngle);
       }
 
       // B) Max angle limit is too large
@@ -422,9 +437,8 @@ public class FourBarKinematicLoop
 
       if (currentMasterJointA < masterJointA.getJointLimitLower() || currentMasterJointA > masterJointA.getJointLimitUpper())
       {
-         throw new RuntimeException(
-               masterJointA.getName() + " is set outside of its bounds [" + masterJointA.getJointLimitLower() + ", " + masterJointA.getJointLimitUpper()
-                     + "]. The current value is: " + masterJointA.getQ());
+         throw new RuntimeException(masterJointA.getName() + " is set outside of its bounds [" + masterJointA.getJointLimitLower() + ", "
+               + masterJointA.getJointLimitUpper() + "]. The current value is: " + masterJointA.getQ());
       }
 
       fourBarCalculator.updateAnglesVelocitiesAndAccelerationsGivenAngleDAB(interiorAngleA, interiorAngleDtA, interiorAngleDt2A);
@@ -461,7 +475,7 @@ public class FourBarKinematicLoop
    }
 
    /**
-    * @param interiorAngle interior angle of the joint when viewing the fourbar as a quadrilateral
+    * @param interiorAngle     interior angle of the joint when viewing the fourbar as a quadrilateral
     * @param passiveJointIndex 0->A, 1->B, 2->C, 3->D
     * @return
     */
@@ -476,7 +490,7 @@ public class FourBarKinematicLoop
    }
 
    /**
-    * @param jointAngle interior angle of the joint when viewing the fourbar as a quadrilateral
+    * @param jointAngle        interior angle of the joint when viewing the fourbar as a quadrilateral
     * @param passiveJointIndex 0->A, 1->B, 2->C, 3->D
     * @return
     */
@@ -598,8 +612,8 @@ public class FourBarKinematicLoop
 
          if (numberOfJointsForJacobianCalculation < 1 || numberOfJointsForJacobianCalculation > 3)
          {
-            throw new RuntimeException(
-                  "Illegal number of joints for jacobian calculation. Expected 1, 2, or 3 and got " + numberOfJointsForJacobianCalculation);
+            throw new RuntimeException("Illegal number of joints for jacobian calculation. Expected 1, 2, or 3 and got "
+                  + numberOfJointsForJacobianCalculation);
          }
 
          return new DMatrixRMaj(3, jointsForJacobianCalculation.length);
