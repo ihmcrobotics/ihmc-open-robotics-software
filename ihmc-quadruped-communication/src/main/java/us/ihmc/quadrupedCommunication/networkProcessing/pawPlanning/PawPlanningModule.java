@@ -73,8 +73,7 @@ public class PawPlanningModule extends QuadrupedToolboxModule
                                            s -> processGroundPlaneMessage(s.takeNextData()));
 
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSupportPlanarRegionParametersMessage.class,
-                                           ROS2Tools.IHMC_ROOT.robot(robotName)
-                                                              .module(ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME)
+                                           ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER.robot(robotName)
                                                               .qualifier(ROS2TopicQualifier.INPUT),
                                            s -> processSupportRegionParameters(s.takeNextData()));
 
