@@ -61,7 +61,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 

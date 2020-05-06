@@ -20,7 +20,6 @@ mainDependencies {
    api("org.ejml:core:0.30")
    api("org.apache.commons:commons-lang3:3.8.1")
    api("us.ihmc.thirdparty.jinput:jinput:200128")
-   api("us.ihmc:ihmc-commons:0.28.2")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-quadruped-robotics:source")
@@ -40,7 +39,7 @@ mainDependencies {
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-commons-testing:0.28.2")
+   api("us.ihmc:ihmc-commons-testing:0.29.0")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-quadruped-robotics-test:source")
    api("us.ihmc:ihmc-quadruped-planning-test:source")

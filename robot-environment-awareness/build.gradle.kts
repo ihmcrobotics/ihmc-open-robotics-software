@@ -29,7 +29,6 @@ mainDependencies {
    
    api("us.ihmc:euclid-shape:0.13.1")
    api("us.ihmc:joctomap:1.8.0")
-   api("us.ihmc:ihmc-commons:0.28.2")
    api("us.ihmc:ihmc-yovariables:0.5.0")
    api("us.ihmc:ihmc-javafx-toolkit:0.15.0")
    api("us.ihmc:ihmc-communication:source")
