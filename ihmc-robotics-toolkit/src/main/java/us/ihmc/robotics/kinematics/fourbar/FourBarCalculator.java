@@ -6,7 +6,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 
-public class FourBarCalculator implements FourbarCalculatorWithDerivatives
+public class FourBarCalculator
 {
    /*
     * @formatter:off
@@ -448,149 +448,66 @@ public class FourBarCalculator implements FourbarCalculatorWithDerivatives
       return null;
    }
 
-   /**
-    * Compute every angle of the quadrilateral AND crop the range of the input angle so that the four
-    * bar doesn't flip.
-    *
-    * @param angleDABInRadians is the angle formed by the sides a and b (see scheme in this class)
-    * @return true if the angle DAB is out of range making the quadrilateral non-convex
-    */
-   @Override
-   public boolean updateAnglesGivenAngleDAB(double angleDABInRadians)
-   {
-      return update(Angle.DAB, angleDABInRadians) != null;
-   }
-
-   /**
-    * Takes in angle B and computes the value of the master joint angle. Same notation used in the rest
-    * of the class.
-    */
-   @Override
-   public void computeMasterJointAngleGivenAngleABC(double angleABCInRadians)
-   {
-      update(Angle.ABC, angleABCInRadians);
-   }
-
-   /**
-    * Takes in angle C and computes the value of the master joint angle. Same notation used in the rest
-    * of the class.
-    */
-   @Override
-   public void computeMasterJointAngleGivenAngleBCD(double angleBCDInRadians)
-   {
-      update(Angle.BCD, angleBCDInRadians);
-   }
-
-   /**
-    * Takes in angle D and computes the value of the master joint angle. Same notation used in the rest
-    * of the class.
-    */
-   @Override
-   public void computeMasterJointAngleGivenAngleCDA(double angleCDAInRadians)
-   {
-      update(Angle.CDA, angleCDAInRadians);
-   }
-
-   /**
-    * Compute every angle of the quadrilateral.
-    *
-    * @param angleDABInRadians  is the angle formed by the sides a and b (see scheme in this class)
-    * @param angularVelocityDAB first time-derivative of the angle DAB
-    * @return true if the angle DAB is out of range making the quadrilateral non-convex
-    */
-   @Override
-   public boolean updateAnglesAndVelocitiesGivenAngleDAB(double angleDABInRadians, double angularVelocityDAB)
-   {
-      return update(Angle.DAB, angleDABInRadians, angularVelocityDAB) != null;
-   }
-
-   /**
-    * Compute every angle of the quadrilateral.
-    *
-    * @param angleDABInRadians      is the angle formed by the sides a and b (see scheme in this class)
-    * @param angularVelocityDAB     first time-derivative of the angle DAB
-    * @param angularAccelerationDAB second time-derivative of the angle DAB
-    * @return true if the angle DAB is out of range making the quadrilateral non-convex
-    */
-   @Override
-   public boolean updateAnglesVelocitiesAndAccelerationsGivenAngleDAB(double angleDABInRadians, double angularVelocityDAB, double angularAccelerationDAB)
-   {
-      return update(Angle.DAB, angleDABInRadians, angularVelocityDAB, angularAccelerationDAB) != null;
-   }
-
-   @Override
    public double getAngleDAB()
    {
       return angleDAB;
    }
 
-   @Override
    public double getAngleABC()
    {
       return angleABC;
    }
 
-   @Override
    public double getAngleBCD()
    {
       return angleBCD;
    }
 
-   @Override
    public double getAngleCDA()
    {
       return angleCDA;
    }
 
-   @Override
    public double getAngleDtDAB()
    {
       return angleDtDAB;
    }
 
-   @Override
    public double getAngleDtABC()
    {
       return angleDtABC;
    }
 
-   @Override
    public double getAngleDtBCD()
    {
       return angleDtBCD;
    }
 
-   @Override
    public double getAngleDtCDA()
    {
       return angleDtCDA;
    }
 
-   @Override
    public double getAngleDt2DAB()
    {
       return angleDt2DAB;
    }
 
-   @Override
    public double getAngleDt2ABC()
    {
       return angleDt2ABC;
    }
 
-   @Override
    public double getAngleDt2BCD()
    {
       return angleDt2BCD;
    }
 
-   @Override
    public double getAngleDt2CDA()
    {
       return angleDt2CDA;
    }
 
-   @Override
    public double getMinDAB()
    {
       if (Double.isNaN(minDAB))
@@ -605,7 +522,6 @@ public class FourBarCalculator implements FourbarCalculatorWithDerivatives
       return minDAB;
    }
 
-   @Override
    public double getMaxDAB()
    {
       if (Double.isNaN(maxDAB))
@@ -704,25 +620,21 @@ public class FourBarCalculator implements FourbarCalculatorWithDerivatives
       return maxCDA;
    }
 
-   @Override
    public double getAB()
    {
       return AB;
    }
 
-   @Override
    public double getBC()
    {
       return BC;
    }
 
-   @Override
    public double getCD()
    {
       return CD;
    }
 
-   @Override
    public double getDA()
    {
       return DA;

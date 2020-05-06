@@ -11,6 +11,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.robotics.kinematics.fourbar.FourBarCalculator.Angle;
 
 public class FourBarCalculatorTest
 {
@@ -23,7 +24,7 @@ public class FourBarCalculatorTest
    {
       FourBarCalculator fourBar = new FourBarCalculator();
       fourBar.setSideLengths(1.0, 1.0, 1.0, 1.0);
-      fourBar.updateAnglesGivenAngleDAB(Math.PI / 2);
+      fourBar.update(Angle.DAB, Math.PI / 2);
       assertEquals(Math.PI / 2, fourBar.getAngleDAB(), EPSILON);
       assertEquals(Math.PI / 2, fourBar.getAngleABC(), EPSILON);
       assertEquals(Math.PI / 2, fourBar.getAngleBCD(), EPSILON);
@@ -52,7 +53,7 @@ public class FourBarCalculatorTest
    {
       FourBarCalculator fourBar = new FourBarCalculator();
       fourBar.setSideLengths(1.0, 1.0, 1.0, 1.0);
-      fourBar.updateAnglesAndVelocitiesGivenAngleDAB(Math.PI / 2, 1);
+      fourBar.update(Angle.DAB, Math.PI / 2, 1.0);
       assertEquals(Math.PI / 2, fourBar.getAngleDAB(), EPSILON);
       assertEquals(Math.PI / 2, fourBar.getAngleABC(), EPSILON);
       assertEquals(Math.PI / 2, fourBar.getAngleBCD(), EPSILON);
@@ -68,7 +69,7 @@ public class FourBarCalculatorTest
    {
       FourBarCalculator fourBar = new FourBarCalculator();
       fourBar.setSideLengths(1.0, 1.0, 1.0, 1.0);
-      fourBar.updateAnglesAndVelocitiesGivenAngleDAB(Math.PI / 3, 1);
+      fourBar.update(Angle.DAB, Math.PI / 3, 1.0);
       assertEquals(Math.PI / 3, fourBar.getAngleDAB(), EPSILON);
       assertEquals(2 * Math.PI / 3, fourBar.getAngleABC(), EPSILON);
       assertEquals(Math.PI / 3, fourBar.getAngleBCD(), EPSILON);
@@ -115,7 +116,7 @@ public class FourBarCalculatorTest
       }
       FourBarCalculator fourBar = new FourBarCalculator();
       fourBar.setSideLengths(b, c, d, a);
-      fourBar.updateAnglesAndVelocitiesGivenAngleDAB(A, 0.0);
+      fourBar.update(Angle.DAB, A, 0.0);
       assertEquals(A, fourBar.getAngleDAB(), EPSILON);
       assertEquals(B, fourBar.getAngleABC(), EPSILON);
       assertEquals(C, fourBar.getAngleBCD(), EPSILON);
@@ -147,7 +148,7 @@ public class FourBarCalculatorTest
 
          FourBarCalculator fourBar = new FourBarCalculator();
          fourBar.setSideLengths(AB, BC, CD, AD);
-         fourBar.updateAnglesAndVelocitiesGivenAngleDAB(BAD, dBAD);
+         fourBar.update(Angle.DAB, BAD, dBAD);
          assertEquals(BAD, fourBar.getAngleDAB(), EPSILON);
          assertEquals(ABC, fourBar.getAngleABC(), EPSILON);
          assertEquals(BCD, fourBar.getAngleBCD(), EPSILON);
@@ -221,12 +222,12 @@ public class FourBarCalculatorTest
             DAB_t0 = RandomNumbers.nextDouble(rand, 0.1, Math.PI - 0.1);
             DAB_tf = DAB_t0 + dDAB * T;
 
-            DAB_t0_outOfRange = fourBar.updateAnglesGivenAngleDAB(DAB_t0);
+            DAB_t0_outOfRange = fourBar.update(Angle.DAB, DAB_t0) != null;
             ABC_t0 = fourBar.getAngleABC();
             CDA_t0 = fourBar.getAngleCDA();
             BCD_t0 = fourBar.getAngleBCD();
 
-            DAB_tf_outOfRange = fourBar.updateAnglesGivenAngleDAB(DAB_tf);
+            DAB_tf_outOfRange = fourBar.update(Angle.DAB, DAB_tf) != null;
             ABC_fourbar_tf = fourBar.getAngleABC();
             CDA_fourbar_tf = fourBar.getAngleCDA();
             BCD_fourbar_tf = fourBar.getAngleBCD();
@@ -254,7 +255,7 @@ public class FourBarCalculatorTest
             for (int j = 0; j < nSteps - 1; j++)
             {
                DAB_tj = DAB_t0 + dDAB * j * deltaT;
-               fourBar.updateAnglesAndVelocitiesGivenAngleDAB(DAB_tj, dDAB);
+               fourBar.update(Angle.DAB, DAB_tj, dDAB);
 
                ABC_next_tj += fourBar.getAngleDtABC() * deltaT;
                CDA_next_tj += fourBar.getAngleDtCDA() * deltaT;
@@ -330,12 +331,12 @@ public class FourBarCalculatorTest
          ddDAB = 2.0 * (DAB_tf - DAB_t0 - dDAB_t0 * T) / MathTools.square(T);
          dDAB_tf = dDAB_t0 + ddDAB * T;
 
-         fourBar.updateAnglesAndVelocitiesGivenAngleDAB(DAB_t0, dDAB_t0);
+         fourBar.update(Angle.DAB, DAB_t0, dDAB_t0);
          ABC_t0 = fourBar.getAngleABC();
          CDA_t0 = fourBar.getAngleCDA();
          BCD_t0 = fourBar.getAngleBCD();
 
-         fourBar.updateAnglesAndVelocitiesGivenAngleDAB(DAB_tf, dDAB_tf);
+         fourBar.update(Angle.DAB, DAB_tf, dDAB_tf);
          ABC_fourbar_tf = fourBar.getAngleABC();
          CDA_fourbar_tf = fourBar.getAngleCDA();
          BCD_fourbar_tf = fourBar.getAngleBCD();
@@ -348,7 +349,7 @@ public class FourBarCalculatorTest
          {
             DAB_tj = ddDAB * MathTools.square(j * deltaT) / 2.0 + dDAB_t0 * j * deltaT + DAB_t0;
             dDAB_tj = ddDAB * j * deltaT + dDAB_t0;
-            fourBar.updateAnglesVelocitiesAndAccelerationsGivenAngleDAB(DAB_tj, dDAB_tj, ddDAB);
+            fourBar.update(Angle.DAB, DAB_tj, dDAB_tj, ddDAB);
 
             ABC_next_tj += fourBar.getAngleDtABC() * deltaT + fourBar.getAngleDt2ABC() * MathTools.square(deltaT) / 2.0;
             CDA_next_tj += fourBar.getAngleDtCDA() * deltaT + fourBar.getAngleDt2CDA() * MathTools.square(deltaT) / 2.0;
@@ -382,19 +383,28 @@ public class FourBarCalculatorTest
          double AB = Math.sqrt(AE * AE + BE * BE), BAE = Math.atan2(BE, AE), ABE = Math.atan2(AE, BE);
          double CD = Math.sqrt(CF * CF + DF * DF), CDF = Math.atan2(CF, DF), DCF = Math.atan2(DF, CF);
          double BC = Math.sqrt(BF * BF + CF * CF), CBF = Math.atan2(CF, BF), BCF = Math.atan2(BF, CF);
-         double BAD = DAE + BAE, ABC = ABE + CBF, BCD = BCF + DCF, ADC = ADE + CDF;
+         double DAB = DAE + BAE, ABC = ABE + CBF, BCD = BCF + DCF, CDA = ADE + CDF;
 
          FourBarCalculator calculator = new FourBarCalculator();
          calculator.setSideLengths(AB, BC, CD, AD);
 
-         calculator.computeMasterJointAngleGivenAngleABC(ABC);
-         assertEquals(BAD, calculator.getAngleDAB(), EPSILON);
+         calculator.update(Angle.ABC, ABC);
+         assertEquals(DAB, calculator.getAngleDAB(), EPSILON);
+         assertEquals(ABC, calculator.getAngleABC(), EPSILON);
+         assertEquals(BCD, calculator.getAngleBCD(), EPSILON);
+         assertEquals(CDA, calculator.getAngleCDA(), EPSILON);
 
-         calculator.computeMasterJointAngleGivenAngleBCD(BCD);
-         assertEquals(BAD, calculator.getAngleDAB(), EPSILON);
+         calculator.update(Angle.BCD, BCD);
+         assertEquals(DAB, calculator.getAngleDAB(), EPSILON);
+         assertEquals(ABC, calculator.getAngleABC(), EPSILON);
+         assertEquals(BCD, calculator.getAngleBCD(), EPSILON);
+         assertEquals(CDA, calculator.getAngleCDA(), EPSILON);
 
-         calculator.computeMasterJointAngleGivenAngleCDA(ADC);
-         assertEquals(BAD, calculator.getAngleDAB(), EPSILON);
+         calculator.update(Angle.CDA, CDA);
+         assertEquals(DAB, calculator.getAngleDAB(), EPSILON);
+         assertEquals(ABC, calculator.getAngleABC(), EPSILON);
+         assertEquals(BCD, calculator.getAngleBCD(), EPSILON);
+         assertEquals(CDA, calculator.getAngleCDA(), EPSILON);
       }
    }
 
