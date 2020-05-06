@@ -69,7 +69,7 @@ public class ROS2Tools
    public static final ROS2TopicName MAPPING_MODULE = IHMC_ROOT.module(MAPPING_MODULE_NAME);
    public static final ROS2TopicName REALSENSE_SLAM_MAP = IHMC_ROOT.module(REALSENSE_SLAM_MODULE_NAME);
 
-   public static final ROS2TopicName REA_SUPPORT_REGIONS = REA.name(REA_CUSTOM_REGION_NAME);
+   public static final ROS2TopicName REA_SUPPORT_REGIONS = REA.suffix(REA_CUSTOM_REGION_NAME);
 
    public final static ExceptionHandler RUNTIME_EXCEPTION = e ->
    {
