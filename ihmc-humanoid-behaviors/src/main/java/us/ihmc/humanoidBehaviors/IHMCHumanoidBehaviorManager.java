@@ -539,17 +539,17 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
       return ihmcHumanoidBehaviorManager;
    }
 
-   public static String getBehaviorRosTopicPrefix(String robotName, ROS2TopicQualifier qualifier)
+   public static ROS2TopicName getBehaviorRosTopicPrefix(String robotName, ROS2TopicQualifier qualifier)
    {
-      return ROS2Tools.IHMC_TOPIC_PREFIX + "/" + robotName.toLowerCase() + ROS2Tools.BEHAVIOR_MODULE + qualifier.toString();
+      return ROS2Tools.BEHAVIOR_MODULE.robot(robotName).qualifier(qualifier);
    }
 
-   public static String getBehaviorOutputRosTopicPrefix(String robotName)
+   public static ROS2TopicName getBehaviorOutputRosTopicPrefix(String robotName)
    {
       return getBehaviorRosTopicPrefix(robotName, ROS2TopicQualifier.OUTPUT);
    }
 
-   public static String getBehaviorInputRosTopicPrefix(String robotName)
+   public static ROS2TopicName getBehaviorInputRosTopicPrefix(String robotName)
    {
       return getBehaviorRosTopicPrefix(robotName, ROS2TopicQualifier.INPUT);
    }
