@@ -72,6 +72,7 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -116,10 +117,10 @@ public abstract class KinematicsStreamingToolboxControllerTest
    protected Ros2Node ros2Node;
    protected IHMCROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
    protected IHMCROS2Publisher<ToolboxStateMessage> statePublisher;
-   protected ROS2MessageTopicNameGenerator controllerSubGenerator;
-   protected ROS2MessageTopicNameGenerator controllerPubGenerator;
-   protected ROS2MessageTopicNameGenerator toolboxSubGenerator;
-   protected ROS2MessageTopicNameGenerator toolboxPubGenerator;
+   protected ROS2TopicName controllerSubGenerator;
+   protected ROS2TopicName controllerPubGenerator;
+   protected ROS2TopicName toolboxSubGenerator;
+   protected ROS2TopicName toolboxPubGenerator;
    protected ScheduledExecutorService executor;
 
    /**

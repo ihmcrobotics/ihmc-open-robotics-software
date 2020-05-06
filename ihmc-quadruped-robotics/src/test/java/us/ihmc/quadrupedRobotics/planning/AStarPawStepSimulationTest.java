@@ -27,6 +27,7 @@ import us.ihmc.quadrupedRobotics.model.QuadrupedInitialOffsetAndYaw;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
@@ -125,7 +126,7 @@ public abstract class AStarPawStepSimulationTest implements QuadrupedMultiRobotT
 
       conductor.getScs().setCameraTracking(true, true, true, false);
 
-      ROS2MessageTopicNameGenerator footstepPlannerPubGenerator = PawStepPlannerCommunicationProperties.publisherTopicNameGenerator(quadrupedTestFactory.getRobotName());
+      ROS2TopicName footstepPlannerPubGenerator = PawStepPlannerCommunicationProperties.publisherTopicNameGenerator(quadrupedTestFactory.getRobotName());
 
       ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), PawStepPlanningToolboxOutputStatus.class, footstepPlannerPubGenerator,
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData(), stepsAreAdjustable));

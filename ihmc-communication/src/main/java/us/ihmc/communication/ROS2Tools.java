@@ -168,16 +168,6 @@ public class ROS2Tools
       }
    }
 
-   @Deprecated
-   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node,
-                                                                    Class<T> messageType,
-                                                                    ROS2MessageTopicNameGenerator topicNameGenerator,
-                                                                    NewMessageListener<T> newMessageListener)
-   {
-      String topicName = topicNameGenerator.generateTopicName(messageType);
-      return createCallbackSubscription(ros2Node, messageType, topicName, newMessageListener);
-   }
-
    public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node,
                                                                     Class<T> messageType,
                                                                     ROS2TopicName topicName,

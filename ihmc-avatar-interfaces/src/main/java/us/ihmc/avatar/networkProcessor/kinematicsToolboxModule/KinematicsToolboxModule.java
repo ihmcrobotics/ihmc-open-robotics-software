@@ -12,6 +12,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -115,23 +116,23 @@ public class KinematicsToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   public ROS2TopicName getPublisherTopicNameGenerator()
    {
       return getPublisherTopicNameGenerator(robotName);
    }
 
-   public static ROS2MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   public static ROS2TopicName getPublisherTopicNameGenerator(String robotName)
    {
       return ROS2Tools.KINEMATICS_TOOLBOX.robot(robotName).qualifier(ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
-   public ROS2MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   public ROS2TopicName getSubscriberTopicNameGenerator()
    {
       return getSubscriberTopicNameGenerator(robotName);
    }
 
-   public static ROS2MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   public static ROS2TopicName getSubscriberTopicNameGenerator(String robotName)
    {
       return ROS2Tools.KINEMATICS_TOOLBOX.robot(robotName).qualifier(ROS2TopicQualifier.INPUT);
    }
