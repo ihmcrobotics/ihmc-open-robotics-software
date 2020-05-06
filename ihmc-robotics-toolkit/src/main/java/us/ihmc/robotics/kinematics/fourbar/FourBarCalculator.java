@@ -3,29 +3,83 @@ package us.ihmc.robotics.kinematics.fourbar;
 import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.unknownTriangleSideLengthByLawOfCosine;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.geometry.Bound;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 
 public class FourBarCalculator implements FourbarCalculatorWithDerivatives
 {
    /*
     * @formatter:off
     *  Representation of the four bar with name correspondences:
-    *        a
+    *        DA
     *    D--------A
     *    |\      /|
-    *    | \e   / |
-    *   d|  \  /  |b
-    *    |   \/   |
+    *    | \DB  / |
+    *    |  \  /  |
+    * CD |   \/   | AB
     *    |   /\   |
     *    |  /  \  |
-    *    | /f   \ |
+    *    | /AC  \ |
     *    |/      \|
     *    C--------B
-    *        c
+    *        BC
+    * Angle name convention:
+    * - Inner angle at vertex A: DAB
+    * - Inner angle at vertex B: ABC
+    * - Inner angle at vertex C: BCD
+    * - Inner angle at vertex D: CDA
     * @formatter:on
     */
+   /**
+    * Side length (input):
+    * 
+    * <pre>
+    *        DA
+    *    D--------A
+    *    |\      /|
+    *    | \DB  / |
+    *    |  \  /  |
+    * CD |   \/   | AB
+    *    |   /\   |
+    *    |  /  \  |
+    *    | /AC  \ |
+    *    |/      \|
+    *    C--------B
+    *        BC
+    * </pre>
+    */
+   private double AB, BC, CD, DA;
+   /**
+    * Diagonal length (output):
+    * 
+    * <pre>
+    *        DA
+    *    D--------A
+    *    |\      /|
+    *    | \DB  / |
+    *    |  \  /  |
+    * CD |   \/   | AB
+    *    |   /\   |
+    *    |  /  \  |
+    *    | /AC  \ |
+    *    |/      \|
+    *    C--------B
+    *        BC
+    * </pre>
+    */
+   private double AC, BD;
 
-   private double a, b, c, d;
-   private double minA, maxA;
+   /**
+    * Rate of change of the diagonal length (output).
+    * 
+    * @see AC, BD
+    */
+   private double ACDt, BDDt;
+
+   private double minDAB, maxDAB;
+   private double minABC, maxABC;
+   private double minBCD, maxBCD;
+   private double minCDA, maxCDA;
 
    private boolean invertedAtDAB, invertedAtABC, invertedAtBCD, invertedAtCDA;
 
@@ -38,28 +92,23 @@ public class FourBarCalculator implements FourbarCalculatorWithDerivatives
    // Angular accelerations
    private double angleDt2DAB, angleDt2ABC, angleDt2BCD, angleDt2CDA;
 
+   public enum Angle
+   {
+      ABC, BCD, CDA, DAB
+   };
+
    public FourBarCalculator()
    {
    }
 
-   public void setSideLengths(double length_DA, double length_AB, double length_BC, double length_CD)
+   public void setSideLengths(double AB, double BC, double CD, double DA)
    {
-      a = Math.abs(length_DA);
-      b = Math.abs(length_AB);
-      c = Math.abs(length_BC);
-      d = Math.abs(length_CD);
+      this.AB = Math.abs(AB);
+      this.BC = Math.abs(BC);
+      this.CD = Math.abs(CD);
+      this.DA = Math.abs(DA);
 
-      double eMax = Math.min(a + b, d + c);
-      if (eMax == a + b)
-         maxA = Math.PI;
-      else
-         maxA = FourbarCalculatorTools.angleWithCosineLaw(a, b, eMax);
-
-      double fMax = Math.min(a + d, b + c);
-      if (fMax == a + d)
-         minA = FourbarCalculatorTools.angleWithCosineLaw(fMax, b, c);
-      else
-         minA = FourbarCalculatorTools.angleWithCosineLaw(fMax, a, d);
+      clearState();
    }
 
    public void setInversion(boolean invertedAtDAB, boolean invertedAtABC, boolean invertedAtBCD, boolean invertedAtCDA)
@@ -76,6 +125,327 @@ public class FourBarCalculator implements FourbarCalculatorWithDerivatives
       this.invertedAtABC = invertedAtABC;
       this.invertedAtBCD = invertedAtBCD;
       this.invertedAtCDA = invertedAtCDA;
+
+      clearState();
+   }
+
+   private void clearState()
+   {
+      AC = Double.NaN;
+      BD = Double.NaN;
+      minDAB = Double.NaN;
+      maxDAB = Double.NaN;
+      minABC = Double.NaN;
+      maxABC = Double.NaN;
+      minBCD = Double.NaN;
+      maxBCD = Double.NaN;
+      minCDA = Double.NaN;
+      maxCDA = Double.NaN;
+
+      setVelocityToZero();
+      setAccelerationToZero();
+   }
+
+   public void setToMin(Angle source)
+   {
+      switch (source)
+      {
+         case ABC:
+         case CDA:
+            angleABC = getMinABC();
+            angleBCD = getMaxBCD();
+            angleCDA = getMinCDA();
+            angleDAB = getMaxDAB();
+            break;
+         case BCD:
+         case DAB:
+            angleABC = getMaxABC();
+            angleBCD = getMinBCD();
+            angleCDA = getMaxCDA();
+            angleDAB = getMinDAB();
+            break;
+      }
+
+      setVelocityToZero();
+      setAccelerationToZero();
+   }
+
+   public void setToMax(Angle source)
+   {
+      switch (source)
+      {
+         case ABC:
+         case CDA:
+            angleABC = getMaxABC();
+            angleBCD = getMinBCD();
+            angleCDA = getMaxCDA();
+            angleDAB = getMinDAB();
+            break;
+         case BCD:
+         case DAB:
+            angleABC = getMinABC();
+            angleBCD = getMaxBCD();
+            angleCDA = getMinCDA();
+            angleDAB = getMaxDAB();
+            break;
+      }
+
+      setVelocityToZero();
+      setAccelerationToZero();
+   }
+
+   public void setVelocityToZero()
+   {
+      angleDtABC = 0.0;
+      angleDtBCD = 0.0;
+      angleDtCDA = 0.0;
+      angleDtDAB = 0.0;
+   }
+
+   public void setAccelerationToZero()
+   {
+      angleDt2ABC = 0.0;
+      angleDt2BCD = 0.0;
+      angleDt2CDA = 0.0;
+      angleDt2DAB = 0.0;
+   }
+
+   /**
+    * <p>
+    * Updates internally: all the angles and diagonal lengths.
+    * </p>
+    * 
+    * @param source
+    * @param angle
+    * @return
+    */
+   public Bound update(Angle source, double angle)
+   {
+      if (source == Angle.ABC || source == Angle.CDA)
+      {
+         if (source == Angle.ABC)
+         {
+            if (angle <= getMinABC())
+            {
+               setToMin(source);
+               return Bound.MIN;
+            }
+            else if (angle > getMaxABC())
+            {
+               setToMax(source);
+               return Bound.MAX;
+            }
+            else
+            {
+               angleABC = MathTools.clamp(angle, getMinABC(), getMaxABC());
+               AC = EuclidGeometryTools.unknownTriangleSideLengthByLawOfCosine(AB, BC, angleABC);
+               angleCDA = FourbarCalculatorTools.angleWithCosineLaw(CD, DA, AC);
+            }
+         }
+         else
+         {
+            if (angle <= getMinCDA())
+            {
+               setToMin(source);
+               return Bound.MIN;
+            }
+            else if (angle > getMaxCDA())
+            {
+               setToMax(source);
+               return Bound.MAX;
+            }
+            else
+            {
+               angleCDA = MathTools.clamp(angle, getMinCDA(), getMaxCDA());
+               AC = EuclidGeometryTools.unknownTriangleSideLengthByLawOfCosine(CD, DA, angleCDA);
+               angleABC = FourbarCalculatorTools.angleWithCosineLaw(AB, BC, AC);
+            }
+         }
+         double angleCAB = FourbarCalculatorTools.angleWithCosineLaw(AB, AC, BC);
+         double angleDAC = FourbarCalculatorTools.angleWithCosineLaw(DA, AC, CD);
+         angleDAB = angleDAC + angleCAB;
+         angleBCD = 2.0 * Math.PI - angleABC - angleCDA - angleDAB;
+      }
+      else
+      {
+         if (source == Angle.BCD)
+         {
+            if (angle <= getMinBCD())
+            {
+               setToMin(source);
+               return Bound.MIN;
+            }
+            else if (angle > getMaxBCD())
+            {
+               setToMax(source);
+               return Bound.MAX;
+            }
+            else
+            {
+               angleBCD = MathTools.clamp(angle, getMinBCD(), getMaxBCD());
+               BD = unknownTriangleSideLengthByLawOfCosine(BC, CD, angleBCD);
+               angleDAB = FourbarCalculatorTools.angleWithCosineLaw(DA, AB, BD);
+            }
+         }
+         else
+         {
+            if (angle <= getMinDAB())
+            {
+               setToMin(source);
+               return Bound.MIN;
+            }
+            else if (angle > getMaxDAB())
+            {
+               setToMax(source);
+               return Bound.MAX;
+            }
+            else
+            {
+               angleDAB = MathTools.clamp(angle, getMinDAB(), getMaxDAB());
+               BD = unknownTriangleSideLengthByLawOfCosine(DA, AB, angleDAB);
+               angleBCD = FourbarCalculatorTools.angleWithCosineLaw(BC, CD, BD);
+            }
+         }
+         double angleDBC = FourbarCalculatorTools.angleWithCosineLaw(BC, BD, CD);
+         double angleABD = FourbarCalculatorTools.angleWithCosineLaw(AB, BD, DA);
+         angleABC = angleABD + angleDBC;
+         angleCDA = 2.0 * Math.PI - angleBCD - angleDAB - angleABC;
+      }
+      return null;
+   }
+
+   public Bound update(Angle source, double angle, double angleDot)
+   {
+      Bound limit = update(source, angle);
+
+      if (limit == Bound.MIN)
+      {
+         if (angleDot <= 0.0)
+         {
+            setVelocityToZero();
+            return limit;
+         }
+      }
+      else if (limit == Bound.MAX)
+      {
+         if (angleDot >= 0.0)
+         {
+            setVelocityToZero();
+            return limit;
+         }
+      }
+
+      if (source == Angle.ABC || source == Angle.CDA)
+      {
+         if (source == Angle.ABC)
+         {
+            angleDtABC = angleDot;
+            ACDt = AB * BC * Math.sin(angleABC) * angleDtABC / AC;
+            angleDtCDA = FourbarCalculatorTools.angleDotWithCosineLaw(CD, DA, 0.0, AC, ACDt);
+         }
+         else
+         {
+            angleDtCDA = angleDot;
+            ACDt = AC * CD * Math.sin(angleCDA) * angleDtCDA / AC;
+            angleDtABC = FourbarCalculatorTools.angleDotWithCosineLaw(AB, BC, 0.0, AC, ACDt);
+         }
+
+         double angleDtCAB = FourbarCalculatorTools.angleDotWithCosineLaw(AB, AC, ACDt, BC, 0.0);
+         double angleDtDAC = FourbarCalculatorTools.angleDotWithCosineLaw(DA, AC, ACDt, CD, 0.0);
+         angleDtDAB = angleDtDAC + angleDtCAB;
+         angleDt2BCD = -angleDtABC - angleDtCDA - angleDtDAB;
+      }
+      else
+      {
+         if (source == Angle.CDA)
+         {
+            angleDtBCD = angleDot;
+            BDDt = BC * CD * Math.sin(angleBCD) * angleDtBCD / BD;
+            angleDtDAB = FourbarCalculatorTools.angleDotWithCosineLaw(DA, AB, 0.0, BD, BDDt);
+         }
+         else
+         {
+            angleDtDAB = angleDot;
+            BDDt = DA * AB * Math.sin(angleDAB) * angleDtDAB / BD;
+            angleDtBCD = FourbarCalculatorTools.angleDotWithCosineLaw(BC, CD, 0.0, BD, BDDt);
+         }
+
+         double angleDtDBA = FourbarCalculatorTools.angleDotWithCosineLaw(AB, BD, BDDt, DA, 0.0);
+         double angleDtDBC = FourbarCalculatorTools.angleDotWithCosineLaw(BC, BD, BDDt, CD, 0.0);
+         angleDtABC = angleDtDBA + angleDtDBC;
+         angleDtCDA = -angleDtDAB - angleDtABC - angleDtBCD;
+      }
+
+      return null;
+   }
+
+   public Bound update(Angle source, double angle, double angleDot, double angleDDot)
+   {
+      Bound limit = update(source, angle, angleDot);
+
+      if (limit == Bound.MIN)
+      {
+         if (angleDot <= 0.0)
+         {
+            setAccelerationToZero();
+            return limit;
+         }
+      }
+      else if (limit == Bound.MAX)
+      {
+         if (angleDot >= 0.0)
+         {
+            setAccelerationToZero();
+            return limit;
+         }
+      }
+
+      if (source == Angle.ABC || source == Angle.CDA)
+      {
+         double ACDt2;
+
+         if (source == Angle.ABC)
+         {
+            angleDt2ABC = angleDDot;
+            ACDt2 = AB * BC / AC * (Math.cos(angleABC) * angleDtABC * angleDtABC + Math.sin(angleABC) * (angleDt2ABC - ACDt * angleDtABC / AC));
+            angleDt2CDA = FourbarCalculatorTools.angleDDotWithCosineLaw(CD, DA, 0.0, 0.0, AC, ACDt, ACDt2);
+         }
+         else
+         {
+            angleDt2CDA = angleDDot;
+            ACDt2 = CD * DA / AC * (Math.cos(angleCDA) * angleDtCDA * angleDtCDA + Math.sin(angleCDA) * (angleDt2CDA - ACDt * angleDtCDA / AC));
+            angleDt2ABC = FourbarCalculatorTools.angleDDotWithCosineLaw(CD, DA, 0.0, 0.0, AC, ACDt, ACDt2);
+         }
+
+         double angleDt2CAB = FourbarCalculatorTools.angleDDotWithCosineLaw(AB, AC, ACDt, ACDt2, BC, 0.0, 0.0);
+         double angleDt2DAC = FourbarCalculatorTools.angleDDotWithCosineLaw(DA, AC, ACDt, ACDt2, CD, 0.0, 0.0);
+         angleDt2DAB = angleDt2DAC + angleDt2CAB;
+         angleDt2BCD = -angleDt2ABC - angleDt2CDA - angleDt2DAB;
+      }
+      else
+      {
+         double BDDt2;
+
+         if (source == Angle.CDA)
+         {
+            angleDt2BCD = angleDDot;
+            BDDt2 = BC * CD / BD * (Math.cos(angleBCD) * angleDtBCD * angleDtBCD + Math.sin(angleBCD) * (angleDt2BCD - BDDt * angleDtBCD / BD));
+            angleDt2DAB = FourbarCalculatorTools.angleDDotWithCosineLaw(DA, AB, 0.0, 0.0, BD, BDDt, BDDt2);
+         }
+         else
+         {
+            angleDt2DAB = angleDDot;
+            BDDt2 = DA * AB / BD * (Math.cos(angleDAB) * angleDtDAB * angleDtDAB + Math.sin(angleDAB) * (angleDt2DAB - BDDt * angleDtDAB / BD));
+            angleDt2BCD = FourbarCalculatorTools.angleDDotWithCosineLaw(BC, CD, 0.0, 0.0, BD, BDDt, BDDt2);
+         }
+
+         double angleDt2DBA = FourbarCalculatorTools.angleDDotWithCosineLaw(AB, BD, BDDt, BDDt2, DA, 0.0, 0.0);
+         double angleDt2DBC = FourbarCalculatorTools.angleDDotWithCosineLaw(BC, BD, BDDt, BDDt2, CD, 0.0, 0.0);
+         angleDt2ABC = angleDt2DBA + angleDt2DBC;
+         angleDt2CDA = -angleDt2DAB - angleDt2ABC - angleDt2BCD;
+      }
+
+      return null;
    }
 
    /**
@@ -88,20 +458,7 @@ public class FourBarCalculator implements FourbarCalculatorWithDerivatives
    @Override
    public boolean updateAnglesGivenAngleDAB(double angleDABInRadians)
    {
-      // Solve angles
-      double A = MathTools.clamp(angleDABInRadians, minA, maxA);
-      double e = unknownTriangleSideLengthByLawOfCosine(a, b, A);
-      double C = FourbarCalculatorTools.angleWithCosineLaw(c, d, e);
-      double angleDBA = FourbarCalculatorTools.angleWithCosineLaw(b, e, a);
-      double angleDBC = FourbarCalculatorTools.angleWithCosineLaw(c, e, d);
-      double B = angleDBA + angleDBC;
-      double D = 2.0 * Math.PI - A - B - C;
-      angleDAB = A;
-      angleABC = B;
-      angleBCD = C;
-      angleCDA = D;
-
-      return !MathTools.intervalContains(angleDABInRadians, minA, maxA);
+      return update(Angle.DAB, angleDABInRadians) != null;
    }
 
    /**
@@ -111,14 +468,7 @@ public class FourBarCalculator implements FourbarCalculatorWithDerivatives
    @Override
    public void computeMasterJointAngleGivenAngleABC(double angleABCInRadians)
    {
-      double B = angleABCInRadians;
-      double f = unknownTriangleSideLengthByLawOfCosine(b, c, B);
-      double D = FourbarCalculatorTools.angleWithCosineLaw(d, a, f);
-      double angleACB = FourbarCalculatorTools.angleWithCosineLaw(c, f, b);
-      double angleACD = FourbarCalculatorTools.angleWithCosineLaw(d, f, a);
-      double C = angleACB + angleACD;
-      double A = 2 * Math.PI - D - B - C;
-      angleDAB = A;
+      update(Angle.ABC, angleABCInRadians);
    }
 
    /**
@@ -128,10 +478,7 @@ public class FourBarCalculator implements FourbarCalculatorWithDerivatives
    @Override
    public void computeMasterJointAngleGivenAngleBCD(double angleBCDInRadians)
    {
-      double C = angleBCDInRadians;
-      double e = unknownTriangleSideLengthByLawOfCosine(c, d, C);
-      double A = FourbarCalculatorTools.angleWithCosineLaw(a, b, e);
-      angleDAB = A;
+      update(Angle.BCD, angleBCDInRadians);
    }
 
    /**
@@ -141,12 +488,7 @@ public class FourBarCalculator implements FourbarCalculatorWithDerivatives
    @Override
    public void computeMasterJointAngleGivenAngleCDA(double angleCDAInRadians)
    {
-      double D = angleCDAInRadians;
-      double f = unknownTriangleSideLengthByLawOfCosine(d, a, D);
-      double angleCAD = FourbarCalculatorTools.angleWithCosineLaw(a, f, d);
-      double angleCAB = FourbarCalculatorTools.angleWithCosineLaw(b, f, c);
-      double A = angleCAD + angleCAB;
-      angleDAB = A;
+      update(Angle.CDA, angleCDAInRadians);
    }
 
    /**
@@ -159,25 +501,7 @@ public class FourBarCalculator implements FourbarCalculatorWithDerivatives
    @Override
    public boolean updateAnglesAndVelocitiesGivenAngleDAB(double angleDABInRadians, double angularVelocityDAB)
    {
-      // Solve angles
-      boolean isAHittingBounds = updateAnglesGivenAngleDAB(angleDABInRadians);
-
-      // Solve angular velocity
-      double A = MathTools.clamp(angleDABInRadians, minA, maxA);
-      double dAdT = angularVelocityDAB;
-      double e = unknownTriangleSideLengthByLawOfCosine(a, b, A);
-      double eDot = a * b * Math.sin(A) * dAdT / e;
-      double dCdT = FourbarCalculatorTools.angleDotWithCosineLaw(c, d, 0.0, e, eDot);
-      double angleDotDBA = FourbarCalculatorTools.angleDotWithCosineLaw(b, e, eDot, a, 0.0);
-      double angleDotDBC = FourbarCalculatorTools.angleDotWithCosineLaw(c, e, eDot, d, 0.0);
-      double dBdT = angleDotDBA + angleDotDBC;
-      double dDdT = -dAdT - dBdT - dCdT;
-      angleDtDAB = dAdT;
-      angleDtABC = dBdT;
-      angleDtBCD = dCdT;
-      angleDtCDA = dDdT;
-
-      return isAHittingBounds;
+      return update(Angle.DAB, angleDABInRadians, angularVelocityDAB) != null;
    }
 
    /**
@@ -191,27 +515,7 @@ public class FourBarCalculator implements FourbarCalculatorWithDerivatives
    @Override
    public boolean updateAnglesVelocitiesAndAccelerationsGivenAngleDAB(double angleDABInRadians, double angularVelocityDAB, double angularAccelerationDAB)
    {
-      // Solve angles and angular velocity
-      boolean isAHittingBounds = updateAnglesAndVelocitiesGivenAngleDAB(angleDABInRadians, angularVelocityDAB);
-
-      // Solve angular acceleration
-      double A = MathTools.clamp(angleDABInRadians, minA, maxA);
-      double dAdT = angularVelocityDAB;
-      double dAdT2 = angularAccelerationDAB;
-      double e = unknownTriangleSideLengthByLawOfCosine(a, b, A);
-      double eDot = a * b * Math.sin(A) * dAdT / e;
-      double eDDot = a * b / e * (Math.cos(A) * dAdT * dAdT + Math.sin(A) * (dAdT2 - eDot * dAdT / e));
-      double dCdT2 = FourbarCalculatorTools.angleDDotWithCosineLaw(c, d, 0.0, 0.0, e, eDot, eDDot);
-      double angleDDotDBA = FourbarCalculatorTools.angleDDotWithCosineLaw(b, e, eDot, eDDot, a, 0.0, 0.0);
-      double angleDDotDBC = FourbarCalculatorTools.angleDDotWithCosineLaw(c, e, eDot, eDDot, d, 0.0, 0.0);
-      double dBdT2 = angleDDotDBA + angleDDotDBC;
-      double dDdT2 = -dAdT2 - dBdT2 - dCdT2;
-      angleDt2DAB = dAdT2;
-      angleDt2ABC = dBdT2;
-      angleDt2BCD = dCdT2;
-      angleDt2CDA = dDdT2;
-
-      return isAHittingBounds;
+      return update(Angle.DAB, angleDABInRadians, angularVelocityDAB, angularAccelerationDAB) != null;
    }
 
    @Override
@@ -289,36 +593,138 @@ public class FourBarCalculator implements FourbarCalculatorWithDerivatives
    @Override
    public double getMinDAB()
    {
-      return minA;
+      if (Double.isNaN(minDAB))
+      {
+         double ACMax = Math.min(CD + DA, AB + BC);
+
+         if (ACMax == DA + CD)
+            minDAB = FourbarCalculatorTools.angleWithCosineLaw(ACMax, AB, BC);
+         else
+            minDAB = FourbarCalculatorTools.angleWithCosineLaw(ACMax, DA, CD);
+      }
+      return minDAB;
    }
 
    @Override
    public double getMaxDAB()
    {
-      return maxA;
+      if (Double.isNaN(maxDAB))
+      {
+         double DBMax = Math.min(DA + AB, BC + CD);
+
+         if (DBMax == DA + AB)
+            maxDAB = Math.PI;
+         else
+            maxDAB = FourbarCalculatorTools.angleWithCosineLaw(DA, AB, DBMax);
+      }
+      return maxDAB;
+   }
+
+   public double getMinABC()
+   {
+      if (Double.isNaN(minABC))
+      {
+         double DBMax = Math.min(DA + AB, BC + CD);
+
+         if (DBMax == DA + AB)
+            minABC = FourbarCalculatorTools.angleWithCosineLaw(DBMax, BC, CD);
+         else
+            minABC = FourbarCalculatorTools.angleWithCosineLaw(DBMax, AB, DA);
+      }
+      return minABC;
+   }
+
+   public double getMaxABC()
+   {
+      if (Double.isNaN(maxABC))
+      {
+         double ACMax = Math.min(CD + DA, AB + BC);
+
+         if (ACMax == AB + BC)
+            maxABC = Math.PI;
+         else
+            maxABC = FourbarCalculatorTools.angleWithCosineLaw(AB, BC, ACMax);
+      }
+      return maxABC;
+   }
+
+   public double getMinBCD()
+   {
+      if (Double.isNaN(minBCD))
+      {
+         double ACMax = Math.min(CD + DA, AB + BC);
+
+         if (ACMax == DA + CD)
+            minBCD = FourbarCalculatorTools.angleWithCosineLaw(ACMax, BC, AB);
+         else
+            minBCD = FourbarCalculatorTools.angleWithCosineLaw(ACMax, CD, DA);
+      }
+      return minBCD;
+   }
+
+   public double getMaxBCD()
+   {
+      if (Double.isNaN(maxBCD))
+      {
+         double DBMax = Math.min(DA + AB, BC + CD);
+
+         if (DBMax == BC + CD)
+            maxBCD = Math.PI;
+         else
+            maxBCD = FourbarCalculatorTools.angleWithCosineLaw(BC, CD, DBMax);
+      }
+      return maxBCD;
+   }
+
+   public double getMinCDA()
+   {
+      if (Double.isNaN(minCDA))
+      {
+         double DBMax = Math.min(DA + AB, BC + CD);
+
+         if (DBMax == DA + AB)
+            minCDA = FourbarCalculatorTools.angleWithCosineLaw(DBMax, CD, BC);
+         else
+            minCDA = FourbarCalculatorTools.angleWithCosineLaw(DBMax, DA, AB);
+      }
+      return minCDA;
+   }
+
+   public double getMaxCDA()
+   {
+      if (Double.isNaN(maxCDA))
+      {
+         double ACMax = Math.min(CD + DA, AB + BC);
+
+         if (ACMax == CD + DA)
+            maxCDA = Math.PI;
+         else
+            maxCDA = FourbarCalculatorTools.angleWithCosineLaw(CD, DA, ACMax);
+      }
+      return maxCDA;
    }
 
    @Override
    public double getAB()
    {
-      return b;
+      return AB;
    }
 
    @Override
    public double getBC()
    {
-      return c;
+      return BC;
    }
 
    @Override
    public double getCD()
    {
-      return d;
+      return CD;
    }
 
    @Override
    public double getDA()
    {
-      return a;
+      return DA;
    }
 }
