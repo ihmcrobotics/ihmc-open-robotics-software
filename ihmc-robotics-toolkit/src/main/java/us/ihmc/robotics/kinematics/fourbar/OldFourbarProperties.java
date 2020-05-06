@@ -6,12 +6,12 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
 
-public interface FourbarProperties
+public interface OldFourbarProperties
 {
-	public FourbarLink getGroundLink();
-	public FourbarLink getInputLink();
-	public FourbarLink getFloatingLink();
-	public FourbarLink getOutputLink();
+	public OldFourbarLink getGroundLink();
+	public OldFourbarLink getInputLink();
+	public OldFourbarLink getFloatingLink();
+	public OldFourbarLink getOutputLink();
 	public boolean isElbowDown();
 	
 	/**

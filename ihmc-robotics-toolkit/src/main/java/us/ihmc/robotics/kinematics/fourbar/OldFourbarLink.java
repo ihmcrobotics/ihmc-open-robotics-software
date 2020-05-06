@@ -6,27 +6,27 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
 
-public class FourbarLink {
+public class OldFourbarLink {
 	
 	private double L;
 	private double m;
 	private double CoM_x;
 	private double CoM_y;
-	public FourbarLink(double length)
+	public OldFourbarLink(double length)
 	{
 		this.L = length;
 		this.m = 0;
 		this.CoM_x = 0;
 		this.CoM_y = 0;
 	}
-	public FourbarLink(double length,double mass,double CoM_x,double CoM_y)
+	public OldFourbarLink(double length,double mass,double CoM_x,double CoM_y)
 	{
 		this.L = length;
 		this.m = mass;
 		this.CoM_x = CoM_x;
 		this.CoM_y = CoM_y;
 	}
-	public FourbarLink(double length,double mass,double[] CoM)
+	public OldFourbarLink(double length,double mass,double[] CoM)
 	{
 		this.L = length;
 		this.m = mass;

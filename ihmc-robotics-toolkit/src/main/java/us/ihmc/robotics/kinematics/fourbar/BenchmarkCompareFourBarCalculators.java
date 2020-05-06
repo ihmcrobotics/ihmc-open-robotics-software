@@ -17,8 +17,8 @@ public class BenchmarkCompareFourBarCalculators
    private double startTimeOtherCalculator, totalTimeOtherCalculator;
    private Random rand = new Random(1986L);
 
-   private FourbarLink outputLink, groundLink, inputLink, floatingLink;
-   private FourbarProperties fourBarProperties;
+   private OldFourbarLink outputLink, groundLink, inputLink, floatingLink;
+   private OldFourbarProperties fourBarProperties;
    
    public BenchmarkCompareFourBarCalculators()
    {
@@ -67,12 +67,12 @@ public class BenchmarkCompareFourBarCalculators
          double BC = sqrt(BF * BF + CF * CF);
          double BAD = DAE + BAE;
 
-         outputLink = new FourbarLink(AD);
-         groundLink = new FourbarLink(AB);
-         inputLink = new FourbarLink(BC);
-         floatingLink = new FourbarLink(CD);
+         outputLink = new OldFourbarLink(AD);
+         groundLink = new OldFourbarLink(AB);
+         inputLink = new OldFourbarLink(BC);
+         floatingLink = new OldFourbarLink(CD);
 
-         fourBarProperties = new FourbarProperties()
+         fourBarProperties = new OldFourbarProperties()
          {
             @Override
             public boolean isElbowDown()
@@ -93,31 +93,31 @@ public class BenchmarkCompareFourBarCalculators
             }
 
             @Override
-            public FourbarLink getOutputLink()
+            public OldFourbarLink getOutputLink()
             {
                return outputLink;
             }
 
             @Override
-            public FourbarLink getInputLink()
+            public OldFourbarLink getInputLink()
             {
                return inputLink;
             }
 
             @Override
-            public FourbarLink getGroundLink()
+            public OldFourbarLink getGroundLink()
             {
                return groundLink;
             }
 
             @Override
-            public FourbarLink getFloatingLink()
+            public OldFourbarLink getFloatingLink()
             {
                return floatingLink;
             }
          };
          
-         FourbarCalculator otherCalculator = new FourbarCalculator(fourBarProperties);
+         OldFourbarCalculator otherCalculator = new OldFourbarCalculator(fourBarProperties);
          otherCalculator.calculateInputAngleFromOutputAngle(Math.PI - BAD);
       }
       totalTimeOtherCalculator = System.currentTimeMillis() - startTimeOtherCalculator;
