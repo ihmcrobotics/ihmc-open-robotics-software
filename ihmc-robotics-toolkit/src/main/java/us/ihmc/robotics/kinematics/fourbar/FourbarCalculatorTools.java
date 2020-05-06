@@ -1,101 +1,170 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
-import static java.lang.Math.abs;
-import static java.lang.Math.acos;
-import static java.lang.Math.atan2;
-import static java.lang.Math.pow;
-import static java.lang.Math.sqrt;
-import static us.ihmc.commons.MathTools.checkIntervalContains;
-import static us.ihmc.commons.MathTools.cube;
-import static us.ihmc.commons.MathTools.square;
-
 import java.util.Random;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 
 public class FourbarCalculatorTools
 {
-   public static double getCosineAngleWithCosineLaw(double l_neighbour1, double l_neighbour2, double l_opposite)
+   /**
+    * Calculates the angle at A for a triangle ABC defined by by its lengths.
+    * 
+    * @param AB the length of the side joining the vertices A and B.
+    * @param AC the length of the side joining the vertices A and C.
+    * @param BC the length of the side joining the vertices B and C.
+    * @return the angle at the vertex A.
+    */
+   public static double angleWithCosineLaw(double AB, double AC, double BC)
    {
-      checkIntervalContains(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
-      checkIntervalContains(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
-      checkIntervalContains(l_opposite, 0.0, Double.POSITIVE_INFINITY);
+      return Math.acos(cosineAngleWithCosineLaw(AB, AC, BC));
+   }
 
-      double cosAngle = MathTools
-            .clamp((square(l_neighbour1) + square(l_neighbour2) - square(l_opposite)) / (2.0 * l_neighbour1 * l_neighbour2), -1.0, 1.0);
+   /**
+    * Calculates the cosine value of the angle at A for a triangle ABC defined by by its lengths.
+    * 
+    * @param AB the length of the side joining the vertices A and B.
+    * @param AC the length of the side joining the vertices A and C.
+    * @param BC the length of the side joining the vertices B and C.
+    * @return the cosine of the angle at the vertex A.
+    */
+   public static double cosineAngleWithCosineLaw(double AB, double AC, double BC)
+   {
+      if (AB < 0.0 || AC < 0.0 || BC < 0.0)
+         throw new IllegalArgumentException("The triangle side lengths cannot be negative: AB= " + AB + ", AC= " + AC + ", BC= " + BC);
+
+      double ABSquared = EuclidCoreTools.square(AB);
+      double ACSquared = EuclidCoreTools.square(AC);
+      double BCSquared = EuclidCoreTools.square(BC);
+      double cosAngle = (ABSquared + ACSquared - BCSquared) / (2.0 * AB * AC);
+      if (cosAngle > 1.0)
+         cosAngle = 1.0;
+      else if (cosAngle < -1.0)
+         cosAngle = -1.0;
 
       return cosAngle;
    }
 
-   public static double getCosineAngleDotWithCosineLaw(double l_neighbour1, double l_neighbour2, double lDot_neighbour2, double l_opposite,
-         double lDot_opposite)
+   /**
+    * Calculates the derivative of the angle at A for a triangle ABC defined by its lengths.
+    * <p>
+    * The angle is changing due to the sides AC and BC changing. Their rate of change is to provided.
+    * This method assumes that the side AB is constant.
+    * </p>
+    * 
+    * @param AB    the length of the side joining the vertices A and B.
+    * @param AC    the length of the side joining the vertices A and C.
+    * @param ACDot the derivative of the side AC.
+    * @param BC    the length of the side joining the vertices B and C.
+    * @param BCDot the derivative of the side BC.
+    * @return the derivative of the angle at the vertex A.
+    */
+   public static double angleDotWithCosineLaw(double AB, double AC, double ACDot, double BC, double BCDot)
    {
-      checkIntervalContains(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
-      checkIntervalContains(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
-      checkIntervalContains(l_opposite, 0.0, Double.POSITIVE_INFINITY);
-
-      double cosAngleDot = (square(l_neighbour2) * lDot_neighbour2 - 2.0 * l_neighbour2 * l_opposite * lDot_opposite - lDot_neighbour2 * square(l_neighbour1)
-            + lDot_neighbour2 * square(l_opposite)) / (2.0 * square(l_neighbour2) * l_neighbour1);
-
-      return cosAngleDot;
+      double cosAngle = cosineAngleWithCosineLaw(AB, AC, BC);
+      double cosAngleDot = cosineAngleDotWithCosineLaw(AB, AC, ACDot, BC, BCDot);
+      return -cosAngleDot / Math.sqrt(1 - cosAngle * cosAngle);
    }
 
-   public static double getCosineAngleDDotWithCosineLaw(double l_neighbour1, double l_neighbour2, double lDot_neighbour2, double lDDot_neighbour2,
-         double l_opposite, double lDot_opposite, double lDDot_opposite)
+   /**
+    * Calculates the derivative of the cosine value for the angle at A for a triangle ABC defined by
+    * its lengths.
+    * <p>
+    * The angle is changing due to the sides AC and BC changing. Their rate of change is to provided.
+    * This method assumes that the side AB is constant.
+    * </p>
+    * 
+    * @param AB    the length of the side joining the vertices A and B.
+    * @param AC    the length of the side joining the vertices A and C.
+    * @param ACDot the derivative of the side AC.
+    * @param BC    the length of the side joining the vertices B and C.
+    * @param BCDot the derivative of the side BC.
+    * @return the derivative of the cosine value for the angle at the vertex A.
+    */
+   public static double cosineAngleDotWithCosineLaw(double AB, double AC, double ACDot, double BC, double BCDot)
    {
-      checkIntervalContains(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
-      checkIntervalContains(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
-      checkIntervalContains(l_opposite, 0.0, Double.POSITIVE_INFINITY);
+      if (AB < 0.0 || AC < 0.0 || BC < 0.0)
+         throw new IllegalArgumentException("The triangle side lengths cannot be negative: AB= " + AB + ", AC= " + AC + ", BC= " + BC);
 
-      double cosAngleDDot =
-            (cube(l_neighbour2) * lDDot_neighbour2 - 2 * square(l_neighbour2 * lDot_opposite) - 2 * square(l_neighbour2) * l_opposite * lDDot_opposite
-                  + 4 * l_neighbour2 * lDot_neighbour2 * l_opposite * lDot_opposite + 2 * square(lDot_neighbour2 * l_neighbour1) - 2 * square(
-                  lDot_neighbour2 * l_opposite) - l_neighbour2 * lDDot_neighbour2 * square(l_neighbour1) + l_neighbour2 * lDDot_neighbour2 * square(l_opposite))
-                  / (2.0 * cube(l_neighbour2) * l_neighbour1);
+      double ABSquared = EuclidCoreTools.square(AB);
+      double ACSquared = EuclidCoreTools.square(AC);
+      double BCSquared = EuclidCoreTools.square(BC);
+
+      return (0.5 * (ACSquared - ABSquared + BCSquared) * ACDot - AC * BC * BCDot) / (ACSquared * AB);
+   }
+
+   /**
+    * Calculates the second derivative of the angle at A for a triangle ABC defined by its lengths.
+    * <p>
+    * The angle is changing due to the sides AC and BC changing. Their rate of change is to provided.
+    * This method assumes that the side AB is constant.
+    * </p>
+    * 
+    * @param AB     the length of the side joining the vertices A and B.
+    * @param AC     the length of the side joining the vertices A and C.
+    * @param ACDot  the derivative of the side AC.
+    * @param ACDDot the second derivative of the side AC.
+    * @param BC     the length of the side joining the vertices B and C.
+    * @param BCDot  the derivative of the side BC.
+    * @param BCDDot the second derivative of the side BC.
+    * @return the second derivative of the angle at the vertex A.
+    */
+   public static double angleDDotWithCosineLaw(double AB, double AC, double ACDot, double ACDDot, double BC, double BCDot, double BCDDot)
+   {
+      double cosAngle = cosineAngleWithCosineLaw(AB, AC, BC);
+      double cosAngleSquared = MathTools.square(cosAngle);
+      double sinAngleSquared = 1.0 - cosAngleSquared;
+      double sinAngle = Math.sqrt(sinAngleSquared);
+
+      double cosAngleDot = cosineAngleDotWithCosineLaw(AB, AC, ACDot, BC, BCDot);
+      double cosAngleDotSquared = cosAngleDot * cosAngleDot;
+
+      double cosAngleDDot = cosineAngleDDotWithCosineLaw(AB, AC, ACDot, ACDDot, BC, BCDot, BCDDot);
+
+      return -(cosAngleDDot * sinAngleSquared + cosAngleDotSquared * cosAngle) / MathTools.cube(sinAngle);
+   }
+
+   /**
+    * Calculates the second derivative of the cosine value for the angle at A for a triangle ABC
+    * defined by its lengths.
+    * <p>
+    * The angle is changing due to the sides AC and BC changing. Their rate of change is to provided.
+    * This method assumes that the side AB is constant.
+    * </p>
+    * 
+    * @param AB     the length of the side joining the vertices A and B.
+    * @param AC     the length of the side joining the vertices A and C.
+    * @param ACDot  the derivative of the side AC.
+    * @param ACDDot the second derivative of the side AC.
+    * @param BC     the length of the side joining the vertices B and C.
+    * @param BCDot  the derivative of the side BC.
+    * @param BCDDot the second derivative of the side BC.
+    * @return the second derivative of the cosine value for the angle at the vertex A.
+    */
+   public static double cosineAngleDDotWithCosineLaw(double AB, double AC, double ACDot, double ACDDot, double BC, double BCDot, double BCDDot)
+   {
+      if (AB < 0.0 || AC < 0.0 || BC < 0.0)
+         throw new IllegalArgumentException("The triangle side lengths cannot be negative: AB= " + AB + ", AC= " + AC + ", BC= " + BC);
+
+      double ABSquared = EuclidCoreTools.square(AB);
+      double ACSquared = MathTools.square(AC);
+      double ACCubed = ACSquared * AC;
+      double BCSquared = EuclidCoreTools.square(BC);
+
+      double BCDotSquared = EuclidCoreTools.square(BCDot);
+      double ACDotSquared = EuclidCoreTools.square(ACDot);
+
+      double cosAngleDDot = 0.5 * (ACCubed + AC * (BCSquared - ABSquared)) * ACDDot;
+      cosAngleDDot += -ACSquared * (BCDotSquared + BC * BCDDot) + (ABSquared - BCSquared) * ACDotSquared + 2.0 * AC * ACDot * BC * BCDot;
+      cosAngleDDot /= ACCubed * AB;
 
       return cosAngleDDot;
    }
 
-   public static double getAngleWithCosineLaw(double l_neighbour1, double l_neighbour2, double l_opposite)
-   {
-      double angle = acos(getCosineAngleWithCosineLaw(l_neighbour1, l_neighbour2, l_opposite));
-
-      return angle;
-   }
-
-   public static double getAngleDotWithCosineLaw(double l_neighbour1, double l_neighbour2, double lDot_neighbour2, double l_opposite, double lDot_opposite)
-   {
-      checkIntervalContains(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
-      checkIntervalContains(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
-      checkIntervalContains(l_opposite, 0.0, Double.POSITIVE_INFINITY);
-
-      double cosAngle = getCosineAngleWithCosineLaw(l_neighbour1, l_neighbour2, l_opposite);
-      double cosAngleDot = getCosineAngleDotWithCosineLaw(l_neighbour1, l_neighbour2, lDot_neighbour2, l_opposite, lDot_opposite);
-      double angleDot = -cosAngleDot / sqrt(1 - cosAngle * cosAngle);
-
-      return angleDot;
-   }
-
-   public static double getAngleDDotWithCosineLaw(double l_neighbour1, double l_neighbour2, double lDot_neighbour2, double lDDot_neighbour2, double l_opposite,
-         double lDot_opposite, double lDDot_opposite)
-   {
-      checkIntervalContains(l_neighbour1, 0.0, Double.POSITIVE_INFINITY);
-      checkIntervalContains(l_neighbour2, 0.0, Double.POSITIVE_INFINITY);
-      checkIntervalContains(l_opposite, 0.0, Double.POSITIVE_INFINITY);
-
-      double cosAngle = getCosineAngleWithCosineLaw(l_neighbour1, l_neighbour2, l_opposite);
-      double cosAngleDot = getCosineAngleDotWithCosineLaw(l_neighbour1, l_neighbour2, lDot_neighbour2, l_opposite, lDot_opposite);
-      double cosAngleDDot = getCosineAngleDDotWithCosineLaw(l_neighbour1, l_neighbour2, lDot_neighbour2, lDDot_neighbour2, l_opposite, lDot_opposite,
-                                                            lDDot_opposite);
-      double angleDDot = (-cosAngleDDot + cosAngleDDot * square(cosAngle) - cosAngleDot * cosAngleDot * cosAngle) / pow(1 - square(cosAngle), 3.0 / 2.0);
-
-      return angleDDot;
-   }
-
    /**
     * @param random
-    * @param sideLengths index 0 is AB, index 1 is BC, ...
+    * @param sideLengths        index 0 is AB, index 1 is BC, ...
     * @param validInitialAngles index 0 is angle A, index 1 is angle B, ...
     * @param minSideLength
     * @param maxSideLength
@@ -105,8 +174,8 @@ public class FourbarCalculatorTools
       double e = RandomNumbers.nextDouble(random, minSideLength, maxSideLength);
       double k1 = random.nextDouble();
       double k2 = random.nextDouble();
-      double d1 = e * abs(random.nextGaussian());
-      double d2 = e * abs(random.nextGaussian());
+      double d1 = e * Math.abs(random.nextGaussian());
+      double d2 = e * Math.abs(random.nextGaussian());
 
       double DE = e * k1;
       double DF = e * k2;
@@ -116,21 +185,21 @@ public class FourbarCalculatorTools
       double AE = d1;
       double CF = d2;
 
-      double DA = sqrt(DE * DE + AE * AE);
-      double DAE = atan2(DE, AE);
-      double ADE = atan2(AE, DE);
+      double DA = Math.sqrt(DE * DE + AE * AE);
+      double DAE = Math.atan2(DE, AE);
+      double ADE = Math.atan2(AE, DE);
 
-      double AB = sqrt(AE * AE + BE * BE);
-      double BAE = atan2(BE, AE);
-      double ABE = atan2(AE, BE);
+      double AB = Math.sqrt(AE * AE + BE * BE);
+      double BAE = Math.atan2(BE, AE);
+      double ABE = Math.atan2(AE, BE);
 
-      double CD = sqrt(CF * CF + DF * DF);
-      double CDF = atan2(CF, DF);
-      double DCF = atan2(DF, CF);
+      double CD = Math.sqrt(CF * CF + DF * DF);
+      double CDF = Math.atan2(CF, DF);
+      double DCF = Math.atan2(DF, CF);
 
-      double BC = sqrt(BF * BF + CF * CF);
-      double CBF = atan2(CF, BF);
-      double BCF = atan2(BF, CF);
+      double BC = Math.sqrt(BF * BF + CF * CF);
+      double CBF = Math.atan2(CF, BF);
+      double BCF = Math.atan2(BF, CF);
 
       double A = DAE + BAE;
       double B = ABE + CBF;
@@ -147,5 +216,4 @@ public class FourbarCalculatorTools
       validInitialAngles[0] = C;
       validInitialAngles[0] = D;
    }
-
 }

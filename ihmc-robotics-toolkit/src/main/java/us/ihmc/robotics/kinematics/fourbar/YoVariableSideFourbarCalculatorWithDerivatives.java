@@ -145,9 +145,9 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
       double dAdT = angularVelocityDAB;
       double e = unknownTriangleSideLengthByLawOfCosine(lengthAD.getDoubleValue(), lengthBA.getDoubleValue(), A);
       double eDot = lengthAD.getDoubleValue() * lengthBA.getDoubleValue() * sin(A) * dAdT / e;
-      double dCdT = FourbarCalculatorTools.getAngleDotWithCosineLaw(lengthCB.getDoubleValue(), lengthDC.getDoubleValue(), 0.0, e, eDot);
-      double angleDotDBA = FourbarCalculatorTools.getAngleDotWithCosineLaw(lengthBA.getDoubleValue(), e, eDot, lengthAD.getDoubleValue(), 0.0);
-      double angleDotDBC = FourbarCalculatorTools.getAngleDotWithCosineLaw(lengthCB.getDoubleValue(), e, eDot, lengthDC.getDoubleValue(), 0.0);
+      double dCdT = FourbarCalculatorTools.angleDotWithCosineLaw(lengthCB.getDoubleValue(), lengthDC.getDoubleValue(), 0.0, e, eDot);
+      double angleDotDBA = FourbarCalculatorTools.angleDotWithCosineLaw(lengthBA.getDoubleValue(), e, eDot, lengthAD.getDoubleValue(), 0.0);
+      double angleDotDBC = FourbarCalculatorTools.angleDotWithCosineLaw(lengthCB.getDoubleValue(), e, eDot, lengthDC.getDoubleValue(), 0.0);
       double dBdT = angleDotDBA + angleDotDBC;
       double dDdT = -dAdT - dBdT - dCdT;
       this.angleDtDAB = dAdT;
@@ -170,9 +170,9 @@ public class YoVariableSideFourbarCalculatorWithDerivatives implements FourbarCa
       double e = unknownTriangleSideLengthByLawOfCosine(lengthAD.getDoubleValue(), lengthBA.getDoubleValue(), A);
       double eDot = lengthAD.getDoubleValue() * lengthBA.getDoubleValue() * sin(A) * dAdT / e;
       double eDDot = lengthAD.getDoubleValue() * lengthBA.getDoubleValue() / e * (cos(A) * dAdT * dAdT + sin(A) * (dAdT2 - eDot * dAdT / e));
-      double dCdT2 = FourbarCalculatorTools.getAngleDDotWithCosineLaw(lengthCB.getDoubleValue(), lengthDC.getDoubleValue(), 0.0, 0.0, e, eDot, eDDot);
-      double angleDDotDBA = FourbarCalculatorTools.getAngleDDotWithCosineLaw(lengthBA.getDoubleValue(), e, eDot, eDDot, lengthAD.getDoubleValue(), 0.0, 0.0);
-      double angleDDotDBC = FourbarCalculatorTools.getAngleDDotWithCosineLaw(lengthCB.getDoubleValue(), e, eDot, eDDot, lengthDC.getDoubleValue(), 0.0, 0.0);
+      double dCdT2 = FourbarCalculatorTools.angleDDotWithCosineLaw(lengthCB.getDoubleValue(), lengthDC.getDoubleValue(), 0.0, 0.0, e, eDot, eDDot);
+      double angleDDotDBA = FourbarCalculatorTools.angleDDotWithCosineLaw(lengthBA.getDoubleValue(), e, eDot, eDDot, lengthAD.getDoubleValue(), 0.0, 0.0);
+      double angleDDotDBC = FourbarCalculatorTools.angleDDotWithCosineLaw(lengthCB.getDoubleValue(), e, eDot, eDDot, lengthDC.getDoubleValue(), 0.0, 0.0);
       double dBdT2 = angleDDotDBA + angleDDotDBC;
       double dDdT2 = -dAdT2 - dBdT2 - dCdT2;
       this.angleDt2DAB = dAdT2;
