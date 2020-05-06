@@ -148,17 +148,7 @@ public abstract class AbstractBehavior implements RobotController
       createSubscriber(messageType, behaviorTopicName, consumer);
    }
 
-   public <T> void createBehaviorInputSubscriber(Class<T> messageType, String topicSuffix, ObjectConsumer<T> consumer)
-   {
-      createSubscriber(messageType, IHMCHumanoidBehaviorManager.getBehaviorInputRosTopicPrefix(robotName) + topicSuffix, consumer);
-   }
-
-   public <T> void createSubscriber(Class<T> messageType, ROS2TopicName topicNameGenerator, ObjectConsumer<T> consumer)
-   {
-      createSubscriber(messageType, topicNameGenerator.generateTopicName(messageType), consumer);
-   }
-
-   public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)
+   public <T> void createSubscriber(Class<T> messageType, ROS2TopicName topicName, ObjectConsumer<T> consumer)
    {
       ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
    }
