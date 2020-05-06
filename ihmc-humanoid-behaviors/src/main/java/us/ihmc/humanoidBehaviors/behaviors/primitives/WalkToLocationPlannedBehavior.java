@@ -76,7 +76,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
 
    private void createSubscribers()
    {
-      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, plannerResult::set);
+      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxTopicName, plannerResult::set);
 
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class,
                                     (packet) -> newGoalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(),
