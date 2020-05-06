@@ -5,9 +5,9 @@
  */
 package us.ihmc.robotics.kinematics.fourbar;
 
-public class FourbarCalculator
+public class OldFourbarCalculator
 {
-   private final FourbarProperties fourbar;
+   private final OldFourbarProperties fourbar;
    private final double L1;
    private final double L2;
    private final double L3;
@@ -17,7 +17,7 @@ public class FourbarCalculator
    private double ratioBasedOnCalculatedInputAngle;
    private double ratioBasedOnCalculatedOutputAngle;
 
-   public FourbarCalculator(FourbarProperties fourbar)
+   public OldFourbarCalculator(OldFourbarProperties fourbar)
    {
       this.fourbar = fourbar;
       L1 = this.fourbar.getGroundLink().getLength();

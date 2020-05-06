@@ -77,12 +77,12 @@ public class FourBarCalculatorsComparisonTest
       double outputFastRunnerCalculator = fastRunnerCalculator.getAngleABC();
 
       // (2) Other calculations
-      final FourbarLink outputLink = new FourbarLink(AD);
-      final FourbarLink groundLink = new FourbarLink(AB);
-      final FourbarLink inputLink = new FourbarLink(BC);
-      final FourbarLink floatingLink = new FourbarLink(CD);
+      final OldFourbarLink outputLink = new OldFourbarLink(AD);
+      final OldFourbarLink groundLink = new OldFourbarLink(AB);
+      final OldFourbarLink inputLink = new OldFourbarLink(BC);
+      final OldFourbarLink floatingLink = new OldFourbarLink(CD);
 
-      FourbarProperties fourBarProperties = new FourbarProperties()
+      OldFourbarProperties fourBarProperties = new OldFourbarProperties()
       {
          @Override
          public boolean isElbowDown()
@@ -103,31 +103,31 @@ public class FourBarCalculatorsComparisonTest
          }
 
          @Override
-         public FourbarLink getOutputLink()
+         public OldFourbarLink getOutputLink()
          {
             return outputLink;
          }
 
          @Override
-         public FourbarLink getInputLink()
+         public OldFourbarLink getInputLink()
          {
             return inputLink;
          }
 
          @Override
-         public FourbarLink getGroundLink()
+         public OldFourbarLink getGroundLink()
          {
             return groundLink;
          }
 
          @Override
-         public FourbarLink getFloatingLink()
+         public OldFourbarLink getFloatingLink()
          {
             return floatingLink;
          }
       };
 
-      FourbarCalculator otherCalculator = new FourbarCalculator(fourBarProperties);
+      OldFourbarCalculator otherCalculator = new OldFourbarCalculator(fourBarProperties);
       double outputOtherCalculator = otherCalculator.calculateInputAngleFromOutputAngle(Math.PI - knownAngle);
 
       // (3) Compare
