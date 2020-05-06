@@ -363,31 +363,6 @@ public class ROS2Tools
    }
 
    /**
-    * Creates a default topic name generator that uses {@value #IHMC_TOPIC_PREFIX} plus the name
-    * of the robot as prefix.
-    * <p>
-    * This generator is not great as the topic name does not include the name of the module, nor
-    * info about whether the topic is an input or output of the module declaring it.
-    * </p>
-    * <p>
-    * Here is a couple examples for this generator:
-    * <ul>
-    * <li>For {@code TextToSpeechPacket} when running Atlas this generates the topic name:
-    * {@code "/ihmc/atlas/text_to_speech"}.
-    * <li>For {@code ArmTrajectoryMessage} when running Valkyrie this generates the topic name:
-    * {@code "/ihmc/valkyrie/arm_trajectory"}.
-    * </ul>
-    * </p>
-    *
-    * @return the generator.
-    * @deprecated
-    */
-   public static ROS2MessageTopicNameGenerator getTopicNameGenerator(String robotName, String moduleName, ROS2TopicQualifier qualifier)
-   {
-      return messageType -> generateDefaultTopicName(messageType, robotName, moduleName, qualifier);
-   }
-
-   /**
     * Generates a default topic name using the class name of the message, for instance:<br>
     * For {@code TextToSpeechPacket} this generates the topic name: {@code "/ihmc/text_to_speech"}.
     *

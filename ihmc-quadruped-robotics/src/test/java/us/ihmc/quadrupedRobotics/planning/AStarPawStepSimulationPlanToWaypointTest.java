@@ -80,16 +80,18 @@ public abstract class AStarPawStepSimulationPlanToWaypointTest implements Quadru
       stepTeleopManager.setEndPhaseShift(180);
 
       ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), PawStepPlanningToolboxOutputStatus.class,
-                                           ROS2Tools.getTopicNameGenerator(stepTeleopManager.getRobotName(), ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME,
-                                                                           ROS2TopicQualifier.OUTPUT),
+                                           ROS2Tools.IHMC_ROOT.robot(stepTeleopManager.getRobotName())
+                                                              .module(ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME)
+                                                              .qualifier(ROS2TopicQualifier.OUTPUT),
                                            s -> {
          QuadrupedTimedStepListMessage stepMessage = s.takeNextData().getFootstepDataList();
          stepMessage.setAreStepsAdjustable(true);
          stepTeleopManager.publishTimedStepListToController(stepMessage);
                                            });
       ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedBodyOrientationMessage.class,
-                                           ROS2Tools.getTopicNameGenerator(stepTeleopManager.getRobotName(), ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME,
-                                                                           ROS2TopicQualifier.OUTPUT),
+                                           ROS2Tools.IHMC_ROOT.robot(stepTeleopManager.getRobotName())
+                                                              .module(ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME)
+                                                              .qualifier(ROS2TopicQualifier.OUTPUT),
                                            s -> stepTeleopManager.publishBodyOrientationMessage(s.takeNextData()));
 
       PawStepPlanningRequestPacket planningRequestPacket = new PawStepPlanningRequestPacket();

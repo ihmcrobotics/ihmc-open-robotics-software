@@ -37,8 +37,6 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
-
 public class QuadrupedUIMessageConverter
 {
    private static final boolean verbose = false;
@@ -176,7 +174,9 @@ public class QuadrupedUIMessageConverter
       /* publishers */
       ROS2MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
 
-      ROS2MessageTopicNameGenerator stepTeleopInputTopicGenerator = getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
+      ROS2MessageTopicNameGenerator stepTeleopInputTopicGenerator = ROS2Tools.IHMC_ROOT.robot(robotName)
+                                                                                       .module(ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME)
+                                                                                       .qualifier(ROS2TopicQualifier.INPUT);
 
       desiredHighLevelStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);
       desiredSteppingStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);

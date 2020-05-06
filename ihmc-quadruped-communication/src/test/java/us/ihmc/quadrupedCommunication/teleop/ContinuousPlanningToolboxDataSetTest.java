@@ -1,6 +1,5 @@
 package us.ihmc.quadrupedCommunication.teleop;
 
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.text.DecimalFormat;
@@ -228,18 +227,22 @@ public class ContinuousPlanningToolboxDataSetTest
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            QuadrupedTimedStepListMessage.class,
-                                           getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.OUTPUT),
+                                           ROS2Tools.IHMC_ROOT.robot(robotName)
+                                                              .module(ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME)
+                                                              .qualifier(ROS2TopicQualifier.OUTPUT),
                                            s -> processTimedStepListMessage(s.takeNextData()));
 
       requestPublisher = ROS2Tools.createPublisher(ros2Node,
                                                    QuadrupedContinuousPlanningRequestPacket.class,
-                                                   getTopicNameGenerator(robotName, ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT));
+                                                   ROS2Tools.IHMC_ROOT.robot(robotName)
+                                                                      .module(ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME)
+                                                                      .qualifier(ROS2TopicQualifier.INPUT));
       planarRegionsPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator);
       plannerParametersPublisher = ROS2Tools.createPublisher(ros2Node,
                                                              PawStepPlannerParametersPacket.class,
-                                                             getTopicNameGenerator(robotName,
-                                                                                   ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME,
-                                                                                   ROS2TopicQualifier.INPUT));
+                                                             ROS2Tools.IHMC_ROOT.robot(robotName)
+                                                                                .module(ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME)
+                                                                                .qualifier(ROS2TopicQualifier.INPUT));
 
       ROS2MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       footstepStatusPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator);

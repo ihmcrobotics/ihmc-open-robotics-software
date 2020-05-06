@@ -51,10 +51,16 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
  */
 public class REACommunicationProperties
 {
-   public static final ROS2MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
-   public static final ROS2MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE_NAME, ROS2TopicQualifier.INPUT);
-   public static final ROS2MessageTopicNameGenerator subscriberCustomRegionsTopicNameGenerator = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE_NAME
-                                                                                                                                       + "/custom_region", ROS2TopicQualifier.INPUT);
+   public static final ROS2MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.IHMC_ROOT.robot(null)
+                                                                                                      .module(ROS2Tools.REA_MODULE_NAME)
+                                                                                                      .qualifier(ROS2TopicQualifier.OUTPUT);
+   public static final ROS2MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.IHMC_ROOT.robot(null)
+                                                                                                       .module(ROS2Tools.REA_MODULE_NAME)
+                                                                                                       .qualifier(ROS2TopicQualifier.INPUT);
+   public static final ROS2MessageTopicNameGenerator subscriberCustomRegionsTopicNameGenerator = ROS2Tools.IHMC_ROOT.robot(null)
+                                                                                                                    .module(ROS2Tools.REA_MODULE_NAME
+                                                                                                                            + "/custom_region")
+                                                                                                                    .qualifier(ROS2TopicQualifier.INPUT);
 
    private static final NetClassList privateNetClassList = new NetClassList();
    static

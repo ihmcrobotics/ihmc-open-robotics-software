@@ -23,8 +23,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
-
 public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
 {
    private static final int updatePeriodMilliseconds = 10;
@@ -161,13 +159,13 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    @Override
    public ROS2MessageTopicNameGenerator getPublisherTopicNameGenerator()
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.IHMC_ROOT.robot(robotName).module(ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME).qualifier(ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
    public ROS2MessageTopicNameGenerator getSubscriberTopicNameGenerator()
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.IHMC_ROOT.robot(robotName).module(ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME).qualifier(ROS2TopicQualifier.INPUT);
    }
 
    @Override

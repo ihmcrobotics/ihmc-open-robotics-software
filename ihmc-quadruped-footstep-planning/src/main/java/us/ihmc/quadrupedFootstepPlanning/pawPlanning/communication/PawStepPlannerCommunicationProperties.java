@@ -11,8 +11,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
-
 public class PawStepPlannerCommunicationProperties
 {
    private static final List<Class<? extends Command<?, ?>>> toolboxSupportedCommands;
@@ -45,11 +43,11 @@ public class PawStepPlannerCommunicationProperties
 
    public static ROS2MessageTopicNameGenerator publisherTopicNameGenerator(String robotName)
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.IHMC_ROOT.robot(robotName).module(ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME).qualifier(ROS2TopicQualifier.OUTPUT);
    }
 
    public static ROS2MessageTopicNameGenerator subscriberTopicNameGenerator(String robotName)
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.IHMC_ROOT.robot(robotName).module(ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME).qualifier(ROS2TopicQualifier.INPUT);
    }
 }

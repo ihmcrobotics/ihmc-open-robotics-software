@@ -81,7 +81,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
 
    public static ROS2MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.WALKING_PREVIEW_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.IHMC_ROOT.robot(robotName).module(ROS2Tools.WALKING_PREVIEW_TOOLBOX_MODULE_NAME).qualifier(ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
@@ -92,7 +92,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
 
    public static ROS2MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.WALKING_PREVIEW_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.IHMC_ROOT.robot(robotName).module(ROS2Tools.WALKING_PREVIEW_TOOLBOX_MODULE_NAME).qualifier(ROS2TopicQualifier.INPUT);
    }
 
    public YoVariableRegistry getRegistry()
