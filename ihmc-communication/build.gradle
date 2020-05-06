@@ -24,7 +24,6 @@ mainDependencies {
    api("commons-net:commons-net:3.6")
 
    api("us.ihmc:euclid:0.13.1")
-   api("us.ihmc:ihmc-commons:0.28.2")
    api("us.ihmc:ihmc-ros2-library:0.16.1")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-interfaces:source")
@@ -33,7 +32,5 @@ mainDependencies {
 }
 
 testDependencies {
-
-   api("us.ihmc:ihmc-commons-testing:0.28.2")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }
