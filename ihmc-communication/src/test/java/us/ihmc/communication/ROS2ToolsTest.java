@@ -34,7 +34,7 @@ class ROS2ToolsTest
       ROS2MessageTopicNameGenerator defaultTopicNameGenerator = ROS2Tools.IHMC_ROOT;
       assertEquals("/ihmc/rea_state_request", defaultTopicNameGenerator.generateTopicName(REAStateRequestMessage.class));
 
-      ROS2MessageTopicNameGenerator defaultTopicNameGeneratorWithRobot = ROS2Tools.getDefaultTopicNameGenerator("atlas");
+      ROS2MessageTopicNameGenerator defaultTopicNameGeneratorWithRobot = ROS2Tools.IHMC_ROOT.robot("atlas");
       assertEquals("/ihmc/atlas/rea_state_request", defaultTopicNameGeneratorWithRobot.generateTopicName(REAStateRequestMessage.class));
 
       ROS2MessageTopicNameGenerator defaultTopicNameGenerator3 = ROS2Tools.getTopicNameGenerator("atlas", "rea", ROS2TopicQualifier.OUTPUT);
