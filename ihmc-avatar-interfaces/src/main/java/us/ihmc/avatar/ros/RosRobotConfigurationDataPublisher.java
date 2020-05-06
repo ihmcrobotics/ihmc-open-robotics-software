@@ -24,6 +24,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -70,7 +71,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
 
    private volatile boolean running = true;
 
-   public RosRobotConfigurationDataPublisher(FullRobotModelFactory sdfFullRobotModelFactory, Ros2Node ros2Node, String robotConfigurationTopicName,
+   public RosRobotConfigurationDataPublisher(FullRobotModelFactory sdfFullRobotModelFactory, Ros2Node ros2Node, ROS2TopicName robotConfigurationTopicName,
                                              final RosMainNode rosMainNode, RobotROSClockCalculator rosClockCalculator,
                                              AvatarRobotRosVisionSensorInformation sensorInformation, HumanoidForceSensorInformation forceSensorInformation,
                                              JointNameMap<?> jointMap, String rosNameSpace, RosTfPublisher tfPublisher)

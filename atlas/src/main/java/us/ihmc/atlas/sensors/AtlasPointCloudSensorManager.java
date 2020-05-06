@@ -29,7 +29,7 @@ public class AtlasPointCloudSensorManager
 
    private final RigidBodyTransform latestTrackingSensorPose = new RigidBodyTransform();
    
-   public AtlasPointCloudSensorManager(FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node, String rcdTopicName,
+   public AtlasPointCloudSensorManager(FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node, ROS2TopicName rcdTopicName,
                                        RobotROSClockCalculator rosClockCalculator, boolean useTrackingData)
    {
       ROS2TopicName depthCloudTopicNameGenerator = ROS2Tools.IHMC_ROOT.name(ROS2Tools.D435_NAME);

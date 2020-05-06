@@ -110,7 +110,7 @@ public class NetworkSubscriber
    {
       final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
-      String topicName = subscriberTopicNameGenerator.generateTopicName(multipleMessageType);
+      ROS2TopicName topicName = subscriberTopicNameGenerator.type(multipleMessageType);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, multipleMessageType, topicName,
                                            s -> unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, s.takeNextData()));
    }
@@ -159,7 +159,7 @@ public class NetworkSubscriber
 
       MessageCollection messageCollection = new MessageCollection();
 
-      String topicName = subscriberTopicNameGenerator.generateTopicName(MessageCollection.class);
+      ROS2TopicName topicName = subscriberTopicNameGenerator.type(MessageCollection.class);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, MessageCollection.class, topicName, s -> {
          s.takeNextData(messageCollection, null);
 
@@ -211,7 +211,7 @@ public class NetworkSubscriber
       { // Creating the subscribers
          Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
          T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
-         String topicName = subscriberTopicNameGenerator.generateTopicName(messageClass);
+         ROS2TopicName topicName = subscriberTopicNameGenerator.type(messageClass);
 
          ROS2Tools.createCallbackSubscription(realtimeRos2Node, messageClass, topicName, s -> {
             s.takeNextData(messageLocalInstance, null);
@@ -222,7 +222,7 @@ public class NetworkSubscriber
 
    private <T extends Settable<T>> IHMCRealtimeROS2Publisher<T> createPublisher(Class<T> messageClass, ROS2TopicName topicNameGenerator)
    {
-      String topicName = topicNameGenerator.generateTopicName(messageClass);
+      ROS2TopicName topicName = topicNameGenerator.type(messageClass);
       IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisher(realtimeRos2Node, messageClass, topicName);
       return publisher;
    }

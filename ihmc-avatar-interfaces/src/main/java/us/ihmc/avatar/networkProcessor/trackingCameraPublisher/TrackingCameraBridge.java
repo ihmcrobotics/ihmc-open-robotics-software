@@ -57,13 +57,13 @@ public class TrackingCameraBridge
    private final IHMCROS2Publisher<StampedPosePacket> stampedPosePacketPublisher;
    private final IHMCRealtimeROS2Publisher<StampedPosePacket> stampedPosePacketRealtimePublisher;
 
-   public TrackingCameraBridge(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
+   public TrackingCameraBridge(FullRobotModelFactory modelFactory, Ros2Node ros2Node, ROS2TopicName robotConfigurationDataTopicName)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
            ROS2Tools.IHMC_ROOT);
    }
 
-   public TrackingCameraBridge(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName,
+   public TrackingCameraBridge(FullRobotModelFactory modelFactory, Ros2Node ros2Node, ROS2TopicName robotConfigurationDataTopicName,
                                   ROS2TopicName defaultTopicNameGenerator)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
@@ -71,12 +71,12 @@ public class TrackingCameraBridge
    }
 
    public TrackingCameraBridge(String robotName, FullRobotModel fullRobotModel, Ros2Node ros2Node, RealtimeRos2Node realtimeRos2Node,
-                                  String robotConfigurationDataTopicName, ROS2TopicName defaultTopicNameGenerator)
+                               ROS2TopicName robotConfigurationDataTopicName, ROS2TopicName defaultTopicNameGenerator)
    {
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
-      String generateTopicName = defaultTopicNameGenerator.generateTopicName(messageTypeToPublish);
+      ROS2TopicName generateTopicName = defaultTopicNameGenerator.type(messageTypeToPublish);
       if (ros2Node != null)
       {
          ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,

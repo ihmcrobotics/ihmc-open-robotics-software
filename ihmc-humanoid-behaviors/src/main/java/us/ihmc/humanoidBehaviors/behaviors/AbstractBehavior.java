@@ -5,8 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.commons.FormattingTools;
@@ -17,7 +15,6 @@ import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.log.LogTools;
@@ -304,37 +301,6 @@ public abstract class AbstractBehavior implements RobotController
    public String getDescription()
    {
       return this.getClass().getCanonicalName();
-   }
-
-   public static class MessageTopicPair<T> extends Pair<Class<T>, String>
-   {
-      private static final long serialVersionUID = 7511864115932037512L;
-      private final Class<T> messageType;
-      private final String topicName;
-
-      public MessageTopicPair(Class<T> messageType, String topicName)
-      {
-         this.messageType = messageType;
-         this.topicName = topicName;
-      }
-
-      @Override
-      public Class<T> getLeft()
-      {
-         return messageType;
-      }
-
-      @Override
-      public String getRight()
-      {
-         return topicName;
-      }
-
-      @Override
-      public String setValue(String value)
-      {
-         throw new UnsupportedOperationException();
-      }
    }
 }
 
