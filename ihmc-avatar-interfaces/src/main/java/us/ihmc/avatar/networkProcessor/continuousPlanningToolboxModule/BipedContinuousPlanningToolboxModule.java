@@ -7,7 +7,7 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.packets.MessageTools;
@@ -52,12 +52,12 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
       // status messages from the controller
-      ROS2MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2TopicName controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepStatusMessage.class, controllerPubGenerator,
                                            s -> processFootstepStatusMessage(s.takeNextData()));
 
       // status messages from the planner
-      ROS2MessageTopicNameGenerator plannerPubGenerator = ROS2Tools.FOOTSTEP_PLANNER.robot(robotName)
+      ROS2TopicName plannerPubGenerator = ROS2Tools.FOOTSTEP_PLANNER.robot(robotName)
                                                                              .qualifier(ROS2TopicQualifier.OUTPUT);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningToolboxOutputStatus.class, plannerPubGenerator,
                                            s -> processFootstepPlannerOutput(s.takeNextData()));
@@ -68,7 +68,7 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
                                            s -> processPlanarRegionsListMessage(s.takeNextData()));
 
-      ROS2MessageTopicNameGenerator plannerSubGenerator = ROS2Tools.FOOTSTEP_PLANNER.robot(robotName)
+      ROS2TopicName plannerSubGenerator = ROS2Tools.FOOTSTEP_PLANNER.robot(robotName)
                                                                              .qualifier(ROS2TopicQualifier.INPUT);
       footstepPlanningRequestPublisher = ROS2Tools.createPublisher(realtimeRos2Node, FootstepPlanningRequestPacket.class, plannerSubGenerator);
       footstepPlanningToolboxStatePublisher = ROS2Tools.createPublisher(realtimeRos2Node, ToolboxStateMessage.class, plannerSubGenerator);
@@ -99,13 +99,13 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   public ROS2TopicName getPublisherTopicNameGenerator()
    {
       return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.robot(robotName).qualifier(ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
-   public ROS2MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   public ROS2TopicName getSubscriberTopicNameGenerator()
    {
       return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.robot(robotName).qualifier(ROS2TopicQualifier.INPUT);
    }

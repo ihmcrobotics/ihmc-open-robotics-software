@@ -16,7 +16,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -24,6 +23,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
@@ -64,14 +64,14 @@ public class TrackingCameraBridge
    }
 
    public TrackingCameraBridge(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName,
-                                  ROS2MessageTopicNameGenerator defaultTopicNameGenerator)
+                                  ROS2TopicName defaultTopicNameGenerator)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
            defaultTopicNameGenerator);
    }
 
    public TrackingCameraBridge(String robotName, FullRobotModel fullRobotModel, Ros2Node ros2Node, RealtimeRos2Node realtimeRos2Node,
-                                  String robotConfigurationDataTopicName, ROS2MessageTopicNameGenerator defaultTopicNameGenerator)
+                                  String robotConfigurationDataTopicName, ROS2TopicName defaultTopicNameGenerator)
    {
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;

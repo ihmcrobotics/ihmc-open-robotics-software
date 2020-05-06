@@ -161,7 +161,7 @@ public class RobotTimeBasedExecutorService
       AtomicDouble estimatedRealtimeRate = new AtomicDouble(1.0);
 
       // Create a thread that estimates the current realtime rate.
-      ROS2MessageTopicNameGenerator topicNameGenerator = createTopicNameGenerator(robotName);
+      ROS2TopicName topicNameGenerator = createTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, topicNameGenerator, new NewMessageListener<RobotConfigurationData>()
       {
          private final SampleInfo sampleInfo = new SampleInfo();

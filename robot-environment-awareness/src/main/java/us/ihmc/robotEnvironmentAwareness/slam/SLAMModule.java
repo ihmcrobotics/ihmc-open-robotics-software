@@ -13,7 +13,6 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -91,9 +90,7 @@ public class SLAMModule
 
       reaMessager.registerTopicListener(REAModuleAPI.SLAMClear, (content) -> clearSLAM());
 
-      ROS2MessageTopicNameGenerator publisherTopicNameGenerator;
-      publisherTopicNameGenerator = (Class<?> T) -> ROS2Tools.IHMC_ROOT.type(T).toString() + "_slam";
-      planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
+      planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP);
    }
 
    public void start() throws IOException
