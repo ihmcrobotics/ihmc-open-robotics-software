@@ -13,8 +13,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
-import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.tools.AtlasDirectRobotInterface;
@@ -57,7 +55,7 @@ public class DirectRobotUIController extends Group
          robotLowLevelMessenger = new AtlasDirectRobotInterface(ros2Node, robotModel);
 
          neckTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node, NeckTrajectoryMessage.class,
-                                                           ROS2Tools.HUMANOID_CONTROLLER.robot(robotName).suffix(ROS2TopicName.INPUT));
+                                                           ROS2Tools.HUMANOID_CONTROLLER.robot(robotName).suffix(ROS2Tools.INPUT));
          OneDoFJointBasics neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
          setupSlider(neckSlider, () ->
          {
@@ -87,7 +85,7 @@ public class DirectRobotUIController extends Group
       supportRegionsParametersPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                     BipedalSupportPlanarRegionParametersMessage.class,
                                                                     ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.robot(robotName)
-                                                                                       .qualifier(ROS2TopicQualifier.INPUT));
+                                                                                       .suffix(ROS2Tools.INPUT));
 
       pumpPSI.setItems(new ImmutableObservableList<>(1500, 2300, 2500, 2800));
       pumpPSI.valueProperty().addListener((ChangeListener) -> sendPumpPSI());
@@ -96,7 +94,7 @@ public class DirectRobotUIController extends Group
       livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, false);
       livePlanarRegionsGraphic.setEnabled(false);
       getChildren().add(livePlanarRegionsGraphic);
-      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.suffix(ROS2TopicName.INPUT));
+      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.suffix(ROS2Tools.INPUT));
 
       supportRegionScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, BipedalSupportPlanarRegionPublisher.defaultScaleFactor, 0.1));
       enableSupportRegions.setSelected(true);

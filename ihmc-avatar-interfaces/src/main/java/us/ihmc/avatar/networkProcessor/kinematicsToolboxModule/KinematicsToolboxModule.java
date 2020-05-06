@@ -12,7 +12,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2TopicName;
-import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -122,7 +121,7 @@ public class KinematicsToolboxModule extends ToolboxModule
 
    public static ROS2TopicName getPublisherTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.KINEMATICS_TOOLBOX.robot(robotName).qualifier(ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.KINEMATICS_TOOLBOX.robot(robotName).suffix(ROS2Tools.OUTPUT);
    }
 
    @Override
@@ -133,6 +132,6 @@ public class KinematicsToolboxModule extends ToolboxModule
 
    public static ROS2TopicName getSubscriberTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.KINEMATICS_TOOLBOX.robot(robotName).qualifier(ROS2TopicQualifier.INPUT);
+      return ROS2Tools.KINEMATICS_TOOLBOX.robot(robotName).suffix(ROS2Tools.INPUT);
    }
 }

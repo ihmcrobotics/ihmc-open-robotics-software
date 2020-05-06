@@ -19,7 +19,6 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -94,7 +93,7 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            BipedalSupportPlanarRegionParametersMessage.class,
                                            ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.robot(robotName)
-                                                              .qualifier(ROS2TopicQualifier.INPUT),
+                                                              .suffix(ROS2Tools.INPUT),
                                            s -> latestParametersMessage.set(s.takeNextData()));
 
       BipedalSupportPlanarRegionParametersMessage defaultParameters = new BipedalSupportPlanarRegionParametersMessage();

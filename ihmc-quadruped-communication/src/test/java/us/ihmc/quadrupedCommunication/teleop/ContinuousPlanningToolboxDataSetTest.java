@@ -35,7 +35,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2TopicName;
-import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -228,18 +227,18 @@ public class ContinuousPlanningToolboxDataSetTest
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            QuadrupedTimedStepListMessage.class,
                                            ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.robot(robotName)
-                                                              .qualifier(ROS2TopicQualifier.OUTPUT),
+                                                              .suffix(ROS2Tools.OUTPUT),
                                            s -> processTimedStepListMessage(s.takeNextData()));
 
       requestPublisher = ROS2Tools.createPublisher(ros2Node,
                                                    QuadrupedContinuousPlanningRequestPacket.class,
                                                    ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.robot(robotName)
-                                                                      .qualifier(ROS2TopicQualifier.INPUT));
+                                                                      .suffix(ROS2Tools.INPUT));
       planarRegionsPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator);
       plannerParametersPublisher = ROS2Tools.createPublisher(ros2Node,
                                                              PawStepPlannerParametersPacket.class,
                                                              ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.robot(robotName)
-                                                                                .qualifier(ROS2TopicQualifier.INPUT));
+                                                                                .suffix(ROS2Tools.INPUT));
 
       ROS2TopicName controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       footstepStatusPublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator);

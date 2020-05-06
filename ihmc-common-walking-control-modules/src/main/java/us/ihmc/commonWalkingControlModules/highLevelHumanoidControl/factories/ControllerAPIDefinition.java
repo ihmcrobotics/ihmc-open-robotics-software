@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetwork
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2TopicName;
-import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
@@ -91,12 +90,12 @@ public class ControllerAPIDefinition
 
    public static ROS2TopicName getSubscriberTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.HUMANOID_CONTROLLER.robot(robotName).qualifier(ROS2TopicQualifier.INPUT);
+      return ROS2Tools.HUMANOID_CONTROLLER.robot(robotName).suffix(ROS2Tools.INPUT);
    }
 
    public static ROS2TopicName getPublisherTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.HUMANOID_CONTROLLER.robot(robotName).qualifier(ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.HUMANOID_CONTROLLER.robot(robotName).suffix(ROS2Tools.OUTPUT);
    }
 
    public static MessageValidator createDefaultMessageValidation()

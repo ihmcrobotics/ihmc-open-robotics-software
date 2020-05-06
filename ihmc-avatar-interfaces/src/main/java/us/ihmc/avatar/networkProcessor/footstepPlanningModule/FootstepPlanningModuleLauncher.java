@@ -6,7 +6,6 @@ import us.ihmc.avatar.footstepPlanning.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2TopicName;
-import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -92,8 +91,8 @@ public class FootstepPlanningModuleLauncher
       FootstepPlanningModule footstepPlanningModule = createModule(robotModel);
       footstepPlanningModule.registerRosNode(ros2Node);
       String name = footstepPlanningModule.getName();
-      ROS2TopicName subscriberTopicNameGenerator = ROS2Tools.FOOTSTEP_PLANNER.robot(name).qualifier(ROS2TopicQualifier.INPUT);
-      ROS2TopicName publisherTopicNameGenerator = ROS2Tools.FOOTSTEP_PLANNER.robot(name).qualifier(ROS2TopicQualifier.OUTPUT);
+      ROS2TopicName subscriberTopicNameGenerator = ROS2Tools.FOOTSTEP_PLANNER.robot(name).suffix(ROS2Tools.INPUT);
+      ROS2TopicName publisherTopicNameGenerator = ROS2Tools.FOOTSTEP_PLANNER.robot(name).suffix(ROS2Tools.OUTPUT);
 
       AtomicBoolean generateLog = new AtomicBoolean();
 

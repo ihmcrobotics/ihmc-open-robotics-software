@@ -20,7 +20,6 @@ import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
-import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -98,17 +97,17 @@ public abstract class AbstractBehavior implements RobotController
 
       behaviorsServices = new ArrayList<>();
 
-      footstepPlannerInputTopicName = ROS2Tools.FOOTSTEP_PLANNER.robot(robotName).qualifier(ROS2TopicQualifier.INPUT);
-      footstepPlannerOutputTopicName = ROS2Tools.FOOTSTEP_PLANNER.robot(robotName).qualifier(ROS2TopicQualifier.OUTPUT);
-      kinematicsToolboxInputTopicName = ROS2Tools.KINEMATICS_TOOLBOX.robot(robotName).qualifier(ROS2TopicQualifier.INPUT);
-      kinematicsToolboxOutputTopicName = ROS2Tools.KINEMATICS_TOOLBOX.robot(robotName).qualifier(ROS2TopicQualifier.OUTPUT);
-      kinematicsPlanningToolboxInputTopicName = ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.robot(robotName).qualifier(ROS2TopicQualifier.INPUT);
-      kinematicsPlanningToolboxOutputTopicName = ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.robot(robotName).qualifier(ROS2TopicQualifier.OUTPUT);
+      footstepPlannerInputTopicName = ROS2Tools.FOOTSTEP_PLANNER.robot(robotName).suffix(ROS2Tools.INPUT);
+      footstepPlannerOutputTopicName = ROS2Tools.FOOTSTEP_PLANNER.robot(robotName).suffix(ROS2Tools.OUTPUT);
+      kinematicsToolboxInputTopicName = ROS2Tools.KINEMATICS_TOOLBOX.robot(robotName).suffix(ROS2Tools.INPUT);
+      kinematicsToolboxOutputTopicName = ROS2Tools.KINEMATICS_TOOLBOX.robot(robotName).suffix(ROS2Tools.OUTPUT);
+      kinematicsPlanningToolboxInputTopicName = ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.robot(robotName).suffix(ROS2Tools.INPUT);
+      kinematicsPlanningToolboxOutputTopicName = ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.robot(robotName).suffix(ROS2Tools.OUTPUT);
 
-      controllerInputTopicName = ROS2Tools.HUMANOID_CONTROLLER.robot(robotName).qualifier(ROS2TopicQualifier.INPUT);
-      controllerOutputTopicName = ROS2Tools.HUMANOID_CONTROLLER.robot(robotName).qualifier(ROS2TopicQualifier.OUTPUT);
-      behaviorInputTopicName = ROS2Tools.BEHAVIOR_MODULE.robot(robotName).qualifier(ROS2TopicQualifier.INPUT);
-      behaviorOutputTopicName = ROS2Tools.BEHAVIOR_MODULE.robot(robotName).qualifier(ROS2TopicQualifier.OUTPUT);
+      controllerInputTopicName = ROS2Tools.HUMANOID_CONTROLLER.robot(robotName).suffix(ROS2Tools.INPUT);
+      controllerOutputTopicName = ROS2Tools.HUMANOID_CONTROLLER.robot(robotName).suffix(ROS2Tools.OUTPUT);
+      behaviorInputTopicName = ROS2Tools.BEHAVIOR_MODULE.robot(robotName).suffix(ROS2Tools.INPUT);
+      behaviorOutputTopicName = ROS2Tools.BEHAVIOR_MODULE.robot(robotName).suffix(ROS2Tools.OUTPUT);
 
       textToSpeechPublisher = createPublisher(TextToSpeechPacket.class, ROS2Tools.IHMC_ROOT);
       uiPositionCheckerPacketpublisher = createBehaviorPublisher(UIPositionCheckerPacket.class);

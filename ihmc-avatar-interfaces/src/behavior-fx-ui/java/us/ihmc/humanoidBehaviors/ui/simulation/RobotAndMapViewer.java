@@ -22,7 +22,6 @@ import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2Node;
 
 import java.util.ArrayList;
@@ -49,7 +48,7 @@ public class RobotAndMapViewer
          view3dFactory.addWorldCoordinateSystem(0.3);
          view3dFactory.addDefaultLighting();
 
-         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REALSENSE_SLAM_MAP.suffix(ROS2TopicName.OUTPUT), false));
+         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REALSENSE_SLAM_MAP.suffix(ROS2Tools.OUTPUT), false));
 //         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REA, false));
          view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
