@@ -42,7 +42,8 @@ public class BenchmarkCompareFourBarCalculators
          double BC = sqrt(BF * BF + CF * CF);
          double BAD = DAE + BAE;
 
-         ConstantSideFourBarCalculatorWithDerivatives fastRunnerCalculator = new ConstantSideFourBarCalculatorWithDerivatives(AD, AB, BC, CD);
+         FourBarCalculator fastRunnerCalculator = new FourBarCalculator();
+         fastRunnerCalculator.setSideLengths(AD, AB, BC, CD);
          fastRunnerCalculator.updateAnglesGivenAngleDAB(BAD);
       }
       totalTimeFastRunnerCalculator = System.currentTimeMillis() - startTimeFastRunnerCalculator;
