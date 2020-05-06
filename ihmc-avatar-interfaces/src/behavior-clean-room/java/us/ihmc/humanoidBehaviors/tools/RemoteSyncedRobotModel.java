@@ -6,6 +6,7 @@ import us.ihmc.ros2.ROS2Input;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
@@ -31,7 +32,8 @@ public class RemoteSyncedRobotModel
 
       robotConfigurationDataInput = new ROS2Input<RobotConfigurationData>(ros2Node,
                                                                           RobotConfigurationData.class,
-                                                                          HUMANOID_CONTROLLER.robot(robotModel.getSimpleRobotName()).output(),
+                                                                          HUMANOID_CONTROLLER.robot(robotModel.getSimpleRobotName())
+                                                                                             .suffix(ROS2TopicName.OUTPUT),
                                                                           ROS2TopicNameTools.newMessageInstance(RobotConfigurationData.class),
                                                                           message ->
                                                                           {

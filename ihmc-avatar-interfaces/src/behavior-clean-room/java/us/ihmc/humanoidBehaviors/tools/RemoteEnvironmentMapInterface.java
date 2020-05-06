@@ -8,6 +8,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2NodeInterface;
 
 import java.util.ArrayList;
@@ -24,10 +25,10 @@ public class RemoteEnvironmentMapInterface
 
    public RemoteEnvironmentMapInterface(Ros2NodeInterface ros2Node)
    {
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.output(), this::acceptRealsenseSLAMRegions);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.suffix(ROS2TopicName.OUTPUT), this::acceptRealsenseSLAMRegions);
 
       // used to be "/ihmc/rea/custom_region/input/planar_regions_list"
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA_SUPPORT_REGIONS.output(), this::acceptAdditionalRegionList);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA_SUPPORT_REGIONS.suffix(ROS2TopicName.OUTPUT), this::acceptAdditionalRegionList);
    }
 
    public synchronized PlanarRegionsList getLatestCombinedRegionsList()

@@ -11,6 +11,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2Node;
 
 /**
@@ -33,9 +34,9 @@ public class PlanarRegionsMappingModule
    {
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.MAPPING_MODULE_NODE_NAME);
 
-      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.output());
+      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.suffix(ROS2TopicName.OUTPUT));
 
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.output(), this::process);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.suffix(ROS2TopicName.OUTPUT), this::process);
    }
 
    private void process(PlanarRegionsListMessage visibleRegionsMessage)
