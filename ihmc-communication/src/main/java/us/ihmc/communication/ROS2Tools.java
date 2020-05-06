@@ -41,7 +41,6 @@ public class ROS2Tools
    public static final String BIPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME = "/bipedal_support_region_publisher";
    public static final String BEHAVIOR_MODULE_NAME = "/behavior";
    public static final String REA_MODULE_NAME = "/rea";
-   public static final String STEREO_REA_MODULE_NAME = "/srea";
    public static final String MAPPING_MODULE_NAME = "/map";
    public static final String REALSENSE_SLAM_MODULE_NAME = "/slam";
 
@@ -65,7 +64,6 @@ public class ROS2Tools
    public static final ROS2TopicName BIPED_SUPPORT_REGION_PUBLISHER = IHMC_ROOT.module(BIPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME);
    public static final ROS2TopicName BEHAVIOR_MODULE = IHMC_ROOT.module(BEHAVIOR_MODULE_NAME);
    public static final ROS2TopicName REA = IHMC_ROOT.module(REA_MODULE_NAME);
-   public static final ROS2TopicName STEREO_REA = IHMC_ROOT.module(STEREO_REA_MODULE_NAME);
    public static final ROS2TopicName MAPPING_MODULE = IHMC_ROOT.module(MAPPING_MODULE_NAME);
    public static final ROS2TopicName REALSENSE_SLAM_MAP = IHMC_ROOT.module(REALSENSE_SLAM_MODULE_NAME);
 
