@@ -22,6 +22,7 @@ import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotModels.FullRobotModel;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotCameraParameters;
@@ -184,7 +185,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 
    private StereoVisionPointCloudPublisher createStereoPointCloudPublisher()
    {
-      String rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).generateTopicName(RobotConfigurationData.class);
+      ROS2TopicName rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).type(RobotConfigurationData.class);
 
       StereoVisionPointCloudPublisher publisher = new StereoVisionPointCloudPublisher(fullRobotModelFactory, ros2Node, rcdTopicName);
       publisher.setROSClockCalculator(rosClockCalculator);
@@ -196,7 +197,7 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    {
       AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(ValkyrieSensorInformation.MULTISENSE_LIDAR_ID);
       String sensorName = multisenseLidarParameters.getSensorNameInSdf();
-      String rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).generateTopicName(RobotConfigurationData.class);
+      ROS2TopicName rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).type(RobotConfigurationData.class);
 
       LidarScanPublisher publisher = new LidarScanPublisher(sensorName, fullRobotModelFactory, ros2Node, rcdTopicName);
       publisher.setROSClockCalculator(rosClockCalculator);

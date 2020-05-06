@@ -8,7 +8,6 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
-import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior.MessageTopicPair;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2Node;
@@ -17,7 +16,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 public abstract class BehaviorService
 {
    private final Ros2Node ros2Node;
-   private final Map<MessageTopicPair<?>, IHMCROS2Publisher<?>> publishers = new HashMap<>();
+   private final Map<ROS2TopicName, IHMCROS2Publisher<?>> publishers = new HashMap<>();
    private final YoVariableRegistry registry;
    protected final String robotName;
    private final ROS2TopicName controllerSubGenerator, controllerPubGenerator;
@@ -44,32 +43,32 @@ public abstract class BehaviorService
    
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
-      String topicName = controllerSubGenerator.generateTopicName(messageType);
+      ROS2TopicName topicName = controllerSubGenerator.type(messageType);
       return createPublisher(messageType, topicName);
    }
 
    public <T> IHMCROS2Publisher<T> createBehaviorOutputPublisher(Class<T> messageType, String topicName)
    {
-      return createPublisher(messageType, IHMCHumanoidBehaviorManager.getBehaviorOutputRosTopicPrefix(robotName) + topicName);
+      return createPublisher(messageType, IHMCHumanoidBehaviorManager.getBehaviorOutputRosTopicPrefix(robotName).name(topicName));
    }
 
    @SuppressWarnings("unchecked")
-   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, String topicName)
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2TopicName topicName)
    {
-      MessageTopicPair<T> key = new MessageTopicPair<>(messageType, topicName);
-      IHMCROS2Publisher<T> publisher = (IHMCROS2Publisher<T>) publishers.get(key);
+      IHMCROS2Publisher<T> publisher = (IHMCROS2Publisher<T>) publishers.get(topicName);
 
-      if (publisher != null)
-         return publisher;
+      if (publisher == null)
+      {
+         publisher = ROS2Tools.createPublisher(ros2Node, messageType, topicName);
+         publishers.put(topicName, publisher);
+      }
 
-      publisher = ROS2Tools.createPublisher(ros2Node, messageType, topicName);
-      publishers.put(key, publisher);
       return publisher;
    }
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      String topicName = controllerPubGenerator.generateTopicName(messageType);
+      ROS2TopicName topicName = controllerPubGenerator.type(messageType);
       createSubscriber(messageType, topicName, consumer);
    }
 

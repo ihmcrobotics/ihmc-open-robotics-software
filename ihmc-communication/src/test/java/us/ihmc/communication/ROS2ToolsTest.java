@@ -32,13 +32,13 @@ class ROS2ToolsTest
                    ROS2Tools.IHMC_ROOT.type(REAStateRequestMessage.class).robot("atlas").module("rea").qualifier(ROS2TopicQualifier.INPUT).toString());
 
       ROS2TopicName defaultTopicNameGenerator = ROS2Tools.IHMC_ROOT;
-      assertEquals("/ihmc/rea_state_request", defaultTopicNameGenerator.generateTopicName(REAStateRequestMessage.class));
+      assertEquals("/ihmc/rea_state_request", defaultTopicNameGenerator.type(REAStateRequestMessage.class));
 
       ROS2TopicName defaultTopicNameGeneratorWithRobot = ROS2Tools.IHMC_ROOT.robot("atlas");
-      assertEquals("/ihmc/atlas/rea_state_request", defaultTopicNameGeneratorWithRobot.generateTopicName(REAStateRequestMessage.class));
+      assertEquals("/ihmc/atlas/rea_state_request", defaultTopicNameGeneratorWithRobot.type(REAStateRequestMessage.class));
 
       ROS2TopicName defaultTopicNameGenerator3 = ROS2Tools.IHMC_ROOT.robot("atlas").module("rea").qualifier(ROS2TopicQualifier.OUTPUT);
-      assertEquals("/ihmc/atlas/rea/output/rea_state_request", defaultTopicNameGenerator3.generateTopicName(REAStateRequestMessage.class));
+      assertEquals("/ihmc/atlas/rea/output/rea_state_request", defaultTopicNameGenerator3.type(REAStateRequestMessage.class));
 
       assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", ROS2Tools.STEP_TELEOP_TOOLBOX.robot("atlas").qualifier(ROS2TopicQualifier.OUTPUT).toString());
    }

@@ -27,6 +27,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.partNames.JointNameMap;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotLidarParameters;
 import us.ihmc.sensorProcessing.parameters.AvatarRobotRosVisionSensorInformation;
@@ -54,13 +55,13 @@ public class RosModule implements CloseableAndDisposable
    {
       this(robotModel, robotModel.getROSClockCalculator(), robotModel.getSensorInformation(), robotModel.getSensorInformation(), robotModel.getJointMap(),
            rosCoreURI, simulatedSensorCommunicator,
-           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getRobotDescription().getName()).generateTopicName(RobotConfigurationData.class),
+           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getRobotDescription().getName()).type(RobotConfigurationData.class),
            pubSubImplementation);
    }
 
    public RosModule(FullRobotModelFactory robotModelFactory, RobotROSClockCalculator rosClockCalculator,
                     AvatarRobotRosVisionSensorInformation sensorInformation, HumanoidForceSensorInformation forceSensorInformation, JointNameMap<?> jointMap,
-                    URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator, String robotConfigurationDataTopicName,
+                    URI rosCoreURI, ObjectCommunicator simulatedSensorCommunicator, ROS2TopicName robotConfigurationDataTopicName,
                     PubSubImplementation pubSubImplementation)
    {
       LogTools.info("Starting ROS Module");
