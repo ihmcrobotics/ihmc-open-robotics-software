@@ -102,12 +102,22 @@ public abstract class AbstractBehavior implements RobotController
 
       behaviorsServices = new ArrayList<>();
 
-      footstepPlanningToolboxSubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.INPUT);
-      footstepPlanningToolboxPubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
-      kinematicsToolboxSubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
-      kinematicsToolboxPubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
-      kinematicsPlanningToolboxSubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
-      kinematicsPlanningToolboxPubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.OUTPUT);
+      footstepPlanningToolboxSubGenerator = ROS2Tools.IHMC_ROOT.robot(robotName)
+                                                               .module(ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME)
+                                                               .qualifier(ROS2TopicQualifier.INPUT);
+      footstepPlanningToolboxPubGenerator = ROS2Tools.IHMC_ROOT.robot(robotName)
+                                                               .module(ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME)
+                                                               .qualifier(ROS2TopicQualifier.OUTPUT);
+      kinematicsToolboxSubGenerator = ROS2Tools.IHMC_ROOT.robot(robotName).module(ROS2Tools.KINEMATICS_TOOLBOX_MODULE_NAME).qualifier(ROS2TopicQualifier.INPUT);
+      kinematicsToolboxPubGenerator = ROS2Tools.IHMC_ROOT.robot(robotName)
+                                                         .module(ROS2Tools.KINEMATICS_TOOLBOX_MODULE_NAME)
+                                                         .qualifier(ROS2TopicQualifier.OUTPUT);
+      kinematicsPlanningToolboxSubGenerator = ROS2Tools.IHMC_ROOT.robot(robotName)
+                                                                 .module(ROS2Tools.KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME)
+                                                                 .qualifier(ROS2TopicQualifier.INPUT);
+      kinematicsPlanningToolboxPubGenerator = ROS2Tools.IHMC_ROOT.robot(robotName)
+                                                                 .module(ROS2Tools.KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME)
+                                                                 .qualifier(ROS2TopicQualifier.OUTPUT);
 
       controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
       controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);

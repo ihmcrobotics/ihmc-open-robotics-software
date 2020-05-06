@@ -29,8 +29,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
-
 public class RemoteQuadrupedTeleopManager
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
@@ -85,9 +83,12 @@ public class RemoteQuadrupedTeleopManager
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotConfigurationData.set(s.takeNextData()));
 
       ROS2MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-      ROS2MessageTopicNameGenerator stepTeleopSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME, ROS2TopicQualifier.INPUT);
-      ROS2MessageTopicNameGenerator footstepPlannerSubGenerator = getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME,
-                                                                                        ROS2TopicQualifier.INPUT);
+      ROS2MessageTopicNameGenerator stepTeleopSubGenerator = ROS2Tools.IHMC_ROOT.robot(robotName)
+                                                                                .module(ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME)
+                                                                                .qualifier(ROS2TopicQualifier.INPUT);
+      ROS2MessageTopicNameGenerator footstepPlannerSubGenerator = ROS2Tools.IHMC_ROOT.robot(robotName)
+                                                                                     .module(ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME)
+                                                                                     .qualifier(ROS2TopicQualifier.INPUT);
 
       controllerStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);
       steppingStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);
