@@ -91,7 +91,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       //createBehaviorInputSubscriber(FootstepPlanningToolboxOutputStatus.class, plannerResult::set);
       
       
-      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, plannerResult::set);
+      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxTopicName, plannerResult::set);
 
       
       
@@ -113,8 +113,8 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
       footstepPublisher = createPublisherForController(FootstepDataListMessage.class);
       headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
-      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlanningToolboxSubGenerator);
-      planningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlanningToolboxSubGenerator);
+      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlanningToolboxTopicName);
+      planningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlanningToolboxTopicName);
       reaStateRequestPublisher = createPublisher(REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
 
       stateMachine = setupStateMachine(yoTime);
