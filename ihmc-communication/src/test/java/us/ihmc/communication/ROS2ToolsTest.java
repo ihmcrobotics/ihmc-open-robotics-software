@@ -39,6 +39,8 @@ class ROS2ToolsTest
 
       ROS2MessageTopicNameGenerator defaultTopicNameGenerator3 = ROS2Tools.IHMC_ROOT.robot("atlas").module("rea").qualifier(ROS2TopicQualifier.OUTPUT);
       assertEquals("/ihmc/atlas/rea/output/rea_state_request", defaultTopicNameGenerator3.generateTopicName(REAStateRequestMessage.class));
+
+      assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", ROS2Tools.STEP_TELEOP_TOOLBOX.robot("atlas").qualifier(ROS2TopicQualifier.OUTPUT).toString());
    }
 
    public void testROS2Communication()
