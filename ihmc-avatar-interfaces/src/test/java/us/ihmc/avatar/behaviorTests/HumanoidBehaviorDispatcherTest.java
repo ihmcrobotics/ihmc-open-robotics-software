@@ -190,11 +190,11 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
                                            });
 
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
-      ROS2Tools.createCallbackSubscription(ros2Node, BehaviorControlModePacket.class, IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscription(ros2Node, BehaviorControlModePacket.class, IHMCHumanoidBehaviorManager.getBehaviorTopicName(robotName),
                                            s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
 
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
-      ROS2Tools.createCallbackSubscription(ros2Node, HumanoidBehaviorTypePacket.class, IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscription(ros2Node, HumanoidBehaviorTypePacket.class, IHMCHumanoidBehaviorManager.getBehaviorTopicName(robotName),
                                            s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
 
       YoVariableServer yoVariableServer = null;
@@ -223,7 +223,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       HumanoidBehaviorTypePacket requestPelvisPoseBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.TEST);
       drcSimulationTestHelper.createPublisher(HumanoidBehaviorTypePacket.class,
-                                              IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(drcSimulationTestHelper.getRobotName()))
+                                              IHMCHumanoidBehaviorManager.getBehaviorTopicName(drcSimulationTestHelper.getRobotName()))
                              .publish(requestPelvisPoseBehaviorPacket);
       PrintTools.debug(this, "Requesting PelvisPoseBehavior");
 
@@ -268,7 +268,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
       drcSimulationTestHelper.createPublisher(HumanoidBehaviorTypePacket.class,
-                                              IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(drcSimulationTestHelper.getRobotName()))
+                                              IHMCHumanoidBehaviorManager.getBehaviorTopicName(drcSimulationTestHelper.getRobotName()))
                              .publish(requestWalkToObjectBehaviorPacket);
       PrintTools.debug(this, "Requesting WalkToLocationBehavior");
 
@@ -336,7 +336,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       HumanoidBehaviorTypePacket requestDiagnosticBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.DIAGNOSTIC);
       drcSimulationTestHelper.createPublisher(HumanoidBehaviorTypePacket.class,
-                                              IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(drcSimulationTestHelper.getRobotName()))
+                                              IHMCHumanoidBehaviorManager.getBehaviorTopicName(drcSimulationTestHelper.getRobotName()))
                              .publish(requestDiagnosticBehaviorPacket);
       PrintTools.debug(this, "Requesting DiagnosticBehavior");
 
@@ -379,7 +379,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
       drcSimulationTestHelper.createPublisher(HumanoidBehaviorTypePacket.class,
-                                              IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(drcSimulationTestHelper.getRobotName()))
+                                              IHMCHumanoidBehaviorManager.getBehaviorTopicName(drcSimulationTestHelper.getRobotName()))
                              .publish(requestWalkToObjectBehaviorPacket);
       PrintTools.debug(this, "Requesting WalkToLocationBehavior");
 
@@ -399,7 +399,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       BehaviorControlModePacket stopModePacket = HumanoidMessageTools.createBehaviorControlModePacket(BehaviorControlModeEnum.STOP);
       drcSimulationTestHelper.createPublisher(BehaviorControlModePacket.class,
-                                              IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(drcSimulationTestHelper.getRobotName()))
+                                              IHMCHumanoidBehaviorManager.getBehaviorTopicName(drcSimulationTestHelper.getRobotName()))
                              .publish(stopModePacket);
       PrintTools.debug(this, "Sending Stop Request");
 
@@ -430,7 +430,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       HumanoidBehaviorTypePacket requestWalkToObjectBehaviorPacket = HumanoidMessageTools.createHumanoidBehaviorTypePacket(HumanoidBehaviorType.WALK_TO_LOCATION);
       drcSimulationTestHelper.createPublisher(HumanoidBehaviorTypePacket.class,
-                                              IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(drcSimulationTestHelper.getRobotName()))
+                                              IHMCHumanoidBehaviorManager.getBehaviorTopicName(drcSimulationTestHelper.getRobotName()))
                              .publish(requestWalkToObjectBehaviorPacket);
       PrintTools.debug(this, "Requesting WalkToLocationBehavior");
 
@@ -450,7 +450,8 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       BehaviorControlModePacket pauseModePacket = HumanoidMessageTools.createBehaviorControlModePacket(BehaviorControlModeEnum.PAUSE);
       IHMCROS2Publisher<BehaviorControlModePacket> publisher = drcSimulationTestHelper.createPublisher(BehaviorControlModePacket.class,
-                                                                                                       IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(drcSimulationTestHelper.getRobotName()));
+                                                                                                       IHMCHumanoidBehaviorManager.getBehaviorTopicName(
+                                                                                                             drcSimulationTestHelper.getRobotName()));
       publisher.publish(pauseModePacket);
       PrintTools.debug(this, "Sending Pause Request");
 

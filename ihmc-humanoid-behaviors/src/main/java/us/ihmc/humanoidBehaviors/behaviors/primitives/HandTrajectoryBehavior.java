@@ -1,7 +1,5 @@
 package us.ihmc.humanoidBehaviors.behaviors.primitives;
 
-import java.util.concurrent.atomic.AtomicReference;
-
 import org.apache.commons.lang3.StringUtils;
 
 import controller_msgs.msg.dds.HandTrajectoryMessage;
@@ -64,11 +62,11 @@ public class HandTrajectoryBehavior extends AbstractBehavior
       hasStatusBeenReceived = new YoBoolean(behaviorNameFirstLowerCase + "HasStatusBeenReceived", registry);
       isDone = new YoBoolean(behaviorNameFirstLowerCase + "IsDone", registry);
 
-      createSubscriberFromController(JointspaceTrajectoryStatusMessage.class, jointSpaceTrajectoryStatus::put);
-      createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, taskSpaceTrajectoryStatus::put);
+      createControllerSubscriber(JointspaceTrajectoryStatusMessage.class, jointSpaceTrajectoryStatus::put);
+      createControllerSubscriber(TaskspaceTrajectoryStatusMessage.class, taskSpaceTrajectoryStatus::put);
 
-      handTrajectoryPublisher = createPublisherForController(HandTrajectoryMessage.class);
-      stopAllTrajectoryPublisher = createPublisherForController(StopAllTrajectoryMessage.class);
+      handTrajectoryPublisher = createControllerPublisher(HandTrajectoryMessage.class);
+      stopAllTrajectoryPublisher = createControllerPublisher(StopAllTrajectoryMessage.class);
    }
 
    public void setInput(HandTrajectoryMessage armTrajectoryMessage)

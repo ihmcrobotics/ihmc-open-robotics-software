@@ -43,7 +43,7 @@ public class TestICPOptimizationBehavior extends AbstractBehavior
 
       timer = new YoStopwatch(yoTime);
 
-      publisher = createPublisherForController(FootstepDataListMessage.class);
+      publisher = createControllerPublisher(FootstepDataListMessage.class);
    }
 
    @Override

@@ -67,7 +67,7 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
       toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, kinematicsPlanningToolboxTopicName);
       rigidBodyMessagePublisher = createPublisher(KinematicsPlanningToolboxRigidBodyMessage.class, kinematicsPlanningToolboxTopicName);
       comMessagePublisher = createPublisher(KinematicsPlanningToolboxCenterOfMassMessage.class, kinematicsPlanningToolboxTopicName);
-      wholeBodyTrajectoryPublisher = createPublisherForController(WholeBodyTrajectoryMessage.class);
+      wholeBodyTrajectoryPublisher = createControllerPublisher(WholeBodyTrajectoryMessage.class);
    }
 
    public void clear()
