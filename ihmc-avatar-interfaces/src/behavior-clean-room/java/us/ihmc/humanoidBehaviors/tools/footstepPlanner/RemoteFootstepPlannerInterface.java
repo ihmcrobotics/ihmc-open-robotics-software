@@ -22,6 +22,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.commons.thread.TypedNotification;
 
@@ -90,7 +91,7 @@ public class RemoteFootstepPlannerInterface
 
       new ROS2Callback<>(ros2Node,
                          FootstepPlanningToolboxOutputStatus.class,
-                         ROS2Tools.FOOTSTEP_PLANNER.robot(robotModel.getSimpleRobotName()).output(),
+                         ROS2Tools.FOOTSTEP_PLANNER.robot(robotModel.getSimpleRobotName()).suffix(ROS2TopicName.OUTPUT),
                          this::acceptFootstepPlannerResult);
    }
 

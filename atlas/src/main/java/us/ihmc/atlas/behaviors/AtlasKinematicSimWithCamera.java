@@ -19,6 +19,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.partNames.NeckJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -62,7 +63,8 @@ public class AtlasKinematicSimWithCamera
 
       ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
                                                                                  RobotConfigurationData.class,
-                                                                                 ROS2Tools.HUMANOID_CONTROLLER.robot(robotModel.getSimpleRobotName()).output());
+                                                                                 ROS2Tools.HUMANOID_CONTROLLER.robot(robotModel.getSimpleRobotName())
+                                                                                                              .suffix(ROS2TopicName.OUTPUT));
 
       String cameraName = "camera";
 
