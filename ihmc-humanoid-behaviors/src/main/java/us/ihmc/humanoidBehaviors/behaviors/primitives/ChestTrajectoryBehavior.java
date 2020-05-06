@@ -37,7 +37,7 @@ public class ChestTrajectoryBehavior extends AbstractBehavior
       trajectoryTime.set(Double.NaN);
       trajectoryTimeHasElapsed = new YoBoolean(behaviorNameFirstLowerCase + "TrajectoryTimeHasElapsed", registry);
 
-      publisher = createControllerPublisher(ChestTrajectoryMessage.class);
+      publisher = createPublisherForController(ChestTrajectoryMessage.class);
    }
 
    public void setInput(ChestTrajectoryMessage chestOrientationPacket)

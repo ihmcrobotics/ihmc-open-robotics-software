@@ -36,7 +36,7 @@ public class HeadTrajectoryBehavior extends AbstractBehavior
       trajectoryTime = new YoDouble(behaviorNameFirstLowerCase + "TrajectoryTime", registry);
       trajectoryTime.set(Double.NaN);
 
-      publisher = createControllerPublisher(HeadTrajectoryMessage.class);
+      publisher = createPublisherForController(HeadTrajectoryMessage.class);
    }
 
    public void setInput(HeadTrajectoryMessage headTrajectoryMessage)

@@ -98,19 +98,19 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       super(robotName, "followFiducial-"+id++, FollowFiducialState.class, yoTime, ros2Node);
       this.yoTime = yoTime;
       this.idealStanceWidth = wholeBodyControllerParameters.getWalkingControllerParameters().getSteppingParameters().getInPlaceWidth();
-      //createBehaviorSubscriber(FootstepPlanningToolboxOutputStatus.class, plannerResult::set);
+      //createBehaviorInputSubscriber(FootstepPlanningToolboxOutputStatus.class, plannerResult::set);
       this.fiducialDetectorBehaviorService = goalDetectorBehaviorService;
       addBehaviorService(fiducialDetectorBehaviorService);
 
       createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxTopicName, plannerResult::set);
 
-      createBehaviorSubscriber(WalkOverTerrainGoalPacket.class,
-                               (packet) -> finalGoalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(),
+      createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class,
+                                    (packet) -> finalGoalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(),
                                                                                   packet.getOrientation())));
       createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
 
-      createControllerSubscriber(FootstepStatusMessage.class, footstepStatusReference::set);
-      createControllerSubscriber(WalkingStatusMessage.class, packet -> {
+      createSubscriberFromController(FootstepStatusMessage.class, footstepStatusReference::set);
+      createSubscriberFromController(WalkingStatusMessage.class, packet -> {
          walkingStatus.set(packet);
          hasWalkedBetweenWaiting = true;
       });
@@ -124,8 +124,8 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       swingTime.set(defaultSwingTime);
       transferTime.set(defaultTransferTime);
 
-      footstepPublisher = createControllerPublisher(FootstepDataListMessage.class);
-      headTrajectoryPublisher = createControllerPublisher(HeadTrajectoryMessage.class);
+      footstepPublisher = createPublisherForController(FootstepDataListMessage.class);
+      headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
       toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlanningToolboxTopicName);
       planningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlanningToolboxTopicName);
       reaStateRequestPublisher = createPublisher(REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);

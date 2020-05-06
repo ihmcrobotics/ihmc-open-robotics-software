@@ -11,6 +11,7 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.FireFighterStanceBehavior;
@@ -218,7 +219,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                     footstepPlannerParameters);
       }
 
-      ROS2TopicName behaviorSubGenerator = getBehaviorTopicName(robotName);
+      ROS2TopicName behaviorSubGenerator = getSubscriberTopicNameGenerator(robotName);
       dispatcher.finalizeStateMachine();
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            BehaviorControlModePacket.class,
@@ -538,9 +539,29 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
       return ihmcHumanoidBehaviorManager;
    }
 
-   public static ROS2TopicName getBehaviorTopicName(String robotName)
+   public static String getBehaviorRosTopicPrefix(String robotName, ROS2TopicQualifier qualifier)
    {
-      return ROS2Tools.BEHAVIOR_MODULE.robot(robotName).setRemote(false);
+      return ROS2Tools.IHMC_TOPIC_PREFIX + "/" + robotName.toLowerCase() + ROS2Tools.BEHAVIOR_MODULE + qualifier.toString();
+   }
+
+   public static String getBehaviorOutputRosTopicPrefix(String robotName)
+   {
+      return getBehaviorRosTopicPrefix(robotName, ROS2TopicQualifier.OUTPUT);
+   }
+
+   public static String getBehaviorInputRosTopicPrefix(String robotName)
+   {
+      return getBehaviorRosTopicPrefix(robotName, ROS2TopicQualifier.INPUT);
+   }
+
+   public static ROS2TopicName getPublisherTopicNameGenerator(String robotName)
+   {
+      return ROS2Tools.BEHAVIOR_MODULE.robot(robotName).qualifier(ROS2TopicQualifier.OUTPUT);
+   }
+
+   public static ROS2TopicName getSubscriberTopicNameGenerator(String robotName)
+   {
+      return ROS2Tools.BEHAVIOR_MODULE.robot(robotName).qualifier(ROS2TopicQualifier.INPUT);
    }
 
    @Override

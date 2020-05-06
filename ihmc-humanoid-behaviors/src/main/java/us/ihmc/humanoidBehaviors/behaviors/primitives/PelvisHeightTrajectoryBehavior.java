@@ -28,7 +28,7 @@ public class PelvisHeightTrajectoryBehavior extends AbstractBehavior
       trajectoryTime.set(Double.NaN);
       this.yoTime = yoTime;
 
-      publisher = createControllerPublisher(PelvisHeightTrajectoryMessage.class);
+      publisher = createPublisherForController(PelvisHeightTrajectoryMessage.class);
    }
 
    public void setInput(PelvisHeightTrajectoryMessage pelvisHeightTrajectoryMessage)

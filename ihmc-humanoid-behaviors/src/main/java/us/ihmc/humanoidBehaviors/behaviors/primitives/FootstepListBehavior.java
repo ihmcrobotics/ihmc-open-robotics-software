@@ -55,10 +55,10 @@ public class FootstepListBehavior extends AbstractBehavior
       super(robotName, ros2Node);
       footstepStatusQueue = new ConcurrentListeningQueue<FootstepStatusMessage>(40);
       walkingStatusQueue = new ConcurrentListeningQueue<>(40);
-      createControllerSubscriber(FootstepStatusMessage.class, footstepStatusQueue::put);
-      createControllerSubscriber(WalkingStatusMessage.class, walkingStatusQueue::put);
-      footstepPublisher = createControllerPublisher(FootstepDataListMessage.class);
-      pauseWalkingPublisher = createControllerPublisher(PauseWalkingMessage.class);
+      createSubscriberFromController(FootstepStatusMessage.class, footstepStatusQueue::put);
+      createSubscriberFromController(WalkingStatusMessage.class, walkingStatusQueue::put);
+      footstepPublisher = createPublisherForController(FootstepDataListMessage.class);
+      pauseWalkingPublisher = createPublisherForController(PauseWalkingMessage.class);
       numberOfFootsteps.set(-1);
       defaultSwingTime = walkingControllerParameters.getDefaultSwingTime();
       defaultTranferTime = walkingControllerParameters.getDefaultTransferTime();

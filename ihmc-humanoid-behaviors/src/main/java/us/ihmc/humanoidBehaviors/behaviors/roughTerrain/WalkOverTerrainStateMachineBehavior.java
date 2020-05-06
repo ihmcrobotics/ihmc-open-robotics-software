@@ -88,15 +88,15 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       super(robotName, ros2Node);
       this.idealStanceWidth = wholeBodyControllerParameters.getWalkingControllerParameters().getSteppingParameters().getInPlaceWidth();
 
-      //createBehaviorSubscriber(FootstepPlanningToolboxOutputStatus.class, plannerResult::set);
+      //createBehaviorInputSubscriber(FootstepPlanningToolboxOutputStatus.class, plannerResult::set);
       
       
       createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxTopicName, plannerResult::set);
 
       
       
-      createBehaviorSubscriber(WalkOverTerrainGoalPacket.class,
-                               (packet) -> goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(), packet.getOrientation())));
+      createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class,
+                                    (packet) -> goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(), packet.getOrientation())));
       createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
       
       
@@ -111,8 +111,8 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       swingTime.set(defaultSwingTime);
       transferTime.set(defaultTransferTime);
 
-      footstepPublisher = createControllerPublisher(FootstepDataListMessage.class);
-      headTrajectoryPublisher = createControllerPublisher(HeadTrajectoryMessage.class);
+      footstepPublisher = createPublisherForController(FootstepDataListMessage.class);
+      headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
       toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlanningToolboxTopicName);
       planningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlanningToolboxTopicName);
       reaStateRequestPublisher = createPublisher(REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
@@ -324,8 +324,8 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
 
       PlanFromSingleSupportState()
       {
-         createControllerSubscriber(FootstepStatusMessage.class, footstepStatus::set);
-         createControllerSubscriber(WalkingStatusMessage.class, packet -> {
+         createSubscriberFromController(FootstepStatusMessage.class, footstepStatus::set);
+         createSubscriberFromController(WalkingStatusMessage.class, packet -> {
             walkingStatus.set(packet);
             waitState.hasWalkedBetweenWaiting.set(true);
          });

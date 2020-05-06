@@ -34,7 +34,7 @@ public class PelvisOrientationTrajectoryBehavior extends AbstractBehavior
       trajectoryTime.set(Double.NaN);
       trajectoryTimeElapsed = new YoBoolean(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
 
-      publisher = createControllerPublisher(PelvisOrientationTrajectoryMessage.class);
+      publisher = createPublisherForController(PelvisOrientationTrajectoryMessage.class);
    }
 
    public void setInput(PelvisOrientationTrajectoryMessage pelvisOrientationTrajectoryMessage)

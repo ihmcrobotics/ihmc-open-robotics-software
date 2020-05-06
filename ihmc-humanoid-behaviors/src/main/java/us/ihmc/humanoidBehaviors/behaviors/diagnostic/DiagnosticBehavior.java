@@ -423,10 +423,10 @@ public class DiagnosticBehavior extends AbstractBehavior
          currentHandOrientations.put(robotSide, currentHandOrientation);
       }
 
-      createControllerSubscriber(CapturabilityBasedStatus.class, inputListeningQueue::put);
+      createSubscriberFromController(CapturabilityBasedStatus.class, inputListeningQueue::put);
       new SleepBehavior(robotName, ros2Node, yoTime);
 
-      stampedPosePublisher = createControllerPublisher(StampedPosePacket.class);
+      stampedPosePublisher = createPublisherForController(StampedPosePacket.class);
    }
 
    private void setupArmsInverseKinematics(FullHumanoidRobotModel fullRobotModel)
