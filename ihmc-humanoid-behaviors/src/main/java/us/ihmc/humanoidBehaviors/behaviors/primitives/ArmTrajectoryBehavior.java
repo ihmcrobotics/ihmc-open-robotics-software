@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage;
 import controller_msgs.msg.dds.StopAllTrajectoryMessage;
+import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -62,10 +63,10 @@ public class ArmTrajectoryBehavior extends AbstractBehavior
       hasStatusBeenReceived = new YoBoolean(behaviorNameFirstLowerCase + "HasStatusBeenReceived", registry);
       isDone = new YoBoolean(behaviorNameFirstLowerCase + "IsDone", registry);
 
-      createControllerSubscriber(JointspaceTrajectoryStatusMessage.class, jointSpaceTrajectoryStatus::put);
+      createSubscriberFromController(JointspaceTrajectoryStatusMessage.class, jointSpaceTrajectoryStatus::put);
 
-      armTrajectoryPublisher = createControllerPublisher(ArmTrajectoryMessage.class);
-      stopAllTrajectoryPublisher = createControllerPublisher(StopAllTrajectoryMessage.class);
+      armTrajectoryPublisher = createPublisherForController(ArmTrajectoryMessage.class);
+      stopAllTrajectoryPublisher = createPublisherForController(StopAllTrajectoryMessage.class);
    }
 
    public void setInput(ArmTrajectoryMessage armTrajectoryMessage)

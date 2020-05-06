@@ -17,6 +17,7 @@ import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.log.LogTools;
@@ -113,7 +114,7 @@ public abstract class AbstractBehavior implements RobotController
       return null;
    }
 
-   public <T> IHMCROS2Publisher<T> createControllerPublisher(Class<T> messageType)
+   public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
       return createPublisher(messageType, controllerTopicName);
    }
@@ -137,17 +138,27 @@ public abstract class AbstractBehavior implements RobotController
       return publisher;
    }
 
-   public <T> void createControllerSubscriber(Class<T> messageType, ObjectConsumer<T> consumer)
+   public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
       createSubscriber(messageType, controllerTopicName, consumer);
    }
 
-   public <T> void createBehaviorSubscriber(Class<T> messageType, ObjectConsumer<T> consumer)
+   public <T> void createBehaviorInputSubscriber(Class<T> messageType, ObjectConsumer<T> consumer)
    {
       createSubscriber(messageType, behaviorTopicName, consumer);
    }
 
-   public <T> void createSubscriber(Class<T> messageType, ROS2TopicName topicName, ObjectConsumer<T> consumer)
+   public <T> void createBehaviorInputSubscriber(Class<T> messageType, String topicSuffix, ObjectConsumer<T> consumer)
+   {
+      createSubscriber(messageType, IHMCHumanoidBehaviorManager.getBehaviorInputRosTopicPrefix(robotName) + topicSuffix, consumer);
+   }
+
+   public <T> void createSubscriber(Class<T> messageType, ROS2TopicName topicNameGenerator, ObjectConsumer<T> consumer)
+   {
+      createSubscriber(messageType, topicNameGenerator.generateTopicName(messageType), consumer);
+   }
+
+   public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)
    {
       ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
    }

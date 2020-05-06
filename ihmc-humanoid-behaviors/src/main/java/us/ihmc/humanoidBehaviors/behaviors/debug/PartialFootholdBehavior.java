@@ -20,7 +20,7 @@ public class PartialFootholdBehavior extends AbstractBehavior
    public PartialFootholdBehavior(String robotName, Ros2Node ros2Node)
    {
       super(robotName, ros2Node);
-      publisher = createControllerPublisher(FootstepDataListMessage.class);
+      publisher = createPublisherForController(FootstepDataListMessage.class);
    }
 
    @Override

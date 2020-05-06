@@ -40,7 +40,7 @@ public class HandDesiredConfigurationBehavior extends AbstractBehavior
 
       trajectoryTimeElapsed = new YoBoolean(getName() + "TrajectoryTimeElapsed", registry);
 
-      publisher = createControllerPublisher(HandDesiredConfigurationMessage.class);
+      publisher = createPublisherForController(HandDesiredConfigurationMessage.class);
    }
 
    public void setInput(HandDesiredConfigurationMessage handDesiredConfigurationMessage)

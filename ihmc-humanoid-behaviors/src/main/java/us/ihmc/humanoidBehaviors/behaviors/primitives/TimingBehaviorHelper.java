@@ -48,8 +48,8 @@ public class TimingBehaviorHelper extends AbstractBehavior
       createSubscriber(ArmTrajectoryMessage.class, controllerTopicName, armTrajectoryMessage::set);
       createSubscriber(FootstepDataListMessage.class, controllerTopicName, footstepDataListMessage::set);
       createSubscriber(WalkingStatusMessage.class, controllerTopicName, walkingStatusMessage::set);
-      createBehaviorSubscriber(DoorLocationPacket.class, doorLocationMessage::set);
-      createBehaviorSubscriber(WalkOverTerrainGoalPacket.class, walkOverTerrainGoalMessage::set);
+      createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationMessage::set);
+      createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class, walkOverTerrainGoalMessage::set);
       dataBase = new SQLBehaviorDatabaseManager();
    }
 

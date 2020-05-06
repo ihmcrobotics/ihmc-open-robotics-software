@@ -15,7 +15,7 @@ public class HighLevelStateBehavior extends AbstractBehavior
    public HighLevelStateBehavior(String robotName, Ros2Node ros2Node)
    {
       super(robotName, ros2Node);
-      publisher = createControllerPublisher(HighLevelStateMessage.class);
+      publisher = createPublisherForController(HighLevelStateMessage.class);
    }
 
    public void setInput(HighLevelStateMessage highLevelStatePacket)

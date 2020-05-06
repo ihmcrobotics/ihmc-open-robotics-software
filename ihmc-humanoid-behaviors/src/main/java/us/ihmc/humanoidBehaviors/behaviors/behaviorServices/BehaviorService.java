@@ -7,6 +7,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectConsumer;
+import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior.MessageTopicPair;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.ros2.ROS2TopicName;
@@ -49,7 +50,7 @@ public abstract class BehaviorService
 
    public <T> IHMCROS2Publisher<T> createBehaviorOutputPublisher(Class<T> messageType, String topicName)
    {
-      return createPublisher(messageType, ROS2Tools.BEHAVIOR_MODULE.robot(robotName).setRemote(false) + topicName);
+      return createPublisher(messageType, IHMCHumanoidBehaviorManager.getBehaviorOutputRosTopicPrefix(robotName) + topicName);
    }
 
    @SuppressWarnings("unchecked")
