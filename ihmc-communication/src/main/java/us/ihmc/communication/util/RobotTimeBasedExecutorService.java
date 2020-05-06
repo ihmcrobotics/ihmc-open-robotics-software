@@ -11,14 +11,10 @@ import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
-import us.ihmc.ros2.ROS2TopicQualifier;
+import us.ihmc.ros2.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.common.SampleInfo;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.RealtimeRos2Node;
-import us.ihmc.ros2.Ros2Node;
 
 /**
  * When scheduling a task with a desired rate that interacts with a robot simulation it needs to consider the real time
@@ -68,7 +64,7 @@ public class RobotTimeBasedExecutorService
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, createTopicNameGenerator(robotName), robotConfigurationDataListener);
    }
 
-   private static ROS2MessageTopicNameGenerator createTopicNameGenerator(String robotName)
+   private static ROS2TopicName createTopicNameGenerator(String robotName)
    {
       return ROS2Tools.HUMANOID_CONTROLLER.robot(robotName).qualifier(ROS2TopicQualifier.OUTPUT);
    }

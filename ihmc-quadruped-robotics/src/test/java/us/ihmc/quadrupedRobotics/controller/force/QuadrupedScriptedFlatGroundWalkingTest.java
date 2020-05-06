@@ -30,6 +30,7 @@ import us.ihmc.quadrupedRobotics.QuadrupedTestGoals;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner;
 import us.ihmc.tools.MemoryTools;
@@ -259,7 +260,7 @@ public abstract class QuadrupedScriptedFlatGroundWalkingTest implements Quadrupe
       List<QuadrupedTimedStepMessage> steps = getSteps();
       int initialSize = steps.size();
 
-      ROS2MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(stepTeleopManager.getRobotName());
+      ROS2TopicName controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(stepTeleopManager.getRobotName());
       ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedFootstepStatusMessage.class, controllerPubGenerator,
                                            s ->
                                            {

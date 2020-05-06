@@ -11,6 +11,7 @@ import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior.MessageTopicPair;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -73,7 +74,7 @@ public abstract class BehaviorService
       createSubscriber(messageType, topicName, consumer);
    }
 
-   public <T> void createSubscriber(Class<T> messageType, ROS2MessageTopicNameGenerator topicNameGenerator, ObjectConsumer<T> consumer)
+   public <T> void createSubscriber(Class<T> messageType, ROS2TopicName topicNameGenerator, ObjectConsumer<T> consumer)
    {
       ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicNameGenerator, s -> consumer.consumeObject(s.takeNextData()));
    }
