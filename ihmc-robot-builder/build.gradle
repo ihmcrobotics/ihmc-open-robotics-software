@@ -15,11 +15,11 @@ ihmc {
 mainDependencies {
    api("io.javaslang:javaslang:2.0.3")
 
-   api("us.ihmc:euclid:0.13.1")
-   api("us.ihmc:ihmc-javafx-toolkit:0.15.0")
-   api("us.ihmc:ihmc-robot-description:0.15.0")
-   api("us.ihmc:ihmc-graphics-description:0.15.0")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.15.0")
+   api("us.ihmc:euclid:0.14.1")
+   api("us.ihmc:ihmc-javafx-toolkit:0.16.0")
+   api("us.ihmc:ihmc-robot-description:0.16.0")
+   api("us.ihmc:ihmc-graphics-description:0.16.0")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.16.0")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
