@@ -13,7 +13,7 @@ import us.ihmc.util.PeriodicThreadSchedulerFactory;
 
 public class ROS2Tools
 {
-   public static final String IHMC_TOPIC_PREFIX = "/ihmc";
+   public static final String IHMC_TOPIC_PREFIX = "ihmc";
 
    public static final String HUMANOID_CONTROLLER_NODE_NAME = "ihmc_controller";
    public static final String HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME = "kinematics_ihmc_controller";
@@ -24,27 +24,27 @@ public class ROS2Tools
    public static final String FOOTSTEP_PLANNER_NODE_NAME = "ihmc_multi_stage_footstep_planning_module";
    public static final String BEHAVIOR_MODULE_NODE_NAME = "behavior_module";
 
-   public static final String HUMANOID_CONTROL_MODULE_NAME = "/humanoid_control";
-   public static final String QUADRUPED_CONTROL_MODULE_NAME = "/quadruped_control";
-   public static final String FOOTSTEP_PLANNER_MODULE_NAME = "/toolbox/footstep_plan";
-   public static final String CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME = "/toolbox/continuous_planning";
-   public static final String FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME = "/toolbox/footstep_postprocessing";
-   public static final String HEIGHT_QUADTREE_TOOLBOX_MODULE_NAME = "/toolbox/height_quad_tree";
-   public static final String KINEMATICS_TOOLBOX_MODULE_NAME = "/toolbox/ik";
-   public static final String KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME = "/toolbox/ik_planning";
-   public static final String KINEMATICS_STREAMING_TOOLBOX_MODULE_NAME = "/toolbox/ik_streaming";
-   public static final String WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE_NAME = "/toolbox/ik_trajectory";
-   public static final String WALKING_PREVIEW_TOOLBOX_MODULE_NAME = "/toolbox/walking_controller_preview";
-   public static final String EXTERNAL_FORCE_ESTIMATION_TOOLBOX_MODULE_NAME = "/toolbox/external_force_estimation";
-   public static final String STEP_TELEOP_TOOLBOX_MODULE_NAME = "/toolbox/teleop/step_teleop";
-   public static final String QUADRUPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME = "/quadruped_support_region_publisher";
-   public static final String BIPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME = "/bipedal_support_region_publisher";
-   public static final String BEHAVIOR_MODULE_NAME = "/behavior";
-   public static final String REA_MODULE_NAME = "/rea";
-   public static final String MAPPING_MODULE_NAME = "/map";
-   public static final String REALSENSE_SLAM_MODULE_NAME = "/slam";
+   public static final String HUMANOID_CONTROL_MODULE_NAME = "humanoid_control";
+   public static final String QUADRUPED_CONTROL_MODULE_NAME = "quadruped_control";
+   public static final String FOOTSTEP_PLANNER_MODULE_NAME = "toolbox/footstep_plan";
+   public static final String CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME = "toolbox/continuous_planning";
+   public static final String FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME = "toolbox/footstep_postprocessing";
+   public static final String HEIGHT_QUADTREE_TOOLBOX_MODULE_NAME = "toolbox/height_quad_tree";
+   public static final String KINEMATICS_TOOLBOX_MODULE_NAME = "toolbox/ik";
+   public static final String KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME = "toolbox/ik_planning";
+   public static final String KINEMATICS_STREAMING_TOOLBOX_MODULE_NAME = "toolbox/ik_streaming";
+   public static final String WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE_NAME = "toolbox/ik_trajectory";
+   public static final String WALKING_PREVIEW_TOOLBOX_MODULE_NAME = "toolbox/walking_controller_preview";
+   public static final String EXTERNAL_FORCE_ESTIMATION_TOOLBOX_MODULE_NAME = "toolbox/external_force_estimation";
+   public static final String STEP_TELEOP_TOOLBOX_MODULE_NAME = "toolbox/teleop/step_teleop";
+   public static final String QUADRUPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME = "quadruped_support_region_publisher";
+   public static final String BIPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME = "bipedal_support_region_publisher";
+   public static final String BEHAVIOR_MODULE_NAME = "behavior";
+   public static final String REA_MODULE_NAME = "rea";
+   public static final String MAPPING_MODULE_NAME = "map";
+   public static final String REALSENSE_SLAM_MODULE_NAME = "slam";
 
-   public static final String REA_CUSTOM_REGION_NAME = "/custom_region";
+   public static final String REA_CUSTOM_REGION_NAME = "custom_region";
 
    public static final ROS2TopicName IHMC_ROOT = new ROS2TopicName().prefix(IHMC_TOPIC_PREFIX);
    public static final ROS2TopicName HUMANOID_CONTROLLER = IHMC_ROOT.module(HUMANOID_CONTROL_MODULE_NAME);
