@@ -8,7 +8,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
@@ -19,6 +18,7 @@ import us.ihmc.quadrupedRobotics.*;
 import us.ihmc.quadrupedRobotics.simulation.QuadrupedGroundContactModelType;
 import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.robotics.testing.YoVariableTestGoal;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOrientedTestConductor;
 import us.ihmc.tools.MemoryTools;
 
@@ -64,7 +64,7 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
       variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
-      ROS2MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(quadrupedTestFactory.getRobotName());
+      ROS2TopicName controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(quadrupedTestFactory.getRobotName());
       soleTrajectoryPublisher = ROS2Tools.createPublisher(stepTeleopManager.getRos2Node(), SoleTrajectoryMessage.class, controllerSubGenerator);
 
       QuadrupedTestBehaviors.standUp(conductor, variables);
@@ -99,7 +99,7 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
       variables = new QuadrupedTestYoVariables(conductor.getScs());
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
-      ROS2MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(quadrupedTestFactory.getRobotName());
+      ROS2TopicName controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(quadrupedTestFactory.getRobotName());
       soleTrajectoryPublisher = ROS2Tools.createPublisher(stepTeleopManager.getRos2Node(), SoleTrajectoryMessage.class, controllerSubGenerator);
 
       QuadrupedTestBehaviors.standUp(conductor, variables);

@@ -15,7 +15,6 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.ros2.Ros2Node;
 
 public class DetectedObjectViewer

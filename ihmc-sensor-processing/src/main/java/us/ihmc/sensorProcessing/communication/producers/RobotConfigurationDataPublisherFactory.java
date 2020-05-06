@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -16,6 +15,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.imu.IMUSensor;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -45,7 +45,7 @@ public class RobotConfigurationDataPublisherFactory
    private final OptionalFactoryField<RobotMotionStatusHolder> robotMotionStatusHolderField = new OptionalFactoryField<>("robotMotionStatusHolder");
 
    private final RequiredFactoryField<RealtimeRos2Node> realtimeRos2NodeField = new RequiredFactoryField<>("realtimeRos2Node");
-   private final RequiredFactoryField<ROS2MessageTopicNameGenerator> publisherTopicNameGeneratorField = new RequiredFactoryField<>("publisherTopicNameGenerator");
+   private final RequiredFactoryField<ROS2TopicName> publisherTopicNameGeneratorField = new RequiredFactoryField<>("publisherTopicNameGenerator");
 
    public RobotConfigurationDataPublisherFactory()
    {
@@ -177,7 +177,7 @@ public class RobotConfigurationDataPublisherFactory
     * @param ros2Node                    the real-time node to create the publisher with.
     * @param publisherTopicNameGenerator the generator to use for creating the topic name.
     */
-   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2MessageTopicNameGenerator publisherTopicNameGenerator)
+   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2TopicName publisherTopicNameGenerator)
    {
       realtimeRos2NodeField.set(ros2Node);
       publisherTopicNameGeneratorField.set(publisherTopicNameGenerator);

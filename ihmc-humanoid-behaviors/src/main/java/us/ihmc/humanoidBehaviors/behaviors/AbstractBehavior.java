@@ -13,7 +13,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.Co
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
@@ -72,12 +72,12 @@ public abstract class AbstractBehavior implements RobotController
 
    protected final String robotName;
 
-   protected final ROS2MessageTopicNameGenerator controllerSubGenerator, controllerPubGenerator;
-   protected final ROS2MessageTopicNameGenerator behaviorSubGenerator, behaviorPubGenerator;
+   protected final ROS2TopicName controllerSubGenerator, controllerPubGenerator;
+   protected final ROS2TopicName behaviorSubGenerator, behaviorPubGenerator;
 
-   protected final ROS2MessageTopicNameGenerator footstepPlanningToolboxSubGenerator, footstepPlanningToolboxPubGenerator;
-   protected final ROS2MessageTopicNameGenerator kinematicsToolboxSubGenerator, kinematicsToolboxPubGenerator;
-   protected final ROS2MessageTopicNameGenerator kinematicsPlanningToolboxSubGenerator, kinematicsPlanningToolboxPubGenerator;
+   protected final ROS2TopicName footstepPlanningToolboxSubGenerator, footstepPlanningToolboxPubGenerator;
+   protected final ROS2TopicName kinematicsToolboxSubGenerator, kinematicsToolboxPubGenerator;
+   protected final ROS2TopicName kinematicsPlanningToolboxSubGenerator, kinematicsPlanningToolboxPubGenerator;
 
    private static int behaviorUniqID = 0;
    
@@ -145,7 +145,7 @@ public abstract class AbstractBehavior implements RobotController
       return createPublisher(messageType, behaviorSubGenerator);
    }
 
-   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2MessageTopicNameGenerator topicNameGenerator)
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2TopicName topicNameGenerator)
    {
       return createPublisher(messageType, topicNameGenerator.generateTopicName(messageType));
    }
@@ -179,7 +179,7 @@ public abstract class AbstractBehavior implements RobotController
       createSubscriber(messageType, IHMCHumanoidBehaviorManager.getBehaviorInputRosTopicPrefix(robotName) + topicSuffix, consumer);
    }
 
-   public <T> void createSubscriber(Class<T> messageType, ROS2MessageTopicNameGenerator topicNameGenerator, ObjectConsumer<T> consumer)
+   public <T> void createSubscriber(Class<T> messageType, ROS2TopicName topicNameGenerator, ObjectConsumer<T> consumer)
    {
       createSubscriber(messageType, topicNameGenerator.generateTopicName(messageType), consumer);
    }

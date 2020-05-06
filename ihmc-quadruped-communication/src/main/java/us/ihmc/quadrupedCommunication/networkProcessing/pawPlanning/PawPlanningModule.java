@@ -2,7 +2,7 @@ package us.ihmc.quadrupedCommunication.networkProcessing.pawPlanning;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
@@ -65,7 +65,7 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
    {
       // status messages from the controller
-      ROS2MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2TopicName controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
                                            s -> processRobotTimestamp(s.takeNextData().getMonotonicTime()));
 //      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> footstepPlanningController.setPaused(true));
@@ -143,9 +143,9 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public Map<Class<? extends Settable<?>>, ROS2MessageTopicNameGenerator> createMapOfSupportedOutputMessages()
+   public Map<Class<? extends Settable<?>>, ROS2TopicName> createMapOfSupportedOutputMessages()
    {
-      Map<Class<? extends Settable<?>>, ROS2MessageTopicNameGenerator> messages = new HashMap<>();
+      Map<Class<? extends Settable<?>>, ROS2TopicName> messages = new HashMap<>();
 
       messages.put(PawStepPlanningToolboxOutputStatus.class, getPublisherTopicNameGenerator());
       messages.put(QuadrupedBodyOrientationMessage.class, getPublisherTopicNameGenerator());
@@ -157,13 +157,13 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public ROS2MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   public ROS2TopicName getPublisherTopicNameGenerator()
    {
       return ROS2Tools.FOOTSTEP_PLANNER.robot(robotName).qualifier(ROS2TopicQualifier.OUTPUT);
    }
 
    @Override
-   public ROS2MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   public ROS2TopicName getSubscriberTopicNameGenerator()
    {
       return ROS2Tools.FOOTSTEP_PLANNER.robot(robotName).qualifier(ROS2TopicQualifier.INPUT);
    }

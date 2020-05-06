@@ -11,7 +11,7 @@ import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.ros2.ROS2Callback;
-import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.ROS2TopicQualifier;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
@@ -31,13 +31,13 @@ class ROS2ToolsTest
       assertEquals("/ihmc/atlas/rea/input/rea_state_request",
                    ROS2Tools.IHMC_ROOT.type(REAStateRequestMessage.class).robot("atlas").module("rea").qualifier(ROS2TopicQualifier.INPUT).toString());
 
-      ROS2MessageTopicNameGenerator defaultTopicNameGenerator = ROS2Tools.IHMC_ROOT;
+      ROS2TopicName defaultTopicNameGenerator = ROS2Tools.IHMC_ROOT;
       assertEquals("/ihmc/rea_state_request", defaultTopicNameGenerator.generateTopicName(REAStateRequestMessage.class));
 
-      ROS2MessageTopicNameGenerator defaultTopicNameGeneratorWithRobot = ROS2Tools.IHMC_ROOT.robot("atlas");
+      ROS2TopicName defaultTopicNameGeneratorWithRobot = ROS2Tools.IHMC_ROOT.robot("atlas");
       assertEquals("/ihmc/atlas/rea_state_request", defaultTopicNameGeneratorWithRobot.generateTopicName(REAStateRequestMessage.class));
 
-      ROS2MessageTopicNameGenerator defaultTopicNameGenerator3 = ROS2Tools.IHMC_ROOT.robot("atlas").module("rea").qualifier(ROS2TopicQualifier.OUTPUT);
+      ROS2TopicName defaultTopicNameGenerator3 = ROS2Tools.IHMC_ROOT.robot("atlas").module("rea").qualifier(ROS2TopicQualifier.OUTPUT);
       assertEquals("/ihmc/atlas/rea/output/rea_state_request", defaultTopicNameGenerator3.generateTopicName(REAStateRequestMessage.class));
 
       assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", ROS2Tools.STEP_TELEOP_TOOLBOX.robot("atlas").qualifier(ROS2TopicQualifier.OUTPUT).toString());

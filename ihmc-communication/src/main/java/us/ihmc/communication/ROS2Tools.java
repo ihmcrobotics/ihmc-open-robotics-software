@@ -45,6 +45,8 @@ public class ROS2Tools
    public static final String REALSENSE_SLAM_MODULE_NAME = "slam";
 
    public static final String REA_CUSTOM_REGION_NAME = "custom_region";
+   public static final String D435_NAME = "d435";
+   public static final String T265_NAME = "t265";
 
    public static final ROS2TopicName IHMC_ROOT = new ROS2TopicName().prefix(IHMC_TOPIC_PREFIX);
    public static final ROS2TopicName HUMANOID_CONTROLLER = IHMC_ROOT.module(HUMANOID_CONTROL_MODULE_NAME);
@@ -203,15 +205,6 @@ public class ROS2Tools
       }
    }
 
-   @Deprecated
-   public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2NodeInterface ros2Node,
-                                                                        Class<T> messageType,
-                                                                        ROS2MessageTopicNameGenerator topicNameGenerator)
-   {
-      String topicName = topicNameGenerator.generateTopicName(messageType);
-      return createQueuedSubscription(ros2Node, messageType, topicName, RUNTIME_EXCEPTION);
-   }
-
    public static <T> Ros2QueuedSubscription<T> createQueuedSubscription(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2TopicName topicName)
    {
       String fixedUpTopicName = topicName.setInputOrOutputForSubscriber().type(messageType).toString();
@@ -240,16 +233,6 @@ public class ROS2Tools
          exceptionHandler.handleException(e);
          return null;
       }
-   }
-
-   @Deprecated
-   public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node,
-                                                     Class<T> messageType,
-                                                     ROS2MessageTopicNameGenerator topicNameGenerator,
-                                                     NewMessageListener<T> newMessageListener)
-   {
-      String topicName = topicNameGenerator.generateTopicName(messageType);
-      createCallbackSubscription(realtimeRos2Node, messageType, topicName, newMessageListener);
    }
 
    public static <T> void createCallbackSubscription(RealtimeRos2Node realtimeRos2Node,
@@ -286,15 +269,6 @@ public class ROS2Tools
       }
    }
 
-   @Deprecated
-   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node,
-                                                                          Class<T> messageType,
-                                                                          ROS2MessageTopicNameGenerator topicNameGenerator)
-   {
-      String topicName = topicNameGenerator.generateTopicName(messageType);
-      return createQueuedSubscription(realtimeRos2Node, messageType, topicName, RUNTIME_EXCEPTION);
-   }
-
    public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node,
                                                                           Class<T> messageType,
                                                                           ROS2TopicName topicName)
@@ -325,15 +299,6 @@ public class ROS2Tools
       }
    }
 
-   @Deprecated
-   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node,
-                                                                  Class<T> messageType,
-                                                                  ROS2MessageTopicNameGenerator topicNameGenerator)
-   {
-      String topicName = topicNameGenerator.generateTopicName(messageType);
-      return createPublisher(realtimeRos2Node, messageType, topicName);
-   }
-
    public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node,
                                                                   Class<T> messageType,
                                                                   ROS2TopicName topicName)
@@ -362,13 +327,6 @@ public class ROS2Tools
          exceptionHandler.handleException(e);
          return null;
       }
-   }
-
-   @Deprecated
-   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2MessageTopicNameGenerator topicNameGenerator)
-   {
-      String topicName = topicNameGenerator.generateTopicName(messageType);
-      return createPublisher(ros2Node, messageType, topicName);
    }
 
    public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2TopicName topicName)

@@ -13,7 +13,6 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2MessageTopicNameGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandJointName;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
@@ -22,6 +21,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotiq.model.RobotiqHandModel;
 import us.ihmc.robotiq.model.RobotiqHandModel.RobotiqHandJointNameMinimal;
+import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -59,7 +59,7 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
    private final MirroredYoVariableRegistry registry;
 
    public SimulatedRobotiqHandsController(FloatingRootJointRobot simulatedRobot, DRCRobotModel robotModel, RealtimeRos2Node realtimeRos2Node,
-                                          ROS2MessageTopicNameGenerator pubTopicNameGenerator, ROS2MessageTopicNameGenerator subTopicNameGenerator)
+                                          ROS2TopicName pubTopicNameGenerator, ROS2TopicName subTopicNameGenerator)
    {
       super((int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
 
