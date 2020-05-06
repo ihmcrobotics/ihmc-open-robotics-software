@@ -70,7 +70,7 @@ public class FourBarCalculatorsComparisonTest
    {
       // (1) Fast runner calculations
       FourBarCalculator fastRunnerCalculator = new FourBarCalculator();
-      fastRunnerCalculator.setSideLengths(AD, AB, BC, CD);
+      fastRunnerCalculator.setSideLengths(AB, BC, CD, AD);
       fastRunnerCalculator.updateAnglesGivenAngleDAB(knownAngle);
       double outputFastRunnerCalculator = fastRunnerCalculator.getAngleABC();
 
