@@ -129,7 +129,7 @@ public class NavigationBehavior implements BehaviorInterface
       {
          mapRegionsInput.getMessageNotification().blockingPoll();
       }
-      while (mapRegionsInput.getMessageNotification().peek().getSequenceId() <= latestMapSequenceId);
+      while (mapRegionsInput.getMessageNotification().read().getSequenceId() <= latestMapSequenceId);
       latestMapSequenceId = mapRegionsInput.getLatest().getSequenceId();
       //      ThreadTools.sleep(100); // try to get a little more perception data TODO wait for a SLAM update
 

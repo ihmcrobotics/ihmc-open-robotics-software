@@ -7,24 +7,32 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC walking controller preview module: WalkingControllerPreviewToolbox.
-       */
+   
+ * This message is part of the IHMC walking controller preview module: WalkingControllerPreviewToolbox.
+   
+ */
 public class WalkingControllerPreviewOutputMessage extends Packet<WalkingControllerPreviewOutputMessage> implements Settable<WalkingControllerPreviewOutputMessage>, EpsilonComparable<WalkingControllerPreviewOutputMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Interval in time between two frames.
-            */
+       
+    * Interval in time between two frames.
+       
+    */
    public double frame_dt_;
 
    /**
-            * List of configurations for each key frames.
-            */
+       
+    * List of configurations for each key frames.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus>  robot_configurations_;
 
    public WalkingControllerPreviewOutputMessage()
@@ -56,15 +64,19 @@ public class WalkingControllerPreviewOutputMessage extends Packet<WalkingControl
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -72,15 +84,19 @@ public class WalkingControllerPreviewOutputMessage extends Packet<WalkingControl
 
 
    /**
-            * Interval in time between two frames.
-            */
+       
+    * Interval in time between two frames.
+       
+    */
    public void setFrameDt(double frame_dt)
    {
       frame_dt_ = frame_dt;
    }
    /**
-            * Interval in time between two frames.
-            */
+       
+    * Interval in time between two frames.
+       
+    */
    public double getFrameDt()
    {
       return frame_dt_;
@@ -89,8 +105,10 @@ public class WalkingControllerPreviewOutputMessage extends Packet<WalkingControl
 
 
    /**
-            * List of configurations for each key frames.
-            */
+       
+    * List of configurations for each key frames.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.KinematicsToolboxOutputStatus>  getRobotConfigurations()
    {
       return robot_configurations_;

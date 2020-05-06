@@ -88,7 +88,7 @@ public class UpDownFlatAreaFinder
                                                                      boolean requireHeightChange)
    {
       TypedNotification<Optional<FramePose3D>> typedNotification = new TypedNotification<>();
-      scheduler.scheduleOnce(() -> typedNotification.add(upOrDown(midFeetZUpFrame, planarRegionsList, requireHeightChange)));
+      scheduler.scheduleOnce(() -> typedNotification.set(upOrDown(midFeetZUpFrame, planarRegionsList, requireHeightChange)));
       return typedNotification;
    }
 

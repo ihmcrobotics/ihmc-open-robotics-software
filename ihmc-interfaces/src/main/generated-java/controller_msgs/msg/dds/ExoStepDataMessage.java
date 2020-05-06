@@ -7,9 +7,12 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message specifies the position, orientation and side (left or right) of a desired footstep in world frame.
+   
+ */
 public class ExoStepDataMessage extends Packet<ExoStepDataMessage> implements Settable<ExoStepDataMessage>, EpsilonComparable<ExoStepDataMessage>
 {
 
@@ -18,47 +21,67 @@ public class ExoStepDataMessage extends Packet<ExoStepDataMessage> implements Se
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Specifies which foot will swing to reach the footstep.
-            */
+       
+    * Specifies which foot will swing to reach the footstep.
+       
+    */
    public byte robot_side_ = (byte) 255;
 
    /**
-            * Specifies the length of the footstep.
-            */
+       
+    * Specifies the length of the footstep.
+       
+    */
    public double step_length_;
 
    /**
-            * Specifies the height of the footstep.
-            */
+       
+    * Specifies the height of the footstep.
+       
+    */
    public double step_height_;
 
    /**
-            * Specifies the ending pitch of the footstep.
-            */
+       
+    * Specifies the ending pitch of the footstep.
+       
+    */
    public double step_pitch_;
 
    /**
-            * Contains information on how high the robot should swing its foot.
-            * This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
-            * If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
-            */
+       
+    * Contains information on how high the robot should swing its foot.
+       
+    * This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
+       
+    * If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
+       
+    */
    public double swing_height_ = -1.0;
 
    /**
-            * The swingDuration is the time a foot is not in ground contact during a step.
-            * If the value of this field is invalid (not positive) it will be replaced by a default swing_duration.
-            */
+       
+    * The swingDuration is the time a foot is not in ground contact during a step.
+       
+    * If the value of this field is invalid (not positive) it will be replaced by a default swing_duration.
+       
+    */
    public double swing_duration_ = -1.0;
 
    /**
-            * The transferDuration is the time spent with the feet in ground contact before a step.
-            * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
-            */
+       
+    * The transferDuration is the time spent with the feet in ground contact before a step.
+       
+    * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
+       
+    */
    public double transfer_duration_ = -1.0;
 
    public ExoStepDataMessage()
@@ -110,15 +133,19 @@ public class ExoStepDataMessage extends Packet<ExoStepDataMessage> implements Se
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -126,15 +153,19 @@ public class ExoStepDataMessage extends Packet<ExoStepDataMessage> implements Se
 
 
    /**
-            * Specifies which foot will swing to reach the footstep.
-            */
+       
+    * Specifies which foot will swing to reach the footstep.
+       
+    */
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
    }
    /**
-            * Specifies which foot will swing to reach the footstep.
-            */
+       
+    * Specifies which foot will swing to reach the footstep.
+       
+    */
    public byte getRobotSide()
    {
       return robot_side_;
@@ -142,15 +173,19 @@ public class ExoStepDataMessage extends Packet<ExoStepDataMessage> implements Se
 
 
    /**
-            * Specifies the length of the footstep.
-            */
+       
+    * Specifies the length of the footstep.
+       
+    */
    public void setStepLength(double step_length)
    {
       step_length_ = step_length;
    }
    /**
-            * Specifies the length of the footstep.
-            */
+       
+    * Specifies the length of the footstep.
+       
+    */
    public double getStepLength()
    {
       return step_length_;
@@ -158,15 +193,19 @@ public class ExoStepDataMessage extends Packet<ExoStepDataMessage> implements Se
 
 
    /**
-            * Specifies the height of the footstep.
-            */
+       
+    * Specifies the height of the footstep.
+       
+    */
    public void setStepHeight(double step_height)
    {
       step_height_ = step_height;
    }
    /**
-            * Specifies the height of the footstep.
-            */
+       
+    * Specifies the height of the footstep.
+       
+    */
    public double getStepHeight()
    {
       return step_height_;
@@ -174,15 +213,19 @@ public class ExoStepDataMessage extends Packet<ExoStepDataMessage> implements Se
 
 
    /**
-            * Specifies the ending pitch of the footstep.
-            */
+       
+    * Specifies the ending pitch of the footstep.
+       
+    */
    public void setStepPitch(double step_pitch)
    {
       step_pitch_ = step_pitch;
    }
    /**
-            * Specifies the ending pitch of the footstep.
-            */
+       
+    * Specifies the ending pitch of the footstep.
+       
+    */
    public double getStepPitch()
    {
       return step_pitch_;
@@ -190,19 +233,27 @@ public class ExoStepDataMessage extends Packet<ExoStepDataMessage> implements Se
 
 
    /**
-            * Contains information on how high the robot should swing its foot.
-            * This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
-            * If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
-            */
+       
+    * Contains information on how high the robot should swing its foot.
+       
+    * This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
+       
+    * If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
+       
+    */
    public void setSwingHeight(double swing_height)
    {
       swing_height_ = swing_height;
    }
    /**
-            * Contains information on how high the robot should swing its foot.
-            * This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
-            * If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
-            */
+       
+    * Contains information on how high the robot should swing its foot.
+       
+    * This affects trajectory types TRAJECTORY_TYPE_DEFAULT and TRAJECTORY_TYPE_OBSTACLE_CLEARANCE.
+       
+    * If a value smaller then the minimal swing height is chosen (e.g. 0.0) the swing height will be changed to a default value.
+       
+    */
    public double getSwingHeight()
    {
       return swing_height_;
@@ -210,17 +261,23 @@ public class ExoStepDataMessage extends Packet<ExoStepDataMessage> implements Se
 
 
    /**
-            * The swingDuration is the time a foot is not in ground contact during a step.
-            * If the value of this field is invalid (not positive) it will be replaced by a default swing_duration.
-            */
+       
+    * The swingDuration is the time a foot is not in ground contact during a step.
+       
+    * If the value of this field is invalid (not positive) it will be replaced by a default swing_duration.
+       
+    */
    public void setSwingDuration(double swing_duration)
    {
       swing_duration_ = swing_duration;
    }
    /**
-            * The swingDuration is the time a foot is not in ground contact during a step.
-            * If the value of this field is invalid (not positive) it will be replaced by a default swing_duration.
-            */
+       
+    * The swingDuration is the time a foot is not in ground contact during a step.
+       
+    * If the value of this field is invalid (not positive) it will be replaced by a default swing_duration.
+       
+    */
    public double getSwingDuration()
    {
       return swing_duration_;
@@ -228,17 +285,23 @@ public class ExoStepDataMessage extends Packet<ExoStepDataMessage> implements Se
 
 
    /**
-            * The transferDuration is the time spent with the feet in ground contact before a step.
-            * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
-            */
+       
+    * The transferDuration is the time spent with the feet in ground contact before a step.
+       
+    * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
+       
+    */
    public void setTransferDuration(double transfer_duration)
    {
       transfer_duration_ = transfer_duration;
    }
    /**
-            * The transferDuration is the time spent with the feet in ground contact before a step.
-            * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
-            */
+       
+    * The transferDuration is the time spent with the feet in ground contact before a step.
+       
+    * If the value of this field is invalid (not positive) it will be replaced by a default transfer_duration.
+       
+    */
    public double getTransferDuration()
    {
       return transfer_duration_;

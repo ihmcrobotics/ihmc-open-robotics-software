@@ -7,42 +7,59 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This class is used to build a wrench (force & moment) profile over time.
-       * A linear interpolation is used to interpolate between trajectory points.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This class is used to build a wrench (force & moment) profile over time.
+   
+ * A linear interpolation is used to interpolate between trajectory points.
+   
+ */
 public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> implements Settable<WrenchTrajectoryMessage>, EpsilonComparable<WrenchTrajectoryMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * List of trajectory points (in taskpsace) to go through while executing the trajectory.
-            */
+       
+    * List of trajectory points (in taskpsace) to go through while executing the trajectory.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.WrenchTrajectoryPointMessage>  wrench_trajectory_points_;
 
    /**
-            * Frame information for this message.
-            */
+       
+    * Frame information for this message.
+       
+    */
    public controller_msgs.msg.dds.FrameInformation frame_information_;
 
    /**
-            * Flag that tells the controller whether the use of a custom control frame is requested.
-            */
+       
+    * Flag that tells the controller whether the use of a custom control frame is requested.
+       
+    */
    public boolean use_custom_control_frame_;
 
    /**
-            * Pose of custom control frame expressed in the end-effector frame.
-            * This is the frame attached to the rigid body that the wrench trajectory is defined for.
-            */
+       
+    * Pose of custom control frame expressed in the end-effector frame.
+       
+    * This is the frame attached to the rigid body that the wrench trajectory is defined for.
+       
+    */
    public us.ihmc.euclid.geometry.Pose3D control_frame_pose_;
 
    /**
-            * Properties for queueing trajectories.
-            */
+       
+    * Properties for queueing trajectories.
+       
+    */
    public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
 
    public WrenchTrajectoryMessage()
@@ -86,15 +103,19 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -103,8 +124,10 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
 
 
    /**
-            * List of trajectory points (in taskpsace) to go through while executing the trajectory.
-            */
+       
+    * List of trajectory points (in taskpsace) to go through while executing the trajectory.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.WrenchTrajectoryPointMessage>  getWrenchTrajectoryPoints()
    {
       return wrench_trajectory_points_;
@@ -113,8 +136,10 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
 
 
    /**
-            * Frame information for this message.
-            */
+       
+    * Frame information for this message.
+       
+    */
    public controller_msgs.msg.dds.FrameInformation getFrameInformation()
    {
       return frame_information_;
@@ -122,15 +147,19 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
 
 
    /**
-            * Flag that tells the controller whether the use of a custom control frame is requested.
-            */
+       
+    * Flag that tells the controller whether the use of a custom control frame is requested.
+       
+    */
    public void setUseCustomControlFrame(boolean use_custom_control_frame)
    {
       use_custom_control_frame_ = use_custom_control_frame;
    }
    /**
-            * Flag that tells the controller whether the use of a custom control frame is requested.
-            */
+       
+    * Flag that tells the controller whether the use of a custom control frame is requested.
+       
+    */
    public boolean getUseCustomControlFrame()
    {
       return use_custom_control_frame_;
@@ -139,9 +168,12 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
 
 
    /**
-            * Pose of custom control frame expressed in the end-effector frame.
-            * This is the frame attached to the rigid body that the wrench trajectory is defined for.
-            */
+       
+    * Pose of custom control frame expressed in the end-effector frame.
+       
+    * This is the frame attached to the rigid body that the wrench trajectory is defined for.
+       
+    */
    public us.ihmc.euclid.geometry.Pose3D getControlFramePose()
    {
       return control_frame_pose_;
@@ -150,8 +182,10 @@ public class WrenchTrajectoryMessage extends Packet<WrenchTrajectoryMessage> imp
 
 
    /**
-            * Properties for queueing trajectories.
-            */
+       
+    * Properties for queueing trajectories.
+       
+    */
    public controller_msgs.msg.dds.QueueableMessage getQueueingProperties()
    {
       return queueing_properties_;

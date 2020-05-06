@@ -7,21 +7,29 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message pauses the execution of a list of footsteps.
-       * If this message is in the middle of executing a footstep, the robot will finish the step and pause when back in double support.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message pauses the execution of a list of footsteps.
+   
+ * If this message is in the middle of executing a footstep, the robot will finish the step and pause when back in double support.
+   
+ */
 public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements Settable<PauseWalkingMessage>, EpsilonComparable<PauseWalkingMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * True to pause walking, false to unpause and resume an existing footstep plan.
-            */
+       
+    * True to pause walking, false to unpause and resume an existing footstep plan.
+       
+    */
    public boolean pause_;
 
    public PauseWalkingMessage()
@@ -49,15 +57,19 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -65,15 +77,19 @@ public class PauseWalkingMessage extends Packet<PauseWalkingMessage> implements 
 
 
    /**
-            * True to pause walking, false to unpause and resume an existing footstep plan.
-            */
+       
+    * True to pause walking, false to unpause and resume an existing footstep plan.
+       
+    */
    public void setPause(boolean pause)
    {
       pause_ = pause;
    }
    /**
-            * True to pause walking, false to unpause and resume an existing footstep plan.
-            */
+       
+    * True to pause walking, false to unpause and resume an existing footstep plan.
+       
+    */
    public boolean getPause()
    {
       return pause_;

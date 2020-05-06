@@ -7,8 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Atlas specific message.
-       */
+   
+ * Atlas specific message.
+   
+ */
 public class BDIBehaviorStatusPacket extends Packet<BDIBehaviorStatusPacket> implements Settable<BDIBehaviorStatusPacket>, EpsilonComparable<BDIBehaviorStatusPacket>
 {
 
@@ -33,8 +35,10 @@ public class BDIBehaviorStatusPacket extends Packet<BDIBehaviorStatusPacket> imp
    public static final byte SOFT_STOP = (byte) 9;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public byte current_bdi_robot_behavior_ = (byte) 255;
@@ -64,15 +68,19 @@ public class BDIBehaviorStatusPacket extends Packet<BDIBehaviorStatusPacket> imp
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

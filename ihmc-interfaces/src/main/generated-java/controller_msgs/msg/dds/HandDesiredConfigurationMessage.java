@@ -7,10 +7,14 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message is old will be refreshed in a future release.
-       * Message for commanding the hands to perform various predefined grasps.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message is old will be refreshed in a future release.
+   
+ * Message for commanding the hands to perform various predefined grasps.
+   
+ */
 public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigurationMessage> implements Settable<HandDesiredConfigurationMessage>, EpsilonComparable<HandDesiredConfigurationMessage>
 {
 
@@ -81,18 +85,24 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
    public static final byte HAND_CONFIGURATION_SLOW_CLOSE = (byte) 30;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Specifies the side of the robot that will execute the trajectory
-            */
+       
+    * Specifies the side of the robot that will execute the trajectory
+       
+    */
    public byte robot_side_ = (byte) 255;
 
    /**
-            * Specifies the grasp to perform
-            */
+       
+    * Specifies the grasp to perform
+       
+    */
    public byte desired_hand_configuration_ = (byte) 255;
 
    public HandDesiredConfigurationMessage()
@@ -124,15 +134,19 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -140,15 +154,19 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
 
 
    /**
-            * Specifies the side of the robot that will execute the trajectory
-            */
+       
+    * Specifies the side of the robot that will execute the trajectory
+       
+    */
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
    }
    /**
-            * Specifies the side of the robot that will execute the trajectory
-            */
+       
+    * Specifies the side of the robot that will execute the trajectory
+       
+    */
    public byte getRobotSide()
    {
       return robot_side_;
@@ -156,15 +174,19 @@ public class HandDesiredConfigurationMessage extends Packet<HandDesiredConfigura
 
 
    /**
-            * Specifies the grasp to perform
-            */
+       
+    * Specifies the grasp to perform
+       
+    */
    public void setDesiredHandConfiguration(byte desired_hand_configuration)
    {
       desired_hand_configuration_ = desired_hand_configuration;
    }
    /**
-            * Specifies the grasp to perform
-            */
+       
+    * Specifies the grasp to perform
+       
+    */
    public byte getDesiredHandConfiguration()
    {
       return desired_hand_configuration_;

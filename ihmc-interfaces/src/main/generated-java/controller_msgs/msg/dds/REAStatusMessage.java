@@ -7,36 +7,50 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC robot environment awareness module (REA).
-       * It is destined to gather complementary information related to the current state REA is in.
-       */
+   
+ * This message is part of the IHMC robot environment awareness module (REA).
+   
+ * It is destined to gather complementary information related to the current state REA is in.
+   
+ */
 public class REAStatusMessage extends Packet<REAStatusMessage> implements Settable<REAStatusMessage>, EpsilonComparable<REAStatusMessage>
 {
 
    /**
-            * Informs if REA is currently collecting sensor data and estimating planar regions.
-            * Note that if both, is_using_lidar and is_using_stereo_vision are false, REA is running but not collecting data.
-            */
+       
+    * Informs if REA is currently collecting sensor data and estimating planar regions.
+       
+    * Note that if both, is_using_lidar and is_using_stereo_vision are false, REA is running but not collecting data.
+       
+    */
    public boolean is_running_;
 
    /**
-            * Informs whether REA is collecting LIDAR data or not.
-            */
+       
+    * Informs whether REA is collecting LIDAR data or not.
+       
+    */
    public boolean is_using_lidar_;
 
    /**
-            * Informs whether REA is collecting pointcloud data from a stereo-camera.
-            */
+       
+    * Informs whether REA is collecting pointcloud data from a stereo-camera.
+       
+    */
    public boolean is_using_stereo_vision_;
 
    /**
-            * Informs whether REA's internal data has just been cleared.
-            */
+       
+    * Informs whether REA's internal data has just been cleared.
+       
+    */
    public boolean has_cleared_;
 
    /**
-            * Provides the current set of filter parameters used in REA.
-            */
+       
+    * Provides the current set of filter parameters used in REA.
+       
+    */
    public controller_msgs.msg.dds.REASensorDataFilterParametersMessage current_sensor_filter_parameters_;
 
    public REAStatusMessage()
@@ -76,17 +90,23 @@ public class REAStatusMessage extends Packet<REAStatusMessage> implements Settab
 
 
    /**
-            * Informs if REA is currently collecting sensor data and estimating planar regions.
-            * Note that if both, is_using_lidar and is_using_stereo_vision are false, REA is running but not collecting data.
-            */
+       
+    * Informs if REA is currently collecting sensor data and estimating planar regions.
+       
+    * Note that if both, is_using_lidar and is_using_stereo_vision are false, REA is running but not collecting data.
+       
+    */
    public void setIsRunning(boolean is_running)
    {
       is_running_ = is_running;
    }
    /**
-            * Informs if REA is currently collecting sensor data and estimating planar regions.
-            * Note that if both, is_using_lidar and is_using_stereo_vision are false, REA is running but not collecting data.
-            */
+       
+    * Informs if REA is currently collecting sensor data and estimating planar regions.
+       
+    * Note that if both, is_using_lidar and is_using_stereo_vision are false, REA is running but not collecting data.
+       
+    */
    public boolean getIsRunning()
    {
       return is_running_;
@@ -94,15 +114,19 @@ public class REAStatusMessage extends Packet<REAStatusMessage> implements Settab
 
 
    /**
-            * Informs whether REA is collecting LIDAR data or not.
-            */
+       
+    * Informs whether REA is collecting LIDAR data or not.
+       
+    */
    public void setIsUsingLidar(boolean is_using_lidar)
    {
       is_using_lidar_ = is_using_lidar;
    }
    /**
-            * Informs whether REA is collecting LIDAR data or not.
-            */
+       
+    * Informs whether REA is collecting LIDAR data or not.
+       
+    */
    public boolean getIsUsingLidar()
    {
       return is_using_lidar_;
@@ -110,15 +134,19 @@ public class REAStatusMessage extends Packet<REAStatusMessage> implements Settab
 
 
    /**
-            * Informs whether REA is collecting pointcloud data from a stereo-camera.
-            */
+       
+    * Informs whether REA is collecting pointcloud data from a stereo-camera.
+       
+    */
    public void setIsUsingStereoVision(boolean is_using_stereo_vision)
    {
       is_using_stereo_vision_ = is_using_stereo_vision;
    }
    /**
-            * Informs whether REA is collecting pointcloud data from a stereo-camera.
-            */
+       
+    * Informs whether REA is collecting pointcloud data from a stereo-camera.
+       
+    */
    public boolean getIsUsingStereoVision()
    {
       return is_using_stereo_vision_;
@@ -126,15 +154,19 @@ public class REAStatusMessage extends Packet<REAStatusMessage> implements Settab
 
 
    /**
-            * Informs whether REA's internal data has just been cleared.
-            */
+       
+    * Informs whether REA's internal data has just been cleared.
+       
+    */
    public void setHasCleared(boolean has_cleared)
    {
       has_cleared_ = has_cleared;
    }
    /**
-            * Informs whether REA's internal data has just been cleared.
-            */
+       
+    * Informs whether REA's internal data has just been cleared.
+       
+    */
    public boolean getHasCleared()
    {
       return has_cleared_;
@@ -143,8 +175,10 @@ public class REAStatusMessage extends Packet<REAStatusMessage> implements Settab
 
 
    /**
-            * Provides the current set of filter parameters used in REA.
-            */
+       
+    * Provides the current set of filter parameters used in REA.
+       
+    */
    public controller_msgs.msg.dds.REASensorDataFilterParametersMessage getCurrentSensorFilterParameters()
    {
       return current_sensor_filter_parameters_;

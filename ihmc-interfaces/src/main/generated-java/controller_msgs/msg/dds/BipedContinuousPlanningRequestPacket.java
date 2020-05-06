@@ -7,8 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC quadruped footstep planning module.
-       */
+   
+ * This message is part of the IHMC quadruped footstep planning module.
+   
+ */
 public class BipedContinuousPlanningRequestPacket extends Packet<BipedContinuousPlanningRequestPacket> implements Settable<BipedContinuousPlanningRequestPacket>, EpsilonComparable<BipedContinuousPlanningRequestPacket>
 {
 
@@ -19,8 +21,10 @@ public class BipedContinuousPlanningRequestPacket extends Packet<BipedContinuous
    public static final int UNSET_ID = -1;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public byte start_target_type_;
@@ -116,15 +120,19 @@ public class BipedContinuousPlanningRequestPacket extends Packet<BipedContinuous
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

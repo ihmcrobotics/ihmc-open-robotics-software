@@ -7,14 +7,18 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * General purpose packet to carry IMU data. (need to be replace with the ROS IMUData)
-       */
+   
+ * General purpose packet to carry IMU data. (need to be replace with the ROS IMUData)
+   
+ */
 public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>, EpsilonComparable<IMUPacket>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public us.ihmc.euclid.tuple4D.Quaternion orientation_;
@@ -62,15 +66,19 @@ public class IMUPacket extends Packet<IMUPacket> implements Settable<IMUPacket>,
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

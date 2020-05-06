@@ -7,11 +7,16 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC quadruped controller API.
-       * This message commands the controller to start loading a foot.
-       * This message will only load the foot when the robot is in Sole Waypoint mode, which is triggered by a SoleTrajectoryMessage
-       * If the robot is walking, the message is ignored
-       */
+   
+ * This message is part of the IHMC quadruped controller API.
+   
+ * This message commands the controller to start loading a foot.
+   
+ * This message will only load the foot when the robot is in Sole Waypoint mode, which is triggered by a SoleTrajectoryMessage
+   
+ * If the robot is walking, the message is ignored
+   
+ */
 public class QuadrupedFootLoadBearingMessage extends Packet<QuadrupedFootLoadBearingMessage> implements Settable<QuadrupedFootLoadBearingMessage>, EpsilonComparable<QuadrupedFootLoadBearingMessage>
 {
 
@@ -24,18 +29,24 @@ public class QuadrupedFootLoadBearingMessage extends Packet<QuadrupedFootLoadBea
    public static final byte HIND_LEFT = (byte) 3;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Specifies which quadrant should be loaded.
-            */
+       
+    * Specifies which quadrant should be loaded.
+       
+    */
    public byte robot_quadrant_ = (byte) 255;
 
    /**
-            * The time to delay this command on the controller side before being executed.
-            */
+       
+    * The time to delay this command on the controller side before being executed.
+       
+    */
    public double execution_delay_time_;
 
    public QuadrupedFootLoadBearingMessage()
@@ -67,15 +78,19 @@ public class QuadrupedFootLoadBearingMessage extends Packet<QuadrupedFootLoadBea
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -83,15 +98,19 @@ public class QuadrupedFootLoadBearingMessage extends Packet<QuadrupedFootLoadBea
 
 
    /**
-            * Specifies which quadrant should be loaded.
-            */
+       
+    * Specifies which quadrant should be loaded.
+       
+    */
    public void setRobotQuadrant(byte robot_quadrant)
    {
       robot_quadrant_ = robot_quadrant;
    }
    /**
-            * Specifies which quadrant should be loaded.
-            */
+       
+    * Specifies which quadrant should be loaded.
+       
+    */
    public byte getRobotQuadrant()
    {
       return robot_quadrant_;
@@ -99,15 +118,19 @@ public class QuadrupedFootLoadBearingMessage extends Packet<QuadrupedFootLoadBea
 
 
    /**
-            * The time to delay this command on the controller side before being executed.
-            */
+       
+    * The time to delay this command on the controller side before being executed.
+       
+    */
    public void setExecutionDelayTime(double execution_delay_time)
    {
       execution_delay_time_ = execution_delay_time;
    }
    /**
-            * The time to delay this command on the controller side before being executed.
-            */
+       
+    * The time to delay this command on the controller side before being executed.
+       
+    */
    public double getExecutionDelayTime()
    {
       return execution_delay_time_;

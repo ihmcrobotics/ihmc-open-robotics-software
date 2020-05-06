@@ -7,8 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Atlas specific message: request taring of the wrist force/torque sensors.
-       */
+   
+ * Atlas specific message: request taring of the wrist force/torque sensors.
+   
+ */
 public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristSensorCalibrationRequestPacket> implements Settable<AtlasWristSensorCalibrationRequestPacket>, EpsilonComparable<AtlasWristSensorCalibrationRequestPacket>
 {
 
@@ -17,13 +19,17 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * The robot side (left or right) for the wrist sensor you would like to request calibration for.
-            */
+       
+    * The robot side (left or right) for the wrist sensor you would like to request calibration for.
+       
+    */
    public byte robot_side_ = (byte) 255;
 
    public AtlasWristSensorCalibrationRequestPacket()
@@ -51,15 +57,19 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -67,15 +77,19 @@ public class AtlasWristSensorCalibrationRequestPacket extends Packet<AtlasWristS
 
 
    /**
-            * The robot side (left or right) for the wrist sensor you would like to request calibration for.
-            */
+       
+    * The robot side (left or right) for the wrist sensor you would like to request calibration for.
+       
+    */
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
    }
    /**
-            * The robot side (left or right) for the wrist sensor you would like to request calibration for.
-            */
+       
+    * The robot side (left or right) for the wrist sensor you would like to request calibration for.
+       
+    */
    public byte getRobotSide()
    {
       return robot_side_;

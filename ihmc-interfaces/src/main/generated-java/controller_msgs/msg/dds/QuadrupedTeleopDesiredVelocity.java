@@ -7,15 +7,20 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC quadruped controller API.
-       * This message sends a desired stepping velocity to the step teleop module.
-       */
+   
+ * This message is part of the IHMC quadruped controller API.
+   
+ * This message sends a desired stepping velocity to the step teleop module.
+   
+ */
 public class QuadrupedTeleopDesiredVelocity extends Packet<QuadrupedTeleopDesiredVelocity> implements Settable<QuadrupedTeleopDesiredVelocity>, EpsilonComparable<QuadrupedTeleopDesiredVelocity>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public double desired_x_velocity_;
@@ -57,15 +62,19 @@ public class QuadrupedTeleopDesiredVelocity extends Packet<QuadrupedTeleopDesire
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

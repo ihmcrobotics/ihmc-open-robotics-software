@@ -7,21 +7,29 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC walking controller preview module: WalkingControllerPreviewToolbox.
-       * Configure only the fields to be previewed.
-       * New fields will be added to this message as the module supports them.
-       */
+   
+ * This message is part of the IHMC walking controller preview module: WalkingControllerPreviewToolbox.
+   
+ * Configure only the fields to be previewed.
+   
+ * New fields will be added to this message as the module supports them.
+   
+ */
 public class WalkingControllerPreviewInputMessage extends Packet<WalkingControllerPreviewInputMessage> implements Settable<WalkingControllerPreviewInputMessage>, EpsilonComparable<WalkingControllerPreviewInputMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Set this field to request a preview of the corresponding walking sequence.
-            */
+       
+    * Set this field to request a preview of the corresponding walking sequence.
+       
+    */
    public controller_msgs.msg.dds.FootstepDataListMessage footsteps_;
 
    public WalkingControllerPreviewInputMessage()
@@ -49,15 +57,19 @@ public class WalkingControllerPreviewInputMessage extends Packet<WalkingControll
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -66,8 +78,10 @@ public class WalkingControllerPreviewInputMessage extends Packet<WalkingControll
 
 
    /**
-            * Set this field to request a preview of the corresponding walking sequence.
-            */
+       
+    * Set this field to request a preview of the corresponding walking sequence.
+       
+    */
    public controller_msgs.msg.dds.FootstepDataListMessage getFootsteps()
    {
       return footsteps_;

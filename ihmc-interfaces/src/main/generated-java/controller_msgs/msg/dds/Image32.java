@@ -10,10 +10,14 @@ public class Image32 extends Packet<Image32> implements Settable<Image32>, Epsil
 {
 
    /**
-            * This message can be used as a general image.
-            * Each component of the data which of length is same with width * height is an integer value describing color with the conventional RGB.
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * This message can be used as a general image.
+       
+    * Each component of the data which of length is same with width * height is an integer value describing color with the conventional RGB.
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public int width_;
@@ -56,19 +60,27 @@ public class Image32 extends Packet<Image32> implements Settable<Image32>, Epsil
 
 
    /**
-            * This message can be used as a general image.
-            * Each component of the data which of length is same with width * height is an integer value describing color with the conventional RGB.
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * This message can be used as a general image.
+       
+    * Each component of the data which of length is same with width * height is an integer value describing color with the conventional RGB.
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * This message can be used as a general image.
-            * Each component of the data which of length is same with width * height is an integer value describing color with the conventional RGB.
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * This message can be used as a general image.
+       
+    * Each component of the data which of length is same with width * height is an integer value describing color with the conventional RGB.
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

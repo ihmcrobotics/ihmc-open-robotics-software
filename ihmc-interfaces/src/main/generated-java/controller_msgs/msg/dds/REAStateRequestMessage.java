@@ -7,31 +7,46 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC robot environment awareness module (REA).
-       * It is destined to host user requests for changing the internal state of REA.
-       */
+   
+ * This message is part of the IHMC robot environment awareness module (REA).
+   
+ * It is destined to host user requests for changing the internal state of REA.
+   
+ */
 public class REAStateRequestMessage extends Packet<REAStateRequestMessage> implements Settable<REAStateRequestMessage>, EpsilonComparable<REAStateRequestMessage>
 {
 
    /**
-            * When true, REA will temporarily stop collecting pointcloud data until another message requesting it to resume is sent.
-            * In the case REA was already paused, nothing changes.
-            * In the case both pause and resume are requested, the pause request is ignored.
-            */
+       
+    * When true, REA will temporarily stop collecting pointcloud data until another message requesting it to resume is sent.
+       
+    * In the case REA was already paused, nothing changes.
+       
+    * In the case both pause and resume are requested, the pause request is ignored.
+       
+    */
    public boolean request_pause_;
 
    /**
-            * When true, REA will resume collecting pointcloud data.
-            * In the case REA was already collecting data, nothing changes.
-            * In the case both pause and resume are requested, the pause request is ignored.
-            */
+       
+    * When true, REA will resume collecting pointcloud data.
+       
+    * In the case REA was already collecting data, nothing changes.
+       
+    * In the case both pause and resume are requested, the pause request is ignored.
+       
+    */
    public boolean request_resume_;
 
    /**
-            * When true, REA will clear its internal data collected until now.
-            * After a clear, REA will start building planar regions from scratch.
-            * This is useful in the case of noisy data, of if the sensor pose estimation has drifted for instance.
-            */
+       
+    * When true, REA will clear its internal data collected until now.
+       
+    * After a clear, REA will start building planar regions from scratch.
+       
+    * This is useful in the case of noisy data, of if the sensor pose estimation has drifted for instance.
+       
+    */
    public boolean request_clear_;
 
    public REAStateRequestMessage()
@@ -63,19 +78,27 @@ public class REAStateRequestMessage extends Packet<REAStateRequestMessage> imple
 
 
    /**
-            * When true, REA will temporarily stop collecting pointcloud data until another message requesting it to resume is sent.
-            * In the case REA was already paused, nothing changes.
-            * In the case both pause and resume are requested, the pause request is ignored.
-            */
+       
+    * When true, REA will temporarily stop collecting pointcloud data until another message requesting it to resume is sent.
+       
+    * In the case REA was already paused, nothing changes.
+       
+    * In the case both pause and resume are requested, the pause request is ignored.
+       
+    */
    public void setRequestPause(boolean request_pause)
    {
       request_pause_ = request_pause;
    }
    /**
-            * When true, REA will temporarily stop collecting pointcloud data until another message requesting it to resume is sent.
-            * In the case REA was already paused, nothing changes.
-            * In the case both pause and resume are requested, the pause request is ignored.
-            */
+       
+    * When true, REA will temporarily stop collecting pointcloud data until another message requesting it to resume is sent.
+       
+    * In the case REA was already paused, nothing changes.
+       
+    * In the case both pause and resume are requested, the pause request is ignored.
+       
+    */
    public boolean getRequestPause()
    {
       return request_pause_;
@@ -83,19 +106,27 @@ public class REAStateRequestMessage extends Packet<REAStateRequestMessage> imple
 
 
    /**
-            * When true, REA will resume collecting pointcloud data.
-            * In the case REA was already collecting data, nothing changes.
-            * In the case both pause and resume are requested, the pause request is ignored.
-            */
+       
+    * When true, REA will resume collecting pointcloud data.
+       
+    * In the case REA was already collecting data, nothing changes.
+       
+    * In the case both pause and resume are requested, the pause request is ignored.
+       
+    */
    public void setRequestResume(boolean request_resume)
    {
       request_resume_ = request_resume;
    }
    /**
-            * When true, REA will resume collecting pointcloud data.
-            * In the case REA was already collecting data, nothing changes.
-            * In the case both pause and resume are requested, the pause request is ignored.
-            */
+       
+    * When true, REA will resume collecting pointcloud data.
+       
+    * In the case REA was already collecting data, nothing changes.
+       
+    * In the case both pause and resume are requested, the pause request is ignored.
+       
+    */
    public boolean getRequestResume()
    {
       return request_resume_;
@@ -103,19 +134,27 @@ public class REAStateRequestMessage extends Packet<REAStateRequestMessage> imple
 
 
    /**
-            * When true, REA will clear its internal data collected until now.
-            * After a clear, REA will start building planar regions from scratch.
-            * This is useful in the case of noisy data, of if the sensor pose estimation has drifted for instance.
-            */
+       
+    * When true, REA will clear its internal data collected until now.
+       
+    * After a clear, REA will start building planar regions from scratch.
+       
+    * This is useful in the case of noisy data, of if the sensor pose estimation has drifted for instance.
+       
+    */
    public void setRequestClear(boolean request_clear)
    {
       request_clear_ = request_clear;
    }
    /**
-            * When true, REA will clear its internal data collected until now.
-            * After a clear, REA will start building planar regions from scratch.
-            * This is useful in the case of noisy data, of if the sensor pose estimation has drifted for instance.
-            */
+       
+    * When true, REA will clear its internal data collected until now.
+       
+    * After a clear, REA will start building planar regions from scratch.
+       
+    * This is useful in the case of noisy data, of if the sensor pose estimation has drifted for instance.
+       
+    */
    public boolean getRequestClear()
    {
       return request_clear_;
