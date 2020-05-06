@@ -19,6 +19,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.kinematics.fourbar.FourBarCalculator;
+import us.ihmc.robotics.kinematics.fourbar.FourBarCalculator.Angle;
 
 public class FourBarKinematicLoop
 {
@@ -363,15 +364,15 @@ public class FourBarKinematicLoop
                masterJointLimit = convertInteriorAngleToJointAngle(interiorAngle, 0);
                break;
             case 1:
-               fourBarCalculator.computeMasterJointAngleGivenAngleABC(interiorAngle);
+               fourBarCalculator.update(Angle.ABC, interiorAngle);
                masterJointLimit = convertInteriorAngleToJointAngle(fourBarCalculator.getAngleDAB(), 0);
                break;
             case 2:
-               fourBarCalculator.computeMasterJointAngleGivenAngleBCD(interiorAngle);
+               fourBarCalculator.update(Angle.BCD, interiorAngle);
                masterJointLimit = convertInteriorAngleToJointAngle(fourBarCalculator.getAngleDAB(), 0);
                break;
             case 3:
-               fourBarCalculator.computeMasterJointAngleGivenAngleCDA(interiorAngle);
+               fourBarCalculator.update(Angle.CDA, interiorAngle);
                masterJointLimit = convertInteriorAngleToJointAngle(fourBarCalculator.getAngleDAB(), 0);
                break;
             default:
@@ -441,7 +442,7 @@ public class FourBarKinematicLoop
                + masterJointA.getJointLimitUpper() + "]. The current value is: " + masterJointA.getQ());
       }
 
-      fourBarCalculator.updateAnglesVelocitiesAndAccelerationsGivenAngleDAB(interiorAngleA, interiorAngleDtA, interiorAngleDt2A);
+      fourBarCalculator.update(Angle.DAB, interiorAngleA, interiorAngleDtA, interiorAngleDt2A);
 
       passiveJointB.setQ(convertInteriorAngleToJointAngle(fourBarCalculator.getAngleABC(), 1));
       passiveJointC.setQ(convertInteriorAngleToJointAngle(fourBarCalculator.getAngleBCD(), 2));
@@ -588,7 +589,7 @@ public class FourBarKinematicLoop
          double masterInteriorAngle = convertJointAngleToInteriorAngle(masterJointA.getQ(), 0);
          double dqA_dqA = 1.0;
          double dInteriorA_dqA = convertJointAngularDerivativeToInteriorAngularDerivative(dqA_dqA, 0);
-         fourBarCalculator.updateAnglesAndVelocitiesGivenAngleDAB(masterInteriorAngle, dInteriorA_dqA);
+         fourBarCalculator.update(Angle.DAB, masterInteriorAngle, dInteriorA_dqA);
          double dqB_dqA = convertInteriorAngularDerivativeToJointAngularDerivative(fourBarCalculator.getAngleDtABC(), 1);
          double dqC_dqA = convertInteriorAngularDerivativeToJointAngularDerivative(fourBarCalculator.getAngleDtBCD(), 2);
 

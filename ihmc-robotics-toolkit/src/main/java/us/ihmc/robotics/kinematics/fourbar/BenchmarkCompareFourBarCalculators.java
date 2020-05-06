@@ -6,6 +6,8 @@ import static java.lang.Math.sqrt;
 
 import java.util.Random;
 
+import us.ihmc.robotics.kinematics.fourbar.FourBarCalculator.Angle;
+
 /**
  * The goal is to determine which of the two four bar calculators (the one including derivatives and 
  * the one used for Beast) is faster
@@ -44,7 +46,7 @@ public class BenchmarkCompareFourBarCalculators
 
          FourBarCalculator fastRunnerCalculator = new FourBarCalculator();
          fastRunnerCalculator.setSideLengths(AB, BC, CD, AD);
-         fastRunnerCalculator.updateAnglesGivenAngleDAB(BAD);
+         fastRunnerCalculator.update(Angle.DAB, BAD);
       }
       totalTimeFastRunnerCalculator = System.currentTimeMillis() - startTimeFastRunnerCalculator;
 
