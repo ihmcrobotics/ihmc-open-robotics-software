@@ -54,8 +54,8 @@ public class GoHomeBehavior extends AbstractBehavior
       hasInputBeenSet = new YoBoolean(behaviorNameFirstLowerCase + "HasInputBeenSet", registry);
       isDone = new YoBoolean(behaviorNameFirstLowerCase + "IsDone", registry);
 
-      goHomePublisher = createPublisherForController(GoHomeMessage.class);
-      stopAllTrajectoryPublisher = createPublisherForController(StopAllTrajectoryMessage.class);
+      goHomePublisher = createControllerPublisher(GoHomeMessage.class);
+      stopAllTrajectoryPublisher = createControllerPublisher(StopAllTrajectoryMessage.class);
    }
 
    public void setInput(GoHomeMessage goHomeMessage)

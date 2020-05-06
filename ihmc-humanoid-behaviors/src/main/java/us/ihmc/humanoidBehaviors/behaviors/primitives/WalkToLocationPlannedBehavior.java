@@ -78,8 +78,8 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    {
       createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxTopicName, plannerResult::set);
 
-      createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class,
-                                    (packet) -> newGoalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(),
+      createBehaviorSubscriber(WalkOverTerrainGoalPacket.class,
+                               (packet) -> newGoalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                                                 packet.getPosition(),
                                                                                 packet.getOrientation())));
       createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);

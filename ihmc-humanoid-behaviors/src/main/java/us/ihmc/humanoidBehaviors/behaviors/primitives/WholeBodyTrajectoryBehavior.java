@@ -38,7 +38,7 @@ public class WholeBodyTrajectoryBehavior extends AbstractBehavior
       trajectoryTime.set(Double.NaN);
       this.yoTime = yoTime;
 
-      publisher = createPublisherForController(WholeBodyTrajectoryMessage.class);
+      publisher = createControllerPublisher(WholeBodyTrajectoryMessage.class);
    }
 
    public void setInput(WholeBodyTrajectoryMessage wholebodyTrajectoryMessage)

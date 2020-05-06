@@ -38,9 +38,9 @@ public class TestGarbageGenerationBehavior extends AbstractBehavior
       super(robotName, ros2Node);
       this.referenceFrames = referenceFrames;
       timer = new YoStopwatch(yoTime);
-      armPublisher = createPublisherForController(ArmTrajectoryMessage.class);
-      chestPublisher = createPublisherForController(ChestTrajectoryMessage.class);
-      footstepPublisher = createPublisherForController(FootstepDataListMessage.class);
+      armPublisher = createControllerPublisher(ArmTrajectoryMessage.class);
+      chestPublisher = createControllerPublisher(ChestTrajectoryMessage.class);
+      footstepPublisher = createControllerPublisher(FootstepDataListMessage.class);
    }
 
    @Override

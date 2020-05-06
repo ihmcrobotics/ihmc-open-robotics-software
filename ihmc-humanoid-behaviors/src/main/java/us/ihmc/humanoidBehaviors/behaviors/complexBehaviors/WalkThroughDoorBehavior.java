@@ -100,7 +100,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                                   YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, "walkThroughDoorBehavior", WalkThroughDoorBehaviorState.class, yoTime, ros2Node);
-      headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
+      headTrajectoryPublisher = createControllerPublisher(HeadTrajectoryMessage.class);
       this.referenceFrames = referenceFrames;
       doorOpenDetectorBehaviorService = new DoorOpenDetectorBehaviorService(robotName, yoNamePrefix + "DoorOpenService", ros2Node, yoGraphicsListRegistry);
       //doorOpenDetectorBehaviorService.setTargetIDToLocate(50);

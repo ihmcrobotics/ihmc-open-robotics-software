@@ -20,7 +20,7 @@ public class FootLoadBearingBehavior extends AbstractBehavior
    public FootLoadBearingBehavior(String robotName, String prefix, Ros2Node ros2Node)
    {
       super(robotName, prefix, ros2Node);
-      publisher = createPublisherForController(FootLoadBearingMessage.class);
+      publisher = createControllerPublisher(FootLoadBearingMessage.class);
    }
 
    public void setInput(FootLoadBearingMessage endEffectorLoadBearingMessage)

@@ -6,7 +6,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.DoorOpenDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.ros2.Ros2Node;
 
@@ -19,7 +18,7 @@ public class TestDoorOpenBehaviorService extends AbstractBehavior
    public TestDoorOpenBehaviorService(String robotName, String yoNamePrefix, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, yoNamePrefix, ros2Node);
-      createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationQueue::put);
+      createBehaviorSubscriber(DoorLocationPacket.class, doorLocationQueue::put);
       doorOpenDetectorBehaviorService = new DoorOpenDetectorBehaviorService(robotName, yoNamePrefix + "DoorOpenService", ros2Node, yoGraphicsListRegistry);
       //doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
       //doorOpenDetectorBehaviorService.setExpectedFiducialSize(0.2032);

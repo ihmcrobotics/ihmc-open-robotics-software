@@ -17,7 +17,7 @@ public class SearchForValveBehavior extends AbstractBehavior
    public SearchForValveBehavior(String robotName, Ros2Node ros2Node)
    {
       super(robotName, "SearchForSpehereFar", ros2Node);
-      createBehaviorInputSubscriber(ValveLocationPacket.class, valveLocationQueue::put);
+      createBehaviorSubscriber(ValveLocationPacket.class, valveLocationQueue::put);
    }
 
    @Override

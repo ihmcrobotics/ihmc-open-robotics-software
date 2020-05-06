@@ -56,8 +56,8 @@ public class RepeatedlyWalkFootstepListBehavior extends AbstractBehavior
 
       soleFrames = referenceFrames.getSoleFrames();
       midFootZUpFrame = referenceFrames.getMidFeetZUpFrame();
-      createSubscriberFromController(FootstepStatusMessage.class, footstepStatusMessage::set);
-      footstepPublisher = createPublisherForController(FootstepDataListMessage.class);
+      createControllerSubscriber(FootstepStatusMessage.class, footstepStatusMessage::set);
+      footstepPublisher = createControllerPublisher(FootstepDataListMessage.class);
 
       walkingForward.set(true);
       initialSwingSide.set(defaultInitialSwingSide);

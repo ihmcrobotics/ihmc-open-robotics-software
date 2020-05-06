@@ -38,7 +38,7 @@ public class FootTrajectoryBehavior extends AbstractBehavior
       trajectoryTime.set(Double.NaN);
       trajectoryTimeElapsed = new YoBoolean(behaviorNameFirstLowerCase + "TrajectoryTimeElapsed", registry);
 
-      publisher = createPublisherForController(FootTrajectoryMessage.class);
+      publisher = createControllerPublisher(FootTrajectoryMessage.class);
    }
 
    public void setInput(FootTrajectoryMessage message)

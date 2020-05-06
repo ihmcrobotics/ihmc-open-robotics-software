@@ -57,9 +57,9 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
       this.doorOpenDetectorBehaviorService = doorOpenDetectorBehaviorService;
       uiPositionCheckerPacketpublisher = createBehaviorPublisher(UIPositionCheckerPacket.class);
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
-      abortMessagePublisher = createPublisherForController(AutomaticManipulationAbortMessage.class);
+      abortMessagePublisher = createControllerPublisher(AutomaticManipulationAbortMessage.class);
 
-      createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationPacket::set);
+      createBehaviorSubscriber(DoorLocationPacket.class, doorLocationPacket::set);
 
       setupStateMachine();
 

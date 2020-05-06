@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.DoorLocationPacket;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -33,7 +32,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
    {
       super(robotName, ThreadName, ros2Node);//, yoGraphicsListRegistry);
 
-      createSubscriber(DoorLocationPacket.class, IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName), doorLocationQueue::set);
+      createSubscriber(DoorLocationPacket.class, IHMCHumanoidBehaviorManager.getBehaviorTopicName(robotName), doorLocationQueue::set);
 
       initialize();
    }

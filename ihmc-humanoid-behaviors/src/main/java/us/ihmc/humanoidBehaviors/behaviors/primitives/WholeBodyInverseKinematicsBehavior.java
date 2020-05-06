@@ -112,7 +112,7 @@ public class WholeBodyInverseKinematicsBehavior extends AbstractBehavior
       createSubscriber(KinematicsToolboxOutputStatus.class, kinematicsToolboxTopicName, kinematicsToolboxOutputQueue::put);
       toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, kinematicsToolboxTopicName);
       kinematicsToolboxRigidBodyPublisher = createPublisher(KinematicsToolboxRigidBodyMessage.class, kinematicsToolboxTopicName);
-      wholeBodyTrajectoryPublisher = createPublisherForController(WholeBodyTrajectoryMessage.class);
+      wholeBodyTrajectoryPublisher = createControllerPublisher(WholeBodyTrajectoryMessage.class);
 
       clear();
    }
