@@ -83,11 +83,9 @@ public class RemoteQuadrupedTeleopManager
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotConfigurationData.set(s.takeNextData()));
 
       ROS2MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-      ROS2MessageTopicNameGenerator stepTeleopSubGenerator = ROS2Tools.IHMC_ROOT.robot(robotName)
-                                                                                .module(ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME)
+      ROS2MessageTopicNameGenerator stepTeleopSubGenerator = ROS2Tools.STEP_TELEOP_TOOLBOX.robot(robotName)
                                                                                 .qualifier(ROS2TopicQualifier.INPUT);
-      ROS2MessageTopicNameGenerator footstepPlannerSubGenerator = ROS2Tools.IHMC_ROOT.robot(robotName)
-                                                                                     .module(ROS2Tools.FOOTSTEP_PLANNER_MODULE_NAME)
+      ROS2MessageTopicNameGenerator footstepPlannerSubGenerator = ROS2Tools.STEP_TELEOP_TOOLBOX.robot(robotName)
                                                                                      .qualifier(ROS2TopicQualifier.INPUT);
 
       controllerStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);

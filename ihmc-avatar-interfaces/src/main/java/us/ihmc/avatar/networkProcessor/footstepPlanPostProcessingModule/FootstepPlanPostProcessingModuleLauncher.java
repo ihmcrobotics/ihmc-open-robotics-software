@@ -42,11 +42,9 @@ public class FootstepPlanPostProcessingModuleLauncher
       postProcessingModule.registerRosNode(ros2Node);
       String name = postProcessingModule.getName();
 
-      ROS2MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.IHMC_ROOT.robot(name)
-                                                                                      .module(ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME)
+      ROS2MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.robot(name)
                                                                                       .qualifier(ROS2TopicQualifier.INPUT);
-      ROS2MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.IHMC_ROOT.robot(name)
-                                                                                     .module(ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME)
+      ROS2MessageTopicNameGenerator publisherTopicNameGenerator = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.robot(name)
                                                                                      .qualifier(ROS2TopicQualifier.OUTPUT);
 
       // Parameters callback

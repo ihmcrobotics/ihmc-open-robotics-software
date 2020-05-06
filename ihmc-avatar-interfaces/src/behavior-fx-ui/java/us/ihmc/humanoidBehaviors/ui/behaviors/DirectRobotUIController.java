@@ -84,8 +84,7 @@ public class DirectRobotUIController extends Group
 
       supportRegionsParametersPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                     BipedalSupportPlanarRegionParametersMessage.class,
-                                                                    ROS2Tools.IHMC_ROOT.robot(robotName)
-                                                                                       .module(ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME)
+                                                                    ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.robot(robotName)
                                                                                        .qualifier(ROS2TopicQualifier.INPUT));
 
       pumpPSI.setItems(new ImmutableObservableList<>(1500, 2300, 2500, 2800));

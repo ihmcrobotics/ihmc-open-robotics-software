@@ -174,8 +174,7 @@ public class QuadrupedUIMessageConverter
       /* publishers */
       ROS2MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
 
-      ROS2MessageTopicNameGenerator stepTeleopInputTopicGenerator = ROS2Tools.IHMC_ROOT.robot(robotName)
-                                                                                       .module(ROS2Tools.STEP_TELEOP_TOOLBOX_MODULE_NAME)
+      ROS2MessageTopicNameGenerator stepTeleopInputTopicGenerator = ROS2Tools.STEP_TELEOP_TOOLBOX.robot(robotName)
                                                                                        .qualifier(ROS2TopicQualifier.INPUT);
 
       desiredHighLevelStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);

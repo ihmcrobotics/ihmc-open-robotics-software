@@ -234,19 +234,16 @@ public class BipedContinuousPlanningToolboxDataSetTest
                                            FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepDataListMessage.class,
-                                           ROS2Tools.IHMC_ROOT.robot(robotName)
-                                                              .module(ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME)
+                                           ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.robot(robotName)
                                                               .qualifier(ROS2TopicQualifier.OUTPUT),
                                            s -> processFootstepDataListMessage(s.takeNextData()));
 
       requestPublisher = ROS2Tools.createPublisher(ros2Node, BipedContinuousPlanningRequestPacket.class,
-                                                   ROS2Tools.IHMC_ROOT.robot(robotName)
-                                                                      .module(ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME)
+                                                   ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.robot(robotName)
                                                                       .qualifier(ROS2TopicQualifier.INPUT));
       planarRegionsPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator);
       plannerParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerParametersPacket.class,
-                                                             ROS2Tools.IHMC_ROOT.robot(robotName)
-                                                                                .module(ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME)
+                                                             ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.robot(robotName)
                                                                                 .qualifier(ROS2TopicQualifier.INPUT));
 
       ROS2MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
