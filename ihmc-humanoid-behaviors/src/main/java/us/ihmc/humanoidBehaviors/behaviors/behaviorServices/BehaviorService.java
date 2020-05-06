@@ -49,7 +49,7 @@ public abstract class BehaviorService
 
    public <T> IHMCROS2Publisher<T> createBehaviorOutputPublisher(Class<T> messageType, String topicName)
    {
-      return createPublisher(messageType, IHMCHumanoidBehaviorManager.getBehaviorOutputRosTopicPrefix(robotName).name(topicName));
+      return createPublisher(messageType, IHMCHumanoidBehaviorManager.getBehaviorOutputRosTopicPrefix(robotName).suffix(topicName));
    }
 
    @SuppressWarnings("unchecked")
