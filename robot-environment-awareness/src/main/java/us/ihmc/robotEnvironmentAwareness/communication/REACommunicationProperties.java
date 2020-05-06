@@ -56,7 +56,7 @@ public class REACommunicationProperties
    public static final ROS2MessageTopicNameGenerator subscriberTopicNameGenerator = ROS2Tools.REA.robot(null)
                                                                                                        .qualifier(ROS2TopicQualifier.INPUT);
    public static final ROS2MessageTopicNameGenerator subscriberCustomRegionsTopicNameGenerator = ROS2Tools.REA.robot(null)
-                                                                                                                    .name("custom_region")
+                                                                                                                    .name(ROS2Tools.REA_CUSTOM_REGION_NAME)
                                                                                                                     .qualifier(ROS2TopicQualifier.INPUT);
 
    private static final NetClassList privateNetClassList = new NetClassList();
