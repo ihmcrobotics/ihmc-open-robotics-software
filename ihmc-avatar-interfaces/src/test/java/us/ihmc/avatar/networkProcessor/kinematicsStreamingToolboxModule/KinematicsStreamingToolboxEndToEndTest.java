@@ -169,13 +169,13 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
                                                                    toolboxRegistry);
       toolboxController.setOutputPublisher(drcSimulationTestHelper::publishToController);
 
-      ROS2Tools.createCallbackSubscription(toolboxRos2Node,
-                                           RobotConfigurationData.class,
-                                           controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionWithType(toolboxRos2Node,
+                                                   RobotConfigurationData.class,
+                                                   controllerPubGenerator,
                                            s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(toolboxRos2Node,
-                                           CapturabilityBasedStatus.class,
-                                           controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionWithType(toolboxRos2Node,
+                                                   CapturabilityBasedStatus.class,
+                                                   controllerPubGenerator,
                                            s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
       toolboxRos2Node.spin();
    }

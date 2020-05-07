@@ -77,13 +77,13 @@ public class DirectRobotUIController extends Group
          throw new RuntimeException("Please add implementation of RobotLowLevelMessenger for " + robotName);
       }
 
-      goHomePublisher = ROS2Tools.createPublisher(ros2Node,
-                                                  ROS2TopicNameTools.newMessageInstance(GoHomeCommand.class).getMessageClass(),
-                                                  ROS2Tools.getControllerInputTopicName(robotName));
+      goHomePublisher = ROS2Tools.createPublisherWithType(ros2Node,
+                                                          ROS2TopicNameTools.newMessageInstance(GoHomeCommand.class).getMessageClass(),
+                                                          ROS2Tools.getControllerInputTopicName(robotName));
 
-      supportRegionsParametersPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                                    BipedalSupportPlanarRegionParametersMessage.class,
-                                                                    ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
+      supportRegionsParametersPublisher = ROS2Tools.createPublisherWithType(ros2Node,
+                                                                            BipedalSupportPlanarRegionParametersMessage.class,
+                                                                            ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
                                                                                        .withInput());
 
       pumpPSI.setItems(new ImmutableObservableList<>(1500, 2300, 2500, 2800));

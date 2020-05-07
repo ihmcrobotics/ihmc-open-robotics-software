@@ -37,7 +37,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    {
       ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s -> {
+      ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s -> {
          if (controller != null)
             controller.updateRobotConfigurationData(s.takeNextData());
       });

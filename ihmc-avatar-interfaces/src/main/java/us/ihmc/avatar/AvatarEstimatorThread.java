@@ -142,7 +142,7 @@ public class AvatarEstimatorThread extends ModularRobotController
                                                 Map<HighLevelControllerName, StateEstimatorMode> stateModeMap)
    {
       ROS2TopicName publisherTopicNameGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, publisherTopicNameGenerator, subscriber ->
+      ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, publisherTopicNameGenerator, subscriber ->
       {
          HighLevelStateChangeStatusMessage message = subscriber.takeNextData();
          StateEstimatorMode requestedMode = stateModeMap.get(HighLevelControllerName.fromByte(message.getEndHighLevelControllerName()));

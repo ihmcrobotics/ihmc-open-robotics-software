@@ -51,7 +51,7 @@ public class MultisenseImageROS1Bridge extends AbstractRosTopicSubscriber<Image>
       rosMainNode.attachSubscriber(MultisenseInformation.getImageTopicName(), this);
       rosMainNode.execute();
 
-      imagePublisher = ROS2Tools.createPublisher(ros2Node, Image32.class, ROS2Tools.IHMC_ROOT);
+      imagePublisher = ROS2Tools.createPublisherWithType(ros2Node, Image32.class, ROS2Tools.IHMC_ROOT);
       System.out.println(ROS2Tools.IHMC_ROOT.withType(Image32.class));
 
       cameraInfoBridge = new MultisenseCameraInfoROS1Bridge();

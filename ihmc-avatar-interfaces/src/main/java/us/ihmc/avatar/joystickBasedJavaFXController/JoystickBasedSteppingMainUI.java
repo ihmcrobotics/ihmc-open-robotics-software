@@ -81,15 +81,15 @@ public class JoystickBasedSteppingMainUI
       mainPane.setCenter(subScene);
 
       robotVisualizer = new JavaFXRobotVisualizer(fullRobotModelFactory);
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
+                                                   RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
                                            s -> robotVisualizer.submitNewConfiguration(s.takeNextData()));
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());
 
       planarRegionsViewer = new JavaFXPlanarRegionsViewer();
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           PlanarRegionsListMessage.class,
-                                           REACommunicationProperties.publisherTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
+                                                   PlanarRegionsListMessage.class,
+                                                   REACommunicationProperties.publisherTopicNameGenerator,
                                            s -> planarRegionsViewer.submitPlanarRegions(s.takeNextData()));
       view3dFactory.addNodeToView(planarRegionsViewer.getRootNode());
 

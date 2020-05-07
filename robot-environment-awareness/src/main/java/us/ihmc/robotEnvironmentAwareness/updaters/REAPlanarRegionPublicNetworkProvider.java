@@ -31,11 +31,11 @@ public class REAPlanarRegionPublicNetworkProvider
                                                ROS2TopicName publisherTopicNameGenerator, ROS2TopicName subscriberTopicNameGenerator)
    {
       this.regionFeaturesProvider = regionFeaturesProvider;
-      planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
+      planarRegionPublisher = ROS2Tools.createPublisherWithType(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
 
       if (messager != null)
       {
-         currentStatePublisher = ROS2Tools.createPublisher(ros2Node, REAStatusMessage.class, publisherTopicNameGenerator);
+         currentStatePublisher = ROS2Tools.createPublisherWithType(ros2Node, REAStatusMessage.class, publisherTopicNameGenerator);
          isRunning = messager.createInput(REAModuleAPI.OcTreeEnable);
          // This should be the only input with a default value, the rest gets populated at the very start.
          hasCleared = messager.createInput(REAModuleAPI.OcTreeClear, false);

@@ -85,8 +85,8 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
    {
       if (enableVideoPublisher)
       {
-         ROS2Tools.createCallbackSubscription(ros2Node,
-                                              RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
+         ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
+                                                      RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
          AvatarRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(ValkyrieSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
@@ -120,8 +120,8 @@ public class ValkyrieSensorSuiteManager implements DRCSensorSuiteManager
 
       if (enableVideoPublisher)
       {
-         ROS2Tools.createCallbackSubscription(ros2Node,
-                                              RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
+         ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
+                                                      RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
          AvatarRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(ValkyrieSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);

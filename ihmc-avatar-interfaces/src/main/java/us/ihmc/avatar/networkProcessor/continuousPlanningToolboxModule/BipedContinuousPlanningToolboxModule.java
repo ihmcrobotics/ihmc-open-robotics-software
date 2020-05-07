@@ -51,25 +51,25 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
    {
       // status messages from the controller
       ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepStatusMessage.class, controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, FootstepStatusMessage.class, controllerPubGenerator,
                                            s -> processFootstepStatusMessage(s.takeNextData()));
 
       // status messages from the planner
       ROS2TopicName plannerPubGenerator = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
                                                                              .withOutput();
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningToolboxOutputStatus.class, plannerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, FootstepPlanningToolboxOutputStatus.class, plannerPubGenerator,
                                            s -> processFootstepPlannerOutput(s.takeNextData()));
 
       // inputs to this module
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, BipedContinuousPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, BipedContinuousPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
                                            s -> processContinuousPlanningRequest(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
                                            s -> processPlanarRegionsListMessage(s.takeNextData()));
 
       ROS2TopicName plannerSubGenerator = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
                                                                              .withInput();
-      footstepPlanningRequestPublisher = ROS2Tools.createPublisher(realtimeRos2Node, FootstepPlanningRequestPacket.class, plannerSubGenerator);
-      footstepPlanningToolboxStatePublisher = ROS2Tools.createPublisher(realtimeRos2Node, ToolboxStateMessage.class, plannerSubGenerator);
+      footstepPlanningRequestPublisher = ROS2Tools.createPublisherWithType(realtimeRos2Node, FootstepPlanningRequestPacket.class, plannerSubGenerator);
+      footstepPlanningToolboxStatePublisher = ROS2Tools.createPublisherWithType(realtimeRos2Node, ToolboxStateMessage.class, plannerSubGenerator);
    }
 
    @Override

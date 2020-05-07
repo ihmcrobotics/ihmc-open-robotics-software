@@ -78,18 +78,18 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "supporting_planar_region_publisher");
 
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           CapturabilityBasedStatus.class, ROS2Tools.getControllerOutputTopicName(robotName),
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
+                                                   CapturabilityBasedStatus.class, ROS2Tools.getControllerOutputTopicName(robotName),
                                            subscriber -> latestCapturabilityBasedStatusMessage.set(subscriber.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
+                                                   RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
                                            subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
-      regionPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                  PlanarRegionsListMessage.class,
-                                                  REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator);
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           BipedalSupportPlanarRegionParametersMessage.class,
-                                           ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
+      regionPublisher = ROS2Tools.createPublisherWithType(ros2Node,
+                                                          PlanarRegionsListMessage.class,
+                                                          REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator);
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
+                                                   BipedalSupportPlanarRegionParametersMessage.class,
+                                                   ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
                                                               .withInput(),
                                            s -> latestParametersMessage.set(s.takeNextData()));
 

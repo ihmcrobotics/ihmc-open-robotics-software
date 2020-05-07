@@ -129,7 +129,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
       controllerNetworkSubscriber.addMessageFilter(createMessageFilter());
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), new NewMessageListener<ToolboxStateMessage>()
+      ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), new NewMessageListener<ToolboxStateMessage>()
       {
          private final ToolboxStateMessage message = new ToolboxStateMessage();
          @Override
