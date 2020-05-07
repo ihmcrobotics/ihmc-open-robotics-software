@@ -42,11 +42,11 @@ public class PawStepPlannerCommunicationProperties
 
    public static ROS2TopicName publisherTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.FOOTSTEP_PLANNER.robot(robotName).suffix(ROS2Tools.OUTPUT);
+      return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withSuffix(ROS2Tools.OUTPUT);
    }
 
    public static ROS2TopicName subscriberTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.FOOTSTEP_PLANNER.robot(robotName).suffix(ROS2Tools.INPUT);
+      return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withSuffix(ROS2Tools.INPUT);
    }
 }

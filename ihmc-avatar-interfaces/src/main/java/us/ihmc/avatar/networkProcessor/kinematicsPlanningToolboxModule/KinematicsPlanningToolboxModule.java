@@ -102,7 +102,7 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
 
    public static ROS2TopicName getPublisherTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.robot(robotName).suffix(ROS2Tools.OUTPUT);
+      return ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withSuffix(ROS2Tools.OUTPUT);
    }
 
    @Override
@@ -113,6 +113,6 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
 
    public static ROS2TopicName getSubscriberTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.robot(robotName).suffix(ROS2Tools.INPUT);
+      return ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withSuffix(ROS2Tools.INPUT);
    }
 }

@@ -32,8 +32,8 @@ public class RemoteSyncedRobotModel
 
       robotConfigurationDataInput = new ROS2Input<RobotConfigurationData>(ros2Node,
                                                                           RobotConfigurationData.class,
-                                                                          HUMANOID_CONTROLLER.robot(robotModel.getSimpleRobotName())
-                                                                                             .suffix(ROS2Tools.OUTPUT),
+                                                                          HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName())
+                                                                                             .withSuffix(ROS2Tools.OUTPUT),
                                                                           ROS2TopicNameTools.newMessageInstance(RobotConfigurationData.class),
                                                                           message ->
                                                                           {

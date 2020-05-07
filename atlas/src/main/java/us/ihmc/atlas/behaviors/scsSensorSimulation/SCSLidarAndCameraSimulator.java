@@ -69,7 +69,7 @@ public class SCSLidarAndCameraSimulator
    {
       robotConfigurationData = new ROS2Input<>(ros2Node,
                                                RobotConfigurationData.class,
-                                               ROS2Tools.HUMANOID_CONTROLLER.robot(robotModel.getSimpleRobotName()).suffix(ROS2Tools.INPUT));
+                                               ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName()).withSuffix(ROS2Tools.INPUT));
 
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
 
@@ -111,8 +111,8 @@ public class SCSLidarAndCameraSimulator
       // required for timestamp
       ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
                                                                                  RobotConfigurationData.class,
-                                                                                 ROS2Tools.HUMANOID_CONTROLLER.robot(robotModel.getSimpleRobotName())
-                                                                                                              .suffix(ROS2Tools.OUTPUT));
+                                                                                 ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName())
+                                                                                                              .withSuffix(ROS2Tools.OUTPUT));
       IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT);
       CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
       cameraConfiguration.setCameraMount(videoCameraMountName);

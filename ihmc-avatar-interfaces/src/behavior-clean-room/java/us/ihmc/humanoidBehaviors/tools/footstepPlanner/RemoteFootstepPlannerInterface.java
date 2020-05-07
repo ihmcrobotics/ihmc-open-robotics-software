@@ -90,7 +90,7 @@ public class RemoteFootstepPlannerInterface
 
       new ROS2Callback<>(ros2Node,
                          FootstepPlanningToolboxOutputStatus.class,
-                         ROS2Tools.FOOTSTEP_PLANNER.robot(robotModel.getSimpleRobotName()).suffix(ROS2Tools.OUTPUT),
+                         ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotModel.getSimpleRobotName()).withSuffix(ROS2Tools.OUTPUT),
                          this::acceptFootstepPlannerResult);
    }
 

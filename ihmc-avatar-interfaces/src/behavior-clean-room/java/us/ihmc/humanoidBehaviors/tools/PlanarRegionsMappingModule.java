@@ -33,9 +33,9 @@ public class PlanarRegionsMappingModule
    {
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.MAPPING_MODULE_NODE_NAME);
 
-      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.suffix(ROS2Tools.OUTPUT));
+      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.withSuffix(ROS2Tools.OUTPUT));
 
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.suffix(ROS2Tools.OUTPUT), this::process);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.withSuffix(ROS2Tools.OUTPUT), this::process);
    }
 
    private void process(PlanarRegionsListMessage visibleRegionsMessage)

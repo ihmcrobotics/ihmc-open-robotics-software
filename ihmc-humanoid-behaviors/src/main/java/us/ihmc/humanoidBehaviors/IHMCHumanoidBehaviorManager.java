@@ -540,7 +540,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
    public static ROS2TopicName getBehaviorRosTopicPrefix(String robotName, String suffix)
    {
-      return ROS2Tools.BEHAVIOR_MODULE.robot(robotName).suffix(suffix);
+      return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withSuffix(suffix);
    }
 
    public static ROS2TopicName getBehaviorOutputRosTopicPrefix(String robotName)
@@ -555,12 +555,12 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
    public static ROS2TopicName getPublisherTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.BEHAVIOR_MODULE.robot(robotName).suffix(ROS2Tools.OUTPUT);
+      return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withSuffix(ROS2Tools.OUTPUT);
    }
 
    public static ROS2TopicName getSubscriberTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.BEHAVIOR_MODULE.robot(robotName).suffix(ROS2Tools.INPUT);
+      return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withSuffix(ROS2Tools.INPUT);
    }
 
    @Override

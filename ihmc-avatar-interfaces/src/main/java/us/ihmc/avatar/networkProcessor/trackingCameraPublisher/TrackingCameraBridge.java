@@ -76,7 +76,7 @@ public class TrackingCameraBridge
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
-      ROS2TopicName generateTopicName = defaultTopicNameGenerator.type(messageTypeToPublish);
+      ROS2TopicName generateTopicName = defaultTopicNameGenerator.withType(messageTypeToPublish);
       if (ros2Node != null)
       {
          ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,

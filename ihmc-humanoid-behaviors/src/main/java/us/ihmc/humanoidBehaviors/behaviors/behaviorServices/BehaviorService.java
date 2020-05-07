@@ -43,13 +43,13 @@ public abstract class BehaviorService
    
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
-      ROS2TopicName topicName = controllerSubGenerator.type(messageType);
+      ROS2TopicName topicName = controllerSubGenerator.withType(messageType);
       return createPublisher(messageType, topicName);
    }
 
    public <T> IHMCROS2Publisher<T> createBehaviorOutputPublisher(Class<T> messageType, String topicName)
    {
-      return createPublisher(messageType, IHMCHumanoidBehaviorManager.getBehaviorOutputRosTopicPrefix(robotName).suffix(topicName));
+      return createPublisher(messageType, IHMCHumanoidBehaviorManager.getBehaviorOutputRosTopicPrefix(robotName).withSuffix(topicName));
    }
 
    @SuppressWarnings("unchecked")
@@ -68,7 +68,7 @@ public abstract class BehaviorService
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      ROS2TopicName topicName = controllerPubGenerator.type(messageType);
+      ROS2TopicName topicName = controllerPubGenerator.withType(messageType);
       createSubscriber(messageType, topicName, consumer);
    }
 

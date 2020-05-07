@@ -72,8 +72,8 @@ public class PawPlanningModule extends QuadrupedToolboxModule
                                            s -> processGroundPlaneMessage(s.takeNextData()));
 
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSupportPlanarRegionParametersMessage.class,
-                                           ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER.robot(robotName)
-                                                              .suffix(ROS2Tools.INPUT),
+                                           ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
+                                                              .withSuffix(ROS2Tools.INPUT),
                                            s -> processSupportRegionParameters(s.takeNextData()));
 
       // inputs to this module
@@ -158,13 +158,13 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    @Override
    public ROS2TopicName getPublisherTopicNameGenerator()
    {
-      return ROS2Tools.FOOTSTEP_PLANNER.robot(robotName).suffix(ROS2Tools.OUTPUT);
+      return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withSuffix(ROS2Tools.OUTPUT);
    }
 
    @Override
    public ROS2TopicName getSubscriberTopicNameGenerator()
    {
-      return ROS2Tools.FOOTSTEP_PLANNER.robot(robotName).suffix(ROS2Tools.INPUT);
+      return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withSuffix(ROS2Tools.INPUT);
    }
 
    @Override

@@ -132,8 +132,8 @@ public class HumanoidKinematicsSimulation
 
       robotConfigurationDataPublisher = new IHMCROS2Publisher<>(ros2Node,
                                                                 RobotConfigurationData.class,
-                                                                ROS2Tools.HUMANOID_CONTROLLER.robot(robotModel.getSimpleRobotName())
-                                                                                             .suffix(ROS2Tools.OUTPUT));
+                                                                ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName())
+                                                                                             .withSuffix(ROS2Tools.OUTPUT));
 
       String robotName = robotModel.getSimpleRobotName();
       fullRobotModel = robotModel.createFullRobotModel();
