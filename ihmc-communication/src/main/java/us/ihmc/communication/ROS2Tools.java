@@ -2,6 +2,7 @@ package us.ihmc.communication;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.function.Function;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.exception.ExceptionHandler;
@@ -74,7 +75,9 @@ public class ROS2Tools
 
    public static final ROS2TopicName REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
 
-   public static final ROS2Topic<RobotConfigurationData> ROBOT_CONFIGURATION_DATA = new ROS2Topic<>(RobotConfigurationData.class, typeName -> typeName);
+   public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
+
+   public static final ROS2Topic<RobotConfigurationData> ROBOT_CONFIGURATION_DATA = getControllerTopic(RobotConfigurationData.class);
 
    public static ROS2TopicName getControllerOutputTopicName(String robotName)
    {
@@ -89,6 +92,21 @@ public class ROS2Tools
    public static ROS2Topic<RobotConfigurationData> getRobotConfigurationDataTopic(String robotName)
    {
       return ROBOT_CONFIGURATION_DATA.withTopicName(ROS2Tools.getControllerOutputTopicName(robotName));
+   }
+
+   private static <T> ROS2Topic<T> getControllerTopic(Class<T> messageType)
+   {
+      return new ROS2Topic<>(messageType, NAMED_BY_TYPE);
+   }
+
+   public static <T> ROS2Topic<T> getControllerInputTopic(Class<T> messageType, String robotName)
+   {
+      return new ROS2Topic<>(messageType, NAMED_BY_TYPE).withTopicName(getControllerInputTopicName(robotName));
+   }
+
+   public static <T> ROS2Topic<T> getControllerOutputTopic(Class<T> messageType, String robotName)
+   {
+      return new ROS2Topic<>(messageType, NAMED_BY_TYPE).withTopicName(getControllerOutputTopicName(robotName));
    }
 
    public static ROS2TopicName getQuadrupedControllerOutputTopicName(String robotName)
