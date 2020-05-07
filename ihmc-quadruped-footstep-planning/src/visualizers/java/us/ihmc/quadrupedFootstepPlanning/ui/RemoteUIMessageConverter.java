@@ -167,7 +167,7 @@ public class RemoteUIMessageConverter
                                            s -> messager.submitMessage(PawStepPlannerMessagerAPI.RobotConfigurationDataTopic, s.takeNextData()));
 
       ROS2TopicName controllerPreviewOutputTopicNameGenerator = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
-                                                                                                 .withSuffix(ROS2Tools.OUTPUT);
+                                                                                                 .withOutput();
       ROS2Tools.createCallbackSubscription(ros2Node, WalkingControllerPreviewOutputMessage.class, controllerPreviewOutputTopicNameGenerator, s -> messager.submitMessage(
             PawStepPlannerMessagerAPI.WalkingPreviewOutput, s.takeNextData()));
 

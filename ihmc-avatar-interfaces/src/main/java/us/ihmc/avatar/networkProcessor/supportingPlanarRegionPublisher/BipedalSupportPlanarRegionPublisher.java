@@ -93,7 +93,7 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            BipedalSupportPlanarRegionParametersMessage.class,
                                            ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
-                                                              .withSuffix(ROS2Tools.INPUT),
+                                                              .withInput(),
                                            s -> latestParametersMessage.set(s.takeNextData()));
 
       BipedalSupportPlanarRegionParametersMessage defaultParameters = new BipedalSupportPlanarRegionParametersMessage();

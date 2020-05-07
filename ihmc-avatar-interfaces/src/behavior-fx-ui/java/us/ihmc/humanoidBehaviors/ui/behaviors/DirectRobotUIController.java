@@ -55,7 +55,7 @@ public class DirectRobotUIController extends Group
          robotLowLevelMessenger = new AtlasDirectRobotInterface(ros2Node, robotModel);
 
          neckTrajectoryPublisher = new IHMCROS2Publisher<>(ros2Node, NeckTrajectoryMessage.class,
-                                                           ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withSuffix(ROS2Tools.INPUT));
+                                                           ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withInput());
          OneDoFJointBasics neckJoint = fullRobotModel.getNeckJoint(NeckJointName.PROXIMAL_NECK_PITCH);
          setupSlider(neckSlider, () ->
          {
@@ -85,7 +85,7 @@ public class DirectRobotUIController extends Group
       supportRegionsParametersPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                     BipedalSupportPlanarRegionParametersMessage.class,
                                                                     ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
-                                                                                       .withSuffix(ROS2Tools.INPUT));
+                                                                                       .withInput());
 
       pumpPSI.setItems(new ImmutableObservableList<>(1500, 2300, 2500, 2800));
       pumpPSI.valueProperty().addListener((ChangeListener) -> sendPumpPSI());
@@ -94,7 +94,7 @@ public class DirectRobotUIController extends Group
       livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, false);
       livePlanarRegionsGraphic.setEnabled(false);
       getChildren().add(livePlanarRegionsGraphic);
-      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.withSuffix(ROS2Tools.INPUT));
+      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.withInput());
 
       supportRegionScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, BipedalSupportPlanarRegionPublisher.defaultScaleFactor, 0.1));
       enableSupportRegions.setSelected(true);

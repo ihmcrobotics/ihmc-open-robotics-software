@@ -186,7 +186,7 @@ public class AtlasCorridorNavigationTest
 
       // create map subscriber
       ROS2Input<PlanarRegionsListMessage> mapRegionsInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class,
-                                                                            ROS2Tools.REALSENSE_SLAM_MAP.withSuffix(ROS2Tools.OUTPUT));
+                                                                            ROS2Tools.REALSENSE_SLAM_MAP.withOutput());
 
       // subscribe to robot pose
       RemoteHumanoidRobotInterface robot = new RemoteHumanoidRobotInterface(ros2Node, createRobotModel());

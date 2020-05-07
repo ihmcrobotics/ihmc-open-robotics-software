@@ -555,12 +555,12 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
    public static ROS2TopicName getPublisherTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withSuffix(ROS2Tools.OUTPUT);
+      return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
    }
 
    public static ROS2TopicName getSubscriberTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withSuffix(ROS2Tools.INPUT);
+      return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();
    }
 
    @Override

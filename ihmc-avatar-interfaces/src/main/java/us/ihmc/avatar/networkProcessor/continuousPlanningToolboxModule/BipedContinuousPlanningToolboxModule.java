@@ -57,7 +57,7 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
 
       // status messages from the planner
       ROS2TopicName plannerPubGenerator = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
-                                                                             .withSuffix(ROS2Tools.OUTPUT);
+                                                                             .withOutput();
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepPlanningToolboxOutputStatus.class, plannerPubGenerator,
                                            s -> processFootstepPlannerOutput(s.takeNextData()));
 
@@ -68,7 +68,7 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
                                            s -> processPlanarRegionsListMessage(s.takeNextData()));
 
       ROS2TopicName plannerSubGenerator = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
-                                                                             .withSuffix(ROS2Tools.INPUT);
+                                                                             .withInput();
       footstepPlanningRequestPublisher = ROS2Tools.createPublisher(realtimeRos2Node, FootstepPlanningRequestPacket.class, plannerSubGenerator);
       footstepPlanningToolboxStatePublisher = ROS2Tools.createPublisher(realtimeRos2Node, ToolboxStateMessage.class, plannerSubGenerator);
    }
@@ -100,13 +100,13 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
    @Override
    public ROS2TopicName getPublisherTopicNameGenerator()
    {
-      return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName).withSuffix(ROS2Tools.OUTPUT);
+      return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
    public ROS2TopicName getSubscriberTopicNameGenerator()
    {
-      return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName).withSuffix(ROS2Tools.INPUT);
+      return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
    }
 
    @Override

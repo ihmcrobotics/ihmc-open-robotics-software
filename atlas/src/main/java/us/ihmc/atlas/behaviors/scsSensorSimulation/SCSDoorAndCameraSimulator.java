@@ -66,7 +66,7 @@ public class SCSDoorAndCameraSimulator
    {
       robotConfigurationData = new ROS2Input<>(ros2Node,
                                                RobotConfigurationData.class,
-                                               ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName()).withSuffix(ROS2Tools.OUTPUT));
+                                               ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName()).withOutput());
 
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
 
@@ -123,7 +123,7 @@ public class SCSDoorAndCameraSimulator
       ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
                                                                                  RobotConfigurationData.class,
                                                                                  ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName())
-                                                                                                              .withSuffix(ROS2Tools.OUTPUT));
+                                                                                                              .withOutput());
       IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT);
       CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
       cameraConfiguration.setCameraMount(videoCameraMountName);

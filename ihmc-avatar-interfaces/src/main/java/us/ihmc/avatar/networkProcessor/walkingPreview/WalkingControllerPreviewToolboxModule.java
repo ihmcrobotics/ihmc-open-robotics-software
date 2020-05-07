@@ -80,7 +80,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
 
    public static ROS2TopicName getPublisherTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withSuffix(ROS2Tools.OUTPUT);
+      return ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -91,7 +91,7 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
 
    public static ROS2TopicName getSubscriberTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withSuffix(ROS2Tools.INPUT);
+      return ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withInput();
    }
 
    public YoVariableRegistry getRegistry()

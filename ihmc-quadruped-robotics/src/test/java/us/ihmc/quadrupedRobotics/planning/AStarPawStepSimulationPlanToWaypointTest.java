@@ -80,7 +80,7 @@ public abstract class AStarPawStepSimulationPlanToWaypointTest implements Quadru
 
       ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), PawStepPlanningToolboxOutputStatus.class,
                                            ROS2Tools.FOOTSTEP_PLANNER.withRobot(stepTeleopManager.getRobotName())
-                                                              .withSuffix(ROS2Tools.OUTPUT),
+                                                              .withOutput(),
                                            s -> {
          QuadrupedTimedStepListMessage stepMessage = s.takeNextData().getFootstepDataList();
          stepMessage.setAreStepsAdjustable(true);
@@ -88,7 +88,7 @@ public abstract class AStarPawStepSimulationPlanToWaypointTest implements Quadru
                                            });
       ROS2Tools.createCallbackSubscription(stepTeleopManager.getRos2Node(), QuadrupedBodyOrientationMessage.class,
                                            ROS2Tools.FOOTSTEP_PLANNER.withRobot(stepTeleopManager.getRobotName())
-                                                              .withSuffix(ROS2Tools.OUTPUT),
+                                                              .withOutput(),
                                            s -> stepTeleopManager.publishBodyOrientationMessage(s.takeNextData()));
 
       PawStepPlanningRequestPacket planningRequestPacket = new PawStepPlanningRequestPacket();
