@@ -21,8 +21,8 @@ public class ROSiRobotCommandDispatcher implements Runnable
 
    public ROSiRobotCommandDispatcher(String robotName, RealtimeRos2Node realtimeRos2Node, String rosHostIP)
    {
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HandDesiredConfigurationMessage.class,
-                                           ROS2Tools.getControllerInputTopicName(robotName), handDesiredConfigurationMessageSubscriber);
+      ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, HandDesiredConfigurationMessage.class,
+                                                   ROS2Tools.getControllerInputTopicName(robotName), handDesiredConfigurationMessageSubscriber);
 
       String rosURI = "http://" + rosHostIP + ":11311";
 

@@ -72,8 +72,8 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
 
       if (realtimeRos2Node != null)
       {
-         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisher(realtimeRos2Node, HandJointAnglePacket.class,
-                                                                                                         pubTopicNameGenerator);
+         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherWithType(realtimeRos2Node, HandJointAnglePacket.class,
+                                                                                                                 pubTopicNameGenerator);
          jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(jointAnglePublisher, simulatedRobot);
       }
       else
@@ -107,8 +107,8 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
             handDesiredConfigurationMessageSubscribers.put(robotSide, handDesiredConfigurationSubscriber);
             if (realtimeRos2Node != null)
             {
-               ROS2Tools.createCallbackSubscription(realtimeRos2Node, HandDesiredConfigurationMessage.class, subTopicNameGenerator,
-                                                    handDesiredConfigurationSubscriber);
+               ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, HandDesiredConfigurationMessage.class, subTopicNameGenerator,
+                                                            handDesiredConfigurationSubscriber);
             }
 
             IndividualRobotiqHandController individualHandController = new IndividualRobotiqHandController(robotSide, handControllerTime, fingerTrajectoryTime,

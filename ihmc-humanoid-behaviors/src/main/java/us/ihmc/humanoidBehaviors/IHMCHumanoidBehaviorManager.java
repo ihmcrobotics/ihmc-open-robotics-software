@@ -135,9 +135,9 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
       ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
 
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           RobotConfigurationData.class,
-                                           controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
+                                                   RobotConfigurationData.class,
+                                                   controllerPubGenerator,
                                            s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
@@ -156,9 +156,9 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                             yoGraphicsListRegistry);
 
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           CapturabilityBasedStatus.class,
-                                           controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
+                                                   CapturabilityBasedStatus.class,
+                                                   controllerPubGenerator,
                                            s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.takeNextData()));
 
       CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
@@ -219,13 +219,13 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
       ROS2TopicName behaviorSubGenerator = getSubscriberTopicNameGenerator(robotName);
       dispatcher.finalizeStateMachine();
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           BehaviorControlModePacket.class,
-                                           behaviorSubGenerator,
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
+                                                   BehaviorControlModePacket.class,
+                                                   behaviorSubGenerator,
                                            s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           HumanoidBehaviorTypePacket.class,
-                                           behaviorSubGenerator,
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
+                                                   HumanoidBehaviorTypePacket.class,
+                                                   behaviorSubGenerator,
                                            s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
 
       if (startYoVariableServer)

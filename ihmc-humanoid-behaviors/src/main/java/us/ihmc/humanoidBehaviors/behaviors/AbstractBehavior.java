@@ -135,7 +135,7 @@ public abstract class AbstractBehavior implements RobotController
 
       if (publisher == null) // !containsKey
       {
-         publisher = ROS2Tools.createPublisher(ros2Node, messageType, topicName);
+         publisher = ROS2Tools.createPublisherWithType(ros2Node, messageType, topicName);
          publishers.put(topicName, publisher);
       }
 
@@ -154,7 +154,7 @@ public abstract class AbstractBehavior implements RobotController
 
    public <T> void createSubscriber(Class<T> messageType, ROS2TopicName topicName, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
    }
 
    public void addBehaviorService(BehaviorService behaviorService)

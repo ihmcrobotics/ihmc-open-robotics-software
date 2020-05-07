@@ -105,21 +105,21 @@ public class StereoVisionPointCloudPublisher
       ROS2TopicName generateTopicName = defaultTopicNameGenerator.withType(messageType);
       if (ros2Node != null)
       {
-         ROS2Tools.createCallbackSubscription(ros2Node,
-                                              RobotConfigurationData.class,
-                                              robotConfigurationDataTopicName,
+         ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
+                                                      RobotConfigurationData.class,
+                                                      robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-         pointcloudPublisher = ROS2Tools.createPublisher(ros2Node, messageType, generateTopicName);
+         pointcloudPublisher = ROS2Tools.createPublisherWithType(ros2Node, messageType, generateTopicName);
          pointcloudRealtimePublisher = null;
       }
       else
       {
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node,
-                                              RobotConfigurationData.class,
-                                              robotConfigurationDataTopicName,
+         ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node,
+                                                      RobotConfigurationData.class,
+                                                      robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
          pointcloudPublisher = null;
-         pointcloudRealtimePublisher = ROS2Tools.createPublisher(realtimeRos2Node, messageType, generateTopicName);
+         pointcloudRealtimePublisher = ROS2Tools.createPublisherWithType(realtimeRos2Node, messageType, generateTopicName);
       }
    }
 

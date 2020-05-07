@@ -35,7 +35,7 @@ public class DetectedObjectViewer
    public DetectedObjectViewer(Ros2Node ros2Node)
    {
       ROS2TopicName doorParameterPacketTopicName = ROS2Tools.IHMC_ROOT.withType(DoorParameterPacket.class);
-      ROS2Tools.createCallbackSubscription(ros2Node, DoorParameterPacket.class, doorParameterPacketTopicName, this::renderDoor);
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, DoorParameterPacket.class, doorParameterPacketTopicName, this::renderDoor);
    }
 
    public void renderDoor(Subscriber<DoorParameterPacket> subscriber)

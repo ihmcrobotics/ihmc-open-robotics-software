@@ -103,7 +103,7 @@ public class ControllerNetworkSubscriber
       try
       {
          T localInstance = multipleMessageType.newInstance();
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node, multipleMessageType, topicName, s ->
+         ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, multipleMessageType, topicName, s ->
          {
             s.takeNextData(localInstance, null);
             unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, localInstance);
@@ -159,7 +159,7 @@ public class ControllerNetworkSubscriber
       MessageCollection messageCollection = new MessageCollection();
 
       ROS2TopicName topicName = subscriberTopicNameGenerator.withType(MessageCollection.class);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, MessageCollection.class, topicName, s ->
+      ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, MessageCollection.class, topicName, s ->
       {
          s.takeNextData(messageCollection, null);
 
@@ -213,7 +213,7 @@ public class ControllerNetworkSubscriber
          T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
          ROS2TopicName topicName = subscriberTopicNameGenerator.withType(messageClass);
 
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node, messageClass, topicName, s ->
+         ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, messageClass, topicName, s ->
          {
             s.takeNextData(messageLocalInstance, null);
             receivedMessage(messageLocalInstance);
@@ -224,7 +224,7 @@ public class ControllerNetworkSubscriber
    private <T extends Settable<T>> IHMCRealtimeROS2Publisher<T> createPublisher(Class<T> messageClass)
    {
       ROS2TopicName topicName = publisherTopicNameGenerator.withType(messageClass);
-      IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisher(realtimeRos2Node, messageClass, topicName);
+      IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisherWithType(realtimeRos2Node, messageClass, topicName);
       return publisher;
    }
 

@@ -106,13 +106,13 @@ public class LIDARBasedREAModule
       new REAModuleROS2Subscription<StampedPosePacket>(ros2Node, reaMessager, "/ihmc/stamped_pose_T265", StampedPosePacket.class,
                                                        this::dispatchStampedPosePacket, REAModuleAPI.DepthCloudBufferEnable);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicNameGenerator,
-                                           this::dispatchCustomPlanarRegion);
-      ROS2Tools.createCallbackSubscription(ros2Node, RequestPlanarRegionsListMessage.class, subscriberTopicNameGenerator,
-                                           this::handleRequestPlanarRegionsListMessage);
-      ROS2Tools.createCallbackSubscription(ros2Node, REAStateRequestMessage.class, subscriberTopicNameGenerator, this::handleREAStateRequestMessage);
-      ROS2Tools.createCallbackSubscription(ros2Node, REASensorDataFilterParametersMessage.class, subscriberTopicNameGenerator,
-                                           this::handleREASensorDataFilterParametersMessage);
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicNameGenerator,
+                                                   this::dispatchCustomPlanarRegion);
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, RequestPlanarRegionsListMessage.class, subscriberTopicNameGenerator,
+                                                   this::handleRequestPlanarRegionsListMessage);
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, REAStateRequestMessage.class, subscriberTopicNameGenerator, this::handleREAStateRequestMessage);
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, REASensorDataFilterParametersMessage.class, subscriberTopicNameGenerator,
+                                                   this::handleREASensorDataFilterParametersMessage);
 
       FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
       loadConfigurationFile(filePropertyHelper);

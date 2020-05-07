@@ -38,11 +38,11 @@ public class QuadrupedREAStateUpdater
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "avatar_rea_state_updater");
 
-      reaStateRequestPublisher = ROS2Tools.createPublisher(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
-      ROS2Tools.createCallbackSubscription(ros2Node, HighLevelStateChangeStatusMessage.class, ROS2Tools.getQuadrupedControllerOutputTopicName(robotName),
-                                           this::handleHighLevelStateChangeMessage);
-      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedSteppingStateChangeMessage.class, ROS2Tools.getQuadrupedControllerOutputTopicName(robotName),
-                                           this::handleSteppingStateMessage);
+      reaStateRequestPublisher = ROS2Tools.createPublisherWithType(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, HighLevelStateChangeStatusMessage.class, ROS2Tools.getQuadrupedControllerOutputTopicName(robotName),
+                                                   this::handleHighLevelStateChangeMessage);
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, QuadrupedSteppingStateChangeMessage.class, ROS2Tools.getQuadrupedControllerOutputTopicName(robotName),
+                                                   this::handleSteppingStateMessage);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {
          shutdown();

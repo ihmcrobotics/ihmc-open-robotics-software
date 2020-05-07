@@ -58,7 +58,7 @@ public class LidarScanLogReader
       else
       {
          ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "lidar_log");
-         lidarScanPublisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, ROS2Tools.IHMC_ROOT);
+         lidarScanPublisher = ROS2Tools.createPublisherWithType(ros2Node, LidarScanMessage.class, ROS2Tools.IHMC_ROOT);
          ros2Node.spin();
       }
 

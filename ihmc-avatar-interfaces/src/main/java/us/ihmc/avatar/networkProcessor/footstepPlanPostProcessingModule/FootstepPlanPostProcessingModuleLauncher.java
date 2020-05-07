@@ -47,18 +47,18 @@ public class FootstepPlanPostProcessingModuleLauncher
                                                                                      .withOutput();
 
       // Parameters callback
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPostProcessingParametersPacket.class, subscriberTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, FootstepPostProcessingParametersPacket.class, subscriberTopicNameGenerator,
                                            s -> postProcessingModule.getParameters().set(s.readNextData()));
 
       // Planner request callback
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPostProcessingPacket.class, subscriberTopicNameGenerator, s -> {
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, FootstepPostProcessingPacket.class, subscriberTopicNameGenerator, s -> {
          FootstepPostProcessingPacket requestPacket = s.takeNextData();
          new Thread(() -> postProcessingModule.handleRequestPacket(requestPacket)).start();
       });
 
       // Result publisher
       IHMCROS2Publisher<FootstepPostProcessingPacket> resultPublisher = ROS2Tools
-            .createPublisher(ros2Node, FootstepPostProcessingPacket.class, publisherTopicNameGenerator);
+            .createPublisherWithType(ros2Node, FootstepPostProcessingPacket.class, publisherTopicNameGenerator);
       postProcessingModule.addStatusCallback(resultPublisher::publish);
 
       return postProcessingModule;

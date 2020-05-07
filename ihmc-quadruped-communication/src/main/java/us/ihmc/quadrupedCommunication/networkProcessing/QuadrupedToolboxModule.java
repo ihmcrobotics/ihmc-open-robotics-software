@@ -123,7 +123,7 @@ public abstract class QuadrupedToolboxModule
       if (fullRobotModel != null)
       {
          robotDataReceiver = new QuadrupedRobotDataReceiver(fullRobotModel, null);
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
+         ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
                                               s -> robotDataReceiver.receivedPacket(s.takeNextData()));
       }
       else
@@ -134,7 +134,7 @@ public abstract class QuadrupedToolboxModule
       networkSubscriber.addMessageFilter(createMessageFilter());
 
       ROS2Tools
-            .createCallbackSubscription(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
+            .createCallbackSubscriptionWithType(realtimeRos2Node, ToolboxStateMessage.class, getSubscriberTopicNameGenerator(), s -> receivedPacket(s.takeNextData()));
 
 
       registerExtraSubscribers(realtimeRos2Node);

@@ -76,17 +76,17 @@ public class RemoteFootstepPlannerInterface
       }
 
       toolboxStatePublisher =
-            ROS2Tools.createPublisher(ros2Node,
-                                      ToolboxStateMessage.class,
-                                      FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            ROS2Tools.createPublisherWithType(ros2Node,
+                                              ToolboxStateMessage.class,
+                                              FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
       footstepPlanningRequestPublisher =
-            ROS2Tools.createPublisher(ros2Node,
-                                      FootstepPlanningRequestPacket.class,
-                                      FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            ROS2Tools.createPublisherWithType(ros2Node,
+                                              FootstepPlanningRequestPacket.class,
+                                              FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
       parametersPublisher =
-            ROS2Tools.createPublisher(ros2Node,
-                                      FootstepPlannerParametersPacket.class,
-                                      FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            ROS2Tools.createPublisherWithType(ros2Node,
+                                              FootstepPlannerParametersPacket.class,
+                                              FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
 
       new ROS2Callback<>(ros2Node,
                          FootstepPlanningToolboxOutputStatus.class,

@@ -73,9 +73,9 @@ public class RosModule implements CloseableAndDisposable
 
       this.rosClockCalculator = rosClockCalculator;
       this.rosClockCalculator.setROSMainNode(rosMainNode);
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           RobotConfigurationData.class,
-                                           robotConfigurationDataTopicName,
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
+                                                   RobotConfigurationData.class,
+                                                   robotConfigurationDataTopicName,
                                            s -> this.rosClockCalculator.receivedRobotConfigurationData(s.takeNextData()));
 
       this.sensorInformation = sensorInformation;
@@ -140,8 +140,8 @@ public class RosModule implements CloseableAndDisposable
    {
       new IHMCETHRosLocalizationUpdateSubscriber(robotName, rosMainNode, ros2Node, rosClockCalculator::computeRobotMonotonicTime);
       RosLocalizationServiceClient rosLocalizationServiceClient = new RosLocalizationServiceClient(rosMainNode);
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           LocalizationPacket.class, ROS2Tools.IHMC_ROOT,
+      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
+                                                   LocalizationPacket.class, ROS2Tools.IHMC_ROOT,
                                            s -> rosLocalizationServiceClient.receivedPacket(s.takeNextData()));
    }
 
