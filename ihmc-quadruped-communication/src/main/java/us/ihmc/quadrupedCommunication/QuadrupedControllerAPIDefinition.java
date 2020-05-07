@@ -67,14 +67,14 @@ public class QuadrupedControllerAPIDefinition
       return quadrupedSupportedStatusMessages;
    }
 
-   public static ROS2TopicName getSubscriberTopicNameGenerator(String robotName)
+   public static ROS2TopicName getInputTopicName(String robotName)
    {
-      return ROS2Tools.QUADRUPED_CONTROLLER.withRobot(robotName).withInput();
+      return ROS2Tools.getQuadrupedControllerInputTopicName(robotName);
    }
 
-   public static ROS2TopicName getPublisherTopicNameGenerator(String robotName)
+   public static ROS2TopicName getOutputTopicName(String robotName)
    {
-      return ROS2Tools.QUADRUPED_CONTROLLER.withRobot(robotName).withOutput();
+      return ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
    }
 
    public static ControllerNetworkSubscriber.MessageValidator createDefaultMessageValidation()

@@ -83,6 +83,16 @@ public class ROS2Tools
       return HUMANOID_CONTROLLER.withRobot(robotName).withInput();
    }
 
+   public static ROS2TopicName getQuadrupedControllerOutputTopicName(String robotName)
+   {
+      return QUADRUPED_CONTROLLER.withRobot(robotName).withOutput();
+   }
+
+   public static ROS2TopicName getQuadrupedControllerInputTopicName(String robotName)
+   {
+      return QUADRUPED_CONTROLLER.withRobot(robotName).withInput();
+   }
+
    public final static ExceptionHandler RUNTIME_EXCEPTION = e ->
    {
       throw new RuntimeException(e);
