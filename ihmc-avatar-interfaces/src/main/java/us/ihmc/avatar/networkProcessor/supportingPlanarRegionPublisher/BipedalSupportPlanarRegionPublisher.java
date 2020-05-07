@@ -15,7 +15,6 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -80,12 +79,10 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "supporting_planar_region_publisher");
 
       ROS2Tools.createCallbackSubscription(ros2Node,
-                                           CapturabilityBasedStatus.class,
-                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                           CapturabilityBasedStatus.class, ROS2Tools.getControllerOutputTopicName(robotName),
                                            subscriber -> latestCapturabilityBasedStatusMessage.set(subscriber.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node,
-                                           RobotConfigurationData.class,
-                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                           RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
                                            subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
       regionPublisher = ROS2Tools.createPublisher(ros2Node,
                                                   PlanarRegionsListMessage.class,

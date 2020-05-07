@@ -3,7 +3,6 @@ package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.*;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -47,7 +46,7 @@ public class ExternalForceEstimationMessageReplay
       String name = getClass().getSimpleName();
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + name);
 
-      ROS2TopicName controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
       robotConfigurationDataPublisher = ROS2Tools.createPublisher(ros2Node, RobotConfigurationData.class, controllerPubGenerator);
       robotDesiredConfigurationDataPublisher = ROS2Tools.createPublisher(ros2Node, RobotDesiredConfigurationData.class, controllerPubGenerator);
 

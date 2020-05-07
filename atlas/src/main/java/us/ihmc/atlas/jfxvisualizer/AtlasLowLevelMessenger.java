@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.AbortWalkingMessage;
 import controller_msgs.msg.dds.AtlasLowLevelControlModeMessage;
 import controller_msgs.msg.dds.BDIBehaviorCommandPacket;
 import controller_msgs.msg.dds.PauseWalkingMessage;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
@@ -22,7 +21,7 @@ public class AtlasLowLevelMessenger implements RobotLowLevelMessenger
 
    public AtlasLowLevelMessenger(RealtimeRos2Node ros2Node, String robotName)
    {
-      ROS2TopicName subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      ROS2TopicName subscriberTopicNameGenerator = ROS2Tools.getControllerInputTopicName(robotName);
       lowLevelModePublisher = ROS2Tools.createPublisher(ros2Node, AtlasLowLevelControlModeMessage.class, subscriberTopicNameGenerator);
       bdiBehaviorPublisher = ROS2Tools.createPublisher(ros2Node, BDIBehaviorCommandPacket.class, subscriberTopicNameGenerator);
       abortWalkingPublisher = ROS2Tools.createPublisher(ros2Node, AbortWalkingMessage.class, subscriberTopicNameGenerator);

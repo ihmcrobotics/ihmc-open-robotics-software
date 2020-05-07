@@ -46,7 +46,6 @@ import us.ihmc.avatar.joystickBasedJavaFXController.JoystickStepParametersProper
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.footstepGenerator.ContinuousStepGenerator;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -160,8 +159,8 @@ public class StepGeneratorJavaFXController
       steppingParameters = walkingControllerParameters.getSteppingParameters();
 
       stepParametersReference = messager.createInput(SteppingParameters, new JoystickStepParameters(walkingControllerParameters));
-      ROS2TopicName controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      ROS2TopicName controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2TopicName controllerSubGenerator = ROS2Tools.getControllerInputTopicName(robotName);
 
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            FootstepStatusMessage.class,

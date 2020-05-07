@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 import java.util.HashMap;
 import java.util.Map;
 
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectConsumer;
@@ -26,8 +25,8 @@ public abstract class BehaviorService
       this.robotName = robotName;
       this.ros2Node = ros2Node;
       registry = new YoVariableRegistry(name);
-      controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-      controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      controllerSubGenerator = ROS2Tools.getControllerInputTopicName(robotName);
+      controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
    }
 
    public abstract void run();

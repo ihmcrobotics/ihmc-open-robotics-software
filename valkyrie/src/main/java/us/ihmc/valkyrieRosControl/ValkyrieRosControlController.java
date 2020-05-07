@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.communication.ROS2Tools;
@@ -382,8 +381,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = null;
       externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(null, null);
       ROS2Tools.createCallbackSubscription(estimatorRealtimeRos2Node,
-                                           StampedPosePacket.class,
-                                           ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName),
+                                           StampedPosePacket.class, ROS2Tools.getControllerInputTopicName(robotName),
                                            externalPelvisPoseSubscriber);
 
       /*

@@ -37,7 +37,6 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -144,8 +143,8 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       ros2Node = drcSimulationTestHelper.getRos2Node();
 
-      controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-      controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      controllerSubGenerator = ROS2Tools.getControllerInputTopicName(robotName);
+      controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
       toolboxSubGenerator = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
       toolboxPubGenerator = KinematicsStreamingToolboxModule.getPublisherTopicNameGenerator(robotName);
 

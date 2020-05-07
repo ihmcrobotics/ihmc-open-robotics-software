@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.base.CaseFormat;
 
 import controller_msgs.msg.dds.*;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.Packet;
@@ -72,7 +71,7 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation,
                                                   "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "KinematicsStreamingToolboxMessageLogger"));
 
-      ROS2TopicName controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
       ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotConfigurationData.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            CapturabilityBasedStatus.class,

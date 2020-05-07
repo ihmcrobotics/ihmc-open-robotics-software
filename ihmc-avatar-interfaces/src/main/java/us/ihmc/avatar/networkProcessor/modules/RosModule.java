@@ -12,7 +12,6 @@ import controller_msgs.msg.dds.LocalizationPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.ros.*;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectCommunicator;
 import us.ihmc.communication.packetCommunicator.PacketCommunicator;
@@ -55,7 +54,7 @@ public class RosModule implements CloseableAndDisposable
    {
       this(robotModel, robotModel.getROSClockCalculator(), robotModel.getSensorInformation(), robotModel.getSensorInformation(), robotModel.getJointMap(),
            rosCoreURI, simulatedSensorCommunicator,
-           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getRobotDescription().getName()).withType(RobotConfigurationData.class),
+           ROS2Tools.getControllerOutputTopicName(robotModel.getRobotDescription().getName()).withType(RobotConfigurationData.class),
            pubSubImplementation);
    }
 

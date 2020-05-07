@@ -4,7 +4,6 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -30,7 +29,7 @@ public class ValkyrieJoystickBasedGraspingApplication extends Application
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(robotTarget, ValkyrieRobotVersion.DEFAULT);
       String robotName = robotModel.getSimpleRobotName();
 
-      ROS2TopicName subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      ROS2TopicName subscriberTopicNameGenerator = ROS2Tools.getControllerInputTopicName(robotName);
 
       ValkyrieFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher = new ValkyrieFingerTrajectoryMessagePublisher(ros2Node,
                                                                                                                                    subscriberTopicNameGenerator);

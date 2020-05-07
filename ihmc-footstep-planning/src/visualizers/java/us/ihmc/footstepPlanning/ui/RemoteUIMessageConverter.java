@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.*;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -186,14 +185,11 @@ public class RemoteUIMessageConverter
                                            s -> processIncomingPlanarRegionMessage(s.takeNextData()));
 
       // things from the controller
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class,
-                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.RobotConfigurationData, s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node, CapturabilityBasedStatus.class,
-                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscription(ros2Node, CapturabilityBasedStatus.class, ROS2Tools.getControllerOutputTopicName(robotName),
                                            s -> processCapturabilityStatus(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepStatusMessage.class,
-                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscription(ros2Node, FootstepStatusMessage.class, ROS2Tools.getControllerOutputTopicName(robotName),
                                            s ->
                                            {
                                               messager.submitMessage(FootstepPlannerMessagerAPI.FootstepStatusMessage, s.takeNextData());
@@ -223,8 +219,8 @@ public class RemoteUIMessageConverter
       footstepPostProcessingRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPostProcessingPacket.class,
                                                                          ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(robotName)
                                                                                             .withInput());
-      footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
-      goHomePublisher = ROS2Tools.createPublisher(ros2Node, GoHomeMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
+      footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, ROS2Tools.getControllerInputTopicName(robotName));
+      goHomePublisher = ROS2Tools.createPublisher(ros2Node, GoHomeMessage.class, ROS2Tools.getControllerInputTopicName(robotName));
 
       ROS2TopicName controllerPreviewInputTopicNameGenerator = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
                                                                                                 .withInput();
