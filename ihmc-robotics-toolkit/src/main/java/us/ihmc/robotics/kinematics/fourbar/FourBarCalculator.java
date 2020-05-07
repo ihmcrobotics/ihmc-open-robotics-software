@@ -1,10 +1,7 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
-import static us.ihmc.euclid.geometry.tools.EuclidGeometryTools.unknownTriangleSideLengthByLawOfCosine;
-
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.Bound;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 public class FourBarCalculator
 {
@@ -30,67 +27,19 @@ public class FourBarCalculator
     * - Inner angle at vertex D: CDA
     * @formatter:on
     */
-   /**
-    * Side length (input):
-    * 
-    * <pre>
-    *        DA
-    *    D--------A
-    *    |\      /|
-    *    | \DB  / |
-    *    |  \  /  |
-    * CD |   \/   | AB
-    *    |   /\   |
-    *    |  /  \  |
-    *    | /AC  \ |
-    *    |/      \|
-    *    C--------B
-    *        BC
-    * </pre>
-    */
-   private double AB, BC, CD, DA;
-   /**
-    * Diagonal length (output):
-    * 
-    * <pre>
-    *        DA
-    *    D--------A
-    *    |\      /|
-    *    | \DB  / |
-    *    |  \  /  |
-    * CD |   \/   | AB
-    *    |   /\   |
-    *    |  /  \  |
-    *    | /AC  \ |
-    *    |/      \|
-    *    C--------B
-    *        BC
-    * </pre>
-    */
-   private double AC, BD;
 
-   /**
-    * Rate of change of the diagonal length (output).
-    * 
-    * @see AC, BD
-    */
-   private double ACDt, BDDt;
+   private final Vertex A = new Vertex("A");
+   private final Vertex B = new Vertex("B");
+   private final Vertex C = new Vertex("C");
+   private final Vertex D = new Vertex("D");
 
-   private double minDAB, maxDAB;
-   private double minABC, maxABC;
-   private double minBCD, maxBCD;
-   private double minCDA, maxCDA;
+   private final Edge AB = new Edge("AB");
+   private final Edge BC = new Edge("BC");
+   private final Edge CD = new Edge("CD");
+   private final Edge DA = new Edge("DA");
 
-   private boolean invertedAtDAB, invertedAtABC, invertedAtBCD, invertedAtCDA;
-
-   // Angles
-   private double angleDAB, angleABC, angleBCD, angleCDA;
-
-   // Angular velocities
-   private double angleDtDAB, angleDtABC, angleDtBCD, angleDtCDA;
-
-   // Angular accelerations
-   private double angleDt2DAB, angleDt2ABC, angleDt2BCD, angleDt2CDA;
+   private final Diagonal AC = new Diagonal("AC");
+   private final Diagonal BD = new Diagonal("AC");
 
    public enum Angle
    {
@@ -99,115 +48,49 @@ public class FourBarCalculator
 
    public FourBarCalculator()
    {
+      A.setup(DA, AB, AC);
+      B.setup(AB, BC, BD);
+      C.setup(BC, CD, AC);
+      D.setup(CD, DA, BD);
+
+      AB.setup(A, B, DA, BC);
+      BC.setup(B, C, AB, CD);
+      CD.setup(C, D, BC, DA);
+      DA.setup(D, A, CD, AB);
+
+      AC.setup(A, C, BD);
+      BD.setup(B, D, AC);
+   }
+
+   public void setup(Point2DReadOnly A, Point2DReadOnly B, Point2DReadOnly C, Point2DReadOnly D)
+   {
+      setSideLengths(A.distance(B), B.distance(C), C.distance(D), D.distance(A));
+
+   }
+
+   public void setToNaN()
+   {
+      A.setToNaN();
+      B.setToNaN();
+      C.setToNaN();
+      D.setToNaN();
+
+      AB.setToNaN();
+      BC.setToNaN();
+      CD.setToNaN();
+      DA.setToNaN();
+
+      AC.setToNaN();
+      BD.setToNaN();
    }
 
    public void setSideLengths(double AB, double BC, double CD, double DA)
    {
-      this.AB = Math.abs(AB);
-      this.BC = Math.abs(BC);
-      this.CD = Math.abs(CD);
-      this.DA = Math.abs(DA);
-
-      clearState();
-   }
-
-   public void setInversion(boolean invertedAtDAB, boolean invertedAtABC, boolean invertedAtBCD, boolean invertedAtCDA)
-   {
-      int inversionCount = invertedAtDAB ? 1 : 0;
-      inversionCount += invertedAtABC ? 1 : 0;
-      inversionCount += invertedAtBCD ? 1 : 0;
-      inversionCount += invertedAtCDA ? 1 : 0;
-
-      if (inversionCount > 1)
-         throw new IllegalArgumentException("Four-bar can only be inverted at one vertex.");
-
-      this.invertedAtDAB = invertedAtDAB;
-      this.invertedAtABC = invertedAtABC;
-      this.invertedAtBCD = invertedAtBCD;
-      this.invertedAtCDA = invertedAtCDA;
-
-      clearState();
-   }
-
-   private void clearState()
-   {
-      AC = Double.NaN;
-      BD = Double.NaN;
-      minDAB = Double.NaN;
-      maxDAB = Double.NaN;
-      minABC = Double.NaN;
-      maxABC = Double.NaN;
-      minBCD = Double.NaN;
-      maxBCD = Double.NaN;
-      minCDA = Double.NaN;
-      maxCDA = Double.NaN;
-
-      setVelocityToZero();
-      setAccelerationToZero();
-   }
-
-   public void setToMin(Angle source)
-   {
-      switch (source)
-      {
-         case ABC:
-         case CDA:
-            angleABC = getMinABC();
-            angleBCD = getMaxBCD();
-            angleCDA = getMinCDA();
-            angleDAB = getMaxDAB();
-            break;
-         case BCD:
-         case DAB:
-            angleABC = getMaxABC();
-            angleBCD = getMinBCD();
-            angleCDA = getMaxCDA();
-            angleDAB = getMinDAB();
-            break;
-      }
-
-      setVelocityToZero();
-      setAccelerationToZero();
-   }
-
-   public void setToMax(Angle source)
-   {
-      switch (source)
-      {
-         case ABC:
-         case CDA:
-            angleABC = getMaxABC();
-            angleBCD = getMinBCD();
-            angleCDA = getMaxCDA();
-            angleDAB = getMinDAB();
-            break;
-         case BCD:
-         case DAB:
-            angleABC = getMinABC();
-            angleBCD = getMaxBCD();
-            angleCDA = getMinCDA();
-            angleDAB = getMaxDAB();
-            break;
-      }
-
-      setVelocityToZero();
-      setAccelerationToZero();
-   }
-
-   public void setVelocityToZero()
-   {
-      angleDtABC = 0.0;
-      angleDtBCD = 0.0;
-      angleDtCDA = 0.0;
-      angleDtDAB = 0.0;
-   }
-
-   public void setAccelerationToZero()
-   {
-      angleDt2ABC = 0.0;
-      angleDt2BCD = 0.0;
-      angleDt2CDA = 0.0;
-      angleDt2DAB = 0.0;
+      setToNaN();
+      this.AB.length = AB;
+      this.BC.length = BC;
+      this.CD.length = CD;
+      this.DA.length = DA;
    }
 
    /**
@@ -221,422 +104,530 @@ public class FourBarCalculator
     */
    public Bound update(Angle source, double angle)
    {
-      if (source == Angle.ABC || source == Angle.CDA)
+      switch (source)
       {
-         if (source == Angle.ABC)
-         {
-            if (angle <= getMinABC())
-            {
-               setToMin(source);
-               return Bound.MIN;
-            }
-            else if (angle > getMaxABC())
-            {
-               setToMax(source);
-               return Bound.MAX;
-            }
-            else
-            {
-               angleABC = MathTools.clamp(angle, getMinABC(), getMaxABC());
-               AC = EuclidGeometryTools.unknownTriangleSideLengthByLawOfCosine(AB, BC, angleABC);
-               angleCDA = FourbarCalculatorTools.angleWithCosineLaw(CD, DA, AC);
-            }
-         }
-         else
-         {
-            if (angle <= getMinCDA())
-            {
-               setToMin(source);
-               return Bound.MIN;
-            }
-            else if (angle > getMaxCDA())
-            {
-               setToMax(source);
-               return Bound.MAX;
-            }
-            else
-            {
-               angleCDA = MathTools.clamp(angle, getMinCDA(), getMaxCDA());
-               AC = EuclidGeometryTools.unknownTriangleSideLengthByLawOfCosine(CD, DA, angleCDA);
-               angleABC = FourbarCalculatorTools.angleWithCosineLaw(AB, BC, AC);
-            }
-         }
-         double angleCAB = FourbarCalculatorTools.angleWithCosineLaw(AB, AC, BC);
-         double angleDAC = FourbarCalculatorTools.angleWithCosineLaw(DA, AC, CD);
-         angleDAB = angleDAC + angleCAB;
-         angleBCD = 2.0 * Math.PI - angleABC - angleCDA - angleDAB;
+         case DAB:
+            return FourbarCalculatorTools.update(getVertexA(), angle);
+         case ABC:
+            return FourbarCalculatorTools.update(getVertexB(), angle);
+         case BCD:
+            return FourbarCalculatorTools.update(getVertexC(), angle);
+         case CDA:
+            return FourbarCalculatorTools.update(getVertexD(), angle);
+         default:
+            throw new IllegalStateException();
       }
-      else
-      {
-         if (source == Angle.BCD)
-         {
-            if (angle <= getMinBCD())
-            {
-               setToMin(source);
-               return Bound.MIN;
-            }
-            else if (angle > getMaxBCD())
-            {
-               setToMax(source);
-               return Bound.MAX;
-            }
-            else
-            {
-               angleBCD = MathTools.clamp(angle, getMinBCD(), getMaxBCD());
-               BD = unknownTriangleSideLengthByLawOfCosine(BC, CD, angleBCD);
-               angleDAB = FourbarCalculatorTools.angleWithCosineLaw(DA, AB, BD);
-            }
-         }
-         else
-         {
-            if (angle <= getMinDAB())
-            {
-               setToMin(source);
-               return Bound.MIN;
-            }
-            else if (angle > getMaxDAB())
-            {
-               setToMax(source);
-               return Bound.MAX;
-            }
-            else
-            {
-               angleDAB = MathTools.clamp(angle, getMinDAB(), getMaxDAB());
-               BD = unknownTriangleSideLengthByLawOfCosine(DA, AB, angleDAB);
-               angleBCD = FourbarCalculatorTools.angleWithCosineLaw(BC, CD, BD);
-            }
-         }
-         double angleDBC = FourbarCalculatorTools.angleWithCosineLaw(BC, BD, CD);
-         double angleABD = FourbarCalculatorTools.angleWithCosineLaw(AB, BD, DA);
-         angleABC = angleABD + angleDBC;
-         angleCDA = 2.0 * Math.PI - angleBCD - angleDAB - angleABC;
-      }
-      return null;
    }
 
    public Bound update(Angle source, double angle, double angleDot)
    {
-      Bound limit = update(source, angle);
-
-      if (limit == Bound.MIN)
+      switch (source)
       {
-         if (angleDot <= 0.0)
-         {
-            setVelocityToZero();
-            return limit;
-         }
+         case DAB:
+            return FourbarCalculatorTools.update(getVertexA(), angle, angleDot);
+         case ABC:
+            return FourbarCalculatorTools.update(getVertexB(), angle, angleDot);
+         case BCD:
+            return FourbarCalculatorTools.update(getVertexC(), angle, angleDot);
+         case CDA:
+            return FourbarCalculatorTools.update(getVertexD(), angle, angleDot);
+         default:
+            throw new IllegalStateException();
       }
-      else if (limit == Bound.MAX)
-      {
-         if (angleDot >= 0.0)
-         {
-            setVelocityToZero();
-            return limit;
-         }
-      }
-
-      if (source == Angle.ABC || source == Angle.CDA)
-      {
-         if (source == Angle.ABC)
-         {
-            angleDtABC = angleDot;
-            ACDt = AB * BC * Math.sin(angleABC) * angleDtABC / AC;
-            angleDtCDA = FourbarCalculatorTools.angleDotWithCosineLaw(CD, DA, 0.0, AC, ACDt);
-         }
-         else
-         {
-            angleDtCDA = angleDot;
-            ACDt = AC * CD * Math.sin(angleCDA) * angleDtCDA / AC;
-            angleDtABC = FourbarCalculatorTools.angleDotWithCosineLaw(AB, BC, 0.0, AC, ACDt);
-         }
-
-         double angleDtCAB = FourbarCalculatorTools.angleDotWithCosineLaw(AB, AC, ACDt, BC, 0.0);
-         double angleDtDAC = FourbarCalculatorTools.angleDotWithCosineLaw(DA, AC, ACDt, CD, 0.0);
-         angleDtDAB = angleDtDAC + angleDtCAB;
-         angleDt2BCD = -angleDtABC - angleDtCDA - angleDtDAB;
-      }
-      else
-      {
-         if (source == Angle.CDA)
-         {
-            angleDtBCD = angleDot;
-            BDDt = BC * CD * Math.sin(angleBCD) * angleDtBCD / BD;
-            angleDtDAB = FourbarCalculatorTools.angleDotWithCosineLaw(DA, AB, 0.0, BD, BDDt);
-         }
-         else
-         {
-            angleDtDAB = angleDot;
-            BDDt = DA * AB * Math.sin(angleDAB) * angleDtDAB / BD;
-            angleDtBCD = FourbarCalculatorTools.angleDotWithCosineLaw(BC, CD, 0.0, BD, BDDt);
-         }
-
-         double angleDtDBA = FourbarCalculatorTools.angleDotWithCosineLaw(AB, BD, BDDt, DA, 0.0);
-         double angleDtDBC = FourbarCalculatorTools.angleDotWithCosineLaw(BC, BD, BDDt, CD, 0.0);
-         angleDtABC = angleDtDBA + angleDtDBC;
-         angleDtCDA = -angleDtDAB - angleDtABC - angleDtBCD;
-      }
-
-      return null;
    }
 
    public Bound update(Angle source, double angle, double angleDot, double angleDDot)
    {
-      Bound limit = update(source, angle, angleDot);
-
-      if (limit == Bound.MIN)
+      switch (source)
       {
-         if (angleDot <= 0.0)
-         {
-            setAccelerationToZero();
-            return limit;
-         }
+         case DAB:
+            return FourbarCalculatorTools.update(getVertexA(), angle, angleDot, angleDDot);
+         case ABC:
+            return FourbarCalculatorTools.update(getVertexB(), angle, angleDot, angleDDot);
+         case BCD:
+            return FourbarCalculatorTools.update(getVertexC(), angle, angleDot, angleDDot);
+         case CDA:
+            return FourbarCalculatorTools.update(getVertexD(), angle, angleDot, angleDDot);
+         default:
+            throw new IllegalStateException();
       }
-      else if (limit == Bound.MAX)
-      {
-         if (angleDot >= 0.0)
-         {
-            setAccelerationToZero();
-            return limit;
-         }
-      }
-
-      if (source == Angle.ABC || source == Angle.CDA)
-      {
-         double ACDt2;
-
-         if (source == Angle.ABC)
-         {
-            angleDt2ABC = angleDDot;
-            ACDt2 = AB * BC / AC * (Math.cos(angleABC) * angleDtABC * angleDtABC + Math.sin(angleABC) * (angleDt2ABC - ACDt * angleDtABC / AC));
-            angleDt2CDA = FourbarCalculatorTools.angleDDotWithCosineLaw(CD, DA, 0.0, 0.0, AC, ACDt, ACDt2);
-         }
-         else
-         {
-            angleDt2CDA = angleDDot;
-            ACDt2 = CD * DA / AC * (Math.cos(angleCDA) * angleDtCDA * angleDtCDA + Math.sin(angleCDA) * (angleDt2CDA - ACDt * angleDtCDA / AC));
-            angleDt2ABC = FourbarCalculatorTools.angleDDotWithCosineLaw(CD, DA, 0.0, 0.0, AC, ACDt, ACDt2);
-         }
-
-         double angleDt2CAB = FourbarCalculatorTools.angleDDotWithCosineLaw(AB, AC, ACDt, ACDt2, BC, 0.0, 0.0);
-         double angleDt2DAC = FourbarCalculatorTools.angleDDotWithCosineLaw(DA, AC, ACDt, ACDt2, CD, 0.0, 0.0);
-         angleDt2DAB = angleDt2DAC + angleDt2CAB;
-         angleDt2BCD = -angleDt2ABC - angleDt2CDA - angleDt2DAB;
-      }
-      else
-      {
-         double BDDt2;
-
-         if (source == Angle.CDA)
-         {
-            angleDt2BCD = angleDDot;
-            BDDt2 = BC * CD / BD * (Math.cos(angleBCD) * angleDtBCD * angleDtBCD + Math.sin(angleBCD) * (angleDt2BCD - BDDt * angleDtBCD / BD));
-            angleDt2DAB = FourbarCalculatorTools.angleDDotWithCosineLaw(DA, AB, 0.0, 0.0, BD, BDDt, BDDt2);
-         }
-         else
-         {
-            angleDt2DAB = angleDDot;
-            BDDt2 = DA * AB / BD * (Math.cos(angleDAB) * angleDtDAB * angleDtDAB + Math.sin(angleDAB) * (angleDt2DAB - BDDt * angleDtDAB / BD));
-            angleDt2BCD = FourbarCalculatorTools.angleDDotWithCosineLaw(BC, CD, 0.0, 0.0, BD, BDDt, BDDt2);
-         }
-
-         double angleDt2DBA = FourbarCalculatorTools.angleDDotWithCosineLaw(AB, BD, BDDt, BDDt2, DA, 0.0, 0.0);
-         double angleDt2DBC = FourbarCalculatorTools.angleDDotWithCosineLaw(BC, BD, BDDt, BDDt2, CD, 0.0, 0.0);
-         angleDt2ABC = angleDt2DBA + angleDt2DBC;
-         angleDt2CDA = -angleDt2DAB - angleDt2ABC - angleDt2BCD;
-      }
-
-      return null;
    }
 
-   public double getAngleDAB()
+   public Vertex getVertexA()
    {
-      return angleDAB;
+      return A;
    }
 
-   public double getAngleABC()
+   public Vertex getVertexB()
    {
-      return angleABC;
+      return B;
    }
 
-   public double getAngleBCD()
+   public Vertex getVertexC()
    {
-      return angleBCD;
+      return C;
    }
 
-   public double getAngleCDA()
+   public Vertex getVertexD()
    {
-      return angleCDA;
+      return D;
    }
 
-   public double getAngleDtDAB()
-   {
-      return angleDtDAB;
-   }
-
-   public double getAngleDtABC()
-   {
-      return angleDtABC;
-   }
-
-   public double getAngleDtBCD()
-   {
-      return angleDtBCD;
-   }
-
-   public double getAngleDtCDA()
-   {
-      return angleDtCDA;
-   }
-
-   public double getAngleDt2DAB()
-   {
-      return angleDt2DAB;
-   }
-
-   public double getAngleDt2ABC()
-   {
-      return angleDt2ABC;
-   }
-
-   public double getAngleDt2BCD()
-   {
-      return angleDt2BCD;
-   }
-
-   public double getAngleDt2CDA()
-   {
-      return angleDt2CDA;
-   }
-
-   public double getMinDAB()
-   {
-      if (Double.isNaN(minDAB))
-      {
-         double ACMax = Math.min(CD + DA, AB + BC);
-
-         if (ACMax == DA + CD)
-            minDAB = FourbarCalculatorTools.angleWithCosineLaw(ACMax, AB, BC);
-         else
-            minDAB = FourbarCalculatorTools.angleWithCosineLaw(ACMax, DA, CD);
-      }
-      return minDAB;
-   }
-
-   public double getMaxDAB()
-   {
-      if (Double.isNaN(maxDAB))
-      {
-         double DBMax = Math.min(DA + AB, BC + CD);
-
-         if (DBMax == DA + AB)
-            maxDAB = Math.PI;
-         else
-            maxDAB = FourbarCalculatorTools.angleWithCosineLaw(DA, AB, DBMax);
-      }
-      return maxDAB;
-   }
-
-   public double getMinABC()
-   {
-      if (Double.isNaN(minABC))
-      {
-         double DBMax = Math.min(DA + AB, BC + CD);
-
-         if (DBMax == DA + AB)
-            minABC = FourbarCalculatorTools.angleWithCosineLaw(DBMax, BC, CD);
-         else
-            minABC = FourbarCalculatorTools.angleWithCosineLaw(DBMax, AB, DA);
-      }
-      return minABC;
-   }
-
-   public double getMaxABC()
-   {
-      if (Double.isNaN(maxABC))
-      {
-         double ACMax = Math.min(CD + DA, AB + BC);
-
-         if (ACMax == AB + BC)
-            maxABC = Math.PI;
-         else
-            maxABC = FourbarCalculatorTools.angleWithCosineLaw(AB, BC, ACMax);
-      }
-      return maxABC;
-   }
-
-   public double getMinBCD()
-   {
-      if (Double.isNaN(minBCD))
-      {
-         double ACMax = Math.min(CD + DA, AB + BC);
-
-         if (ACMax == DA + CD)
-            minBCD = FourbarCalculatorTools.angleWithCosineLaw(ACMax, BC, AB);
-         else
-            minBCD = FourbarCalculatorTools.angleWithCosineLaw(ACMax, CD, DA);
-      }
-      return minBCD;
-   }
-
-   public double getMaxBCD()
-   {
-      if (Double.isNaN(maxBCD))
-      {
-         double DBMax = Math.min(DA + AB, BC + CD);
-
-         if (DBMax == BC + CD)
-            maxBCD = Math.PI;
-         else
-            maxBCD = FourbarCalculatorTools.angleWithCosineLaw(BC, CD, DBMax);
-      }
-      return maxBCD;
-   }
-
-   public double getMinCDA()
-   {
-      if (Double.isNaN(minCDA))
-      {
-         double DBMax = Math.min(DA + AB, BC + CD);
-
-         if (DBMax == DA + AB)
-            minCDA = FourbarCalculatorTools.angleWithCosineLaw(DBMax, CD, BC);
-         else
-            minCDA = FourbarCalculatorTools.angleWithCosineLaw(DBMax, DA, AB);
-      }
-      return minCDA;
-   }
-
-   public double getMaxCDA()
-   {
-      if (Double.isNaN(maxCDA))
-      {
-         double ACMax = Math.min(CD + DA, AB + BC);
-
-         if (ACMax == CD + DA)
-            maxCDA = Math.PI;
-         else
-            maxCDA = FourbarCalculatorTools.angleWithCosineLaw(CD, DA, ACMax);
-      }
-      return maxCDA;
-   }
-
-   public double getAB()
+   public Edge getEdgeAB()
    {
       return AB;
    }
 
-   public double getBC()
+   public Edge getEdgeBC()
    {
       return BC;
    }
 
-   public double getCD()
+   public Edge getEdgeCD()
    {
       return CD;
    }
 
-   public double getDA()
+   public Edge getEdgeDA()
    {
       return DA;
+   }
+
+   public Diagonal getDiagonalAC()
+   {
+      return AC;
+   }
+
+   public Diagonal getDiagonalBD()
+   {
+      return BD;
+   }
+
+   public double getAngleDAB()
+   {
+      return getVertexA().getAngle();
+   }
+
+   public double getAngleABC()
+   {
+      return getVertexB().getAngle();
+   }
+
+   public double getAngleBCD()
+   {
+      return getVertexC().getAngle();
+   }
+
+   public double getAngleCDA()
+   {
+      return getVertexD().getAngle();
+   }
+
+   public double getAngleDtDAB()
+   {
+      return getVertexA().getAngleDot();
+   }
+
+   public double getAngleDtABC()
+   {
+      return getVertexB().getAngleDot();
+   }
+
+   public double getAngleDtBCD()
+   {
+      return getVertexC().getAngleDot();
+   }
+
+   public double getAngleDtCDA()
+   {
+      return getVertexD().getAngleDot();
+   }
+
+   public double getAngleDt2DAB()
+   {
+      return getVertexA().getAngleDDot();
+   }
+
+   public double getAngleDt2ABC()
+   {
+      return getVertexB().getAngleDDot();
+   }
+
+   public double getAngleDt2BCD()
+   {
+      return getVertexC().getAngleDDot();
+   }
+
+   public double getAngleDt2CDA()
+   {
+      return getVertexD().getAngleDDot();
+   }
+
+   public double getMinDAB()
+   {
+      return getVertexA().getMinAngle();
+   }
+
+   public double getMaxDAB()
+   {
+      return getVertexA().getMaxAngle();
+   }
+
+   public double getMinABC()
+   {
+      return getVertexB().getMinAngle();
+   }
+
+   public double getMaxABC()
+   {
+      return getVertexB().getMaxAngle();
+   }
+
+   public double getMinBCD()
+   {
+      return getVertexC().getMinAngle();
+   }
+
+   public double getMaxBCD()
+   {
+      return getVertexC().getMaxAngle();
+   }
+
+   public double getMinCDA()
+   {
+      return getVertexD().getMinAngle();
+   }
+
+   public double getMaxCDA()
+   {
+      return getVertexD().getMaxAngle();
+   }
+
+   public double getAB()
+   {
+      return getEdgeAB().getLength();
+   }
+
+   public double getBC()
+   {
+      return getEdgeBC().getLength();
+   }
+
+   public double getCD()
+   {
+      return getEdgeCD().getLength();
+   }
+
+   public double getDA()
+   {
+      return getEdgeDA().getLength();
+   }
+
+   public static class Vertex
+   {
+      private final String name;
+
+      private double angle;
+      private double angleDot;
+      private double angleDDot;
+
+      private double minAngle;
+      private double maxAngle;
+
+      private Edge nextEdge, previousEdge;
+      private Diagonal diagonal;
+
+      private Vertex(String name)
+      {
+         this.name = name;
+      }
+
+      private void setup(Edge previousEdge, Edge nextEdge, Diagonal diagonal)
+      {
+         this.nextEdge = nextEdge;
+         this.previousEdge = previousEdge;
+         this.diagonal = diagonal;
+      }
+
+      public void setToNaN()
+      {
+         angle = Double.NaN;
+         angleDot = Double.NaN;
+         angleDDot = Double.NaN;
+         minAngle = Double.NaN;
+         maxAngle = Double.NaN;
+      }
+
+      public void setToMin()
+      {
+         angle = getMinAngle();
+         angle = 0.0;
+         angleDDot = 0.0;
+      }
+
+      public void setToMax()
+      {
+         angle = getMaxAngle();
+         angle = 0.0;
+         angleDDot = 0.0;
+      }
+
+      public void setAngle(double angle)
+      {
+         this.angle = angle;
+      }
+
+      public void setAngleDot(double angleDot)
+      {
+         this.angleDot = angleDot;
+      }
+
+      public void setAngleDDot(double angleDDot)
+      {
+         this.angleDDot = angleDDot;
+      }
+
+      public void setMinAngle(double minAngle)
+      {
+         this.minAngle = minAngle;
+      }
+
+      public void setMaxAngle(double maxAngle)
+      {
+         this.maxAngle = maxAngle;
+      }
+
+      public String getName()
+      {
+         return name;
+      }
+
+      public double getAngle()
+      {
+         return angle;
+      }
+
+      public double getAngleDot()
+      {
+         return angleDot;
+      }
+
+      public double getAngleDDot()
+      {
+         return angleDDot;
+      }
+
+      public double getMinAngle()
+      {
+         if (Double.isNaN(minAngle))
+            FourbarCalculatorTools.updateMinAngle(this);
+         return minAngle;
+      }
+
+      public double getMaxAngle()
+      {
+         if (Double.isNaN(maxAngle))
+            FourbarCalculatorTools.updateMaxAngle(this);
+         return maxAngle;
+      }
+
+      public Edge getNextEdge()
+      {
+         return nextEdge;
+      }
+
+      public Edge getPreviousEdge()
+      {
+         return previousEdge;
+      }
+
+      public Diagonal getDiagonal()
+      {
+         return diagonal;
+      }
+
+      public Vertex getNextVertex()
+      {
+         return nextEdge.getEnd();
+      }
+
+      public Vertex getPreviousVertex()
+      {
+         return previousEdge.getStart();
+      }
+
+      public Vertex getOppositeVertex()
+      {
+         return nextEdge.getNext().getEnd();
+      }
+
+      @Override
+      public String toString()
+      {
+         return getName();
+      }
+   }
+
+   public static class Edge
+   {
+      private final String name;
+
+      private double length;
+      private Vertex start, end;
+      private Edge nextEdge, previous;
+
+      private Edge(String name)
+      {
+         this.name = name;
+      }
+
+      private void setup(Vertex start, Vertex end, Edge previous, Edge next)
+      {
+         this.start = start;
+         this.end = end;
+         this.previous = previous;
+         this.nextEdge = next;
+      }
+
+      public void setToNaN()
+      {
+         length = Double.NaN;
+      }
+
+      public String getName()
+      {
+         return name;
+      }
+
+      public double getLength()
+      {
+         return length;
+      }
+
+      public Vertex getStart()
+      {
+         return start;
+      }
+
+      public Vertex getEnd()
+      {
+         return end;
+      }
+
+      public Edge getNext()
+      {
+         return nextEdge;
+      }
+
+      public Edge getPrevious()
+      {
+         return previous;
+      }
+
+      @Override
+      public String toString()
+      {
+         return getName();
+      }
+   }
+
+   public static class Diagonal
+   {
+      private final String name;
+
+      private double length;
+      private double lengthDot;
+      private double lengthDDot;
+      private double maxLength;
+      private Vertex start, end;
+      private Diagonal other;
+
+      public Diagonal(String name)
+      {
+         this.name = name;
+      }
+
+      private void setup(Vertex start, Vertex end, Diagonal other)
+      {
+         this.start = start;
+         this.end = end;
+         this.other = other;
+      }
+
+      public void setToNaN()
+      {
+         length = Double.NaN;
+         lengthDot = Double.NaN;
+         lengthDDot = Double.NaN;
+         maxLength = Double.NaN;
+      }
+
+      public void setLength(double length)
+      {
+         this.length = length;
+      }
+
+      public void setLengthDot(double lengthDot)
+      {
+         this.lengthDot = lengthDot;
+      }
+
+      public void setLengthDDot(double lengthDDot)
+      {
+         this.lengthDDot = lengthDDot;
+      }
+
+      public void setMaxLength(double maxLength)
+      {
+         this.maxLength = maxLength;
+      }
+
+      public String getName()
+      {
+         return name;
+      }
+
+      public double getLength()
+      {
+         return length;
+      }
+
+      public double getLengthDot()
+      {
+         return lengthDot;
+      }
+
+      public double getLengthDDot()
+      {
+         return lengthDDot;
+      }
+
+      public double getMaxLength()
+      {
+         if (Double.isNaN(maxLength))
+            FourbarCalculatorTools.updateDiagonalMaxLength(this);
+         return maxLength;
+      }
+
+      public Vertex getStart()
+      {
+         return start;
+      }
+
+      public Vertex getEnd()
+      {
+         return end;
+      }
+
+      public Diagonal getOther()
+      {
+         return other;
+      }
+
+      @Override
+      public String toString()
+      {
+         return getName();
+      }
    }
 }

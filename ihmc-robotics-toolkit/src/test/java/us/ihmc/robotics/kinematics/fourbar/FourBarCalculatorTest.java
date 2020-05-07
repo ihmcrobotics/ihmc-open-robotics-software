@@ -1,6 +1,6 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
-import static us.ihmc.robotics.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 import java.util.Random;
@@ -412,10 +412,7 @@ public class FourBarCalculatorTest
    public void testGetMinMaxAngles()
    {
       Random random = new Random(45647);
-      FourBarCalculator calculatorABCD = new FourBarCalculator();
-      FourBarCalculator calculatorBCDA = new FourBarCalculator();
-      FourBarCalculator calculatorCDAB = new FourBarCalculator();
-      FourBarCalculator calculatorDABC = new FourBarCalculator();
+      FourBarCalculator calculator = new FourBarCalculator();
 
       for (int i = 0; i < ITERATIONS; i++)
       { // Testing for a convex quadrilateral
@@ -429,38 +426,21 @@ public class FourBarCalculatorTest
          double BCLength = B.distance(C);
          double CDLength = C.distance(D);
          double DALength = D.distance(A);
-         calculatorABCD.setSideLengths(ABLength, BCLength, CDLength, DALength);
-         calculatorBCDA.setSideLengths(BCLength, CDLength, DALength, ABLength);
-         calculatorCDAB.setSideLengths(CDLength, DALength, ABLength, BCLength);
-         calculatorDABC.setSideLengths(DALength, ABLength, BCLength, CDLength);
+         calculator.setSideLengths(ABLength, BCLength, CDLength, DALength);
 
          // Check sum of angles is 2*pi.
          // when diagonal AC is max we have: DAB=minDAB, ABC=maxABC, BCD=minBCD, CDA=maxCDA. Let's verify this:
-         assertEquals(2.0 * Math.PI,
-                      calculatorABCD.getMinDAB() + calculatorABCD.getMaxABC() + calculatorABCD.getMinBCD() + calculatorABCD.getMaxCDA(),
-                      EPSILON);
-         assertEquals(2.0 * Math.PI,
-                      calculatorBCDA.getMaxDAB() + calculatorBCDA.getMinABC() + calculatorBCDA.getMaxBCD() + calculatorBCDA.getMinCDA(),
-                      EPSILON);
-         assertEquals(2.0 * Math.PI,
-                      calculatorCDAB.getMinDAB() + calculatorCDAB.getMaxABC() + calculatorCDAB.getMinBCD() + calculatorCDAB.getMaxCDA(),
-                      EPSILON);
-         assertEquals(2.0 * Math.PI,
-                      calculatorDABC.getMaxDAB() + calculatorDABC.getMinABC() + calculatorDABC.getMaxBCD() + calculatorDABC.getMinCDA(),
-                      EPSILON);
+         double minDAB = calculator.getMinDAB();
+         double maxABC = calculator.getMaxABC();
+         double minBCD = calculator.getMinBCD();
+         double maxCDA = calculator.getMaxCDA();
+         assertEquals(2.0 * Math.PI, minDAB + maxABC + minBCD + maxCDA, EPSILON, "Iteration " + i);
          // when diagonal BD is max we have: DAB=maxDAB, ABC=minABC, BCD=maxBCD, CDA=minCDA. Let's verify this:
-         assertEquals(2.0 * Math.PI,
-                      calculatorABCD.getMaxDAB() + calculatorABCD.getMinABC() + calculatorABCD.getMaxBCD() + calculatorABCD.getMinCDA(),
-                      EPSILON);
-         assertEquals(2.0 * Math.PI,
-                      calculatorBCDA.getMinDAB() + calculatorBCDA.getMaxABC() + calculatorBCDA.getMinBCD() + calculatorBCDA.getMaxCDA(),
-                      EPSILON);
-         assertEquals(2.0 * Math.PI,
-                      calculatorCDAB.getMaxDAB() + calculatorCDAB.getMinABC() + calculatorCDAB.getMaxBCD() + calculatorCDAB.getMinCDA(),
-                      EPSILON);
-         assertEquals(2.0 * Math.PI,
-                      calculatorDABC.getMinDAB() + calculatorDABC.getMaxABC() + calculatorDABC.getMinBCD() + calculatorDABC.getMaxCDA(),
-                      EPSILON);
+         double maxDAB = calculator.getMaxDAB();
+         double minABC = calculator.getMinABC();
+         double maxBCD = calculator.getMaxBCD();
+         double minCDA = calculator.getMinCDA();
+         assertEquals(2.0 * Math.PI, maxDAB + minABC + maxBCD + minCDA, EPSILON, "Iteration " + i);
       }
    }
 }

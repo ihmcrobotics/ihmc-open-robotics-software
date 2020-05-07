@@ -4,10 +4,216 @@ import java.util.Random;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.geometry.Bound;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 
 public class FourbarCalculatorTools
 {
+   public static Bound update(FourBarCalculator.Vertex vertex, double angle)
+   {
+      FourBarCalculator.Vertex A = vertex;
+      FourBarCalculator.Vertex B = vertex.getNextVertex();
+      FourBarCalculator.Vertex C = vertex.getOppositeVertex();
+      FourBarCalculator.Vertex D = vertex.getPreviousVertex();
+
+      if (angle <= A.getMinAngle())
+      {
+         A.setToMin();
+         B.setToMax();
+         C.setToMin();
+         D.setToMax();
+         return Bound.MIN;
+      }
+      else if (angle >= A.getMaxAngle())
+      {
+         A.setToMax();
+         B.setToMin();
+         C.setToMax();
+         D.setToMin();
+         return Bound.MAX;
+      }
+
+      FourBarCalculator.Edge ABEdge = A.getNextEdge();
+      FourBarCalculator.Edge BCEdge = B.getNextEdge();
+      FourBarCalculator.Edge CDEdge = C.getNextEdge();
+      FourBarCalculator.Edge DAEdge = D.getNextEdge();
+      FourBarCalculator.Diagonal BDDiag = B.getDiagonal();
+
+      double AB = ABEdge.getLength();
+      double BC = BCEdge.getLength();
+      double CD = CDEdge.getLength();
+      double DA = DAEdge.getLength();
+
+      A.setAngle(angle);
+      double BD = EuclidGeometryTools.unknownTriangleSideLengthByLawOfCosine(DA, AB, angle);
+      BDDiag.setLength(BD);
+      C.setAngle(angleWithCosineLaw(BC, CD, BD));
+
+      double angleDBC = angleWithCosineLaw(BC, BD, CD);
+      double angleABD = angleWithCosineLaw(AB, BD, DA);
+      B.setAngle(angleABD + angleDBC);
+      D.setAngle(2.0 * Math.PI - A.getAngle() - B.getAngle() - C.getAngle());
+
+      return null;
+   }
+
+   public static Bound update(FourBarCalculator.Vertex vertex, double angle, double angleDot)
+   {
+      Bound limit = update(vertex, angle);
+
+      FourBarCalculator.Vertex A = vertex;
+      FourBarCalculator.Vertex B = vertex.getNextVertex();
+      FourBarCalculator.Vertex C = vertex.getOppositeVertex();
+      FourBarCalculator.Vertex D = vertex.getPreviousVertex();
+
+      if (limit == Bound.MIN)
+      {
+         if (angleDot <= 0.0)
+         {
+            A.setAngleDot(0.0);
+            B.setAngleDot(0.0);
+            C.setAngleDot(0.0);
+            D.setAngleDot(0.0);
+            return limit;
+         }
+      }
+      else if (limit == Bound.MAX)
+      {
+         if (angleDot >= 0.0)
+         {
+            A.setAngleDot(0.0);
+            B.setAngleDot(0.0);
+            C.setAngleDot(0.0);
+            D.setAngleDot(0.0);
+            return limit;
+         }
+      }
+
+      FourBarCalculator.Edge ABEdge = A.getNextEdge();
+      FourBarCalculator.Edge BCEdge = B.getNextEdge();
+      FourBarCalculator.Edge CDEdge = C.getNextEdge();
+      FourBarCalculator.Edge DAEdge = D.getNextEdge();
+      FourBarCalculator.Diagonal BDBiag = B.getDiagonal();
+
+      double AB = ABEdge.getLength();
+      double BC = BCEdge.getLength();
+      double CD = CDEdge.getLength();
+      double DA = DAEdge.getLength();
+      double BD = BDBiag.getLength();
+
+      A.setAngleDot(angleDot);
+      double BDDt = DA * AB * Math.sin(angle) * angleDot / BD;
+      BDBiag.setLengthDot(BDDt);
+      C.setAngleDot(angleDotWithCosineLaw(BC, CD, 0.0, BD, BDDt));
+
+      double angleDtDBA = angleDotWithCosineLaw(AB, BD, BDDt, DA, 0.0);
+      double angleDtDBC = angleDotWithCosineLaw(BC, BD, BDDt, CD, 0.0);
+      B.setAngleDot(angleDtDBA + angleDtDBC);
+      D.setAngleDot(-A.getAngleDot() - B.getAngleDot() - C.getAngleDot());
+
+      return null;
+   }
+
+   public static Bound update(FourBarCalculator.Vertex vertex, double angle, double angleDot, double angleDDot)
+   {
+      Bound limit = update(vertex, angle, angleDot);
+
+      FourBarCalculator.Vertex A = vertex;
+      FourBarCalculator.Vertex B = vertex.getNextVertex();
+      FourBarCalculator.Vertex C = vertex.getOppositeVertex();
+      FourBarCalculator.Vertex D = vertex.getPreviousVertex();
+
+      if (limit == Bound.MIN)
+      {
+         if (angleDot <= 0.0)
+         {
+            A.setAngleDDot(0.0);
+            B.setAngleDDot(0.0);
+            C.setAngleDDot(0.0);
+            D.setAngleDDot(0.0);
+            return limit;
+         }
+      }
+      else if (limit == Bound.MAX)
+      {
+         if (angleDot >= 0.0)
+         {
+            A.setAngleDDot(0.0);
+            B.setAngleDDot(0.0);
+            C.setAngleDDot(0.0);
+            D.setAngleDDot(0.0);
+            return limit;
+         }
+      }
+
+      FourBarCalculator.Edge ABEdge = A.getNextEdge();
+      FourBarCalculator.Edge BCEdge = B.getNextEdge();
+      FourBarCalculator.Edge CDEdge = C.getNextEdge();
+      FourBarCalculator.Edge DAEdge = D.getNextEdge();
+      FourBarCalculator.Diagonal BDDiag = B.getDiagonal();
+
+      double AB = ABEdge.getLength();
+      double BC = BCEdge.getLength();
+      double CD = CDEdge.getLength();
+      double DA = DAEdge.getLength();
+      double BD = BDDiag.getLength();
+      double BDDt = BDDiag.getLengthDot();
+
+      A.setAngleDDot(angleDDot);
+      double BDDt2 = DA * AB / BD * (Math.cos(angle) * angleDot * angleDot + Math.sin(angle) * (angleDDot - BDDt * angleDot / BD));
+      BDDiag.setLengthDDot(BDDt2);
+
+      C.setAngleDDot(angleDDotWithCosineLaw(BC, CD, 0.0, 0.0, BD, BDDt, BDDt2));
+
+      double angleDt2DBA = angleDDotWithCosineLaw(AB, BD, BDDt, BDDt2, DA, 0.0, 0.0);
+      double angleDt2DBC = angleDDotWithCosineLaw(BC, BD, BDDt, BDDt2, CD, 0.0, 0.0);
+      B.setAngleDDot(angleDt2DBA + angleDt2DBC);
+      D.setAngleDDot(-A.getAngleDDot() - B.getAngleDDot() - C.getAngleDDot());
+
+      return null;
+   }
+
+   public static void updateMinAngle(FourBarCalculator.Vertex vertex)
+   {
+      FourBarCalculator.Diagonal diagonal = vertex.getDiagonal();
+
+      FourBarCalculator.Edge next = vertex.getNextEdge();
+      FourBarCalculator.Edge prev = vertex.getPreviousEdge();
+      double diagonalMaxLength = diagonal.getMaxLength();
+
+      if (prev.getLength() + prev.getPrevious().getLength() == diagonalMaxLength)
+         vertex.setMinAngle(angleWithCosineLaw(diagonalMaxLength, next.getLength(), next.getNext().getLength()));
+      else
+         vertex.setMinAngle(angleWithCosineLaw(diagonalMaxLength, prev.getLength(), prev.getPrevious().getLength()));
+   }
+
+   public static void updateMaxAngle(FourBarCalculator.Vertex vertex)
+   {
+      FourBarCalculator.Diagonal otherDiagonal = vertex.getDiagonal().getOther();
+
+      FourBarCalculator.Edge next = vertex.getNextEdge();
+      FourBarCalculator.Edge prev = vertex.getPreviousEdge();
+      double diagonalMaxLength = otherDiagonal.getMaxLength();
+
+      if (prev.getLength() + next.getLength() == diagonalMaxLength)
+         vertex.setMaxAngle(Math.PI);
+      else
+         vertex.setMaxAngle(angleWithCosineLaw(prev.getLength(), next.getLength(), diagonalMaxLength));
+   }
+
+   public static void updateDiagonalMaxLength(FourBarCalculator.Diagonal diagonal)
+   {
+      FourBarCalculator.Vertex start = diagonal.getStart();
+      /*
+       * We collapse the 2 pairs of edges on each side of the diagonal, the one pair giving the smallest
+       * length is the max diagonal length.
+       */
+      double previousHalf = start.getPreviousEdge().getLength() + start.getPreviousEdge().getPrevious().getLength();
+      double nextHalf = start.getNextEdge().getLength() + start.getNextEdge().getNext().getLength();
+      diagonal.setMaxLength(Math.min(previousHalf, nextHalf));
+   }
+
    /**
     * Calculates the angle at A for a triangle ABC defined by by its lengths.
     * 
