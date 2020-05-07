@@ -420,14 +420,14 @@ public class FourBar
       public double getMinAngle()
       {
          if (Double.isNaN(minAngle))
-            FourBarTools.updateMinAngle(this);
+            FourBarTools.updateLimits(this);
          return minAngle;
       }
 
       public double getMaxAngle()
       {
          if (Double.isNaN(maxAngle))
-            FourBarTools.updateMaxAngle(this);
+            FourBarTools.updateLimits(this);
          return maxAngle;
       }
 
