@@ -18,7 +18,7 @@ public class ROS2InputQueue<T>
 
    public ROS2InputQueue(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2TopicName topicName)
    {
-      this(ros2Node, messageType, topicName.type(messageType).toString());
+      this(ros2Node, messageType, topicName.withType(messageType).toString());
    }
 
    public ROS2InputQueue(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName)

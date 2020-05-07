@@ -95,8 +95,8 @@ public class QuadrupedSupportPlanarRegionPublisher
                                                   REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator);
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            QuadrupedSupportPlanarRegionParametersMessage.class,
-                                           ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER.robot(robotName)
-                                                              .suffix(ROS2Tools.INPUT),
+                                           ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
+                                                              .withSuffix(ROS2Tools.INPUT),
                                            s -> latestParametersMessage.set(s.takeNextData()));
 
       QuadrupedSupportPlanarRegionParametersMessage defaultParameters = new QuadrupedSupportPlanarRegionParametersMessage();

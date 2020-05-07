@@ -99,7 +99,7 @@ public class ControllerNetworkSubscriber
    {
       final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
-      ROS2TopicName topicName = subscriberTopicNameGenerator.type(multipleMessageType);
+      ROS2TopicName topicName = subscriberTopicNameGenerator.withType(multipleMessageType);
       try
       {
          T localInstance = multipleMessageType.newInstance();
@@ -158,7 +158,7 @@ public class ControllerNetworkSubscriber
 
       MessageCollection messageCollection = new MessageCollection();
 
-      ROS2TopicName topicName = subscriberTopicNameGenerator.type(MessageCollection.class);
+      ROS2TopicName topicName = subscriberTopicNameGenerator.withType(MessageCollection.class);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, MessageCollection.class, topicName, s ->
       {
          s.takeNextData(messageCollection, null);
@@ -211,7 +211,7 @@ public class ControllerNetworkSubscriber
       { // Creating the subscribers
          Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
          T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
-         ROS2TopicName topicName = subscriberTopicNameGenerator.type(messageClass);
+         ROS2TopicName topicName = subscriberTopicNameGenerator.withType(messageClass);
 
          ROS2Tools.createCallbackSubscription(realtimeRos2Node, messageClass, topicName, s ->
          {
@@ -223,7 +223,7 @@ public class ControllerNetworkSubscriber
 
    private <T extends Settable<T>> IHMCRealtimeROS2Publisher<T> createPublisher(Class<T> messageClass)
    {
-      ROS2TopicName topicName = publisherTopicNameGenerator.type(messageClass);
+      ROS2TopicName topicName = publisherTopicNameGenerator.withType(messageClass);
       IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisher(realtimeRos2Node, messageClass, topicName);
       return publisher;
    }

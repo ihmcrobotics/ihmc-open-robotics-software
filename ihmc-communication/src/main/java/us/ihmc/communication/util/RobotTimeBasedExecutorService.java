@@ -66,7 +66,7 @@ public class RobotTimeBasedExecutorService
 
    private static ROS2TopicName createTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.HUMANOID_CONTROLLER.robot(robotName).suffix(ROS2Tools.OUTPUT);
+      return ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withSuffix(ROS2Tools.OUTPUT);
    }
 
    private static NewMessageListener<RobotConfigurationData> createListener(long period, TimeUnit timeUnit, Runnable runnable)

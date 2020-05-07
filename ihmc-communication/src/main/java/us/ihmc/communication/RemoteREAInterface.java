@@ -19,8 +19,8 @@ public class RemoteREAInterface
 
    public RemoteREAInterface(Ros2NodeInterface ros2Node)
    {
-      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.suffix(ROS2Tools.INPUT));
-      planarRegionsListInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.suffix(ROS2Tools.OUTPUT));
+      reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.withSuffix(ROS2Tools.INPUT));
+      planarRegionsListInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.withSuffix(ROS2Tools.OUTPUT));
 
       planarRegionsListInput.addCallback(planarRegionsListMessage -> stopwatch.start());
    }

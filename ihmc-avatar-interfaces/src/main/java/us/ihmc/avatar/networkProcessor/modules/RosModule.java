@@ -55,7 +55,7 @@ public class RosModule implements CloseableAndDisposable
    {
       this(robotModel, robotModel.getROSClockCalculator(), robotModel.getSensorInformation(), robotModel.getSensorInformation(), robotModel.getJointMap(),
            rosCoreURI, simulatedSensorCommunicator,
-           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getRobotDescription().getName()).type(RobotConfigurationData.class),
+           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotModel.getRobotDescription().getName()).withType(RobotConfigurationData.class),
            pubSubImplementation);
    }
 

@@ -25,21 +25,21 @@ class ROS2ToolsTest
    @Test
    public void testTopicNameStuff()
    {
-      assertEquals("/ihmc/rea_state_request", ROS2Tools.IHMC_ROOT.type(REAStateRequestMessage.class).toString());
-      assertEquals("/ihmc/atlas/rea_state_request", ROS2Tools.IHMC_ROOT.type(REAStateRequestMessage.class).robot("atlas").toString());
+      assertEquals("/ihmc/rea_state_request", ROS2Tools.IHMC_ROOT.withType(REAStateRequestMessage.class).toString());
+      assertEquals("/ihmc/atlas/rea_state_request", ROS2Tools.IHMC_ROOT.withType(REAStateRequestMessage.class).withRobot("atlas").toString());
       assertEquals("/ihmc/atlas/rea/rea_state_request/input",
-                   ROS2Tools.IHMC_ROOT.type(REAStateRequestMessage.class).robot("atlas").module("rea").suffix(ROS2Tools.INPUT).toString());
+                   ROS2Tools.IHMC_ROOT.withType(REAStateRequestMessage.class).withRobot("atlas").withModule("rea").withSuffix(ROS2Tools.INPUT).toString());
 
       ROS2TopicName defaultTopicNameGenerator = ROS2Tools.IHMC_ROOT;
-      assertEquals("/ihmc/rea_state_request", defaultTopicNameGenerator.type(REAStateRequestMessage.class).toString());
+      assertEquals("/ihmc/rea_state_request", defaultTopicNameGenerator.withType(REAStateRequestMessage.class).toString());
 
-      ROS2TopicName defaultTopicNameGeneratorWithRobot = ROS2Tools.IHMC_ROOT.robot("atlas");
-      assertEquals("/ihmc/atlas/rea_state_request", defaultTopicNameGeneratorWithRobot.type(REAStateRequestMessage.class).toString());
+      ROS2TopicName defaultTopicNameGeneratorWithRobot = ROS2Tools.IHMC_ROOT.withRobot("atlas");
+      assertEquals("/ihmc/atlas/rea_state_request", defaultTopicNameGeneratorWithRobot.withType(REAStateRequestMessage.class).toString());
 
-      ROS2TopicName defaultTopicNameGenerator3 = ROS2Tools.IHMC_ROOT.robot("atlas").module("rea").suffix(ROS2Tools.OUTPUT);
-      assertEquals("/ihmc/atlas/rea/rea_state_request/output", defaultTopicNameGenerator3.type(REAStateRequestMessage.class).toString());
+      ROS2TopicName defaultTopicNameGenerator3 = ROS2Tools.IHMC_ROOT.withRobot("atlas").withModule("rea").withSuffix(ROS2Tools.OUTPUT);
+      assertEquals("/ihmc/atlas/rea/rea_state_request/output", defaultTopicNameGenerator3.withType(REAStateRequestMessage.class).toString());
 
-      assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", ROS2Tools.STEP_TELEOP_TOOLBOX.robot("atlas").suffix(ROS2Tools.OUTPUT).toString());
+      assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot("atlas").withSuffix(ROS2Tools.OUTPUT).toString());
    }
 
    public void testROS2Communication()

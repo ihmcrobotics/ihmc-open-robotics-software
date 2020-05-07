@@ -102,7 +102,7 @@ public class StereoVisionPointCloudPublisher
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
-      ROS2TopicName generateTopicName = defaultTopicNameGenerator.type(messageType);
+      ROS2TopicName generateTopicName = defaultTopicNameGenerator.withType(messageType);
       if (ros2Node != null)
       {
          ROS2Tools.createCallbackSubscription(ros2Node,

@@ -93,7 +93,7 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
 
    public static ROS2TopicName getPublisherTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.HEIGHT_QUADTREE_TOOLBOX.robot(robotName).suffix(ROS2Tools.OUTPUT);
+      return ROS2Tools.HEIGHT_QUADTREE_TOOLBOX.withRobot(robotName).withSuffix(ROS2Tools.OUTPUT);
    }
 
    @Override
@@ -104,6 +104,6 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
 
    public static ROS2TopicName getSubscriberTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.HEIGHT_QUADTREE_TOOLBOX.robot(robotName).suffix(ROS2Tools.INPUT);
+      return ROS2Tools.HEIGHT_QUADTREE_TOOLBOX.withRobot(robotName).withSuffix(ROS2Tools.INPUT);
    }
 }

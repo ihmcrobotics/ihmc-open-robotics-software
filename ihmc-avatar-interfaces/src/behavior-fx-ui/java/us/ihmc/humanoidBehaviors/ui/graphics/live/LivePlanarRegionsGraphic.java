@@ -30,7 +30,7 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
 
    public LivePlanarRegionsGraphic(Ros2Node ros2Node, boolean initializeToFlatGround)
    {
-      this(ros2Node, ROS2Tools.REA.suffix(ROS2Tools.INPUT), initializeToFlatGround);
+      this(ros2Node, ROS2Tools.REA.withSuffix(ROS2Tools.INPUT), initializeToFlatGround);
    }
 
    public LivePlanarRegionsGraphic(Ros2Node ros2Node, ROS2TopicName regionsSourceTopicName, boolean initializeToFlatGround)

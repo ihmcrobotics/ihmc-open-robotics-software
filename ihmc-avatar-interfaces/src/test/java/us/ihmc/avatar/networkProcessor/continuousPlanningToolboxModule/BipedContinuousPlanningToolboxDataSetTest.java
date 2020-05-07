@@ -233,17 +233,17 @@ public class BipedContinuousPlanningToolboxDataSetTest
                                            FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(robotName),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepDataListMessage.class,
-                                           ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.robot(robotName)
-                                                              .suffix(ROS2Tools.OUTPUT),
+                                           ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName)
+                                                              .withSuffix(ROS2Tools.OUTPUT),
                                            s -> processFootstepDataListMessage(s.takeNextData()));
 
       requestPublisher = ROS2Tools.createPublisher(ros2Node, BipedContinuousPlanningRequestPacket.class,
-                                                   ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.robot(robotName)
-                                                                      .suffix(ROS2Tools.INPUT));
+                                                   ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName)
+                                                                      .withSuffix(ROS2Tools.INPUT));
       planarRegionsPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator);
       plannerParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerParametersPacket.class,
-                                                             ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.robot(robotName)
-                                                                                .suffix(ROS2Tools.INPUT));
+                                                             ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName)
+                                                                                .withSuffix(ROS2Tools.INPUT));
 
       ROS2TopicName controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       footstepStatusPublisher = ROS2Tools.createPublisher(ros2Node, FootstepStatusMessage.class, controllerPubGenerator);

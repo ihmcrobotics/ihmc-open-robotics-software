@@ -163,7 +163,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       if (enableStereoVisionPointCloudPublisher)
       {
-         ROS2TopicName rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).type(RobotConfigurationData.class);
+         ROS2TopicName rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).withType(RobotConfigurationData.class);
          multisenseStereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName);
          multisenseStereoVisionPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
          AvatarRobotPointCloudParameters multisenseStereoParameters = sensorInformation.getPointCloudParameters(AtlasSensorInformation.MULTISENSE_STEREO_ID);
@@ -172,7 +172,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       if (enableDepthPointCloudPublisher)
       {
-         ROS2TopicName rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).type(RobotConfigurationData.class);
+         ROS2TopicName rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).withType(RobotConfigurationData.class);
          pointCloudSensorManager = new AtlasPointCloudSensorManager(modelFactory,
                                                                     ros2Node,
                                                                     rcdTopicName,
@@ -255,7 +255,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    {
       AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(AtlasSensorInformation.MULTISENSE_LIDAR_ID);
       String sensorName = multisenseLidarParameters.getSensorNameInSdf();
-      ROS2TopicName rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).type(RobotConfigurationData.class);
+      ROS2TopicName rcdTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName).withType(RobotConfigurationData.class);
       LidarScanPublisher lidarScanPublisher = new LidarScanPublisher(sensorName, modelFactory, ros2Node, rcdTopicName);
       lidarScanPublisher.setROSClockCalculator(rosClockCalculator);
       lidarScanPublisher.setShadowFilter();

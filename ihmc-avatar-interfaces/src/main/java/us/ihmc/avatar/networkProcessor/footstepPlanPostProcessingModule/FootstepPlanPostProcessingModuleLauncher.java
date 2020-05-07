@@ -41,10 +41,10 @@ public class FootstepPlanPostProcessingModuleLauncher
       postProcessingModule.registerRosNode(ros2Node);
       String name = postProcessingModule.getName();
 
-      ROS2TopicName subscriberTopicNameGenerator = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.robot(name)
-                                                                                            .suffix(ROS2Tools.INPUT);
-      ROS2TopicName publisherTopicNameGenerator = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.robot(name)
-                                                                                     .suffix(ROS2Tools.OUTPUT);
+      ROS2TopicName subscriberTopicNameGenerator = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
+                                                                                            .withSuffix(ROS2Tools.INPUT);
+      ROS2TopicName publisherTopicNameGenerator = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
+                                                                                     .withSuffix(ROS2Tools.OUTPUT);
 
       // Parameters callback
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPostProcessingParametersPacket.class, subscriberTopicNameGenerator,
