@@ -7,6 +7,7 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.robotics.kinematics.fourbar.FourBar.Diagonal;
 
 public class FourBarTools
 {
@@ -174,44 +175,47 @@ public class FourBarTools
       return null;
    }
 
-   public static void updateMinAngle(FourBar.Vertex vertex)
+   public static void updateLimits(FourBar.Vertex vertex)
    {
-      FourBar.Diagonal diagonal = vertex.getDiagonal();
+      FourBar.Vertex A = vertex;
+      FourBar.Edge ABEdge = A.getNextEdge();
+      FourBar.Edge BCEdge = ABEdge.getNext();
+      FourBar.Edge CDEdge = BCEdge.getNext();
+      FourBar.Edge DAEdge = CDEdge.getNext();
+      FourBar.Diagonal ACDiag = A.getDiagonal();
+      FourBar.Diagonal BDDiag = ACDiag.getOther();
 
-      FourBar.Edge next = vertex.getNextEdge();
-      FourBar.Edge prev = vertex.getPreviousEdge();
-      double diagonalMaxLength = diagonal.getMaxLength();
+      double AB = ABEdge.getLength();
+      double BC = BCEdge.getLength();
+      double CD = CDEdge.getLength();
+      double DA = DAEdge.getLength();
+      double ACMax = ACDiag.getMaxLength();
+      double BDMax = BDDiag.getMaxLength();
 
-      if (prev.getLength() + prev.getPrevious().getLength() == diagonalMaxLength)
-         vertex.setMinAngle(angleWithCosineLaw(diagonalMaxLength, next.getLength(), next.getNext().getLength()));
+      if (DA + CD == ACMax)
+         A.setMinAngle(angleWithCosineLaw(ACMax, AB, BC));
       else
-         vertex.setMinAngle(angleWithCosineLaw(diagonalMaxLength, prev.getLength(), prev.getPrevious().getLength()));
-   }
+         A.setMinAngle(angleWithCosineLaw(ACMax, DA, CD));
 
-   public static void updateMaxAngle(FourBar.Vertex vertex)
-   {
-      FourBar.Diagonal otherDiagonal = vertex.getDiagonal().getOther();
-
-      FourBar.Edge next = vertex.getNextEdge();
-      FourBar.Edge prev = vertex.getPreviousEdge();
-      double diagonalMaxLength = otherDiagonal.getMaxLength();
-
-      if (prev.getLength() + next.getLength() == diagonalMaxLength)
-         vertex.setMaxAngle(Math.PI);
+      if (DA + AB == BDMax)
+         A.setMaxAngle(Math.PI);
       else
-         vertex.setMaxAngle(angleWithCosineLaw(prev.getLength(), next.getLength(), diagonalMaxLength));
+         A.setMaxAngle(angleWithCosineLaw(DA, AB, BDMax));
    }
 
    public static void updateDiagonalMaxLength(FourBar.Diagonal diagonal)
    {
-      FourBar.Vertex start = diagonal.getStart();
+      Diagonal AC = diagonal;
+      FourBar.Edge AB = AC.getStart().getNextEdge();
+      FourBar.Edge BC = AB.getNext();
+      FourBar.Edge CD = BC.getNext();
+      FourBar.Edge DA = CD.getNext();
+
       /*
        * We collapse the 2 pairs of edges on each side of the diagonal, the one pair giving the smallest
        * length is the max diagonal length.
        */
-      double previousHalf = start.getPreviousEdge().getLength() + start.getPreviousEdge().getPrevious().getLength();
-      double nextHalf = start.getNextEdge().getLength() + start.getNextEdge().getNext().getLength();
-      diagonal.setMaxLength(Math.min(previousHalf, nextHalf));
+      AC.setMaxLength(Math.min(DA.getLength() + CD.getLength(), AB.getLength() + BC.getLength()));
    }
 
    /**
