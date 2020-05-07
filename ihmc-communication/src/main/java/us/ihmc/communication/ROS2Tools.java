@@ -3,6 +3,7 @@ package us.ihmc.communication;
 import java.io.IOException;
 import java.net.InetAddress;
 
+import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.TopicDataType;
@@ -73,6 +74,8 @@ public class ROS2Tools
 
    public static final ROS2TopicName REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
 
+   public static final ROS2Topic<RobotConfigurationData> ROBOT_CONFIGURATION_DATA = new ROS2Topic<>(RobotConfigurationData.class, typeName -> typeName);
+
    public static ROS2TopicName getControllerOutputTopicName(String robotName)
    {
       return HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
@@ -81,6 +84,11 @@ public class ROS2Tools
    public static ROS2TopicName getControllerInputTopicName(String robotName)
    {
       return HUMANOID_CONTROLLER.withRobot(robotName).withInput();
+   }
+
+   public static ROS2Topic<RobotConfigurationData> getRobotConfigurationDataTopic(String robotName)
+   {
+      return ROBOT_CONFIGURATION_DATA.withTopicName(ROS2Tools.getControllerOutputTopicName(robotName));
    }
 
    public static ROS2TopicName getQuadrupedControllerOutputTopicName(String robotName)
@@ -200,6 +208,11 @@ public class ROS2Tools
       return createCallbackSubscription(ros2Node, messageType, topicName.withType(messageType), newMessageListener);
    }
 
+   public static <T> void createCallbackSubscription(Ros2NodeInterface ros2Node, ROS2Topic<T> topic, NewMessageListener<T> newMessageListener)
+   {
+      createCallbackSubscription(ros2Node, topic.getMessageType(), topic.getTopicName(), newMessageListener);
+   }
+
    public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node,
                                                                     Class<T> messageType,
                                                                     ROS2TopicName topicName,
@@ -287,6 +300,11 @@ public class ROS2Tools
       return createQueuedSubscription(realtimeRos2Node, messageType, topicName.withType(messageType));
    }
 
+   public static <T> void createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, ROS2Topic<T> topic)
+   {
+      createQueuedSubscription(realtimeRos2Node, topic.getMessageType(), topic.getTopicName());
+   }
+
    public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, ROS2TopicName topicName)
    {
       return createQueuedSubscription(realtimeRos2Node, messageType, topicName.toString());
@@ -321,6 +339,11 @@ public class ROS2Tools
       return createPublisher(realtimeRos2Node, messageType, topicName.withType(messageType));
    }
 
+   public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, ROS2Topic<T> topic)
+   {
+      return createPublisher(realtimeRos2Node, topic.getMessageType(), topic.getTopicName());
+   }
+
    public static <T> IHMCRealtimeROS2Publisher<T> createPublisher(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, ROS2TopicName topicName)
    {
       return createPublisher(realtimeRos2Node, messageType, topicName.toString());
@@ -351,6 +374,11 @@ public class ROS2Tools
    public static <T> IHMCROS2Publisher<T> createPublisherWithType(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2TopicName topicName)
    {
       return createPublisher(ros2Node, messageType, topicName.withType(messageType));
+   }
+
+   public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, ROS2Topic<T> topic)
+   {
+      return createPublisher(ros2Node, topic.getMessageType(), topic.getTopicName());
    }
 
    public static <T> IHMCROS2Publisher<T> createPublisher(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2TopicName topicName)
