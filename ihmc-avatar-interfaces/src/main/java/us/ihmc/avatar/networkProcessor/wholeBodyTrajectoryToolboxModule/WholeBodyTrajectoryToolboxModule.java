@@ -101,7 +101,7 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 
    public static ROS2TopicName getPublisherTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.WHOLE_BODY_TRAJECTORY_TOOLBOX.withRobot(robotName).withSuffix(ROS2Tools.OUTPUT);
+      return ROS2Tools.WHOLE_BODY_TRAJECTORY_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -112,7 +112,7 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
 
    public static ROS2TopicName getSubscriberTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.WHOLE_BODY_TRAJECTORY_TOOLBOX.withRobot(robotName).withSuffix(ROS2Tools.INPUT);
+      return ROS2Tools.WHOLE_BODY_TRAJECTORY_TOOLBOX.withRobot(robotName).withInput();
    }
 
    @Override

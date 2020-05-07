@@ -179,7 +179,7 @@ public class RemoteUIMessageConverter
       // we want to list to the footstep plan post processing result from the toolbox
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepPostProcessingPacket.class,
                                            ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(robotName)
-                                                              .withSuffix(ROS2Tools.OUTPUT),
+                                                              .withOutput(),
                                            s -> processFootstepPostProcessingResult(s.takeNextData()));
       // we want to also listen to incoming REA planar region data.
       ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
@@ -201,7 +201,7 @@ public class RemoteUIMessageConverter
                                            });
 
       ROS2TopicName controllerPreviewOutputTopicNameGenerator = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
-                                                                                                   .withSuffix(ROS2Tools.OUTPUT);
+                                                                                                   .withOutput();
       ROS2Tools.createCallbackSubscription(ros2Node, WalkingControllerPreviewOutputMessage.class, controllerPreviewOutputTopicNameGenerator, s -> messager.submitMessage(FootstepPlannerMessagerAPI.WalkingPreviewOutput, s.takeNextData()));
 
       // publishers
@@ -217,17 +217,17 @@ public class RemoteUIMessageConverter
       postProcessingParametersPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                     FootstepPostProcessingParametersPacket.class,
                                                                     ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(robotName)
-                                                                                       .withSuffix(ROS2Tools.INPUT));
+                                                                                       .withInput());
       footstepPlanningRequestPublisher = ROS2Tools
             .createPublisher(ros2Node, FootstepPlanningRequestPacket.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotName));
       footstepPostProcessingRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPostProcessingPacket.class,
                                                                          ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(robotName)
-                                                                                            .withSuffix(ROS2Tools.INPUT));
+                                                                                            .withInput());
       footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node, FootstepDataListMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
       goHomePublisher = ROS2Tools.createPublisher(ros2Node, GoHomeMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
 
       ROS2TopicName controllerPreviewInputTopicNameGenerator = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
-                                                                                                .withSuffix(ROS2Tools.INPUT);
+                                                                                                .withInput();
       walkingPreviewToolboxStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, controllerPreviewInputTopicNameGenerator);
       walkingPreviewRequestPublisher = ROS2Tools.createPublisher(ros2Node, WalkingControllerPreviewInputMessage.class, controllerPreviewInputTopicNameGenerator);
 
@@ -258,7 +258,7 @@ public class RemoteUIMessageConverter
       IHMCRealtimeROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher = ROS2Tools
             .createPublisher(ros2Node, BipedalSupportPlanarRegionParametersMessage.class,
                              ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
-                                                .withSuffix(ROS2Tools.INPUT));
+                                                .withInput());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters, supportRegionsParametersPublisher::publish);
    }
 

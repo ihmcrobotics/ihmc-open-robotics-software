@@ -83,9 +83,9 @@ public class RemoteQuadrupedTeleopManager
 
       ROS2TopicName controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
       ROS2TopicName stepTeleopSubGenerator = ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName)
-                                                                                .withSuffix(ROS2Tools.INPUT);
+                                                                                .withInput();
       ROS2TopicName footstepPlannerSubGenerator = ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName)
-                                                                                     .withSuffix(ROS2Tools.INPUT);
+                                                                                     .withInput();
 
       controllerStatePublisher = ROS2Tools.createPublisher(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);
       steppingStatePublisher = ROS2Tools.createPublisher(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);

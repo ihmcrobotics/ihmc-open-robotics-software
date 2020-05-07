@@ -96,7 +96,7 @@ public class QuadrupedSupportPlanarRegionPublisher
       ROS2Tools.createCallbackSubscription(ros2Node,
                                            QuadrupedSupportPlanarRegionParametersMessage.class,
                                            ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
-                                                              .withSuffix(ROS2Tools.INPUT),
+                                                              .withInput(),
                                            s -> latestParametersMessage.set(s.takeNextData()));
 
       QuadrupedSupportPlanarRegionParametersMessage defaultParameters = new QuadrupedSupportPlanarRegionParametersMessage();

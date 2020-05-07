@@ -234,16 +234,16 @@ public class BipedContinuousPlanningToolboxDataSetTest
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
       ROS2Tools.createCallbackSubscription(ros2Node, FootstepDataListMessage.class,
                                            ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName)
-                                                              .withSuffix(ROS2Tools.OUTPUT),
+                                                              .withOutput(),
                                            s -> processFootstepDataListMessage(s.takeNextData()));
 
       requestPublisher = ROS2Tools.createPublisher(ros2Node, BipedContinuousPlanningRequestPacket.class,
                                                    ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName)
-                                                                      .withSuffix(ROS2Tools.INPUT));
+                                                                      .withInput());
       planarRegionsPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator);
       plannerParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerParametersPacket.class,
                                                              ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName)
-                                                                                .withSuffix(ROS2Tools.INPUT));
+                                                                                .withInput());
 
       ROS2TopicName controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
       footstepStatusPublisher = ROS2Tools.createPublisher(ros2Node, FootstepStatusMessage.class, controllerPubGenerator);

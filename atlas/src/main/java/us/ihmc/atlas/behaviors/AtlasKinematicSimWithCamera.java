@@ -63,7 +63,7 @@ public class AtlasKinematicSimWithCamera
       ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
                                                                                  RobotConfigurationData.class,
                                                                                  ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName())
-                                                                                                              .withSuffix(ROS2Tools.OUTPUT));
+                                                                                                              .withOutput());
 
       String cameraName = "camera";
 

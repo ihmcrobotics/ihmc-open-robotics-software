@@ -97,17 +97,17 @@ public abstract class AbstractBehavior implements RobotController
 
       behaviorsServices = new ArrayList<>();
 
-      footstepPlannerInputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withSuffix(ROS2Tools.INPUT);
-      footstepPlannerOutputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withSuffix(ROS2Tools.OUTPUT);
-      kinematicsToolboxInputTopicName = ROS2Tools.KINEMATICS_TOOLBOX.withRobot(robotName).withSuffix(ROS2Tools.INPUT);
-      kinematicsToolboxOutputTopicName = ROS2Tools.KINEMATICS_TOOLBOX.withRobot(robotName).withSuffix(ROS2Tools.OUTPUT);
-      kinematicsPlanningToolboxInputTopicName = ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withSuffix(ROS2Tools.INPUT);
-      kinematicsPlanningToolboxOutputTopicName = ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withSuffix(ROS2Tools.OUTPUT);
+      footstepPlannerInputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
+      footstepPlannerOutputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
+      kinematicsToolboxInputTopicName = ROS2Tools.KINEMATICS_TOOLBOX.withRobot(robotName).withInput();
+      kinematicsToolboxOutputTopicName = ROS2Tools.KINEMATICS_TOOLBOX.withRobot(robotName).withOutput();
+      kinematicsPlanningToolboxInputTopicName = ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
+      kinematicsPlanningToolboxOutputTopicName = ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
 
-      controllerInputTopicName = ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withSuffix(ROS2Tools.INPUT);
-      controllerOutputTopicName = ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withSuffix(ROS2Tools.OUTPUT);
-      behaviorInputTopicName = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withSuffix(ROS2Tools.INPUT);
-      behaviorOutputTopicName = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withSuffix(ROS2Tools.OUTPUT);
+      controllerInputTopicName = ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withInput();
+      controllerOutputTopicName = ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
+      behaviorInputTopicName = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();
+      behaviorOutputTopicName = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
 
       textToSpeechPublisher = createPublisher(TextToSpeechPacket.class, ROS2Tools.IHMC_ROOT);
       uiPositionCheckerPacketpublisher = createBehaviorPublisher(UIPositionCheckerPacket.class);
