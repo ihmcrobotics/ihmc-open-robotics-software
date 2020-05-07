@@ -198,8 +198,8 @@ public class AvatarEstimatorThreadFactory
     *
     * @param ros2Node  the real-time node to create the publisher with.
     * @param robotName the name of the robot used to get the topic name generator, see
-    *                  {@link ControllerAPIDefinition#getPublisherTopicNameGenerator(String)} and
-    *                  {@link ControllerAPIDefinition#getSubscriberTopicNameGenerator(String)}.
+    *                  {@link ControllerAPIDefinition#getOutputTopicName(String)} and
+    *                  {@link ControllerAPIDefinition#getInputTopicName(String)}.
     */
    public void setROS2Info(RealtimeRos2Node ros2Node, String robotName)
    {

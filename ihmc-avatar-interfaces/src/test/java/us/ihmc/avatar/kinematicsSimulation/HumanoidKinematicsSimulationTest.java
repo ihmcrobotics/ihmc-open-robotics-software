@@ -37,7 +37,7 @@ public abstract class HumanoidKinematicsSimulationTest
 //
 //      footstepDataListPublisher = ROS2Tools.createPublisher(ros2Node,
 //                                                            ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
-//                                                            ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+//                                                            ControllerAPIDefinition.getInputTopicName(robotModel.getSimpleRobotName()));
 //
 //   }
 
