@@ -630,4 +630,18 @@ public class FourBar
          return getName();
       }
    }
+
+   @Override
+   public String toString()
+   {
+      return String.format("Lengths: AB=%f, BC=%f, CD=%f, DA=%f\nAngles: DAB=%f, ABC=%f, BCD=%f, CDA=%f",
+                           AB.getLength(),
+                           BC.getLength(),
+                           CD.getLength(),
+                           DA.getLength(),
+                           A.getAngle(),
+                           B.getAngle(),
+                           C.getAngle(),
+                           D.getAngle());
+   }
 }
