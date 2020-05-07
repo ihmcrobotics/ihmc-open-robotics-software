@@ -3,7 +3,7 @@ package us.ihmc.robotics.kinematics.fourbar;
 import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
-public class FourBarCalculator
+public class FourBar
 {
    /*
     * @formatter:off
@@ -46,7 +46,7 @@ public class FourBarCalculator
       ABC, BCD, CDA, DAB
    };
 
-   public FourBarCalculator()
+   public FourBar()
    {
       A.setup(DA, AB, AC);
       B.setup(AB, BC, BD);
@@ -107,13 +107,13 @@ public class FourBarCalculator
       switch (source)
       {
          case DAB:
-            return FourbarCalculatorTools.update(getVertexA(), angle);
+            return FourBarTools.update(getVertexA(), angle);
          case ABC:
-            return FourbarCalculatorTools.update(getVertexB(), angle);
+            return FourBarTools.update(getVertexB(), angle);
          case BCD:
-            return FourbarCalculatorTools.update(getVertexC(), angle);
+            return FourBarTools.update(getVertexC(), angle);
          case CDA:
-            return FourbarCalculatorTools.update(getVertexD(), angle);
+            return FourBarTools.update(getVertexD(), angle);
          default:
             throw new IllegalStateException();
       }
@@ -124,13 +124,13 @@ public class FourBarCalculator
       switch (source)
       {
          case DAB:
-            return FourbarCalculatorTools.update(getVertexA(), angle, angleDot);
+            return FourBarTools.update(getVertexA(), angle, angleDot);
          case ABC:
-            return FourbarCalculatorTools.update(getVertexB(), angle, angleDot);
+            return FourBarTools.update(getVertexB(), angle, angleDot);
          case BCD:
-            return FourbarCalculatorTools.update(getVertexC(), angle, angleDot);
+            return FourBarTools.update(getVertexC(), angle, angleDot);
          case CDA:
-            return FourbarCalculatorTools.update(getVertexD(), angle, angleDot);
+            return FourBarTools.update(getVertexD(), angle, angleDot);
          default:
             throw new IllegalStateException();
       }
@@ -141,13 +141,13 @@ public class FourBarCalculator
       switch (source)
       {
          case DAB:
-            return FourbarCalculatorTools.update(getVertexA(), angle, angleDot, angleDDot);
+            return FourBarTools.update(getVertexA(), angle, angleDot, angleDDot);
          case ABC:
-            return FourbarCalculatorTools.update(getVertexB(), angle, angleDot, angleDDot);
+            return FourBarTools.update(getVertexB(), angle, angleDot, angleDDot);
          case BCD:
-            return FourbarCalculatorTools.update(getVertexC(), angle, angleDot, angleDDot);
+            return FourBarTools.update(getVertexC(), angle, angleDot, angleDDot);
          case CDA:
-            return FourbarCalculatorTools.update(getVertexD(), angle, angleDot, angleDDot);
+            return FourBarTools.update(getVertexD(), angle, angleDot, angleDDot);
          default:
             throw new IllegalStateException();
       }
@@ -420,14 +420,14 @@ public class FourBarCalculator
       public double getMinAngle()
       {
          if (Double.isNaN(minAngle))
-            FourbarCalculatorTools.updateMinAngle(this);
+            FourBarTools.updateMinAngle(this);
          return minAngle;
       }
 
       public double getMaxAngle()
       {
          if (Double.isNaN(maxAngle))
-            FourbarCalculatorTools.updateMaxAngle(this);
+            FourBarTools.updateMaxAngle(this);
          return maxAngle;
       }
 
@@ -605,7 +605,7 @@ public class FourBarCalculator
       public double getMaxLength()
       {
          if (Double.isNaN(maxLength))
-            FourbarCalculatorTools.updateDiagonalMaxLength(this);
+            FourBarTools.updateDiagonalMaxLength(this);
          return maxLength;
       }
 

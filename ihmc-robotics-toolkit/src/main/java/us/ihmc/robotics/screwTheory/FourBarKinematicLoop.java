@@ -18,8 +18,8 @@ import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.GeometryTools;
-import us.ihmc.robotics.kinematics.fourbar.FourBarCalculator;
-import us.ihmc.robotics.kinematics.fourbar.FourBarCalculator.Angle;
+import us.ihmc.robotics.kinematics.fourbar.FourBar;
+import us.ihmc.robotics.kinematics.fourbar.FourBar.Angle;
 
 public class FourBarKinematicLoop
 {
@@ -52,7 +52,7 @@ public class FourBarKinematicLoop
    private final PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD, fourBarOutputJoint;
    private final Vector3D jointDInJointABeforeFrame;
 
-   private final FourBarCalculator fourBarCalculator;
+   private final FourBar fourBarCalculator;
 
    private final FourBarKinematicLoopJacobianSolver fourBarJacobianSolver;
    private final DMatrixRMaj columnJacobian = new DMatrixRMaj(6, 1);
@@ -236,7 +236,7 @@ public class FourBarKinematicLoop
       }
    }
 
-   private FourBarCalculator createFourBarCalculator(FrameVector2D vectorBCProjected, FrameVector2D vectorCDProjected, FrameVector2D vectorDAProjected,
+   private FourBar createFourBarCalculator(FrameVector2D vectorBCProjected, FrameVector2D vectorCDProjected, FrameVector2D vectorDAProjected,
                                                      FrameVector2D vectorABProjected)
    {
       double masterLinkAB = vectorABProjected.length();
@@ -250,7 +250,7 @@ public class FourBarKinematicLoop
          System.out.println("masterLinkAB BC CD DA : " + masterLinkAB + ", " + BC + ", " + CD + ", " + DA);
       }
 
-      FourBarCalculator fourBarCalculator = new FourBarCalculator();
+      FourBar fourBarCalculator = new FourBar();
       fourBarCalculator.setSideLengths(masterLinkAB, BC, CD, DA);
 
       return fourBarCalculator;
