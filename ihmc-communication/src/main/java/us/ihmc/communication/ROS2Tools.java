@@ -73,6 +73,16 @@ public class ROS2Tools
 
    public static final ROS2TopicName REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
 
+   public static ROS2TopicName getControllerOutputTopicName(String robotName)
+   {
+      return HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
+   }
+
+   public static ROS2TopicName getControllerInputTopicName(String robotName)
+   {
+      return HUMANOID_CONTROLLER.withRobot(robotName).withInput();
+   }
+
    public final static ExceptionHandler RUNTIME_EXCEPTION = e ->
    {
       throw new RuntimeException(e);

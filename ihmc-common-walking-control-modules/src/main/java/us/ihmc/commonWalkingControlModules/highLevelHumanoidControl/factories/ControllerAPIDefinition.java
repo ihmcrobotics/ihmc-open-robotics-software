@@ -90,12 +90,12 @@ public class ControllerAPIDefinition
 
    public static ROS2TopicName getSubscriberTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withInput();
+      return ROS2Tools.getControllerInputTopicName(robotName);
    }
 
    public static ROS2TopicName getPublisherTopicNameGenerator(String robotName)
    {
-      return ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
+      return ROS2Tools.getControllerOutputTopicName(robotName);
    }
 
    public static MessageValidator createDefaultMessageValidation()
