@@ -9,7 +9,6 @@ import javafx.scene.control.*;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.MathTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -80,7 +79,7 @@ public class DirectRobotUIController extends Group
 
       goHomePublisher = ROS2Tools.createPublisher(ros2Node,
                                                   ROS2TopicNameTools.newMessageInstance(GoHomeCommand.class).getMessageClass(),
-                                                  ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
+                                                  ROS2Tools.getControllerInputTopicName(robotName));
 
       supportRegionsParametersPublisher = ROS2Tools.createPublisher(ros2Node,
                                                                     BipedalSupportPlanarRegionParametersMessage.class,

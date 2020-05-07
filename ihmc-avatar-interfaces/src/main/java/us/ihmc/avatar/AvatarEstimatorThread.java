@@ -8,7 +8,6 @@ import controller_msgs.msg.dds.HighLevelStateChangeStatusMessage;
 import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ControllerCrashLocation;
@@ -142,7 +141,7 @@ public class AvatarEstimatorThread extends ModularRobotController
    public void setupHighLevelControllerCallback(String robotName, RealtimeRos2Node realtimeRos2Node,
                                                 Map<HighLevelControllerName, StateEstimatorMode> stateModeMap)
    {
-      ROS2TopicName publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2TopicName publisherTopicNameGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, publisherTopicNameGenerator, subscriber ->
       {
          HighLevelStateChangeStatusMessage message = subscriber.takeNextData();

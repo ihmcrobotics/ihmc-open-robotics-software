@@ -203,9 +203,7 @@ public class AvatarEstimatorThreadFactory
     */
    public void setROS2Info(RealtimeRos2Node ros2Node, String robotName)
    {
-      setROS2Info(ros2Node,
-                  ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                  ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
+      setROS2Info(ros2Node, ROS2Tools.getControllerOutputTopicName(robotName), ROS2Tools.getControllerInputTopicName(robotName));
    }
 
    /**

@@ -16,7 +16,6 @@ import javafx.scene.transform.Translate;
 import javafx.stage.Stage;
 import us.ihmc.avatar.joystickBasedJavaFXController.StepGeneratorJavaFXController.SecondaryControlOption;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
@@ -83,8 +82,7 @@ public class JoystickBasedSteppingMainUI
 
       robotVisualizer = new JavaFXRobotVisualizer(fullRobotModelFactory);
       ROS2Tools.createCallbackSubscription(ros2Node,
-                                           RobotConfigurationData.class,
-                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
+                                           RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
                                            s -> robotVisualizer.submitNewConfiguration(s.takeNextData()));
       view3dFactory.addNodeToView(robotVisualizer.getRootNode());
 

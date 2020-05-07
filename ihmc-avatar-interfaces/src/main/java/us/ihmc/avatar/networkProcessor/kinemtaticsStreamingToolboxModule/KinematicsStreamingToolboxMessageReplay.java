@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.mutable.MutableInt;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
@@ -57,7 +56,7 @@ public class KinematicsStreamingToolboxMessageReplay
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + name);
 
-      ROS2TopicName controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
       robotConfigurationDataPublisher = ROS2Tools.createPublisher(ros2Node, RobotConfigurationData.class, controllerPubGenerator);
       capturabilityBasedStatusPublisher = ROS2Tools.createPublisher(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator);
 

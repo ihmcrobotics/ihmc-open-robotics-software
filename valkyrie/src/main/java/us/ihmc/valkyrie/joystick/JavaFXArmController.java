@@ -20,7 +20,6 @@ import us.ihmc.avatar.handControl.HandFingerTrajectoryMessagePublisher;
 import us.ihmc.avatar.joystickBasedJavaFXController.ButtonState;
 import us.ihmc.avatar.joystickBasedJavaFXController.XBoxOneJavaFXController;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
@@ -152,7 +151,7 @@ public class JavaFXArmController
       ROS2TopicName toolboxRequestTopicNameGenerator = KinematicsToolboxModule.getSubscriberTopicNameGenerator(robotName);
       ROS2TopicName toolboxResponseTopicNameGenerator = KinematicsToolboxModule.getPublisherTopicNameGenerator(robotName);
 
-      ROS2TopicName subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      ROS2TopicName subscriberTopicNameGenerator = ROS2Tools.getControllerInputTopicName(robotName);
 
       wholeBodyTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, WholeBodyTrajectoryMessage.class, subscriberTopicNameGenerator);
       toolboxStatePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, toolboxRequestTopicNameGenerator);

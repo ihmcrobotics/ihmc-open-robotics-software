@@ -12,7 +12,6 @@ import controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2TopicName;
 import us.ihmc.communication.controllerAPI.MessageUnpackingTools;
@@ -118,7 +117,7 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
-      ROS2TopicName controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
 
       ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s -> {
          if (wholeBodyTrajectoryToolboxController != null)

@@ -11,7 +11,6 @@ import controller_msgs.msg.dds.ManualHandControlPacket;
 import us.ihmc.avatar.handControl.HandControlThread;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.avatar.handControl.packetsAndConsumers.ManualHandControlProvider;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -42,8 +41,8 @@ public class RobotiqControlThread extends HandControlThread
       handDesiredConfigurationMessageSubscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
       manualHandControlProvider = new ManualHandControlProvider(robotSide);
 
-      ROS2TopicName publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      ROS2TopicName subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      ROS2TopicName publisherTopicNameGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2TopicName subscriberTopicNameGenerator = ROS2Tools.getControllerInputTopicName(robotName);
 
       IHMCRealtimeROS2Publisher<HandJointAnglePacket> handJointAnglePublisher = ROS2Tools.createPublisher(realtimeRos2Node, HandJointAnglePacket.class,
                                                                                                           publisherTopicNameGenerator);
