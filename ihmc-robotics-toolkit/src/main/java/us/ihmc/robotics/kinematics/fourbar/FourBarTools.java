@@ -8,14 +8,14 @@ import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 
-public class FourbarCalculatorTools
+public class FourBarTools
 {
-   public static Bound update(FourBarCalculator.Vertex vertex, double angle)
+   public static Bound update(FourBar.Vertex vertex, double angle)
    {
-      FourBarCalculator.Vertex A = vertex;
-      FourBarCalculator.Vertex B = vertex.getNextVertex();
-      FourBarCalculator.Vertex C = vertex.getOppositeVertex();
-      FourBarCalculator.Vertex D = vertex.getPreviousVertex();
+      FourBar.Vertex A = vertex;
+      FourBar.Vertex B = vertex.getNextVertex();
+      FourBar.Vertex C = vertex.getOppositeVertex();
+      FourBar.Vertex D = vertex.getPreviousVertex();
 
       if (angle <= A.getMinAngle())
       {
@@ -34,11 +34,11 @@ public class FourbarCalculatorTools
          return Bound.MAX;
       }
 
-      FourBarCalculator.Edge ABEdge = A.getNextEdge();
-      FourBarCalculator.Edge BCEdge = B.getNextEdge();
-      FourBarCalculator.Edge CDEdge = C.getNextEdge();
-      FourBarCalculator.Edge DAEdge = D.getNextEdge();
-      FourBarCalculator.Diagonal BDDiag = B.getDiagonal();
+      FourBar.Edge ABEdge = A.getNextEdge();
+      FourBar.Edge BCEdge = B.getNextEdge();
+      FourBar.Edge CDEdge = C.getNextEdge();
+      FourBar.Edge DAEdge = D.getNextEdge();
+      FourBar.Diagonal BDDiag = B.getDiagonal();
 
       double AB = ABEdge.getLength();
       double BC = BCEdge.getLength();
@@ -58,14 +58,14 @@ public class FourbarCalculatorTools
       return null;
    }
 
-   public static Bound update(FourBarCalculator.Vertex vertex, double angle, double angleDot)
+   public static Bound update(FourBar.Vertex vertex, double angle, double angleDot)
    {
       Bound limit = update(vertex, angle);
 
-      FourBarCalculator.Vertex A = vertex;
-      FourBarCalculator.Vertex B = vertex.getNextVertex();
-      FourBarCalculator.Vertex C = vertex.getOppositeVertex();
-      FourBarCalculator.Vertex D = vertex.getPreviousVertex();
+      FourBar.Vertex A = vertex;
+      FourBar.Vertex B = vertex.getNextVertex();
+      FourBar.Vertex C = vertex.getOppositeVertex();
+      FourBar.Vertex D = vertex.getPreviousVertex();
 
       if (limit == Bound.MIN)
       {
@@ -90,11 +90,11 @@ public class FourbarCalculatorTools
          }
       }
 
-      FourBarCalculator.Edge ABEdge = A.getNextEdge();
-      FourBarCalculator.Edge BCEdge = B.getNextEdge();
-      FourBarCalculator.Edge CDEdge = C.getNextEdge();
-      FourBarCalculator.Edge DAEdge = D.getNextEdge();
-      FourBarCalculator.Diagonal BDBiag = B.getDiagonal();
+      FourBar.Edge ABEdge = A.getNextEdge();
+      FourBar.Edge BCEdge = B.getNextEdge();
+      FourBar.Edge CDEdge = C.getNextEdge();
+      FourBar.Edge DAEdge = D.getNextEdge();
+      FourBar.Diagonal BDBiag = B.getDiagonal();
 
       double AB = ABEdge.getLength();
       double BC = BCEdge.getLength();
@@ -115,14 +115,14 @@ public class FourbarCalculatorTools
       return null;
    }
 
-   public static Bound update(FourBarCalculator.Vertex vertex, double angle, double angleDot, double angleDDot)
+   public static Bound update(FourBar.Vertex vertex, double angle, double angleDot, double angleDDot)
    {
       Bound limit = update(vertex, angle, angleDot);
 
-      FourBarCalculator.Vertex A = vertex;
-      FourBarCalculator.Vertex B = vertex.getNextVertex();
-      FourBarCalculator.Vertex C = vertex.getOppositeVertex();
-      FourBarCalculator.Vertex D = vertex.getPreviousVertex();
+      FourBar.Vertex A = vertex;
+      FourBar.Vertex B = vertex.getNextVertex();
+      FourBar.Vertex C = vertex.getOppositeVertex();
+      FourBar.Vertex D = vertex.getPreviousVertex();
 
       if (limit == Bound.MIN)
       {
@@ -147,11 +147,11 @@ public class FourbarCalculatorTools
          }
       }
 
-      FourBarCalculator.Edge ABEdge = A.getNextEdge();
-      FourBarCalculator.Edge BCEdge = B.getNextEdge();
-      FourBarCalculator.Edge CDEdge = C.getNextEdge();
-      FourBarCalculator.Edge DAEdge = D.getNextEdge();
-      FourBarCalculator.Diagonal BDDiag = B.getDiagonal();
+      FourBar.Edge ABEdge = A.getNextEdge();
+      FourBar.Edge BCEdge = B.getNextEdge();
+      FourBar.Edge CDEdge = C.getNextEdge();
+      FourBar.Edge DAEdge = D.getNextEdge();
+      FourBar.Diagonal BDDiag = B.getDiagonal();
 
       double AB = ABEdge.getLength();
       double BC = BCEdge.getLength();
@@ -174,12 +174,12 @@ public class FourbarCalculatorTools
       return null;
    }
 
-   public static void updateMinAngle(FourBarCalculator.Vertex vertex)
+   public static void updateMinAngle(FourBar.Vertex vertex)
    {
-      FourBarCalculator.Diagonal diagonal = vertex.getDiagonal();
+      FourBar.Diagonal diagonal = vertex.getDiagonal();
 
-      FourBarCalculator.Edge next = vertex.getNextEdge();
-      FourBarCalculator.Edge prev = vertex.getPreviousEdge();
+      FourBar.Edge next = vertex.getNextEdge();
+      FourBar.Edge prev = vertex.getPreviousEdge();
       double diagonalMaxLength = diagonal.getMaxLength();
 
       if (prev.getLength() + prev.getPrevious().getLength() == diagonalMaxLength)
@@ -188,12 +188,12 @@ public class FourbarCalculatorTools
          vertex.setMinAngle(angleWithCosineLaw(diagonalMaxLength, prev.getLength(), prev.getPrevious().getLength()));
    }
 
-   public static void updateMaxAngle(FourBarCalculator.Vertex vertex)
+   public static void updateMaxAngle(FourBar.Vertex vertex)
    {
-      FourBarCalculator.Diagonal otherDiagonal = vertex.getDiagonal().getOther();
+      FourBar.Diagonal otherDiagonal = vertex.getDiagonal().getOther();
 
-      FourBarCalculator.Edge next = vertex.getNextEdge();
-      FourBarCalculator.Edge prev = vertex.getPreviousEdge();
+      FourBar.Edge next = vertex.getNextEdge();
+      FourBar.Edge prev = vertex.getPreviousEdge();
       double diagonalMaxLength = otherDiagonal.getMaxLength();
 
       if (prev.getLength() + next.getLength() == diagonalMaxLength)
@@ -202,9 +202,9 @@ public class FourbarCalculatorTools
          vertex.setMaxAngle(angleWithCosineLaw(prev.getLength(), next.getLength(), diagonalMaxLength));
    }
 
-   public static void updateDiagonalMaxLength(FourBarCalculator.Diagonal diagonal)
+   public static void updateDiagonalMaxLength(FourBar.Diagonal diagonal)
    {
-      FourBarCalculator.Vertex start = diagonal.getStart();
+      FourBar.Vertex start = diagonal.getStart();
       /*
        * We collapse the 2 pairs of edges on each side of the diagonal, the one pair giving the smallest
        * length is the max diagonal length.

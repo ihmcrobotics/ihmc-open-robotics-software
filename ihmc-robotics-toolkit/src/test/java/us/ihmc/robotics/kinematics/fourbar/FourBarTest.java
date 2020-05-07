@@ -11,9 +11,9 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.kinematics.fourbar.FourBarCalculator.Angle;
+import us.ihmc.robotics.kinematics.fourbar.FourBar.Angle;
 
-public class FourBarCalculatorTest
+public class FourBarTest
 {
    private static final int ITERATIONS = 1000;
    private static final double EPSILON = 1e-7;
@@ -22,7 +22,7 @@ public class FourBarCalculatorTest
    @Test
    public void testSquare()
    {
-      FourBarCalculator fourBar = new FourBarCalculator();
+      FourBar fourBar = new FourBar();
       fourBar.setSideLengths(1.0, 1.0, 1.0, 1.0);
       fourBar.update(Angle.DAB, Math.PI / 2);
       assertEquals(Math.PI / 2, fourBar.getAngleDAB(), EPSILON);
@@ -40,7 +40,7 @@ public class FourBarCalculatorTest
       double BC = random.nextDouble();
       double CD = random.nextDouble();
 
-      FourBarCalculator fourBar = new FourBarCalculator();
+      FourBar fourBar = new FourBar();
       fourBar.setSideLengths(AB, BC, CD, DA);
       assertEquals(AB, fourBar.getAB(), EPSILON);
       assertEquals(BC, fourBar.getBC(), EPSILON);
@@ -51,7 +51,7 @@ public class FourBarCalculatorTest
    @Test
    public void testSquareDerivatives()
    {
-      FourBarCalculator fourBar = new FourBarCalculator();
+      FourBar fourBar = new FourBar();
       fourBar.setSideLengths(1.0, 1.0, 1.0, 1.0);
       fourBar.update(Angle.DAB, Math.PI / 2, 1.0);
       assertEquals(Math.PI / 2, fourBar.getAngleDAB(), EPSILON);
@@ -67,7 +67,7 @@ public class FourBarCalculatorTest
    @Test
    public void testParallelogram()
    {
-      FourBarCalculator fourBar = new FourBarCalculator();
+      FourBar fourBar = new FourBar();
       fourBar.setSideLengths(1.0, 1.0, 1.0, 1.0);
       fourBar.update(Angle.DAB, Math.PI / 3, 1.0);
       assertEquals(Math.PI / 3, fourBar.getAngleDAB(), EPSILON);
@@ -114,7 +114,7 @@ public class FourBarCalculatorTest
             System.out.println(names[i] + " = " + vals[i]);
          }
       }
-      FourBarCalculator fourBar = new FourBarCalculator();
+      FourBar fourBar = new FourBar();
       fourBar.setSideLengths(b, c, d, a);
       fourBar.update(Angle.DAB, A, 0.0);
       assertEquals(A, fourBar.getAngleDAB(), EPSILON);
@@ -146,7 +146,7 @@ public class FourBarCalculatorTest
          double dADC = -dBAD;
          double dBCD = -dABC;
 
-         FourBarCalculator fourBar = new FourBarCalculator();
+         FourBar fourBar = new FourBar();
          fourBar.setSideLengths(AB, BC, CD, AD);
          fourBar.update(Angle.DAB, BAD, dBAD);
          assertEquals(BAD, fourBar.getAngleDAB(), EPSILON);
@@ -169,7 +169,7 @@ public class FourBarCalculatorTest
       double eps = 1.0e-6;
       Random rand = new Random(1976L);
       double DA, AB, BC, CD;
-      FourBarCalculator fourBar;
+      FourBar fourBar;
       boolean isQuadrilateralOK;
       int k;
 
@@ -192,7 +192,7 @@ public class FourBarCalculatorTest
          BC = RandomNumbers.nextDouble(rand, 0.1, 2.0);
          CD = RandomNumbers.nextDouble(rand, 0.1, 2.0);
          DA = RandomNumbers.nextDouble(rand, 0.1, 2.0);
-         fourBar = new FourBarCalculator();
+         fourBar = new FourBar();
          fourBar.setSideLengths(AB, BC, CD, DA);
          isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
@@ -204,7 +204,7 @@ public class FourBarCalculatorTest
             BC = RandomNumbers.nextDouble(rand, 0.1, 2.0);
             CD = RandomNumbers.nextDouble(rand, 0.1, 2.0);
             DA = RandomNumbers.nextDouble(rand, 0.1, 2.0);
-            fourBar = new FourBarCalculator();
+            fourBar = new FourBar();
             fourBar.setSideLengths(AB, BC, CD, DA);
             isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
@@ -282,7 +282,7 @@ public class FourBarCalculatorTest
       double eps = 1.0e-5;
       Random random = new Random(1984L);
       double AD, BA, CB, DC;
-      FourBarCalculator fourBar;
+      FourBar fourBar;
       boolean isQuadrilateralOK;
       int k;
 
@@ -304,7 +304,7 @@ public class FourBarCalculatorTest
          CB = RandomNumbers.nextDouble(random, 0.1, 2.0);
          DC = RandomNumbers.nextDouble(random, 0.1, 2.0);
          AD = RandomNumbers.nextDouble(random, 0.1, 2.0);
-         fourBar = new FourBarCalculator();
+         fourBar = new FourBar();
          fourBar.setSideLengths(BA, CB, DC, AD);
          isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
@@ -316,7 +316,7 @@ public class FourBarCalculatorTest
             CB = RandomNumbers.nextDouble(random, 0.1, 2.0);
             DC = RandomNumbers.nextDouble(random, 0.1, 2.0);
             AD = RandomNumbers.nextDouble(random, 0.1, 2.0);
-            fourBar = new FourBarCalculator();
+            fourBar = new FourBar();
             fourBar.setSideLengths(BA, CB, DC, AD);
             isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
@@ -385,7 +385,7 @@ public class FourBarCalculatorTest
          double BC = Math.sqrt(BF * BF + CF * CF), CBF = Math.atan2(CF, BF), BCF = Math.atan2(BF, CF);
          double DAB = DAE + BAE, ABC = ABE + CBF, BCD = BCF + DCF, CDA = ADE + CDF;
 
-         FourBarCalculator calculator = new FourBarCalculator();
+         FourBar calculator = new FourBar();
          calculator.setSideLengths(AB, BC, CD, AD);
 
          calculator.update(Angle.ABC, ABC);
@@ -412,7 +412,7 @@ public class FourBarCalculatorTest
    public void testGetMinMaxAngles()
    {
       Random random = new Random(45647);
-      FourBarCalculator calculator = new FourBarCalculator();
+      FourBar calculator = new FourBar();
 
       for (int i = 0; i < ITERATIONS; i++)
       { // Testing for a convex quadrilateral

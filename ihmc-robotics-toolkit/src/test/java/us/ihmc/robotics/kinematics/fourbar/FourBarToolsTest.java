@@ -14,7 +14,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.log.LogTools;
 
-public class FourbarCalculatorToolsTest
+public class FourBarToolsTest
 {
    private static final int ITERATIONS = 10000;
    private static final double EPSILON = 1.0e-11;
@@ -34,7 +34,7 @@ public class FourbarCalculatorToolsTest
          double BC = AB * Math.tan(expectedAngle);
          double AC = Math.hypot(AB, BC);
 
-         double actualAngle = FourbarCalculatorTools.angleWithCosineLaw(AB, AC, BC);
+         double actualAngle = FourBarTools.angleWithCosineLaw(AB, AC, BC);
 
          assertEquals(expectedAngle, actualAngle, EPSILON, "error=" + Math.abs(expectedAngle - actualAngle));
       }
@@ -54,7 +54,7 @@ public class FourbarCalculatorToolsTest
          BC.sub(C, B);
 
          double expectedAngle = Math.abs(AB.angle(AC));
-         double actualAngle = FourbarCalculatorTools.angleWithCosineLaw(AB.length(), AC.length(), BC.length());
+         double actualAngle = FourBarTools.angleWithCosineLaw(AB.length(), AC.length(), BC.length());
 
          assertEquals(expectedAngle, actualAngle, EPSILON, "error=" + Math.abs(expectedAngle - actualAngle));
       }
@@ -93,11 +93,11 @@ public class FourbarCalculatorToolsTest
             double ACLengthDot = (ACLengthFuture - ACLengthPast) / dt;
             double BCLengthDot = (BCLengthFuture - BCLengthPast) / dt;
 
-            double anglePast = FourbarCalculatorTools.angleWithCosineLaw(ABLength, ACLengthPast, BCLengthPast);
-            double angleFuture = FourbarCalculatorTools.angleWithCosineLaw(ABLength, ACLengthFuture, BCLengthFuture);
+            double anglePast = FourBarTools.angleWithCosineLaw(ABLength, ACLengthPast, BCLengthPast);
+            double angleFuture = FourBarTools.angleWithCosineLaw(ABLength, ACLengthFuture, BCLengthFuture);
             double expectedAngleDot = (angleFuture - anglePast) / dt;
 
-            double actualAngleDot = FourbarCalculatorTools.angleDotWithCosineLaw(ABLength, ACLength, ACLengthDot, BCLength, BCLengthDot);
+            double actualAngleDot = FourBarTools.angleDotWithCosineLaw(ABLength, ACLength, ACLengthDot, BCLength, BCLengthDot);
 
             double error = Math.abs(expectedAngleDot - actualAngleDot);
             averageError += error;
@@ -158,11 +158,11 @@ public class FourbarCalculatorToolsTest
             double ACDotFuture = projectOntoSide(CDotFuture, A, C);
             double BCDotFuture = projectOntoSide(CDotFuture, B, C);
 
-            double angleDotPast = FourbarCalculatorTools.angleDotWithCosineLaw(AB, ACPast, ACDotPast, BCPast, BCDotPast);
-            double angleDotFuture = FourbarCalculatorTools.angleDotWithCosineLaw(AB, ACFuture, ACDotFuture, BCFuture, BCDotFuture);
+            double angleDotPast = FourBarTools.angleDotWithCosineLaw(AB, ACPast, ACDotPast, BCPast, BCDotPast);
+            double angleDotFuture = FourBarTools.angleDotWithCosineLaw(AB, ACFuture, ACDotFuture, BCFuture, BCDotFuture);
             double expectedAngleDDot = (angleDotFuture - angleDotPast) / dt;
 
-            double actualAngleDDot = FourbarCalculatorTools.angleDDotWithCosineLaw(AB, AC, ACDot, ACDDot, BC, BCDot, BCDDot);
+            double actualAngleDDot = FourBarTools.angleDDotWithCosineLaw(AB, AC, ACDot, ACDDot, BC, BCDot, BCDDot);
 
             double error = Math.abs(expectedAngleDDot - actualAngleDDot);
             averageError += error;
