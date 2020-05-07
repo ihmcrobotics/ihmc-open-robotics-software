@@ -94,9 +94,14 @@ public class ROS2Tools
       return ROBOT_CONFIGURATION_DATA.withTopicName(ROS2Tools.getControllerOutputTopicName(robotName));
    }
 
-   private static <T> ROS2Topic<T> getControllerTopic(Class<T> messageType)
+   private static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType)
    {
       return new ROS2Topic<>(messageType, NAMED_BY_TYPE);
+   }
+
+   private static <T> ROS2Topic<T> getControllerTopic(Class<T> messageType)
+   {
+      return typeNamedTopic(messageType);
    }
 
    public static <T> ROS2Topic<T> getControllerInputTopic(Class<T> messageType, String robotName)
@@ -223,10 +228,10 @@ public class ROS2Tools
                                                                             ROS2TopicName topicName,
                                                                             NewMessageListener<T> newMessageListener)
    {
-      return createCallbackSubscription(ros2Node, messageType, topicName.withType(messageType), newMessageListener);
+      return createCallbackSubscription(ros2Node, typeNamedTopic(messageType).withTopicName(topicName), newMessageListener);
    }
 
-   public static <T> void createCallbackSubscription(Ros2NodeInterface ros2Node, ROS2Topic<T> topic, NewMessageListener<T> newMessageListener)
+   public static <T> Ros2Subscription<T> createCallbackSubscription(Ros2NodeInterface ros2Node, ROS2Topic<T> topic, NewMessageListener<T> newMessageListener)
    {
       createCallbackSubscription(ros2Node, topic.getMessageType(), topic.getTopicName(), newMessageListener);
    }
@@ -318,9 +323,9 @@ public class ROS2Tools
       return createQueuedSubscription(realtimeRos2Node, messageType, topicName.withType(messageType));
    }
 
-   public static <T> void createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, ROS2Topic<T> topic)
+   public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, ROS2Topic<T> topic)
    {
-      createQueuedSubscription(realtimeRos2Node, topic.getMessageType(), topic.getTopicName());
+      return createQueuedSubscription(realtimeRos2Node, topic.getMessageType(), topic.getTopicName());
    }
 
    public static <T> RealtimeRos2Subscription<T> createQueuedSubscription(RealtimeRos2Node realtimeRos2Node, Class<T> messageType, ROS2TopicName topicName)
