@@ -80,7 +80,7 @@ public class SimulatedDepthCamera
       return FILTER_TYPE == FilterType.SPHERICAL ? filterUsingSpherical(map) : filterUsingPlaneCutting(map);
    }
 
-   public PlanarRegionsList filterUsingSpherical(PlanarRegionsList map)
+   public synchronized PlanarRegionsList filterUsingSpherical(PlanarRegionsList map)
    {
       pointsInRegions.clear();
 
@@ -166,7 +166,7 @@ public class SimulatedDepthCamera
       return PlanarRegionPolygonizer.createPlanarRegionsList(segmentationRawData, concaveHullFactoryParameters, polygonizerParameters);
    }
 
-   public PlanarRegionsList filterUsingPlaneCutting(PlanarRegionsList map)
+   public synchronized PlanarRegionsList filterUsingPlaneCutting(PlanarRegionsList map)
    {
       // TODO consider prefilter with view distance
       // List<PlanarRegion> filteredRegions = PlanarRegionTools
