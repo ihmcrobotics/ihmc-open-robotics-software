@@ -146,10 +146,10 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    {
       Map<Class<? extends Settable<?>>, ROS2TopicName> messages = new HashMap<>();
 
-      ROS2TopicName controllerSubGenerator = ROS2Tools.getQuadrupedControllerInputTopicName(robotName);
-      messages.put(QuadrupedTimedStepListMessage.class, controllerSubGenerator);
-      messages.put(QuadrupedBodyOrientationMessage.class, controllerSubGenerator);
-      messages.put(AbortWalkingMessage.class, controllerSubGenerator);
+      ROS2TopicName controllerInputTopicName = ROS2Tools.getQuadrupedControllerInputTopicName(robotName);
+      messages.put(QuadrupedTimedStepListMessage.class, controllerInputTopicName);
+      messages.put(QuadrupedBodyOrientationMessage.class, controllerInputTopicName);
+      messages.put(AbortWalkingMessage.class, controllerInputTopicName);
 
       return messages;
    }

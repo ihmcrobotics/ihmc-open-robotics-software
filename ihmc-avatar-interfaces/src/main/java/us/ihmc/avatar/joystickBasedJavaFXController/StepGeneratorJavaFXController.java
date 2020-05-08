@@ -160,7 +160,7 @@ public class StepGeneratorJavaFXController
 
       stepParametersReference = messager.createInput(SteppingParameters, new JoystickStepParameters(walkingControllerParameters));
       ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
-      ROS2TopicName controllerSubGenerator = ROS2Tools.getControllerInputTopicName(robotName);
+      ROS2TopicName controllerInputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     FootstepStatusMessage.class,
@@ -171,8 +171,8 @@ public class StepGeneratorJavaFXController
                                                     REACommunicationProperties.publisherTopicNameGenerator,
                                            s -> planarRegionsListMessage.set(s.takeNextData()));
 
-      pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
-      footstepPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepDataListMessage.class, controllerSubGenerator);
+      pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, controllerInputTopicName);
+      footstepPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepDataListMessage.class, controllerInputTopicName);
       reaStateRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
 
       trajectoryDuration = messager.createInput(WalkingTrajectoryDuration, 1.0);

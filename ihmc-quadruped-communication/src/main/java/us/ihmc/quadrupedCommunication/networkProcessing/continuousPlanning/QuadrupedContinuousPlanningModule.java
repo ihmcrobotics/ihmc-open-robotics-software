@@ -84,10 +84,10 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
       messages.put(BodyPathPlanMessage.class, getPublisherTopicNameGenerator());
       messages.put(QuadrupedTimedStepListMessage.class, getPublisherTopicNameGenerator());
 
-      ROS2TopicName plannerSubGenerator = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
+      ROS2TopicName plannerInputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
                                                                              .withInput();
-      messages.put(PawStepPlanningRequestPacket.class, plannerSubGenerator);
-      messages.put(ToolboxStateMessage.class, plannerSubGenerator);
+      messages.put(PawStepPlanningRequestPacket.class, plannerInputTopicName);
+      messages.put(ToolboxStateMessage.class, plannerInputTopicName);
 
       return messages;
    }

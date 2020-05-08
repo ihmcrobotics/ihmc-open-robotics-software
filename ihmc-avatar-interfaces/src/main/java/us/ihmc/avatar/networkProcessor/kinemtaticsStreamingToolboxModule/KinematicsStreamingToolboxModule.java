@@ -80,10 +80,10 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
-      ROS2TopicName controllerSubGenerator = ROS2Tools.getControllerInputTopicName(robotName);
+      ROS2TopicName controllerInputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
       ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
 
-      outputPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, WholeBodyTrajectoryMessage.class, controllerSubGenerator);
+      outputPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, WholeBodyTrajectoryMessage.class, controllerInputTopicName);
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 

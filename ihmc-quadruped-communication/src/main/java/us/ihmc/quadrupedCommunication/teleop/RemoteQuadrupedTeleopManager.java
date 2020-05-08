@@ -80,34 +80,34 @@ public class RemoteQuadrupedTeleopManager
                                            s -> steppingStateChangeMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopicName, s -> robotConfigurationData.set(s.takeNextData()));
 
-      ROS2TopicName controllerSubGenerator = ROS2Tools.getQuadrupedControllerInputTopicName(robotName);
-      ROS2TopicName stepTeleopSubGenerator = ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName)
+      ROS2TopicName controllerInputTopicName = ROS2Tools.getQuadrupedControllerInputTopicName(robotName);
+      ROS2TopicName stepTeleopInputTopicName = ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName)
                                                                                 .withInput();
-      ROS2TopicName footstepPlannerSubGenerator = ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName)
+      ROS2TopicName footstepPlannerInputTopicName = ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName)
                                                                                      .withInput();
 
-      controllerStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HighLevelStateMessage.class, controllerSubGenerator);
-      steppingStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerSubGenerator);
-      timedStepListPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedTimedStepListMessage.class, controllerSubGenerator);
-      bodyOrientationPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedBodyOrientationMessage.class, controllerSubGenerator);
-      planarRegionsListControllerPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, controllerSubGenerator);
-      pauseWalkingMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
-      abortWalkingMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AbortWalkingMessage.class, controllerSubGenerator);
-      loadBearingMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedFootLoadBearingMessage.class, controllerSubGenerator);
-      bodyHeightPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedBodyHeightMessage.class, controllerSubGenerator);
-      bodyPosePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedBodyTrajectoryMessage.class, controllerSubGenerator);
+      controllerStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HighLevelStateMessage.class, controllerInputTopicName);
+      steppingStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerInputTopicName);
+      timedStepListPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedTimedStepListMessage.class, controllerInputTopicName);
+      bodyOrientationPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedBodyOrientationMessage.class, controllerInputTopicName);
+      planarRegionsListControllerPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, controllerInputTopicName);
+      pauseWalkingMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, controllerInputTopicName);
+      abortWalkingMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AbortWalkingMessage.class, controllerInputTopicName);
+      loadBearingMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedFootLoadBearingMessage.class, controllerInputTopicName);
+      bodyHeightPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedBodyHeightMessage.class, controllerInputTopicName);
+      bodyPosePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedBodyTrajectoryMessage.class, controllerInputTopicName);
 
-      desiredVelocityPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedTeleopDesiredVelocity.class, stepTeleopSubGenerator);
+      desiredVelocityPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedTeleopDesiredVelocity.class, stepTeleopInputTopicName);
 
-      stepTeleopStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, stepTeleopSubGenerator);
-      pawPlannerStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, footstepPlannerSubGenerator);
+      stepTeleopStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, stepTeleopInputTopicName);
+      pawPlannerStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, footstepPlannerInputTopicName);
 
-      planarRegionsListTeleopPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, stepTeleopSubGenerator);
-      stepXGaitSettingsPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedXGaitSettingsPacket.class, stepTeleopSubGenerator);
-      bodyPathPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedBodyPathPlanMessage.class, stepTeleopSubGenerator);
+      planarRegionsListTeleopPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, stepTeleopInputTopicName);
+      stepXGaitSettingsPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedXGaitSettingsPacket.class, stepTeleopInputTopicName);
+      bodyPathPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedBodyPathPlanMessage.class, stepTeleopInputTopicName);
 
-      plannerXGaitSettingsPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedXGaitSettingsPacket.class, footstepPlannerSubGenerator);
-      planningRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PawStepPlanningRequestPacket.class, footstepPlannerSubGenerator);
+      plannerXGaitSettingsPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedXGaitSettingsPacket.class, footstepPlannerInputTopicName);
+      planningRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PawStepPlanningRequestPacket.class, footstepPlannerInputTopicName);
 
       robotDataReceiver = new QuadrupedRobotDataReceiver(robotModel, null);
 
