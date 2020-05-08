@@ -16,6 +16,7 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 
 public class AtlasSLAMModule extends SLAMModule
@@ -27,20 +28,20 @@ public class AtlasSLAMModule extends SLAMModule
 
       if (robotConfigurationData.getPelvisLinearVelocity().lengthSquared() < 0.001)
       {
-         reaMessager.submitMessage(REAModuleAPI.RobotStatus, true);
+         reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, true);
       }
       else
       {
-         reaMessager.submitMessage(REAModuleAPI.RobotStatus, false);
+         reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, false);
       }
-      
+
       if (robotConfigurationData.getPelvisLinearVelocity().lengthSquared() < 0.01)
       {
-         reaMessager.submitMessage(REAModuleAPI.VelocityStatus, true);
+         reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, true);
       }
       else
       {
-         reaMessager.submitMessage(REAModuleAPI.VelocityStatus, false);
+         reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, false);
       }
    }
 
