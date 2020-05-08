@@ -68,14 +68,14 @@ public class ExternalForceEstimationMessageLogger
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopicName, s -> robotConfigurationData.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotDesiredConfigurationData.class, controllerOutputTopicName, s -> robotDesiredConfigurationData.set(s.takeNextData()));
 
-      ROS2TopicName toolboxSubTopicName = ExternalForceEstimationToolboxModule.getInputTopicName(robotName);
+      ROS2TopicName toolboxInputTopicName = ExternalForceEstimationToolboxModule.getInputTopicName(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     ToolboxStateMessage.class,
-                                                    toolboxSubTopicName,
+                                                    toolboxInputTopicName,
                                            s -> processToolboxStateMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     ExternalForceEstimationConfigurationMessage.class,
-                                                    toolboxSubTopicName,
+                                                    toolboxInputTopicName,
                                            s -> externalForceEstimationConfigurationMessage.set(s.takeNextData()));
 
       ros2Node.spin();

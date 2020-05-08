@@ -38,7 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerStateListener
 {
    private final RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "valkyrie_wrench_estimation_visualizer");
-   private final ROS2TopicName subTopicName;
+   private final ROS2TopicName inputTopicName;
    private final ROS2TopicName pubTopicName;
    private final int endEffectorHashCode;
    private final Vector3D externalForcePointOffset = new Vector3D();
@@ -56,7 +56,7 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
       DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, version);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
-      subTopicName = ExternalForceEstimationToolboxModule.getInputTopicName(robotModel.getSimpleRobotName());
+      inputTopicName = ExternalForceEstimationToolboxModule.getInputTopicName(robotModel.getSimpleRobotName());
       pubTopicName = ExternalForceEstimationToolboxModule.getOutputTopicName(robotModel.getSimpleRobotName());
 
       // ----- Root Joint ----- //
@@ -124,10 +124,10 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
       // ----- Toolbox Control ----- //
       IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                 ToolboxStateMessage.class,
-                                                                                                                subTopicName);
+                                                                                                                inputTopicName);
       IHMCRealtimeROS2Publisher<ExternalForceEstimationConfigurationMessage> configurationMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                                                 ExternalForceEstimationConfigurationMessage.class,
-                                                                                                                                                subTopicName);
+                                                                                                                                                inputTopicName);
       JButton wakeupButton = new JButton("Start");
       wakeupButton.addActionListener(e ->
                                      {
