@@ -63,9 +63,11 @@ public class AtlasLookAndStepBehaviorDemo
       MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(environment.get(), createRobotModel(), ros2Node);
       RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(environment.get(), createRobotModel(), ros2Node);
       VisiblePlanarRegionService realsensePlanarRegionService = new VisiblePlanarRegionService(ros2Node, "/realsense", realsense);
-      VisiblePlanarRegionService multisensePlanarRegionService = new VisiblePlanarRegionService(ros2Node, "/multisense", multisense);
+//      VisiblePlanarRegionService multisensePlanarRegionService = new VisiblePlanarRegionService(ros2Node, "/multisense", multisense);
+      VisiblePlanarRegionService allPlanarRegionService = new VisiblePlanarRegionService(ros2Node, realsense, multisense);
       realsensePlanarRegionService.start();
-      multisensePlanarRegionService.start();
+//      multisensePlanarRegionService.start();
+      allPlanarRegionService.start();
 
       new PlanarRegionsMappingModule(pubSubMode); // Start the SLAM mapper which look and step uses
    }
