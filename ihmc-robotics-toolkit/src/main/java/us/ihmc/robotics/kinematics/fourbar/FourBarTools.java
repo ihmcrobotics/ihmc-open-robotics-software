@@ -7,16 +7,15 @@ import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.robotics.kinematics.fourbar.FourBar.Diagonal;
 
 public class FourBarTools
 {
-   public static Bound update(FourBar.Vertex vertex, double angle)
+   public static Bound update(FourBarVertex vertex, double angle)
    {
-      FourBar.Vertex A = vertex;
-      FourBar.Vertex B = vertex.getNextVertex();
-      FourBar.Vertex C = vertex.getOppositeVertex();
-      FourBar.Vertex D = vertex.getPreviousVertex();
+      FourBarVertex A = vertex;
+      FourBarVertex B = vertex.getNextVertex();
+      FourBarVertex C = vertex.getOppositeVertex();
+      FourBarVertex D = vertex.getPreviousVertex();
 
       if (angle <= A.getMinAngle())
       {
@@ -35,11 +34,11 @@ public class FourBarTools
          return Bound.MAX;
       }
 
-      FourBar.Edge ABEdge = A.getNextEdge();
-      FourBar.Edge BCEdge = B.getNextEdge();
-      FourBar.Edge CDEdge = C.getNextEdge();
-      FourBar.Edge DAEdge = D.getNextEdge();
-      FourBar.Diagonal BDDiag = B.getDiagonal();
+      FourBarEdge ABEdge = A.getNextEdge();
+      FourBarEdge BCEdge = B.getNextEdge();
+      FourBarEdge CDEdge = C.getNextEdge();
+      FourBarEdge DAEdge = D.getNextEdge();
+      FourBarDiagonal BDDiag = B.getDiagonal();
 
       double AB = ABEdge.getLength();
       double BC = BCEdge.getLength();
@@ -59,14 +58,14 @@ public class FourBarTools
       return null;
    }
 
-   public static Bound update(FourBar.Vertex vertex, double angle, double angleDot)
+   public static Bound update(FourBarVertex vertex, double angle, double angleDot)
    {
       Bound limit = update(vertex, angle);
 
-      FourBar.Vertex A = vertex;
-      FourBar.Vertex B = vertex.getNextVertex();
-      FourBar.Vertex C = vertex.getOppositeVertex();
-      FourBar.Vertex D = vertex.getPreviousVertex();
+      FourBarVertex A = vertex;
+      FourBarVertex B = vertex.getNextVertex();
+      FourBarVertex C = vertex.getOppositeVertex();
+      FourBarVertex D = vertex.getPreviousVertex();
 
       if (limit == Bound.MIN)
       {
@@ -91,11 +90,11 @@ public class FourBarTools
          }
       }
 
-      FourBar.Edge ABEdge = A.getNextEdge();
-      FourBar.Edge BCEdge = B.getNextEdge();
-      FourBar.Edge CDEdge = C.getNextEdge();
-      FourBar.Edge DAEdge = D.getNextEdge();
-      FourBar.Diagonal BDBiag = B.getDiagonal();
+      FourBarEdge ABEdge = A.getNextEdge();
+      FourBarEdge BCEdge = B.getNextEdge();
+      FourBarEdge CDEdge = C.getNextEdge();
+      FourBarEdge DAEdge = D.getNextEdge();
+      FourBarDiagonal BDBiag = B.getDiagonal();
 
       double AB = ABEdge.getLength();
       double BC = BCEdge.getLength();
@@ -116,14 +115,14 @@ public class FourBarTools
       return null;
    }
 
-   public static Bound update(FourBar.Vertex vertex, double angle, double angleDot, double angleDDot)
+   public static Bound update(FourBarVertex vertex, double angle, double angleDot, double angleDDot)
    {
       Bound limit = update(vertex, angle, angleDot);
 
-      FourBar.Vertex A = vertex;
-      FourBar.Vertex B = vertex.getNextVertex();
-      FourBar.Vertex C = vertex.getOppositeVertex();
-      FourBar.Vertex D = vertex.getPreviousVertex();
+      FourBarVertex A = vertex;
+      FourBarVertex B = vertex.getNextVertex();
+      FourBarVertex C = vertex.getOppositeVertex();
+      FourBarVertex D = vertex.getPreviousVertex();
 
       if (limit == Bound.MIN)
       {
@@ -148,11 +147,11 @@ public class FourBarTools
          }
       }
 
-      FourBar.Edge ABEdge = A.getNextEdge();
-      FourBar.Edge BCEdge = B.getNextEdge();
-      FourBar.Edge CDEdge = C.getNextEdge();
-      FourBar.Edge DAEdge = D.getNextEdge();
-      FourBar.Diagonal BDDiag = B.getDiagonal();
+      FourBarEdge ABEdge = A.getNextEdge();
+      FourBarEdge BCEdge = B.getNextEdge();
+      FourBarEdge CDEdge = C.getNextEdge();
+      FourBarEdge DAEdge = D.getNextEdge();
+      FourBarDiagonal BDDiag = B.getDiagonal();
 
       double AB = ABEdge.getLength();
       double BC = BCEdge.getLength();
@@ -175,15 +174,15 @@ public class FourBarTools
       return null;
    }
 
-   public static void updateLimits(FourBar.Vertex vertex)
+   public static void updateLimits(FourBarVertex vertex)
    {
-      FourBar.Vertex A = vertex;
-      FourBar.Edge ABEdge = A.getNextEdge();
-      FourBar.Edge BCEdge = ABEdge.getNext();
-      FourBar.Edge CDEdge = BCEdge.getNext();
-      FourBar.Edge DAEdge = CDEdge.getNext();
-      FourBar.Diagonal ACDiag = A.getDiagonal();
-      FourBar.Diagonal BDDiag = ACDiag.getOther();
+      FourBarVertex A = vertex;
+      FourBarEdge ABEdge = A.getNextEdge();
+      FourBarEdge BCEdge = ABEdge.getNext();
+      FourBarEdge CDEdge = BCEdge.getNext();
+      FourBarEdge DAEdge = CDEdge.getNext();
+      FourBarDiagonal ACDiag = A.getDiagonal();
+      FourBarDiagonal BDDiag = ACDiag.getOther();
 
       double AB = ABEdge.getLength();
       double BC = BCEdge.getLength();
@@ -203,13 +202,13 @@ public class FourBarTools
          A.setMaxAngle(angleWithCosineLaw(DA, AB, BDMax));
    }
 
-   public static void updateDiagonalMaxLength(FourBar.Diagonal diagonal)
+   public static void updateDiagonalMaxLength(FourBarDiagonal diagonal)
    {
-      Diagonal AC = diagonal;
-      FourBar.Edge AB = AC.getStart().getNextEdge();
-      FourBar.Edge BC = AB.getNext();
-      FourBar.Edge CD = BC.getNext();
-      FourBar.Edge DA = CD.getNext();
+      FourBarDiagonal AC = diagonal;
+      FourBarEdge AB = AC.getStart().getNextEdge();
+      FourBarEdge BC = AB.getNext();
+      FourBarEdge CD = BC.getNext();
+      FourBarEdge DA = CD.getNext();
 
       /*
        * We collapse the 2 pairs of edges on each side of the diagonal, the one pair giving the smallest
