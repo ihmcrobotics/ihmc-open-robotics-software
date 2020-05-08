@@ -117,7 +117,7 @@ public class WristForceSensorFilteredUpdatable implements Updatable
       //      YoGraphicVector wristForceViz = new YoGraphicVector(sidePrefix + "Wrist Force", yoWristSensorPoint, yoWristSensorForce,
       //            YoAppearance.OrangeRed());
 
-      publisher = ROS2Tools.createPublisherWithType(ros2Node, HandCollisionDetectedPacket.class, IHMCHumanoidBehaviorManager.getPublisherTopicNameGenerator(robotName));
+      publisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HandCollisionDetectedPacket.class, IHMCHumanoidBehaviorManager.getPublisherTopicNameGenerator(robotName));
 
       initialize();
    }

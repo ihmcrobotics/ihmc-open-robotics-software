@@ -131,8 +131,8 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       if (enableVideoPublisher)
       {
-         ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
-                                                      RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
+         ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                       RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
          AvatarRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);

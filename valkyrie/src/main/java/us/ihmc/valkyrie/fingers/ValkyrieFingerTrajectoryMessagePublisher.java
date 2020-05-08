@@ -16,7 +16,7 @@ public class ValkyrieFingerTrajectoryMessagePublisher implements HandFingerTraje
 
    public ValkyrieFingerTrajectoryMessagePublisher(Ros2Node ros2Node, ROS2TopicName subscriberTopicNameGenerator)
    {
-      publisher = ROS2Tools.createPublisherWithType(ros2Node, ValkyrieHandFingerTrajectoryMessage.class, subscriberTopicNameGenerator);
+      publisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ValkyrieHandFingerTrajectoryMessage.class, subscriberTopicNameGenerator);
    }
 
    @Override

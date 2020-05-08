@@ -64,7 +64,7 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
       ROS2TopicName controllerSubGenerator = ROS2Tools.getQuadrupedControllerInputTopicName(quadrupedTestFactory.getRobotName());
-      soleTrajectoryPublisher = ROS2Tools.createPublisherWithType(stepTeleopManager.getRos2Node(), SoleTrajectoryMessage.class, controllerSubGenerator);
+      soleTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(stepTeleopManager.getRos2Node(), SoleTrajectoryMessage.class, controllerSubGenerator);
 
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);
@@ -99,7 +99,7 @@ public abstract class QuadrupedSoleWaypointControllerTest implements QuadrupedMu
       stepTeleopManager = quadrupedTestFactory.getRemoteStepTeleopManager();
 
       ROS2TopicName controllerSubGenerator = ROS2Tools.getQuadrupedControllerInputTopicName(quadrupedTestFactory.getRobotName());
-      soleTrajectoryPublisher = ROS2Tools.createPublisherWithType(stepTeleopManager.getRos2Node(), SoleTrajectoryMessage.class, controllerSubGenerator);
+      soleTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(stepTeleopManager.getRos2Node(), SoleTrajectoryMessage.class, controllerSubGenerator);
 
       QuadrupedTestBehaviors.standUp(conductor, variables);
       QuadrupedTestBehaviors.startBalancing(conductor, variables, stepTeleopManager);

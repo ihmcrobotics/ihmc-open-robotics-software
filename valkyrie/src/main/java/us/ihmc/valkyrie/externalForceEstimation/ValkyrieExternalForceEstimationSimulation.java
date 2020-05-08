@@ -107,14 +107,14 @@ public class ValkyrieExternalForceEstimationSimulation
       simulationStarter.getSimulationConstructionSet().addYoGraphicsListRegistry(graphicsListRegistry);
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().setDT(simDT, (int) (controllerDT / simDT));
 
-      IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher = ROS2Tools.createPublisherWithType(ros2Node,
-                                                                                                               ToolboxStateMessage.class,
-                                                                                                               ExternalForceEstimationToolboxModule.getSubscriberTopicNameGenerator(
+      IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                                                                ToolboxStateMessage.class,
+                                                                                                                ExternalForceEstimationToolboxModule.getSubscriberTopicNameGenerator(
                                                                                                              robotModel.getSimpleRobotName()));
 
-      IHMCRealtimeROS2Publisher<ExternalForceEstimationConfigurationMessage> configurationMessagePublisher = ROS2Tools.createPublisherWithType(ros2Node,
-                                                                                                                                               ExternalForceEstimationConfigurationMessage.class,
-                                                                                                                                               ExternalForceEstimationToolboxModule
+      IHMCRealtimeROS2Publisher<ExternalForceEstimationConfigurationMessage> configurationMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                                                                                                ExternalForceEstimationConfigurationMessage.class,
+                                                                                                                                                ExternalForceEstimationToolboxModule
                                                                                                                                              .getSubscriberTopicNameGenerator(
                                                                                                                                                    robotModel.getSimpleRobotName()));
 
@@ -149,9 +149,9 @@ public class ValkyrieExternalForceEstimationSimulation
       new ExternalForceEstimationToolboxModule(robotModel, true, PubSubImplementation.FAST_RTPS);
 
       AtomicReference<ExternalForceEstimationOutputStatus> toolboxOutputStatus = new AtomicReference<>();
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
-                                                   ExternalForceEstimationOutputStatus.class,
-                                                   ExternalForceEstimationToolboxModule.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName()),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    ExternalForceEstimationOutputStatus.class,
+                                                    ExternalForceEstimationToolboxModule.getPublisherTopicNameGenerator(robotModel.getSimpleRobotName()),
                                            s -> toolboxOutputStatus.set(s.takeNextData()));
 
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().addScript(t ->

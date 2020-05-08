@@ -65,8 +65,8 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
 
       if (realtimeRos2Node != null)
       {
-         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherWithType(realtimeRos2Node, HandJointAnglePacket.class,
-                                                                                                                 pubTopicNameGenerator);
+         IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, HandJointAnglePacket.class,
+                                                                                                                  pubTopicNameGenerator);
          jointAngleProducer = new SimulatedValkyrieFingerJointAngleProducer(jointAnglePublisher, simulatedRobot);
       }
       else
@@ -135,10 +135,10 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
          valkyrieHandFingerTrajectoryMessageSubscribers.put(robotSide, valkyrieHandFingerTrajectoryMessageSubscriber);
          if (realtimeRos2Node != null)
          {
-            ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, HandDesiredConfigurationMessage.class, subTopicNameGenerator,
-                                                         handDesiredConfigurationSubscriber);
-            ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, ValkyrieHandFingerTrajectoryMessage.class, subTopicNameGenerator,
-                                                         valkyrieHandFingerTrajectoryMessageSubscriber);
+            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HandDesiredConfigurationMessage.class, subTopicNameGenerator,
+                                                          handDesiredConfigurationSubscriber);
+            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, ValkyrieHandFingerTrajectoryMessage.class, subTopicNameGenerator,
+                                                          valkyrieHandFingerTrajectoryMessageSubscriber);
          }
       }
 

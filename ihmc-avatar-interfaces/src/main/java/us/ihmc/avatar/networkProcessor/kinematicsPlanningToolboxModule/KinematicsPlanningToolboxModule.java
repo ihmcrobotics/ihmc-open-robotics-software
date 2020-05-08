@@ -45,12 +45,12 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    {
       ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
 
-      ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
       {
          if (kinematicsPlanningToolboxController != null)
             kinematicsPlanningToolboxController.updateRobotConfigurationData(s.takeNextData());
       });
-      ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
       {
          if (kinematicsPlanningToolboxController != null)
             kinematicsPlanningToolboxController.updateCapturabilityBasedStatus(s.takeNextData());

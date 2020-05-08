@@ -127,7 +127,7 @@ public abstract class AStarPawStepSimulationTest implements QuadrupedMultiRobotT
 
       ROS2TopicName footstepPlannerPubGenerator = PawStepPlannerCommunicationProperties.publisherTopicNameGenerator(quadrupedTestFactory.getRobotName());
 
-      ROS2Tools.createCallbackSubscriptionWithType(stepTeleopManager.getRos2Node(), PawStepPlanningToolboxOutputStatus.class, footstepPlannerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(stepTeleopManager.getRos2Node(), PawStepPlanningToolboxOutputStatus.class, footstepPlannerPubGenerator,
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData(), stepsAreAdjustable));
 
       QuadrupedTestBehaviors.readyXGait(conductor, variables, stepTeleopManager);

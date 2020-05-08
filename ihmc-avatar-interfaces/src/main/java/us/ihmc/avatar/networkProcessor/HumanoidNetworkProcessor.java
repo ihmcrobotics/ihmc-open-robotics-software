@@ -325,9 +325,9 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       {
          MocapPlanarRegionsListManager planarRegionsListManager = new MocapPlanarRegionsListManager();
 
-         ROS2Tools.createCallbackSubscriptionWithType(getOrCreateRos2Node(),
-                                                      PlanarRegionsListMessage.class,
-                                                      REACommunicationProperties.publisherTopicNameGenerator,
+         ROS2Tools.createCallbackSubscriptionTypeNamed(getOrCreateRos2Node(),
+                                                       PlanarRegionsListMessage.class,
+                                                       REACommunicationProperties.publisherTopicNameGenerator,
                                               s -> planarRegionsListManager.receivedPacket(s.takeNextData()));
          return new IHMCMOCAPLocalizationModule(robotModel, planarRegionsListManager);
       }

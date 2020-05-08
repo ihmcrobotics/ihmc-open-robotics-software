@@ -31,12 +31,12 @@ public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, 
    public AtlasKickAndPunchMessenger(Ros2Node ros2Node, String robotName)
    {
       ROS2TopicName subscriberTopicNameGenerator = ROS2Tools.getControllerInputTopicName(robotName);
-      armTrajectoryPublisher = ROS2Tools.createPublisherWithType(ros2Node, ArmTrajectoryMessage.class, subscriberTopicNameGenerator);
-      footTrajectoryPublisher = ROS2Tools.createPublisherWithType(ros2Node, FootTrajectoryMessage.class, subscriberTopicNameGenerator);
-      footLoadBearingPublisher = ROS2Tools.createPublisherWithType(ros2Node, FootLoadBearingMessage.class, subscriberTopicNameGenerator);
-      atlasLowLevelControlModePublisher = ROS2Tools.createPublisherWithType(ros2Node, AtlasLowLevelControlModeMessage.class, subscriberTopicNameGenerator);
-      abortWalkingPublisher = ROS2Tools.createPublisherWithType(ros2Node, AbortWalkingMessage.class, subscriberTopicNameGenerator);
-      pauseWalkingPublisher = ROS2Tools.createPublisherWithType(ros2Node, PauseWalkingMessage.class, subscriberTopicNameGenerator);
+      armTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ArmTrajectoryMessage.class, subscriberTopicNameGenerator);
+      footTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootTrajectoryMessage.class, subscriberTopicNameGenerator);
+      footLoadBearingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootLoadBearingMessage.class, subscriberTopicNameGenerator);
+      atlasLowLevelControlModePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AtlasLowLevelControlModeMessage.class, subscriberTopicNameGenerator);
+      abortWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AbortWalkingMessage.class, subscriberTopicNameGenerator);
+      pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, subscriberTopicNameGenerator);
    }
 
    @Override

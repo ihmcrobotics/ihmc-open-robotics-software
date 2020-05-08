@@ -105,21 +105,21 @@ public class LidarScanPublisher
 
       if (ros2Node != null)
       {
-         ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
-                                                      RobotConfigurationData.class,
-                                                      robotConfigurationDataTopicName,
+         ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                       RobotConfigurationData.class,
+                                                       robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-         lidarScanPublisher = ROS2Tools.createPublisherWithType(ros2Node, LidarScanMessage.class, ROS2Tools.IHMC_ROOT);
+         lidarScanPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, LidarScanMessage.class, ROS2Tools.IHMC_ROOT);
          lidarScanRealtimePublisher = null;
       }
       else
       {
-         ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node,
-                                                      RobotConfigurationData.class,
-                                                      robotConfigurationDataTopicName,
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
+                                                       RobotConfigurationData.class,
+                                                       robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
          lidarScanPublisher = null;
-         lidarScanRealtimePublisher = ROS2Tools.createPublisherWithType(realtimeRos2Node, LidarScanMessage.class, ROS2Tools.IHMC_ROOT);
+         lidarScanRealtimePublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, LidarScanMessage.class, ROS2Tools.IHMC_ROOT);
       }
    }
 

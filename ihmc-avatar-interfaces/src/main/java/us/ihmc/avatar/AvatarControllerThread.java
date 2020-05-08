@@ -99,8 +99,8 @@ public class AvatarControllerThread implements AvatarControllerThreadInterface
       contextDataFactory.setSensorDataContext(new SensorDataContext(controllerFullRobotModel));
       humanoidRobotContextData = contextDataFactory.createHumanoidRobotContextData();
 
-      crashNotificationPublisher = ROS2Tools.createPublisherWithType(realtimeRos2Node, ControllerCrashNotificationPacket.class,
-                                                                     ROS2Tools.getControllerOutputTopicName(robotName));
+      crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, ControllerCrashNotificationPacket.class,
+                                                                      ROS2Tools.getControllerOutputTopicName(robotName));
 
       if (ALLOW_MODEL_CORRUPTION)
       {

@@ -37,13 +37,13 @@ public class ExternalForceEstimationToolboxModule extends ToolboxModule
    {
       ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
 
-      ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
       {
          if(forceEstimationToolboxController != null)
             forceEstimationToolboxController.updateRobotConfigurationData(s.takeNextData());
       });
 
-      ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, RobotDesiredConfigurationData.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotDesiredConfigurationData.class, controllerPubGenerator, s ->
       {
          if(forceEstimationToolboxController != null)
             forceEstimationToolboxController.updateRobotDesiredConfigurationData(s.takeNextData());

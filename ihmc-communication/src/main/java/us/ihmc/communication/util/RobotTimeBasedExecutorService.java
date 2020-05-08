@@ -44,7 +44,7 @@ public class RobotTimeBasedExecutorService
    public static void schedulePackageBased(RealtimeRos2Node ros2Node, String robotName, long period, TimeUnit timeUnit, Runnable runnable)
    {
       NewMessageListener<RobotConfigurationData> robotConfigurationDataListener = createListener(period, timeUnit, runnable);
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, RobotConfigurationData.class, createTopicNameGenerator(robotName), robotConfigurationDataListener);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, createTopicNameGenerator(robotName), robotConfigurationDataListener);
    }
 
    /**
@@ -61,7 +61,7 @@ public class RobotTimeBasedExecutorService
    public static void schedulePackageBased(Ros2Node ros2Node, String robotName, long period, TimeUnit timeUnit, Runnable runnable)
    {
       NewMessageListener<RobotConfigurationData> robotConfigurationDataListener = createListener(period, timeUnit, runnable);
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, RobotConfigurationData.class, createTopicNameGenerator(robotName), robotConfigurationDataListener);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, createTopicNameGenerator(robotName), robotConfigurationDataListener);
    }
 
    private static ROS2TopicName createTopicNameGenerator(String robotName)
@@ -162,7 +162,7 @@ public class RobotTimeBasedExecutorService
 
       // Create a thread that estimates the current realtime rate.
       ROS2TopicName topicNameGenerator = createTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, RobotConfigurationData.class, topicNameGenerator, new NewMessageListener<RobotConfigurationData>()
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, topicNameGenerator, new NewMessageListener<RobotConfigurationData>()
       {
          private final SampleInfo sampleInfo = new SampleInfo();
          private final RobotConfigurationData robotConfigurationData = new RobotConfigurationData();

@@ -35,7 +35,7 @@ public abstract class HumanoidKinematicsSimulationTest
 //
 //      ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
 //
-//      footstepDataListPublisher = ROS2Tools.createPublisherWithType(ros2Node,
+//      footstepDataListPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
 //                                                            ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
 //                                                            ControllerAPIDefinition.getInputTopicName(robotModel.getSimpleRobotName()));
 //
