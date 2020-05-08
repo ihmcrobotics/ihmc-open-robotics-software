@@ -222,7 +222,6 @@ public class NetworkSubscriber
 
    private <T extends Settable<T>> IHMCRealtimeROS2Publisher<T> createPublisher(Class<T> messageClass, ROS2TopicName topicName)
    {
-      ROS2TopicName topicName = topicName.withType(messageClass);
       IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, messageClass, topicName);
       return publisher;
    }
