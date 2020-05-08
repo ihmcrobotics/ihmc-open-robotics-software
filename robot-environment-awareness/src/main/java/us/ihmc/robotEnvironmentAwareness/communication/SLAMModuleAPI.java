@@ -68,7 +68,7 @@ public class SLAMModuleAPI
    
    public static final Topic<String> SLAMStatus = Root.child(Module).topic(Status);
    public static final Topic<String> QueuedBuffers = Root.child(Module).child(Buffer).topic(Status);
-
+   
    public static final Topic<StereoVisionPointCloudMessage> StereoVisionPointCloudState = Root.child(UI).child(StereoVision).topic(Data);
    public static final Topic<StereoVisionPointCloudMessage> DepthPointCloudState = Root.child(UI).child(DepthCloud).topic(Data);
    public static final Topic<StereoVisionPointCloudMessage> IhmcSLAMFrameState = Root.child(UI).child(Buffer).topic(Data);
