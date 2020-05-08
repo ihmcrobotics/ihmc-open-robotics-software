@@ -11,7 +11,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.kinematics.fourbar.FourBar.Angle;
 
 public class FourBarTest
 {
@@ -24,7 +23,7 @@ public class FourBarTest
    {
       FourBar fourBar = new FourBar();
       fourBar.setSideLengths(1.0, 1.0, 1.0, 1.0);
-      fourBar.update(Angle.DAB, Math.PI / 2);
+      fourBar.update(FourBarAngle.DAB, Math.PI / 2);
       assertEquals(Math.PI / 2, fourBar.getAngleDAB(), EPSILON);
       assertEquals(Math.PI / 2, fourBar.getAngleABC(), EPSILON);
       assertEquals(Math.PI / 2, fourBar.getAngleBCD(), EPSILON);
@@ -53,7 +52,7 @@ public class FourBarTest
    {
       FourBar fourBar = new FourBar();
       fourBar.setSideLengths(1.0, 1.0, 1.0, 1.0);
-      fourBar.update(Angle.DAB, Math.PI / 2, 1.0);
+      fourBar.update(FourBarAngle.DAB, Math.PI / 2, 1.0);
       assertEquals(Math.PI / 2, fourBar.getAngleDAB(), EPSILON);
       assertEquals(Math.PI / 2, fourBar.getAngleABC(), EPSILON);
       assertEquals(Math.PI / 2, fourBar.getAngleBCD(), EPSILON);
@@ -69,7 +68,7 @@ public class FourBarTest
    {
       FourBar fourBar = new FourBar();
       fourBar.setSideLengths(1.0, 1.0, 1.0, 1.0);
-      fourBar.update(Angle.DAB, Math.PI / 3, 1.0);
+      fourBar.update(FourBarAngle.DAB, Math.PI / 3, 1.0);
       assertEquals(Math.PI / 3, fourBar.getAngleDAB(), EPSILON);
       assertEquals(2 * Math.PI / 3, fourBar.getAngleABC(), EPSILON);
       assertEquals(Math.PI / 3, fourBar.getAngleBCD(), EPSILON);
@@ -116,7 +115,7 @@ public class FourBarTest
       }
       FourBar fourBar = new FourBar();
       fourBar.setSideLengths(b, c, d, a);
-      fourBar.update(Angle.DAB, A, 0.0);
+      fourBar.update(FourBarAngle.DAB, A, 0.0);
       assertEquals(A, fourBar.getAngleDAB(), EPSILON);
       assertEquals(B, fourBar.getAngleABC(), EPSILON);
       assertEquals(C, fourBar.getAngleBCD(), EPSILON);
@@ -148,7 +147,7 @@ public class FourBarTest
 
          FourBar fourBar = new FourBar();
          fourBar.setSideLengths(AB, BC, CD, AD);
-         fourBar.update(Angle.DAB, BAD, dBAD);
+         fourBar.update(FourBarAngle.DAB, BAD, dBAD);
          assertEquals(BAD, fourBar.getAngleDAB(), EPSILON);
          assertEquals(ABC, fourBar.getAngleABC(), EPSILON);
          assertEquals(BCD, fourBar.getAngleBCD(), EPSILON);
@@ -222,12 +221,12 @@ public class FourBarTest
             DAB_t0 = RandomNumbers.nextDouble(rand, 0.1, Math.PI - 0.1);
             DAB_tf = DAB_t0 + dDAB * T;
 
-            DAB_t0_outOfRange = fourBar.update(Angle.DAB, DAB_t0) != null;
+            DAB_t0_outOfRange = fourBar.update(FourBarAngle.DAB, DAB_t0) != null;
             ABC_t0 = fourBar.getAngleABC();
             CDA_t0 = fourBar.getAngleCDA();
             BCD_t0 = fourBar.getAngleBCD();
 
-            DAB_tf_outOfRange = fourBar.update(Angle.DAB, DAB_tf) != null;
+            DAB_tf_outOfRange = fourBar.update(FourBarAngle.DAB, DAB_tf) != null;
             ABC_fourbar_tf = fourBar.getAngleABC();
             CDA_fourbar_tf = fourBar.getAngleCDA();
             BCD_fourbar_tf = fourBar.getAngleBCD();
@@ -255,7 +254,7 @@ public class FourBarTest
             for (int j = 0; j < nSteps - 1; j++)
             {
                DAB_tj = DAB_t0 + dDAB * j * deltaT;
-               fourBar.update(Angle.DAB, DAB_tj, dDAB);
+               fourBar.update(FourBarAngle.DAB, DAB_tj, dDAB);
 
                ABC_next_tj += fourBar.getAngleDtABC() * deltaT;
                CDA_next_tj += fourBar.getAngleDtCDA() * deltaT;
@@ -331,12 +330,12 @@ public class FourBarTest
          ddDAB = 2.0 * (DAB_tf - DAB_t0 - dDAB_t0 * T) / MathTools.square(T);
          dDAB_tf = dDAB_t0 + ddDAB * T;
 
-         fourBar.update(Angle.DAB, DAB_t0, dDAB_t0);
+         fourBar.update(FourBarAngle.DAB, DAB_t0, dDAB_t0);
          ABC_t0 = fourBar.getAngleABC();
          CDA_t0 = fourBar.getAngleCDA();
          BCD_t0 = fourBar.getAngleBCD();
 
-         fourBar.update(Angle.DAB, DAB_tf, dDAB_tf);
+         fourBar.update(FourBarAngle.DAB, DAB_tf, dDAB_tf);
          ABC_fourbar_tf = fourBar.getAngleABC();
          CDA_fourbar_tf = fourBar.getAngleCDA();
          BCD_fourbar_tf = fourBar.getAngleBCD();
@@ -349,7 +348,7 @@ public class FourBarTest
          {
             DAB_tj = ddDAB * MathTools.square(j * deltaT) / 2.0 + dDAB_t0 * j * deltaT + DAB_t0;
             dDAB_tj = ddDAB * j * deltaT + dDAB_t0;
-            fourBar.update(Angle.DAB, DAB_tj, dDAB_tj, ddDAB);
+            fourBar.update(FourBarAngle.DAB, DAB_tj, dDAB_tj, ddDAB);
 
             ABC_next_tj += fourBar.getAngleDtABC() * deltaT + fourBar.getAngleDt2ABC() * MathTools.square(deltaT) / 2.0;
             CDA_next_tj += fourBar.getAngleDtCDA() * deltaT + fourBar.getAngleDt2CDA() * MathTools.square(deltaT) / 2.0;
@@ -388,19 +387,19 @@ public class FourBarTest
          FourBar calculator = new FourBar();
          calculator.setSideLengths(AB, BC, CD, AD);
 
-         calculator.update(Angle.ABC, ABC);
+         calculator.update(FourBarAngle.ABC, ABC);
          assertEquals(DAB, calculator.getAngleDAB(), EPSILON);
          assertEquals(ABC, calculator.getAngleABC(), EPSILON);
          assertEquals(BCD, calculator.getAngleBCD(), EPSILON);
          assertEquals(CDA, calculator.getAngleCDA(), EPSILON);
 
-         calculator.update(Angle.BCD, BCD);
+         calculator.update(FourBarAngle.BCD, BCD);
          assertEquals(DAB, calculator.getAngleDAB(), EPSILON);
          assertEquals(ABC, calculator.getAngleABC(), EPSILON);
          assertEquals(BCD, calculator.getAngleBCD(), EPSILON);
          assertEquals(CDA, calculator.getAngleCDA(), EPSILON);
 
-         calculator.update(Angle.CDA, CDA);
+         calculator.update(FourBarAngle.CDA, CDA);
          assertEquals(DAB, calculator.getAngleDAB(), EPSILON);
          assertEquals(ABC, calculator.getAngleABC(), EPSILON);
          assertEquals(BCD, calculator.getAngleBCD(), EPSILON);
