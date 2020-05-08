@@ -1,6 +1,7 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
 import us.ihmc.euclid.geometry.Bound;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 public class FourBar
@@ -66,6 +67,14 @@ public class FourBar
    {
       setSideLengths(A.distance(B), B.distance(C), C.distance(D), D.distance(A));
 
+      if (!EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(A, D, B))
+         throw new UnsupportedOperationException("The four-bar is concave at the vertex A.");
+      if (!EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(B, A, C))
+         throw new UnsupportedOperationException("The four-bar is concave at the vertex B.");
+      if (!EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(C, B, D))
+         throw new UnsupportedOperationException("The four-bar is concave at the vertex C.");
+      if (!EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(D, C, A))
+         throw new UnsupportedOperationException("The four-bar is concave at the vertex D.");
    }
 
    public void setToNaN()
