@@ -40,17 +40,23 @@ public class JointspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
         current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
       }
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -67,7 +73,9 @@ public class JointspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubs
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -75,14 +83,18 @@ public class JointspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubs
       {
           current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getJointNames().get(i0).length() + 1;
       }
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getDesiredJointPositions().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -95,19 +107,25 @@ public class JointspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubs
 
    public static void write(controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       if(data.getJointNames().size() <= 100)
       cdr.write_type_e(data.getJointNames());else
           throw new RuntimeException("joint_names field exceeds the maximum length");
 
+
       cdr.write_type_9(data.getTrajectoryExecutionStatus());
 
+
       cdr.write_type_6(data.getTimestamp());
+
 
       if(data.getDesiredJointPositions().size() <= 100)
       cdr.write_type_e(data.getDesiredJointPositions());else
           throw new RuntimeException("desired_joint_positions field exceeds the maximum length");
+
 
       if(data.getActualJointPositions().size() <= 100)
       cdr.write_type_e(data.getActualJointPositions());else
@@ -117,14 +135,20 @@ public class JointspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubs
 
    public static void read(controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       cdr.read_type_e(data.getJointNames());	
+
       data.setTrajectoryExecutionStatus(cdr.read_type_9());
       	
+
       data.setTimestamp(cdr.read_type_6());
       	
+
       cdr.read_type_e(data.getDesiredJointPositions());	
+
       cdr.read_type_e(data.getActualJointPositions());	
 
    }
@@ -132,22 +156,34 @@ public class JointspaceTrajectoryStatusMessagePubSubType implements us.ihmc.pubs
    @Override
    public final void serialize(controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_e("joint_names", data.getJointNames());
+
       ser.write_type_9("trajectory_execution_status", data.getTrajectoryExecutionStatus());
+
       ser.write_type_6("timestamp", data.getTimestamp());
+
       ser.write_type_e("desired_joint_positions", data.getDesiredJointPositions());
+
       ser.write_type_e("actual_joint_positions", data.getActualJointPositions());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.JointspaceTrajectoryStatusMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_e("joint_names", data.getJointNames());
+
       data.setTrajectoryExecutionStatus(ser.read_type_9("trajectory_execution_status"));
+
       data.setTimestamp(ser.read_type_6("timestamp"));
+
       ser.read_type_e("desired_joint_positions", data.getDesiredJointPositions());
+
       ser.read_type_e("actual_joint_positions", data.getActualJointPositions());
    }
 

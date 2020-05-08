@@ -45,6 +45,7 @@ import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPu
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputWriter;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
+import us.ihmc.sensorProcessing.sensorProcessors.RobotJointLimitWatcher;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
@@ -416,6 +417,8 @@ public class AvatarEstimatorThreadFactory
                                                                               createControllerCrashPublisher(),
                                                                               getEstimatorRegistry(),
                                                                               getYoGraphicsListRegistry());
+
+      avatarEstimatorThread.addRobotController(new RobotJointLimitWatcher(getEstimatorFullRobotModel().getOneDoFJoints(), getRawSensorOutputMap()));
       avatarEstimatorThread.setRawOutputWriter(getRobotConfigurationDataPublisher());
       ParameterLoaderHelper.loadParameters(this, getControllerParameters(), getEstimatorRegistry());
 

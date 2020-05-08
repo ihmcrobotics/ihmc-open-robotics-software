@@ -77,7 +77,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             OutdatedPoseToUpToDateReferenceFrameUpdater.this.stateEstimatorReferenceFrameInPresent.getTransformToDesiredFrame(transformToParent, worldFrame);
-            transformToParent.setRotationToZero();
+            transformToParent.getRotation().setToZero();
          }
       };
 
@@ -106,7 +106,7 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
          protected void updateTransformToParent(RigidBodyTransform transformToParent)
          {
             OutdatedPoseToUpToDateReferenceFrameUpdater.this.stateEstimatorReferenceFrameInPresent.getTransformToDesiredFrame(transformToParent, worldFrame);
-            transformToParent.setTranslationToZero();
+            transformToParent.getTranslation().setToZero();
          }
 
          @Override
@@ -163,10 +163,10 @@ public class OutdatedPoseToUpToDateReferenceFrameUpdater
 
       localizationPoseInThePast.changeFrame(stateEstimatorReferenceFrameInThePast);
       localizationPoseInThePast.get(localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation);
-      localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation.setTranslationToZero();
+      localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation.getTranslation().setToZero();
 
       totalErrorTransform.set(localizationPoseTransformInThePast_InStateEstimatorReferenceFrameInThePast_Rotation);
-      totalErrorTransform.setTranslation(translationOffsetVector);
+      totalErrorTransform.getTranslation().set(translationOffsetVector);
 
       localizationReferenceFrameInPresent_Rotation.update();
    }

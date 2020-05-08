@@ -47,7 +47,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -129,7 +129,7 @@ public class NavigationBehavior implements BehaviorInterface
       {
          mapRegionsInput.getMessageNotification().blockingPoll();
       }
-      while (mapRegionsInput.getMessageNotification().peek().getSequenceId() <= latestMapSequenceId);
+      while (mapRegionsInput.getMessageNotification().read().getSequenceId() <= latestMapSequenceId);
       latestMapSequenceId = mapRegionsInput.getLatest().getSequenceId();
       //      ThreadTools.sleep(100); // try to get a little more perception data TODO wait for a SLAM update
 
@@ -220,7 +220,7 @@ public class NavigationBehavior implements BehaviorInterface
       FramePose3D goalPose = new FramePose3D();
       goalPose.setX(finalPose.getX());
       goalPose.setY(finalPose.getY());
-      goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0); // TODO: use initial yaw?
+      goalPose.getOrientation().setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0); // TODO: use initial yaw?
 
 //      LogTools.info("Creating A* planner");
 //      YoVariableRegistry registry = new YoVariableRegistry("registry");

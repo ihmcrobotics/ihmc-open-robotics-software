@@ -40,9 +40,12 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -59,10 +62,13 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -74,9 +80,12 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void write(controller_msgs.msg.dds.TimeIntervalMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
+
       cdr.write_type_6(data.getStartTime());
+
 
       cdr.write_type_6(data.getEndTime());
 
@@ -84,10 +93,13 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void read(controller_msgs.msg.dds.TimeIntervalMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setStartTime(cdr.read_type_6());
       	
+
       data.setEndTime(cdr.read_type_6());
       	
 
@@ -96,16 +108,22 @@ public class TimeIntervalMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void serialize(controller_msgs.msg.dds.TimeIntervalMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_6("start_time", data.getStartTime());
+
       ser.write_type_6("end_time", data.getEndTime());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.TimeIntervalMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setStartTime(ser.read_type_6("start_time"));
+
       data.setEndTime(ser.read_type_6("end_time"));
    }
 

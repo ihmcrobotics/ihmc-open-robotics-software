@@ -32,13 +32,6 @@ public class AtlasPostProcessingTest extends AvatarPostProcessingTests
             };
          }
 
-         public FootstepPlannerParametersBasics getFootstepPlannerParameters()
-         {
-            FootstepPlannerParametersBasics plannerParameters = new AtlasFootstepPlannerParameters();
-            plannerParameters.setReturnBestEffortPlan(false);
-            return plannerParameters;
-         }
-
          public FootstepPostProcessingParametersBasics getFootstepPostProcessingParameters()
          {
             FootstepPostProcessingParametersBasics parametersBasics = new DefaultFootstepPostProcessingParameters();

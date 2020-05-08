@@ -1,8 +1,9 @@
 package us.ihmc.commonWalkingControlModules.bipedSupportPolygons;
 
+import java.awt.Color;
+
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
@@ -12,8 +13,6 @@ import us.ihmc.robotics.robotSide.RobotQuadrant;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 import us.ihmc.yoVariables.variable.YoFramePoint2D;
-
-import java.awt.*;
 
 public class QuadrupedSupportPolygons
 {
@@ -106,15 +105,14 @@ public class QuadrupedSupportPolygons
          {
             for (int i = 0; i < contactState.getTotalNumberOfContactPoints(); i++)
             {
-               ContactPointInterface contactPoint = contactState.getContactPoints().get(i);
+               ContactPointBasics contactPoint = contactState.getContactPoints().get(i);
                if (!contactPoint.isInContact())
                   continue;
 
-               FramePoint3DReadOnly position = contactPoint.getPosition();
-               footPolygonInWorldFrame.addVertexMatchingFrame(position);
-               footPolygonInSoleFrame.addVertexMatchingFrame(position);
-               footPolygonInSoleZUpFrame.addVertexMatchingFrame(position);
-               footPolygonInMidFeetZUp.addVertexMatchingFrame(position);
+               footPolygonInWorldFrame.addVertexMatchingFrame(contactPoint);
+               footPolygonInSoleFrame.addVertexMatchingFrame(contactPoint);
+               footPolygonInSoleZUpFrame.addVertexMatchingFrame(contactPoint);
+               footPolygonInMidFeetZUp.addVertexMatchingFrame(contactPoint);
             }
 
             footPolygonInWorldFrame.update();

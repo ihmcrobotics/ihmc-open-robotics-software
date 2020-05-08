@@ -40,7 +40,9 @@ public class QuadrupedSteppingStateChangeMessagePubSubType implements us.ihmc.pu
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -57,7 +59,9 @@ public class QuadrupedSteppingStateChangeMessagePubSubType implements us.ihmc.pu
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -69,7 +73,9 @@ public class QuadrupedSteppingStateChangeMessagePubSubType implements us.ihmc.pu
 
    public static void write(controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_9(data.getInitialQuadrupedSteppingStateEnum());
+
 
       cdr.write_type_9(data.getEndQuadrupedSteppingStateEnum());
 
@@ -77,8 +83,10 @@ public class QuadrupedSteppingStateChangeMessagePubSubType implements us.ihmc.pu
 
    public static void read(controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setInitialQuadrupedSteppingStateEnum(cdr.read_type_9());
       	
+
       data.setEndQuadrupedSteppingStateEnum(cdr.read_type_9());
       	
 
@@ -87,14 +95,18 @@ public class QuadrupedSteppingStateChangeMessagePubSubType implements us.ihmc.pu
    @Override
    public final void serialize(controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_9("initial_quadruped_stepping_state_enum", data.getInitialQuadrupedSteppingStateEnum());
+
       ser.write_type_9("end_quadruped_stepping_state_enum", data.getEndQuadrupedSteppingStateEnum());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuadrupedSteppingStateChangeMessage data)
    {
+
       data.setInitialQuadrupedSteppingStateEnum(ser.read_type_9("initial_quadruped_stepping_state_enum"));
+
       data.setEndQuadrupedSteppingStateEnum(ser.read_type_9("end_quadruped_stepping_state_enum"));
    }
 

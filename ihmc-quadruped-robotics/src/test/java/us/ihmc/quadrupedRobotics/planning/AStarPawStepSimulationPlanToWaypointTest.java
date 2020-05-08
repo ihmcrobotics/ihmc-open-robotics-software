@@ -99,7 +99,7 @@ public abstract class AStarPawStepSimulationPlanToWaypointTest implements Quadru
                                                                         variables.getBodyEstimateRoll());
 
       planningRequestPacket.getGoalPositionInWorld().set(1.5, 0.5, 0.0);
-      planningRequestPacket.getGoalOrientationInWorld().setToYawQuaternion(-Math.PI * 0.25);
+      planningRequestPacket.getGoalOrientationInWorld().setToYawOrientation(-Math.PI * 0.25);
       planningRequestPacket.setRequestedPawPlannerType(PawStepPlannerType.A_STAR.toByte());
 
       stepTeleopManager.publishPlanningRequest(planningRequestPacket);

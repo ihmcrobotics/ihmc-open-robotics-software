@@ -121,13 +121,13 @@ public class LidarFastSimulation
       Vector3D offset = new Vector3D(0.0, -0.5, 0.25);
       axisAngle.transform(offset);
       RigidBodyTransform configuration2 = new RigidBodyTransform(configuration);
-      configuration2.setTranslation(configuration2.getM03() + offset.getX(), configuration2.getM13() + offset.getY(), configuration2.getM23() + offset.getZ());
+      configuration2.getTranslation().set(configuration2.getM03() + offset.getX(), configuration2.getM13() + offset.getY(), configuration2.getM23() + offset.getZ());
       blocksTerrain.addRotatableBox(configuration2, 0.5, 0.5, 1.0, YoAppearance.DarkCyan());
 
       offset = new Vector3D(0.5, 0.0, 0.25);
       axisAngle.transform(offset);
       RigidBodyTransform configuration3 = new RigidBodyTransform(configuration);
-      configuration3.setTranslation(configuration3.getM03() + offset.getX(), configuration3.getM13() + offset.getY(), configuration3.getM23() + offset.getZ());
+      configuration3.getTranslation().set(configuration3.getM03() + offset.getX(), configuration3.getM13() + offset.getY(), configuration3.getM23() + offset.getZ());
       blocksTerrain.addRotatableBox(configuration3, 0.5, 0.5, 1.0, YoAppearance.DarkCyan());
 
       return blocksTerrain.getLinkGraphics();

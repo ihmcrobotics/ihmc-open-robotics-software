@@ -44,6 +44,8 @@ public class LinearMomentumRateControlModuleInput
     */
    private final FrameVector2D desiredCapturePointVelocity = new FrameVector2D();
 
+   private final FramePoint2D desiredICPAtEndOfState = new FramePoint2D();
+
    /**
     * Assuming to tracking error for the ICP this is the location that the CMP should be placed at according to the ICP
     * plan.
@@ -212,6 +214,17 @@ public class LinearMomentumRateControlModuleInput
    {
       return desiredCapturePointVelocity;
    }
+
+   public void setDesiredICPAtEndOfState(FramePoint2DReadOnly desiredICPAtEndOfState)
+   {
+      this.desiredICPAtEndOfState.setIncludingFrame(desiredICPAtEndOfState);
+   }
+
+   public FramePoint2D getDesiredICPAtEndOfState()
+   {
+      return desiredICPAtEndOfState;
+   }
+
 
    @Deprecated // TODO: This should not be coming from the walking controller.
    public void setDesiredCenterOfMassHeightAcceleration(double desiredCoMHeightAcceleration)
@@ -419,6 +432,7 @@ public class LinearMomentumRateControlModuleInput
       useMomentumRecoveryMode = other.useMomentumRecoveryMode;
       desiredCapturePoint.setIncludingFrame(other.desiredCapturePoint);
       desiredCapturePointVelocity.setIncludingFrame(other.desiredCapturePointVelocity);
+      desiredICPAtEndOfState.setIncludingFrame(other.desiredICPAtEndOfState);
       perfectCMP.setIncludingFrame(other.perfectCMP);
       perfectCoP.setIncludingFrame(other.perfectCoP);
       controlHeightWithMomentum = other.controlHeightWithMomentum;
@@ -458,6 +472,8 @@ public class LinearMomentumRateControlModuleInput
          if (!desiredCapturePoint.equals(other.desiredCapturePoint))
             return false;
          if (!desiredCapturePointVelocity.equals(other.desiredCapturePointVelocity))
+            return false;
+         if (!desiredICPAtEndOfState.equals(other.desiredICPAtEndOfState))
             return false;
          if (!perfectCMP.equals(other.perfectCMP))
             return false;

@@ -94,9 +94,9 @@ public class FootstepPlannerParametersTest
       parameters.setMinimumSurfaceInclineRadians(minSurfaceIncline);
       assertEquals(minSurfaceIncline, parameters.getMinimumSurfaceInclineRadians(), epsilon);
 
-      boolean wiggleIntoConvexHull = RandomNumbers.nextBoolean(random, 0.5);
-      parameters.setWiggleIntoConvexHullOfPlanarRegions(wiggleIntoConvexHull);
-      assertEquals(wiggleIntoConvexHull, parameters.getWiggleIntoConvexHullOfPlanarRegions());
+      boolean enableConcaveHullWiggler = RandomNumbers.nextBoolean(random, 0.5);
+      parameters.setEnableConcaveHullWiggler(enableConcaveHullWiggler);
+      assertEquals(enableConcaveHullWiggler, parameters.getEnableConcaveHullWiggler());
 
       double maximumXYWiggleDistance = RandomNumbers.nextDouble(random, 10.00);
       parameters.setMaximumXYWiggleDistance(maximumXYWiggleDistance);
@@ -117,14 +117,6 @@ public class FootstepPlannerParametersTest
       double minimumDistanceFromCliff = RandomNumbers.nextDouble(random, 10.0);
       parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliff);
       assertEquals(minimumDistanceFromCliff, parameters.getMinimumDistanceFromCliffBottoms(), epsilon);
-
-      boolean returnBestEffortPlan = RandomNumbers.nextBoolean(random, 0.5);
-      parameters.setReturnBestEffortPlan(returnBestEffortPlan);
-      assertEquals(returnBestEffortPlan, parameters.getReturnBestEffortPlan());
-
-      int minStepsForBestEffort = RandomNumbers.nextInt(random, -10, 10);
-      parameters.setMinimumStepsForBestEffortPlan(minStepsForBestEffort);
-      assertEquals(minStepsForBestEffort, parameters.getMinimumStepsForBestEffortPlan());
 
       double minXClearanceFromStance = RandomNumbers.nextDouble(random, 10.0);
       parameters.setMinXClearanceFromStance(minXClearanceFromStance);
@@ -162,41 +154,13 @@ public class FootstepPlannerParametersTest
       parameters.setFinalTurnProximity(finalTurnProximity);
       assertEquals(finalTurnProximity, parameters.getFinalTurnProximity(), epsilon);
 
-      double finalTurnBodyPathProximity = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setFinalTurnBodyPathProximity(finalTurnBodyPathProximity);
-      assertEquals(finalTurnBodyPathProximity, parameters.getFinalTurnBodyPathProximity(), epsilon);
-
-      double finalTurnProximityBlendFactor = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setFinalTurnProximityBlendFactor(finalTurnProximityBlendFactor);
-      assertEquals(finalTurnProximityBlendFactor, parameters.getFinalTurnProximityBlendFactor(), epsilon);
-
       int numberOfBoundingBoxChecks = RandomNumbers.nextInt(random, -10, 10);
       parameters.setNumberOfBoundingBoxChecks(numberOfBoundingBoxChecks);
       assertEquals(numberOfBoundingBoxChecks, parameters.getNumberOfBoundingBoxChecks());
 
-      boolean useQuadraticDistanceCost = RandomNumbers.nextBoolean(random, 0.5);
-      parameters.setUseQuadraticDistanceCost(useQuadraticDistanceCost);
-      assertEquals(useQuadraticDistanceCost, parameters.useQuadraticDistanceCost());
-
-      boolean useQuadraticHeightCost = RandomNumbers.nextBoolean(random, 0.5);
-      parameters.setUseQuadraticHeightCost(useQuadraticHeightCost);
-      assertEquals(useQuadraticHeightCost, parameters.useQuadraticHeightCost());
-
       double aStarHeuristicWeight = RandomNumbers.nextDouble(random, 10.0);
       parameters.setAStarHeuristicsWeight(aStarHeuristicWeight);
       assertEquals(aStarHeuristicWeight, parameters.getAStarHeuristicsWeight().getValue(), epsilon);
-
-      double visGrpahWithAStarHeuristicWeight = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setVisGraphWithAStarHeuristicsWeight(visGrpahWithAStarHeuristicWeight);
-      assertEquals(visGrpahWithAStarHeuristicWeight, parameters.getVisGraphWithAStarHeuristicsWeight().getValue(), epsilon);
-
-      double depthFirstWeight = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setDepthFirstHeuristicsWeight(depthFirstWeight);
-      assertEquals(depthFirstWeight, parameters.getDepthFirstHeuristicsWeight().getValue(), epsilon);
-
-      double bodyPathWeight = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setBodyPathBasedHeuristicWeight(bodyPathWeight);
-      assertEquals(bodyPathWeight, parameters.getBodyPathBasedHeuristicsWeight().getValue(), epsilon);
 
       double yawWeight = RandomNumbers.nextDouble(random, 10.0);
       parameters.setYawWeight(yawWeight);
@@ -234,21 +198,9 @@ public class FootstepPlannerParametersTest
       parameters.setMaximum2dDistanceFromBoundingBoxToPenalize(maximumDistanceFromBoundingBox);
       assertEquals(maximumDistanceFromBoundingBox, parameters.getMaximum2dDistanceFromBoundingBoxToPenalize(), epsilon);
 
-      double boundingBoxCost=  RandomNumbers.nextDouble(random, 10.00);
-      parameters.setBoundingBoxCost(boundingBoxCost);
-      assertEquals(boundingBoxCost, parameters.getBoundingBoxCost(), epsilon);
-
       double footholdAreaWeight = RandomNumbers.nextDouble(random, 10.00);
       parameters.setFootholdAreaWeight(footholdAreaWeight);
       assertEquals(footholdAreaWeight, parameters.getFootholdAreaWeight(), epsilon);
-
-      double longStepWeight = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setLongStepWeight(longStepWeight);
-      assertEquals(longStepWeight, parameters.getLongStepWeight(), epsilon);
-
-      double bodyPathViolationWeight = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setBodyPathViolationWeight(bodyPathViolationWeight);
-      assertEquals(bodyPathViolationWeight, parameters.getBodyPathViolationWeight(), epsilon);
 
       double distanceFrompathTolerance = RandomNumbers.nextDouble(random, 10.0);
       parameters.setDistanceFromPathTolerance(distanceFrompathTolerance);

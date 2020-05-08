@@ -40,19 +40,27 @@ public class KinematicsStreamingToolboxOutputConfigurationMessagePubSubType impl
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -69,25 +77,33 @@ public class KinematicsStreamingToolboxOutputConfigurationMessagePubSubType impl
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -99,19 +115,27 @@ public class KinematicsStreamingToolboxOutputConfigurationMessagePubSubType impl
 
    public static void write(controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_7(data.getEnableLeftArmJointspace());
 
+
       cdr.write_type_7(data.getEnableRightArmJointspace());
+
 
       cdr.write_type_7(data.getEnableNeckJointspace());
 
+
       cdr.write_type_7(data.getEnableLeftHandTaskspace());
+
 
       cdr.write_type_7(data.getEnableRightHandTaskspace());
 
+
       cdr.write_type_7(data.getEnableChestTaskspace());
+
 
       cdr.write_type_7(data.getEnablePelvisTaskspace());
 
@@ -119,20 +143,28 @@ public class KinematicsStreamingToolboxOutputConfigurationMessagePubSubType impl
 
    public static void read(controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setEnableLeftArmJointspace(cdr.read_type_7());
       	
+
       data.setEnableRightArmJointspace(cdr.read_type_7());
       	
+
       data.setEnableNeckJointspace(cdr.read_type_7());
       	
+
       data.setEnableLeftHandTaskspace(cdr.read_type_7());
       	
+
       data.setEnableRightHandTaskspace(cdr.read_type_7());
       	
+
       data.setEnableChestTaskspace(cdr.read_type_7());
       	
+
       data.setEnablePelvisTaskspace(cdr.read_type_7());
       	
 
@@ -141,26 +173,42 @@ public class KinematicsStreamingToolboxOutputConfigurationMessagePubSubType impl
    @Override
    public final void serialize(controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_7("enable_left_arm_jointspace", data.getEnableLeftArmJointspace());
+
       ser.write_type_7("enable_right_arm_jointspace", data.getEnableRightArmJointspace());
+
       ser.write_type_7("enable_neck_jointspace", data.getEnableNeckJointspace());
+
       ser.write_type_7("enable_left_hand_taskspace", data.getEnableLeftHandTaskspace());
+
       ser.write_type_7("enable_right_hand_taskspace", data.getEnableRightHandTaskspace());
+
       ser.write_type_7("enable_chest_taskspace", data.getEnableChestTaskspace());
+
       ser.write_type_7("enable_pelvis_taskspace", data.getEnablePelvisTaskspace());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.KinematicsStreamingToolboxOutputConfigurationMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setEnableLeftArmJointspace(ser.read_type_7("enable_left_arm_jointspace"));
+
       data.setEnableRightArmJointspace(ser.read_type_7("enable_right_arm_jointspace"));
+
       data.setEnableNeckJointspace(ser.read_type_7("enable_neck_jointspace"));
+
       data.setEnableLeftHandTaskspace(ser.read_type_7("enable_left_hand_taskspace"));
+
       data.setEnableRightHandTaskspace(ser.read_type_7("enable_right_hand_taskspace"));
+
       data.setEnableChestTaskspace(ser.read_type_7("enable_chest_taskspace"));
+
       data.setEnablePelvisTaskspace(ser.read_type_7("enable_pelvis_taskspace"));
    }
 

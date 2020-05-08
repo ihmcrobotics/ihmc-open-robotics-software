@@ -40,7 +40,9 @@ public class BDIBehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -57,7 +59,9 @@ public class BDIBehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDa
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -69,7 +73,9 @@ public class BDIBehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void write(controller_msgs.msg.dds.BDIBehaviorStatusPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_9(data.getCurrentBdiRobotBehavior());
 
@@ -77,8 +83,10 @@ public class BDIBehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDa
 
    public static void read(controller_msgs.msg.dds.BDIBehaviorStatusPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setCurrentBdiRobotBehavior(cdr.read_type_9());
       	
 
@@ -87,14 +95,18 @@ public class BDIBehaviorStatusPacketPubSubType implements us.ihmc.pubsub.TopicDa
    @Override
    public final void serialize(controller_msgs.msg.dds.BDIBehaviorStatusPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_9("current_bdi_robot_behavior", data.getCurrentBdiRobotBehavior());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.BDIBehaviorStatusPacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setCurrentBdiRobotBehavior(ser.read_type_9("current_bdi_robot_behavior"));
    }
 

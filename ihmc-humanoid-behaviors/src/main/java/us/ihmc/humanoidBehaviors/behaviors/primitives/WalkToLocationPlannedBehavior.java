@@ -8,13 +8,10 @@ import controller_msgs.msg.dds.WalkOverTerrainGoalPacket;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.WalkToLocationPlannedBehavior.WalkToLocationStates;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
@@ -28,13 +25,12 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
 {
    public enum WalkToLocationStates
    {
-      WAIT_FOR_GOAL, PLAN_PATH,SLEEP, PLAN_FAILED, WALK_PATH, DONE
+      WAIT_FOR_GOAL, PLAN_PATH, SLEEP, PLAN_FAILED, WALK_PATH, DONE
    }
 
    private final HumanoidReferenceFrames referenceFrames;
 
    private boolean walkSucceded = true;
-   
 
    private final AtomicReference<FramePose3D> currentGoalPose = new AtomicReference<>();
    private final AtomicReference<FramePose3D> newGoalPose = new AtomicReference<>();
@@ -46,13 +42,14 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    private final YoDouble yoTime;
    private boolean setupComplete = false;
    private boolean goalLocationChanged = false;
-   
-   private  FootstepPlannerType footStepPlannerToUse =  FootstepPlannerType.A_STAR;
-   private boolean assumeFlatGround = false;
 
+   private boolean planBodyPath = false;
+   private boolean performAStarSearch = false;
+   private boolean assumeFlatGround = true;
 
    public WalkToLocationPlannedBehavior(String robotName, Ros2Node ros2Node, FullHumanoidRobotModel fullRobotModel, HumanoidReferenceFrames referenceFrames,
-                                        WalkingControllerParameters walkingControllerParameters,FootstepPlannerParametersBasics footstepPlannerParameters, YoDouble yoTime)
+                                        WalkingControllerParameters walkingControllerParameters, FootstepPlannerParametersBasics footstepPlannerParameters,
+                                        YoDouble yoTime)
    {
       super(robotName, "WalkToLocationBehavior", WalkToLocationStates.class, yoTime, ros2Node);
 
@@ -61,9 +58,8 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
 
       createSubscribers();
       //setupBehaviors
-      planPathToLocationBehavior = new PlanPathToLocationBehavior(robotName, ros2Node,footstepPlannerParameters, yoTime);
+      planPathToLocationBehavior = new PlanPathToLocationBehavior(robotName, ros2Node, footstepPlannerParameters, yoTime);
       footstepListBehavior = new FootstepListBehavior(robotName, ros2Node, walkingControllerParameters);
-
 
       setupStateMachine();
    }
@@ -71,19 +67,21 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    @Override
    public void doControl()
    {
-      if(newGoalPose.get()!=null)
+      if (newGoalPose.get() != null)
       {
          setTarget(newGoalPose.getAndSet(null));
       }
       super.doControl();
    }
-   
+
    private void createSubscribers()
    {
       createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, plannerResult::set);
 
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class,
-                                    (packet) -> newGoalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(), packet.getOrientation())));
+                                    (packet) -> newGoalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(),
+                                                                                packet.getPosition(),
+                                                                                packet.getOrientation())));
       createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
    }
 
@@ -91,14 +89,19 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    {
       publishTextToSpeech("New Goal Target Recieved");
       currentGoalPose.set(targetPoseInWorld);
-      goalLocationChanged=true;
+      goalLocationChanged = true;
    }
-   
-   public void setFootStepPlanner( FootstepPlannerType footStepPlannerToUse)
+
+   public void setPlanBodyPath(boolean planBodyPath)
    {
-      this.footStepPlannerToUse = footStepPlannerToUse;
+      this.planBodyPath = planBodyPath;
    }
-   
+
+   public void setPerformAStarSearch(boolean performAStarSearch)
+   {
+      this.performAStarSearch = performAStarSearch;
+   }
+
    public void setAssumeFlatGround(boolean assumeFlatGround)
    {
       this.assumeFlatGround = assumeFlatGround;
@@ -111,15 +114,14 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
       walkSucceded = false;
       planPathToLocationBehavior.onBehaviorEntered();
       footstepListBehavior.onBehaviorEntered();
-      goalLocationChanged= false;
+      goalLocationChanged = false;
       super.onBehaviorEntered();
-     
+
    }
+
    @Override
    protected WalkToLocationStates configureStateMachineAndReturnInitialKey(StateMachineFactory<WalkToLocationStates, BehaviorAction> factory)
    {
-      
-      
 
       BehaviorAction waitForGoalToBeSet = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
       {
@@ -145,17 +147,20 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          {
             goalLocationChanged = false;
             RobotSide initialStanceSide = RobotSide.LEFT;
-            FramePose3D leftFootPose = new FramePose3D();
-            FramePose3D rightFootPose = new FramePose3D();
-            leftFootPose.setToZero(referenceFrames.getSoleFrame(RobotSide.LEFT));
-            rightFootPose.setToZero(referenceFrames.getSoleFrame(RobotSide.RIGHT));
+            FramePose3D leftFootPose = new FramePose3D(referenceFrames.getSoleFrame(RobotSide.LEFT));
+            FramePose3D rightFootPose = new FramePose3D(referenceFrames.getSoleFrame(RobotSide.RIGHT));
+            leftFootPose.changeFrame(ReferenceFrame.getWorldFrame());
+            rightFootPose.changeFrame(ReferenceFrame.getWorldFrame());
             if (currentGoalPose.get() == null)
-               System.err.println("WalkToLocationPlannedBehavior: goal pose NULL");
+            {
+               publishTextToSpeech("WalkToLocationPlannedBehavior:planFootSteps: goal pose NULL");
+            }
 
-            planPathToLocationBehavior.setInputs(currentGoalPose.get(), initialStanceSide, leftFootPose, rightFootPose,footStepPlannerToUse, assumeFlatGround);
+           
+            planPathToLocationBehavior.setInputs(currentGoalPose.get(), initialStanceSide, leftFootPose, rightFootPose, planBodyPath, assumeFlatGround);
             planPathToLocationBehavior.setPlanningTimeout(20);
          }
-         
+
       };
 
       BehaviorAction sendPlanToController = new BehaviorAction(footstepListBehavior)
@@ -164,13 +169,11 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
          protected void setBehaviorInput()
          {
 
-
             if (planPathToLocationBehavior.getFootStepList() != null)
             {
                footstepListBehavior.set(planPathToLocationBehavior.getFootStepList());
             }
          }
-
 
       };
       BehaviorAction doneState = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
@@ -191,13 +194,13 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
             publishTextToSpeech("WalkToLocationPlannedBehavior: Plan Failed");
          }
       };
-      
+
       BehaviorAction PausedState = new BehaviorAction(new SimpleDoNothingBehavior(robotName, ros2Node))
       {
          @Override
          protected void setBehaviorInput()
          {
-            
+
          }
       };
 
@@ -215,7 +218,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
       factory.addTransition(WalkToLocationStates.WALK_PATH, WalkToLocationStates.PLAN_PATH, t -> goalLocationChanged);
 
       //factory.addTransition(WalkToLocationStates.PLAN_PATH, WalkToLocationStates.PLAN_FAILED, t -> isPlanPathComplete() && !hasValidPlanPath());
-      
+
       return WalkToLocationStates.WAIT_FOR_GOAL;
    }
 
@@ -243,8 +246,8 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    @Override
    public void onBehaviorResumed()
    {
-      if(!goalLocationChanged)
-      super.onBehaviorResumed();
+      if (!goalLocationChanged)
+         super.onBehaviorResumed();
       else
          getStateMachine().resetCurrentState();
       //i dont think this needs to be called i thiink the line above calls it
@@ -270,12 +273,13 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
    {
       return planPathToLocationBehavior.planSuccess();
    }
-   
+
    @Override
    public boolean isDone()
    {
-      if(setupComplete)
-      return getStateMachine().getCurrentBehaviorKey().equals(WalkToLocationStates.DONE) ||  getStateMachine().getCurrentBehaviorKey().equals(WalkToLocationStates.PLAN_FAILED);
+      if (setupComplete)
+         return getStateMachine().getCurrentBehaviorKey().equals(WalkToLocationStates.DONE)
+               || getStateMachine().getCurrentBehaviorKey().equals(WalkToLocationStates.PLAN_FAILED);
       else
          return false;
    }

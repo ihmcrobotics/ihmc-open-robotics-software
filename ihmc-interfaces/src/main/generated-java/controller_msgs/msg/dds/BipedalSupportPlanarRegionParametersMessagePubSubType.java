@@ -40,7 +40,9 @@ public class BipedalSupportPlanarRegionParametersMessagePubSubType implements us
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -57,7 +59,9 @@ public class BipedalSupportPlanarRegionParametersMessagePubSubType implements us
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -69,7 +73,9 @@ public class BipedalSupportPlanarRegionParametersMessagePubSubType implements us
 
    public static void write(controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_7(data.getEnable());
+
 
       cdr.write_type_6(data.getSupportRegionScaleFactor());
 
@@ -77,8 +83,10 @@ public class BipedalSupportPlanarRegionParametersMessagePubSubType implements us
 
    public static void read(controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setEnable(cdr.read_type_7());
       	
+
       data.setSupportRegionScaleFactor(cdr.read_type_6());
       	
 
@@ -87,14 +95,18 @@ public class BipedalSupportPlanarRegionParametersMessagePubSubType implements us
    @Override
    public final void serialize(controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_7("enable", data.getEnable());
+
       ser.write_type_6("support_region_scale_factor", data.getSupportRegionScaleFactor());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.BipedalSupportPlanarRegionParametersMessage data)
    {
+
       data.setEnable(ser.read_type_7("enable"));
+
       data.setSupportRegionScaleFactor(ser.read_type_6("support_region_scale_factor"));
    }
 

@@ -3,38 +3,37 @@ package us.ihmc.modelFileLoaders.SdfLoader;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.log.LogTools;
 import us.ihmc.modelFileLoaders.ModelFileLoaderConversionsHelper;
 import us.ihmc.modelFileLoaders.SdfLoader.xmlDescription.SDFJoint;
 
 public class SDFJointHolder
 {
    public static final boolean DEBUG = false;
-   
+
    // Data from SDF
    private final String name;
    private final SDFJointType type;
    private final Vector3D axisInModelFrame;
-   
+
    private boolean hasLimits;
    private double upperLimit;
    private double lowerLimit;
-   
-   private final double effortLimit;
+
+   private double effortLimit;
    private final double velocityLimit;
-   
-   
+
    private final RigidBodyTransform transformFromChildLink;
    private double damping = 0.0;
    private double friction = 0.0;
-   
+
    // Extra data
    private final ArrayList<SDFForceSensor> forceSensors = new ArrayList<>();
    private final ArrayList<SDFContactSensor> contactSensors = new ArrayList<>();
-   
+
    // Set by loader
    private SDFLinkHolder parentLinkHolder;
    private SDFLinkHolder childLinkHolder;
@@ -45,12 +44,12 @@ public class SDFJointHolder
    private final Vector3D offsetFromParentJoint = new Vector3D();
    private final Vector3D axisInParentFrame = new Vector3D();
    private final Vector3D axisInJointFrame = new Vector3D();
-   
+
    private double contactKp;
    private double contactKd;
    private double maxVel;
 
-   public SDFJointHolder(SDFJoint sdfJoint, SDFLinkHolder parent, SDFLinkHolder child)   throws IOException
+   public SDFJointHolder(SDFJoint sdfJoint, SDFLinkHolder parent, SDFLinkHolder child) throws IOException
    {
       name = createValidVariableName(sdfJoint.getName());
       String typeString = sdfJoint.getType();
@@ -69,15 +68,15 @@ public class SDFJointHolder
       }
 
       axisInModelFrame = ModelFileLoaderConversionsHelper.stringToNormalizedVector3d(sdfJoint.getAxis().getXyz());
-      
-      if(sdfJoint.getAxis().getLimit() != null)
+
+      if (sdfJoint.getAxis().getLimit() != null)
       {
          double sdfUpperLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getUpper());
          double sdfLowerLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getLower());
-         
+
          setLimits(sdfLowerLimit, sdfUpperLimit);
 
-         if(sdfJoint.getAxis().getLimit().getVelocity() != null)
+         if (sdfJoint.getAxis().getLimit().getVelocity() != null)
          {
             velocityLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getVelocity());
          }
@@ -85,8 +84,8 @@ public class SDFJointHolder
          {
             velocityLimit = Double.NaN;
          }
-         
-         if(sdfJoint.getAxis().getLimit().getEffort() != null)
+
+         if (sdfJoint.getAxis().getLimit().getEffort() != null)
          {
             effortLimit = Double.parseDouble(sdfJoint.getAxis().getLimit().getEffort());
          }
@@ -100,52 +99,52 @@ public class SDFJointHolder
          hasLimits = false;
          upperLimit = Double.POSITIVE_INFINITY;
          lowerLimit = Double.NEGATIVE_INFINITY;
-         
+
          velocityLimit = Double.NaN;
          effortLimit = Double.NaN;
       }
-      
-      if(sdfJoint.getAxis().getDynamics() != null)
+
+      if (sdfJoint.getAxis().getDynamics() != null)
       {
-         if(sdfJoint.getAxis().getDynamics().getFriction() != null)
+         if (sdfJoint.getAxis().getDynamics().getFriction() != null)
          {
             friction = Double.parseDouble(sdfJoint.getAxis().getDynamics().getFriction());
          }
-         if(sdfJoint.getAxis().getDynamics().getDamping() != null)
+         if (sdfJoint.getAxis().getDynamics().getDamping() != null)
          {
             damping = Double.parseDouble(sdfJoint.getAxis().getDynamics().getDamping());
          }
       }
-      
+
       transformFromChildLink = ModelFileLoaderConversionsHelper.poseToTransform(sdfJoint.getPose());
 
-      if(parent == null || child == null)
+      if (parent == null || child == null)
       {
          throw new IOException("Cannot make joint with null parent or child links, joint name is " + sdfJoint.getName());
       }
-      
+
       this.parentLinkHolder = parent;
       this.childLinkHolder = child;
       parent.addChild(this);
       child.setJoint(this);
-      
+
       calculateContactGains();
    }
-   
+
    public static String createValidVariableName(String name)
    {
       name = name.trim().replaceAll("[//[//]///]", "");
       return name;
    }
-   
+
    private void calculateContactGains()
    {
       double parentKp = parentLinkHolder.getContactKp();
       double childKp = childLinkHolder.getContactKp();
-      
-      if(Math.abs(parentKp) > 1e-3 && Math.abs(childKp) > 1e-3)
+
+      if (Math.abs(parentKp) > 1e-3 && Math.abs(childKp) > 1e-3)
       {
-         contactKp = 1.0 / (( 1.0 / parentKp ) + (1.0 / childKp));
+         contactKp = 1.0 / ((1.0 / parentKp) + (1.0 / childKp));
       }
       else if (Math.abs(parentKp) > 1e-3)
       {
@@ -155,27 +154,26 @@ public class SDFJointHolder
       {
          contactKp = childKp;
       }
-      
+
       contactKd = parentLinkHolder.getContactKd() + childLinkHolder.getContactKd();
-      
+
       maxVel = Math.min(parentLinkHolder.getContactMaxVel(), childLinkHolder.getContactMaxVel());
-      
+
    }
 
    public void calculateTransformToParentJoint()
    {
-
 
       RigidBodyTransform modelToParentLink = getParentLinkHolder().getTransformFromModelReferenceFrame();
       RigidBodyTransform modelToChildLink = getChildLinkHolder().getTransformFromModelReferenceFrame();
 
       RigidBodyTransform rotationTransform = new RigidBodyTransform();
       RigidBodyTransform parentLinkToParentJoint;
-      
+
       SDFJointHolder parentJoint = parentLinkHolder.getJoint();
       if (parentJoint != null)
       {
-         rotationTransform.setRotation(parentJoint.getLinkRotation());
+         rotationTransform.getRotation().set(parentJoint.getLinkRotation());
          parentLinkToParentJoint = parentJoint.getTransformFromChildLink();
       }
       else
@@ -188,9 +186,9 @@ public class SDFJointHolder
 
       modelToParentJoint.set(modelToParentLink);
       modelToParentJoint.multiply(parentLinkToParentJoint);
-      
-      modelToChildLink.getRotation(linkRotation);
-      
+
+      linkRotation.set(modelToChildLink.getRotation());
+
       modelToChildJoint.set(modelToChildLink);
       modelToChildJoint.multiply(transformFromChildLink);
 
@@ -202,15 +200,15 @@ public class SDFJointHolder
       parentJointToChildJoint.multiply(modelToChildJoint);
 
       transformToParentJoint = parentJointToChildJoint;
-      
-      parentJointToChildJoint.getTranslation(offsetFromParentJoint);
+
+      offsetFromParentJoint.set(parentJointToChildJoint.getTranslation());
       rotationTransform.transform(offsetFromParentJoint);
-      
+
       linkRotation.transform(axisInModelFrame, axisInParentFrame);
-      
+
       RigidBodyTransform transformFromParentJoint = new RigidBodyTransform(modelToChildJoint);
       transformFromParentJoint.transform(axisInParentFrame, axisInJointFrame);
-      
+
    }
 
    public String getName()
@@ -237,7 +235,7 @@ public class SDFJointHolder
    {
       return lowerLimit;
    }
-   
+
    public boolean hasLimits()
    {
       return hasLimits;
@@ -302,44 +300,43 @@ public class SDFJointHolder
    {
       return velocityLimit;
    }
-   
+
    public RotationMatrix getLinkRotation()
    {
       return linkRotation;
    }
-   
+
    public Vector3D getOffsetFromParentJoint()
    {
       return offsetFromParentJoint;
    }
-   
+
    public Vector3D getAxisInParentFrame()
    {
       return axisInParentFrame;
    }
-   
+
    public Vector3D getAxisInJointFrame()
    {
       return axisInJointFrame;
    }
 
-   
    // Temporary hack to get force sensors nicely in the code
    public ArrayList<SDFForceSensor> getForceSensors()
    {
       return forceSensors;
    }
-   
+
    public void addForceSensor(SDFForceSensor forceSensor)
    {
       forceSensors.add(forceSensor);
    }
-   
+
    public ArrayList<SDFContactSensor> getContactSensors()
    {
       return contactSensors;
    }
-   
+
    public void addContactSensor(SDFContactSensor contactSensor)
    {
       contactSensors.add(contactSensor);
@@ -349,7 +346,7 @@ public class SDFJointHolder
    {
       if (upperLimit > lowerLimit)
       {
-         hasLimits = true;
+         hasLimits = Double.isFinite(lowerLimit) && Double.isFinite(upperLimit);
          this.upperLimit = upperLimit;
          this.lowerLimit = lowerLimit;
       }
@@ -358,8 +355,13 @@ public class SDFJointHolder
          hasLimits = false;
          this.upperLimit = Double.POSITIVE_INFINITY;
          this.lowerLimit = Double.NEGATIVE_INFINITY;
-         PrintTools.debug(DEBUG, this, getName() + " has invalid joint limits.  LowerLimit = " + lowerLimit + ", UpperLimit = " + upperLimit
-               + ".  Using LowerLimit = " + lowerLimit + ", UpperLimit = " + upperLimit + " instead.");
+         LogTools.debug(getName() + " has invalid joint limits.  LowerLimit = " + lowerLimit + ", UpperLimit = " + upperLimit + ".  Using LowerLimit = "
+               + lowerLimit + ", UpperLimit = " + upperLimit + " instead.");
       }
+   }
+
+   public void setEffortLimit(double effortLimit)
+   {
+      this.effortLimit = effortLimit;
    }
 }

@@ -225,12 +225,12 @@ public class PawNodeCheckerRenderer extends AnimationTimer
       }
 
       snappedTransformToWorld.appendTranslation(0.0, 0.0, 0.01);
-      planarTransformToWorld.setTranslationZ(snappedTransformToWorld.getTranslationZ() + 0.1);
+      planarTransformToWorld.getTranslation().setZ(snappedTransformToWorld.getTranslationZ() + 0.1);
 
       Color regionColor = valid ? Color.GREEN : Color.RED;
       regionColor = Color.hsb(regionColor.getHue(), 0.9, 1.0);
 
-      meshBuilder.addSphere(0.1, snappedTransformToWorld.getTranslationVector(), regionColor);
+      meshBuilder.addSphere(0.1, snappedTransformToWorld.getTranslation(), regionColor);
 
       // TODO add mesh of planar footstep
 

@@ -38,4 +38,10 @@ public class DataSet
    {
       this.plannerInput = plannerInput;
    }
+
+   @Override
+   public String toString()
+   {
+      return name;
+   }
 }

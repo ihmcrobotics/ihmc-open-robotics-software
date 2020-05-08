@@ -753,8 +753,8 @@ public final class RandomHumanoidMessages
 
          previousFootstep.transform(position);
 
-         previousFootstep.setTranslation(new Vector3D32(position));
-         previousFootstep.setRotation(orientation);
+         previousFootstep.getTranslation().set(new Vector3D32(position));
+         previousFootstep.getRotation().set(orientation);
 
          FootstepDataMessage footstepData = HumanoidMessageTools.createFootstepDataMessage(robotSide, new Point3D(position), orientation);
 

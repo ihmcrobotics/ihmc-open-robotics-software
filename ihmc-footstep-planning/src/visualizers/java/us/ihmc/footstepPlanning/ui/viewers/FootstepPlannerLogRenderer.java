@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
-import controller_msgs.msg.dds.ValkyrieFootstepPlanningRequestPacket;
+import controller_msgs.msg.dds.FootstepPlanRequestPacket;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
@@ -19,6 +19,7 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
@@ -41,15 +42,15 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
    private final AtomicReference<Pair<RigidBodyTransform, ConvexPolygon2D>> debugChildStep;
    private final AtomicReference<RigidBodyTransform> debugIdealStep;
 
-   public FootstepPlannerLogRenderer(RobotContactPointParameters<RobotSide> contactPointParameters, Messager messager)
+   public FootstepPlannerLogRenderer(SideDependentList<List<Point2D>> defaultContactPoints, Messager messager)
    {
-      if (contactPointParameters == null)
+      if (defaultContactPoints == null)
       {
          defaultFootPolygon.set(PlannerTools.createDefaultFootPolygon());
       }
       else
       {
-         List<Point2D> contactPoints = contactPointParameters.getFootContactPoints().get(RobotSide.LEFT);
+         List<Point2D> contactPoints = defaultContactPoints.get(RobotSide.LEFT);
          contactPoints.forEach(defaultFootPolygon::addVertex);
          defaultFootPolygon.update();
       }
@@ -63,6 +64,8 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
       debugChildStep = messager.createInput(FootstepPlannerMessagerAPI.childDebugStep);
       debugIdealStep = messager.createInput(FootstepPlannerMessagerAPI.idealDebugStep);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLogGraphics, root::setVisible);
+
+      root.setVisible(false);
    }
 
    @Override
@@ -108,21 +111,6 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
          this.debugIdealStepGraphic.meshReference.set(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
          debugIdealStepGraphic.update();
       }
-   }
-
-   public void initialize(ValkyrieFootstepPlanningRequestPacket planningRequestPacket)
-   {
-      meshBuilder.clear();
-      addFootstep(planningRequestPacket.getStartLeftFootPose().getPosition(),
-                  planningRequestPacket.getStartLeftFootPose().getOrientation(),
-                  defaultFootPoints,
-                  defaultFootPolygon,
-                  Color.DARKGREEN);
-      addFootstep(planningRequestPacket.getStartRightFootPose().getPosition(),
-                  planningRequestPacket.getStartRightFootPose().getOrientation(),
-                  defaultFootPoints,
-                  defaultFootPolygon,
-                  Color.DARKGREEN);
    }
 
    private void addFootstep(Tuple3DReadOnly translation, Orientation3DReadOnly orientation, List<Point2D> footPoints, ConvexPolygon2D footPolygon, Color color)

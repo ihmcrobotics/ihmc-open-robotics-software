@@ -40,7 +40,9 @@ public class FootstepPlannerStatusMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -57,7 +59,9 @@ public class FootstepPlannerStatusMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -69,7 +73,9 @@ public class FootstepPlannerStatusMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void write(controller_msgs.msg.dds.FootstepPlannerStatusMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_9(data.getFootstepPlannerStatus());
 
@@ -77,8 +83,10 @@ public class FootstepPlannerStatusMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void read(controller_msgs.msg.dds.FootstepPlannerStatusMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setFootstepPlannerStatus(cdr.read_type_9());
       	
 
@@ -87,14 +95,18 @@ public class FootstepPlannerStatusMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void serialize(controller_msgs.msg.dds.FootstepPlannerStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_9("footstep_planner_status", data.getFootstepPlannerStatus());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepPlannerStatusMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setFootstepPlannerStatus(ser.read_type_9("footstep_planner_status"));
    }
 
