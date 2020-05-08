@@ -33,6 +33,7 @@ public class FourBar
    private final FourBarVertex B = new FourBarVertex("B");
    private final FourBarVertex C = new FourBarVertex("C");
    private final FourBarVertex D = new FourBarVertex("D");
+   private final FourBarVertex[] vertices = {A, B, C, D};
 
    private final FourBarEdge AB = new FourBarEdge("AB");
    private final FourBarEdge BC = new FourBarEdge("BC");
@@ -41,11 +42,6 @@ public class FourBar
 
    private final FourBarDiagonal AC = new FourBarDiagonal("AC");
    private final FourBarDiagonal BD = new FourBarDiagonal("AC");
-
-   public enum Angle
-   {
-      ABC, BCD, CDA, DAB
-   };
 
    public FourBar()
    {
@@ -111,55 +107,19 @@ public class FourBar
     * @param angle
     * @return
     */
-   public Bound update(Angle source, double angle)
+   public Bound update(FourBarAngle source, double angle)
    {
-      switch (source)
-      {
-         case DAB:
-            return FourBarTools.update(getVertexA(), angle);
-         case ABC:
-            return FourBarTools.update(getVertexB(), angle);
-         case BCD:
-            return FourBarTools.update(getVertexC(), angle);
-         case CDA:
-            return FourBarTools.update(getVertexD(), angle);
-         default:
-            throw new IllegalStateException();
-      }
+      return FourBarTools.update(vertices[source.ordinal()], angle);
    }
 
-   public Bound update(Angle source, double angle, double angleDot)
+   public Bound update(FourBarAngle source, double angle, double angleDot)
    {
-      switch (source)
-      {
-         case DAB:
-            return FourBarTools.update(getVertexA(), angle, angleDot);
-         case ABC:
-            return FourBarTools.update(getVertexB(), angle, angleDot);
-         case BCD:
-            return FourBarTools.update(getVertexC(), angle, angleDot);
-         case CDA:
-            return FourBarTools.update(getVertexD(), angle, angleDot);
-         default:
-            throw new IllegalStateException();
-      }
+      return FourBarTools.update(vertices[source.ordinal()], angle, angleDot);
    }
 
-   public Bound update(Angle source, double angle, double angleDot, double angleDDot)
+   public Bound update(FourBarAngle source, double angle, double angleDot, double angleDDot)
    {
-      switch (source)
-      {
-         case DAB:
-            return FourBarTools.update(getVertexA(), angle, angleDot, angleDDot);
-         case ABC:
-            return FourBarTools.update(getVertexB(), angle, angleDot, angleDDot);
-         case BCD:
-            return FourBarTools.update(getVertexC(), angle, angleDot, angleDDot);
-         case CDA:
-            return FourBarTools.update(getVertexD(), angle, angleDot, angleDDot);
-         default:
-            throw new IllegalStateException();
-      }
+      return FourBarTools.update(vertices[source.ordinal()], angle, angleDot, angleDDot);
    }
 
    public FourBarVertex getVertexA()
