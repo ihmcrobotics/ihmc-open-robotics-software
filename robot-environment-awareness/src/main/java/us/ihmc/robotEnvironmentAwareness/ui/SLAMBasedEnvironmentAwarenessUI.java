@@ -3,11 +3,11 @@ package us.ihmc.robotEnvironmentAwareness.ui;
 import java.io.File;
 import java.io.IOException;
 
+import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.input.KeyCode;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import us.ihmc.communication.util.NetworkPorts;
@@ -15,14 +15,10 @@ import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
+import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.SLAMMeshViewer;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.CustomRegionMergeAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.DataExporterAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.NormalEstimationAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.PolygonizerAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.RegionSegmentationAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
@@ -38,17 +34,10 @@ public class SLAMBasedEnvironmentAwarenessUI
    private final SLAMMeshViewer ihmcSLAMViewer;
    private final REAUIMessager uiMessager;
    private final SensorFrameViewer<StereoVisionPointCloudMessage> depthFrameViewer;
+   private final SensorFrameViewer<StampedPosePacket> pelvisFrameViewer;
 
    @FXML
    private SLAMAnchorPaneController slamAnchorPaneController;
-   @FXML
-   private NormalEstimationAnchorPaneController normalEstimationAnchorPaneController;
-   @FXML
-   private RegionSegmentationAnchorPaneController regionSegmentationAnchorPaneController;
-   @FXML
-   private CustomRegionMergeAnchorPaneController customRegionMergeAnchorPaneController;
-   @FXML
-   private PolygonizerAnchorPaneController polygonizerAnchorPaneController;
    @FXML
    private DataExporterAnchorPaneController dataExporterAnchorPaneController;
 
@@ -72,9 +61,15 @@ public class SLAMBasedEnvironmentAwarenessUI
 
       ihmcSLAMViewer = new SLAMMeshViewer(uiMessager);
       depthFrameViewer = new SensorFrameViewer<StereoVisionPointCloudMessage>(uiMessager,
-                                                                              REAModuleAPI.DepthPointCloudState,
-                                                                              REAModuleAPI.UISensorPoseHistoryFrames,
-                                                                              SensorFrameViewer.createStereoVisionSensorFrameExtractor());
+                                                                              SLAMModuleAPI.DepthPointCloudState,
+                                                                              SLAMModuleAPI.UISensorPoseHistoryFrames,
+                                                                              SensorFrameViewer.createStereoVisionSensorFrameExtractor(),
+                                                                              SLAMModuleAPI.SensorPoseHistoryClear);
+      pelvisFrameViewer = new SensorFrameViewer<StampedPosePacket>(uiMessager,
+                                                                   SLAMModuleAPI.CustomizedFrameState,
+                                                                   SLAMModuleAPI.UISensorPoseHistoryFrames,
+                                                                   SensorFrameViewer.createStampedPosePacketSensorFrameExtractor(),
+                                                                   SLAMModuleAPI.SensorPoseHistoryClear);
       new PlanarRegionSegmentationDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       new PlanarRegionDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       stereoVisionPointCloudDataExporter = new StereoVisionPointCloudDataExporter(uiMessager);
@@ -88,8 +83,9 @@ public class SLAMBasedEnvironmentAwarenessUI
 
       view3dFactory.addNodeToView(ihmcSLAMViewer.getRoot());
       view3dFactory.addNodeToView(depthFrameViewer.getRoot());
+      view3dFactory.addNodeToView(pelvisFrameViewer.getRoot());
 
-      uiConnectionHandler = new UIConnectionHandler(primaryStage, uiMessager);
+      uiConnectionHandler = new UIConnectionHandler(primaryStage, uiMessager, SLAMModuleAPI.RequestEntireModuleState);
       uiConnectionHandler.start();
 
       uiMessager.notifyModuleMessagerStateListeners();
@@ -98,19 +94,13 @@ public class SLAMBasedEnvironmentAwarenessUI
       primaryStage.setMaximized(true);
       Scene mainScene = new Scene(mainPane, 600, 400);
 
-      mainScene.setOnKeyPressed(event ->
-      {
-         if (event.getCode() == KeyCode.F5)
-            refreshModuleState();
-      });
-
       primaryStage.setScene(mainScene);
       primaryStage.setOnCloseRequest(event -> stop());
    }
 
    private void refreshModuleState()
    {
-      uiMessager.submitStateRequestToModule(REAModuleAPI.RequestEntireModuleState);
+      uiMessager.submitStateRequestToModule(SLAMModuleAPI.RequestEntireModuleState);
    }
 
    private void initializeControllers(REAUIMessager uiMessager)
@@ -130,27 +120,10 @@ public class SLAMBasedEnvironmentAwarenessUI
       slamAnchorPaneController.setConfigurationFile(configurationFile);
       slamAnchorPaneController.attachREAMessager(uiMessager);
       slamAnchorPaneController.bindControls();
-
-      normalEstimationAnchorPaneController.setConfigurationFile(configurationFile);
-      normalEstimationAnchorPaneController.attachREAMessager(uiMessager);
-      normalEstimationAnchorPaneController.bindControls();
-
-      regionSegmentationAnchorPaneController.setConfigurationFile(configurationFile);
-      regionSegmentationAnchorPaneController.attachREAMessager(uiMessager);
-      regionSegmentationAnchorPaneController.bindControls();
-
-      customRegionMergeAnchorPaneController.setConfigurationFile(configurationFile);
-      customRegionMergeAnchorPaneController.attachREAMessager(uiMessager);
-      customRegionMergeAnchorPaneController.bindControls();
-
-      polygonizerAnchorPaneController.setConfigurationFile(configurationFile);
-      polygonizerAnchorPaneController.attachREAMessager(uiMessager);
-      polygonizerAnchorPaneController.bindControls();
-
-      dataExporterAnchorPaneController.setConfigurationFile(configurationFile);
-      dataExporterAnchorPaneController.attachREAMessager(uiMessager);
-      dataExporterAnchorPaneController.setMainWindow(primaryStage);
-      dataExporterAnchorPaneController.bindControls();
+      //      dataExporterAnchorPaneController.setConfigurationFile(configurationFile);
+      //      dataExporterAnchorPaneController.attachREAMessager(uiMessager);
+      //      dataExporterAnchorPaneController.setMainWindow(primaryStage);
+      //      dataExporterAnchorPaneController.bindControls();
    }
 
    public void show() throws IOException
@@ -168,6 +141,7 @@ public class SLAMBasedEnvironmentAwarenessUI
 
          ihmcSLAMViewer.stop();
          depthFrameViewer.stop();
+         pelvisFrameViewer.stop();
 
          stereoVisionPointCloudDataExporter.shutdown();
       }
@@ -179,19 +153,9 @@ public class SLAMBasedEnvironmentAwarenessUI
 
    public static SLAMBasedEnvironmentAwarenessUI creatIntraprocessUI(Stage primaryStage) throws Exception
    {
-      Messager moduleMessager = KryoMessager.createIntraprocess(REAModuleAPI.API,
-                                                                NetworkPorts.REA_MODULE_UI_PORT,
+      Messager moduleMessager = KryoMessager.createIntraprocess(SLAMModuleAPI.API,
+                                                                NetworkPorts.SLAM_MODULE_UI_PORT,
                                                                 REACommunicationProperties.getPrivateNetClassList());
-      REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
-      return new SLAMBasedEnvironmentAwarenessUI(uiMessager, primaryStage);
-   }
-
-   public static SLAMBasedEnvironmentAwarenessUI creatRemoteUI(Stage primaryStage, String host) throws Exception
-   {
-      Messager moduleMessager = KryoMessager.createTCPClient(REAModuleAPI.API,
-                                                             host,
-                                                             NetworkPorts.REA_MODULE_UI_PORT,
-                                                             REACommunicationProperties.getPrivateNetClassList());
       REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
       return new SLAMBasedEnvironmentAwarenessUI(uiMessager, primaryStage);
    }
