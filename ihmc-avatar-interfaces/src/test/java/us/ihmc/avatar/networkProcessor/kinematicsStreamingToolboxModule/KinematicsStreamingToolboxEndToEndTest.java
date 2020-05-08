@@ -146,9 +146,9 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
    public void createToolboxController(DRCRobotModel robotModel)
    {
       String robotName = robotModel.getSimpleRobotName();
-      ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
       ROS2TopicName toolboxSubGenerator = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
-      ROS2TopicName toolboxPubGenerator = KinematicsStreamingToolboxModule.getPublisherTopicNameGenerator(robotName);
+      ROS2TopicName toolboxOutputTopicName = KinematicsStreamingToolboxModule.getPublisherTopicNameGenerator(robotName);
 
       desiredFullRobotModel = robotModel.createFullRobotModel();
       toolboxRegistry = new YoVariableRegistry("toolboxMain");
@@ -157,7 +157,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(desiredFullRobotModel));
       statusOutputManager = new StatusMessageOutputManager(KinematicsStreamingToolboxModule.supportedStatus());
 
-      new ControllerNetworkSubscriber(toolboxSubGenerator, commandInputManager, toolboxPubGenerator, statusOutputManager, toolboxRos2Node);
+      new ControllerNetworkSubscriber(toolboxSubGenerator, commandInputManager, toolboxOutputTopicName, statusOutputManager, toolboxRos2Node);
 
       toolboxController = new KinematicsStreamingToolboxController(commandInputManager,
                                                                    statusOutputManager,
@@ -171,11 +171,11 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(toolboxRos2Node,
                                                     RobotConfigurationData.class,
-                                                    controllerPubGenerator,
+                                                    controllerOutputTopicName,
                                            s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(toolboxRos2Node,
                                                     CapturabilityBasedStatus.class,
-                                                    controllerPubGenerator,
+                                                    controllerOutputTopicName,
                                            s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
       toolboxRos2Node.spin();
    }
