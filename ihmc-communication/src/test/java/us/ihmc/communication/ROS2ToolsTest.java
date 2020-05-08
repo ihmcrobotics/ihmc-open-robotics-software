@@ -30,14 +30,14 @@ class ROS2ToolsTest
       assertEquals("/ihmc/atlas/rea/input/rea_state_request",
                    ROS2Tools.IHMC_ROOT.withType(REAStateRequestMessage.class).withRobot("atlas").withModule("rea").withInput().toString());
 
-      ROS2TopicName defaultTopicNameGenerator = ROS2Tools.IHMC_ROOT;
-      assertEquals("/ihmc/rea_state_request", defaultTopicNameGenerator.withType(REAStateRequestMessage.class).toString());
+      ROS2TopicName defaultTopicName = ROS2Tools.IHMC_ROOT;
+      assertEquals("/ihmc/rea_state_request", defaultTopicName.withType(REAStateRequestMessage.class).toString());
 
-      ROS2TopicName defaultTopicNameGeneratorWithRobot = ROS2Tools.IHMC_ROOT.withRobot("atlas");
-      assertEquals("/ihmc/atlas/rea_state_request", defaultTopicNameGeneratorWithRobot.withType(REAStateRequestMessage.class).toString());
+      ROS2TopicName defaultTopicNameWithRobot = ROS2Tools.IHMC_ROOT.withRobot("atlas");
+      assertEquals("/ihmc/atlas/rea_state_request", defaultTopicNameWithRobot.withType(REAStateRequestMessage.class).toString());
 
-      ROS2TopicName defaultTopicNameGenerator3 = ROS2Tools.IHMC_ROOT.withRobot("atlas").withModule("rea").withOutput();
-      assertEquals("/ihmc/atlas/rea/output/rea_state_request", defaultTopicNameGenerator3.withType(REAStateRequestMessage.class).toString());
+      ROS2TopicName defaultTopicName3 = ROS2Tools.IHMC_ROOT.withRobot("atlas").withModule("rea").withOutput();
+      assertEquals("/ihmc/atlas/rea/output/rea_state_request", defaultTopicName3.withType(REAStateRequestMessage.class).toString());
 
       assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot("atlas").withOutput().toString());
    }

@@ -69,11 +69,11 @@ public class OutputManager
     * It is used to register in the API a output message.
     * @param outputMessageClass
     */
-   public <S extends Settable<S>> void registerOutputMessage(Class<S> outputMessageClass, ROS2TopicName topicNameGenerator)
+   public <S extends Settable<S>> void registerOutputMessage(Class<S> outputMessageClass, ROS2TopicName topicName)
    {
       Builder<S> builder = CommandInputManager.createBuilderWithEmptyConstructor(outputMessageClass);
       outputClassToObjectMap.put(outputMessageClass, builder.newInstance());
-      outputClassToTopicMap.put(outputMessageClass, topicNameGenerator);
+      outputClassToTopicMap.put(outputMessageClass, topicName);
       listOfSupportedMessages.add(outputMessageClass);
    }
 
@@ -175,7 +175,7 @@ public class OutputManager
       return listOfSupportedMessages;
    }
 
-   public ROS2TopicName getMessageTopicNameGenerator(Class<? extends Settable<?>> messageClass)
+   public ROS2TopicName getMessageTopicName(Class<? extends Settable<?>> messageClass)
    {
       return outputClassToTopicMap.get(messageClass);
    }

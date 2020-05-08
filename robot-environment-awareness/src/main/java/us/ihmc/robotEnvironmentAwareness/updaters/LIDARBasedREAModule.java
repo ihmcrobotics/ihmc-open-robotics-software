@@ -1,8 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.publisherTopicNameGenerator;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberTopicNameGenerator;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.publisherTopicName;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberTopicName;
 
 import java.io.File;
 import java.io.IOException;
@@ -106,12 +106,12 @@ public class LIDARBasedREAModule
       new REAModuleROS2Subscription<StampedPosePacket>(ros2Node, reaMessager, "/ihmc/stamped_pose_T265", StampedPosePacket.class,
                                                        this::dispatchStampedPosePacket, REAModuleAPI.DepthCloudBufferEnable);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicName,
                                                     this::dispatchCustomPlanarRegion);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RequestPlanarRegionsListMessage.class, subscriberTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RequestPlanarRegionsListMessage.class, subscriberTopicName,
                                                     this::handleRequestPlanarRegionsListMessage);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, subscriberTopicNameGenerator, this::handleREAStateRequestMessage);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REASensorDataFilterParametersMessage.class, subscriberTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, subscriberTopicName, this::handleREAStateRequestMessage);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REASensorDataFilterParametersMessage.class, subscriberTopicName,
                                                     this::handleREASensorDataFilterParametersMessage);
 
       FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
@@ -124,8 +124,8 @@ public class LIDARBasedREAModule
       reaMessager.registerTopicListener(REAModuleAPI.SaveRegionUpdaterConfiguration,
                                         (content) -> planarRegionFeatureUpdater.saveConfiguration(filePropertyHelper));
 
-      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager, planarRegionFeatureUpdater, ros2Node, publisherTopicNameGenerator,
-                                                                             subscriberTopicNameGenerator);
+      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager, planarRegionFeatureUpdater, ros2Node, publisherTopicName,
+                                                                             subscriberTopicName);
       clearOcTree = reaMessager.createInput(REAModuleAPI.OcTreeClear, false);
 
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.

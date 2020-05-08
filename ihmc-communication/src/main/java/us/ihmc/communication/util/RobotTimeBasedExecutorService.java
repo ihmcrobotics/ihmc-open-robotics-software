@@ -44,7 +44,7 @@ public class RobotTimeBasedExecutorService
    public static void schedulePackageBased(RealtimeRos2Node ros2Node, String robotName, long period, TimeUnit timeUnit, Runnable runnable)
    {
       NewMessageListener<RobotConfigurationData> robotConfigurationDataListener = createListener(period, timeUnit, runnable);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, createTopicNameGenerator(robotName), robotConfigurationDataListener);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, createTopicName(robotName), robotConfigurationDataListener);
    }
 
    /**
@@ -61,10 +61,10 @@ public class RobotTimeBasedExecutorService
    public static void schedulePackageBased(Ros2Node ros2Node, String robotName, long period, TimeUnit timeUnit, Runnable runnable)
    {
       NewMessageListener<RobotConfigurationData> robotConfigurationDataListener = createListener(period, timeUnit, runnable);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, createTopicNameGenerator(robotName), robotConfigurationDataListener);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, createTopicName(robotName), robotConfigurationDataListener);
    }
 
-   private static ROS2TopicName createTopicNameGenerator(String robotName)
+   private static ROS2TopicName createTopicName(String robotName)
    {
       return ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
    }
@@ -161,8 +161,8 @@ public class RobotTimeBasedExecutorService
       AtomicDouble estimatedRealtimeRate = new AtomicDouble(1.0);
 
       // Create a thread that estimates the current realtime rate.
-      ROS2TopicName topicNameGenerator = createTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, topicNameGenerator, new NewMessageListener<RobotConfigurationData>()
+      ROS2TopicName topicName = createTopicName(robotName);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, topicName, new NewMessageListener<RobotConfigurationData>()
       {
          private final SampleInfo sampleInfo = new SampleInfo();
          private final RobotConfigurationData robotConfigurationData = new RobotConfigurationData();

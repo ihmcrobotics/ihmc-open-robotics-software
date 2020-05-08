@@ -5,12 +5,12 @@ import us.ihmc.ros2.ROS2TopicName;
 
 public class FootstepPlannerCommunicationProperties
 {
-   public static ROS2TopicName publisherTopicNameGenerator(String robotName)
+   public static ROS2TopicName publisherTopicName(String robotName)
    {
       return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
    }
 
-   public static ROS2TopicName subscriberTopicNameGenerator(String robotName)
+   public static ROS2TopicName subscriberTopicName(String robotName)
    {
       return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
    }

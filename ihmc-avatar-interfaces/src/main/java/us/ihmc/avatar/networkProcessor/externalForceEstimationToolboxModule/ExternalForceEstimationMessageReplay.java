@@ -50,9 +50,9 @@ public class ExternalForceEstimationMessageReplay
       robotConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopicName);
       robotDesiredConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotDesiredConfigurationData.class, controllerOutputTopicName);
 
-      ROS2TopicName toolboxSubTopicNameGenerator = ExternalForceEstimationToolboxModule.getSubscriberTopicNameGenerator(robotName);
-      configMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ExternalForceEstimationConfigurationMessage.class, toolboxSubTopicNameGenerator);
-      toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxSubTopicNameGenerator);
+      ROS2TopicName toolboxSubTopicName = ExternalForceEstimationToolboxModule.getSubscriberTopicName(robotName);
+      configMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ExternalForceEstimationConfigurationMessage.class, toolboxSubTopicName);
+      toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxSubTopicName);
 
       ros2Node.spin();
    }

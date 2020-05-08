@@ -97,7 +97,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class,
                                     (packet) -> goalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(), packet.getOrientation())));
-      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
+      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicName, planarRegions::set);
       
       
 
@@ -115,7 +115,7 @@ public class WalkOverTerrainStateMachineBehavior extends AbstractBehavior
       headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
       toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlannerInputTopicName);
       planningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlannerInputTopicName);
-      reaStateRequestPublisher = createPublisher(REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
+      reaStateRequestPublisher = createPublisher(REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicName);
 
       stateMachine = setupStateMachine(yoTime);
    }

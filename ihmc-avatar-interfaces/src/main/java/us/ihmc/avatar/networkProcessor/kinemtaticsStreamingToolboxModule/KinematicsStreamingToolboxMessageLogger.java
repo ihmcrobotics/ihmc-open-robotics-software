@@ -78,24 +78,24 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
                                                     controllerOutputTopicName,
                                            s -> capturabilityBasedStatus.set(s.takeNextData()));
 
-      ROS2TopicName toolboxSubTopicNameGenerator = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
+      ROS2TopicName toolboxSubTopicName = KinematicsStreamingToolboxModule.getSubscriberTopicName(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     ToolboxStateMessage.class,
-                                                    toolboxSubTopicNameGenerator,
+                                                    toolboxSubTopicName,
                                            s -> processToolboxStateMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     KinematicsToolboxConfigurationMessage.class,
-                                                    toolboxSubTopicNameGenerator,
+                                                    toolboxSubTopicName,
                                            s -> kinematicsToolboxConfigurationMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     KinematicsStreamingToolboxInputMessage.class,
-                                                    toolboxSubTopicNameGenerator,
+                                                    toolboxSubTopicName,
                                            s -> kinematicsStreamingToolboxInputMessage.set(s.takeNextData()));
 
-      ROS2TopicName toolboxPubTopicNameGenerator = KinematicsStreamingToolboxModule.getPublisherTopicNameGenerator(robotName);
+      ROS2TopicName toolboxPubTopicName = KinematicsStreamingToolboxModule.getPublisherTopicName(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     KinematicsToolboxOutputStatus.class,
-                                                    toolboxPubTopicNameGenerator,
+                                                    toolboxPubTopicName,
                                            s -> kinematicsToolboxOutputStatus.set(s.takeNextData()));
 
       ros2Node.spin();

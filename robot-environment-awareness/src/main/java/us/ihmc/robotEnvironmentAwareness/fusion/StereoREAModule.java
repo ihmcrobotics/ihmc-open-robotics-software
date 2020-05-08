@@ -1,7 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.fusion;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.publisherTopicNameGenerator;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberTopicNameGenerator;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.publisherTopicName;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberTopicName;
 
 import java.awt.image.BufferedImage;
 import java.text.DecimalFormat;
@@ -51,8 +51,8 @@ public class StereoREAModule implements Runnable
 
       enable = messager.createInput(LidarImageFusionAPI.EnableREA, false);
 
-      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager, planarRegionFeatureUpdater, ros2Node, publisherTopicNameGenerator,
-                                                                             subscriberTopicNameGenerator);
+      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager, planarRegionFeatureUpdater, ros2Node, publisherTopicName,
+                                                                             subscriberTopicName);
 
       loadedStereoVisionPointCloudMessage = reaMessager.createInput(REAModuleAPI.StereoVisionPointCloudState);
       loadedImage32Message = messager.createInput(LidarImageFusionAPI.ImageState);

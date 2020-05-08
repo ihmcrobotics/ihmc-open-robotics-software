@@ -217,7 +217,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                     footstepPlannerParameters);
       }
 
-      ROS2TopicName behaviorInputTopicName = getSubscriberTopicNameGenerator(robotName);
+      ROS2TopicName behaviorInputTopicName = getSubscriberTopicName(robotName);
       dispatcher.finalizeStateMachine();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     BehaviorControlModePacket.class,
@@ -552,12 +552,12 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
       return getBehaviorRosTopicPrefix(robotName, ROS2Tools.INPUT);
    }
 
-   public static ROS2TopicName getPublisherTopicNameGenerator(String robotName)
+   public static ROS2TopicName getPublisherTopicName(String robotName)
    {
       return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
    }
 
-   public static ROS2TopicName getSubscriberTopicNameGenerator(String robotName)
+   public static ROS2TopicName getSubscriberTopicName(String robotName)
    {
       return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();
    }

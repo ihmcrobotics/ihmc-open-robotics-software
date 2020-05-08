@@ -74,7 +74,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
       pipeLine = new PipeLine<>(yoTime);
       this.footstepPlannerParameters = footstepPlannerParameters;
       createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopicName, footPlanStatusQueue::put);
-      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
+      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicName, planarRegions::set);
 
       toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlannerInputTopicName);
       footstepPlanningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlannerInputTopicName);

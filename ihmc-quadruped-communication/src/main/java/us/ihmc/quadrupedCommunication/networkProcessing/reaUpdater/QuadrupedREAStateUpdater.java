@@ -38,7 +38,7 @@ public class QuadrupedREAStateUpdater
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "avatar_rea_state_updater");
 
-      reaStateRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
+      reaStateRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, HighLevelStateChangeStatusMessage.class, ROS2Tools.getQuadrupedControllerOutputTopicName(robotName),
                                                     this::handleHighLevelStateChangeMessage);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, QuadrupedSteppingStateChangeMessage.class, ROS2Tools.getQuadrupedControllerOutputTopicName(robotName),

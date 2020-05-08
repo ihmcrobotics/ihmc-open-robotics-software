@@ -141,7 +141,7 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       referenceFrames = robotDataReceiver.getReferenceFrames();
       humanoidBehabiorTypePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                          HumanoidBehaviorTypePacket.class,
-                                                                         IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName));
+                                                                         IHMCHumanoidBehaviorManager.getSubscriberTopicName(robotName));
    }
 
    public Ros2Node getRos2Node()
@@ -234,13 +234,13 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     BehaviorControlModePacket.class,
-                                                    IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName),
+                                                    IHMCHumanoidBehaviorManager.getSubscriberTopicName(robotName),
                                            s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
 
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     HumanoidBehaviorTypePacket.class,
-                                                    IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName),
+                                                    IHMCHumanoidBehaviorManager.getSubscriberTopicName(robotName),
                                            s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
 
       YoVariableServer yoVariableServer = null;

@@ -91,8 +91,8 @@ public class AvatarEstimatorThreadFactory
    private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisPoseSubscriberField = new OptionalFactoryField<>("externalPelvisPoseSubscriberField");
 
    private final OptionalFactoryField<RealtimeRos2Node> realtimeRos2NodeField = new OptionalFactoryField<>("realtimeRos2Node");
-   private final OptionalFactoryField<ROS2TopicName> publisherTopicNameGeneratorField = new OptionalFactoryField<>("publisherTopicNameGenerator");
-   private final OptionalFactoryField<ROS2TopicName> subscriberTopicNameGeneratorField = new OptionalFactoryField<>("subscriberTopicNameGenerator");
+   private final OptionalFactoryField<ROS2TopicName> publisherTopicNameField = new OptionalFactoryField<>("publisherTopicName");
+   private final OptionalFactoryField<ROS2TopicName> subscriberTopicNameField = new OptionalFactoryField<>("subscriberTopicName");
 
    private final OptionalFactoryField<SensorDataContext> sensorDataContextField = new OptionalFactoryField<>("sensorDataContext");
    private final OptionalFactoryField<HumanoidRobotContextData> humanoidRobotContextDataField = new OptionalFactoryField<>("humanoidRobotContextData");
@@ -210,17 +210,17 @@ public class AvatarEstimatorThreadFactory
     * ROS 2 necessary information to create the real-time publisher/subscriber.
     *
     * @param ros2Node                     the real-time node to create the publisher with.
-    * @param publisherTopicNameGenerator  the generator to use for creating the topic name for
+    * @param publisherTopicName  the generator to use for creating the topic name for
     *                                     publishers.
-    * @param subscriberTopicNameGenerator the generator to use for creating the topic name for
+    * @param subscriberTopicName the generator to use for creating the topic name for
     *                                     subscribers.
     */
-   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2TopicName publisherTopicNameGenerator,
-                           ROS2TopicName subscriberTopicNameGenerator)
+   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2TopicName publisherTopicName,
+                           ROS2TopicName subscriberTopicName)
    {
       realtimeRos2NodeField.set(ros2Node);
-      publisherTopicNameGeneratorField.set(publisherTopicNameGenerator);
-      subscriberTopicNameGeneratorField.set(subscriberTopicNameGenerator);
+      publisherTopicNameField.set(publisherTopicName);
+      subscriberTopicNameField.set(subscriberTopicName);
    }
 
    /**
@@ -482,18 +482,18 @@ public class AvatarEstimatorThreadFactory
          return null;
    }
 
-   public ROS2TopicName getPublisherTopicNameGenerator()
+   public ROS2TopicName getPublisherTopicName()
    {
-      if (publisherTopicNameGeneratorField.hasValue())
-         return publisherTopicNameGeneratorField.get();
+      if (publisherTopicNameField.hasValue())
+         return publisherTopicNameField.get();
       else
          return null;
    }
 
-   public ROS2TopicName getSubscriberTopicNameGenerator()
+   public ROS2TopicName getSubscriberTopicName()
    {
-      if (subscriberTopicNameGeneratorField.hasValue())
-         return subscriberTopicNameGeneratorField.get();
+      if (subscriberTopicNameField.hasValue())
+         return subscriberTopicNameField.get();
       else
          return null;
    }
@@ -519,7 +519,7 @@ public class AvatarEstimatorThreadFactory
             RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
             ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2NodeField.get(),
                                                           RequestWristForceSensorCalibrationPacket.class,
-                                                          subscriberTopicNameGeneratorField.get(),
+                                                          subscriberTopicNameField.get(),
                                                  subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
             forceSensorStateUpdaterField.get().setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
          }
@@ -530,7 +530,7 @@ public class AvatarEstimatorThreadFactory
    private IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> createControllerCrashPublisher()
    {
       if (realtimeRos2NodeField.hasValue())
-         return ROS2Tools.createPublisherTypeNamed(realtimeRos2NodeField.get(), ControllerCrashNotificationPacket.class, publisherTopicNameGeneratorField.get());
+         return ROS2Tools.createPublisherTypeNamed(realtimeRos2NodeField.get(), ControllerCrashNotificationPacket.class, publisherTopicNameField.get());
       else
          return null;
    }
@@ -763,7 +763,7 @@ public class AvatarEstimatorThreadFactory
          factory.setDefinitionsToPublish(getEstimatorFullRobotModel());
          factory.setSensorSource(getEstimatorFullRobotModel(), forceSensorDataHolderToSend, getRawSensorOutputMap());
          factory.setRobotMotionStatusHolder(getRobotMotionStatusFromController());
-         factory.setROS2Info(realtimeRos2NodeField.get(), publisherTopicNameGeneratorField.get());
+         factory.setROS2Info(realtimeRos2NodeField.get(), publisherTopicNameField.get());
          factory.setPublishPeriod(Conversions.secondsToNanoseconds(UnitConversions.hertzToSeconds(120)));
          robotConfigurationDataPublisherField.set(factory.createRobotConfigurationDataPublisher());
       }

@@ -76,13 +76,13 @@ public class PawPlanningModule extends QuadrupedToolboxModule
                                            s -> processSupportRegionParameters(s.takeNextData()));
 
       // inputs to this module
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PawStepPlanningRequestPacket.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PawStepPlanningRequestPacket.class, getSubscriberTopicName(),
                                            s -> processPawPlanningRequest(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getSubscriberTopicName(),
                                            s -> processXGaitSettingsPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PawStepPlannerParametersPacket.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PawStepPlannerParametersPacket.class, getSubscriberTopicName(),
                                            s -> processFootstepPlannerParametersPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, VisibilityGraphsParametersPacket.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, VisibilityGraphsParametersPacket.class, getSubscriberTopicName(),
                                            s -> processVisibilityGraphParametersPacket(s.takeNextData()));
    }
 
@@ -145,23 +145,23 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    {
       Map<Class<? extends Settable<?>>, ROS2TopicName> messages = new HashMap<>();
 
-      messages.put(PawStepPlanningToolboxOutputStatus.class, getPublisherTopicNameGenerator());
-      messages.put(QuadrupedBodyOrientationMessage.class, getPublisherTopicNameGenerator());
-      messages.put(BodyPathPlanMessage.class, getPublisherTopicNameGenerator());
-      messages.put(PawStepPlannerParametersPacket.class, getPublisherTopicNameGenerator());
-      messages.put(FootstepPlannerStatusMessage.class, getPublisherTopicNameGenerator());
+      messages.put(PawStepPlanningToolboxOutputStatus.class, getPublisherTopicName());
+      messages.put(QuadrupedBodyOrientationMessage.class, getPublisherTopicName());
+      messages.put(BodyPathPlanMessage.class, getPublisherTopicName());
+      messages.put(PawStepPlannerParametersPacket.class, getPublisherTopicName());
+      messages.put(FootstepPlannerStatusMessage.class, getPublisherTopicName());
 
       return messages;
    }
 
    @Override
-   public ROS2TopicName getPublisherTopicNameGenerator()
+   public ROS2TopicName getPublisherTopicName()
    {
       return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2TopicName getSubscriberTopicNameGenerator()
+   public ROS2TopicName getSubscriberTopicName()
    {
       return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
    }
