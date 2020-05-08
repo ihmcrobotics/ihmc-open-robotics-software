@@ -116,8 +116,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
 
       ForceSensorDataHolder forceSensorDataHolder = new ForceSensorDataHolder(Arrays.asList(fullRobotModel.getForceSensorDefinitions()));
       robotDataReceiver = new HumanoidRobotDataReceiver(fullRobotModel, forceSensorDataHolder);
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
-                                                   RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
                                            s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
@@ -139,9 +139,9 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
       behaviorDispatcher = setupBehaviorDispatcher(fullRobotModel, ros2Node, robotDataReceiver, yoGraphicsListRegistry);
 
       referenceFrames = robotDataReceiver.getReferenceFrames();
-      humanoidBehabiorTypePublisher = ROS2Tools.createPublisherWithType(ros2Node,
-                                                                        HumanoidBehaviorTypePacket.class,
-                                                                        IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName));
+      humanoidBehabiorTypePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                         HumanoidBehaviorTypePacket.class,
+                                                                         IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName));
    }
 
    public Ros2Node getRos2Node()
@@ -232,15 +232,15 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
                                                       YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
-                                                   BehaviorControlModePacket.class,
-                                                   IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    BehaviorControlModePacket.class,
+                                                    IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName),
                                            s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
 
       HumanoidBehaviorTypeSubscriber desiredBehaviorSubscriber = new HumanoidBehaviorTypeSubscriber();
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
-                                                   HumanoidBehaviorTypePacket.class,
-                                                   IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    HumanoidBehaviorTypePacket.class,
+                                                    IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName),
                                            s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
 
       YoVariableServer yoVariableServer = null;
@@ -295,8 +295,8 @@ public class DRCBehaviorTestHelper extends DRCSimulationTestHelper
    private CapturePointUpdatable createCapturePointUpdateable(YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
-                                                   CapturabilityBasedStatus.class, ROS2Tools.getControllerOutputTopicName(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    CapturabilityBasedStatus.class, ROS2Tools.getControllerOutputTopicName(robotName),
                                            s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.takeNextData()));
 
       CapturePointUpdatable ret = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);

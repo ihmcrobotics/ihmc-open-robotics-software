@@ -699,7 +699,7 @@ public class DRCSimulationTestHelper
 
    public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2TopicName generator)
    {
-      return ROS2Tools.createPublisherWithType(ros2Node, messageType, generator);
+      return ROS2Tools.createPublisherTypeNamed(ros2Node, messageType, generator);
    }
 
    public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, String topicName)
@@ -714,7 +714,7 @@ public class DRCSimulationTestHelper
 
    public <T> void createSubscriber(Class<T> messageType, ROS2TopicName generator, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, messageType, generator, s -> consumer.consumeObject(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, messageType, generator, s -> consumer.consumeObject(s.takeNextData()));
    }
 
    public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)

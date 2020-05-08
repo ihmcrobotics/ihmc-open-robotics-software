@@ -79,17 +79,17 @@ public class TrackingCameraBridge
       ROS2TopicName generateTopicName = defaultTopicNameGenerator.withType(messageTypeToPublish);
       if (ros2Node != null)
       {
-         ROS2Tools.createCallbackSubscriptionWithType(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
+         ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-         stampedPosePacketPublisher = ROS2Tools.createPublisherWithType(ros2Node, messageTypeToPublish, generateTopicName);
+         stampedPosePacketPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, messageTypeToPublish, generateTopicName);
          stampedPosePacketRealtimePublisher = null;
       }
       else
       {
-         ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
          stampedPosePacketPublisher = null;
-         stampedPosePacketRealtimePublisher = ROS2Tools.createPublisherWithType(realtimeRos2Node, messageTypeToPublish, generateTopicName);
+         stampedPosePacketRealtimePublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, messageTypeToPublish, generateTopicName);
       }
    }
 

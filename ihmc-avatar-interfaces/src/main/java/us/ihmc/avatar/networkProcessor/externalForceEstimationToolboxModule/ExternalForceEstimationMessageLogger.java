@@ -65,17 +65,17 @@ public class ExternalForceEstimationMessageLogger
                                                   "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ExternalForceEstimationMessageLogger"));
 
       ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotConfigurationData.set(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, RobotDesiredConfigurationData.class, controllerPubGenerator, s -> robotDesiredConfigurationData.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotConfigurationData.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotDesiredConfigurationData.class, controllerPubGenerator, s -> robotDesiredConfigurationData.set(s.takeNextData()));
 
       ROS2TopicName toolboxSubTopicNameGenerator = ExternalForceEstimationToolboxModule.getSubscriberTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
-                                                   ToolboxStateMessage.class,
-                                                   toolboxSubTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    ToolboxStateMessage.class,
+                                                    toolboxSubTopicNameGenerator,
                                            s -> processToolboxStateMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
-                                                   ExternalForceEstimationConfigurationMessage.class,
-                                                   toolboxSubTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    ExternalForceEstimationConfigurationMessage.class,
+                                                    toolboxSubTopicNameGenerator,
                                            s -> externalForceEstimationConfigurationMessage.set(s.takeNextData()));
 
       ros2Node.spin();

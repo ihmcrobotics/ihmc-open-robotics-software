@@ -162,18 +162,18 @@ public class StepGeneratorJavaFXController
       ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
       ROS2TopicName controllerSubGenerator = ROS2Tools.getControllerInputTopicName(robotName);
 
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
-                                                   FootstepStatusMessage.class,
-                                                   controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    FootstepStatusMessage.class,
+                                                    controllerPubGenerator,
                                            s -> continuousStepGenerator.consumeFootstepStatus(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
-                                                   PlanarRegionsListMessage.class,
-                                                   REACommunicationProperties.publisherTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    PlanarRegionsListMessage.class,
+                                                    REACommunicationProperties.publisherTopicNameGenerator,
                                            s -> planarRegionsListMessage.set(s.takeNextData()));
 
-      pauseWalkingPublisher = ROS2Tools.createPublisherWithType(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
-      footstepPublisher = ROS2Tools.createPublisherWithType(ros2Node, FootstepDataListMessage.class, controllerSubGenerator);
-      reaStateRequestPublisher = ROS2Tools.createPublisherWithType(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
+      pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, controllerSubGenerator);
+      footstepPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepDataListMessage.class, controllerSubGenerator);
+      reaStateRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
 
       trajectoryDuration = messager.createInput(WalkingTrajectoryDuration, 1.0);
       stepTime = () -> stepParametersReference.get().getSwingDuration() + stepParametersReference.get().getTransferDuration();
@@ -241,12 +241,12 @@ public class StepGeneratorJavaFXController
       messager.registerTopicListener(DPadLeftState, state -> sendREAResumeRequest());
       messager.registerTopicListener(DPadDownState, state -> sendREAClearRequest());
 
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, WalkingControllerFailureStatusMessage.class, controllerPubGenerator, s -> stopWalking(true));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, WalkingControllerFailureStatusMessage.class, controllerPubGenerator, s -> stopWalking(true));
       messager.registerTopicListener(ButtonSelectState, state -> stopWalking(true));
       messager.registerTopicListener(ButtonSelectState, state -> lowLevelMessenger.sendFreezeRequest());
       messager.registerTopicListener(ButtonStartState, state -> stopWalking(true));
       messager.registerTopicListener(ButtonStartState, state -> lowLevelMessenger.sendStandRequest());
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
       {
          CapturabilityBasedStatus status = s.takeNextData();
          isLeftFootInSupport.set(!status.getLeftFootSupportPolygon2d().isEmpty());

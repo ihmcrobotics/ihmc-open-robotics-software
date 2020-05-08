@@ -246,9 +246,9 @@ public class AvatarSimulationFactory
       else
       {
          pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeRos2Node.get(), publisherTopicNameGenerator);
-         ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node.get(),
-                                                      StampedPosePacket.class,
-                                                      subscriberTopicNameGenerator,
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node.get(),
+                                                       StampedPosePacket.class,
+                                                       subscriberTopicNameGenerator,
                                               s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
       }
 

@@ -83,11 +83,11 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
       ROS2TopicName controllerSubGenerator = ROS2Tools.getControllerInputTopicName(robotName);
       ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
 
-      outputPublisher = ROS2Tools.createPublisherWithType(realtimeRos2Node, WholeBodyTrajectoryMessage.class, controllerSubGenerator);
+      outputPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, WholeBodyTrajectoryMessage.class, controllerSubGenerator);
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
-      ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
       {
          if (controller != null)
          {
@@ -98,7 +98,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-      ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
       {
          if (controller != null)
          {

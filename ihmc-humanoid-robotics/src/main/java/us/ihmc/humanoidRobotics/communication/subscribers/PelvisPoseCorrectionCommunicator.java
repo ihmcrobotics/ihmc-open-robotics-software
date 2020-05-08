@@ -21,8 +21,8 @@ public class PelvisPoseCorrectionCommunicator implements PelvisPoseCorrectionCom
    {
       if (realtimeRos2Node != null && topicNameGenerator != null)
       {
-         poseErrorPublisher = ROS2Tools.createPublisherWithType(realtimeRos2Node, PelvisPoseErrorPacket.class, topicNameGenerator);
-         localizationPublisher = ROS2Tools.createPublisherWithType(realtimeRos2Node, LocalizationPacket.class, topicNameGenerator);
+         poseErrorPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, PelvisPoseErrorPacket.class, topicNameGenerator);
+         localizationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, LocalizationPacket.class, topicNameGenerator);
       }
       else
       {

@@ -85,15 +85,15 @@ public class QuadrupedSupportPlanarRegionPublisher
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "supporting_planar_region_publisher");
 
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
-                                                   RobotConfigurationData.class, ROS2Tools.getQuadrupedControllerOutputTopicName(robotName),
-                                                   (NewMessageListener<RobotConfigurationData>) subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
-      regionPublisher = ROS2Tools.createPublisherWithType(ros2Node,
-                                                          PlanarRegionsListMessage.class,
-                                                          REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator);
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
-                                                   QuadrupedSupportPlanarRegionParametersMessage.class,
-                                                   ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    RobotConfigurationData.class, ROS2Tools.getQuadrupedControllerOutputTopicName(robotName),
+                                                    (NewMessageListener<RobotConfigurationData>) subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
+      regionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                           PlanarRegionsListMessage.class,
+                                                           REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    QuadrupedSupportPlanarRegionParametersMessage.class,
+                                                    ROS2Tools.QUADRUPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
                                                               .withInput(),
                                            s -> latestParametersMessage.set(s.takeNextData()));
 

@@ -70,8 +70,8 @@ public class LidarImageFusionProcessorCommunicationModule
       new ROS2Callback<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, this::dispatchVideoPacket);
       new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.IHMC_ROOT, this::dispatchCustomPlanarRegion);
 
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicNameGenerator,
-                                                   this::dispatchCustomPlanarRegion);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicNameGenerator,
+                                                    this::dispatchCustomPlanarRegion);
 
       objectDetectionManager = new FusionSensorObjectDetectionManager(ros2Node, messager);
 

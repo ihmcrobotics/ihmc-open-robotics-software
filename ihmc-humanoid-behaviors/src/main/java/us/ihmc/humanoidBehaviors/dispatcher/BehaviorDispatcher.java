@@ -100,8 +100,8 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       addBehavior(stopBehavior, simpleForwardingBehavior);
 
       ROS2TopicName publisherTopicNameGenerator = IHMCHumanoidBehaviorManager.getPublisherTopicNameGenerator(robotName);
-      behaviorStatusPublisher = ROS2Tools.createPublisherWithType(ros2Node, BehaviorStatusPacket.class, publisherTopicNameGenerator);
-      behaviorControlModeResponsePublisher = ROS2Tools.createPublisherWithType(ros2Node, BehaviorControlModeResponsePacket.class, publisherTopicNameGenerator);
+      behaviorStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, BehaviorStatusPacket.class, publisherTopicNameGenerator);
+      behaviorControlModeResponsePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, BehaviorControlModeResponsePacket.class, publisherTopicNameGenerator);
 
       requestedBehavior.set(null);
 

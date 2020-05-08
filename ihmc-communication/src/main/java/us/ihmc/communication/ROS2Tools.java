@@ -217,10 +217,10 @@ public class ROS2Tools
       }
    }
 
-   public static <T> Ros2Subscription<T> createCallbackSubscriptionWithType(Ros2NodeInterface ros2Node,
-                                                                            Class<T> messageType,
-                                                                            ROS2TopicName topicName,
-                                                                            NewMessageListener<T> newMessageListener)
+   public static <T> Ros2Subscription<T> createCallbackSubscriptionTypeNamed(Ros2NodeInterface ros2Node,
+                                                                             Class<T> messageType,
+                                                                             ROS2TopicName topicName,
+                                                                             NewMessageListener<T> newMessageListener)
    {
       return createCallbackSubscription(ros2Node, typeNamedTopic(messageType).withTopicName(topicName), newMessageListener);
    }
@@ -264,10 +264,10 @@ public class ROS2Tools
       }
    }
 
-   public static <T> void createCallbackSubscriptionWithType(RealtimeRos2Node realtimeRos2Node,
-                                                             Class<T> messageType,
-                                                             ROS2TopicName topicName,
-                                                             NewMessageListener<T> newMessageListener)
+   public static <T> void createCallbackSubscriptionTypeNamed(RealtimeRos2Node realtimeRos2Node,
+                                                              Class<T> messageType,
+                                                              ROS2TopicName topicName,
+                                                              NewMessageListener<T> newMessageListener)
    {
       createCallbackSubscription(realtimeRos2Node, typeNamedTopic(messageType).withTopicName(topicName), newMessageListener);
    }
@@ -310,9 +310,9 @@ public class ROS2Tools
       }
    }
 
-   public static <T> RealtimeRos2Subscription<T> createQueuedSubscriptionWithType(RealtimeRos2Node realtimeRos2Node,
-                                                                                  Class<T> messageType,
-                                                                                  ROS2TopicName topicName)
+   public static <T> RealtimeRos2Subscription<T> createQueuedSubscriptionTypeNamed(RealtimeRos2Node realtimeRos2Node,
+                                                                                   Class<T> messageType,
+                                                                                   ROS2TopicName topicName)
    {
       return createQueuedSubscription(realtimeRos2Node, typeNamedTopic(messageType).withTopicName(topicName));
    }
@@ -349,9 +349,9 @@ public class ROS2Tools
       }
    }
 
-   public static <T> IHMCRealtimeROS2Publisher<T> createPublisherWithType(RealtimeRos2Node realtimeRos2Node,
-                                                                          Class<T> messageType,
-                                                                          ROS2TopicName topicName)
+   public static <T> IHMCRealtimeROS2Publisher<T> createPublisherTypeNamed(RealtimeRos2Node realtimeRos2Node,
+                                                                           Class<T> messageType,
+                                                                           ROS2TopicName topicName)
    {
       return createPublisher(realtimeRos2Node, typeNamedTopic(messageType).withTopicName(topicName));
    }
@@ -388,7 +388,7 @@ public class ROS2Tools
       }
    }
 
-   public static <T> IHMCROS2Publisher<T> createPublisherWithType(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2TopicName topicName)
+   public static <T> IHMCROS2Publisher<T> createPublisherTypeNamed(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2TopicName topicName)
    {
       return createPublisher(ros2Node, typeNamedTopic(messageType).withTopicName(topicName));
    }

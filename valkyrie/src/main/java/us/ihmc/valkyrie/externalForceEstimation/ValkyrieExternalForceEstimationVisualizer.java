@@ -100,9 +100,9 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
       scs.addYoGraphic(estimatedForceVector);
 
       AtomicReference<ExternalForceEstimationOutputStatus> toolboxOutputStatus = new AtomicReference<>();
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node,
-                                                   ExternalForceEstimationOutputStatus.class,
-                                                   pubTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    ExternalForceEstimationOutputStatus.class,
+                                                    pubTopicNameGenerator,
                                            s -> toolboxOutputStatus.set(s.takeNextData()));
 
       AtomicBoolean reset = new AtomicBoolean();
@@ -122,12 +122,12 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
                  }).start();
 
       // ----- Toolbox Control ----- //
-      IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher = ROS2Tools.createPublisherWithType(ros2Node,
-                                                                                                               ToolboxStateMessage.class,
-                                                                                                               subTopicNameGenerator);
-      IHMCRealtimeROS2Publisher<ExternalForceEstimationConfigurationMessage> configurationMessagePublisher = ROS2Tools.createPublisherWithType(ros2Node,
-                                                                                                                                               ExternalForceEstimationConfigurationMessage.class,
-                                                                                                                                               subTopicNameGenerator);
+      IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                                                                ToolboxStateMessage.class,
+                                                                                                                subTopicNameGenerator);
+      IHMCRealtimeROS2Publisher<ExternalForceEstimationConfigurationMessage> configurationMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                                                                                                ExternalForceEstimationConfigurationMessage.class,
+                                                                                                                                                subTopicNameGenerator);
       JButton wakeupButton = new JButton("Start");
       wakeupButton.addActionListener(e ->
                                      {

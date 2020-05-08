@@ -146,7 +146,7 @@ public class RosRobotConfigurationDataPublisher implements PacketConsumer<RobotC
          }
       }
 
-      ROS2Tools.createCallbackSubscriptionWithType(ros2Node, RobotConfigurationData.class, robotConfigurationTopicName, s -> receivedPacket(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, robotConfigurationTopicName, s -> receivedPacket(s.takeNextData()));
 
       Thread t = new Thread(this, "RosRobotJointStatePublisher");
       t.start();

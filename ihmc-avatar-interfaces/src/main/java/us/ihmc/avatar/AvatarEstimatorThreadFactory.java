@@ -517,9 +517,9 @@ public class AvatarEstimatorThreadFactory
          if (realtimeRos2NodeField.hasValue())
          {
             RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
-            ROS2Tools.createCallbackSubscriptionWithType(realtimeRos2NodeField.get(),
-                                                         RequestWristForceSensorCalibrationPacket.class,
-                                                         subscriberTopicNameGeneratorField.get(),
+            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2NodeField.get(),
+                                                          RequestWristForceSensorCalibrationPacket.class,
+                                                          subscriberTopicNameGeneratorField.get(),
                                                  subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
             forceSensorStateUpdaterField.get().setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
          }
@@ -530,7 +530,7 @@ public class AvatarEstimatorThreadFactory
    private IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> createControllerCrashPublisher()
    {
       if (realtimeRos2NodeField.hasValue())
-         return ROS2Tools.createPublisherWithType(realtimeRos2NodeField.get(), ControllerCrashNotificationPacket.class, publisherTopicNameGeneratorField.get());
+         return ROS2Tools.createPublisherTypeNamed(realtimeRos2NodeField.get(), ControllerCrashNotificationPacket.class, publisherTopicNameGeneratorField.get());
       else
          return null;
    }
