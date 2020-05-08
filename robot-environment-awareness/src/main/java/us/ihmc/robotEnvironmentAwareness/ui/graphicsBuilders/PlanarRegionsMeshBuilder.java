@@ -30,20 +30,23 @@ public class PlanarRegionsMeshBuilder implements Runnable
 
    private final AtomicReference<Pair<Mesh, Material>> meshAndMaterialToRender = new AtomicReference<>(null);
 
+   private final Topic<Boolean> requestPlanarRegionsTopic;
+   
    private final REAUIMessager uiMessager;
 
    public PlanarRegionsMeshBuilder(REAUIMessager uiMessager, Topic<PlanarRegionsListMessage> planarregionsstate)
    {
-      this(uiMessager, planarregionsstate, REAModuleAPI.OcTreeEnable, REAModuleAPI.PlanarRegionsPolygonizerClear, REAModuleAPI.OcTreeClear);
+      this(uiMessager, planarregionsstate, REAModuleAPI.OcTreeEnable, REAModuleAPI.PlanarRegionsPolygonizerClear, REAModuleAPI.OcTreeClear, REAModuleAPI.RequestPlanarRegions);
    }
 
    public PlanarRegionsMeshBuilder(REAUIMessager uiMessager, Topic<PlanarRegionsListMessage> planarregionsstate, Topic<Boolean> enableTopic,
-                                   Topic<Boolean> clearTopic, Topic<Boolean> octreeClearTopic)
+                                   Topic<Boolean> clearTopic, Topic<Boolean> octreeClearTopic, Topic<Boolean> requestPlanarRegionsTopic)
    {
       this.uiMessager = uiMessager;
       enable = uiMessager.createInput(enableTopic, false);
       clear = uiMessager.createInput(clearTopic, false);
       clearOcTree = uiMessager.createInput(octreeClearTopic, false);
+      this.requestPlanarRegionsTopic = requestPlanarRegionsTopic;
 
       planarRegionsListMessage = uiMessager.createInput(planarregionsstate);
 
@@ -72,7 +75,7 @@ public class PlanarRegionsMeshBuilder implements Runnable
       if (!enable.get())
          return;
 
-      uiMessager.submitStateRequestToModule(REAModuleAPI.RequestPlanarRegions);
+      uiMessager.submitStateRequestToModule(requestPlanarRegionsTopic);
 
       if (newMessage == null || newMessage.getRegionId().size() == 0)
          return;

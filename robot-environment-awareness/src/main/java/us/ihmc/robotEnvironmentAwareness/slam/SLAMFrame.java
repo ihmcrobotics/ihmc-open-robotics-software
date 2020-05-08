@@ -41,6 +41,8 @@ public class SLAMFrame
    protected final Point3DReadOnly[] originalPointCloudToWorld; // For comparison after mapping.
    protected final Point3DReadOnly[] pointCloudToSensorFrame;
    protected final Point3D[] optimizedPointCloudToWorld;
+   
+   private double confidenceFactor;
 
    public SLAMFrame(StereoVisionPointCloudMessage message)
    {
@@ -102,6 +104,11 @@ public class SLAMFrame
          optimizedSensorPoseToWorld.transform(optimizedPointCloudToWorld[i]);
       }
    }
+   
+   public void setConfidenceFactor(double value)
+   {
+      confidenceFactor = value;
+   }
 
    public Point3DReadOnly[] getOriginalPointCloud()
    {
@@ -144,5 +151,10 @@ public class SLAMFrame
    public SLAMFrame getPreviousFrame()
    {
       return previousFrame;
+   }
+   
+   public double getConfidenceFactor()
+   {
+      return confidenceFactor;
    }
 }
