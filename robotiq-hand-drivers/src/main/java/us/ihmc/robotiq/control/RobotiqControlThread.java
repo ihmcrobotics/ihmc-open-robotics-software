@@ -41,11 +41,11 @@ public class RobotiqControlThread extends HandControlThread
       handDesiredConfigurationMessageSubscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
       manualHandControlProvider = new ManualHandControlProvider(robotSide);
 
-      ROS2TopicName publisherTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2TopicName outputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
       ROS2TopicName subscriberTopicName = ROS2Tools.getControllerInputTopicName(robotName);
 
       IHMCRealtimeROS2Publisher<HandJointAnglePacket> handJointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, HandJointAnglePacket.class,
-                                                                                                                   publisherTopicName);
+                                                                                                                   outputTopicName);
       jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, handJointAnglePublisher);
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HandDesiredConfigurationMessage.class, subscriberTopicName,
                                                     handDesiredConfigurationMessageSubscriber);

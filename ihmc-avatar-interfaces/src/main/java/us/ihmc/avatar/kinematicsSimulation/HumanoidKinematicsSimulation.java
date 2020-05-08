@@ -235,10 +235,10 @@ public class HumanoidKinematicsSimulation
       RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(kinematicsSimulationParameters.getPubSubImplementation(),
                                                                            ROS2Tools.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
       ROS2TopicName subscriberTopicName = ROS2Tools.getControllerInputTopicName(robotName);
-      ROS2TopicName publisherTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2TopicName outputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(subscriberTopicName,
                                                                                                 walkingInputManager,
-                                                                                                publisherTopicName,
+                                                                                                outputTopicName,
                                                                                                 walkingOutputManager,
                                                                                                 realtimeRos2Node);
       controllerNetworkSubscriber.addMessageFilter(message ->

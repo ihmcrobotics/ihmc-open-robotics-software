@@ -168,7 +168,7 @@ public class StepGeneratorJavaFXController
                                            s -> continuousStepGenerator.consumeFootstepStatus(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PlanarRegionsListMessage.class,
-                                                    REACommunicationProperties.publisherTopicName,
+                                                    REACommunicationProperties.outputTopicName,
                                            s -> planarRegionsListMessage.set(s.takeNextData()));
 
       pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, controllerInputTopicName);

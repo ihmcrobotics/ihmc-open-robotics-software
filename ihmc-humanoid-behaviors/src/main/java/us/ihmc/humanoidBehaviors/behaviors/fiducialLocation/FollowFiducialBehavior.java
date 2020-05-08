@@ -107,7 +107,7 @@ public class FollowFiducialBehavior extends StateMachineBehavior<FollowFiducialS
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class,
                                     (packet) -> finalGoalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(), packet.getPosition(),
                                                                                   packet.getOrientation())));
-      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicName, planarRegions::set);
+      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.outputTopicName, planarRegions::set);
 
       createSubscriberFromController(FootstepStatusMessage.class, footstepStatusReference::set);
       createSubscriberFromController(WalkingStatusMessage.class, packet -> {

@@ -43,7 +43,7 @@ public class FootstepPlanPostProcessingModuleLauncher
 
       ROS2TopicName subscriberTopicName = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
                                                                                             .withInput();
-      ROS2TopicName publisherTopicName = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
+      ROS2TopicName outputTopicName = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
                                                                                      .withOutput();
 
       // Parameters callback
@@ -58,7 +58,7 @@ public class FootstepPlanPostProcessingModuleLauncher
 
       // Result publisher
       IHMCROS2Publisher<FootstepPostProcessingPacket> resultPublisher = ROS2Tools
-            .createPublisherTypeNamed(ros2Node, FootstepPostProcessingPacket.class, publisherTopicName);
+            .createPublisherTypeNamed(ros2Node, FootstepPostProcessingPacket.class, outputTopicName);
       postProcessingModule.addStatusCallback(resultPublisher::publish);
 
       return postProcessingModule;

@@ -127,7 +127,7 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
             .createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, FootstepPlannerCommunicationProperties.subscriberTopicName(getSimpleRobotName()));
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningToolboxOutputStatus.class,
-                                                    FootstepPlannerCommunicationProperties.publisherTopicName(getSimpleRobotName()),
+                                                    FootstepPlannerCommunicationProperties.outputTopicName(getSimpleRobotName()),
                                            s -> setOutputStatus(s.takeNextData()));
 
       FullHumanoidRobotModel fullHumanoidRobotModel = getRobotModel().createFullRobotModel();

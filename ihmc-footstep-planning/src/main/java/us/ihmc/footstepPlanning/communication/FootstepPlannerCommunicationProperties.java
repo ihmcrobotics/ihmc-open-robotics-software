@@ -5,7 +5,7 @@ import us.ihmc.ros2.ROS2TopicName;
 
 public class FootstepPlannerCommunicationProperties
 {
-   public static ROS2TopicName publisherTopicName(String robotName)
+   public static ROS2TopicName outputTopicName(String robotName)
    {
       return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
    }

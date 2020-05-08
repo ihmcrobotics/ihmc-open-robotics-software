@@ -61,15 +61,15 @@ public class ControllerNetworkSubscriber
    private final RealtimeRos2Node realtimeRos2Node;
 
    private final ROS2TopicName subscriberTopicName;
-   private final ROS2TopicName publisherTopicName;
+   private final ROS2TopicName outputTopicName;
 
    public ControllerNetworkSubscriber(ROS2TopicName subscriberTopicName, CommandInputManager controllerCommandInputManager,
-                                      ROS2TopicName publisherTopicName, StatusMessageOutputManager controllerStatusOutputManager,
+                                      ROS2TopicName outputTopicName, StatusMessageOutputManager controllerStatusOutputManager,
                                       RealtimeRos2Node realtimeRos2Node)
    {
       this.subscriberTopicName = subscriberTopicName;
       this.controllerCommandInputManager = controllerCommandInputManager;
-      this.publisherTopicName = publisherTopicName;
+      this.outputTopicName = outputTopicName;
       this.controllerStatusOutputManager = controllerStatusOutputManager;
       this.realtimeRos2Node = realtimeRos2Node;
       listOfSupportedStatusMessages = controllerStatusOutputManager.getListOfSupportedMessages();
@@ -223,7 +223,7 @@ public class ControllerNetworkSubscriber
 
    private <T extends Settable<T>> IHMCRealtimeROS2Publisher<T> createPublisher(Class<T> messageClass)
    {
-      ROS2TopicName topicName = publisherTopicName.withType(messageClass);
+      ROS2TopicName topicName = outputTopicName.withType(messageClass);
       IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, messageClass, topicName);
       return publisher;
    }
