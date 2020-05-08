@@ -56,7 +56,7 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
    private final MirroredYoVariableRegistry registry;
 
    public SimulatedValkyrieFingerController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node, DRCRobotModel robotModel,
-                                            ROS2TopicName pubTopicName, ROS2TopicName subTopicName)
+                                            ROS2TopicName pubTopicName, ROS2TopicName inputTopicName)
    {
       super((int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
 
@@ -135,9 +135,9 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
          valkyrieHandFingerTrajectoryMessageSubscribers.put(robotSide, valkyrieHandFingerTrajectoryMessageSubscriber);
          if (realtimeRos2Node != null)
          {
-            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HandDesiredConfigurationMessage.class, subTopicName,
+            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HandDesiredConfigurationMessage.class, inputTopicName,
                                                           handDesiredConfigurationSubscriber);
-            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, ValkyrieHandFingerTrajectoryMessage.class, subTopicName,
+            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, ValkyrieHandFingerTrajectoryMessage.class, inputTopicName,
                                                           valkyrieHandFingerTrajectoryMessageSubscriber);
          }
       }

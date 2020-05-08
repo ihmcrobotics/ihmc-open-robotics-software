@@ -78,18 +78,18 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
                                                     controllerOutputTopicName,
                                            s -> capturabilityBasedStatus.set(s.takeNextData()));
 
-      ROS2TopicName toolboxSubTopicName = KinematicsStreamingToolboxModule.getInputTopicName(robotName);
+      ROS2TopicName toolboxInputTopicName = KinematicsStreamingToolboxModule.getInputTopicName(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     ToolboxStateMessage.class,
-                                                    toolboxSubTopicName,
+                                                    toolboxInputTopicName,
                                            s -> processToolboxStateMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     KinematicsToolboxConfigurationMessage.class,
-                                                    toolboxSubTopicName,
+                                                    toolboxInputTopicName,
                                            s -> kinematicsToolboxConfigurationMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     KinematicsStreamingToolboxInputMessage.class,
-                                                    toolboxSubTopicName,
+                                                    toolboxInputTopicName,
                                            s -> kinematicsStreamingToolboxInputMessage.set(s.takeNextData()));
 
       ROS2TopicName toolboxPubTopicName = KinematicsStreamingToolboxModule.getOutputTopicName(robotName);
