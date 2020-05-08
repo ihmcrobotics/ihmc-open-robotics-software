@@ -112,7 +112,10 @@ public class ObstacleBetweenNodesChecker
       }
       catch(Exception e)
       {
-         e.printStackTrace();
+         if (DEBUG)
+         {
+            e.printStackTrace();
+         }
       }
 
       return false;

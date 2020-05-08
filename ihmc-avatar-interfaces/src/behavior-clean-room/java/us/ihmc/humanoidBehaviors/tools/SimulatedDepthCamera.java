@@ -52,6 +52,11 @@ public class SimulatedDepthCamera
    private FramePose3D tempCameraPose = new FramePose3D();
    private Point2D tempCircleOrigin = new Point2D();
 
+   public SimulatedDepthCamera(ReferenceFrame cameraFrame)
+   {
+      this(Double.NaN, Double.NaN, Double.POSITIVE_INFINITY, cameraFrame);
+   }
+
    public SimulatedDepthCamera(double verticalFOV, double horizontalFOV, ReferenceFrame cameraFrame)
    {
       this(verticalFOV, horizontalFOV, Double.POSITIVE_INFINITY, cameraFrame);
@@ -91,15 +96,22 @@ public class SimulatedDepthCamera
       double sphereRadius = 5.0;
       Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(tempCameraPose.getPosition(), sphereRadius, numberOfPointsToGenerate);
 
-      updateViewPlanes();
-
-      ArrayList<Point3D> pointsInView = new ArrayList<>();
-      for (Point3D point3D : pointsOnSphere)
+      ArrayList<Point3D> pointsInView = new ArrayList<>();;
+      if (!Double.isNaN(verticalFOV) && !Double.isNaN(horizontalFOV))
       {
-         if (planeTop.isOnOrAbove(point3D) && planeBottom.isOnOrAbove(point3D) && planeLeft.isOnOrAbove(point3D) && planeRight.isOnOrAbove(point3D))
+         updateViewPlanes();
+
+         for (Point3D point3D : pointsOnSphere)
          {
-            pointsInView.add(point3D);
+            if (planeTop.isOnOrAbove(point3D) && planeBottom.isOnOrAbove(point3D) && planeLeft.isOnOrAbove(point3D) && planeRight.isOnOrAbove(point3D))
+            {
+               pointsInView.add(point3D);
+            }
          }
+      }
+      else
+      {
+         pointsInView.addAll(Arrays.asList(pointsOnSphere));
       }
 
       tempCircleOrigin.set(tempCameraPose.getPosition());

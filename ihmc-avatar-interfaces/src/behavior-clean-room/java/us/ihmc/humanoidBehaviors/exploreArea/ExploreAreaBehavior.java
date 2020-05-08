@@ -74,7 +74,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 
 public class ExploreAreaBehavior implements BehaviorInterface
 {
@@ -321,17 +321,17 @@ public class ExploreAreaBehavior implements BehaviorInterface
       boolean savedOutTroublesomeRegions = false;
 
       @Override
-      public void originalHulls(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+      public void originalHulls(List<Point2D> hullOne, List<Point2D> hullTwo)
       {
       }
 
       @Override
-      public void preprocessedHull(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+      public void preprocessedHull(List<Point2D> hullOne, List<Point2D> hullTwo)
       {
       }
 
       @Override
-      public void hullGotLooped(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo, ArrayList<Point2D> mergedVertices)
+      public void hullGotLooped(List<Point2D> hullOne, List<Point2D> hullTwo, List<Point2D> mergedVertices)
       {
          hullGotLooped.set(true);
 
@@ -365,7 +365,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       }
 
       @Override
-      public void foundStartingVertexAndWorkingHull(Point2D startingVertex, ArrayList<Point2D> workingHull, boolean workingHullIsOne)
+      public void foundStartingVertexAndWorkingHull(Point2D startingVertex, List<Point2D> workingHull, boolean workingHullIsOne)
       {
       }
 
@@ -380,12 +380,12 @@ public class ExploreAreaBehavior implements BehaviorInterface
       }
 
       @Override
-      public void hullIsInvalid(ArrayList<Point2D> invalidHull)
+      public void hullIsInvalid(List<Point2D> invalidHull)
       {
       }
 
       @Override
-      public void hullsAreInvalid(ArrayList<Point2D> invalidHullA, ArrayList<Point2D> invalidHullB)
+      public void hullsAreInvalid(List<Point2D> invalidHullA, List<Point2D> invalidHullB)
       {
       }
    };
@@ -793,7 +793,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       if (plannerFinished)
       {
-         RemoteFootstepPlannerResult plannerResult = footstepPlanResultNotification.peek();
+         RemoteFootstepPlannerResult plannerResult = footstepPlanResultNotification.read();
          FootstepPlanningResult planResult = plannerResult.getResult();
 
          LogTools.info("planResult = " + planResult);
@@ -864,7 +864,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    //   private boolean readyToTransitionFromWalkToNextLocationToStop(double timeInState)
    //   {
-   //      return (walkingCompleted.hasNext());
+   //      return (walkingCompleted.hasValue());
    //      //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    //   }
 
@@ -919,13 +919,13 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private boolean readyToTransitionFromTakeAStepToTakeAStep(double timeInState)
    {
-      return ((footstepIndex < footstepDataList.size()) && (walkingCompleted.hasNext()));
+      return ((footstepIndex < footstepDataList.size()) && (walkingCompleted.hasValue()));
       //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    }
 
    private boolean readyToTransitionFromTakeAStepToStop(double timeInState)
    {
-      return ((footstepIndex >= footstepDataList.size()) && (walkingCompleted.hasNext()));
+      return ((footstepIndex >= footstepDataList.size()) && (walkingCompleted.hasValue()));
       //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    }
 
@@ -965,7 +965,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private boolean readyToTransitionFromTurnInPlaceToStop(double timeInState)
    {
-      return (walkingCompleted.hasNext());
+      return (walkingCompleted.hasValue());
       //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    }
 

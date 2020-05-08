@@ -40,7 +40,9 @@ public class WalkingControllerFailureStatusMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -57,7 +59,9 @@ public class WalkingControllerFailureStatusMessagePubSubType implements us.ihmc.
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getFallingDirection(), current_alignment);
@@ -68,15 +72,19 @@ public class WalkingControllerFailureStatusMessagePubSubType implements us.ihmc.
 
    public static void write(controller_msgs.msg.dds.WalkingControllerFailureStatusMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getFallingDirection(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.WalkingControllerFailureStatusMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getFallingDirection(), cdr);	
 
    }
@@ -84,7 +92,9 @@ public class WalkingControllerFailureStatusMessagePubSubType implements us.ihmc.
    @Override
    public final void serialize(controller_msgs.msg.dds.WalkingControllerFailureStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_a("falling_direction", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getFallingDirection());
 
    }
@@ -92,7 +102,9 @@ public class WalkingControllerFailureStatusMessagePubSubType implements us.ihmc.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WalkingControllerFailureStatusMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_a("falling_direction", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getFallingDirection());
 
    }

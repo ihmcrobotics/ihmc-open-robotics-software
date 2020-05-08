@@ -6,6 +6,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
@@ -18,8 +19,6 @@ import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
-import us.ihmc.pathPlanning.graph.search.AStarIterationData;
-import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
@@ -113,6 +112,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          output.setFootstepPlanningResult(FootstepPlanningResult.EXCEPTION);
          output.setException(exception);
          statusCallback.accept(output);
+         isPlanning.set(false);
          return output;
       }
    }
@@ -308,11 +308,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public FootstepNodeChecker getChecker()
    {
       return aStarFootstepPlanner.getChecker();
-   }
-
-   public AStarPathPlanner<FootstepNode> getLowLevelStepPlanner()
-   {
-      return aStarFootstepPlanner.getLowLevelStepPlanner();
    }
 
    public VisibilityGraphPathPlanner getBodyPathPlanner()

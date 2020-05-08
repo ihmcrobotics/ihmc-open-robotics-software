@@ -3,15 +3,14 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.CenterOfMassHeightControlState;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisAndCenterOfMassHeightControlState;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlMode;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisHeightControlState;
+import us.ihmc.commonWalkingControlModules.controlModules.pelvis.*;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PelvisHeightTrajectoryCommand;
@@ -57,7 +56,8 @@ public class CenterOfMassHeightManager
 
    private final boolean useStateMachine;
 
-   public CenterOfMassHeightManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
+   public CenterOfMassHeightManager(HighLevelHumanoidControllerToolbox controllerToolbox,
+                                    WalkingControllerParameters walkingControllerParameters,
                                     YoVariableRegistry parentRegistry)
    {
       parentRegistry.addChild(registry);
@@ -279,7 +279,7 @@ public class CenterOfMassHeightManager
       }
    }
 
-   public void initialize(TransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
+   public void initialize(NewTransferToAndNextFootstepsData transferToAndNextFootstepsData, double extraToeOffHeight)
    {
       if (useStateMachine)
       {
@@ -287,29 +287,31 @@ public class CenterOfMassHeightManager
       }
    }
 
-   public double computeDesiredCoMHeightAcceleration(FrameVector2D desiredICPVelocity, boolean isInDoubleSupport, double omega0, boolean isRecoveringFromPush,
+   public double computeDesiredCoMHeightAcceleration(FrameVector2DReadOnly desiredICPVelocity,
+                                                     FrameVector2DReadOnly desiredCoMVelocity,
+                                                     boolean isInDoubleSupport,
+                                                     double omega0,
+                                                     boolean isRecoveringFromPush,
                                                      FeetManager feetManager)
    {
       if (useStateMachine)
       {
-         return stateMachine.getCurrentState().computeDesiredCoMHeightAcceleration(desiredICPVelocity, isInDoubleSupport, omega0, isRecoveringFromPush,
-                                                                                   feetManager);
+         return stateMachine.getCurrentState()
+                            .computeDesiredCoMHeightAcceleration(desiredICPVelocity,
+                                                                 desiredCoMVelocity,
+                                                                 isInDoubleSupport,
+                                                                 omega0,
+                                                                 isRecoveringFromPush,
+                                                                 feetManager);
       }
       else
       {
-         return pelvisHeightControlState.computeDesiredCoMHeightAcceleration(desiredICPVelocity, isInDoubleSupport, omega0, isRecoveringFromPush, feetManager);
-      }
-   }
-
-   public boolean hasBeenInitializedWithNextStep()
-   {
-      if (useStateMachine)
-      {
-         return centerOfMassHeightControlState.hasBeenInitializedWithNextStep();
-      }
-      else
-      {
-         return true;
+         return pelvisHeightControlState.computeDesiredCoMHeightAcceleration(desiredICPVelocity,
+                                                                             desiredCoMVelocity,
+                                                                             isInDoubleSupport,
+                                                                             omega0,
+                                                                             isRecoveringFromPush,
+                                                                             feetManager);
       }
    }
 
@@ -356,7 +358,8 @@ public class CenterOfMassHeightManager
       }
    }
 
-   public void setComHeightGains(PIDGainsReadOnly walkingControllerComHeightGains, DoubleProvider walkingControllerMaxComHeightVelocity,
+   public void setComHeightGains(PIDGainsReadOnly walkingControllerComHeightGains,
+                                 DoubleProvider walkingControllerMaxComHeightVelocity,
                                  PIDGainsReadOnly userModeComHeightGains)
    {
       if (useStateMachine)

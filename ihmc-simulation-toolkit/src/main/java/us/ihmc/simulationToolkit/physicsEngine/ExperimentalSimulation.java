@@ -13,14 +13,35 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.mecano.multiBodySystem.interfaces.*;
+import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
+import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
-import us.ihmc.robotics.physics.*;
+import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.robotics.physics.CollidableHelper;
+import us.ihmc.robotics.physics.ExperimentalPhysicsEngine;
+import us.ihmc.robotics.physics.MultiBodySystemStateReader;
+import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
+import us.ihmc.robotics.physics.PhysicsEngineTools;
+import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
-import us.ihmc.simulationconstructionset.*;
+import us.ihmc.simulationconstructionset.FloatingJoint;
+import us.ihmc.simulationconstructionset.GroundContactPoint;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.Simulation;
+import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
 import us.ihmc.simulationconstructionset.physics.collision.simple.CollisionManager;
 import us.ihmc.simulationconstructionset.util.ground.TerrainObject3D;
@@ -89,7 +110,7 @@ public class ExperimentalSimulation extends Simulation
    }
 
    @Override
-   protected void simulate() throws UnreasonableAccelerationException
+   public void simulate()
    {
       synchronized (getSimulationSynchronizer())
       {
@@ -115,7 +136,7 @@ public class ExperimentalSimulation extends Simulation
    }
 
    @Override
-   public synchronized void simulate(int numTicks) throws UnreasonableAccelerationException
+   public synchronized void simulate(int numTicks)
    {
       while (numTicks > 0)
       {
@@ -276,7 +297,10 @@ public class ExperimentalSimulation extends Simulation
 
       for (Shape3DReadOnly terrainShape : terrainObject3D.getTerrainCollisionShapes())
       {
-         collidables.add(new Collidable(null, collisionMask, collisionGroup, terrainShape, ReferenceFrame.getWorldFrame()));
+         collidables.add(new Collidable(null,
+                                        collisionMask,
+                                        collisionGroup,
+                                        PhysicsEngineTools.toFrameShape3DBasics(ReferenceFrame.getWorldFrame(), terrainShape)));
       }
 
       return collidables;
@@ -359,5 +383,10 @@ public class ExperimentalSimulation extends Simulation
          scsGroundContactPoint.setVelocity(linearVelocity);
          scsGroundContactPoint.setAngularVelocity(angularVelocity);
       }
+   }
+
+   public ExperimentalPhysicsEngine getPhysicsEngine()
+   {
+      return physicsEngine;
    }
 }

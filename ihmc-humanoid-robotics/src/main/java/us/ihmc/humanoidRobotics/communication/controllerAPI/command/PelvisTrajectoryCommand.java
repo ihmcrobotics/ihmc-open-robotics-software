@@ -11,6 +11,7 @@ import us.ihmc.sensorProcessing.frames.ReferenceFrameHashCodeResolver;
 public class PelvisTrajectoryCommand implements Command<PelvisTrajectoryCommand, PelvisTrajectoryMessage>, FrameBasedCommand<PelvisTrajectoryMessage>, EpsilonComparable<PelvisTrajectoryCommand>
 {
    private long sequenceId;
+   private boolean forceExecution = false;
    private boolean enableUserPelvisControl = false;
    private boolean enableUserPelvisControlDuringWalking = false;
    private final SE3TrajectoryControllerCommand se3Trajectory;
@@ -29,6 +30,9 @@ public class PelvisTrajectoryCommand implements Command<PelvisTrajectoryCommand,
    public void clear()
    {
       sequenceId = 0;
+      setForceExecution(false);
+      setEnableUserPelvisControl(false);
+      setEnableUserPelvisControlDuringWalking(false);
       se3Trajectory.clear();
    }
 
@@ -36,8 +40,9 @@ public class PelvisTrajectoryCommand implements Command<PelvisTrajectoryCommand,
    public void set(PelvisTrajectoryCommand other)
    {
       sequenceId = other.sequenceId;
-      setEnableUserPelvisControlDuringWalking(other.isEnableUserPelvisControlDuringWalking());
+      setForceExecution(other.getForceExecution());
       setEnableUserPelvisControl(other.isEnableUserPelvisControl());
+      setEnableUserPelvisControlDuringWalking(other.isEnableUserPelvisControlDuringWalking());
       se3Trajectory.set(other.se3Trajectory);
    }
 
@@ -51,9 +56,20 @@ public class PelvisTrajectoryCommand implements Command<PelvisTrajectoryCommand,
    public void set(ReferenceFrameHashCodeResolver resolver, PelvisTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();
-      setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
+      setForceExecution(message.getForceExecution());
       setEnableUserPelvisControl(message.getEnableUserPelvisControl());
+      setEnableUserPelvisControlDuringWalking(message.getEnableUserPelvisControlDuringWalking());
       se3Trajectory.set(resolver, message.getSe3Trajectory());
+   }
+
+   public boolean getForceExecution()
+   {
+      return forceExecution;
+   }
+
+   public void setForceExecution(boolean forceExecution)
+   {
+      this.forceExecution = forceExecution;
    }
 
    public boolean isEnableUserPelvisControlDuringWalking()

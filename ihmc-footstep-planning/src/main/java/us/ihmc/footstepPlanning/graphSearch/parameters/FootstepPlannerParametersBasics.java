@@ -173,9 +173,9 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.idealBackStepLength, idealBackStepLength);
    }
 
-   default void setWiggleIntoConvexHullOfPlanarRegions(boolean wiggleIntoConvexHullOfPlanarRegions)
+   default void setEnableConcaveHullWiggler(boolean enableConcaveHullWiggler)
    {
-      set(FootstepPlannerParameterKeys.wiggleIntoConvexHullOfPlanarRegions, wiggleIntoConvexHullOfPlanarRegions);
+      set(FootstepPlannerParameterKeys.enableConcaveHullWiggler, enableConcaveHullWiggler);
    }
 
    default void setMaximumZPenetrationOnValleyRegions(double maximumZPenetrationOnValleyRegions)
@@ -288,6 +288,16 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(deltaYawFromReferenceTolerance, tolerance);
    }
 
+   default void setMaximumBranchFactor(int maximumBranchFactor)
+   {
+      set(FootstepPlannerParameterKeys.maximumBranchFactor, maximumBranchFactor);
+   }
+
+   default void setEnableExpansionMask(boolean enableExpansionMask)
+   {
+      set(FootstepPlannerParameterKeys.enableExpansionMask, enableExpansionMask);
+   }
+
    default void set(FootstepPlannerParametersPacket parametersPacket)
    {
       double noValue = FootstepPlannerParametersPacket.DEFAULT_NO_VALUE;
@@ -340,7 +350,7 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinimumFootholdPercent(parametersPacket.getMinimumFootholdPercent());
       if (parametersPacket.getMinimumSurfaceInclineRadians() != noValue)
          setMinimumSurfaceInclineRadians(parametersPacket.getMinimumSurfaceInclineRadians());
-      setWiggleIntoConvexHullOfPlanarRegions(parametersPacket.getWiggleIntoConvexHullOfPlanarRegions());
+      setEnableConcaveHullWiggler(parametersPacket.getEnableConcaveHullWiggler());
       if (parametersPacket.getMaximumXyWiggleDistance() != noValue)
          setMaximumXYWiggleDistance(parametersPacket.getMaximumXyWiggleDistance());
       if (parametersPacket.getMaximumYawWiggle() != noValue)
@@ -371,6 +381,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinYClearanceFromStance(parametersPacket.getMinYClearanceFromStance());
       if (parametersPacket.getFinalTurnProximity() != noValue)
          setFinalTurnProximity(parametersPacket.getFinalTurnProximity());
+      setMaximumBranchFactor(parametersPacket.getMaximumBranchFactor());
+      setEnableExpansionMask(parametersPacket.getEnableExpansionMask());
 
       if (parametersPacket.getAStarHeuristicsWeight() != noValue)
          setAStarHeuristicsWeight(parametersPacket.getAStarHeuristicsWeight());

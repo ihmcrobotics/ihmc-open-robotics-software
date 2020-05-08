@@ -40,25 +40,36 @@ public class PilotInterfacePacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -75,34 +86,45 @@ public class PilotInterfacePacketPubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -114,25 +136,36 @@ public class PilotInterfacePacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(controller_msgs.msg.dds.PilotInterfacePacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_2(data.getBehaviourState());
 
+
       cdr.write_type_2(data.getRequestedBehaviorState());
+
 
       cdr.write_type_2(data.getDesiredStepType());
 
+
       cdr.write_type_2(data.getDesiredStepLengthType());
+
 
       cdr.write_type_2(data.getDesiredStepStairsType());
 
+
       cdr.write_type_7(data.getDesiredStepContinousWalk());
+
 
       cdr.write_type_2(data.getDesiredStepsToTake());
 
+
       cdr.write_type_7(data.getExecuteBehavior());
 
+
       cdr.write_type_2(data.getDesiredSlopeStepType());
+
 
       cdr.write_type_2(data.getCurrentPilotState());
 
@@ -140,26 +173,37 @@ public class PilotInterfacePacketPubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void read(controller_msgs.msg.dds.PilotInterfacePacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setBehaviourState(cdr.read_type_2());
       	
+
       data.setRequestedBehaviorState(cdr.read_type_2());
       	
+
       data.setDesiredStepType(cdr.read_type_2());
       	
+
       data.setDesiredStepLengthType(cdr.read_type_2());
       	
+
       data.setDesiredStepStairsType(cdr.read_type_2());
       	
+
       data.setDesiredStepContinousWalk(cdr.read_type_7());
       	
+
       data.setDesiredStepsToTake(cdr.read_type_2());
       	
+
       data.setExecuteBehavior(cdr.read_type_7());
       	
+
       data.setDesiredSlopeStepType(cdr.read_type_2());
       	
+
       data.setCurrentPilotState(cdr.read_type_2());
       	
 
@@ -168,32 +212,54 @@ public class PilotInterfacePacketPubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(controller_msgs.msg.dds.PilotInterfacePacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_2("behaviour_state", data.getBehaviourState());
+
       ser.write_type_2("requested_behavior_state", data.getRequestedBehaviorState());
+
       ser.write_type_2("desired_step_type", data.getDesiredStepType());
+
       ser.write_type_2("desired_step_length_type", data.getDesiredStepLengthType());
+
       ser.write_type_2("desired_step_stairs_type", data.getDesiredStepStairsType());
+
       ser.write_type_7("desired_step_continous_walk", data.getDesiredStepContinousWalk());
+
       ser.write_type_2("desired_steps_to_take", data.getDesiredStepsToTake());
+
       ser.write_type_7("execute_behavior", data.getExecuteBehavior());
+
       ser.write_type_2("desired_slope_step_type", data.getDesiredSlopeStepType());
+
       ser.write_type_2("current_pilot_state", data.getCurrentPilotState());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PilotInterfacePacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setBehaviourState(ser.read_type_2("behaviour_state"));
+
       data.setRequestedBehaviorState(ser.read_type_2("requested_behavior_state"));
+
       data.setDesiredStepType(ser.read_type_2("desired_step_type"));
+
       data.setDesiredStepLengthType(ser.read_type_2("desired_step_length_type"));
+
       data.setDesiredStepStairsType(ser.read_type_2("desired_step_stairs_type"));
+
       data.setDesiredStepContinousWalk(ser.read_type_7("desired_step_continous_walk"));
+
       data.setDesiredStepsToTake(ser.read_type_2("desired_steps_to_take"));
+
       data.setExecuteBehavior(ser.read_type_7("execute_behavior"));
+
       data.setDesiredSlopeStepType(ser.read_type_2("desired_slope_step_type"));
+
       data.setCurrentPilotState(ser.read_type_2("current_pilot_state"));
    }
 

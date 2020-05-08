@@ -42,11 +42,16 @@ public class MessagerAStarDataSetTest extends FootstepPlannerDataSetTest
 
    public static void main(String[] args) throws Exception
    {
+      MessagerAStarDataSetTest messagerAStarDataSetTest = new MessagerAStarDataSetTest();
+      messagerAStarDataSetTest.setup();
+      messagerAStarDataSetTest.testDataSets();
+
+/*
       MessagerAStarDataSetTest test = new MessagerAStarDataSetTest();
       test.VISUALIZE = true;
       test.setup();
       test.runAssertionsOnDataset(test::runAssertions, DataSetName._20171218_205120_BodyPathPlannerEnvironment);
       test.tearDown();
-
+*/
    }
 }

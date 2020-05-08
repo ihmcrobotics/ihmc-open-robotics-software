@@ -40,15 +40,21 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 5000; ++i0)
       {
@@ -66,19 +72,25 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -92,15 +104,21 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void write(controller_msgs.msg.dds.HeightQuadTreeMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_5(data.getDefaultHeight());
 
+
       cdr.write_type_5(data.getResolution());
+
 
       cdr.write_type_5(data.getSizeX());
 
+
       cdr.write_type_5(data.getSizeY());
+
 
       if(data.getLeaves().size() <= 5000)
       cdr.write_type_e(data.getLeaves());else
@@ -110,16 +128,22 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
 
    public static void read(controller_msgs.msg.dds.HeightQuadTreeMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setDefaultHeight(cdr.read_type_5());
       	
+
       data.setResolution(cdr.read_type_5());
       	
+
       data.setSizeX(cdr.read_type_5());
       	
+
       data.setSizeY(cdr.read_type_5());
       	
+
       cdr.read_type_e(data.getLeaves());	
 
    }
@@ -127,22 +151,34 @@ public class HeightQuadTreeMessagePubSubType implements us.ihmc.pubsub.TopicData
    @Override
    public final void serialize(controller_msgs.msg.dds.HeightQuadTreeMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_5("default_height", data.getDefaultHeight());
+
       ser.write_type_5("resolution", data.getResolution());
+
       ser.write_type_5("size_x", data.getSizeX());
+
       ser.write_type_5("size_y", data.getSizeY());
+
       ser.write_type_e("leaves", data.getLeaves());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HeightQuadTreeMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setDefaultHeight(ser.read_type_5("default_height"));
+
       data.setResolution(ser.read_type_5("resolution"));
+
       data.setSizeX(ser.read_type_5("size_x"));
+
       data.setSizeY(ser.read_type_5("size_y"));
+
       ser.read_type_e("leaves", data.getLeaves());
    }
 

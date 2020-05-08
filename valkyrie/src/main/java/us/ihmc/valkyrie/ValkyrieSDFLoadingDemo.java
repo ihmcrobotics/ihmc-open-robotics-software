@@ -141,7 +141,7 @@ public class ValkyrieSDFLoadingDemo
    private static Graphics3DObject getGraphics(Collidable collidable)
    {
       Shape3DReadOnly shape = collidable.getShape();
-      RigidBodyTransform transformToParentJoint = collidable.getShapeFrame()
+      RigidBodyTransform transformToParentJoint = collidable.getShape().getReferenceFrame()
                                                             .getTransformToDesiredFrame(collidable.getRigidBody().getParentJoint().getFrameAfterJoint());
       Graphics3DObject graphics = new Graphics3DObject();
       graphics.transform(transformToParentJoint);

@@ -24,7 +24,9 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
+import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameSphere3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.Capsule3D;
 import us.ihmc.euclid.shape.primitives.Sphere3D;
@@ -384,7 +386,7 @@ public final class KinematicsToolboxControllerTest
                                                                                                                 .equals(side.getCamelCaseName() + "HandLink"))
                                                                                             .findFirst().get());
 
-      Collidable torsoCollidable = new Collidable(torso, 0b001, 0b110, torsoCollisionShape, torso.getParentJoint().getFrameAfterJoint());
+      Collidable torsoCollidable = new Collidable(torso, 0b001, 0b110, new FrameCapsule3D(torso.getParentJoint().getFrameAfterJoint(), torsoCollisionShape));
 
       SideDependentList<Collidable> handCollidables = new SideDependentList<>(side ->
       {
@@ -392,7 +394,7 @@ public final class KinematicsToolboxControllerTest
          int collisionMask = side == RobotSide.LEFT ? 0b010 : 0b100;
          int collisionGroup = 0b001;
          ReferenceFrame shapeFrame = hand.getParentJoint().getFrameAfterJoint();
-         return new Collidable(hand, collisionMask, collisionGroup, handCollisionShape, shapeFrame);
+         return new Collidable(hand, collisionMask, collisionGroup, new FrameSphere3D(shapeFrame, handCollisionShape));
       });
 
       toolboxController.registerCollidable(torsoCollidable);

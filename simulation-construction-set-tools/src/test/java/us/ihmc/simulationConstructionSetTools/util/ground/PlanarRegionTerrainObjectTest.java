@@ -35,7 +35,7 @@ public class PlanarRegionTerrainObjectTest
       {
          PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
                                                                                                             RandomNumbers.nextDouble(random, 0.0, 30.0),
-                                                                                                            random.nextInt(10));
+                                                                                                            3 + random.nextInt(10));
          BoundingBox3D boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
 
          double randomXCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getMinX() - 10.0, boundingBox3dInWorld.getMaxX() + 10.0);
@@ -70,7 +70,7 @@ public class PlanarRegionTerrainObjectTest
       {
          PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
                                                                                                             RandomNumbers.nextDouble(random, 0.0, 30.0),
-                                                                                                            random.nextInt(10));
+                                                                                                            3 + random.nextInt(10));
          BoundingBox3D boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
 
          double randomXCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getMinX() - 10.0, boundingBox3dInWorld.getMaxX() + 10.0);
@@ -152,7 +152,7 @@ public class PlanarRegionTerrainObjectTest
       {
          PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
                                                                                                             RandomNumbers.nextDouble(random, 0.0, 30.0),
-                                                                                                            random.nextInt(10));
+                                                                                                            3 + random.nextInt(10));
          BoundingBox3D boundingBox3dInWorld = planarRegion.getBoundingBox3dInWorld();
 
          double randomXCoord = RandomNumbers.nextDouble(random, boundingBox3dInWorld.getMinX() - 10.0, boundingBox3dInWorld.getMaxX() + 10.0);
@@ -189,7 +189,7 @@ public class PlanarRegionTerrainObjectTest
 
          PlanarRegion planarRegion = PlanarRegion.generatePlanarRegionFromRandomPolygonsWithRandomTransform(random, random.nextInt(10),
                                                                                                             RandomNumbers.nextDouble(random, 0.0, 30.0),
-                                                                                                            random.nextInt(10));
+                                                                                                            3 + random.nextInt(10));
 
          double randomXCoord = RandomNumbers.nextDouble(random, 15.0);
          double randomYCoord = RandomNumbers.nextDouble(random, 15.0);

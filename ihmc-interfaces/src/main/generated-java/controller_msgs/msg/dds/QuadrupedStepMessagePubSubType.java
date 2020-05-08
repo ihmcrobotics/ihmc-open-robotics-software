@@ -40,13 +40,18 @@ public class QuadrupedStepMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -63,15 +68,20 @@ public class QuadrupedStepMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getGoalPosition(), current_alignment);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -83,12 +93,17 @@ public class QuadrupedStepMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void write(controller_msgs.msg.dds.QuadrupedStepMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_9(data.getRobotQuadrant());
 
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getGoalPosition(), cdr);
+
       cdr.write_type_6(data.getGroundClearance());
+
 
       cdr.write_type_9(data.getTrajectoryType());
 
@@ -96,13 +111,18 @@ public class QuadrupedStepMessagePubSubType implements us.ihmc.pubsub.TopicDataT
 
    public static void read(controller_msgs.msg.dds.QuadrupedStepMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setRobotQuadrant(cdr.read_type_9());
       	
+
       geometry_msgs.msg.dds.PointPubSubType.read(data.getGoalPosition(), cdr);	
+
       data.setGroundClearance(cdr.read_type_6());
       	
+
       data.setTrajectoryType(cdr.read_type_9());
       	
 
@@ -111,22 +131,32 @@ public class QuadrupedStepMessagePubSubType implements us.ihmc.pubsub.TopicDataT
    @Override
    public final void serialize(controller_msgs.msg.dds.QuadrupedStepMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_9("robot_quadrant", data.getRobotQuadrant());
+
       ser.write_type_a("goal_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalPosition());
 
+
       ser.write_type_6("ground_clearance", data.getGroundClearance());
+
       ser.write_type_9("trajectory_type", data.getTrajectoryType());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuadrupedStepMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setRobotQuadrant(ser.read_type_9("robot_quadrant"));
+
       ser.read_type_a("goal_position", new geometry_msgs.msg.dds.PointPubSubType(), data.getGoalPosition());
 
+
       data.setGroundClearance(ser.read_type_6("ground_clearance"));
+
       data.setTrajectoryType(ser.read_type_9("trajectory_type"));
    }
 

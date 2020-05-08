@@ -55,7 +55,7 @@ public class FootstepPlanningTestTools
       assertEquals(parameters.getMaximumStepZ(), other.getMaximumStepZ(), epsilon);
       assertEquals(parameters.getMinimumFootholdPercent(), other.getMinimumFootholdPercent(), epsilon);
       assertEquals(parameters.getMinimumSurfaceInclineRadians(), other.getMinimumSurfaceInclineRadians(), epsilon);
-      assertEquals(parameters.getWiggleIntoConvexHullOfPlanarRegions(), other.getWiggleIntoConvexHullOfPlanarRegions());
+      assertEquals(parameters.getEnableConcaveHullWiggler(), other.getEnableConcaveHullWiggler());
       assertEquals(parameters.getMaximumXYWiggleDistance(), other.getMaximumXYWiggleDistance(), epsilon);
       assertEquals(parameters.getMaximumYawWiggle(), other.getMaximumYawWiggle(), epsilon);
       assertEquals(parameters.getMaximumZPenetrationOnValleyRegions(), other.getMaximumZPenetrationOnValleyRegions(), epsilon);

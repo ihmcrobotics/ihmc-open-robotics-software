@@ -104,8 +104,8 @@ public class SimplifiedWalkThroughDoorBehavior extends StateMachineBehavior<Walk
       headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
       this.referenceFrames = referenceFrames;
       doorOpenDetectorBehaviorService = new DoorOpenDetectorBehaviorService(robotName, yoNamePrefix + "DoorOpenService", ros2Node, yoGraphicsListRegistry);
-      doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
-      doorOpenDetectorBehaviorService.setExpectedFiducialSize(0.2032);
+     // doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
+     // doorOpenDetectorBehaviorService.setExpectedFiducialSize(0.2032);
       registry.addChild(doorOpenDetectorBehaviorService.getYoVariableRegistry());
       addBehaviorService(doorOpenDetectorBehaviorService);
 

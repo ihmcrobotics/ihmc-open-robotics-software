@@ -1,6 +1,8 @@
 package us.ihmc.robotics.physics;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,11 +17,11 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameShapeRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
-import us.ihmc.euclid.shape.primitives.interfaces.Shape3DBasics;
-import us.ihmc.euclid.shape.tools.EuclidShapeRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -33,7 +35,11 @@ import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
-import us.ihmc.mecano.tools.*;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MecanoRandomTools;
+import us.ihmc.mecano.tools.MomentOfInertiaFactory;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 public class SingleContactImpulseCalculatorTest
 {
@@ -115,8 +121,8 @@ public class SingleContactImpulseCalculatorTest
 
          SingleContactImpulseCalculator impulseCalculator = new SingleContactImpulseCalculator(worldFrame, rootBodyA, forwardDynamicsCalculatorA, null, null);
          impulseCalculator.setCollision(collisionResult);
-         impulseCalculator.setSpringConstant(0.0);
          impulseCalculator.setTolerance(GAMMA);
+         impulseCalculator.setContactParameters(new ContactParameters(0.7, 0.0, 0.0, 1.0));
          impulseCalculator.initialize(dt);
          impulseCalculator.updateInertia(null, null);
          impulseCalculator.computeImpulse(dt);
@@ -156,8 +162,8 @@ public class SingleContactImpulseCalculatorTest
                                                                                                rootBodyB,
                                                                                                forwardDynamicsCalculatorB);
          impulseCalculator.setCollision(collisionResult);
-         impulseCalculator.setSpringConstant(0.0);
          impulseCalculator.setTolerance(GAMMA);
+         impulseCalculator.setContactParameters(new ContactParameters(0.7, 0.0, 0.0, 1.0));
          impulseCalculator.initialize(dt);
          impulseCalculator.updateInertia(null, null);
 
@@ -221,7 +227,8 @@ public class SingleContactImpulseCalculatorTest
          impulseNormal.changeFrame(worldFrame);
          impulseTangential.changeFrame(worldFrame);
 
-         boolean isSticking = impulseTangential.length() < (impulseCalculator.getCoefficientOfFriction() - epsilon) * impulseNormal.length();
+         boolean isSticking = impulseTangential.length() < (impulseCalculator.getContactParameters().getCoefficientOfFriction() - epsilon)
+               * impulseNormal.length();
 
          if (isSticking)
          {
@@ -233,7 +240,7 @@ public class SingleContactImpulseCalculatorTest
          else
          {
             assertEquals(impulseTangential.length(),
-                         impulseCalculator.getCoefficientOfFriction() * impulseNormal.length(),
+                         impulseCalculator.getContactParameters().getCoefficientOfFriction() * impulseNormal.length(),
                          Math.max(1.0, Math.abs(impulseTangential.length())) * epsilon,
                          messagePrefix);
             FrameVector3D tangentialVelocityPostImpulse = extractTangentialPart(contactLinearVelocityPostImpulse, collisionAxisForA);
@@ -452,12 +459,14 @@ public class SingleContactImpulseCalculatorTest
 
    static Collidable nextStaticCollidable(Random random)
    {
-      return new Collidable(null, -1, -1, EuclidShapeRandomTools.nextShape3D(random), worldFrame);
+      return new Collidable(null, -1, -1, EuclidFrameShapeRandomTools.nextFrameShape3D(random, worldFrame));
    }
 
    static Collidable nextCollidable(Random random, RigidBodyBasics rigidBody)
    {
-      Shape3DBasics shape = EuclidShapeMissingRandomTools.nextConvexShape3D(random, rigidBody.getInertia().getCenterOfMassOffset());
-      return new Collidable(rigidBody, -1, -1, shape, rigidBody.getBodyFixedFrame());
+      FrameShape3DBasics shape = EuclidFrameShapeRandomTools.nextFrameConvexShape3D(random,
+                                                                               rigidBody.getBodyFixedFrame(),
+                                                                               rigidBody.getInertia().getCenterOfMassOffset());
+      return new Collidable(rigidBody, -1, -1, shape);
    }
 }

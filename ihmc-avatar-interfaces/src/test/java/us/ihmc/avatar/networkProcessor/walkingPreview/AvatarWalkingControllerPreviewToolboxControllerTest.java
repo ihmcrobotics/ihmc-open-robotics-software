@@ -340,7 +340,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       for (RobotSide robotSide : RobotSide.values)
       {
          assertTrackingErrorMeanIsLow(footTrackingWatchers.get(robotSide), 0.01, 0.015, 0.06, 0.20);
-         assertTrackingErrorMeanIsLow(handTrackingWatchers.get(robotSide), 0.01, 0.10, 0.06, 0.20); // I wonder if the tracking is off because the control is in joint-space.
+         assertTrackingErrorMeanIsLow(handTrackingWatchers.get(robotSide), 0.04, 0.10, 0.06, 0.20); // I wonder if the tracking is off because the control is in joint-space.
       }
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
@@ -504,7 +504,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       {
          RobotSide side = RobotSide.values[i % 2];
          Pose3D footPose = new Pose3D(footPoses.get(side));
-         footPose.prependTranslation(0.10, 0.0, 0.0);
+         footPose.prependTranslation(0.10, 0.0, -0.01); // Lowering the footstep to trigger touchdown earlier on the controller side.
          footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(side, footPose));
       }
 

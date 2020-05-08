@@ -375,10 +375,7 @@ public class ConcaveHullCutterTest
          List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
          ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHull, 0.10, decomposedPolygons); // TODO: tune depth threshold?
 
-         Point2D[] concaveHullsVertices = new Point2D[concaveHull.getNumberOfVertices()];
-         concaveHull.getConcaveHullVertices().toArray(concaveHullsVertices);
-
-         PlanarRegion resultingRegion = new PlanarRegion(new RigidBodyTransform(), concaveHullsVertices, decomposedPolygons);
+         PlanarRegion resultingRegion = new PlanarRegion(new RigidBodyTransform(), concaveHull.getConcaveHullVertices(), decomposedPolygons);
          resultingRegion.setRegionId(id++);
          resultingRegions.add(resultingRegion);
       }

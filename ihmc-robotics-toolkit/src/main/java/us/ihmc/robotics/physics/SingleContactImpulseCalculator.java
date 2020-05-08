@@ -42,12 +42,11 @@ import us.ihmc.mecano.spatial.interfaces.SpatialImpulseReadOnly;
  */
 public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCalculator
 {
-   private double coefficientOfFriction = 0.7;
    private double beta1 = 0.35;
    private double beta2 = 0.95;
    private double beta3 = 1.15;
    private double gamma = 1.0e-6;
-   private double springConstant = 0.0;
+   private final ContactParameters contactParameters = new ContactParameters(0.7, 0.0, 0.0, 1.0);
 
    private boolean isFirstUpdate = false;
    private boolean isImpulseZero = false;
@@ -152,19 +151,14 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       }
    }
 
-   public void setSpringConstant(double springConstant)
-   {
-      this.springConstant = springConstant;
-   }
-
    public void setTolerance(double gamma)
    {
       this.gamma = gamma;
    }
 
-   public void setCoefficientOfFriction(double coefficientOfFriction)
+   public void setContactParameters(ContactParametersReadOnly parameters)
    {
-      this.coefficientOfFriction = coefficientOfFriction;
+      contactParameters.set(parameters);
    }
 
    @Override
@@ -268,10 +262,11 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private final FrameVector3D collisionPositionTerm = new FrameVector3D();
 
    @Override
-   public void updateImpulse(double dt, double alpha)
+   public void updateImpulse(double dt, double alpha, boolean ignoreOtherImpulses)
    {
-      if (externalRigidBodyTwistModifier != null)
+      if (!ignoreOtherImpulses && externalRigidBodyTwistModifier != null)
       {
+         // Compute the change in twist due to other impulses.
          velocityDueToOtherImpulseA.setIncludingFrame(externalRigidBodyTwistModifier.getLinearVelocityOfBodyFixedPoint(contactingBodyA, pointA));
          velocityDueToOtherImpulseA.changeFrame(contactFrame);
          velocityA.add(velocityNoImpulseA, velocityDueToOtherImpulseA);
@@ -283,8 +278,9 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
       if (rootB != null)
       {
-         if (externalRigidBodyTwistModifier != null)
+         if (!ignoreOtherImpulses && externalRigidBodyTwistModifier != null)
          {
+            // Compute the change in twist due to other impulses.
             velocityDueToOtherImpulseB.setIncludingFrame(externalRigidBodyTwistModifier.getLinearVelocityOfBodyFixedPoint(contactingBodyB, pointB));
             velocityDueToOtherImpulseB.changeFrame(contactFrame);
             velocityB.add(velocityNoImpulseB, velocityDueToOtherImpulseB);
@@ -312,42 +308,77 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          velocityRelativePrevious.set(velocityRelative);
       }
 
-      collisionPositionTerm.setIncludingFrame(collisionResult.getPointOnBRootFrame());
-      collisionPositionTerm.sub(collisionResult.getPointOnARootFrame());
-      collisionPositionTerm.scale(springConstant);
-      collisionPositionTerm.changeFrame(velocityRelative.getReferenceFrame());
-      velocityRelative.sub(collisionPositionTerm);
+      /*
+       * Modifying the contact velocity that the solver is trying to cancel. For instance, the coefficient
+       * of restitution is 1.0, the velocity is doubled, which results in an impulse which magnitude is
+       * doubled, such that, the post-impact velocity is opposite of the pre-impact velocity along the
+       * collision axis.
+       */
+      if (contactParameters.getCoefficientOfRestitution() != 0.0)
+         velocityRelative.scale(1.0 + contactParameters.getCoefficientOfRestitution());
 
-      impulseA.setToZero(bodyFrameA, contactFrame);
+      /*
+       * Computing the correction term based on the penetration of the two collidables. This assumes that
+       * the two shapes are inter-penetrating. The penetration distance is transformed into a velocity
+       * that would allow to correct the error in a single tick, this velocity is scaled with the user
+       * parameter error-reduction-parameter which is in [0, 1]. The resulting is subtracted to the
+       * relative velocity that the solver is trying to cancel, this way the calculator will implicitly
+       * account for the error.
+       */
+      if (contactParameters.getErrorReductionParameter() != 0.0)
+      {
+         collisionPositionTerm.setIncludingFrame(collisionResult.getPointOnBRootFrame());
+         collisionPositionTerm.sub(collisionResult.getPointOnARootFrame());
+         collisionPositionTerm.scale(contactParameters.getErrorReductionParameter() / dt);
+         collisionPositionTerm.changeFrame(velocityRelative.getReferenceFrame());
+         velocityRelative.sub(collisionPositionTerm);
+      }
 
       isContactClosing = velocityRelative.getZ() < 0.0;
+      impulseA.setToZero(bodyFrameA, contactFrame);
 
       if (isContactClosing)
       { // Closing contact, impulse needs to be calculated.
-         velocityRelative.get(c);
-         LinearSolver<DenseMatrix64F> solver;
-         if (CommonOps.det(M_inv) > 1.0e-6)
-            solver = linearSolver;
-         else
-            solver = svdSolver; // TODO This is not enough to cover the degenerate case.
+         double mu = contactParameters.getCoefficientOfFriction();
 
-         M_inv_solverCopy.set(M_inv);
-         solver.setA(M_inv_solverCopy);
-         solver.solve(c, lambda_v_0);
-         CommonOps.changeSign(lambda_v_0);
-
-         if (lambda_v_0.get(2) > -1.0e-12 && ContactImpulseTools.isInsideFrictionCone(coefficientOfFriction, lambda_v_0))
-         { // Contact is sticking, i.e. satisfies Coulomb's friction cone while canceling velocity.
-            impulseA.getLinearPart().set(lambda_v_0);
+         if (EuclidCoreTools.isZero(mu, 1.0e-12))
+         { // Trivial case, i.e. there is no friction => the impulse is along the collision axis.
+            impulseA.getLinearPart().setZ(-velocityRelative.getZ() / M_inv.get(2, 2));
          }
          else
-         { // Contact is slipping, that's the though case.
-            ContactImpulseTools.computeSlipLambda(beta1, beta2, beta3, gamma, coefficientOfFriction, M_inv, lambda_v_0, c, impulseA.getLinearPart(), false);
+         {
+            velocityRelative.get(c);
+            LinearSolver<DenseMatrix64F> solver;
+            if (CommonOps.det(M_inv) > 1.0e-6)
+               solver = linearSolver;
+            else
+               solver = svdSolver; // TODO This is not enough to cover the degenerate case, need to decompose the problem to work in reduced space, i.e. either 2D or 1D.
+
+            M_inv_solverCopy.set(M_inv);
+            solver.setA(M_inv_solverCopy);
+            solver.solve(c, lambda_v_0);
+            CommonOps.changeSign(lambda_v_0);
+
+            if (lambda_v_0.get(2) > -1.0e-12 && ContactImpulseTools.isInsideFrictionCone(mu, lambda_v_0))
+            { // Contact is sticking, i.e. satisfies Coulomb's friction cone while canceling velocity.
+               impulseA.getLinearPart().set(lambda_v_0);
+            }
+            else
+            { // Contact is slipping, that's the though case.
+               ContactImpulseTools.computeSlipLambda(beta1, beta2, beta3, gamma, mu, M_inv, lambda_v_0, c, impulseA.getLinearPart(), false);
+            }
          }
       }
 
       if (impulseA.getLinearPart().getZ() < 0.0)
          throw new IllegalStateException("Malformed impulse");
+
+      /*
+       * Based on the documentation of ODE, this seems to be the way the constraint force mixing should be
+       * applied.
+       */
+      if (contactParameters.getConstraintForceMixing() != 1.0)
+         impulseA.getLinearPart().scale(contactParameters.getConstraintForceMixing());
 
       if (isFirstUpdate)
       {
@@ -366,9 +397,32 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       {
          impulseA.getLinearPart().interpolate(impulsePreviousA, impulseA.getLinearPart(), alpha);
          impulseChangeA.sub(impulseA.getLinearPart(), impulsePreviousA);
-         isImpulseZero = impulseA.getLinearPart().length() < 1.0e-10;
+         isImpulseZero = impulseA.getLinearPart().length() < 1.0e-6;
       }
 
+      if (isImpulseZero)
+      {
+         if (rootB != null)
+         {
+            impulseB.setToZero(contactingBodyB.getBodyFixedFrame(), impulseA.getReferenceFrame());
+         }
+      }
+      else
+      {
+         if (rootB != null)
+         {
+            impulseB.setIncludingFrame(contactingBodyB.getBodyFixedFrame(), impulseA);
+            impulseB.negate();
+         }
+      }
+
+      impulsePreviousA.set(impulseA.getLinearPart());
+      isFirstUpdate = false;
+   }
+
+   @Override
+   public void updateTwistModifiers()
+   {
       if (isImpulseZero)
       {
          rigidBodyTwistModifierA.setImpulseToZero();
@@ -376,7 +430,6 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
          if (rootB != null)
          {
-            impulseB.setToZero(contactingBodyB.getBodyFixedFrame(), impulseA.getReferenceFrame());
             rigidBodyTwistModifierB.setImpulseToZero();
             jointTwistModifierB.setImpulseToZero();
          }
@@ -388,15 +441,10 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
          if (rootB != null)
          {
-            impulseB.setIncludingFrame(contactingBodyB.getBodyFixedFrame(), impulseA);
-            impulseB.negate();
             rigidBodyTwistModifierB.setImpulse(impulseB.getLinearPart());
             jointTwistModifierB.setImpulse(impulseB.getLinearPart());
          }
       }
-
-      impulsePreviousA.set(impulseA.getLinearPart());
-      isFirstUpdate = false;
    }
 
    @Override
@@ -617,9 +665,9 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       return responseCalculatorB;
    }
 
-   public double getCoefficientOfFriction()
+   public ContactParametersBasics getContactParameters()
    {
-      return coefficientOfFriction;
+      return contactParameters;
    }
 
    @Override
@@ -639,6 +687,13 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
    public void printForUnitTest()
    {
-      System.err.println(ContactImpulseTools.toStringForUnitTest(beta1, beta2, beta3, gamma, coefficientOfFriction, M_inv, lambda_v_0, c));
+      System.err.println(ContactImpulseTools.toStringForUnitTest(beta1,
+                                                                 beta2,
+                                                                 beta3,
+                                                                 gamma,
+                                                                 contactParameters.getCoefficientOfFriction(),
+                                                                 M_inv,
+                                                                 lambda_v_0,
+                                                                 c));
    }
 }

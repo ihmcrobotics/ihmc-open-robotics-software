@@ -3,8 +3,8 @@ package us.ihmc.commonWalkingControlModules.controlModules.foot;
 import us.ihmc.commonWalkingControlModules.configurations.SwingTrajectoryParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
+import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesData;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
@@ -16,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -576,7 +577,7 @@ public class WorkspaceLimiterControlModule
       }
    }
 
-   public void correctCoMHeightTrajectoryForSingularityAvoidanceInSupport(FrameVector2D comXYVelocity,
+   public void correctCoMHeightTrajectoryForSingularityAvoidanceInSupport(FrameVector2DReadOnly comXYVelocity,
                                                                           CoMHeightTimeDerivativesData comHeightDataToCorrect,
                                                                           double zCurrentInWorld,
                                                                           ReferenceFrame pelvisZUpFrame,
@@ -698,7 +699,8 @@ public class WorkspaceLimiterControlModule
       }
    }
 
-   private void applySingularityAvoidanceInSupport(FrameVector2DBasics comXYVelocity,
+   private final FrameVector2DBasics comVelocity = new FrameVector2D();
+   private void applySingularityAvoidanceInSupport(FrameVector2DReadOnly comXYVelocity,
                                                    CoMHeightTimeDerivativesData comHeightDataToCorrect,
                                                    double zCurrent,
                                                    ReferenceFrame pelvisZUpFrame)
@@ -718,8 +720,9 @@ public class WorkspaceLimiterControlModule
       // Correct the height velocity
       equivalentDesiredHipVelocity.setIncludingFrame(worldFrame, 0.0, 0.0, comHeightDataToCorrect.getComHeightVelocity());
       equivalentDesiredHipVelocity.changeFrame(pelvisZUpFrame);
-      comXYVelocity.changeFrame(pelvisZUpFrame);
-      equivalentDesiredHipVelocity.setX(comXYVelocity.getX());
+      comVelocity.setIncludingFrame(comVelocity);
+      comVelocity.changeFrame(pelvisZUpFrame);
+      equivalentDesiredHipVelocity.setX(comVelocity.getX());
       equivalentDesiredHipVelocity.changeFrame(virtualLegTangentialFrameAnkleCentered);
 
       double scaledHipVelocity = InterpolationTools.linearInterpolate(equivalentDesiredHipVelocity.getZ(),
@@ -727,8 +730,8 @@ public class WorkspaceLimiterControlModule
                                                                       alphaSupportSingularityAvoidance.getDoubleValue());
       equivalentDesiredHipVelocity.setZ(scaledHipVelocity);
       equivalentDesiredHipVelocity.changeFrame(pelvisZUpFrame);
-      if (Math.abs(comXYVelocity.getX()) > 1e-3 && Math.abs(equivalentDesiredHipVelocity.getX()) > 1e-3)
-         equivalentDesiredHipVelocity.scale(comXYVelocity.getX() / equivalentDesiredHipVelocity.getX());
+      if (Math.abs(comVelocity.getX()) > 1e-3 && Math.abs(equivalentDesiredHipVelocity.getX()) > 1e-3)
+         equivalentDesiredHipVelocity.scale(comVelocity.getX() / equivalentDesiredHipVelocity.getX());
       equivalentDesiredHipVelocity.changeFrame(worldFrame);
       heightVelocityCorrectedFilteredForSingularityAvoidance.update(equivalentDesiredHipVelocity.getZ());
       comHeightDataToCorrect.setComHeightVelocity(heightVelocityCorrectedFilteredForSingularityAvoidance.getDoubleValue());

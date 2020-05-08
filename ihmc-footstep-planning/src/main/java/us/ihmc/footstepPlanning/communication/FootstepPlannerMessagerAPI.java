@@ -21,6 +21,7 @@ import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
@@ -149,6 +150,10 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Pair<RigidBodyTransform, ConvexPolygon2D>> parentDebugStep = topic("ParentDebugStep");
    public static final Topic<Pair<RigidBodyTransform, ConvexPolygon2D>> childDebugStep = topic("ChildDebugStep");
    public static final Topic<RigidBodyTransform> idealDebugStep = topic("IdealDebugStep");
+
+   // Test dashboard, only shown if launched from test class
+   public static final Topic<List<DataSet>> testDataSets = topic("testDataSets");
+   public static final Topic<DataSet> testDataSetSelected = topic("testDataSetSelected");
 
    // Walking preview
    public static final Topic<WalkingControllerPreviewInputMessage> RequestWalkingPreview = topic("RequestWalkingPreview");

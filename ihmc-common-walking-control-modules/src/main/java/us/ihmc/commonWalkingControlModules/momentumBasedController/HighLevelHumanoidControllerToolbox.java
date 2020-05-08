@@ -27,6 +27,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPosition;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -177,8 +178,7 @@ public class HighLevelHumanoidControllerToolbox
       {
          referenceFramesVisualizer = new CommonHumanoidReferenceFramesVisualizer(referenceFrames,
                                                                                  yoGraphicsListRegistry,
-                                                                                 registry,
-                                                                                 fullRobotModel.getHead().getBodyFixedFrame());
+                                                                                 registry);
       }
       else
       {
@@ -450,6 +450,11 @@ public class HighLevelHumanoidControllerToolbox
       capturePointCalculator.compute(capturePoint2d, omega0.getValue());
       capturePoint2d.changeFrame(yoCapturePoint.getReferenceFrame());
       yoCapturePoint.set(capturePoint2d, 0.0);
+   }
+
+   public CenterOfMassJacobian getCenterOfMassJacobian()
+   {
+      return capturePointCalculator.getCenterOfMassJacobian();
    }
 
    private final FrameVector3D angularMomentum = new FrameVector3D();

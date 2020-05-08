@@ -17,10 +17,15 @@ public interface ImpulseBasedConstraintCalculator
 
    default void computeImpulse(double dt)
    {
-      updateImpulse(dt, 1.0);
+      updateImpulse(dt, 1.0, true);
    }
 
-   void updateImpulse(double dt, double alpha);
+   void updateImpulse(double dt, double alpha, boolean ignoreOtherImpulses);
+
+   default void updateTwistModifiers()
+   {
+      
+   }
 
    default void finalizeImpulse()
    {
