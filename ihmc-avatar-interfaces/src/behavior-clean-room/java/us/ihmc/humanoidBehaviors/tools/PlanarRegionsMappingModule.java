@@ -35,7 +35,11 @@ public class PlanarRegionsMappingModule
 
       planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME);
 
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA, this::process);
+      String topicName = ROS2Tools.generateDefaultTopicName(PlanarRegionsListMessage.class,
+                                                            null,
+                                                            ROS2Tools.REA_MODULE + "/realsense",
+                                                            ROS2Tools.ROS2TopicQualifier.OUTPUT);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, topicName, this::process);
    }
 
    private void process(PlanarRegionsListMessage visibleRegionsMessage)
