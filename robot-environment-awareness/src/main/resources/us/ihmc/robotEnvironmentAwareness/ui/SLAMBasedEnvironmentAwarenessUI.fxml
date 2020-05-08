@@ -19,42 +19,6 @@
    <bottom>
       <TabPane prefHeight="204.0" prefWidth="893.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
          <tabs>
-            <Tab text="NormalEstimation">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <fx:include fx:id="normalEstimationAnchorPane" source="NormalEstimationAnchorPane.fxml" />
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-            <Tab text="RegionSegmentation">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <fx:include fx:id="regionSegmentationAnchorPane" source="RegionSegmentationAnchorPane.fxml" />
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
-            <Tab text="CustomRegionMerge">
-              <content>
-                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <fx:include fx:id="customRegionMergeAnchorPane" source="CustomRegionMergeAnchorPane.fxml" />
-                     </children>
-                  </AnchorPane>
-              </content>
-            </Tab>
-            <Tab text="Polygonizer">
-               <content>
-                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
-                     <children>
-                        <fx:include fx:id="polygonizerAnchorPane" source="PolygonizerAnchorPane.fxml" />
-                     </children>
-                  </AnchorPane>
-               </content>
-            </Tab>
             <Tab text="DataExporter">
                <content>
                   <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
