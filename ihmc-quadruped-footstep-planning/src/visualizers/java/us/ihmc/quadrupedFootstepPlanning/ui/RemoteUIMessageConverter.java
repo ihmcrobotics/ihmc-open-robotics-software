@@ -136,7 +136,7 @@ public class RemoteUIMessageConverter
       /* subscribers */
       // we want to listen to the incoming request to the planning toolbox
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PawStepPlanningRequestPacket.class,
-                                                    PawStepPlannerCommunicationProperties.subscriberTopicName(robotName),
+                                                    PawStepPlannerCommunicationProperties.inputTopicName(robotName),
                                            s -> processPawPlanningRequestPacket(s.takeNextData()));
       // we want to listen to the resulting body path plan from the toolbox
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, BodyPathPlanMessage.class, PawStepPlannerCommunicationProperties.outputTopicName(robotName),
@@ -171,13 +171,13 @@ public class RemoteUIMessageConverter
 
       // publishers
       plannerParametersPublisher = ROS2Tools
-            .createPublisherTypeNamed(ros2Node, PawStepPlannerParametersPacket.class, PawStepPlannerCommunicationProperties.subscriberTopicName(robotName));
+            .createPublisherTypeNamed(ros2Node, PawStepPlannerParametersPacket.class, PawStepPlannerCommunicationProperties.inputTopicName(robotName));
       visibilityGraphsParametersPublisher = ROS2Tools
-            .createPublisherTypeNamed(ros2Node, VisibilityGraphsParametersPacket.class, PawStepPlannerCommunicationProperties.subscriberTopicName(robotName));
+            .createPublisherTypeNamed(ros2Node, VisibilityGraphsParametersPacket.class, PawStepPlannerCommunicationProperties.inputTopicName(robotName));
       toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class,
-                                                                 PawStepPlannerCommunicationProperties.subscriberTopicName(robotName));
+                                                                 PawStepPlannerCommunicationProperties.inputTopicName(robotName));
       pawPlanningRequestPublisher = ROS2Tools
-            .createPublisherTypeNamed(ros2Node, PawStepPlanningRequestPacket.class, PawStepPlannerCommunicationProperties.subscriberTopicName(robotName));
+            .createPublisherTypeNamed(ros2Node, PawStepPlanningRequestPacket.class, PawStepPlannerCommunicationProperties.inputTopicName(robotName));
       footstepDataListPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedTimedStepListMessage.class, ROS2Tools.getControllerInputTopicName(robotName));
 
 //      MessageTopicName controllerPreviewInputTopicName = ROS2Tools.getTopicName(robotName, ROS2Tools.WALKING_PREVIEW_TOOLBOX, ROS2TopicQualifier.INPUT);

@@ -526,9 +526,9 @@ public class HighLevelHumanoidControllerFactory implements CloseableAndDisposabl
 
    public void createControllerNetworkSubscriber(String robotName, RealtimeRos2Node realtimeRos2Node)
    {
-      ROS2TopicName subscriberTopicName = ROS2Tools.getControllerInputTopicName(robotName);
+      ROS2TopicName inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
       ROS2TopicName outputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
-      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(subscriberTopicName, commandInputManager,
+      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopicName, commandInputManager,
                                                                                                 outputTopicName, statusMessageOutputManager,
                                                                                                 realtimeRos2Node);
 

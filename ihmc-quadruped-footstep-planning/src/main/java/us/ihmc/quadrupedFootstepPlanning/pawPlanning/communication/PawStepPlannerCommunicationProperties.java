@@ -45,7 +45,7 @@ public class PawStepPlannerCommunicationProperties
       return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
    }
 
-   public static ROS2TopicName subscriberTopicName(String robotName)
+   public static ROS2TopicName inputTopicName(String robotName)
    {
       return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
    }

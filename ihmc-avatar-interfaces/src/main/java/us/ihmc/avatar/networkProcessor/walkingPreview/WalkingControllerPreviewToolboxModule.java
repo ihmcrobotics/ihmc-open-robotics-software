@@ -83,12 +83,12 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2TopicName getSubscriberTopicName()
+   public ROS2TopicName getInputTopicName()
    {
-      return getSubscriberTopicName(robotName);
+      return getInputTopicName(robotName);
    }
 
-   public static ROS2TopicName getSubscriberTopicName(String robotName)
+   public static ROS2TopicName getInputTopicName(String robotName)
    {
       return ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withInput();
    }

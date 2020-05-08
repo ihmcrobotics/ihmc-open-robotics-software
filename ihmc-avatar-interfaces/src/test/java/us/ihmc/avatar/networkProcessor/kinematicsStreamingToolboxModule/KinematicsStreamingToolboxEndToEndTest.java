@@ -147,7 +147,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
    {
       String robotName = robotModel.getSimpleRobotName();
       ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
-      ROS2TopicName toolboxInputTopicName = KinematicsStreamingToolboxModule.getSubscriberTopicName(robotName);
+      ROS2TopicName toolboxInputTopicName = KinematicsStreamingToolboxModule.getInputTopicName(robotName);
       ROS2TopicName toolboxOutputTopicName = KinematicsStreamingToolboxModule.getPublisherTopicName(robotName);
 
       desiredFullRobotModel = robotModel.createFullRobotModel();

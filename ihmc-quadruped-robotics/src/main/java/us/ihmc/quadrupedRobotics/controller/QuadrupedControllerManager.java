@@ -479,9 +479,9 @@ public class QuadrupedControllerManager implements RobotController, CloseableAnd
 
    public void createControllerNetworkSubscriber(String robotName, RealtimeRos2Node realtimeRos2Node)
    {
-      ROS2TopicName subscriberTopicName = ROS2Tools.getQuadrupedControllerInputTopicName(robotName);
+      ROS2TopicName inputTopicName = ROS2Tools.getQuadrupedControllerInputTopicName(robotName);
       ROS2TopicName outputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
-      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(subscriberTopicName,
+      ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopicName,
                                                                                                 commandInputManager,
                                                                                                 outputTopicName,
                                                                                                 statusMessageOutputManager,

@@ -28,7 +28,7 @@ public class REAPlanarRegionPublicNetworkProvider
    private final REAStatusMessage currentState = new REAStatusMessage();
 
    public REAPlanarRegionPublicNetworkProvider(Messager messager, RegionFeaturesProvider regionFeaturesProvider, Ros2Node ros2Node,
-                                               ROS2TopicName outputTopicName, ROS2TopicName subscriberTopicName)
+                                               ROS2TopicName outputTopicName, ROS2TopicName inputTopicName)
    {
       this.regionFeaturesProvider = regionFeaturesProvider;
       planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, outputTopicName);

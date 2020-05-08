@@ -109,13 +109,13 @@ public class ValkyrieExternalForceEstimationSimulation
 
       IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                 ToolboxStateMessage.class,
-                                                                                                                ExternalForceEstimationToolboxModule.getSubscriberTopicName(
+                                                                                                                ExternalForceEstimationToolboxModule.getInputTopicName(
                                                                                                              robotModel.getSimpleRobotName()));
 
       IHMCRealtimeROS2Publisher<ExternalForceEstimationConfigurationMessage> configurationMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                                                 ExternalForceEstimationConfigurationMessage.class,
                                                                                                                                                 ExternalForceEstimationToolboxModule
-                                                                                                                                             .getSubscriberTopicName(
+                                                                                                                                             .getInputTopicName(
                                                                                                                                                    robotModel.getSimpleRobotName()));
 
       JButton wakeupButton = new JButton("Start estimation");
