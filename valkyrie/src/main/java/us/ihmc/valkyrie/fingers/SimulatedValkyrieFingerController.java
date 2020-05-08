@@ -56,7 +56,7 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
    private final MirroredYoVariableRegistry registry;
 
    public SimulatedValkyrieFingerController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node, DRCRobotModel robotModel,
-                                            ROS2TopicName pubTopicName, ROS2TopicName inputTopicName)
+                                            ROS2TopicName outputTopicName, ROS2TopicName inputTopicName)
    {
       super((int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
 
@@ -66,7 +66,7 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
       if (realtimeRos2Node != null)
       {
          IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, HandJointAnglePacket.class,
-                                                                                                                  pubTopicName);
+                                                                                                                  outputTopicName);
          jointAngleProducer = new SimulatedValkyrieFingerJointAngleProducer(jointAnglePublisher, simulatedRobot);
       }
       else
