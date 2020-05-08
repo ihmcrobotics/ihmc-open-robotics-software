@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.util.function.Function;
 
+import controller_msgs.msg.dds.DoorParameterPacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -77,8 +78,6 @@ public class ROS2Tools
 
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
-   public static final ROS2Topic<RobotConfigurationData> ROBOT_CONFIGURATION_DATA = getControllerTopic(RobotConfigurationData.class);
-
    public static ROS2TopicName getControllerOutputTopicName(String robotName)
    {
       return HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
@@ -89,31 +88,6 @@ public class ROS2Tools
       return HUMANOID_CONTROLLER.withRobot(robotName).withInput();
    }
 
-   public static ROS2Topic<RobotConfigurationData> getRobotConfigurationDataTopic(String robotName)
-   {
-      return ROBOT_CONFIGURATION_DATA.withTopicName(ROS2Tools.getControllerOutputTopicName(robotName));
-   }
-
-   public static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType)
-   {
-      return new ROS2Topic<>(messageType, NAMED_BY_TYPE);
-   }
-
-   private static <T> ROS2Topic<T> getControllerTopic(Class<T> messageType)
-   {
-      return typeNamedTopic(messageType);
-   }
-
-   public static <T> ROS2Topic<T> getControllerInputTopic(Class<T> messageType, String robotName)
-   {
-      return new ROS2Topic<>(messageType, NAMED_BY_TYPE).withTopicName(getControllerInputTopicName(robotName));
-   }
-
-   public static <T> ROS2Topic<T> getControllerOutputTopic(Class<T> messageType, String robotName)
-   {
-      return new ROS2Topic<>(messageType, NAMED_BY_TYPE).withTopicName(getControllerOutputTopicName(robotName));
-   }
-
    public static ROS2TopicName getQuadrupedControllerOutputTopicName(String robotName)
    {
       return QUADRUPED_CONTROLLER.withRobot(robotName).withOutput();
@@ -122,6 +96,26 @@ public class ROS2Tools
    public static ROS2TopicName getQuadrupedControllerInputTopicName(String robotName)
    {
       return QUADRUPED_CONTROLLER.withRobot(robotName).withInput();
+   }
+
+   public static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType)
+   {
+      return new ROS2Topic<>(messageType, NAMED_BY_TYPE);
+   }
+
+   public static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType, ROS2TopicName topicName)
+   {
+      return typeNamedTopic(messageType).withTopicName(topicName);
+   }
+
+   public static ROS2Topic<RobotConfigurationData> getRobotConfigurationDataTopic(String robotName)
+   {
+      return typeNamedTopic(RobotConfigurationData.class, getControllerOutputTopicName(robotName));
+   }
+
+   public static ROS2Topic<DoorParameterPacket> getDoorParameterTopic()
+   {
+      return typeNamedTopic(DoorParameterPacket.class, ROS2Tools.IHMC_ROOT);
    }
 
    public final static ExceptionHandler RUNTIME_EXCEPTION = e ->
