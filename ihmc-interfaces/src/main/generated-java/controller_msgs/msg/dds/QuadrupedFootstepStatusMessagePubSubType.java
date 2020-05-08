@@ -40,19 +40,27 @@ public class QuadrupedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       current_alignment += controller_msgs.msg.dds.TimeIntervalMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       current_alignment += controller_msgs.msg.dds.TimeIntervalMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -69,23 +77,31 @@ public class QuadrupedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getDesiredTouchdownPositionInWorld(), current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getActualTouchdownPositionInWorld(), current_alignment);
 
+
       current_alignment += controller_msgs.msg.dds.TimeIntervalMessagePubSubType.getCdrSerializedSize(data.getDesiredStepInterval(), current_alignment);
+
 
       current_alignment += controller_msgs.msg.dds.TimeIntervalMessagePubSubType.getCdrSerializedSize(data.getActualStepInterval(), current_alignment);
 
@@ -95,33 +111,49 @@ public class QuadrupedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.
 
    public static void write(controller_msgs.msg.dds.QuadrupedFootstepStatusMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_9(data.getFootstepStatus());
 
+
       cdr.write_type_2(data.getFootstepIndex());
+
 
       cdr.write_type_9(data.getRobotQuadrant());
 
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredTouchdownPositionInWorld(), cdr);
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getActualTouchdownPositionInWorld(), cdr);
+
       controller_msgs.msg.dds.TimeIntervalMessagePubSubType.write(data.getDesiredStepInterval(), cdr);
+
       controller_msgs.msg.dds.TimeIntervalMessagePubSubType.write(data.getActualStepInterval(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.QuadrupedFootstepStatusMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setFootstepStatus(cdr.read_type_9());
       	
+
       data.setFootstepIndex(cdr.read_type_2());
       	
+
       data.setRobotQuadrant(cdr.read_type_9());
       	
+
       geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredTouchdownPositionInWorld(), cdr);	
+
       geometry_msgs.msg.dds.PointPubSubType.read(data.getActualTouchdownPositionInWorld(), cdr);	
+
       controller_msgs.msg.dds.TimeIntervalMessagePubSubType.read(data.getDesiredStepInterval(), cdr);	
+
       controller_msgs.msg.dds.TimeIntervalMessagePubSubType.read(data.getActualStepInterval(), cdr);	
 
    }
@@ -129,15 +161,23 @@ public class QuadrupedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final void serialize(controller_msgs.msg.dds.QuadrupedFootstepStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_9("footstep_status", data.getFootstepStatus());
+
       ser.write_type_2("footstep_index", data.getFootstepIndex());
+
       ser.write_type_9("robot_quadrant", data.getRobotQuadrant());
+
       ser.write_type_a("desired_touchdown_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredTouchdownPositionInWorld());
+
 
       ser.write_type_a("actual_touchdown_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getActualTouchdownPositionInWorld());
 
+
       ser.write_type_a("desired_step_interval", new controller_msgs.msg.dds.TimeIntervalMessagePubSubType(), data.getDesiredStepInterval());
+
 
       ser.write_type_a("actual_step_interval", new controller_msgs.msg.dds.TimeIntervalMessagePubSubType(), data.getActualStepInterval());
 
@@ -146,15 +186,23 @@ public class QuadrupedFootstepStatusMessagePubSubType implements us.ihmc.pubsub.
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuadrupedFootstepStatusMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setFootstepStatus(ser.read_type_9("footstep_status"));
+
       data.setFootstepIndex(ser.read_type_2("footstep_index"));
+
       data.setRobotQuadrant(ser.read_type_9("robot_quadrant"));
+
       ser.read_type_a("desired_touchdown_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getDesiredTouchdownPositionInWorld());
+
 
       ser.read_type_a("actual_touchdown_position_in_world", new geometry_msgs.msg.dds.PointPubSubType(), data.getActualTouchdownPositionInWorld());
 
+
       ser.read_type_a("desired_step_interval", new controller_msgs.msg.dds.TimeIntervalMessagePubSubType(), data.getDesiredStepInterval());
+
 
       ser.read_type_a("actual_step_interval", new controller_msgs.msg.dds.TimeIntervalMessagePubSubType(), data.getActualStepInterval());
 

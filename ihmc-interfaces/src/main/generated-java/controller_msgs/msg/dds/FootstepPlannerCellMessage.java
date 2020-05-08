@@ -7,22 +7,34 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC footstep planning module.
-       * This message is sent from the planner in order to visualize and debug planner progress
-       */
+   
+ * This message is part of the IHMC footstep planning module.
+   
+ * This message is sent from the planner in order to visualize and debug planner progress
+   
+ */
 public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessage> implements Settable<FootstepPlannerCellMessage>, EpsilonComparable<FootstepPlannerCellMessage>
 {
+
    /**
-            * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
-            */
+       
+    * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+       
+    */
    public int x_index_;
+
    /**
-            * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
-            */
+       
+    * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+       
+    */
    public int y_index_;
 
    public FootstepPlannerCellMessage()
    {
+
+
+
    }
 
    public FootstepPlannerCellMessage(FootstepPlannerCellMessage other)
@@ -33,37 +45,49 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
 
    public void set(FootstepPlannerCellMessage other)
    {
+
       x_index_ = other.x_index_;
+
 
       y_index_ = other.y_index_;
 
    }
 
+
    /**
-            * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
-            */
+       
+    * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+       
+    */
    public void setXIndex(int x_index)
    {
       x_index_ = x_index;
    }
    /**
-            * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
-            */
+       
+    * X index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+       
+    */
    public int getXIndex()
    {
       return x_index_;
    }
 
+
    /**
-            * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
-            */
+       
+    * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+       
+    */
    public void setYIndex(int y_index)
    {
       y_index_ = y_index;
    }
    /**
-            * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
-            */
+       
+    * Y index of the cell. See us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode for more information
+       
+    */
    public int getYIndex()
    {
       return y_index_;
@@ -87,7 +111,9 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
       if(other == null) return false;
       if(other == this) return true;
 
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.x_index_, other.x_index_, epsilon)) return false;
+
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.y_index_, other.y_index_, epsilon)) return false;
 
@@ -104,7 +130,9 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
 
       FootstepPlannerCellMessage otherMyClass = (FootstepPlannerCellMessage) other;
 
+
       if(this.x_index_ != otherMyClass.x_index_) return false;
+
 
       if(this.y_index_ != otherMyClass.y_index_) return false;
 
@@ -118,8 +146,10 @@ public class FootstepPlannerCellMessage extends Packet<FootstepPlannerCellMessag
       StringBuilder builder = new StringBuilder();
 
       builder.append("FootstepPlannerCellMessage {");
+
       builder.append("x_index=");
       builder.append(this.x_index_);      builder.append(", ");
+
       builder.append("y_index=");
       builder.append(this.y_index_);
       builder.append("}");

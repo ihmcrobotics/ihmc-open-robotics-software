@@ -9,6 +9,7 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.CommonMatrix3DBasics;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DBasics;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
@@ -404,5 +405,36 @@ public class EuclidCoreMissingTools
                                                          Point2DReadOnly lineSegmentEnd2)
    {
       return closestPoint2DsBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2, null, null);
+   }
+
+   public static double distanceSquaredFromPoint2DToLineSegment2D(double pointX,
+                                                                  double pointY,
+                                                                  double lineSegmentStartX,
+                                                                  double lineSegmentStartY,
+                                                                  double lineSegmentEndX,
+                                                                  double lineSegmentEndY,
+                                                                  Point2D intersectionPointToPack)
+   {
+      double percentage = EuclidGeometryTools.percentageAlongLineSegment2D(pointX,
+                                                                           pointY,
+                                                                           lineSegmentStartX,
+                                                                           lineSegmentStartY,
+                                                                           lineSegmentEndX,
+                                                                           lineSegmentEndY);
+
+      if (percentage > 1.0)
+         percentage = 1.0;
+      else if (percentage < 0.0)
+         percentage = 0.0;
+
+      double projectionX = (1.0 - percentage) * lineSegmentStartX + percentage * lineSegmentEndX;
+      double projectionY = (1.0 - percentage) * lineSegmentStartY + percentage * lineSegmentEndY;
+
+      if (intersectionPointToPack != null)
+         intersectionPointToPack.set(projectionX, projectionY);
+
+      double dx = projectionX - pointX;
+      double dy = projectionY - pointY;
+      return dx * dx + dy * dy;
    }
 }

@@ -137,11 +137,8 @@ public class SCSLidarAndCameraSimulator
       scs.setGroundVisible(false);
       scs.addStaticLinkGraphics(terrainObject3D.getLinkGraphics());
 
-      if (!SystemUtils.IS_OS_WINDOWS)
-         scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(2.0 / 3.0));
-
+      scs.getGUI().getFrame().setSize(AWTTools.getDimensionOfSmallestScreenScaled(0.25));
       scs.startOnAThread();
-
       scs.simulate();
    }
 

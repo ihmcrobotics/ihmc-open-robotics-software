@@ -1,8 +1,10 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
+import us.ihmc.commonWalkingControlModules.polygonWiggling.ConcavePolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -23,40 +25,17 @@ import java.util.function.DoubleSupplier;
 public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 {
    private final SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame;
+   private final FootstepPlannerParametersReadOnly parameters;
 
-   private final BooleanSupplier wiggleIntoConvexHullOfPlanarRegions;
-   private final DoubleSupplier wiggleInsideDelta;
-   private final DoubleSupplier maximumXYWiggleDistance;
-   private final DoubleSupplier maximumYawWiggle;
-   private final DoubleSupplier maximumZPenetrationOnValleyRegions;
-
+   private final ConcavePolygonWiggler concavePolygonWiggler = new ConcavePolygonWiggler();
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private final PlanarRegion planarRegionToPack = new PlanarRegion();
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
 
    public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters)
    {
-      this(footPolygonsInSoleFrame,
-           parameters::getWiggleIntoConvexHullOfPlanarRegions,
-           parameters::getWiggleInsideDelta,
-           parameters::getMaximumXYWiggleDistance,
-           parameters::getMaximumYawWiggle,
-           parameters::getMaximumZPenetrationOnValleyRegions);
-   }
-
-   public FootstepNodeSnapAndWiggler(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
-                                      BooleanSupplier wiggleIntoConvexHullOfPlanarRegions,
-                                      DoubleSupplier wiggleInsideDelta,
-                                      DoubleSupplier maximumXYWiggleDistance,
-                                      DoubleSupplier maximumYawWiggle,
-                                      DoubleSupplier maximumZPenetrationOnValleyRegions)
-   {
       this.footPolygonsInSoleFrame = footPolygonsInSoleFrame;
-      this.wiggleIntoConvexHullOfPlanarRegions = wiggleIntoConvexHullOfPlanarRegions;
-      this.wiggleInsideDelta = wiggleInsideDelta;
-      this.maximumXYWiggleDistance = maximumXYWiggleDistance;
-      this.maximumYawWiggle = maximumYawWiggle;
-      this.maximumZPenetrationOnValleyRegions = maximumZPenetrationOnValleyRegions;
+      this.parameters = parameters;
    }
 
    @Override
@@ -89,7 +68,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
       for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
       {
          Point2DReadOnly vertex = footPolygon.getVertex(i);
-         if (planarRegionToPack.getConvexHull().signedDistance(vertex) > - wiggleInsideDelta.getAsDouble())
+         if (planarRegionToPack.getConvexHull().signedDistance(vertex) > - parameters.getWiggleInsideDelta())
          {
             doWiggle = true;
             break;
@@ -166,21 +145,21 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
    {
       updateWiggleParameters();
 
-      if (wiggleIntoConvexHullOfPlanarRegions.getAsBoolean())
-         return PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footholdPolygon, planarRegionToPack, wiggleParameters);
+      if (parameters.getEnableConcaveHullWiggler() && !planarRegionToPack.getConcaveHull().isEmpty())
+         return concavePolygonWiggler.wigglePolygon(footholdPolygon, Vertex2DSupplier.asVertex2DSupplier(planarRegionToPack.getConcaveHull()), wiggleParameters);
       else
-         return PolygonWiggler.wigglePolygonIntoRegion(footholdPolygon, planarRegionToPack, wiggleParameters);
+         return PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footholdPolygon, planarRegionToPack, wiggleParameters);
    }
 
    private void updateWiggleParameters()
    {
-      wiggleParameters.deltaInside = wiggleInsideDelta.getAsDouble();
-      wiggleParameters.maxX = maximumXYWiggleDistance.getAsDouble();
-      wiggleParameters.minX = -maximumXYWiggleDistance.getAsDouble();
-      wiggleParameters.maxY = maximumXYWiggleDistance.getAsDouble();
-      wiggleParameters.minY = -maximumXYWiggleDistance.getAsDouble();
-      wiggleParameters.maxYaw = maximumYawWiggle.getAsDouble();
-      wiggleParameters.minYaw = -maximumYawWiggle.getAsDouble();
+      wiggleParameters.deltaInside = parameters.getWiggleInsideDelta();
+      wiggleParameters.maxX = parameters.getMaximumXYWiggleDistance();
+      wiggleParameters.minX = -parameters.getMaximumXYWiggleDistance();
+      wiggleParameters.maxY = parameters.getMaximumXYWiggleDistance();
+      wiggleParameters.minY = -parameters.getMaximumXYWiggleDistance();
+      wiggleParameters.maxYaw = parameters.getMaximumYawWiggle();
+      wiggleParameters.minYaw = -parameters.getMaximumYawWiggle();
    }
 
    private RigidBodyTransform getWiggleTransformInWorldFrame(RigidBodyTransform wiggleTransformLocalToLocal)
@@ -226,7 +205,7 @@ public class FootstepNodeSnapAndWiggler extends FootstepNodeSnapper
 
                   double zPenetration = vertex3dInWorld.getZ() - planeZGivenXY;
 
-                  if (zPenetration > maximumZPenetrationOnValleyRegions.getAsDouble())
+                  if (zPenetration > parameters.getMaximumZPenetrationOnValleyRegions())
                   {
                      return true;
                   }

@@ -222,6 +222,115 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
    }
 
    @Test
+   public void testForceExecutionWithSingleTrajectoryPoint() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      Random random = new Random(564574L);
+
+      DRCObstacleCourseStartingLocation selectedLocation = DRCObstacleCourseStartingLocation.DEFAULT;
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.setStartingLocation(selectedLocation);
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+
+      List<TaskspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
+      drcSimulationTestHelper.createSubscriberFromController(TaskspaceTrajectoryStatusMessage.class, statusMessages::add);
+
+      double controllerDT = getRobotModel().getControllerDT();
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+
+      drcSimulationTestHelper.publishToController(EndToEndTestTools.generateStepsInPlace(drcSimulationTestHelper.getControllerFullRobotModel(), 10));
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+      HumanoidReferenceFrames humanoidReferenceFrames = new HumanoidReferenceFrames(fullRobotModel);
+      humanoidReferenceFrames.updateFrames();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         double trajectoryTime = 1.0;
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
+
+         OneDoFJointBasics[] armOriginal = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
+         OneDoFJointBasics[] armClone = MultiBodySystemFactories.cloneOneDoFJointKinematicChain(chest, hand);
+         for (int jointIndex = 0; jointIndex < armOriginal.length; jointIndex++)
+         {
+            OneDoFJointBasics original = armOriginal[jointIndex];
+            OneDoFJointBasics clone = armClone[jointIndex];
+
+            double limitLower = clone.getJointLimitLower();
+            double limitUpper = clone.getJointLimitUpper();
+
+            double randomQ = RandomNumbers.nextDouble(random, original.getQ() - 0.2, original.getQ() + 0.2);
+            randomQ = MathTools.clamp(randomQ, limitLower, limitUpper);
+            clone.setQ(randomQ);
+         }
+
+         RigidBodyBasics handClone = armClone[armClone.length - 1].getSuccessor();
+         FramePose3D desiredRandomHandPose = new FramePose3D(handClone.getBodyFixedFrame());
+         humanoidReferenceFrames.updateFrames();
+         desiredRandomHandPose.changeFrame(HumanoidReferenceFrames.getWorldFrame());
+
+         Point3D desiredPosition = new Point3D();
+         Quaternion desiredOrientation = new Quaternion();
+         desiredRandomHandPose.get(desiredPosition, desiredOrientation);
+         ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
+         HandTrajectoryMessage handTrajectoryMessage = HumanoidMessageTools.createHandTrajectoryMessage(robotSide,
+                                                                                                        trajectoryTime,
+                                                                                                        desiredPosition,
+                                                                                                        desiredOrientation,
+                                                                                                        worldFrame);
+         handTrajectoryMessage.setForceExecution(true);
+         handTrajectoryMessage.setSequenceId(random.nextLong());
+
+         // ROS1 users have these fields set to zero by default which can cause an exception to be thrown even if these fields are not used.
+         handTrajectoryMessage.getSe3Trajectory().getControlFramePose().getOrientation().setUnsafe(0.0, 0.0, 0.0, 0.0);
+
+         drcSimulationTestHelper.publishToController(handTrajectoryMessage);
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(controllerDT);
+         humanoidReferenceFrames.updateFrames();
+         String handName = fullRobotModel.getHand(robotSide).getName();
+
+         assertEquals(1, statusMessages.size());
+         EndToEndTestTools.assertTaskspaceTrajectoryStatus(handTrajectoryMessage.getSequenceId(),
+                                                           TrajectoryExecutionStatus.STARTED,
+                                                           0.0,
+                                                           handName,
+                                                           statusMessages.remove(0),
+                                                           controllerDT);
+
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
+         assertTrue(success);
+
+         SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+
+         humanoidReferenceFrames.updateFrames();
+         desiredRandomHandPose.changeFrame(HumanoidReferenceFrames.getWorldFrame());
+         desiredRandomHandPose.get(desiredPosition, desiredOrientation);
+
+         assertSingleWaypointExecuted(handName, desiredPosition, desiredOrientation, scs);
+
+         assertEquals(1, statusMessages.size());
+         EndToEndTestTools.assertTaskspaceTrajectoryStatus(handTrajectoryMessage.getSequenceId(),
+                                                           TrajectoryExecutionStatus.COMPLETED,
+                                                           trajectoryTime,
+                                                           desiredRandomHandPose,
+                                                           handName,
+                                                           statusMessages.remove(0),
+                                                           1.0e-12,
+                                                           controllerDT);
+      }
+
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
+   }
+
+   @Test
    public void testCustomControlFrame() throws SimulationExceededMaximumTimeException
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

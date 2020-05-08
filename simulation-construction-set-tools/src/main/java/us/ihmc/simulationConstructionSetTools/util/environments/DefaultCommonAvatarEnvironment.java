@@ -1723,6 +1723,21 @@ public class DefaultCommonAvatarEnvironment implements CommonAvatarEnvironmentIn
       return fiducualTerrainObject;
    }
 
+   public static CombinedTerrainObject3D addFlatFiducial(double boxSideLength, Vector3D position, double yaw, Fiducial fiducial)
+   {
+      YoAppearanceTexture fiducialTexture = new YoAppearanceTexture(fiducial.getPathString());
+
+      CombinedTerrainObject3D fiducualTerrainObject = new CombinedTerrainObject3D(fiducial.name());
+
+      RigidBodyTransform location = new RigidBodyTransform();
+      location.setRotationEulerAndZeroTranslation(0.0, 0.0, yaw);
+      location.setTranslation(position);
+
+      RotatableBoxTerrainObject newBox = new RotatableBoxTerrainObject(new Box3D(location, 0.001, boxSideLength, boxSideLength), fiducialTexture);
+      fiducualTerrainObject.addTerrainObject(newBox);
+      return fiducualTerrainObject;
+   }
+
    public static CombinedTerrainObject3D addValveTextureBox(Vector3D position, double yaw)
    {
       YoAppearanceTexture valveTexture = new YoAppearanceTexture("/images/red-valve.jpg");

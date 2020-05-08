@@ -40,6 +40,7 @@ public class UIConnectedPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -55,6 +56,7 @@ public class UIConnectedPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -64,12 +66,14 @@ public class UIConnectedPacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void write(controller_msgs.msg.dds.UIConnectedPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
    }
 
    public static void read(controller_msgs.msg.dds.UIConnectedPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
 
@@ -78,13 +82,16 @@ public class UIConnectedPacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void serialize(controller_msgs.msg.dds.UIConnectedPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.UIConnectedPacket data)
    {
-      data.setSequenceId(ser.read_type_4("sequence_id"));   }
+
+      data.setSequenceId(ser.read_type_4("sequence_id"));
+   }
 
    public static void staticCopy(controller_msgs.msg.dds.UIConnectedPacket src, controller_msgs.msg.dds.UIConnectedPacket dest)
    {

@@ -40,15 +40,21 @@ public class WalkToGoalBehaviorPacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -65,19 +71,25 @@ public class WalkToGoalBehaviorPacketPubSubType implements us.ihmc.pubsub.TopicD
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -89,15 +101,21 @@ public class WalkToGoalBehaviorPacketPubSubType implements us.ihmc.pubsub.TopicD
 
    public static void write(controller_msgs.msg.dds.WalkToGoalBehaviorPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_9(data.getWalkToGoalAction());
 
+
       cdr.write_type_6(data.getXGoal());
+
 
       cdr.write_type_6(data.getYGoal());
 
+
       cdr.write_type_6(data.getThetaGoal());
+
 
       cdr.write_type_9(data.getGoalRobotSide());
 
@@ -105,16 +123,22 @@ public class WalkToGoalBehaviorPacketPubSubType implements us.ihmc.pubsub.TopicD
 
    public static void read(controller_msgs.msg.dds.WalkToGoalBehaviorPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setWalkToGoalAction(cdr.read_type_9());
       	
+
       data.setXGoal(cdr.read_type_6());
       	
+
       data.setYGoal(cdr.read_type_6());
       	
+
       data.setThetaGoal(cdr.read_type_6());
       	
+
       data.setGoalRobotSide(cdr.read_type_9());
       	
 
@@ -123,22 +147,34 @@ public class WalkToGoalBehaviorPacketPubSubType implements us.ihmc.pubsub.TopicD
    @Override
    public final void serialize(controller_msgs.msg.dds.WalkToGoalBehaviorPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_9("walk_to_goal_action", data.getWalkToGoalAction());
+
       ser.write_type_6("x_goal", data.getXGoal());
+
       ser.write_type_6("y_goal", data.getYGoal());
+
       ser.write_type_6("theta_goal", data.getThetaGoal());
+
       ser.write_type_9("goal_robot_side", data.getGoalRobotSide());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WalkToGoalBehaviorPacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setWalkToGoalAction(ser.read_type_9("walk_to_goal_action"));
+
       data.setXGoal(ser.read_type_6("x_goal"));
+
       data.setYGoal(ser.read_type_6("y_goal"));
+
       data.setThetaGoal(ser.read_type_6("theta_goal"));
+
       data.setGoalRobotSide(ser.read_type_9("goal_robot_side"));
    }
 

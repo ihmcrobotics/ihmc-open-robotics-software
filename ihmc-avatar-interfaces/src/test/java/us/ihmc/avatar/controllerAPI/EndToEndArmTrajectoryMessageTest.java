@@ -144,6 +144,88 @@ public abstract class EndToEndArmTrajectoryMessageTest implements MultiRobotTest
    }
 
    @Test
+   public void testForceExecutionWithSingleTrajectoryPoint() throws Exception
+   {
+      BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+      Random random = new Random(564654L);
+      double epsilon = 1.0e-10;
+
+      drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel());
+      drcSimulationTestHelper.createSimulation(getClass().getSimpleName());
+
+      List<JointspaceTrajectoryStatusMessage> statusMessages = new ArrayList<>();
+      drcSimulationTestHelper.createSubscriberFromController(JointspaceTrajectoryStatusMessage.class, statusMessages::add);
+
+      ThreadTools.sleep(1000);
+      boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+
+      // Sending a bunch of footsteps
+      drcSimulationTestHelper.publishToController(EndToEndTestTools.generateStepsInPlace(drcSimulationTestHelper.getControllerFullRobotModel(), 10));
+      success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+      assertTrue(success);
+
+      FullHumanoidRobotModel fullRobotModel = drcSimulationTestHelper.getControllerFullRobotModel();
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         double trajectoryTime = 0.5;
+         RigidBodyBasics chest = fullRobotModel.getChest();
+         RigidBodyBasics hand = fullRobotModel.getHand(robotSide);
+         OneDoFJointBasics[] armJoints = MultiBodySystemTools.createOneDoFJointPath(chest, hand);
+         String[] armJointNames = Stream.of(armJoints).map(JointReadOnly::getName).toArray(String[]::new);
+         int numberOfJoints = MultiBodySystemTools.computeDegreesOfFreedom(armJoints);
+         double[] desiredJointPositions = generateRandomJointPositions(random, armJoints);
+         double[] desiredJointVelocities = new double[numberOfJoints];
+         long sequenceID = random.nextLong();
+
+         generateRandomJointPositions(random, armJoints);
+
+         ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryTime, desiredJointPositions);
+         armTrajectoryMessage.setForceExecution(true);
+         armTrajectoryMessage.setSequenceId(sequenceID);
+
+         if (DEBUG)
+         {
+            for (int i = 0; i < numberOfJoints; i++)
+            {
+               OneDoFJointBasics armJoint = armJoints[i];
+               System.out.println(armJoint.getName() + ": q = " + armJoint.getQ());
+            }
+         }
+
+         drcSimulationTestHelper.publishToController(armTrajectoryMessage);
+
+         success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(1.0 + trajectoryTime);
+         assertTrue(success);
+
+         SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+
+         EndToEndTestTools.assertOneDoFJointsFeebackControllerDesireds(armJointNames, desiredJointPositions, desiredJointVelocities, epsilon, scs);
+
+         assertEquals(2, statusMessages.size());
+         JointspaceTrajectoryStatusMessage startedStatus = statusMessages.remove(0);
+         JointspaceTrajectoryStatusMessage completedStatus = statusMessages.remove(0);
+         EndToEndTestTools.assertJointspaceTrajectoryStatus(sequenceID,
+                                                            TrajectoryExecutionStatus.STARTED,
+                                                            0.0,
+                                                            armJointNames,
+                                                            startedStatus,
+                                                            getRobotModel().getControllerDT());
+         EndToEndTestTools.assertJointspaceTrajectoryStatus(sequenceID,
+                                                            TrajectoryExecutionStatus.COMPLETED,
+                                                            trajectoryTime,
+                                                            desiredJointPositions,
+                                                            armJointNames,
+                                                            completedStatus,
+                                                            1.0e-12,
+                                                            getRobotModel().getControllerDT());
+      }
+      drcSimulationTestHelper.createVideo(getSimpleRobotName(), 2);
+   }
+
+   @Test
    public void testMultipleTrajectoryPoints() throws Exception
    {
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());

@@ -221,11 +221,6 @@ public class Cluster
       pointsInWorld.forEach(this::addRawPointInWorld);
    }
 
-   public void addRawPointsInLocal2D(Point2DReadOnly[] pointsInLocal)
-   {
-      addRawPointsInLocal2D(Arrays.asList(pointsInLocal));
-   }
-
    public Point3DReadOnly getRawPointInLocal(int i)
    {
       return rawPointsInLocal3D.get(i);

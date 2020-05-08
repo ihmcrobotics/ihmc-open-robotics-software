@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import gnu.trove.list.linked.TDoubleLinkedList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -11,6 +12,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Physics engine that simulates the dynamic behavior of multiple robots and their contact
@@ -52,6 +54,14 @@ public class ExperimentalPhysicsEngine
 
    private final CollidableListVisualizer environmentCollidableVisualizers;
    private final List<CollidableListVisualizer> robotCollidableVisualizers = new ArrayList<>();
+
+   private final YoDouble time = new YoDouble("physicsTime", physicsEngineRegistry);
+   private final YoDouble rawTickDurationMilliseconds = new YoDouble("rawTickDurationMilliseconds", physicsEngineRegistry);
+   private final YoDouble averageTickDurationMilliseconds = new YoDouble("averageTickDurationMilliseconds", physicsEngineRegistry);
+   private final YoDouble rawRealTimeRate = new YoDouble("rawRealTimeRate", physicsEngineRegistry);
+   private final YoDouble averageRealTimeRate = new YoDouble("averageRealTimeRate", physicsEngineRegistry);
+   private final int averageWindow = 100;
+   private final TDoubleLinkedList rawTickDurationBuffer = new TDoubleLinkedList();
 
    private boolean initialize = true;
 
@@ -98,6 +108,16 @@ public class ExperimentalPhysicsEngine
       multiRobotPhysicsEnginePlugin.addExternalWrenchReader(externalWrenchReader);
    }
 
+   public void setGlobalConstraintParameters(ConstraintParametersReadOnly parameters)
+   {
+      multiRobotPhysicsEnginePlugin.setGlobalConstraintParameters(parameters);
+   }
+
+   public void setGlobalContactParameters(ContactParametersReadOnly parameters)
+   {
+      multiRobotPhysicsEnginePlugin.setGlobalContactParameters(parameters);
+   }
+
    public boolean initialize()
    {
       if (!initialize)
@@ -118,16 +138,18 @@ public class ExperimentalPhysicsEngine
       if (initialize())
          return;
 
+      long startTick = System.nanoTime();
+
       for (PhysicsEngineRobotData robot : robotList)
       {
          robot.resetCalculators();
          robot.updateCollidableBoundingBoxes();
       }
 
-      environmentCollidables.forEach(Collidable::updateBoundingBox);
+      environmentCollidables.forEach(collidable -> collidable.updateBoundingBox(rootFrame));
       collisionDetectionPlugin.evaluationCollisions(robotList, () -> environmentCollidables);
       multiRobotPhysicsEnginePlugin.submitCollisions(collisionDetectionPlugin);
-      multiRobotPhysicsEnginePlugin.doScience(dt, gravity);
+      multiRobotPhysicsEnginePlugin.doScience(time.getValue(), dt, gravity);
       integrationMethod.integrate(dt);
 
       environmentCollidableVisualizers.update(collisionDetectionPlugin.getAllCollisions());
@@ -138,6 +160,23 @@ public class ExperimentalPhysicsEngine
          PhysicsEngineRobotData robot = robotList.get(i);
          robot.updateFrames();
          physicsOutputReaders.get(i).read();
+      }
+
+      time.add(dt);
+
+      long endTick = System.nanoTime();
+
+      double dtMilliseconds = dt * 1.0e3;
+      double tickDuration = (endTick - startTick) / 1.0e6;
+      rawTickDurationMilliseconds.set(tickDuration);
+      rawRealTimeRate.set(dtMilliseconds / tickDuration);
+      rawTickDurationBuffer.add(tickDuration);
+
+      if (rawTickDurationBuffer.size() >= averageWindow)
+      {
+         averageTickDurationMilliseconds.set(rawTickDurationBuffer.sum() / averageWindow);
+         averageRealTimeRate.set(dtMilliseconds / averageTickDurationMilliseconds.getValue());
+         rawTickDurationBuffer.removeAt(0);
       }
    }
 

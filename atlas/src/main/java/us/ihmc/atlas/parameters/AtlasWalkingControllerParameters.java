@@ -80,7 +80,7 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
 
       minimumHeightAboveGround = jointMap.getModelScale() * (0.625 + 0.08);
       nominalHeightAboveGround = jointMap.getModelScale() * (0.705 + 0.08);
-      maximumHeightAboveGround = jointMap.getModelScale() * (0.845 + 0.08);
+      maximumHeightAboveGround = jointMap.getModelScale() * (0.764 + 0.08);
 
       runningOnRealRobot = target == RobotTarget.REAL_ROBOT;
 
@@ -610,5 +610,15 @@ public class AtlasWalkingControllerParameters extends WalkingControllerParameter
    public void setLeapOfFaithParameters(LeapOfFaithParameters leapOfFaithParameters)
    {
       this.leapOfFaithParameters = leapOfFaithParameters;
+   }
+
+   /**
+    * Maximum velocity of the CoM height. Desired height velocity will be set to this if it is exceeded.
+    * Not a very clean variable and probably should not be here, but here it is...
+    */
+   @Override
+   public double getMaximumVelocityCoMHeight()
+   {
+      return 0.5;
    }
 }

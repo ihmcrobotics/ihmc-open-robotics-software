@@ -40,21 +40,29 @@ public class FootstepPathPlanPacketPubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -71,29 +79,37 @@ public class FootstepPathPlanPacketPubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+
       current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getCdrSerializedSize(data.getStart(), current_alignment);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getOriginalGoals().size(); ++i0)
       {
           current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getCdrSerializedSize(data.getOriginalGoals().get(i0), current_alignment);}
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getPathPlan().size(); ++i0)
       {
           current_alignment += controller_msgs.msg.dds.FootstepDataMessagePubSubType.getCdrSerializedSize(data.getPathPlan().get(i0), current_alignment);}
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getFootstepUnknown().size() * 1) + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -105,24 +121,32 @@ public class FootstepPathPlanPacketPubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void write(controller_msgs.msg.dds.FootstepPathPlanPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_7(data.getGoalsValid());
 
+
       controller_msgs.msg.dds.FootstepDataMessagePubSubType.write(data.getStart(), cdr);
+
       if(data.getOriginalGoals().size() <= 100)
       cdr.write_type_e(data.getOriginalGoals());else
           throw new RuntimeException("original_goals field exceeds the maximum length");
+
 
       if(data.getPathPlan().size() <= 100)
       cdr.write_type_e(data.getPathPlan());else
           throw new RuntimeException("path_plan field exceeds the maximum length");
 
+
       if(data.getFootstepUnknown().size() <= 100)
       cdr.write_type_e(data.getFootstepUnknown());else
           throw new RuntimeException("footstep_unknown field exceeds the maximum length");
 
+
       cdr.write_type_6(data.getSubOptimality());
+
 
       cdr.write_type_6(data.getPathCost());
 
@@ -130,16 +154,24 @@ public class FootstepPathPlanPacketPubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void read(controller_msgs.msg.dds.FootstepPathPlanPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setGoalsValid(cdr.read_type_7());
       	
+
       controller_msgs.msg.dds.FootstepDataMessagePubSubType.read(data.getStart(), cdr);	
+
       cdr.read_type_e(data.getOriginalGoals());	
+
       cdr.read_type_e(data.getPathPlan());	
+
       cdr.read_type_e(data.getFootstepUnknown());	
+
       data.setSubOptimality(cdr.read_type_6());
       	
+
       data.setPathCost(cdr.read_type_6());
       	
 
@@ -148,28 +180,44 @@ public class FootstepPathPlanPacketPubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void serialize(controller_msgs.msg.dds.FootstepPathPlanPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_7("goals_valid", data.getGoalsValid());
+
       ser.write_type_a("start", new controller_msgs.msg.dds.FootstepDataMessagePubSubType(), data.getStart());
 
+
       ser.write_type_e("original_goals", data.getOriginalGoals());
+
       ser.write_type_e("path_plan", data.getPathPlan());
+
       ser.write_type_e("footstep_unknown", data.getFootstepUnknown());
+
       ser.write_type_6("sub_optimality", data.getSubOptimality());
+
       ser.write_type_6("path_cost", data.getPathCost());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FootstepPathPlanPacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setGoalsValid(ser.read_type_7("goals_valid"));
+
       ser.read_type_a("start", new controller_msgs.msg.dds.FootstepDataMessagePubSubType(), data.getStart());
 
+
       ser.read_type_e("original_goals", data.getOriginalGoals());
+
       ser.read_type_e("path_plan", data.getPathPlan());
+
       ser.read_type_e("footstep_unknown", data.getFootstepUnknown());
+
       data.setSubOptimality(ser.read_type_6("sub_optimality"));
+
       data.setPathCost(ser.read_type_6("path_cost"));
    }
 

@@ -10,7 +10,7 @@ plugins {
    id("us.ihmc.ihmc-build") version "0.20.1"
    id("us.ihmc.ihmc-ci") version "5.3"
    id("us.ihmc.ihmc-cd") version "1.14"
-   id("us.ihmc.log-tools") version "0.4.1"
+   id("us.ihmc.log-tools") version "0.4.2"
 }
 
 ihmc {
@@ -53,12 +53,11 @@ mainDependencies {
    api("us.ihmc.ihmcPerception:cuda:7.5")
    api("org.ddogleg:ddogleg:0.7")
 
-   api("us.ihmc:euclid:0.13.1")
-   api("us.ihmc:ihmc-yovariables:0.5.0")
-   api("us.ihmc:ihmc-commons:0.28.2")
-   api("us.ihmc:simulation-construction-set:0.15.0")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.15.0")
-   api("us.ihmc:ihmc-graphics-description:0.15.0")
+   api("us.ihmc:euclid:0.14.1")
+   api("us.ihmc:ihmc-yovariables:0.6.0")
+   api("us.ihmc:simulation-construction-set:0.16.0")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.16.0")
+   api("us.ihmc:ihmc-graphics-description:0.16.0")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-ros-tools:source")
@@ -70,10 +69,9 @@ mainDependencies {
 }
 
 testDependencies {
-
-   api("us.ihmc:ihmc-commons-testing:0.28.2")
-   api("us.ihmc:simulation-construction-set:0.15.0")
-   api("us.ihmc:simulation-construction-set-test:0.15.0")
+   api("us.ihmc:ihmc-commons-testing:0.29.0")
+   api("us.ihmc:simulation-construction-set:0.16.0")
+   api("us.ihmc:simulation-construction-set-test:0.16.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")

@@ -40,9 +40,12 @@ public class QuadrupedBodyPathPlanMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
@@ -60,10 +63,13 @@ public class QuadrupedBodyPathPlanMessagePubSubType implements us.ihmc.pubsub.To
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -77,9 +83,12 @@ public class QuadrupedBodyPathPlanMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void write(controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
+
       cdr.write_type_7(data.getIsExpressedInAbsoluteTime());
+
 
       if(data.getBodyPathPoints().size() <= 50)
       cdr.write_type_e(data.getBodyPathPoints());else
@@ -89,10 +98,13 @@ public class QuadrupedBodyPathPlanMessagePubSubType implements us.ihmc.pubsub.To
 
    public static void read(controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setIsExpressedInAbsoluteTime(cdr.read_type_7());
       	
+
       cdr.read_type_e(data.getBodyPathPoints());	
 
    }
@@ -100,16 +112,22 @@ public class QuadrupedBodyPathPlanMessagePubSubType implements us.ihmc.pubsub.To
    @Override
    public final void serialize(controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_7("is_expressed_in_absolute_time", data.getIsExpressedInAbsoluteTime());
+
       ser.write_type_e("body_path_points", data.getBodyPathPoints());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuadrupedBodyPathPlanMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setIsExpressedInAbsoluteTime(ser.read_type_7("is_expressed_in_absolute_time"));
+
       ser.read_type_e("body_path_points", data.getBodyPathPoints());
    }
 

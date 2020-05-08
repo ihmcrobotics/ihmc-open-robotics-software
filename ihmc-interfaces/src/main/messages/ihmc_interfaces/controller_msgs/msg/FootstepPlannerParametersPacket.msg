@@ -203,14 +203,9 @@ float64 minimum_foothold_percent 0.9
 # z-value less than cos(minimumSurfaceInclineRadians), it will be rejected.
 float64 minimum_surface_incline_radians -11.1
 
-# There are two methods of wiggling a polygon into a planar region:
-#    Wiggle the polygon into the planar region itself, which isn't necessarily convex
-#    Wiggle the polygon into the convex hull of the planar region
-# The first method is not implemented completely. Instead it will wiggle into the sub polygon of the planar region that
-# has the biggest overlap with the foothold.
-#
-# If this parameter is set to true (recommended), the second wiggle method will be used.
-bool wiggle_into_convex_hull_of_planar_regions true
+# There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
+# this toggles between them.
+bool enable_concave_hull_wiggler false
 
 # If the planner uses footstep wiggling it attempts to move a candidate footstep inside its associated planar region.
 # This attempt is parametrized by {@link #getWiggleIntoConvexHullOfPlanarRegions()}, {@link #getWiggleInsideDelta},
@@ -350,7 +345,17 @@ uint32 number_of_bounding_box_checks 1
 # @see FootstepPlannerCostParameters#getBoundingBoxCost
 float64 maximum_2d_distance_from_bounding_box_to_penalize -11.1
 
+# If the robot's mid-foot pose is within this distance of the body path, it will match the body path heading.
+# Otherwise, it will turn towards the body path
 float64 distance_from_path_tolerance -11.1
 
+# If the robot's mid-foot pose oriented within this threshold of the body path's heading, it will match the body path heading.
+# Otherwise, it will turn in plance towards the body path
 float64 delta_yaw_from_reference_tolerance -11.1
 
+# Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
+# ideal step are considered and the others are ignored. Set to non-positive number to disable
+int32 maximum_branch_factor -1
+
+# If true, enables a mask that reduces the number of calculated steps away from the ideal step
+bool enable_expansion_mask true
