@@ -6,7 +6,6 @@ import java.util.LinkedList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -24,18 +23,17 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
-import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
-import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
@@ -84,34 +82,24 @@ public class SLAMModule
    {
       this.reaMessager = messager;
 
-      new REAModuleROS2Subscription<StereoVisionPointCloudMessage>(ros2Node,
-                                                                   reaMessager,
-                                                                   REASourceType.STEREO_POINT_CLOUD,
-                                                                   StereoVisionPointCloudMessage.class,
-                                                                   this::handlePointCloud);
-      new REAModuleROS2Subscription<StereoVisionPointCloudMessage>(ros2Node,
-                                                                   reaMessager,
-                                                                   REASourceType.DEPTH_POINT_CLOUD,
-                                                                   StereoVisionPointCloudMessage.class,
-                                                                   this::handlePointCloud);
+      ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud", this::handlePointCloud);
+      ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud_D435", this::handlePointCloud);
 
-      reaMessager.submitMessage(REAModuleAPI.StereoVisionBufferEnable, true);
-      reaMessager.submitMessage(REAModuleAPI.DepthCloudBufferEnable, true);
-      reaMessager.submitMessage(REAModuleAPI.UISensorPoseHistoryFrames, 1000);
+      reaMessager.submitMessage(SLAMModuleAPI.UISensorPoseHistoryFrames, 1000);
 
-      enable = reaMessager.createInput(REAModuleAPI.SLAMEnable, true);
-      planarRegionsStateTopicToSubmit = REAModuleAPI.SLAMPlanarRegionsState;
+      enable = reaMessager.createInput(SLAMModuleAPI.SLAMEnable, true);
+      planarRegionsStateTopicToSubmit = SLAMModuleAPI.SLAMPlanarRegionsState;
 
-      ihmcSLAMParameters = reaMessager.createInput(REAModuleAPI.SLAMParameters, new RandomICPSLAMParameters());
+      ihmcSLAMParameters = reaMessager.createInput(SLAMModuleAPI.SLAMParameters, new RandomICPSLAMParameters());
 
-      reaMessager.registerTopicListener(REAModuleAPI.SLAMClear, (content) -> clearSLAM());
+      reaMessager.registerTopicListener(SLAMModuleAPI.SLAMClear, (content) -> clearSLAM());
 
       MessageTopicNameGenerator publisherTopicNameGenerator;
       publisherTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(ROS2Tools.IHMC_ROS_TOPIC_PREFIX, T) + PLANAR_REGIONS_LIST_TOPIC_SURFIX;
       planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
 
-      robotStatus = reaMessager.createInput(REAModuleAPI.RobotStatus, false);
-      velocityStatus = reaMessager.createInput(REAModuleAPI.VelocityStatus, false);
+      robotStatus = reaMessager.createInput(SLAMModuleAPI.SensorStatus, false);
+      velocityStatus = reaMessager.createInput(SLAMModuleAPI.VelocityLimitStatus, true);
    }
 
    public void start() throws IOException
@@ -183,7 +171,7 @@ public class SLAMModule
       }
       else
       {
-         if(reasonableVelocityFlag)
+         if (reasonableVelocityFlag)
          {
             if (stationaryFlag)
             {
@@ -193,25 +181,26 @@ public class SLAMModule
             else
             {
                success = slam.addFrame(pointCloudToCompute);
-            }   
+            }
          }
          else
          {
             success = false;
          }
       }
+
       pointCloudQueue.removeFirst();
       stationaryFlagQueue.removeFirst();
       reasonableVelocityFlagQueue.removeFirst();
-      reaMessager.submitMessage(REAModuleAPI.QueuedBuffers, pointCloudQueue.size() + " [" + slam.getSensorPoses().size() + "]");
+      reaMessager.submitMessage(SLAMModuleAPI.QueuedBuffers, pointCloudQueue.size() + " [" + slam.getSensorPoses().size() + "]");
       stringToReport = stringToReport + success + " " + slam.getSensorPoses().size() + " " + slam.getComputationTimeForLatestFrame() + " (sec) ";
-      reaMessager.submitMessage(REAModuleAPI.SLAMStatus, stringToReport);
+      reaMessager.submitMessage(SLAMModuleAPI.SLAMStatus, stringToReport);
 
       if (success)
       {
          NormalOcTree octreeMap = slam.getOctree();
          NormalOcTreeMessage octreeMessage = OcTreeMessageConverter.convertToMessage(octreeMap);
-         reaMessager.submitMessage(REAModuleAPI.SLAMOctreeMapState, octreeMessage);
+         reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, octreeMessage);
 
          slam.updatePlanarRegionsMap();
          PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
@@ -231,7 +220,8 @@ public class SLAMModule
          RigidBodyTransformReadOnly sensorPose = latestFrame.getSensorPose();
          latestStereoMessage.getSensorPosition().set(sensorPose.getTranslation());
          latestStereoMessage.getSensorOrientation().set(sensorPose.getRotation());
-         reaMessager.submitMessage(REAModuleAPI.IhmcSLAMFrameState, latestStereoMessage);
+         reaMessager.submitMessage(SLAMModuleAPI.IhmcSLAMFrameState, latestStereoMessage);
+         reaMessager.submitMessage(SLAMModuleAPI.LatestFrameConfidenceFactor, latestFrame.getConfidenceFactor());
 
          if (estimatedPelvisPublisher != null)
          {
@@ -244,13 +234,12 @@ public class SLAMModule
             }
             else
             {
-               //posePacket.setConfidenceFactor(1.0 - (double) pointCloudQueue.size() / maximumBufferOfQueue);
-               posePacket.setConfidenceFactor(1.0);
+               posePacket.setConfidenceFactor(latestFrame.getConfidenceFactor());
             }
             RigidBodyTransform estimatedPelvisPose = new RigidBodyTransform(sensorPoseToPelvisTransformer);
             estimatedPelvisPose.preMultiply(sensorPose);
             posePacket.getPose().set(estimatedPelvisPose);
-            reaMessager.submitMessage(REAModuleAPI.CustomizedFrameState, posePacket);
+            reaMessager.submitMessage(SLAMModuleAPI.CustomizedFrameState, posePacket);
             estimatedPelvisPublisher.publish(posePacket);
          }
       }
@@ -318,13 +307,13 @@ public class SLAMModule
    {
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       newPointCloud.set(message);
-      reaMessager.submitMessage(REAModuleAPI.DepthPointCloudState, new StereoVisionPointCloudMessage(message));
+      reaMessager.submitMessage(SLAMModuleAPI.DepthPointCloudState, new StereoVisionPointCloudMessage(message));
    }
 
    public static SLAMModule createIntraprocessModule(String configurationFilePath) throws Exception
    {
-      KryoMessager messager = KryoMessager.createIntraprocess(REAModuleAPI.API,
-                                                              NetworkPorts.REA_MODULE_UI_PORT,
+      KryoMessager messager = KryoMessager.createIntraprocess(SLAMModuleAPI.API,
+                                                              NetworkPorts.SLAM_MODULE_UI_PORT,
                                                               REACommunicationProperties.getPrivateNetClassList());
       messager.setAllowSelfSubmit(true);
       messager.startMessager();
