@@ -50,14 +50,14 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
       // status messages from the controller
-      ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, FootstepStatusMessage.class, controllerPubGenerator,
+      ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, FootstepStatusMessage.class, controllerOutputTopicName,
                                            s -> processFootstepStatusMessage(s.takeNextData()));
 
       // status messages from the planner
-      ROS2TopicName plannerPubGenerator = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
+      ROS2TopicName plannerOutputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
                                                                              .withOutput();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, FootstepPlanningToolboxOutputStatus.class, plannerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, FootstepPlanningToolboxOutputStatus.class, plannerOutputTopicName,
                                            s -> processFootstepPlannerOutput(s.takeNextData()));
 
       // inputs to this module

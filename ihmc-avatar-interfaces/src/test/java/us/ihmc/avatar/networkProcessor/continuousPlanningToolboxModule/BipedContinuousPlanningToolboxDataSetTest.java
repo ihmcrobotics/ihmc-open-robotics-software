@@ -244,8 +244,8 @@ public class BipedContinuousPlanningToolboxDataSetTest
                                                                       ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName)
                                                                                 .withInput());
 
-      ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
-      footstepStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepStatusMessage.class, controllerPubGenerator);
+      ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      footstepStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepStatusMessage.class, controllerOutputTopicName);
 
       ros2Node.spin();
 

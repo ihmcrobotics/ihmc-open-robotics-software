@@ -56,14 +56,14 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
    {
       // status messages from the controller
-      ROS2TopicName controllerPubGenerator = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator,
+      ROS2TopicName controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedFootstepStatusMessage.class, controllerOutputTopicName,
                                            s -> processFootstepStatusMessage(s.takeNextData()));
 
       // status messages from the planner
-      ROS2TopicName plannerPubGenerator = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
+      ROS2TopicName plannerOutputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
                                                                     .withOutput();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PawStepPlanningToolboxOutputStatus.class, plannerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PawStepPlanningToolboxOutputStatus.class, plannerOutputTopicName,
                                            s -> processFootstepPlannerOutputMessage(s.takeNextData()));
 
       // inputs to this module

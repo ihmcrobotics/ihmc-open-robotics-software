@@ -159,12 +159,12 @@ public class StepGeneratorJavaFXController
       steppingParameters = walkingControllerParameters.getSteppingParameters();
 
       stepParametersReference = messager.createInput(SteppingParameters, new JoystickStepParameters(walkingControllerParameters));
-      ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
       ROS2TopicName controllerSubGenerator = ROS2Tools.getControllerInputTopicName(robotName);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     FootstepStatusMessage.class,
-                                                    controllerPubGenerator,
+                                                    controllerOutputTopicName,
                                            s -> continuousStepGenerator.consumeFootstepStatus(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PlanarRegionsListMessage.class,
@@ -241,12 +241,12 @@ public class StepGeneratorJavaFXController
       messager.registerTopicListener(DPadLeftState, state -> sendREAResumeRequest());
       messager.registerTopicListener(DPadDownState, state -> sendREAClearRequest());
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, WalkingControllerFailureStatusMessage.class, controllerPubGenerator, s -> stopWalking(true));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, WalkingControllerFailureStatusMessage.class, controllerOutputTopicName, s -> stopWalking(true));
       messager.registerTopicListener(ButtonSelectState, state -> stopWalking(true));
       messager.registerTopicListener(ButtonSelectState, state -> lowLevelMessenger.sendFreezeRequest());
       messager.registerTopicListener(ButtonStartState, state -> stopWalking(true));
       messager.registerTopicListener(ButtonStartState, state -> lowLevelMessenger.sendStandRequest());
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerOutputTopicName, s ->
       {
          CapturabilityBasedStatus status = s.takeNextData();
          isLeftFootInSupport.set(!status.getLeftFootSupportPolygon2d().isEmpty());

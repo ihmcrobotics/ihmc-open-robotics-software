@@ -117,9 +117,9 @@ public class WholeBodyTrajectoryToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
-      ROS2TopicName controllerPubGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s -> {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopicName, s -> {
          if (wholeBodyTrajectoryToolboxController != null)
             wholeBodyTrajectoryToolboxController.updateRobotConfigurationData(s.takeNextData());
       });
