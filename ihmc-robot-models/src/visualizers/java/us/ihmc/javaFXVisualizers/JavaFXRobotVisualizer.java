@@ -144,9 +144,9 @@ public class JavaFXRobotVisualizer
       newJointConfigurationReference.set(robotConfigurationData.getJointAngles().toArray());
    }
 
-   public void submitNewConfiguration(QuaternionReadOnly rootJointOrientation, Tuple3DReadOnly rootJointTranslation, ToDoubleFunction<String> jointAngles)
+   public void submitNewConfiguration(RigidBodyTransform rootJointTransform, ToDoubleFunction<String> jointAngles)
    {
-      newRootJointPoseReference.set(new RigidBodyTransform(rootJointOrientation, rootJointTranslation));
+      newRootJointPoseReference.set(rootJointTransform);
       float[] jointAngleArray = new float[allJoints.length];
       for (int i = 0; i < allJoints.length; i++)
       {

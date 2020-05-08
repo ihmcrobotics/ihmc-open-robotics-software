@@ -28,8 +28,6 @@
                     <Button fx:id="stepInto" text="Step Into" onAction="#stepInto" prefWidth="150"/>
                     <Region prefHeight="10"/>
                     <Button fx:id="stepBack" text="Step Back" onAction="#stepBack" prefWidth="150"/>
-                    <Region prefHeight="10"/>
-                    <CheckBox fx:id="showLogGraphics" text="Show Log Graphics" alignment="CENTER" selected="false"/>
                 </VBox>
 
                 <Separator prefWidth="20" orientation="VERTICAL"/>

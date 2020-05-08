@@ -21,9 +21,11 @@ public class PolygonizerDisplayOptionTabController
    @FXML
    private ToggleButton showPriorityQueueButton;
    @FXML
-   private ToggleButton showConcaveHullButton;
+   private ToggleButton showRawConcaveHullButton;
    @FXML
    private ToggleButton showConcavePocketsButton;
+   @FXML
+   private ToggleButton showProcessedConcaveHullButton;
 
    public void initialize(JavaFXMessager messager)
    {
@@ -34,7 +36,8 @@ public class PolygonizerDisplayOptionTabController
       messager.bindBidirectional(MultipleConcaveHullViewer.ViewConstraintEdges, showConstraintEdgesButton.selectedProperty(), false);
       messager.bindBidirectional(MultipleConcaveHullViewer.ViewOrderedBorderEdges, showOrderedBorderEdgesButton.selectedProperty(), false);
       messager.bindBidirectional(MultipleConcaveHullViewer.ViewPriorityQueue, showPriorityQueueButton.selectedProperty(), false);
-      messager.bindBidirectional(MultipleConcaveHullViewer.ViewConcaveHull, showConcaveHullButton.selectedProperty(), false);
+      messager.bindBidirectional(MultipleConcaveHullViewer.ViewRawConcaveHull, showRawConcaveHullButton.selectedProperty(), false);
       messager.bindBidirectional(MultipleConcaveHullViewer.ViewConcavePockets, showConcavePocketsButton.selectedProperty(), false);
+      messager.bindBidirectional(MultipleConcaveHullViewer.ViewProcessedConcaveHull, showProcessedConcaveHullButton.selectedProperty(), false);
    }
 }

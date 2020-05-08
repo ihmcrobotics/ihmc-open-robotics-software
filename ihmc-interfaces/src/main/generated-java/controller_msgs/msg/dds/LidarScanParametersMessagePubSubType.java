@@ -40,27 +40,39 @@ public class LidarScanParametersMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -77,37 +89,49 @@ public class LidarScanParametersMessagePubSubType implements us.ihmc.pubsub.Topi
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -119,27 +143,39 @@ public class LidarScanParametersMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void write(controller_msgs.msg.dds.LidarScanParametersMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_11(data.getTimestamp());
 
+
       cdr.write_type_5(data.getSweepYawMax());
+
 
       cdr.write_type_5(data.getSweepYawMin());
 
+
       cdr.write_type_5(data.getHeightPitchMax());
+
 
       cdr.write_type_5(data.getHeightPitchMin());
 
+
       cdr.write_type_5(data.getTimeIncrement());
+
 
       cdr.write_type_5(data.getScanTime());
 
+
       cdr.write_type_5(data.getMinRange());
+
 
       cdr.write_type_5(data.getMaxRange());
 
+
       cdr.write_type_2(data.getPointsPerSweep());
+
 
       cdr.write_type_2(data.getScanHeight());
 
@@ -147,28 +183,40 @@ public class LidarScanParametersMessagePubSubType implements us.ihmc.pubsub.Topi
 
    public static void read(controller_msgs.msg.dds.LidarScanParametersMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setTimestamp(cdr.read_type_11());
       	
+
       data.setSweepYawMax(cdr.read_type_5());
       	
+
       data.setSweepYawMin(cdr.read_type_5());
       	
+
       data.setHeightPitchMax(cdr.read_type_5());
       	
+
       data.setHeightPitchMin(cdr.read_type_5());
       	
+
       data.setTimeIncrement(cdr.read_type_5());
       	
+
       data.setScanTime(cdr.read_type_5());
       	
+
       data.setMinRange(cdr.read_type_5());
       	
+
       data.setMaxRange(cdr.read_type_5());
       	
+
       data.setPointsPerSweep(cdr.read_type_2());
       	
+
       data.setScanHeight(cdr.read_type_2());
       	
 
@@ -177,34 +225,58 @@ public class LidarScanParametersMessagePubSubType implements us.ihmc.pubsub.Topi
    @Override
    public final void serialize(controller_msgs.msg.dds.LidarScanParametersMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_11("timestamp", data.getTimestamp());
+
       ser.write_type_5("sweep_yaw_max", data.getSweepYawMax());
+
       ser.write_type_5("sweep_yaw_min", data.getSweepYawMin());
+
       ser.write_type_5("height_pitch_max", data.getHeightPitchMax());
+
       ser.write_type_5("height_pitch_min", data.getHeightPitchMin());
+
       ser.write_type_5("time_increment", data.getTimeIncrement());
+
       ser.write_type_5("scan_time", data.getScanTime());
+
       ser.write_type_5("min_range", data.getMinRange());
+
       ser.write_type_5("max_range", data.getMaxRange());
+
       ser.write_type_2("points_per_sweep", data.getPointsPerSweep());
+
       ser.write_type_2("scan_height", data.getScanHeight());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.LidarScanParametersMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setTimestamp(ser.read_type_11("timestamp"));
+
       data.setSweepYawMax(ser.read_type_5("sweep_yaw_max"));
+
       data.setSweepYawMin(ser.read_type_5("sweep_yaw_min"));
+
       data.setHeightPitchMax(ser.read_type_5("height_pitch_max"));
+
       data.setHeightPitchMin(ser.read_type_5("height_pitch_min"));
+
       data.setTimeIncrement(ser.read_type_5("time_increment"));
+
       data.setScanTime(ser.read_type_5("scan_time"));
+
       data.setMinRange(ser.read_type_5("min_range"));
+
       data.setMaxRange(ser.read_type_5("max_range"));
+
       data.setPointsPerSweep(ser.read_type_2("points_per_sweep"));
+
       data.setScanHeight(ser.read_type_2("scan_height"));
    }
 

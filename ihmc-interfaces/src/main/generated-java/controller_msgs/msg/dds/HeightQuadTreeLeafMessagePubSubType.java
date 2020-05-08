@@ -40,11 +40,15 @@ public class HeightQuadTreeLeafMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -61,13 +65,17 @@ public class HeightQuadTreeLeafMessagePubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -79,11 +87,15 @@ public class HeightQuadTreeLeafMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(controller_msgs.msg.dds.HeightQuadTreeLeafMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_5(data.getCenterX());
 
+
       cdr.write_type_5(data.getCenterY());
+
 
       cdr.write_type_5(data.getHeight());
 
@@ -91,12 +103,16 @@ public class HeightQuadTreeLeafMessagePubSubType implements us.ihmc.pubsub.Topic
 
    public static void read(controller_msgs.msg.dds.HeightQuadTreeLeafMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setCenterX(cdr.read_type_5());
       	
+
       data.setCenterY(cdr.read_type_5());
       	
+
       data.setHeight(cdr.read_type_5());
       	
 
@@ -105,18 +121,26 @@ public class HeightQuadTreeLeafMessagePubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(controller_msgs.msg.dds.HeightQuadTreeLeafMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_5("center_x", data.getCenterX());
+
       ser.write_type_5("center_y", data.getCenterY());
+
       ser.write_type_5("height", data.getHeight());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HeightQuadTreeLeafMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setCenterX(ser.read_type_5("center_x"));
+
       data.setCenterY(ser.read_type_5("center_y"));
+
       data.setHeight(ser.read_type_5("height"));
    }
 

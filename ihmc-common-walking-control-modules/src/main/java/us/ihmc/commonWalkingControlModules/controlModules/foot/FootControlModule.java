@@ -19,10 +19,11 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
-import us.ihmc.commonWalkingControlModules.trajectories.CoMHeightTimeDerivativesData;
+import us.ihmc.commonWalkingControlModules.heightPlanning.CoMHeightTimeDerivativesData;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
@@ -55,11 +56,11 @@ public class FootControlModule
       {
          switch (this)
          {
-         case FULL:
-         case TOES:
-            return true;
-         default:
-            return false;
+            case FULL:
+            case TOES:
+               return true;
+            default:
+               return false;
          }
       }
    }
@@ -75,6 +76,7 @@ public class FootControlModule
    private final RobotSide robotSide;
 
    private final LegSingularityAndKneeCollapseAvoidanceControlModule legSingularityAndKneeCollapseAvoidanceControlModule;
+   private final WorkspaceLimiterControlModule workspaceLimiterControlModule;
 
    private final SwingState swingState;
    private final MoveViaWaypointsState moveViaWaypointsState;
@@ -135,6 +137,7 @@ public class FootControlModule
       footLoadThresholdToHoldPosition.set(0.2);
 
       legSingularityAndKneeCollapseAvoidanceControlModule = footControlHelper.getLegSingularityAndKneeCollapseAvoidanceControlModule();
+      workspaceLimiterControlModule = footControlHelper.getWorkspaceLimiterControlModule();
 
       requestedState = YoEnum.create(namePrefix + "RequestedState", "", ConstraintType.class, registry, true);
       requestedState.set(null);
@@ -142,12 +145,16 @@ public class FootControlModule
       setupContactStatesMap();
 
       Vector3D defaultTouchdownVelocity = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownVelocity());
-      FrameParameterVector3D touchdownVelocity = new FrameParameterVector3D(namePrefix + "TouchdownVelocity", ReferenceFrame.getWorldFrame(),
-                                                                            defaultTouchdownVelocity, registry);
+      FrameParameterVector3D touchdownVelocity = new FrameParameterVector3D(namePrefix + "TouchdownVelocity",
+                                                                            ReferenceFrame.getWorldFrame(),
+                                                                            defaultTouchdownVelocity,
+                                                                            registry);
 
       Vector3D defaultTouchdownAcceleration = new Vector3D(0.0, 0.0, swingTrajectoryParameters.getDesiredTouchdownAcceleration());
-      FrameParameterVector3D touchdownAcceleration = new FrameParameterVector3D(namePrefix + "TouchdownAcceleration", ReferenceFrame.getWorldFrame(),
-                                                                                defaultTouchdownAcceleration, registry);
+      FrameParameterVector3D touchdownAcceleration = new FrameParameterVector3D(namePrefix + "TouchdownAcceleration",
+                                                                                ReferenceFrame.getWorldFrame(),
+                                                                                defaultTouchdownAcceleration,
+                                                                                registry);
 
       onToesState = new OnToesState(footControlHelper, toeOffCalculator, toeOffFootControlGains, registry);
       supportState = new SupportState(footControlHelper, holdPositionFootControlGains, registry);
@@ -195,7 +202,10 @@ public class FootControlModule
 
       String targetRegistryName = FeetManager.class.getSimpleName();
       String parameterRegistryName = FootControlModule.class.getSimpleName() + "Parameters";
-      coefficientOfFriction = ParameterProvider.getOrCreateParameter(targetRegistryName, parameterRegistryName, "CoefficientOfFriction", registry,
+      coefficientOfFriction = ParameterProvider.getOrCreateParameter(targetRegistryName,
+                                                                     parameterRegistryName,
+                                                                     "CoefficientOfFriction",
+                                                                     registry,
                                                                      defaultCoefficientOfFriction);
    }
 
@@ -218,7 +228,7 @@ public class FootControlModule
       contactStatesMap.put(ConstraintType.SWING, falses);
       contactStatesMap.put(ConstraintType.MOVE_VIA_WAYPOINTS, falses);
       contactStatesMap.put(ConstraintType.FULL, trues);
-//      contactStatesMap.put(ConstraintType.TOES, getOnEdgeContactPointStates(contactableFoot, ConstraintType.TOES));
+      //      contactStatesMap.put(ConstraintType.TOES, getOnEdgeContactPointStates(contactableFoot, ConstraintType.TOES));
       contactStatesMap.put(ConstraintType.TOES, trues);
    }
 
@@ -240,7 +250,9 @@ public class FootControlModule
       return factory.build(ConstraintType.FULL);
    }
 
-   public void setWeights(Vector3DReadOnly loadedFootAngularWeight, Vector3DReadOnly loadedFootLinearWeight, Vector3DReadOnly footAngularWeight,
+   public void setWeights(Vector3DReadOnly loadedFootAngularWeight,
+                          Vector3DReadOnly loadedFootLinearWeight,
+                          Vector3DReadOnly footAngularWeight,
                           Vector3DReadOnly footLinearWeight)
    {
       swingState.setWeights(footAngularWeight, footLinearWeight);
@@ -305,6 +317,10 @@ public class FootControlModule
       {
          legSingularityAndKneeCollapseAvoidanceControlModule.resetSwingParameters();
       }
+      if (workspaceLimiterControlModule != null)
+      {
+         workspaceLimiterControlModule.resetSwingParameters();
+      }
 
       footControlHelper.update();
 
@@ -322,7 +338,6 @@ public class FootControlModule
 
       if (!isInFlatSupportState() && footControlHelper.getPartialFootholdControlModule() != null)
          footControlHelper.getPartialFootholdControlModule().reset();
-
 
       stateMachine.doAction();
 
@@ -360,26 +375,32 @@ public class FootControlModule
       {
          legSingularityAndKneeCollapseAvoidanceControlModule.update();
       }
-   }
-
-   public void correctCoMHeightTrajectoryForSingularityAvoidance(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect,
-                                                                 double zCurrent, ReferenceFrame pelvisZUpFrame)
-   {
-      if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
+      if (workspaceLimiterControlModule != null)
       {
-         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,
-                                                                                                               pelvisZUpFrame, getCurrentConstraintType());
+         workspaceLimiterControlModule.update();
       }
    }
 
-   public void correctCoMHeightTrajectoryForCollapseAvoidance(FrameVector2D comXYVelocity, CoMHeightTimeDerivativesData comHeightDataToCorrect, double zCurrent,
-                                                              ReferenceFrame pelvisZUpFrame, double footLoadPercentage)
+   public void correctCoMHeightTrajectoryForSupportSingularityAvoidance(FrameVector2DReadOnly comXYVelocity,
+                                                                        CoMHeightTimeDerivativesData comHeightDataToCorrect,
+                                                                        double zCurrent,
+                                                                        ReferenceFrame pelvisZUpFrame)
    {
       if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
       {
-         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForCollapseAvoidance(comXYVelocity, comHeightDataToCorrect, zCurrent,
-                                                                                                            pelvisZUpFrame, footLoadPercentage,
-                                                                                                            getCurrentConstraintType());
+         legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForSingularityAvoidance(comXYVelocity,
+                                                                                                               comHeightDataToCorrect,
+                                                                                                               zCurrent,
+                                                                                                               pelvisZUpFrame,
+                                                                                                               getCurrentConstraintType());
+      }
+      if (workspaceLimiterControlModule != null)
+      {
+         workspaceLimiterControlModule.correctCoMHeightTrajectoryForSingularityAvoidanceInSupport(comXYVelocity,
+                                                                                                  comHeightDataToCorrect,
+                                                                                                  zCurrent,
+                                                                                                  pelvisZUpFrame,
+                                                                                                  getCurrentConstraintType());
       }
    }
 
@@ -389,6 +410,10 @@ public class FootControlModule
       {
          legSingularityAndKneeCollapseAvoidanceControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect,
                                                                                                               getCurrentConstraintType());
+      }
+      if (workspaceLimiterControlModule != null)
+      {
+         workspaceLimiterControlModule.correctCoMHeightTrajectoryForUnreachableFootStep(comHeightDataToCorrect, getCurrentConstraintType());
       }
    }
 
@@ -405,9 +430,9 @@ public class FootControlModule
    public void resetHeightCorrectionParametersForSingularityAvoidance()
    {
       if (legSingularityAndKneeCollapseAvoidanceControlModule != null)
-      {
          legSingularityAndKneeCollapseAvoidanceControlModule.resetHeightCorrectionParameters();
-      }
+      if (workspaceLimiterControlModule != null)
+         workspaceLimiterControlModule.resetHeightCorrectionParameters();
    }
 
    /**
@@ -479,14 +504,16 @@ public class FootControlModule
 
    private void requestExploration()
    {
-      if (!isInFlatSupportState()) return;
+      if (!isInFlatSupportState())
+         return;
       requestExploration.set(false);
       initializeFootExploration();
    }
 
    private void resetFootPolygon()
    {
-      if (!isInFlatSupportState()) return;
+      if (!isInFlatSupportState())
+         return;
       resetFootPolygon.set(false);
       if (footControlHelper.getPartialFootholdControlModule() != null)
       {

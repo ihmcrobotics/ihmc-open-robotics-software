@@ -4,7 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.commons.Epsilons;
-import us.ihmc.euclid.Axis;
+import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.Line3D;
@@ -20,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -33,7 +35,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.commons.MathTools;
 
 public class GeometryTools
 {
@@ -903,7 +904,7 @@ public class GeometryTools
     */
    public static ReferenceFrame constructReferenceFrameFromPointAndZAxis(String frameName, FramePoint3D point, FrameVector3D zAxis)
    {
-      return constructReferenceFrameFromPointAndAxis(frameName, point, Axis.Z, zAxis);
+      return constructReferenceFrameFromPointAndAxis(frameName, point, Axis3D.Z, zAxis);
    }
 
    /**
@@ -924,17 +925,17 @@ public class GeometryTools
     * @throws ReferenceFrameMismatchException if {@code point} and {@code alignAxisWithThis} are not
     *            expressed in the same reference frame.
     */
-   public static ReferenceFrame constructReferenceFrameFromPointAndAxis(String frameName, FramePoint3D point, Axis axisToAlign, FrameVector3D alignAxisWithThis)
+   public static ReferenceFrame constructReferenceFrameFromPointAndAxis(String frameName, FramePoint3D point, Axis3D axisToAlign, FrameVector3D alignAxisWithThis)
    {
       ReferenceFrame parentFrame = point.getReferenceFrame();
       alignAxisWithThis.checkReferenceFrameMatch(point.getReferenceFrame());
    
       AxisAngle rotationToDesired = new AxisAngle();
-      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(axisToAlign, alignAxisWithThis, rotationToDesired);
+      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(axisToAlign, alignAxisWithThis, rotationToDesired);
    
       RigidBodyTransform transformToDesired = new RigidBodyTransform(rotationToDesired, point);
    
-      return ReferenceFrame.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToDesired);
+      return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToDesired);
    }
 
    public static void pitchAboutPoint(FramePoint3DReadOnly pointToTransform, FramePoint3DReadOnly pointToPitchAbout, double pitch, FramePoint3D resultToPack)
@@ -1004,12 +1005,12 @@ public class GeometryTools
       resultToPack.add(tempX, tempY);
    }
 
-   public static void rotatePoseAboutAxis(ReferenceFrame rotationAxisFrame, Axis rotationAxis, double angle, FramePose3D framePoseToPack)
+   public static void rotatePoseAboutAxis(ReferenceFrame rotationAxisFrame, Axis3D rotationAxis, double angle, FramePose3D framePoseToPack)
    {
       GeometryTools.rotatePoseAboutAxis(rotationAxisFrame, rotationAxis, angle, false, false, framePoseToPack);
    }
 
-   public static void rotatePoseAboutAxis(ReferenceFrame rotationAxisFrame, Axis rotationAxis, double angle, boolean lockPosition, boolean lockOrientation, FramePose3D framePoseToPack)
+   public static void rotatePoseAboutAxis(ReferenceFrame rotationAxisFrame, Axis3D rotationAxis, double angle, boolean lockPosition, boolean lockOrientation, FramePose3D framePoseToPack)
    {
       ReferenceFrame initialFrame = framePoseToPack.getReferenceFrame();
    
@@ -1022,14 +1023,14 @@ public class GeometryTools
       {
          Point3D newPosition = new Point3D(framePoseToPack.getPosition());
          axisAngle.transform(newPosition);
-         framePoseToPack.setPosition(newPosition);
+         framePoseToPack.getPosition().set(newPosition);
       }
    
       if (!lockOrientation)
       {
          Quaternion newOrientation = new Quaternion(framePoseToPack.getOrientation());
          axisAngle.transform(newOrientation);
-         framePoseToPack.setOrientation(newOrientation);
+         framePoseToPack.getOrientation().set(newOrientation);
       }
    
       framePoseToPack.changeFrame(initialFrame);
@@ -1040,7 +1041,7 @@ public class GeometryTools
       ReferenceFrame frameWhoseZAxisIsRotationAxis = constructReferenceFrameFromPointAndZAxis("rotationAxisFrame", rotationAxisOrigin,
                                                                                                              rotatationAxis);
    
-      rotatePoseAboutAxis(frameWhoseZAxisIsRotationAxis, Axis.Z, angle, framePoseToPack);
+      rotatePoseAboutAxis(frameWhoseZAxisIsRotationAxis, Axis3D.Z, angle, framePoseToPack);
    }
 
    /**

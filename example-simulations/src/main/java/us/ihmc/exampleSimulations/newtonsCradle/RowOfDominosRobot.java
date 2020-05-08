@@ -34,7 +34,7 @@ public class RowOfDominosRobot extends Robot
 
       double dominoMass = 0.2;
       RigidBodyTransform nextDominoTransform = new RigidBodyTransform();
-      nextDominoTransform.setTranslation(new Vector3D(0.0, 0.0, dominoHeight/2.0 + 0.001));
+      nextDominoTransform.getTranslation().set(new Vector3D(0.0, 0.0, dominoHeight/2.0 + 0.001));
 
       Vector3D dominoTranslation = new Vector3D(dominoHeight * 0.6, 0.0, 0.0);
       RigidBodyTransform tempTransform = new RigidBodyTransform();
@@ -68,7 +68,7 @@ public class RowOfDominosRobot extends Robot
 
          tempTransform.setIdentity();
          tempTransform.setRotationYawAndZeroTranslation(0.15);
-         tempTransform.setTranslation(dominoTranslation);
+         tempTransform.getTranslation().set(dominoTranslation);
 
          tempTransform2.setIdentity();
          tempTransform2.set(tempTransform);

@@ -1,8 +1,8 @@
 package us.ihmc.atlas.initialSetup;
 
-import org.apache.commons.lang3.ArrayUtils;
-import us.ihmc.atlas.AtlasRobotModel;
-import us.ihmc.atlas.AtlasRobotVersion;
+import java.util.ArrayList;
+import java.util.List;
+
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -11,7 +11,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.log.LogTools;
+import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -20,17 +20,14 @@ import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloatingRootJointRobot>
 {
    public static final Pose3D PELVIS_POSE = new Pose3D();
    public static final ArrayList<Double> JOINT_Qs = new ArrayList<>(31);
    static
    {
-      PELVIS_POSE.setPosition(0.0, 0.0, 0.9286147465454951);
-      PELVIS_POSE.setOrientation(0.0, 0.0, 0.841, 0.540); // not sure about these two values
+      PELVIS_POSE.getPosition().set(0.0, 0.0, 0.9286147465454951);
+      PELVIS_POSE.getOrientation().set(0.0, 0.0, 0.841, 0.540); // not sure about these two values
 
       JOINT_Qs.add(+0.0             );
       JOINT_Qs.add(+0.0             );
@@ -147,10 +144,9 @@ public class AtlasSimInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
          robot.setPositionInWorld(positionInWorld);
 
          FrameQuaternion frameOrientation = new FrameQuaternion(ReferenceFrame.getWorldFrame(), rotation);
-         double[] yawPitchRoll = new double[3];
-         frameOrientation.getYawPitchRoll(yawPitchRoll);
-         yawPitchRoll[0] = initialYaw;
-         frameOrientation.setYawPitchRoll(yawPitchRoll);
+         YawPitchRoll yawPitchRoll = new YawPitchRoll(frameOrientation);
+         yawPitchRoll.setYaw(initialYaw);
+         frameOrientation.set(yawPitchRoll);
 
          robot.setOrientation(frameOrientation);
          robot.update();

@@ -2,7 +2,7 @@ package us.ihmc.stateEstimation.humanoid;
 
 import java.util.Random;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorNoiseParameters;
 
@@ -187,9 +187,9 @@ public class DRCSimulatedSensorNoiseParameters
    private static Vector3D computeGazeboBiasVector(double mean, double standardDeviation, Random random)
    {
       Vector3D ret = new Vector3D();
-      for (Axis axis : Axis.values())
+      for (Axis3D axis : Axis3D.values())
       {
-         Axis.set(ret, axis, computeGazeboBias(mean, standardDeviation, random));
+         Axis3D.set(ret, axis, computeGazeboBias(mean, standardDeviation, random));
       }
 
       return ret;

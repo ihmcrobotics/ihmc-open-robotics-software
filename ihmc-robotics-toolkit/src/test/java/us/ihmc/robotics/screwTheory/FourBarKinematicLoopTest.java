@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -915,10 +915,10 @@ public class FourBarKinematicLoopTest
    private void initializeFourBarWithRandomlyRotatedJointFrames(FramePoint3D jointAPosition, FramePoint3D jointBPosition, FramePoint3D jointCPosition, FramePoint3D jointDPosition,
          FrameVector3D jointAxisA, FrameVector3D jointAxisB, FrameVector3D jointAxisC, FrameVector3D jointAxisD)
    {
-      ReferenceFrame jointAFrame = GeometryTools.constructReferenceFrameFromPointAndAxis("jointAFrame", jointAPosition, Axis.Z, new FrameVector3D(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
-      ReferenceFrame jointBFrame = GeometryTools.constructReferenceFrameFromPointAndAxis("jointBFrame", jointBPosition, Axis.Z, new FrameVector3D(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
-      ReferenceFrame jointCFrame = GeometryTools.constructReferenceFrameFromPointAndAxis("jointCFrame", jointCPosition, Axis.Z, new FrameVector3D(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
-      ReferenceFrame jointDFrame = GeometryTools.constructReferenceFrameFromPointAndAxis("jointDFrame", jointDPosition, Axis.Z, new FrameVector3D(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
+      ReferenceFrame jointAFrame = GeometryTools.constructReferenceFrameFromPointAndAxis("jointAFrame", jointAPosition, Axis3D.Z, new FrameVector3D(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
+      ReferenceFrame jointBFrame = GeometryTools.constructReferenceFrameFromPointAndAxis("jointBFrame", jointBPosition, Axis3D.Z, new FrameVector3D(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
+      ReferenceFrame jointCFrame = GeometryTools.constructReferenceFrameFromPointAndAxis("jointCFrame", jointCPosition, Axis3D.Z, new FrameVector3D(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
+      ReferenceFrame jointDFrame = GeometryTools.constructReferenceFrameFromPointAndAxis("jointDFrame", jointDPosition, Axis3D.Z, new FrameVector3D(worldFrame, RandomGeometry.nextVector3D(random, 1.0)));
 
       Vector3D jointAxisAFrameA = new Vector3D();
       Vector3D jointAxisBFrameB = new Vector3D();
@@ -945,7 +945,7 @@ public class FourBarKinematicLoopTest
    // the RigidBodies are independent of the calculations done by FourBarKinematicLoop, so this suffices to make all the RigidBodies
    private static RigidBodyBasics createAndAttachCylinderRB(String name, RevoluteJoint parentJoint)
    {
-      Matrix3D inertiaCylinder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(1.0, 1.0, 1.0, Axis.Z);
+      Matrix3D inertiaCylinder = RotationalInertiaCalculator.getRotationalInertiaMatrixOfSolidCylinder(1.0, 1.0, 1.0, Axis3D.Z);
       return new RigidBody(name, parentJoint, inertiaCylinder, 1.0, new Vector3D());
    }
 

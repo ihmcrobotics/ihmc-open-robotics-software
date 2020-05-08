@@ -40,11 +40,15 @@ public class REASensorDataFilterParametersMessagePubSubType implements us.ihmc.p
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
+
+      current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -61,11 +65,15 @@ public class REASensorDataFilterParametersMessagePubSubType implements us.ihmc.p
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBoundingBoxMin(), current_alignment);
+
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getBoundingBoxMax(), current_alignment);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -77,9 +85,13 @@ public class REASensorDataFilterParametersMessagePubSubType implements us.ihmc.p
 
    public static void write(controller_msgs.msg.dds.REASensorDataFilterParametersMessage data, us.ihmc.idl.CDR cdr)
    {
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getBoundingBoxMin(), cdr);
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getBoundingBoxMax(), cdr);
+
       cdr.write_type_6(data.getSensorMaxRange());
+
 
       cdr.write_type_6(data.getSensorMinRange());
 
@@ -87,10 +99,14 @@ public class REASensorDataFilterParametersMessagePubSubType implements us.ihmc.p
 
    public static void read(controller_msgs.msg.dds.REASensorDataFilterParametersMessage data, us.ihmc.idl.CDR cdr)
    {
+
       geometry_msgs.msg.dds.PointPubSubType.read(data.getBoundingBoxMin(), cdr);	
+
       geometry_msgs.msg.dds.PointPubSubType.read(data.getBoundingBoxMax(), cdr);	
+
       data.setSensorMaxRange(cdr.read_type_6());
       	
+
       data.setSensorMinRange(cdr.read_type_6());
       	
 
@@ -99,22 +115,30 @@ public class REASensorDataFilterParametersMessagePubSubType implements us.ihmc.p
    @Override
    public final void serialize(controller_msgs.msg.dds.REASensorDataFilterParametersMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_a("bounding_box_min", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBoxMin());
+
 
       ser.write_type_a("bounding_box_max", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBoxMax());
 
+
       ser.write_type_6("sensor_max_range", data.getSensorMaxRange());
+
       ser.write_type_6("sensor_min_range", data.getSensorMinRange());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.REASensorDataFilterParametersMessage data)
    {
+
       ser.read_type_a("bounding_box_min", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBoxMin());
+
 
       ser.read_type_a("bounding_box_max", new geometry_msgs.msg.dds.PointPubSubType(), data.getBoundingBoxMax());
 
+
       data.setSensorMaxRange(ser.read_type_6("sensor_max_range"));
+
       data.setSensorMinRange(ser.read_type_6("sensor_min_range"));
    }
 

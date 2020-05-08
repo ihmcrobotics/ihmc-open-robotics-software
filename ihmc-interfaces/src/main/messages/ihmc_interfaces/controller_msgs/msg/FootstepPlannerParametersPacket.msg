@@ -19,6 +19,12 @@ float64 ideal_footstep_width -11.1
 # Returns the ideal step length for walking on flat ground.
 float64 ideal_footstep_length -11.1
 
+# Returns the ideal step side step width when "shuffling" sideways.
+float64 ideal_side_step_width -11.1
+
+# Returns the ideal length when walking backwards. This value is negative.
+float64 ideal_back_step_length -11.1
+
 # If the planner in use utilized footstep wiggling (see {@link PolygonWiggler}) to move footholds onto planer
 # regions this parameter will be used. It specifies the minimum distance between the foot polygon and the
 # edge of the planar region polygon that the footstep is moved into. This value can be negative. That corresponds
@@ -197,14 +203,9 @@ float64 minimum_foothold_percent 0.9
 # z-value less than cos(minimumSurfaceInclineRadians), it will be rejected.
 float64 minimum_surface_incline_radians -11.1
 
-# There are two methods of wiggling a polygon into a planar region:
-#    Wiggle the polygon into the planar region itself, which isn't necessarily convex
-#    Wiggle the polygon into the convex hull of the planar region
-# The first method is not implemented completely. Instead it will wiggle into the sub polygon of the planar region that
-# has the biggest overlap with the foothold.
-#
-# If this parameter is set to true (recommended), the second wiggle method will be used.
-bool wiggle_into_convex_hull_of_planar_regions true
+# There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
+# this toggles between them.
+bool enable_concave_hull_wiggler false
 
 # If the planner uses footstep wiggling it attempts to move a candidate footstep inside its associated planar region.
 # This attempt is parametrized by {@link #getWiggleIntoConvexHullOfPlanarRegions()}, {@link #getWiggleInsideDelta},
@@ -252,16 +253,6 @@ float64 cliff_height_to_avoid -11.1
 # generator is capable of swinging over.
 float64 minimum_distance_from_cliff_bottoms -11.1
 
-# When the planner is done planning and cannot find a path to the goal, this flag indicates whether the
-# planner should return the best plan that it found. If this value is false, the planner will return
-# a {@link FootstepPlan} of type {@link FootstepPlanningResult#NO_PATH_EXISTS}. Otherwise it will return
-# "best" is determined by the planner.
-bool return_best_effort_plan false
-
-# When {@link #getReturnBestEffortPlan()} is true, the planner will return the best effort plan if the plan
-# contains at least this many footsteps.
-uint32 minimum_steps_for_best_effort_plan
-
 # Some node checkers will check if a bounding box that describes the body of the robot will move
 # through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
 # collisions, this defines the box height.
@@ -305,15 +296,6 @@ float64 min_y_clearance_from_stance -11.1
 # Radius around the goal inside which the planner should start to turn to match the goal's orientation
 float64 final_turn_proximity -11.1
 
-# Radius around the goal inside which the body path heuristic planner should start to turn to match the goal's orientation
-float64 final_turn_body_path_proximity -11.1
-
-# Defines a percentage of the radius around the final turn proximity in which the blending from the desired heading to the
-# final orientation should occur. That is, at 1 + {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
-# the desired orientation is the desired heading, and at 1 - {@link #getFinalTurnProximityBlendFactor()}} * {@link #getFinalTurnProximity()},
-# the desired orientation is the final orientation.
-float64 final_turn_proximity_blend_factor -11.1
-
 # When using a cost based planning approach this value defined how the yaw of a footstep will be
 # weighted in comparison to its position.
 float64 yaw_weight -11.1
@@ -352,23 +334,8 @@ float64 foothold_area_weight -11.1
 # taken. Setting this value to a high number will favor plans with less steps.
 float64 cost_per_step -11.1
 
-# Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link EuclideanDistanceAndYawBasedCost}
-bool use_quadratic_distance_cost false
-
-# Determines which cost function for distance and yaw to use, between {@link QuadraticDistanceAndYawCost} and {@link LinearHeightCost}
-bool use_quadratic_height_cost false
-
 # Gets the weight for the heuristics in the A Star planner.
 float64 a_star_heuristics_weight -11.1
-
-# Gets the weight for the heuristics in the Visibility graph with A star planner.
-float64 vis_graph_with_a_star_heuristics_weight -11.1
-
-# Gets the weight for the heuristics in the Depth First planner.
-float64 depth_first_heuristics_weight -11.1
-
-# Gets the weight for the heuristics in the Body path based planner.
-float64 body_path_based_heuristics_weight -11.1
 
 # This sets how many bounding box checks to perform. If this value is 1, only the final footstep is checked.
 # Additional checks are done by interpolating between the start and end steps
@@ -378,14 +345,17 @@ uint32 number_of_bounding_box_checks 1
 # @see FootstepPlannerCostParameters#getBoundingBoxCost
 float64 maximum_2d_distance_from_bounding_box_to_penalize -11.1
 
-# If a node doesn't have bounding box collisions at the default dimensions, but does when increasing the xy dimensions by d,
-# where d < getMaximum2DDistanceFromBoundingBoxToPenalize, there will be a cost given to the node of:
-# {@code c * (1 - d / d_max)}, where d_max is this value.
-float64 bounding_box_cost -11.1
-
-float64 body_path_violation_weight -11.1
-
+# If the robot's mid-foot pose is within this distance of the body path, it will match the body path heading.
+# Otherwise, it will turn towards the body path
 float64 distance_from_path_tolerance -11.1
 
+# If the robot's mid-foot pose oriented within this threshold of the body path's heading, it will match the body path heading.
+# Otherwise, it will turn in plance towards the body path
 float64 delta_yaw_from_reference_tolerance -11.1
 
+# Maximum steps considered at each iteration. If more than this number of steps are available, the closest steps to the
+# ideal step are considered and the others are ignored. Set to non-positive number to disable
+int32 maximum_branch_factor -1
+
+# If true, enables a mask that reduces the number of calculated steps away from the ideal step
+bool enable_expansion_mask true

@@ -27,7 +27,7 @@ import us.ihmc.simulationConstructionSetTools.util.simulationrunner.GoalOriented
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 
 import java.io.IOException;
 
@@ -118,7 +118,7 @@ public class AtlasFootstepPlanBehaviorTest
       RemoteFootstepPlannerResult result = resultNotification.blockingPoll();
 
       LogTools.info("Received footstep planning result: {}", FootstepPlanningResult.fromByte(result.getMessage().getFootstepPlanningResult()));
-      LogTools.info("Received footstep plan took: {} s", result.getMessage().getFootstepPlanningStatistics().getTimeTaken());
+      LogTools.info("Received footstep plan took: {} s", result.getMessage().getPlannerTimings().getTotalElapsedSeconds());
       LogTools.info("Received footstep planning status: {}", result);
 
       assertTrue(result.isValidForExecution(), "Solution failed");

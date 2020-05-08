@@ -14,6 +14,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
 {
    private long sequenceId;
    private RobotSide robotSide;
+   private boolean forceExecution = false;
    private final JointspaceTrajectoryCommand jointspaceTrajectoryCommand = new JointspaceTrajectoryCommand();
    private final SE3TrajectoryControllerCommand taskspaceTrajectoryCommand = new SE3TrajectoryControllerCommand();
 
@@ -21,17 +22,19 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    {
    }
 
-   public HandHybridJointspaceTaskspaceTrajectoryCommand(RobotSide robotSide, SE3TrajectoryControllerCommand taskspaceTrajectoryCommand,
+   public HandHybridJointspaceTaskspaceTrajectoryCommand(RobotSide robotSide, boolean forceExecution, SE3TrajectoryControllerCommand taskspaceTrajectoryCommand,
                                                          JointspaceTrajectoryCommand jointspaceTrajectoryCommand)
    {
       this.robotSide = robotSide;
+      this.setForceExecution(forceExecution);
       this.jointspaceTrajectoryCommand.set(jointspaceTrajectoryCommand);
       this.taskspaceTrajectoryCommand.set(taskspaceTrajectoryCommand);
    }
 
    public HandHybridJointspaceTaskspaceTrajectoryCommand(Random random)
    {
-      this(RobotSide.generateRandomRobotSide(random), new SE3TrajectoryControllerCommand(random), new JointspaceTrajectoryCommand(random));
+      this(RobotSide.generateRandomRobotSide(random), random.nextBoolean(), new SE3TrajectoryControllerCommand(random),
+           new JointspaceTrajectoryCommand(random));
    }
 
    @Override
@@ -45,6 +48,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    {
       sequenceId = 0;
       robotSide = null;
+      setForceExecution(false);
       jointspaceTrajectoryCommand.clear();
       taskspaceTrajectoryCommand.clear();
    }
@@ -60,6 +64,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    {
       sequenceId = message.getSequenceId();
       robotSide = RobotSide.fromByte(message.getRobotSide());
+      setForceExecution(message.getForceExecution());
       jointspaceTrajectoryCommand.setFromMessage(message.getJointspaceTrajectoryMessage());
       taskspaceTrajectoryCommand.set(resolver, message.getTaskspaceTrajectoryMessage());
    }
@@ -75,6 +80,7 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    {
       sequenceId = other.sequenceId;
       robotSide = other.robotSide;
+      setForceExecution(other.getForceExecution());
       taskspaceTrajectoryCommand.set(other.getTaskspaceTrajectoryCommand());
       jointspaceTrajectoryCommand.set(other.getJointspaceTrajectoryCommand());
    }
@@ -82,6 +88,16 @@ public class HandHybridJointspaceTaskspaceTrajectoryCommand
    public RobotSide getRobotSide()
    {
       return robotSide;
+   }
+
+   public boolean getForceExecution()
+   {
+      return forceExecution;
+   }
+
+   public void setForceExecution(boolean forceExecution)
+   {
+      this.forceExecution = forceExecution;
    }
 
    public JointspaceTrajectoryCommand getJointspaceTrajectoryCommand()

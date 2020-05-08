@@ -232,7 +232,7 @@ public abstract class HumanoidBehaviorDispatcherTest implements MultiRobotTestIn
 
       PelvisOrientationTrajectoryMessage pelvisPosePacket = createPelvisOrientationTrajectoryMessage(new Vector3D(0.0, 1.0, 0.0), Math.toRadians(5.0));
       FramePose3D desiredPelvisPose = new FramePose3D();
-      desiredPelvisPose.setOrientation(pelvisPosePacket.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getOrientation());
+      desiredPelvisPose.getOrientation().set(pelvisPosePacket.getSo3Trajectory().getTaskspaceTrajectoryPoints().getLast().getOrientation());
 
       pelvisOrientationTrajectoryBehavior.initialize();
       pelvisOrientationTrajectoryBehavior.setInput(pelvisPosePacket);

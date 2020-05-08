@@ -122,8 +122,12 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       DRCRobotModel robotModel = getRobotModel();
       toolboxInputManager = new CommandInputManager(WalkingControllerPreviewToolboxModule.supportedCommands());
       toolboxOutputManager = new StatusMessageOutputManager(WalkingControllerPreviewToolboxModule.supportedStatus());
-      toolboxController = new WalkingControllerPreviewToolboxController(robotModel, integrationDT, toolboxInputManager, toolboxOutputManager,
-                                                                        yoGraphicsListRegistry, toolboxMainRegistry);
+      toolboxController = new WalkingControllerPreviewToolboxController(robotModel,
+                                                                        integrationDT,
+                                                                        toolboxInputManager,
+                                                                        toolboxOutputManager,
+                                                                        yoGraphicsListRegistry,
+                                                                        toolboxMainRegistry);
 
       DRCRobotModel ghostRobotModel = getGhostRobotModel();
       RobotDescription robotDescription = ghostRobotModel.getRobotDescription();
@@ -336,12 +340,23 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       for (RobotSide robotSide : RobotSide.values)
       {
          assertTrackingErrorMeanIsLow(footTrackingWatchers.get(robotSide), 0.01, 0.015, 0.06, 0.20);
-         assertTrackingErrorMeanIsLow(handTrackingWatchers.get(robotSide), 0.01, 0.10, 0.06, 0.20); // I wonder if the tracking is off because the control is in joint-space.
+         assertTrackingErrorMeanIsLow(handTrackingWatchers.get(robotSide), 0.04, 0.10, 0.06, 0.20); // I wonder if the tracking is off because the control is in joint-space.
       }
 
       BambooTools.reportTestFinishedMessage(simulationTestingParameters.getShowWindows());
    }
 
+   /**
+    * The idea of this test is as follows:
+    * <ol>
+    * <li>Run the actual controller, make it go to a random robot configuration using its API so you
+    * know it is reachable.
+    * <li>Pause sim.
+    * <li>Starts the preview and snap it to the current controller configuration.
+    * <li>Resume simulation and preview at the same rate as the controller.
+    * <li>Verify that the preview matches the controller over time
+    * </ol>
+    */
    @SuppressWarnings("unchecked")
    @Test
    public void testResetFeature() throws SimulationExceededMaximumTimeException
@@ -357,7 +372,8 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, getRobotModel(), new FlatGroundWithGhost(ghost));
       // Spawning at a random location
       drcSimulationTestHelper.setStartingLocation(new OffsetAndYawRobotInitialSetup(EuclidCoreRandomTools.nextDouble(random, 5.0),
-                                                                                    EuclidCoreRandomTools.nextDouble(random, 5.0), 0.0,
+                                                                                    EuclidCoreRandomTools.nextDouble(random, 5.0),
+                                                                                    0.0,
                                                                                     EuclidCoreRandomTools.nextDouble(random, Math.PI)));
       drcSimulationTestHelper.createSimulation("WalkingPreview_OneStep");
       drcSimulationTestHelper.getSimulationConstructionSet().addYoGraphicsListRegistry(yoGraphicsListRegistry);
@@ -488,7 +504,7 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       {
          RobotSide side = RobotSide.values[i % 2];
          Pose3D footPose = new Pose3D(footPoses.get(side));
-         footPose.prependTranslation(0.10, 0.0, 0.0);
+         footPose.prependTranslation(0.10, 0.0, -0.01); // Lowering the footstep to trigger touchdown earlier on the controller side.
          footstepDataList.add().set(HumanoidMessageTools.createFootstepDataMessage(side, footPose));
       }
 
@@ -528,7 +544,13 @@ public abstract class AvatarWalkingControllerPreviewToolboxControllerTest implem
       double angularVelocityMean = watcher.yoAngularVelocityTrackingErrorMean.getValue();
 
       String errorMessage = "Poor tracking of the " + watcher.controllerBody.getName()
-            + EuclidCoreIOTools.getStringOf("(", ")", ",", EuclidCoreIOTools.DEFAULT_FORMAT, positionMean, orientationMean, linearVelocityMean,
+            + EuclidCoreIOTools.getStringOf("(",
+                                            ")",
+                                            ",",
+                                            EuclidCoreIOTools.DEFAULT_FORMAT,
+                                            positionMean,
+                                            orientationMean,
+                                            linearVelocityMean,
                                             angularVelocityMean);
       assertTrue(positionMean < positionTreshold, errorMessage);
       assertTrue(orientationMean < orientationTreshold, errorMessage);

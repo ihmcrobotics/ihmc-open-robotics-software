@@ -34,7 +34,6 @@ import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandModel;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.sensors.DRCSensorSuiteManager;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -63,7 +62,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlannerType;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
@@ -133,6 +132,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
    private static final double defaultNominalWidth = 0.3;
    private static final double defaultNominalLength = 0.0;
 
+   private static final double timeout = 240.0;
    private static final double defaultBestEffortTimeout = 0.5;
    //   private static final double defaultHorizonLength = 1.0;
    private static final double defaultHorizonLength = 2.0;
@@ -202,15 +202,6 @@ public class BipedContinuousPlanningToolboxDataSetTest
       return parameters;
    }
 
-   public FootstepPlannerParametersBasics getTestFootstepPlannerParameters()
-   {
-      FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
-      parameters.setReturnBestEffortPlan(true);
-      parameters.setMinimumStepsForBestEffortPlan(3);
-
-      return parameters;
-   }
-
    @BeforeEach
    public void setup()
    {
@@ -227,7 +218,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
          visibilityGraphsParameters = getTestVisibilityGraphsParameters();
 
       if (footstepPlannerParameters == null)
-         footstepPlannerParameters = getTestFootstepPlannerParameters();
+         footstepPlannerParameters = new DefaultFootstepPlannerParameters();
 
       DRCRobotModel robotModel = getRobotModel();
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(robotModel, pubSubImplementation);
@@ -350,7 +341,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
                                                                  return false;
 
                                                               return dataSet.getPlannerInput().getStepPlannerIsTestable() && dataSet.getPlannerInput()
-                                                                                                                                    .containsFlag(getTimeoutFlag());
+                                                                                                                                    .containsFlag(getIterationLimitFlag());
                                                            });
       runAssertionsOnAllDatasets(dataSets, false);
    }
@@ -371,7 +362,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
 
                                                               return dataSet.getPlannerInput().getStepPlannerIsTestable() && dataSet.getPlannerInput()
-                                                                                                                                    .containsFlag(getTimeoutFlag());
+                                                                                                                                    .containsFlag(getIterationLimitFlag());
                                                            });
       runAssertionsOnAllDatasets(dataSets, false);
    }
@@ -391,7 +382,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
                                                               }
 
                                                               return dataSet.getPlannerInput().getStepPlannerIsTestable() && dataSet.getPlannerInput()
-                                                                                                                                    .containsFlag(getTimeoutFlag());
+                                                                                                                                    .containsFlag(getIterationLimitFlag());
                                                            });
       runAssertionsOnAllDatasets(dataSets, true);
    }
@@ -404,14 +395,14 @@ public class BipedContinuousPlanningToolboxDataSetTest
                                                            {
                                                               if (!dataSet.hasPlannerInput())
                                                                  return false;
-                                                              return dataSet.getPlannerInput().getStepPlannerIsInDevelopment() && dataSet.getPlannerInput().containsFlag(getTimeoutFlag());
+                                                              return dataSet.getPlannerInput().getStepPlannerIsInDevelopment() && dataSet.getPlannerInput().containsFlag(getIterationLimitFlag());
                                                            });
       runAssertionsOnAllDatasets(dataSets, false);
    }
 
-   protected String getTimeoutFlag()
+   protected String getIterationLimitFlag()
    {
-      return FootstepPlannerType.VIS_GRAPH_WITH_A_STAR.toString().toLowerCase() + "_timeout";
+      return "vis_graph_with_a_star_max_iterations";
    }
 
    private void runAssertionsOnAllDatasets(List<DataSet> allDatasets, boolean simulateOcclusions)
@@ -532,11 +523,14 @@ public class BipedContinuousPlanningToolboxDataSetTest
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerParameters, footstepPlannerParameters);
 
       ThreadTools.sleep(100);
+      String plannerTypePrefix = "vis_graph_with_a_star";
+      int maxIterations = plannerInput.getIterationLimitFlag(plannerTypePrefix);
 
       BipedContinuousPlanningRequestPacket requestPacket = new BipedContinuousPlanningRequestPacket();
       requestPacket.setHorizonLength(defaultHorizonLength);
-      requestPacket.setTimeout(dataset.getPlannerInput().getTimeoutFlag(FootstepPlannerType.VIS_GRAPH_WITH_A_STAR.toString().toLowerCase()));
+      requestPacket.setTimeout(timeout);
       requestPacket.setBestEffortTimeout(defaultBestEffortTimeout);
+      requestPacket.setMaxIterations(maxIterations);
       requestPacket.getGoalOrientationInWorld().set(goalOrientation);
       requestPacket.getGoalPositionInWorld().set(plannerInput.getGoalPosition());
 
@@ -575,8 +569,8 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       outputFromPlannerReference.set(packet);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, packet.getLowLevelPlannerGoal().getPosition());
-      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, packet.getLowLevelPlannerGoal().getOrientation());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalPosition, packet.getGoalPose().getPosition());
+      messager.submitMessage(FootstepPlannerMessagerAPI.LowLevelGoalOrientation, packet.getGoalPose().getOrientation());
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, packet.getBodyPath());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, PlanarRegionMessageConverter.convertToPlanarRegionsList(packet.getPlanarRegionsList()));
    }
@@ -596,7 +590,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       SideDependentList<FramePose3D> feetPoses = new SideDependentList<>();
       Quaternion startOrientation = new Quaternion();
       if (dataSet.getPlannerInput().hasStartOrientation())
-         startOrientation.setToYawQuaternion(dataSet.getPlannerInput().getStartYaw());
+         startOrientation.setToYawOrientation(dataSet.getPlannerInput().getStartYaw());
       PoseReferenceFrame startFrame = new PoseReferenceFrame("startFrame", ReferenceFrame.getWorldFrame());
       startFrame.setPositionAndUpdate(new FramePoint3D(ReferenceFrame.getWorldFrame(), dataSet.getPlannerInput().getStartPosition()));
       startFrame.setOrientationAndUpdate(startOrientation);
@@ -726,8 +720,8 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
             footstepStatusPublisher.publish(statusMessage);
             FramePose3D footPose = new FramePose3D();
-            footPose.setPosition(currentStep.getLocation());
-            footPose.setOrientation(currentStep.getOrientation());
+            footPose.getPosition().set(currentStep.getLocation());
+            footPose.getOrientation().set(currentStep.getOrientation());
             feetPoses.put(RobotSide.fromByte(currentStep.getRobotSide()), footPose);
          }
 
@@ -770,7 +764,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
 
       if (outputFromPlannerReference.get() != null)
       {
-         Point3DReadOnly pointReached = outputFromPlannerReference.get().getLowLevelPlannerGoal().getPosition();
+         Point3DReadOnly pointReached = outputFromPlannerReference.get().getGoalPose().getPosition();
          Point3DReadOnly goalPosition = dataSet.getPlannerInput().getGoalPosition();
          if (pointReached.distanceXY(goalPosition) > LatticeNode.gridSizeXY)
          {
@@ -1089,7 +1083,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
       @Override
       public FootstepPlannerParametersBasics getFootstepPlannerParameters()
       {
-         return getTestFootstepPlannerParameters();
+         return new DefaultFootstepPlannerParameters();
       }
 
       @Override

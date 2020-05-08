@@ -63,7 +63,7 @@ public class PlanarRegionsListCutter
       Vector2D planeNormal2D = new Vector2D(planeNormal3D);
       planeNormal2D.normalize();
 
-      cuttingLine2D.setDirection(planeNormal2D.getY(), -planeNormal2D.getX()); // make sure left side of line is plane normal
+      cuttingLine2D.getDirection().set(planeNormal2D.getY(), -planeNormal2D.getX()); // make sure left side of line is plane normal
 
       ConcaveHull concaveHull = new ConcaveHull(); // TODO make this one line
       for (Point2D point2D : region.getConcaveHull())
@@ -80,10 +80,7 @@ public class PlanarRegionsListCutter
          List<ConvexPolygon2D> decomposedPolygons = new ArrayList<>();
          ConcaveHullDecomposition.recursiveApproximateDecomposition(resultingConcaveHull, 0.0, decomposedPolygons); // TODO: tune depth threshold?
 
-         Point2D[] concaveHullsVertices = new Point2D[resultingConcaveHull.getNumberOfVertices()];
-         resultingConcaveHull.getConcaveHullVertices().toArray(concaveHullsVertices);
-
-         PlanarRegion resultingRegion = new PlanarRegion(region.getTransformToWorld(), concaveHullsVertices, decomposedPolygons);
+         PlanarRegion resultingRegion = new PlanarRegion(region.getTransformToWorld(), resultingConcaveHull.getConcaveHullVertices(), decomposedPolygons);
          resultingRegion.setRegionId(region.getRegionId());
          resultingRegions.add(resultingRegion);
       }

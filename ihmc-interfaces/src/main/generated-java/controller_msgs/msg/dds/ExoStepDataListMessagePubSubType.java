@@ -40,16 +40,22 @@ public class ExoStepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.ExoStepDataMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -66,7 +72,9 @@ public class ExoStepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDat
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -74,13 +82,17 @@ public class ExoStepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDat
       {
           current_alignment += controller_msgs.msg.dds.ExoStepDataMessagePubSubType.getCdrSerializedSize(data.getStepDataList().get(i0), current_alignment);}
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -91,31 +103,43 @@ public class ExoStepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDat
 
    public static void write(controller_msgs.msg.dds.ExoStepDataListMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       if(data.getStepDataList().size() <= 50)
       cdr.write_type_e(data.getStepDataList());else
           throw new RuntimeException("step_data_list field exceeds the maximum length");
 
+
       cdr.write_type_6(data.getDefaultSwingDuration());
+
 
       cdr.write_type_6(data.getDefaultTransferDuration());
 
+
       controller_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
+
       cdr.write_type_9(data.getStepType());
 
    }
 
    public static void read(controller_msgs.msg.dds.ExoStepDataListMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       cdr.read_type_e(data.getStepDataList());	
+
       data.setDefaultSwingDuration(cdr.read_type_6());
       	
+
       data.setDefaultTransferDuration(cdr.read_type_6());
       	
+
       controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
+
       data.setStepType(cdr.read_type_9());
       	
 
@@ -124,11 +148,17 @@ public class ExoStepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void serialize(controller_msgs.msg.dds.ExoStepDataListMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_e("step_data_list", data.getStepDataList());
+
       ser.write_type_6("default_swing_duration", data.getDefaultSwingDuration());
+
       ser.write_type_6("default_transfer_duration", data.getDefaultTransferDuration());
+
       ser.write_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
+
 
       ser.write_type_9("step_type", data.getStepType());
    }
@@ -136,11 +166,17 @@ public class ExoStepDataListMessagePubSubType implements us.ihmc.pubsub.TopicDat
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.ExoStepDataListMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_e("step_data_list", data.getStepDataList());
+
       data.setDefaultSwingDuration(ser.read_type_6("default_swing_duration"));
+
       data.setDefaultTransferDuration(ser.read_type_6("default_transfer_duration"));
+
       ser.read_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
+
 
       data.setStepType(ser.read_type_9("step_type"));
    }

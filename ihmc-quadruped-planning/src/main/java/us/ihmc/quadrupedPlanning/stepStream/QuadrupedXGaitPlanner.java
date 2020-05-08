@@ -193,7 +193,7 @@ public class QuadrupedXGaitPlanner
       bodyPathProvider.getPlanarPose(time, bodyPathPose);
       finalPose.setX(bodyPathPose.getX());
       finalPose.setY(bodyPathPose.getY());
-      finalPose.setOrientationYawPitchRoll(bodyPathPose.getYaw(), finalPose.getPitch(), finalPose.getRoll());
+      finalPose.getOrientation().setYawPitchRoll(bodyPathPose.getYaw(), finalPose.getPitch(), finalPose.getRoll());
    }
 
    public void setStepSnapper(PointFootSnapper snapper)

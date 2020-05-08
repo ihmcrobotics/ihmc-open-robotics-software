@@ -1,11 +1,16 @@
 package us.ihmc.pathPlanning.visibilityGraphs;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -16,26 +21,22 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.NavigableRegionFilter;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.messager.UIVisibilityGraphsTopics;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullDecomposition;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionFilter;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 public class VisibilityGraphOcclusionTest
 {
@@ -182,7 +183,7 @@ public class VisibilityGraphOcclusionTest
       Point3D walkerCurrentPosition = new Point3D(pathStart);
       List<Point3D> collisions = new ArrayList<>();
       Ellipsoid3D walkerShape = new Ellipsoid3D();
-      walkerShape.setRadii(walkerRadii);
+      walkerShape.getRadii().set(walkerRadii);
 
       Point3D walkerBody3D = new Point3D(walkerCurrentPosition);
       walkerBody3D.addZ(walkerOffsetHeight);
@@ -238,7 +239,7 @@ public class VisibilityGraphOcclusionTest
          Point3D walkerPosition3D = new Point3D(walkerShapeWorld.getPosition());
 
          Plane3D plane = planarRegion.getPlane();
-         Point3D closestPoint = plane.orthogonalProjectionCopy(walkerPosition3D);
+         Point3DBasics closestPoint = plane.orthogonalProjectionCopy(walkerPosition3D);
 
          if (!walkerShapeWorld.isPointInside(closestPoint))
             continue; // Not even close to the region plane, let's keep going.
@@ -250,7 +251,7 @@ public class VisibilityGraphOcclusionTest
 
          if (planarRegion.getNumberOfConvexPolygons() == 0)
          {
-            List<Point2DReadOnly> concaveHullVertices = new ArrayList<>(Arrays.asList(planarRegion.getConcaveHull()));
+            List<Point2DReadOnly> concaveHullVertices = new ArrayList<>(planarRegion.getConcaveHull());
             double depthThreshold = 0.05;
             List<ConvexPolygon2D> convexPolygons = new ArrayList<>();
             ConcaveHullDecomposition.recursiveApproximateDecomposition(concaveHullVertices, depthThreshold, convexPolygons);
@@ -309,7 +310,7 @@ public class VisibilityGraphOcclusionTest
       generator.addRectangle(2.0, 4.0);
 
       generator.translate(1.0, -1.0, 0.5);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
 
       generator.addRectangle(0.9, 1.9);
 
@@ -329,7 +330,7 @@ public class VisibilityGraphOcclusionTest
       generator.addRectangle(2.0, 4.0);
 
       generator.translate(2.0, 0.0, 1.0);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
 
       generator.addRectangle(0.2, 0.5);
 
@@ -344,7 +345,7 @@ public class VisibilityGraphOcclusionTest
       generator.addRectangle(2.0, 4.0);
 
       generator.translate(2.0, 0.0, 1.0);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
 
       generator.addRectangle(0.05, 0.05);
 
@@ -359,7 +360,7 @@ public class VisibilityGraphOcclusionTest
       generator.addRectangle(2.0, 4.0);
 
       generator.translate(2.0, 0.0, 0.5);
-      generator.rotate(0.5 * Math.PI, Axis.Y);
+      generator.rotate(0.5 * Math.PI, Axis3D.Y);
 
       generator.addRectangle(1.0, 0.6);
 

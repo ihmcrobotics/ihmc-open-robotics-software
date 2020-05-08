@@ -40,13 +40,18 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (100 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
@@ -62,17 +67,22 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getData().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getName().length() + 1;
@@ -83,15 +93,20 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
 
    public static void write(controller_msgs.msg.dds.HeatMapPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       if(data.getData().size() <= 100)
       cdr.write_type_e(data.getData());else
           throw new RuntimeException("data field exceeds the maximum length");
 
+
       cdr.write_type_2(data.getWidth());
 
+
       cdr.write_type_2(data.getHeight());
+
 
       if(data.getName().length() <= 255)
       cdr.write_type_d(data.getName());else
@@ -101,13 +116,18 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
 
    public static void read(controller_msgs.msg.dds.HeatMapPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       cdr.read_type_e(data.getData());	
+
       data.setWidth(cdr.read_type_2());
       	
+
       data.setHeight(cdr.read_type_2());
       	
+
       cdr.read_type_d(data.getName());	
 
    }
@@ -115,20 +135,30 @@ public class HeatMapPacketPubSubType implements us.ihmc.pubsub.TopicDataType<con
    @Override
    public final void serialize(controller_msgs.msg.dds.HeatMapPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_e("data", data.getData());
+
       ser.write_type_2("width", data.getWidth());
+
       ser.write_type_2("height", data.getHeight());
+
       ser.write_type_d("name", data.getName());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.HeatMapPacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_e("data", data.getData());
+
       data.setWidth(ser.read_type_2("width"));
+
       data.setHeight(ser.read_type_2("height"));
+
       ser.read_type_d("name", data.getName());
    }
 

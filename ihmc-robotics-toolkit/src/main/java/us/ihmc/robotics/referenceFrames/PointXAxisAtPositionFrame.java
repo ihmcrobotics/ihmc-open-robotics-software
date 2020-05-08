@@ -35,6 +35,6 @@ public class PointXAxisAtPositionFrame extends ReferenceFrame
       yAxis.cross(zAxis, xAxis);
 
       rotationMatrix.setColumns(xAxis, yAxis, zAxis);
-      transformToParent.setRotation(rotationMatrix);
+      transformToParent.getRotation().set(rotationMatrix);
    }
 }

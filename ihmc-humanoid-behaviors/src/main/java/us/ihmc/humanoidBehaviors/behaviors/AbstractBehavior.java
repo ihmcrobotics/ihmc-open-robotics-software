@@ -22,6 +22,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.ros2.Ros2Node;
@@ -265,6 +266,7 @@ public abstract class AbstractBehavior implements RobotController
 
    public void publishTextToSpeech(String textToSpeak)
    {
+      LogTools.info(1, "TextToSpeech: " + textToSpeak);
       textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket(textToSpeak));
    }
 

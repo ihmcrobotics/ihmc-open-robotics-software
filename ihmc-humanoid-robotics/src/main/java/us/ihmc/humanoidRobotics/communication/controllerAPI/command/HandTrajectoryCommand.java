@@ -15,6 +15,7 @@ public class HandTrajectoryCommand
 {
    private long sequenceId;
    private RobotSide robotSide;
+   private boolean forceExecution = false;
    private final SE3TrajectoryControllerCommand se3Trajectory;
 
    public HandTrajectoryCommand()
@@ -30,6 +31,7 @@ public class HandTrajectoryCommand
 
    public HandTrajectoryCommand(Random random)
    {
+      setForceExecution(random.nextBoolean());
       se3Trajectory = new SE3TrajectoryControllerCommand(random);
       robotSide = RobotSide.generateRandomRobotSide(random);
    }
@@ -38,22 +40,26 @@ public class HandTrajectoryCommand
    public void clear()
    {
       sequenceId = 0;
-      se3Trajectory.clear();
       robotSide = null;
+      setForceExecution(false);
+      se3Trajectory.clear();
    }
 
    public void clear(ReferenceFrame referenceFrame)
    {
-      se3Trajectory.clear(referenceFrame);
+      sequenceId = 0;
       robotSide = null;
+      setForceExecution(false);
+      se3Trajectory.clear(referenceFrame);
    }
 
    @Override
    public void set(HandTrajectoryCommand other)
    {
       sequenceId = other.sequenceId;
-      se3Trajectory.set(other.se3Trajectory);
       robotSide = other.robotSide;
+      setForceExecution(other.getForceExecution());
+      se3Trajectory.set(other.se3Trajectory);
    }
 
    /**
@@ -64,8 +70,9 @@ public class HandTrajectoryCommand
    public void setPropertiesOnly(HandTrajectoryCommand other)
    {
       sequenceId = other.sequenceId;
-      se3Trajectory.setPropertiesOnly(other.se3Trajectory);
       robotSide = other.robotSide;
+      setForceExecution(other.getForceExecution());
+      se3Trajectory.setPropertiesOnly(other.se3Trajectory);
    }
 
    @Override
@@ -78,8 +85,9 @@ public class HandTrajectoryCommand
    public void set(ReferenceFrameHashCodeResolver resolver, HandTrajectoryMessage message)
    {
       sequenceId = message.getSequenceId();
-      se3Trajectory.set(resolver, message.getSe3Trajectory());
       robotSide = RobotSide.fromByte(message.getRobotSide());
+      setForceExecution(message.getForceExecution());
+      se3Trajectory.set(resolver, message.getSe3Trajectory());
    }
 
    public void setRobotSide(RobotSide robotSide)
@@ -90,6 +98,16 @@ public class HandTrajectoryCommand
    public RobotSide getRobotSide()
    {
       return robotSide;
+   }
+
+   public boolean getForceExecution()
+   {
+      return forceExecution;
+   }
+
+   public void setForceExecution(boolean forceExecution)
+   {
+      this.forceExecution = forceExecution;
    }
 
    public SE3TrajectoryControllerCommand getSE3Trajectory()

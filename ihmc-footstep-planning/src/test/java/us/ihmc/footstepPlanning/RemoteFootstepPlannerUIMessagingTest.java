@@ -231,7 +231,9 @@ public class RemoteFootstepPlannerUIMessagingTest
          Pose3D goalLeftFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
          Pose3D goalRightFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
-         FootstepPlannerType planningType = FootstepPlannerType.generateRandomPlannerType(random);
+         boolean planBodyPath = random.nextBoolean();
+         boolean performAStarSearch = random.nextBoolean();
+
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
@@ -240,7 +242,8 @@ public class RemoteFootstepPlannerUIMessagingTest
          messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, startRightFootPose);
          messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootGoalPose, goalLeftFootPose);
          messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, goalRightFootPose);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, planningType);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, planBodyPath);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, performAStarSearch);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
          messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations, maxIterations);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlanarRegionData, planarRegionsList);
@@ -269,7 +272,8 @@ public class RemoteFootstepPlannerUIMessagingTest
          assertTrue("Left goal foot poses aren't equal", packet.getGoalLeftFootPose().epsilonEquals(goalLeftFootPose, epsilon));
          assertTrue("Right goal foot poses aren't equal", packet.getGoalRightFootPose().epsilonEquals(goalRightFootPose, epsilon));
          assertEquals("Timeouts aren't equal.", timeout, packet.getTimeout(), 1e-5);
-         assertEquals("Planner types aren't equal.", planningType, FootstepPlannerType.fromByte(packet.getRequestedFootstepPlannerType()));
+         assertEquals("Perform A* search flags aren't.", performAStarSearch, packet.getPerformAStarSearch());
+         assertEquals("Plan body path flags aren't equal.", planBodyPath, packet.getPlanBodyPath());
          assertEquals("Initial support sides aren't equal.", robotSide, RobotSide.fromByte(packet.getRequestedInitialStanceSide()));
 
          assertEquals("Planner Request Ids aren't equal.", plannerRequestId, packet.getPlannerRequestId(), epsilon);
@@ -295,7 +299,8 @@ public class RemoteFootstepPlannerUIMessagingTest
       AtomicReference<Pose3DReadOnly> leftFootGoalPoseReference = messager.createInput(FootstepPlannerMessagerAPI.LeftFootGoalPose);
       AtomicReference<Pose3DReadOnly> rightFootGoalPoseReference = messager.createInput(FootstepPlannerMessagerAPI.RightFootGoalPose);
 
-      AtomicReference<FootstepPlannerType> planningTypeReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerType);
+      AtomicReference<Boolean> planBodyPathReference = messager.createInput(FootstepPlannerMessagerAPI.PlanBodyPath);
+      AtomicReference<Boolean> performAStarSearchReference = messager.createInput(FootstepPlannerMessagerAPI.PerformAStarSearch);
       AtomicReference<Double> timeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeout);
       AtomicReference<RobotSide> robotSideReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportSide);
       AtomicReference<Integer> plannerRequestIdReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestId);
@@ -307,7 +312,9 @@ public class RemoteFootstepPlannerUIMessagingTest
          double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10.0);
          int sequenceId = RandomNumbers.nextInt(random, 1, 100);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
-         FootstepPlannerType planningType = FootstepPlannerType.generateRandomPlannerType(random);
+         boolean planBodyPath = random.nextBoolean();
+         boolean performAStarSearch = random.nextBoolean();
+
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
          Pose3D leftFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
@@ -316,7 +323,8 @@ public class RemoteFootstepPlannerUIMessagingTest
          Pose3D rightFootGoalPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
 
          FootstepPlanningRequestPacket packet = new FootstepPlanningRequestPacket();
-         packet.setRequestedFootstepPlannerType(planningType.toByte());
+         packet.setPerformAStarSearch(performAStarSearch);
+         packet.setPlanBodyPath(planBodyPath);
          packet.getStartLeftFootPose().set(leftFootPose);
          packet.getStartRightFootPose().set(rightFootPose);
          packet.getGoalLeftFootPose().set(leftFootGoalPose);
@@ -333,9 +341,10 @@ public class RemoteFootstepPlannerUIMessagingTest
          double maxWaitTime = 5.0;
          double currentWaitTime = 0.0;
          long sleepDuration = 10;
-         while (leftFootPoseReference.get() == null || rightFootPoseReference.get() == null || leftFootGoalPoseReference.get() == null || rightFootGoalPoseReference.get() == null
-                || timeoutReference.get() == null || planningTypeReference.get() == null || robotSideReference.get() == null
-                || plannerRequestIdReference.get() == null || plannerHorizonLengthReference.get() == null)
+         while (leftFootPoseReference.get() == null || rightFootPoseReference.get() == null || leftFootGoalPoseReference.get() == null
+                || rightFootGoalPoseReference.get() == null || timeoutReference.get() == null || performAStarSearchReference.get() == null
+                || planBodyPathReference.get() == null || robotSideReference.get() == null || plannerRequestIdReference.get() == null
+                || plannerHorizonLengthReference.get() == null)
          {
             assertFalse("Timed out waiting on the results.", currentWaitTime > maxWaitTime);
 
@@ -348,7 +357,8 @@ public class RemoteFootstepPlannerUIMessagingTest
          Assertions.assertTrue(leftFootGoalPose.epsilonEquals(leftFootGoalPoseReference.get(), epsilon), "leftFootGoalPose values aren't equal");
          Assertions.assertTrue(rightFootGoalPose.epsilonEquals(rightFootGoalPoseReference.get(), epsilon), "rightFootGoalPose values aren't equal");
          assertEquals("Timeouts aren't equal.", timeout, timeoutReference.getAndSet(null), epsilon);
-         assertEquals("Planner types aren't equal.", planningType, planningTypeReference.getAndSet(null));
+         assertEquals("Perform A* search flags aren't equal.", performAStarSearch, performAStarSearchReference.getAndSet(null));
+         assertEquals("Plan body path flags aren't equal.", planBodyPath, planBodyPathReference.getAndSet(null));
          assertEquals("Initial support sides aren't equal.", robotSide, robotSideReference.getAndSet(null));
          assertEquals("Planner Request Ids aren't equal.", plannerRequestId, plannerRequestIdReference.getAndSet(null), epsilon);
          assertEquals("Planner horizon lengths aren't equal.", horizonLength, plannerHorizonLengthReference.getAndSet(null), epsilon);
@@ -376,11 +386,12 @@ public class RemoteFootstepPlannerUIMessagingTest
          double timeout = RandomNumbers.nextDouble(random, 0.1, 100.0);
          int maxIterations = RandomNumbers.nextInt(random, 0, 100);
          double horizonLength = RandomNumbers.nextDouble(random, 0.1, 10);
+         boolean planBodyPath = random.nextBoolean();
+         boolean performAStarSearch = random.nextBoolean();
          Pose3D leftFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
          Pose3D rightFootPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
          Pose3D leftFootGoalPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
          Pose3D rightFootGoalPose = new Pose3D(EuclidCoreRandomTools.nextRigidBodyTransform(random));
-         FootstepPlannerType planningType = FootstepPlannerType.generateRandomPlannerType(random);
          RobotSide robotSide = RobotSide.generateRandomRobotSide(random);
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
          int plannerRequestId = RandomNumbers.nextInt(random, 1, 100);
@@ -389,7 +400,8 @@ public class RemoteFootstepPlannerUIMessagingTest
          messager.submitMessage(FootstepPlannerMessagerAPI.RightFootGoalPose, rightFootGoalPose);
          messager.submitMessage(FootstepPlannerMessagerAPI.LeftFootPose, leftFootPose);
          messager.submitMessage(FootstepPlannerMessagerAPI.RightFootPose, rightFootPose);
-         messager.submitMessage(FootstepPlannerMessagerAPI.PlannerType, planningType);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, planBodyPath);
+         messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, performAStarSearch);
          messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
          messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations,maxIterations);
          messager.submitMessage(FootstepPlannerMessagerAPI.SnapGoalSteps, random.nextBoolean());
@@ -436,7 +448,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       AtomicReference<PlanarRegionsList> planarRegionsListReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
       AtomicReference<FootstepDataListMessage> footstepPlanReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanResponse);
       AtomicReference<Integer> receivedPlanIdReference = messager.createInput(FootstepPlannerMessagerAPI.ReceivedPlanId);
-      AtomicReference<FootstepPlanningResult> plannerResultReference = messager.createInput(FootstepPlannerMessagerAPI.PlanningResult);
+      AtomicReference<FootstepPlanningResult> plannerResultReference = messager.createInput(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic);
       AtomicReference<List<? extends Pose3DReadOnly>> bodyPathReference = messager.createInput(FootstepPlannerMessagerAPI.BodyPathData);
       AtomicReference<Point3D> lowLevelPositionGoalReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalPosition);
       AtomicReference<Quaternion> lowLevelOrientationGoalReference = messager.createInput(FootstepPlannerMessagerAPI.LowLevelGoalOrientation);
@@ -445,8 +457,8 @@ public class RemoteFootstepPlannerUIMessagingTest
       {
 
          Pose2D goalPose = new Pose2D();
-         goalPose.setPosition(EuclidCoreRandomTools.nextPoint2D(random));
-         goalPose.setOrientation(EuclidCoreRandomTools.nextQuaternion(random));
+         goalPose.getPosition().set(EuclidCoreRandomTools.nextPoint2D(random));
+         goalPose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random));
          PlanarRegionsList planarRegionsList = createRandomPlanarRegionList(random);
          FootstepDataListMessage footstepDataListMessage = nextFootstepDataListMessage(random);
          int sequenceId = RandomNumbers.nextInt(random, 0, 100);
@@ -457,15 +469,15 @@ public class RemoteFootstepPlannerUIMessagingTest
          for (int i = 2; i < RandomNumbers.nextInt(random, 2, 100); i++)
          {
             Pose3D pose = new Pose3D();
-            pose.setPosition(EuclidCoreRandomTools.nextPoint3D(random, 100.0));
-            pose.setOrientation(EuclidCoreRandomTools.nextQuaternion(random, 100.0));
+            pose.getPosition().set(EuclidCoreRandomTools.nextPoint3D(random, 100.0));
+            pose.getOrientation().set(EuclidCoreRandomTools.nextQuaternion(random, 100.0));
             bodyPath.add(pose);
          }
          Point3D lowLevelGoalPosition = EuclidCoreRandomTools.nextPoint3D(random, 100.0);
          Quaternion lowLevelGoalOrientation = EuclidCoreRandomTools.nextQuaternion(random, 100.0);
 
          FootstepPlanningToolboxOutputStatus outputPacket = new FootstepPlanningToolboxOutputStatus();
-         outputPacket.getLowLevelPlannerGoal().set(goalPose);
+         outputPacket.getGoalPose().set(goalPose);
          outputPacket.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
          outputPacket.getFootstepDataList().set(footstepDataListMessage);
          outputPacket.setPlanId(planId);
@@ -473,8 +485,8 @@ public class RemoteFootstepPlannerUIMessagingTest
          outputPacket.setFootstepPlanningResult(result.toByte());
          for (int i = 0; i < bodyPath.size(); i++)
             outputPacket.getBodyPath().add().set(bodyPath.get(i));
-         outputPacket.getLowLevelPlannerGoal().getPosition().set(lowLevelGoalPosition);
-         outputPacket.getLowLevelPlannerGoal().getOrientation().set(lowLevelGoalOrientation);
+         outputPacket.getGoalPose().getPosition().set(lowLevelGoalPosition);
+         outputPacket.getGoalPose().getOrientation().set(lowLevelGoalOrientation);
 
          footstepOutputStatusPublisher.publish(outputPacket);
 
@@ -700,8 +712,8 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Max step z isn't equal.", parameters.getMaximumStepZ(), packet.getMaximumStepZ(), epsilon);
       assertEquals("Min foothold percent aren't equal.", parameters.getMinimumFootholdPercent(), packet.getMinimumFootholdPercent(), epsilon);
       assertEquals("Min surface incline aren't equal.", parameters.getMinimumSurfaceInclineRadians(), packet.getMinimumSurfaceInclineRadians(), epsilon);
-      assertEquals("Wiggle into convex hull isn't equal.", parameters.getWiggleIntoConvexHullOfPlanarRegions(),
-                   packet.getWiggleIntoConvexHullOfPlanarRegions());
+      assertEquals("Wiggle into convex hull isn't equal.", parameters.getEnableConcaveHullWiggler(),
+                   packet.getEnableConcaveHullWiggler());
       assertEquals("Max XY wiggle distance isn't equal.", parameters.getMaximumXYWiggleDistance(), packet.getMaximumXyWiggleDistance(), epsilon);
       assertEquals("Max yaw wiggle isn't equal.", parameters.getMaximumYawWiggle(), packet.getMaximumYawWiggle(), epsilon);
       assertEquals("Max Z penetration isn't equal.", parameters.getMaximumZPenetrationOnValleyRegions(), packet.getMaximumZPenetrationOnValleyRegions(),
@@ -710,9 +722,6 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Cliff height to avoid isn't equal.", parameters.getCliffHeightToAvoid(), packet.getCliffHeightToAvoid(), epsilon);
       assertEquals("Minimum distance from cliff bottoms isn't equal.", parameters.getMinimumDistanceFromCliffBottoms(),
                    packet.getMinimumDistanceFromCliffBottoms(), epsilon);
-      assertEquals("Return best effort isn't equal.", parameters.getReturnBestEffortPlan(), packet.getReturnBestEffortPlan());
-      assertEquals("Min steps for best effort aren't equal.", parameters.getMinimumStepsForBestEffortPlan(), packet.getMinimumStepsForBestEffortPlan(),
-                   epsilon);
       assertEquals("Body box heigth isn't equal.", parameters.getBodyBoxHeight(), packet.getBodyBoxHeight(), epsilon);
       assertEquals("Body box depth isn't equal.", parameters.getBodyBoxDepth(), packet.getBodyBoxDepth(), epsilon);
       assertEquals("Body box width isn't equal.", parameters.getBodyBoxWidth(), packet.getBodyBoxWidth(), epsilon);
@@ -721,18 +730,8 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Body box base Z isn't equal.", parameters.getBodyBoxBaseZ(), packet.getBodyBoxBaseZ(), epsilon);
       assertEquals("Min X clearance from stance isn't equal.", parameters.getMinXClearanceFromStance(), packet.getMinXClearanceFromStance(), epsilon);
       assertEquals("Min Y clearance from stance isn't equal.", parameters.getMinYClearanceFromStance(), packet.getMinYClearanceFromStance(), epsilon);
-      assertEquals("Use quadratic distance cost flags aren't equal.", parameters.useQuadraticDistanceCost(), packet.getUseQuadraticDistanceCost());
-      assertEquals("Use quadratic height cost flags aren't equal.", parameters.useQuadraticHeightCost(), packet.getUseQuadraticHeightCost());
 
       assertEquals("A star heuristics weights aren't equal.", parameters.getAStarHeuristicsWeight().getValue(), packet.getAStarHeuristicsWeight(), epsilon);
-      assertEquals("Vis graph with A star heuristics weights aren't equal.", parameters.getVisGraphWithAStarHeuristicsWeight().getValue(),
-                   packet.getVisGraphWithAStarHeuristicsWeight(), epsilon);
-      assertEquals("Depth first heuristics weights aren't equal.", parameters.getDepthFirstHeuristicsWeight().getValue(),
-                   packet.getDepthFirstHeuristicsWeight(), epsilon);
-      assertEquals("Body path based heuristics weights aren't equal.", parameters.getBodyPathBasedHeuristicsWeight().getValue(),
-                   packet.getBodyPathBasedHeuristicsWeight(), epsilon);
-      assertEquals("Number of bounding box checks weren't equal", parameters.getNumberOfBoundingBoxChecks(), packet.getNumberOfBoundingBoxChecks());
-
       assertEquals("Yaw weights aren't equal.", parameters.getYawWeight(), packet.getYawWeight(), epsilon);
       assertEquals("Roll weights aren't equal.", parameters.getRollWeight(), packet.getRollWeight(), epsilon);
       assertEquals("Pitch weights aren't equal.", parameters.getPitchWeight(), packet.getPitchWeight(), epsilon);

@@ -1,6 +1,21 @@
 package us.ihmc.humanoidBehaviors.upDownExploration;
 
+import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.MultiAngleSearch.ANGLE_SUCCESS;
+import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.MultiAngleSearch.HIT_MAX_ANGLE_TO_SEARCH;
+import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.MultiAngleSearch.STILL_ANGLING;
+import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.SingleAngleSearch.HIT_MAX_SEARCH_DISTANCE;
+import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.SingleAngleSearch.STILL_SEARCHING;
+import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.SingleAngleSearch.WAYPOINT_FOUND;
+
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Optional;
+import java.util.TreeSet;
+
 import org.apache.commons.lang3.tuple.Pair;
+
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -19,12 +34,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.tools.thread.ExceptionHandlingThreadScheduler;
-import us.ihmc.tools.thread.TypedNotification;
-
-import java.util.*;
-
-import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.MultiAngleSearch.*;
-import static us.ihmc.humanoidBehaviors.upDownExploration.UpDownFlatAreaFinder.SingleAngleSearch.*;
+import us.ihmc.commons.thread.TypedNotification;
 
 public class UpDownFlatAreaFinder
 {
@@ -78,7 +88,7 @@ public class UpDownFlatAreaFinder
                                                                      boolean requireHeightChange)
    {
       TypedNotification<Optional<FramePose3D>> typedNotification = new TypedNotification<>();
-      scheduler.scheduleOnce(() -> typedNotification.add(upOrDown(midFeetZUpFrame, planarRegionsList, requireHeightChange)));
+      scheduler.scheduleOnce(() -> typedNotification.set(upOrDown(midFeetZUpFrame, planarRegionsList, requireHeightChange)));
       return typedNotification;
    }
 
@@ -130,7 +140,7 @@ public class UpDownFlatAreaFinder
       {
          FramePose3D waypointPose = new FramePose3D();
          waypointPose.setFromReferenceFrame(midFeetZUpFrame);
-         waypointPose.setPosition(centerPoint3D);
+         waypointPose.getPosition().set(centerPoint3D);
 
          if (waypointPose.getZ() > midFeetZUpPose.getZ())
          {

@@ -450,11 +450,11 @@ public class PlanarRegionFileTools
             loadedPoints.add(new Point2D(x, y));
          }
 
-         Point2D[] concaveHullVertices = new Point2D[concaveHullSize];
+         List<Point2D> concaveHullVertices = new ArrayList<>();
 
          for (int i = 0; i < concaveHullSize; i++)
          {
-            concaveHullVertices[i] = loadedPoints.remove(0);
+            concaveHullVertices.add(loadedPoints.remove(0));
          }
 
          List<ConvexPolygon2D> convexPolygons = new ArrayList<>();

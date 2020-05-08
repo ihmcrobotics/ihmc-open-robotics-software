@@ -55,15 +55,13 @@ public class FootstepPlanningTestTools
       assertEquals(parameters.getMaximumStepZ(), other.getMaximumStepZ(), epsilon);
       assertEquals(parameters.getMinimumFootholdPercent(), other.getMinimumFootholdPercent(), epsilon);
       assertEquals(parameters.getMinimumSurfaceInclineRadians(), other.getMinimumSurfaceInclineRadians(), epsilon);
-      assertEquals(parameters.getWiggleIntoConvexHullOfPlanarRegions(), other.getWiggleIntoConvexHullOfPlanarRegions());
+      assertEquals(parameters.getEnableConcaveHullWiggler(), other.getEnableConcaveHullWiggler());
       assertEquals(parameters.getMaximumXYWiggleDistance(), other.getMaximumXYWiggleDistance(), epsilon);
       assertEquals(parameters.getMaximumYawWiggle(), other.getMaximumYawWiggle(), epsilon);
       assertEquals(parameters.getMaximumZPenetrationOnValleyRegions(), other.getMaximumZPenetrationOnValleyRegions(), epsilon);
       assertEquals(parameters.getMaximumStepWidth(), other.getMaximumStepWidth(), epsilon);
       assertEquals(parameters.getCliffHeightToAvoid(), other.getCliffHeightToAvoid(), epsilon);
       assertEquals(parameters.getMinimumDistanceFromCliffBottoms(), other.getMinimumDistanceFromCliffBottoms(), epsilon);
-      assertEquals(parameters.getReturnBestEffortPlan(), other.getReturnBestEffortPlan());
-      assertEquals(parameters.getMinimumStepsForBestEffortPlan(), other.getMinimumStepsForBestEffortPlan());
       assertEquals(parameters.getBodyBoxHeight(), other.getBodyBoxHeight(), epsilon);
       assertEquals(parameters.getBodyBoxDepth(), other.getBodyBoxDepth(), epsilon);
       assertEquals(parameters.getBodyBoxWidth(), other.getBodyBoxWidth(), epsilon);
@@ -74,12 +72,7 @@ public class FootstepPlanningTestTools
       assertEquals(parameters.getMinYClearanceFromStance(), other.getMinYClearanceFromStance(), epsilon);
       assertEquals(parameters.getNumberOfBoundingBoxChecks(), other.getNumberOfBoundingBoxChecks());
 
-      assertEquals(parameters.useQuadraticDistanceCost(), other.useQuadraticDistanceCost());
-      assertEquals(parameters.useQuadraticHeightCost(), other.useQuadraticHeightCost());
       assertEquals(parameters.getAStarHeuristicsWeight().getValue(), other.getAStarHeuristicsWeight().getValue(), epsilon);
-      assertEquals(parameters.getVisGraphWithAStarHeuristicsWeight().getValue(), other.getVisGraphWithAStarHeuristicsWeight().getValue(), epsilon);
-      assertEquals(parameters.getDepthFirstHeuristicsWeight().getValue(), other.getDepthFirstHeuristicsWeight().getValue(), epsilon);
-      assertEquals(parameters.getBodyPathBasedHeuristicsWeight().getValue(), other.getBodyPathBasedHeuristicsWeight().getValue(), epsilon);
       assertEquals(parameters.getYawWeight(), other.getYawWeight(), epsilon);
       assertEquals(parameters.getForwardWeight(), other.getForwardWeight(), epsilon);
       assertEquals(parameters.getLateralWeight(), other.getLateralWeight(), epsilon);

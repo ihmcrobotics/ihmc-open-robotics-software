@@ -1,7 +1,13 @@
 package us.ihmc.humanoidBehaviors.tools;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+
 import org.apache.commons.lang3.tuple.ImmutablePair;
-import us.ihmc.commons.MathTools;
+
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -19,8 +25,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.SpiralBasedAlgorithm;
-
-import java.util.*;
 
 public class SimulatedDepthCamera
 {
@@ -47,6 +51,11 @@ public class SimulatedDepthCamera
    private HashMap<PlanarRegion, List<Point3D>> pointsInRegions = new HashMap<>();
    private FramePose3D tempCameraPose = new FramePose3D();
    private Point2D tempCircleOrigin = new Point2D();
+
+   public SimulatedDepthCamera(ReferenceFrame cameraFrame)
+   {
+      this(Double.NaN, Double.NaN, Double.POSITIVE_INFINITY, cameraFrame);
+   }
 
    public SimulatedDepthCamera(double verticalFOV, double horizontalFOV, ReferenceFrame cameraFrame)
    {
@@ -87,15 +96,22 @@ public class SimulatedDepthCamera
       double sphereRadius = 5.0;
       Point3D[] pointsOnSphere = SpiralBasedAlgorithm.generatePointsOnSphere(tempCameraPose.getPosition(), sphereRadius, numberOfPointsToGenerate);
 
-      updateViewPlanes();
-
-      ArrayList<Point3D> pointsInView = new ArrayList<>();
-      for (Point3D point3D : pointsOnSphere)
+      ArrayList<Point3D> pointsInView = new ArrayList<>();;
+      if (!Double.isNaN(verticalFOV) && !Double.isNaN(horizontalFOV))
       {
-         if (planeTop.isOnOrAbove(point3D) && planeBottom.isOnOrAbove(point3D) && planeLeft.isOnOrAbove(point3D) && planeRight.isOnOrAbove(point3D))
+         updateViewPlanes();
+
+         for (Point3D point3D : pointsOnSphere)
          {
-            pointsInView.add(point3D);
+            if (planeTop.isOnOrAbove(point3D) && planeBottom.isOnOrAbove(point3D) && planeLeft.isOnOrAbove(point3D) && planeRight.isOnOrAbove(point3D))
+            {
+               pointsInView.add(point3D);
+            }
          }
+      }
+      else
+      {
+         pointsInView.addAll(Arrays.asList(pointsOnSphere));
       }
 
       tempCircleOrigin.set(tempCameraPose.getPosition());
@@ -216,7 +232,7 @@ public class SimulatedDepthCamera
    {
       tempFramePoint3D.setToZero(cameraFrame);
       tempFramePoint3D.changeFrame(ReferenceFrame.getWorldFrame());
-      plane.setPoint(tempFramePoint3D);
+      plane.getPoint().set(tempFramePoint3D);
 
       tempFramePose3D.setToZero();
       tempFramePose3D.setReferenceFrame(cameraFrame);
@@ -225,6 +241,6 @@ public class SimulatedDepthCamera
       tempFramePose3D.changeFrame(ReferenceFrame.getWorldFrame());
       tempNormal.set(0.0, yFace, zFace);
       tempFramePose3D.getOrientation().transform(tempNormal);
-      plane.setNormal(tempNormal);
+      plane.getNormal().set(tempNormal);
    }
 }

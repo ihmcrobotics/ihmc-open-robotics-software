@@ -1,18 +1,36 @@
 package us.ihmc.humanoidBehaviors.exploreArea;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
+
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -22,9 +40,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
-import us.ihmc.humanoidBehaviors.BehaviorInterface;
-import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
+import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
@@ -57,14 +74,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.tools.thread.TypedNotification;
-
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicReference;
+import us.ihmc.commons.thread.TypedNotification;
 
 public class ExploreAreaBehavior implements BehaviorInterface
 {
@@ -217,7 +227,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          //         transform.setTranslation(0.01, -0.01, 0.01);
          //         transform.setTranslation(0.02, -0.02, 0.0);
          //         transform.setTranslation(0.02, -0.02, 0.02);
-         transform.setRotationYaw(0.025);
+         transform.getRotation().setToYawOrientation(0.025);
 
          boolean sendingSlamCorrection = false;
          publishPoseUpdateForStateEstimator(transform, sendingSlamCorrection);
@@ -311,17 +321,17 @@ public class ExploreAreaBehavior implements BehaviorInterface
       boolean savedOutTroublesomeRegions = false;
 
       @Override
-      public void originalHulls(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+      public void originalHulls(List<Point2D> hullOne, List<Point2D> hullTwo)
       {
       }
 
       @Override
-      public void preprocessedHull(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo)
+      public void preprocessedHull(List<Point2D> hullOne, List<Point2D> hullTwo)
       {
       }
 
       @Override
-      public void hullGotLooped(ArrayList<Point2D> hullOne, ArrayList<Point2D> hullTwo, ArrayList<Point2D> mergedVertices)
+      public void hullGotLooped(List<Point2D> hullOne, List<Point2D> hullTwo, List<Point2D> mergedVertices)
       {
          hullGotLooped.set(true);
 
@@ -355,7 +365,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       }
 
       @Override
-      public void foundStartingVertexAndWorkingHull(Point2D startingVertex, ArrayList<Point2D> workingHull, boolean workingHullIsOne)
+      public void foundStartingVertexAndWorkingHull(Point2D startingVertex, List<Point2D> workingHull, boolean workingHullIsOne)
       {
       }
 
@@ -370,12 +380,12 @@ public class ExploreAreaBehavior implements BehaviorInterface
       }
 
       @Override
-      public void hullIsInvalid(ArrayList<Point2D> invalidHull)
+      public void hullIsInvalid(List<Point2D> invalidHull)
       {
       }
 
       @Override
-      public void hullsAreInvalid(ArrayList<Point2D> invalidHullA, ArrayList<Point2D> invalidHullB)
+      public void hullsAreInvalid(List<Point2D> invalidHullA, List<Point2D> invalidHullB)
       {
       }
    };
@@ -631,7 +641,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
          FramePoint3D desiredLocation = new FramePoint3D(midFeetZUpFrame, 0.0, 0.0, 0.0);
 
          FramePose3D desiredFramePose = new FramePose3D(midFeetZUpFrame);
-         desiredFramePose.setPosition(desiredLocation);
+         desiredFramePose.getPosition().set(desiredLocation);
 
          desiredFramePose.changeFrame(worldFrame);
          desiredFramePoses.add(desiredFramePose);
@@ -651,8 +661,8 @@ public class ExploreAreaBehavior implements BehaviorInterface
          double yaw = Math.atan2(startToGoal.getY(), startToGoal.getX());
 
          FramePose3D desiredFramePose = new FramePose3D(worldFrame);
-         desiredFramePose.setPosition(goalPoint);
-         desiredFramePose.setOrientationYawPitchRoll(yaw, 0.0, 0.0);
+         desiredFramePose.getPosition().set(goalPoint);
+         desiredFramePose.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
          desiredFramePoses.add(desiredFramePose);
       }
 
@@ -783,7 +793,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       if (plannerFinished)
       {
-         RemoteFootstepPlannerResult plannerResult = footstepPlanResultNotification.peek();
+         RemoteFootstepPlannerResult plannerResult = footstepPlanResultNotification.read();
          FootstepPlanningResult planResult = plannerResult.getResult();
 
          LogTools.info("planResult = " + planResult);
@@ -854,7 +864,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    //   private boolean readyToTransitionFromWalkToNextLocationToStop(double timeInState)
    //   {
-   //      return (walkingCompleted.hasNext());
+   //      return (walkingCompleted.hasValue());
    //      //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    //   }
 
@@ -909,13 +919,13 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private boolean readyToTransitionFromTakeAStepToTakeAStep(double timeInState)
    {
-      return ((footstepIndex < footstepDataList.size()) && (walkingCompleted.hasNext()));
+      return ((footstepIndex < footstepDataList.size()) && (walkingCompleted.hasValue()));
       //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    }
 
    private boolean readyToTransitionFromTakeAStepToStop(double timeInState)
    {
-      return ((footstepIndex >= footstepDataList.size()) && (walkingCompleted.hasNext()));
+      return ((footstepIndex >= footstepDataList.size()) && (walkingCompleted.hasValue()));
       //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    }
 
@@ -955,7 +965,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private boolean readyToTransitionFromTurnInPlaceToStop(double timeInState)
    {
-      return (walkingCompleted.hasNext());
+      return (walkingCompleted.hasValue());
       //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    }
 

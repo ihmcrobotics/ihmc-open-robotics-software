@@ -148,8 +148,8 @@ public class PathOrientationCalculatorTest
       List<? extends Pose3DReadOnly> poses = pathOrientationCalculator.computePosesFromPath(points, null, startOrientation, goalOrientation);
 
       assertEquals(9, poses.size());
-      assertTrue(poses.get(0).getOrientationDistance(zeroOrientation) < 1e-5);
-      assertTrue(poses.get(poses.size() - 1).getOrientationDistance(zeroOrientation) < 1e-5);
+      assertTrue(poses.get(0).getOrientation().distance(zeroOrientation) < 1e-5);
+      assertTrue(poses.get(poses.size() - 1).getOrientation().distance(zeroOrientation) < 1e-5);
 
       for (int i = 0; i < poses.size(); i++)
       {
@@ -174,8 +174,8 @@ public class PathOrientationCalculatorTest
       poses = pathOrientationCalculator.computePosesFromPath(points, null, startOrientation, goalOrientation);
 
       assertEquals(11, poses.size());
-      assertTrue(poses.get(0).getOrientationDistance(zeroOrientation) < 1e-5);
-      assertTrue(poses.get(poses.size() - 1).getOrientationDistance(zeroOrientation) < 1e-5);
+      assertTrue(poses.get(0).getOrientation().distance(zeroOrientation) < 1e-5);
+      assertTrue(poses.get(poses.size() - 1).getOrientation().distance(zeroOrientation) < 1e-5);
       for (int i = 1; i < poses.size() - 1; i++)
       {
          double previousHeading = BodyPathPlannerTools.calculateHeading(poses.get(i - 1).getPosition(), poses.get(i).getPosition());

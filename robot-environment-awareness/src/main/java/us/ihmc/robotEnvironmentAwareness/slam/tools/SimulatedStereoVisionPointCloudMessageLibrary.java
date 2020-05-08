@@ -13,7 +13,7 @@ public class SimulatedStereoVisionPointCloudMessageLibrary
    private static final RigidBodyTransform fixedSensorPose = new RigidBodyTransform();
    static
    {
-      fixedSensorPose.setTranslation(0.0, 0.0, 100.0);
+      fixedSensorPose.getTranslation().set(0.0, 0.0, 100.0);
    }
 
    public static StereoVisionPointCloudMessage generateMessageSimpleStair(double stairHeight, double stairWidth, double stairLength)
@@ -71,7 +71,7 @@ public class SimulatedStereoVisionPointCloudMessageLibrary
 
       RigidBodyTransform centerTwo = new RigidBodyTransform();
       centerTwo.appendPitchRotation(Math.toRadians(90));
-      centerTwo.setTranslation(stairLengthLower / 2, 0.0, stairHeight / 2 - 0.01);
+      centerTwo.getTranslation().set(stairLengthLower / 2, 0.0, stairHeight / 2 - 0.01);
       ConvexPolygon2D polygonTwo = new ConvexPolygon2D();
       polygonTwo.addVertex(stairHeight / 2, stairWidth / 2);
       polygonTwo.addVertex(stairHeight / 2, -stairWidth / 2);
@@ -80,7 +80,7 @@ public class SimulatedStereoVisionPointCloudMessageLibrary
       polygonTwo.update();
 
       RigidBodyTransform centerThr = new RigidBodyTransform();
-      centerThr.setTranslation(stairLengthLower / 2 + stairLengthUpper / 2, 0.0, stairHeight);
+      centerThr.getTranslation().set(stairLengthLower / 2 + stairLengthUpper / 2, 0.0, stairHeight);
       ConvexPolygon2D polygonThr = new ConvexPolygon2D();
       polygonThr.addVertex(stairLengthUpper / 2, stairWidth / 2);
       polygonThr.addVertex(stairLengthUpper / 2, -stairWidth / 2);
