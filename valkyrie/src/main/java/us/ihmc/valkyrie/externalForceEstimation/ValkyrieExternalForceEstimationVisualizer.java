@@ -39,7 +39,7 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
 {
    private final RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "valkyrie_wrench_estimation_visualizer");
    private final ROS2TopicName inputTopicName;
-   private final ROS2TopicName pubTopicName;
+   private final ROS2TopicName outputTopicName;
    private final int endEffectorHashCode;
    private final Vector3D externalForcePointOffset = new Vector3D();
    private String endEffectorName;
@@ -57,7 +57,7 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
       inputTopicName = ExternalForceEstimationToolboxModule.getInputTopicName(robotModel.getSimpleRobotName());
-      pubTopicName = ExternalForceEstimationToolboxModule.getOutputTopicName(robotModel.getSimpleRobotName());
+      outputTopicName = ExternalForceEstimationToolboxModule.getOutputTopicName(robotModel.getSimpleRobotName());
 
       // ----- Root Joint ----- //
       //      RigidBodyBasics endEffector = fullRobotModel.getRootBody();
@@ -102,7 +102,7 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
       AtomicReference<ExternalForceEstimationOutputStatus> toolboxOutputStatus = new AtomicReference<>();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     ExternalForceEstimationOutputStatus.class,
-                                                    pubTopicName,
+                                                    outputTopicName,
                                            s -> toolboxOutputStatus.set(s.takeNextData()));
 
       AtomicBoolean reset = new AtomicBoolean();
