@@ -67,9 +67,9 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
                                            s -> processFootstepPlannerOutputMessage(s.takeNextData()));
 
       // inputs to this module
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getSubscriberTopicName(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getInputTopicName(),
                                            s -> processQuadrupedXGaitSettings(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedContinuousPlanningRequestPacket.class, getSubscriberTopicName(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedContinuousPlanningRequestPacket.class, getInputTopicName(),
                                            s -> processContinuousPlanningRequest(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopicName,
                                            s -> processPlanarRegionsListMessage(s.takeNextData()));
@@ -146,7 +146,7 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public ROS2TopicName getSubscriberTopicName()
+   public ROS2TopicName getInputTopicName()
    {
       return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
    }

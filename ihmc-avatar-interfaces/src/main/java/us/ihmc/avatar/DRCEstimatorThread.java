@@ -177,10 +177,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          if (realtimeRos2Node != null)
          {
             RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
-            ROS2TopicName subscriberTopicName = ROS2Tools.getControllerInputTopicName(robotName);
+            ROS2TopicName inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
             ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
                                                           RequestWristForceSensorCalibrationPacket.class,
-                                                          subscriberTopicName,
+                                                          inputTopicName,
                                                  subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
             forceSensorStateUpdater.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
          }

@@ -236,7 +236,7 @@ public class AvatarSimulationFactory
       String robotName = robotModel.get().getSimpleRobotName();
 
       ROS2TopicName outputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
-      ROS2TopicName subscriberTopicName = ROS2Tools.getControllerInputTopicName(robotName);
+      ROS2TopicName inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
 
       PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
       if (externalPelvisCorrectorSubscriber.hasValue())
@@ -248,7 +248,7 @@ public class AvatarSimulationFactory
          pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeRos2Node.get(), outputTopicName);
          ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node.get(),
                                                        StampedPosePacket.class,
-                                                       subscriberTopicName,
+                                                       inputTopicName,
                                               s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
       }
 

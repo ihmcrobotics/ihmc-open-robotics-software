@@ -92,7 +92,7 @@ public class AvatarEstimatorThreadFactory
 
    private final OptionalFactoryField<RealtimeRos2Node> realtimeRos2NodeField = new OptionalFactoryField<>("realtimeRos2Node");
    private final OptionalFactoryField<ROS2TopicName> outputTopicNameField = new OptionalFactoryField<>("outputTopicName");
-   private final OptionalFactoryField<ROS2TopicName> subscriberTopicNameField = new OptionalFactoryField<>("subscriberTopicName");
+   private final OptionalFactoryField<ROS2TopicName> inputTopicNameField = new OptionalFactoryField<>("inputTopicName");
 
    private final OptionalFactoryField<SensorDataContext> sensorDataContextField = new OptionalFactoryField<>("sensorDataContext");
    private final OptionalFactoryField<HumanoidRobotContextData> humanoidRobotContextDataField = new OptionalFactoryField<>("humanoidRobotContextData");
@@ -212,15 +212,15 @@ public class AvatarEstimatorThreadFactory
     * @param ros2Node                     the real-time node to create the publisher with.
     * @param outputTopicName  the generator to use for creating the topic name for
     *                                     publishers.
-    * @param subscriberTopicName the generator to use for creating the topic name for
+    * @param inputTopicName the generator to use for creating the topic name for
     *                                     subscribers.
     */
    public void setROS2Info(RealtimeRos2Node ros2Node, ROS2TopicName outputTopicName,
-                           ROS2TopicName subscriberTopicName)
+                           ROS2TopicName inputTopicName)
    {
       realtimeRos2NodeField.set(ros2Node);
       outputTopicNameField.set(outputTopicName);
-      subscriberTopicNameField.set(subscriberTopicName);
+      inputTopicNameField.set(inputTopicName);
    }
 
    /**
@@ -490,10 +490,10 @@ public class AvatarEstimatorThreadFactory
          return null;
    }
 
-   public ROS2TopicName getSubscriberTopicName()
+   public ROS2TopicName getInputTopicName()
    {
-      if (subscriberTopicNameField.hasValue())
-         return subscriberTopicNameField.get();
+      if (inputTopicNameField.hasValue())
+         return inputTopicNameField.get();
       else
          return null;
    }
@@ -519,7 +519,7 @@ public class AvatarEstimatorThreadFactory
             RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
             ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2NodeField.get(),
                                                           RequestWristForceSensorCalibrationPacket.class,
-                                                          subscriberTopicNameField.get(),
+                                                          inputTopicNameField.get(),
                                                  subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
             forceSensorStateUpdaterField.get().setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
          }

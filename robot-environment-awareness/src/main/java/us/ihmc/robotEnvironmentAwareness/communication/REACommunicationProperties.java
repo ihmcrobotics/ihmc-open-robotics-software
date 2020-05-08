@@ -51,7 +51,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 public class REACommunicationProperties
 {
    public static final ROS2TopicName outputTopicName = ROS2Tools.REA.withRobot(null).withOutput();
-   public static final ROS2TopicName subscriberTopicName = ROS2Tools.REA.withRobot(null).withInput();
+   public static final ROS2TopicName inputTopicName = ROS2Tools.REA.withRobot(null).withInput();
    public static final ROS2TopicName subscriberCustomRegionsTopicName = ROS2Tools.REA.withRobot(null)
                                                                                               .withSuffix(ROS2Tools.REA_CUSTOM_REGION_NAME)
                                                                                               .withInput();

@@ -23,11 +23,11 @@ public class ValkyriePunchMessenger implements HumanoidRobotPunchMessenger, Robo
 
    public ValkyriePunchMessenger(String robotName, Ros2Node ros2Node)
    {
-      ROS2TopicName subscriberTopicName = ROS2Tools.getControllerInputTopicName(robotName);
-      armTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ArmTrajectoryMessage.class, subscriberTopicName);
-      highLevelStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HighLevelStateMessage.class, subscriberTopicName);
-      abortWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AbortWalkingMessage.class, subscriberTopicName);
-      pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, subscriberTopicName);
+      ROS2TopicName inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
+      armTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ArmTrajectoryMessage.class, inputTopicName);
+      highLevelStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HighLevelStateMessage.class, inputTopicName);
+      abortWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AbortWalkingMessage.class, inputTopicName);
+      pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, inputTopicName);
    }
 
 

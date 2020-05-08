@@ -85,7 +85,7 @@ public class RemotePlannerMessageConverter
       /* subscribers */
       // we want to listen to the incoming request
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningRequestPacket.class,
-                                                    FootstepPlannerCommunicationProperties.subscriberTopicName(robotName),
+                                                    FootstepPlannerCommunicationProperties.inputTopicName(robotName),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       // we want to also listen to incoming REA planar region data.
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopicName,

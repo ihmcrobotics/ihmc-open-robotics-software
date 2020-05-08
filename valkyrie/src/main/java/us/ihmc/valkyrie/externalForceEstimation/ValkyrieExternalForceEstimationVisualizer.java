@@ -56,7 +56,7 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
       DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, version);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
-      subTopicName = ExternalForceEstimationToolboxModule.getSubscriberTopicName(robotModel.getSimpleRobotName());
+      subTopicName = ExternalForceEstimationToolboxModule.getInputTopicName(robotModel.getSimpleRobotName());
       pubTopicName = ExternalForceEstimationToolboxModule.getPublisherTopicName(robotModel.getSimpleRobotName());
 
       // ----- Root Joint ----- //

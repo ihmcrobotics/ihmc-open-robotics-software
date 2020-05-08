@@ -59,13 +59,13 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
                                            s -> processGroundPlaneMessage(s.takeNextData()));
 
       // inputs to this module
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedBodyPathPlanMessage.class, getSubscriberTopicName(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedBodyPathPlanMessage.class, getInputTopicName(),
                                            s -> processBodyPathPlanMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getSubscriberTopicName(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getInputTopicName(),
                                            s -> processXGaitSettingsPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedTeleopDesiredVelocity.class, getSubscriberTopicName(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedTeleopDesiredVelocity.class, getInputTopicName(),
                                            s -> processTeleopDesiredVelocity(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PlanarRegionsListMessage.class, getSubscriberTopicName(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PlanarRegionsListMessage.class, getInputTopicName(),
                                            s -> processPlanarRegionsListMessage(s.takeNextData()));
    }
 
@@ -161,7 +161,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public ROS2TopicName getSubscriberTopicName()
+   public ROS2TopicName getInputTopicName()
    {
       return ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName).withInput();
    }

@@ -29,10 +29,10 @@ public class ValkyrieJoystickBasedGraspingApplication extends Application
       ValkyrieRobotModel robotModel = new ValkyrieRobotModel(robotTarget, ValkyrieRobotVersion.DEFAULT);
       String robotName = robotModel.getSimpleRobotName();
 
-      ROS2TopicName subscriberTopicName = ROS2Tools.getControllerInputTopicName(robotName);
+      ROS2TopicName inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
 
       ValkyrieFingerTrajectoryMessagePublisher handFingerTrajectoryMessagePublisher = new ValkyrieFingerTrajectoryMessagePublisher(ros2Node,
-                                                                                                                                   subscriberTopicName);
+                                                                                                                                   inputTopicName);
 
       ui = new JoystickBasedGraspingMainUI(robotName, primaryStage, ros2Node, robotModel, handFingerTrajectoryMessagePublisher);
    }

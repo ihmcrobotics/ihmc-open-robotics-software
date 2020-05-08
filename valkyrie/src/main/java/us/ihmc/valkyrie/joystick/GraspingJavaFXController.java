@@ -159,12 +159,12 @@ public class GraspingJavaFXController
       messager.registerTopicListener(XBoxOneJavaFXController.ButtonXState, state -> submitReachingManifoldsToToolbox(state));
       messager.registerTopicListener(XBoxOneJavaFXController.ButtonYState, state -> confirmReachingMotion(state));
 
-      ROS2TopicName toolboxRequestTopicName = KinematicsPlanningToolboxModule.getSubscriberTopicName(robotName);
+      ROS2TopicName toolboxRequestTopicName = KinematicsPlanningToolboxModule.getInputTopicName(robotName);
       ROS2TopicName toolboxResponseTopicName = KinematicsPlanningToolboxModule.getPublisherTopicName(robotName);
 
-      ROS2TopicName subscriberTopicName = ROS2Tools.getControllerInputTopicName(robotName);
+      ROS2TopicName inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
 
-      wholeBodyTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WholeBodyTrajectoryMessage.class, subscriberTopicName);
+      wholeBodyTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WholeBodyTrajectoryMessage.class, inputTopicName);
       toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxRequestTopicName);
       //toolboxMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsPlanningToolboxRigidBodyMessage.class, toolboxRequestTopicName);
       toolboxMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsPlanningToolboxInputMessage.class, toolboxRequestTopicName);

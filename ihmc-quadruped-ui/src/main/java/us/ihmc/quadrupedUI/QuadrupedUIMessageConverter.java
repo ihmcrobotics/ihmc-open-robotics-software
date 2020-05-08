@@ -125,7 +125,7 @@ public class QuadrupedUIMessageConverter
       /* subscribers */
       ROS2TopicName controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
       ROS2TopicName footstepPlannerOutputTopicName = PawStepPlannerCommunicationProperties.outputTopicName(robotName);
-      ROS2TopicName footstepPlannerInputTopicGenerator = PawStepPlannerCommunicationProperties.subscriberTopicName(robotName);
+      ROS2TopicName footstepPlannerInputTopicGenerator = PawStepPlannerCommunicationProperties.inputTopicName(robotName);
 
       ROS2Tools
             .createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopicName, s -> processRobotConfigurationData(s.takeNextData()));
@@ -198,7 +198,7 @@ public class QuadrupedUIMessageConverter
 
       stepListMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedTimedStepListMessage.class, controllerInputTopicName);
 
-      reaStateRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicName);
+      reaStateRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.inputTopicName);
 
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredControllerNameTopic, this::publishDesiredHighLevelControllerState);
       messager.registerTopicListener(QuadrupedUIMessagerAPI.DesiredSteppingStateNameTopic, this::publishDesiredQuadrupedSteppigState);
