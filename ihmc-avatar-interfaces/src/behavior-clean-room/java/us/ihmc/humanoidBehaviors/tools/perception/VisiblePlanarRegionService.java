@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.tools.perception;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
@@ -25,8 +26,16 @@ public class VisiblePlanarRegionService
 
    public VisiblePlanarRegionService(Ros2NodeInterface ros2Node, Supplier<PlanarRegionsList>... planarRegionSuppliers)
    {
+      this(ros2Node, "", planarRegionSuppliers);
+   }
+
+   public VisiblePlanarRegionService(Ros2NodeInterface ros2Node, String topicSpecifier, Supplier<PlanarRegionsList>... planarRegionSuppliers)
+   {
       this.planarRegionSuppliers = planarRegionSuppliers;
-      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
+      MessageTopicNameGenerator topicGenerator = ROS2Tools.getTopicNameGenerator(null,
+                                                                                 ROS2Tools.REA_MODULE + topicSpecifier,
+                                                                                 ROS2Tools.ROS2TopicQualifier.OUTPUT);
+      planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, topicGenerator);
       thread = new PausablePeriodicThread(getClass().getSimpleName(), 0.5, this::process);
    }
 

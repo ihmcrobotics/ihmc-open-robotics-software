@@ -6,7 +6,6 @@ import java.util.concurrent.Executors;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Callback;
-import us.ihmc.communication.ROS2ModuleIdentifier;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
@@ -30,24 +29,19 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
 
    public LivePlanarRegionsGraphic(Ros2Node ros2Node, boolean initializeToFlatGround)
    {
-      this(ros2Node, ROS2Tools.REA, initializeToFlatGround);
+      this(ros2Node, "", initializeToFlatGround);
    }
 
-   public LivePlanarRegionsGraphic(Ros2Node ros2Node, ROS2ModuleIdentifier regionsSource, boolean initializeToFlatGround)
-   {
-      this(ros2Node,
-           ROS2Tools.generateDefaultTopicName(PlanarRegionsListMessage.class,
-                                              null,
-                                              regionsSource.getModuleTopicQualifier(),
-                                              regionsSource.deriveIOTopicQualifierForSubscriber(ros2Node.getName())),
-           initializeToFlatGround);
-   }
-
-   public LivePlanarRegionsGraphic(Ros2Node ros2Node, String regionsSourceTopicName, boolean initializeToFlatGround)
+   public LivePlanarRegionsGraphic(Ros2Node ros2Node, String topicSpecifier, boolean initializeToFlatGround)
    {
       super(initializeToFlatGround);
 
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, regionsSourceTopicName, this::acceptPlanarRegions);
+      String topicName = ROS2Tools.generateDefaultTopicName(PlanarRegionsListMessage.class,
+                                                            null,
+                                                            ROS2Tools.REA_MODULE + topicSpecifier,
+                                                            ROS2Tools.ROS2TopicQualifier.OUTPUT);
+
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, topicName, this::acceptPlanarRegions);
       animationTimer.start();
    }
 
