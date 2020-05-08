@@ -217,15 +217,15 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                     footstepPlannerParameters);
       }
 
-      ROS2TopicName behaviorSubGenerator = getSubscriberTopicNameGenerator(robotName);
+      ROS2TopicName behaviorInputTopicName = getSubscriberTopicNameGenerator(robotName);
       dispatcher.finalizeStateMachine();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     BehaviorControlModePacket.class,
-                                                    behaviorSubGenerator,
+                                                    behaviorInputTopicName,
                                            s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     HumanoidBehaviorTypePacket.class,
-                                                    behaviorSubGenerator,
+                                                    behaviorInputTopicName,
                                            s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
 
       if (startYoVariableServer)

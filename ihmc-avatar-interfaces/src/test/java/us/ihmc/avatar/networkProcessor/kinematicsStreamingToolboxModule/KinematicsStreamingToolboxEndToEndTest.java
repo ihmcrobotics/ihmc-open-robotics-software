@@ -147,7 +147,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
    {
       String robotName = robotModel.getSimpleRobotName();
       ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
-      ROS2TopicName toolboxSubGenerator = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
+      ROS2TopicName toolboxInputTopicName = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
       ROS2TopicName toolboxOutputTopicName = KinematicsStreamingToolboxModule.getPublisherTopicNameGenerator(robotName);
 
       desiredFullRobotModel = robotModel.createFullRobotModel();
@@ -157,7 +157,7 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
       commandInputManager.registerConversionHelper(new KinematicsStreamingToolboxCommandConverter(desiredFullRobotModel));
       statusOutputManager = new StatusMessageOutputManager(KinematicsStreamingToolboxModule.supportedStatus());
 
-      new ControllerNetworkSubscriber(toolboxSubGenerator, commandInputManager, toolboxOutputTopicName, statusOutputManager, toolboxRos2Node);
+      new ControllerNetworkSubscriber(toolboxInputTopicName, commandInputManager, toolboxOutputTopicName, statusOutputManager, toolboxRos2Node);
 
       toolboxController = new KinematicsStreamingToolboxController(commandInputManager,
                                                                    statusOutputManager,

@@ -66,10 +66,10 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator,
                                            s -> processPlanarRegionsListMessage(s.takeNextData()));
 
-      ROS2TopicName plannerSubGenerator = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
+      ROS2TopicName plannerInputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
                                                                              .withInput();
-      footstepPlanningRequestPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, FootstepPlanningRequestPacket.class, plannerSubGenerator);
-      footstepPlanningToolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, ToolboxStateMessage.class, plannerSubGenerator);
+      footstepPlanningRequestPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, FootstepPlanningRequestPacket.class, plannerInputTopicName);
+      footstepPlanningToolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, ToolboxStateMessage.class, plannerInputTopicName);
    }
 
    @Override
