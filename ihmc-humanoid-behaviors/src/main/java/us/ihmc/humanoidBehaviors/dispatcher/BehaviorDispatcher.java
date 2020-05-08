@@ -99,9 +99,9 @@ public class BehaviorDispatcher<E extends Enum<E>> implements Runnable
       SimpleDoNothingBehavior simpleForwardingBehavior = new SimpleDoNothingBehavior(robotName, ros2Node);
       addBehavior(stopBehavior, simpleForwardingBehavior);
 
-      ROS2TopicName publisherTopicName = IHMCHumanoidBehaviorManager.getPublisherTopicName(robotName);
-      behaviorStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, BehaviorStatusPacket.class, publisherTopicName);
-      behaviorControlModeResponsePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, BehaviorControlModeResponsePacket.class, publisherTopicName);
+      ROS2TopicName outputTopicName = IHMCHumanoidBehaviorManager.getPublisherTopicName(robotName);
+      behaviorStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, BehaviorStatusPacket.class, outputTopicName);
+      behaviorControlModeResponsePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, BehaviorControlModeResponsePacket.class, outputTopicName);
 
       requestedBehavior.set(null);
 

@@ -72,7 +72,7 @@ public class JoystickBasedGraspingMainUI
       view3dFactory.addNodeToView(javaFXRobotVisualizer.getRootNode());
 
       planarRegionsViewer = new JavaFXPlanarRegionsViewer();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicName,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopicName,
                                            s -> planarRegionsViewer.submitPlanarRegions(s.takeNextData()));
       view3dFactory.addNodeToView(planarRegionsViewer.getRootNode());
       

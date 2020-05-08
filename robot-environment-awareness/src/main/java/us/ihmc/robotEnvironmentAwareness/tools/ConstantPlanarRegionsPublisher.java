@@ -1,6 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.tools;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.publisherTopicName;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopicName;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberTopicName;
 
 import us.ihmc.communication.ROS2Tools;
@@ -32,7 +32,7 @@ public class ConstantPlanarRegionsPublisher
    public ConstantPlanarRegionsPublisher(PlanarRegionsList planarRegionsList)
    {
       this.planarRegionsList = planarRegionsList;
-      this.publisher = new REAPlanarRegionPublicNetworkProvider(null, new ConstantPlanarRegionProvider(), ros2Node, publisherTopicName, subscriberTopicName);
+      this.publisher = new REAPlanarRegionPublicNetworkProvider(null, new ConstantPlanarRegionProvider(), ros2Node, outputTopicName, subscriberTopicName);
    }
 
    public void start()

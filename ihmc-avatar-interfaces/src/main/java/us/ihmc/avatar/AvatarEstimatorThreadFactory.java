@@ -91,7 +91,7 @@ public class AvatarEstimatorThreadFactory
    private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisPoseSubscriberField = new OptionalFactoryField<>("externalPelvisPoseSubscriberField");
 
    private final OptionalFactoryField<RealtimeRos2Node> realtimeRos2NodeField = new OptionalFactoryField<>("realtimeRos2Node");
-   private final OptionalFactoryField<ROS2TopicName> publisherTopicNameField = new OptionalFactoryField<>("publisherTopicName");
+   private final OptionalFactoryField<ROS2TopicName> outputTopicNameField = new OptionalFactoryField<>("outputTopicName");
    private final OptionalFactoryField<ROS2TopicName> subscriberTopicNameField = new OptionalFactoryField<>("subscriberTopicName");
 
    private final OptionalFactoryField<SensorDataContext> sensorDataContextField = new OptionalFactoryField<>("sensorDataContext");
@@ -210,16 +210,16 @@ public class AvatarEstimatorThreadFactory
     * ROS 2 necessary information to create the real-time publisher/subscriber.
     *
     * @param ros2Node                     the real-time node to create the publisher with.
-    * @param publisherTopicName  the generator to use for creating the topic name for
+    * @param outputTopicName  the generator to use for creating the topic name for
     *                                     publishers.
     * @param subscriberTopicName the generator to use for creating the topic name for
     *                                     subscribers.
     */
-   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2TopicName publisherTopicName,
+   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2TopicName outputTopicName,
                            ROS2TopicName subscriberTopicName)
    {
       realtimeRos2NodeField.set(ros2Node);
-      publisherTopicNameField.set(publisherTopicName);
+      outputTopicNameField.set(outputTopicName);
       subscriberTopicNameField.set(subscriberTopicName);
    }
 
@@ -484,8 +484,8 @@ public class AvatarEstimatorThreadFactory
 
    public ROS2TopicName getPublisherTopicName()
    {
-      if (publisherTopicNameField.hasValue())
-         return publisherTopicNameField.get();
+      if (outputTopicNameField.hasValue())
+         return outputTopicNameField.get();
       else
          return null;
    }
@@ -530,7 +530,7 @@ public class AvatarEstimatorThreadFactory
    private IHMCRealtimeROS2Publisher<ControllerCrashNotificationPacket> createControllerCrashPublisher()
    {
       if (realtimeRos2NodeField.hasValue())
-         return ROS2Tools.createPublisherTypeNamed(realtimeRos2NodeField.get(), ControllerCrashNotificationPacket.class, publisherTopicNameField.get());
+         return ROS2Tools.createPublisherTypeNamed(realtimeRos2NodeField.get(), ControllerCrashNotificationPacket.class, outputTopicNameField.get());
       else
          return null;
    }
@@ -763,7 +763,7 @@ public class AvatarEstimatorThreadFactory
          factory.setDefinitionsToPublish(getEstimatorFullRobotModel());
          factory.setSensorSource(getEstimatorFullRobotModel(), forceSensorDataHolderToSend, getRawSensorOutputMap());
          factory.setRobotMotionStatusHolder(getRobotMotionStatusFromController());
-         factory.setROS2Info(realtimeRos2NodeField.get(), publisherTopicNameField.get());
+         factory.setROS2Info(realtimeRos2NodeField.get(), outputTopicNameField.get());
          factory.setPublishPeriod(Conversions.secondsToNanoseconds(UnitConversions.hertzToSeconds(120)));
          robotConfigurationDataPublisherField.set(factory.createRobotConfigurationDataPublisher());
       }

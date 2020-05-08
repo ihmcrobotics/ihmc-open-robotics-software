@@ -71,7 +71,7 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
                                            s -> processQuadrupedXGaitSettings(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedContinuousPlanningRequestPacket.class, getSubscriberTopicName(),
                                            s -> processContinuousPlanningRequest(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicName,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopicName,
                                            s -> processPlanarRegionsListMessage(s.takeNextData()));
    }
 

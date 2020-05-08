@@ -89,7 +89,7 @@ public class JoystickBasedSteppingMainUI
       planarRegionsViewer = new JavaFXPlanarRegionsViewer();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     PlanarRegionsListMessage.class,
-                                                    REACommunicationProperties.publisherTopicName,
+                                                    REACommunicationProperties.outputTopicName,
                                            s -> planarRegionsViewer.submitPlanarRegions(s.takeNextData()));
       view3dFactory.addNodeToView(planarRegionsViewer.getRootNode());
 

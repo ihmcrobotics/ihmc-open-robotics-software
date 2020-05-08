@@ -88,12 +88,12 @@ public class RemotePlannerMessageConverter
                                                     FootstepPlannerCommunicationProperties.subscriberTopicName(robotName),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       // we want to also listen to incoming REA planar region data.
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicName,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopicName,
                                            s -> processIncomingPlanarRegionMessage(s.takeNextData()));
 
       // publishers
       outputStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepPlanningToolboxOutputStatus.class,
-                                                                 FootstepPlannerCommunicationProperties.publisherTopicName(robotName));
+                                                                 FootstepPlannerCommunicationProperties.outputTopicName(robotName));
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, request -> checkAndPublishIfInvalidResult());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, request -> publishResultingPlan());

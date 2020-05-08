@@ -64,7 +64,7 @@ public class NetworkSubscriber
    private final ROS2TopicName subscriberTopicName;
 
    public NetworkSubscriber(ROS2TopicName subscriberTopicName, CommandInputManager controllerCommandInputManager,
-                            ROS2TopicName publisherTopicName, OutputManager messageOutputManager, RealtimeRos2Node realtimeRos2Node)
+                            ROS2TopicName outputTopicName, OutputManager messageOutputManager, RealtimeRos2Node realtimeRos2Node)
    {
       this.subscriberTopicName = subscriberTopicName;
       this.controllerCommandInputManager = controllerCommandInputManager;
@@ -79,7 +79,7 @@ public class NetworkSubscriber
       if (realtimeRos2Node == null)
          PrintTools.error(this, "No ROS2 node, " + getClass().getSimpleName() + " cannot be created.");
 
-      messageOutputManager.registerOutputMessage(InvalidPacketNotificationPacket.class, publisherTopicName);
+      messageOutputManager.registerOutputMessage(InvalidPacketNotificationPacket.class, outputTopicName);
 
       createPublishersSubscribersForSupportedMessages();
       createGlobalStatusMessageListener();

@@ -124,7 +124,7 @@ public class QuadrupedUIMessageConverter
    {
       /* subscribers */
       ROS2TopicName controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
-      ROS2TopicName footstepPlannerOutputTopicName = PawStepPlannerCommunicationProperties.publisherTopicName(robotName);
+      ROS2TopicName footstepPlannerOutputTopicName = PawStepPlannerCommunicationProperties.outputTopicName(robotName);
       ROS2TopicName footstepPlannerInputTopicGenerator = PawStepPlannerCommunicationProperties.subscriberTopicName(robotName);
 
       ROS2Tools
@@ -148,7 +148,7 @@ public class QuadrupedUIMessageConverter
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PawStepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopicName,
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
       // we want to also listen to incoming REA planar region data.
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicName,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopicName,
                                            s -> processIncomingPlanarRegionMessage(s.takeNextData()));
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT,
@@ -156,10 +156,10 @@ public class QuadrupedUIMessageConverter
 
       /* TODO
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepNodeDataListMessage.class,
-                                           FootstepPlannerCommunicationProperties.publisherTopicName(robotName),
+                                           FootstepPlannerCommunicationProperties.outputTopicName(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.NodeDataTopic, s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlannerOccupancyMapMessage.class,
-                                           FootstepPlannerCommunicationProperties.publisherTopicName(robotName),
+                                           FootstepPlannerCommunicationProperties.outputTopicName(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.OccupancyMapTopic, s.takeNextData()));
                                            */
       // TODO
