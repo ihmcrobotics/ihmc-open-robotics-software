@@ -552,7 +552,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
       return getBehaviorRosTopicPrefix(robotName, ROS2Tools.INPUT);
    }
 
-   public static ROS2TopicName getPublisherTopicName(String robotName)
+   public static ROS2TopicName getOutputTopicName(String robotName)
    {
       return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
    }

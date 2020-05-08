@@ -155,7 +155,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public ROS2TopicName getPublisherTopicName()
+   public ROS2TopicName getOutputTopicName()
    {
       return ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName).withOutput();
    }

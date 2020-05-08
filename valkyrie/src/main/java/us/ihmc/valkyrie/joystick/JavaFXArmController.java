@@ -149,7 +149,7 @@ public class JavaFXArmController
       messager.registerTopicListener(XBoxOneJavaFXController.ButtonYState, state -> confirmReachingMotion(state));
 
       ROS2TopicName toolboxRequestTopicName = KinematicsToolboxModule.getInputTopicName(robotName);
-      ROS2TopicName toolboxResponseTopicName = KinematicsToolboxModule.getPublisherTopicName(robotName);
+      ROS2TopicName toolboxResponseTopicName = KinematicsToolboxModule.getOutputTopicName(robotName);
 
       ROS2TopicName inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
 

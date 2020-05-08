@@ -145,17 +145,17 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    {
       Map<Class<? extends Settable<?>>, ROS2TopicName> messages = new HashMap<>();
 
-      messages.put(PawStepPlanningToolboxOutputStatus.class, getPublisherTopicName());
-      messages.put(QuadrupedBodyOrientationMessage.class, getPublisherTopicName());
-      messages.put(BodyPathPlanMessage.class, getPublisherTopicName());
-      messages.put(PawStepPlannerParametersPacket.class, getPublisherTopicName());
-      messages.put(FootstepPlannerStatusMessage.class, getPublisherTopicName());
+      messages.put(PawStepPlanningToolboxOutputStatus.class, getOutputTopicName());
+      messages.put(QuadrupedBodyOrientationMessage.class, getOutputTopicName());
+      messages.put(BodyPathPlanMessage.class, getOutputTopicName());
+      messages.put(PawStepPlannerParametersPacket.class, getOutputTopicName());
+      messages.put(FootstepPlannerStatusMessage.class, getOutputTopicName());
 
       return messages;
    }
 
    @Override
-   public ROS2TopicName getPublisherTopicName()
+   public ROS2TopicName getOutputTopicName()
    {
       return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
    }

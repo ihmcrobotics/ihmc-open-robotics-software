@@ -80,9 +80,9 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    {
       Map<Class<? extends Settable<?>>, ROS2TopicName> messages = new HashMap<>();
 
-      messages.put(PawStepPlanningToolboxOutputStatus.class, getPublisherTopicName());
-      messages.put(BodyPathPlanMessage.class, getPublisherTopicName());
-      messages.put(QuadrupedTimedStepListMessage.class, getPublisherTopicName());
+      messages.put(PawStepPlanningToolboxOutputStatus.class, getOutputTopicName());
+      messages.put(BodyPathPlanMessage.class, getOutputTopicName());
+      messages.put(QuadrupedTimedStepListMessage.class, getOutputTopicName());
 
       ROS2TopicName plannerInputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
                                                                              .withInput();
@@ -140,7 +140,7 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
 
 
    @Override
-   public ROS2TopicName getPublisherTopicName()
+   public ROS2TopicName getOutputTopicName()
    {
       return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
    }

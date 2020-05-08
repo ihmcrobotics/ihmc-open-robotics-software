@@ -109,7 +109,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
-      controllerNetworkSubscriber = new ControllerNetworkSubscriber(getInputTopicName(), commandInputManager, getPublisherTopicName(),
+      controllerNetworkSubscriber = new ControllerNetworkSubscriber(getInputTopicName(), commandInputManager, getOutputTopicName(),
                                                                     statusOutputManager, realtimeRos2Node);
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
@@ -458,7 +458,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       return Collections.emptySet();
    }
 
-   public abstract ROS2TopicName getPublisherTopicName();
+   public abstract ROS2TopicName getOutputTopicName();
 
    public abstract ROS2TopicName getInputTopicName();
 }

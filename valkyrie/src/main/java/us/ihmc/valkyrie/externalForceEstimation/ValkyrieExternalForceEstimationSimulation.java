@@ -151,7 +151,7 @@ public class ValkyrieExternalForceEstimationSimulation
       AtomicReference<ExternalForceEstimationOutputStatus> toolboxOutputStatus = new AtomicReference<>();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     ExternalForceEstimationOutputStatus.class,
-                                                    ExternalForceEstimationToolboxModule.getPublisherTopicName(robotModel.getSimpleRobotName()),
+                                                    ExternalForceEstimationToolboxModule.getOutputTopicName(robotModel.getSimpleRobotName()),
                                            s -> toolboxOutputStatus.set(s.takeNextData()));
 
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().addScript(t ->
