@@ -177,10 +177,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          if (realtimeRos2Node != null)
          {
             RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
-            ROS2TopicName subscriberTopicNameGenerator = ROS2Tools.getControllerInputTopicName(robotName);
+            ROS2TopicName subscriberTopicName = ROS2Tools.getControllerInputTopicName(robotName);
             ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
                                                           RequestWristForceSensorCalibrationPacket.class,
-                                                          subscriberTopicNameGenerator,
+                                                          subscriberTopicName,
                                                  subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
             forceSensorStateUpdater.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
          }
@@ -352,8 +352,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    public void setupHighLevelControllerCallback(String robotName, RealtimeRos2Node realtimeRos2Node,
                                                 Map<HighLevelControllerName, StateEstimatorMode> stateModeMap)
    {
-      ROS2TopicName publisherTopicNameGenerator = ROS2Tools.getControllerOutputTopicName(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, publisherTopicNameGenerator, subscriber ->
+      ROS2TopicName publisherTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, publisherTopicName, subscriber ->
       {
          HighLevelStateChangeStatusMessage message = subscriber.takeNextData();
          LogTools.debug("Estimator recieved message: controller going to {}", HighLevelControllerName.fromByte(message.getEndHighLevelControllerName()));

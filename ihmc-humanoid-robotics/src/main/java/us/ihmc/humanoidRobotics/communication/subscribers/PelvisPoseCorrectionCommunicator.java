@@ -17,12 +17,12 @@ public class PelvisPoseCorrectionCommunicator implements PelvisPoseCorrectionCom
    private final IHMCRealtimeROS2Publisher<PelvisPoseErrorPacket> poseErrorPublisher;
    private final IHMCRealtimeROS2Publisher<LocalizationPacket> localizationPublisher;
 
-   public PelvisPoseCorrectionCommunicator(RealtimeRos2Node realtimeRos2Node, ROS2TopicName topicNameGenerator)
+   public PelvisPoseCorrectionCommunicator(RealtimeRos2Node realtimeRos2Node, ROS2TopicName topicName)
    {
-      if (realtimeRos2Node != null && topicNameGenerator != null)
+      if (realtimeRos2Node != null && topicName != null)
       {
-         poseErrorPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, PelvisPoseErrorPacket.class, topicNameGenerator);
-         localizationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, LocalizationPacket.class, topicNameGenerator);
+         poseErrorPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, PelvisPoseErrorPacket.class, topicName);
+         localizationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, LocalizationPacket.class, topicName);
       }
       else
       {

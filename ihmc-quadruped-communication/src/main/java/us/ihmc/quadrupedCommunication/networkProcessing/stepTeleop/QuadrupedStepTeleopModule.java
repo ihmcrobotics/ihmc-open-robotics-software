@@ -59,13 +59,13 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
                                            s -> processGroundPlaneMessage(s.takeNextData()));
 
       // inputs to this module
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedBodyPathPlanMessage.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedBodyPathPlanMessage.class, getSubscriberTopicName(),
                                            s -> processBodyPathPlanMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getSubscriberTopicName(),
                                            s -> processXGaitSettingsPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedTeleopDesiredVelocity.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedTeleopDesiredVelocity.class, getSubscriberTopicName(),
                                            s -> processTeleopDesiredVelocity(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PlanarRegionsListMessage.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PlanarRegionsListMessage.class, getSubscriberTopicName(),
                                            s -> processPlanarRegionsListMessage(s.takeNextData()));
    }
 
@@ -155,13 +155,13 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public ROS2TopicName getPublisherTopicNameGenerator()
+   public ROS2TopicName getPublisherTopicName()
    {
       return ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2TopicName getSubscriberTopicNameGenerator()
+   public ROS2TopicName getSubscriberTopicName()
    {
       return ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName).withInput();
    }

@@ -82,7 +82,7 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
                                     (packet) -> newGoalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                                                 packet.getPosition(),
                                                                                 packet.getOrientation())));
-      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
+      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicName, planarRegions::set);
    }
 
    public void setTarget(FramePose3D targetPoseInWorld)

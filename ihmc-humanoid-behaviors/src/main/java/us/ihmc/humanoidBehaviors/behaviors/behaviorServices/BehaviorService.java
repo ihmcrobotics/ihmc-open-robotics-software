@@ -71,9 +71,9 @@ public abstract class BehaviorService
       createSubscriber(messageType, topicName, consumer);
    }
 
-   public <T> void createSubscriber(Class<T> messageType, ROS2TopicName topicNameGenerator, ObjectConsumer<T> consumer)
+   public <T> void createSubscriber(Class<T> messageType, ROS2TopicName topicName, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, messageType, topicNameGenerator, s -> consumer.consumeObject(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
    }
 
    public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)

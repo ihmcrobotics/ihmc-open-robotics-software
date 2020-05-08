@@ -144,23 +144,23 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2TopicName getPublisherTopicNameGenerator()
+   public ROS2TopicName getPublisherTopicName()
    {
-      return getPublisherTopicNameGenerator(robotName);
+      return getPublisherTopicName(robotName);
    }
 
-   public static ROS2TopicName getPublisherTopicNameGenerator(String robotName)
+   public static ROS2TopicName getPublisherTopicName(String robotName)
    {
       return ROS2Tools.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2TopicName getSubscriberTopicNameGenerator()
+   public ROS2TopicName getSubscriberTopicName()
    {
-      return getSubscriberTopicNameGenerator(robotName);
+      return getSubscriberTopicName(robotName);
    }
 
-   public static ROS2TopicName getSubscriberTopicNameGenerator(String robotName)
+   public static ROS2TopicName getSubscriberTopicName(String robotName)
    {
       return ROS2Tools.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withInput();
    }

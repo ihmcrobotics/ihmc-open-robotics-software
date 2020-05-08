@@ -45,7 +45,7 @@ public class RobotConfigurationDataPublisherFactory
    private final OptionalFactoryField<RobotMotionStatusHolder> robotMotionStatusHolderField = new OptionalFactoryField<>("robotMotionStatusHolder");
 
    private final RequiredFactoryField<RealtimeRos2Node> realtimeRos2NodeField = new RequiredFactoryField<>("realtimeRos2Node");
-   private final RequiredFactoryField<ROS2TopicName> publisherTopicNameGeneratorField = new RequiredFactoryField<>("publisherTopicNameGenerator");
+   private final RequiredFactoryField<ROS2TopicName> publisherTopicNameField = new RequiredFactoryField<>("publisherTopicName");
 
    public RobotConfigurationDataPublisherFactory()
    {
@@ -175,12 +175,12 @@ public class RobotConfigurationDataPublisherFactory
     * ROS 2 necessary information to create the real-time publisher.
     * 
     * @param ros2Node                    the real-time node to create the publisher with.
-    * @param publisherTopicNameGenerator the generator to use for creating the topic name.
+    * @param publisherTopicName the generator to use for creating the topic name.
     */
-   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2TopicName publisherTopicNameGenerator)
+   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2TopicName publisherTopicName)
    {
       realtimeRos2NodeField.set(ros2Node);
-      publisherTopicNameGeneratorField.set(publisherTopicNameGenerator);
+      publisherTopicNameField.set(publisherTopicName);
    }
 
    /**
@@ -207,7 +207,7 @@ public class RobotConfigurationDataPublisherFactory
       List<ForceSensorDataReadOnly> forceSensorDataToPublish = filterForceSensorDataToPublish();
 
       RobotConfigurationDataPublisher publisher = new RobotConfigurationDataPublisher(realtimeRos2NodeField.get(),
-                                                                                      publisherTopicNameGeneratorField.get(),
+                                                                                      publisherTopicNameField.get(),
                                                                                       rootJointSensorData.get(),
                                                                                       jointSensorDataToPublish,
                                                                                       imuSensorDataToPublish,

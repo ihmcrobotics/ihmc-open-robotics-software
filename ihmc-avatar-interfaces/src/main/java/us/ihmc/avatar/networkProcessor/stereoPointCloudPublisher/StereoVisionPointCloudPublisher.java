@@ -90,19 +90,19 @@ public class StereoVisionPointCloudPublisher
    }
 
    public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, ROS2TopicName robotConfigurationDataTopicName,
-                                          ROS2TopicName defaultTopicNameGenerator)
+                                          ROS2TopicName defaultTopicName)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
-           defaultTopicNameGenerator);
+           defaultTopicName);
    }
 
    public StereoVisionPointCloudPublisher(String robotName, FullRobotModel fullRobotModel, Ros2Node ros2Node, RealtimeRos2Node realtimeRos2Node,
-                                          ROS2TopicName robotConfigurationDataTopicName, ROS2TopicName defaultTopicNameGenerator)
+                                          ROS2TopicName robotConfigurationDataTopicName, ROS2TopicName defaultTopicName)
    {
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
-      ROS2TopicName generateTopicName = defaultTopicNameGenerator.withType(messageType);
+      ROS2TopicName generateTopicName = defaultTopicName.withType(messageType);
       if (ros2Node != null)
       {
          ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,

@@ -1,6 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.fusion;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
 
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -70,7 +70,7 @@ public class LidarImageFusionProcessorCommunicationModule
       new ROS2Callback<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, this::dispatchVideoPacket);
       new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.IHMC_ROOT, this::dispatchCustomPlanarRegion);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicName,
                                                     this::dispatchCustomPlanarRegion);
 
       objectDetectionManager = new FusionSensorObjectDetectionManager(ros2Node, messager);

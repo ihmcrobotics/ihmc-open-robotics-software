@@ -41,24 +41,24 @@ public class FootstepPlanPostProcessingModuleLauncher
       postProcessingModule.registerRosNode(ros2Node);
       String name = postProcessingModule.getName();
 
-      ROS2TopicName subscriberTopicNameGenerator = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
+      ROS2TopicName subscriberTopicName = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
                                                                                             .withInput();
-      ROS2TopicName publisherTopicNameGenerator = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
+      ROS2TopicName publisherTopicName = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
                                                                                      .withOutput();
 
       // Parameters callback
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPostProcessingParametersPacket.class, subscriberTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPostProcessingParametersPacket.class, subscriberTopicName,
                                            s -> postProcessingModule.getParameters().set(s.readNextData()));
 
       // Planner request callback
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPostProcessingPacket.class, subscriberTopicNameGenerator, s -> {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPostProcessingPacket.class, subscriberTopicName, s -> {
          FootstepPostProcessingPacket requestPacket = s.takeNextData();
          new Thread(() -> postProcessingModule.handleRequestPacket(requestPacket)).start();
       });
 
       // Result publisher
       IHMCROS2Publisher<FootstepPostProcessingPacket> resultPublisher = ROS2Tools
-            .createPublisherTypeNamed(ros2Node, FootstepPostProcessingPacket.class, publisherTopicNameGenerator);
+            .createPublisherTypeNamed(ros2Node, FootstepPostProcessingPacket.class, publisherTopicName);
       postProcessingModule.addStatusCallback(resultPublisher::publish);
 
       return postProcessingModule;

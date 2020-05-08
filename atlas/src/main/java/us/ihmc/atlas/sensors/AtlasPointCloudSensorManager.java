@@ -32,12 +32,12 @@ public class AtlasPointCloudSensorManager
    public AtlasPointCloudSensorManager(FullHumanoidRobotModelFactory modelFactory, Ros2Node ros2Node, ROS2TopicName rcdTopicName,
                                        RobotROSClockCalculator rosClockCalculator, boolean useTrackingData)
    {
-      ROS2TopicName depthCloudTopicNameGenerator = ROS2Tools.IHMC_ROOT.withSuffix(ROS2Tools.D435_NAME);
-      realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName, depthCloudTopicNameGenerator);
+      ROS2TopicName depthCloudTopicName = ROS2Tools.IHMC_ROOT.withSuffix(ROS2Tools.D435_NAME);
+      realsenseDepthPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName, depthCloudTopicName);
       realsenseDepthPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
 
-      ROS2TopicName trackingCameraTopicNameGenerator = ROS2Tools.IHMC_ROOT.withSuffix(ROS2Tools.T265_NAME);
-      trackingCameraPublisher = new TrackingCameraBridge(modelFactory, ros2Node, rcdTopicName, trackingCameraTopicNameGenerator);
+      ROS2TopicName trackingCameraTopicName = ROS2Tools.IHMC_ROOT.withSuffix(ROS2Tools.T265_NAME);
+      trackingCameraPublisher = new TrackingCameraBridge(modelFactory, ros2Node, rcdTopicName, trackingCameraTopicName);
       trackingCameraPublisher.setROSClockCalculator(rosClockCalculator);
       trackingCameraPublisher.setCustomInitializationTransformer(createCustomTrackingCameraWorldTransformCalculator());
 

@@ -145,8 +145,8 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       controllerInputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
       controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
-      toolboxInputTopicName = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
-      toolboxOutputTopicName = KinematicsStreamingToolboxModule.getPublisherTopicNameGenerator(robotName);
+      toolboxInputTopicName = KinematicsStreamingToolboxModule.getSubscriberTopicName(robotName);
+      toolboxOutputTopicName = KinematicsStreamingToolboxModule.getPublisherTopicName(robotName);
 
       RealtimeRos2Node toolboxRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
       new ControllerNetworkSubscriber(toolboxInputTopicName, commandInputManager, toolboxOutputTopicName, statusOutputManager, toolboxRos2Node);

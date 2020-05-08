@@ -148,17 +148,17 @@ public class JavaFXArmController
       messager.registerTopicListener(XBoxOneJavaFXController.ButtonXState, state -> submitReachingManifoldsToToolbox(state));
       messager.registerTopicListener(XBoxOneJavaFXController.ButtonYState, state -> confirmReachingMotion(state));
 
-      ROS2TopicName toolboxRequestTopicNameGenerator = KinematicsToolboxModule.getSubscriberTopicNameGenerator(robotName);
-      ROS2TopicName toolboxResponseTopicNameGenerator = KinematicsToolboxModule.getPublisherTopicNameGenerator(robotName);
+      ROS2TopicName toolboxRequestTopicName = KinematicsToolboxModule.getSubscriberTopicName(robotName);
+      ROS2TopicName toolboxResponseTopicName = KinematicsToolboxModule.getPublisherTopicName(robotName);
 
-      ROS2TopicName subscriberTopicNameGenerator = ROS2Tools.getControllerInputTopicName(robotName);
+      ROS2TopicName subscriberTopicName = ROS2Tools.getControllerInputTopicName(robotName);
 
-      wholeBodyTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WholeBodyTrajectoryMessage.class, subscriberTopicNameGenerator);
-      toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxRequestTopicNameGenerator);
-      toolboxMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsToolboxRigidBodyMessage.class, toolboxRequestTopicNameGenerator);
+      wholeBodyTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WholeBodyTrajectoryMessage.class, subscriberTopicName);
+      toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxRequestTopicName);
+      toolboxMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsToolboxRigidBodyMessage.class, toolboxRequestTopicName);
       this.handFingerTrajectoryMessagePublisher = handFingerTrajectoryMessagePublisher;
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, KinematicsToolboxOutputStatus.class, toolboxResponseTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, KinematicsToolboxOutputStatus.class, toolboxResponseTopicName,
                                            s -> consumeToolboxOutputStatus(s.takeNextData()));
 
       animationTimer = new AnimationTimer()
