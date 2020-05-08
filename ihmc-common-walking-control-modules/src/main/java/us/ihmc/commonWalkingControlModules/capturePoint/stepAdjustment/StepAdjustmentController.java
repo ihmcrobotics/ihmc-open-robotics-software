@@ -50,6 +50,7 @@ public class StepAdjustmentController
    private final DoubleProvider transferDurationSplitFraction;
 
    private final DoubleProvider minimumFootstepMultiplier;
+   private final DoubleProvider minICPErrorForStepAdjustment;
    private final DoubleProvider maximumTimeFromTransfer;
    private final BooleanProvider useActualErrorInsteadOfResidual;
 
@@ -139,6 +140,8 @@ public class StepAdjustmentController
       maximumTimeFromTransfer = new DoubleParameter(yoNamePrefix + "MaximumTimeFromTransfer",
                                                     registry,
                                                     icpOptimizationParameters.maximumTimeFromTransferInFootstepMultiplier());
+      minICPErrorForStepAdjustment = new DoubleParameter(yoNamePrefix + "MinICPErrorForStepAdjustment", registry,
+                                                         icpOptimizationParameters.getMinICPErrorForStepAdjustment());
 
       transferDurationSplitFraction = new DoubleParameter(yoNamePrefix + "TransferDurationSplitFraction",
                                                           registry,
@@ -277,6 +280,9 @@ public class StepAdjustmentController
          return;
 
       icpError.sub(desiredICP, currentICP);
+
+      if (icpError.length() < minICPErrorForStepAdjustment.getValue())
+         return;
 
       footstepMultiplier.set(computeFootstepAdjustmentMultiplier(omega0));
       if (useActualErrorInsteadOfResidual.getValue())
