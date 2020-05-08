@@ -482,7 +482,7 @@ public class AvatarEstimatorThreadFactory
          return null;
    }
 
-   public ROS2TopicName getPublisherTopicName()
+   public ROS2TopicName getOutputTopicName()
    {
       if (outputTopicNameField.hasValue())
          return outputTopicNameField.get();

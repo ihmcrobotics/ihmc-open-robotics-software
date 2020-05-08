@@ -94,12 +94,12 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2TopicName getPublisherTopicName()
+   public ROS2TopicName getOutputTopicName()
    {
-      return getPublisherTopicName(robotName);
+      return getOutputTopicName(robotName);
    }
 
-   public static ROS2TopicName getPublisherTopicName(String robotName)
+   public static ROS2TopicName getOutputTopicName(String robotName)
    {
       return ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
    }

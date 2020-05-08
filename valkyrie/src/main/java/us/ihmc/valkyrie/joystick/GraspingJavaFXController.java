@@ -160,7 +160,7 @@ public class GraspingJavaFXController
       messager.registerTopicListener(XBoxOneJavaFXController.ButtonYState, state -> confirmReachingMotion(state));
 
       ROS2TopicName toolboxRequestTopicName = KinematicsPlanningToolboxModule.getInputTopicName(robotName);
-      ROS2TopicName toolboxResponseTopicName = KinematicsPlanningToolboxModule.getPublisherTopicName(robotName);
+      ROS2TopicName toolboxResponseTopicName = KinematicsPlanningToolboxModule.getOutputTopicName(robotName);
 
       ROS2TopicName inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
 

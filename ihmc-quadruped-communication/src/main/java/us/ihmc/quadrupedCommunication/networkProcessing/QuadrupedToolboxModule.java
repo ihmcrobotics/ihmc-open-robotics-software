@@ -101,7 +101,7 @@ public abstract class QuadrupedToolboxModule
       realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       inputManager = new CommandInputManager(name, createListOfSupportedCommands());
       outputManager = new OutputManager(createMapOfSupportedOutputMessages());
-      networkSubscriber = new NetworkSubscriber(getInputTopicName(), inputManager, getPublisherTopicName(), outputManager,
+      networkSubscriber = new NetworkSubscriber(getInputTopicName(), inputManager, getOutputTopicName(), outputManager,
                                                 realtimeRos2Node);
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
@@ -402,7 +402,7 @@ public abstract class QuadrupedToolboxModule
       return Collections.emptySet();
    }
 
-   public abstract ROS2TopicName getPublisherTopicName();
+   public abstract ROS2TopicName getOutputTopicName();
 
    public abstract ROS2TopicName getInputTopicName();
 }

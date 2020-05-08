@@ -97,7 +97,7 @@ public class BipedContinuousPlanningToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2TopicName getPublisherTopicName()
+   public ROS2TopicName getOutputTopicName()
    {
       return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
    }

@@ -92,7 +92,7 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
                                                     toolboxSubTopicName,
                                            s -> kinematicsStreamingToolboxInputMessage.set(s.takeNextData()));
 
-      ROS2TopicName toolboxPubTopicName = KinematicsStreamingToolboxModule.getPublisherTopicName(robotName);
+      ROS2TopicName toolboxPubTopicName = KinematicsStreamingToolboxModule.getOutputTopicName(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     KinematicsToolboxOutputStatus.class,
                                                     toolboxPubTopicName,
