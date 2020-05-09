@@ -338,10 +338,10 @@ public class ICPController
    private static void fastStaticInverse(DenseMatrix64F matrixToInvert, DenseMatrix64F invertedMatrixToPack)
    {
       double determinate = CommonOps.det(matrixToInvert);
-      invertedMatrixToPack.set(0, 0, determinate * matrixToInvert.get(1, 1));
-      invertedMatrixToPack.set(1, 1, determinate * matrixToInvert.get(0, 0));
-      invertedMatrixToPack.set(0, 1, -determinate * matrixToInvert.get(0, 1));
-      invertedMatrixToPack.set(1, 0, -determinate * matrixToInvert.get(1, 0));
+      invertedMatrixToPack.set(0, 0,  matrixToInvert.get(1, 1) / determinate);
+      invertedMatrixToPack.set(1, 1, matrixToInvert.get(0, 0) / determinate);
+      invertedMatrixToPack.set(0, 1, -matrixToInvert.get(0, 1) / determinate);
+      invertedMatrixToPack.set(1, 0, -matrixToInvert.get(1, 0) / determinate);
    }
 
    private boolean solveQP()
