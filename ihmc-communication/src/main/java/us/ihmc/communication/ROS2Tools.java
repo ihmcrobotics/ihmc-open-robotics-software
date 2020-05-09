@@ -53,47 +53,47 @@ public class ROS2Tools
    public static final String INPUT = ROS2Topic.INPUT;
    public static final String OUTPUT = ROS2Topic.OUTPUT;
 
-   public static final ROS2Topic IHMC_ROOT = new ROS2Topic().withPrefix(IHMC_TOPIC_PREFIX);
-   public static final ROS2Topic HUMANOID_CONTROLLER = IHMC_ROOT.withModule(HUMANOID_CONTROL_MODULE_NAME);
-   public static final ROS2Topic QUADRUPED_CONTROLLER = IHMC_ROOT.withModule(QUADRUPED_CONTROL_MODULE_NAME);
-   public static final ROS2Topic FOOTSTEP_PLANNER = IHMC_ROOT.withModule(FOOTSTEP_PLANNER_MODULE_NAME);
-   public static final ROS2Topic CONTINUOUS_PLANNING_TOOLBOX = IHMC_ROOT.withModule(CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME);
-   public static final ROS2Topic FOOTSTEP_POSTPROCESSING_TOOLBOX = IHMC_ROOT.withModule(FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME);
-   public static final ROS2Topic HEIGHT_QUADTREE_TOOLBOX = IHMC_ROOT.withModule(HEIGHT_QUADTREE_TOOLBOX_MODULE_NAME);
-   public static final ROS2Topic KINEMATICS_TOOLBOX = IHMC_ROOT.withModule(KINEMATICS_TOOLBOX_MODULE_NAME);
-   public static final ROS2Topic KINEMATICS_PLANNING_TOOLBOX = IHMC_ROOT.withModule(KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME);
-   public static final ROS2Topic KINEMATICS_STREAMING_TOOLBOX = IHMC_ROOT.withModule(KINEMATICS_STREAMING_TOOLBOX_MODULE_NAME);
-   public static final ROS2Topic WHOLE_BODY_TRAJECTORY_TOOLBOX = IHMC_ROOT.withModule(WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE_NAME);
-   public static final ROS2Topic WALKING_PREVIEW_TOOLBOX = IHMC_ROOT.withModule(WALKING_PREVIEW_TOOLBOX_MODULE_NAME);
-   public static final ROS2Topic EXTERNAL_FORCE_ESTIMATION_TOOLBOX = IHMC_ROOT.withModule(EXTERNAL_FORCE_ESTIMATION_TOOLBOX_MODULE_NAME);
-   public static final ROS2Topic STEP_TELEOP_TOOLBOX = IHMC_ROOT.withModule(STEP_TELEOP_TOOLBOX_MODULE_NAME);
-   public static final ROS2Topic QUADRUPED_SUPPORT_REGION_PUBLISHER = IHMC_ROOT.withModule(QUADRUPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME);
-   public static final ROS2Topic BIPED_SUPPORT_REGION_PUBLISHER = IHMC_ROOT.withModule(BIPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME);
-   public static final ROS2Topic BEHAVIOR_MODULE = IHMC_ROOT.withModule(BEHAVIOR_MODULE_NAME);
-   public static final ROS2Topic REA = IHMC_ROOT.withModule(REA_MODULE_NAME);
-   public static final ROS2Topic MAPPING_MODULE = IHMC_ROOT.withModule(MAPPING_MODULE_NAME);
-   public static final ROS2Topic REALSENSE_SLAM_MAP = IHMC_ROOT.withModule(REALSENSE_SLAM_MODULE_NAME);
+   public static final ROS2Topic<?> IHMC_ROOT = new ROS2Topic<>().withPrefix(IHMC_TOPIC_PREFIX);
+   public static final ROS2Topic<?> HUMANOID_CONTROLLER = IHMC_ROOT.withModule(HUMANOID_CONTROL_MODULE_NAME);
+   public static final ROS2Topic<?> QUADRUPED_CONTROLLER = IHMC_ROOT.withModule(QUADRUPED_CONTROL_MODULE_NAME);
+   public static final ROS2Topic<?> FOOTSTEP_PLANNER = IHMC_ROOT.withModule(FOOTSTEP_PLANNER_MODULE_NAME);
+   public static final ROS2Topic<?> CONTINUOUS_PLANNING_TOOLBOX = IHMC_ROOT.withModule(CONTINUOUS_PLANNING_TOOLBOX_MODULE_NAME);
+   public static final ROS2Topic<?> FOOTSTEP_POSTPROCESSING_TOOLBOX = IHMC_ROOT.withModule(FOOTSTEP_POSTPROCESSING_TOOLBOX_MODULE_NAME);
+   public static final ROS2Topic<?> HEIGHT_QUADTREE_TOOLBOX = IHMC_ROOT.withModule(HEIGHT_QUADTREE_TOOLBOX_MODULE_NAME);
+   public static final ROS2Topic<?> KINEMATICS_TOOLBOX = IHMC_ROOT.withModule(KINEMATICS_TOOLBOX_MODULE_NAME);
+   public static final ROS2Topic<?> KINEMATICS_PLANNING_TOOLBOX = IHMC_ROOT.withModule(KINEMATICS_PLANNING_TOOLBOX_MODULE_NAME);
+   public static final ROS2Topic<?> KINEMATICS_STREAMING_TOOLBOX = IHMC_ROOT.withModule(KINEMATICS_STREAMING_TOOLBOX_MODULE_NAME);
+   public static final ROS2Topic<?> WHOLE_BODY_TRAJECTORY_TOOLBOX = IHMC_ROOT.withModule(WHOLE_BODY_TRAJECTORY_TOOLBOX_MODULE_NAME);
+   public static final ROS2Topic<?> WALKING_PREVIEW_TOOLBOX = IHMC_ROOT.withModule(WALKING_PREVIEW_TOOLBOX_MODULE_NAME);
+   public static final ROS2Topic<?> EXTERNAL_FORCE_ESTIMATION_TOOLBOX = IHMC_ROOT.withModule(EXTERNAL_FORCE_ESTIMATION_TOOLBOX_MODULE_NAME);
+   public static final ROS2Topic<?> STEP_TELEOP_TOOLBOX = IHMC_ROOT.withModule(STEP_TELEOP_TOOLBOX_MODULE_NAME);
+   public static final ROS2Topic<?> QUADRUPED_SUPPORT_REGION_PUBLISHER = IHMC_ROOT.withModule(QUADRUPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME);
+   public static final ROS2Topic<?> BIPED_SUPPORT_REGION_PUBLISHER = IHMC_ROOT.withModule(BIPED_SUPPORT_REGION_PUBLISHER_MODULE_NAME);
+   public static final ROS2Topic<?> BEHAVIOR_MODULE = IHMC_ROOT.withModule(BEHAVIOR_MODULE_NAME);
+   public static final ROS2Topic<?> REA = IHMC_ROOT.withModule(REA_MODULE_NAME);
+   public static final ROS2Topic<?> MAPPING_MODULE = IHMC_ROOT.withModule(MAPPING_MODULE_NAME);
+   public static final ROS2Topic<?> REALSENSE_SLAM_MAP = IHMC_ROOT.withModule(REALSENSE_SLAM_MODULE_NAME);
 
-   public static final ROS2Topic REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
+   public static final ROS2Topic<?> REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
 
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
-   public static ROS2Topic getControllerOutputTopicName(String robotName)
+   public static ROS2Topic<?> getControllerOutputTopicName(String robotName)
    {
       return HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
    }
 
-   public static ROS2Topic getControllerInputTopicName(String robotName)
+   public static ROS2Topic<?> getControllerInputTopicName(String robotName)
    {
       return HUMANOID_CONTROLLER.withRobot(robotName).withInput();
    }
 
-   public static ROS2Topic getQuadrupedControllerOutputTopicName(String robotName)
+   public static ROS2Topic<?> getQuadrupedControllerOutputTopicName(String robotName)
    {
       return QUADRUPED_CONTROLLER.withRobot(robotName).withOutput();
    }
 
-   public static ROS2Topic getQuadrupedControllerInputTopicName(String robotName)
+   public static ROS2Topic<?> getQuadrupedControllerInputTopicName(String robotName)
    {
       return QUADRUPED_CONTROLLER.withRobot(robotName).withInput();
    }
@@ -103,7 +103,7 @@ public class ROS2Tools
       return new ROS2Topic<>(messageType, NAMED_BY_TYPE);
    }
 
-   public static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType, ROS2Topic<T> topicName)
+   public static <T> ROS2Topic<T> typeNamedTopic(Class<T> messageType, ROS2Topic<?> topicName)
    {
       return typeNamedTopic(messageType).withTopic(topicName);
    }
