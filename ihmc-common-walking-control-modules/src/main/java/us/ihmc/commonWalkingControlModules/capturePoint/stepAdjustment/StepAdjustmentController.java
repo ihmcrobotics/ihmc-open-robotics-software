@@ -256,6 +256,7 @@ public class StepAdjustmentController
       this.initialTime.set(initialTime);
       reachabilityConstraintHandler.initializeReachabilityConstraint(supportSide, upcomingFootstep);
       speedUpTime.set(0.0);
+      footstepSolution.set(upcomingFootstep);
    }
 
    public void compute(double currentTime,
@@ -282,7 +283,10 @@ public class StepAdjustmentController
       icpError.sub(desiredICP, currentICP);
 
       if (icpError.length() < minICPErrorForStepAdjustment.getValue())
+      {
+         footstepWasAdjusted.set(false);
          return;
+      }
 
       footstepMultiplier.set(computeFootstepAdjustmentMultiplier(omega0));
       if (useActualErrorInsteadOfResidual.getValue())
