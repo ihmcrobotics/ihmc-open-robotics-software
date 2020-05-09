@@ -88,14 +88,14 @@ public class ControllerAPIDefinition
       return controllerSupportedStatusMessages;
    }
 
-   public static ROS2Topic getInputTopicName(String robotName)
+   public static ROS2Topic getInputTopic(String robotName)
    {
-      return ROS2Tools.getControllerInputTopicName(robotName);
+      return ROS2Tools.getControllerInputTopic(robotName);
    }
 
-   public static ROS2Topic getOutputTopicName(String robotName)
+   public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ROS2Tools.getControllerOutputTopicName(robotName);
+      return ROS2Tools.getControllerOutputTopic(robotName);
    }
 
    public static MessageValidator createDefaultMessageValidation()

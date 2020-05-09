@@ -28,14 +28,14 @@ public class REAPlanarRegionPublicNetworkProvider
    private final REAStatusMessage currentState = new REAStatusMessage();
 
    public REAPlanarRegionPublicNetworkProvider(Messager messager, RegionFeaturesProvider regionFeaturesProvider, Ros2Node ros2Node,
-                                               ROS2Topic outputTopicName, ROS2Topic inputTopicName)
+                                               ROS2Topic outputTopic, ROS2Topic inputTopic)
    {
       this.regionFeaturesProvider = regionFeaturesProvider;
-      planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, outputTopicName);
+      planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, outputTopic);
 
       if (messager != null)
       {
-         currentStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStatusMessage.class, outputTopicName);
+         currentStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStatusMessage.class, outputTopic);
          isRunning = messager.createInput(REAModuleAPI.OcTreeEnable);
          // This should be the only input with a default value, the rest gets populated at the very start.
          hasCleared = messager.createInput(REAModuleAPI.OcTreeClear, false);

@@ -163,17 +163,17 @@ public class RemoteUIMessageConverter
       /* subscribers */
       // we want to listen to the incoming request to the planning toolbox
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningRequestPacket.class,
-                                                    FootstepPlannerCommunicationProperties.inputTopicName(robotName),
+                                                    FootstepPlannerCommunicationProperties.inputTopic(robotName),
                                            s -> processFootstepPlanningRequestPacket(s.takeNextData()));
       // we want to listen to the resulting body path plan from the toolbox
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, BodyPathPlanMessage.class, FootstepPlannerCommunicationProperties.outputTopicName(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, BodyPathPlanMessage.class, FootstepPlannerCommunicationProperties.outputTopic(robotName),
                                            s -> processBodyPathPlanMessage(s.takeNextData()));
       // we want to listen to the resulting footstep plan from the toolbox
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningToolboxOutputStatus.class,
-                                                    FootstepPlannerCommunicationProperties.outputTopicName(robotName),
+                                                    FootstepPlannerCommunicationProperties.outputTopic(robotName),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlannerOccupancyMapMessage.class,
-                                                    FootstepPlannerCommunicationProperties.outputTopicName(robotName),
+                                                    FootstepPlannerCommunicationProperties.outputTopic(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.OccupancyMap, new PlannerOccupancyMap(s.takeNextData())));
       // we want to list to the footstep plan post processing result from the toolbox
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPostProcessingPacket.class,
@@ -181,51 +181,51 @@ public class RemoteUIMessageConverter
                                                               .withOutput(),
                                            s -> processFootstepPostProcessingResult(s.takeNextData()));
       // we want to also listen to incoming REA planar region data.
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopicName,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
                                            s -> processIncomingPlanarRegionMessage(s.takeNextData()));
 
       // things from the controller
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.RobotConfigurationData, s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, ROS2Tools.getControllerOutputTopicName(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, CapturabilityBasedStatus.class, ROS2Tools.getControllerOutputTopic(robotName),
                                            s -> processCapturabilityStatus(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, ROS2Tools.getControllerOutputTopicName(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class, ROS2Tools.getControllerOutputTopic(robotName),
                                            s ->
                                            {
                                               messager.submitMessage(FootstepPlannerMessagerAPI.FootstepStatusMessage, s.takeNextData());
                                               System.out.println("fdsjklsdf");
                                            });
 
-      ROS2Topic controllerPreviewOutputTopicName = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
+      ROS2Topic controllerPreviewOutputTopic = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
                                                                                     .withOutput();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, WalkingControllerPreviewOutputMessage.class, controllerPreviewOutputTopicName, s -> messager.submitMessage(FootstepPlannerMessagerAPI.WalkingPreviewOutput, s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, WalkingControllerPreviewOutputMessage.class, controllerPreviewOutputTopic, s -> messager.submitMessage(FootstepPlannerMessagerAPI.WalkingPreviewOutput, s.takeNextData()));
 
       // publishers
       plannerParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                       FootstepPlannerParametersPacket.class,
-                                                                      FootstepPlannerCommunicationProperties.inputTopicName(robotName));
+                                                                      FootstepPlannerCommunicationProperties.inputTopic(robotName));
       visibilityGraphsParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                VisibilityGraphsParametersPacket.class,
-                                                                               FootstepPlannerCommunicationProperties.inputTopicName(robotName));
+                                                                               FootstepPlannerCommunicationProperties.inputTopic(robotName));
       plannerActionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                   FootstepPlannerActionMessage.class,
-                                                                  FootstepPlannerCommunicationProperties.inputTopicName(robotName));
+                                                                  FootstepPlannerCommunicationProperties.inputTopic(robotName));
       postProcessingParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                              FootstepPostProcessingParametersPacket.class,
                                                                              ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(robotName)
                                                                                        .withInput());
       footstepPlanningRequestPublisher = ROS2Tools
-            .createPublisherTypeNamed(ros2Node, FootstepPlanningRequestPacket.class, FootstepPlannerCommunicationProperties.inputTopicName(robotName));
+            .createPublisherTypeNamed(ros2Node, FootstepPlanningRequestPacket.class, FootstepPlannerCommunicationProperties.inputTopic(robotName));
       footstepPostProcessingRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepPostProcessingPacket.class,
                                                                                   ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(robotName)
                                                                                             .withInput());
-      footstepDataListPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepDataListMessage.class, ROS2Tools.getControllerInputTopicName(robotName));
-      goHomePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, GoHomeMessage.class, ROS2Tools.getControllerInputTopicName(robotName));
+      footstepDataListPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepDataListMessage.class, ROS2Tools.getControllerInputTopic(robotName));
+      goHomePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, GoHomeMessage.class, ROS2Tools.getControllerInputTopic(robotName));
 
-      ROS2Topic controllerPreviewInputTopicName = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
+      ROS2Topic controllerPreviewInputTopic = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
                                                                                    .withInput();
-      walkingPreviewToolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, controllerPreviewInputTopicName);
-      walkingPreviewRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WalkingControllerPreviewInputMessage.class, controllerPreviewInputTopicName);
+      walkingPreviewToolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, controllerPreviewInputTopic);
+      walkingPreviewRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WalkingControllerPreviewInputMessage.class, controllerPreviewInputTopic);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, request -> requestNewPlan());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.PostProcessPlan, request -> requestPostProcessing());

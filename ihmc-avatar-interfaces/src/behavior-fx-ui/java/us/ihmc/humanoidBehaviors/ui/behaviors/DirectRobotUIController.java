@@ -79,7 +79,7 @@ public class DirectRobotUIController extends Group
 
       goHomePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                            ROS2TopicNameTools.newMessageInstance(GoHomeCommand.class).getMessageClass(),
-                                                           ROS2Tools.getControllerInputTopicName(robotName));
+                                                           ROS2Tools.getControllerInputTopic(robotName));
 
       supportRegionsParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                              BipedalSupportPlanarRegionParametersMessage.class,

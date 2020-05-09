@@ -94,10 +94,10 @@ public class ValkyrieFingerController implements RobotController
       for (RobotSide robotSide : RobotSide.values)
       {
          ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
-                                                       HandDesiredConfigurationMessage.class, ROS2Tools.getControllerInputTopicName(robotName),
+                                                       HandDesiredConfigurationMessage.class, ROS2Tools.getControllerInputTopic(robotName),
                                                        handDesiredConfigurationMessageSubscribers.get(robotSide));
          ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
-                                                       ValkyrieHandFingerTrajectoryMessage.class, ROS2Tools.getControllerInputTopicName(robotName),
+                                                       ValkyrieHandFingerTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName),
                                                        valkyrieHandFingerTrajectoryMessageSubscribers.get(robotSide));
       }
    }

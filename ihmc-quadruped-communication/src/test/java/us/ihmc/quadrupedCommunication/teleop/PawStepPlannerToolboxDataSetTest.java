@@ -133,7 +133,7 @@ public abstract class PawStepPlannerToolboxDataSetTest
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_footstep_planner_test");
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PawStepPlanningToolboxOutputStatus.class,
-                                                    PawStepPlannerCommunicationProperties.outputTopicName(robotName),
+                                                    PawStepPlannerCommunicationProperties.outputTopic(robotName),
                                            s -> processFootstepPlanningOutputStatus(s.takeNextData()));
 
       converter = RemoteUIMessageConverter.createConverter(messager, robotName, pubSubImplementation);

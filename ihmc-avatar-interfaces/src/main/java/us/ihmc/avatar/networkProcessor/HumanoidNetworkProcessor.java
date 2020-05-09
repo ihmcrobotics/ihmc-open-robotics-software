@@ -327,7 +327,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
 
          ROS2Tools.createCallbackSubscriptionTypeNamed(getOrCreateRos2Node(),
                                                        PlanarRegionsListMessage.class,
-                                                       REACommunicationProperties.outputTopicName,
+                                                       REACommunicationProperties.outputTopic,
                                               s -> planarRegionsListManager.receivedPacket(s.takeNextData()));
          return new IHMCMOCAPLocalizationModule(robotModel, planarRegionsListManager);
       }

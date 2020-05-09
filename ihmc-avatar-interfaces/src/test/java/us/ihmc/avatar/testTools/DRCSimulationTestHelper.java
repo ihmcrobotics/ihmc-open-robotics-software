@@ -694,7 +694,7 @@ public class DRCSimulationTestHelper
 
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
-      return createPublisher(messageType, ROS2Tools.getControllerInputTopicName(robotName));
+      return createPublisher(messageType, ROS2Tools.getControllerInputTopic(robotName));
    }
 
    public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic generator)
@@ -709,7 +709,7 @@ public class DRCSimulationTestHelper
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      createSubscriber(messageType, ROS2Tools.getControllerOutputTopicName(robotName), consumer);
+      createSubscriber(messageType, ROS2Tools.getControllerOutputTopic(robotName), consumer);
    }
 
    public <T> void createSubscriber(Class<T> messageType, ROS2Topic generator, ObjectConsumer<T> consumer)

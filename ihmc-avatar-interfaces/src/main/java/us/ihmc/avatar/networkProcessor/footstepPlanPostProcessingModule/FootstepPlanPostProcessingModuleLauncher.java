@@ -41,24 +41,24 @@ public class FootstepPlanPostProcessingModuleLauncher
       postProcessingModule.registerRosNode(ros2Node);
       String name = postProcessingModule.getName();
 
-      ROS2Topic inputTopicName = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
+      ROS2Topic inputTopic = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
                                                                           .withInput();
-      ROS2Topic outputTopicName = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
+      ROS2Topic outputTopic = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
                                                                            .withOutput();
 
       // Parameters callback
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPostProcessingParametersPacket.class, inputTopicName,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPostProcessingParametersPacket.class, inputTopic,
                                            s -> postProcessingModule.getParameters().set(s.readNextData()));
 
       // Planner request callback
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPostProcessingPacket.class, inputTopicName, s -> {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPostProcessingPacket.class, inputTopic, s -> {
          FootstepPostProcessingPacket requestPacket = s.takeNextData();
          new Thread(() -> postProcessingModule.handleRequestPacket(requestPacket)).start();
       });
 
       // Result publisher
       IHMCROS2Publisher<FootstepPostProcessingPacket> resultPublisher = ROS2Tools
-            .createPublisherTypeNamed(ros2Node, FootstepPostProcessingPacket.class, outputTopicName);
+            .createPublisherTypeNamed(ros2Node, FootstepPostProcessingPacket.class, outputTopic);
       postProcessingModule.addStatusCallback(resultPublisher::publish);
 
       return postProcessingModule;

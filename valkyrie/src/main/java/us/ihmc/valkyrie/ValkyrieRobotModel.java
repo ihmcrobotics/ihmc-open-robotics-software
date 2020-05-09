@@ -442,8 +442,8 @@ public class ValkyrieRobotModel implements DRCRobotModel
       {
          return new SimulatedValkyrieFingerController(simulatedRobot,
                                                       realtimeRos2Node,
-                                                      this, ROS2Tools.getControllerOutputTopicName(getSimpleRobotName()),
-                                                      ROS2Tools.getControllerInputTopicName(getSimpleRobotName()));
+                                                      this, ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                      ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
       }
       else
       {

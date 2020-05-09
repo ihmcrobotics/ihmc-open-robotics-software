@@ -48,7 +48,7 @@ public class KinematicToolboxDiagnosticEnvironment
       RobotConfigurationDataPublisherFactory factory = new RobotConfigurationDataPublisherFactory();
       factory.setDefinitionsToPublish(humanoidFullRobotModel);
       factory.setSensorSource(humanoidFullRobotModel, new ForceSensorDataHolder(forceSensorDefinitionList), sensorOutputMapReadOnly);
-      factory.setROS2Info(realtimeRos2Node, ROS2Tools.getControllerOutputTopicName(drcRobotModel.getSimpleRobotName()));
+      factory.setROS2Info(realtimeRos2Node, ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()));
       RobotConfigurationDataPublisher robotConfigurationDataPublisher = factory.createRobotConfigurationDataPublisher();
 
       PeriodicNonRealtimeThreadScheduler scheduler2 = new PeriodicNonRealtimeThreadScheduler(threadName);

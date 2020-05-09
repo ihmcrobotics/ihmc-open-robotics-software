@@ -71,31 +71,31 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation,
                                                   "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "KinematicsStreamingToolboxMessageLogger"));
 
-      ROS2Topic controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopicName, s -> robotConfigurationData.set(s.takeNextData()));
+      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s -> robotConfigurationData.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     CapturabilityBasedStatus.class,
-                                                    controllerOutputTopicName,
+                                                    controllerOutputTopic,
                                            s -> capturabilityBasedStatus.set(s.takeNextData()));
 
-      ROS2Topic toolboxInputTopicName = KinematicsStreamingToolboxModule.getInputTopicName(robotName);
+      ROS2Topic toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     ToolboxStateMessage.class,
-                                                    toolboxInputTopicName,
+                                                    toolboxInputTopic,
                                            s -> processToolboxStateMessage(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     KinematicsToolboxConfigurationMessage.class,
-                                                    toolboxInputTopicName,
+                                                    toolboxInputTopic,
                                            s -> kinematicsToolboxConfigurationMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     KinematicsStreamingToolboxInputMessage.class,
-                                                    toolboxInputTopicName,
+                                                    toolboxInputTopic,
                                            s -> kinematicsStreamingToolboxInputMessage.set(s.takeNextData()));
 
-      ROS2Topic toolboxOutputTopicName = KinematicsStreamingToolboxModule.getOutputTopicName(robotName);
+      ROS2Topic toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     KinematicsToolboxOutputStatus.class,
-                                                    toolboxOutputTopicName,
+                                                    toolboxOutputTopic,
                                            s -> kinematicsToolboxOutputStatus.set(s.takeNextData()));
 
       ros2Node.spin();

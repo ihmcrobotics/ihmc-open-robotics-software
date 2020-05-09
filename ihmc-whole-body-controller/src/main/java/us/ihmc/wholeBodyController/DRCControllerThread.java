@@ -129,7 +129,7 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
       closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerFactory);
 
       crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, ControllerCrashNotificationPacket.class,
-                                                                      ROS2Tools.getControllerOutputTopicName(robotName));
+                                                                      ROS2Tools.getControllerOutputTopic(robotName));
 
       if (ALLOW_MODEL_CORRUPTION)
       {

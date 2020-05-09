@@ -33,7 +33,7 @@ public class ZeroPoseMockRobotConfigurationDataPublisherModule implements Runnab
       fullRobotModel = robotModel.createFullRobotModel();
       forceSensorDefinitions = fullRobotModel.getForceSensorDefinitions();
 
-      publisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotModel.getSimpleRobotName()));
+      publisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotModel.getSimpleRobotName()));
 
       Thread t = new Thread(this);
       t.start();

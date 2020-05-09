@@ -67,12 +67,12 @@ public abstract class AbstractBehavior implements RobotController
 
    protected final String robotName;
 
-   protected final ROS2Topic controllerInputTopicName, controllerOutputTopicName;
-   protected final ROS2Topic behaviorInputTopicName, behaviorOutputTopicName;
+   protected final ROS2Topic controllerInputTopic, controllerOutputTopic;
+   protected final ROS2Topic behaviorInputTopic, behaviorOutputTopic;
 
-   protected final ROS2Topic footstepPlannerInputTopicName, footstepPlannerOutputTopicName;
-   protected final ROS2Topic kinematicsToolboxInputTopicName, kinematicsToolboxOutputTopicName;
-   protected final ROS2Topic kinematicsPlanningToolboxInputTopicName, kinematicsPlanningToolboxOutputTopicName;
+   protected final ROS2Topic footstepPlannerInputTopic, footstepPlannerOutputTopic;
+   protected final ROS2Topic kinematicsToolboxInputTopic, kinematicsToolboxOutputTopic;
+   protected final ROS2Topic kinematicsPlanningToolboxInputTopic, kinematicsPlanningToolboxOutputTopic;
 
    private static int behaviorUniqID = 0;
    
@@ -97,17 +97,17 @@ public abstract class AbstractBehavior implements RobotController
 
       behaviorsServices = new ArrayList<>();
 
-      footstepPlannerInputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
-      footstepPlannerOutputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
-      kinematicsToolboxInputTopicName = ROS2Tools.KINEMATICS_TOOLBOX.withRobot(robotName).withInput();
-      kinematicsToolboxOutputTopicName = ROS2Tools.KINEMATICS_TOOLBOX.withRobot(robotName).withOutput();
-      kinematicsPlanningToolboxInputTopicName = ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
-      kinematicsPlanningToolboxOutputTopicName = ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
+      footstepPlannerInputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
+      footstepPlannerOutputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
+      kinematicsToolboxInputTopic = ROS2Tools.KINEMATICS_TOOLBOX.withRobot(robotName).withInput();
+      kinematicsToolboxOutputTopic = ROS2Tools.KINEMATICS_TOOLBOX.withRobot(robotName).withOutput();
+      kinematicsPlanningToolboxInputTopic = ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
+      kinematicsPlanningToolboxOutputTopic = ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
 
-      controllerInputTopicName = ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withInput();
-      controllerOutputTopicName = ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
-      behaviorInputTopicName = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();
-      behaviorOutputTopicName = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
+      controllerInputTopic = ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withInput();
+      controllerOutputTopic = ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
+      behaviorInputTopic = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();
+      behaviorOutputTopic = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
 
       textToSpeechPublisher = createPublisher(TextToSpeechPacket.class, ROS2Tools.IHMC_ROOT);
       uiPositionCheckerPacketpublisher = createBehaviorPublisher(UIPositionCheckerPacket.class);
@@ -120,12 +120,12 @@ public abstract class AbstractBehavior implements RobotController
 
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
-      return createPublisher(messageType, controllerInputTopicName);
+      return createPublisher(messageType, controllerInputTopic);
    }
 
    public <T> IHMCROS2Publisher<T> createBehaviorPublisher(Class<T> messageType)
    {
-      return createPublisher(messageType, behaviorOutputTopicName);
+      return createPublisher(messageType, behaviorOutputTopic);
    }
 
    @SuppressWarnings("unchecked")
@@ -144,12 +144,12 @@ public abstract class AbstractBehavior implements RobotController
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      createSubscriber(messageType, controllerOutputTopicName, consumer);
+      createSubscriber(messageType, controllerOutputTopic, consumer);
    }
 
    public <T> void createBehaviorInputSubscriber(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      createSubscriber(messageType, behaviorInputTopicName, consumer);
+      createSubscriber(messageType, behaviorInputTopic, consumer);
    }
 
    public <T> void createSubscriber(Class<T> messageType, ROS2Topic topicName, ObjectConsumer<T> consumer)

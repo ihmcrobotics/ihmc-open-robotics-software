@@ -148,12 +148,12 @@ public class JavaFXArmController
       messager.registerTopicListener(XBoxOneJavaFXController.ButtonXState, state -> submitReachingManifoldsToToolbox(state));
       messager.registerTopicListener(XBoxOneJavaFXController.ButtonYState, state -> confirmReachingMotion(state));
 
-      ROS2Topic toolboxRequestTopicName = KinematicsToolboxModule.getInputTopicName(robotName);
-      ROS2Topic toolboxResponseTopicName = KinematicsToolboxModule.getOutputTopicName(robotName);
+      ROS2Topic toolboxRequestTopicName = KinematicsToolboxModule.getInputTopic(robotName);
+      ROS2Topic toolboxResponseTopicName = KinematicsToolboxModule.getOutputTopic(robotName);
 
-      ROS2Topic inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
+      ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
 
-      wholeBodyTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WholeBodyTrajectoryMessage.class, inputTopicName);
+      wholeBodyTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WholeBodyTrajectoryMessage.class, inputTopic);
       toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxRequestTopicName);
       toolboxMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsToolboxRigidBodyMessage.class, toolboxRequestTopicName);
       this.handFingerTrajectoryMessagePublisher = handFingerTrajectoryMessagePublisher;

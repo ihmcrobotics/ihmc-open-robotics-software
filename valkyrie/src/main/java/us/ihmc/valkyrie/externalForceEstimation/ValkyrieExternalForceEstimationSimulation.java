@@ -109,13 +109,13 @@ public class ValkyrieExternalForceEstimationSimulation
 
       IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                 ToolboxStateMessage.class,
-                                                                                                                ExternalForceEstimationToolboxModule.getInputTopicName(
+                                                                                                                ExternalForceEstimationToolboxModule.getInputTopic(
                                                                                                              robotModel.getSimpleRobotName()));
 
       IHMCRealtimeROS2Publisher<ExternalForceEstimationConfigurationMessage> configurationMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                                                 ExternalForceEstimationConfigurationMessage.class,
                                                                                                                                                 ExternalForceEstimationToolboxModule
-                                                                                                                                             .getInputTopicName(
+                                                                                                                                             .getInputTopic(
                                                                                                                                                    robotModel.getSimpleRobotName()));
 
       JButton wakeupButton = new JButton("Start estimation");
@@ -151,7 +151,7 @@ public class ValkyrieExternalForceEstimationSimulation
       AtomicReference<ExternalForceEstimationOutputStatus> toolboxOutputStatus = new AtomicReference<>();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     ExternalForceEstimationOutputStatus.class,
-                                                    ExternalForceEstimationToolboxModule.getOutputTopicName(robotModel.getSimpleRobotName()),
+                                                    ExternalForceEstimationToolboxModule.getOutputTopic(robotModel.getSimpleRobotName()),
                                            s -> toolboxOutputStatus.set(s.takeNextData()));
 
       simulationStarter.getAvatarSimulation().getSimulationConstructionSet().addScript(t ->

@@ -431,8 +431,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          case ROBOTIQ:
             return new SimulatedRobotiqHandsController(simulatedRobot,
                                                        this,
-                                                       realtimeRos2Node, ROS2Tools.getControllerOutputTopicName(getSimpleRobotName()),
-                                                       ROS2Tools.getControllerInputTopicName(getSimpleRobotName()));
+                                                       realtimeRos2Node, ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                       ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
 
          default:
             return null;

@@ -79,10 +79,10 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "supporting_planar_region_publisher");
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    CapturabilityBasedStatus.class, ROS2Tools.getControllerOutputTopicName(robotName),
+                                                    CapturabilityBasedStatus.class, ROS2Tools.getControllerOutputTopic(robotName),
                                            subscriber -> latestCapturabilityBasedStatusMessage.set(subscriber.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
+                                                    RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName),
                                            subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
       regionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                            PlanarRegionsListMessage.class,

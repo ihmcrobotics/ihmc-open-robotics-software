@@ -78,22 +78,22 @@ public class ROS2Tools
 
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
-   public static ROS2Topic<?> getControllerOutputTopicName(String robotName)
+   public static ROS2Topic<?> getControllerOutputTopic(String robotName)
    {
       return HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
    }
 
-   public static ROS2Topic<?> getControllerInputTopicName(String robotName)
+   public static ROS2Topic<?> getControllerInputTopic(String robotName)
    {
       return HUMANOID_CONTROLLER.withRobot(robotName).withInput();
    }
 
-   public static ROS2Topic<?> getQuadrupedControllerOutputTopicName(String robotName)
+   public static ROS2Topic<?> getQuadrupedControllerOutputTopic(String robotName)
    {
       return QUADRUPED_CONTROLLER.withRobot(robotName).withOutput();
    }
 
-   public static ROS2Topic<?> getQuadrupedControllerInputTopicName(String robotName)
+   public static ROS2Topic<?> getQuadrupedControllerInputTopic(String robotName)
    {
       return QUADRUPED_CONTROLLER.withRobot(robotName).withInput();
    }
@@ -110,7 +110,7 @@ public class ROS2Tools
 
    public static ROS2Topic<RobotConfigurationData> getRobotConfigurationDataTopic(String robotName)
    {
-      return typeNamedTopic(RobotConfigurationData.class, getControllerOutputTopicName(robotName));
+      return typeNamedTopic(RobotConfigurationData.class, getControllerOutputTopic(robotName));
    }
 
    public static ROS2Topic<DoorParameterPacket> getDoorParameterTopic()

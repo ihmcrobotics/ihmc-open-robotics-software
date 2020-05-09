@@ -56,22 +56,22 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
    {
       // status messages from the controller
-      ROS2Topic controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedFootstepStatusMessage.class, controllerOutputTopicName,
+      ROS2Topic controllerOutputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedFootstepStatusMessage.class, controllerOutputTopic,
                                            s -> processFootstepStatusMessage(s.takeNextData()));
 
       // status messages from the planner
-      ROS2Topic plannerOutputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
+      ROS2Topic plannerOutputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
                                                                    .withOutput();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PawStepPlanningToolboxOutputStatus.class, plannerOutputTopicName,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PawStepPlanningToolboxOutputStatus.class, plannerOutputTopic,
                                            s -> processFootstepPlannerOutputMessage(s.takeNextData()));
 
       // inputs to this module
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getInputTopicName(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getInputTopic(),
                                            s -> processQuadrupedXGaitSettings(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedContinuousPlanningRequestPacket.class, getInputTopicName(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedContinuousPlanningRequestPacket.class, getInputTopic(),
                                            s -> processContinuousPlanningRequest(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopicName,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
                                            s -> processPlanarRegionsListMessage(s.takeNextData()));
    }
 
@@ -80,14 +80,14 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    {
       Map<Class<? extends Settable<?>>, ROS2Topic> messages = new HashMap<>();
 
-      messages.put(PawStepPlanningToolboxOutputStatus.class, getOutputTopicName());
-      messages.put(BodyPathPlanMessage.class, getOutputTopicName());
-      messages.put(QuadrupedTimedStepListMessage.class, getOutputTopicName());
+      messages.put(PawStepPlanningToolboxOutputStatus.class, getOutputTopic());
+      messages.put(BodyPathPlanMessage.class, getOutputTopic());
+      messages.put(QuadrupedTimedStepListMessage.class, getOutputTopic());
 
-      ROS2Topic plannerInputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
+      ROS2Topic plannerInputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
                                                                   .withInput();
-      messages.put(PawStepPlanningRequestPacket.class, plannerInputTopicName);
-      messages.put(ToolboxStateMessage.class, plannerInputTopicName);
+      messages.put(PawStepPlanningRequestPacket.class, plannerInputTopic);
+      messages.put(ToolboxStateMessage.class, plannerInputTopic);
 
       return messages;
    }
@@ -140,13 +140,13 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
 
 
    @Override
-   public ROS2Topic getOutputTopicName()
+   public ROS2Topic getOutputTopic()
    {
       return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2Topic getInputTopicName()
+   public ROS2Topic getInputTopic()
    {
       return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
    }
