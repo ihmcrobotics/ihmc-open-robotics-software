@@ -2,7 +2,7 @@ package us.ihmc.quadrupedFootstepPlanning.pawPlanning.communication;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 
@@ -40,12 +40,12 @@ public class PawStepPlannerCommunicationProperties
       return toolboxSupportedCommands;
    }
 
-   public static ROS2TopicName outputTopicName(String robotName)
+   public static ROS2Topic outputTopicName(String robotName)
    {
       return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
    }
 
-   public static ROS2TopicName inputTopicName(String robotName)
+   public static ROS2Topic inputTopicName(String robotName)
    {
       return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
    }

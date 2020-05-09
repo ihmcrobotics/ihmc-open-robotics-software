@@ -2,7 +2,7 @@ package us.ihmc.quadrupedCommunication.networkProcessing.stepTeleop;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -45,7 +45,7 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
    {
       // status messages from the controller
-      ROS2TopicName controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
+      ROS2Topic controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopicName,
                                            s -> processTimestamp(s.takeNextData().getMonotonicTime()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HighLevelStateMessage.class, controllerOutputTopicName, s -> setPaused(true));
@@ -142,11 +142,11 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public Map<Class<? extends Settable<?>>, ROS2TopicName> createMapOfSupportedOutputMessages()
+   public Map<Class<? extends Settable<?>>, ROS2Topic> createMapOfSupportedOutputMessages()
    {
-      Map<Class<? extends Settable<?>>, ROS2TopicName> messages = new HashMap<>();
+      Map<Class<? extends Settable<?>>, ROS2Topic> messages = new HashMap<>();
 
-      ROS2TopicName controllerInputTopicName = ROS2Tools.getQuadrupedControllerInputTopicName(robotName);
+      ROS2Topic controllerInputTopicName = ROS2Tools.getQuadrupedControllerInputTopicName(robotName);
       messages.put(QuadrupedTimedStepListMessage.class, controllerInputTopicName);
       messages.put(QuadrupedBodyOrientationMessage.class, controllerInputTopicName);
       messages.put(AbortWalkingMessage.class, controllerInputTopicName);
@@ -155,13 +155,13 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public ROS2TopicName getOutputTopicName()
+   public ROS2Topic getOutputTopicName()
    {
       return ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2TopicName getInputTopicName()
+   public ROS2Topic getInputTopicName()
    {
       return ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName).withInput();
    }

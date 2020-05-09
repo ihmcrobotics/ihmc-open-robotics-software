@@ -13,7 +13,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
@@ -67,12 +67,12 @@ public class QuadrupedControllerAPIDefinition
       return quadrupedSupportedStatusMessages;
    }
 
-   public static ROS2TopicName getInputTopicName(String robotName)
+   public static ROS2Topic getInputTopicName(String robotName)
    {
       return ROS2Tools.getQuadrupedControllerInputTopicName(robotName);
    }
 
-   public static ROS2TopicName getOutputTopicName(String robotName)
+   public static ROS2Topic getOutputTopicName(String robotName)
    {
       return ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
    }

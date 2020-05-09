@@ -46,7 +46,7 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
@@ -234,8 +234,8 @@ public class HumanoidKinematicsSimulation
       // create controller network subscriber here!!
       RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(kinematicsSimulationParameters.getPubSubImplementation(),
                                                                            ROS2Tools.HUMANOID_KINEMATICS_CONTROLLER_NODE_NAME + "_rt");
-      ROS2TopicName inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
-      ROS2TopicName outputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Topic inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
+      ROS2Topic outputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
       ControllerNetworkSubscriber controllerNetworkSubscriber = new ControllerNetworkSubscriber(inputTopicName,
                                                                                                 walkingInputManager,
                                                                                                 outputTopicName,

@@ -5,7 +5,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
@@ -123,9 +123,9 @@ public class QuadrupedUIMessageConverter
    private void registerPubSubs()
    {
       /* subscribers */
-      ROS2TopicName controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
-      ROS2TopicName footstepPlannerOutputTopicName = PawStepPlannerCommunicationProperties.outputTopicName(robotName);
-      ROS2TopicName footstepPlannerInputTopicGenerator = PawStepPlannerCommunicationProperties.inputTopicName(robotName);
+      ROS2Topic controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
+      ROS2Topic footstepPlannerOutputTopicName = PawStepPlannerCommunicationProperties.outputTopicName(robotName);
+      ROS2Topic footstepPlannerInputTopicGenerator = PawStepPlannerCommunicationProperties.inputTopicName(robotName);
 
       ROS2Tools
             .createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopicName, s -> processRobotConfigurationData(s.takeNextData()));
@@ -170,10 +170,10 @@ public class QuadrupedUIMessageConverter
 
 
       /* publishers */
-      ROS2TopicName controllerInputTopicName = ROS2Tools.getQuadrupedControllerInputTopicName(robotName);
+      ROS2Topic controllerInputTopicName = ROS2Tools.getQuadrupedControllerInputTopicName(robotName);
 
-      ROS2TopicName stepTeleopInputTopicGenerator = ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName)
-                                                                                       .withInput();
+      ROS2Topic stepTeleopInputTopicGenerator = ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName)
+                                                                             .withInput();
 
       desiredHighLevelStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HighLevelStateMessage.class, controllerInputTopicName);
       desiredSteppingStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerInputTopicName);

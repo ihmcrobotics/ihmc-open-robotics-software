@@ -7,7 +7,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -196,8 +196,8 @@ public class RemoteUIMessageConverter
                                               System.out.println("fdsjklsdf");
                                            });
 
-      ROS2TopicName controllerPreviewOutputTopicName = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
-                                                                                                   .withOutput();
+      ROS2Topic controllerPreviewOutputTopicName = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
+                                                                                    .withOutput();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, WalkingControllerPreviewOutputMessage.class, controllerPreviewOutputTopicName, s -> messager.submitMessage(FootstepPlannerMessagerAPI.WalkingPreviewOutput, s.takeNextData()));
 
       // publishers
@@ -222,8 +222,8 @@ public class RemoteUIMessageConverter
       footstepDataListPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepDataListMessage.class, ROS2Tools.getControllerInputTopicName(robotName));
       goHomePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, GoHomeMessage.class, ROS2Tools.getControllerInputTopicName(robotName));
 
-      ROS2TopicName controllerPreviewInputTopicName = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
-                                                                                                .withInput();
+      ROS2Topic controllerPreviewInputTopicName = ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName)
+                                                                                   .withInput();
       walkingPreviewToolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, controllerPreviewInputTopicName);
       walkingPreviewRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WalkingControllerPreviewInputMessage.class, controllerPreviewInputTopicName);
 

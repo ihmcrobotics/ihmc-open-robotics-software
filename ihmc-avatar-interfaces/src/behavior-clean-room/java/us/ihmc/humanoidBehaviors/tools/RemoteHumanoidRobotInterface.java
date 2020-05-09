@@ -33,7 +33,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Input;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
@@ -64,7 +64,7 @@ public class RemoteHumanoidRobotInterface
    private final RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState;
 
    private final FootstepPlanPostProcessingModule footstepPlanPostProcessingModule;
-   private final ROS2TopicName topicName;
+   private final ROS2Topic topicName;
 
    public RemoteHumanoidRobotInterface(Ros2NodeInterface ros2Node, DRCRobotModel robotModel)
    {

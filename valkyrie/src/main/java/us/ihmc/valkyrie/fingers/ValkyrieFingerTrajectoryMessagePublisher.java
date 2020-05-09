@@ -6,7 +6,7 @@ import us.ihmc.avatar.handControl.HandFingerTrajectoryMessagePublisher;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.valkyrie.network.ValkyrieMessageTools;
 
@@ -14,7 +14,7 @@ public class ValkyrieFingerTrajectoryMessagePublisher implements HandFingerTraje
 {
    private final IHMCROS2Publisher<ValkyrieHandFingerTrajectoryMessage> publisher;
 
-   public ValkyrieFingerTrajectoryMessagePublisher(Ros2Node ros2Node, ROS2TopicName inputTopicName)
+   public ValkyrieFingerTrajectoryMessagePublisher(Ros2Node ros2Node, ROS2Topic inputTopicName)
    {
       publisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ValkyrieHandFingerTrajectoryMessage.class, inputTopicName);
    }

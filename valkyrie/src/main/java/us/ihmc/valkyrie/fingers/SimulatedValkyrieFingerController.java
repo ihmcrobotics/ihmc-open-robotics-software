@@ -20,7 +20,7 @@ import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.partNames.FingerName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -56,7 +56,7 @@ public class SimulatedValkyrieFingerController extends SimulatedHandControlTask
    private final MirroredYoVariableRegistry registry;
 
    public SimulatedValkyrieFingerController(FloatingRootJointRobot simulatedRobot, RealtimeRos2Node realtimeRos2Node, DRCRobotModel robotModel,
-                                            ROS2TopicName outputTopicName, ROS2TopicName inputTopicName)
+                                            ROS2Topic outputTopicName, ROS2Topic inputTopicName)
    {
       super((int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
 

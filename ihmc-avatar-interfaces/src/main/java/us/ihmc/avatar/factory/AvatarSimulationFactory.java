@@ -39,7 +39,7 @@ import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.physics.RobotCollisionModel;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
@@ -235,8 +235,8 @@ public class AvatarSimulationFactory
    {
       String robotName = robotModel.get().getSimpleRobotName();
 
-      ROS2TopicName outputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
-      ROS2TopicName inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
+      ROS2Topic outputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Topic inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
 
       PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
       if (externalPelvisCorrectorSubscriber.hasValue())

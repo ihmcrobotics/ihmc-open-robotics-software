@@ -11,7 +11,7 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 
 public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
@@ -33,7 +33,7 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
       this(ros2Node, ROS2Tools.REA.withInput(), initializeToFlatGround);
    }
 
-   public LivePlanarRegionsGraphic(Ros2Node ros2Node, ROS2TopicName regionsSourceTopicName, boolean initializeToFlatGround)
+   public LivePlanarRegionsGraphic(Ros2Node ros2Node, ROS2Topic regionsSourceTopicName, boolean initializeToFlatGround)
    {
       super(initializeToFlatGround);
 

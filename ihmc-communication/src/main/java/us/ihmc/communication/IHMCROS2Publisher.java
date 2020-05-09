@@ -3,7 +3,7 @@ package us.ihmc.communication;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.log.LogTools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.ros2.Ros2PublisherBasics;
@@ -27,7 +27,7 @@ public class IHMCROS2Publisher<T>
       this(ros2Node, messageType, ROS2Tools.IHMC_ROOT);
    }
 
-   public IHMCROS2Publisher(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2TopicName topicName)
+   public IHMCROS2Publisher(Ros2NodeInterface ros2Node, Class<T> messageType, ROS2Topic topicName)
    {
       this(ros2Node, messageType, topicName.withType(messageType).toString());
    }

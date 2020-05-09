@@ -15,7 +15,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.imu.IMUSensor;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -45,7 +45,7 @@ public class RobotConfigurationDataPublisherFactory
    private final OptionalFactoryField<RobotMotionStatusHolder> robotMotionStatusHolderField = new OptionalFactoryField<>("robotMotionStatusHolder");
 
    private final RequiredFactoryField<RealtimeRos2Node> realtimeRos2NodeField = new RequiredFactoryField<>("realtimeRos2Node");
-   private final RequiredFactoryField<ROS2TopicName> outputTopicNameField = new RequiredFactoryField<>("outputTopicName");
+   private final RequiredFactoryField<ROS2Topic> outputTopicNameField = new RequiredFactoryField<>("outputTopicName");
 
    public RobotConfigurationDataPublisherFactory()
    {
@@ -177,7 +177,7 @@ public class RobotConfigurationDataPublisherFactory
     * @param ros2Node                    the real-time node to create the publisher with.
     * @param outputTopicName the generator to use for creating the topic name.
     */
-   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2TopicName outputTopicName)
+   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2Topic outputTopicName)
    {
       realtimeRos2NodeField.set(ros2Node);
       outputTopicNameField.set(outputTopicName);

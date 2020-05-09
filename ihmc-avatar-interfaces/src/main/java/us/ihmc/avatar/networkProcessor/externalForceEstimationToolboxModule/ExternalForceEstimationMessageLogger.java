@@ -8,7 +8,7 @@ import us.ihmc.communication.packets.Packet;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 import java.io.File;
@@ -64,11 +64,11 @@ public class ExternalForceEstimationMessageLogger
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation,
                                                   "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ExternalForceEstimationMessageLogger"));
 
-      ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Topic controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopicName, s -> robotConfigurationData.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotDesiredConfigurationData.class, controllerOutputTopicName, s -> robotDesiredConfigurationData.set(s.takeNextData()));
 
-      ROS2TopicName toolboxInputTopicName = ExternalForceEstimationToolboxModule.getInputTopicName(robotName);
+      ROS2Topic toolboxInputTopicName = ExternalForceEstimationToolboxModule.getInputTopicName(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     ToolboxStateMessage.class,
                                                     toolboxInputTopicName,

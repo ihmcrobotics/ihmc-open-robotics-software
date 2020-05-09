@@ -53,7 +53,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -697,7 +697,7 @@ public class DRCSimulationTestHelper
       return createPublisher(messageType, ROS2Tools.getControllerInputTopicName(robotName));
    }
 
-   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2TopicName generator)
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic generator)
    {
       return ROS2Tools.createPublisherTypeNamed(ros2Node, messageType, generator);
    }
@@ -712,7 +712,7 @@ public class DRCSimulationTestHelper
       createSubscriber(messageType, ROS2Tools.getControllerOutputTopicName(robotName), consumer);
    }
 
-   public <T> void createSubscriber(Class<T> messageType, ROS2TopicName generator, ObjectConsumer<T> consumer)
+   public <T> void createSubscriber(Class<T> messageType, ROS2Topic generator, ObjectConsumer<T> consumer)
    {
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, messageType, generator, s -> consumer.consumeObject(s.takeNextData()));
    }

@@ -20,7 +20,7 @@ import us.ihmc.robotDataLogger.YoVariableClient;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizer;
 import us.ihmc.robotDataVisualizer.visualizer.SCSVisualizerStateListener;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.KinematicPoint;
@@ -38,8 +38,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerStateListener
 {
    private final RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "valkyrie_wrench_estimation_visualizer");
-   private final ROS2TopicName inputTopicName;
-   private final ROS2TopicName outputTopicName;
+   private final ROS2Topic inputTopicName;
+   private final ROS2Topic outputTopicName;
    private final int endEffectorHashCode;
    private final Vector3D externalForcePointOffset = new Vector3D();
    private String endEffectorName;

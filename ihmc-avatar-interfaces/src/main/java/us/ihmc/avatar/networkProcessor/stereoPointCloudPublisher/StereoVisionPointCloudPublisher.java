@@ -31,7 +31,7 @@ import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.ihmcPerception.depthData.CollisionShapeTester;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
@@ -83,26 +83,26 @@ public class StereoVisionPointCloudPublisher
    private long publisherPeriodInMillisecond = 200L;
    private double minimumResolution = 0.005;
 
-   public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, ROS2TopicName robotConfigurationDataTopicName)
+   public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, ROS2Topic robotConfigurationDataTopicName)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
            ROS2Tools.IHMC_ROOT);
    }
 
-   public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, ROS2TopicName robotConfigurationDataTopicName,
-                                          ROS2TopicName defaultTopicName)
+   public StereoVisionPointCloudPublisher(FullRobotModelFactory modelFactory, Ros2Node ros2Node, ROS2Topic robotConfigurationDataTopicName,
+                                          ROS2Topic defaultTopicName)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
            defaultTopicName);
    }
 
    public StereoVisionPointCloudPublisher(String robotName, FullRobotModel fullRobotModel, Ros2Node ros2Node, RealtimeRos2Node realtimeRos2Node,
-                                          ROS2TopicName robotConfigurationDataTopicName, ROS2TopicName defaultTopicName)
+                                          ROS2Topic robotConfigurationDataTopicName, ROS2Topic defaultTopicName)
    {
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
-      ROS2TopicName generateTopicName = defaultTopicName.withType(messageType);
+      ROS2Topic generateTopicName = defaultTopicName.withType(messageType);
       if (ros2Node != null)
       {
          ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,

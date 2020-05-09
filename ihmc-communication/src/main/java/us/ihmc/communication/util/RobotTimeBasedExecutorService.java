@@ -64,7 +64,7 @@ public class RobotTimeBasedExecutorService
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, createTopicName(robotName), robotConfigurationDataListener);
    }
 
-   private static ROS2TopicName createTopicName(String robotName)
+   private static ROS2Topic createTopicName(String robotName)
    {
       return ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
    }
@@ -161,7 +161,7 @@ public class RobotTimeBasedExecutorService
       AtomicDouble estimatedRealtimeRate = new AtomicDouble(1.0);
 
       // Create a thread that estimates the current realtime rate.
-      ROS2TopicName topicName = createTopicName(robotName);
+      ROS2Topic topicName = createTopicName(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, topicName, new NewMessageListener<RobotConfigurationData>()
       {
          private final SampleInfo sampleInfo = new SampleInfo();
