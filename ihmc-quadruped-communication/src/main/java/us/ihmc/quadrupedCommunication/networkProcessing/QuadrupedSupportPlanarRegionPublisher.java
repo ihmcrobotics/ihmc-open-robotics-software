@@ -86,7 +86,7 @@ public class QuadrupedSupportPlanarRegionPublisher
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "supporting_planar_region_publisher");
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class, ROS2Tools.getQuadrupedControllerOutputTopicName(robotName),
+                                                    RobotConfigurationData.class, ROS2Tools.getQuadrupedControllerOutputTopic(robotName),
                                                     (NewMessageListener<RobotConfigurationData>) subscriber -> latestRobotConfigurationData.set(subscriber.takeNextData()));
       regionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                            PlanarRegionsListMessage.class,

@@ -59,7 +59,7 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
    private final MirroredYoVariableRegistry registry;
 
    public SimulatedRobotiqHandsController(FloatingRootJointRobot simulatedRobot, DRCRobotModel robotModel, RealtimeRos2Node realtimeRos2Node,
-                                          ROS2Topic outputTopicName, ROS2Topic inputTopicName)
+                                          ROS2Topic outputTopic, ROS2Topic inputTopic)
    {
       super((int) Math.round(robotModel.getControllerDT() / robotModel.getSimulateDT()));
 
@@ -73,7 +73,7 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
       if (realtimeRos2Node != null)
       {
          IHMCRealtimeROS2Publisher<HandJointAnglePacket> jointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, HandJointAnglePacket.class,
-                                                                                                                  outputTopicName);
+                                                                                                                  outputTopic);
          jointAngleProducer = new SimulatedRobotiqHandJointAngleProducer(jointAnglePublisher, simulatedRobot);
       }
       else
@@ -107,7 +107,7 @@ public class SimulatedRobotiqHandsController extends SimulatedHandControlTask
             handDesiredConfigurationMessageSubscribers.put(robotSide, handDesiredConfigurationSubscriber);
             if (realtimeRos2Node != null)
             {
-               ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HandDesiredConfigurationMessage.class, inputTopicName,
+               ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HandDesiredConfigurationMessage.class, inputTopic,
                                                              handDesiredConfigurationSubscriber);
             }
 

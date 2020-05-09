@@ -38,8 +38,8 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerStateListener
 {
    private final RealtimeRos2Node ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.FAST_RTPS, "valkyrie_wrench_estimation_visualizer");
-   private final ROS2Topic inputTopicName;
-   private final ROS2Topic outputTopicName;
+   private final ROS2Topic inputTopic;
+   private final ROS2Topic outputTopic;
    private final int endEffectorHashCode;
    private final Vector3D externalForcePointOffset = new Vector3D();
    private String endEffectorName;
@@ -56,8 +56,8 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
       DRCRobotModel robotModel = new ValkyrieRobotModel(RobotTarget.SCS, version);
       FullHumanoidRobotModel fullRobotModel = robotModel.createFullRobotModel();
 
-      inputTopicName = ExternalForceEstimationToolboxModule.getInputTopicName(robotModel.getSimpleRobotName());
-      outputTopicName = ExternalForceEstimationToolboxModule.getOutputTopicName(robotModel.getSimpleRobotName());
+      inputTopic = ExternalForceEstimationToolboxModule.getInputTopic(robotModel.getSimpleRobotName());
+      outputTopic = ExternalForceEstimationToolboxModule.getOutputTopic(robotModel.getSimpleRobotName());
 
       // ----- Root Joint ----- //
       //      RigidBodyBasics endEffector = fullRobotModel.getRootBody();
@@ -102,7 +102,7 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
       AtomicReference<ExternalForceEstimationOutputStatus> toolboxOutputStatus = new AtomicReference<>();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     ExternalForceEstimationOutputStatus.class,
-                                                    outputTopicName,
+                                                    outputTopic,
                                            s -> toolboxOutputStatus.set(s.takeNextData()));
 
       AtomicBoolean reset = new AtomicBoolean();
@@ -124,10 +124,10 @@ public class ValkyrieExternalForceEstimationVisualizer implements SCSVisualizerS
       // ----- Toolbox Control ----- //
       IHMCRealtimeROS2Publisher<ToolboxStateMessage> toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                 ToolboxStateMessage.class,
-                                                                                                                inputTopicName);
+                                                                                                                inputTopic);
       IHMCRealtimeROS2Publisher<ExternalForceEstimationConfigurationMessage> configurationMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                                                 ExternalForceEstimationConfigurationMessage.class,
-                                                                                                                                                inputTopicName);
+                                                                                                                                                inputTopic);
       JButton wakeupButton = new JButton("Start");
       wakeupButton.addActionListener(e ->
                                      {

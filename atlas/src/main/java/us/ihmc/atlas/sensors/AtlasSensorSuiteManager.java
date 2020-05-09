@@ -132,7 +132,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
       if (enableVideoPublisher)
       {
          ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                       RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
+                                                       RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName),
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
 
          AvatarRobotCameraParameters multisenseLeftEyeCameraParameters = sensorInformation.getCameraParameters(AtlasSensorInformation.MULTISENSE_SL_LEFT_CAMERA_ID);
@@ -160,7 +160,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       if (enableStereoVisionPointCloudPublisher)
       {
-         ROS2Topic rcdTopicName = ROS2Tools.getControllerOutputTopicName(robotName).withType(RobotConfigurationData.class);
+         ROS2Topic rcdTopicName = ROS2Tools.getControllerOutputTopic(robotName).withType(RobotConfigurationData.class);
          multisenseStereoVisionPointCloudPublisher = new StereoVisionPointCloudPublisher(modelFactory, ros2Node, rcdTopicName);
          multisenseStereoVisionPointCloudPublisher.setROSClockCalculator(rosClockCalculator);
          AvatarRobotPointCloudParameters multisenseStereoParameters = sensorInformation.getPointCloudParameters(AtlasSensorInformation.MULTISENSE_STEREO_ID);
@@ -169,7 +169,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
 
       if (enableDepthPointCloudPublisher)
       {
-         ROS2Topic rcdTopicName = ROS2Tools.getControllerOutputTopicName(robotName).withType(RobotConfigurationData.class);
+         ROS2Topic rcdTopicName = ROS2Tools.getControllerOutputTopic(robotName).withType(RobotConfigurationData.class);
          pointCloudSensorManager = new AtlasPointCloudSensorManager(modelFactory,
                                                                     ros2Node,
                                                                     rcdTopicName,
@@ -252,7 +252,7 @@ public class AtlasSensorSuiteManager implements DRCSensorSuiteManager
    {
       AvatarRobotLidarParameters multisenseLidarParameters = sensorInformation.getLidarParameters(AtlasSensorInformation.MULTISENSE_LIDAR_ID);
       String sensorName = multisenseLidarParameters.getSensorNameInSdf();
-      ROS2Topic rcdTopicName = ROS2Tools.getControllerOutputTopicName(robotName).withType(RobotConfigurationData.class);
+      ROS2Topic rcdTopicName = ROS2Tools.getControllerOutputTopic(robotName).withType(RobotConfigurationData.class);
       LidarScanPublisher lidarScanPublisher = new LidarScanPublisher(sensorName, modelFactory, ros2Node, rcdTopicName);
       lidarScanPublisher.setROSClockCalculator(rosClockCalculator);
       lidarScanPublisher.setShadowFilter();

@@ -115,10 +115,10 @@ public abstract class KinematicsStreamingToolboxControllerTest
    protected Ros2Node ros2Node;
    protected IHMCROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
    protected IHMCROS2Publisher<ToolboxStateMessage> statePublisher;
-   protected ROS2Topic controllerInputTopicName;
-   protected ROS2Topic controllerOutputTopicName;
-   protected ROS2Topic toolboxInputTopicName;
-   protected ROS2Topic toolboxOutputTopicName;
+   protected ROS2Topic controllerInputTopic;
+   protected ROS2Topic controllerOutputTopic;
+   protected ROS2Topic toolboxInputTopic;
+   protected ROS2Topic toolboxOutputTopic;
    protected ScheduledExecutorService executor;
 
    /**
@@ -143,32 +143,32 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       ros2Node = drcSimulationTestHelper.getRos2Node();
 
-      controllerInputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
-      controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
-      toolboxInputTopicName = KinematicsStreamingToolboxModule.getInputTopicName(robotName);
-      toolboxOutputTopicName = KinematicsStreamingToolboxModule.getOutputTopicName(robotName);
+      controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
+      toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
 
       RealtimeRos2Node toolboxRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
-      new ControllerNetworkSubscriber(toolboxInputTopicName, commandInputManager, toolboxOutputTopicName, statusOutputManager, toolboxRos2Node);
+      new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxRos2Node);
       IHMCROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                          WholeBodyTrajectoryMessage.class,
-                                                                                                         controllerInputTopicName);
+                                                                                                         controllerInputTopic);
       toolboxController.setOutputPublisher(outputPublisher::publish);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,
-                                                    controllerOutputTopicName,
+                                                    controllerOutputTopic,
                                            s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     CapturabilityBasedStatus.class,
-                                                    controllerOutputTopicName,
+                                                    controllerOutputTopic,
                                            s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
 
-      inputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxInputTopicName);
-      statePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxInputTopicName);
+      inputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxInputTopic);
+      statePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxInputTopic);
 
       AtomicReference<KinematicsToolboxOutputStatus> toolboxViz = new AtomicReference<>(null);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, KinematicsToolboxOutputStatus.class, toolboxOutputTopicName, s -> toolboxViz.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, KinematicsToolboxOutputStatus.class, toolboxOutputTopic, s -> toolboxViz.set(s.takeNextData()));
 
       ghost.setController(new RobotController()
       {

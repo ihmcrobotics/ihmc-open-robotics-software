@@ -381,7 +381,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
       PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = null;
       externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(null, null);
       ROS2Tools.createCallbackSubscriptionTypeNamed(estimatorRealtimeRos2Node,
-                                                    StampedPosePacket.class, ROS2Tools.getControllerInputTopicName(robotName),
+                                                    StampedPosePacket.class, ROS2Tools.getControllerInputTopic(robotName),
                                                     externalPelvisPoseSubscriber);
 
       /*

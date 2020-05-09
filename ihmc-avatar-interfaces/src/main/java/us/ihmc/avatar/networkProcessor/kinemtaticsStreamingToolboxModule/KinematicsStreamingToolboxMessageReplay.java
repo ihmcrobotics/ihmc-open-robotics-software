@@ -56,14 +56,14 @@ public class KinematicsStreamingToolboxMessageReplay
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + name);
 
-      ROS2Topic controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
-      robotConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopicName);
-      capturabilityBasedStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerOutputTopicName);
+      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      robotConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic);
+      capturabilityBasedStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, CapturabilityBasedStatus.class, controllerOutputTopic);
 
-      ROS2Topic toolboxInputTopicName = KinematicsStreamingToolboxModule.getInputTopicName(robotName);
-      kinematicsToolboxConfigurationPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsToolboxConfigurationMessage.class, toolboxInputTopicName);
-      kinematicsStreamingToolboxInputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxInputTopicName);
-      toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxInputTopicName);
+      ROS2Topic toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
+      kinematicsToolboxConfigurationPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsToolboxConfigurationMessage.class, toolboxInputTopic);
+      kinematicsStreamingToolboxInputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxInputTopic);
+      toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxInputTopic);
 
       ros2Node.spin();
    }

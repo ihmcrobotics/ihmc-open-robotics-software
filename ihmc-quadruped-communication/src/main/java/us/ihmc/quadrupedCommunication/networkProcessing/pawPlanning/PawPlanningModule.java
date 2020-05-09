@@ -63,11 +63,11 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
    {
       // status messages from the controller
-      ROS2Topic controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopicName,
+      ROS2Topic controllerOutputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopic,
                                            s -> processRobotTimestamp(s.takeNextData().getMonotonicTime()));
-//      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HighLevelStateMessage.class, controllerOutputTopicName, s -> footstepPlanningController.setPaused(true));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedGroundPlaneMessage.class, controllerOutputTopicName,
+//      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HighLevelStateMessage.class, controllerOutputTopic, s -> footstepPlanningController.setPaused(true));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedGroundPlaneMessage.class, controllerOutputTopic,
                                            s -> processGroundPlaneMessage(s.takeNextData()));
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedSupportPlanarRegionParametersMessage.class,
@@ -76,13 +76,13 @@ public class PawPlanningModule extends QuadrupedToolboxModule
                                            s -> processSupportRegionParameters(s.takeNextData()));
 
       // inputs to this module
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PawStepPlanningRequestPacket.class, getInputTopicName(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PawStepPlanningRequestPacket.class, getInputTopic(),
                                            s -> processPawPlanningRequest(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getInputTopicName(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getInputTopic(),
                                            s -> processXGaitSettingsPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PawStepPlannerParametersPacket.class, getInputTopicName(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PawStepPlannerParametersPacket.class, getInputTopic(),
                                            s -> processFootstepPlannerParametersPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, VisibilityGraphsParametersPacket.class, getInputTopicName(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, VisibilityGraphsParametersPacket.class, getInputTopic(),
                                            s -> processVisibilityGraphParametersPacket(s.takeNextData()));
    }
 
@@ -145,23 +145,23 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    {
       Map<Class<? extends Settable<?>>, ROS2Topic> messages = new HashMap<>();
 
-      messages.put(PawStepPlanningToolboxOutputStatus.class, getOutputTopicName());
-      messages.put(QuadrupedBodyOrientationMessage.class, getOutputTopicName());
-      messages.put(BodyPathPlanMessage.class, getOutputTopicName());
-      messages.put(PawStepPlannerParametersPacket.class, getOutputTopicName());
-      messages.put(FootstepPlannerStatusMessage.class, getOutputTopicName());
+      messages.put(PawStepPlanningToolboxOutputStatus.class, getOutputTopic());
+      messages.put(QuadrupedBodyOrientationMessage.class, getOutputTopic());
+      messages.put(BodyPathPlanMessage.class, getOutputTopic());
+      messages.put(PawStepPlannerParametersPacket.class, getOutputTopic());
+      messages.put(FootstepPlannerStatusMessage.class, getOutputTopic());
 
       return messages;
    }
 
    @Override
-   public ROS2Topic getOutputTopicName()
+   public ROS2Topic getOutputTopic()
    {
       return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2Topic getInputTopicName()
+   public ROS2Topic getInputTopic()
    {
       return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
    }

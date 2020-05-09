@@ -101,7 +101,7 @@ public abstract class QuadrupedToolboxModule
       realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       inputManager = new CommandInputManager(name, createListOfSupportedCommands());
       outputManager = new OutputManager(createMapOfSupportedOutputMessages());
-      networkSubscriber = new NetworkSubscriber(getInputTopicName(), inputManager, getOutputTopicName(), outputManager,
+      networkSubscriber = new NetworkSubscriber(getInputTopic(), inputManager, getOutputTopic(), outputManager,
                                                 realtimeRos2Node);
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
@@ -119,11 +119,11 @@ public abstract class QuadrupedToolboxModule
          }
       });
 
-      ROS2Topic controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
+      ROS2Topic controllerOutputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
       if (fullRobotModel != null)
       {
          robotDataReceiver = new QuadrupedRobotDataReceiver(fullRobotModel, null);
-         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopicName,
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopic,
                                               s -> robotDataReceiver.receivedPacket(s.takeNextData()));
       }
       else
@@ -134,7 +134,7 @@ public abstract class QuadrupedToolboxModule
       networkSubscriber.addMessageFilter(createMessageFilter());
 
       ROS2Tools
-            .createCallbackSubscriptionTypeNamed(realtimeRos2Node, ToolboxStateMessage.class, getInputTopicName(), s -> receivedPacket(s.takeNextData()));
+            .createCallbackSubscriptionTypeNamed(realtimeRos2Node, ToolboxStateMessage.class, getInputTopic(), s -> receivedPacket(s.takeNextData()));
 
 
       registerExtraSubscribers(realtimeRos2Node);
@@ -402,7 +402,7 @@ public abstract class QuadrupedToolboxModule
       return Collections.emptySet();
    }
 
-   public abstract ROS2Topic getOutputTopicName();
+   public abstract ROS2Topic getOutputTopic();
 
-   public abstract ROS2Topic getInputTopicName();
+   public abstract ROS2Topic getInputTopic();
 }

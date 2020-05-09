@@ -60,16 +60,16 @@ public class ControllerNetworkSubscriber
 
    private final RealtimeRos2Node realtimeRos2Node;
 
-   private final ROS2Topic inputTopicName;
-   private final ROS2Topic outputTopicName;
+   private final ROS2Topic inputTopic;
+   private final ROS2Topic outputTopic;
 
-   public ControllerNetworkSubscriber(ROS2Topic inputTopicName, CommandInputManager controllerCommandInputManager,
-                                      ROS2Topic outputTopicName, StatusMessageOutputManager controllerStatusOutputManager,
+   public ControllerNetworkSubscriber(ROS2Topic inputTopic, CommandInputManager controllerCommandInputManager,
+                                      ROS2Topic outputTopic, StatusMessageOutputManager controllerStatusOutputManager,
                                       RealtimeRos2Node realtimeRos2Node)
    {
-      this.inputTopicName = inputTopicName;
+      this.inputTopic = inputTopic;
       this.controllerCommandInputManager = controllerCommandInputManager;
-      this.outputTopicName = outputTopicName;
+      this.outputTopic = outputTopic;
       this.controllerStatusOutputManager = controllerStatusOutputManager;
       this.realtimeRos2Node = realtimeRos2Node;
       listOfSupportedStatusMessages = controllerStatusOutputManager.getListOfSupportedMessages();
@@ -90,16 +90,16 @@ public class ControllerNetworkSubscriber
    public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType, int expectedMessageSize,
                                                                             MessageUnpacker<T> messageUnpacker)
    {
-      registerSubcriberWithMessageUnpacker(multipleMessageType, inputTopicName, expectedMessageSize, messageUnpacker);
+      registerSubcriberWithMessageUnpacker(multipleMessageType, inputTopic, expectedMessageSize, messageUnpacker);
    }
 
    public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
-                                                                            ROS2Topic inputTopicName, int expectedMessageSize,
+                                                                            ROS2Topic inputTopic, int expectedMessageSize,
                                                                             MessageUnpacker<T> messageUnpacker)
    {
       final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
-      ROS2Topic topicName = inputTopicName.withType(multipleMessageType);
+      ROS2Topic topicName = inputTopic.withType(multipleMessageType);
       try
       {
          T localInstance = multipleMessageType.newInstance();
@@ -158,7 +158,7 @@ public class ControllerNetworkSubscriber
 
       MessageCollection messageCollection = new MessageCollection();
 
-      ROS2Topic topicName = inputTopicName.withType(MessageCollection.class);
+      ROS2Topic topicName = inputTopic.withType(MessageCollection.class);
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, MessageCollection.class, topicName, s ->
       {
          s.takeNextData(messageCollection, null);
@@ -211,7 +211,7 @@ public class ControllerNetworkSubscriber
       { // Creating the subscribers
          Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
          T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
-         ROS2Topic topicName = inputTopicName.withType(messageClass);
+         ROS2Topic topicName = inputTopic.withType(messageClass);
 
          ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, messageClass, topicName, s ->
          {
@@ -223,7 +223,7 @@ public class ControllerNetworkSubscriber
 
    private <T extends Settable<T>> IHMCRealtimeROS2Publisher<T> createPublisher(Class<T> messageClass)
    {
-      ROS2Topic topicName = outputTopicName.withType(messageClass);
+      ROS2Topic topicName = outputTopic.withType(messageClass);
       IHMCRealtimeROS2Publisher<T> publisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, messageClass, topicName);
       return publisher;
    }

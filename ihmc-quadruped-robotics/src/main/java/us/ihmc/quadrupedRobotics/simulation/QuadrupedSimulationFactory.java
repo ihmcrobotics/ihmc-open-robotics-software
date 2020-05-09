@@ -317,7 +317,7 @@ public class QuadrupedSimulationFactory
       factory.setDefinitionsToPublish(fullRobotModel.get());
       factory.setSensorSource(fullRobotModel.get(), sensorReader.getRawSensorOutputMap());
       factory.setRobotMotionStatusHolder(controllerManager.getMotionStatusHolder());
-      factory.setROS2Info(realtimeRos2Node, ROS2Tools.getQuadrupedControllerOutputTopicName(sdfRobot.get().getName()));
+      factory.setROS2Info(realtimeRos2Node, ROS2Tools.getQuadrupedControllerOutputTopic(sdfRobot.get().getName()));
 
       robotConfigurationDataPublisher = factory.createRobotConfigurationDataPublisher();
    }

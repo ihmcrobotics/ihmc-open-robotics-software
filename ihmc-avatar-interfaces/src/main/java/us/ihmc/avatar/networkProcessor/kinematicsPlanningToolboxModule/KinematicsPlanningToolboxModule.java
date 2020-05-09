@@ -43,14 +43,14 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
-      ROS2Topic controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopicName, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
       {
          if (kinematicsPlanningToolboxController != null)
             kinematicsPlanningToolboxController.updateRobotConfigurationData(s.takeNextData());
       });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, CapturabilityBasedStatus.class, controllerOutputTopicName, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
       {
          if (kinematicsPlanningToolboxController != null)
             kinematicsPlanningToolboxController.updateCapturabilityBasedStatus(s.takeNextData());
@@ -94,23 +94,23 @@ public class KinematicsPlanningToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2Topic getOutputTopicName()
+   public ROS2Topic getOutputTopic()
    {
-      return getOutputTopicName(robotName);
+      return getOutputTopic(robotName);
    }
 
-   public static ROS2Topic getOutputTopicName(String robotName)
+   public static ROS2Topic getOutputTopic(String robotName)
    {
       return ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2Topic getInputTopicName()
+   public ROS2Topic getInputTopic()
    {
-      return getInputTopicName(robotName);
+      return getInputTopic(robotName);
    }
 
-   public static ROS2Topic getInputTopicName(String robotName)
+   public static ROS2Topic getInputTopic(String robotName)
    {
       return ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
    }

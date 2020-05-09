@@ -1,8 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopicName;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopicName;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
 
 import java.io.File;
 import java.io.IOException;
@@ -108,10 +108,10 @@ public class LIDARBasedREAModule
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicName,
                                                     this::dispatchCustomPlanarRegion);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RequestPlanarRegionsListMessage.class, inputTopicName,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RequestPlanarRegionsListMessage.class, inputTopic,
                                                     this::handleRequestPlanarRegionsListMessage);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopicName, this::handleREAStateRequestMessage);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REASensorDataFilterParametersMessage.class, inputTopicName,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopic, this::handleREAStateRequestMessage);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REASensorDataFilterParametersMessage.class, inputTopic,
                                                     this::handleREASensorDataFilterParametersMessage);
 
       FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
@@ -124,8 +124,8 @@ public class LIDARBasedREAModule
       reaMessager.registerTopicListener(REAModuleAPI.SaveRegionUpdaterConfiguration,
                                         (content) -> planarRegionFeatureUpdater.saveConfiguration(filePropertyHelper));
 
-      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager, planarRegionFeatureUpdater, ros2Node, outputTopicName,
-                                                                             inputTopicName);
+      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager, planarRegionFeatureUpdater, ros2Node, outputTopic,
+                                                                             inputTopic);
       clearOcTree = reaMessager.createInput(REAModuleAPI.OcTreeClear, false);
 
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.

@@ -78,15 +78,15 @@ public class RemoteFootstepPlannerInterface
       toolboxStatePublisher =
             ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                ToolboxStateMessage.class,
-                                               FootstepPlannerCommunicationProperties.inputTopicName(robotModel.getSimpleRobotName()));
+                                               FootstepPlannerCommunicationProperties.inputTopic(robotModel.getSimpleRobotName()));
       footstepPlanningRequestPublisher =
             ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                FootstepPlanningRequestPacket.class,
-                                               FootstepPlannerCommunicationProperties.inputTopicName(robotModel.getSimpleRobotName()));
+                                               FootstepPlannerCommunicationProperties.inputTopic(robotModel.getSimpleRobotName()));
       parametersPublisher =
             ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                FootstepPlannerParametersPacket.class,
-                                               FootstepPlannerCommunicationProperties.inputTopicName(robotModel.getSimpleRobotName()));
+                                               FootstepPlannerCommunicationProperties.inputTopic(robotModel.getSimpleRobotName()));
 
       new ROS2Callback<>(ros2Node,
                          FootstepPlanningToolboxOutputStatus.class,

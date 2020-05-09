@@ -67,12 +67,12 @@ public class JoystickBasedGraspingMainUI
       mainPane.setCenter(subScene);
 
       javaFXRobotVisualizer = new JavaFXRobotVisualizer(fullRobotModelFactory);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, ROS2Tools.getControllerOutputTopicName(robotName),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, ROS2Tools.getControllerOutputTopic(robotName),
                                            s -> javaFXRobotVisualizer.submitNewConfiguration(s.takeNextData()));
       view3dFactory.addNodeToView(javaFXRobotVisualizer.getRootNode());
 
       planarRegionsViewer = new JavaFXPlanarRegionsViewer();
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopicName,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
                                            s -> planarRegionsViewer.submitPlanarRegions(s.takeNextData()));
       view3dFactory.addNodeToView(planarRegionsViewer.getRootNode());
       

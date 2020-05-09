@@ -91,16 +91,16 @@ public class FootstepPlanningModuleLauncher
       FootstepPlanningModule footstepPlanningModule = createModule(robotModel);
       footstepPlanningModule.registerRosNode(ros2Node);
       String name = footstepPlanningModule.getName();
-      ROS2Topic inputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(name).withInput();
-      ROS2Topic outputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(name).withOutput();
+      ROS2Topic inputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(name).withInput();
+      ROS2Topic outputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(name).withOutput();
 
       AtomicBoolean generateLog = new AtomicBoolean();
 
-      createParametersCallbacks(ros2Node, footstepPlanningModule, inputTopicName);
-      createRequestCallback(ros2Node, footstepPlanningModule, inputTopicName, generateLog);
-      createStatusPublisher(ros2Node, robotModel, swingParameters, footstepPlanningModule, outputTopicName);
-      createOccupancyGridCallback(ros2Node, footstepPlanningModule, outputTopicName);
-      createPlannerActionCallback(ros2Node, footstepPlanningModule, inputTopicName, outputTopicName);
+      createParametersCallbacks(ros2Node, footstepPlanningModule, inputTopic);
+      createRequestCallback(ros2Node, footstepPlanningModule, inputTopic, generateLog);
+      createStatusPublisher(ros2Node, robotModel, swingParameters, footstepPlanningModule, outputTopic);
+      createOccupancyGridCallback(ros2Node, footstepPlanningModule, outputTopic);
+      createPlannerActionCallback(ros2Node, footstepPlanningModule, inputTopic, outputTopic);
       createLoggerCallback(footstepPlanningModule, generateLog);
 
       return footstepPlanningModule;
@@ -108,14 +108,14 @@ public class FootstepPlanningModuleLauncher
 
    private static void createParametersCallbacks(Ros2Node ros2Node,
                                                  FootstepPlanningModule footstepPlanningModule,
-                                                 ROS2Topic inputTopicName)
+                                                 ROS2Topic inputTopic)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlannerParametersPacket.class, inputTopicName, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlannerParametersPacket.class, inputTopic, s ->
       {
          if (!footstepPlanningModule.isPlanning())
             footstepPlanningModule.getFootstepPlannerParameters().set(s.readNextData());
       });
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, VisibilityGraphsParametersPacket.class, inputTopicName, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, VisibilityGraphsParametersPacket.class, inputTopic, s ->
       {
          if (!footstepPlanningModule.isPlanning())
             footstepPlanningModule.getVisibilityGraphParameters().set(s.takeNextData());
@@ -124,10 +124,10 @@ public class FootstepPlanningModuleLauncher
 
    private static void createRequestCallback(Ros2Node ros2Node,
                                              FootstepPlanningModule footstepPlanningModule,
-                                             ROS2Topic inputTopicName,
+                                             ROS2Topic inputTopic,
                                              AtomicBoolean generateLog)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningRequestPacket.class, inputTopicName, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningRequestPacket.class, inputTopic, s ->
       {
          FootstepPlannerRequest request = new FootstepPlannerRequest();
          FootstepPlanningRequestPacket requestPacket = s.takeNextData();
@@ -141,11 +141,11 @@ public class FootstepPlanningModuleLauncher
                                              DRCRobotModel robotModel,
                                              AdaptiveSwingParameters swingParameters,
                                              FootstepPlanningModule footstepPlanningModule,
-                                             ROS2Topic outputTopicName)
+                                             ROS2Topic outputTopic)
    {
       IHMCROS2Publisher<FootstepPlanningToolboxOutputStatus> resultPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                   FootstepPlanningToolboxOutputStatus.class,
-                                                                                                                  outputTopicName);
+                                                                                                                  outputTopic);
 
       AdaptiveSwingTrajectoryCalculator swingParameterCalculator =
             swingParameters == null ? null : new AdaptiveSwingTrajectoryCalculator(swingParameters, robotModel.getWalkingControllerParameters());
@@ -167,11 +167,11 @@ public class FootstepPlanningModuleLauncher
 
    private static void createOccupancyGridCallback(Ros2Node ros2Node,
                                                    FootstepPlanningModule footstepPlanningModule,
-                                                   ROS2Topic outputTopicName)
+                                                   ROS2Topic outputTopic)
    {
       IHMCROS2Publisher<FootstepPlannerOccupancyMapMessage> occupancyMapPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                        FootstepPlannerOccupancyMapMessage.class,
-                                                                                                                       outputTopicName);
+                                                                                                                       outputTopic);
       FootstepPlannerOccupancyMapAssembler occupancyMapAssembler = new FootstepPlannerOccupancyMapAssembler();
       footstepPlanningModule.addRequestCallback(request -> occupancyMapAssembler.reset());
       footstepPlanningModule.addIterationCallback(occupancyMapAssembler);
@@ -188,12 +188,12 @@ public class FootstepPlanningModuleLauncher
 
    private static void createPlannerActionCallback(Ros2Node ros2Node,
                                                    FootstepPlanningModule footstepPlanningModule,
-                                                   ROS2Topic inputTopicName,
-                                                   ROS2Topic outputTopicName)
+                                                   ROS2Topic inputTopic,
+                                                   ROS2Topic outputTopic)
    {
       IHMCROS2Publisher<FootstepPlannerParametersPacket> parametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                   FootstepPlannerParametersPacket.class,
-                                                                                                                  outputTopicName);
+                                                                                                                  outputTopic);
 
       FootstepPlannerActionMessage footstepPlannerActionMessage = new FootstepPlannerActionMessage();
       FootstepPlannerParametersPacket footstepPlannerParametersPacket = new FootstepPlannerParametersPacket();
@@ -212,7 +212,7 @@ public class FootstepPlanningModuleLauncher
          }
       };
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlannerActionMessage.class, inputTopicName, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlannerActionMessage.class, inputTopic, s ->
       {
          s.takeNextData(footstepPlannerActionMessage, null);
          new Thread(callback).start();

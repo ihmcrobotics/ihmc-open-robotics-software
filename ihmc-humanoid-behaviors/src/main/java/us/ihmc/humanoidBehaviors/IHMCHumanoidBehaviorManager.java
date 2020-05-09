@@ -133,11 +133,11 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
       HumanoidReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
 
-      ROS2Topic controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,
-                                                    controllerOutputTopicName,
+                                                    controllerOutputTopic,
                                            s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
@@ -158,7 +158,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     CapturabilityBasedStatus.class,
-                                                    controllerOutputTopicName,
+                                                    controllerOutputTopic,
                                            s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.takeNextData()));
 
       CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
@@ -217,15 +217,15 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                     footstepPlannerParameters);
       }
 
-      ROS2Topic behaviorInputTopicName = getInputTopicName(robotName);
+      ROS2Topic behaviorInputTopic = getInputTopic(robotName);
       dispatcher.finalizeStateMachine();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     BehaviorControlModePacket.class,
-                                                    behaviorInputTopicName,
+                                                    behaviorInputTopic,
                                            s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     HumanoidBehaviorTypePacket.class,
-                                                    behaviorInputTopicName,
+                                                    behaviorInputTopic,
                                            s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
 
       if (startYoVariableServer)
@@ -552,12 +552,12 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
       return getBehaviorRosTopicPrefix(robotName, ROS2Tools.INPUT);
    }
 
-   public static ROS2Topic getOutputTopicName(String robotName)
+   public static ROS2Topic getOutputTopic(String robotName)
    {
       return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
    }
 
-   public static ROS2Topic getInputTopicName(String robotName)
+   public static ROS2Topic getInputTopic(String robotName)
    {
       return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();
    }

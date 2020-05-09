@@ -58,7 +58,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
       AtomicInteger stepCounter = new AtomicInteger();
       ROS2Tools.createCallbackSubscriptionTypeNamed(drcSimulationTestHelper.getRos2Node(), FootstepStatusMessage.class,
-                                                    ROS2Tools.getControllerOutputTopicName(getSimpleRobotName()), (p) -> {
+                                                    ROS2Tools.getControllerOutputTopic(getSimpleRobotName()), (p) -> {
                if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
                {
                   stepCounter.incrementAndGet();
@@ -135,7 +135,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
       AtomicInteger stepCounter = new AtomicInteger();
       ROS2Tools.createCallbackSubscriptionTypeNamed(drcSimulationTestHelper.getRos2Node(), FootstepStatusMessage.class,
-                                                    ROS2Tools.getControllerOutputTopicName(getSimpleRobotName()), (p) -> {
+                                                    ROS2Tools.getControllerOutputTopic(getSimpleRobotName()), (p) -> {
                if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
                {
                   stepCounter.incrementAndGet();
@@ -218,7 +218,7 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
 
       AtomicInteger stepCounter = new AtomicInteger();
       ROS2Tools.createCallbackSubscriptionTypeNamed(drcSimulationTestHelper.getRos2Node(), FootstepStatusMessage.class,
-                                                    ROS2Tools.getControllerOutputTopicName(getSimpleRobotName()), (p) -> {
+                                                    ROS2Tools.getControllerOutputTopic(getSimpleRobotName()), (p) -> {
                if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
                {
                   stepCounter.incrementAndGet();

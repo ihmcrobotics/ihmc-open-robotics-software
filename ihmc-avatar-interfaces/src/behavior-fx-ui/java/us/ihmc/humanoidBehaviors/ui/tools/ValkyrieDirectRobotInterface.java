@@ -19,10 +19,10 @@ public class ValkyrieDirectRobotInterface implements RobotLowLevelMessenger
 
    public ValkyrieDirectRobotInterface(Ros2Node ros2Node, DRCRobotModel robotModel)
    {
-      ROS2Topic inputTopicName = ROS2Tools.getControllerInputTopicName(robotModel.getSimpleRobotName());
-      highLevelStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HighLevelStateMessage.class, inputTopicName);
-      abortWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AbortWalkingMessage.class, inputTopicName);
-      pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, inputTopicName);
+      ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName());
+      highLevelStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HighLevelStateMessage.class, inputTopic);
+      abortWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AbortWalkingMessage.class, inputTopic);
+      pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, inputTopic);
    }
 
    @Override

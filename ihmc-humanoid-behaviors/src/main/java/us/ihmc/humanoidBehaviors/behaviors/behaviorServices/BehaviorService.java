@@ -18,15 +18,15 @@ public abstract class BehaviorService
    private final Map<ROS2Topic, IHMCROS2Publisher<?>> publishers = new HashMap<>();
    private final YoVariableRegistry registry;
    protected final String robotName;
-   private final ROS2Topic controllerInputTopicName, controllerOutputTopicName;
+   private final ROS2Topic controllerInputTopic, controllerOutputTopic;
 
    public BehaviorService(String robotName, String name, Ros2Node ros2Node)
    {
       this.robotName = robotName;
       this.ros2Node = ros2Node;
       registry = new YoVariableRegistry(name);
-      controllerInputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
-      controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
    }
 
    public abstract void run();
@@ -42,7 +42,7 @@ public abstract class BehaviorService
    
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
-      ROS2Topic topicName = controllerInputTopicName.withType(messageType);
+      ROS2Topic topicName = controllerInputTopic.withType(messageType);
       return createPublisher(messageType, topicName);
    }
 
@@ -67,7 +67,7 @@ public abstract class BehaviorService
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      ROS2Topic topicName = controllerOutputTopicName.withType(messageType);
+      ROS2Topic topicName = controllerOutputTopic.withType(messageType);
       createSubscriber(messageType, topicName, consumer);
    }
 

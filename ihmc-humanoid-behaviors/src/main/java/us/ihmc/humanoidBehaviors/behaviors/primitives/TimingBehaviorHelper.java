@@ -34,20 +34,20 @@ public class TimingBehaviorHelper extends AbstractBehavior
    {
       super(robotName, ros2Node);
 
-      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopicName, plannerResult::set);
-      createSubscriber(FootstepPlanningRequestPacket.class, footstepPlannerInputTopicName, footstepPlanningRequestPacket::set);
+      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopic, plannerResult::set);
+      createSubscriber(FootstepPlanningRequestPacket.class, footstepPlannerInputTopic, footstepPlanningRequestPacket::set);
 
-      createSubscriber(FootstepStatusMessage.class, controllerInputTopicName, footstepStatusMessage::set);
-      createSubscriber(HandTrajectoryMessage.class, controllerInputTopicName, handTrajectoryMessage::set);
-      createSubscriber(ArmTrajectoryMessage.class, controllerInputTopicName, armTrajectoryMessage::set);
-      createSubscriber(FootstepDataListMessage.class, controllerInputTopicName, footstepDataListMessage::set);
-      createSubscriber(WalkingStatusMessage.class, controllerInputTopicName, walkingStatusMessage::set);
+      createSubscriber(FootstepStatusMessage.class, controllerInputTopic, footstepStatusMessage::set);
+      createSubscriber(HandTrajectoryMessage.class, controllerInputTopic, handTrajectoryMessage::set);
+      createSubscriber(ArmTrajectoryMessage.class, controllerInputTopic, armTrajectoryMessage::set);
+      createSubscriber(FootstepDataListMessage.class, controllerInputTopic, footstepDataListMessage::set);
+      createSubscriber(WalkingStatusMessage.class, controllerInputTopic, walkingStatusMessage::set);
 
-      createSubscriber(FootstepStatusMessage.class, controllerOutputTopicName, footstepStatusMessage::set);
-      createSubscriber(HandTrajectoryMessage.class, controllerOutputTopicName, handTrajectoryMessage::set);
-      createSubscriber(ArmTrajectoryMessage.class, controllerOutputTopicName, armTrajectoryMessage::set);
-      createSubscriber(FootstepDataListMessage.class, controllerOutputTopicName, footstepDataListMessage::set);
-      createSubscriber(WalkingStatusMessage.class, controllerOutputTopicName, walkingStatusMessage::set);
+      createSubscriber(FootstepStatusMessage.class, controllerOutputTopic, footstepStatusMessage::set);
+      createSubscriber(HandTrajectoryMessage.class, controllerOutputTopic, handTrajectoryMessage::set);
+      createSubscriber(ArmTrajectoryMessage.class, controllerOutputTopic, armTrajectoryMessage::set);
+      createSubscriber(FootstepDataListMessage.class, controllerOutputTopic, footstepDataListMessage::set);
+      createSubscriber(WalkingStatusMessage.class, controllerOutputTopic, walkingStatusMessage::set);
       createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationMessage::set);
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class, walkOverTerrainGoalMessage::set);
       dataBase = new SQLBehaviorDatabaseManager();

@@ -38,7 +38,7 @@ public class IHMCETHRosLocalizationUpdateSubscriber implements Runnable, PacketC
       localizationPointMapPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, LocalizationPointMapPacket.class, ROS2Tools.IHMC_ROOT);
 
       IHMCROS2Publisher<StampedPosePacket> stampedPosePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, StampedPosePacket.class,
-                                                                                                     ROS2Tools.getControllerInputTopicName(robotName));
+                                                                                                     ROS2Tools.getControllerInputTopic(robotName));
       RosPoseStampedSubscriber rosPoseStampedSubscriber = new RosPoseStampedSubscriber()
       {
          @Override

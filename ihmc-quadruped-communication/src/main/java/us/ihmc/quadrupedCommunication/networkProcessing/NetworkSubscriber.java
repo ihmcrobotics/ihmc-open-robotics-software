@@ -61,12 +61,12 @@ public class NetworkSubscriber
 
    private final RealtimeRos2Node realtimeRos2Node;
 
-   private final ROS2Topic inputTopicName;
+   private final ROS2Topic inputTopic;
 
-   public NetworkSubscriber(ROS2Topic inputTopicName, CommandInputManager controllerCommandInputManager,
-                            ROS2Topic outputTopicName, OutputManager messageOutputManager, RealtimeRos2Node realtimeRos2Node)
+   public NetworkSubscriber(ROS2Topic inputTopic, CommandInputManager controllerCommandInputManager,
+                            ROS2Topic outputTopic, OutputManager messageOutputManager, RealtimeRos2Node realtimeRos2Node)
    {
-      this.inputTopicName = inputTopicName;
+      this.inputTopic = inputTopic;
       this.controllerCommandInputManager = controllerCommandInputManager;
       this.messageOutputManager = messageOutputManager;
       this.realtimeRos2Node = realtimeRos2Node;
@@ -79,7 +79,7 @@ public class NetworkSubscriber
       if (realtimeRos2Node == null)
          PrintTools.error(this, "No ROS2 node, " + getClass().getSimpleName() + " cannot be created.");
 
-      messageOutputManager.registerOutputMessage(InvalidPacketNotificationPacket.class, outputTopicName);
+      messageOutputManager.registerOutputMessage(InvalidPacketNotificationPacket.class, outputTopic);
 
       createPublishersSubscribersForSupportedMessages();
       createGlobalStatusMessageListener();
@@ -101,16 +101,16 @@ public class NetworkSubscriber
    public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType, int expectedMessageSize,
                                                                             MessageUnpacker<T> messageUnpacker)
    {
-      registerSubcriberWithMessageUnpacker(multipleMessageType, inputTopicName, expectedMessageSize, messageUnpacker);
+      registerSubcriberWithMessageUnpacker(multipleMessageType, inputTopic, expectedMessageSize, messageUnpacker);
    }
 
    public <T extends Settable<T>> void registerSubcriberWithMessageUnpacker(Class<T> multipleMessageType,
-                                                                            ROS2Topic inputTopicName, int expectedMessageSize,
+                                                                            ROS2Topic inputTopic, int expectedMessageSize,
                                                                             MessageUnpacker<T> messageUnpacker)
    {
       final List<Settable<?>> unpackedMessages = new ArrayList<>(expectedMessageSize);
 
-      ROS2Topic topicName = inputTopicName.withType(multipleMessageType);
+      ROS2Topic topicName = inputTopic.withType(multipleMessageType);
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, multipleMessageType, topicName,
                                            s -> unpackMultiMessage(multipleMessageType, messageUnpacker, unpackedMessages, s.takeNextData()));
    }
@@ -159,7 +159,7 @@ public class NetworkSubscriber
 
       MessageCollection messageCollection = new MessageCollection();
 
-      ROS2Topic topicName = inputTopicName.withType(MessageCollection.class);
+      ROS2Topic topicName = inputTopic.withType(MessageCollection.class);
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, MessageCollection.class, topicName, s -> {
          s.takeNextData(messageCollection, null);
 
@@ -211,7 +211,7 @@ public class NetworkSubscriber
       { // Creating the subscribers
          Class<T> messageClass = (Class<T>) listOfSupportedControlMessages.get(i);
          T messageLocalInstance = ROS2TopicNameTools.newMessageInstance(messageClass);
-         ROS2Topic topicName = inputTopicName.withType(messageClass);
+         ROS2Topic topicName = inputTopic.withType(messageClass);
 
          ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, messageClass, topicName, s -> {
             s.takeNextData(messageLocalInstance, null);

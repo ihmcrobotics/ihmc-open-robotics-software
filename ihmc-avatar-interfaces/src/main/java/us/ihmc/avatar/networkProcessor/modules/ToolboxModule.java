@@ -109,7 +109,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, name));
       commandInputManager = new CommandInputManager(name, createListOfSupportedCommands());
       statusOutputManager = new StatusMessageOutputManager(createListOfSupportedStatus());
-      controllerNetworkSubscriber = new ControllerNetworkSubscriber(getInputTopicName(), commandInputManager, getOutputTopicName(),
+      controllerNetworkSubscriber = new ControllerNetworkSubscriber(getInputTopic(), commandInputManager, getOutputTopic(),
                                                                     statusOutputManager, realtimeRos2Node);
 
       executorService = Executors.newScheduledThreadPool(1, threadFactory);
@@ -129,7 +129,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
 
       controllerNetworkSubscriber.addMessageFilter(createMessageFilter());
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, ToolboxStateMessage.class, getInputTopicName(), new NewMessageListener<ToolboxStateMessage>()
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, ToolboxStateMessage.class, getInputTopic(), new NewMessageListener<ToolboxStateMessage>()
       {
          private final ToolboxStateMessage message = new ToolboxStateMessage();
          @Override
@@ -458,7 +458,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       return Collections.emptySet();
    }
 
-   public abstract ROS2Topic getOutputTopicName();
+   public abstract ROS2Topic getOutputTopic();
 
-   public abstract ROS2Topic getInputTopicName();
+   public abstract ROS2Topic getInputTopic();
 }
