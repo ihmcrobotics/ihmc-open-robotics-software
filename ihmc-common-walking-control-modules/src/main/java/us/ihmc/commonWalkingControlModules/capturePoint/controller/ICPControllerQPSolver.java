@@ -515,10 +515,11 @@ public class ICPControllerQPSolver
       if (useAngularMomentum.getBooleanValue())
          addCMPFeedbackTask();
 
-      addFeedbackRateTask();
+//      addFeedbackRateTask();
 
       addDynamicConstraintTask();
 
+      /*
       if (copLocationConstraint.getInequalityConstraintSize() > 0)
          addCoPLocationConstraint();
 
@@ -530,6 +531,8 @@ public class ICPControllerQPSolver
          addMaximumFeedbackMagnitudeConstraint();
          addMaximumFeedbackRateConstraint();
       }
+
+       */
 
       boolean foundSolution = solve(solution);
       previousTickFailed = !foundSolution;
@@ -691,6 +694,9 @@ public class ICPControllerQPSolver
     */
    private void addMaximumFeedbackMagnitudeConstraint()
    {
+      if (!Double.isFinite(maxFeedbackXMagnitude) && !Double.isFinite(maxFeedbackYMagnitude))
+         return;
+
       ICPControllerQPConstraintCalculator.calculateMaxFeedbackMagnitudeConstraint(feedbackLimitConstraint,
                                                                                   maxFeedbackXMagnitude,
                                                                                   maxFeedbackYMagnitude,
@@ -726,6 +732,9 @@ public class ICPControllerQPSolver
     */
    private void addMaximumFeedbackRateConstraint()
    {
+      if (!Double.isFinite(maxFeedbackXMagnitude) && !Double.isFinite(maxFeedbackYMagnitude))
+         return;
+
       ICPControllerQPConstraintCalculator.calculateMaxFeedbackRateConstraint(feedbackRateLimitConstraint,
                                                                              maximumFeedbackRate,
                                                                              previousFeedbackDeltaSolution,

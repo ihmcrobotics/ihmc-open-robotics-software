@@ -55,14 +55,14 @@ public class ICPController
 
    private final YoEnum<RobotSide> supportSide = new YoEnum<>(yoNamePrefix + "SupportSide", registry, RobotSide.class, true);
 
-   private final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
+   final YoFrameVector2D icpError = new YoFrameVector2D(yoNamePrefix + "ICPError", "", worldFrame, registry);
    private final YoFramePoint2D feedbackCoP = new YoFramePoint2D(yoNamePrefix + "FeedbackCoPSolution", worldFrame, registry);
    private final YoFramePoint2D feedbackCMP = new YoFramePoint2D(yoNamePrefix + "FeedbackCMPSolution", worldFrame, registry);
-   private final YoFramePoint2D perfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
-   private final YoFramePoint2D perfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
+   final YoFramePoint2D perfectCoP = new YoFramePoint2D(yoNamePrefix + "PerfectCoP", worldFrame, registry);
+   final YoFramePoint2D perfectCMP = new YoFramePoint2D(yoNamePrefix + "PerfectCMP", worldFrame, registry);
 
-   private final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
-   private final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
+   final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
+   final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
    private final DenseMatrix64F feedbackCMPDeltaMatrix = new DenseMatrix64F(2, 1);
 
    private final YoFrameVector2D residualDynamicsError = new YoFrameVector2D(yoNamePrefix + "ResidualDynamicsError", worldFrame, registry);
@@ -84,7 +84,6 @@ public class ICPController
    private final AngularMomentumIntegrator integrator;
 
    private final ICPControlGainsReadOnly feedbackGains;
-   private final LinearSolver<DenseMatrix64F> linearSolver = LinearSolverFactory.symmPosDef(2);
    private final DenseMatrix64F transformedGains = new DenseMatrix64F(2, 2);
    private final DenseMatrix64F inverseTransformedGains = new DenseMatrix64F(2, 2);
    private final FrameVector2D transformedMagnitudeLimits = new FrameVector2D();
@@ -320,8 +319,7 @@ public class ICPController
                                         feedbackGains.getFeedbackPartMaxValueParallelToMotion(),
                                         feedbackGains.getFeedbackPartMaxValueOrthogonalToMotion());
 
-      linearSolver.setA(transformedGains);
-      linearSolver.invert(inverseTransformedGains);
+      fastStaticInverse(transformedGains, inverseTransformedGains);
 
       solver.resetCoPFeedbackConditions();
       solver.setFeedbackConditions(scaledCoPFeedbackWeight, transformedGains, dynamicsObjectiveWeight.getValue());
@@ -335,6 +333,15 @@ public class ICPController
 
       if (useCMPFeedback.getValue())
          solver.setCMPFeedbackConditions(cmpFeedbackWeight.getValue(), useAngularMomentum.getValue());
+   }
+
+   private static void fastStaticInverse(DenseMatrix64F matrixToInvert, DenseMatrix64F invertedMatrixToPack)
+   {
+      double determinate = CommonOps.det(matrixToInvert);
+      invertedMatrixToPack.set(0, 0, determinate * matrixToInvert.get(1, 1));
+      invertedMatrixToPack.set(1, 1, determinate * matrixToInvert.get(0, 0));
+      invertedMatrixToPack.set(0, 1, -determinate * matrixToInvert.get(0, 1));
+      invertedMatrixToPack.set(1, 0, -determinate * matrixToInvert.get(1, 0));
    }
 
    private boolean solveQP()

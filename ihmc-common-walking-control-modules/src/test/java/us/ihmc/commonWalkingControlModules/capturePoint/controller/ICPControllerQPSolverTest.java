@@ -11,6 +11,7 @@ import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 
 import static us.ihmc.robotics.Assert.assertTrue;
@@ -48,8 +49,8 @@ public class ICPControllerQPSolverTest
       FrameVector2D cmpCoPDifferenceExpected = new FrameVector2D();
       FrameVector2D copFeedbackExpected = new FrameVector2D();
 
-      Assert.assertTrue("The CoP feedback is wrong.", copFeedback.epsilonEquals(copFeedbackExpected, epsilon));
-      Assert.assertTrue("The CMP feedback is wrong.", cmpCoPDifference.epsilonEquals(cmpCoPDifferenceExpected, epsilon));
+      EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals("The CoP feedback is wrong.", copFeedbackExpected, copFeedback, epsilon);
+      EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals("The CMP feedback is wrong.", cmpCoPDifferenceExpected, cmpCoPDifference, epsilon);
    }
 
    @Test

@@ -273,6 +273,91 @@ public class ICPControllerTest
    }
 
    @Test
+   public void testStandingUnconstrained() throws Exception
+   {
+      YoVariableRegistry registry = new YoVariableRegistry("robert");
+
+      double feedbackGain = 2.0;
+      TestICPOptimizationParameters optimizationParameters = new TestICPOptimizationParameters()
+      {
+         @Override
+         public ICPControlGainsReadOnly getICPFeedbackGains()
+         {
+            ICPControlGains gains = new ICPControlGains();
+            gains.setKpParallelToMotion(feedbackGain);
+            gains.setKpOrthogonalToMotion(feedbackGain);
+
+            return gains;
+         }
+
+         @Override
+         public double getDynamicsObjectiveWeight()
+         {
+            return 10000.0;
+         }
+
+         @Override
+         public boolean useAngularMomentum()
+         {
+            return false;
+         }
+
+         @Override
+         public boolean allowStepAdjustment()
+         {
+            return false;
+         }
+      };
+
+      TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
+         SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(10.0, 5.0, stanceWidth);
+      BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
+      double controlDT = 0.001;
+      ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
+                                                   bipedSupportPolygons, null, contactableFeet, controlDT, registry, null);
+      new DefaultParameterReader().readParametersInRegistry(registry);
+
+      double omega = walkingControllerParameters.getOmega0();
+
+      FramePoint2D desiredICP = new FramePoint2D(worldFrame, 0.03, 0.06);
+      FramePoint2D perfectCMP = new FramePoint2D(worldFrame, 0.01, 0.04);
+      FrameVector2D desiredICPVelocity = new FrameVector2D();
+
+      desiredICPVelocity.set(desiredICP);
+      desiredICPVelocity.sub(perfectCMP);
+      desiredICPVelocity.scale(omega);
+
+      FrameVector2D icpError = new FrameVector2D(worldFrame, 0.03, 0.06);
+      FramePoint2D currentICP = new FramePoint2D();
+      FrameVector2D currentICPVelocity = new FrameVector2D();
+      currentICP.set(desiredICP);
+      currentICP.add(icpError);
+
+      controller.initializeForStanding();
+      controller.compute(desiredICP, desiredICPVelocity, perfectCMP, currentICP, currentICPVelocity);
+
+      FramePoint2D desiredCMP = new FramePoint2D();
+      controller.getDesiredCMP(desiredCMP);
+
+      FramePoint2D desiredCMPExpected = new FramePoint2D();
+      FrameVector2D expectedCoPFeedbackDelta = new FrameVector2D();
+      FrameVector2D expectedCMPFeedbackDelta = new FrameVector2D();
+      expectedCoPFeedbackDelta.set(icpError);
+      expectedCoPFeedbackDelta.scale(feedbackGain + 1.0);
+
+      desiredCMPExpected.set(perfectCMP);
+      desiredCMPExpected.add(expectedCMPFeedbackDelta);
+      desiredCMPExpected.add(expectedCoPFeedbackDelta);
+
+      EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals(icpError, controller.icpError, epsilon);
+      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(perfectCMP, controller.perfectCoP, epsilon);
+      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(perfectCMP, controller.perfectCMP, epsilon);
+      EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals(expectedCMPFeedbackDelta, controller.feedbackCMPDelta, epsilon);
+      EuclidFrameTestTools.assertFrameVector2DGeometricallyEquals(expectedCoPFeedbackDelta, controller.feedbackCoPDelta, epsilon);
+      EuclidFrameTestTools.assertFramePoint2DGeometricallyEquals(desiredCMPExpected, desiredCMP, epsilon);
+   }
+
+   @Test
    public void testStandingConstrainedWithAngularMomentum() throws Exception
    {
       YoVariableRegistry registry = new YoVariableRegistry("robert");
@@ -705,138 +790,7 @@ public class ICPControllerTest
       @Override
       public SteppingParameters getSteppingParameters()
       {
-         return new TestSteppingParameters();
+         return null;
       }
    }
-
-   private class TestSteppingParameters implements SteppingParameters
-   {
-
-      @Override
-      public double getMaxStepLength()
-      {
-         return 1.0;
-      }
-
-      @Override
-      public double getDefaultStepLength()
-      {
-         return 0.5;
-      }
-
-      @Override
-      public double getMaxStepWidth()
-      {
-         return 0.5;
-      }
-
-      @Override
-      public double getMinStepWidth()
-      {
-         return 0.05;
-      }
-
-      @Override
-      public double getInPlaceWidth()
-      {
-         return 0.2;
-      }
-
-      @Override
-      public double getDesiredStepForward()
-      {
-         return 0.3;
-      }
-
-      @Override
-      public double getStepPitch()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxStepUp()
-      {
-         return 0.2;
-      }
-
-      @Override
-      public double getMaxStepDown()
-      {
-         return 0.2;
-      }
-
-      @Override
-      public double getMaxSwingHeightFromStanceFoot()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMaxAngleTurnOutwards()
-      {
-         return 0.3;
-      }
-
-      @Override
-      public double getMaxAngleTurnInwards()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getMinAreaPercentForValidFootstep()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getDangerAreaPercentForValidFootstep()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getFootForwardOffset()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getFootBackwardOffset()
-      {
-         return 0;
-      }
-
-      @Override
-      public double getFootWidth()
-      {
-         return 0.1;
-      }
-
-      @Override
-      public double getToeWidth()
-      {
-         return 0.1;
-      }
-
-      @Override
-      public double getFootLength()
-      {
-         return 0.2;
-      }
-
-      @Override
-      public double getActualFootWidth()
-      {
-         return 0.1;
-      }
-
-      @Override
-      public double getActualFootLength()
-      {
-         return 0.2;
-      }
-   }
-
 }
