@@ -342,6 +342,7 @@ public class ICPControllerQPSolver
       copFeedbackMinimizationTask.reshape(2);
       dynamicsTaskInput.reshape(problemSize);
       cmpFeedbackMinimizationTask.reshape(2);
+      feedbackRateMinimizationTask.reshape(problemSize);
 
       numberOfInequalityConstraints += (Double.isFinite(maximumFeedbackRate) && Double.isFinite(controlDT)) ? 4 : 0;
       numberOfInequalityConstraints += Double.isFinite(maxFeedbackXMagnitude) ? 2 : 0;
@@ -363,6 +364,12 @@ public class ICPControllerQPSolver
       copFeedbackWeight.zero();
       feedbackGain.zero();
       dynamicsWeight.zero();
+   }
+
+   public void resetCMPFeedbackConditions()
+   {
+      cmpFeedbackWeight.zero();
+      useAngularMomentum.set(false);
    }
 
    /**
