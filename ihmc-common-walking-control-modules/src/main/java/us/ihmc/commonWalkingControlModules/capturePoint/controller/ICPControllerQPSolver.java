@@ -515,11 +515,10 @@ public class ICPControllerQPSolver
       if (useAngularMomentum.getBooleanValue())
          addCMPFeedbackTask();
 
-//      addFeedbackRateTask();
+      addFeedbackRateTask();
 
       addDynamicConstraintTask();
 
-      /*
       if (copLocationConstraint.getInequalityConstraintSize() > 0)
          addCoPLocationConstraint();
 
@@ -531,8 +530,6 @@ public class ICPControllerQPSolver
          addMaximumFeedbackMagnitudeConstraint();
          addMaximumFeedbackRateConstraint();
       }
-
-       */
 
       boolean foundSolution = solve(solution);
       previousTickFailed = !foundSolution;
