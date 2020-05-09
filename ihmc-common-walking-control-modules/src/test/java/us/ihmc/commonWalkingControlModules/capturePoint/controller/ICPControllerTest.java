@@ -228,8 +228,9 @@ public class ICPControllerTest
          }
       };
 
+      double footWidth = 0.1;
       TestWalkingControllerParameters walkingControllerParameters = new TestWalkingControllerParameters();
-      SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, 0.1, stanceWidth);
+      SideDependentList<FootSpoof> contactableFeet = setupContactableFeet(footLength, footWidth, stanceWidth);
       BipedSupportPolygons bipedSupportPolygons = setupBipedSupportPolygons(contactableFeet, registry);
       double controlDT = 0.001;
       ICPController controller = new ICPController(walkingControllerParameters, optimizationParameters,
@@ -263,7 +264,7 @@ public class ICPControllerTest
       desiredCMPExpected.scale(feedbackGain + 1.0);
       desiredCMPExpected.add(perfectCMP);
 
-      double maxY = stanceWidth / 2.0;
+      double maxY = stanceWidth / 2.0 + footWidth / 2.0;
       double maxX = footLength / 2.0;
 
       desiredCMPExpected.setX(Math.min(maxX, desiredCMPExpected.getX()));
