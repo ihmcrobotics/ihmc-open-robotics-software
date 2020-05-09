@@ -2,6 +2,7 @@ package us.ihmc.robotics.math.trajectories;
 
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.robotics.math.trajectories.YoGraphicTrajectory3D.TrajectoryColorType;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class BlendedPositionTrajectoryGeneratorVisualizer
@@ -10,21 +11,23 @@ public class BlendedPositionTrajectoryGeneratorVisualizer
 
    public BlendedPositionTrajectoryGeneratorVisualizer(String namePrefix,
                                                        BlendedPoseTrajectoryGenerator trajectory,
+                                                       DoubleProvider swingDuration,
                                                        YoVariableRegistry registry,
                                                        YoGraphicsListRegistry graphicsListRegistry)
    {
-      this(namePrefix, trajectory.getPositionTrajectoryGenerator(), registry, graphicsListRegistry);
+      this(namePrefix, trajectory.getPositionTrajectoryGenerator(), swingDuration, registry, graphicsListRegistry);
    }
 
    public BlendedPositionTrajectoryGeneratorVisualizer(String namePrefix,
                                                        BlendedPositionTrajectoryGenerator trajectory,
+                                                       DoubleProvider swingDuration,
                                                        YoVariableRegistry registry,
                                                        YoGraphicsListRegistry graphicsListRegistry)
    {
       trajectoryViz = new YoGraphicTrajectory3D(namePrefix + "Trajectory",
                                                 null,
                                                 trajectory,
-                                                () -> 1.0,
+                                                swingDuration,
                                                 0.01,
                                                 25,
                                                 8,
