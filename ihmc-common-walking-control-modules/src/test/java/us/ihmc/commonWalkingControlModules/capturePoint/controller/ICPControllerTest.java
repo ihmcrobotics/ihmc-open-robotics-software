@@ -264,7 +264,7 @@ public class ICPControllerTest
       desiredCMPExpected.scale(feedbackGain + 1.0);
       desiredCMPExpected.add(perfectCMP);
 
-      double maxY = stanceWidth / 2.0 + footWidth / 2.0;
+      double maxY = stanceWidth / 2.0;// + footWidth / 2.0;
       double maxX = footLength / 2.0;
 
       desiredCMPExpected.setX(Math.min(maxX, desiredCMPExpected.getX()));
@@ -378,7 +378,7 @@ public class ICPControllerTest
          @Override
          public double getDynamicsObjectiveWeight()
          {
-            return 10000.0;
+            return 1000000.0;
          }
 
          @Override
@@ -390,7 +390,7 @@ public class ICPControllerTest
          @Override
          public double getAngularMomentumMinimizationWeight()
          {
-            return 25.0;
+            return 1.0;
          }
 
          @Override
