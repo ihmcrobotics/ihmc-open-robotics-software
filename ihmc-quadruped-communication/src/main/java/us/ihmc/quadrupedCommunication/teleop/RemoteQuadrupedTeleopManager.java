@@ -4,7 +4,7 @@ import com.google.common.util.concurrent.AtomicDouble;
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
@@ -73,18 +73,18 @@ public class RemoteQuadrupedTeleopManager
       this.xGaitSettings = new YoQuadrupedXGaitSettings(defaultXGaitSettings, registry);
       this.networkProcessor = networkProcessor;
 
-      ROS2TopicName controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
+      ROS2Topic controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, HighLevelStateChangeStatusMessage.class, controllerOutputTopicName,
                                            s -> controllerStateChangeMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, QuadrupedSteppingStateChangeMessage.class, controllerOutputTopicName,
                                            s -> steppingStateChangeMessage.set(s.takeNextData()));
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopicName, s -> robotConfigurationData.set(s.takeNextData()));
 
-      ROS2TopicName controllerInputTopicName = ROS2Tools.getQuadrupedControllerInputTopicName(robotName);
-      ROS2TopicName stepTeleopInputTopicName = ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName)
-                                                                                .withInput();
-      ROS2TopicName footstepPlannerInputTopicName = ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName)
-                                                                                     .withInput();
+      ROS2Topic controllerInputTopicName = ROS2Tools.getQuadrupedControllerInputTopicName(robotName);
+      ROS2Topic stepTeleopInputTopicName = ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName)
+                                                                        .withInput();
+      ROS2Topic footstepPlannerInputTopicName = ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName)
+                                                                             .withInput();
 
       controllerStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HighLevelStateMessage.class, controllerInputTopicName);
       steppingStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, QuadrupedRequestedSteppingStateMessage.class, controllerInputTopicName);

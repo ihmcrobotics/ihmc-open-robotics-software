@@ -9,7 +9,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 import javax.swing.*;
@@ -46,11 +46,11 @@ public class ExternalForceEstimationMessageReplay
       String name = getClass().getSimpleName();
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation, "ihmc_" + name);
 
-      ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Topic controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
       robotConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopicName);
       robotDesiredConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, RobotDesiredConfigurationData.class, controllerOutputTopicName);
 
-      ROS2TopicName toolboxInputTopicName = ExternalForceEstimationToolboxModule.getInputTopicName(robotName);
+      ROS2Topic toolboxInputTopicName = ExternalForceEstimationToolboxModule.getInputTopicName(robotName);
       configMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ExternalForceEstimationConfigurationMessage.class, toolboxInputTopicName);
       toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxInputTopicName);
 

@@ -42,7 +42,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -177,7 +177,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          if (realtimeRos2Node != null)
          {
             RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
-            ROS2TopicName inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
+            ROS2Topic inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
             ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
                                                           RequestWristForceSensorCalibrationPacket.class,
                                                           inputTopicName,
@@ -352,7 +352,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    public void setupHighLevelControllerCallback(String robotName, RealtimeRos2Node realtimeRos2Node,
                                                 Map<HighLevelControllerName, StateEstimatorMode> stateModeMap)
    {
-      ROS2TopicName outputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Topic outputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, outputTopicName, subscriber ->
       {
          HighLevelStateChangeStatusMessage message = subscriber.takeNextData();

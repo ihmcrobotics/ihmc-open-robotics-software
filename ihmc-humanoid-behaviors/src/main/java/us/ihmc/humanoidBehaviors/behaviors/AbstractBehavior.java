@@ -10,7 +10,7 @@ import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -43,7 +43,7 @@ public abstract class AbstractBehavior implements RobotController
    KryoMessager messager;
 
    protected final Ros2Node ros2Node;
-   private final Map<ROS2TopicName, IHMCROS2Publisher<?>> publishers = new HashMap<>();
+   private final Map<ROS2Topic, IHMCROS2Publisher<?>> publishers = new HashMap<>();
 
    protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>> localListeningNetworkQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>>();
 
@@ -67,12 +67,12 @@ public abstract class AbstractBehavior implements RobotController
 
    protected final String robotName;
 
-   protected final ROS2TopicName controllerInputTopicName, controllerOutputTopicName;
-   protected final ROS2TopicName behaviorInputTopicName, behaviorOutputTopicName;
+   protected final ROS2Topic controllerInputTopicName, controllerOutputTopicName;
+   protected final ROS2Topic behaviorInputTopicName, behaviorOutputTopicName;
 
-   protected final ROS2TopicName footstepPlannerInputTopicName, footstepPlannerOutputTopicName;
-   protected final ROS2TopicName kinematicsToolboxInputTopicName, kinematicsToolboxOutputTopicName;
-   protected final ROS2TopicName kinematicsPlanningToolboxInputTopicName, kinematicsPlanningToolboxOutputTopicName;
+   protected final ROS2Topic footstepPlannerInputTopicName, footstepPlannerOutputTopicName;
+   protected final ROS2Topic kinematicsToolboxInputTopicName, kinematicsToolboxOutputTopicName;
+   protected final ROS2Topic kinematicsPlanningToolboxInputTopicName, kinematicsPlanningToolboxOutputTopicName;
 
    private static int behaviorUniqID = 0;
    
@@ -129,7 +129,7 @@ public abstract class AbstractBehavior implements RobotController
    }
 
    @SuppressWarnings("unchecked")
-   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2TopicName topicName)
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic topicName)
    {
       IHMCROS2Publisher<T> publisher = (IHMCROS2Publisher<T>) publishers.get(topicName);
 
@@ -152,7 +152,7 @@ public abstract class AbstractBehavior implements RobotController
       createSubscriber(messageType, behaviorInputTopicName, consumer);
    }
 
-   public <T> void createSubscriber(Class<T> messageType, ROS2TopicName topicName, ObjectConsumer<T> consumer)
+   public <T> void createSubscriber(Class<T> messageType, ROS2Topic topicName, ObjectConsumer<T> consumer)
    {
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
    }

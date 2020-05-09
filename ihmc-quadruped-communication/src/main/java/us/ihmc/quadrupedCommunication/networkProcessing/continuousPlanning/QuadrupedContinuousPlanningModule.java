@@ -2,7 +2,7 @@ package us.ihmc.quadrupedCommunication.networkProcessing.continuousPlanning;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -56,13 +56,13 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
    {
       // status messages from the controller
-      ROS2TopicName controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
+      ROS2Topic controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedFootstepStatusMessage.class, controllerOutputTopicName,
                                            s -> processFootstepStatusMessage(s.takeNextData()));
 
       // status messages from the planner
-      ROS2TopicName plannerOutputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
-                                                                    .withOutput();
+      ROS2Topic plannerOutputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
+                                                                   .withOutput();
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PawStepPlanningToolboxOutputStatus.class, plannerOutputTopicName,
                                            s -> processFootstepPlannerOutputMessage(s.takeNextData()));
 
@@ -76,16 +76,16 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public Map<Class<? extends Settable<?>>, ROS2TopicName> createMapOfSupportedOutputMessages()
+   public Map<Class<? extends Settable<?>>, ROS2Topic> createMapOfSupportedOutputMessages()
    {
-      Map<Class<? extends Settable<?>>, ROS2TopicName> messages = new HashMap<>();
+      Map<Class<? extends Settable<?>>, ROS2Topic> messages = new HashMap<>();
 
       messages.put(PawStepPlanningToolboxOutputStatus.class, getOutputTopicName());
       messages.put(BodyPathPlanMessage.class, getOutputTopicName());
       messages.put(QuadrupedTimedStepListMessage.class, getOutputTopicName());
 
-      ROS2TopicName plannerInputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
-                                                                             .withInput();
+      ROS2Topic plannerInputTopicName = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
+                                                                  .withInput();
       messages.put(PawStepPlanningRequestPacket.class, plannerInputTopicName);
       messages.put(ToolboxStateMessage.class, plannerInputTopicName);
 
@@ -140,13 +140,13 @@ public class QuadrupedContinuousPlanningModule extends QuadrupedToolboxModule
 
 
    @Override
-   public ROS2TopicName getOutputTopicName()
+   public ROS2Topic getOutputTopicName()
    {
       return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2TopicName getInputTopicName()
+   public ROS2Topic getInputTopicName()
    {
       return ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
    }

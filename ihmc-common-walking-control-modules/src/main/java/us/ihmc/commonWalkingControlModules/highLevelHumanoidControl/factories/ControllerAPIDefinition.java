@@ -12,7 +12,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
@@ -88,12 +88,12 @@ public class ControllerAPIDefinition
       return controllerSupportedStatusMessages;
    }
 
-   public static ROS2TopicName getInputTopicName(String robotName)
+   public static ROS2Topic getInputTopicName(String robotName)
    {
       return ROS2Tools.getControllerInputTopicName(robotName);
    }
 
-   public static ROS2TopicName getOutputTopicName(String robotName)
+   public static ROS2Topic getOutputTopicName(String robotName)
    {
       return ROS2Tools.getControllerOutputTopicName(robotName);
    }

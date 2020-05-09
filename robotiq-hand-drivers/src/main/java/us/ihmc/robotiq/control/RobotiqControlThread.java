@@ -20,7 +20,7 @@ import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurati
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.RobotiqHandCommunicator;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 
 public class RobotiqControlThread extends HandControlThread
 {
@@ -41,8 +41,8 @@ public class RobotiqControlThread extends HandControlThread
       handDesiredConfigurationMessageSubscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
       manualHandControlProvider = new ManualHandControlProvider(robotSide);
 
-      ROS2TopicName outputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
-      ROS2TopicName inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
+      ROS2Topic outputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Topic inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
 
       IHMCRealtimeROS2Publisher<HandJointAnglePacket> handJointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, HandJointAnglePacket.class,
                                                                                                                    outputTopicName);

@@ -12,7 +12,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.toolbox.heightQuadTree.command.HeightQuadTreeToolboxRequestCommand;
@@ -44,7 +44,7 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
-      ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Topic controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopicName, s ->
       {
          if (controller != null)
@@ -85,23 +85,23 @@ public class HeightQuadTreeToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2TopicName getOutputTopicName()
+   public ROS2Topic getOutputTopicName()
    {
       return getOutputTopicName(robotName);
    }
 
-   public static ROS2TopicName getOutputTopicName(String robotName)
+   public static ROS2Topic getOutputTopicName(String robotName)
    {
       return ROS2Tools.HEIGHT_QUADTREE_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2TopicName getInputTopicName()
+   public ROS2Topic getInputTopicName()
    {
       return getInputTopicName(robotName);
    }
 
-   public static ROS2TopicName getInputTopicName(String robotName)
+   public static ROS2Topic getInputTopicName(String robotName)
    {
       return ROS2Tools.HEIGHT_QUADTREE_TOOLBOX.withRobot(robotName).withInput();
    }

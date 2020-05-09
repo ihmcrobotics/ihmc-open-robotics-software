@@ -8,7 +8,7 @@ import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 
 public class ValkyrieDirectRobotInterface implements RobotLowLevelMessenger
@@ -19,7 +19,7 @@ public class ValkyrieDirectRobotInterface implements RobotLowLevelMessenger
 
    public ValkyrieDirectRobotInterface(Ros2Node ros2Node, DRCRobotModel robotModel)
    {
-      ROS2TopicName inputTopicName = ROS2Tools.getControllerInputTopicName(robotModel.getSimpleRobotName());
+      ROS2Topic inputTopicName = ROS2Tools.getControllerInputTopicName(robotModel.getSimpleRobotName());
       highLevelStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HighLevelStateMessage.class, inputTopicName);
       abortWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AbortWalkingMessage.class, inputTopicName);
       pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, inputTopicName);

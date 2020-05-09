@@ -9,7 +9,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.atlas.AtlasLowLevelControlMode;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 public class AtlasLowLevelMessenger implements RobotLowLevelMessenger
@@ -21,7 +21,7 @@ public class AtlasLowLevelMessenger implements RobotLowLevelMessenger
 
    public AtlasLowLevelMessenger(RealtimeRos2Node ros2Node, String robotName)
    {
-      ROS2TopicName inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
+      ROS2Topic inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
       lowLevelModePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AtlasLowLevelControlModeMessage.class, inputTopicName);
       bdiBehaviorPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, BDIBehaviorCommandPacket.class, inputTopicName);
       abortWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AbortWalkingMessage.class, inputTopicName);

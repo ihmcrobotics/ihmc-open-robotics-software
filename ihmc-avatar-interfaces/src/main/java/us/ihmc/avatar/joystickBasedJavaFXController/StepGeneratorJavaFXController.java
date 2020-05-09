@@ -77,7 +77,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -159,8 +159,8 @@ public class StepGeneratorJavaFXController
       steppingParameters = walkingControllerParameters.getSteppingParameters();
 
       stepParametersReference = messager.createInput(SteppingParameters, new JoystickStepParameters(walkingControllerParameters));
-      ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
-      ROS2TopicName controllerInputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
+      ROS2Topic controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Topic controllerInputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     FootstepStatusMessage.class,

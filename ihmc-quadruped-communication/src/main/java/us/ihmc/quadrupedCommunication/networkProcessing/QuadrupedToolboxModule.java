@@ -22,7 +22,7 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullQuadrupedRobotModel;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -119,7 +119,7 @@ public abstract class QuadrupedToolboxModule
          }
       });
 
-      ROS2TopicName controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
+      ROS2Topic controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
       if (fullRobotModel != null)
       {
          robotDataReceiver = new QuadrupedRobotDataReceiver(fullRobotModel, null);
@@ -384,7 +384,7 @@ public abstract class QuadrupedToolboxModule
    /**
     * @return used to create the {@link StatusMessageOutputManager} and to defines the output API.
     */
-   abstract public Map<Class<? extends Settable<?>>, ROS2TopicName> createMapOfSupportedOutputMessages();
+   abstract public Map<Class<? extends Settable<?>>, ROS2Topic> createMapOfSupportedOutputMessages();
 
    /**
     * @return the collection of commands that cannot wake up this module.
@@ -402,7 +402,7 @@ public abstract class QuadrupedToolboxModule
       return Collections.emptySet();
    }
 
-   public abstract ROS2TopicName getOutputTopicName();
+   public abstract ROS2Topic getOutputTopicName();
 
-   public abstract ROS2TopicName getInputTopicName();
+   public abstract ROS2Topic getInputTopicName();
 }

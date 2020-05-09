@@ -36,7 +36,7 @@ import us.ihmc.robotDataLogger.YoVariableServer;
 import us.ihmc.robotDataLogger.logger.DataServerSettings;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.NewMessageListener;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -458,7 +458,7 @@ public abstract class ToolboxModule implements CloseableAndDisposable
       return Collections.emptySet();
    }
 
-   public abstract ROS2TopicName getOutputTopicName();
+   public abstract ROS2Topic getOutputTopicName();
 
-   public abstract ROS2TopicName getInputTopicName();
+   public abstract ROS2Topic getInputTopicName();
 }

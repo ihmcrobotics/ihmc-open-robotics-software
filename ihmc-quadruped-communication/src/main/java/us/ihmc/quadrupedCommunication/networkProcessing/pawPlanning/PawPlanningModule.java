@@ -2,7 +2,7 @@ package us.ihmc.quadrupedCommunication.networkProcessing.pawPlanning;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -63,7 +63,7 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
    {
       // status messages from the controller
-      ROS2TopicName controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
+      ROS2Topic controllerOutputTopicName = ROS2Tools.getQuadrupedControllerOutputTopicName(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopicName,
                                            s -> processRobotTimestamp(s.takeNextData().getMonotonicTime()));
 //      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HighLevelStateMessage.class, controllerOutputTopicName, s -> footstepPlanningController.setPaused(true));
@@ -141,9 +141,9 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public Map<Class<? extends Settable<?>>, ROS2TopicName> createMapOfSupportedOutputMessages()
+   public Map<Class<? extends Settable<?>>, ROS2Topic> createMapOfSupportedOutputMessages()
    {
-      Map<Class<? extends Settable<?>>, ROS2TopicName> messages = new HashMap<>();
+      Map<Class<? extends Settable<?>>, ROS2Topic> messages = new HashMap<>();
 
       messages.put(PawStepPlanningToolboxOutputStatus.class, getOutputTopicName());
       messages.put(QuadrupedBodyOrientationMessage.class, getOutputTopicName());
@@ -155,13 +155,13 @@ public class PawPlanningModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public ROS2TopicName getOutputTopicName()
+   public ROS2Topic getOutputTopicName()
    {
       return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2TopicName getInputTopicName()
+   public ROS2Topic getInputTopicName()
    {
       return ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
    }

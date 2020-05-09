@@ -13,7 +13,7 @@ import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelSta
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
@@ -80,8 +80,8 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
-      ROS2TopicName controllerInputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
-      ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Topic controllerInputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
+      ROS2Topic controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
 
       outputPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, WholeBodyTrajectoryMessage.class, controllerInputTopicName);
 
@@ -144,23 +144,23 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    }
 
    @Override
-   public ROS2TopicName getOutputTopicName()
+   public ROS2Topic getOutputTopicName()
    {
       return getOutputTopicName(robotName);
    }
 
-   public static ROS2TopicName getOutputTopicName(String robotName)
+   public static ROS2Topic getOutputTopicName(String robotName)
    {
       return ROS2Tools.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public ROS2TopicName getInputTopicName()
+   public ROS2Topic getInputTopicName()
    {
       return getInputTopicName(robotName);
    }
 
-   public static ROS2TopicName getInputTopicName(String robotName)
+   public static ROS2Topic getInputTopicName(String robotName)
    {
       return ROS2Tools.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withInput();
    }

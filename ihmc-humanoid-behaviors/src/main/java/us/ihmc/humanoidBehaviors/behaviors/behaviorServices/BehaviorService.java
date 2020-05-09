@@ -8,17 +8,17 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class BehaviorService
 {
    private final Ros2Node ros2Node;
-   private final Map<ROS2TopicName, IHMCROS2Publisher<?>> publishers = new HashMap<>();
+   private final Map<ROS2Topic, IHMCROS2Publisher<?>> publishers = new HashMap<>();
    private final YoVariableRegistry registry;
    protected final String robotName;
-   private final ROS2TopicName controllerInputTopicName, controllerOutputTopicName;
+   private final ROS2Topic controllerInputTopicName, controllerOutputTopicName;
 
    public BehaviorService(String robotName, String name, Ros2Node ros2Node)
    {
@@ -42,7 +42,7 @@ public abstract class BehaviorService
    
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
-      ROS2TopicName topicName = controllerInputTopicName.withType(messageType);
+      ROS2Topic topicName = controllerInputTopicName.withType(messageType);
       return createPublisher(messageType, topicName);
    }
 
@@ -52,7 +52,7 @@ public abstract class BehaviorService
    }
 
    @SuppressWarnings("unchecked")
-   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2TopicName topicName)
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic topicName)
    {
       IHMCROS2Publisher<T> publisher = (IHMCROS2Publisher<T>) publishers.get(topicName);
 
@@ -67,11 +67,11 @@ public abstract class BehaviorService
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      ROS2TopicName topicName = controllerOutputTopicName.withType(messageType);
+      ROS2Topic topicName = controllerOutputTopicName.withType(messageType);
       createSubscriber(messageType, topicName, consumer);
    }
 
-   public <T> void createSubscriber(Class<T> messageType, ROS2TopicName topicName, ObjectConsumer<T> consumer)
+   public <T> void createSubscriber(Class<T> messageType, ROS2Topic topicName, ObjectConsumer<T> consumer)
    {
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
    }

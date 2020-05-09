@@ -18,7 +18,7 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotController.ModularRobotController;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorReader;
 import us.ihmc.stateEstimation.humanoid.StateEstimatorController;
@@ -141,7 +141,7 @@ public class AvatarEstimatorThread extends ModularRobotController
    public void setupHighLevelControllerCallback(String robotName, RealtimeRos2Node realtimeRos2Node,
                                                 Map<HighLevelControllerName, StateEstimatorMode> stateModeMap)
    {
-      ROS2TopicName outputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Topic outputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, outputTopicName, subscriber ->
       {
          HighLevelStateChangeStatusMessage message = subscriber.takeNextData();

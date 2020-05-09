@@ -48,7 +48,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 
 /**
@@ -159,10 +159,10 @@ public class GraspingJavaFXController
       messager.registerTopicListener(XBoxOneJavaFXController.ButtonXState, state -> submitReachingManifoldsToToolbox(state));
       messager.registerTopicListener(XBoxOneJavaFXController.ButtonYState, state -> confirmReachingMotion(state));
 
-      ROS2TopicName toolboxRequestTopicName = KinematicsPlanningToolboxModule.getInputTopicName(robotName);
-      ROS2TopicName toolboxResponseTopicName = KinematicsPlanningToolboxModule.getOutputTopicName(robotName);
+      ROS2Topic toolboxRequestTopicName = KinematicsPlanningToolboxModule.getInputTopicName(robotName);
+      ROS2Topic toolboxResponseTopicName = KinematicsPlanningToolboxModule.getOutputTopicName(robotName);
 
-      ROS2TopicName inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
+      ROS2Topic inputTopicName = ROS2Tools.getControllerInputTopicName(robotName);
 
       wholeBodyTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WholeBodyTrajectoryMessage.class, inputTopicName);
       toolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxRequestTopicName);

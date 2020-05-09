@@ -45,7 +45,7 @@ import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -244,7 +244,7 @@ public class BipedContinuousPlanningToolboxDataSetTest
                                                                       ROS2Tools.CONTINUOUS_PLANNING_TOOLBOX.withRobot(robotName)
                                                                                 .withInput());
 
-      ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Topic controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
       footstepStatusPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepStatusMessage.class, controllerOutputTopicName);
 
       ros2Node.spin();

@@ -38,7 +38,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolder;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisher;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
@@ -91,8 +91,8 @@ public class AvatarEstimatorThreadFactory
    private final OptionalFactoryField<PelvisPoseCorrectionCommunicatorInterface> externalPelvisPoseSubscriberField = new OptionalFactoryField<>("externalPelvisPoseSubscriberField");
 
    private final OptionalFactoryField<RealtimeRos2Node> realtimeRos2NodeField = new OptionalFactoryField<>("realtimeRos2Node");
-   private final OptionalFactoryField<ROS2TopicName> outputTopicNameField = new OptionalFactoryField<>("outputTopicName");
-   private final OptionalFactoryField<ROS2TopicName> inputTopicNameField = new OptionalFactoryField<>("inputTopicName");
+   private final OptionalFactoryField<ROS2Topic> outputTopicNameField = new OptionalFactoryField<>("outputTopicName");
+   private final OptionalFactoryField<ROS2Topic> inputTopicNameField = new OptionalFactoryField<>("inputTopicName");
 
    private final OptionalFactoryField<SensorDataContext> sensorDataContextField = new OptionalFactoryField<>("sensorDataContext");
    private final OptionalFactoryField<HumanoidRobotContextData> humanoidRobotContextDataField = new OptionalFactoryField<>("humanoidRobotContextData");
@@ -215,8 +215,8 @@ public class AvatarEstimatorThreadFactory
     * @param inputTopicName the generator to use for creating the topic name for
     *                                     subscribers.
     */
-   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2TopicName outputTopicName,
-                           ROS2TopicName inputTopicName)
+   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2Topic outputTopicName,
+                           ROS2Topic inputTopicName)
    {
       realtimeRos2NodeField.set(ros2Node);
       outputTopicNameField.set(outputTopicName);
@@ -482,7 +482,7 @@ public class AvatarEstimatorThreadFactory
          return null;
    }
 
-   public ROS2TopicName getOutputTopicName()
+   public ROS2Topic getOutputTopicName()
    {
       if (outputTopicNameField.hasValue())
          return outputTopicNameField.get();
@@ -490,7 +490,7 @@ public class AvatarEstimatorThreadFactory
          return null;
    }
 
-   public ROS2TopicName getInputTopicName()
+   public ROS2Topic getInputTopicName()
    {
       if (inputTopicNameField.hasValue())
          return inputTopicNameField.get();

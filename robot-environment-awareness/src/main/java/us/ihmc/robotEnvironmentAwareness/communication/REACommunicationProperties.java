@@ -18,7 +18,7 @@ import geometry_msgs.msg.dds.QuaternionPubSubType;
 import geometry_msgs.msg.dds.Vector3PubSubType;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.net.NetClassList;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -50,11 +50,11 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
  */
 public class REACommunicationProperties
 {
-   public static final ROS2TopicName outputTopicName = ROS2Tools.REA.withRobot(null).withOutput();
-   public static final ROS2TopicName inputTopicName = ROS2Tools.REA.withRobot(null).withInput();
-   public static final ROS2TopicName subscriberCustomRegionsTopicName = ROS2Tools.REA.withRobot(null)
-                                                                                              .withSuffix(ROS2Tools.REA_CUSTOM_REGION_NAME)
-                                                                                              .withInput();
+   public static final ROS2Topic outputTopicName = ROS2Tools.REA.withRobot(null).withOutput();
+   public static final ROS2Topic inputTopicName = ROS2Tools.REA.withRobot(null).withInput();
+   public static final ROS2Topic subscriberCustomRegionsTopicName = ROS2Tools.REA.withRobot(null)
+                                                                                 .withSuffix(ROS2Tools.REA_CUSTOM_REGION_NAME)
+                                                                                 .withInput();
 
    private static final NetClassList privateNetClassList = new NetClassList();
    static

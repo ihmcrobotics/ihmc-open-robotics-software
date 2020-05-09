@@ -9,7 +9,7 @@ import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.FireFighterStanceBehavior;
@@ -133,7 +133,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
       HumanoidReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
 
-      ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Topic controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     RobotConfigurationData.class,
@@ -217,7 +217,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                     footstepPlannerParameters);
       }
 
-      ROS2TopicName behaviorInputTopicName = getInputTopicName(robotName);
+      ROS2Topic behaviorInputTopicName = getInputTopicName(robotName);
       dispatcher.finalizeStateMachine();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
                                                     BehaviorControlModePacket.class,
@@ -537,27 +537,27 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
       return ihmcHumanoidBehaviorManager;
    }
 
-   public static ROS2TopicName getBehaviorRosTopicPrefix(String robotName, String suffix)
+   public static ROS2Topic getBehaviorRosTopicPrefix(String robotName, String suffix)
    {
       return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withSuffix(suffix);
    }
 
-   public static ROS2TopicName getBehaviorOutputRosTopicPrefix(String robotName)
+   public static ROS2Topic getBehaviorOutputRosTopicPrefix(String robotName)
    {
       return getBehaviorRosTopicPrefix(robotName, ROS2Tools.OUTPUT);
    }
 
-   public static ROS2TopicName getBehaviorInputRosTopicPrefix(String robotName)
+   public static ROS2Topic getBehaviorInputRosTopicPrefix(String robotName)
    {
       return getBehaviorRosTopicPrefix(robotName, ROS2Tools.INPUT);
    }
 
-   public static ROS2TopicName getOutputTopicName(String robotName)
+   public static ROS2Topic getOutputTopicName(String robotName)
    {
       return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
    }
 
-   public static ROS2TopicName getInputTopicName(String robotName)
+   public static ROS2Topic getInputTopicName(String robotName)
    {
       return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();
    }

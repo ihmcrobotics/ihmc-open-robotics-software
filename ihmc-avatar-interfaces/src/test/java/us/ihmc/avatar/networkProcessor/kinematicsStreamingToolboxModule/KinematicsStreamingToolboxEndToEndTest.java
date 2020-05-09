@@ -25,7 +25,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -146,9 +146,9 @@ public abstract class KinematicsStreamingToolboxEndToEndTest
    public void createToolboxController(DRCRobotModel robotModel)
    {
       String robotName = robotModel.getSimpleRobotName();
-      ROS2TopicName controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
-      ROS2TopicName toolboxInputTopicName = KinematicsStreamingToolboxModule.getInputTopicName(robotName);
-      ROS2TopicName toolboxOutputTopicName = KinematicsStreamingToolboxModule.getOutputTopicName(robotName);
+      ROS2Topic controllerOutputTopicName = ROS2Tools.getControllerOutputTopicName(robotName);
+      ROS2Topic toolboxInputTopicName = KinematicsStreamingToolboxModule.getInputTopicName(robotName);
+      ROS2Topic toolboxOutputTopicName = KinematicsStreamingToolboxModule.getOutputTopicName(robotName);
 
       desiredFullRobotModel = robotModel.createFullRobotModel();
       toolboxRegistry = new YoVariableRegistry("toolboxMain");

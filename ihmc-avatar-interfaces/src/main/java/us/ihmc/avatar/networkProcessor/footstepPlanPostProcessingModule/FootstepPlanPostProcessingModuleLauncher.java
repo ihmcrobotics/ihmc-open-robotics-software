@@ -7,7 +7,7 @@ import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2TopicName;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -41,10 +41,10 @@ public class FootstepPlanPostProcessingModuleLauncher
       postProcessingModule.registerRosNode(ros2Node);
       String name = postProcessingModule.getName();
 
-      ROS2TopicName inputTopicName = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
-                                                                                            .withInput();
-      ROS2TopicName outputTopicName = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
-                                                                                     .withOutput();
+      ROS2Topic inputTopicName = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
+                                                                          .withInput();
+      ROS2Topic outputTopicName = ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(name)
+                                                                           .withOutput();
 
       // Parameters callback
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPostProcessingParametersPacket.class, inputTopicName,
