@@ -96,6 +96,19 @@ public class LookAndStepBehavior2 implements BehaviorInterface
 
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
 
+      // modules
+      // environmentMap
+      // footstepPlanningModule
+      // operatorReviewEnabledInput
+      // planShortener
+      // robot
+
+      // MAPPING BLOCK
+      // RCD input (already there)
+      // when regions received, give to mapping (already happening)
+      // has regions callback
+
+
       EnumBasedStateMachineFactory<LookAndStepBehaviorState> stateMachineFactory = new EnumBasedStateMachineFactory<>(LookAndStepBehaviorState.class);
       stateMachineFactory.addTransition(AQUIRE_PATH, PERCEPT, this::transitionFromAquirePath);
       stateMachineFactory.addTransition(PERCEPT, PLAN, this::transitionFromPercept);
