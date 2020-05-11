@@ -8,8 +8,10 @@ public class FourBarVertex
    private double angleDot;
    private double angleDDot;
 
-   private double minAngle;
-   private double maxAngle;
+   protected double minAngle;
+   protected double maxAngle;
+
+   private boolean convex = true;
 
    private FourBarEdge nextEdge, previousEdge;
    private FourBarDiagonal diagonal;
@@ -24,6 +26,11 @@ public class FourBarVertex
       this.nextEdge = nextEdge;
       this.previousEdge = previousEdge;
       this.diagonal = diagonal;
+   }
+
+   protected void updateLimits()
+   {
+      FourBarTools.updateLimits(this);
    }
 
    public void setToNaN()
@@ -74,6 +81,11 @@ public class FourBarVertex
       this.maxAngle = maxAngle;
    }
 
+   void setConvex(boolean convex)
+   {
+      this.convex = convex;
+   }
+
    public String getName()
    {
       return name;
@@ -97,15 +109,20 @@ public class FourBarVertex
    public double getMinAngle()
    {
       if (Double.isNaN(minAngle))
-         FourBarTools.updateLimits(this);
+         updateLimits();
       return minAngle;
    }
 
    public double getMaxAngle()
    {
       if (Double.isNaN(maxAngle))
-         FourBarTools.updateLimits(this);
+         updateLimits();
       return maxAngle;
+   }
+
+   public boolean isConvex()
+   {
+      return convex;
    }
 
    public FourBarEdge getNextEdge()
