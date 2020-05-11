@@ -202,7 +202,7 @@ public class FourBarTools
          A.setMaxAngle(angleWithCosineLaw(DA, AB, BDMax));
    }
 
-   public static void updateDiagonalMaxLength(FourBarDiagonal diagonal)
+   public static void updateMaxLength(FourBarDiagonal diagonal)
    {
       FourBarDiagonal AC = diagonal;
       FourBarEdge AB = AC.getStart().getNextEdge();
