@@ -55,25 +55,25 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
  * </pre>
  *
  * Note the symbols "-" and "+" next to each vertex indicating their winding, i.e. "-" for
- * counter-clockwise and "+" for clockwise. A vertex is assumed to be convex when its winding is
- * clockwise.
+ * counter-clockwise and "+" for clockwise. In this example, a vertex is assumed to be convex when
+ * its winding is clockwise.
  * </p>
  * <p>
  * This implementation does not handle the following kind of configuration:
  *
  * <pre>
- *         +B                   -D
- *         /|                   /|
- *        / |                  / |
- *       /  |                 /  |
- *      /   C-      or       /   C+
- *     /     \              /     \
- *    /       \            /       \
- *   /         \          /         \
- * +A-----------D+      -A-----------B-
+ *         B
+ *        /|
+ *       / |
+ *      /  |
+ *     /   C
+ *    /     \
+ *   /       \
+ *  /         \ 
+ * A-----------D
  * </pre>
  *
- * Using the same symbols as before to highlight the winding at each vertex.
+ * The four bar is only concave at one vertex.
  * </p>
  */
 public class FourBar
@@ -133,7 +133,20 @@ public class FourBar
       boolean isCConvex = !EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(C, B, D);
       boolean isDConvex = !EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(D, C, A);
 
-      setSideLengths(A.distance(B), B.distance(C), C.distance(D), D.distance(A), isAConvex, isBConvex, isCConvex, isDConvex);
+      int convexCount = isAConvex ? 1 : 0;
+      convexCount += isBConvex ? 1 : 0;
+      convexCount += isCConvex ? 1 : 0;
+      convexCount += isDConvex ? 1 : 0;
+
+      if (convexCount <= 1)
+      { // The 4 points are ordered in a counter-clockwise scheme.
+         isAConvex = !isAConvex;
+         isBConvex = !isBConvex;
+         isCConvex = !isCConvex;
+         isDConvex = !isDConvex;
+      }
+
+      setup(A.distance(B), B.distance(C), C.distance(D), D.distance(A), isAConvex, isBConvex, isCConvex, isDConvex);
    }
 
    /**
@@ -148,9 +161,9 @@ public class FourBar
     * @param CD the length of the side joining the vertices C and D.
     * @param DA the length of the side joining the vertices D and A.
     */
-   public void setSideLengths(double AB, double BC, double CD, double DA)
+   public void setup(double AB, double BC, double CD, double DA)
    {
-      setSideLengths(AB, BC, CD, DA, true, true, true, true);
+      setup(AB, BC, CD, DA, true, true, true, true);
    }
 
    /**
@@ -171,7 +184,7 @@ public class FourBar
     * @throws if the number of convex vertices is equal to either 1 or 3 which represents the
     *            configurations that this calculator does not support yet.
     */
-   public void setSideLengths(double AB, double BC, double CD, double DA, boolean isAConvex, boolean isBConvex, boolean isCConvex, boolean isDConvex)
+   public void setup(double AB, double BC, double CD, double DA, boolean isAConvex, boolean isBConvex, boolean isCConvex, boolean isDConvex)
    {
       setToNaN();
       this.AB.setLength(AB);
@@ -187,6 +200,8 @@ public class FourBar
       if (convexCount == 1 || convexCount == 3)
          throw new UnsupportedOperationException("The quadrilateral ABCD is concave at " + (4 - convexCount)
                + "vertices, only handles either 0 or 2 concave vertices.");
+      if (convexCount == 0)
+         throw new IllegalArgumentException("The four bar linkage cannot be concave at all vertices");
 
       A.setConvex(isAConvex);
       B.setConvex(isBConvex);

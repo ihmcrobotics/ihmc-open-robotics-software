@@ -136,11 +136,7 @@ public class FourBarVertex
    }
 
    /**
-    * Indicates the winding at this vertex:
-    * <ul>
-    * <li>{@code true} for clockwise.
-    * <li>{@code false} for counter-clockwise.
-    * </ul>
+    * Indicates whether the four bar linkage is concave at this vertex.
     * 
     * @param convex whether the four bar linkage is convex at this vertex.
     */

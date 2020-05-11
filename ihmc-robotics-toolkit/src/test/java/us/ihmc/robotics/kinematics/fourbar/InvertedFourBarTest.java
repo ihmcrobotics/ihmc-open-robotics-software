@@ -1,7 +1,6 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -37,13 +36,16 @@ import us.ihmc.euclid.tuple2D.UnitVector2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
+/**
+ * Tests for {@link FourBar} using exclusively inverted configurations.
+ */
 public class InvertedFourBarTest
 {
-   private static final double EPSILON = 1.0e-9;
+   static final double EPSILON = 1.0e-9;
    private static final double FD_DOT_EPSILON = 1.0e-4;
    private static final double FD_DDOT_EPSILON = 1.0e-2;
    private static final int ITERATIONS = 10000;
-   private static final boolean VERBOSE = false;
+   static final boolean VERBOSE = false;
 
    @Test
    public void testAngleLimits() throws InterruptedException
@@ -132,7 +134,7 @@ public class InvertedFourBarTest
          Point2D B = vertices.get(1);
          Point2D C = vertices.get(2);
          Point2D D = vertices.get(3);
-         performBasicGeometricAssertions(random, fourBar, i, A, B, C, D);
+         ConvexFourBarTest.performBasicGeometricAssertions(random, fourBar, i, A, B, C, D);
       }
 
       for (int i = 0; i < ITERATIONS; i++)
@@ -178,123 +180,7 @@ public class InvertedFourBarTest
          B.add(X, XB);
          C.add(X, XC);
          D.add(X, XD);
-         performBasicGeometricAssertions(random, fourBar, i, A, B, C, D);
-      }
-   }
-
-   public void performBasicGeometricAssertions(Random random, FourBar fourBar, int iteration, Point2D A, Point2D B, Point2D C, Point2D D)
-         throws InterruptedException, Throwable
-   {
-      fourBar.setup(A, B, C, D);
-
-      Vector2D AB = new Vector2D();
-      Vector2D BC = new Vector2D();
-      Vector2D CD = new Vector2D();
-      Vector2D DA = new Vector2D();
-
-      AB.sub(B, A);
-      BC.sub(C, B);
-      CD.sub(D, C);
-      DA.sub(A, D);
-
-      Vector2D BA = new Vector2D(AB);
-      Vector2D CB = new Vector2D(BC);
-      Vector2D DC = new Vector2D(CD);
-      Vector2D AD = new Vector2D(DA);
-      BA.negate();
-      CB.negate();
-      DC.negate();
-      AD.negate();
-
-      FourBarVertex vertexA = fourBar.getVertexA();
-      FourBarVertex vertexB = fourBar.getVertexB();
-      FourBarVertex vertexC = fourBar.getVertexC();
-      FourBarVertex vertexD = fourBar.getVertexD();
-
-      assertEquals(DA.cross(AB) <= 0.0, vertexA.isConvex());
-      assertEquals(AB.cross(BC) <= 0.0, vertexB.isConvex());
-      assertEquals(BC.cross(CD) <= 0.0, vertexC.isConvex());
-      assertEquals(CD.cross(DA) <= 0.0, vertexD.isConvex());
-
-      double expectedAB = AB.length();
-      double expectedBC = BC.length();
-      double expectedCD = CD.length();
-      double expectedDA = DA.length();
-      double expectedDAB = AD.angle(AB);
-      double expectedABC = BA.angle(BC);
-      double expectedBCD = CB.angle(CD);
-      double expectedCDA = DC.angle(DA);
-      double expectedAC = A.distance(C);
-      double expectedBD = B.distance(D);
-
-      if (VERBOSE)
-         System.out.printf("Expected\n\tlengths: AB=%f, BC=%f, CD=%f, DA=%f\n\tangles: DAB=%f, ABC=%f, BCD=%f, CDA=%f\n\tdiagonal lengths: AC=%f, BD=%f\n",
-                           expectedAB,
-                           expectedBC,
-                           expectedCD,
-                           expectedDA,
-                           expectedDAB,
-                           expectedABC,
-                           expectedBCD,
-                           expectedCDA,
-                           expectedAC,
-                           expectedBD);
-
-      try
-      {
-         assertTrue(vertexA.getMinAngle() <= expectedDAB,
-                    "Itertation " + iteration + ", inaccurate minDAB: valid angle: " + expectedDAB + ", computed min: " + vertexA.getMinAngle());
-         assertTrue(vertexB.getMinAngle() <= expectedABC,
-                    "Itertation " + iteration + ", inaccurate minABC: valid angle: " + expectedABC + ", computed min: " + vertexB.getMinAngle());
-         assertTrue(vertexC.getMinAngle() <= expectedBCD,
-                    "Itertation " + iteration + ", inaccurate minBCD: valid angle: " + expectedBCD + ", computed min: " + vertexC.getMinAngle());
-         assertTrue(vertexD.getMinAngle() <= expectedCDA,
-                    "Itertation " + iteration + ", inaccurate minCDA: valid angle: " + expectedCDA + ", computed min: " + vertexD.getMinAngle());
-         assertTrue(expectedDAB <= vertexA.getMaxAngle(),
-                    "Itertation " + iteration + ", inaccurate maxDAB: valid angle: " + expectedDAB + ", computed max: " + vertexA.getMaxAngle());
-         assertTrue(expectedABC <= vertexB.getMaxAngle(),
-                    "Itertation " + iteration + ", inaccurate maxABC: valid angle: " + expectedABC + ", computed max: " + vertexB.getMaxAngle());
-         assertTrue(expectedBCD <= vertexC.getMaxAngle(),
-                    "Itertation " + iteration + ", inaccurate maxBCD: valid angle: " + expectedBCD + ", computed max: " + vertexC.getMaxAngle());
-         assertTrue(expectedCDA <= vertexD.getMaxAngle(),
-                    "Itertation " + iteration + ", inaccurate maxCDA: valid angle: " + expectedCDA + ", computed max: " + vertexD.getMaxAngle());
-
-         switch (EuclidCoreRandomTools.nextElementIn(random, FourBarAngle.values()))
-         {
-            case DAB:
-               fourBar.update(FourBarAngle.DAB, expectedDAB);
-               break;
-            case ABC:
-               fourBar.update(FourBarAngle.ABC, expectedABC);
-               break;
-            case BCD:
-               fourBar.update(FourBarAngle.BCD, expectedBCD);
-               break;
-            case CDA:
-               fourBar.update(FourBarAngle.CDA, expectedCDA);
-               break;
-         }
-
-         if (VERBOSE)
-            System.out.println(fourBar);
-
-         assertEquals(expectedAC, fourBar.getDiagonalAC().getLength(), EPSILON, "Iteration " + iteration);
-         assertEquals(expectedBD, fourBar.getDiagonalBD().getLength(), EPSILON, "Iteration " + iteration);
-
-         assertEquals(expectedDAB, vertexA.getAngle(), EPSILON, "Iteration " + iteration + ", error: " + Math.abs(expectedDAB - vertexA.getAngle()));
-         assertEquals(expectedABC, vertexB.getAngle(), EPSILON, "Iteration " + iteration + ", error: " + Math.abs(expectedABC - vertexB.getAngle()));
-         assertEquals(expectedBCD, vertexC.getAngle(), EPSILON, "Iteration " + iteration + ", error: " + Math.abs(expectedBCD - vertexC.getAngle()));
-         assertEquals(expectedCDA, vertexD.getAngle(), EPSILON, "Iteration " + iteration + ", error: " + Math.abs(expectedCDA - vertexD.getAngle()));
-      }
-      catch (Throwable e)
-      {
-         System.err.println(e.getClass().getSimpleName() + ": " + e.getMessage());
-
-         Viewer viewer = startupViewer();
-         viewer.updateFOV(A, B, C, D);
-         draw(viewer, A, B, C, D);
-         viewer.waitUntilClosed();
-         throw e;
+         ConvexFourBarTest.performBasicGeometricAssertions(random, fourBar, i, A, B, C, D);
       }
    }
 
@@ -560,7 +446,7 @@ public class InvertedFourBarTest
       }
    }
 
-   private static class Viewer
+   static class Viewer
    {
       double span = 10.0;
       Point2D center = new Point2D();
