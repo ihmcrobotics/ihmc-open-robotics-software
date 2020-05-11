@@ -158,6 +158,6 @@ public class FourBarVertex
    @Override
    public String toString()
    {
-      return getName();
+      return String.format("%s: [angle=%f, angleDot=%f, angleDDot=%f, convex=%b]", getName(), getAngle(), getAngleDot(), getAngleDDot(), isConvex());
    }
 }

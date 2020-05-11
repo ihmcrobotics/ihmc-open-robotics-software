@@ -44,7 +44,7 @@ public class FourBar
    private final FourBarEdge DA = new FourBarEdge("DA");
 
    private final FourBarDiagonal AC = new FourBarDiagonal("AC");
-   private final FourBarDiagonal BD = new FourBarDiagonal("AC");
+   private final FourBarDiagonal BD = new FourBarDiagonal("BD");
 
    public FourBar()
    {

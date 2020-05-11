@@ -87,6 +87,6 @@ public class FourBarEdge
    @Override
    public String toString()
    {
-      return getName();
+      return String.format("%s: [length=%f, flipped=%b, crossing=%b]", getName(), getLength(), isFlipped(), isCrossing());
    }
 }

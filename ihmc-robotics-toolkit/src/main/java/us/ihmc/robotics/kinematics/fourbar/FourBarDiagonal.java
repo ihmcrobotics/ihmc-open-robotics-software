@@ -101,6 +101,6 @@ public class FourBarDiagonal
    @Override
    public String toString()
    {
-      return getName();
+      return String.format("%s [length=%f, lengthDot=%f, lengthDDot=%f]", getName(), getLength(), getLengthDot(), getLengthDDot());
    }
 }
