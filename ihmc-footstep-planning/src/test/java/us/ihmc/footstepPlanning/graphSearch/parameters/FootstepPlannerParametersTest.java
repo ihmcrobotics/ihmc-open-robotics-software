@@ -94,6 +94,10 @@ public class FootstepPlannerParametersTest
       parameters.setMinimumSurfaceInclineRadians(minSurfaceIncline);
       assertEquals(minSurfaceIncline, parameters.getMinimumSurfaceInclineRadians(), epsilon);
 
+      boolean wiggleWhilePlanning = random.nextBoolean();
+      parameters.setWiggleWhilePlanning(wiggleWhilePlanning);
+      assertEquals(wiggleWhilePlanning, parameters.getWiggleWhilePlanning());
+
       boolean enableConcaveHullWiggler = RandomNumbers.nextBoolean(random, 0.5);
       parameters.setEnableConcaveHullWiggler(enableConcaveHullWiggler);
       assertEquals(enableConcaveHullWiggler, parameters.getEnableConcaveHullWiggler());
