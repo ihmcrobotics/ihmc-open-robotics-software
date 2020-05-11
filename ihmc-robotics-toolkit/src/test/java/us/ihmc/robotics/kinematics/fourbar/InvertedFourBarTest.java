@@ -227,17 +227,18 @@ public class InvertedFourBarTest
       double expectedAC = A.distance(C);
       double expectedBD = B.distance(D);
 
-      System.out.printf("Expected\n\tlengths: AB=%f, BC=%f, CD=%f, DA=%f\n\tangles: DAB=%f, ABC=%f, BCD=%f, CDA=%f\n\tdiagonal lengths: AC=%f, BD=%f\n",
-                        expectedAB,
-                        expectedBC,
-                        expectedCD,
-                        expectedDA,
-                        expectedDAB,
-                        expectedABC,
-                        expectedBCD,
-                        expectedCDA,
-                        expectedAC,
-                        expectedBD);
+      if (VERBOSE)
+         System.out.printf("Expected\n\tlengths: AB=%f, BC=%f, CD=%f, DA=%f\n\tangles: DAB=%f, ABC=%f, BCD=%f, CDA=%f\n\tdiagonal lengths: AC=%f, BD=%f\n",
+                           expectedAB,
+                           expectedBC,
+                           expectedCD,
+                           expectedDA,
+                           expectedDAB,
+                           expectedABC,
+                           expectedBCD,
+                           expectedCDA,
+                           expectedAC,
+                           expectedBD);
 
       try
       {
@@ -279,7 +280,8 @@ public class InvertedFourBarTest
                break;
          }
 
-         System.out.println(fourBar);
+         if (VERBOSE)
+            System.out.println(fourBar);
 
          assertEquals(expectedAC, fourBar.getDiagonalAC().getLength(), EPSILON, "Iteration " + iteration);
          assertEquals(expectedBD, fourBar.getDiagonalBD().getLength(), EPSILON, "Iteration " + iteration);
