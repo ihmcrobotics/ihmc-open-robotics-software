@@ -38,6 +38,7 @@ public class FourBarTools
       FourBarEdge BCEdge = B.getNextEdge();
       FourBarEdge CDEdge = C.getNextEdge();
       FourBarEdge DAEdge = D.getNextEdge();
+      FourBarDiagonal ACDiag = A.getDiagonal();
       FourBarDiagonal BDDiag = B.getDiagonal();
 
       double AB = ABEdge.getLength();
@@ -46,14 +47,40 @@ public class FourBarTools
       double DA = DAEdge.getLength();
 
       A.setAngle(angle);
-      double BD = EuclidGeometryTools.unknownTriangleSideLengthByLawOfCosine(DA, AB, angle);
+      double BD = EuclidGeometryTools.unknownTriangleSideLengthByLawOfCosine(AB, DA, angle);
       BDDiag.setLength(BD);
       C.setAngle(angleWithCosineLaw(BC, CD, BD));
-
       double angleDBC = angleWithCosineLaw(BC, BD, CD);
       double angleABD = angleWithCosineLaw(AB, BD, DA);
-      B.setAngle(angleABD + angleDBC);
-      D.setAngle(2.0 * Math.PI - A.getAngle() - B.getAngle() - C.getAngle());
+
+      if (ABEdge.isCrossing() || BCEdge.isCrossing())
+      { // Inverted four bar
+         /*
+          * @formatter:off
+          *  +A------B+    +D------A+    +C------D+    +B------C+
+          *    \    /        \    /        \    /        \    /  
+          *     \  /          \  /          \  /          \  /   
+          *      \/     or     \/     or     \/     or     \/    
+          *      /\            /\            /\            /\    
+          *     /  \          /  \          /  \          /  \   
+          *    /    \        /    \        /    \        /    \  
+          *  -C------D-    -B------C-    -A------B-    -D------A-
+          * @formatter:on
+          */
+         if (!C.isConvex())
+            C.setAngle(-C.getAngle());
+         B.setAngle(Math.abs(angleABD - angleDBC));
+         if (!B.isConvex())
+            B.setAngle(-B.getAngle());
+         D.setAngle(-A.getAngle() - B.getAngle() - C.getAngle());
+      }
+      else
+      { // Assume the four bar is convex.
+         B.setAngle(angleABD + angleDBC);
+         D.setAngle(2.0 * Math.PI - A.getAngle() - B.getAngle() - C.getAngle());
+      }
+
+      ACDiag.setLength(EuclidGeometryTools.unknownTriangleSideLengthByLawOfCosine(AB, BC, B.getAngle()));
 
       return null;
    }
@@ -71,23 +98,39 @@ public class FourBarTools
       FourBarEdge BCEdge = B.getNextEdge();
       FourBarEdge CDEdge = C.getNextEdge();
       FourBarEdge DAEdge = D.getNextEdge();
-      FourBarDiagonal BDBiag = B.getDiagonal();
+      FourBarDiagonal ACDiag = A.getDiagonal();
+      FourBarDiagonal BDDiag = B.getDiagonal();
 
       double AB = ABEdge.getLength();
       double BC = BCEdge.getLength();
       double CD = CDEdge.getLength();
       double DA = DAEdge.getLength();
-      double BD = BDBiag.getLength();
+      double AC = ACDiag.getLength();
+      double BD = BDDiag.getLength();
 
       A.setAngleDot(angleDot);
       double BDDt = DA * AB * Math.sin(angle) * angleDot / BD;
-      BDBiag.setLengthDot(BDDt);
-      C.setAngleDot(angleDotWithCosineLaw(BC, CD, 0.0, BD, BDDt));
+      BDDiag.setLengthDot(BDDt);
+      C.setAngleDot(FourBarTools.angleDotWithCosineLaw(BC, CD, 0.0, BD, BDDt));
+      double angleDtABD = FourBarTools.angleDotWithCosineLaw(AB, BD, BDDt, DA, 0.0);
+      double angleDtDBC = FourBarTools.angleDotWithCosineLaw(BC, BD, BDDt, CD, 0.0);
 
-      double angleDtDBA = angleDotWithCosineLaw(AB, BD, BDDt, DA, 0.0);
-      double angleDtDBC = angleDotWithCosineLaw(BC, BD, BDDt, CD, 0.0);
-      B.setAngleDot(angleDtDBA + angleDtDBC);
+      if (!C.isConvex())
+         C.setAngleDot(-C.getAngleDot());
+
+      if (ABEdge.isCrossing())
+         angleDtABD = -angleDtABD;
+      if (BCEdge.isCrossing())
+         angleDtDBC = -angleDtDBC;
+
+      B.setAngleDot(angleDtABD + angleDtDBC);
+      if (!B.isConvex())
+         B.setAngleDot(-B.getAngleDot());
+
       D.setAngleDot(-A.getAngleDot() - B.getAngleDot() - C.getAngleDot());
+
+      double ACDt = AB * BC * Math.sin(B.getAngle()) * B.getAngleDot() / AC;
+      ACDiag.setLengthDot(ACDt);
 
       return limit;
    }
@@ -105,25 +148,39 @@ public class FourBarTools
       FourBarEdge BCEdge = B.getNextEdge();
       FourBarEdge CDEdge = C.getNextEdge();
       FourBarEdge DAEdge = D.getNextEdge();
+      FourBarDiagonal ACDiag = A.getDiagonal();
       FourBarDiagonal BDDiag = B.getDiagonal();
 
       double AB = ABEdge.getLength();
       double BC = BCEdge.getLength();
       double CD = CDEdge.getLength();
       double DA = DAEdge.getLength();
+      double AC = ACDiag.getLength();
       double BD = BDDiag.getLength();
+      double ACDt = ACDiag.getLengthDot();
       double BDDt = BDDiag.getLengthDot();
 
       A.setAngleDDot(angleDDot);
       double BDDt2 = DA * AB / BD * (Math.cos(angle) * angleDot * angleDot + Math.sin(angle) * (angleDDot - BDDt * angleDot / BD));
       BDDiag.setLengthDDot(BDDt2);
+      C.setAngleDDot(FourBarTools.angleDDotWithCosineLaw(BC, CD, 0.0, 0.0, BD, BDDt, BDDt2));
+      if (!C.isConvex())
+         C.setAngleDDot(-C.getAngleDDot());
 
-      C.setAngleDDot(angleDDotWithCosineLaw(BC, CD, 0.0, 0.0, BD, BDDt, BDDt2));
+      double angleDt2ABD = FourBarTools.angleDDotWithCosineLaw(AB, BD, BDDt, BDDt2, DA, 0.0, 0.0);
+      double angleDt2DBC = FourBarTools.angleDDotWithCosineLaw(BC, BD, BDDt, BDDt2, CD, 0.0, 0.0);
+      if (ABEdge.isCrossing())
+         angleDt2ABD = -angleDt2ABD;
+      if (BCEdge.isCrossing())
+         angleDt2DBC = -angleDt2DBC;
 
-      double angleDt2DBA = angleDDotWithCosineLaw(AB, BD, BDDt, BDDt2, DA, 0.0, 0.0);
-      double angleDt2DBC = angleDDotWithCosineLaw(BC, BD, BDDt, BDDt2, CD, 0.0, 0.0);
-      B.setAngleDDot(angleDt2DBA + angleDt2DBC);
+      B.setAngleDDot(angleDt2ABD + angleDt2DBC);
+      if (!B.isConvex())
+         B.setAngleDDot(-B.getAngleDDot());
       D.setAngleDDot(-A.getAngleDDot() - B.getAngleDDot() - C.getAngleDDot());
+
+      double ACDt2 = AB * BC / AC * (Math.cos(B.getAngle()) * B.getAngleDot() * B.getAngleDot() + Math.sin(B.getAngle()) * (B.getAngleDDot() - ACDt * B.getAngleDot() / AC));
+      ACDiag.setLengthDDot(ACDt2);
 
       return limit;
    }
@@ -135,40 +192,118 @@ public class FourBarTools
       FourBarEdge BCEdge = ABEdge.getNext();
       FourBarEdge CDEdge = BCEdge.getNext();
       FourBarEdge DAEdge = CDEdge.getNext();
-      FourBarDiagonal ACDiag = A.getDiagonal();
-      FourBarDiagonal BDDiag = ACDiag.getOther();
 
       double AB = ABEdge.getLength();
       double BC = BCEdge.getLength();
       double CD = CDEdge.getLength();
       double DA = DAEdge.getLength();
-      double ACMax = ACDiag.getMaxLength();
-      double BDMax = BDDiag.getMaxLength();
 
-      if (DA + CD == ACMax)
-         A.setMinAngle(angleWithCosineLaw(ACMax, AB, BC));
+      double lowerBound, upperBound;
+
+      if (DAEdge.isCrossing())
+      { // Assume the four-bar is inverted with DA crossing BC
+         if (DA > AB && EuclidGeometryTools.isFormingTriangle(BC, CD, DA - AB))
+         {
+            /*
+                * @formatter:off
+                *   A------B      A
+                *    \    /        \
+                *     \  /          \
+                *      \/    =>      B
+                *      /\           / \
+                *     /  \         /   \
+                *    /    \       /     \
+                *   C------D     C-------D
+                * @formatter:on
+                */
+            lowerBound = 0.0;
+         }
+         else
+         {
+            /*
+             * @formatter:off
+             *   A------B      A-----B
+             *    \    /        \   /
+             *     \  /          \ /
+             *      \/    =>      D
+             *      /\           /
+             *     /  \         C
+             *    C----D
+             * @formatter:on
+             */
+            lowerBound = FourBarTools.angleWithCosineLaw(AB, DA, BC - CD);
+         }
+
+         if (DA > CD && EuclidGeometryTools.isFormingTriangle(AB, DA - CD, BC))
+         {
+            /*
+             * @formatter:off
+             *   A------B      A-----B
+             *    \    /        \   /
+             *     \  /          \ /
+             *      \/    =>      C
+             *      /\             \
+             *     /  \             \
+             *    /    \             \
+             *   C------D             D
+             * @formatter:on
+             */
+            upperBound = FourBarTools.angleWithCosineLaw(AB, DA - CD, BC);
+         }
+         else
+         {
+            /*
+             * @formatter:off
+             *    A----B           B
+             *     \  /           /
+             *      \/           A 
+             *      /\    =>    / \ 
+             *     /  \        /   \
+             *    /    \      C-----D
+             *   C------D
+             * @formatter:on
+             */
+            upperBound = Math.PI - FourBarTools.angleWithCosineLaw(BC - AB, DA, CD);
+         }
+      }
+      else if (ABEdge.isCrossing())
+      { // Assume the four-bar is inverted with DA crossing BC
+         if (AB > DA && EuclidGeometryTools.isFormingTriangle(BC, CD, AB - DA))
+            lowerBound = 0.0;
+         else
+            lowerBound = FourBarTools.angleWithCosineLaw(DA, AB, CD - BC);
+
+         if (AB > BC && EuclidGeometryTools.isFormingTriangle(DA, AB - BC, CD))
+            upperBound = FourBarTools.angleWithCosineLaw(DA, AB - BC, CD);
+         else
+            upperBound = Math.PI - FourBarTools.angleWithCosineLaw(AB, CD - DA, BC);
+      }
       else
-         A.setMinAngle(angleWithCosineLaw(ACMax, DA, CD));
+      { // Assume the four-bar is convex.
+         double ACMax = Math.min(DA + CD, AB + BC);
+         double BDMax = Math.min(BC + CD, DA + AB);
 
-      if (DA + AB == BDMax)
-         A.setMaxAngle(Math.PI);
+         if (DA + CD == ACMax)
+            lowerBound = angleWithCosineLaw(ACMax, AB, BC);
+         else
+            lowerBound = angleWithCosineLaw(ACMax, DA, CD);
+
+         if (DA + AB == BDMax)
+            upperBound = Math.PI;
+         else
+            upperBound = angleWithCosineLaw(DA, AB, BDMax);
+      }
+
+      if (A.isConvex())
+      {
+         A.setMinAngle(lowerBound);
+         A.setMaxAngle(upperBound);
+      }
       else
-         A.setMaxAngle(angleWithCosineLaw(DA, AB, BDMax));
-   }
-
-   public static void updateMaxLength(FourBarDiagonal diagonal)
-   {
-      FourBarDiagonal AC = diagonal;
-      FourBarEdge AB = AC.getStart().getNextEdge();
-      FourBarEdge BC = AB.getNext();
-      FourBarEdge CD = BC.getNext();
-      FourBarEdge DA = CD.getNext();
-
-      /*
-       * We collapse the 2 pairs of edges on each side of the diagonal, the one pair giving the smallest
-       * length is the max diagonal length.
-       */
-      AC.setMaxLength(Math.min(DA.getLength() + CD.getLength(), AB.getLength() + BC.getLength()));
+      {
+         A.setMinAngle(-upperBound);
+         A.setMaxAngle(-lowerBound);
+      }
    }
 
    /**

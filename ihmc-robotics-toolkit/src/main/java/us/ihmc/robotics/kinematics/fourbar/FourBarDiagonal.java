@@ -12,7 +12,6 @@ public class FourBarDiagonal
    private double length;
    private double lengthDot;
    private double lengthDDot;
-   private double maxLength;
    private FourBarVertex start, end;
    private FourBarDiagonal other;
 
@@ -41,15 +40,6 @@ public class FourBarDiagonal
    }
 
    /**
-    * Assuming the length of each side of the four bar linkage has been set, this method calculates and
-    * updates the maximum length that this diagonal can reach.
-    */
-   protected void updateMaxLength()
-   {
-      FourBarTools.updateMaxLength(this);
-   }
-
-   /**
     * Clears the internal state.
     */
    public void setToNaN()
@@ -57,7 +47,6 @@ public class FourBarDiagonal
       length = Double.NaN;
       lengthDot = Double.NaN;
       lengthDDot = Double.NaN;
-      maxLength = Double.NaN;
    }
 
    /**
@@ -88,16 +77,6 @@ public class FourBarDiagonal
    public void setLengthDDot(double lengthDDot)
    {
       this.lengthDDot = lengthDDot;
-   }
-
-   /**
-    * Sets the maximum length that this diagonal can reach.
-    * 
-    * @param maxLength the maximum length for this diagonal.
-    */
-   void setMaxLength(double maxLength)
-   {
-      this.maxLength = maxLength;
    }
 
    /**
@@ -140,18 +119,6 @@ public class FourBarDiagonal
    public double getLengthDDot()
    {
       return lengthDDot;
-   }
-
-   /**
-    * Gets the maximum length this diagonal can reach.
-    * 
-    * @return the value of the maximum length for this diagonal.
-    */
-   public double getMaxLength()
-   {
-      if (Double.isNaN(maxLength))
-         updateMaxLength();
-      return maxLength;
    }
 
    /**

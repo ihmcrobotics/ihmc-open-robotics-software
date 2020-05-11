@@ -49,7 +49,7 @@ public class InvertedFourBarTest
    public void testAngleLimits() throws InterruptedException
    {
       Random random = new Random(67547);
-      InvertedFourBar fourBar = new InvertedFourBar();
+      FourBar fourBar = new FourBar();
 
       for (int i = 0; i < ITERATIONS; i++)
       { // Generate convex points that are on a random circle, then flipping an edge.
@@ -121,7 +121,7 @@ public class InvertedFourBarTest
    public void testGeometry() throws Throwable
    {
       Random random = new Random(345);
-      InvertedFourBar fourBar = new InvertedFourBar();
+      FourBar fourBar = new FourBar();
 
       for (int i = 0; i < ITERATIONS; i++)
       { // Generate convex points that are on a random circle, then flipping an edge.
@@ -182,7 +182,7 @@ public class InvertedFourBarTest
       }
    }
 
-   public void performBasicGeometricAssertions(Random random, InvertedFourBar fourBar, int iteration, Point2D A, Point2D B, Point2D C, Point2D D)
+   public void performBasicGeometricAssertions(Random random, FourBar fourBar, int iteration, Point2D A, Point2D B, Point2D C, Point2D D)
          throws InterruptedException, Throwable
    {
       fourBar.setup(A, B, C, D);
@@ -242,11 +242,6 @@ public class InvertedFourBarTest
 
       try
       {
-         assertTrue(expectedAC <= fourBar.getDiagonalAC().getMaxLength(),
-                    "Inaccurate maxAC: valid length: " + expectedAC + ", computed max: " + fourBar.getDiagonalAC().getMaxLength());
-         assertTrue(expectedBD <= fourBar.getDiagonalBD().getMaxLength(),
-                    "Inaccurate maxBD: valid length: " + expectedBD + ", computed max: " + fourBar.getDiagonalBD().getMaxLength());
-
          assertTrue(vertexA.getMinAngle() <= expectedDAB,
                     "Itertation " + iteration + ", inaccurate minDAB: valid angle: " + expectedDAB + ", computed min: " + vertexA.getMinAngle());
          assertTrue(vertexB.getMinAngle() <= expectedABC,
@@ -318,7 +313,7 @@ public class InvertedFourBarTest
          Point2D C = vertices.get(2);
          Point2D D = vertices.get(3);
 
-         InvertedFourBar fourBar = new InvertedFourBar();
+         FourBar fourBar = new FourBar();
          fourBar.setup(A, B, C, D);
 
          FourBarAngle fourBarAngle = FourBarAngle.DAB; //EuclidCoreRandomTools.nextElementIn(random, FourBarAngle.values());
@@ -404,7 +399,7 @@ public class InvertedFourBarTest
          Point2D C = vertices.get(2);
          Point2D D = vertices.get(3);
 
-         InvertedFourBar fourBar = new InvertedFourBar();
+         FourBar fourBar = new FourBar();
          fourBar.setup(A, B, C, D);
 
          FourBarAngle fourBarAngle = FourBarAngle.DAB; //EuclidCoreRandomTools.nextElementIn(random, FourBarAngle.values());
@@ -497,7 +492,7 @@ public class InvertedFourBarTest
    {
       double eps = 1.0e-5;
       Random random = new Random(1984L);
-      InvertedFourBar fourBar;
+      FourBar fourBar;
 
       double DAB_t0 = 0.0, DAB_tf = 0.0, DAB_tj = 0.0;
       double dDAB_t0 = 0.0, dDAB_tf = 0.0, dDAB_tj = 0.0;
@@ -521,7 +516,7 @@ public class InvertedFourBarTest
          Point2D C = vertices.get(2);
          Point2D D = vertices.get(3);
 
-         fourBar = new InvertedFourBar();
+         fourBar = new FourBar();
          fourBar.setup(A, B, C, D);
 
          DAB_t0 = RandomNumbers.nextDouble(random, fourBar.getMinDAB(), fourBar.getMaxDAB());
