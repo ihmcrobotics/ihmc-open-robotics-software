@@ -1,19 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.BodyPathPlanForUI;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.CurrentState;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.FootstepPlanForUI;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.FootstepPlannerParameters;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.LookAndStepParameters;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.MapRegionsForUI;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.OperatorReviewEnabled;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.RePlan;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.SubGoalForUI;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.TakeStep;
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.BodyPathPlanInput;
-
 import java.util.ArrayList;
-import java.util.List;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
@@ -25,6 +12,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.RemoteREAInterface;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -48,7 +36,6 @@ import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIActionMap;
 import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
@@ -56,6 +43,8 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidancePro
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepBehaviorUI extends BehaviorUIInterface
 {
@@ -144,7 +133,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       });
       placeGoalActionMap.mapAction(FXUITrigger.ORIENTATION_LEFT_CLICK, trigger ->
       {
-         calculateAndSendBodyPathPlan();
+         behaviorMessager.submitMessage(GoalInput, new Pose3D(goalGraphic.getPose()));
 
          placeGoalButton.setDisable(false);
       });

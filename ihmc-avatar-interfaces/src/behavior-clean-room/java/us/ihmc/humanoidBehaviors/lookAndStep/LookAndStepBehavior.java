@@ -12,7 +12,6 @@ import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidBehaviors.tools.RemoteEnvironmentMapInterface;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -56,7 +55,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    public enum LookAndStepBehaviorState
    {
-      AQUIRE_PATH, PERCEPT, PLAN, REVIEW, STEP, PLAN_FAILED
+      LIDAR, ACQUIRE_PATH, STEREO, BODY_PLAN, FOOTSTEP_PLAN, REVIEW, STEP, PLAN_FAILED
    }
 
    private final LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
@@ -98,18 +97,20 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
 
       EnumBasedStateMachineFactory<LookAndStepBehaviorState> stateMachineFactory = new EnumBasedStateMachineFactory<>(LookAndStepBehaviorState.class);
-      stateMachineFactory.addTransition(AQUIRE_PATH, PERCEPT, this::transitionFromAquirePath);
-      stateMachineFactory.addTransition(PERCEPT, PLAN, this::transitionFromPercept);
-      stateMachineFactory.setOnEntry(PLAN, this::onPlanStateEntry);
-      stateMachineFactory.addTransition(PLAN, Lists.newArrayList(REVIEW, STEP, PLAN_FAILED), this::transitionFromPlan);
-      stateMachineFactory.addTransition(REVIEW, Lists.newArrayList(STEP, AQUIRE_PATH), this::transitionFromReview);
+      stateMachineFactory.addTransition(LIDAR, ACQUIRE_PATH, this::transitionFromAquirePath);
+      stateMachineFactory.addTransition(ACQUIRE_PATH, STEREO, this::transitionFromAquirePath);
+      stateMachineFactory.addTransition(STEREO, BODY_PLAN, this::transitionFromPercept);
+      stateMachineFactory.addTransition(STEREO, FOOTSTEP_PLAN, this::transitionFromPercept);
+      stateMachineFactory.setOnEntry(FOOTSTEP_PLAN, this::onFootstepPlanStateEntry);
+      stateMachineFactory.addTransition(FOOTSTEP_PLAN, Lists.newArrayList(REVIEW, STEP, PLAN_FAILED), this::transitionFromPlan);
+      stateMachineFactory.addTransition(REVIEW, Lists.newArrayList(STEP, ACQUIRE_PATH), this::transitionFromReview);
       stateMachineFactory.setOnEntry(STEP, this::onStepStateEntry);
-      stateMachineFactory.addTransition(STEP, AQUIRE_PATH, this::transitionFromStep);
+      stateMachineFactory.addTransition(STEP, ACQUIRE_PATH, this::transitionFromStep);
       stateMachineFactory.setOnEntry(PLAN_FAILED, this::onPlanFailedStateEntry);
-      stateMachineFactory.addTransition(PLAN_FAILED, AQUIRE_PATH, this::transitionFromPlanFailed);
+      stateMachineFactory.addTransition(PLAN_FAILED, ACQUIRE_PATH, this::transitionFromPlanFailed);
       Arrays.stream(values()).forEach(state -> stateMachineFactory.setDoAction(state, this::pollInterrupts));
       stateMachineFactory.getFactory().addStateChangedListener(this::stateChanged);
-      stateMachine = stateMachineFactory.getFactory().build(AQUIRE_PATH);
+      stateMachine = stateMachineFactory.getFactory().build(ACQUIRE_PATH);
 
       double period = 0.1;
       int crashesBeforeGivingUp = 1;
@@ -129,6 +130,12 @@ public class LookAndStepBehavior implements BehaviorInterface
    {
       helper.publishToUI(CurrentState, to.name());
       LogTools.debug("{} -> {}", from == null ? null : from.name(), to.name());
+   }
+
+   private boolean transitionFromLidarPercept()
+   {
+      // lidar regions not empty
+
    }
 
    private boolean transitionFromAquirePath()
@@ -174,7 +181,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       return !arePlanarRegionsExpired() && !environmentMap.getLatestCombinedRegionsList().isEmpty();
    }
 
-   private void onPlanStateEntry()
+   private void onFootstepPlanStateEntry()
    {
       LogTools.info("Entering plan state");
       HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
@@ -282,6 +289,10 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       helper.publishToUI(SubGoalForUI, new Point3D(goalPoseBetweenFeet.getPosition()));
 
+      footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.get(LookAndStepBehaviorParameters.idealFootstepLengthOverride));
+      footstepPlannerParameters.setWiggleInsideDelta(lookAndStepParameters.get(LookAndStepBehaviorParameters.wiggleInsideDeltaOverride));
+      footstepPlannerParameters.setCliffHeightToAvoid(lookAndStepParameters.get(LookAndStepBehaviorParameters.cliffHeightToAvoidOverride));
+
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
       footstepPlannerRequest.setRequestedInitialStanceSide(initialStanceFootSide);
@@ -290,13 +301,9 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlannerRequest.setPlanarRegionsList(latestPlanarRegionList);
       footstepPlannerRequest.setTimeout(lookAndStepParameters.get(LookAndStepBehaviorParameters.footstepPlannerTimeout));
 
-      footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.get(LookAndStepBehaviorParameters.idealFootstepLengthOverride));
-      footstepPlannerParameters.setWiggleInsideDelta(lookAndStepParameters.get(LookAndStepBehaviorParameters.wiggleInsideDeltaOverride));
-      footstepPlannerParameters.setCliffHeightToAvoid(lookAndStepParameters.get(LookAndStepBehaviorParameters.cliffHeightToAvoidOverride));
-
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
-
       footstepPlanningModule.addStatusCallback(this::footstepPlanningStatusUpdate);
+      footstepPlanningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= 1);
 
       ThreadTools.startAsDaemon(() -> footstepPlanningThread(footstepPlannerRequest), "FootstepPlanner");
    }
@@ -308,7 +315,6 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private void footstepPlanningThread(FootstepPlannerRequest footstepPlannerRequest)
    {
-      footstepPlanningModule.addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= 1);
       LogTools.info("Footstep planner started");
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.handleRequest(footstepPlannerRequest);
       
@@ -363,7 +369,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    {
       if (rePlanNotification.read())
       {
-         return AQUIRE_PATH;
+         return ACQUIRE_PATH;
       }
       else if (takeStepNotification.read())
       {
@@ -432,6 +438,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
       public static final Topic<List<String>> LookAndStepParameters = topic("LookAndStepParameters");
       public static final Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");
+      public static final Topic<Pose3D> GoalInput = topic("GoalInput");
       public static final Topic<List<Point3D>> BodyPathPlanInput = topic("BodyPathPlanInput");
       public static final Topic<List<Point3D>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
 

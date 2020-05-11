@@ -1,5 +1,6 @@
 package us.ihmc.atlas.behaviors;
 
+import com.google.common.collect.Lists;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -9,9 +10,9 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
+import us.ihmc.humanoidBehaviors.tools.perception.CompositePlanarRegionService;
 import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
-import us.ihmc.humanoidBehaviors.tools.perception.VisiblePlanarRegionService;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
@@ -27,6 +28,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsLis
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
+import java.util.ArrayList;
 import java.util.function.Supplier;
 
 public class AtlasLookAndStepBehaviorDemo
@@ -62,12 +64,9 @@ public class AtlasLookAndStepBehaviorDemo
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, ROS2Tools.REA.getNodeName());
       MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(environment.get(), createRobotModel(), ros2Node);
       RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(environment.get(), createRobotModel(), ros2Node);
-      VisiblePlanarRegionService realsensePlanarRegionService = new VisiblePlanarRegionService(ros2Node, "/realsense", realsense);
-//      VisiblePlanarRegionService multisensePlanarRegionService = new VisiblePlanarRegionService(ros2Node, "/multisense", multisense);
-      VisiblePlanarRegionService allPlanarRegionService = new VisiblePlanarRegionService(ros2Node, realsense, multisense);
-      realsensePlanarRegionService.start();
-//      multisensePlanarRegionService.start();
-      allPlanarRegionService.start();
+      ArrayList<String> names = Lists.newArrayList("/realsense", "/multisense");
+      CompositePlanarRegionService planarRegionService = new CompositePlanarRegionService(ros2Node, names, realsense, multisense);
+      planarRegionService.start();
 
       new PlanarRegionsMappingModule(pubSubMode); // Start the SLAM mapper which look and step uses
    }
