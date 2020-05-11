@@ -38,14 +38,14 @@ public class FourBarVertex
    public void setToMin()
    {
       angle = getMinAngle();
-      angle = 0.0;
+      angleDot = 0.0;
       angleDDot = 0.0;
    }
 
    public void setToMax()
    {
       angle = getMaxAngle();
-      angle = 0.0;
+      angleDot = 0.0;
       angleDDot = 0.0;
    }
 
