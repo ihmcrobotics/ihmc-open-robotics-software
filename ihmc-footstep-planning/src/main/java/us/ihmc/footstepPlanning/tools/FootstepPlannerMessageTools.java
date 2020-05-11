@@ -75,6 +75,7 @@ public class FootstepPlannerMessageTools
       packet.setTranslationScaleFromGrandparentNode(parameters.getTranslationScaleFromGrandparentNode());
       packet.setMinimumFootholdPercent(parameters.getMinimumFootholdPercent());
       packet.setMinimumSurfaceInclineRadians(parameters.getMinimumSurfaceInclineRadians());
+      packet.setWiggleWhilePlanning(parameters.getWiggleWhilePlanning());
       packet.setEnableConcaveHullWiggler(parameters.getEnableConcaveHullWiggler());
       packet.setMaximumXyWiggleDistance(parameters.getMaximumXYWiggleDistance());
       packet.setMaximumYawWiggle(parameters.getMaximumYawWiggle());

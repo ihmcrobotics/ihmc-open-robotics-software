@@ -5,7 +5,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.collision.BodyCollisionData;
 import us.ihmc.footstepPlanning.graphSearch.collision.FootstepNodeBodyCollisionDetector;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
@@ -20,7 +20,7 @@ import java.util.function.UnaryOperator;
 public class FootstepNodeChecker
 {
    private final FootstepPlannerParametersReadOnly parameters;
-   private final FootstepNodeSnapper snapper;
+   private final FootstepNodeSnapAndWiggler snapper;
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepPlannerEdgeData edgeData;
 
@@ -37,7 +37,7 @@ public class FootstepNodeChecker
    private int footstepIndex = -1;
 
    public FootstepNodeChecker(FootstepPlannerParametersReadOnly parameters,
-                              SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapper snapper, FootstepPlannerEdgeData edgeData)
+                              SideDependentList<ConvexPolygon2D> footPolygons, FootstepNodeSnapAndWiggler snapper, FootstepPlannerEdgeData edgeData)
    {
       this.parameters = parameters;
       this.snapper = snapper;
@@ -71,8 +71,10 @@ public class FootstepNodeChecker
    private BipedalFootstepPlannerNodeRejectionReason isNodeValidInternal(FootstepNode candidateNode, FootstepNode stanceNode)
    {
       footstepIndex++;
-      candidateNodeSnapData.set(snapper.snapFootstepNode(candidateNode));
-      
+
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(candidateNode, parameters.getWiggleWhilePlanning());
+      candidateNodeSnapData.set(snapData);
+
       if (planarRegionsList == null || planarRegionsList.isEmpty())
       {
          return null;
@@ -85,7 +87,7 @@ public class FootstepNodeChecker
       }
 
       // Check incline
-      RigidBodyTransform snappedSoleTransform = candidateNodeSnapData.getOrComputeSnappedNodeTransform(candidateNode);
+      RigidBodyTransform snappedSoleTransform = candidateNodeSnapData.getSnappedNodeTransform(candidateNode);
       double minimumSurfaceNormalZ = Math.cos(parameters.getMinimumSurfaceInclineRadians());
       if (snappedSoleTransform.getM22() < minimumSurfaceNormalZ)
       {
@@ -142,25 +144,39 @@ public class FootstepNodeChecker
       // Check for bounding box collisions
       if (parameters.checkForBodyBoxCollisions())
       {
-         FootstepNodeSnapData stanceNodeSnapData = snapper.snapFootstepNode(stanceNode);
-
-         double candidateNodeHeight = FootstepNodeTools.getSnappedNodeHeight(candidateNode, candidateNodeSnapData.getSnapTransform());
-         double stanceNodeHeight = FootstepNodeTools.getSnappedNodeHeight(stanceNode, stanceNodeSnapData.getSnapTransform());
-         List<BodyCollisionData> collisionData = collisionDetector.checkForCollision(candidateNode,
-                                                                                     stanceNode,
-                                                                                     candidateNodeHeight,
-                                                                                     stanceNodeHeight,
-                                                                                     parameters.getNumberOfBoundingBoxChecks());
-         for (int i = 0; i < collisionData.size(); i++)
+         if (boundingBoxCollisionDetected(candidateNode, stanceNode))
          {
-            if (collisionData.get(i).isCollisionDetected())
-            {
-               return BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY;
-            }
+            return BipedalFootstepPlannerNodeRejectionReason.OBSTACLE_HITTING_BODY;
+         }
+     }
+
+      return null;
+   }
+
+   private boolean boundingBoxCollisionDetected(FootstepNode candidateNode, FootstepNode stanceNode)
+   {
+      FootstepNodeSnapData stanceNodeSnapData = snapper.snapFootstepNode(stanceNode, parameters.getWiggleWhilePlanning());
+      if (stanceNodeSnapData == null)
+      {
+         return false;
+      }
+
+      double candidateNodeHeight = FootstepNodeTools.getSnappedNodeHeight(candidateNode, candidateNodeSnapData.getSnapTransform());
+      double stanceNodeHeight = FootstepNodeTools.getSnappedNodeHeight(stanceNode, stanceNodeSnapData.getSnapTransform());
+      List<BodyCollisionData> collisionData = collisionDetector.checkForCollision(candidateNode,
+                                                                                  stanceNode,
+                                                                                  candidateNodeHeight,
+                                                                                  stanceNodeHeight,
+                                                                                  parameters.getNumberOfBoundingBoxChecks());
+      for (int i = 0; i < collisionData.size(); i++)
+      {
+         if (collisionData.get(i).isCollisionDetected())
+         {
+            return true;
          }
       }
 
-      return null;
+      return false;
    }
 
    public void setPlanarRegions(PlanarRegionsList planarRegionsList)

@@ -1,11 +1,14 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
@@ -17,34 +20,32 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 public class FootstepNodeSnappingTools
 {
    /**
-    * Computes the convex hull of the intersections of footPolygonInWorldFrame when snapped to planarRegion using
-    * snapTransform
-    *
-    * @param planarRegion
-    * @param footPolygon foot polygon in world frame
-    * @param snapTransform
-    * @return intersection polygon in region frame
+    * Computes the snapped polygon using the given snap transform
     */
-   public static ConvexPolygon2D getConvexHullOfPolygonIntersections(PlanarRegion planarRegion, ConvexPolygon2D footPolygon,
-                                                                     RigidBodyTransform snapTransform)
+   public static ConvexPolygon2D computeTransformedPolygon(ConvexPolygon2DReadOnly initialPolygon, RigidBodyTransformReadOnly transform)
+   {
+      ConvexPolygon2D footPolygonInRegionFrame = new ConvexPolygon2D();
+      Vector4D transformedVertex = new Vector4D();
+
+      for (int i = 0; i < initialPolygon.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly vertex = initialPolygon.getVertex(i);
+         transformedVertex.set(vertex.getX(), vertex.getY(), 0.0, 1.0);
+         transform.transform(transformedVertex);
+         footPolygonInRegionFrame.addVertex(transformedVertex.getX() + 1e-10, transformedVertex.getY() + 1e-10);
+      }
+
+      footPolygonInRegionFrame.update();
+      return footPolygonInRegionFrame;
+   }
+
+   /**
+    * Computes the intersection of the given polygon with the region's convex polygons
+    */
+   public static ConvexPolygon2D computeRegionIntersection(PlanarRegion planarRegion, ConvexPolygon2DReadOnly polygonInPlaneFrame)
    {
       ArrayList<ConvexPolygon2D> intersections = new ArrayList<>();
-      ConvexPolygon2D footPolygonInPlaneFrame = new ConvexPolygon2D();
-
-      RigidBodyTransform inverseSnapTransform = new RigidBodyTransform(snapTransform);
-      inverseSnapTransform.invert();
-
-      for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
-      {
-         Point2DReadOnly vertex = footPolygon.getVertex(i);
-         Vector4D transformPoint = new Vector4D(vertex.getX(), vertex.getY(), 0.0, 1.0);
-         snapTransform.transform(transformPoint);
-         transformPoint.setZ(0.0);
-         footPolygonInPlaneFrame.addVertex(transformPoint.getX() + 1e-10, transformPoint.getY() + 1e-10);
-      }
-      footPolygonInPlaneFrame.update();
-
-      planarRegion.getPolygonIntersectionsWhenProjectedVertically(footPolygonInPlaneFrame, intersections);
+      planarRegion.getPolygonIntersectionsWhenProjectedVertically(polygonInPlaneFrame, intersections);
       return getConvexHull(intersections);
    }
 
