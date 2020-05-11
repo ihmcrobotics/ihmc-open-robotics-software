@@ -8,6 +8,7 @@ import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningMo
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.ROS2PlanarRegionsInput;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -64,6 +65,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final StateMachine<LookAndStepBehaviorState, State> stateMachine;
    private final PausablePeriodicThread mainThread;
    private final RemoteREAInterface rea;
+   private final ROS2PlanarRegionsInput combinedRegionsInput;
    private final RemoteEnvironmentMapInterface environmentMap;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final RemoteHumanoidRobotInterface robot;
@@ -84,6 +86,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    {
       this.helper = helper;
       rea = helper.getOrCreateREAInterface();
+      combinedRegionsInput = helper.createPlanarRegionsInput("");
       environmentMap = helper.getOrCreateEnvironmentMapInterface();
       robot = helper.getOrCreateRobotInterface();
       operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
@@ -97,7 +100,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
 
       EnumBasedStateMachineFactory<LookAndStepBehaviorState> stateMachineFactory = new EnumBasedStateMachineFactory<>(LookAndStepBehaviorState.class);
-      stateMachineFactory.addTransition(LIDAR, ACQUIRE_PATH, this::transitionFromAquirePath);
+      stateMachineFactory.addTransition(LIDAR, ACQUIRE_PATH, this::transitionFromLidar);
       stateMachineFactory.addTransition(ACQUIRE_PATH, STEREO, this::transitionFromAquirePath);
       stateMachineFactory.addTransition(STEREO, BODY_PLAN, this::transitionFromPercept);
       stateMachineFactory.addTransition(STEREO, FOOTSTEP_PLAN, this::transitionFromPercept);
@@ -132,10 +135,16 @@ public class LookAndStepBehavior implements BehaviorInterface
       LogTools.debug("{} -> {}", from == null ? null : from.name(), to.name());
    }
 
-   private boolean transitionFromLidarPercept()
+   private boolean transitionFromLidar()
    {
-      // lidar regions not empty
 
+
+      // lidar regions not empty
+      boolean notEmpty = !combinedRegionsInput.getLatest().getNumberOfConvexPolygons().isEmpty();
+
+      helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
+
+      return notEmpty;
    }
 
    private boolean transitionFromAquirePath()
