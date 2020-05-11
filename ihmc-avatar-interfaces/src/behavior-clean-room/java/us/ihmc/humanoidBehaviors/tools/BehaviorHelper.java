@@ -1,7 +1,10 @@
 package us.ihmc.humanoidBehaviors.tools;
 
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.ROS2PlanarRegionsInput;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -136,6 +139,15 @@ public class BehaviorHelper
       TypedNotification<K> typedNotification = new TypedNotification<>();
       createUICallback(topic, message -> typedNotification.add(message));
       return typedNotification;
+   }
+
+   // ROS 2 Methods:
+
+   public ROS2PlanarRegionsInput createPlanarRegionsInput(String specifier)
+   {
+      String lidarRegionsTopic = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE + specifier, ROS2Tools.ROS2TopicQualifier.OUTPUT)
+                                          .generateTopicName(PlanarRegionsListMessage.class);
+      return new ROS2PlanarRegionsInput(managedROS2Node, PlanarRegionsListMessage.class, lidarRegionsTopic);
    }
 
    // Thread and Schedule Methods:
