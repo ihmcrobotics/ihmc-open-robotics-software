@@ -74,7 +74,7 @@ public class FourBarDiagonal
    public double getMaxLength()
    {
       if (Double.isNaN(maxLength))
-         FourBarTools.updateDiagonalMaxLength(this);
+         FourBarTools.updateMaxLength(this);
       return maxLength;
    }
 
