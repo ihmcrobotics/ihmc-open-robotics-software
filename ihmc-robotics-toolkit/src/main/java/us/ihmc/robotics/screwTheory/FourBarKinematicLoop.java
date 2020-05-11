@@ -20,6 +20,7 @@ import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.kinematics.fourbar.FourBar;
 import us.ihmc.robotics.kinematics.fourbar.FourBarAngle;
+import us.ihmc.robotics.kinematics.fourbar.FourBarInterface;
 
 public class FourBarKinematicLoop
 {
@@ -52,7 +53,7 @@ public class FourBarKinematicLoop
    private final PassiveRevoluteJoint passiveJointB, passiveJointC, passiveJointD, fourBarOutputJoint;
    private final Vector3D jointDInJointABeforeFrame;
 
-   private final FourBar fourBarCalculator;
+   private final FourBarInterface fourBarCalculator;
 
    private final FourBarKinematicLoopJacobianSolver fourBarJacobianSolver;
    private final DMatrixRMaj columnJacobian = new DMatrixRMaj(6, 1);
@@ -236,7 +237,7 @@ public class FourBarKinematicLoop
       }
    }
 
-   private FourBar createFourBarCalculator(FrameVector2D vectorBCProjected, FrameVector2D vectorCDProjected, FrameVector2D vectorDAProjected,
+   private FourBarInterface createFourBarCalculator(FrameVector2D vectorBCProjected, FrameVector2D vectorCDProjected, FrameVector2D vectorDAProjected,
                                                      FrameVector2D vectorABProjected)
    {
       double masterLinkAB = vectorABProjected.length();

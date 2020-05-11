@@ -1,9 +1,14 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
+/**
+ * Represents one of the two diagonals of a four bar linkage.
+ * <p>
+ * The length of a diagonal depends on the state of the four bar linkage.
+ * </p>
+ */
 public class FourBarDiagonal
 {
    private final String name;
-
    private double length;
    private double lengthDot;
    private double lengthDDot;
@@ -11,11 +16,23 @@ public class FourBarDiagonal
    private FourBarVertex start, end;
    private FourBarDiagonal other;
 
+   /**
+    * Creates a new diagonal given a human readable name.
+    * 
+    * @param name the name of this diagonal.
+    */
    FourBarDiagonal(String name)
    {
       this.name = name;
    }
 
+   /**
+    * Initializes the data structure of the four bar linkage.
+    * 
+    * @param start the vertex from which this diagonal starts.
+    * @param end   the vertex at which this diagonal ends.
+    * @param other the other diagonal of the four bar linkage.
+    */
    void setup(FourBarVertex start, FourBarVertex end, FourBarDiagonal other)
    {
       this.start = start;
@@ -23,11 +40,18 @@ public class FourBarDiagonal
       this.other = other;
    }
 
+   /**
+    * Assuming the length of each side of the four bar linkage has been set, this method calculates and
+    * updates the maximum length that this diagonal can reach.
+    */
    protected void updateMaxLength()
    {
       FourBarTools.updateMaxLength(this);
    }
 
+   /**
+    * Clears the internal state.
+    */
    public void setToNaN()
    {
       length = Double.NaN;
@@ -36,46 +60,93 @@ public class FourBarDiagonal
       maxLength = Double.NaN;
    }
 
-   public void setLength(double length)
+   /**
+    * Sets the current length of this diagonal.
+    * 
+    * @param length the new diagonal length.
+    */
+   void setLength(double length)
    {
       this.length = length;
    }
 
-   public void setLengthDot(double lengthDot)
+   /**
+    * Sets the first time-derivative of this diagonal's length.
+    * 
+    * @param lengthDot the rate of change of the length.
+    */
+   void setLengthDot(double lengthDot)
    {
       this.lengthDot = lengthDot;
    }
 
+   /**
+    * Sets the second time-derivative of this diagonal's length.
+    * 
+    * @param lengthDDot the length second time-derivative.
+    */
    public void setLengthDDot(double lengthDDot)
    {
       this.lengthDDot = lengthDDot;
    }
 
-   public void setMaxLength(double maxLength)
+   /**
+    * Sets the maximum length that this diagonal can reach.
+    * 
+    * @param maxLength the maximum length for this diagonal.
+    */
+   void setMaxLength(double maxLength)
    {
       this.maxLength = maxLength;
    }
 
+   /**
+    * Gets the short name for this diagonal.
+    * 
+    * @return this diagonal's name.
+    */
    public String getName()
    {
       return name;
    }
 
+   /**
+    * Gets the current length of this diagonal or {@link Double#NaN} if it has not been computed yet.
+    * 
+    * @return the length of this diagonal.
+    */
    public double getLength()
    {
       return length;
    }
 
+   /**
+    * Gets the current value of the first time-derivative of the length of this diagonal or
+    * {@link Double#NaN} if it has not been computed yet.
+    * 
+    * @return the value of the first time-derivative of the length of this diagonal.
+    */
    public double getLengthDot()
    {
       return lengthDot;
    }
 
+   /**
+    * Gets the current value of the second time-derivative of the length of this diagonal or
+    * {@link Double#NaN} if it has not been computed yet.
+    * 
+    * @return the value of the second time-derivative of the length of this diagonal.
+    */
    public double getLengthDDot()
    {
       return lengthDDot;
    }
 
+   /**
+    * Gets the maximum length this diagonal can reach.
+    * 
+    * @return the value of the maximum length for this diagonal.
+    */
    public double getMaxLength()
    {
       if (Double.isNaN(maxLength))
@@ -83,16 +154,31 @@ public class FourBarDiagonal
       return maxLength;
    }
 
+   /**
+    * Gets the vertex from which this diagonal starts.
+    * 
+    * @return the start vertex.
+    */
    public FourBarVertex getStart()
    {
       return start;
    }
 
+   /**
+    * Gets the vertex at which this diagonal ends.
+    * 
+    * @return the end vertex.
+    */
    public FourBarVertex getEnd()
    {
       return end;
    }
 
+   /**
+    * Gets the other diagonal of the four bar linkage.
+    * 
+    * @return the other diagonal.
+    */
    public FourBarDiagonal getOther()
    {
       return other;

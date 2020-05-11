@@ -5,8 +5,16 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 /**
+ * {@link FourBar} implements the math for working with a convex four bar linkage:
+ * <ul>
+ * <li>the full state of the linkage can be calculated from the angle, velocity, and acceleration at
+ * one of its vertices.
+ * <li>this implementation constrains the four bar linkage to remain convex. The limits of the
+ * convex configuration set can be accessed by reading the min and max angles at any vertex.
+ * </ul>
+ * <p>
  * Representation of the four bar with name correspondences:
- * 
+ *
  * <pre>
  *        DA
  *    D--------A
@@ -21,7 +29,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
  *    C--------B
  *        BC
  * </pre>
- * 
+ *
  * Angle name convention:
  * <ul>
  * <li>Inner angle at vertex A: DAB
@@ -29,8 +37,9 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
  * <li>Inner angle at vertex C: BCD
  * <li>Inner angle at vertex D: CDA
  * </ul>
+ * </p>
  */
-public class FourBar
+public class FourBar implements FourBarInterface
 {
    private final FourBarVertex A = new FourBarVertex("A");
    private final FourBarVertex B = new FourBarVertex("B");
@@ -46,6 +55,11 @@ public class FourBar
    private final FourBarDiagonal AC = new FourBarDiagonal("AC");
    private final FourBarDiagonal BD = new FourBarDiagonal("BD");
 
+   /**
+    * Created a new four bar. The new instance needs to be configured.
+    *
+    * @see #setup(Point2DReadOnly, Point2DReadOnly, Point2DReadOnly, Point2DReadOnly)
+    */
    public FourBar()
    {
       A.setup(DA, AB, AC);
@@ -62,6 +76,12 @@ public class FourBar
       BD.setup(B, D, AC);
    }
 
+   /**
+    * {@inheritDoc}
+    * 
+    * @throws UnsupportedOperationException if the resulting four bar linkage is not fully convex.
+    */
+   @Override
    public void setup(Point2DReadOnly A, Point2DReadOnly B, Point2DReadOnly C, Point2DReadOnly D)
    {
       setSideLengths(A.distance(B), B.distance(C), C.distance(D), D.distance(A));
@@ -76,22 +96,18 @@ public class FourBar
          throw new UnsupportedOperationException("The four-bar is concave at the vertex D.");
    }
 
-   public void setToNaN()
-   {
-      A.setToNaN();
-      B.setToNaN();
-      C.setToNaN();
-      D.setToNaN();
-
-      AB.setToNaN();
-      BC.setToNaN();
-      CD.setToNaN();
-      DA.setToNaN();
-
-      AC.setToNaN();
-      BD.setToNaN();
-   }
-
+   /**
+    * Sets up this four bar linkage given its 4 side lengths.
+    * <p>
+    * The state of this four bar linkage is cleared, i.e. angles, lengths, and their derivatives are
+    * cleared and need to be update using one of the update methods.
+    * </p>
+    *
+    * @param AB the length of the side joining the vertices A and B.
+    * @param BC the length of the side joining the vertices B and C.
+    * @param CD the length of the side joining the vertices C and D.
+    * @param DA the length of the side joining the vertices D and A.
+    */
    public void setSideLengths(double AB, double BC, double CD, double DA)
    {
       setToNaN();
@@ -101,198 +117,88 @@ public class FourBar
       this.DA.setLength(DA);
    }
 
-   /**
-    * <p>
-    * Updates internally: all the angles and diagonal lengths.
-    * </p>
-    * 
-    * @param source
-    * @param angle
-    * @return
-    */
+   @Override
    public Bound update(FourBarAngle source, double angle)
    {
       return FourBarTools.update(vertices[source.ordinal()], angle);
    }
 
+   @Override
    public Bound update(FourBarAngle source, double angle, double angleDot)
    {
       return FourBarTools.update(vertices[source.ordinal()], angle, angleDot);
    }
 
+   @Override
    public Bound update(FourBarAngle source, double angle, double angleDot, double angleDDot)
    {
       return FourBarTools.update(vertices[source.ordinal()], angle, angleDot, angleDDot);
    }
 
+   @Override
    public FourBarVertex getVertexA()
    {
       return A;
    }
 
+   @Override
    public FourBarVertex getVertexB()
    {
       return B;
    }
 
+   @Override
    public FourBarVertex getVertexC()
    {
       return C;
    }
 
+   @Override
    public FourBarVertex getVertexD()
    {
       return D;
    }
 
+   @Override
+   public FourBarVertex getVertex(FourBarAngle angle)
+   {
+      return vertices[angle.ordinal()];
+   }
+
+   @Override
    public FourBarEdge getEdgeAB()
    {
       return AB;
    }
 
+   @Override
    public FourBarEdge getEdgeBC()
    {
       return BC;
    }
 
+   @Override
    public FourBarEdge getEdgeCD()
    {
       return CD;
    }
 
+   @Override
    public FourBarEdge getEdgeDA()
    {
       return DA;
    }
 
+   @Override
    public FourBarDiagonal getDiagonalAC()
    {
       return AC;
    }
 
+   @Override
    public FourBarDiagonal getDiagonalBD()
    {
       return BD;
-   }
-
-   public double getAngleDAB()
-   {
-      return getVertexA().getAngle();
-   }
-
-   public double getAngleABC()
-   {
-      return getVertexB().getAngle();
-   }
-
-   public double getAngleBCD()
-   {
-      return getVertexC().getAngle();
-   }
-
-   public double getAngleCDA()
-   {
-      return getVertexD().getAngle();
-   }
-
-   public double getAngleDtDAB()
-   {
-      return getVertexA().getAngleDot();
-   }
-
-   public double getAngleDtABC()
-   {
-      return getVertexB().getAngleDot();
-   }
-
-   public double getAngleDtBCD()
-   {
-      return getVertexC().getAngleDot();
-   }
-
-   public double getAngleDtCDA()
-   {
-      return getVertexD().getAngleDot();
-   }
-
-   public double getAngleDt2DAB()
-   {
-      return getVertexA().getAngleDDot();
-   }
-
-   public double getAngleDt2ABC()
-   {
-      return getVertexB().getAngleDDot();
-   }
-
-   public double getAngleDt2BCD()
-   {
-      return getVertexC().getAngleDDot();
-   }
-
-   public double getAngleDt2CDA()
-   {
-      return getVertexD().getAngleDDot();
-   }
-
-   public double getMinDAB()
-   {
-      return getVertexA().getMinAngle();
-   }
-
-   public double getMaxDAB()
-   {
-      return getVertexA().getMaxAngle();
-   }
-
-   public double getMinABC()
-   {
-      return getVertexB().getMinAngle();
-   }
-
-   public double getMaxABC()
-   {
-      return getVertexB().getMaxAngle();
-   }
-
-   public double getMinBCD()
-   {
-      return getVertexC().getMinAngle();
-   }
-
-   public double getMaxBCD()
-   {
-      return getVertexC().getMaxAngle();
-   }
-
-   public double getMinCDA()
-   {
-      return getVertexD().getMinAngle();
-   }
-
-   public double getMaxCDA()
-   {
-      return getVertexD().getMaxAngle();
-   }
-
-   public double getAB()
-   {
-      return getEdgeAB().getLength();
-   }
-
-   public double getBC()
-   {
-      return getEdgeBC().getLength();
-   }
-
-   public double getCD()
-   {
-      return getEdgeCD().getLength();
-   }
-
-   public double getDA()
-   {
-      return getEdgeDA().getLength();
    }
 
    @Override

@@ -1,5 +1,8 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
+/**
+ * Represents one of the four vertices of a four bar linkage.
+ */
 public class FourBarVertex
 {
    private final String name;
@@ -16,11 +19,23 @@ public class FourBarVertex
    private FourBarEdge nextEdge, previousEdge;
    private FourBarDiagonal diagonal;
 
+   /**
+    * Creates a new vertex given a human readable name.
+    * 
+    * @param name the name of this vertex.
+    */
    FourBarVertex(String name)
    {
       this.name = name;
    }
 
+   /**
+    * Initializes the data structure of the four bar linkage.
+    * 
+    * @param previousEdge the previous edge, i.e. the edge that ends at this vertex.
+    * @param nextEdge     the next edge, i.e. the edge that starts at this vertex.
+    * @param diagonal     the diagonal that starts or ends at this vertex.
+    */
    void setup(FourBarEdge previousEdge, FourBarEdge nextEdge, FourBarDiagonal diagonal)
    {
       this.nextEdge = nextEdge;
@@ -28,11 +43,17 @@ public class FourBarVertex
       this.diagonal = diagonal;
    }
 
+   /**
+    * Computes and update the lower and upper limits at this vertex.
+    */
    protected void updateLimits()
    {
       FourBarTools.updateLimits(this);
    }
 
+   /**
+    * Clears the internal state.
+    */
    public void setToNaN()
    {
       angle = Double.NaN;
@@ -42,6 +63,10 @@ public class FourBarVertex
       maxAngle = Double.NaN;
    }
 
+   /**
+    * Sets the inner angle at this vertex to {@link #getMinAngle()} and zeroes the velocity and
+    * acceleration.
+    */
    public void setToMin()
    {
       angle = getMinAngle();
@@ -49,6 +74,10 @@ public class FourBarVertex
       angleDDot = 0.0;
    }
 
+   /**
+    * Sets the inner angle at this vertex to {@link #getMaxAngle()} and zeroes the velocity and
+    * acceleration.
+    */
    public void setToMax()
    {
       angle = getMaxAngle();
@@ -56,56 +85,125 @@ public class FourBarVertex
       angleDDot = 0.0;
    }
 
-   public void setAngle(double angle)
+   /**
+    * Sets the inner angle at this vertex.
+    * 
+    * @param angle the new angle.
+    */
+   void setAngle(double angle)
    {
       this.angle = angle;
    }
 
-   public void setAngleDot(double angleDot)
+   /**
+    * Sets the value of the first time-derivative of the inner angle at this vertex.
+    * 
+    * @param angle the new angle first time-derivative.
+    */
+   void setAngleDot(double angleDot)
    {
       this.angleDot = angleDot;
    }
 
-   public void setAngleDDot(double angleDDot)
+   /**
+    * Sets the value of the second time-derivative of the inner angle at this vertex.
+    * 
+    * @param angle the new angle second time-derivative.
+    */
+   void setAngleDDot(double angleDDot)
    {
       this.angleDDot = angleDDot;
    }
 
-   public void setMinAngle(double minAngle)
+   /**
+    * Sets the lower bound for the inner angle at this vertex.
+    * 
+    * @param minAngle the minimum angle.
+    */
+   void setMinAngle(double minAngle)
    {
       this.minAngle = minAngle;
    }
 
-   public void setMaxAngle(double maxAngle)
+   /**
+    * Sets the upper bound for the inner angle at this vertex.
+    * 
+    * @param maxAngle the maximum angle.
+    */
+   void setMaxAngle(double maxAngle)
    {
       this.maxAngle = maxAngle;
    }
 
+   /**
+    * Indicates the winding at this vertex:
+    * <ul>
+    * <li>{@code true} for clockwise.
+    * <li>{@code false} for counter-clockwise.
+    * </ul>
+    * 
+    * @param convex whether the four bar linkage is convex at this vertex.
+    */
    void setConvex(boolean convex)
    {
       this.convex = convex;
    }
 
+   /**
+    * Gets the short name for this vertex.
+    * 
+    * @return this vertex's name.
+    */
    public String getName()
    {
       return name;
    }
 
+   /**
+    * Gets the current inner angle at this vertex or {@link Double#NaN} if it has not been computed
+    * yet.
+    * <p>
+    * Note: the sign of the angle depends on convex property of this vertex:
+    * <ul>
+    * <li>if {@code this.isConvex() == true}: the angle is positive and defined in [0; <i>pi</i>].
+    * <li>if {@code this.isConvex() == false}: the angle is negative and defined in [-<i>pi</i>; 0].
+    * </ul>
+    * </p>
+    * 
+    * @return the inner angle at this vertex.
+    */
    public double getAngle()
    {
       return angle;
    }
 
+   /**
+    * Gets the current value for the first time-derivative of the inner angle at this vertex or
+    * {@link Double#NaN} if it has not been computed yet.
+    * 
+    * @return the value for the first time-derivative of the inner angle at this vertex.
+    */
    public double getAngleDot()
    {
       return angleDot;
    }
 
+   /**
+    * Gets the current value for the second time-derivative of the inner angle at this vertex or
+    * {@link Double#NaN} if it has not been computed yet.
+    * 
+    * @return the value for the second time-derivative of the inner angle at this vertex.
+    */
    public double getAngleDDot()
    {
       return angleDDot;
    }
 
+   /**
+    * Gets the lower bound for the inner angle at this vertex
+    * 
+    * @return the minimum angle for this vertex.
+    */
    public double getMinAngle()
    {
       if (Double.isNaN(minAngle))
@@ -113,6 +211,11 @@ public class FourBarVertex
       return minAngle;
    }
 
+   /**
+    * Gets the upper bound for the inner angle at this vertex
+    * 
+    * @return the maximum angle for this vertex.
+    */
    public double getMaxAngle()
    {
       if (Double.isNaN(maxAngle))
@@ -120,36 +223,71 @@ public class FourBarVertex
       return maxAngle;
    }
 
+   /**
+    * Indicates whether the four bar linkage is convex or concave at this vertex.
+    * 
+    * @return {@code true} if the four bar linkage is convex at this vertex, {@code false} otherwise.
+    */
    public boolean isConvex()
    {
       return convex;
    }
 
+   /**
+    * Gets the next edge, i.e. the edge that starts at this vertex.
+    * 
+    * @return the next edge.
+    */
    public FourBarEdge getNextEdge()
    {
       return nextEdge;
    }
 
+   /**
+    * Gets the previous edge, i.e. the edge that ends at this vertex.
+    * 
+    * @return the next edge.
+    */
    public FourBarEdge getPreviousEdge()
    {
       return previousEdge;
    }
 
+   /**
+    * Gets the diagonal that starts or ends at this vertex.
+    * 
+    * @return the diagonal associated with this vertex.
+    */
    public FourBarDiagonal getDiagonal()
    {
       return diagonal;
    }
 
+   /**
+    * Quick access to get the end vertex of the next edge.
+    * 
+    * @return the next vertex.
+    */
    public FourBarVertex getNextVertex()
    {
       return nextEdge.getEnd();
    }
 
+   /**
+    * Quick access to get the start vertex of the previous edge.
+    * 
+    * @return the previous vertex.
+    */
    public FourBarVertex getPreviousVertex()
    {
       return previousEdge.getStart();
    }
 
+   /**
+    * Gets the vertex that is on the other end of the diagonal associated with this vertex.
+    * 
+    * @return the opposite vertex.
+    */
    public FourBarVertex getOppositeVertex()
    {
       return nextEdge.getNext().getEnd();
