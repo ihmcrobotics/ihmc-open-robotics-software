@@ -67,29 +67,6 @@ public class FourBarTools
       FourBarVertex C = vertex.getOppositeVertex();
       FourBarVertex D = vertex.getPreviousVertex();
 
-      if (limit == Bound.MIN)
-      {
-         if (angleDot <= 0.0)
-         {
-            A.setAngleDot(0.0);
-            B.setAngleDot(0.0);
-            C.setAngleDot(0.0);
-            D.setAngleDot(0.0);
-            return limit;
-         }
-      }
-      else if (limit == Bound.MAX)
-      {
-         if (angleDot >= 0.0)
-         {
-            A.setAngleDot(0.0);
-            B.setAngleDot(0.0);
-            C.setAngleDot(0.0);
-            D.setAngleDot(0.0);
-            return limit;
-         }
-      }
-
       FourBarEdge ABEdge = A.getNextEdge();
       FourBarEdge BCEdge = B.getNextEdge();
       FourBarEdge CDEdge = C.getNextEdge();
@@ -112,7 +89,7 @@ public class FourBarTools
       B.setAngleDot(angleDtDBA + angleDtDBC);
       D.setAngleDot(-A.getAngleDot() - B.getAngleDot() - C.getAngleDot());
 
-      return null;
+      return limit;
    }
 
    public static Bound update(FourBarVertex vertex, double angle, double angleDot, double angleDDot)
@@ -123,29 +100,6 @@ public class FourBarTools
       FourBarVertex B = vertex.getNextVertex();
       FourBarVertex C = vertex.getOppositeVertex();
       FourBarVertex D = vertex.getPreviousVertex();
-
-      if (limit == Bound.MIN)
-      {
-         if (angleDot <= 0.0)
-         {
-            A.setAngleDDot(0.0);
-            B.setAngleDDot(0.0);
-            C.setAngleDDot(0.0);
-            D.setAngleDDot(0.0);
-            return limit;
-         }
-      }
-      else if (limit == Bound.MAX)
-      {
-         if (angleDot >= 0.0)
-         {
-            A.setAngleDDot(0.0);
-            B.setAngleDDot(0.0);
-            C.setAngleDDot(0.0);
-            D.setAngleDDot(0.0);
-            return limit;
-         }
-      }
 
       FourBarEdge ABEdge = A.getNextEdge();
       FourBarEdge BCEdge = B.getNextEdge();
@@ -171,7 +125,7 @@ public class FourBarTools
       B.setAngleDDot(angleDt2DBA + angleDt2DBC);
       D.setAngleDDot(-A.getAngleDDot() - B.getAngleDDot() - C.getAngleDDot());
 
-      return null;
+      return limit;
    }
 
    public static void updateLimits(FourBarVertex vertex)

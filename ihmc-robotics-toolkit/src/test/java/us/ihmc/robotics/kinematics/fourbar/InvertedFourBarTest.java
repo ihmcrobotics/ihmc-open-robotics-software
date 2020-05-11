@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import com.sun.javafx.application.PlatformImpl;
 
+import javafx.application.Platform;
 import javafx.beans.binding.Bindings;
 import javafx.beans.binding.DoubleBinding;
 import javafx.scene.Group;
@@ -23,6 +24,8 @@ import javafx.scene.shape.Circle;
 import javafx.scene.shape.Line;
 import javafx.scene.text.Text;
 import javafx.stage.Stage;
+import us.ihmc.commons.MathTools;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.lists.ListWrappingIndexTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -37,6 +40,8 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 public class InvertedFourBarTest
 {
    private static final double EPSILON = 1.0e-9;
+   private static final double FD_DOT_EPSILON = 1.0e-4;
+   private static final double FD_DDOT_EPSILON = 1.0e-2;
    private static final int ITERATIONS = 10000;
    private static final boolean VERBOSE = false;
 
@@ -296,6 +301,268 @@ public class InvertedFourBarTest
       }
    }
 
+   @Test
+   public void testVelocityAgainstFiniteDifference()
+   {
+      Random random = new Random(4545786);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         List<Point2D> vertices = EuclidGeometryRandomTools.nextCircleBasedConvexPolygon2D(random, 10.0, 5.0, 4);
+         int flippedIndex = random.nextInt(4);
+         Collections.swap(vertices, flippedIndex, (flippedIndex + 1) % 4);
+         Point2D A = vertices.get(0);
+         Point2D B = vertices.get(1);
+         Point2D C = vertices.get(2);
+         Point2D D = vertices.get(3);
+
+         InvertedFourBar fourBar = new InvertedFourBar();
+         fourBar.setup(A, B, C, D);
+
+         FourBarAngle fourBarAngle = FourBarAngle.DAB; //EuclidCoreRandomTools.nextElementIn(random, FourBarAngle.values());
+
+         double angleStart = EuclidCoreRandomTools.nextDouble(random,
+                                                              fourBar.getVertex(fourBarAngle).getMinAngle(),
+                                                              fourBar.getVertex(fourBarAngle).getMaxAngle());
+         fourBar.update(fourBarAngle, angleStart);
+         double DAB_start = fourBar.getAngleDAB();
+         double ABC_start = fourBar.getAngleABC();
+         double BCD_start = fourBar.getAngleBCD();
+         double CDA_start = fourBar.getAngleCDA();
+
+         double AC_start = fourBar.getDiagonalAC().getLength();
+         double BD_start = fourBar.getDiagonalBD().getLength();
+
+         double angleEnd;
+         double angleMaxDelta = 0.5e-7;
+         double dt = 0.5e-6;
+
+         if (random.nextBoolean())
+         { // Going toward max
+            angleMaxDelta = Math.min(angleMaxDelta, fourBar.getVertex(fourBarAngle).getMaxAngle() - angleStart);
+            angleEnd = angleStart + EuclidCoreRandomTools.nextDouble(random, 0.0, angleMaxDelta);
+         }
+         else
+         { // Going toward min
+            angleMaxDelta = Math.max(-angleMaxDelta, fourBar.getVertex(fourBarAngle).getMinAngle() - angleStart);
+            angleEnd = angleStart + EuclidCoreRandomTools.nextDouble(random, angleMaxDelta, 0.0);
+         }
+
+         fourBar.update(fourBarAngle, angleEnd);
+         double DAB_end = fourBar.getAngleDAB();
+         double ABC_end = fourBar.getAngleABC();
+         double BCD_end = fourBar.getAngleBCD();
+         double CDA_end = fourBar.getAngleCDA();
+
+         double AC_end = fourBar.getDiagonalAC().getLength();
+         double BD_end = fourBar.getDiagonalBD().getLength();
+
+         double angleDot = (angleEnd - angleStart) / dt;
+
+         double expected_dtDAB = (DAB_end - DAB_start) / dt;
+         double expected_dtABC = (ABC_end - ABC_start) / dt;
+         double expected_dtBCD = (BCD_end - BCD_start) / dt;
+         double expected_dtCDA = (CDA_end - CDA_start) / dt;
+
+         double expected_dtAC = (AC_end - AC_start) / dt;
+         double expected_dtBD = (BD_end - BD_start) / dt;
+
+         if (VERBOSE)
+            System.out.printf("Expected:\n\tangleDots [DAB=%f, ABC=%f, BCD=%f, CDA=%f]\n\tdiagonal lengthDots [AC=%f, BD=%f]\n",
+                              expected_dtDAB,
+                              expected_dtABC,
+                              expected_dtBCD,
+                              expected_dtCDA,
+                              expected_dtAC,
+                              expected_dtBD);
+
+         fourBar.update(fourBarAngle, angleStart, angleDot);
+
+         assertEqualsDynEpsilon(expected_dtDAB, fourBar.getAngleDtDAB(), FD_DOT_EPSILON, "Iteration= " + i);
+         assertEqualsDynEpsilon(expected_dtABC, fourBar.getAngleDtABC(), FD_DOT_EPSILON, "Iteration= " + i);
+         assertEqualsDynEpsilon(expected_dtBCD, fourBar.getAngleDtBCD(), FD_DOT_EPSILON, "Iteration= " + i);
+         assertEqualsDynEpsilon(expected_dtCDA, fourBar.getAngleDtCDA(), FD_DOT_EPSILON, "Iteration= " + i);
+         assertEqualsDynEpsilon(expected_dtAC, fourBar.getDiagonalAC().getLengthDot(), FD_DOT_EPSILON, "Iteration= " + i);
+         assertEqualsDynEpsilon(expected_dtBD, fourBar.getDiagonalBD().getLengthDot(), FD_DOT_EPSILON, "Iteration= " + i);
+      }
+   }
+
+   @Test
+   public void testAccelerationAgainstFiniteDifference()
+   {
+      Random random = new Random(4545786);
+
+      for (int i = 0; i < ITERATIONS; i++)
+      {
+         List<Point2D> vertices = EuclidGeometryRandomTools.nextCircleBasedConvexPolygon2D(random, 10.0, 5.0, 4);
+         int flippedIndex = random.nextInt(4);
+         Collections.swap(vertices, flippedIndex, (flippedIndex + 1) % 4);
+         Point2D A = vertices.get(0);
+         Point2D B = vertices.get(1);
+         Point2D C = vertices.get(2);
+         Point2D D = vertices.get(3);
+
+         InvertedFourBar fourBar = new InvertedFourBar();
+         fourBar.setup(A, B, C, D);
+
+         FourBarAngle fourBarAngle = FourBarAngle.DAB; //EuclidCoreRandomTools.nextElementIn(random, FourBarAngle.values());
+
+         double dt = 1.0e-6;
+
+         double angleStart = EuclidCoreRandomTools.nextDouble(random,
+                                                              fourBar.getVertex(fourBarAngle).getMinAngle(),
+                                                              fourBar.getVertex(fourBarAngle).getMaxAngle());
+         double angleEnd;
+         double angleDotStart;
+         double angleDotEnd;
+         double angleDDot;
+         do
+         {
+            double angleDotDelta = EuclidCoreRandomTools.nextDouble(random, 1.0e-6);
+            angleDotStart = EuclidCoreRandomTools.nextDouble(random, 0.5);
+            angleDotEnd = angleDotStart + angleDotDelta;
+            angleDDot = angleDotDelta / dt;
+            angleEnd = angleStart + (angleDotStart + 0.5 * angleDotDelta) * dt;
+         }
+         while (angleEnd > fourBar.getVertex(fourBarAngle).getMaxAngle() || angleEnd < fourBar.getVertex(fourBarAngle).getMinAngle());
+
+         fourBar.update(fourBarAngle, angleStart, angleDotStart);
+         double dtDAB_start = fourBar.getAngleDtDAB();
+         double dtABC_start = fourBar.getAngleDtABC();
+         double dtBCD_start = fourBar.getAngleDtBCD();
+         double dtCDA_start = fourBar.getAngleDtCDA();
+
+         double dtAC_start = fourBar.getDiagonalAC().getLengthDot();
+         double dtBD_start = fourBar.getDiagonalBD().getLengthDot();
+
+         fourBar.update(fourBarAngle, angleEnd, angleDotEnd);
+         double dtDAB_end = fourBar.getAngleDtDAB();
+         double dtABC_end = fourBar.getAngleDtABC();
+         double dtBCD_end = fourBar.getAngleDtBCD();
+         double dtCDA_end = fourBar.getAngleDtCDA();
+
+         double dtAC_end = fourBar.getDiagonalAC().getLengthDot();
+         double dtBD_end = fourBar.getDiagonalBD().getLengthDot();
+
+         double expected_dt2DAB = (dtDAB_end - dtDAB_start) / dt;
+         double expected_dt2ABC = (dtABC_end - dtABC_start) / dt;
+         double expected_dt2BCD = (dtBCD_end - dtBCD_start) / dt;
+         double expected_dt2CDA = (dtCDA_end - dtCDA_start) / dt;
+
+         double expected_dt2AC = (dtAC_end - dtAC_start) / dt;
+         double expected_dt2BD = (dtBD_end - dtBD_start) / dt;
+
+         if (Math.abs(expected_dt2AC) > 1000.0 || Math.abs(expected_dt2BD) > 1000.0)
+         {
+            i--;
+            continue;
+         }
+
+         if (VERBOSE)
+            System.out.printf("Expected:\n\tangleDDots [DAB=%f, ABC=%f, BCD=%f, CDA=%f]\n\tdiagonal lengthDDots [AC=%f, BD=%f]\n",
+                              expected_dt2DAB,
+                              expected_dt2ABC,
+                              expected_dt2BCD,
+                              expected_dt2CDA,
+                              expected_dt2AC,
+                              expected_dt2BD);
+
+         fourBar.update(fourBarAngle, angleStart, angleDotStart, angleDDot);
+
+         assertEqualsDynEpsilon(expected_dt2DAB, fourBar.getAngleDt2DAB(), FD_DDOT_EPSILON, "Iteration= " + i);
+         assertEqualsDynEpsilon(expected_dt2ABC, fourBar.getAngleDt2ABC(), FD_DDOT_EPSILON, "Iteration= " + i);
+         assertEqualsDynEpsilon(expected_dt2BCD, fourBar.getAngleDt2BCD(), FD_DDOT_EPSILON, "Iteration= " + i);
+         assertEqualsDynEpsilon(expected_dt2CDA, fourBar.getAngleDt2CDA(), FD_DDOT_EPSILON, "Iteration= " + i);
+         assertEqualsDynEpsilon(expected_dt2AC, fourBar.getDiagonalAC().getLengthDDot(), FD_DDOT_EPSILON, "Iteration= " + i);
+         assertEqualsDynEpsilon(expected_dt2BD, fourBar.getDiagonalBD().getLengthDDot(), FD_DDOT_EPSILON, "Iteration= " + i);
+      }
+   }
+
+   private void assertEqualsDynEpsilon(double expected, double actual, double epsilon, String messagePrefix)
+   {
+      double dynEspilon = epsilon * Math.max(1.0, Math.abs(expected));
+      String errorMessage = "rror= " + +Math.abs(expected - actual) + ", epsilon= " + dynEspilon;
+      if (messagePrefix == null || messagePrefix.isEmpty())
+         messagePrefix = "E" + errorMessage;
+      else
+         messagePrefix += ", e" + errorMessage;
+
+      assertEquals(expected, actual, dynEspilon, messagePrefix);
+   }
+
+   @Test
+   public void testAccelerationsWithRandomQuadrilateral()
+   {
+      double eps = 1.0e-5;
+      Random random = new Random(1984L);
+      InvertedFourBar fourBar;
+
+      double DAB_t0 = 0.0, DAB_tf = 0.0, DAB_tj = 0.0;
+      double dDAB_t0 = 0.0, dDAB_tf = 0.0, dDAB_tj = 0.0;
+      double ddDAB = 0.0;
+
+      double ABC_t0 = 0.0, CDA_t0 = 0.0, BCD_t0 = 0.0;
+      double ABC_next_tj = 0.0, CDA_next_tj = 0.0, BCD_next_tj = 0.0;
+      double ABC_numerical_tf = 0.0, CDA_numerical_tf = 0.0, BCD_numerical_tf = 0.0;
+      double ABC_fourbar_tf = 0.0, CDA_fourbar_tf = 0.0, BCD_fourbar_tf = 0.0;
+
+      int nSteps = 10000;
+      double T = 0.001, deltaT = T / (nSteps - 1.0);
+
+      for (int i = 0; i < 50; i++)
+      {
+         List<Point2D> vertices = EuclidGeometryRandomTools.nextCircleBasedConvexPolygon2D(random, 10.0, 5.0, 4);
+         int flippedIndex = random.nextInt(4);
+         Collections.swap(vertices, flippedIndex, (flippedIndex + 1) % 4);
+         Point2D A = vertices.get(0);
+         Point2D B = vertices.get(1);
+         Point2D C = vertices.get(2);
+         Point2D D = vertices.get(3);
+
+         fourBar = new InvertedFourBar();
+         fourBar.setup(A, B, C, D);
+
+         DAB_t0 = RandomNumbers.nextDouble(random, fourBar.getMinDAB(), fourBar.getMaxDAB());
+         DAB_tf = RandomNumbers.nextDouble(random, fourBar.getMinDAB(), fourBar.getMaxDAB());
+         dDAB_t0 = 0.0;
+         ddDAB = 2.0 * (DAB_tf - DAB_t0 - dDAB_t0 * T) / MathTools.square(T);
+         dDAB_tf = dDAB_t0 + ddDAB * T;
+
+         fourBar.update(FourBarAngle.DAB, DAB_t0, dDAB_t0);
+         ABC_t0 = fourBar.getAngleABC();
+         CDA_t0 = fourBar.getAngleCDA();
+         BCD_t0 = fourBar.getAngleBCD();
+
+         fourBar.update(FourBarAngle.DAB, DAB_tf, dDAB_tf);
+         ABC_fourbar_tf = fourBar.getAngleABC();
+         CDA_fourbar_tf = fourBar.getAngleCDA();
+         BCD_fourbar_tf = fourBar.getAngleBCD();
+
+         ABC_next_tj = ABC_t0;
+         CDA_next_tj = CDA_t0;
+         BCD_next_tj = BCD_t0;
+
+         for (int j = 0; j < nSteps - 1; j++)
+         {
+            DAB_tj = ddDAB * MathTools.square(j * deltaT) / 2.0 + dDAB_t0 * j * deltaT + DAB_t0;
+            dDAB_tj = ddDAB * j * deltaT + dDAB_t0;
+            fourBar.update(FourBarAngle.DAB, DAB_tj, dDAB_tj, ddDAB);
+
+            ABC_next_tj += fourBar.getAngleDtABC() * deltaT + fourBar.getAngleDt2ABC() * MathTools.square(deltaT) / 2.0;
+            CDA_next_tj += fourBar.getAngleDtCDA() * deltaT + fourBar.getAngleDt2CDA() * MathTools.square(deltaT) / 2.0;
+            BCD_next_tj += fourBar.getAngleDtBCD() * deltaT + fourBar.getAngleDt2BCD() * MathTools.square(deltaT) / 2.0;
+         }
+
+         ABC_numerical_tf = ABC_next_tj;
+         CDA_numerical_tf = CDA_next_tj;
+         BCD_numerical_tf = BCD_next_tj;
+
+         assertEquals(ABC_numerical_tf, ABC_fourbar_tf, eps);
+         assertEquals(CDA_numerical_tf, CDA_fourbar_tf, eps);
+         assertEquals(BCD_numerical_tf, BCD_fourbar_tf, eps);
+      }
+   }
+
    private static class Viewer
    {
       double span = 10.0;
@@ -316,6 +583,16 @@ public class InvertedFourBarTest
       public void waitUntilClosed() throws InterruptedException
       {
          countDownLatch.await();
+      }
+
+      public DoubleBinding yPositionProperty(double span, Point2D center, Scene scene, Point2DReadOnly vertex)
+      {
+         return Bindings.multiply(0.5 - (vertex.getY() - center.getY()) / span, scene.heightProperty());
+      }
+
+      public DoubleBinding xPositionProperty(double span, Point2D center, Scene scene, Point2DReadOnly vertex)
+      {
+         return Bindings.multiply(0.5 + (vertex.getX() - center.getX()) / span, scene.widthProperty());
       }
    }
 
@@ -342,11 +619,6 @@ public class InvertedFourBarTest
       private Point2DReadOnly vertex;
       private String name;
       private Color color;
-      private String strokeSyle;
-
-      public VertexGraphics()
-      {
-      }
 
       public VertexGraphics(Point2DReadOnly vertex, String name, Color color)
       {
@@ -394,7 +666,7 @@ public class InvertedFourBarTest
 
    public static void draw(Viewer viewer, VertexGraphics... vertices) throws InterruptedException
    {
-      PlatformImpl.runLater(() ->
+      Platform.runLater(() ->
       {
          Group root = viewer.root;
          Scene scene = viewer.scene;
@@ -411,8 +683,8 @@ public class InvertedFourBarTest
 
             Text text = new Text(vertex.name);
             text.setStroke(vertex.color);
-            DoubleBinding xPositionProperty = xPositionProperty(viewer.span, viewer.center, scene, vertex);
-            DoubleBinding yPositionProperty = yPositionProperty(viewer.span, viewer.center, scene, vertex);
+            DoubleBinding xPositionProperty = viewer.xPositionProperty(viewer.span, viewer.center, scene, vertex);
+            DoubleBinding yPositionProperty = viewer.yPositionProperty(viewer.span, viewer.center, scene, vertex);
             if (moveLeft)
                xPositionProperty = xPositionProperty.subtract(15.0);
             else if (moveRight)
@@ -433,10 +705,10 @@ public class InvertedFourBarTest
             VertexGraphics nextVertex = vertices[(i + 1) % 4];
 
             Line line = new Line();
-            line.startXProperty().bind(xPositionProperty(viewer.span, viewer.center, scene, vertex));
-            line.startYProperty().bind(yPositionProperty(viewer.span, viewer.center, scene, vertex));
-            line.endXProperty().bind(xPositionProperty(viewer.span, viewer.center, scene, nextVertex));
-            line.endYProperty().bind(yPositionProperty(viewer.span, viewer.center, scene, nextVertex));
+            line.startXProperty().bind(viewer.xPositionProperty(viewer.span, viewer.center, scene, vertex));
+            line.startYProperty().bind(viewer.yPositionProperty(viewer.span, viewer.center, scene, vertex));
+            line.endXProperty().bind(viewer.xPositionProperty(viewer.span, viewer.center, scene, nextVertex));
+            line.endYProperty().bind(viewer.yPositionProperty(viewer.span, viewer.center, scene, nextVertex));
             line.setStrokeWidth(2.0);
             line.setStroke(vertex.color.interpolate(nextVertex.color, 0.5));
             root.getChildren().add(line);
@@ -447,21 +719,11 @@ public class InvertedFourBarTest
             VertexGraphics vertex = vertices[i];
 
             Circle circle = new Circle(5.0);
-            circle.centerXProperty().bind(xPositionProperty(viewer.span, viewer.center, scene, vertex));
-            circle.centerYProperty().bind(yPositionProperty(viewer.span, viewer.center, scene, vertex));
+            circle.centerXProperty().bind(viewer.xPositionProperty(viewer.span, viewer.center, scene, vertex));
+            circle.centerYProperty().bind(viewer.yPositionProperty(viewer.span, viewer.center, scene, vertex));
             circle.setFill(vertex.color);
             root.getChildren().add(circle);
          }
       });
-   }
-
-   public static DoubleBinding yPositionProperty(double span, Point2D center, Scene scene, Point2DReadOnly vertex)
-   {
-      return Bindings.multiply(0.5 - (vertex.getY() - center.getY()) / span, scene.heightProperty());
-   }
-
-   public static DoubleBinding xPositionProperty(double span, Point2D center, Scene scene, Point2DReadOnly vertex)
-   {
-      return Bindings.multiply(0.5 + (vertex.getX() - center.getX()) / span, scene.widthProperty());
    }
 }

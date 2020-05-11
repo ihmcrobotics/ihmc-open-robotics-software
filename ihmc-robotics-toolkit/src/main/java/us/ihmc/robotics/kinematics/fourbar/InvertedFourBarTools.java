@@ -172,4 +172,103 @@ public class InvertedFourBarTools
 
       return null;
    }
+
+   public static Bound update(FourBarVertex vertex, double angle, double angleDot)
+   {
+      Bound limit = update(vertex, angle);
+
+      FourBarVertex A = vertex;
+      FourBarVertex B = vertex.getNextVertex();
+      FourBarVertex C = vertex.getOppositeVertex();
+      FourBarVertex D = vertex.getPreviousVertex();
+
+      FourBarEdge ABEdge = A.getNextEdge();
+      FourBarEdge BCEdge = B.getNextEdge();
+      FourBarEdge CDEdge = C.getNextEdge();
+      FourBarEdge DAEdge = D.getNextEdge();
+      FourBarDiagonal ACDiag = A.getDiagonal();
+      FourBarDiagonal BDBiag = B.getDiagonal();
+
+      double AB = ABEdge.getLength();
+      double BC = BCEdge.getLength();
+      double CD = CDEdge.getLength();
+      double DA = DAEdge.getLength();
+      double AC = ACDiag.getLength();
+      double BD = BDBiag.getLength();
+
+      A.setAngleDot(angleDot);
+      double BDDt = DA * AB * Math.sin(angle) * angleDot / BD;
+      BDBiag.setLengthDot(BDDt);
+      C.setAngleDot(FourBarTools.angleDotWithCosineLaw(BC, CD, 0.0, BD, BDDt));
+      if (!C.isConvex())
+         C.setAngleDot(-C.getAngleDot());
+
+      double angleDtABD = FourBarTools.angleDotWithCosineLaw(AB, BD, BDDt, DA, 0.0);
+      double angleDtDBC = FourBarTools.angleDotWithCosineLaw(BC, BD, BDDt, CD, 0.0);
+
+      if (ABEdge.isCrossing())
+         angleDtABD = -angleDtABD;
+      if (BCEdge.isCrossing())
+         angleDtDBC = -angleDtDBC;
+
+      B.setAngleDot(angleDtABD + angleDtDBC);
+      if (!B.isConvex())
+         B.setAngleDot(-B.getAngleDot());
+      D.setAngleDot(-A.getAngleDot() - B.getAngleDot() - C.getAngleDot());
+
+      double ACDt = AB * BC * Math.sin(B.getAngle()) * B.getAngleDot() / AC;
+      ACDiag.setLengthDot(ACDt);
+
+      return limit;
+   }
+
+   public static Bound update(FourBarVertex vertex, double angle, double angleDot, double angleDDot)
+   {
+      Bound limit = update(vertex, angle, angleDot);
+
+      FourBarVertex A = vertex;
+      FourBarVertex B = vertex.getNextVertex();
+      FourBarVertex C = vertex.getOppositeVertex();
+      FourBarVertex D = vertex.getPreviousVertex();
+
+      FourBarEdge ABEdge = A.getNextEdge();
+      FourBarEdge BCEdge = B.getNextEdge();
+      FourBarEdge CDEdge = C.getNextEdge();
+      FourBarEdge DAEdge = D.getNextEdge();
+      FourBarDiagonal ACDiag = A.getDiagonal();
+      FourBarDiagonal BDDiag = B.getDiagonal();
+
+      double AB = ABEdge.getLength();
+      double BC = BCEdge.getLength();
+      double CD = CDEdge.getLength();
+      double DA = DAEdge.getLength();
+      double AC = ACDiag.getLength();
+      double BD = BDDiag.getLength();
+      double ACDt = ACDiag.getLengthDot();
+      double BDDt = BDDiag.getLengthDot();
+
+      A.setAngleDDot(angleDDot);
+      double BDDt2 = DA * AB / BD * (Math.cos(angle) * angleDot * angleDot + Math.sin(angle) * (angleDDot - BDDt * angleDot / BD));
+      BDDiag.setLengthDDot(BDDt2);
+      C.setAngleDDot(FourBarTools.angleDDotWithCosineLaw(BC, CD, 0.0, 0.0, BD, BDDt, BDDt2));
+      if (!C.isConvex())
+         C.setAngleDDot(-C.getAngleDDot());
+
+      double angleDt2ABD = FourBarTools.angleDDotWithCosineLaw(AB, BD, BDDt, BDDt2, DA, 0.0, 0.0);
+      double angleDt2DBC = FourBarTools.angleDDotWithCosineLaw(BC, BD, BDDt, BDDt2, CD, 0.0, 0.0);
+      if (ABEdge.isCrossing())
+         angleDt2ABD = -angleDt2ABD;
+      if (BCEdge.isCrossing())
+         angleDt2DBC = -angleDt2DBC;
+
+      B.setAngleDDot(angleDt2ABD + angleDt2DBC);
+      if (!B.isConvex())
+         B.setAngleDDot(-B.getAngleDDot());
+      D.setAngleDDot(-A.getAngleDDot() - B.getAngleDDot() - C.getAngleDDot());
+
+      double ACDt2 = AB * BC / AC * (Math.cos(B.getAngle()) * B.getAngleDot() * B.getAngleDot() + Math.sin(B.getAngle()) * (B.getAngleDDot() - ACDt * B.getAngleDot() / AC));
+      ACDiag.setLengthDDot(ACDt2);
+
+      return limit;
+   }
 }

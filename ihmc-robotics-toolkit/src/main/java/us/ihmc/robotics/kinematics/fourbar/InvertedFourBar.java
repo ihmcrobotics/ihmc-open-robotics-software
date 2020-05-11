@@ -33,7 +33,7 @@ public class InvertedFourBar
    private final FourBarEdge DA = new FourBarEdge("DA");
 
    private final FourBarDiagonal AC = new FourBarDiagonal("AC");
-   private final FourBarDiagonal BD = new FourBarDiagonal("AC");
+   private final FourBarDiagonal BD = new FourBarDiagonal("BD");
 
    public InvertedFourBar()
    {
@@ -190,12 +190,12 @@ public class InvertedFourBar
 
    public Bound update(FourBarAngle source, double angle, double angleDot)
    {
-      return FourBarTools.update(vertices[source.ordinal()], angle, angleDot);
+      return InvertedFourBarTools.update(vertices[source.ordinal()], angle, angleDot);
    }
 
    public Bound update(FourBarAngle source, double angle, double angleDot, double angleDDot)
    {
-      return FourBarTools.update(vertices[source.ordinal()], angle, angleDDot);
+      return InvertedFourBarTools.update(vertices[source.ordinal()], angle, angleDot, angleDDot);
    }
 
    public FourBarVertex getVertexA()
