@@ -23,6 +23,11 @@ public class FourBarDiagonal
       this.other = other;
    }
 
+   protected void updateMaxLength()
+   {
+      FourBarTools.updateMaxLength(this);
+   }
+
    public void setToNaN()
    {
       length = Double.NaN;
@@ -74,7 +79,7 @@ public class FourBarDiagonal
    public double getMaxLength()
    {
       if (Double.isNaN(maxLength))
-         FourBarTools.updateMaxLength(this);
+         updateMaxLength();
       return maxLength;
    }
 

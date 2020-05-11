@@ -5,6 +5,9 @@ public class FourBarEdge
    private final String name;
 
    private double length;
+   private boolean isFlipped = false;
+   private boolean crossing = false;
+
    private FourBarVertex start, end;
    private FourBarEdge nextEdge, previous;
 
@@ -31,6 +34,16 @@ public class FourBarEdge
       this.length = length;
    }
 
+   void setFlipped(boolean isFlipped)
+   {
+      this.isFlipped = isFlipped;
+   }
+
+   void setCrossing(boolean crossing)
+   {
+      this.crossing = crossing;
+   }
+
    public String getName()
    {
       return name;
@@ -39,6 +52,16 @@ public class FourBarEdge
    public double getLength()
    {
       return length;
+   }
+
+   public boolean isFlipped()
+   {
+      return isFlipped;
+   }
+
+   public boolean isCrossing()
+   {
+      return crossing;
    }
 
    public FourBarVertex getStart()
