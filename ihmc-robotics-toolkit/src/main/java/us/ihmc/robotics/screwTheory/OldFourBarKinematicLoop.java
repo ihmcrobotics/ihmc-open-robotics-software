@@ -251,7 +251,7 @@ public class OldFourBarKinematicLoop
       }
 
       FourBar fourBarCalculator = new FourBar();
-      fourBarCalculator.setSideLengths(masterLinkAB, BC, CD, DA);
+      fourBarCalculator.setup(masterLinkAB, BC, CD, DA);
 
       return fourBarCalculator;
    }

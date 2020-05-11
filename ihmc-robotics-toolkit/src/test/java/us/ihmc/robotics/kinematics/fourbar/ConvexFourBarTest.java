@@ -1,7 +1,9 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
@@ -10,9 +12,16 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
-public class FourBarTest
+/**
+ * Tests for {@link FourBar} using exclusively convex configurations.
+ */
+public class ConvexFourBarTest
 {
    private static final int ITERATIONS = 1000;
    private static final double EPSILON = 1e-7;
@@ -22,7 +31,7 @@ public class FourBarTest
    public void testSquare()
    {
       FourBar fourBar = new FourBar();
-      fourBar.setSideLengths(1.0, 1.0, 1.0, 1.0);
+      fourBar.setup(1.0, 1.0, 1.0, 1.0);
       fourBar.update(FourBarAngle.DAB, Math.PI / 2);
       assertEquals(Math.PI / 2, fourBar.getAngleDAB(), EPSILON);
       assertEquals(Math.PI / 2, fourBar.getAngleABC(), EPSILON);
@@ -40,7 +49,7 @@ public class FourBarTest
       double CD = random.nextDouble();
 
       FourBar fourBar = new FourBar();
-      fourBar.setSideLengths(AB, BC, CD, DA);
+      fourBar.setup(AB, BC, CD, DA);
       assertEquals(AB, fourBar.getAB(), EPSILON);
       assertEquals(BC, fourBar.getBC(), EPSILON);
       assertEquals(CD, fourBar.getCD(), EPSILON);
@@ -51,7 +60,7 @@ public class FourBarTest
    public void testSquareDerivatives()
    {
       FourBar fourBar = new FourBar();
-      fourBar.setSideLengths(1.0, 1.0, 1.0, 1.0);
+      fourBar.setup(1.0, 1.0, 1.0, 1.0);
       fourBar.update(FourBarAngle.DAB, Math.PI / 2, 1.0);
       assertEquals(Math.PI / 2, fourBar.getAngleDAB(), EPSILON);
       assertEquals(Math.PI / 2, fourBar.getAngleABC(), EPSILON);
@@ -67,7 +76,7 @@ public class FourBarTest
    public void testParallelogram()
    {
       FourBar fourBar = new FourBar();
-      fourBar.setSideLengths(1.0, 1.0, 1.0, 1.0);
+      fourBar.setup(1.0, 1.0, 1.0, 1.0);
       fourBar.update(FourBarAngle.DAB, Math.PI / 3, 1.0);
       assertEquals(Math.PI / 3, fourBar.getAngleDAB(), EPSILON);
       assertEquals(2 * Math.PI / 3, fourBar.getAngleABC(), EPSILON);
@@ -114,7 +123,7 @@ public class FourBarTest
          }
       }
       FourBar fourBar = new FourBar();
-      fourBar.setSideLengths(b, c, d, a);
+      fourBar.setup(b, c, d, a);
       fourBar.update(FourBarAngle.DAB, A, 0.0);
       assertEquals(A, fourBar.getAngleDAB(), EPSILON);
       assertEquals(B, fourBar.getAngleABC(), EPSILON);
@@ -146,7 +155,7 @@ public class FourBarTest
          double dBCD = -dABC;
 
          FourBar fourBar = new FourBar();
-         fourBar.setSideLengths(AB, BC, CD, AD);
+         fourBar.setup(AB, BC, CD, AD);
          fourBar.update(FourBarAngle.DAB, BAD, dBAD);
          assertEquals(BAD, fourBar.getAngleDAB(), EPSILON);
          assertEquals(ABC, fourBar.getAngleABC(), EPSILON);
@@ -192,7 +201,7 @@ public class FourBarTest
          CD = RandomNumbers.nextDouble(rand, 0.1, 2.0);
          DA = RandomNumbers.nextDouble(rand, 0.1, 2.0);
          fourBar = new FourBar();
-         fourBar.setSideLengths(AB, BC, CD, DA);
+         fourBar.setup(AB, BC, CD, DA);
          isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
          k = 0;
@@ -204,7 +213,7 @@ public class FourBarTest
             CD = RandomNumbers.nextDouble(rand, 0.1, 2.0);
             DA = RandomNumbers.nextDouble(rand, 0.1, 2.0);
             fourBar = new FourBar();
-            fourBar.setSideLengths(AB, BC, CD, DA);
+            fourBar.setup(AB, BC, CD, DA);
             isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
             k++;
@@ -304,7 +313,7 @@ public class FourBarTest
          DC = RandomNumbers.nextDouble(random, 0.1, 2.0);
          AD = RandomNumbers.nextDouble(random, 0.1, 2.0);
          fourBar = new FourBar();
-         fourBar.setSideLengths(BA, CB, DC, AD);
+         fourBar.setup(BA, CB, DC, AD);
          isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
          k = 0;
@@ -316,7 +325,7 @@ public class FourBarTest
             DC = RandomNumbers.nextDouble(random, 0.1, 2.0);
             AD = RandomNumbers.nextDouble(random, 0.1, 2.0);
             fourBar = new FourBar();
-            fourBar.setSideLengths(BA, CB, DC, AD);
+            fourBar.setup(BA, CB, DC, AD);
             isQuadrilateralOK = fourBar.getMaxDAB() - fourBar.getMinDAB() > 1.0e-5;
 
             k++;
@@ -385,7 +394,7 @@ public class FourBarTest
          double DAB = DAE + BAE, ABC = ABE + CBF, BCD = BCF + DCF, CDA = ADE + CDF;
 
          FourBar calculator = new FourBar();
-         calculator.setSideLengths(AB, BC, CD, AD);
+         calculator.setup(AB, BC, CD, AD);
 
          calculator.update(FourBarAngle.ABC, ABC);
          assertEquals(DAB, calculator.getAngleDAB(), EPSILON);
@@ -425,7 +434,7 @@ public class FourBarTest
          double BCLength = B.distance(C);
          double CDLength = C.distance(D);
          double DALength = D.distance(A);
-         calculator.setSideLengths(ABLength, BCLength, CDLength, DALength);
+         calculator.setup(ABLength, BCLength, CDLength, DALength);
 
          // Check sum of angles is 2*pi.
          // when diagonal AC is max we have: DAB=minDAB, ABC=maxABC, BCD=minBCD, CDA=maxCDA. Let's verify this:
@@ -441,5 +450,175 @@ public class FourBarTest
          double minCDA = calculator.getMinCDA();
          assertEquals(2.0 * Math.PI, maxDAB + minABC + maxBCD + minCDA, EPSILON, "Iteration " + i);
       }
+   }
+
+   @Test
+   public void testGeometry() throws Throwable
+   {
+      Random random = new Random(345);
+      FourBar fourBar = new FourBar();
+
+      for (int i = 0; i < ITERATIONS; i++)
+      { // Generate convex points that are on a random circle and occasionally making all vertices "concave".
+         List<Point2D> vertices = EuclidGeometryRandomTools.nextCircleBasedConvexPolygon2D(random, 10.0, 5.0, 4);
+         if (random.nextBoolean())
+            Collections.reverse(vertices);
+         Point2D A = vertices.get(0);
+         Point2D B = vertices.get(1);
+         Point2D C = vertices.get(2);
+         Point2D D = vertices.get(3);
+         performBasicGeometricAssertions(random, fourBar, i, A, B, C, D);
+      }
+   }
+
+   public static void performBasicGeometricAssertions(Random random, FourBar fourBar, int iteration, Point2D A, Point2D B, Point2D C, Point2D D)
+         throws InterruptedException, Throwable
+   {
+      boolean clockwise = isClockwiseOrdered(A, B, C, D);
+      fourBar.setup(A, B, C, D);
+
+      Vector2D AB = new Vector2D();
+      Vector2D BC = new Vector2D();
+      Vector2D CD = new Vector2D();
+      Vector2D DA = new Vector2D();
+
+      AB.sub(B, A);
+      BC.sub(C, B);
+      CD.sub(D, C);
+      DA.sub(A, D);
+
+      Vector2D BA = new Vector2D(AB);
+      Vector2D CB = new Vector2D(BC);
+      Vector2D DC = new Vector2D(CD);
+      Vector2D AD = new Vector2D(DA);
+      BA.negate();
+      CB.negate();
+      DC.negate();
+      AD.negate();
+
+      FourBarVertex vertexA = fourBar.getVertexA();
+      FourBarVertex vertexB = fourBar.getVertexB();
+      FourBarVertex vertexC = fourBar.getVertexC();
+      FourBarVertex vertexD = fourBar.getVertexD();
+
+      assertEquals(clockwise ? DA.cross(AB) <= 0.0 : DA.cross(AB) >= 0.0, vertexA.isConvex());
+      assertEquals(clockwise ? AB.cross(BC) <= 0.0 : AB.cross(BC) >= 0.0, vertexB.isConvex());
+      assertEquals(clockwise ? BC.cross(CD) <= 0.0 : BC.cross(CD) >= 0.0, vertexC.isConvex());
+      assertEquals(clockwise ? CD.cross(DA) <= 0.0 : CD.cross(DA) >= 0.0, vertexD.isConvex());
+
+      double expectedAB = AB.length();
+      double expectedBC = BC.length();
+      double expectedCD = CD.length();
+      double expectedDA = DA.length();
+      double expectedDAB = AD.angle(AB);
+      double expectedABC = BA.angle(BC);
+      double expectedBCD = CB.angle(CD);
+      double expectedCDA = DC.angle(DA);
+      double expectedAC = A.distance(C);
+      double expectedBD = B.distance(D);
+
+      if (!clockwise)
+      {
+         expectedDAB = -expectedDAB;
+         expectedABC = -expectedABC;
+         expectedBCD = -expectedBCD;
+         expectedCDA = -expectedCDA;
+      }
+
+      if (InvertedFourBarTest.VERBOSE)
+         System.out.printf("Expected\n\tlengths: AB=%f, BC=%f, CD=%f, DA=%f\n\tangles: DAB=%f, ABC=%f, BCD=%f, CDA=%f\n\tdiagonal lengths: AC=%f, BD=%f\n",
+                           expectedAB,
+                           expectedBC,
+                           expectedCD,
+                           expectedDA,
+                           expectedDAB,
+                           expectedABC,
+                           expectedBCD,
+                           expectedCDA,
+                           expectedAC,
+                           expectedBD);
+
+      try
+      {
+         assertTrue(vertexA.getMinAngle() <= expectedDAB,
+                    "Itertation " + iteration + ", inaccurate minDAB: valid angle: " + expectedDAB + ", computed min: " + vertexA.getMinAngle());
+         assertTrue(vertexB.getMinAngle() <= expectedABC,
+                    "Itertation " + iteration + ", inaccurate minABC: valid angle: " + expectedABC + ", computed min: " + vertexB.getMinAngle());
+         assertTrue(vertexC.getMinAngle() <= expectedBCD,
+                    "Itertation " + iteration + ", inaccurate minBCD: valid angle: " + expectedBCD + ", computed min: " + vertexC.getMinAngle());
+         assertTrue(vertexD.getMinAngle() <= expectedCDA,
+                    "Itertation " + iteration + ", inaccurate minCDA: valid angle: " + expectedCDA + ", computed min: " + vertexD.getMinAngle());
+         assertTrue(expectedDAB <= vertexA.getMaxAngle(),
+                    "Itertation " + iteration + ", inaccurate maxDAB: valid angle: " + expectedDAB + ", computed max: " + vertexA.getMaxAngle());
+         assertTrue(expectedABC <= vertexB.getMaxAngle(),
+                    "Itertation " + iteration + ", inaccurate maxABC: valid angle: " + expectedABC + ", computed max: " + vertexB.getMaxAngle());
+         assertTrue(expectedBCD <= vertexC.getMaxAngle(),
+                    "Itertation " + iteration + ", inaccurate maxBCD: valid angle: " + expectedBCD + ", computed max: " + vertexC.getMaxAngle());
+         assertTrue(expectedCDA <= vertexD.getMaxAngle(),
+                    "Itertation " + iteration + ", inaccurate maxCDA: valid angle: " + expectedCDA + ", computed max: " + vertexD.getMaxAngle());
+
+         switch (EuclidCoreRandomTools.nextElementIn(random, FourBarAngle.values()))
+         {
+            case DAB:
+               fourBar.update(FourBarAngle.DAB, expectedDAB);
+               break;
+            case ABC:
+               fourBar.update(FourBarAngle.ABC, expectedABC);
+               break;
+            case BCD:
+               fourBar.update(FourBarAngle.BCD, expectedBCD);
+               break;
+            case CDA:
+               fourBar.update(FourBarAngle.CDA, expectedCDA);
+               break;
+         }
+
+         if (InvertedFourBarTest.VERBOSE)
+            System.out.println(fourBar);
+
+         assertEquals(expectedAC, fourBar.getDiagonalAC().getLength(), InvertedFourBarTest.EPSILON, "Iteration " + iteration);
+         assertEquals(expectedBD, fourBar.getDiagonalBD().getLength(), InvertedFourBarTest.EPSILON, "Iteration " + iteration);
+
+         assertEquals(expectedDAB,
+                      vertexA.getAngle(),
+                      InvertedFourBarTest.EPSILON,
+                      "Iteration " + iteration + ", error: " + Math.abs(expectedDAB - vertexA.getAngle()));
+         assertEquals(expectedABC,
+                      vertexB.getAngle(),
+                      InvertedFourBarTest.EPSILON,
+                      "Iteration " + iteration + ", error: " + Math.abs(expectedABC - vertexB.getAngle()));
+         assertEquals(expectedBCD,
+                      vertexC.getAngle(),
+                      InvertedFourBarTest.EPSILON,
+                      "Iteration " + iteration + ", error: " + Math.abs(expectedBCD - vertexC.getAngle()));
+         assertEquals(expectedCDA,
+                      vertexD.getAngle(),
+                      InvertedFourBarTest.EPSILON,
+                      "Iteration " + iteration + ", error: " + Math.abs(expectedCDA - vertexD.getAngle()));
+      }
+      catch (Throwable e)
+      {
+         System.err.println(e.getClass().getSimpleName() + ": " + e.getMessage());
+
+         InvertedFourBarTest.Viewer viewer = InvertedFourBarTest.startupViewer();
+         viewer.updateFOV(A, B, C, D);
+         InvertedFourBarTest.draw(viewer, A, B, C, D);
+         viewer.waitUntilClosed();
+         throw e;
+      }
+   }
+
+   public static boolean isClockwiseOrdered(Point2DReadOnly A, Point2DReadOnly B, Point2DReadOnly C, Point2DReadOnly D)
+   {
+      boolean isAConvex = !EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(A, D, B);
+      boolean isBConvex = !EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(B, A, C);
+      boolean isCConvex = !EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(C, B, D);
+      boolean isDConvex = !EuclidGeometryTools.isPoint2DOnRightSideOfLine2D(D, C, A);
+
+      int convexCount = isAConvex ? 1 : 0;
+      convexCount += isBConvex ? 1 : 0;
+      convexCount += isCConvex ? 1 : 0;
+      convexCount += isDConvex ? 1 : 0;
+      return convexCount >= 2;
    }
 }
