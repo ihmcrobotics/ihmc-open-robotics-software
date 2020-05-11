@@ -6,7 +6,7 @@ import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 
-public class FourBarKinematicLoopTools
+public class OldFourBarKinematicLoopTools
 {   
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final boolean DEBUG = false;

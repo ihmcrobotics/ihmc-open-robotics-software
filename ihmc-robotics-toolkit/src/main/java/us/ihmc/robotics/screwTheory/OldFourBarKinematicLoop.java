@@ -21,7 +21,7 @@ import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.kinematics.fourbar.FourBar;
 import us.ihmc.robotics.kinematics.fourbar.FourBarAngle;
 
-public class FourBarKinematicLoop
+public class OldFourBarKinematicLoop
 {
    /*
     * @formatter:off
@@ -80,7 +80,7 @@ public class FourBarKinematicLoop
     *                                  passiveJointB, passiveJointC and jointDInJointABeforeFrame must
     *                                  form a convex quadrilateral when their joint angles are 0
     */
-   public FourBarKinematicLoop(String name, RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC,
+   public OldFourBarKinematicLoop(String name, RevoluteJoint masterJointA, PassiveRevoluteJoint passiveJointB, PassiveRevoluteJoint passiveJointC,
                                PassiveRevoluteJoint passiveJointD, Vector3DReadOnly jointDInJointABeforeFrame, boolean recomputeJointLimits)
    {
       this.name = name;
@@ -102,10 +102,10 @@ public class FourBarKinematicLoop
       FrameVector3D jointBAxis = new FrameVector3D(passiveJointB.getJointAxis());
       FrameVector3D jointCAxis = new FrameVector3D(passiveJointC.getJointAxis());
       FrameVector3D jointDAxis = new FrameVector3D(passiveJointD.getJointAxis());
-      FourBarKinematicLoopTools.checkJointAxesAreParallel(masterAxis, jointBAxis, jointCAxis, jointDAxis);
+      OldFourBarKinematicLoopTools.checkJointAxesAreParallel(masterAxis, jointBAxis, jointCAxis, jointDAxis);
 
       // Joint order
-      FourBarKinematicLoopTools.checkCorrectJointOrder(name, masterJointA, passiveJointB, passiveJointC, passiveJointD);
+      OldFourBarKinematicLoopTools.checkCorrectJointOrder(name, masterJointA, passiveJointB, passiveJointC, passiveJointD);
 
       // Go to zero configuration
       masterJointA.setQ(0.0);
@@ -132,11 +132,11 @@ public class FourBarKinematicLoop
                                                          vectorCDClosurePointProjected);
 
       // Check that the fourbar is convex in its zero angle configuration and it's orientation (CW or CCW)
-      FourBarKinematicLoopTools.checkFourBarConvexityAndOrientation(vectorABProjected,
+      OldFourBarKinematicLoopTools.checkFourBarConvexityAndOrientation(vectorABProjected,
                                                                     vectorBCProjected,
                                                                     vectorCDClosurePointProjected,
                                                                     vectorDAClosurePointProjected);
-      fourBarIsClockwise = FourBarKinematicLoopTools.checkFourBarConvexityAndOrientation(vectorABProjected,
+      fourBarIsClockwise = OldFourBarKinematicLoopTools.checkFourBarConvexityAndOrientation(vectorABProjected,
                                                                                          vectorBCProjected,
                                                                                          vectorCDProjected,
                                                                                          vectorDAProjected);
@@ -145,7 +145,7 @@ public class FourBarKinematicLoop
       fourBarCalculator = createFourBarCalculator(vectorBCProjected, vectorCDProjected, vectorDAClosurePointProjected, vectorABProjected);
 
       // Set output joint     
-      fourBarOutputJoint = FourBarKinematicLoopTools.getFourBarOutputJoint(passiveJointB, passiveJointC, passiveJointD);
+      fourBarOutputJoint = OldFourBarKinematicLoopTools.getFourBarOutputJoint(passiveJointB, passiveJointC, passiveJointD);
 
       // Jacobian
       fourBarJacobianSolver = new FourBarKinematicLoopJacobianSolver(fourBarOutputJoint);
@@ -237,7 +237,7 @@ public class FourBarKinematicLoop
    }
 
    private FourBar createFourBarCalculator(FrameVector2D vectorBCProjected, FrameVector2D vectorCDProjected, FrameVector2D vectorDAProjected,
-                                                     FrameVector2D vectorABProjected)
+                                           FrameVector2D vectorABProjected)
    {
       double masterLinkAB = vectorABProjected.length();
       double BC = vectorBCProjected.length();
