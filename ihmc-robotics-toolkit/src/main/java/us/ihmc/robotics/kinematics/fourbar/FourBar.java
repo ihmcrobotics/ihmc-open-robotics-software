@@ -4,31 +4,34 @@ import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
+/**
+ * Representation of the four bar with name correspondences:
+ * 
+ * <pre>
+ *        DA
+ *    D--------A
+ *    |\      /|
+ *    | \DB  / |
+ *    |  \  /  |
+ * CD |   \/   | AB
+ *    |   /\   |
+ *    |  /  \  |
+ *    | /AC  \ |
+ *    |/      \|
+ *    C--------B
+ *        BC
+ * </pre>
+ * 
+ * Angle name convention:
+ * <ul>
+ * <li>Inner angle at vertex A: DAB
+ * <li>Inner angle at vertex B: ABC
+ * <li>Inner angle at vertex C: BCD
+ * <li>Inner angle at vertex D: CDA
+ * </ul>
+ */
 public class FourBar
 {
-   /*
-    * @formatter:off
-    *  Representation of the four bar with name correspondences:
-    *        DA
-    *    D--------A
-    *    |\      /|
-    *    | \DB  / |
-    *    |  \  /  |
-    * CD |   \/   | AB
-    *    |   /\   |
-    *    |  /  \  |
-    *    | /AC  \ |
-    *    |/      \|
-    *    C--------B
-    *        BC
-    * Angle name convention:
-    * - Inner angle at vertex A: DAB
-    * - Inner angle at vertex B: ABC
-    * - Inner angle at vertex C: BCD
-    * - Inner angle at vertex D: CDA
-    * @formatter:on
-    */
-
    private final FourBarVertex A = new FourBarVertex("A");
    private final FourBarVertex B = new FourBarVertex("B");
    private final FourBarVertex C = new FourBarVertex("C");
