@@ -12,7 +12,6 @@ import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -40,7 +39,6 @@ import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -122,7 +120,7 @@ public class WalkingMessageHandler
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final CenterOfMassTrajectoryHandler comTrajectoryHandler;
    private final PlanarRegionsListHandler planarRegionsListHandler;
-   private final PlanarRegionHandler planarRegionStepConstraintHandler;
+   private final StepConstraintRegionHandler stepConstraintRegionHandler;
 
    private final YoBoolean offsettingXYPlanWithFootstepError = new YoBoolean("offsettingXYPlanWithFootstepError", registry);
    private final YoBoolean offsettingHeightPlanWithFootstepError = new YoBoolean("offsettingHeightPlanWithFootstepError", registry);
@@ -183,7 +181,7 @@ public class WalkingMessageHandler
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
       planarRegionsListHandler = new PlanarRegionsListHandler(statusOutputManager, registry);
-      planarRegionStepConstraintHandler = new PlanarRegionHandler(registry);
+      stepConstraintRegionHandler = new StepConstraintRegionHandler(registry);
 
       parentRegistry.addChild(registry);
    }
@@ -331,9 +329,9 @@ public class WalkingMessageHandler
       planarRegionsListHandler.handlePlanarRegionsListCommand(planarRegionsListCommand);
    }
 
-   public void handlePlanarRegionConstraint(PlanarRegionCommand planarRegionCommand)
+   public void handlePlanarRegionConstraint(StepConstraintRegionCommand stepConstraintRegionCommand)
    {
-      planarRegionStepConstraintHandler.handlePlanarRegionsListCommand(planarRegionCommand);
+      stepConstraintRegionHandler.handleStepConstraintRegionCommand(stepConstraintRegionCommand);
    }
 
    public PlanarRegionsListHandler getPlanarRegionsListHandler()
@@ -341,9 +339,9 @@ public class WalkingMessageHandler
       return planarRegionsListHandler;
    }
 
-   public PlanarRegionHandler getPlanarRegionStepConstraintHandler()
+   public StepConstraintRegionHandler getStepConstraintRegionHandler()
    {
-      return planarRegionStepConstraintHandler;
+      return stepConstraintRegionHandler;
    }
 
    public void handleAdjustFootstepCommand(AdjustFootstepCommand command)

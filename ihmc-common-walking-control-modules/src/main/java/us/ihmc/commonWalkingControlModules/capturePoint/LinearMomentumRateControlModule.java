@@ -15,7 +15,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCore
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
-import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionHandler;
+import us.ihmc.commonWalkingControlModules.messageHandlers.StepConstraintRegionHandler;
 import us.ihmc.commonWalkingControlModules.messageHandlers.PlanarRegionsListHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.CapturePointCalculator;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.MomentumOptimizationSettings;
@@ -38,7 +38,6 @@ import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.math.filters.AlphaFilteredYoVariable;
 import us.ihmc.robotics.math.filters.FilteredVelocityYoFrameVector2d;
 import us.ihmc.robotics.math.filters.RateLimitedYoFrameVector;
@@ -159,7 +158,7 @@ public class LinearMomentumRateControlModule
    private final LinearMomentumRateControlModuleOutput output = new LinearMomentumRateControlModuleOutput();
 
    private PlanarRegionsListHandler planarRegionsListHandler;
-   private PlanarRegionHandler planarRegionStepConstraintHandler;
+   private StepConstraintRegionHandler stepConstraintRegionHandler;
 
    public LinearMomentumRateControlModule(CommonHumanoidReferenceFrames referenceFrames,
                                           SideDependentList<ContactableFoot> contactableFeet,
@@ -274,9 +273,9 @@ public class LinearMomentumRateControlModule
       yoCapturePoint.setToNaN();
    }
 
-   public void setPlanarRegionStepConstraintHandler(PlanarRegionHandler planarRegionStepConstraint)
+   public void setPlanarRegionStepConstraintHandler(StepConstraintRegionHandler planarRegionStepConstraint)
    {
-      this.planarRegionStepConstraintHandler = planarRegionStepConstraint;
+      this.stepConstraintRegionHandler = planarRegionStepConstraint;
    }
 
    public void setPlanarRegionsListHandler(PlanarRegionsListHandler planarRegionsListHandler)
@@ -525,8 +524,8 @@ public class LinearMomentumRateControlModule
          icpController.setKeepCoPInsideSupportPolygon(keepCoPInsideSupportPolygon);
          if (!Double.isNaN(remainingTimeInSwingUnderDisturbance) && remainingTimeInSwingUnderDisturbance > 0.0)
             stepAdjustmentController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
-         if (planarRegionStepConstraintHandler != null && planarRegionStepConstraintHandler.hasNewPlanarRegion())
-            stepAdjustmentController.setPlanarRegionConstraint(planarRegionStepConstraintHandler.pollHasNewPlanarRegion());
+         if (stepConstraintRegionHandler != null && stepConstraintRegionHandler.hasNewStepConstraintRegion())
+            stepAdjustmentController.setStepConstraintRegion(stepConstraintRegionHandler.pollHasNewStepConstraintRegion());
       }
    }
 

@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -18,7 +19,6 @@ import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -43,7 +43,7 @@ public class EnvironmentConstraintHandler
    private final FrameConvexPolygon2D shrunkHullConstraint = new FrameConvexPolygon2D();
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
-   private PlanarRegion planarRegionToConstrainTo = null;
+   private StepConstraintRegion stepConstraintRegion = null;
 
    private final FramePoint3D projectedReachablePoint = new FramePoint3D();
    private final ConvexPolygon2D footstepPolygon = new ConvexPolygon2D();
@@ -78,27 +78,30 @@ public class EnvironmentConstraintHandler
       }
    }
 
-   public void setPlanarRegionConstraint(PlanarRegion planarRegionToConstrainTo)
+   public void setStepConstraintRegion(StepConstraintRegion stepConstraintRegion)
    {
-      this.planarRegionToConstrainTo = planarRegionToConstrainTo;
+      this.stepConstraintRegion = stepConstraintRegion;
    }
 
    public void reset()
    {
-      planarRegionToConstrainTo = null;
+      stepConstraintRegion = null;
       yoConvexHullConstraint.clear();
       yoShrunkConvexHullConstraint.clear();
    }
 
    public void setReachabilityRegion(FrameConvexPolygon2DReadOnly reachabilityRegion)
    {
-      if (planarRegionToConstrainTo == null)
+      if (stepConstraintRegion == null)
          return;
 
       reachabilityRegionInConstraintPlane.clear();
       for (int i = 0; i < reachabilityRegion.getNumberOfVertices(); i++)
       {
-         icpControlPlane.projectPointFromControlPlaneOntoPlanarRegion(worldFrame, reachabilityRegion.getVertex(i), projectedReachablePoint, planarRegionToConstrainTo);
+         icpControlPlane.projectPointFromControlPlaneOntoConstraintRegion(worldFrame,
+                                                                          reachabilityRegion.getVertex(i),
+                                                                          projectedReachablePoint,
+                                                                          stepConstraintRegion);
          reachabilityRegionInConstraintPlane.addVertex(projectedReachablePoint);
       }
       reachabilityRegionInConstraintPlane.update();
@@ -108,28 +111,27 @@ public class EnvironmentConstraintHandler
                                                     FixedFramePose3DBasics footstepPoseToPack,
                                                     List<Point2D> predictedContactPoints)
    {
-      if (planarRegionToConstrainTo == null)
+      if (stepConstraintRegion == null)
          return;
 
-      computeShrunkConvexHull(planarRegionToConstrainTo, upcomingFootstepSide, predictedContactPoints, footstepPoseToPack.getOrientation());
+      computeShrunkConvexHull(stepConstraintRegion, upcomingFootstepSide, predictedContactPoints, footstepPoseToPack.getOrientation());
 
       stepXY.set(footstepPoseToPack.getPosition());
       yoShrunkConvexHullConstraint.orthogonalProjection(stepXY);
 
-      footstepPoseToPack.getPosition().set(stepXY, planarRegionToConstrainTo.getPlaneZGivenXY(stepXY.getX(), stepXY.getY()));
-      footstepPoseToPack.getOrientation().set(planarRegionToConstrainTo.getTransformToWorld().getRotation());
+      footstepPoseToPack.getPosition().set(stepXY, stepConstraintRegion.getPlaneZGivenXY(stepXY.getX(), stepXY.getY()));
+      footstepPoseToPack.getOrientation().set(stepConstraintRegion.getTransformToWorld().getRotation());
    }
 
-
-   private void computeShrunkConvexHull(PlanarRegion planarRegion,
+   private void computeShrunkConvexHull(StepConstraintRegion stepConstraintRegion,
                                         RobotSide upcomingFootstepSide,
                                         List<? extends Point2DBasics> predictedContactPoints,
                                         Orientation3DReadOnly orientation)
    {
       computeFootstepPolygon(upcomingFootstepSide, predictedContactPoints, orientation);
 
-      yoConvexHullConstraint.set(planarRegion.getConvexHull());
-      yoConvexHullConstraint.applyTransform(planarRegion.getTransformToWorld(), false);
+      yoConvexHullConstraint.set(stepConstraintRegion.getConvexHullInCosntraintRegion());
+      yoConvexHullConstraint.applyTransform(stepConstraintRegion.getTransformToWorld(), false);
 
       scaler.scaleConvexPolygonToContainInteriorPolygon(yoConvexHullConstraint, footstepPolygon, distanceInsideRegion, shrunkHullConstraint);
 
