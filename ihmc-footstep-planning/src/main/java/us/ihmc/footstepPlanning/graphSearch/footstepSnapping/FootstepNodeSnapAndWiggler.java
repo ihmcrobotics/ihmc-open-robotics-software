@@ -153,7 +153,7 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
       ConvexPolygon2D footPolygonInRegionFrame = FootstepNodeSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
 
-      RigidBodyTransform wiggleTransformInLocal = null;
+      RigidBodyTransform wiggleTransformInLocal;
       if (parameters.getEnableConcaveHullWiggler() && !planarRegionToPack.getConcaveHull().isEmpty())
       {
          wiggleTransformInLocal = concavePolygonWiggler.wigglePolygon(footPolygonInRegionFrame,
@@ -169,15 +169,10 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
          }
          else
          {
-            RigidBodyTransform convexHullTransform = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegionFrame, planarRegionToPack, wiggleParameters);
-            if (convexHullTransform == null)
+            if ((wiggleTransformInLocal = wiggleIntoConvexHull(footPolygonInRegionFrame)) == null)
             {
                snapData.getWiggleTransformInWorld().setIdentity();
                return;
-            }
-            else
-            {
-               wiggleTransformInLocal = convexHullTransform;
             }
          }
       }
@@ -185,24 +180,13 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       snapData.getWiggleTransformInWorld().set(planarRegionToPack.getTransformToLocal());
       snapData.getWiggleTransformInWorld().preMultiply(wiggleTransformInLocal);
       snapData.getWiggleTransformInWorld().preMultiply(planarRegionToPack.getTransformToWorld());
-//      tempTransform.multiply(snapTransform);
-
-//      // Ensure polygon will be completely above the planarRegions with this snap and wiggle:
-//      ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(footholdPolygonInRegionFrame);
-//      footPolygonInWorld.applyTransform(tempTransform, false);
-//
-//      List<PlanarRegion> planarRegionsIntersectingSnappedAndWiggledPolygon = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(footPolygonInWorld, planarRegionsList);
-//      boolean tooMuchPenetration = checkForTooMuchPenetrationAfterWiggle(planarRegionToPack,
-//                                                                         footPolygonInWorld,
-//                                                                         planarRegionsIntersectingSnappedAndWiggledPolygon,
-//                                                                         parameters.getMaximumZPenetrationOnValleyRegions());
-//      if (tooMuchPenetration)
-//      {
-//         // indicate this wiggle transform has been solved by setting to identity. maybe add some enum or indication of failure mode, or move this check to wiggler
-//         snapData.getWiggleTransformInWorld().setIdentity();
-//      }
-
       computeCroppedFoothold(footstepNode, snapData);
+   }
+
+   /** Extracted to method for testing purposes */
+   protected RigidBodyTransform wiggleIntoConvexHull(ConvexPolygon2D footPolygonInRegionFrame)
+   {
+      return PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegionFrame, planarRegionToPack, wiggleParameters);
    }
 
    protected void computeCroppedFoothold(FootstepNode footstepNode, FootstepNodeSnapData snapData)

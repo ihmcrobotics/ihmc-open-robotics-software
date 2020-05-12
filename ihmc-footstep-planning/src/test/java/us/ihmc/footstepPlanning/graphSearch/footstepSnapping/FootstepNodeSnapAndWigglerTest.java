@@ -43,56 +43,36 @@ public class FootstepNodeSnapAndWigglerTest
       tooSmallPolygon.addVertex(-pX - (wiggleInsideDelta - epsilon), -pY - (wiggleInsideDelta - epsilon));
       tooSmallPolygon.update();
 
-//      SideDependentList<ConvexPolygon2D> defaultFootPolygons = PlannerTools.createDefaultFootPolygons();
-//      FootstepNodeSnapAndWiggleTester snapAndWiggler = new FootstepNodeSnapAndWiggleTester(defaultFootPolygons, footstepPlannerParameters);
-//
-//      // test region meeting wiggleInsideDelta requirement doesn't call wiggle method
-//      FootstepNode footstepNode = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
-//      snapAndWiggler.setPlanarRegions(new PlanarRegionsList(new PlanarRegion(new RigidBodyTransform(), largeEnoughPolygon)));
-//      snapAndWiggler.snapFootstepNode(footstepNode);
-//      Assertions.assertFalse(snapAndWiggler.dirtyBit);
-//
-//      // test region not meeting wiggleInsideDelta requirement calls wiggle method
-//      snapAndWiggler.snapFootstepNode(footstepNode);
-//      snapAndWiggler.setPlanarRegions(new PlanarRegionsList(new PlanarRegion(new RigidBodyTransform(), tooSmallPolygon)));
-//      snapAndWiggler.snapFootstepNode(footstepNode);
-//      Assertions.assertTrue(snapAndWiggler.dirtyBit);
+      SideDependentList<ConvexPolygon2D> defaultFootPolygons = PlannerTools.createDefaultFootPolygons();
+      FootstepNodeSnapAndWiggleTester snapAndWiggler = new FootstepNodeSnapAndWiggleTester(defaultFootPolygons, footstepPlannerParameters);
+
+      // test region meeting wiggleInsideDelta requirement doesn't call wiggle method
+      FootstepNode footstepNode = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
+      snapAndWiggler.setPlanarRegions(new PlanarRegionsList(new PlanarRegion(new RigidBodyTransform(), largeEnoughPolygon)));
+      snapAndWiggler.snapFootstepNode(footstepNode, true);
+      Assertions.assertFalse(snapAndWiggler.dirtyBit);
+
+      // test region not meeting wiggleInsideDelta requirement calls wiggle method
+      snapAndWiggler.snapFootstepNode(footstepNode);
+      snapAndWiggler.setPlanarRegions(new PlanarRegionsList(new PlanarRegion(new RigidBodyTransform(), tooSmallPolygon)));
+      snapAndWiggler.snapFootstepNode(footstepNode, true);
+      Assertions.assertTrue(snapAndWiggler.dirtyBit);
    }
 
-//   private class FootstepNodeSnapAndWiggleTester extends FootstepNodeSnapAndWiggler
-//   {
-//      boolean dirtyBit = false;
-//
-//      public FootstepNodeSnapAndWiggleTester(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters)
-//      {
-//         super(footPolygonsInSoleFrame, parameters);
-//      }
-//
-//      @Override
-//      RigidBodyTransform getWiggleTransformInPlanarRegionFrame(ConvexPolygon2D footholdPolygon)
-//      {
-//         dirtyBit = true;
-//         return super.getWiggleTransformInPlanarRegionFrame(footholdPolygon);
-//      }
-//   }
-
-   @Test
-   public void testSimpleSnap()
+   private class FootstepNodeSnapAndWiggleTester extends FootstepNodeSnapAndWiggler
    {
-      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.translate(0.0, 0.0, -0.2);
-      generator.addRectangle(5.0, 5.0);
-      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+      boolean dirtyBit = false;
 
-      SideDependentList<ConvexPolygon2D> defaultFootPolygons = PlannerTools.createDefaultFootPolygons();
-      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepNodeSnapAndWiggler snapAndWiggler = new FootstepNodeSnapAndWiggler(defaultFootPolygons, parameters);
-      snapAndWiggler.setPlanarRegions(planarRegionsList);
+      public FootstepNodeSnapAndWiggleTester(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters)
+      {
+         super(footPolygonsInSoleFrame, parameters);
+      }
 
-      FootstepNode footstepNode = new FootstepNode(0.1, 0.2, 1.0, RobotSide.RIGHT);
-      FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(footstepNode);
-      System.out.println(snapData.getSnapTransform());
-      System.out.println();
-      System.out.println(snapData.getSnappedNodeTransform(footstepNode));
+      @Override
+      protected RigidBodyTransform wiggleIntoConvexHull(ConvexPolygon2D footPolygonInRegionFrame)
+      {
+         dirtyBit = true;
+         return super.wiggleIntoConvexHull(footPolygonInRegionFrame);
+      }
    }
 }
