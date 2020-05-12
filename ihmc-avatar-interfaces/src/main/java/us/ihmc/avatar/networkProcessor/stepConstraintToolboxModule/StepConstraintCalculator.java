@@ -100,9 +100,15 @@ public class StepConstraintCalculator
       planarRegionDecider.setPlanarRegions(planarRegions.getPlanarRegionsAsList());
    }
 
+   public void setSwitchPlanarRegionConstraintsAutomatically(boolean switchAutomatically)
+   {
+      planarRegionDecider.setSwitchPlanarRegionConstraintsAutomatically(switchAutomatically);
+   }
+
    public void reset()
    {
       currentStep = null;
+      planarRegionDecider.reset();
    }
 
    public void update()

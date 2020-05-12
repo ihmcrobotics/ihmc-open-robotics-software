@@ -152,6 +152,11 @@ public class StepConstraintToolboxController extends ToolboxController
       return isDone.getValue();
    }
 
+   public void setSwitchPlanarRegionConstraintsAutomatically(boolean switchAutomatically)
+   {
+      stepConstraintCalculator.setSwitchPlanarRegionConstraintsAutomatically(switchAutomatically);
+   }
+
    public void updateRobotConfigurationData(RobotConfigurationData newConfigurationData)
    {
       this.configurationData.set(newConfigurationData);

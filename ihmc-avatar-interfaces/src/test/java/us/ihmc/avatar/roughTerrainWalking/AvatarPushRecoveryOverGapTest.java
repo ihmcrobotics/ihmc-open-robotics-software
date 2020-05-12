@@ -71,12 +71,17 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       drcSimulationTestHelper.createSimulation(className);
 
       stepConstraintModule = new StepConstraintToolboxModule(robotModel, true, PubSubImplementation.INTRAPROCESS, 9.81);
+      stepConstraintModule.setSwitchPlanarRegionConstraintsAutomatically(true);
       stepConstraintModule.wakeUp();
 
       PlanarRegionsList planarRegionsList = environment.getPlanarRegionsList();
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
 
       drcSimulationTestHelper.publishToController(planarRegionsListMessage);
+
+      stepConstraintModule = new StepConstraintToolboxModule(robotModel, true, PubSubImplementation.INTRAPROCESS, 9.81);
+      stepConstraintModule.setSwitchPlanarRegionConstraintsAutomatically(true);
+      stepConstraintModule.wakeUp();
       stepConstraintModule.updatePlanarRegion(planarRegionsListMessage);
 
       double z = getForcePointOffsetZInChestFrame();
