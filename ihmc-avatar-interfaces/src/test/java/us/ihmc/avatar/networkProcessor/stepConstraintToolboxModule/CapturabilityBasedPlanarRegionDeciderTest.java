@@ -130,10 +130,10 @@ public class CapturabilityBasedPlanarRegionDeciderTest
 
 
       captureRegion.clear();
-      captureRegion.addVertex(stepLength + 0.05,  + 0.05);
-      captureRegion.addVertex(stepLength - 0.05,  + 0.05);
-      captureRegion.addVertex(stepLength - 0.05,  - 0.05);
-      captureRegion.addVertex(stepLength + 0.05,  - 0.05);
+      captureRegion.addVertex(stepLength + 0.05 + 0.05,  -0.05 + 0.05);
+      captureRegion.addVertex(stepLength + 0.05 - 0.05,  -0.05 + 0.05);
+      captureRegion.addVertex(stepLength + 0.05 - 0.05,  -0.05 - 0.05);
+      captureRegion.addVertex(stepLength + 0.05 + 0.05,  -0.05 - 0.05);
       captureRegion.update();
 
       constraintCalculator.setCaptureRegion(captureRegion);
