@@ -97,6 +97,11 @@ public class StepConstraintToolboxModule extends ToolboxModule
       planarRegionConstraintPublisher = ROS2Tools.createPublisher(realtimeRos2Node, PlanarRegionMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
    }
 
+   public void setSwitchPlanarRegionConstraintsAutomatically(boolean switchAutomatically)
+   {
+      controller.setSwitchPlanarRegionConstraintsAutomatically(switchAutomatically);
+   }
+
    public void updatePlanarRegion(PlanarRegionsListMessage planarRegionsListMessage)
    {
       if (controller != null)

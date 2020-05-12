@@ -145,7 +145,10 @@ public class CapturabilityBasedPlanarRegionDecider
          planarRegionToConstrainTo = findPlanarRegionUnderFoothold(footstepPose.getPosition());
 
          if (planarRegionToConstrainTo != null)
+         {
             computeShrunkAndProjectedConvexHulls(planarRegionToConstrainTo);
+            constraintRegionChanged.set(true);
+         }
       }
 
       if (switchPlanarRegionConstraintsAutomatically.getBooleanValue() && !checkIfCurrentPlanarRegionIsValid(captureRegion))
