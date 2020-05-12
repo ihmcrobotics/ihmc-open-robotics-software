@@ -625,6 +625,15 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
    /**
        
+    * Maximum height above a stance step that a candidate step is snapped to. Regions above this height are ignored.
+       
+    * Intended to avoid ceilings or obstacles that are above the top of the robot
+       
+    */
+   public double maximum_snap_height_ = -11.1;
+
+   /**
+       
     * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
        
     * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
@@ -861,6 +870,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
 
+
    }
 
    public FootstepPlannerParametersPacket(FootstepPlannerParametersPacket other)
@@ -993,6 +1003,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
       body_box_base_z_ = other.body_box_base_z_;
+
+
+      maximum_snap_height_ = other.maximum_snap_height_;
 
 
       min_x_clearance_from_stance_ = other.min_x_clearance_from_stance_;
@@ -2423,6 +2436,30 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
    /**
        
+    * Maximum height above a stance step that a candidate step is snapped to. Regions above this height are ignored.
+       
+    * Intended to avoid ceilings or obstacles that are above the top of the robot
+       
+    */
+   public void setMaximumSnapHeight(double maximum_snap_height)
+   {
+      maximum_snap_height_ = maximum_snap_height;
+   }
+   /**
+       
+    * Maximum height above a stance step that a candidate step is snapped to. Regions above this height are ignored.
+       
+    * Intended to avoid ceilings or obstacles that are above the top of the robot
+       
+    */
+   public double getMaximumSnapHeight()
+   {
+      return maximum_snap_height_;
+   }
+
+
+   /**
+       
     * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
        
     * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
@@ -3030,6 +3067,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_box_base_z_, other.body_box_base_z_, epsilon)) return false;
 
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_snap_height_, other.maximum_snap_height_, epsilon)) return false;
+
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.min_x_clearance_from_stance_, other.min_x_clearance_from_stance_, epsilon)) return false;
 
 
@@ -3226,6 +3266,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.body_box_base_z_ != otherMyClass.body_box_base_z_) return false;
 
 
+      if(this.maximum_snap_height_ != otherMyClass.maximum_snap_height_) return false;
+
+
       if(this.min_x_clearance_from_stance_ != otherMyClass.min_x_clearance_from_stance_) return false;
 
 
@@ -3418,6 +3461,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
       builder.append("body_box_base_z=");
       builder.append(this.body_box_base_z_);      builder.append(", ");
+
+      builder.append("maximum_snap_height=");
+      builder.append(this.maximum_snap_height_);      builder.append(", ");
 
       builder.append("min_x_clearance_from_stance=");
       builder.append(this.min_x_clearance_from_stance_);      builder.append(", ");

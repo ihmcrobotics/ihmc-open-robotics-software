@@ -218,6 +218,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.bodyBoxBaseZ, bodyBoxBaseZ);
    }
 
+   default void setMaximumSnapHeight(double maximumSnapHeight)
+   {
+      set(FootstepPlannerParameterKeys.maximumSnapHeight, maximumSnapHeight);
+   }
+
    default void setAStarHeuristicsWeight(double aStarHeuristicsWeight)
    {
       set(FootstepPlannerParameterKeys.aStarHeuristicsWeight, aStarHeuristicsWeight);
@@ -381,6 +386,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setBodyBoxBaseY(parametersPacket.getBodyBoxBaseY());
       if (parametersPacket.getBodyBoxBaseZ() != noValue)
          setBodyBoxBaseZ(parametersPacket.getBodyBoxBaseZ());
+      if (parametersPacket.getMaximumSnapHeight() != noValue)
+         setMaximumSnapHeight(parametersPacket.getMaximumSnapHeight());
       if (parametersPacket.getMinXClearanceFromStance() != noValue)
          setMinXClearanceFromStance(parametersPacket.getMinXClearanceFromStance());
       if (parametersPacket.getMinYClearanceFromStance() != noValue)
