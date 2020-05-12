@@ -39,7 +39,7 @@ public class OneStepCaptureRegionCalculator
    private final double footWidth;
    private final double kinematicStepRange;
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
-   private final SideDependentList<FrameConvexPolygon2D> reachableRegions  = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
+   private final SideDependentList<FrameConvexPolygon2D> reachableRegions = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
 
    private final RecyclingArrayList<FramePoint2D> visibleVertices = new RecyclingArrayList<>(MAX_CAPTURE_REGION_POLYGON_POINTS, FramePoint2D.class);
 
