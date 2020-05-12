@@ -123,7 +123,6 @@ public class ICPControlPlane
 
    public void projectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
    {
-
       projectConvexHullOntoControlPlane(planarRegion.getConvexHull(), planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
    }
 

@@ -1,6 +1,5 @@
 package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
@@ -11,8 +10,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -24,10 +21,9 @@ import java.util.concurrent.atomic.AtomicReference;
 public class StepConstraintCalculator
 {
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
-   private final ICPControlPlane icpControlPlane;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleProvider timeProvider;
-   private final CapturabilityPlanarRegionDecider planarRegionDecider;
+   private final CapturabilityBasedPlanarRegionDecider planarRegionDecider;
 
    private final FramePoint2D capturePoint = new FramePoint2D();
 
@@ -62,8 +58,7 @@ public class StepConstraintCalculator
    {
       this.timeProvider = timeProvider;
       this.captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange, soleZUpFrames, registry, null);
-      this.icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
-      this.planarRegionDecider = new CapturabilityPlanarRegionDecider(captureRegionCalculator, icpControlPlane, registry, null);
+      this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, gravityZ, registry, null);
    }
 
    public void setLeftFootSupportPolygon(List<? extends Point3DReadOnly> footVertices)
@@ -112,8 +107,6 @@ public class StepConstraintCalculator
 
    public void update()
    {
-      icpControlPlane.setOmega0(omega);
-
       if (currentStep == null)
       {
          captureRegionCalculator.hideCaptureRegion();
@@ -121,6 +114,9 @@ public class StepConstraintCalculator
       else
       {
          updateCaptureRegion(currentStep);
+
+         planarRegionDecider.setOmega0(omega);
+         planarRegionDecider.setCaptureRegion(captureRegionCalculator.getCaptureRegion());
          planarRegionDecider.updatePlanarRegionConstraintForStep(currentStep.getStepPose());
       }
    }
