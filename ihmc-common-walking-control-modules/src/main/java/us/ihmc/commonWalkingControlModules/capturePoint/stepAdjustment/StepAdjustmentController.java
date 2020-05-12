@@ -11,7 +11,6 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
@@ -32,8 +31,6 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
-
-import java.util.List;
 
 public class StepAdjustmentController
 {
@@ -92,7 +89,7 @@ public class StepAdjustmentController
 
    private final StepAdjustmentReachabilityConstraint reachabilityConstraintHandler;
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
-   private final EnvironmentConstraintProvider environmentConstraintProvider;
+   private final EnvironmentConstraintHandler environmentConstraintProvider;
 
    private final FrameConvexPolygon2D captureRegionInWorld = new FrameConvexPolygon2D();
 
@@ -140,7 +137,8 @@ public class StepAdjustmentController
       maximumTimeFromTransfer = new DoubleParameter(yoNamePrefix + "MaximumTimeFromTransfer",
                                                     registry,
                                                     icpOptimizationParameters.maximumTimeFromTransferInFootstepMultiplier());
-      minICPErrorForStepAdjustment = new DoubleParameter(yoNamePrefix + "MinICPErrorForStepAdjustment", registry,
+      minICPErrorForStepAdjustment = new DoubleParameter(yoNamePrefix + "MinICPErrorForStepAdjustment",
+                                                         registry,
                                                          icpOptimizationParameters.getMinICPErrorForStepAdjustment());
 
       transferDurationSplitFraction = new DoubleParameter(yoNamePrefix + "TransferDurationSplitFraction",
@@ -159,11 +157,7 @@ public class StepAdjustmentController
                                                                                yoGraphicsListRegistry);
 
       captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, yoNamePrefix, registry, yoGraphicsListRegistry);
-      environmentConstraintProvider = new EnvironmentConstraintProvider(icpControlPlane,
-                                                                        contactableFeet,
-                                                                        yoNamePrefix,
-                                                                        registry,
-                                                                        yoGraphicsListRegistry);
+      environmentConstraintProvider = new EnvironmentConstraintHandler(contactableFeet, yoNamePrefix, registry, yoGraphicsListRegistry);
 
       if (walkingControllerParameters != null)
          swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
@@ -245,11 +239,6 @@ public class StepAdjustmentController
       environmentConstraintProvider.setPlanarRegionConstraint(planarRegion);
    }
 
-   public void setPlanarRegions(List<PlanarRegion> planarRegions)
-   {
-      environmentConstraintProvider.setPlanarRegions(planarRegions);
-   }
-
    public void initialize(double initialTime, RobotSide supportSide)
    {
       isInSwing.set(true);
@@ -322,17 +311,10 @@ public class StepAdjustmentController
       captureRegionInWorld.orthogonalProjection(adjustedSolutionInControlPlane);
       reachabilityConstraintHandler.getReachabilityConstraint().orthogonalProjection(adjustedSolutionInControlPlane);
 
-      FrameConvexPolygon2DReadOnly constraintRegion = environmentConstraintProvider.updatePlanarRegionConstraintForStep(upcomingFootstepSide.getEnumValue(),
-                                                                                                                        upcomingFootstep,
-                                                                                                                        upcomingFootstepContactPoints);
-      if (constraintRegion != null)
-      {
-         constraintRegion.orthogonalProjection(adjustedSolutionInControlPlane);
-      }
-
       icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, adjustedSolutionInControlPlane, tempPoint, upcomingFootstep.getPosition().getZ());
-
       footstepSolution.getPosition().set(tempPoint);
+
+      environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(), footstepSolution, upcomingFootstepContactPoints);
 
       if (wasFootstepAdjusted() && CONTINUOUSLY_UPDATE_DESIRED_POSITION)
          upcomingFootstep.set(footstepSolution);
