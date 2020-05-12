@@ -56,7 +56,14 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    public enum LookAndStepBehaviorState
    {
-      LIDAR, ACQUIRE_PATH, STEREO, BODY_PLAN, FOOTSTEP_PLAN, REVIEW, STEP, PLAN_FAILED
+      PERCEPT_FAR,
+      BODY_PATH_PLAN,
+      BODY_PATH_PLAN_FAILED,
+      PERCEPT_NEAR,
+      FOOTSTEP_PLAN,
+      FOOTSTEP_PLAN_FAILED,
+      REVIEW,
+      STEP,
    }
 
    private final LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
@@ -100,20 +107,21 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
 
       EnumBasedStateMachineFactory<LookAndStepBehaviorState> stateMachineFactory = new EnumBasedStateMachineFactory<>(LookAndStepBehaviorState.class);
-      stateMachineFactory.addTransition(LIDAR, ACQUIRE_PATH, this::transitionFromLidar);
-      stateMachineFactory.addTransition(ACQUIRE_PATH, STEREO, this::transitionFromAquirePath);
-      stateMachineFactory.addTransition(STEREO, BODY_PLAN, this::transitionFromPercept);
-      stateMachineFactory.addTransition(STEREO, FOOTSTEP_PLAN, this::transitionFromPercept);
-      stateMachineFactory.setOnEntry(FOOTSTEP_PLAN, this::onFootstepPlanStateEntry);
-      stateMachineFactory.addTransition(FOOTSTEP_PLAN, Lists.newArrayList(REVIEW, STEP, PLAN_FAILED), this::transitionFromPlan);
-      stateMachineFactory.addTransition(REVIEW, Lists.newArrayList(STEP, ACQUIRE_PATH), this::transitionFromReview);
+      stateMachineFactory.addTransition(PERCEPT_FAR, BODY_PATH_PLAN, this::transitionFromPerceptFar);
+      stateMachineFactory.addTransition(BODY_PATH_PLAN, Lists.newArrayList(PERCEPT_NEAR, BODY_PATH_PLAN_FAILED), this::transitionFromBodyPathPlan);
+      stateMachineFactory.addTransition(BODY_PATH_PLAN_FAILED, PERCEPT_FAR, this::transitionFromBodyPathPlanFailed);
+      stateMachineFactory.setOnEntry(BODY_PATH_PLAN, this::onBodyPathPlanEntry);
+      stateMachineFactory.addTransition(PERCEPT_NEAR, FOOTSTEP_PLAN, this::transitionFromPerceptNear);
+      stateMachineFactory.setOnEntry(FOOTSTEP_PLAN, this::onFootstepPlanEntry);
+      stateMachineFactory.addTransition(FOOTSTEP_PLAN, Lists.newArrayList(REVIEW, STEP, FOOTSTEP_PLAN_FAILED), this::transitionFromPlan);
+      stateMachineFactory.setOnEntry(FOOTSTEP_PLAN_FAILED, this::onPlanFailedStateEntry);
+      stateMachineFactory.addTransition(FOOTSTEP_PLAN_FAILED, PERCEPT_NEAR, this::transitionFromPlanFailed);
+      stateMachineFactory.addTransition(REVIEW, Lists.newArrayList(STEP, PERCEPT_NEAR), this::transitionFromReview);
       stateMachineFactory.setOnEntry(STEP, this::onStepStateEntry);
-      stateMachineFactory.addTransition(STEP, ACQUIRE_PATH, this::transitionFromStep);
-      stateMachineFactory.setOnEntry(PLAN_FAILED, this::onPlanFailedStateEntry);
-      stateMachineFactory.addTransition(PLAN_FAILED, ACQUIRE_PATH, this::transitionFromPlanFailed);
+      stateMachineFactory.addTransition(STEP, Lists.newArrayList(PERCEPT_NEAR, PERCEPT_FAR), this::transitionFromStep);
       Arrays.stream(values()).forEach(state -> stateMachineFactory.setDoAction(state, this::pollInterrupts));
       stateMachineFactory.getFactory().addStateChangedListener(this::stateChanged);
-      stateMachine = stateMachineFactory.getFactory().build(ACQUIRE_PATH);
+      stateMachine = stateMachineFactory.getFactory().build(PERCEPT_FAR);
 
       double period = 0.1;
       int crashesBeforeGivingUp = 1;
@@ -135,7 +143,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       LogTools.debug("{} -> {}", from == null ? null : from.name(), to.name());
    }
 
-   private boolean transitionFromLidar()
+   private boolean transitionFromPerceptFar()
    {
 
 
@@ -145,6 +153,21 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
 
       return notEmpty;
+   }
+
+   private LookAndStepBehaviorState transitionFromBodyPathPlan()
+   {
+
+   }
+
+   private boolean transitionFromBodyPathPlanFailed()
+   {
+
+   }
+
+   private void onBodyPathPlanEntry()
+   {
+
    }
 
    private boolean transitionFromAquirePath()
@@ -185,12 +208,12 @@ public class LookAndStepBehavior implements BehaviorInterface
       return transition;
    }
 
-   private boolean transitionFromPercept()
+   private boolean transitionFromPerceptNear()
    {
       return !arePlanarRegionsExpired() && !environmentMap.getLatestCombinedRegionsList().isEmpty();
    }
 
-   private void onFootstepPlanStateEntry()
+   private void onFootstepPlanEntry()
    {
       LogTools.info("Entering plan state");
       HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
@@ -357,7 +380,7 @@ public class LookAndStepBehavior implements BehaviorInterface
          }
          else
          {
-            return PLAN_FAILED;
+            return FOOTSTEP_PLAN_FAILED;
          }
       }
 
@@ -378,7 +401,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    {
       if (rePlanNotification.read())
       {
-         return ACQUIRE_PATH;
+         return PERCEPT_NEAR;
       }
       else if (takeStepNotification.read())
       {
@@ -410,7 +433,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepDataListMessage));
    }
 
-   private boolean transitionFromStep()
+   private LookAndStepBehaviorState transitionFromStep()
    {
       return walkingStatusNotification.hasNext(); // use rea.isRobotWalking?
    }
