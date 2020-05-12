@@ -11,6 +11,8 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -43,8 +45,23 @@ public class StepConstraintCalculator
                                    DoubleProvider timeProvider,
                                    double gravityZ)
    {
+      this(soleZUpFrames,
+           centerOfMassFrame,
+           walkingControllerParameters.getSteppingParameters().getFootWidth(),
+           walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
+           timeProvider,
+           gravityZ);
+   }
+
+   public StepConstraintCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                   ReferenceFrame centerOfMassFrame,
+                                   double footWidth,
+                                   double kinematicStepRange,
+                                   DoubleProvider timeProvider,
+                                   double gravityZ)
+   {
       this.timeProvider = timeProvider;
-      this.captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, registry, null);
+      this.captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange, soleZUpFrames, registry, null);
       this.icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
       this.planarRegionDecider = new CapturabilityPlanarRegionDecider(captureRegionCalculator, icpControlPlane, registry, null);
    }
