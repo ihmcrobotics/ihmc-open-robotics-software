@@ -24,6 +24,7 @@ public class StepConstraintCalculator
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleProvider timeProvider;
    private final CapturabilityBasedPlanarRegionDecider planarRegionDecider;
+   private final ReachabilityConstraintCalculator reachabilityConstraintCalculator;
 
    private final FramePoint2D capturePoint = new FramePoint2D();
 
@@ -45,6 +46,9 @@ public class StepConstraintCalculator
            centerOfMassFrame,
            walkingControllerParameters.getSteppingParameters().getFootWidth(),
            walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
+           walkingControllerParameters.getSteppingParameters().getMaxBackwardStepLength(),
+           walkingControllerParameters.getSteppingParameters().getMinStepWidth(),
+           walkingControllerParameters.getSteppingParameters().getMaxStepWidth(),
            timeProvider,
            gravityZ);
    }
@@ -53,12 +57,21 @@ public class StepConstraintCalculator
                                    ReferenceFrame centerOfMassFrame,
                                    double footWidth,
                                    double kinematicStepRange,
+                                   double maxBackwardStepLength,
+                                   double minStepWidth,
+                                   double maxStepWidth,
                                    DoubleProvider timeProvider,
                                    double gravityZ)
    {
       this.timeProvider = timeProvider;
       this.captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange, soleZUpFrames, registry, null);
       this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, gravityZ, registry, null);
+      this.reachabilityConstraintCalculator = new ReachabilityConstraintCalculator(soleZUpFrames,
+                                                                                   kinematicStepRange,
+                                                                                   maxBackwardStepLength,
+                                                                                   minStepWidth,
+                                                                                   maxStepWidth,
+                                                                                   registry);
    }
 
    public void setLeftFootSupportPolygon(List<? extends Point3DReadOnly> footVertices)
