@@ -53,13 +53,13 @@ public class FootstepNodeSnapAndWigglerTest
       // test region meeting wiggleInsideDelta requirement doesn't call wiggle method
       FootstepNode footstepNode = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
       snapAndWiggler.setPlanarRegions(new PlanarRegionsList(new PlanarRegion(new RigidBodyTransform(), largeEnoughPolygon)));
-      snapAndWiggler.snapFootstepNode(footstepNode, true);
+      snapAndWiggler.snapFootstepNode(footstepNode, null, true);
       Assertions.assertFalse(snapAndWiggler.dirtyBit);
 
       // test region not meeting wiggleInsideDelta requirement calls wiggle method
       snapAndWiggler.snapFootstepNode(footstepNode);
       snapAndWiggler.setPlanarRegions(new PlanarRegionsList(new PlanarRegion(new RigidBodyTransform(), tooSmallPolygon)));
-      snapAndWiggler.snapFootstepNode(footstepNode, true);
+      snapAndWiggler.snapFootstepNode(footstepNode, null, true);
       Assertions.assertTrue(snapAndWiggler.dirtyBit);
    }
 
@@ -131,29 +131,32 @@ public class FootstepNodeSnapAndWigglerTest
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
       double epsilon = 1e-8;
 
+      FootstepNode stanceNode = new FootstepNode(0.0, 0.0);
+      snapper.snapFootstepNode(stanceNode, null, false);
+
       // test regions low enough to snap
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(new FootstepNode(1.0, -1.0));
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(new FootstepNode(1.0, -1.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, lowHeight0));
       Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
 
-      snapData = snapper.snapFootstepNode(new FootstepNode(1.0, 0.0));
+      snapData = snapper.snapFootstepNode(new FootstepNode(1.0, 0.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, lowHeight1));
       Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
 
-      snapData = snapper.snapFootstepNode(new FootstepNode(1.0, 1.0));
+      snapData = snapper.snapFootstepNode(new FootstepNode(1.0, 1.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, lowHeight2));
       Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
 
       // test regions high enough to snap
-      snapData = snapper.snapFootstepNode(new FootstepNode(2.0, -1.0));
+      snapData = snapper.snapFootstepNode(new FootstepNode(2.0, -1.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
       Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
 
-      snapData = snapper.snapFootstepNode(new FootstepNode(2.0, 0.0));
+      snapData = snapper.snapFootstepNode(new FootstepNode(2.0, 0.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
       Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
 
-      snapData = snapper.snapFootstepNode(new FootstepNode(2.0, 1.0));
+      snapData = snapper.snapFootstepNode(new FootstepNode(2.0, 1.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
       Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
    }
@@ -168,7 +171,6 @@ public class FootstepNodeSnapAndWigglerTest
       PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
       planarRegionsListGenerator.translate(0.0, 0.0, groundHeight);
       planarRegionsListGenerator.addRectangle(100.0, 100.0);
-      planarRegionsListGenerator.identity();
       planarRegionsListGenerator.rotate(rotatedAngle, Axis3D.Y);
       planarRegionsListGenerator.addRectangle(100.0, 100.0);
 
@@ -181,14 +183,17 @@ public class FootstepNodeSnapAndWigglerTest
       RigidBodyTransform expectedTransform = new RigidBodyTransform();
       double epsilon = 1e-8;
 
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(new FootstepNode(- 1.0, 0.0));
+      FootstepNode stanceNode = new FootstepNode(0.0, 0.0);
+      snapper.snapFootstepNode(stanceNode, null, false);
+
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(new FootstepNode(- 1.0, 0.0), stanceNode, false);
       expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
       Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
 
-      snapData = snapper.snapFootstepNode(new FootstepNode(maximumSnapHeight - LatticeNode.gridSizeXY, 0.0));
+      snapData = snapper.snapFootstepNode(new FootstepNode(1.0, 0.0), stanceNode, false);
       Assertions.assertTrue(EuclidCoreTools.epsilonEquals(snapData.getSnapTransform().getRotation().getPitch(), rotatedAngle, epsilon));
 
-      snapData = snapper.snapFootstepNode(new FootstepNode(maximumSnapHeight + LatticeNode.gridSizeXY, 0.0));
+      snapData = snapper.snapFootstepNode(new FootstepNode(3.0, 0.0), stanceNode, false);
       Assertions.assertTrue(EuclidCoreTools.epsilonEquals(snapData.getSnapTransform().getRotation().getPitch(), 0.0, epsilon));
    }
 }

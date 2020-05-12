@@ -60,11 +60,11 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
 
    public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode)
    {
-      return snapFootstepNode(footstepNode, false);
+      return snapFootstepNode(footstepNode, null,false);
    }
 
    @Override
-   public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode, boolean computeWiggleTransform)
+   public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode, FootstepNode stanceNode, boolean computeWiggleTransform)
    {
       if (snapDataHolder.containsKey(footstepNode))
       {
@@ -86,7 +86,7 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       }
       else
       {
-         FootstepNodeSnapData snapData = computeSnapTransform(footstepNode);
+         FootstepNodeSnapData snapData = computeSnapTransform(footstepNode, stanceNode);
          snapDataHolder.put(footstepNode, snapData);
 
          if (snapData.getSnapTransform().containsNaN())
@@ -110,10 +110,12 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       snapDataHolder.put(footstepNode, snapData);
    }
 
-   protected FootstepNodeSnapData computeSnapTransform(FootstepNode footstepNode)
+   protected FootstepNodeSnapData computeSnapTransform(FootstepNode footstepNode, FootstepNode stanceNode)
    {
+      double maximumRegionHeightToConsider = getMaximumRegionHeightToConsider(stanceNode);
       FootstepNodeTools.getFootPolygon(footstepNode, footPolygonsInSoleFrame.get(footstepNode.getRobotSide()), footPolygon);
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, planarRegionToPack);
+
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, maximumRegionHeightToConsider, planarRegionToPack);
       if (snapTransform == null)
       {
          return FootstepNodeSnapData.emptyData();
@@ -124,6 +126,24 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
          snapData.setPlanarRegionId(planarRegionToPack.getRegionId());
          computeCroppedFoothold(footstepNode, snapData);
          return snapData;
+      }
+   }
+
+   private double getMaximumRegionHeightToConsider(FootstepNode stanceNode)
+   {
+      if (stanceNode == null)
+      {
+         return Double.POSITIVE_INFINITY;
+      }
+
+      FootstepNodeSnapData snapData = snapDataHolder.get(stanceNode);
+      if (snapData == null || snapData.getSnapTransform().containsNaN())
+      {
+         return Double.POSITIVE_INFINITY;
+      }
+      else
+      {
+         return parameters.getMaximumSnapHeight() + FootstepNodeTools.getSnappedNodeHeight(stanceNode, snapData.getSnapTransform());
       }
    }
 

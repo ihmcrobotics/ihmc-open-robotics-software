@@ -226,7 +226,7 @@ public class AStarFootstepPlanner
          SimpleFootstep footstep = new SimpleFootstep();
 
          footstep.setRobotSide(path.get(i).getRobotSide());
-         FootstepNodeSnapData snapData = snapper.snapFootstepNode(path.get(i), true);
+         FootstepNodeSnapData snapData = snapper.snapFootstepNode(path.get(i), null, true);
          footstep.getSoleFramePose().set(snapData.getSnappedNodeTransform(path.get(i)));
 
          if (request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty())
