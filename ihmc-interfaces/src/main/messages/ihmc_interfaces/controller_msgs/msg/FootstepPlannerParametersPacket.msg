@@ -287,6 +287,10 @@ float64 body_box_base_y -11.1
 # collisions, this defines the z-offset of a bounding box relative to the average frame between sequential footsteps.
 float64 body_box_base_z -11.1
 
+# Maximum height above a stance step that a candidate step is snapped to. Regions above this height are ignored.
+# Intended to avoid ceilings or obstacles that are above the top of the robot
+float64 maximum_snap_height -11.1
+
 # Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
 # Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
 # this parameter.

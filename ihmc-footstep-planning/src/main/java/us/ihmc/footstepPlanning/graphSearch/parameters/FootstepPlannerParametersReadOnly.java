@@ -567,6 +567,15 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * Maximum height above a stance step that a candidate step is snapped to. Regions above this height are ignored.
+    * Intended to avoid ceilings or obstacles that are above the top of the robot
+    */
+   default double getMaximumSnapHeight()
+   {
+      return get(maximumSnapHeight);
+   }
+
+   /**
     * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
     * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
     * this parameter.

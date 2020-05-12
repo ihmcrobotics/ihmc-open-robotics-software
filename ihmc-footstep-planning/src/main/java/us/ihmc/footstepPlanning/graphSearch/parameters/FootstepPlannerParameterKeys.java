@@ -51,6 +51,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  bodyBoxBaseX                               = keys.addDoubleKey ("Body box base X", 0.0);
    public static final DoubleStoredPropertyKey  bodyBoxBaseY                               = keys.addDoubleKey ("Body box base Y", 0.0);
    public static final DoubleStoredPropertyKey  bodyBoxBaseZ                               = keys.addDoubleKey ("Body box base Z", 0.25);
+   public static final DoubleStoredPropertyKey  maximumSnapHeight                          = keys.addDoubleKey("Maximum snap height", 2.5);
    public static final DoubleStoredPropertyKey  finalTurnProximity                         = keys.addDoubleKey ("Final turn proximity", 0.2);
    public static final IntegerStoredPropertyKey numberOfBoundingBoxChecks                  = keys.addIntegerKey("Number of bounding box checks", 1);
    public static final DoubleStoredPropertyKey distanceFromPathTolerance                   = keys.addDoubleKey("Distance from path tolerance", 0.3);
