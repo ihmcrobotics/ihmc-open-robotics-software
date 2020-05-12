@@ -42,7 +42,7 @@ public class CapturabilityBasedPlanarRegionDecider
    private static final double maxNormalAngleFromVertical = 0.3;
    private static final double minimumAreaToConsider = 0.01;
 
-   private static final double minimumIntersectionForSearch = 0.01;
+   private static final double minimumIntersectionForSearch = 0.005;
 
    private static final Vector3D verticalAxis = new Vector3D(0.0, 0.0, 1.0);
 
