@@ -82,7 +82,6 @@ public class CapturabilityBasedPlanarRegionDecider
       constraintRegionChanged = new YoBoolean("constraintRegionChanged", registry);
 
       switchPlanarRegionConstraintsAutomatically = new YoBoolean("switchPlanarRegionConstraintsAutomatically", registry);
-      switchPlanarRegionConstraintsAutomatically.set(true);
 
       yoConvexHullConstraint = new YoFrameConvexPolygon2D("convexHullConstraint", "", worldFrame, 12, registry);
       yoConvexHullConstraintInControlPlane = new YoFrameConvexPolygon2D("convexHullConstraintInControlPlane", "", worldFrame, 12, registry);
@@ -113,6 +112,11 @@ public class CapturabilityBasedPlanarRegionDecider
    public void setOmega0(double omega)
    {
       icpControlPlane.setOmega0(omega);
+   }
+
+   public void setSwitchPlanarRegionConstraintsAutomatically(boolean switchAutomatically)
+   {
+      switchPlanarRegionConstraintsAutomatically.set(switchAutomatically);
    }
 
    public void reset()

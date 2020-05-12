@@ -48,10 +48,13 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       PlanarRegionsList planarRegionsList = new PlanarRegionsList();
       planarRegionsList.addPlanarRegion(groundPlane);
 
-
       PoseReferenceFrame centerOfMassFrame = new PoseReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame());
-      centerOfMassFrame.translateAndUpdate(0.0 ,0.0, 1.0);
-      CapturabilityBasedPlanarRegionDecider constraintCalculator = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, 9.81, new YoVariableRegistry(""), null);
+      centerOfMassFrame.translateAndUpdate(0.0, 0.0, 1.0);
+      CapturabilityBasedPlanarRegionDecider constraintCalculator = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame,
+                                                                                                             9.81,
+                                                                                                             new YoVariableRegistry(""),
+                                                                                                             null);
+      constraintCalculator.setSwitchPlanarRegionConstraintsAutomatically(true);
 
       FramePose3D stepPose = new FramePose3D();
       stepPose.getPosition().set(stepLength, 0.5 * stanceWidth, 0.0);
@@ -117,7 +120,11 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       captureRegion.update();
 
       PoseReferenceFrame centerOfMassFrame = new PoseReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame());
-      CapturabilityBasedPlanarRegionDecider constraintCalculator = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, 9.81, new YoVariableRegistry(""), null);
+      CapturabilityBasedPlanarRegionDecider constraintCalculator = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame,
+                                                                                                             9.81,
+                                                                                                             new YoVariableRegistry(""),
+                                                                                                             null);
+      constraintCalculator.setSwitchPlanarRegionConstraintsAutomatically(true);
 
       centerOfMassFrame.setPositionAndUpdate(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.1, -0.05, comHeight));
 
@@ -128,12 +135,11 @@ public class CapturabilityBasedPlanarRegionDeciderTest
 
       assertTrue(smallRegionPlane.epsilonEquals(constraintCalculator.getConstraintRegion(), 1e-8));
 
-
       captureRegion.clear();
-      captureRegion.addVertex(stepLength + 0.05 + 0.05,  -0.05 + 0.05);
-      captureRegion.addVertex(stepLength + 0.05 - 0.05,  -0.05 + 0.05);
-      captureRegion.addVertex(stepLength + 0.05 - 0.05,  -0.05 - 0.05);
-      captureRegion.addVertex(stepLength + 0.05 + 0.05,  -0.05 - 0.05);
+      captureRegion.addVertex(stepLength + 0.05 + 0.05, -0.05 + 0.05);
+      captureRegion.addVertex(stepLength + 0.05 - 0.05, -0.05 + 0.05);
+      captureRegion.addVertex(stepLength + 0.05 - 0.05, -0.05 - 0.05);
+      captureRegion.addVertex(stepLength + 0.05 + 0.05, -0.05 - 0.05);
       captureRegion.update();
 
       constraintCalculator.setCaptureRegion(captureRegion);

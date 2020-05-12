@@ -527,8 +527,6 @@ public class LinearMomentumRateControlModule
             stepAdjustmentController.submitRemainingTimeInSwingUnderDisturbance(remainingTimeInSwingUnderDisturbance);
          if (planarRegionStepConstraintHandler != null && planarRegionStepConstraintHandler.hasNewPlanarRegion())
             stepAdjustmentController.setPlanarRegionConstraint(planarRegionStepConstraintHandler.pollHasNewPlanarRegion());
-         if (planarRegionsListHandler != null && planarRegionsListHandler.hasNewPlanarRegions())
-            stepAdjustmentController.setPlanarRegions(planarRegionsListHandler.pollHasNewPlanarRegionsList());
       }
    }
 
