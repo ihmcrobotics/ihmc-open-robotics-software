@@ -157,7 +157,7 @@ public class StepAdjustmentController
                                                                                yoGraphicsListRegistry);
 
       captureRegionCalculator = new OneStepCaptureRegionCalculator(soleZUpFrames, walkingControllerParameters, yoNamePrefix, registry, yoGraphicsListRegistry);
-      environmentConstraintProvider = new EnvironmentConstraintHandler(contactableFeet, yoNamePrefix, registry, yoGraphicsListRegistry);
+      environmentConstraintProvider = new EnvironmentConstraintHandler(icpControlPlane, contactableFeet, yoNamePrefix, registry, yoGraphicsListRegistry);
 
       if (walkingControllerParameters != null)
          swingSpeedUpEnabled.set(walkingControllerParameters.allowDisturbanceRecoveryBySpeedingUpSwing());
@@ -314,6 +314,7 @@ public class StepAdjustmentController
       icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, adjustedSolutionInControlPlane, tempPoint, upcomingFootstep.getPosition().getZ());
       footstepSolution.getPosition().set(tempPoint);
 
+      environmentConstraintProvider.setReachabilityRegion(reachabilityConstraintHandler.getReachabilityConstraint());
       environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(), footstepSolution, upcomingFootstepContactPoints);
 
       if (wasFootstepAdjusted() && CONTINUOUSLY_UPDATE_DESIRED_POSITION)
