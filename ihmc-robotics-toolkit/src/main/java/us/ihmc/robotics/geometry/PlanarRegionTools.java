@@ -1085,7 +1085,7 @@ public class PlanarRegionTools
     * Will return the intersection point between a line and a single planar region. If the line does
     * not intersect the region this method will return null.
     */
-   public static Point3D intersectRegionWithLine(PlanarRegion region, Line3D projectionLineInWorld)
+   public static Point3D intersectRegionWithLine(PlanarRegion region, Line3DReadOnly projectionLineInWorld)
    {
       RigidBodyTransformReadOnly regionToWorld = region.getTransformToWorld();
       RigidBodyTransformReadOnly regionToLocal = region.getTransformToLocal();
