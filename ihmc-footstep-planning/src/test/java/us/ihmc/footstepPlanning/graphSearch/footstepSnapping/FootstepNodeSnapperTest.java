@@ -80,7 +80,7 @@ public class FootstepNodeSnapperTest
       }
 
       @Override
-      protected FootstepNodeSnapData computeSnapTransform(FootstepNode footstepNode)
+      protected FootstepNodeSnapData computeSnapTransform(FootstepNode footstepNode, FootstepNode stanceNode)
       {
          dirtyBit = true;
          return FootstepNodeSnapData.emptyData();
