@@ -2,9 +2,13 @@ package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -74,5 +78,117 @@ public class FootstepNodeSnapAndWigglerTest
          dirtyBit = true;
          return super.wiggleIntoConvexHull(footPolygonInRegionFrame);
       }
+   }
+
+   @Test
+   public void testMaximumSnapHeightOnFlatRegions()
+   {
+      double groundHeight = -0.2;
+      double maximumSnapHeight = 2.7;
+
+      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
+      planarRegionsListGenerator.translate(0.0, 0.0, groundHeight);
+      planarRegionsListGenerator.addRectangle(100.0, 100.0);
+
+      // regions low enough to snap
+      planarRegionsListGenerator.identity();
+      double lowHeight0 = groundHeight + maximumSnapHeight - 1e-5;
+      planarRegionsListGenerator.translate(1.0, -1.0, lowHeight0);
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+
+      planarRegionsListGenerator.identity();
+      double lowHeight1 = groundHeight + maximumSnapHeight - 0.5;
+      planarRegionsListGenerator.translate(1.0, 0.0, lowHeight1);
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+
+      planarRegionsListGenerator.identity();
+      double lowHeight2 = groundHeight + 0.2;
+      planarRegionsListGenerator.translate(1.0, 1.0, lowHeight2);
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+
+      // regions too high to snap
+      planarRegionsListGenerator.identity();
+      double highHeight0 = groundHeight + maximumSnapHeight + 1e-5;
+      planarRegionsListGenerator.translate(2.0, -1.0, highHeight0);
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+
+      planarRegionsListGenerator.identity();
+      double highHeight1 = groundHeight + maximumSnapHeight + 0.5;
+      planarRegionsListGenerator.translate(2.0, 0.0, highHeight1);
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+
+      planarRegionsListGenerator.identity();
+      double highHeight2 = groundHeight + 100.0;
+      planarRegionsListGenerator.translate(2.0, 1.0, highHeight2);
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+
+      PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
+      DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+      footstepPlannerParameters.setMaximumSnapHeight(maximumSnapHeight);
+      FootstepNodeSnapAndWiggler snapper  = new FootstepNodeSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters);
+      snapper.setPlanarRegions(planarRegionsList);
+
+      RigidBodyTransform expectedTransform = new RigidBodyTransform();
+      double epsilon = 1e-8;
+
+      // test regions low enough to snap
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(new FootstepNode(1.0, -1.0));
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, lowHeight0));
+      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+
+      snapData = snapper.snapFootstepNode(new FootstepNode(1.0, 0.0));
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, lowHeight1));
+      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+
+      snapData = snapper.snapFootstepNode(new FootstepNode(1.0, 1.0));
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, lowHeight2));
+      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+
+      // test regions high enough to snap
+      snapData = snapper.snapFootstepNode(new FootstepNode(2.0, -1.0));
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
+      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+
+      snapData = snapper.snapFootstepNode(new FootstepNode(2.0, 0.0));
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
+      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+
+      snapData = snapper.snapFootstepNode(new FootstepNode(2.0, 1.0));
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
+      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+   }
+
+   @Test
+   public void testMaximumSnapHeightOnSlopedRegion()
+   {
+      double groundHeight = -0.2;
+      double maximumSnapHeight = 2.7;
+      double rotatedAngle = Math.toRadians(- 45.0);
+
+      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
+      planarRegionsListGenerator.translate(0.0, 0.0, groundHeight);
+      planarRegionsListGenerator.addRectangle(100.0, 100.0);
+      planarRegionsListGenerator.identity();
+      planarRegionsListGenerator.rotate(rotatedAngle, Axis3D.Y);
+      planarRegionsListGenerator.addRectangle(100.0, 100.0);
+
+      PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
+      DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+      footstepPlannerParameters.setMaximumSnapHeight(maximumSnapHeight);
+      FootstepNodeSnapAndWiggler snapper  = new FootstepNodeSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters);
+      snapper.setPlanarRegions(planarRegionsList);
+
+      RigidBodyTransform expectedTransform = new RigidBodyTransform();
+      double epsilon = 1e-8;
+
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(new FootstepNode(- 1.0, 0.0));
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
+      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+
+      snapData = snapper.snapFootstepNode(new FootstepNode(maximumSnapHeight - LatticeNode.gridSizeXY, 0.0));
+      Assertions.assertTrue(EuclidCoreTools.epsilonEquals(snapData.getSnapTransform().getRotation().getPitch(), rotatedAngle, epsilon));
+
+      snapData = snapper.snapFootstepNode(new FootstepNode(maximumSnapHeight + LatticeNode.gridSizeXY, 0.0));
+      Assertions.assertTrue(EuclidCoreTools.epsilonEquals(snapData.getSnapTransform().getRotation().getPitch(), 0.0, epsilon));
    }
 }
