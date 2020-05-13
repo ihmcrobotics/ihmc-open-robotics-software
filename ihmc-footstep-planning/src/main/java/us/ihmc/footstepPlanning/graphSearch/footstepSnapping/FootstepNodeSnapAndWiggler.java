@@ -60,11 +60,11 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
 
    public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode)
    {
-      return snapFootstepNode(footstepNode, false);
+      return snapFootstepNode(footstepNode, null,false);
    }
 
    @Override
-   public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode, boolean computeWiggleTransform)
+   public FootstepNodeSnapData snapFootstepNode(FootstepNode footstepNode, FootstepNode stanceNode, boolean computeWiggleTransform)
    {
       if (snapDataHolder.containsKey(footstepNode))
       {
@@ -86,7 +86,7 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       }
       else
       {
-         FootstepNodeSnapData snapData = computeSnapTransform(footstepNode);
+         FootstepNodeSnapData snapData = computeSnapTransform(footstepNode, stanceNode);
          snapDataHolder.put(footstepNode, snapData);
 
          if (snapData.getSnapTransform().containsNaN())
@@ -110,10 +110,12 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       snapDataHolder.put(footstepNode, snapData);
    }
 
-   protected FootstepNodeSnapData computeSnapTransform(FootstepNode footstepNode)
+   protected FootstepNodeSnapData computeSnapTransform(FootstepNode footstepNode, FootstepNode stanceNode)
    {
+      double maximumRegionHeightToConsider = getMaximumRegionHeightToConsider(stanceNode);
       FootstepNodeTools.getFootPolygon(footstepNode, footPolygonsInSoleFrame.get(footstepNode.getRobotSide()), footPolygon);
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, planarRegionToPack);
+
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, maximumRegionHeightToConsider, planarRegionToPack);
       if (snapTransform == null)
       {
          return FootstepNodeSnapData.emptyData();
@@ -124,6 +126,24 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
          snapData.setPlanarRegionId(planarRegionToPack.getRegionId());
          computeCroppedFoothold(footstepNode, snapData);
          return snapData;
+      }
+   }
+
+   private double getMaximumRegionHeightToConsider(FootstepNode stanceNode)
+   {
+      if (stanceNode == null)
+      {
+         return Double.POSITIVE_INFINITY;
+      }
+
+      FootstepNodeSnapData snapData = snapDataHolder.get(stanceNode);
+      if (snapData == null || snapData.getSnapTransform().containsNaN())
+      {
+         return Double.POSITIVE_INFINITY;
+      }
+      else
+      {
+         return parameters.getMaximumSnapHeight() + FootstepNodeTools.getSnappedNodeHeight(stanceNode, snapData.getSnapTransform());
       }
    }
 
@@ -153,7 +173,7 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
       ConvexPolygon2D footPolygonInRegionFrame = FootstepNodeSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
 
-      RigidBodyTransform wiggleTransformInLocal = null;
+      RigidBodyTransform wiggleTransformInLocal;
       if (parameters.getEnableConcaveHullWiggler() && !planarRegionToPack.getConcaveHull().isEmpty())
       {
          wiggleTransformInLocal = concavePolygonWiggler.wigglePolygon(footPolygonInRegionFrame,
@@ -169,15 +189,10 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
          }
          else
          {
-            RigidBodyTransform convexHullTransform = PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegionFrame, planarRegionToPack, wiggleParameters);
-            if (convexHullTransform == null)
+            if ((wiggleTransformInLocal = wiggleIntoConvexHull(footPolygonInRegionFrame)) == null)
             {
                snapData.getWiggleTransformInWorld().setIdentity();
                return;
-            }
-            else
-            {
-               wiggleTransformInLocal = convexHullTransform;
             }
          }
       }
@@ -185,24 +200,13 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       snapData.getWiggleTransformInWorld().set(planarRegionToPack.getTransformToLocal());
       snapData.getWiggleTransformInWorld().preMultiply(wiggleTransformInLocal);
       snapData.getWiggleTransformInWorld().preMultiply(planarRegionToPack.getTransformToWorld());
-//      tempTransform.multiply(snapTransform);
-
-//      // Ensure polygon will be completely above the planarRegions with this snap and wiggle:
-//      ConvexPolygon2D footPolygonInWorld = new ConvexPolygon2D(footholdPolygonInRegionFrame);
-//      footPolygonInWorld.applyTransform(tempTransform, false);
-//
-//      List<PlanarRegion> planarRegionsIntersectingSnappedAndWiggledPolygon = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(footPolygonInWorld, planarRegionsList);
-//      boolean tooMuchPenetration = checkForTooMuchPenetrationAfterWiggle(planarRegionToPack,
-//                                                                         footPolygonInWorld,
-//                                                                         planarRegionsIntersectingSnappedAndWiggledPolygon,
-//                                                                         parameters.getMaximumZPenetrationOnValleyRegions());
-//      if (tooMuchPenetration)
-//      {
-//         // indicate this wiggle transform has been solved by setting to identity. maybe add some enum or indication of failure mode, or move this check to wiggler
-//         snapData.getWiggleTransformInWorld().setIdentity();
-//      }
-
       computeCroppedFoothold(footstepNode, snapData);
+   }
+
+   /** Extracted to method for testing purposes */
+   protected RigidBodyTransform wiggleIntoConvexHull(ConvexPolygon2D footPolygonInRegionFrame)
+   {
+      return PolygonWiggler.wigglePolygonIntoConvexHullOfRegion(footPolygonInRegionFrame, planarRegionToPack, wiggleParameters);
    }
 
    protected void computeCroppedFoothold(FootstepNode footstepNode, FootstepNodeSnapData snapData)

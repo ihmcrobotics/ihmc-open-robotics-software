@@ -72,7 +72,7 @@ public class FootstepNodeChecker
    {
       footstepIndex++;
 
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(candidateNode, parameters.getWiggleWhilePlanning());
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(candidateNode, stanceNode, parameters.getWiggleWhilePlanning());
       candidateNodeSnapData.set(snapData);
 
       if (planarRegionsList == null || planarRegionsList.isEmpty())
@@ -155,7 +155,7 @@ public class FootstepNodeChecker
 
    private boolean boundingBoxCollisionDetected(FootstepNode candidateNode, FootstepNode stanceNode)
    {
-      FootstepNodeSnapData stanceNodeSnapData = snapper.snapFootstepNode(stanceNode, parameters.getWiggleWhilePlanning());
+      FootstepNodeSnapData stanceNodeSnapData = snapper.snapFootstepNode(stanceNode, null, parameters.getWiggleWhilePlanning());
       if (stanceNodeSnapData == null)
       {
          return false;

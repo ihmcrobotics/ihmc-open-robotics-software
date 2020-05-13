@@ -154,6 +154,10 @@ public class FootstepPlannerParametersTest
       parameters.setBodyBoxBaseZ(bodyBoxBaseZ);
       assertEquals(bodyBoxBaseZ, parameters.getBodyBoxBaseZ(), epsilon);
 
+      double maximumSnapHeight = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setMaximumSnapHeight(maximumSnapHeight);
+      assertEquals(maximumSnapHeight, parameters.getMaximumSnapHeight(), epsilon);
+
       double finalTurnProximity = RandomNumbers.nextDouble(random, 10.0);
       parameters.setFinalTurnProximity(finalTurnProximity);
       assertEquals(finalTurnProximity, parameters.getFinalTurnProximity(), epsilon);
