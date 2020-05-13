@@ -34,6 +34,9 @@ import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -41,6 +44,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -77,7 +81,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final RemoteHumanoidRobotInterface robot;
    private final FootstepPlanningModule footstepPlanningModule;
-   private final VisibilityGraphPathPlanner bodyPathPlanner;
+   private final VisibilityGraphsParametersBasics visibilityGraphParameters;
 
    private final AtomicReference<Boolean> operatorReviewEnabledInput;
    private AtomicReference<FootstepPlannerOutput> latestFootstepPlannerOutput = new AtomicReference<>();
@@ -108,7 +112,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.createUICallback(FootstepPlannerParameters, footstepPlannerParameters::setAllFromStrings);
 
       footstepPlanningModule = helper.getOrCreateFootstepPlanner();
-      bodyPathPlanner = helper.getOrCreateBodyPathPlanner();
+      visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
 
       EnumBasedStateMachineFactory<LookAndStepBehaviorState> stateMachineFactory = new EnumBasedStateMachineFactory<>(LookAndStepBehaviorState.class);
       stateMachineFactory.addTransition(PERCEPT_FAR, BODY_PATH_PLAN, this::transitionFromPerceptFar);
@@ -157,6 +161,12 @@ public class LookAndStepBehavior implements BehaviorInterface
    private void onBodyPathPlanEntry()
    {
       // calculate and send body path plan
+      visibilityGraphParameters.setIncludePreferredExtrusions(false);
+      BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
+      VisibilityGraphPathPlanner bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters,
+                                                                                  pathPostProcessor,
+                                                                                  new YoVariableRegistry(getClass().getSimpleName()));
+
       bodyPathPlanner.setGoal(goalInput.read());
       bodyPathPlanner.setPlanarRegionsList(rea.getLatestPlanarRegionsList());
       HumanoidRobotState humanoidRobotState = robot.pollHumanoidRobotState();
