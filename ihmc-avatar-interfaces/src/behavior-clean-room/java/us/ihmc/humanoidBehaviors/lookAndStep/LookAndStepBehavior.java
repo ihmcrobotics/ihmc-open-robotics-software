@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.commons.Conversions;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
@@ -28,7 +29,6 @@ import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
@@ -118,12 +118,13 @@ public class LookAndStepBehavior implements BehaviorInterface
       stateMachineFactory.addTransition(PERCEPT_NEAR, FOOTSTEP_PLAN, this::transitionFromPerceptNear);
       stateMachineFactory.setOnEntry(FOOTSTEP_PLAN, this::onFootstepPlanEntry);
       stateMachineFactory.addTransition(FOOTSTEP_PLAN, Lists.newArrayList(REVIEW, STEP, FOOTSTEP_PLAN_FAILED), this::transitionFromPlan);
-      stateMachineFactory.addTransition(FOOTSTEP_PLAN_FAILED, PERCEPT_NEAR, this::transitionFromPlanFailed);
+      stateMachineFactory.addTransition(FOOTSTEP_PLAN_FAILED, PERCEPT_NEAR, this::transitionFromFootstepPlanFailed);
       stateMachineFactory.addTransition(REVIEW, Lists.newArrayList(STEP, PERCEPT_NEAR), this::transitionFromReview);
       stateMachineFactory.setOnEntry(STEP, this::onStepStateEntry);
       stateMachineFactory.addTransition(STEP, Lists.newArrayList(PERCEPT_NEAR, PERCEPT_FAR), this::transitionFromStep);
       Arrays.stream(values()).forEach(state -> stateMachineFactory.setDoAction(state, this::pollInterrupts));
       stateMachineFactory.getFactory().addStateChangedListener(this::stateChanged);
+      stateMachineFactory.getFactory().buildClock(() -> Conversions.nanosecondsToSeconds(System.nanoTime()));
       stateMachine = stateMachineFactory.getFactory().build(PERCEPT_FAR);
 
       double period = 0.1;
@@ -382,7 +383,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       return null;
    }
 
-   private boolean transitionFromPlanFailed(double timeInState)
+   private boolean transitionFromFootstepPlanFailed(double timeInState)
    {
       return timeInState > lookAndStepParameters.get(LookAndStepBehaviorParameters.waitTimeAfterPlanFailed);
    }
