@@ -557,7 +557,7 @@ public class ConvexFourBarTest
          assertTrue(expectedCDA <= vertexD.getMaxAngle(),
                     "Itertation " + iteration + ", inaccurate maxCDA: valid angle: " + expectedCDA + ", computed max: " + vertexD.getMaxAngle());
 
-         switch (EuclidCoreRandomTools.nextElementIn(random, FourBarAngle.values()))
+         switch (EuclidCoreRandomTools.nextElementIn(random, FourBarAngle.values))
          {
             case DAB:
                fourBar.update(FourBarAngle.DAB, expectedDAB);

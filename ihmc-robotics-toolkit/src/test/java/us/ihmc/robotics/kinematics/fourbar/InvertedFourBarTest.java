@@ -70,7 +70,7 @@ public class InvertedFourBarTest
 
          fourBar.setup(A, B, C, D);
 
-         for (FourBarAngle angle : FourBarAngle.values())
+         for (FourBarAngle angle : FourBarAngle.values)
          {
             fourBar.setup(A, B, C, D);
             fourBar.setToMin(angle);
@@ -202,7 +202,7 @@ public class InvertedFourBarTest
          FourBar fourBar = new FourBar();
          fourBar.setup(A, B, C, D);
 
-         FourBarAngle fourBarAngle = FourBarAngle.DAB; //EuclidCoreRandomTools.nextElementIn(random, FourBarAngle.values());
+         FourBarAngle fourBarAngle = EuclidCoreRandomTools.nextElementIn(random, FourBarAngle.values);
 
          double angleStart = EuclidCoreRandomTools.nextDouble(random,
                                                               fourBar.getVertex(fourBarAngle).getMinAngle(),
@@ -288,7 +288,7 @@ public class InvertedFourBarTest
          FourBar fourBar = new FourBar();
          fourBar.setup(A, B, C, D);
 
-         FourBarAngle fourBarAngle = FourBarAngle.DAB; //EuclidCoreRandomTools.nextElementIn(random, FourBarAngle.values());
+         FourBarAngle fourBarAngle = FourBarAngle.DAB; //EuclidCoreRandomTools.nextElementIn(random, FourBarAngle.values);
 
          double dt = 1.0e-6;
 
