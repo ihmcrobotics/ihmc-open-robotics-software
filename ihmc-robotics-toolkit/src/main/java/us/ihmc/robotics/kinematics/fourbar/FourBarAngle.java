@@ -35,4 +35,6 @@ public enum FourBarAngle
    BCD,
    /** Inner angle at vertex D. */
    CDA;
+
+   public static final FourBarAngle[] values = values();
 }
