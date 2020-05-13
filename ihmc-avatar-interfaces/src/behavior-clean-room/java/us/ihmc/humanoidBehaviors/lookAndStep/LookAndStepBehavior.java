@@ -10,7 +10,6 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2PlanarRegionsInput;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
@@ -87,7 +86,6 @@ public class LookAndStepBehavior implements BehaviorInterface
    private TypedNotification<Pose3D> goalInput;
    private final Notification takeStepNotification;
    private final Notification rePlanNotification;
-   private final Stopwatch planFailedWait = new Stopwatch();
    private final FramePose3D goalPoseBetweenFeet = new FramePose3D();
    private List<Point3D> bodyPathPlan;
 
@@ -114,13 +112,12 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       EnumBasedStateMachineFactory<LookAndStepBehaviorState> stateMachineFactory = new EnumBasedStateMachineFactory<>(LookAndStepBehaviorState.class);
       stateMachineFactory.addTransition(PERCEPT_FAR, BODY_PATH_PLAN, this::transitionFromPerceptFar);
+      stateMachineFactory.setOnEntry(BODY_PATH_PLAN, this::onBodyPathPlanEntry);
       stateMachineFactory.addTransition(BODY_PATH_PLAN, Lists.newArrayList(PERCEPT_NEAR, BODY_PATH_PLAN_FAILED), this::transitionFromBodyPathPlan);
       stateMachineFactory.addTransition(BODY_PATH_PLAN_FAILED, PERCEPT_FAR, this::transitionFromBodyPathPlanFailed);
-      stateMachineFactory.setOnEntry(BODY_PATH_PLAN, this::onBodyPathPlanEntry);
       stateMachineFactory.addTransition(PERCEPT_NEAR, FOOTSTEP_PLAN, this::transitionFromPerceptNear);
       stateMachineFactory.setOnEntry(FOOTSTEP_PLAN, this::onFootstepPlanEntry);
       stateMachineFactory.addTransition(FOOTSTEP_PLAN, Lists.newArrayList(REVIEW, STEP, FOOTSTEP_PLAN_FAILED), this::transitionFromPlan);
-      stateMachineFactory.setOnEntry(FOOTSTEP_PLAN_FAILED, this::onPlanFailedStateEntry);
       stateMachineFactory.addTransition(FOOTSTEP_PLAN_FAILED, PERCEPT_NEAR, this::transitionFromPlanFailed);
       stateMachineFactory.addTransition(REVIEW, Lists.newArrayList(STEP, PERCEPT_NEAR), this::transitionFromReview);
       stateMachineFactory.setOnEntry(STEP, this::onStepStateEntry);
@@ -151,24 +148,9 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private boolean transitionFromPerceptFar()
    {
-
-
-      // lidar regions not empty
-      boolean notEmpty = !combinedRegionsInput.getLatest().getNumberOfConvexPolygons().isEmpty();
-
-      helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
-
-      return notEmpty;
-   }
-
-   private LookAndStepBehaviorState transitionFromBodyPathPlan()
-   {
-
-   }
-
-   private boolean transitionFromBodyPathPlanFailed()
-   {
-
+      return !rea.getPlanarRegionsListExpired(lookAndStepParameters.getPlanarRegionsExpiration())
+          && !rea.getLatestPlanarRegionsList().isEmpty()
+          && goalInput.peek() != null;
    }
 
    private void onBodyPathPlanEntry()
@@ -182,70 +164,63 @@ public class LookAndStepBehavior implements BehaviorInterface
       leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
       rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
       bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
+      Stopwatch stopwatch = new Stopwatch().start();
+      LogTools.info("Planning body path...");
+      bodyPathPlan = null; // TODO: Is this necessary?
       bodyPathPlanner.planWaypoints();
-      ArrayList<Point3D> waypointsAsPoints = new ArrayList<>();
-      for (Pose3DReadOnly poseWaypoint : bodyPathPlanner.getWaypoints())
+      LogTools.info("Body path planning took {}", stopwatch.totalElapsed());
+//      bodyPathPlan = bodyPathPlanner.getWaypoints();
+      if (bodyPathPlanner.getWaypoints() != null)
       {
-         waypointsAsPoints.add(new Point3D(poseWaypoint.getPosition()));
+         bodyPathPlan = new ArrayList<>();
+         for (Pose3DReadOnly poseWaypoint : bodyPathPlanner.getWaypoints())
+         {
+            bodyPathPlan.add(new Point3D(poseWaypoint.getPosition()));
+         }
+         helper.publishToUI(BodyPathPlanForUI, bodyPathPlan);
       }
    }
 
-   private boolean transitionFromAquirePath()
+   private LookAndStepBehaviorState transitionFromBodyPathPlan()
    {
-      // check for new body path plans
-      bodyPathPlanNotificationInput.poll();
-      
-      if (bodyPathPlanNotificationInput.hasNext())
+      if (bodyPathPlan != null && bodyPathPlan.size() >= 2)
       {
-         bodyPathPlan = bodyPathPlanNotificationInput.peek();
+         return PERCEPT_NEAR;
       }
-
-      boolean transition = true;
-      // check there is a path
-      boolean hasAtLeastTwoPoints = bodyPathPlan != null && !bodyPathPlan.isEmpty() && bodyPathPlan.size() >= 2;
-      transition &= hasAtLeastTwoPoints;
-
-      if (hasAtLeastTwoPoints)
+      else
       {
-         // visualize the body path in UI
-         helper.publishToUI(BodyPathPlanForUI, bodyPathPlan);
-
-         FramePose3DReadOnly midFeetUnderPelvis = robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getMidFeetUnderPelvisFrame);
-
-         // check you are within radius of path
-         for (int i = 0; i < bodyPathPlan.size() - 1; i++)
-         {
-            LineSegment3D lineSegment = new LineSegment3D();
-            lineSegment.set(bodyPathPlan.get(i), bodyPathPlan.get(i + 1));
-
-            transition &= lineSegment.distance(midFeetUnderPelvis.getPosition()) < lookAndStepParameters.getMaxPlanStrayDistance();
-         }
-
-         // check you aren't close to end of path
-         transition &= bodyPathPlan.get(bodyPathPlan.size() - 1).distance(midFeetUnderPelvis.getPosition()) > lookAndStepParameters.getGoalSatisfactionRadius();
+         return BODY_PATH_PLAN_FAILED;
       }
+   }
 
-      return transition;
+   private boolean transitionFromBodyPathPlanFailed(double timeInState)
+   {
+      return timeInState > lookAndStepParameters.get(LookAndStepBehaviorParameters.waitTimeAfterPlanFailed);
    }
 
    private boolean transitionFromPerceptNear()
    {
-      return !arePlanarRegionsExpired() && !environmentMap.getLatestCombinedRegionsList().isEmpty();
+      return !environmentMap.getPlanarRegionsListExpired(lookAndStepParameters.getPlanarRegionsExpiration())
+          && !environmentMap.getLatestCombinedRegionsList().isEmpty();
    }
 
    private void onFootstepPlanEntry()
    {
       LogTools.info("Entering plan state");
-      HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
       PlanarRegionsList latestPlanarRegionList = environmentMap.getLatestCombinedRegionsList();
       helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
 
+      HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
       FramePose3D initialPoseBetweenFeet = new FramePose3D();
       initialPoseBetweenFeet.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
       initialPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
       double midFeetZ = initialPoseBetweenFeet.getZ();
 
-      goalPoseBetweenFeet.setIncludingFrame(robot.quickPollPoseReadOnly(HumanoidReferenceFrames::getPelvisFrame));
+      FramePose3D pelvisPose = new FramePose3D();
+      pelvisPose.setToZero(latestHumanoidRobotState.getPelvisFrame());
+      pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
+
+      goalPoseBetweenFeet.setIncludingFrame(pelvisPose);
       goalPoseBetweenFeet.setZ(midFeetZ);
       
       // find closest point along body path plan
@@ -257,15 +232,15 @@ public class LookAndStepBehavior implements BehaviorInterface
          LogTools.info("Finding closest point along body path. Segment: {}, closestDistance: {}", i, closestDistance);
          LineSegment3D lineSegment = new LineSegment3D();
          lineSegment.set(bodyPathPlan.get(i), bodyPathPlan.get(i + 1));
-         
+
          Point3D closestPointOnBodyPathSegment = new Point3D();
-         EuclidGeometryTools.closestPoint3DsBetweenTwoLineSegment3Ds(lineSegment.getFirstEndpoint(), 
-                                                                     lineSegment.getSecondEndpoint(), 
-                                                                     goalPoseBetweenFeet.getPosition(), 
-                                                                     goalPoseBetweenFeet.getPosition(), 
-                                                                     closestPointOnBodyPathSegment, 
+         EuclidGeometryTools.closestPoint3DsBetweenTwoLineSegment3Ds(lineSegment.getFirstEndpoint(),
+                                                                     lineSegment.getSecondEndpoint(),
+                                                                     goalPoseBetweenFeet.getPosition(),
+                                                                     goalPoseBetweenFeet.getPosition(),
+                                                                     closestPointOnBodyPathSegment,
                                                                      new Point3D()); // TODO find a better way to do this
-         
+
          double distance = closestPointOnBodyPathSegment.distance(goalPoseBetweenFeet.getPosition());
          if (distance < closestDistance)
          {
@@ -275,20 +250,20 @@ public class LookAndStepBehavior implements BehaviorInterface
          }
       }
       LogTools.info("closestPointAlongPath: {}, closestDistance: {}, closestLineSegmentIndex: {}", closestPointAlongPath, closestDistance, closestSegmentIndex);
-      
+
       // move point along body path plan by plan horizon
       Point3D goalPoint = new Point3D(closestPointAlongPath);
-      
+
       double moveAmountToGo = lookAndStepParameters.get(LookAndStepBehaviorParameters.planHorizon);
-      
+
       Point3D previousComparisonPoint = closestPointAlongPath;
       for (int i = closestSegmentIndex; i < bodyPathPlan.size() - 1 && moveAmountToGo > 0; i++)
       {
          Point3D endOfSegment = bodyPathPlan.get(i + 1);
-         
+
          double distanceToEndOfSegment = endOfSegment.distance(previousComparisonPoint);
          LogTools.info("Evaluating segment {}, moveAmountToGo: {}, distanceToEndOfSegment: {}", i, moveAmountToGo, distanceToEndOfSegment);
-         
+
          if (distanceToEndOfSegment < moveAmountToGo)
          {
             previousComparisonPoint = bodyPathPlan.get(i + 1);
@@ -299,11 +274,11 @@ public class LookAndStepBehavior implements BehaviorInterface
             goalPoint.interpolate(previousComparisonPoint, endOfSegment, moveAmountToGo / distanceToEndOfSegment);
             moveAmountToGo = 0;
          }
-         
+
          goalPoint.set(previousComparisonPoint);
       }
       LogTools.info("previousComparisonPoint: {}, goalPoint: {}", previousComparisonPoint, goalPoint);
-      
+
 //      double trailingBy = goalPoseBetweenFeet.getPositionDistance(initialPoseBetweenFeet);
 //      goalPoseBetweenFeet.getOrientation().setYawPitchRoll(lookAndStepParameters.get(LookAndStepBehaviorParameters.direction), 0.0, 0.0);
 //      goalPoseBetweenFeet.appendTranslation(lookAndStepParameters.get(LookAndStepBehaviorParameters.planHorizon) - trailingBy, 0.0, 0.0);
@@ -311,10 +286,10 @@ public class LookAndStepBehavior implements BehaviorInterface
       Vector2D headingVector = new Vector2D();
       headingVector.set(goalPoint.getX(), goalPoint.getY());
       headingVector.sub(goalPoseBetweenFeet.getPosition().getX(), goalPoseBetweenFeet.getPosition().getY());
-      
+
       LogTools.info("Setting goalPoint: {}", goalPoint);
       goalPoseBetweenFeet.getPosition().set(goalPoint);
-      
+
       double yaw = Math.atan2(headingVector.getX(), headingVector.getY());
       LogTools.info("Setting yaw: {}", yaw);
       goalPoseBetweenFeet.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
@@ -407,14 +382,9 @@ public class LookAndStepBehavior implements BehaviorInterface
       return null;
    }
 
-   private void onPlanFailedStateEntry()
+   private boolean transitionFromPlanFailed(double timeInState)
    {
-      planFailedWait.start();
-   }
-
-   private boolean transitionFromPlanFailed()
-   {
-      return planFailedWait.lapElapsed() > lookAndStepParameters.get(LookAndStepBehaviorParameters.waitTimeAfterPlanFailed);
+      return timeInState > lookAndStepParameters.get(LookAndStepBehaviorParameters.waitTimeAfterPlanFailed);
    }
 
    private LookAndStepBehaviorState transitionFromReview()
@@ -455,7 +425,33 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private LookAndStepBehaviorState transitionFromStep()
    {
-      return walkingStatusNotification.hasNext(); // use rea.isRobotWalking?
+      if (walkingStatusNotification.hasNext()) // use rea.isRobotWalking?
+      {
+         // if close to goal, far, else near
+         HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
+         FramePose3D initialPoseBetweenFeet = new FramePose3D();
+         initialPoseBetweenFeet.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
+         initialPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
+         double midFeetZ = initialPoseBetweenFeet.getZ();
+
+         FramePose3D pelvisMidFeetPose = new FramePose3D();
+         pelvisMidFeetPose.setToZero(latestHumanoidRobotState.getPelvisFrame());
+         pelvisMidFeetPose.changeFrame(ReferenceFrame.getWorldFrame());
+         pelvisMidFeetPose.setZ(midFeetZ);
+
+         double distanceToEnd = bodyPathPlan.get(bodyPathPlan.size() - 1).distance(pelvisMidFeetPose.getPosition());
+
+         if (distanceToEnd < lookAndStepParameters.getGoalSatisfactionRadius())
+         {
+            return PERCEPT_FAR;
+         }
+         else
+         {
+            return PERCEPT_NEAR;
+         }
+      }
+
+      return null;
    }
 
    private void pollInterrupts()
@@ -469,11 +465,6 @@ public class LookAndStepBehavior implements BehaviorInterface
       takeStepNotification.poll();
       rePlanNotification.poll();
       goalInput.poll();
-   }
-
-   private boolean arePlanarRegionsExpired()
-   {
-      return environmentMap.getPlanarRegionsListExpired(lookAndStepParameters.getPlanarRegionsExpiration());
    }
 
    public static class LookAndStepBehaviorAPI
