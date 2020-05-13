@@ -34,9 +34,9 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
 
    private final Group root = new Group();
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette());
-   private final MeshHolder debugParentStepGraphic = new MeshHolder();
-   private final MeshHolder debugChildStepGraphic = new MeshHolder();
-   private final MeshHolder debugIdealStepGraphic = new MeshHolder();
+   private final MeshHolder debugParentStepGraphic = new MeshHolder(root);
+   private final MeshHolder debugChildStepGraphic = new MeshHolder(root);
+   private final MeshHolder debugIdealStepGraphic = new MeshHolder(root);
 
    private final AtomicReference<Pair<RigidBodyTransform, ConvexPolygon2D>> debugParentStep;
    private final AtomicReference<Pair<RigidBodyTransform, ConvexPolygon2D>> debugChildStep;
@@ -119,29 +119,6 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
       transform.appendTranslation(0.0, 0.0, 0.0025);
       meshBuilder.addMultiLine(transform, footPoints, 0.01, color, true);
       meshBuilder.addPolygon(transform, footPolygon, color);
-   }
-
-   class MeshHolder
-   {
-      final AtomicReference<Pair<Mesh, Material>> meshReference = new AtomicReference<>(null);
-      final MeshView meshView = new MeshView();
-      boolean addedFlag = false;
-
-      void update()
-      {
-         Pair<Mesh, Material> mesh = meshReference.getAndSet(null);
-         if (mesh != null)
-         {
-            if (!addedFlag)
-            {
-               root.getChildren().add(meshView);
-               addedFlag = true;
-            }
-
-            meshView.setMesh(mesh.getKey());
-            meshView.setMaterial(mesh.getValue());
-         }
-      }
    }
 
    public Group getRoot()
