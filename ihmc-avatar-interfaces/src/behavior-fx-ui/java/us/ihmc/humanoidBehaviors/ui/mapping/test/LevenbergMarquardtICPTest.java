@@ -19,9 +19,9 @@ public class LevenbergMarquardtICPTest
    private XYPlaneDrawer drawer;
    private JFrame frame;
 
-   private List<List<Point2D>> fullModel = new ArrayList<>();
-   private List<List<Point2D>> data1 = new ArrayList<>();
-   private List<List<Point2D>> data2 = new ArrayList<>();
+   private List<Point2D> fullModel = new ArrayList<>();
+   private List<Point2D> data1 = new ArrayList<>();
+   private List<Point2D> data2 = new ArrayList<>();
 
    private void setupPointCloud()
    {
@@ -35,18 +35,18 @@ public class LevenbergMarquardtICPTest
       double innerCircleShort = 1.0;
       double outterCircleLong = 4.0;
       double outterCircleShort = 3.0;
-      fullModel.add(generatePointsOnEllipsoid(50, Math.toRadians(90.0), Math.toRadians(359.9), innerCircleLong, innerCircleShort));
-      fullModel.add(generatePointsOnEllipsoid(70, Math.toRadians(90.0), Math.toRadians(359.9), outterCircleLong, outterCircleShort));
-      fullModel.add(generatePointsOnLine(10, innerCircleShort, outterCircleShort, 0.0, true));
-      fullModel.add(generatePointsOnLine(10, innerCircleLong, outterCircleLong, 0.0, false));
+      fullModel.addAll(generatePointsOnEllipsoid(50, Math.toRadians(90.0), Math.toRadians(359.9), innerCircleLong, innerCircleShort));
+      fullModel.addAll(generatePointsOnEllipsoid(70, Math.toRadians(90.0), Math.toRadians(359.9), outterCircleLong, outterCircleShort));
+      fullModel.addAll(generatePointsOnLine(10, innerCircleShort, outterCircleShort, 0.0, true));
+      fullModel.addAll(generatePointsOnLine(10, innerCircleLong, outterCircleLong, 0.0, false));
 
-      data1.add(generatePointsOnEllipsoid(35, Math.toRadians(90.0), Math.toRadians(200.0), innerCircleLong, innerCircleShort));
-      data1.add(generatePointsOnEllipsoid(50, Math.toRadians(90.0), Math.toRadians(320.0), outterCircleLong, outterCircleShort));
-      data1.add(generatePointsOnLine(10, innerCircleShort, outterCircleShort, 0.0, true));
+      data1.addAll(generatePointsOnEllipsoid(35, Math.toRadians(90.0), Math.toRadians(200.0), innerCircleLong, innerCircleShort));
+      data1.addAll(generatePointsOnEllipsoid(50, Math.toRadians(90.0), Math.toRadians(320.0), outterCircleLong, outterCircleShort));
+      data1.addAll(generatePointsOnLine(10, innerCircleShort, outterCircleShort, 0.0, true));
 
-      data2.add(generatePointsOnEllipsoid(50, Math.toRadians(130.0), Math.toRadians(359.9), innerCircleLong, innerCircleShort));
-      data2.add(generatePointsOnEllipsoid(60, Math.toRadians(120.0), Math.toRadians(359.9), outterCircleLong, outterCircleShort));
-      data2.add(generatePointsOnLine(10, innerCircleLong, outterCircleLong, 0.0, false));
+      data2.addAll(generatePointsOnEllipsoid(50, Math.toRadians(130.0), Math.toRadians(359.9), innerCircleLong, innerCircleShort));
+      data2.addAll(generatePointsOnEllipsoid(60, Math.toRadians(120.0), Math.toRadians(359.9), outterCircleLong, outterCircleShort));
+      data2.addAll(generatePointsOnLine(10, innerCircleLong, outterCircleLong, 0.0, false));
    }
 
    @Test
@@ -57,20 +57,9 @@ public class LevenbergMarquardtICPTest
       transformPointCloud(data1, 1.0, 2.0, Math.toRadians(30.0));
       transformPointCloud(data2, -1.0, -2.0, Math.toRadians(-90));
 
-      for (int i = 0; i < fullModel.size(); i++)
-      {
-         drawer.addPointCloud(fullModel.get(i), Color.black);
-      }
-
-      for (int i = 0; i < data1.size(); i++)
-      {
-         drawer.addPointCloud(data1.get(i), Color.red);
-      }
-
-      for (int i = 0; i < data2.size(); i++)
-      {
-         drawer.addPointCloud(data2.get(i), Color.green);
-      }
+      drawer.addPointCloud(fullModel, Color.black, false);
+      drawer.addPointCloud(data1, Color.red, false);
+      drawer.addPointCloud(data2, Color.green, false);
 
       frame.add(drawer);
       frame.pack();
@@ -86,14 +75,17 @@ public class LevenbergMarquardtICPTest
 
       transformPointCloud(data1, 0.3, 0.5, Math.toRadians(10.0));
 
-      for (int i = 0; i < fullModel.size(); i++)
-      {
-         drawer.addPointCloud(fullModel.get(i), Color.black);
-      }
+      drawer.addPointCloud(fullModel, Color.black, false);
+      drawer.addPointCloud(data1, Color.red, false);
 
+      double outlierDistance = 0.2;
       for (int i = 0; i < data1.size(); i++)
       {
-         drawer.addPointCloud(data1.get(i), Color.red);
+         double distance = computeClosestDistance(data1.get(i), fullModel);
+         if (distance < outlierDistance)
+            drawer.addPoint(data1.get(i), Color.red, true);
+         else
+            drawer.addPoint(data1.get(i), Color.red, false);
       }
 
       frame.add(drawer);
@@ -127,20 +119,37 @@ public class LevenbergMarquardtICPTest
 
    }
 
-   private void transformPointCloud(List<List<Point2D>> pointCloud, double translationX, double translationY, double theta)
+   private double computeClosestDistance(Point2D point, List<Point2D> pointCloud)
+   {
+      double minDistance = Double.MAX_VALUE;
+      double distance = 0.0;
+
+      for (int i = 0; i < pointCloud.size(); i++)
+      {
+         Point2D modelPoint = pointCloud.get(i);
+
+         distance = point.distance(modelPoint);
+         if (distance < minDistance)
+         {
+            minDistance = distance;
+         }
+      }
+
+      return minDistance;
+   }
+
+   private void transformPointCloud(List<Point2D> pointCloud, double translationX, double translationY, double theta)
    {
       double sin = Math.sin(theta);
       double cos = Math.cos(theta);
       for (int i = 0; i < pointCloud.size(); i++)
       {
-         List<Point2D> points = pointCloud.get(i);
-         for (int j = 0; j < points.size(); j++)
-         {
-            double transformedX = cos * points.get(j).getX() - sin * points.get(j).getY() + translationX;
-            double transformedY = sin * points.get(j).getX() + cos * points.get(j).getY() + translationY;
+         Point2D point = pointCloud.get(i);
 
-            points.get(j).set(transformedX, transformedY);
-         }
+         double transformedX = cos * point.getX() - sin * point.getY() + translationX;
+         double transformedY = sin * point.getX() + cos * point.getY() + translationY;
+
+         point.set(transformedX, transformedY);
       }
    }
 
@@ -193,8 +202,9 @@ public class LevenbergMarquardtICPTest
    {
       private static final long serialVersionUID = 1L;
       private static final int scale = 40;
-      private final List<List<Point2D>> pointCloud;
-      private final List<Color> colors;
+      private final List<Point2D> pointCloud;
+      private final List<Color> pointCloudColors;
+      private final List<Boolean> fillers;
 
       private final double xUpper;
       private final double yUpper;
@@ -204,17 +214,29 @@ public class LevenbergMarquardtICPTest
       XYPlaneDrawer(double xUpper, double xLower, double yUpper, double yLower)
       {
          pointCloud = new ArrayList<>();
-         colors = new ArrayList<>();
+         pointCloudColors = new ArrayList<>();
+         fillers = new ArrayList<>();
          this.xUpper = xUpper;
          this.yUpper = yUpper;
          sizeU = (int) Math.round((-yLower + yUpper) * scale);
          sizeV = (int) Math.round((-xLower + xUpper) * scale);
       }
 
-      public void addPointCloud(List<Point2D> points, Color color)
+      public void addPoint(Point2D point, Color color, boolean fill)
       {
-         pointCloud.add(points);
-         colors.add(color);
+         pointCloud.add(point);
+         pointCloudColors.add(color);
+         fillers.add(fill);
+      }
+
+      public void addPointCloud(List<Point2D> points, Color color, boolean fill)
+      {
+         pointCloud.addAll(points);
+         for (int i = 0; i < points.size(); i++)
+         {
+            pointCloudColors.add(color);
+            fillers.add(fill);
+         }
       }
 
       public void paint(Graphics g)
@@ -230,12 +252,12 @@ public class LevenbergMarquardtICPTest
 
          for (int i = 0; i < pointCloud.size(); i++)
          {
-            g.setColor(colors.get(i));
-            for (int j = 0; j < pointCloud.get(i).size(); j++)
-            {
-               Point2D point = pointCloud.get(i).get(j);
+            g.setColor(pointCloudColors.get(i));
+            Point2D point = pointCloud.get(i);
+            if (fillers.get(i))
+               pointFill(g, point.getX(), point.getY(), 4);
+            else
                point(g, point.getX(), point.getY(), 4);
-            }
          }
       }
 
@@ -248,7 +270,7 @@ public class LevenbergMarquardtICPTest
       public void pointFill(Graphics g, double px, double py, int size)
       {
          int diameter = size;
-         g.fillOval(y2v(py) - diameter / 2, x2u(px) - diameter / 2, diameter, diameter);
+         g.fillOval(x2u(px) - diameter / 2, y2v(py) - diameter / 2, diameter, diameter);
       }
 
       public int x2u(double px)
