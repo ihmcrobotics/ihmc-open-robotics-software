@@ -7,20 +7,27 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC footstep planning module.
-       * This message is sent from the planner in order to visualize and debug planner progress
-       */
+   
+ * This message is part of the IHMC footstep planning module.
+   
+ * This message is sent from the planner in order to visualize and debug planner progress
+   
+ */
 public class FootstepPlannerOccupancyMapMessage extends Packet<FootstepPlannerOccupancyMapMessage> implements Settable<FootstepPlannerOccupancyMapMessage>, EpsilonComparable<FootstepPlannerOccupancyMapMessage>
 {
 
    /**
-            * This is the ID of the planning request which this message corresponds to
-            */
+       
+    * This is the ID of the planning request which this message corresponds to
+       
+    */
    public long sequence_id_;
 
    /**
-            * List of cells that the planner has explored
-            */
+       
+    * List of cells that the planner has explored
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepPlannerCellMessage>  occupied_cells_;
 
    public FootstepPlannerOccupancyMapMessage()
@@ -48,15 +55,19 @@ public class FootstepPlannerOccupancyMapMessage extends Packet<FootstepPlannerOc
 
 
    /**
-            * This is the ID of the planning request which this message corresponds to
-            */
+       
+    * This is the ID of the planning request which this message corresponds to
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * This is the ID of the planning request which this message corresponds to
-            */
+       
+    * This is the ID of the planning request which this message corresponds to
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -65,8 +76,10 @@ public class FootstepPlannerOccupancyMapMessage extends Packet<FootstepPlannerOc
 
 
    /**
-            * List of cells that the planner has explored
-            */
+       
+    * List of cells that the planner has explored
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepPlannerCellMessage>  getOccupiedCells()
    {
       return occupied_cells_;

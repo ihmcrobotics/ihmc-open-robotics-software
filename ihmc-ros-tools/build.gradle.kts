@@ -38,14 +38,12 @@ mainDependencies {
    api("org.ros.rosjava_messages:tf2_msgs:0.5.9")
    api("org.ros.rosjava_messages:tf:1.10.8")
 
-   api("us.ihmc:euclid:0.13.1")
-   api("us.ihmc:ihmc-commons:0.28.2")
+   api("us.ihmc:euclid:0.14.1")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-java-toolkit:source")
 }
 
 testDependencies {
-   api("us.ihmc:ihmc-commons-testing:0.28.2")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }

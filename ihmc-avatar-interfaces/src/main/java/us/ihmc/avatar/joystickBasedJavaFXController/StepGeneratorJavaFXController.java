@@ -457,7 +457,8 @@ public class StepGeneratorJavaFXController
       footPolygon.applyTransform(tempTransform, false);
 
       PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
-      return PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, tempRegion) != null;
+
+      return PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, Double.POSITIVE_INFINITY, tempRegion) != null;
    }
 
    private void processToggleFlamingoMode(RobotSide robotSide, ButtonState state)

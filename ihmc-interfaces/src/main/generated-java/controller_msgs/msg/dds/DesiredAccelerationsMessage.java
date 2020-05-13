@@ -7,26 +7,36 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * General message that carries desired joint accelerations.
-       * It is used by ArmDesiredAccelerationsMessage, SpineDesiredAccelerationsMessage, NeckDesiredAccelerationsMessage.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * General message that carries desired joint accelerations.
+   
+ * It is used by ArmDesiredAccelerationsMessage, SpineDesiredAccelerationsMessage, NeckDesiredAccelerationsMessage.
+   
+ */
 public class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMessage> implements Settable<DesiredAccelerationsMessage>, EpsilonComparable<DesiredAccelerationsMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Specifies the desired joint accelerations.
-            */
+       
+    * Specifies the desired joint accelerations.
+       
+    */
    public us.ihmc.idl.IDLSequence.Double  desired_joint_accelerations_;
 
    /**
-            * Properties for queueing commands.
-            */
+       
+    * Properties for queueing commands.
+       
+    */
    public controller_msgs.msg.dds.QueueableMessage queueing_properties_;
 
    public DesiredAccelerationsMessage()
@@ -59,15 +69,19 @@ public class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMess
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -76,8 +90,10 @@ public class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMess
 
 
    /**
-            * Specifies the desired joint accelerations.
-            */
+       
+    * Specifies the desired joint accelerations.
+       
+    */
    public us.ihmc.idl.IDLSequence.Double  getDesiredJointAccelerations()
    {
       return desired_joint_accelerations_;
@@ -86,8 +102,10 @@ public class DesiredAccelerationsMessage extends Packet<DesiredAccelerationsMess
 
 
    /**
-            * Properties for queueing commands.
-            */
+       
+    * Properties for queueing commands.
+       
+    */
    public controller_msgs.msg.dds.QueueableMessage getQueueingProperties()
    {
       return queueing_properties_;

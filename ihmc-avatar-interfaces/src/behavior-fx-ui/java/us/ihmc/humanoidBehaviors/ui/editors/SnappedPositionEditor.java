@@ -20,7 +20,7 @@ import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
 import us.ihmc.humanoidBehaviors.ui.model.interfaces.PositionEditable;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 
 import java.util.function.Consumer;
 
@@ -70,18 +70,18 @@ public class SnappedPositionEditor
       mouseMovedMeshIntersection.poll();
       mouseClickedMeshIntersection.poll();
 
-      if (mouseClickedMeshIntersection.hasNext())  // use the clicked position if clicked
+      if (mouseClickedMeshIntersection.hasValue())  // use the clicked position if clicked
       {
-         selectedGraphic.setPosition(mouseClickedMeshIntersection.peek());
+         selectedGraphic.setPosition(mouseClickedMeshIntersection.read());
       }
-      else if (mouseMovedMeshIntersection.hasNext())  // just for selection preview
+      else if (mouseMovedMeshIntersection.hasValue())  // just for selection preview
       {
-         selectedGraphic.setPosition(mouseMovedMeshIntersection.peek());
+         selectedGraphic.setPosition(mouseMovedMeshIntersection.read());
       }
 
-      if (mouseClickedMeshIntersection.hasNext())
+      if (mouseClickedMeshIntersection.hasValue())
       {
-         LogTools.debug("Selected position is validated: {}", mouseClickedMeshIntersection.peek());
+         LogTools.debug("Selected position is validated: {}", mouseClickedMeshIntersection.read());
          deactivate(FXUITrigger.POSITION_LEFT_CLICK);
       }
 
@@ -110,7 +110,7 @@ public class SnappedPositionEditor
       Point3D intersection = calculateMouseIntersection(event);
       if (intersection != null)
       {
-         mouseMovedMeshIntersection.add(intersection);
+         mouseMovedMeshIntersection.set(intersection);
       }
    }
 
@@ -125,7 +125,7 @@ public class SnappedPositionEditor
             Point3D intersection = calculateMouseIntersection(event);
             if (intersection != null)
             {
-               mouseClickedMeshIntersection.add(intersection);
+               mouseClickedMeshIntersection.set(intersection);
             }
             else
             {

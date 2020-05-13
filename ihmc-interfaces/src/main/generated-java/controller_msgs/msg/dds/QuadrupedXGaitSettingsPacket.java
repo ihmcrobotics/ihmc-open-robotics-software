@@ -7,9 +7,12 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC quadruped controller API.
-       * This message sends the x gait settings used for determining gait.
-       */
+   
+ * This message is part of the IHMC quadruped controller API.
+   
+ * This message sends the x gait settings used for determining gait.
+   
+ */
 public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsPacket> implements Settable<QuadrupedXGaitSettingsPacket>, EpsilonComparable<QuadrupedXGaitSettingsPacket>
 {
 
@@ -20,8 +23,10 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
    public static final byte FAST = (byte) 2;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public double end_phase_shift_ = -1.0;
@@ -141,15 +146,19 @@ public class QuadrupedXGaitSettingsPacket extends Packet<QuadrupedXGaitSettingsP
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

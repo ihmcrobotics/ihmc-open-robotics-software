@@ -7,14 +7,18 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Should disappear for the ROS equivalent.
-       */
+   
+ * Should disappear for the ROS equivalent.
+   
+ */
 public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloudMessage> implements Settable<StereoVisionPointCloudMessage>, EpsilonComparable<StereoVisionPointCloudMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public long timestamp_;
@@ -24,46 +28,68 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
    public us.ihmc.euclid.tuple4D.Quaternion sensor_orientation_;
 
    /**
-            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
-            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
-            * The confidence of the sensor pose represents the quality of the pose estimation.
-            */
+       
+    * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+       
+    * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+       
+    * The confidence of the sensor pose represents the quality of the pose estimation.
+       
+    */
    public double sensor_pose_confidence_ = 1.0;
 
    /**
-            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
-            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
-            * The confidence of the point cloud represents the quality of the collected point cloud data.
-            */
+       
+    * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+       
+    * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+       
+    * The confidence of the point cloud represents the quality of the collected point cloud data.
+       
+    */
    public double point_cloud_confidence_ = 1.0;
 
    /**
-            * The center location of the bounding box of all the points.
-            * The location of each point in the pointcloud is with respect to this location.
-            */
+       
+    * The center location of the bounding box of all the points.
+       
+    * The location of each point in the pointcloud is with respect to this location.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D point_cloud_center_;
 
    /**
-            * The pointcloud is compressed by using an octree.
-            * This indicates the resolution used for the octree, the octree depth is 16.
-            */
+       
+    * The pointcloud is compressed by using an octree.
+       
+    * This indicates the resolution used for the octree, the octree depth is 16.
+       
+    */
    public double resolution_;
 
    /**
-            * The number of points in this frame.
-            */
+       
+    * The number of points in this frame.
+       
+    */
    public int number_of_points_;
 
    /**
-            * The compressed pointcloud.
-            * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
-            */
+       
+    * The compressed pointcloud.
+       
+    * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+       
+    */
    public us.ihmc.idl.IDLSequence.Byte  point_cloud_;
 
    /**
-            * The compressed colors.
-            * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
-            */
+       
+    * The compressed colors.
+       
+    * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+       
+    */
    public us.ihmc.idl.IDLSequence.Byte  colors_;
 
    public StereoVisionPointCloudMessage()
@@ -129,15 +155,19 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -169,19 +199,27 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
 
    /**
-            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
-            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
-            * The confidence of the sensor pose represents the quality of the pose estimation.
-            */
+       
+    * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+       
+    * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+       
+    * The confidence of the sensor pose represents the quality of the pose estimation.
+       
+    */
    public void setSensorPoseConfidence(double sensor_pose_confidence)
    {
       sensor_pose_confidence_ = sensor_pose_confidence;
    }
    /**
-            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
-            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
-            * The confidence of the sensor pose represents the quality of the pose estimation.
-            */
+       
+    * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+       
+    * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+       
+    * The confidence of the sensor pose represents the quality of the pose estimation.
+       
+    */
    public double getSensorPoseConfidence()
    {
       return sensor_pose_confidence_;
@@ -189,19 +227,27 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
 
    /**
-            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
-            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
-            * The confidence of the point cloud represents the quality of the collected point cloud data.
-            */
+       
+    * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+       
+    * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+       
+    * The confidence of the point cloud represents the quality of the collected point cloud data.
+       
+    */
    public void setPointCloudConfidence(double point_cloud_confidence)
    {
       point_cloud_confidence_ = point_cloud_confidence;
    }
    /**
-            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
-            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
-            * The confidence of the point cloud represents the quality of the collected point cloud data.
-            */
+       
+    * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+       
+    * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+       
+    * The confidence of the point cloud represents the quality of the collected point cloud data.
+       
+    */
    public double getPointCloudConfidence()
    {
       return point_cloud_confidence_;
@@ -210,9 +256,12 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
 
    /**
-            * The center location of the bounding box of all the points.
-            * The location of each point in the pointcloud is with respect to this location.
-            */
+       
+    * The center location of the bounding box of all the points.
+       
+    * The location of each point in the pointcloud is with respect to this location.
+       
+    */
    public us.ihmc.euclid.tuple3D.Point3D getPointCloudCenter()
    {
       return point_cloud_center_;
@@ -220,17 +269,23 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
 
    /**
-            * The pointcloud is compressed by using an octree.
-            * This indicates the resolution used for the octree, the octree depth is 16.
-            */
+       
+    * The pointcloud is compressed by using an octree.
+       
+    * This indicates the resolution used for the octree, the octree depth is 16.
+       
+    */
    public void setResolution(double resolution)
    {
       resolution_ = resolution;
    }
    /**
-            * The pointcloud is compressed by using an octree.
-            * This indicates the resolution used for the octree, the octree depth is 16.
-            */
+       
+    * The pointcloud is compressed by using an octree.
+       
+    * This indicates the resolution used for the octree, the octree depth is 16.
+       
+    */
    public double getResolution()
    {
       return resolution_;
@@ -238,15 +293,19 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
 
    /**
-            * The number of points in this frame.
-            */
+       
+    * The number of points in this frame.
+       
+    */
    public void setNumberOfPoints(int number_of_points)
    {
       number_of_points_ = number_of_points;
    }
    /**
-            * The number of points in this frame.
-            */
+       
+    * The number of points in this frame.
+       
+    */
    public int getNumberOfPoints()
    {
       return number_of_points_;
@@ -255,9 +314,12 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
 
    /**
-            * The compressed pointcloud.
-            * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
-            */
+       
+    * The compressed pointcloud.
+       
+    * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+       
+    */
    public us.ihmc.idl.IDLSequence.Byte  getPointCloud()
    {
       return point_cloud_;
@@ -266,9 +328,12 @@ public class StereoVisionPointCloudMessage extends Packet<StereoVisionPointCloud
 
 
    /**
-            * The compressed colors.
-            * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
-            */
+       
+    * The compressed colors.
+       
+    * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+       
+    */
    public us.ihmc.idl.IDLSequence.Byte  getColors()
    {
       return colors_;

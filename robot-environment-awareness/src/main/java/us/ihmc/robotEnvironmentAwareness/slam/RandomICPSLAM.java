@@ -74,7 +74,6 @@ public class RandomICPSLAM extends SLAMBasics
 
       segmentationCalculator.setParameters(planarRegionSegmentationParameters);
       segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
-      segmentationCalculator.setSensorPosition(new Point3D(0.0, 0.0, 20.0)); //TODO: work this for every poses.
 
       polygonizerParameters.setConcaveHullThreshold(0.15);
 
@@ -161,8 +160,10 @@ public class RandomICPSLAM extends SLAMBasics
 
       if (sourcePointsToSensor == null)
       {
+         // TODO: this frame would be handled when robot revisit this area.
          if (DEBUG)
             System.out.println("small overlapped area");
+         frame.setConfidenceFactor(-1.0);
          return new RigidBodyTransform();
       }
       else
@@ -180,6 +181,7 @@ public class RandomICPSLAM extends SLAMBasics
          {
             if (DEBUG)
                System.out.println("too far. will not be merged.");
+            frame.setConfidenceFactor(0.0);
             return null;
          }
          else
@@ -192,6 +194,7 @@ public class RandomICPSLAM extends SLAMBasics
             {
                if (DEBUG)
                   System.out.println("close enough. many inliers.");
+               frame.setConfidenceFactor(1.0);
                return new RigidBodyTransform();
             }
 
@@ -214,6 +217,8 @@ public class RandomICPSLAM extends SLAMBasics
                System.out.println("finalQuery " + finalQuery);
             }
 
+            //TODO: put proper value based on final distance.
+            frame.setConfidenceFactor(1 - optimizer.getOptimalQuery() / getOctreeResolution() / 1);
             return transformer;
          }
       }

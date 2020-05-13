@@ -7,57 +7,80 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC robot environment awareness module.
-       * This message contains a list of planar regions.
-       * A planar region is a finite area that lies on a 3D plane and that is delimited by a concave hull.
-       * As concave hulls are complex to manipulate, a set of convex polygons are also provided, altogether they approximate the area of the planar region.
-       */
+   
+ * This message is part of the IHMC robot environment awareness module.
+   
+ * This message contains a list of planar regions.
+   
+ * A planar region is a finite area that lies on a 3D plane and that is delimited by a concave hull.
+   
+ * As concave hulls are complex to manipulate, a set of convex polygons are also provided, altogether they approximate the area of the planar region.
+   
+ */
 public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> implements Settable<PlanarRegionsListMessage>, EpsilonComparable<PlanarRegionsListMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * ID number referring to each planar region, it should be unique.
-            */
+       
+    * ID number referring to each planar region, it should be unique.
+       
+    */
    public us.ihmc.idl.IDLSequence.Integer  region_id_;
 
    /**
-            * The coordinates in world of the origin of each planar region.
-            */
+       
+    * The coordinates in world of the origin of each planar region.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  region_origin_;
 
    /**
-            * The orientation with respect to world of each planar region.
-            */
+       
+    * The orientation with respect to world of each planar region.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple4D.Quaternion>  region_orientation_;
 
    /**
-            * The normal expressed in world of each planar region.
-            */
+       
+    * The normal expressed in world of each planar region.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  region_normal_;
 
    /**
-            * Indicates for each planar region the number of vertices for the concave hull.
-            */
+       
+    * Indicates for each planar region the number of vertices for the concave hull.
+       
+    */
    public us.ihmc.idl.IDLSequence.Integer  concave_hulls_size_;
 
    /**
-            * Indicates for each planar region the number of convex polygons.
-            */
+       
+    * Indicates for each planar region the number of convex polygons.
+       
+    */
    public us.ihmc.idl.IDLSequence.Integer  number_of_convex_polygons_;
 
    /**
-            * Indicates successively the number of vertices for each convex polygon of each planar region.
-            */
+       
+    * Indicates successively the number of vertices for each convex polygon of each planar region.
+       
+    */
    public us.ihmc.idl.IDLSequence.Integer  convex_polygons_size_;
 
    /**
-            * Single buffer used to store for each planar the vertices of the concave hull and the convex polygons.
-            */
+       
+    * Single buffer used to store for each planar the vertices of the concave hull and the convex polygons.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  vertex_buffer_;
 
    public PlanarRegionsListMessage()
@@ -117,15 +140,19 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -134,8 +161,10 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
 
    /**
-            * ID number referring to each planar region, it should be unique.
-            */
+       
+    * ID number referring to each planar region, it should be unique.
+       
+    */
    public us.ihmc.idl.IDLSequence.Integer  getRegionId()
    {
       return region_id_;
@@ -144,8 +173,10 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
 
    /**
-            * The coordinates in world of the origin of each planar region.
-            */
+       
+    * The coordinates in world of the origin of each planar region.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getRegionOrigin()
    {
       return region_origin_;
@@ -154,8 +185,10 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
 
    /**
-            * The orientation with respect to world of each planar region.
-            */
+       
+    * The orientation with respect to world of each planar region.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple4D.Quaternion>  getRegionOrientation()
    {
       return region_orientation_;
@@ -164,8 +197,10 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
 
    /**
-            * The normal expressed in world of each planar region.
-            */
+       
+    * The normal expressed in world of each planar region.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Vector3D>  getRegionNormal()
    {
       return region_normal_;
@@ -174,8 +209,10 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
 
    /**
-            * Indicates for each planar region the number of vertices for the concave hull.
-            */
+       
+    * Indicates for each planar region the number of vertices for the concave hull.
+       
+    */
    public us.ihmc.idl.IDLSequence.Integer  getConcaveHullsSize()
    {
       return concave_hulls_size_;
@@ -184,8 +221,10 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
 
    /**
-            * Indicates for each planar region the number of convex polygons.
-            */
+       
+    * Indicates for each planar region the number of convex polygons.
+       
+    */
    public us.ihmc.idl.IDLSequence.Integer  getNumberOfConvexPolygons()
    {
       return number_of_convex_polygons_;
@@ -194,8 +233,10 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
 
    /**
-            * Indicates successively the number of vertices for each convex polygon of each planar region.
-            */
+       
+    * Indicates successively the number of vertices for each convex polygon of each planar region.
+       
+    */
    public us.ihmc.idl.IDLSequence.Integer  getConvexPolygonsSize()
    {
       return convex_polygons_size_;
@@ -204,8 +245,10 @@ public class PlanarRegionsListMessage extends Packet<PlanarRegionsListMessage> i
 
 
    /**
-            * Single buffer used to store for each planar the vertices of the concave hull and the convex polygons.
-            */
+       
+    * Single buffer used to store for each planar the vertices of the concave hull and the convex polygons.
+       
+    */
    public us.ihmc.idl.IDLSequence.Object<us.ihmc.euclid.tuple3D.Point3D>  getVertexBuffer()
    {
       return vertex_buffer_;

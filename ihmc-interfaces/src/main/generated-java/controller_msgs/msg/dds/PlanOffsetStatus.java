@@ -7,20 +7,27 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * The controller sends this message to notify that it has shifted the remaining footsteps to be executed due to some execution error.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * The controller sends this message to notify that it has shifted the remaining footsteps to be executed due to some execution error.
+   
+ */
 public class PlanOffsetStatus extends Packet<PlanOffsetStatus> implements Settable<PlanOffsetStatus>, EpsilonComparable<PlanOffsetStatus>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * The amount by which the remaining footsteps have been translated.
-            */
+       
+    * The amount by which the remaining footsteps have been translated.
+       
+    */
    public us.ihmc.euclid.tuple3D.Vector3D offset_vector_;
 
    public PlanOffsetStatus()
@@ -48,15 +55,19 @@ public class PlanOffsetStatus extends Packet<PlanOffsetStatus> implements Settab
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -65,8 +76,10 @@ public class PlanOffsetStatus extends Packet<PlanOffsetStatus> implements Settab
 
 
    /**
-            * The amount by which the remaining footsteps have been translated.
-            */
+       
+    * The amount by which the remaining footsteps have been translated.
+       
+    */
    public us.ihmc.euclid.tuple3D.Vector3D getOffsetVector()
    {
       return offset_vector_;

@@ -7,6 +7,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.stage.Window;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 
@@ -15,11 +16,17 @@ public class UIConnectionHandler
    private final AtomicBoolean enable = new AtomicBoolean(false);
    private final Window mainWindow;
    private final REAUIMessager uiMessager;
+   
+   private final Topic<Boolean> requestEntireModuleState;
 
-   public UIConnectionHandler(Window mainWindow, REAUIMessager uiMessager)
+   public UIConnectionHandler(Window mainWindow, REAUIMessager uiMessager, Topic<Boolean> requestEntireModuleState)
    {
       this.mainWindow = mainWindow;
       this.uiMessager = uiMessager;
+      if(requestEntireModuleState == null)
+         this.requestEntireModuleState = REAModuleAPI.RequestEntireModuleState;
+      else
+         this.requestEntireModuleState = requestEntireModuleState;
       uiMessager.registerModuleMessagerStateListener(isMessagerOpen -> {
          if (isMessagerOpen)
             new Thread(() -> {
@@ -31,6 +38,11 @@ public class UIConnectionHandler
          else
             displayWarning();
       });
+   }
+   
+   public UIConnectionHandler(Window mainWindow, REAUIMessager uiMessager)
+   {
+      this(mainWindow, uiMessager, null);
    }
 
    public void start()
@@ -47,7 +59,7 @@ public class UIConnectionHandler
    {
       if (enable.get())
       {
-         uiMessager.submitStateRequestToModule(REAModuleAPI.RequestEntireModuleState);
+         uiMessager.submitStateRequestToModule(requestEntireModuleState);
       }
    }
 

@@ -40,7 +40,7 @@ import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -352,7 +352,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       
       LogTools.info("Footstep planner completed!");
       
-      footstepPlannerOutputNotification.add(footstepPlannerOutput);
+      footstepPlannerOutputNotification.set(footstepPlannerOutput);
 
       latestFootstepPlannerOutput.set(footstepPlannerOutput);
 
@@ -365,9 +365,9 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private LookAndStepBehaviorState transitionFromPlan()
    {
-      if (footstepPlannerOutputNotification.hasNext())
+      if (footstepPlannerOutputNotification.hasValue())
       {
-         if (footstepPlannerOutputNotification.peek().getFootstepPlan().getNumberOfSteps() > 0) // at least 1 footstep
+         if (footstepPlannerOutputNotification.read().getFootstepPlan().getNumberOfSteps() > 0) // at least 1 footstep
          {
             if (operatorReviewEnabledInput.get())
             {
@@ -430,7 +430,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private LookAndStepBehaviorState transitionFromStep()
    {
-      if (walkingStatusNotification.hasNext()) // use rea.isRobotWalking?
+      if (walkingStatusNotification.hasValue()) // use rea.isRobotWalking?
       {
          // if close to goal, far, else near
          HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
