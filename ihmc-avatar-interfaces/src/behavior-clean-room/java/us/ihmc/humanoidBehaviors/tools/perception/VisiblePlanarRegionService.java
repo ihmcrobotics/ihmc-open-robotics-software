@@ -26,16 +26,16 @@ public class VisiblePlanarRegionService
 
    public VisiblePlanarRegionService(Ros2NodeInterface ros2Node, Supplier<PlanarRegionsList>... planarRegionSuppliers)
    {
-      this(ros2Node, "", planarRegionSuppliers);
+      this(ros2Node,
+           ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE, ROS2Tools.ROS2TopicQualifier.OUTPUT).generateTopicName(PlanarRegionsListMessage.class),
+           planarRegionSuppliers);
    }
 
-   public VisiblePlanarRegionService(Ros2NodeInterface ros2Node, String topicSpecifier, Supplier<PlanarRegionsList>... planarRegionSuppliers)
+   public VisiblePlanarRegionService(Ros2NodeInterface ros2Node, String topicName, Supplier<PlanarRegionsList>... planarRegionSuppliers)
    {
       this.planarRegionSuppliers = planarRegionSuppliers;
-      MessageTopicNameGenerator topicGenerator = ROS2Tools.getTopicNameGenerator(null,
-                                                                                 ROS2Tools.REA_MODULE + topicSpecifier,
-                                                                                 ROS2Tools.ROS2TopicQualifier.OUTPUT);
-      planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, topicGenerator);
+
+      planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, topicName);
       thread = new PausablePeriodicThread(getClass().getSimpleName(), 0.5, this::process);
    }
 

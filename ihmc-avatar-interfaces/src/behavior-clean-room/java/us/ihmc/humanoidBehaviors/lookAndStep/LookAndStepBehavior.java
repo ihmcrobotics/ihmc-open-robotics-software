@@ -4,15 +4,16 @@ import com.google.common.collect.Lists;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2PlanarRegionsInput;
 import us.ihmc.euclid.geometry.LineSegment3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.humanoidBehaviors.tools.RemoteEnvironmentMapInterface;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -77,17 +78,21 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final RemoteHumanoidRobotInterface robot;
    private final FootstepPlanningModule footstepPlanningModule;
+   private final VisibilityGraphPathPlanner bodyPathPlanner;
 
    private final AtomicReference<Boolean> operatorReviewEnabledInput;
    private AtomicReference<FootstepPlannerOutput> latestFootstepPlannerOutput = new AtomicReference<>();
    private final TypedNotification<FootstepPlannerOutput> footstepPlannerOutputNotification = new TypedNotification<>();
    private TypedNotification<WalkingStatusMessage> walkingStatusNotification;
+   private TypedNotification<Pose3D> goalInput;
    private final Notification takeStepNotification;
    private final Notification rePlanNotification;
    private final Stopwatch planFailedWait = new Stopwatch();
    private final FramePose3D goalPoseBetweenFeet = new FramePose3D();
-   private final TypedNotification<List<Point3D>> bodyPathPlanNotificationInput;
    private List<Point3D> bodyPathPlan;
+
+   private FramePose3D leftFootPoseTemp = new FramePose3D();
+   private FramePose3D rightFootPoseTemp = new FramePose3D();
 
    public LookAndStepBehavior(BehaviorHelper helper)
    {
@@ -99,12 +104,13 @@ public class LookAndStepBehavior implements BehaviorInterface
       operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
       rePlanNotification = helper.createUINotification(RePlan);
       takeStepNotification = helper.createUINotification(TakeStep);
-      bodyPathPlanNotificationInput = helper.createUITypedNotification(BodyPathPlanInput);
+      goalInput = helper.createUITypedNotification(GoalInput);
       helper.createUICallback(LookAndStepParameters, lookAndStepParameters::setAllFromStrings);
       footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
       helper.createUICallback(FootstepPlannerParameters, footstepPlannerParameters::setAllFromStrings);
 
-      footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(helper.getRobotModel());
+      footstepPlanningModule = helper.getOrCreateFootstepPlanner();
+      bodyPathPlanner = helper.getOrCreateBodyPathPlanner();
 
       EnumBasedStateMachineFactory<LookAndStepBehaviorState> stateMachineFactory = new EnumBasedStateMachineFactory<>(LookAndStepBehaviorState.class);
       stateMachineFactory.addTransition(PERCEPT_FAR, BODY_PATH_PLAN, this::transitionFromPerceptFar);
@@ -167,7 +173,21 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private void onBodyPathPlanEntry()
    {
-
+      // calculate and send body path plan
+      bodyPathPlanner.setGoal(goalInput.peek());
+      bodyPathPlanner.setPlanarRegionsList(rea.getLatestPlanarRegionsList());
+      HumanoidRobotState humanoidRobotState = robot.pollHumanoidRobotState();
+      leftFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.LEFT));
+      rightFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.RIGHT));
+      leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
+      rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
+      bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
+      bodyPathPlanner.planWaypoints();
+      ArrayList<Point3D> waypointsAsPoints = new ArrayList<>();
+      for (Pose3DReadOnly poseWaypoint : bodyPathPlanner.getWaypoints())
+      {
+         waypointsAsPoints.add(new Point3D(poseWaypoint.getPosition()));
+      }
    }
 
    private boolean transitionFromAquirePath()
@@ -448,6 +468,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlannerOutputNotification.poll();
       takeStepNotification.poll();
       rePlanNotification.poll();
+      goalInput.poll();
    }
 
    private boolean arePlanarRegionsExpired()
@@ -471,7 +492,6 @@ public class LookAndStepBehavior implements BehaviorInterface
       public static final Topic<List<String>> LookAndStepParameters = topic("LookAndStepParameters");
       public static final Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");
       public static final Topic<Pose3D> GoalInput = topic("GoalInput");
-      public static final Topic<List<Point3D>> BodyPathPlanInput = topic("BodyPathPlanInput");
       public static final Topic<List<Point3D>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
 
       private static <T> Topic<T> topic(String name)
