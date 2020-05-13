@@ -10,6 +10,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
@@ -21,13 +22,14 @@ import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor.EditMode;
 import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.PositionGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIActionMap;
 import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
 import us.ihmc.ros2.Ros2NodeInterface;
+
+import java.util.ArrayList;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.*;
 
@@ -41,7 +43,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private Messager behaviorMessager;
    private FootstepPlanGraphic footstepPlanGraphic;
    private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
-   private PositionGraphic subGoalGraphic;
+   private PoseGraphic subGoalGraphic;
    private BodyPathPlanGraphic bodyPathPlanGraphic;
    private PoseGraphic goalGraphic;
    
@@ -68,14 +70,21 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       behaviorMessager.registerTopicListener(MapRegionsForUI, livePlanarRegionsGraphic::acceptPlanarRegions);
 
       goalGraphic = new PoseGraphic("Goal", Color.CADETBLUE, 0.03);
-      goalGraphic.getOrientationGraphic().setVisible(true);
-      
-      subGoalGraphic = new PositionGraphic(Color.GREEN, 0.02);
-      behaviorMessager.registerTopicListener(SubGoalForUI, position -> Platform.runLater(() -> subGoalGraphic.setPosition(position)));
+
+      subGoalGraphic = new PoseGraphic("Sub goal", Color.YELLOW, 0.027);
+      behaviorMessager.registerTopicListener(SubGoalForUI, pose -> Platform.runLater(() -> subGoalGraphic.setPose(pose)));
 
       bodyPathPlanGraphic = new BodyPathPlanGraphic();
       behaviorMessager.registerTopicListener(BodyPathPlanForUI,
-                                             bodyPathPlan -> Platform.runLater(() -> bodyPathPlanGraphic.generateMeshesAsynchronously(bodyPathPlan)));
+      bodyPathPlan ->
+      {
+         ArrayList<Point3DReadOnly> bodyPathAsPoints = new ArrayList<>();
+         for (Pose3D pose3D : bodyPathPlan)
+         {
+            bodyPathAsPoints.add(pose3D.getPosition());
+         }
+         Platform.runLater(() -> bodyPathPlanGraphic.generateMeshesAsynchronously(bodyPathAsPoints));
+      });
 
       JavaFXStoredPropertyTable lookAndStepJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(lookAndStepParameterTable);
       lookAndStepJavaFXStoredPropertyTable.setup(lookAndStepParameters, LookAndStepBehaviorParameters.keys, this::publishLookAndStepParameters);
@@ -122,7 +131,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       {
          livePlanarRegionsGraphic.clear();
          footstepPlanGraphic.clear();
-         Platform.runLater(() -> getChildren().remove(subGoalGraphic.getNode()));
+         Platform.runLater(() -> getChildren().remove(subGoalGraphic));
          Platform.runLater(() -> getChildren().remove(goalGraphic));
          Platform.runLater(() -> getChildren().remove(bodyPathPlanGraphic));
          Platform.runLater(() -> getChildren().remove(livePlanarRegionsGraphic));
@@ -130,7 +139,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       }
       else
       {
-         Platform.runLater(() -> getChildren().add(subGoalGraphic.getNode()));
+         Platform.runLater(() -> getChildren().add(subGoalGraphic));
          Platform.runLater(() -> getChildren().add(goalGraphic));
          Platform.runLater(() -> getChildren().add(bodyPathPlanGraphic));
          Platform.runLater(() -> getChildren().add(livePlanarRegionsGraphic));

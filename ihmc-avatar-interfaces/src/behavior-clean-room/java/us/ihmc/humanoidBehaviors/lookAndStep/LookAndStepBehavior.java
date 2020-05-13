@@ -87,7 +87,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final Notification takeStepNotification;
    private final Notification rePlanNotification;
    private final FramePose3D goalPoseBetweenFeet = new FramePose3D();
-   private List<Point3D> bodyPathPlan;
+   private List<Pose3D> bodyPathPlan;
 
    private FramePose3D leftFootPoseTemp = new FramePose3D();
    private FramePose3D rightFootPoseTemp = new FramePose3D();
@@ -176,7 +176,7 @@ public class LookAndStepBehavior implements BehaviorInterface
          bodyPathPlan = new ArrayList<>();
          for (Pose3DReadOnly poseWaypoint : bodyPathPlanner.getWaypoints())
          {
-            bodyPathPlan.add(new Point3D(poseWaypoint.getPosition()));
+            bodyPathPlan.add(new Pose3D(poseWaypoint));
          }
          helper.publishToUI(BodyPathPlanForUI, bodyPathPlan);
       }
@@ -225,14 +225,14 @@ public class LookAndStepBehavior implements BehaviorInterface
       goalPoseBetweenFeet.setZ(midFeetZ);
       
       // find closest point along body path plan
-      Point3D closestPointAlongPath = bodyPathPlan.get(0);
+      Point3D closestPointAlongPath = bodyPathPlan.get(0).getPosition();
       double closestDistance = closestPointAlongPath.distance(goalPoseBetweenFeet.getPosition());
       int closestSegmentIndex = 0;
       for (int i = 0; i < bodyPathPlan.size() - 1; i++)
       {
          LogTools.info("Finding closest point along body path. Segment: {}, closestDistance: {}", i, closestDistance);
          LineSegment3D lineSegment = new LineSegment3D();
-         lineSegment.set(bodyPathPlan.get(i), bodyPathPlan.get(i + 1));
+         lineSegment.set(bodyPathPlan.get(i).getPosition(), bodyPathPlan.get(i + 1).getPosition());
 
          Point3D closestPointOnBodyPathSegment = new Point3D();
          EuclidGeometryTools.closestPoint3DsBetweenTwoLineSegment3Ds(lineSegment.getFirstEndpoint(),
@@ -258,16 +258,17 @@ public class LookAndStepBehavior implements BehaviorInterface
       double moveAmountToGo = lookAndStepParameters.get(LookAndStepBehaviorParameters.planHorizon);
 
       Point3D previousComparisonPoint = closestPointAlongPath;
+      int segmentIndexOfGoal = closestSegmentIndex;
       for (int i = closestSegmentIndex; i < bodyPathPlan.size() - 1 && moveAmountToGo > 0; i++)
       {
-         Point3D endOfSegment = bodyPathPlan.get(i + 1);
+         Point3D endOfSegment = bodyPathPlan.get(i + 1).getPosition();
 
          double distanceToEndOfSegment = endOfSegment.distance(previousComparisonPoint);
          LogTools.info("Evaluating segment {}, moveAmountToGo: {}, distanceToEndOfSegment: {}", i, moveAmountToGo, distanceToEndOfSegment);
 
          if (distanceToEndOfSegment < moveAmountToGo)
          {
-            previousComparisonPoint = bodyPathPlan.get(i + 1);
+            previousComparisonPoint = bodyPathPlan.get(i + 1).getPosition();
             moveAmountToGo -= distanceToEndOfSegment;
          }
          else
@@ -277,6 +278,7 @@ public class LookAndStepBehavior implements BehaviorInterface
          }
 
          goalPoint.set(previousComparisonPoint);
+         segmentIndexOfGoal = i;
       }
       LogTools.info("previousComparisonPoint: {}, goalPoint: {}", previousComparisonPoint, goalPoint);
 
@@ -284,16 +286,18 @@ public class LookAndStepBehavior implements BehaviorInterface
 //      goalPoseBetweenFeet.getOrientation().setYawPitchRoll(lookAndStepParameters.get(LookAndStepBehaviorParameters.direction), 0.0, 0.0);
 //      goalPoseBetweenFeet.appendTranslation(lookAndStepParameters.get(LookAndStepBehaviorParameters.planHorizon) - trailingBy, 0.0, 0.0);
 
-      Vector2D headingVector = new Vector2D();
-      headingVector.set(goalPoint.getX(), goalPoint.getY());
-      headingVector.sub(goalPoseBetweenFeet.getPosition().getX(), goalPoseBetweenFeet.getPosition().getY());
+//      Vector2D headingVector = new Vector2D();
+//      headingVector.set(goalPoint.getX(), goalPoint.getY());
+//      headingVector.sub(goalPoseBetweenFeet.getPosition().getX(), goalPoseBetweenFeet.getPosition().getY());
 
       LogTools.info("Setting goalPoint: {}", goalPoint);
       goalPoseBetweenFeet.getPosition().set(goalPoint);
 
-      double yaw = Math.atan2(headingVector.getX(), headingVector.getY());
-      LogTools.info("Setting yaw: {}", yaw);
-      goalPoseBetweenFeet.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
+//      double yaw = Math.atan2(headingVector.getX(), headingVector.getY());
+//      LogTools.info("Setting yaw: {}", yaw);
+//      goalPoseBetweenFeet.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
+
+      goalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get(segmentIndexOfGoal + 1).getOrientation());
 
       RobotSide initialStanceFootSide = null;
       FramePose3D initialStanceFootPose = null;
@@ -315,7 +319,7 @@ public class LookAndStepBehavior implements BehaviorInterface
          initialStanceFootPose = rightSolePose;
       }
 
-      helper.publishToUI(SubGoalForUI, new Point3D(goalPoseBetweenFeet.getPosition()));
+      helper.publishToUI(SubGoalForUI, new Pose3D(goalPoseBetweenFeet));
 
       footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.get(LookAndStepBehaviorParameters.idealFootstepLengthOverride));
       footstepPlannerParameters.setWiggleInsideDelta(lookAndStepParameters.get(LookAndStepBehaviorParameters.wiggleInsideDeltaOverride));
@@ -440,7 +444,7 @@ public class LookAndStepBehavior implements BehaviorInterface
          pelvisMidFeetPose.changeFrame(ReferenceFrame.getWorldFrame());
          pelvisMidFeetPose.setZ(midFeetZ);
 
-         double distanceToEnd = bodyPathPlan.get(bodyPathPlan.size() - 1).distance(pelvisMidFeetPose.getPosition());
+         double distanceToEnd = bodyPathPlan.get(bodyPathPlan.size() - 1).getPosition().distance(pelvisMidFeetPose.getPosition());
 
          if (distanceToEnd < lookAndStepParameters.getGoalSatisfactionRadius())
          {
@@ -479,12 +483,12 @@ public class LookAndStepBehavior implements BehaviorInterface
       public static final Topic<Object> RePlan = topic("RePlan");
       public static final Topic<Boolean> OperatorReviewEnabled = topic("OperatorReview");
       public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlan");
-      public static final Topic<Point3D> SubGoalForUI = topic("GoalForUI");
+      public static final Topic<Pose3D> SubGoalForUI = topic("GoalForUI");
       public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
       public static final Topic<List<String>> LookAndStepParameters = topic("LookAndStepParameters");
       public static final Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");
       public static final Topic<Pose3D> GoalInput = topic("GoalInput");
-      public static final Topic<List<Point3D>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
+      public static final Topic<List<Pose3D>> BodyPathPlanForUI = topic("BodyPathPlanForUI");
 
       private static <T> Topic<T> topic(String name)
       {
