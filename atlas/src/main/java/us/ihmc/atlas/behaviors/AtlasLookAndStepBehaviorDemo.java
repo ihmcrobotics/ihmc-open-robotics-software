@@ -1,6 +1,5 @@
 package us.ihmc.atlas.behaviors;
 
-import com.google.common.collect.Lists;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
@@ -10,7 +9,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
+import us.ihmc.humanoidBehaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.humanoidBehaviors.tools.perception.CompositePlanarRegionService;
 import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
@@ -67,21 +66,21 @@ public class AtlasLookAndStepBehaviorDemo
       MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(environment.get(), createRobotModel(), ros2Node);
       RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(environment.get(), createRobotModel(), ros2Node);
 
-      // Start the SLAM mapper which look and step uses
-      PlanarRegionsMappingModule realsenseSLAM = new PlanarRegionsMappingModule(pubSubMode);
+      PlanarRegionSLAMMapper realsenseSLAM = new PlanarRegionSLAMMapper();
 
-      String multisenseTopicName = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE + "/multisense", ROS2Tools.ROS2TopicQualifier.OUTPUT)
-                                            .generateTopicName(PlanarRegionsListMessage.class);
+      // might be a weird delay with threads at 0.5 hz depending on each other
 
-      VisiblePlanarRegionService multisensePublisher = new VisiblePlanarRegionService(ros2Node, multisenseTopicName, multisense);
-      multisensePublisher.start();
+      ArrayList<String> topicNames = new ArrayList<>();
+      topicNames.add(ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME);
+      topicNames.add(ROS2Tools.getTopicNameGenerator(null,
+                                                     ROS2Tools.REA_MODULE + "/multisense",
+                                                     ROS2Tools.ROS2TopicQualifier.OUTPUT).generateTopicName(PlanarRegionsListMessage.class));
 
-      ArrayList<String> names = new ArrayList<>();
-      names.add(ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME);
-      names.add(multisenseTopicName);
-
-      CompositePlanarRegionService planarRegionService = new CompositePlanarRegionService(ros2Node, names, realsenseSLAM::getLatestMap, multisense);
-      planarRegionService.start();
+      CompositePlanarRegionService allRegionsPublisher = new CompositePlanarRegionService(ros2Node,
+                                                                                          topicNames,
+                                                                                          () -> realsenseSLAM.update(realsense.get()),
+                                                                                          multisense);
+      allRegionsPublisher.start();
    }
 
    private void dynamicsSimulation()
