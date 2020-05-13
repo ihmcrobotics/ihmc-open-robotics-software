@@ -88,7 +88,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final Notification rePlanNotification;
    private final FramePose3D goalPoseBetweenFeet = new FramePose3D();
    private List<Pose3D> bodyPathPlan;
-
+   private RobotSide lastStanceSide = null;
    private FramePose3D leftFootPoseTemp = new FramePose3D();
    private FramePose3D rightFootPoseTemp = new FramePose3D();
 
@@ -151,13 +151,13 @@ public class LookAndStepBehavior implements BehaviorInterface
    {
       return !rea.getPlanarRegionsListExpired(lookAndStepParameters.getPlanarRegionsExpiration())
           && !rea.getLatestPlanarRegionsList().isEmpty()
-          && goalInput.peek() != null;
+          && goalInput.read() != null;
    }
 
    private void onBodyPathPlanEntry()
    {
       // calculate and send body path plan
-      bodyPathPlanner.setGoal(goalInput.peek());
+      bodyPathPlanner.setGoal(goalInput.read());
       bodyPathPlanner.setPlanarRegionsList(rea.getLatestPlanarRegionsList());
       HumanoidRobotState humanoidRobotState = robot.pollHumanoidRobotState();
       leftFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.LEFT));
@@ -299,8 +299,6 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       goalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get(segmentIndexOfGoal + 1).getOrientation());
 
-      RobotSide initialStanceFootSide = null;
-      FramePose3D initialStanceFootPose = null;
       FramePose3D leftSolePose = new FramePose3D();
       leftSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.LEFT));
       leftSolePose.changeFrame(ReferenceFrame.getWorldFrame());
@@ -308,26 +306,35 @@ public class LookAndStepBehavior implements BehaviorInterface
       rightSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.RIGHT));
       rightSolePose.changeFrame(ReferenceFrame.getWorldFrame());
 
-      if (leftSolePose.getPosition().distance(goalPoseBetweenFeet.getPosition()) <= rightSolePose.getPosition().distance(goalPoseBetweenFeet.getPosition()))
+      RobotSide stanceSide;
+      if (lastStanceSide != null)
       {
-         initialStanceFootSide = RobotSide.LEFT;
-         initialStanceFootPose = leftSolePose;
+         stanceSide = lastStanceSide.getOppositeSide();
       }
       else
       {
-         initialStanceFootSide = RobotSide.RIGHT;
-         initialStanceFootPose = rightSolePose;
+         if (leftSolePose.getPosition().distance(goalPoseBetweenFeet.getPosition()) <= rightSolePose.getPosition().distance(goalPoseBetweenFeet.getPosition()))
+         {
+            stanceSide = RobotSide.LEFT;
+         }
+         else
+         {
+            stanceSide = RobotSide.RIGHT;
+         }
       }
+
+      lastStanceSide = stanceSide;
 
       helper.publishToUI(SubGoalForUI, new Pose3D(goalPoseBetweenFeet));
 
       footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.get(LookAndStepBehaviorParameters.idealFootstepLengthOverride));
       footstepPlannerParameters.setWiggleInsideDelta(lookAndStepParameters.get(LookAndStepBehaviorParameters.wiggleInsideDeltaOverride));
       footstepPlannerParameters.setCliffHeightToAvoid(lookAndStepParameters.get(LookAndStepBehaviorParameters.cliffHeightToAvoidOverride));
+      footstepPlannerParameters.setEnableConcaveHullWiggler(lookAndStepParameters.get(LookAndStepBehaviorParameters.enableConcaveHullWigglerOverride));
 
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
-      footstepPlannerRequest.setRequestedInitialStanceSide(initialStanceFootSide);
+      footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
       footstepPlannerRequest.setStartFootPoses(leftSolePose, rightSolePose);
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPoseBetweenFeet);
       footstepPlannerRequest.setPlanarRegionsList(latestPlanarRegionList);

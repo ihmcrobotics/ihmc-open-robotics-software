@@ -14,6 +14,7 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet
    public static final DoubleStoredPropertyKey idealFootstepLengthOverride = keys.addDoubleKey("Ideal footstep length override");
    public static final DoubleStoredPropertyKey wiggleInsideDeltaOverride = keys.addDoubleKey("Wiggle inside delta override");
    public static final DoubleStoredPropertyKey cliffHeightToAvoidOverride = keys.addDoubleKey("Cliff height to avoid override");
+   public static final BooleanStoredPropertyKey enableConcaveHullWigglerOverride = keys.addBooleanKey("Enable concave hull wiggler override");
    public static final DoubleStoredPropertyKey footstepPlannerTimeout = keys.addDoubleKey("Footstep planner timeout");
    public static final DoubleStoredPropertyKey planarRegionsExpiration = keys.addDoubleKey("Planar regions expiration");
    public static final DoubleStoredPropertyKey swingTime = keys.addDoubleKey("Swing time");
