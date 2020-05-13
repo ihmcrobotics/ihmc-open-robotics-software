@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.tools.perception;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
@@ -14,7 +13,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import java.util.function.Supplier;
 
 /**
- * Assembles and publishes currently visible planar regions on the REA output topic.
+ * Combines and publishes planar regions from suppliers.
  */
 public class VisiblePlanarRegionService
 {
