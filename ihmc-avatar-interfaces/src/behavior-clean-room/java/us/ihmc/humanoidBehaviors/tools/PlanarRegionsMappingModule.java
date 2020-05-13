@@ -20,7 +20,7 @@ public class PlanarRegionsMappingModule
 {
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
-   private PlanarRegionsList slamMap = new PlanarRegionsList();
+   private volatile PlanarRegionsList slamMap = new PlanarRegionsList();
    private PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
 
    private Notification slamUpdated = new Notification();
@@ -80,6 +80,11 @@ public class PlanarRegionsMappingModule
       {
          slamUpdated.set();
       }
+   }
+
+   public PlanarRegionsList getLatestMap()
+   {
+      return slamMap;
    }
 
    public Notification getSlamUpdated()

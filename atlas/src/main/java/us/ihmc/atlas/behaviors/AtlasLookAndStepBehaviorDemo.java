@@ -1,6 +1,7 @@
 package us.ihmc.atlas.behaviors;
 
 import com.google.common.collect.Lists;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -13,6 +14,7 @@ import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
 import us.ihmc.humanoidBehaviors.tools.perception.CompositePlanarRegionService;
 import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
+import us.ihmc.humanoidBehaviors.tools.perception.VisiblePlanarRegionService;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
@@ -64,11 +66,22 @@ public class AtlasLookAndStepBehaviorDemo
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, ROS2Tools.REA.getNodeName());
       MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(environment.get(), createRobotModel(), ros2Node);
       RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(environment.get(), createRobotModel(), ros2Node);
-      ArrayList<String> names = Lists.newArrayList("/realsense", "/multisense");
-      CompositePlanarRegionService planarRegionService = new CompositePlanarRegionService(ros2Node, names, realsense, multisense);
-      planarRegionService.start();
 
-      new PlanarRegionsMappingModule(pubSubMode); // Start the SLAM mapper which look and step uses
+      // Start the SLAM mapper which look and step uses
+      PlanarRegionsMappingModule realsenseSLAM = new PlanarRegionsMappingModule(pubSubMode);
+
+      String multisenseTopicName = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE + "/multisense", ROS2Tools.ROS2TopicQualifier.OUTPUT)
+                                            .generateTopicName(PlanarRegionsListMessage.class);
+
+      VisiblePlanarRegionService multisensePublisher = new VisiblePlanarRegionService(ros2Node, multisenseTopicName, multisense);
+      multisensePublisher.start();
+
+      ArrayList<String> names = new ArrayList<>();
+      names.add(ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME);
+      names.add(multisenseTopicName);
+
+      CompositePlanarRegionService planarRegionService = new CompositePlanarRegionService(ros2Node, names, realsenseSLAM::getLatestMap, multisense);
+      planarRegionService.start();
    }
 
    private void dynamicsSimulation()

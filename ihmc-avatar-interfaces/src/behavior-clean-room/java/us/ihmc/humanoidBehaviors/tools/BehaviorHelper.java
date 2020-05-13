@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ROS2PlanarRegionsInput;
 import us.ihmc.communication.ROS2Tools;
@@ -9,11 +10,16 @@ import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
+import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
@@ -21,6 +27,7 @@ import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.tools.thread.TypedNotification;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -63,6 +70,8 @@ public class BehaviorHelper
    private RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private RemoteREAInterface rea;
    private RemoteEnvironmentMapInterface environmentMap;
+   private FootstepPlanningModule footstepPlanner;
+   private VisibilityGraphPathPlanner bodyPathPlanner;
 
    public BehaviorHelper(DRCRobotModel robotModel, Messager messager, Ros2Node ros2Node)
    {
@@ -102,6 +111,28 @@ public class BehaviorHelper
       if (environmentMap == null)
          environmentMap = new RemoteEnvironmentMapInterface(managedROS2Node);
       return environmentMap;
+   }
+
+   public FootstepPlanningModule getOrCreateFootstepPlanner()
+   {
+      if (footstepPlanner == null)
+      {
+         footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
+      }
+
+      return footstepPlanner;
+   }
+
+   public VisibilityGraphPathPlanner getOrCreateBodyPathPlanner()
+   {
+      if (bodyPathPlanner == null)
+      {
+         VisibilityGraphsParametersBasics visibilityGraphParameters = robotModel.getVisibilityGraphsParameters();
+         BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
+         bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor, new YoVariableRegistry(getClass().getSimpleName()));
+      }
+
+      return bodyPathPlanner;
    }
 
    // UI Communication Methods:

@@ -69,6 +69,12 @@ public class ManagedMessager implements Messager
    }
 
    @Override
+   public <T> AtomicReference<T> createInput(Topic<T> topic)
+   {
+      return createInput(topic, null);
+   }
+
+   @Override
    public <T> AtomicReference<T> createInput(Topic<T> topic, T initialValue)
    {
       AtomicReference<T> input = messager.createInput(topic, initialValue);

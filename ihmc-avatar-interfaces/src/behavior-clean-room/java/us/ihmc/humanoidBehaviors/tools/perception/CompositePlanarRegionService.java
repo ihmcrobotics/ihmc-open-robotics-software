@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 /**
- * Assembles and publishes currently visible planar regions on the REA output topic.
+ * Combines and publishes planar regions from suppliers.
  */
 public class CompositePlanarRegionService
 {
@@ -27,16 +27,13 @@ public class CompositePlanarRegionService
 
    private PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
 
-   public CompositePlanarRegionService(Ros2NodeInterface ros2Node, List<String> names, Supplier<PlanarRegionsList>... planarRegionSuppliers)
+   public CompositePlanarRegionService(Ros2NodeInterface ros2Node, List<String> topicNames, Supplier<PlanarRegionsList>... planarRegionSuppliers)
    {
       this.planarRegionSuppliers = planarRegionSuppliers;
 
       for (int i = 0; i < planarRegionSuppliers.length; i++)
       {
-         MessageTopicNameGenerator topicGenerator = ROS2Tools.getTopicNameGenerator(null,
-                                                                                    ROS2Tools.REA_MODULE + names.get(i),
-                                                                                    ROS2Tools.ROS2TopicQualifier.OUTPUT);
-         planarRegionPublishers.add(ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, topicGenerator));
+         planarRegionPublishers.add(ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, topicNames.get(i)));
       }
 
       MessageTopicNameGenerator topicGenerator = ROS2Tools.getTopicNameGenerator(null,

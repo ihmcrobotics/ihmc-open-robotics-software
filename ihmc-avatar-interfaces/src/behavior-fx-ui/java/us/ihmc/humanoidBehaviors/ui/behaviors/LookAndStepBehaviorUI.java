@@ -1,7 +1,5 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
-import java.util.ArrayList;
-
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.SubScene;
@@ -11,19 +9,11 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
-import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
-import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
@@ -37,12 +27,7 @@ import us.ihmc.humanoidBehaviors.ui.model.FXUIActionMap;
 import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
-import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2NodeInterface;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.*;
 
@@ -60,8 +45,6 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private BodyPathPlanGraphic bodyPathPlanGraphic;
    private PoseGraphic goalGraphic;
    
-   private VisibilityGraphPathPlanner bodyPathPlanner;
-
    private SnappedPositionEditor snappedPositionEditor;
    private OrientationYawEditor orientationYawEditor;
 
@@ -72,11 +55,6 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @FXML private TextField behaviorState;
    @FXML private TableView lookAndStepParameterTable;
    @FXML private TableView footstepPlannerParameterTable;
-
-   private RemoteREAInterface rea;
-   private RemoteHumanoidRobotInterface robot;
-   private FramePose3D leftFootPoseTemp = new FramePose3D();
-   private FramePose3D rightFootPoseTemp = new FramePose3D();
 
    @Override
    public void init(SubScene sceneNode, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
@@ -105,14 +83,6 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       JavaFXStoredPropertyTable footstepPlannerJavaFXStoredPropertyTable = new JavaFXStoredPropertyTable(footstepPlannerParameterTable);
       footstepPlannerJavaFXStoredPropertyTable.setup(footstepPlannerParameters, FootstepPlannerParameterKeys.keys, this::footstepPlanningParameters);
-
-      VisibilityGraphsParametersBasics visibilityGraphParameters = robotModel.getVisibilityGraphsParameters();
-      BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
-      bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor,
-                                                            new YoVariableRegistry(getClass().getSimpleName()));
-      
-      rea = new RemoteREAInterface(ros2Node); // maybe instead subscribe to all regions (Visible regions)
-      robot = new RemoteHumanoidRobotInterface(ros2Node, robotModel);
 
       behaviorMessager.registerTopicListener(CurrentState, state -> Platform.runLater(() -> behaviorState.setText(state)));
 
@@ -166,27 +136,6 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
          Platform.runLater(() -> getChildren().add(livePlanarRegionsGraphic));
          Platform.runLater(() -> getChildren().add(footstepPlanGraphic));
       }
-   }
-
-   private void calculateAndSendBodyPathPlan()
-   {
-      // calculate and send body path plan
-      bodyPathPlanner.setGoal(goalGraphic.getPose());
-      bodyPathPlanner.setPlanarRegionsList(rea.getLatestPlanarRegionsList());
-      HumanoidRobotState humanoidRobotState = robot.pollHumanoidRobotState();
-      leftFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.LEFT));
-      rightFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.RIGHT));
-      leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
-      rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
-      bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
-      bodyPathPlanner.planWaypoints();
-      ArrayList<Point3D> waypointsAsPoints = new ArrayList<>();
-      for (Pose3DReadOnly poseWaypoint : bodyPathPlanner.getWaypoints())
-      {
-         waypointsAsPoints.add(new Point3D(poseWaypoint.getPosition()));
-      }
-
-      behaviorMessager.submitMessage(BodyPathPlanInput, waypointsAsPoints);
    }
 
    private void publishLookAndStepParameters()
