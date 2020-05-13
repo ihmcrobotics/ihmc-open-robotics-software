@@ -123,18 +123,6 @@ public class BehaviorHelper
       return footstepPlanner;
    }
 
-   public VisibilityGraphPathPlanner getOrCreateBodyPathPlanner()
-   {
-      if (bodyPathPlanner == null)
-      {
-         VisibilityGraphsParametersBasics visibilityGraphParameters = robotModel.getVisibilityGraphsParameters();
-         BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
-         bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor, new YoVariableRegistry(getClass().getSimpleName()));
-      }
-
-      return bodyPathPlanner;
-   }
-
    // UI Communication Methods:
    // Extract into class?
 
