@@ -242,6 +242,9 @@
 
 
 
+
+
+
 float64 DEFAULT_NO_VALUE=-11.1
 
 
@@ -995,6 +998,20 @@ float64 body_box_base_y
 # Field default value -11.1
 
 float64 body_box_base_z
+
+
+
+
+
+# Maximum height above a stance step that a candidate step is snapped to. Regions above this height are ignored.
+
+# Intended to avoid ceilings or obstacles that are above the top of the robot
+
+
+
+# Field default value -11.1
+
+float64 maximum_snap_height
 
 
 

@@ -2,9 +2,13 @@ package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
+import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -43,56 +47,153 @@ public class FootstepNodeSnapAndWigglerTest
       tooSmallPolygon.addVertex(-pX - (wiggleInsideDelta - epsilon), -pY - (wiggleInsideDelta - epsilon));
       tooSmallPolygon.update();
 
-//      SideDependentList<ConvexPolygon2D> defaultFootPolygons = PlannerTools.createDefaultFootPolygons();
-//      FootstepNodeSnapAndWiggleTester snapAndWiggler = new FootstepNodeSnapAndWiggleTester(defaultFootPolygons, footstepPlannerParameters);
-//
-//      // test region meeting wiggleInsideDelta requirement doesn't call wiggle method
-//      FootstepNode footstepNode = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
-//      snapAndWiggler.setPlanarRegions(new PlanarRegionsList(new PlanarRegion(new RigidBodyTransform(), largeEnoughPolygon)));
-//      snapAndWiggler.snapFootstepNode(footstepNode);
-//      Assertions.assertFalse(snapAndWiggler.dirtyBit);
-//
-//      // test region not meeting wiggleInsideDelta requirement calls wiggle method
-//      snapAndWiggler.snapFootstepNode(footstepNode);
-//      snapAndWiggler.setPlanarRegions(new PlanarRegionsList(new PlanarRegion(new RigidBodyTransform(), tooSmallPolygon)));
-//      snapAndWiggler.snapFootstepNode(footstepNode);
-//      Assertions.assertTrue(snapAndWiggler.dirtyBit);
+      SideDependentList<ConvexPolygon2D> defaultFootPolygons = PlannerTools.createDefaultFootPolygons();
+      FootstepNodeSnapAndWiggleTester snapAndWiggler = new FootstepNodeSnapAndWiggleTester(defaultFootPolygons, footstepPlannerParameters);
+
+      // test region meeting wiggleInsideDelta requirement doesn't call wiggle method
+      FootstepNode footstepNode = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
+      snapAndWiggler.setPlanarRegions(new PlanarRegionsList(new PlanarRegion(new RigidBodyTransform(), largeEnoughPolygon)));
+      snapAndWiggler.snapFootstepNode(footstepNode, null, true);
+      Assertions.assertFalse(snapAndWiggler.dirtyBit);
+
+      // test region not meeting wiggleInsideDelta requirement calls wiggle method
+      snapAndWiggler.snapFootstepNode(footstepNode);
+      snapAndWiggler.setPlanarRegions(new PlanarRegionsList(new PlanarRegion(new RigidBodyTransform(), tooSmallPolygon)));
+      snapAndWiggler.snapFootstepNode(footstepNode, null, true);
+      Assertions.assertTrue(snapAndWiggler.dirtyBit);
    }
 
-//   private class FootstepNodeSnapAndWiggleTester extends FootstepNodeSnapAndWiggler
-//   {
-//      boolean dirtyBit = false;
-//
-//      public FootstepNodeSnapAndWiggleTester(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters)
-//      {
-//         super(footPolygonsInSoleFrame, parameters);
-//      }
-//
-//      @Override
-//      RigidBodyTransform getWiggleTransformInPlanarRegionFrame(ConvexPolygon2D footholdPolygon)
-//      {
-//         dirtyBit = true;
-//         return super.getWiggleTransformInPlanarRegionFrame(footholdPolygon);
-//      }
-//   }
+   private class FootstepNodeSnapAndWiggleTester extends FootstepNodeSnapAndWiggler
+   {
+      boolean dirtyBit = false;
+
+      public FootstepNodeSnapAndWiggleTester(SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame, FootstepPlannerParametersReadOnly parameters)
+      {
+         super(footPolygonsInSoleFrame, parameters);
+      }
+
+      @Override
+      protected RigidBodyTransform wiggleIntoConvexHull(ConvexPolygon2D footPolygonInRegionFrame)
+      {
+         dirtyBit = true;
+         return super.wiggleIntoConvexHull(footPolygonInRegionFrame);
+      }
+   }
 
    @Test
-   public void testSimpleSnap()
+   public void testMaximumSnapHeightOnFlatRegions()
    {
-      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
-      generator.translate(0.0, 0.0, -0.2);
-      generator.addRectangle(5.0, 5.0);
-      PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
+      double groundHeight = -0.2;
+      double maximumSnapHeight = 2.7;
 
-      SideDependentList<ConvexPolygon2D> defaultFootPolygons = PlannerTools.createDefaultFootPolygons();
-      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      FootstepNodeSnapAndWiggler snapAndWiggler = new FootstepNodeSnapAndWiggler(defaultFootPolygons, parameters);
-      snapAndWiggler.setPlanarRegions(planarRegionsList);
+      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
+      planarRegionsListGenerator.translate(0.0, 0.0, groundHeight);
+      planarRegionsListGenerator.addRectangle(100.0, 100.0);
 
-      FootstepNode footstepNode = new FootstepNode(0.1, 0.2, 1.0, RobotSide.RIGHT);
-      FootstepNodeSnapData snapData = snapAndWiggler.snapFootstepNode(footstepNode);
-      System.out.println(snapData.getSnapTransform());
-      System.out.println();
-      System.out.println(snapData.getSnappedNodeTransform(footstepNode));
+      // regions low enough to snap
+      planarRegionsListGenerator.identity();
+      double lowHeight0 = groundHeight + maximumSnapHeight - 1e-5;
+      planarRegionsListGenerator.translate(1.0, -1.0, lowHeight0);
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+
+      planarRegionsListGenerator.identity();
+      double lowHeight1 = groundHeight + maximumSnapHeight - 0.5;
+      planarRegionsListGenerator.translate(1.0, 0.0, lowHeight1);
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+
+      planarRegionsListGenerator.identity();
+      double lowHeight2 = groundHeight + 0.2;
+      planarRegionsListGenerator.translate(1.0, 1.0, lowHeight2);
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+
+      // regions too high to snap
+      planarRegionsListGenerator.identity();
+      double highHeight0 = groundHeight + maximumSnapHeight + 1e-5;
+      planarRegionsListGenerator.translate(2.0, -1.0, highHeight0);
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+
+      planarRegionsListGenerator.identity();
+      double highHeight1 = groundHeight + maximumSnapHeight + 0.5;
+      planarRegionsListGenerator.translate(2.0, 0.0, highHeight1);
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+
+      planarRegionsListGenerator.identity();
+      double highHeight2 = groundHeight + 100.0;
+      planarRegionsListGenerator.translate(2.0, 1.0, highHeight2);
+      planarRegionsListGenerator.addRectangle(1.0, 1.0);
+
+      PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
+      DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+      footstepPlannerParameters.setMaximumSnapHeight(maximumSnapHeight);
+      FootstepNodeSnapAndWiggler snapper  = new FootstepNodeSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters);
+      snapper.setPlanarRegions(planarRegionsList);
+
+      RigidBodyTransform expectedTransform = new RigidBodyTransform();
+      double epsilon = 1e-8;
+
+      FootstepNode stanceNode = new FootstepNode(0.0, 0.0);
+      snapper.snapFootstepNode(stanceNode, null, false);
+
+      // test regions low enough to snap
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(new FootstepNode(1.0, -1.0), stanceNode, false);
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, lowHeight0));
+      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+
+      snapData = snapper.snapFootstepNode(new FootstepNode(1.0, 0.0), stanceNode, false);
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, lowHeight1));
+      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+
+      snapData = snapper.snapFootstepNode(new FootstepNode(1.0, 1.0), stanceNode, false);
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, lowHeight2));
+      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+
+      // test regions high enough to snap
+      snapData = snapper.snapFootstepNode(new FootstepNode(2.0, -1.0), stanceNode, false);
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
+      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+
+      snapData = snapper.snapFootstepNode(new FootstepNode(2.0, 0.0), stanceNode, false);
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
+      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+
+      snapData = snapper.snapFootstepNode(new FootstepNode(2.0, 1.0), stanceNode, false);
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
+      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+   }
+
+   @Test
+   public void testMaximumSnapHeightOnSlopedRegion()
+   {
+      double groundHeight = -0.2;
+      double maximumSnapHeight = 2.7;
+      double rotatedAngle = Math.toRadians(- 45.0);
+
+      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
+      planarRegionsListGenerator.translate(0.0, 0.0, groundHeight);
+      planarRegionsListGenerator.addRectangle(100.0, 100.0);
+      planarRegionsListGenerator.rotate(rotatedAngle, Axis3D.Y);
+      planarRegionsListGenerator.addRectangle(100.0, 100.0);
+
+      PlanarRegionsList planarRegionsList = planarRegionsListGenerator.getPlanarRegionsList();
+      DefaultFootstepPlannerParameters footstepPlannerParameters = new DefaultFootstepPlannerParameters();
+      footstepPlannerParameters.setMaximumSnapHeight(maximumSnapHeight);
+      FootstepNodeSnapAndWiggler snapper  = new FootstepNodeSnapAndWiggler(PlannerTools.createDefaultFootPolygons(), footstepPlannerParameters);
+      snapper.setPlanarRegions(planarRegionsList);
+
+      RigidBodyTransform expectedTransform = new RigidBodyTransform();
+      double epsilon = 1e-8;
+
+      FootstepNode stanceNode = new FootstepNode(0.0, 0.0);
+      snapper.snapFootstepNode(stanceNode, null, false);
+
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(new FootstepNode(- 1.0, 0.0), stanceNode, false);
+      expectedTransform.setTranslationAndIdentityRotation(new Vector3D(0.0, 0.0, groundHeight));
+      Assertions.assertTrue(snapData.getSnapTransform().epsilonEquals(expectedTransform, epsilon));
+
+      snapData = snapper.snapFootstepNode(new FootstepNode(1.0, 0.0), stanceNode, false);
+      Assertions.assertTrue(EuclidCoreTools.epsilonEquals(snapData.getSnapTransform().getRotation().getPitch(), rotatedAngle, epsilon));
+
+      snapData = snapper.snapFootstepNode(new FootstepNode(3.0, 0.0), stanceNode, false);
+      Assertions.assertTrue(EuclidCoreTools.epsilonEquals(snapData.getSnapTransform().getRotation().getPitch(), 0.0, epsilon));
    }
 }

@@ -89,6 +89,7 @@ public class FootstepPlannerMessageTools
       packet.setBodyBoxBaseX(parameters.getBodyBoxBaseX());
       packet.setBodyBoxBaseY(parameters.getBodyBoxBaseY());
       packet.setBodyBoxBaseZ(parameters.getBodyBoxBaseZ());
+      packet.setMaximumSnapHeight(parameters.getMaximumSnapHeight());
       packet.setMinXClearanceFromStance(parameters.getMinXClearanceFromStance());
       packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
       packet.setFinalTurnProximity(parameters.getFinalTurnProximity());
