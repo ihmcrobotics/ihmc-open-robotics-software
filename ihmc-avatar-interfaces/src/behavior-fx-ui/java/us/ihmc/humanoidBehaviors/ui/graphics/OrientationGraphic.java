@@ -40,7 +40,6 @@ public class OrientationGraphic
 
       arrow = new MeshView(meshBuilder.generateMesh());
       arrow.setMaterial(meshBuilder.generateMaterial());
-      arrow.setVisible(false);
    }
 
    public FramePose3DBasics getPose()
