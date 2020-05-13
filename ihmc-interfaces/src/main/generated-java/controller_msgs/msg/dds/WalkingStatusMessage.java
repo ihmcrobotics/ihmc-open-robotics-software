@@ -7,45 +7,62 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * The controller sends this message to notify the user of the status of walking.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * The controller sends this message to notify the user of the status of walking.
+   
+ */
 public class WalkingStatusMessage extends Packet<WalkingStatusMessage> implements Settable<WalkingStatusMessage>, EpsilonComparable<WalkingStatusMessage>
 {
 
    /**
-          * The robot has begun its initial transfer/sway at the start of a walking plan.
-          */
+      
+    * The robot has begun its initial transfer/sway at the start of a walking plan.
+      
+    */
    public static final byte STARTED = (byte) 0;
 
    /**
-          * The robot has finished its final transfer/sway at the end of a walking plan.
-          */
+      
+    * The robot has finished its final transfer/sway at the end of a walking plan.
+      
+    */
    public static final byte COMPLETED = (byte) 1;
 
    /**
-          * A walking abort has been requested by the controller.
-          */
+      
+    * A walking abort has been requested by the controller.
+      
+    */
    public static final byte ABORT_REQUESTED = (byte) 2;
 
    /**
-          * The robot is back to standing on a break waiting for either an un-pause command or new footsteps.
-          */
+      
+    * The robot is back to standing on a break waiting for either an un-pause command or new footsteps.
+      
+    */
    public static final byte PAUSED = (byte) 3;
 
    /**
-          * The robot is resuming the series of footsteps that were paused.
-          */
+      
+    * The robot is resuming the series of footsteps that were paused.
+      
+    */
    public static final byte RESUMED = (byte) 4;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * Status of walking.
-            */
+       
+    * Status of walking.
+       
+    */
    public byte walking_status_ = (byte) 255;
 
    public WalkingStatusMessage()
@@ -73,15 +90,19 @@ public class WalkingStatusMessage extends Packet<WalkingStatusMessage> implement
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -89,15 +110,19 @@ public class WalkingStatusMessage extends Packet<WalkingStatusMessage> implement
 
 
    /**
-            * Status of walking.
-            */
+       
+    * Status of walking.
+       
+    */
    public void setWalkingStatus(byte walking_status)
    {
       walking_status_ = walking_status;
    }
    /**
-            * Status of walking.
-            */
+       
+    * Status of walking.
+       
+    */
    public byte getWalkingStatus()
    {
       return walking_status_;

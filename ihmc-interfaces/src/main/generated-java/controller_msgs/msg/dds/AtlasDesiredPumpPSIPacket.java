@@ -7,19 +7,25 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Send a request to change the desired PSI of the Atlas hydraulic pump.
-       */
+   
+ * Send a request to change the desired PSI of the Atlas hydraulic pump.
+   
+ */
 public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket> implements Settable<AtlasDesiredPumpPSIPacket>, EpsilonComparable<AtlasDesiredPumpPSIPacket>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * The desired hydraulic pump PSI.
-            */
+       
+    * The desired hydraulic pump PSI.
+       
+    */
    public int desired_pump_psi_;
 
    public AtlasDesiredPumpPSIPacket()
@@ -47,15 +53,19 @@ public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -63,15 +73,19 @@ public class AtlasDesiredPumpPSIPacket extends Packet<AtlasDesiredPumpPSIPacket>
 
 
    /**
-            * The desired hydraulic pump PSI.
-            */
+       
+    * The desired hydraulic pump PSI.
+       
+    */
    public void setDesiredPumpPsi(int desired_pump_psi)
    {
       desired_pump_psi_ = desired_pump_psi;
    }
    /**
-            * The desired hydraulic pump PSI.
-            */
+       
+    * The desired hydraulic pump PSI.
+       
+    */
    public int getDesiredPumpPsi()
    {
       return desired_pump_psi_;

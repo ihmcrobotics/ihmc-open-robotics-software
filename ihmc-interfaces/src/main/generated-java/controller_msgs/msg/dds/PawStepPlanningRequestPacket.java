@@ -7,8 +7,10 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC quadruped footstep planning module.
-       */
+   
+ * This message is part of the IHMC quadruped footstep planning module.
+   
+ */
 public class PawStepPlanningRequestPacket extends Packet<PawStepPlanningRequestPacket> implements Settable<PawStepPlanningRequestPacket>, EpsilonComparable<PawStepPlanningRequestPacket>
 {
 
@@ -33,8 +35,10 @@ public class PawStepPlanningRequestPacket extends Packet<PawStepPlanningRequestP
    public static final byte PAW_PLANNER_TYPE_A_STAR = (byte) 2;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public byte initial_step_robot_quadrant_ = (byte) 255;
@@ -160,15 +164,19 @@ public class PawStepPlanningRequestPacket extends Packet<PawStepPlanningRequestP
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

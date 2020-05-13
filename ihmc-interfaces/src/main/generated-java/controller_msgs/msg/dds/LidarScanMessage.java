@@ -7,14 +7,18 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message should disappear to be replaced by ROS equivalent.
-       */
+   
+ * This message should disappear to be replaced by ROS equivalent.
+   
+ */
 public class LidarScanMessage extends Packet<LidarScanMessage> implements Settable<LidarScanMessage>, EpsilonComparable<LidarScanMessage>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public long robot_timestamp_;
@@ -24,17 +28,25 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
    public us.ihmc.euclid.tuple4D.Quaternion lidar_orientation_;
 
    /**
-            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
-            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
-            * The confidence of the sensor pose represents the quality of the pose estimation.
-            */
+       
+    * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+       
+    * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+       
+    * The confidence of the sensor pose represents the quality of the pose estimation.
+       
+    */
    public double sensor_pose_confidence_ = 1.0;
 
    /**
-            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
-            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
-            * The confidence of the point cloud represents the quality of the collected point cloud data.
-            */
+       
+    * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+       
+    * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+       
+    * The confidence of the point cloud represents the quality of the collected point cloud data.
+       
+    */
    public double point_cloud_confidence_ = 1.0;
 
    public us.ihmc.idl.IDLSequence.Float  scan_;
@@ -85,15 +97,19 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -125,19 +141,27 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
 
 
    /**
-            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
-            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
-            * The confidence of the sensor pose represents the quality of the pose estimation.
-            */
+       
+    * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+       
+    * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+       
+    * The confidence of the sensor pose represents the quality of the pose estimation.
+       
+    */
    public void setSensorPoseConfidence(double sensor_pose_confidence)
    {
       sensor_pose_confidence_ = sensor_pose_confidence;
    }
    /**
-            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
-            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
-            * The confidence of the sensor pose represents the quality of the pose estimation.
-            */
+       
+    * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+       
+    * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+       
+    * The confidence of the sensor pose represents the quality of the pose estimation.
+       
+    */
    public double getSensorPoseConfidence()
    {
       return sensor_pose_confidence_;
@@ -145,19 +169,27 @@ public class LidarScanMessage extends Packet<LidarScanMessage> implements Settab
 
 
    /**
-            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
-            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
-            * The confidence of the point cloud represents the quality of the collected point cloud data.
-            */
+       
+    * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+       
+    * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+       
+    * The confidence of the point cloud represents the quality of the collected point cloud data.
+       
+    */
    public void setPointCloudConfidence(double point_cloud_confidence)
    {
       point_cloud_confidence_ = point_cloud_confidence;
    }
    /**
-            * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
-            * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
-            * The confidence of the point cloud represents the quality of the collected point cloud data.
-            */
+       
+    * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+       
+    * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+       
+    * The confidence of the point cloud represents the quality of the collected point cloud data.
+       
+    */
    public double getPointCloudConfidence()
    {
       return point_cloud_confidence_;

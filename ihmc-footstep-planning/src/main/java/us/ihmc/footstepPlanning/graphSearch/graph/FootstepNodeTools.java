@@ -2,10 +2,12 @@ package us.ihmc.footstepPlanning.graphSearch.graph;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -32,10 +34,8 @@ public class FootstepNodeTools
     */
    public static void getNodeTransform(FootstepNode node, RigidBodyTransform nodeToWorldTransformToPack)
    {
-      double soleYaw = node.getYaw();
-      Point3D solePosition = new Point3D(node.getX(), node.getY(), 0.0);
-      nodeToWorldTransformToPack.setRotationYawAndZeroTranslation(soleYaw);
-      nodeToWorldTransformToPack.getTranslation().set(solePosition);
+      nodeToWorldTransformToPack.setRotationYawAndZeroTranslation(node.getYaw());
+      nodeToWorldTransformToPack.getTranslation().set(node.getX(), node.getY(), 0.0);
    }
 
    /**
@@ -46,7 +46,7 @@ public class FootstepNodeTools
     * @param snapTransform pre-snap to post-snap transform
     * @param transformToPack
     */
-   public static void getSnappedNodeTransform(FootstepNode node, RigidBodyTransform snapTransform, RigidBodyTransform transformToPack)
+   public static void getSnappedNodeTransform(FootstepNode node, RigidBodyTransformReadOnly snapTransform, RigidBodyTransform transformToPack)
    {
       getNodeTransform(node, transformToPack);
       snapTransform.transform(transformToPack);
@@ -87,7 +87,7 @@ public class FootstepNodeTools
     * @param footPolygonInSoleFrame
     * @param footPolygonToPack
     */
-   public static void getFootPolygon(FootstepNode node, ConvexPolygon2D footPolygonInSoleFrame, ConvexPolygon2D footPolygonToPack)
+   public static void getFootPolygon(FootstepNode node, ConvexPolygon2DReadOnly footPolygonInSoleFrame, ConvexPolygon2D footPolygonToPack)
    {
       footPolygonToPack.set(footPolygonInSoleFrame);
 

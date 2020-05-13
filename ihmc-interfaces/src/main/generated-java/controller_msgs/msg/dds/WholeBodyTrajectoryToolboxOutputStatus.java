@@ -7,24 +7,35 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * General purpose message normally used to report the solution of a whole-body trajectory planner.
-       * Main usage is the IHMC WholeBodyTrajectoryToolbox.
-       */
+   
+ * General purpose message normally used to report the solution of a whole-body trajectory planner.
+   
+ * Main usage is the IHMC WholeBodyTrajectoryToolbox.
+   
+ */
 public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTrajectoryToolboxOutputStatus> implements Settable<WholeBodyTrajectoryToolboxOutputStatus>, EpsilonComparable<WholeBodyTrajectoryToolboxOutputStatus>
 {
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    /**
-            * 0: not completed.
-            * 1: fail to find initial guess.
-            * 2: fail to complete expanding tree.
-            * 3: fail to optimize path.
-            * 4: solution is available.
-            */
+       
+    * 0: not completed.
+       
+    * 1: fail to find initial guess.
+       
+    * 2: fail to complete expanding tree.
+       
+    * 3: fail to optimize path.
+       
+    * 4: solution is available.
+       
+    */
    public int planning_result_;
 
    public us.ihmc.idl.IDLSequence.Double  trajectory_times_;
@@ -65,15 +76,19 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -81,23 +96,35 @@ public class WholeBodyTrajectoryToolboxOutputStatus extends Packet<WholeBodyTraj
 
 
    /**
-            * 0: not completed.
-            * 1: fail to find initial guess.
-            * 2: fail to complete expanding tree.
-            * 3: fail to optimize path.
-            * 4: solution is available.
-            */
+       
+    * 0: not completed.
+       
+    * 1: fail to find initial guess.
+       
+    * 2: fail to complete expanding tree.
+       
+    * 3: fail to optimize path.
+       
+    * 4: solution is available.
+       
+    */
    public void setPlanningResult(int planning_result)
    {
       planning_result_ = planning_result;
    }
    /**
-            * 0: not completed.
-            * 1: fail to find initial guess.
-            * 2: fail to complete expanding tree.
-            * 3: fail to optimize path.
-            * 4: solution is available.
-            */
+       
+    * 0: not completed.
+       
+    * 1: fail to find initial guess.
+       
+    * 2: fail to complete expanding tree.
+       
+    * 3: fail to optimize path.
+       
+    * 4: solution is available.
+       
+    */
    public int getPlanningResult()
    {
       return planning_result_;

@@ -7,9 +7,12 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * Message used to configure the exploration for a RRT-based planner.
-       * Main usage is the IHMC WholeBodyTrajectoryToolbox.
-       */
+   
+ * Message used to configure the exploration for a RRT-based planner.
+   
+ * Main usage is the IHMC WholeBodyTrajectoryToolbox.
+   
+ */
 public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyExplorationConfigurationMessage> implements Settable<RigidBodyExplorationConfigurationMessage>, EpsilonComparable<RigidBodyExplorationConfigurationMessage>
 {
 
@@ -28,8 +31,10 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
    public static final byte CONFIGURATION_SPACE_NAME_SO3 = (byte) 6;
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public int rigid_body_hash_code_;
@@ -80,15 +85,19 @@ public class RigidBodyExplorationConfigurationMessage extends Packet<RigidBodyEx
 
 
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;

@@ -32,7 +32,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2NodeInterface;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
 
 // TODO: Clean this up by using DRCUserInterfaceNetworkingManager (After cleaning that up first...)
@@ -111,7 +111,7 @@ public class RemoteHumanoidRobotInterface
       {
          while (!walkingCompletedNotifications.isEmpty())
          {
-            walkingCompletedNotifications.remove(0).add(message);
+            walkingCompletedNotifications.remove(0).set(message);
          }
       }
    }

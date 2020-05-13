@@ -7,10 +7,8 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
-import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -25,18 +23,18 @@ public class ObstacleBetweenNodesChecker
    private static final boolean DEBUG = false;
 
    private PlanarRegionsList planarRegionsList;
-   private final FootstepNodeSnapper snapper;
+   private final FootstepNodeSnapAndWiggler snapper;
    private final BooleanSupplier checkForPathCollisions;
    private final DoubleSupplier idealFootstepWidth;
    private final DoubleSupplier heightOffset;
    private final DoubleSupplier heightExtrusion;
 
-   public ObstacleBetweenNodesChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapper snapper)
+   public ObstacleBetweenNodesChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapAndWiggler snapper)
    {
       this(snapper, parameters::checkForPathCollisions, parameters::getIdealFootstepWidth, parameters::getBodyBoxBaseZ, parameters::getBodyBoxHeight);
    }
 
-   public ObstacleBetweenNodesChecker(FootstepNodeSnapper snapper,
+   public ObstacleBetweenNodesChecker(FootstepNodeSnapAndWiggler snapper,
                                       BooleanSupplier checkForPathCollisions,
                                       DoubleSupplier idealFootstepWidth,
                                       DoubleSupplier heightOffset,
@@ -65,6 +63,11 @@ public class ObstacleBetweenNodesChecker
          return true;
 
       FootstepNodeSnapData snapData = snapper.snapFootstepNode(node);
+      if (snapData == null)
+      {
+         return true;
+      }
+
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
 
       FootstepNodeSnapData previousNodeSnapData = snapper.snapFootstepNode(previousNode);

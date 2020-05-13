@@ -7,10 +7,14 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC quadruped controller API.
-       * This message notifies the user of a change in the stepping controller state.
-       * This message's primary use is to signal a requested state change is completed.
-       */
+   
+ * This message is part of the IHMC quadruped controller API.
+   
+ * This message notifies the user of a change in the stepping controller state.
+   
+ * This message's primary use is to signal a requested state change is completed.
+   
+ */
 public class QuadrupedSteppingStateChangeMessage extends Packet<QuadrupedSteppingStateChangeMessage> implements Settable<QuadrupedSteppingStateChangeMessage>, EpsilonComparable<QuadrupedSteppingStateChangeMessage>
 {
 
@@ -21,13 +25,17 @@ public class QuadrupedSteppingStateChangeMessage extends Packet<QuadrupedSteppin
    public static final byte SOLE_WAYPOINT = (byte) 2;
 
    /**
-            * Specifies the controller's state prior to transition.
-            */
+       
+    * Specifies the controller's state prior to transition.
+       
+    */
    public byte initial_quadruped_stepping_state_enum_ = (byte) 255;
 
    /**
-            * Specifies the state the controller has transitioned into.
-            */
+       
+    * Specifies the state the controller has transitioned into.
+       
+    */
    public byte end_quadruped_stepping_state_enum_ = (byte) 255;
 
    public QuadrupedSteppingStateChangeMessage()
@@ -55,15 +63,19 @@ public class QuadrupedSteppingStateChangeMessage extends Packet<QuadrupedSteppin
 
 
    /**
-            * Specifies the controller's state prior to transition.
-            */
+       
+    * Specifies the controller's state prior to transition.
+       
+    */
    public void setInitialQuadrupedSteppingStateEnum(byte initial_quadruped_stepping_state_enum)
    {
       initial_quadruped_stepping_state_enum_ = initial_quadruped_stepping_state_enum;
    }
    /**
-            * Specifies the controller's state prior to transition.
-            */
+       
+    * Specifies the controller's state prior to transition.
+       
+    */
    public byte getInitialQuadrupedSteppingStateEnum()
    {
       return initial_quadruped_stepping_state_enum_;
@@ -71,15 +83,19 @@ public class QuadrupedSteppingStateChangeMessage extends Packet<QuadrupedSteppin
 
 
    /**
-            * Specifies the state the controller has transitioned into.
-            */
+       
+    * Specifies the state the controller has transitioned into.
+       
+    */
    public void setEndQuadrupedSteppingStateEnum(byte end_quadruped_stepping_state_enum)
    {
       end_quadruped_stepping_state_enum_ = end_quadruped_stepping_state_enum;
    }
    /**
-            * Specifies the state the controller has transitioned into.
-            */
+       
+    * Specifies the state the controller has transitioned into.
+       
+    */
    public byte getEndQuadrupedSteppingStateEnum()
    {
       return end_quadruped_stepping_state_enum_;
