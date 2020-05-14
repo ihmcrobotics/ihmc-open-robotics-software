@@ -1,12 +1,19 @@
 package us.ihmc.footstepPlanning.ui.controllers;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerLogVisualizerController.ChildStepProperty;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.messager.TopicListener;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -36,6 +43,11 @@ public class FootstepPlannerStatusBarController
    private Text footstepPlanTime;
    @FXML
    private Text iterationsTaken;
+
+   @FXML
+   private TableView<FootstepTableProperty> footstepPlanTable;
+
+   private final ObservableList<FootstepTableProperty> footstepPlanTableItems = FXCollections.observableArrayList();
 
    public void attachMessager(JavaFXMessager messager)
    {
@@ -71,6 +83,35 @@ public class FootstepPlannerStatusBarController
          footstepPlanTime.setText(String.format("%.2f", timings.getTimePlanningStepsSeconds()));
          iterationsTaken.setText(Long.toString(timings.getStepPlanningIterations()));
       });
+
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepPlanResponse ->
+      {
+         footstepPlanTableItems.clear();
+         for (int i = 0; i < footstepPlanResponse.getFootstepDataList().size(); i++)
+         {
+            FootstepDataMessage footstepDataMessage = footstepPlanResponse.getFootstepDataList().get(i);
+            footstepPlanTableItems.add(new FootstepTableProperty(i, RobotSide.fromByte(footstepDataMessage.getRobotSide())));
+         }
+      });
+
+      footstepPlanTable.setPrefWidth(240.0);
+      footstepPlanTable.setPrefHeight(320.0);
+      footstepPlanTable.getColumns().add(new TableColumn<>("Index"));
+      footstepPlanTable.getColumns().add(new TableColumn<>("Side"));
+      footstepPlanTable.getColumns().get(0).setCellValueFactory(new PropertyValueFactory<>("stepIndex"));
+      footstepPlanTable.getColumns().get(1).setCellValueFactory(new PropertyValueFactory<>("side"));
+      footstepPlanTable.getColumns().get(0).setPrefWidth(120.0);
+      footstepPlanTable.getColumns().get(1).setPrefWidth(120.0);
+      footstepPlanTable.setItems(footstepPlanTableItems);
+
+      footstepPlanTable.getSelectionModel().selectedItemProperty().addListener((observer, oldValue, newValue) ->
+                                                                               {
+                                                                                  if (newValue != null)
+                                                                                  {
+                                                                                     messager.submitMessage(FootstepPlannerMessagerAPI.SelectedFootstepToAdjust,
+                                                                                                            newValue.stepIndex);
+                                                                                  }
+                                                                               });
    }
 
    private static class TextViewerListener<T> implements TopicListener<T>
@@ -87,6 +128,28 @@ public class FootstepPlannerStatusBarController
       {
          if (messageContent != null)
             textField.setText(messageContent.toString());
+      }
+   }
+
+   public class FootstepTableProperty
+   {
+      private int stepIndex;
+      private RobotSide side;
+
+      public FootstepTableProperty(int stepIndex, RobotSide side)
+      {
+         this.stepIndex = stepIndex;
+         this.side = side;
+      }
+
+      public int getStepIndex()
+      {
+         return stepIndex;
+      }
+
+      public RobotSide getSide()
+      {
+         return side;
       }
    }
 }
