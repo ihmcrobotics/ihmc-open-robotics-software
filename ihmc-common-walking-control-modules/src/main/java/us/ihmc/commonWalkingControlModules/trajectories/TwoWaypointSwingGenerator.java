@@ -98,7 +98,7 @@ public class TwoWaypointSwingGenerator implements SwingGenerator
       for (int i = 0; i < numberWaypoints; i++)
          this.waypointProportions[i] = defaultWaypointProportions[i];
 
-      trajectory = new PositionOptimizedTrajectoryGenerator(namePrefix, registry, null, maxTimeIterations, numberWaypoints);
+      trajectory = new PositionOptimizedTrajectoryGenerator(namePrefix, registry, yoGraphicsListRegistry, maxTimeIterations, numberWaypoints);
 
       for (int i = 0; i < numberWaypoints; i++)
          waypointPositions.add(new FramePoint3D());
