@@ -104,6 +104,9 @@ public class FootstepPlannerStatusBarController
       footstepPlanTable.getColumns().get(1).setPrefWidth(120.0);
       footstepPlanTable.setItems(footstepPlanTableItems);
 
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, c -> footstepPlanTableItems.clear());
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.GlobalReset, c -> footstepPlanTableItems.clear());
+
       footstepPlanTable.getSelectionModel().selectedItemProperty().addListener((observer, oldValue, newValue) ->
                                                                                {
                                                                                   if (newValue != null)
