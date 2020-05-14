@@ -8,9 +8,7 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.layout.Region;
 import javafx.scene.text.Text;
-import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerLogVisualizerController.ChildStepProperty;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -111,7 +109,7 @@ public class FootstepPlannerStatusBarController
                                                                                {
                                                                                   if (newValue != null)
                                                                                   {
-                                                                                     messager.submitMessage(FootstepPlannerMessagerAPI.SelectedFootstepToAdjust,
+                                                                                     messager.submitMessage(FootstepPlannerMessagerAPI.SelectedFootstep,
                                                                                                             newValue.stepIndex);
                                                                                   }
                                                                                });

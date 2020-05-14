@@ -24,14 +24,15 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
 /**
  * This class uses the shorthand:
- * compute a mesh = using a FootstepDataMessage generate a Mesh and Material pair (can happen on any thread)
- * update a mesh = from a Mesh and Material pair update a MeshView (can happen only on {@link #handle}
+ * compute a mesh = using a FootstepDataMessage generate a Mesh and Material pair
+ * update a mesh = from a Mesh and Material pair update a MeshView
  */
 public class FootstepPathMeshViewer extends AnimationTimer
 {
@@ -41,6 +42,9 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
    private final AtomicBoolean reset = new AtomicBoolean(false);
    private final AtomicReference<Boolean> ignorePartialFootholds;
+
+   private final AtomicReference<Integer> previousSelectedStep = new AtomicReference<>(-1);
+   private final AtomicReference<Integer> selectedStep;
 
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
@@ -57,15 +61,17 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
       // call this on animation timer update thread since it updates a single step and might come in at higher frequency
       messager.registerTopicListener(FootstepToUpdateViz, updateStep::set);
+      selectedStep = messager.createInput(SelectedFootstep, -1);
 
       // handle reset on animation timer thread
       messager.registerTopicListener(ComputePath, data -> reset.set(true));
+      messager.registerTopicListener(GlobalReset, data -> reset.set(true));
 
       ignorePartialFootholds = messager.createInput(IgnorePartialFootholds, false);
 
       for (int i = 0; i < 200; i++)
       {
-         footstepMeshes.add(new FootstepMeshManager());
+         footstepMeshes.add(new FootstepMeshManager(i));
       }
    }
 
@@ -77,7 +83,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
          while (footstepPlanResponse.getFootstepDataList().size() > footstepMeshes.size())
          {
-            footstepMeshes.add(new FootstepMeshManager());
+            footstepMeshes.add(new FootstepMeshManager(footstepMeshes.size()));
          }
 
          for (int i = 0; i < footstepPlanResponse.getFootstepDataList().size(); i++)
@@ -95,16 +101,33 @@ public class FootstepPathMeshViewer extends AnimationTimer
       updateAllMeshes.set(true);
    }
 
-   private static Color getFootstepColor(FootstepDataMessage footstepDataMessage)
+   private Color getFootstepColor(FootstepDataMessage footstepDataMessage, int index)
    {
-      return footstepDataMessage.getRobotSide() == 0 ? Color.RED : Color.GREEN;
+      if (index == selectedStep.get())
+      {
+         return Color.YELLOW;
+      }
+      else
+      {
+         return footstepDataMessage.getRobotSide() == 0 ? Color.RED : Color.GREEN;
+      }
    }
 
    private class FootstepMeshManager
    {
       private static final double ADDITIONAL_HEIGHT = 0.01;
+
+      private final int index;
       private final MeshHolder meshHolder = new MeshHolder(root);
       private final AtomicReference<FootstepDataMessage> footstepDataMessage = new AtomicReference<>();
+
+      private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
+      private final ConvexPolygon2D foothold = new ConvexPolygon2D();
+
+      public FootstepMeshManager(int index)
+      {
+         this.index = index;
+      }
 
       /**
        * Call from any thread
@@ -117,13 +140,14 @@ public class FootstepPathMeshViewer extends AnimationTimer
          }
 
          meshBuilder.clear();
+         foothold.clear();
+
          FootstepDataMessage footstepDataMessage = this.footstepDataMessage.get();
 
-         Color footColor = getFootstepColor(footstepDataMessage);
-         ConvexPolygon2D foothold = new ConvexPolygon2D();
+         Color footColor = getFootstepColor(footstepDataMessage, index);
          RobotSide robotSide = RobotSide.fromByte(footstepDataMessage.getRobotSide());
 
-         RigidBodyTransform transformToWorld = new RigidBodyTransform(footstepDataMessage.getOrientation(), footstepDataMessage.getLocation());
+         transformToWorld.set(footstepDataMessage.getOrientation(), footstepDataMessage.getLocation());
          transformToWorld.appendTranslation(0.0, 0.0, ADDITIONAL_HEIGHT);
 
          if (ignorePartialFootholds.get() || footstepDataMessage.getPredictedContactPoints2d().isEmpty())
@@ -175,6 +199,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
       {
          footstepMeshes.get(updateStep.getKey()).footstepDataMessage.set(updateStep.getValue());
          footstepMeshes.get(updateStep.getKey()).computeMesh();
+         footstepMeshes.get(updateStep.getKey()).updateMesh();
       }
       else if (updateAllMeshes.getAndSet(false))
       {
@@ -182,6 +207,19 @@ public class FootstepPathMeshViewer extends AnimationTimer
          {
             footstepMeshes.get(i).updateMesh();
          }
+      }
+      else if (previousSelectedStep.get().intValue() != selectedStep.get().intValue())
+      {
+         if (previousSelectedStep.get() >= 0)
+         {
+            footstepMeshes.get(previousSelectedStep.get()).computeMesh();
+            footstepMeshes.get(previousSelectedStep.get()).updateMesh();
+         }
+         
+         footstepMeshes.get(selectedStep.get()).computeMesh();
+         footstepMeshes.get(selectedStep.get()).updateMesh();
+
+         previousSelectedStep.set(selectedStep.get());
       }
       else if (reset.getAndSet(false))
       {
@@ -195,6 +233,9 @@ public class FootstepPathMeshViewer extends AnimationTimer
       {
          footstepMeshes.get(i).clear();
       }
+
+      selectedStep.set(-1);
+      previousSelectedStep.set(-1);
    }
 
    public void setDefaultContactPoints(SideDependentList<List<Point2D>> defaultContactPoints)
