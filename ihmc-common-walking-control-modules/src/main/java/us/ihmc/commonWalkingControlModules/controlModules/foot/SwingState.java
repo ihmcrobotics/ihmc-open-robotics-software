@@ -65,6 +65,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SwingState extends AbstractFootControlState
 {
+   private static final boolean visualizeAdjustedSwing = false;
    private static final boolean USE_ALL_LEG_JOINT_SWING_CORRECTOR = false;
 
    private final YoBoolean replanTrajectory;
@@ -335,7 +336,10 @@ public class SwingState extends AbstractFootControlState
       swingDuration = new YoDouble(namePrefix + "Duration", registry);
       swingHeight = new YoDouble(namePrefix + "Height", registry);
 
-      swingVisualizer = new BlendedPositionTrajectoryGeneratorVisualizer(namePrefix, blendedSwingTrajectory, swingDuration, registry, yoGraphicsListRegistry);
+      if (visualizeAdjustedSwing)
+         swingVisualizer = new BlendedPositionTrajectoryGeneratorVisualizer(namePrefix, blendedSwingTrajectory, swingDuration, registry, yoGraphicsListRegistry);
+      else
+         swingVisualizer = null;
 
       swingTimeSpeedUpFactor = new YoDouble(namePrefix + "TimeSpeedUpFactor", registry);
       minSwingTimeForDisturbanceRecovery = new YoDouble(namePrefix + "MinTimeForDisturbanceRecovery", registry);
@@ -570,7 +574,8 @@ public class SwingState extends AbstractFootControlState
       if (activeTrajectoryType.getEnumValue() != TrajectoryType.WAYPOINTS && swingTrajectoryOptimizer.doOptimizationUpdate()) // haven't finished original planning
       {
          fillAndInitializeTrajectories(false);
-         swingVisualizer.visualize();
+         if (swingVisualizer != null)
+            swingVisualizer.visualize();
       }
       else if (replanTrajectory.getBooleanValue()) // need to update the beginning and end blending
          fillAndInitializeBlendedTrajectories();
@@ -757,7 +762,8 @@ public class SwingState extends AbstractFootControlState
    {
       double swingDuration = this.swingDuration.getDoubleValue();
       blendedSwingTrajectory.clear();
-      swingVisualizer.hideVisualization();
+      if (swingVisualizer != null)
+         swingVisualizer.hideVisualization();
       if (swingTrajectoryBlendDuration > 0.0)
       {
          initialPose.changeFrame(worldFrame);
@@ -788,7 +794,8 @@ public class SwingState extends AbstractFootControlState
       }
       blendedSwingTrajectory.initialize();
       touchdownTrajectory.initialize();
-      swingVisualizer.visualize();
+      if (swingVisualizer != null)
+         swingVisualizer.visualize();
 
       if (!swingWaypointsForViz.isEmpty() && activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
       {
