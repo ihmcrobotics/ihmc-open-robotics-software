@@ -6,6 +6,7 @@ import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -26,6 +27,11 @@ public class BlendedPoseTrajectoryGenerator implements PoseTrajectoryGenerator
       this.trajectory = trajectory;
       this.blendedPositionTrajectory = new BlendedPositionTrajectoryGenerator(prefix + "Position", trajectory, trajectoryFrame, parentRegistry);
       this.blendedOrientationTrajectory = new BlendedOrientationTrajectoryGenerator(prefix + "Orientation", trajectory, trajectoryFrame, parentRegistry);
+   }
+
+   public BlendedPositionTrajectoryGenerator getPositionTrajectoryGenerator()
+   {
+      return blendedPositionTrajectory;
    }
 
    public void clear()

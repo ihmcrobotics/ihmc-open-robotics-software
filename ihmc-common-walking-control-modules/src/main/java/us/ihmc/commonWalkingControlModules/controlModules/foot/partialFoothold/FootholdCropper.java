@@ -106,12 +106,13 @@ public class FootholdCropper
          yoShrunkPolygon.setVisible(true);
          yoGraphicsListRegistry.registerArtifact(listName, yoShrunkPolygon);
 
-         measuredVisualizer = new OccupancyGridVisualizer(namePrefix + "MeasuredCoP",
-                                                          measuredCoPOccupancy,
-                                                          50,
-                                                          YoAppearance.Red(),
-                                                          registry,
-                                                          yoGraphicsListRegistry);
+//         measuredVisualizer = new OccupancyGridVisualizer(namePrefix + "MeasuredCoP",
+//                                                          measuredCoPOccupancy,
+//                                                          50,
+//                                                          YoAppearance.Red(),
+//                                                          registry,
+//                                                          yoGraphicsListRegistry);
+         measuredVisualizer = null;
       }
       else
       {
