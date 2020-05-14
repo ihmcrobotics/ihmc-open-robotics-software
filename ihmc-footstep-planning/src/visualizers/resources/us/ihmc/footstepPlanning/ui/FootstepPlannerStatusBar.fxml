@@ -12,6 +12,7 @@
 <?import javafx.scene.layout.Region?>
 
 <?import javafx.scene.text.Text?>
+<?import javafx.scene.control.TableView?>
 <VBox xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" alignment="TOP_CENTER"
       fx:controller="us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerStatusBarController">
 
@@ -64,13 +65,15 @@
             <Label text="Iterations" GridPane.columnIndex="0" GridPane.rowIndex="11" GridPane.halignment="RIGHT"/>
             <Text fx:id="iterationsTaken" GridPane.columnIndex="1" GridPane.rowIndex="11" />
 
-            <Separator prefHeight="10" GridPane.columnIndex="0" GridPane.rowIndex="12" GridPane.columnSpan="2"/>
-
             <Button fx:id="viewExceptionButton" text="View exception" GridPane.columnIndex="0" GridPane.rowIndex="13" GridPane.columnSpan="2"
                     GridPane.halignment="CENTER"/>
 
+            <Separator prefHeight="10" GridPane.columnIndex="0" GridPane.rowIndex="12" GridPane.columnSpan="2"/>
+
             <!-- Add region to enlarge default width of status bar -->
             <Region GridPane.columnIndex="1" GridPane.rowIndex="14" prefWidth="150"/>
+
+            <TableView fx:id="footstepPlanTable" GridPane.rowIndex="15" GridPane.columnSpan="2"/>
         </children>
     </GridPane>
 </VBox>
