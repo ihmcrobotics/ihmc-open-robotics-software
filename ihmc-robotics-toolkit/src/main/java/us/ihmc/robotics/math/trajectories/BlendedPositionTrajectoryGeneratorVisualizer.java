@@ -24,7 +24,7 @@ public class BlendedPositionTrajectoryGeneratorVisualizer
                                                        YoVariableRegistry registry,
                                                        YoGraphicsListRegistry graphicsListRegistry)
    {
-      trajectoryViz = new YoGraphicTrajectory3D(namePrefix + "Trajectory",
+      trajectoryViz = new YoGraphicTrajectory3D(namePrefix + "BlendedTrajectory",
                                                 null,
                                                 trajectory,
                                                 swingDuration,
