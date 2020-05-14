@@ -57,6 +57,7 @@ public class ControllerAPIDefinition
       commands.add(MomentumTrajectoryCommand.class);
       commands.add(CenterOfMassTrajectoryCommand.class);
       commands.add(PlanarRegionsListCommand.class);
+      commands.add(PlanarRegionCommand.class);
       commands.add(HandWrenchTrajectoryCommand.class);
 
       controllerSupportedCommands = Collections.unmodifiableList(commands);

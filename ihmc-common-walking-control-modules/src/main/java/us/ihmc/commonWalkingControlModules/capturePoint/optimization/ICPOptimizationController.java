@@ -465,7 +465,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.resetReachabilityConstraint();
       solver.resetPlanarRegionConstraint();
 
-      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraint());
       if (reachabilityConstraintHandler != null)
       {
          solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport());
@@ -507,7 +507,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.resetReachabilityConstraint();
       solver.resetPlanarRegionConstraint();
 
-      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraint());
       if (reachabilityConstraintHandler != null)
       {
          solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForDoubleSupport());
@@ -542,7 +542,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       solver.resetReachabilityConstraint();
       solver.resetPlanarRegionConstraint();
 
-      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide));
+      solver.addSupportPolygon(copConstraintHandler.updateCoPConstraint());
       if (reachabilityConstraintHandler != null)
       {
          solver.addReachabilityPolygon(reachabilityConstraintHandler.initializeReachabilityConstraintForSingleSupport(supportSide, upcomingFootstep));
@@ -744,7 +744,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       if (isInDoubleSupport.getBooleanValue())
       {
          solver.resetCoPLocationConstraint();
-         solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForDoubleSupport());
+         solver.addSupportPolygon(copConstraintHandler.updateCoPConstraint());
 
          if (copConstraintHandler.hasSupportPolygonChanged())
             solver.notifyResetActiveSet();
@@ -752,7 +752,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
       else
       {
          solver.resetCoPLocationConstraint();
-         solver.addSupportPolygon(copConstraintHandler.updateCoPConstraintForSingleSupport(supportSide.getEnumValue()));
+         solver.addSupportPolygon(copConstraintHandler.updateCoPConstraint());
 
          boolean resetActiveSet = copConstraintHandler.hasSupportPolygonChanged();
 
