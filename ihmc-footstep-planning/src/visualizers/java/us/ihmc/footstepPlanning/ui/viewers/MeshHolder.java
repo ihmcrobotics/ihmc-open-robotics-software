@@ -10,7 +10,7 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Lightweight class for passing mesh data between threads
- * Set meshReference on any thread and call update() from an AnimationTimer update method
+ * Set meshReference on any thread and call update() and remove() from an AnimationTimer handle method
  */
 class MeshHolder
 {
@@ -25,7 +25,7 @@ class MeshHolder
    }
 
    /**
-    * Should be called from AnimationTimer.update
+    * Should be called from AnimationTimer.handle
     */
    void update()
    {
@@ -40,6 +40,18 @@ class MeshHolder
 
          meshView.setMesh(mesh.getKey());
          meshView.setMaterial(mesh.getValue());
+      }
+   }
+
+   /**
+    * Should be called from AnimationTimer.handle
+    */
+   void remove()
+   {
+      if (addedFlag)
+      {
+         root.getChildren().remove(meshView);
+         addedFlag = false;
       }
    }
 }
