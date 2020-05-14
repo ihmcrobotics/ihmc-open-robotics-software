@@ -38,7 +38,7 @@ public class StepConstraintCalculator
    private final CapturabilityBasedPlanarRegionDecider planarRegionDecider;
    private final ReachabilityConstraintCalculator reachabilityConstraintCalculator;
 
-   private final ConvexPolygon2D reachabilityRegionInConstraintPlane = new ConvexPolygon2D();
+   private final FrameConvexPolygon2D reachabilityRegionInConstraintPlane = new FrameConvexPolygon2D();
 
    private final FramePoint2D capturePoint = new FramePoint2D();
 
@@ -59,6 +59,7 @@ public class StepConstraintCalculator
    {
       this(soleZUpFrames,
            centerOfMassFrame,
+           walkingControllerParameters.getSteppingParameters().getFootLength(),
            walkingControllerParameters.getSteppingParameters().getFootWidth(),
            walkingControllerParameters.getSteppingParameters().getMaxStepLength(),
            walkingControllerParameters.getSteppingParameters().getMaxBackwardStepLength(),
@@ -70,6 +71,7 @@ public class StepConstraintCalculator
 
    public StepConstraintCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames,
                                    ReferenceFrame centerOfMassFrame,
+                                   double footLength,
                                    double footWidth,
                                    double kinematicStepRange,
                                    double maxBackwardStepLength,
@@ -82,6 +84,8 @@ public class StepConstraintCalculator
       this.captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange, soleZUpFrames, registry, null);
       this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, gravityZ, registry, null);
       this.reachabilityConstraintCalculator = new ReachabilityConstraintCalculator(soleZUpFrames,
+                                                                                   footLength,
+                                                                                   footWidth,
                                                                                    kinematicStepRange,
                                                                                    maxBackwardStepLength,
                                                                                    minStepWidth,
@@ -179,7 +183,8 @@ public class StepConstraintCalculator
 
       FrameConvexPolygon2DReadOnly reachabilityRegion = reachabilityConstraintCalculator.getReachabilityPolygon(supportSide);
       reachabilityRegionInConstraintPlane.clear();
-      reachabilityRegionInConstraintPlane.set(reachabilityRegion);
+      reachabilityRegionInConstraintPlane.setIncludingFrame(reachabilityRegion);
+      reachabilityRegionInConstraintPlane.changeFrame(worldFrame);
       reachabilityRegionInConstraintPlane.applyTransform(planarRegionForConstraint.getTransformToLocal(), false);
    }
 
@@ -192,11 +197,8 @@ public class StepConstraintCalculator
       if (planarRegionForConstraint == null)
          return null;
 
-      ConvexPolygon2D convexHull = new ConvexPolygon2D(planarRegionForConstraint.getConvexHull());
-      convexHull.applyTransform(planarRegionForConstraint.getTransformToWorld(), false);
-
       ConvexPolygon2D constraintConvexHull = new ConvexPolygon2D();
-      convexPolygonTools.computeIntersectionOfPolygons(convexHull, reachabilityRegionInConstraintPlane, constraintConvexHull);
+      convexPolygonTools.computeIntersectionOfPolygons(planarRegionForConstraint.getConvexHull(), reachabilityRegionInConstraintPlane, constraintConvexHull);
 
       return new StepConstraintRegion(planarRegionForConstraint.getTransformToWorld(), constraintConvexHull);
    }
