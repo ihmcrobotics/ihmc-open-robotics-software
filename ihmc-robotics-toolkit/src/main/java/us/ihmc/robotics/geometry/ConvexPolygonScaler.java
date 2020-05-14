@@ -215,8 +215,8 @@ public class ConvexPolygonScaler
     * remain inside an exterior polygon. The distance inside that the interior polygon can achieve is set by {@param distanceInside}, where positive
     * represents an interior offset, and negative represents an exterior offset.
     */
-   public boolean scaleConvexPolygonToContainInteriorPolygon(ConvexPolygon2D exteriorPolygon, ConvexPolygon2D interiorPolygon, double distanceInside,
-                                                             ConvexPolygon2D scaledPolygonToPack)
+   public boolean scaleConvexPolygonToContainInteriorPolygon(ConvexPolygon2DReadOnly exteriorPolygon, ConvexPolygon2DReadOnly interiorPolygon, double distanceInside,
+                                                             ConvexPolygon2DBasics scaledPolygonToPack)
    {
       if (Math.abs(distanceInside) < 1.0e-10 && interiorPolygon.getArea() <= 1.0e-10)
       {
