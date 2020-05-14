@@ -509,7 +509,7 @@ public class WalkingCommandConsumer
 
    public void consumePlanarRegionStepConstraintCommand()
    {
-      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(PlanarRegionCommand.class))
+      if (commandConsumerWithDelayBuffers.isNewCommandAvailable(StepConstraintRegionCommand.class))
       {
          walkingMessageHandler.handleStepConstraintRegionCommand(commandConsumerWithDelayBuffers.pollNewestCommand(StepConstraintRegionCommand.class));
       }

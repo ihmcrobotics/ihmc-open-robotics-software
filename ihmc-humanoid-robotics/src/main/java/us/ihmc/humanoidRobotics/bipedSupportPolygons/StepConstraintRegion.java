@@ -10,6 +10,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -170,5 +171,24 @@ public class StepConstraintRegion
    public ConvexPolygon2DReadOnly getConvexPolygonInRegionFrame(int i)
    {
       return convexPolygons.get(i);
+   }
+
+   public boolean epsilonEquals(StepConstraintRegion other, double epsilon)
+   {
+      if (!fromLocalToWorldTransform.epsilonEquals(other.fromLocalToWorldTransform, epsilon))
+         return false;
+      // Not necessary, but just in case
+      if (!fromWorldToLocalTransform.epsilonEquals(other.fromWorldToLocalTransform, epsilon))
+         return false;
+
+      if (getNumberOfConvexPolygons() != other.getNumberOfConvexPolygons())
+         return false;
+
+      for (int i = 0; i < getNumberOfConvexPolygons(); i++)
+      {
+         if (!convexPolygons.get(i).epsilonEquals(other.convexPolygons.get(i), epsilon))
+            return false;
+      }
+      return true;
    }
 }

@@ -10,17 +10,19 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
 
 public class ReachabilityConstraintCalculator
 {
+   private static final double distanceInsideRegion = 0.04;
    private static final int numberOfVertices = 5;
 
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
-   private final DoubleProvider lengthLimit;
-   private final DoubleProvider lengthBackLimit;
-   private final DoubleProvider innerLimit;
-   private final DoubleProvider outerLimit;
+   private final YoDouble lengthLimit;
+   private final YoDouble lengthBackLimit;
+   private final YoDouble innerLimit;
+   private final YoDouble outerLimit;
 
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
 
@@ -29,6 +31,8 @@ public class ReachabilityConstraintCalculator
                                            YoVariableRegistry parentRegistry)
    {
       this(soleZUpFrames,
+           steppingParameters.getFootLength(),
+           steppingParameters.getFootWidth(),
            steppingParameters.getMaxStepLength(),
            steppingParameters.getMaxBackwardStepLength(),
            steppingParameters.getMinStepWidth(),
@@ -37,6 +41,8 @@ public class ReachabilityConstraintCalculator
    }
 
    public ReachabilityConstraintCalculator(SideDependentList<? extends ReferenceFrame> soleZUpFrames,
+                                           double footLength,
+                                           double footWidth,
                                            double maxStepLength,
                                            double maxBackwardStepLength,
                                            double minStepWidth,
@@ -45,10 +51,15 @@ public class ReachabilityConstraintCalculator
    {
       this.soleZUpFrames = soleZUpFrames;
 
-      lengthLimit = new DoubleParameter("MaxReachabilityLength", registry, maxStepLength);
-      lengthBackLimit = new DoubleParameter("MaxReachabilityBackwardLength", registry, maxBackwardStepLength);
-      innerLimit = new DoubleParameter("MinReachabilityWidth", registry, minStepWidth);
-      outerLimit = new DoubleParameter("MaxReachabilityWidth", registry, maxStepWidth);
+      lengthLimit = new YoDouble("MaxReachabilityLength", registry);
+      lengthBackLimit = new YoDouble("MaxReachabilityBackwardLength", registry);
+      innerLimit = new YoDouble("MinReachabilityWidth", registry);
+      outerLimit = new YoDouble("MaxReachabilityWidth", registry);
+
+      lengthLimit.set(maxStepLength + 0.5 * footLength + distanceInsideRegion);
+      lengthBackLimit.set(maxBackwardStepLength + 0.5 * footLength + distanceInsideRegion);
+      innerLimit.set(minStepWidth - 0.5 * footWidth - distanceInsideRegion);
+      outerLimit.set(maxStepWidth + 0.5 * footWidth + distanceInsideRegion);
 
       parentRegistry.addChild(registry);
    }
@@ -73,6 +84,7 @@ public class ReachabilityConstraintCalculator
       }
 
       polygon.update();
+      polygon.changeFrameAndProjectToXYPlane(ReferenceFrame.getWorldFrame());
 
       return polygon;
    }
