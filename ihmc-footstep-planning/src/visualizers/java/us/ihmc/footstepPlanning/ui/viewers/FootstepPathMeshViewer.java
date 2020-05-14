@@ -8,29 +8,16 @@ import javafx.scene.Node;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
-import javafx.scene.shape.MeshView;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.idl.IDLSequence.Double;
-import us.ihmc.jMonkeyEngineToolkit.tralala.Pair;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -41,114 +28,113 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
+/**
+ * This class uses the shorthand:
+ * compute a mesh = using a FootstepDataMessage generate a Mesh and Material pair (can happen on any thread)
+ * update a mesh = from a Mesh and Material pair update a MeshView (can happen only on {@link #handle}
+ */
 public class FootstepPathMeshViewer extends AnimationTimer
 {
-   private static Color footWaypointColor = Color.WHITE;
-   private static Color midpointColor = Color.GREEN;
-   private static double footWaypointRadius = 0.02;
-   private static double midpointRadius = 0.02;
-
    private final Group root = new Group();
-   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.getNamedThreadFactory(getClass().getSimpleName()));
+   private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
    private SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
 
-   private final double[] defaultWaypointProportions = new double[]{0.15, 0.85};
-   private final AtomicReference<Boolean> showSolution;
-   private final AtomicReference<Boolean> showPostProcessingInfo;
-   private final AtomicReference<FootstepDataListMessage> footstepDataListMessage;
-   private final AtomicReference<Boolean> ignorePartialFootholds;
-   private final AtomicReference<Pose3DReadOnly> leftFootPose;
-   private final AtomicReference<Pose3DReadOnly> rightFootPose;
-   private final AtomicBoolean solutionWasReceived = new AtomicBoolean(false);
    private final AtomicBoolean reset = new AtomicBoolean(false);
-   private final AtomicBoolean renderShiftedFootsteps = new AtomicBoolean(false);
+   private final AtomicReference<Boolean> ignorePartialFootholds;
 
-   private final MeshView footstepPathMeshView = new MeshView();
-   private final MeshView footstepPostProcessedMeshView = new MeshView();
-   private final AtomicReference<Pair<Mesh, Material>> meshReference = new AtomicReference<>(null);
-   private final AtomicReference<Pair<Mesh, Material>> postProcessedMeshReference = new AtomicReference<>(null);
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
-   private final JavaFXMultiColorMeshBuilder postProcessedMeshBuilder = new JavaFXMultiColorMeshBuilder(palette);
+
+   private final List<FootstepMeshManager> footstepMeshes = new ArrayList<>();
+   private final AtomicReference<Pair<Integer, FootstepDataMessage>> updateStep = new AtomicReference<>();
+   private final AtomicBoolean updateAllMeshes = new AtomicBoolean();
 
    public FootstepPathMeshViewer(Messager messager)
    {
-      ignorePartialFootholds = messager.createInput(IgnorePartialFootholds, false);
-      footstepDataListMessage = messager.createInput(FootstepPlanResponse, null);
-      leftFootPose = messager.createInput(LeftFootPose, null);
-      rightFootPose = messager.createInput(RightFootPose, null);
+      // call these on separate thread since they update all meshes
+      messager.registerTopicListener(FootstepPlanResponse, footstepPlan -> executorService.submit(() -> computeAllMeshes(footstepPlan)));
+      messager.registerTopicListener(IgnorePartialFootholds, b -> executorService.submit(() -> computeAllMeshes(null)));
 
-      messager.registerTopicListener(FootstepPlanResponse, footstepPlan -> executorService.submit(() -> {
-         solutionWasReceived.set(true);
-         processFootstepPath(footstepPlan);
-      }));
+      // call this on animation timer update thread since it updates a single step and might come in at higher frequency
+      messager.registerTopicListener(FootstepToUpdateViz, updateStep::set);
 
-      messager.registerTopicListener(RenderShiftedWaypoints, value ->
-      {
-         renderShiftedFootsteps.set(value);
-         processFootstepPath(footstepDataListMessage.get());
-      });
-
-      messager.registerTopicListener(IgnorePartialFootholds, b -> processFootstepPath(footstepDataListMessage.get()));
+      // handle reset on animation timer thread
       messager.registerTopicListener(ComputePath, data -> reset.set(true));
-      messager.registerTopicListener(GlobalReset, data -> reset.set(true));
 
-      showSolution = messager.createInput(ShowFootstepPlan, true);
-      showPostProcessingInfo = messager.createInput(ShowPostProcessingInfo, true);
+      ignorePartialFootholds = messager.createInput(IgnorePartialFootholds, false);
+
+      for (int i = 0; i < 200; i++)
+      {
+         footstepMeshes.add(new FootstepMeshManager());
+      }
    }
 
-   private synchronized void processFootstepPath(FootstepDataListMessage footstepDataListMessage)
+   private synchronized void computeAllMeshes(FootstepDataListMessage footstepPlanResponse)
    {
-      if (footstepDataListMessage == null)
+      if (footstepPlanResponse != null)
       {
-         return;
-      }
+         clearAll();
 
-      meshBuilder.clear();
-
-      FramePose3D footPose = new FramePose3D();
-      RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      ConvexPolygon2D foothold = new ConvexPolygon2D();
-      FootstepPlan plan = FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage);
-
-      if (ignorePartialFootholds.get())
-      {
-         for (int i = 0; i < plan.getNumberOfSteps(); i++)
+         while (footstepPlanResponse.getFootstepDataList().size() > footstepMeshes.size())
          {
-            plan.getFootstep(i).setFoothold(defaultContactPoints.get(plan.getFootstep(i).getRobotSide()));
+            footstepMeshes.add(new FootstepMeshManager());
+         }
+
+         for (int i = 0; i < footstepPlanResponse.getFootstepDataList().size(); i++)
+         {
+            FootstepDataMessage footstepDataMessage = footstepPlanResponse.getFootstepDataList().get(i);
+            footstepMeshes.get(i).footstepDataMessage.set(footstepDataMessage);
          }
       }
 
-      boolean hasInfoToRenderFootsteps = leftFootPose.get() != null && rightFootPose.get() != null;
-
-      FramePoint3D stanceFootPosition = new FramePoint3D();
-      FramePoint3D previousStanceFootPosition = new FramePoint3D();
-      RobotSide firstStepSide = plan.getFootstep(0).getRobotSide();
-      if (hasInfoToRenderFootsteps && firstStepSide == RobotSide.LEFT)
+      for (int i = 0; i < footstepMeshes.size(); i++)
       {
-         previousStanceFootPosition.set(leftFootPose.get().getPosition());
-         stanceFootPosition.set(rightFootPose.get().getPosition());
-      }
-      else if (hasInfoToRenderFootsteps)
-      {
-         previousStanceFootPosition.set(rightFootPose.get().getPosition());
-         stanceFootPosition.set(leftFootPose.get().getPosition());
+         footstepMeshes.get(i).computeMesh();
       }
 
-      for (int i = 0; i < plan.getNumberOfSteps(); i++)
+      updateAllMeshes.set(true);
+   }
+
+   private static Color getFootstepColor(FootstepDataMessage footstepDataMessage)
+   {
+      return footstepDataMessage.getRobotSide() == 0 ? Color.RED : Color.GREEN;
+   }
+
+   private class FootstepMeshManager
+   {
+      private static final double ADDITIONAL_HEIGHT = 0.01;
+      private final MeshHolder meshHolder = new MeshHolder(root);
+      private final AtomicReference<FootstepDataMessage> footstepDataMessage = new AtomicReference<>();
+
+      /**
+       * Call from any thread
+       */
+      void computeMesh()
       {
-         SimpleFootstep footstep = plan.getFootstep(i);
-         FootstepDataMessage footstepDataMessage = footstepDataListMessage.getFootstepDataList().get(i);
-         Color regionColor = getFootstepColor(footstepDataMessage);
+         if (footstepDataMessage.get() == null)
+         {
+            return;
+         }
 
-         footstep.getSoleFramePose(footPose);
-         footPose.get(transformToWorld);
-         transformToWorld.appendTranslation(0.0, 0.0, 0.01);
+         meshBuilder.clear();
+         FootstepDataMessage footstepDataMessage = this.footstepDataMessage.get();
 
-         if (footstep.hasFoothold())
-            footstep.getFoothold(foothold);
+         Color footColor = getFootstepColor(footstepDataMessage);
+         ConvexPolygon2D foothold = new ConvexPolygon2D();
+         RobotSide robotSide = RobotSide.fromByte(footstepDataMessage.getRobotSide());
+
+         RigidBodyTransform transformToWorld = new RigidBodyTransform(footstepDataMessage.getOrientation(), footstepDataMessage.getLocation());
+         transformToWorld.appendTranslation(0.0, 0.0, ADDITIONAL_HEIGHT);
+
+         if (ignorePartialFootholds.get() || footstepDataMessage.getPredictedContactPoints2d().isEmpty())
+         {
+            foothold.set(defaultContactPoints.get(robotSide));
+         }
          else
-            foothold.set(defaultContactPoints.get(plan.getFootstep(i).getRobotSide()));
+         {
+            footstepDataMessage.getPredictedContactPoints2d().forEach(p -> foothold.addVertex(p.getX(), p.getY()));
+            foothold.update();
+         }
 
          Point2D[] vertices = new Point2D[foothold.getNumberOfVertices()];
          for (int j = 0; j < vertices.length; j++)
@@ -156,110 +142,58 @@ public class FootstepPathMeshViewer extends AnimationTimer
             vertices[j] = new Point2D(foothold.getVertex(j));
          }
 
-         meshBuilder.addMultiLine(transformToWorld, vertices, 0.01, regionColor, true);
-         meshBuilder.addPolygon(transformToWorld, foothold, regionColor);
+         meshBuilder.addMultiLine(transformToWorld, vertices, 0.01, footColor, true);
+         meshBuilder.addPolygon(transformToWorld, foothold, footColor);
 
-         for (Point3D waypoint : footstepDataMessage.getCustomPositionWaypoints())
-         {
-            postProcessedMeshBuilder.addSphere(footWaypointRadius, waypoint, footWaypointColor);
-         }
-
-         if (hasInfoToRenderFootsteps && footstepDataMessage.getTransferWeightDistribution() != -1.0)
-         {
-            FramePoint3D copMidpoint = new FramePoint3D();
-            copMidpoint.interpolate(previousStanceFootPosition, stanceFootPosition, footstepDataMessage.getTransferWeightDistribution());
-            postProcessedMeshBuilder.addSphere(midpointRadius, copMidpoint, getWaypointColor(footstepDataMessage));
-         }
-
-         previousStanceFootPosition.set(stanceFootPosition);
-         stanceFootPosition.set(footPose.getPosition());
+         Pair<Mesh, Material> meshMaterialPair = Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial());
+         meshHolder.meshReference.set(meshMaterialPair);
       }
 
-      meshReference.set(new Pair<>(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
-      postProcessedMeshReference.set(new Pair<>(postProcessedMeshBuilder.generateMesh(), postProcessedMeshBuilder.generateMaterial()));
-   }
-
-   private Color getFootstepColor(FootstepDataMessage footstepDataMessage)
-   {
-      if (renderShiftedFootsteps.get())
+      /**
+       * Call from AnimationTimer.handle
+       */
+      void updateMesh()
       {
-         if(hasDefaultWaypointProportions(footstepDataMessage))
-         {
-            // default waypoints
-            return Color.GRAY;
-         }
-         else
-         {
-            double epsilon = 1e-5;
-            if(EuclidCoreTools.epsilonEquals(defaultWaypointProportions[0], footstepDataMessage.getCustomWaypointProportions().get(0), epsilon))
-            {
-               // second waypoint shifted forward
-               return Color.GREEN;
-            }
-            else
-            {
-               // first waypoint shifted back
-               return Color.RED;
-            }
-         }
+         meshHolder.update();
       }
 
-      return footstepDataMessage.getRobotSide() == 0 ? Color.RED : Color.GREEN;
-   }
-
-   private Color getWaypointColor(FootstepDataMessage footstepDataMessage)
-   {
-      return toTransparentColor(footstepDataMessage.getRobotSide() == 0 ? Color.RED : Color.GREEN, 0.5);
-   }
-
-   private boolean hasDefaultWaypointProportions(FootstepDataMessage footstepDataMessage)
-   {
-      double epsilon = 1e-5;
-      Double customWaypointProportions = footstepDataMessage.getCustomWaypointProportions();
-      if(customWaypointProportions.isEmpty())
-         return true;
-      else
-         return EuclidCoreTools.epsilonEquals(customWaypointProportions.get(0), defaultWaypointProportions[0], epsilon) && EuclidCoreTools
-               .epsilonEquals(customWaypointProportions.get(1), defaultWaypointProportions[1], epsilon);
+      /**
+       * Call from AnimationTimer.handle
+       */
+      void clear()
+      {
+         footstepDataMessage.set(null);
+         meshHolder.remove();
+      }
    }
 
    @Override
    public void handle(long now)
    {
-      boolean addSolution = showSolution.get() && solutionWasReceived.get() && root.getChildren().isEmpty();
-      if (addSolution)
-         root.getChildren().add(footstepPathMeshView);
-      boolean addPostProcessingInfo = showPostProcessingInfo.get() && addSolution;
-      if (addPostProcessingInfo)
-         root.getChildren().add(footstepPostProcessedMeshView);
-
-      boolean removeSolution = !showSolution.get() && solutionWasReceived.get() && !root.getChildren().isEmpty();
-      if (removeSolution)
-         root.getChildren().clear();
-
-      if (reset.getAndSet(false))
+      Pair<Integer, FootstepDataMessage> updateStep = this.updateStep.getAndSet(null);
+      if (updateStep != null)
       {
-         footstepPathMeshView.setMesh(null);
-         footstepPathMeshView.setMaterial(null);
-         footstepPostProcessedMeshView.setMesh(null);
-         footstepPostProcessedMeshView.setMaterial(null);
-         meshReference.set(null);
-         postProcessedMeshReference.set(null);
-         return;
+         footstepMeshes.get(updateStep.getKey()).footstepDataMessage.set(updateStep.getValue());
+         footstepMeshes.get(updateStep.getKey()).computeMesh();
       }
-
-      Pair<Mesh, Material> newMeshAndMaterial = meshReference.getAndSet(null);
-      if (newMeshAndMaterial != null)
+      else if (updateAllMeshes.getAndSet(false))
       {
-         footstepPathMeshView.setMesh(newMeshAndMaterial.getKey());
-         footstepPathMeshView.setMaterial(newMeshAndMaterial.getValue());
+         for (int i = 0; i < footstepMeshes.size(); i++)
+         {
+            footstepMeshes.get(i).updateMesh();
+         }
       }
-
-      Pair<Mesh, Material> newPostProcessedMeshAndMaterial = postProcessedMeshReference.getAndSet(null);
-      if (newPostProcessedMeshAndMaterial != null)
+      else if (reset.getAndSet(false))
       {
-         footstepPostProcessedMeshView.setMesh(newPostProcessedMeshAndMaterial.getKey());
-         footstepPostProcessedMeshView.setMaterial(newPostProcessedMeshAndMaterial.getValue());
+         clearAll();
+      }
+   }
+
+   private void clearAll()
+   {
+      for (int i = 0; i < footstepMeshes.size(); i++)
+      {
+         footstepMeshes.get(i).clear();
       }
    }
 
@@ -278,12 +212,6 @@ public class FootstepPathMeshViewer extends AnimationTimer
       }
    }
 
-   public void setDefaultWaypointProportions(double[] defaultWaypointProportions)
-   {
-      this.defaultWaypointProportions[0] = defaultWaypointProportions[0];
-      this.defaultWaypointProportions[1] = defaultWaypointProportions[1];
-   }
-
    @Override
    public void stop()
    {
@@ -294,13 +222,5 @@ public class FootstepPathMeshViewer extends AnimationTimer
    public Node getRoot()
    {
       return root;
-   }
-
-   private static Color toTransparentColor(Color opaqueColor, double opacity)
-   {
-      double red = opaqueColor.getRed();
-      double green = opaqueColor.getGreen();
-      double blue = opaqueColor.getBlue();
-      return new Color(red, green, blue, opacity);
    }
 }
