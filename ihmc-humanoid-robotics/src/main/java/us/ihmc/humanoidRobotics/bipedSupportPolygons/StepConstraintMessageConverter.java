@@ -52,7 +52,7 @@ public class StepConstraintMessageConverter
       return message;
    }
 
-   public static StepConstraintRegion convertToPlanarRegion(StepConstraintMessage message)
+   public static StepConstraintRegion convertToStepConstraintRegion(StepConstraintMessage message)
    {
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
 

@@ -329,7 +329,7 @@ public class WalkingMessageHandler
       planarRegionsListHandler.handlePlanarRegionsListCommand(planarRegionsListCommand);
    }
 
-   public void handlePlanarRegionConstraint(StepConstraintRegionCommand stepConstraintRegionCommand)
+   public void handleStepConstraintRegionCommand(StepConstraintRegionCommand stepConstraintRegionCommand)
    {
       stepConstraintRegionHandler.handleStepConstraintRegionCommand(stepConstraintRegionCommand);
    }

@@ -2,42 +2,29 @@ package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxCommandConverter;
-import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
-import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxOutputConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class StepConstraintToolboxModule extends ToolboxModule
 {
    private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 5;
 
    protected final StepConstraintToolboxController controller;
-   private IHMCRealtimeROS2Publisher<PlanarRegionMessage> planarRegionConstraintPublisher;
+   private IHMCRealtimeROS2Publisher<StepConstraintMessage> constraintRegionPublisher;
 
    public StepConstraintToolboxModule(DRCRobotModel robotModel, boolean startYoVariableServer, PubSubImplementation pubSubImplementation, double gravityZ)
    {
@@ -49,7 +36,8 @@ public class StepConstraintToolboxModule extends ToolboxModule
             pubSubImplementation);
 
       setTimeWithoutInputsBeforeGoingToSleep(3.0);
-      controller = new StepConstraintToolboxController(statusOutputManager, planarRegionConstraintPublisher, robotModel.getWalkingControllerParameters(), fullRobotModel, gravityZ, registry);
+      controller = new StepConstraintToolboxController(statusOutputManager,
+                                                       constraintRegionPublisher, robotModel.getWalkingControllerParameters(), fullRobotModel, gravityZ, registry);
 
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
       startYoVariableServer();
@@ -94,7 +82,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
                                            REACommunicationProperties.publisherTopicNameGenerator,
                                            s -> updatePlanarRegion(s.takeNextData()));
 
-      planarRegionConstraintPublisher = ROS2Tools.createPublisher(realtimeRos2Node, PlanarRegionMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
+      constraintRegionPublisher = ROS2Tools.createPublisher(realtimeRos2Node, StepConstraintMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
    }
 
    public void setSwitchPlanarRegionConstraintsAutomatically(boolean switchAutomatically)

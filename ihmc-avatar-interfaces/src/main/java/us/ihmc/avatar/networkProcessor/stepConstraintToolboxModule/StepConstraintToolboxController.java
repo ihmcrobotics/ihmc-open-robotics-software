@@ -10,6 +10,7 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -31,7 +32,7 @@ public class StepConstraintToolboxController extends ToolboxController
 
    private final YoBoolean isDone = new YoBoolean("isDone", registry);
 
-   private final IHMCRealtimeROS2Publisher<PlanarRegionMessage> planarRegionConstraintPublisher;
+   private final IHMCRealtimeROS2Publisher<StepConstraintMessage> constraintRegionPublisher;
 
    private final OneDoFJointBasics[] oneDoFJoints;
    private final HumanoidReferenceFrames referenceFrames;
@@ -42,7 +43,7 @@ public class StepConstraintToolboxController extends ToolboxController
    private final AtomicReference<PlanarRegionsListMessage> planarRegions = new AtomicReference<>();
 
    public StepConstraintToolboxController(StatusMessageOutputManager statusOutputManager,
-                                          IHMCRealtimeROS2Publisher<PlanarRegionMessage> planarRegionConstraintPublisher,
+                                          IHMCRealtimeROS2Publisher<StepConstraintMessage> constraintRegionPublisher,
                                           WalkingControllerParameters walkingControllerParameters,
                                           FullHumanoidRobotModel fullRobotModel,
                                           double gravityZ,
@@ -50,7 +51,7 @@ public class StepConstraintToolboxController extends ToolboxController
    {
       super(statusOutputManager, parentRegistry);
 
-      this.planarRegionConstraintPublisher = planarRegionConstraintPublisher;
+      this.constraintRegionPublisher = constraintRegionPublisher;
       this.fullRobotModel = fullRobotModel;
       this.referenceFrames = new HumanoidReferenceFrames(fullRobotModel);
 
@@ -122,7 +123,7 @@ public class StepConstraintToolboxController extends ToolboxController
          stepConstraintCalculator.update();
 
          if (stepConstraintCalculator.constraintRegionChanged())
-            planarRegionConstraintPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionMessage(stepConstraintCalculator.getConstraintRegion()));
+            constraintRegionPublisher.publish(StepConstraintMessageConverter.convertToStepConstraintMessage(stepConstraintCalculator.getConstraintRegion()));
       }
       catch (Throwable e)
       {
