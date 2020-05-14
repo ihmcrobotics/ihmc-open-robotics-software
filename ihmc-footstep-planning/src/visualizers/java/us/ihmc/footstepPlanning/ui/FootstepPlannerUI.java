@@ -21,10 +21,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
-import us.ihmc.footstepPlanning.ui.components.FootPoseFromMidFootUpdater;
-import us.ihmc.footstepPlanning.ui.components.FootstepCompletionListener;
-import us.ihmc.footstepPlanning.ui.components.GoalOrientationEditor;
-import us.ihmc.footstepPlanning.ui.components.OccupancyMapRenderer;
+import us.ihmc.footstepPlanning.ui.components.*;
 import us.ihmc.footstepPlanning.ui.controllers.*;
 import us.ihmc.footstepPlanning.ui.viewers.*;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -221,6 +218,7 @@ public class FootstepPlannerUI
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
       this.occupancyMapRenderer = new OccupancyMapRenderer(messager);
       this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(defaultContactPoints, messager);
+      new UIFootstepPlanManager(messager);
 
       startGoalPositionViewer.setShowStartGoalTopics(ShowStart, ShowGoal, ShowGoal);
 

@@ -244,17 +244,7 @@ public class RemoteUIMessageConverter
          walkingPreviewRequestPublisher.publish(request);
       });
 
-
-
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListMessage ->
-      {
-         if(ignorePartialFootholds.get())
-         {
-            footstepDataListMessage.getFootstepDataList().forEach(m -> m.getPredictedContactPoints2d().clear());
-         }
-
-         footstepDataListPublisher.publish(footstepDataListMessage);
-      });
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListPublisher::publish);
 
       IHMCRealtimeROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher = ROS2Tools
             .createPublisher(ros2Node, BipedalSupportPlanarRegionParametersMessage.class,
