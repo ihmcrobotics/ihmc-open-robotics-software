@@ -56,7 +56,8 @@ public class StepConstraintCalculatorTest
       YoDouble time = new YoDouble("time", null);
 
       PoseReferenceFrame centerOfMassFrame = new PoseReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame());
-      StepConstraintCalculator constraintCalculator = new StepConstraintCalculator(ankleZUpFrames, centerOfMassFrame, footWidth, maxStepLength, time, 9.81);
+
+      StepConstraintCalculator constraintCalculator = new StepConstraintCalculator(ankleZUpFrames, centerOfMassFrame, footWidth, maxStepLength, maxStepLength, 0.0, maxStepLength, time, 9.81);
 
       SimpleStep step = new SimpleStep();
       step.setSwingDuration(1.0);
@@ -125,7 +126,7 @@ public class StepConstraintCalculatorTest
       YoDouble time = new YoDouble("time", null);
 
       PoseReferenceFrame centerOfMassFrame = new PoseReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame());
-      StepConstraintCalculator constraintCalculator = new StepConstraintCalculator(ankleZUpFrames, centerOfMassFrame, footWidth, maxStepLength, time, gravity);
+      StepConstraintCalculator constraintCalculator = new StepConstraintCalculator(ankleZUpFrames, centerOfMassFrame, footWidth, maxStepLength, maxStepLength, 0.0, maxStepLength ,time, gravity);
 
       SimpleStep step = new SimpleStep();
       step.setSwingDuration(1.0);

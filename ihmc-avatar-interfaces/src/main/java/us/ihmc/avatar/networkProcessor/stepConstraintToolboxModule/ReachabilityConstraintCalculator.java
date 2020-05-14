@@ -53,7 +53,7 @@ public class ReachabilityConstraintCalculator
       parentRegistry.addChild(registry);
    }
 
-   private FrameConvexPolygon2DReadOnly getReachabilityPolygon(RobotSide supportSide)
+   public FrameConvexPolygon2DReadOnly getReachabilityPolygon(RobotSide supportSide)
    {
       FrameConvexPolygon2DBasics polygon = new FrameConvexPolygon2D(soleZUpFrames.get(supportSide));
 

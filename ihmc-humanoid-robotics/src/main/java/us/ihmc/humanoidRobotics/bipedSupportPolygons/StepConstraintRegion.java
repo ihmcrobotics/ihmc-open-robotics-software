@@ -42,6 +42,23 @@ public class StepConstraintRegion
       updateConvexHull();
    }
 
+   public StepConstraintRegion(RigidBodyTransformReadOnly transformToWorld, ConvexPolygon2D convexPolygon)
+   {
+      fromLocalToWorldTransform.set(transformToWorld);
+      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
+
+      concaveHullsVertices = new ArrayList<>();
+      for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
+      {
+         concaveHullsVertices.add(new Point2D(convexPolygon.getVertex(i)));
+      }
+      checkConcaveHullRepeatVertices();
+
+      convexPolygons = new ArrayList<>();
+      convexPolygons.add(convexPolygon);
+      updateConvexHull();
+   }
+
    private void checkConcaveHullRepeatVertices()
    {
       if (concaveHullsVertices.size() < 2)
