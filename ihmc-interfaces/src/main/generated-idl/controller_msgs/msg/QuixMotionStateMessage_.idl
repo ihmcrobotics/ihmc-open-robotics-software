@@ -36,7 +36,11 @@ module controller_msgs
 
 
    
+<<<<<<< HEAD
+   const octet MOVE_TO_FLAT_GROUND =
+=======
    const octet MOVE_TO_START =
+>>>>>>> develop
 
       3;
 
@@ -50,11 +54,40 @@ module controller_msgs
 
 
    
+<<<<<<< HEAD
+   const octet MOVE_TO_SLOPE =
+
+      5;
+
+
+
+   
+   const octet SLOPE_WALKING =
+
+      6;
+
+
+
+   
+   const octet OLD_FLAT_GROUND_WALKING =
+
+      7;
+
+
+
+   
+   /**
+   
+    * This message is part of the Quix controller API.
+   
+    * This message is used to notify the crutch display of the current motion state and allow the crutch to communicate a desired change in state.
+=======
    /**
    
     * This message is part of the IHMC whole-body controller API.
    
     * This message is used to switch the control scheme between different control mode.
+>>>>>>> develop
    
     */
    
@@ -76,12 +109,15 @@ module controller_msgs
 
 
     
+<<<<<<< HEAD
+=======
     /**
     
      * Specifies the which state the controller should transition into.
     
      */
     
+>>>>>>> develop
 
     @defaultValue(value=255)
 

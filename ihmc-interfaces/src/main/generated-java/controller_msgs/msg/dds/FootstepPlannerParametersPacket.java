@@ -441,7 +441,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double minimum_surface_incline_radians_ = -11.1;
 
    /**
-       
+
     * The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
        
     * If true, this wiggles each candidate step, which will slow down plan times but resulting plans will be guarunteed to match step constraints.
@@ -450,7 +450,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public boolean wiggle_while_planning_;
 
    /**
-       
+
     * There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
        
     * this toggles between them.
@@ -624,7 +624,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double body_box_base_z_ = -11.1;
 
    /**
-       
+
     * Maximum height above a stance step that a candidate step is snapped to. Regions above this height are ignored.
        
     * Intended to avoid ceilings or obstacles that are above the top of the robot
@@ -633,7 +633,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double maximum_snap_height_ = -11.1;
 
    /**
-       
+
     * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
        
     * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
@@ -1979,7 +1979,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
    /**
-       
+
     * The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
        
     * If true, this wiggles each candidate step, which will slow down plan times but resulting plans will be guarunteed to match step constraints.
@@ -2003,7 +2003,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
    /**
-       
+
     * There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
        
     * this toggles between them.
@@ -2435,7 +2435,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
    /**
-       
+
     * Maximum height above a stance step that a candidate step is snapped to. Regions above this height are ignored.
        
     * Intended to avoid ceilings or obstacles that are above the top of the robot
@@ -2459,7 +2459,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
    /**
-       
+
     * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
        
     * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by

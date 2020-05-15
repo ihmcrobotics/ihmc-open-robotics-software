@@ -239,12 +239,15 @@
 
 
 
+<<<<<<< HEAD
+=======
 
 
 
 
 
 
+>>>>>>> develop
 float64 DEFAULT_NO_VALUE=-11.1
 
 
@@ -751,6 +754,8 @@ float64 minimum_surface_incline_radians
 
 
 
+<<<<<<< HEAD
+=======
 # The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
 
 # If true, this wiggles each candidate step, which will slow down plan times but resulting plans will be guarunteed to match step constraints.
@@ -763,6 +768,7 @@ bool wiggle_while_planning
 
 
 
+>>>>>>> develop
 # There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
 
 # this toggles between them.
@@ -1003,6 +1009,8 @@ float64 body_box_base_z
 
 
 
+<<<<<<< HEAD
+=======
 # Maximum height above a stance step that a candidate step is snapped to. Regions above this height are ignored.
 
 # Intended to avoid ceilings or obstacles that are above the top of the robot
@@ -1017,6 +1025,7 @@ float64 maximum_snap_height
 
 
 
+>>>>>>> develop
 # Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
 
 # Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
