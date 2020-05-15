@@ -237,14 +237,14 @@ public class LevenbergMarquardtICPTest
          }
       };
       DenseMatrix64F purterbationVector = new DenseMatrix64F(3, 1);
-      purterbationVector.set(0, 0.0001);
-      purterbationVector.set(1, 0.0001);
-      purterbationVector.set(2, 0.0001);
+      purterbationVector.set(0, 0.00001);
+      purterbationVector.set(1, 0.00001);
+      purterbationVector.set(2, 0.00001);
       optimizer.setPerturbationVector(purterbationVector);
       optimizer.setOutputCalculator(functionOutputCalculator);
-      boolean isSolved = optimizer.solve(10, 1.0);
+      boolean isSolved = optimizer.solve(30, 1.0);
       LogTools.info("Computation is done " + optimizer.getComputationTime());
-      System.out.println("is solved? " + isSolved);
+      System.out.println("is solved? " + isSolved + " " + optimizer.getQuality());
       optimizer.getOptimalParameter().print();
 
       DenseMatrix64F optimalParameter = optimizer.getOptimalParameter();
@@ -260,12 +260,6 @@ public class LevenbergMarquardtICPTest
       frame.setVisible(true);
 
       ThreadTools.sleepForever();
-   }
-
-   @Test
-   public void testLMOptimizer()
-   {
-
    }
 
    private double computeClosestDistance(Point2D point, List<Point2D> pointCloud)
