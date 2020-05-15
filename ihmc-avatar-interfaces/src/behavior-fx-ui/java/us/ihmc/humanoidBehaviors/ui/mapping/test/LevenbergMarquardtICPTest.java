@@ -16,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import cern.colt.list.BooleanArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.robotics.optimization.FunctionOutputCalculator;
+import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 
 public class LevenbergMarquardtICPTest
 {
@@ -206,7 +208,55 @@ public class LevenbergMarquardtICPTest
    @Test
    public void testIteration()
    {
+      setupPointCloud();
 
+      transformPointCloud(data1, 0.3, 0.5, Math.toRadians(10.0));
+
+      drawer.addPointCloud(fullModel, Color.black, false);
+      drawer.addPointCloud(data1, Color.red, false);
+
+      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(3, data1.size());
+      FunctionOutputCalculator functionOutputCalculator = new FunctionOutputCalculator()
+      {
+         @Override
+         public DenseMatrix64F computeOutput(DenseMatrix64F inputParameter)
+         {
+            List<Point2D> transformedData = new ArrayList<>();
+            for (int i = 0; i < data1.size(); i++)
+               transformedData.add(new Point2D(data1.get(i)));
+            transformPointCloud(transformedData, inputParameter.get(0, 0), inputParameter.get(1, 0), inputParameter.get(2, 0));
+
+            DenseMatrix64F errorSpace = new DenseMatrix64F(transformedData.size(), 1);
+            for (int i = 0; i < transformedData.size(); i++)
+            {
+               double distance = computeClosestDistance(transformedData.get(i), fullModel);
+               errorSpace.set(i, distance);
+            }
+            return errorSpace;
+         }
+      };
+      DenseMatrix64F purterbationVector = new DenseMatrix64F(3, 1);
+      purterbationVector.set(0, 0.001);
+      purterbationVector.set(1, 0.001);
+      purterbationVector.set(2, 0.001);
+      optimizer.setPerturbationVector(purterbationVector);
+      optimizer.setOutputCalculator(functionOutputCalculator);
+      boolean isSolved = optimizer.solve(5, 1.0);
+      System.out.println("is solved? " + isSolved);
+
+      DenseMatrix64F optimalParameter = optimizer.getOptimalParameter();
+      List<Point2D> transformedData = new ArrayList<>();
+      for (int i = 0; i < data1.size(); i++)
+         transformedData.add(new Point2D(data1.get(i)));
+      transformPointCloud(transformedData, optimalParameter.get(0, 0), optimalParameter.get(1, 0), optimalParameter.get(2, 0));
+
+      drawer.addPointCloud(transformedData, Color.GREEN, true);
+      
+      frame.add(drawer);
+      frame.pack();
+      frame.setVisible(true);
+
+      ThreadTools.sleepForever();
    }
 
    private double computeClosestDistance(Point2D point, List<Point2D> pointCloud)
