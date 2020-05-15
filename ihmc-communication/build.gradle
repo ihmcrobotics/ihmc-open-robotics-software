@@ -2,7 +2,7 @@ plugins {
    id("us.ihmc.ihmc-build") version "0.20.1"
    id("us.ihmc.ihmc-ci") version "5.3"
    id("us.ihmc.ihmc-cd") version "1.14"
-   id("us.ihmc.log-tools") version "0.4.1"
+   id("us.ihmc.log-tools") version "0.4.2"
 }
 
 ihmc {
@@ -23,8 +23,7 @@ mainDependencies {
    api("org.reflections:reflections:0.9.10")
    api("commons-net:commons-net:3.6")
 
-   api("us.ihmc:euclid:0.13.1")
-   api("us.ihmc:ihmc-commons:0.28.2")
+   api("us.ihmc:euclid:0.14.1")
    api("us.ihmc:ihmc-ros2-library:0.16.1")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-interfaces:source")
@@ -33,7 +32,5 @@ mainDependencies {
 }
 
 testDependencies {
-
-   api("us.ihmc:ihmc-commons-testing:0.28.2")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
 }

@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.ros2.Ros2NodeInterface;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 
 /**
  * An atomic reference to the latest received message through an optional filter.
@@ -91,7 +91,7 @@ public class ROS2Input<T>
       if (messageFilter.accept(incomingData))
       {
          atomicReference.set(incomingData);
-         messageNotification.add(incomingData);
+         messageNotification.set(incomingData);
          for (Consumer<T> userCallback : userCallbacks)
          {
             userCallback.accept(incomingData);

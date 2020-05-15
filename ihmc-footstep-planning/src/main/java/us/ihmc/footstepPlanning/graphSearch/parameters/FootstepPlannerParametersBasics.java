@@ -173,6 +173,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.idealBackStepLength, idealBackStepLength);
    }
 
+   default void setWiggleWhilePlanning(boolean wiggleWhilePlanning)
+   {
+      set(FootstepPlannerParameterKeys.wiggleWhilePlanning, wiggleWhilePlanning);
+   }
+
    default void setEnableConcaveHullWiggler(boolean enableConcaveHullWiggler)
    {
       set(FootstepPlannerParameterKeys.enableConcaveHullWiggler, enableConcaveHullWiggler);
@@ -211,6 +216,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
    default void setBodyBoxBaseZ(double bodyBoxBaseZ)
    {
       set(FootstepPlannerParameterKeys.bodyBoxBaseZ, bodyBoxBaseZ);
+   }
+
+   default void setMaximumSnapHeight(double maximumSnapHeight)
+   {
+      set(FootstepPlannerParameterKeys.maximumSnapHeight, maximumSnapHeight);
    }
 
    default void setAStarHeuristicsWeight(double aStarHeuristicsWeight)
@@ -350,6 +360,7 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMinimumFootholdPercent(parametersPacket.getMinimumFootholdPercent());
       if (parametersPacket.getMinimumSurfaceInclineRadians() != noValue)
          setMinimumSurfaceInclineRadians(parametersPacket.getMinimumSurfaceInclineRadians());
+      setWiggleWhilePlanning(parametersPacket.getWiggleWhilePlanning());
       setEnableConcaveHullWiggler(parametersPacket.getEnableConcaveHullWiggler());
       if (parametersPacket.getMaximumXyWiggleDistance() != noValue)
          setMaximumXYWiggleDistance(parametersPacket.getMaximumXyWiggleDistance());
@@ -375,6 +386,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setBodyBoxBaseY(parametersPacket.getBodyBoxBaseY());
       if (parametersPacket.getBodyBoxBaseZ() != noValue)
          setBodyBoxBaseZ(parametersPacket.getBodyBoxBaseZ());
+      if (parametersPacket.getMaximumSnapHeight() != noValue)
+         setMaximumSnapHeight(parametersPacket.getMaximumSnapHeight());
       if (parametersPacket.getMinXClearanceFromStance() != noValue)
          setMinXClearanceFromStance(parametersPacket.getMinXClearanceFromStance());
       if (parametersPacket.getMinYClearanceFromStance() != noValue)

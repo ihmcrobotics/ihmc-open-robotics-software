@@ -55,7 +55,7 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
    private Function<T, SensorFrame> function;
 
    public SensorFrameViewer(REAUIMessager uiMessager, Topic<T> messageState, Topic<Integer> numberOfFramesTopic, Function<T, SensorFrame> function,
-                            boolean showInterval)
+                            Topic<Boolean> clearTopic, boolean showInterval)
    {
       this.showInterval = showInterval;
       this.function = function;
@@ -63,7 +63,7 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
          numberOfFramesToShow = new AtomicReference<Integer>(DEFAULT_NUMBER_OF_FRAMES);
       else
          numberOfFramesToShow = uiMessager.createInput(numberOfFramesTopic, 10); //REAModuleAPI.UINavigationFrames
-      uiMessager.registerTopicListener(REAModuleAPI.UISensorPoseHistoryClear, (c) -> clear());
+      uiMessager.registerTopicListener(clearTopic, (c) -> clear());
 
       meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(2048));
 
@@ -84,9 +84,9 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
       });
    }
 
-   public SensorFrameViewer(REAUIMessager uiMessager, Topic<T> messageState, Topic<Integer> numberOfFramesTopic, Function<T, SensorFrame> function)
+   public SensorFrameViewer(REAUIMessager uiMessager, Topic<T> messageState, Topic<Integer> numberOfFramesTopic, Function<T, SensorFrame> function, Topic<Boolean> clearTopic)
    {
-      this(uiMessager, messageState, numberOfFramesTopic, function, false);
+      this(uiMessager, messageState, numberOfFramesTopic, function, clearTopic, false);
    }
 
    @Override

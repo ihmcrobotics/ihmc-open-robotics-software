@@ -38,7 +38,7 @@ public class PartialFootholdCropperModule
       rotationDetector = new CombinedFootRotationDetector(side, soleFrame, rotationParameters, dt, registry);
       edgeCalculator = new CombinedRotationEdgeCalculator(side, soleFrame, rotationParameters, dt, registry, graphicsRegistry);
 
-      cropVerifier = new CropVerifier(side.getLowerCaseName(), soleFrame, 0.005, rotationParameters, registry, graphicsRegistry);
+      cropVerifier = new CropVerifier(side.getLowerCaseName(), soleFrame, 0.005, rotationParameters, registry, null);
       footholdCropper = new FootholdCropper(side.getLowerCaseName(), soleFrame, defaultContactPoints, rotationParameters, dt, registry, graphicsRegistry);
 
       reset();

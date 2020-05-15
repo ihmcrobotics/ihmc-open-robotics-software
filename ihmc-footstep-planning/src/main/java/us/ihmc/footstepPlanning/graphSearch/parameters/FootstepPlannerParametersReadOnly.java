@@ -416,6 +416,14 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    }
 
    /**
+    * The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
+    */
+   default boolean getWiggleWhilePlanning()
+   {
+      return get(wiggleWhilePlanning);
+   }
+
+   /**
     * When wiggling a candidate footstep into a planar region, this is the maximum distance xy-distance
     * distance the planner will use
     */
@@ -556,6 +564,15 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default double getBodyBoxBaseZ()
    {
       return get(bodyBoxBaseZ);
+   }
+
+   /**
+    * Maximum height above a stance step that a candidate step is snapped to. Regions above this height are ignored.
+    * Intended to avoid ceilings or obstacles that are above the top of the robot
+    */
+   default double getMaximumSnapHeight()
+   {
+      return get(maximumSnapHeight);
    }
 
    /**
