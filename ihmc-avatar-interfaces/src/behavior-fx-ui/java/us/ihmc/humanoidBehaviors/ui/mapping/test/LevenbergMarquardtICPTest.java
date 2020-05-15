@@ -9,8 +9,11 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import org.ejml.data.DenseMatrix64F;
+import org.ejml.ops.CommonOps;
 import org.junit.jupiter.api.Test;
 
+import cern.colt.list.BooleanArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 
@@ -78,14 +81,21 @@ public class LevenbergMarquardtICPTest
       drawer.addPointCloud(fullModel, Color.black, false);
       drawer.addPointCloud(data1, Color.red, false);
 
+      BooleanArrayList correspondenceFlags = new BooleanArrayList();
       double outlierDistance = 0.2;
       for (int i = 0; i < data1.size(); i++)
       {
          double distance = computeClosestDistance(data1.get(i), fullModel);
          if (distance < outlierDistance)
+         {
+            correspondenceFlags.add(true);
             drawer.addPoint(data1.get(i), Color.red, true);
+         }
          else
+         {
+            correspondenceFlags.add(false);
             drawer.addPoint(data1.get(i), Color.red, false);
+         }
       }
 
       frame.add(drawer);
@@ -96,21 +106,101 @@ public class LevenbergMarquardtICPTest
    }
 
    @Test
-   public void testCorrespondenceWeightFactor()
+   public void testErrorFunctionDerivationAndJacobian()
    {
+      setupPointCloud();
 
-   }
+      transformPointCloud(data1, 0.3, 0.5, Math.toRadians(10.0));
 
-   @Test
-   public void testErrorFunctionDerivation()
-   {
+      drawer.addPointCloud(fullModel, Color.black, false);
+      drawer.addPointCloud(data1, Color.red, false);
 
-   }
+      DenseMatrix64F originalError = new DenseMatrix64F(data1.size(), 1);
 
-   @Test
-   public void testJacobian()
-   {
+      BooleanArrayList correspondenceFlags = new BooleanArrayList();
+      double outlierDistance = 0.2;
+      for (int i = 0; i < data1.size(); i++)
+      {
+         double distance = computeClosestDistance(data1.get(i), fullModel);
+         originalError.set(i, distance);
+         if (distance < outlierDistance)
+         {
+            correspondenceFlags.add(true);
+            drawer.addPoint(data1.get(i), Color.red, true);
+         }
+         else
+         {
+            correspondenceFlags.add(false);
+            drawer.addPoint(data1.get(i), Color.red, false);
+         }
+      }
 
+      int parameterDimension = 3;
+      double perturb = 0.001;
+      DenseMatrix64F currentParameter = new DenseMatrix64F(parameterDimension, 1);
+      DenseMatrix64F perturbedParameter = new DenseMatrix64F(parameterDimension, 1);
+      DenseMatrix64F errorJacobian = new DenseMatrix64F(data1.size(), parameterDimension);
+
+      List<Point2D> purterbedData = new ArrayList<>(data1);
+      for (int i = 0; i < parameterDimension; i++)
+      {
+         for (int j = 0; j < parameterDimension; j++)
+         {
+            if (j == i)
+               perturbedParameter.set(j, 0, currentParameter.get(j, 0) + perturb);
+            else
+               perturbedParameter.set(j, 0, currentParameter.get(j, 0));
+         }
+         perturbedParameter.print();
+         purterbedData.clear();
+         for (int k = 0; k < data1.size(); k++)
+            purterbedData.add(new Point2D(data1.get(k)));
+         transformPointCloud(purterbedData, perturbedParameter.get(0, 0), perturbedParameter.get(1, 0), perturbedParameter.get(2, 0));
+         for (int j = 0; j < data1.size(); j++)
+         {
+            double distance = computeClosestDistance(purterbedData.get(j), fullModel);
+            if (distance < outlierDistance)
+            {
+               errorJacobian.set(j, i, (distance - originalError.get(j, 0)) / perturb);
+            }
+            else
+            {
+               errorJacobian.set(j, i, 0.0);
+            }
+         }
+      }
+      errorJacobian.print();
+      DenseMatrix64F jacobianTranspose = new DenseMatrix64F(data1.size(), parameterDimension);
+      jacobianTranspose.set(errorJacobian);
+      CommonOps.transpose(jacobianTranspose);
+
+      DenseMatrix64F squaredJacobian = new DenseMatrix64F(parameterDimension, parameterDimension);
+      CommonOps.mult(jacobianTranspose, errorJacobian, squaredJacobian);
+      squaredJacobian.print();
+      CommonOps.invert(squaredJacobian);
+      squaredJacobian.print();
+
+      DenseMatrix64F invMultJacobianTranspose = new DenseMatrix64F(parameterDimension, data1.size());
+      CommonOps.mult(squaredJacobian, jacobianTranspose, invMultJacobianTranspose);
+
+      DenseMatrix64F direction = new DenseMatrix64F(parameterDimension, 1);
+      CommonOps.mult(invMultJacobianTranspose, originalError, direction);
+      direction.print();
+
+      purterbedData.clear();
+      for (int k = 0; k < data1.size(); k++)
+         purterbedData.add(new Point2D(data1.get(k)));
+      transformPointCloud(purterbedData, -direction.get(0, 0), -direction.get(1, 0), -direction.get(2, 0));
+      for (int i = 0; i < data1.size(); i++)
+      {
+         drawer.addPoint(purterbedData.get(i), Color.green, true);
+      }
+
+      frame.add(drawer);
+      frame.pack();
+      frame.setVisible(true);
+
+      ThreadTools.sleepForever();
    }
 
    @Test
@@ -204,7 +294,7 @@ public class LevenbergMarquardtICPTest
       private static final int scale = 40;
       private final List<Point2D> pointCloud;
       private final List<Color> pointCloudColors;
-      private final List<Boolean> fillers;
+      private final BooleanArrayList fillers;
 
       private final double xUpper;
       private final double yUpper;
@@ -215,7 +305,7 @@ public class LevenbergMarquardtICPTest
       {
          pointCloud = new ArrayList<>();
          pointCloudColors = new ArrayList<>();
-         fillers = new ArrayList<>();
+         fillers = new BooleanArrayList();
          this.xUpper = xUpper;
          this.yUpper = yUpper;
          sizeU = (int) Math.round((-yLower + yUpper) * scale);
@@ -287,5 +377,48 @@ public class LevenbergMarquardtICPTest
       {
          return new Dimension(sizeU, sizeV);
       }
+   }
+
+   @Test
+   public void testMatrixOperations()
+   {
+      DenseMatrix64F testMatrix = new DenseMatrix64F(3, 3);
+      testMatrix.set(0, 0, 1);
+      testMatrix.set(1, 0, 2);
+      testMatrix.set(2, 0, 3);
+
+      testMatrix.set(0, 1, 4);
+      testMatrix.set(1, 1, 5);
+      testMatrix.set(2, 1, 6);
+
+      testMatrix.set(0, 2, 7);
+      testMatrix.set(1, 2, 8);
+      testMatrix.set(2, 2, 9);
+
+      System.out.println("testMatrix");
+      testMatrix.print();
+
+      DenseMatrix64F matrix2 = new DenseMatrix64F(3, 3);
+      matrix2.set(0, 0, 2);
+      matrix2.set(1, 0, 0);
+      matrix2.set(2, 0, 0);
+
+      matrix2.set(0, 1, 0);
+      matrix2.set(1, 1, 2);
+      matrix2.set(2, 1, 0);
+
+      matrix2.set(0, 2, 0);
+      matrix2.set(1, 2, 0);
+      matrix2.set(2, 2, 2);
+
+      System.out.println("matrix2");
+      matrix2.print();
+
+      DenseMatrix64F matrix3 = new DenseMatrix64F(3, 3);
+
+      CommonOps.mult(testMatrix, matrix2, matrix3);
+
+      System.out.println("matrix3");
+      matrix3.print();
    }
 }
