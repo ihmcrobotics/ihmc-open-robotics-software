@@ -14,6 +14,8 @@ public class LevenbergMarquardtParameterOptimizer
 
    private FunctionOutputCalculator outputCalculator = null;
    private final DenseMatrix64F dampingCoefficient;
+   private static final double DEFAULT_RESIDUAL_SCALER = 0.1;
+   private double residualScaler = DEFAULT_RESIDUAL_SCALER;
 
    private final DenseMatrix64F currentInput;
    private final DenseMatrix64F currentOutput;
@@ -21,14 +23,18 @@ public class LevenbergMarquardtParameterOptimizer
    private final DenseMatrix64F perturbedInput;
    private final DenseMatrix64F perturbedOutput;
    private final DenseMatrix64F jacobian;
-   //   private final DenseMatrix64F jacobianTranspose;
-   //   private final DenseMatrix64F squaredJacobian;
+
+   private final DenseMatrix64F jacobianTranspose;
+   private final DenseMatrix64F squaredJacobian;
+   private final DenseMatrix64F invMultJacobianTranspose;
+
    private final DenseMatrix64F optimizeDirection;
 
    private boolean[] correspondence;
    private double correspondenceThreshold = 0.3; // TODO:
 
    private double computationTime;
+   private double initialQuality;
    private double quality;
    private int iteration;
    private boolean optimized;
@@ -52,6 +58,10 @@ public class LevenbergMarquardtParameterOptimizer
       perturbedOutput = new DenseMatrix64F(outputDimension, 1);
       jacobian = new DenseMatrix64F(outputDimension, inputParameterDimension);
 
+      jacobianTranspose = new DenseMatrix64F(outputDimension, inputParameterDimension);
+      squaredJacobian = new DenseMatrix64F(inputParameterDimension, inputParameterDimension);
+      invMultJacobianTranspose = new DenseMatrix64F(inputParameterDimension, outputDimension);
+
       optimizeDirection = new DenseMatrix64F(inputParameterDimension, 1);
 
       correspondence = new boolean[outputDimension];
@@ -61,9 +71,14 @@ public class LevenbergMarquardtParameterOptimizer
    {
       this.parameterDimension = parameterDimension;
       this.outputDimension = outputDimension;
+      // TODO: reshape all DenseMatrix64F.
    }
 
    // TODO: set bound. especially, orientation.
+   public void setBound()
+   {
+      
+   }
 
    public void setPerturbationVector(DenseMatrix64F purterbationVector)
    {
@@ -90,18 +105,54 @@ public class LevenbergMarquardtParameterOptimizer
       return norm;
    }
 
+   private void initialize()
+   {
+      iteration = 0;
+      optimized = false;
+      residualScaler = DEFAULT_RESIDUAL_SCALER;
+      for (int i = 0; i < parameterDimension; i++)
+      {
+         for (int j = 0; j < parameterDimension; j++)
+         {
+            if (i == j)
+            {
+               dampingCoefficient.set(i, j, 1.0);
+            }
+            else
+            {
+               dampingCoefficient.set(i, j, 0.0);
+            }
+         }
+      }
+   }
+   
+   private void updateDamping()
+   {
+      if(quality < initialQuality)
+         residualScaler = quality / initialQuality * DEFAULT_RESIDUAL_SCALER;
+      
+      for (int i = 0; i < parameterDimension; i++)
+      {
+         for (int j = 0; j < parameterDimension; j++)
+         {
+            if (i == j)
+            {
+               dampingCoefficient.set(i, j, residualScaler);
+            }
+         }
+      }
+   }
+
    public boolean solve(int terminalIteration, double terminalConvergencePercentage)
    {
       long startTime = System.nanoTime();
-      iteration = 0;
-      optimized = false;
+      initialize();
 
       DenseMatrix64F newInput = new DenseMatrix64F(parameterDimension, 1);
 
-      double currentQuality = 0.0;
-      double qualityDiff = 0.0;
+      double previousQuality = 0.0;
 
-      // compute correspondence space
+      // compute correspondence space.
       currentOutput.set(outputCalculator.computeOutput(currentInput));
       for (int i = 0; i < outputDimension; i++)
       {
@@ -115,17 +166,18 @@ public class LevenbergMarquardtParameterOptimizer
          }
       }
       quality = computeQuality(currentOutput, correspondence);
+      initialQuality = quality;
       if (DEBUG)
       {
          System.out.println("Initial Quality = " + quality);
       }
-      // start
+      // start.
       for (int iter = 0; iter < terminalIteration; iter++)
       {
          iteration = iter;
-         currentQuality = quality;
+         previousQuality = quality;
 
-         // compute jacobian
+         // compute jacobian.
          for (int i = 0; i < parameterDimension; i++)
          {
             perturbedInput.set(currentInput);
@@ -147,15 +199,15 @@ public class LevenbergMarquardtParameterOptimizer
          }
 
          // compute direction.
-         DenseMatrix64F jacobianTranspose = new DenseMatrix64F(outputDimension, parameterDimension);
          jacobianTranspose.set(jacobian);
          CommonOps.transpose(jacobianTranspose);
 
-         DenseMatrix64F squaredJacobian = new DenseMatrix64F(parameterDimension, parameterDimension);
          CommonOps.mult(jacobianTranspose, jacobian, squaredJacobian);
+         updateDamping();
+
+         CommonOps.add(squaredJacobian, dampingCoefficient, squaredJacobian);
          CommonOps.invert(squaredJacobian);
 
-         DenseMatrix64F invMultJacobianTranspose = new DenseMatrix64F(parameterDimension, outputDimension);
          CommonOps.mult(squaredJacobian, jacobianTranspose, invMultJacobianTranspose);
          CommonOps.mult(invMultJacobianTranspose, currentOutput, optimizeDirection);
 
@@ -177,25 +229,27 @@ public class LevenbergMarquardtParameterOptimizer
             }
          }
          quality = computeQuality(currentOutput, correspondence);
-         currentQuality = computeQuality(currentOutput, correspondence);
+         double qualityDiff = previousQuality - quality;
+         double regressionPercentage = qualityDiff / previousQuality * 100;
          if (DEBUG)
          {
-            System.out.println("# iter [" + iter + "] quality = " + quality);
+            System.out.println("# iter [" + iter + "] quality = " + quality + ", regression = " + regressionPercentage + " [%], residualScaler = " + residualScaler);
          }
-
-         quality = currentQuality;
-         //         // compute terminal condition.
-         //         qualityDiff = currentQuality - quality;
-         //         if (qualityDiff / quality * 100 < terminalConvergencePercentage) // abs(qualityDiff)?
-         //         {
-         //            optimized = true;
-         //            quality = currentQuality;
-         //            break;
-         //         }
-         //         else
-         //         {
-         //            quality = currentQuality;            
-         //         }
+         
+         if(iter > 3 && qualityDiff < 0)
+         {
+            // revert updating parameter.
+            optimized = false;
+            quality = previousQuality;
+            CommonOps.subtract(currentInput, optimizeDirection, currentInput);
+            break;
+         }         
+         if(Math.abs(regressionPercentage) < terminalConvergencePercentage)
+         {
+            // terminal.
+            optimized = true;
+            break;
+         }
       }
 
       computationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - startTime);
@@ -214,12 +268,12 @@ public class LevenbergMarquardtParameterOptimizer
 
    public double getQuality()
    {
-      return 0.0;
+      return quality;
    }
 
    public int getIteration()
    {
-      return 0;
+      return iteration;
    }
 
    public double getComputationTime()
