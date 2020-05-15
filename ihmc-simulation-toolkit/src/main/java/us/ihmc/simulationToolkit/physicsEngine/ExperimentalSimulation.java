@@ -364,7 +364,7 @@ public class ExperimentalSimulation extends Simulation
 
    private static void updateGroundContactPointsVelocity(RigidBodyReadOnly rootBody, Robot scsRobot)
    {
-      ArrayList<GroundContactPoint> scsGroundContactPoints = scsRobot.getAllGroundContactPoints();
+      List<GroundContactPoint> scsGroundContactPoints = scsRobot.getAllGroundContactPoints();
       JointReadOnly[] allJoint = MultiBodySystemTools.collectSubtreeJoints(rootBody);
       FramePoint3D position = new FramePoint3D();
       FrameVector3D linearVelocity = new FrameVector3D();

@@ -466,7 +466,7 @@ public class SkippyRobot extends Robot
 
    public Point3D computeFootLocation()
    {
-      return footGroundContactPoint.getPositionPoint();
+      return footGroundContactPoint.getPositionCopy();
    }
 
    public void computeFootContactForce(Vector3DBasics tempForce){
@@ -479,7 +479,7 @@ public class SkippyRobot extends Robot
    {
       if (robotType == RobotType.TIPPY)
       {
-         transform.getTranslation().set(new Vector3D(bodyPoint.getPositionPoint()));
+         transform.getTranslation().set(new Vector3D(bodyPoint.getPositionCopy()));
       }
 
       else if (robotType == RobotType.SKIPPY)

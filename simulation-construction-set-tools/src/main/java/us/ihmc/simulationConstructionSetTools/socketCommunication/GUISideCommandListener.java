@@ -5,16 +5,17 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import us.ihmc.commons.PrintTools;
+import us.ihmc.simulationconstructionset.gui.CreatedNewRegistriesListener;
+import us.ihmc.simulationconstructionset.gui.CreatedNewVariablesListener;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.registry.NameSpace;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableList;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.simulationconstructionset.gui.CreatedNewRegistriesListener;
-import us.ihmc.simulationconstructionset.gui.CreatedNewVariablesListener;
 
 public class GUISideCommandListener implements GUISideAbstractCommandListener
 {
@@ -23,14 +24,14 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
    private YoVariableList allVariables;
    private final CreatedNewVariablesListener createdNewVariablesListener;
    private final ReceivedDataListener receivedDataListener;
-   private final ArrayList<DoDisconnectListener> doDisconnectListeners = new ArrayList<DoDisconnectListener>();
-   private final ArrayList<CreatedNewRegistriesListener> createdNewRegistryListeners = new ArrayList<CreatedNewRegistriesListener>();
+   private final List<DoDisconnectListener> doDisconnectListeners = new ArrayList<DoDisconnectListener>();
+   private final List<CreatedNewRegistriesListener> createdNewRegistryListeners = new ArrayList<CreatedNewRegistriesListener>();
 
    private final LinkedHashMap<YoVariable<?>, Integer> allVariablesIndexMap = new LinkedHashMap<>();
-   private final ArrayList<YoVariable<?>> sendVariables = new ArrayList<>();
+   private final List<YoVariable<?>> sendVariables = new ArrayList<>();
 
    private final LinkedHashMap<YoVariableRegistry, Integer> registryIndexMap = new LinkedHashMap<YoVariableRegistry, Integer>();
-   private final ArrayList<YoVariableRegistry> allRegistries = new ArrayList<YoVariableRegistry>();
+   private final List<YoVariableRegistry> allRegistries = new ArrayList<YoVariableRegistry>();
 
    private boolean connected = false;
    private boolean doneReceivingAllRegistriesAndVariables = false;
@@ -92,7 +93,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
             error = error + "\nregistry.getName() = " + registry.getName();
             error = error + "\n\n registry variables:\n";
 
-            ArrayList<YoVariable<?>> registryVariables = registry.getAllVariablesInThisListOnly();
+            List<YoVariable<?>> registryVariables = registry.getAllVariablesInThisListOnly();
             for (int j=0; j<registryVariables.size(); j++)
             {
                error = error + registryVariables.get(j).getFullNameWithNameSpace() + "\n";
@@ -439,7 +440,7 @@ public class GUISideCommandListener implements GUISideAbstractCommandListener
       return expectedRegistrySettingsIdentifier;
    }
 
-   public ArrayList<YoVariableRegistry> getAllRegistries()
+   public List<YoVariableRegistry> getAllRegistries()
    {
       return allRegistries;
    }
