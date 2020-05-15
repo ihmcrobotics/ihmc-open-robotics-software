@@ -136,7 +136,7 @@ public class ParameterUpdateListener implements YoVariablesUpdatedListener
    public void connected()
    {
       List<GuiRegistry> registriesCopy = new ArrayList<>();
-      ArrayList<YoVariableRegistry> yoRegistries = yoRootRegistry.getChildren();
+      List<YoVariableRegistry> yoRegistries = yoRootRegistry.getChildren();
       yoRegistries.stream().forEach(yoRegistry -> {
          GuiRegistry guiRegistry = new GuiRegistry(yoRegistry.getName(), null);
          createGuiRegistryRecursive(guiRegistry, yoRegistry);

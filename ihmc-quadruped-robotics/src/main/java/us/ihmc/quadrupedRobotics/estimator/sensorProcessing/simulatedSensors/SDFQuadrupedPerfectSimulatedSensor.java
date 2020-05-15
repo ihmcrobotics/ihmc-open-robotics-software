@@ -56,7 +56,7 @@ public class SDFQuadrupedPerfectSimulatedSensor extends SDFPerfectSimulatedSenso
       }
 
       //FootSwitches
-      ArrayList<GroundContactPoint> groundContactPoints = sdfRobot.getAllGroundContactPoints();
+      List<GroundContactPoint> groundContactPoints = sdfRobot.getAllGroundContactPoints();
 
       for (RobotQuadrant quadrant : quadrants)
       {
