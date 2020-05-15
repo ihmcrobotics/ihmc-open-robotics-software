@@ -24,7 +24,7 @@ import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 
 /**
  * Keep track of state and manage the specific flow of exploration for the May 2019 demo.
@@ -133,7 +133,7 @@ public class UpDownExplorer
 
    public boolean shouldTransitionToPlan()
    {
-      return state == UpDownState.TURNING || upDownSearchNotification.hasNext();
+      return state == UpDownState.TURNING || upDownSearchNotification.hasValue();
    }
 
    public void onPlanEntry(FramePose3DReadOnly midFeetZUpPose, WaypointManager waypointManager)
@@ -143,9 +143,9 @@ public class UpDownExplorer
 
       if (state == UpDownState.TRAVERSING) // going to what the updown found
       {
-         if (upDownSearchNotification.peek().isPresent()) // success
+         if (upDownSearchNotification.read().isPresent()) // success
          {
-            newWaypoint.getPose().set(upDownSearchNotification.peek().get());
+            newWaypoint.getPose().set(upDownSearchNotification.read().get());
          }
          else
          {

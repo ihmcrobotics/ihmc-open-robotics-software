@@ -82,17 +82,26 @@ public class LIDARBasedEnvironmentAwarenessUI
       uiMessager.startMessager();
 
       reaMeshViewer = new REAMeshViewer(uiMessager);
-      lidarFrameViewer = new SensorFrameViewer<LidarScanMessage>(uiMessager, REAModuleAPI.LidarScanState, null,
-                                                                 SensorFrameViewer.createLidarScanSensorFrameExtractor());
-      stereoFrameViewer = new SensorFrameViewer<StereoVisionPointCloudMessage>(uiMessager, REAModuleAPI.StereoVisionPointCloudState,
+      lidarFrameViewer = new SensorFrameViewer<LidarScanMessage>(uiMessager,
+                                                                 REAModuleAPI.LidarScanState,
+                                                                 null,
+                                                                 SensorFrameViewer.createLidarScanSensorFrameExtractor(),
+                                                                 REAModuleAPI.UISensorPoseHistoryClear);
+      stereoFrameViewer = new SensorFrameViewer<StereoVisionPointCloudMessage>(uiMessager,
+                                                                               REAModuleAPI.StereoVisionPointCloudState,
                                                                                REAModuleAPI.UISensorPoseHistoryFrames,
-                                                                               SensorFrameViewer.createStereoVisionSensorFrameExtractor());
-      depthFrameViewer = new SensorFrameViewer<StereoVisionPointCloudMessage>(uiMessager, REAModuleAPI.DepthPointCloudState,
+                                                                               SensorFrameViewer.createStereoVisionSensorFrameExtractor(),
+                                                                               REAModuleAPI.UISensorPoseHistoryClear);
+      depthFrameViewer = new SensorFrameViewer<StereoVisionPointCloudMessage>(uiMessager,
+                                                                              REAModuleAPI.DepthPointCloudState,
                                                                               REAModuleAPI.UISensorPoseHistoryFrames,
-                                                                              SensorFrameViewer.createStereoVisionSensorFrameExtractor());
-      trackingFrameViewer = new SensorFrameViewer<StampedPosePacket>(uiMessager, REAModuleAPI.TrackingCameraMessageState,
+                                                                              SensorFrameViewer.createStereoVisionSensorFrameExtractor(),
+                                                                              REAModuleAPI.UISensorPoseHistoryClear);
+      trackingFrameViewer = new SensorFrameViewer<StampedPosePacket>(uiMessager,
+                                                                     REAModuleAPI.TrackingCameraMessageState,
                                                                      REAModuleAPI.UISensorPoseHistoryFrames,
-                                                                     SensorFrameViewer.createStampedPosePacketSensorFrameExtractor());
+                                                                     SensorFrameViewer.createStampedPosePacketSensorFrameExtractor(),
+                                                                     REAModuleAPI.UISensorPoseHistoryClear);
       new PlanarRegionSegmentationDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       new PlanarRegionDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       stereoVisionPointCloudDataExporter = new StereoVisionPointCloudDataExporter(uiMessager);
@@ -119,7 +128,8 @@ public class LIDARBasedEnvironmentAwarenessUI
       primaryStage.setMaximized(true);
       Scene mainScene = new Scene(mainPane, 600, 400);
 
-      mainScene.setOnKeyPressed(event -> {
+      mainScene.setOnKeyPressed(event ->
+      {
          if (event.getCode() == KeyCode.F5)
             refreshModuleState();
       });
@@ -208,7 +218,8 @@ public class LIDARBasedEnvironmentAwarenessUI
 
    public static LIDARBasedEnvironmentAwarenessUI creatIntraprocessUI(Stage primaryStage) throws Exception
    {
-      Messager moduleMessager = KryoMessager.createIntraprocess(REAModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,
+      Messager moduleMessager = KryoMessager.createIntraprocess(REAModuleAPI.API,
+                                                                NetworkPorts.REA_MODULE_UI_PORT,
                                                                 REACommunicationProperties.getPrivateNetClassList());
       REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
       return new LIDARBasedEnvironmentAwarenessUI(uiMessager, primaryStage);
@@ -216,7 +227,9 @@ public class LIDARBasedEnvironmentAwarenessUI
 
    public static LIDARBasedEnvironmentAwarenessUI creatRemoteUI(Stage primaryStage, String host) throws Exception
    {
-      Messager moduleMessager = KryoMessager.createTCPClient(REAModuleAPI.API, host, NetworkPorts.REA_MODULE_UI_PORT,
+      Messager moduleMessager = KryoMessager.createTCPClient(REAModuleAPI.API,
+                                                             host,
+                                                             NetworkPorts.REA_MODULE_UI_PORT,
                                                              REACommunicationProperties.getPrivateNetClassList());
       REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
       return new LIDARBasedEnvironmentAwarenessUI(uiMessager, primaryStage);

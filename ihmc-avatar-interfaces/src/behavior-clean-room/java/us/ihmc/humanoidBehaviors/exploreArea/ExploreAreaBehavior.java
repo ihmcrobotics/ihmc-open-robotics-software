@@ -74,7 +74,7 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 
 public class ExploreAreaBehavior implements BehaviorInterface
 {
@@ -793,7 +793,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
       if (plannerFinished)
       {
-         RemoteFootstepPlannerResult plannerResult = footstepPlanResultNotification.peek();
+         RemoteFootstepPlannerResult plannerResult = footstepPlanResultNotification.read();
          FootstepPlanningResult planResult = plannerResult.getResult();
 
          LogTools.info("planResult = " + planResult);
@@ -864,7 +864,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    //   private boolean readyToTransitionFromWalkToNextLocationToStop(double timeInState)
    //   {
-   //      return (walkingCompleted.hasNext());
+   //      return (walkingCompleted.hasValue());
    //      //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    //   }
 
@@ -919,13 +919,13 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private boolean readyToTransitionFromTakeAStepToTakeAStep(double timeInState)
    {
-      return ((footstepIndex < footstepDataList.size()) && (walkingCompleted.hasNext()));
+      return ((footstepIndex < footstepDataList.size()) && (walkingCompleted.hasValue()));
       //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    }
 
    private boolean readyToTransitionFromTakeAStepToStop(double timeInState)
    {
-      return ((footstepIndex >= footstepDataList.size()) && (walkingCompleted.hasNext()));
+      return ((footstepIndex >= footstepDataList.size()) && (walkingCompleted.hasValue()));
       //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    }
 
@@ -965,7 +965,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
 
    private boolean readyToTransitionFromTurnInPlaceToStop(double timeInState)
    {
-      return (walkingCompleted.hasNext());
+      return (walkingCompleted.hasValue());
       //      return ((timeInState > 0.1) && (!behaviorHelper.isRobotWalking()));
    }
 

@@ -8,9 +8,15 @@ import us.ihmc.pubsub.TopicDataType;
 
 /**
    
+<<<<<<< HEAD
  * This message is part of the Quix controller API.
    
  * This message is used to notify the crutch display of the current motion state and allow the crutch to communicate a desired change in state.
+=======
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message is used to switch the control scheme between different control mode.
+>>>>>>> develop
    
  */
 public class QuixMotionStateMessage extends Packet<QuixMotionStateMessage> implements Settable<QuixMotionStateMessage>, EpsilonComparable<QuixMotionStateMessage>
@@ -84,11 +90,21 @@ public class QuixMotionStateMessage extends Packet<QuixMotionStateMessage> imple
       return sequence_id_;
    }
 
+   /**
 
+    * Specifies the which state the controller should transition into.
+
+    */
    public void setMotionStateName(byte motion_state_name)
    {
       motion_state_name_ = motion_state_name;
    }
+
+   /**
+
+    * Specifies the which state the controller should transition into.
+
+    */
    public byte getMotionStateName()
    {
       return motion_state_name_;
