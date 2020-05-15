@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import cern.colt.list.BooleanArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.optimization.FunctionOutputCalculator;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 
@@ -236,13 +237,15 @@ public class LevenbergMarquardtICPTest
          }
       };
       DenseMatrix64F purterbationVector = new DenseMatrix64F(3, 1);
-      purterbationVector.set(0, 0.001);
-      purterbationVector.set(1, 0.001);
-      purterbationVector.set(2, 0.001);
+      purterbationVector.set(0, 0.0001);
+      purterbationVector.set(1, 0.0001);
+      purterbationVector.set(2, 0.0001);
       optimizer.setPerturbationVector(purterbationVector);
       optimizer.setOutputCalculator(functionOutputCalculator);
-      boolean isSolved = optimizer.solve(5, 1.0);
+      boolean isSolved = optimizer.solve(10, 1.0);
+      LogTools.info("Computation is done " + optimizer.getComputationTime());
       System.out.println("is solved? " + isSolved);
+      optimizer.getOptimalParameter().print();
 
       DenseMatrix64F optimalParameter = optimizer.getOptimalParameter();
       List<Point2D> transformedData = new ArrayList<>();
@@ -250,13 +253,19 @@ public class LevenbergMarquardtICPTest
          transformedData.add(new Point2D(data1.get(i)));
       transformPointCloud(transformedData, optimalParameter.get(0, 0), optimalParameter.get(1, 0), optimalParameter.get(2, 0));
 
-      drawer.addPointCloud(transformedData, Color.GREEN, true);
-      
+      drawer.addPointCloud(transformedData, Color.green, true);
+
       frame.add(drawer);
       frame.pack();
       frame.setVisible(true);
 
       ThreadTools.sleepForever();
+   }
+
+   @Test
+   public void testLMOptimizer()
+   {
+
    }
 
    private double computeClosestDistance(Point2D point, List<Point2D> pointCloud)

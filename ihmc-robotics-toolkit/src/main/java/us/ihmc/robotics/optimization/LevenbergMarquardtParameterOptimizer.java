@@ -5,7 +5,6 @@ import org.ejml.ops.CommonOps;
 import org.ejml.ops.MatrixDimensionException;
 
 import us.ihmc.commons.Conversions;
-import us.ihmc.log.LogTools;
 
 public class LevenbergMarquardtParameterOptimizer
 {
@@ -27,7 +26,7 @@ public class LevenbergMarquardtParameterOptimizer
    private final DenseMatrix64F optimizeDirection;
 
    private boolean[] correspondence;
-   private double correspondenceThreshold = 0.2; // TODO:
+   private double correspondenceThreshold = 0.3; // TODO:
 
    private double computationTime;
    private double quality;
@@ -40,7 +39,7 @@ public class LevenbergMarquardtParameterOptimizer
    public LevenbergMarquardtParameterOptimizer(int inputParameterDimension, int outputDimension)
    {
       if (DEBUG)
-         LogTools.info("Optimizer Info = " + inputParameterDimension + " " + outputDimension + " space solver");
+         System.out.println("Optimizer Info = " + inputParameterDimension + " " + outputDimension + " space solver");
       this.parameterDimension = inputParameterDimension;
       this.outputDimension = outputDimension;
 
@@ -81,7 +80,7 @@ public class LevenbergMarquardtParameterOptimizer
    private double computeQuality(DenseMatrix64F space, boolean[] correspondence)
    {
       double norm = 0.0;
-      for (int i = 0; i < space.getNumCols(); i++)
+      for (int i = 0; i < space.getNumRows(); i++)
       {
          if (correspondence[i])
          {
@@ -116,7 +115,10 @@ public class LevenbergMarquardtParameterOptimizer
          }
       }
       quality = computeQuality(currentOutput, correspondence);
-
+      if (DEBUG)
+      {
+         System.out.println("Initial Quality = " + quality);
+      }
       // start
       for (int iter = 0; iter < terminalIteration; iter++)
       {
@@ -155,14 +157,8 @@ public class LevenbergMarquardtParameterOptimizer
 
          DenseMatrix64F invMultJacobianTranspose = new DenseMatrix64F(parameterDimension, outputDimension);
          CommonOps.mult(squaredJacobian, jacobianTranspose, invMultJacobianTranspose);
-
          CommonOps.mult(invMultJacobianTranspose, currentOutput, optimizeDirection);
 
-         if (DEBUG)
-         {
-            LogTools.info("optimizeDirection");
-            optimizeDirection.print();
-         }
          // update currentInput.
          CommonOps.subtract(currentInput, optimizeDirection, newInput);
 
@@ -184,8 +180,7 @@ public class LevenbergMarquardtParameterOptimizer
          currentQuality = computeQuality(currentOutput, correspondence);
          if (DEBUG)
          {
-            LogTools.info("");
-            System.out.println(iter + " quality " + quality);
+            System.out.println("# iter [" + iter + "] quality = " + quality);
          }
 
          quality = currentQuality;
