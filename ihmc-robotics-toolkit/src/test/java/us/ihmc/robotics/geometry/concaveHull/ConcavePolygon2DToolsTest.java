@@ -11,7 +11,7 @@ import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 public class ConcavePolygon2DToolsTest
 {
@@ -56,5 +56,47 @@ public class ConcavePolygon2DToolsTest
 
       assertEquals(totalArea, concaveHull.getArea(), 1e-7);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(totalCentroid, concaveHull.getCentroid(), 1e-7);
+   }
+
+   @Test
+   public void testInsertVertex()
+   {
+      ConcavePolygon2D polygon = new ConcavePolygon2D();
+      polygon.addVertex(-1.0, 1.0);
+      polygon.addVertex(1.0, 1.0);
+      polygon.addVertex(1.0, -1.0);
+      polygon.addVertex(-1.0, -1.0);
+      polygon.update();
+
+      double area = 4.0;
+      assertEquals(4, polygon.getNumberOfVertices());
+      assertEquals(area, polygon.getArea(), 1e-7);
+
+      polygon.insertVertex(1, 0.0, 1.0);
+      assertFalse(polygon.isUpToDate());
+
+      polygon.update();
+
+      assertTrue(polygon.isUpToDate());
+      assertEquals(5, polygon.getNumberOfVertices());
+      assertEquals(area, polygon.getArea(), 1e-7);
+
+      polygon.removeVertex(1);
+      assertFalse(polygon.isUpToDate());
+
+      polygon.update();
+
+      assertTrue(polygon.isUpToDate());
+      assertEquals(4, polygon.getNumberOfVertices());
+      assertEquals(area, polygon.getArea(), 1e-7);
+
+      polygon.insertVertex(1, 0.0, 0.0);
+      assertFalse(polygon.isUpToDate());
+
+      polygon.update();
+
+      assertTrue(polygon.isUpToDate());
+      assertEquals(5, polygon.getNumberOfVertices());
+      assertEquals(3.0, polygon.getArea(), 1e-7);
    }
 }
