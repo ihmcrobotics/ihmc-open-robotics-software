@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry.concavePolygon2D;
 
 import us.ihmc.euclid.geometry.exceptions.EmptyPolygonException;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DBasics;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -55,6 +56,21 @@ public interface ConcavePolygon2DBasics extends ConcavePolygon2DReadOnly, Transf
    void notifyVerticesChanged();
 
    Point2DBasics getVertexUnsafe(int var1);
+
+   default void set(Vertex2DSupplier vertex2DSupplier)
+   {
+      clear();
+      addVertices(vertex2DSupplier);
+      update();
+   }
+
+   default void addVertices(Vertex2DSupplier vertex2DSupplier)
+   {
+      for (int index = 0; index < vertex2DSupplier.getNumberOfVertices(); index++)
+      {
+         addVertex(vertex2DSupplier.getVertex(index));
+      }
+   }
 
    default void addVertex(Point2DReadOnly vertex)
    {
