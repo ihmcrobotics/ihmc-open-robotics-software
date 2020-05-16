@@ -3,26 +3,37 @@ package us.ihmc.robotics.geometry.concavePolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 
 import java.util.List;
 
-import static us.ihmc.commons.lists.ListWrappingIndexTools.next;
-import static us.ihmc.commons.lists.ListWrappingIndexTools.previous;
-
 public class GeometryPolygonTools
 {
-   public static boolean isClockwiseOrdered(List<? extends Point2DReadOnly> concaveHullVertices)
+   /**
+    * Checks to see if the inner polygon is entirely inside the outer polygon.
+    */
+   public static boolean isPolygonInsideOtherPolygon(ConcavePolygon2DReadOnly innerPolygon, ConcavePolygon2DReadOnly outerPolygon)
    {
+      for (int i = 0; i < innerPolygon.getNumberOfVertices(); i++)
+      {
+         if (!outerPolygon.isPointInside(innerPolygon.getVertex(i)))
+            return false;
+      }
+
+      return true;
+   }
+
+   public static boolean isClockwiseOrdered(List<? extends Point2DReadOnly> concaveHullVertices, int numberOfVertices)
+   {
+      checkNumberOfVertices(concaveHullVertices, numberOfVertices);
+
       double sumOfAngles = 0.0;
 
-      for (int vertexIndex = 0; vertexIndex < concaveHullVertices.size(); vertexIndex++)
+      for (int vertexIndex = 0; vertexIndex < numberOfVertices; vertexIndex++)
       {
-         int previousVertexIndex = previous(vertexIndex, concaveHullVertices);
-         int nextVertexIndex = next(vertexIndex, concaveHullVertices);
+         int previousVertexIndex = EuclidGeometryPolygonTools.previous(vertexIndex, numberOfVertices);
+         int nextVertexIndex = EuclidGeometryPolygonTools.next(vertexIndex, numberOfVertices);
 
          Point2DReadOnly previousVertex = concaveHullVertices.get(previousVertexIndex);
          Point2DReadOnly vertex = concaveHullVertices.get(vertexIndex);
@@ -38,24 +49,87 @@ public class GeometryPolygonTools
       return sumOfAngles <= 0.0;
    }
 
-   public static boolean isSimplePolygon(List<? extends Point2DReadOnly> concaveHullVertices)
+   /**
+    * Solver to determine if a point is inside or outside a simple polygon. A simple polygon is a convex or concave polygon with no self intersections and no
+    * holes.
+    * The solver performs a ray-cast from the query point along the x-axis. If a ray has an odd number of intersections, that indicates the point is inside the
+    * polygon.
+    *
+    * @see <a href="https://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm</a>
+    * @see <a href="https://dl.acm.org/doi/10.1145/368637.368653</a>
+    */
+   public static boolean isPoint2DInsideSimplePolygon2D(Point2DReadOnly queryPoint, List<? extends Point2DReadOnly> polygon, int numberOfVertices)
    {
-      // TODO implement some other versions of this algorithm that are faster (see https://www.webcitation.org/6ahkPQIsN)
-      return isSimplePolygonBruteForce(concaveHullVertices);
+      return isPoint2DInsideSimplePolygon2D(queryPoint.getX(), queryPoint.getY(), polygon, numberOfVertices);
    }
 
-   public static boolean isSimplePolygonBruteForce(List<? extends Point2DReadOnly> concaveHullVertices)
+   /**
+    * Solver to determine if a point is inside or outside a simple polygon. A simple polygon is a convex or concave polygon with no self intersections and no
+    * holes.
+    * The solver performs a ray-cast from the query point along the x-axis. If a ray has an odd number of intersections, that indicates the point is inside the
+    * polygon.
+    *
+    * @see <a href="https://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm</a>
+    * @see <a href="https://dl.acm.org/doi/10.1145/368637.368653</a>
+    */
+   public static boolean isPoint2DInsideSimplePolygon2D(double pointX,
+                                                        double pointY,
+                                                        List<? extends Point2DReadOnly> polygon,
+                                                        int numberOfVertices)
    {
-      int size = concaveHullVertices.size();
-      for (int index = 0; index < size; index++)
+      checkNumberOfVertices(polygon, numberOfVertices);
+
+      if (numberOfVertices < 3)
       {
-         int previousIndex = EuclidGeometryPolygonTools.previous(index, size);
+         return false;
+      }
+
+      int intersections = 0;
+
+      for (int i = 0; i < numberOfVertices; i++)
+      {
+         Point2DReadOnly vertex = polygon.get(i);
+         Point2DReadOnly nextVertex = polygon.get((i + 1) % numberOfVertices);
+         double lineDirectionX = 1.0;
+         double lineDirectionY = 0.0;
+
+         boolean intersects = EuclidGeometryTools.intersectionBetweenRay2DAndLineSegment2D(pointX,
+                                                                                           pointY,
+                                                                                           lineDirectionX,
+                                                                                           lineDirectionY,
+                                                                                           vertex.getX(),
+                                                                                           vertex.getY(),
+                                                                                           nextVertex.getX(),
+                                                                                           nextVertex.getY(),
+                                                                                           null);
+
+         if (intersects)
+         {
+            intersections++;
+         }
+      }
+
+      boolean oddNumberOfIntersections = intersections % 2 == 1;
+      return oddNumberOfIntersections;
+   }
+
+   public static boolean isSimplePolygon(List<? extends Point2DReadOnly> concaveHullVertices, int numberOfVertices)
+   {
+      // TODO implement some other versions of this algorithm that are faster (see https://www.webcitation.org/6ahkPQIsN)
+      return isSimplePolygonBruteForce(concaveHullVertices, numberOfVertices);
+   }
+
+   public static boolean isSimplePolygonBruteForce(List<? extends Point2DReadOnly> concaveHullVertices, int numberOfVertices)
+   {
+      for (int index = 0; index < numberOfVertices; index++)
+      {
+         int previousIndex = EuclidGeometryPolygonTools.previous(index, numberOfVertices);
 
          Point2DReadOnly segmentStart = concaveHullVertices.get(previousIndex);
          Point2DReadOnly segmentEnd = concaveHullVertices.get(index);
 
-         int nextSegmentStart = EuclidGeometryPolygonTools.next(index, size);
-         int nextSegmentEnd = EuclidGeometryPolygonTools.next(nextSegmentStart, size);
+         int nextSegmentStart = EuclidGeometryPolygonTools.next(index, numberOfVertices);
+         int nextSegmentEnd = EuclidGeometryPolygonTools.next(nextSegmentStart, numberOfVertices);
          while (nextSegmentEnd != previousIndex)
          {
             if (EuclidGeometryTools.doLineSegment2DsIntersect(segmentStart,
@@ -67,7 +141,7 @@ public class GeometryPolygonTools
             }
 
             nextSegmentStart = nextSegmentEnd;
-            nextSegmentEnd = EuclidGeometryPolygonTools.next(nextSegmentStart, size);
+            nextSegmentEnd = EuclidGeometryPolygonTools.next(nextSegmentStart, numberOfVertices);
          }
       }
 
