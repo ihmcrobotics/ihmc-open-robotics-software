@@ -44,18 +44,51 @@ public class ConcavePolygon2D implements ConcavePolygon2DBasics
    }
 
    @Override
+   public void removeVertex(int indexOfVertexToRemove)
+   {
+      checkNonEmpty();
+      checkIndexInBoundaries(indexOfVertexToRemove);
+
+      if (indexOfVertexToRemove == numberOfVertices - 1)
+      {
+         numberOfVertices--;
+         return;
+      }
+      isUpToDate = false;
+      Collections.swap(vertexBuffer, indexOfVertexToRemove, numberOfVertices - 1);
+      numberOfVertices--;
+   }
+
+   @Override
+   public void insertVertex(int indexToSetVertex, double vertexXToSet, double vertexYToSet)
+   {
+      checkNonEmpty();
+      checkIndexInBoundaries(indexToSetVertex);
+
+      addVertex(getVertex(numberOfVertices - 1));
+      for (int vertex = numberOfVertices - 2; vertex > indexToSetVertex; vertex--)
+      {
+         Point2DReadOnly vertexToShift = getVertex(vertex);
+         setOrCreate(vertexToShift.getX(), vertexToShift.getY(), vertex + 1);
+      }
+      setOrCreate(vertexXToSet, vertexYToSet, indexToSetVertex);
+
+      isUpToDate = false;
+      numberOfVertices++;
+   }
+
+   @Override
    public void update()
    {
       if (isUpToDate)
          return;
 
-      if (!GeometryPolygonTools.isClockwiseOrdered(vertexBuffer))
+      if (!GeometryPolygonTools.isClockwiseOrdered(vertexBuffer, numberOfVertices))
          throw new RuntimeException("Vertices are not clockwise ordered.");
-      if (!GeometryPolygonTools.isSimplePolygon(vertexBuffer))
+      if (!GeometryPolygonTools.isSimplePolygon(vertexBuffer, numberOfVertices))
          throw new RuntimeException("Polygon is not simple, as in it has self intersections.");
 
       // TODO should maybe do alpha shape?
-      numberOfVertices = vertexBuffer.size();
       isUpToDate = true;
 
       updateCentroidAndArea();

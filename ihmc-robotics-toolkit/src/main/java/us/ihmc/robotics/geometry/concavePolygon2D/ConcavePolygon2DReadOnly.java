@@ -4,6 +4,7 @@ import us.ihmc.euclid.geometry.exceptions.EmptyPolygonException;
 import us.ihmc.euclid.geometry.exceptions.OutdatedPolygonException;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 import java.util.List;
@@ -22,6 +23,16 @@ public interface ConcavePolygon2DReadOnly extends Vertex2DSupplier
 
    Point2DReadOnly getCentroid();
 
+   default boolean isPointInside(Point2DReadOnly point)
+   {
+      return isPointInside(point.getX(), point.getY());
+   }
+
+   default boolean isPointInside(double x, double y)
+   {
+      checkIfUpToDate();
+      return GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(x, y, getVertexBufferView(), getNumberOfVertices());
+   }
    default boolean isEmpty()
    {
       return getNumberOfVertices() == 0;

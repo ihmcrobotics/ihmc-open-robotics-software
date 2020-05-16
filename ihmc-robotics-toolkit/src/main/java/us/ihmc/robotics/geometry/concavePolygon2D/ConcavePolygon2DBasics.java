@@ -40,6 +40,16 @@ public interface ConcavePolygon2DBasics extends ConcavePolygon2DReadOnly, Transf
 
    void addVertex(double var1, double var3);
 
+   void removeVertex(int indexOfVertexToRemove);
+
+   default void insertVertex(int indexToSetVertex, Point2DReadOnly vertexToSet)
+   {
+      insertVertex(indexToSetVertex, vertexToSet.getX(), vertexToSet.getY());
+   }
+
+   void insertVertex(int indexToSetVertex, double vertexXToSet, double vertexYToSet);
+
+
    BoundingBox2DBasics getBoundingBox();
 
    void notifyVerticesChanged();
