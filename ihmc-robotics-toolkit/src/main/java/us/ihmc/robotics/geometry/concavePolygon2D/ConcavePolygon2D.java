@@ -55,7 +55,11 @@ public class ConcavePolygon2D implements ConcavePolygon2DBasics
          return;
       }
       isUpToDate = false;
-      Collections.swap(vertexBuffer, indexOfVertexToRemove, numberOfVertices - 1);
+      for (int index = indexOfVertexToRemove; index < numberOfVertices - 1; index++)
+      {
+         Point2DReadOnly nextVertex = getVertex(index + 1);
+         setOrCreate(nextVertex.getX(), nextVertex.getY(), index);
+      }
       numberOfVertices--;
    }
 
@@ -65,8 +69,9 @@ public class ConcavePolygon2D implements ConcavePolygon2DBasics
       checkNonEmpty();
       checkIndexInBoundaries(indexToSetVertex);
 
-      addVertex(getVertex(numberOfVertices - 1));
-      for (int vertex = numberOfVertices - 2; vertex > indexToSetVertex; vertex--)
+      numberOfVertices++;
+
+      for (int vertex = numberOfVertices - 2; vertex >= indexToSetVertex; vertex--)
       {
          Point2DReadOnly vertexToShift = getVertex(vertex);
          setOrCreate(vertexToShift.getX(), vertexToShift.getY(), vertex + 1);
@@ -74,7 +79,6 @@ public class ConcavePolygon2D implements ConcavePolygon2DBasics
       setOrCreate(vertexXToSet, vertexYToSet, indexToSetVertex);
 
       isUpToDate = false;
-      numberOfVertices++;
    }
 
    @Override
