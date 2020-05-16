@@ -7,11 +7,13 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
+import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.*;
 
 public class GeometryPolygonToolsTest
 {
@@ -59,4 +61,35 @@ public class GeometryPolygonToolsTest
       assertEquals(totalArea, actualArea, 1e-7);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(totalCentroid, centroid, 1e-7);
    }
+
+   @Test
+   public void testEasyInteriorPolygon()
+   {
+      ConcavePolygon2D outerPolygon = new ConcavePolygon2D();
+      ConcavePolygon2D innerPolygon = new ConcavePolygon2D();
+
+      outerPolygon.addVertex(-1.0, 1.0);
+      outerPolygon.addVertex(1.0, 1.0);
+      outerPolygon.addVertex(1.0, -1.0);
+      outerPolygon.addVertex(-1.0, -1.0);
+      outerPolygon.update();
+
+      innerPolygon.addVertex(-0.5, 0.5);
+      innerPolygon.addVertex(0.5, 0.5);
+      innerPolygon.addVertex(0.5, -0.5);
+      innerPolygon.addVertex(-0.5, -0.5);
+      innerPolygon.update();
+
+      assertTrue(GeometryPolygonTools.isPolygonInsideOtherPolygon(innerPolygon, outerPolygon));
+
+      innerPolygon.clear();
+      innerPolygon.addVertex(-0.5, 0.5);
+      innerPolygon.addVertex(1.5, 0.5);
+      innerPolygon.addVertex(1.5, -0.5);
+      innerPolygon.addVertex(-0.5, -0.5);
+      innerPolygon.update();
+
+      assertFalse(GeometryPolygonTools.isPolygonInsideOtherPolygon(innerPolygon, outerPolygon));
+   }
+
 }
