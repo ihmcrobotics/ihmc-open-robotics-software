@@ -24,6 +24,25 @@ public class GeometryPolygonTools
       return true;
    }
 
+   public static boolean doPolygonsIntersect(ConcavePolygon2DReadOnly polygonA, ConcavePolygon2DReadOnly polygonB)
+   {
+      boolean aInsideB = false;
+      boolean aOutsideB = false;
+
+      for (int i = 0; i < polygonA.getNumberOfVertices(); i++)
+      {
+         if (polygonB.isPointInside(polygonA.getVertex(i)))
+            aInsideB = true;
+         else
+            aOutsideB = true;
+
+         if (aInsideB == aOutsideB)
+            return true;
+      }
+
+      return false;
+   }
+
    public static boolean isClockwiseOrdered(List<? extends Point2DReadOnly> concaveHullVertices, int numberOfVertices)
    {
       checkNumberOfVertices(concaveHullVertices, numberOfVertices);
