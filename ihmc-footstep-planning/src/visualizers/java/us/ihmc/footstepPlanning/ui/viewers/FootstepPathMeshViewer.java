@@ -105,7 +105,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
    {
       if (index == selectedStep.get().getKey())
       {
-         return Color.YELLOW;
+         return Color.YELLOW.darker();
       }
       else
       {
