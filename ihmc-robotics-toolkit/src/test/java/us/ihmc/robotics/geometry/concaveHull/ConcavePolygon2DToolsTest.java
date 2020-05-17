@@ -99,4 +99,31 @@ public class ConcavePolygon2DToolsTest
       assertEquals(5, polygon.getNumberOfVertices());
       assertEquals(3.0, polygon.getArea(), 1e-7);
    }
+
+   @Test
+   public void testEpsilonEquals()
+   {
+      ConcavePolygon2D polygonA = new ConcavePolygon2D();
+      polygonA.addVertex(1.0, 1.0);
+      polygonA.addVertex(1.0, -1.0);
+      polygonA.addVertex(-1.0, -1.0);
+      polygonA.update();
+
+      ConcavePolygon2D polygonB = new ConcavePolygon2D();
+      polygonB.addVertex(1.0, 1.0);
+      polygonB.addVertex(1.0, -1.0);
+      polygonB.addVertex(-1.0, -1.0);
+      polygonB.update();
+
+      assertTrue(polygonA.epsilonEquals(polygonB, 1e-7));
+
+      polygonB.clear();
+      polygonB.addVertex(0.5, 0.5);
+      polygonB.addVertex(0.5, -0.5);
+      polygonB.addVertex(-0.5, -0.5);
+      polygonB.update();
+
+      assertFalse(polygonA.epsilonEquals(polygonB, 1e-7));
+   }
+
 }

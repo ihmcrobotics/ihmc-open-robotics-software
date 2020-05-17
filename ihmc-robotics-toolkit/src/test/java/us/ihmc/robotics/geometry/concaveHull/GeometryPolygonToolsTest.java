@@ -92,4 +92,35 @@ public class GeometryPolygonToolsTest
       assertFalse(GeometryPolygonTools.isPolygonInsideOtherPolygon(innerPolygon, outerPolygon));
    }
 
+   @Test
+   public void doPolygonIntersectTest()
+   {
+      ConcavePolygon2D polygonToClip = new ConcavePolygon2D();
+      polygonToClip.addVertex(-1.0, 1.0);
+      polygonToClip.addVertex(1.0, 1.0);
+      polygonToClip.addVertex(1.0, -1.0);
+      polygonToClip.addVertex(-1.0, -1.0);
+      polygonToClip.update();
+
+      assertTrue(polygonToClip.isPointInside(0.5, 0.5));
+
+      ConcavePolygon2D clippingPolygon = new ConcavePolygon2D();
+      clippingPolygon.addVertex(1.0 + -0.5, 0.5);
+      clippingPolygon.addVertex(1.0 + 0.5, 0.5);
+      clippingPolygon.addVertex(1.0 + 0.5, -0.5);
+      clippingPolygon.addVertex(1.0 + -0.5, -0.5);
+      clippingPolygon.update();
+
+      assertTrue(polygonToClip.isPointInside(clippingPolygon.getVertex(0)));
+      assertFalse(polygonToClip.isPointInside(clippingPolygon.getVertex(1)));
+      assertFalse(polygonToClip.isPointInside(clippingPolygon.getVertex(2)));
+      assertTrue(polygonToClip.isPointInside(clippingPolygon.getVertex(3)));
+
+      ConcavePolygon2D polygonToClipUnmodified = new ConcavePolygon2D(polygonToClip);
+      ConcavePolygon2D clippingPolygonUnmodified = new ConcavePolygon2D(clippingPolygon);
+
+      assertTrue(GeometryPolygonTools.doPolygonsIntersect(polygonToClip, clippingPolygon));
+      assertTrue(polygonToClip.epsilonEquals(polygonToClipUnmodified, 1e-8));
+      assertTrue(clippingPolygon.epsilonEquals(clippingPolygonUnmodified, 1e-8));
+   }
 }
