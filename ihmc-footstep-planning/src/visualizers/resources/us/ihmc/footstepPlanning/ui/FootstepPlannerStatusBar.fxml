@@ -13,6 +13,7 @@
 
 <?import javafx.scene.text.Text?>
 <?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
 <VBox xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" alignment="TOP_CENTER"
       fx:controller="us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerStatusBarController">
 
@@ -75,5 +76,25 @@
 
             <TableView fx:id="footstepPlanTable" GridPane.rowIndex="15" GridPane.columnSpan="2"/>
         </children>
+    </GridPane>
+
+    <Region prefHeight="5"/>
+
+    <Label alignment="CENTER" contentDisplay="CENTER" text="Manual Adjustment" textAlignment="CENTER">
+        <font>
+            <Font size="16.0"/>
+        </font>
+    </Label>
+
+    <Region prefHeight="5"/>
+
+    <GridPane alignment="TOP_CENTER" hgap="12" vgap="5">
+        <Label GridPane.columnIndex="0" GridPane.rowIndex="0" text="Frame (R)"/>
+        <Label GridPane.columnIndex="1" GridPane.rowIndex="0" fx:id="worldFrameLabel" text="World"/>
+        <Label GridPane.columnIndex="2" GridPane.rowIndex="0" fx:id="regionFrameLabel" text="Region"/>
+
+        <Label GridPane.columnIndex="0" GridPane.rowIndex="1" text="Mode (T)"/>
+        <Label GridPane.columnIndex="1" GridPane.rowIndex="1" fx:id="translationModeLabel" text="Translation"/>
+        <Label GridPane.columnIndex="2" GridPane.rowIndex="1" fx:id="orientationModeLabel" text="Orientation"/>
     </GridPane>
 </VBox>

@@ -6,9 +6,13 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.Region;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.communication.UIStepAdjustmentFrame;
+import us.ihmc.footstepPlanning.communication.UIStepAdjustmentMode;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -41,6 +45,15 @@ public class FootstepPlannerStatusBarController
    private Text footstepPlanTime;
    @FXML
    private Text iterationsTaken;
+
+   @FXML
+   private Label worldFrameLabel;
+   @FXML
+   private Label regionFrameLabel;
+   @FXML
+   private Label translationModeLabel;
+   @FXML
+   private Label orientationModeLabel;
 
    @FXML
    private TableView<FootstepTableProperty> footstepPlanTable;
@@ -88,7 +101,7 @@ public class FootstepPlannerStatusBarController
          for (int i = 0; i < footstepPlanResponse.getFootstepDataList().size(); i++)
          {
             FootstepDataMessage footstepDataMessage = footstepPlanResponse.getFootstepDataList().get(i);
-            footstepPlanTableItems.add(new FootstepTableProperty(i, RobotSide.fromByte(footstepDataMessage.getRobotSide())));
+            footstepPlanTableItems.add(new FootstepTableProperty(i, footstepDataMessage));
          }
       });
 
@@ -110,9 +123,47 @@ public class FootstepPlannerStatusBarController
                                                                                   if (newValue != null)
                                                                                   {
                                                                                      messager.submitMessage(FootstepPlannerMessagerAPI.SelectedFootstep,
-                                                                                                            newValue.stepIndex);
+                                                                                                            Pair.of(newValue.stepIndex,
+                                                                                                                    newValue.footstepDataMessage));
                                                                                   }
                                                                                });
+
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepAdjustmentFrame, this::setFrame);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepAdjustmentMode, this::setMode);
+
+      setMode(UIStepAdjustmentMode.TRANSLATION);
+      setFrame(UIStepAdjustmentFrame.WORLD);
+   }
+
+   private final Border solidBorder = new Border(new BorderStroke(Color.BLACK.brighter(), BorderStrokeStyle.SOLID, null, new BorderWidths(1)));
+   private final Border noBorder = new Border(new BorderStroke(Color.TRANSPARENT, BorderStrokeStyle.SOLID, null, new BorderWidths(1)));
+
+   private void setFrame(UIStepAdjustmentFrame adjustmentFrame)
+   {
+      if (adjustmentFrame == UIStepAdjustmentFrame.WORLD)
+      {
+         worldFrameLabel.setBorder(solidBorder);
+         regionFrameLabel.setBorder(noBorder);
+      }
+      else
+      {
+         regionFrameLabel.setBorder(solidBorder);
+         worldFrameLabel.setBorder(noBorder);
+      }
+   }
+
+   private void setMode(UIStepAdjustmentMode adjustmentMode)
+   {
+      if (adjustmentMode == UIStepAdjustmentMode.TRANSLATION)
+      {
+         translationModeLabel.setBorder(solidBorder);
+         orientationModeLabel.setBorder(noBorder);
+      }
+      else
+      {
+         orientationModeLabel.setBorder(solidBorder);
+         translationModeLabel.setBorder(noBorder);
+      }
    }
 
    private static class TextViewerListener<T> implements TopicListener<T>
@@ -134,13 +185,15 @@ public class FootstepPlannerStatusBarController
 
    public class FootstepTableProperty
    {
-      private int stepIndex;
-      private RobotSide side;
+      private final int stepIndex;
+      private final FootstepDataMessage footstepDataMessage;
+      private final RobotSide side;
 
-      public FootstepTableProperty(int stepIndex, RobotSide side)
+      public FootstepTableProperty(int stepIndex, FootstepDataMessage footstepDataMessage)
       {
          this.stepIndex = stepIndex;
-         this.side = side;
+         this.footstepDataMessage = footstepDataMessage;
+         this.side = RobotSide.fromByte(footstepDataMessage.getRobotSide());
       }
 
       public int getStepIndex()

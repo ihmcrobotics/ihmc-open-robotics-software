@@ -77,6 +77,7 @@ public class FootstepPlannerUI
    private final JavaFXRobotVisualizer robotVisualizer;
    private final JavaFXRobotVisualizer walkingPreviewVisualizer;
    private final FootstepPlannerLogRenderer footstepPlannerLogRenderer;
+   private final ManualFootstepAdjustmentListener manualFootstepAdjustmentListener;
 
    private final List<Runnable> shutdownHooks = new ArrayList<>();
 
@@ -219,6 +220,7 @@ public class FootstepPlannerUI
       this.occupancyMapRenderer = new OccupancyMapRenderer(messager);
       this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(defaultContactPoints, messager);
       new UIFootstepPlanManager(messager);
+      this.manualFootstepAdjustmentListener = new ManualFootstepAdjustmentListener(messager, view3dFactory.getSubScene());
 
       startGoalPositionViewer.setShowStartGoalTopics(ShowStart, ShowGoal, ShowGoal);
 
@@ -285,6 +287,7 @@ public class FootstepPlannerUI
       visibilityGraphsRenderer.start();
       occupancyMapRenderer.start();
       footstepPlannerLogRenderer.start();
+      manualFootstepAdjustmentListener.start();
       new FootPoseFromMidFootUpdater(messager).start();
       new FootstepCompletionListener(messager).start();
 

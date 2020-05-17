@@ -1,7 +1,9 @@
 package us.ihmc.footstepPlanning.ui.components;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
 import org.apache.commons.lang3.tuple.Pair;
+import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -19,6 +21,8 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class UIFootstepPlanManager
 {
+   private final Messager messager;
+
    private final AtomicReference<FootstepDataListMessage> plannedPath = new AtomicReference<>();
    private final AtomicReference<FootstepDataListMessage> adjustedPath = new AtomicReference<>();
 
@@ -36,6 +40,7 @@ public class UIFootstepPlanManager
 
    public UIFootstepPlanManager(Messager messager)
    {
+      this.messager = messager;
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanResponse, this::updatePaths);
 
       ignorePartialFootholds = messager.createInput(FootstepPlannerMessagerAPI.IgnorePartialFootholds, false);
@@ -53,7 +58,7 @@ public class UIFootstepPlanManager
       messager.registerTopicListener(FootstepPlannerMessagerAPI.OverrideSwingHeight, value -> updateStepHeights());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ManualSwingHeight, value -> updateStepHeights());
 
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ManualStepAdjustment, this::updateStepPlacements);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ManuallyAdjustmentedStep, this::updateStepPlacements);
 
       // Send plan to robot when requested
       Runnable dispathPlanRunnable = () -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, adjustedPath.get());
@@ -96,26 +101,25 @@ public class UIFootstepPlanManager
       }
    }
 
-   private void updateStepPlacements(Pair<Integer, Pose3D> manualStepAdjustment)
+   private void updateStepPlacements(Pair<Integer, Pose3D> manuallyAdjustedStep)
    {
       FootstepDataListMessage adjustedPath = this.adjustedPath.get();
-      FootstepDataListMessage plannedPath = this.plannedPath.get();
 
-      if (manualStepAdjustment.getKey() >= adjustedPath.getFootstepDataList().size() || manualStepAdjustment.getKey() >= plannedPath.getFootstepDataList().size())
+      if (manuallyAdjustedStep.getKey() == null || manuallyAdjustedStep.getValue() == null)
       {
          return;
       }
 
-      int stepIndex = manualStepAdjustment.getKey();
+      if (manuallyAdjustedStep.getKey() >= adjustedPath.getFootstepDataList().size())
+      {
+         return;
+      }
 
-      Point3D plannedLocation = plannedPath.getFootstepDataList().get(stepIndex).getLocation();
-      Quaternion plannedOrientation = plannedPath.getFootstepDataList().get(stepIndex).getOrientation();
-
-      adjustedPath.getFootstepDataList().get(stepIndex).getLocation().set(plannedLocation);
-      adjustedPath.getFootstepDataList().get(stepIndex).getOrientation().set(plannedOrientation);
-
-      adjustedPath.getFootstepDataList().get(stepIndex).getLocation().add(manualStepAdjustment.getValue().getPosition());
-      adjustedPath.getFootstepDataList().get(stepIndex).getOrientation().append(manualStepAdjustment.getValue().getOrientation());
+      int stepIndex = manuallyAdjustedStep.getKey();
+      FootstepDataMessage footstepDataMessage = adjustedPath.getFootstepDataList().get(stepIndex);
+      footstepDataMessage.getLocation().set(manuallyAdjustedStep.getValue().getPosition());
+      footstepDataMessage.getOrientation().set(manuallyAdjustedStep.getValue().getOrientation());
+      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepToUpdateViz, Pair.of(stepIndex, footstepDataMessage));
    }
 
    private void updatePaths(FootstepDataListMessage plannedPath)
@@ -132,8 +136,9 @@ public class UIFootstepPlanManager
          setManualStepTimes(adjustedPath, manualSwingTime.get(), manualTransferTime.get());
       }
 
-      this.plannedPath.set(plannedPath);
       adjustedPath.set(plannedPath);
+      this.plannedPath.set(plannedPath);
+      this.adjustedPath.set(adjustedPath);
    }
 
    private static void removePartialFootholds(FootstepDataListMessage footstepDataListMessage)
