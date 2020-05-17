@@ -1,8 +1,10 @@
 package us.ihmc.robotics.geometry.concavePolygon2D;
 
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 
@@ -10,10 +12,11 @@ import java.util.List;
 
 public class GeometryPolygonTools
 {
+
    /**
     * Checks to see if the inner polygon is entirely inside the outer polygon.
     */
-   public static boolean isPolygonInsideOtherPolygon(ConcavePolygon2DReadOnly innerPolygon, ConcavePolygon2DReadOnly outerPolygon)
+   public static boolean isPolygonInsideOtherPolygon(Vertex2DSupplier innerPolygon, ConcavePolygon2DReadOnly outerPolygon)
    {
       for (int i = 0; i < innerPolygon.getNumberOfVertices(); i++)
       {
@@ -24,23 +27,83 @@ public class GeometryPolygonTools
       return true;
    }
 
+   // FIXME this doesn't work if there aren't vertices overlapping.
    public static boolean doPolygonsIntersect(ConcavePolygon2DReadOnly polygonA, ConcavePolygon2DReadOnly polygonB)
    {
-      boolean aInsideB = false;
-      boolean aOutsideB = false;
+      return doPolygonsIntersectBruteForce(polygonA, polygonB);
+   }
 
-      for (int i = 0; i < polygonA.getNumberOfVertices(); i++)
+   public static boolean doPolygonsIntersectBruteForce(ConcavePolygon2DReadOnly polygonA, ConcavePolygon2DReadOnly polygonB)
+   {
+      boolean hasPointInside = false;
+      boolean hasPointOutside = false;
+
+      for (int vertexIdx = 0; vertexIdx < polygonB.getNumberOfVertices(); vertexIdx++)
       {
-         if (polygonB.isPointInside(polygonA.getVertex(i)))
-            aInsideB = true;
+         if (polygonA.isPointInside(polygonB.getVertex(vertexIdx)))
+            hasPointInside = true;
          else
-            aOutsideB = true;
+            hasPointOutside = true;
 
-         if (aInsideB == aOutsideB)
+         if (hasPointInside == hasPointOutside)
+            return true;
+      }
+
+      hasPointInside = false;
+      hasPointOutside = false;
+
+      for (int vertexIdx = 0; vertexIdx < polygonA.getNumberOfVertices(); vertexIdx++)
+      {
+         if (polygonB.isPointInside(polygonA.getVertex(vertexIdx)))
+            hasPointInside = true;
+         else
+            hasPointOutside = true;
+
+         if (hasPointInside == hasPointOutside)
             return true;
       }
 
       return false;
+   }
+
+   public static int findIndexOfFirstVertexInsidePolygon(ConcavePolygon2DReadOnly containingPolygon, ConcavePolygon2DReadOnly polygonToCheck)
+   {
+      return findIndexOfFirstVertexInsidePolygon(containingPolygon, polygonToCheck, 0);
+   }
+
+   public static int findIndexOfFirstVertexInsidePolygon(ConcavePolygon2DReadOnly containingPolygon, Vertex2DSupplier verticesToCheck, int vertexStart)
+   {
+      if (isPolygonInsideOtherPolygon(verticesToCheck, containingPolygon))
+         return -1;
+
+      while (containingPolygon.isPointInside(verticesToCheck.getVertex(vertexStart)))
+         vertexStart = EuclidGeometryPolygonTools.previous(vertexStart, verticesToCheck.getNumberOfVertices());
+
+      int vertexIdx = vertexStart + 1;
+      while (!containingPolygon.isPointInside(verticesToCheck.getVertex(vertexIdx)))
+         vertexIdx = EuclidGeometryPolygonTools.next(vertexIdx, verticesToCheck.getNumberOfVertices());
+
+      return vertexIdx;
+   }
+
+   public static int findIndexOfFirstVertexOutsidePolygon(ConcavePolygon2DReadOnly containingPolygon, ConcavePolygon2DReadOnly polygonToCheck)
+   {
+      return findIndexOfFirstVertexOutsidePolygon(containingPolygon, polygonToCheck, 0);
+   }
+
+   public static int findIndexOfFirstVertexOutsidePolygon(ConcavePolygon2DReadOnly containingPolygon, Vertex2DSupplier verticesToCheck, int vertexStart)
+   {
+      if (isPolygonInsideOtherPolygon(verticesToCheck, containingPolygon))
+         return -1;
+
+      while (!containingPolygon.isPointInside(verticesToCheck.getVertex(vertexStart)))
+         vertexStart = EuclidGeometryPolygonTools.previous(vertexStart, verticesToCheck.getNumberOfVertices());
+
+      int vertexIdx = vertexStart + 1;
+      while (containingPolygon.isPointInside(verticesToCheck.getVertex(vertexIdx)))
+         vertexIdx = EuclidGeometryPolygonTools.next(vertexIdx, verticesToCheck.getNumberOfVertices());
+
+      return vertexIdx;
    }
 
    public static boolean isClockwiseOrdered(List<? extends Point2DReadOnly> concaveHullVertices, int numberOfVertices)
@@ -91,10 +154,18 @@ public class GeometryPolygonTools
     * @see <a href="https://en.wikipedia.org/wiki/Point_in_polygon#Ray_casting_algorithm</a>
     * @see <a href="https://dl.acm.org/doi/10.1145/368637.368653</a>
     */
+   public static boolean isPoint2DInsideSimplePolygon2D(double pointX, double pointY, List<? extends Point2DReadOnly> polygon, int numberOfVertices)
+   {
+      return isPoint2DInsideSimplePolygon2D(pointX, pointY, 1.0, 0.0, polygon, numberOfVertices, null);
+   }
+
    public static boolean isPoint2DInsideSimplePolygon2D(double pointX,
                                                         double pointY,
+                                                        double lineDirectionX,
+                                                        double lineDirectionY,
                                                         List<? extends Point2DReadOnly> polygon,
-                                                        int numberOfVertices)
+                                                        int numberOfVertices,
+                                                        Point2DBasics intersectionToPack)
    {
       checkNumberOfVertices(polygon, numberOfVertices);
 
@@ -109,8 +180,6 @@ public class GeometryPolygonTools
       {
          Point2DReadOnly vertex = polygon.get(i);
          Point2DReadOnly nextVertex = polygon.get((i + 1) % numberOfVertices);
-         double lineDirectionX = 1.0;
-         double lineDirectionY = 0.0;
 
          boolean intersects = EuclidGeometryTools.intersectionBetweenRay2DAndLineSegment2D(pointX,
                                                                                            pointY,
@@ -120,7 +189,7 @@ public class GeometryPolygonTools
                                                                                            vertex.getY(),
                                                                                            nextVertex.getX(),
                                                                                            nextVertex.getY(),
-                                                                                           null);
+                                                                                           intersectionToPack);
 
          if (intersects)
          {

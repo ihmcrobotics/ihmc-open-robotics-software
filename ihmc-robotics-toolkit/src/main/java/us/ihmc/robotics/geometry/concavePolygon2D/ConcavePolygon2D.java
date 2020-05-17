@@ -2,6 +2,8 @@ package us.ihmc.robotics.geometry.concavePolygon2D;
 
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DBasics;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -26,6 +28,15 @@ public class ConcavePolygon2D implements ConcavePolygon2DBasics
 
    private final BoundingBox2D boundingBox = new BoundingBox2D();
    private final Point2D centroid = new Point2D();
+
+   public ConcavePolygon2D()
+   {
+   }
+
+   public ConcavePolygon2D(Vertex2DSupplier vertex2DSupplier)
+   {
+      set(vertex2DSupplier);
+   }
 
    @Override
    public void clear()
