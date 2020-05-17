@@ -44,7 +44,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
    private final AtomicReference<Boolean> ignorePartialFootholds;
 
    private final AtomicReference<Integer> previousSelectedStep = new AtomicReference<>(-1);
-   private final AtomicReference<Integer> selectedStep;
+   private final AtomicReference<Pair<Integer, FootstepDataMessage>> selectedStep;
 
    private final TextureColorAdaptivePalette palette = new TextureColorAdaptivePalette(1024, false);
    private final JavaFXMultiColorMeshBuilder meshBuilder = new JavaFXMultiColorMeshBuilder(palette);
@@ -61,7 +61,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
       // call this on animation timer update thread since it updates a single step and might come in at higher frequency
       messager.registerTopicListener(FootstepToUpdateViz, updateStep::set);
-      selectedStep = messager.createInput(SelectedFootstep, -1);
+      selectedStep = messager.createInput(SelectedFootstep, Pair.of(-1, null));
 
       // handle reset on animation timer thread
       messager.registerTopicListener(ComputePath, data -> reset.set(true));
@@ -103,7 +103,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
    private Color getFootstepColor(FootstepDataMessage footstepDataMessage, int index)
    {
-      if (index == selectedStep.get())
+      if (index == selectedStep.get().getKey())
       {
          return Color.YELLOW;
       }
@@ -208,22 +208,28 @@ public class FootstepPathMeshViewer extends AnimationTimer
             footstepMeshes.get(i).updateMesh();
          }
       }
-      else if (previousSelectedStep.get().intValue() != selectedStep.get().intValue())
+      else
       {
-         if (previousSelectedStep.get() >= 0)
-         {
-            footstepMeshes.get(previousSelectedStep.get()).computeMesh();
-            footstepMeshes.get(previousSelectedStep.get()).updateMesh();
-         }
-         
-         footstepMeshes.get(selectedStep.get()).computeMesh();
-         footstepMeshes.get(selectedStep.get()).updateMesh();
+         int selectedStepIndex = selectedStep.get().getKey();
+         int previousSelectedStepIndex = previousSelectedStep.get();
 
-         previousSelectedStep.set(selectedStep.get());
-      }
-      else if (reset.getAndSet(false))
-      {
-         clearAll();
+         if (previousSelectedStepIndex != selectedStepIndex)
+         {
+            if (previousSelectedStepIndex >= 0)
+            {
+               footstepMeshes.get(previousSelectedStepIndex).computeMesh();
+               footstepMeshes.get(previousSelectedStepIndex).updateMesh();
+            }
+
+            footstepMeshes.get(selectedStepIndex).computeMesh();
+            footstepMeshes.get(selectedStepIndex).updateMesh();
+
+            previousSelectedStep.set(selectedStepIndex);
+         }
+         else if (reset.getAndSet(false))
+         {
+            clearAll();
+         }
       }
    }
 
@@ -234,7 +240,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
          footstepMeshes.get(i).clear();
       }
 
-      selectedStep.set(-1);
+      selectedStep.set(Pair.of(-1, null));
       previousSelectedStep.set(-1);
    }
 
