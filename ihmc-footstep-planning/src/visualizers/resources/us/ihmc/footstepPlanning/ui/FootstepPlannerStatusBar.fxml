@@ -90,11 +90,16 @@
 
     <GridPane alignment="TOP_CENTER" hgap="12" vgap="5">
         <Label GridPane.columnIndex="0" GridPane.rowIndex="0" text="Frame (R)"/>
-        <Label GridPane.columnIndex="1" GridPane.rowIndex="0" fx:id="worldFrameLabel" text="World"/>
-        <Label GridPane.columnIndex="2" GridPane.rowIndex="0" fx:id="regionFrameLabel" text="Region"/>
-
-        <Label GridPane.columnIndex="0" GridPane.rowIndex="1" text="Mode (T)"/>
-        <Label GridPane.columnIndex="1" GridPane.rowIndex="1" fx:id="translationModeLabel" text="Translation"/>
-        <Label GridPane.columnIndex="2" GridPane.rowIndex="1" fx:id="orientationModeLabel" text="Orientation"/>
+        <Label GridPane.columnIndex="1" GridPane.rowIndex="0" fx:id="regionFrameLabel" text="Region"/>
+        <Label GridPane.columnIndex="2" GridPane.rowIndex="0" fx:id="worldFrameLabel" text="World"/>
     </GridPane>
+
+    <Region prefHeight="5"/>
+    <Label alignment="TOP_LEFT" text="Translate: Numpad 2/4/6/8"/>
+    <Region prefHeight="5"/>
+    <Label alignment="TOP_LEFT" text="Trans vertical: Ctrl"/>
+    <Region prefHeight="5"/>
+    <Label alignment="TOP_LEFT" text="Rotate: Numpad 7/9"/>
+    <Region prefHeight="5"/>
+    <Label alignment="TOP_LEFT" text="Fine adjust: Shift"/>
 </VBox>

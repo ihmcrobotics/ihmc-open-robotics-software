@@ -12,7 +12,6 @@ import javafx.scene.text.Text;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.communication.UIStepAdjustmentFrame;
-import us.ihmc.footstepPlanning.communication.UIStepAdjustmentMode;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -50,10 +49,6 @@ public class FootstepPlannerStatusBarController
    private Label worldFrameLabel;
    @FXML
    private Label regionFrameLabel;
-   @FXML
-   private Label translationModeLabel;
-   @FXML
-   private Label orientationModeLabel;
 
    @FXML
    private TableView<FootstepTableProperty> footstepPlanTable;
@@ -129,10 +124,7 @@ public class FootstepPlannerStatusBarController
                                                                                });
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepAdjustmentFrame, this::setFrame);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepAdjustmentMode, this::setMode);
-
-      setMode(UIStepAdjustmentMode.TRANSLATION);
-      setFrame(UIStepAdjustmentFrame.WORLD);
+      setFrame(UIStepAdjustmentFrame.getDefault());
    }
 
    private final Border solidBorder = new Border(new BorderStroke(Color.BLACK.brighter(), BorderStrokeStyle.SOLID, null, new BorderWidths(1)));
@@ -149,20 +141,6 @@ public class FootstepPlannerStatusBarController
       {
          regionFrameLabel.setBorder(solidBorder);
          worldFrameLabel.setBorder(noBorder);
-      }
-   }
-
-   private void setMode(UIStepAdjustmentMode adjustmentMode)
-   {
-      if (adjustmentMode == UIStepAdjustmentMode.TRANSLATION)
-      {
-         translationModeLabel.setBorder(solidBorder);
-         orientationModeLabel.setBorder(noBorder);
-      }
-      else
-      {
-         orientationModeLabel.setBorder(solidBorder);
-         translationModeLabel.setBorder(noBorder);
       }
    }
 

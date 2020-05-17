@@ -12,4 +12,8 @@ public enum UIStepAdjustmentFrame
          return WORLD;
    }
 
+   public static UIStepAdjustmentFrame getDefault()
+   {
+      return LOCAL;
+   }
 }
