@@ -131,35 +131,24 @@ public class ManualFootstepAdjustmentListener extends AnimationTimer
       }
 
       double displacement = (shiftPressed.get() ? SLOW_SPEED : NORMAL_SPEED) * Conversions.millisecondsToSeconds(timestampDifference);
+      boolean adjustmentRequested = false;
 
       if (frame == UIStepAdjustmentFrame.WORLD)
       {
          if (mode == UIStepAdjustmentMode.ORIENTATION)
          {
-            double deltaYaw = YAW_MULTIPLIER * leftRightArrowValue.get() * displacement;
-            footstepPose.getOrientation().appendYawRotation(deltaYaw);
+            adjustmentRequested = shiftFootOrientation(displacement);
          }
          else
          {
             if (controlPressed.get())
             {
+               adjustmentRequested = upDownArrowValue.get() != 0.0;
                footstepPose.getPosition().addZ(displacement * upDownArrowValue.get());
             }
             else
             {
-               Transform cameraTransform = subScene.getCamera().getLocalToSceneTransform();
-               Vector2D cameraToFoot = new Vector2D(footstepPose.getX() - cameraTransform.getTx(), footstepPose.getY() - cameraTransform.getTy());
-               cameraToFoot.normalize();
-               Vector2D orthogonalMotion = new Vector2D(-cameraToFoot.getY(), cameraToFoot.getX());
-
-               Vector3D adjustment = new Vector3D();
-               adjustment.addX(cameraToFoot.getX() * upDownArrowValue.get());
-               adjustment.addY(cameraToFoot.getY() * upDownArrowValue.get());
-               adjustment.addX(orthogonalMotion.getX() * leftRightArrowValue.get());
-               adjustment.addY(orthogonalMotion.getY() * leftRightArrowValue.get());
-               adjustment.scale(displacement);
-
-               footstepPose.getPosition().add(adjustment);
+               adjustmentRequested = shiftFootTranslationWorld(displacement);
             }
          }
       }
@@ -167,50 +156,96 @@ public class ManualFootstepAdjustmentListener extends AnimationTimer
       {
          if (mode == UIStepAdjustmentMode.ORIENTATION)
          {
-            double deltaYaw = YAW_MULTIPLIER * leftRightArrowValue.get() * displacement;
-            footstepPose.getOrientation().appendYawRotation(deltaYaw);
+            shiftFootOrientation(displacement);
          }
          else
          {
             if (controlPressed.get())
             {
                footstepPose.appendTranslation(0.0, 0.0, displacement * upDownArrowValue.get());
+               adjustmentRequested = upDownArrowValue.get() != 0.0;
             }
             else
             {
-               Plane3D footPlane = new Plane3D();
-               footPlane.getPoint().set(footstepPose.getPosition());
-               footstepPose.getOrientation().transform(footPlane.getNormal());
-
-               Transform cameraTransform = subScene.getCamera().getLocalToSceneTransform();
-               Point3D cameraPosition = new Point3D(cameraTransform.getTx(), cameraTransform.getTy(), cameraTransform.getTz());
-               footPlane.orthogonalProjection(cameraPosition);
-
-               Vector3D cameraToFoot = new Vector3D(footstepPose.getPosition());
-               cameraToFoot.sub(cameraPosition);
-               cameraToFoot.normalize();
-
-               Vector3D orthogonalMotion = new Vector3D();
-               orthogonalMotion.cross(footPlane.getNormal(), cameraToFoot);
-
-               Vector3D adjustment = new Vector3D();
-
-               adjustment.addX(cameraToFoot.getX() * upDownArrowValue.get());
-               adjustment.addY(cameraToFoot.getY() * upDownArrowValue.get());
-               adjustment.addZ(cameraToFoot.getZ() * upDownArrowValue.get());
-
-               adjustment.addX(orthogonalMotion.getX() * leftRightArrowValue.get());
-               adjustment.addY(orthogonalMotion.getY() * leftRightArrowValue.get());
-               adjustment.addZ(orthogonalMotion.getZ() * leftRightArrowValue.get());
-
-               adjustment.scale(displacement);
-
-               footstepPose.getPosition().add(adjustment);
+               adjustmentRequested = shiftFootTranslationInLocal(displacement);
             }
          }
       }
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.ManuallyAdjustmentedStep, Pair.of(selectedStepIndex, footstepPose));
+      if (adjustmentRequested)
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.ManuallyAdjustmentedStep, Pair.of(selectedStepIndex, footstepPose));
+      }
+  }
+
+   private boolean shiftFootOrientation(double displacement)
+   {
+      double deltaYaw = YAW_MULTIPLIER * leftRightArrowValue.get() * displacement;
+      footstepPose.getOrientation().appendYawRotation(deltaYaw);
+      return leftRightArrowValue.get() != 0.0;
+   }
+
+   private boolean shiftFootTranslationWorld(double displacement)
+   {
+      boolean adjustmentRequested = upDownArrowValue.get() != 0.0 && leftRightArrowValue.get() != 0.0;
+      if (!adjustmentRequested)
+      {
+         return false;
+      }
+
+      Transform cameraTransform = subScene.getCamera().getLocalToSceneTransform();
+      Vector2D cameraToFoot = new Vector2D(footstepPose.getX() - cameraTransform.getTx(), footstepPose.getY() - cameraTransform.getTy());
+      cameraToFoot.normalize();
+      Vector2D orthogonalMotion = new Vector2D(-cameraToFoot.getY(), cameraToFoot.getX());
+
+      Vector3D adjustment = new Vector3D();
+      adjustment.addX(cameraToFoot.getX() * upDownArrowValue.get());
+      adjustment.addY(cameraToFoot.getY() * upDownArrowValue.get());
+      adjustment.addX(orthogonalMotion.getX() * leftRightArrowValue.get());
+      adjustment.addY(orthogonalMotion.getY() * leftRightArrowValue.get());
+      adjustment.scale(displacement);
+
+      footstepPose.getPosition().add(adjustment);
+      return true;
+   }
+
+   private boolean shiftFootTranslationInLocal(double displacement)
+   {
+      boolean adjustmentRequested = upDownArrowValue.get() != 0.0 && leftRightArrowValue.get() != 0.0;
+      if (!adjustmentRequested)
+      {
+         return false;
+      }
+
+      Plane3D footPlane = new Plane3D();
+      footPlane.getPoint().set(footstepPose.getPosition());
+      footstepPose.getOrientation().transform(footPlane.getNormal());
+
+      Transform cameraTransform = subScene.getCamera().getLocalToSceneTransform();
+      Point3D cameraPosition = new Point3D(cameraTransform.getTx(), cameraTransform.getTy(), cameraTransform.getTz());
+      footPlane.orthogonalProjection(cameraPosition);
+
+      Vector3D cameraToFoot = new Vector3D(footstepPose.getPosition());
+      cameraToFoot.sub(cameraPosition);
+      cameraToFoot.normalize();
+
+      Vector3D orthogonalMotion = new Vector3D();
+      orthogonalMotion.cross(footPlane.getNormal(), cameraToFoot);
+
+      Vector3D adjustment = new Vector3D();
+
+      adjustment.addX(cameraToFoot.getX() * upDownArrowValue.get());
+      adjustment.addY(cameraToFoot.getY() * upDownArrowValue.get());
+      adjustment.addZ(cameraToFoot.getZ() * upDownArrowValue.get());
+
+      adjustment.addX(orthogonalMotion.getX() * leftRightArrowValue.get());
+      adjustment.addY(orthogonalMotion.getY() * leftRightArrowValue.get());
+      adjustment.addZ(orthogonalMotion.getZ() * leftRightArrowValue.get());
+
+      adjustment.scale(displacement);
+      footstepPose.getPosition().add(adjustment);
+
+      return true;
    }
 
    private void handleModeAndFrameChange()
