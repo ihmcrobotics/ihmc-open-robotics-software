@@ -10,6 +10,7 @@ public class LinkedPointList
 {
    private LinkedPoint firstPoint;
    private LinkedPoint lastPoint;
+   private boolean isForwardList = true;
 
    private final Collection<LinkedPoint> points = new HashSet<>();
 
@@ -90,8 +91,14 @@ public class LinkedPointList
       return lastPoint;
    }
 
+   public boolean isForwardList()
+   {
+      return isForwardList;
+   }
+
    public void reverse()
    {
+      isForwardList = !isForwardList;
       points.forEach(LinkedPoint::reverse);
       LinkedPoint oldFirstPoint = firstPoint;
       firstPoint = lastPoint;

@@ -5,6 +5,8 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
+import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
 
 public class ClippingTools
@@ -18,6 +20,24 @@ public class ClippingTools
       }
 
       return linkedPointList;
+   }
+
+   public static ConcavePolygon2DReadOnly createConcavePolygon(LinkedPointList list)
+   {
+      ConcavePolygon2DBasics polygon = new ConcavePolygon2D();
+      LinkedPoint point = list.getFirstPoint();
+      do
+      {
+         polygon.addVertex(point.getPoint());
+         if (list.isForwardList())
+            point = point.getSuccessor();
+         else
+            point = point.getPredecessor();
+      }
+      while (!point.equals(list.getFirstPoint()));
+
+      polygon.update();
+      return polygon;
    }
 
    public static void insertIntersectionsIntoList(LinkedPointList list, ConcavePolygon2DReadOnly polygonToIntersect)
