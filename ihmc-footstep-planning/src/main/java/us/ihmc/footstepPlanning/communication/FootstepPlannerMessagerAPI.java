@@ -77,7 +77,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Pair<Integer, Pose3D>> ManuallyAdjustmentedStep = topic("ManualStepAdjustment"); // ManualFootstepAdjustmentListener >>> UIFootstepPlanManager
    public static final Topic<Pair<Integer, FootstepDataMessage>> FootstepToUpdateViz = topic("FootstepToUpdateViz"); // UIFootstepPlanManager >>> FootstepPathMeshViewer
    public static final Topic<UIStepAdjustmentFrame> FootstepAdjustmentFrame = topic("FootstepAdjustmentFrame"); // ManualFootstepAdjustmentListener >>> table
-   public static final Topic<UIStepAdjustmentMode> FootstepAdjustmentMode = topic("FootstepAdjustmentMode"); // ManualFootstepAdjustmentListener >>> table
 
    // Parameters
    public static final Topic<FootstepPostProcessingParametersReadOnly> PostProcessingParametersTopic = topic("FootstepPostProcessingParameters");

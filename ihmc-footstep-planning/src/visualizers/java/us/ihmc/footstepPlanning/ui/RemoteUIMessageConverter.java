@@ -195,13 +195,10 @@ public class RemoteUIMessageConverter
       ROS2Tools.createCallbackSubscription(ros2Node, CapturabilityBasedStatus.class,
                                            ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            s -> processCapturabilityStatus(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepStatusMessage.class,
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           FootstepStatusMessage.class,
                                            ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                                           s ->
-                                           {
-                                              messager.submitMessage(FootstepPlannerMessagerAPI.FootstepStatusMessage, s.takeNextData());
-                                              System.out.println("fdsjklsdf");
-                                           });
+                                           s -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepStatusMessage, s.takeNextData()));
 
       MessageTopicNameGenerator controllerPreviewOutputTopicNameGenerator = getTopicNameGenerator(robotName, ROS2Tools.WALKING_PREVIEW_TOOLBOX, ROS2TopicQualifier.OUTPUT);
       ROS2Tools.createCallbackSubscription(ros2Node, WalkingControllerPreviewOutputMessage.class, controllerPreviewOutputTopicNameGenerator, s -> messager.submitMessage(FootstepPlannerMessagerAPI.WalkingPreviewOutput, s.takeNextData()));

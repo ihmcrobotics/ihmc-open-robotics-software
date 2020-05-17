@@ -10,13 +10,11 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.communication.UIStepAdjustmentFrame;
-import us.ihmc.footstepPlanning.communication.UIStepAdjustmentMode;
 import us.ihmc.messager.Messager;
 
 import java.util.ArrayList;
@@ -38,16 +36,16 @@ public class ManualFootstepAdjustmentListener extends AnimationTimer
 
    private final Pose3D footstepPose = new Pose3D();
    private int selectedStepIndex = -1;
-   private UIStepAdjustmentMode mode = UIStepAdjustmentMode.TRANSLATION;
-   private UIStepAdjustmentFrame frame = UIStepAdjustmentFrame.WORLD;
+   private UIStepAdjustmentFrame frame = UIStepAdjustmentFrame.getDefault();
 
    private final AtomicBoolean controlPressed = new AtomicBoolean();
    private final AtomicBoolean shiftPressed = new AtomicBoolean();
    private final AtomicBoolean tPressed = new AtomicBoolean();
    private final AtomicBoolean rPressed = new AtomicBoolean();
 
-   private final AtomicDouble leftRightArrowValue = new AtomicDouble();
-   private final AtomicDouble upDownArrowValue = new AtomicDouble();
+   private final AtomicDouble topLeftRightNumPad = new AtomicDouble();
+   private final AtomicDouble middleLeftRightNumPad = new AtomicDouble();
+   private final AtomicDouble upDownNumPad = new AtomicDouble();
 
    private long previousTimestamp;
 
@@ -72,14 +70,18 @@ public class ManualFootstepAdjustmentListener extends AnimationTimer
                                      shiftPressed.set(true);
                                   if (keyCode == KeyCode.CONTROL)
                                      controlPressed.set(true);
+                                  if (keyCode == KeyCode.NUMPAD7)
+                                     topLeftRightNumPad.set(1.0);
+                                  if (keyCode == KeyCode.NUMPAD9)
+                                     topLeftRightNumPad.set(-1.0);
                                   if (keyCode == KeyCode.NUMPAD4)
-                                     leftRightArrowValue.set(1.0);
+                                     middleLeftRightNumPad.set(1.0);
                                   if (keyCode == KeyCode.NUMPAD6)
-                                     leftRightArrowValue.set(-1.0);
+                                     middleLeftRightNumPad.set(-1.0);
                                   if (keyCode == KeyCode.NUMPAD8)
-                                     upDownArrowValue.set(1.0);
+                                     upDownNumPad.set(1.0);
                                   if (keyCode == KeyCode.NUMPAD2)
-                                     upDownArrowValue.set(-1.0);
+                                     upDownNumPad.set(-1.0);
 
                                   if (keyCode == KeyCode.T)
                                      tPressed.set(true);
@@ -94,17 +96,19 @@ public class ManualFootstepAdjustmentListener extends AnimationTimer
                                       shiftPressed.set(false);
                                    if (keyCode == KeyCode.CONTROL)
                                       controlPressed.set(false);
+                                   if (keyCode == KeyCode.NUMPAD7 || keyCode == KeyCode.NUMPAD9)
+                                      topLeftRightNumPad.set(0.0);
                                    if (keyCode == KeyCode.NUMPAD4 || keyCode == KeyCode.NUMPAD6)
-                                      leftRightArrowValue.set(0.0);
+                                      middleLeftRightNumPad.set(0.0);
                                    if (keyCode == KeyCode.NUMPAD8 || keyCode == KeyCode.NUMPAD2)
-                                      upDownArrowValue.set(0.0);
+                                      upDownNumPad.set(0.0);
                                 });
    }
 
    @Override
    public void handle(long now)
    {
-      handleModeAndFrameChange();
+      handleFrameChange();
 
       long timestamp = System.currentTimeMillis();
       long timestampDifference = timestamp - previousTimestamp;
@@ -131,44 +135,31 @@ public class ManualFootstepAdjustmentListener extends AnimationTimer
       }
 
       double displacement = (shiftPressed.get() ? SLOW_SPEED : NORMAL_SPEED) * Conversions.millisecondsToSeconds(timestampDifference);
-      boolean adjustmentRequested = false;
+
+      boolean adjustmentRequested = shiftFootOrientation(displacement);
 
       if (frame == UIStepAdjustmentFrame.WORLD)
       {
-         if (mode == UIStepAdjustmentMode.ORIENTATION)
+         if (controlPressed.get())
          {
-            adjustmentRequested = shiftFootOrientation(displacement);
+            adjustmentRequested = upDownNumPad.get() != 0.0;
+            footstepPose.getPosition().addZ(displacement * upDownNumPad.get());
          }
          else
          {
-            if (controlPressed.get())
-            {
-               adjustmentRequested = upDownArrowValue.get() != 0.0;
-               footstepPose.getPosition().addZ(displacement * upDownArrowValue.get());
-            }
-            else
-            {
-               adjustmentRequested = shiftFootTranslationWorld(displacement);
-            }
+            adjustmentRequested |= shiftFootTranslationWorld(displacement);
          }
       }
       else
       {
-         if (mode == UIStepAdjustmentMode.ORIENTATION)
+         if (controlPressed.get())
          {
-            shiftFootOrientation(displacement);
+            footstepPose.appendTranslation(0.0, 0.0, displacement * upDownNumPad.get());
+            adjustmentRequested |= upDownNumPad.get() != 0.0;
          }
          else
          {
-            if (controlPressed.get())
-            {
-               footstepPose.appendTranslation(0.0, 0.0, displacement * upDownArrowValue.get());
-               adjustmentRequested = upDownArrowValue.get() != 0.0;
-            }
-            else
-            {
-               adjustmentRequested = shiftFootTranslationInLocal(displacement);
-            }
+            adjustmentRequested |= shiftFootTranslationInLocal(displacement);
          }
       }
 
@@ -180,14 +171,14 @@ public class ManualFootstepAdjustmentListener extends AnimationTimer
 
    private boolean shiftFootOrientation(double displacement)
    {
-      double deltaYaw = YAW_MULTIPLIER * leftRightArrowValue.get() * displacement;
+      double deltaYaw = YAW_MULTIPLIER * topLeftRightNumPad.get() * displacement;
       footstepPose.getOrientation().appendYawRotation(deltaYaw);
-      return leftRightArrowValue.get() != 0.0;
+      return topLeftRightNumPad.get() != 0.0;
    }
 
    private boolean shiftFootTranslationWorld(double displacement)
    {
-      boolean adjustmentRequested = upDownArrowValue.get() != 0.0 && leftRightArrowValue.get() != 0.0;
+      boolean adjustmentRequested = upDownNumPad.get() != 0.0 || middleLeftRightNumPad.get() != 0.0;
       if (!adjustmentRequested)
       {
          return false;
@@ -199,10 +190,10 @@ public class ManualFootstepAdjustmentListener extends AnimationTimer
       Vector2D orthogonalMotion = new Vector2D(-cameraToFoot.getY(), cameraToFoot.getX());
 
       Vector3D adjustment = new Vector3D();
-      adjustment.addX(cameraToFoot.getX() * upDownArrowValue.get());
-      adjustment.addY(cameraToFoot.getY() * upDownArrowValue.get());
-      adjustment.addX(orthogonalMotion.getX() * leftRightArrowValue.get());
-      adjustment.addY(orthogonalMotion.getY() * leftRightArrowValue.get());
+      adjustment.addX(cameraToFoot.getX() * upDownNumPad.get());
+      adjustment.addY(cameraToFoot.getY() * upDownNumPad.get());
+      adjustment.addX(orthogonalMotion.getX() * middleLeftRightNumPad.get());
+      adjustment.addY(orthogonalMotion.getY() * middleLeftRightNumPad.get());
       adjustment.scale(displacement);
 
       footstepPose.getPosition().add(adjustment);
@@ -211,7 +202,7 @@ public class ManualFootstepAdjustmentListener extends AnimationTimer
 
    private boolean shiftFootTranslationInLocal(double displacement)
    {
-      boolean adjustmentRequested = upDownArrowValue.get() != 0.0 && leftRightArrowValue.get() != 0.0;
+      boolean adjustmentRequested = upDownNumPad.get() != 0.0 || middleLeftRightNumPad.get() != 0.0;
       if (!adjustmentRequested)
       {
          return false;
@@ -234,13 +225,13 @@ public class ManualFootstepAdjustmentListener extends AnimationTimer
 
       Vector3D adjustment = new Vector3D();
 
-      adjustment.addX(cameraToFoot.getX() * upDownArrowValue.get());
-      adjustment.addY(cameraToFoot.getY() * upDownArrowValue.get());
-      adjustment.addZ(cameraToFoot.getZ() * upDownArrowValue.get());
+      adjustment.addX(cameraToFoot.getX() * upDownNumPad.get());
+      adjustment.addY(cameraToFoot.getY() * upDownNumPad.get());
+      adjustment.addZ(cameraToFoot.getZ() * upDownNumPad.get());
 
-      adjustment.addX(orthogonalMotion.getX() * leftRightArrowValue.get());
-      adjustment.addY(orthogonalMotion.getY() * leftRightArrowValue.get());
-      adjustment.addZ(orthogonalMotion.getZ() * leftRightArrowValue.get());
+      adjustment.addX(orthogonalMotion.getX() * middleLeftRightNumPad.get());
+      adjustment.addY(orthogonalMotion.getY() * middleLeftRightNumPad.get());
+      adjustment.addZ(orthogonalMotion.getZ() * middleLeftRightNumPad.get());
 
       adjustment.scale(displacement);
       footstepPose.getPosition().add(adjustment);
@@ -248,14 +239,8 @@ public class ManualFootstepAdjustmentListener extends AnimationTimer
       return true;
    }
 
-   private void handleModeAndFrameChange()
+   private void handleFrameChange()
    {
-      if (tPressed.getAndSet(false))
-      {
-         mode = mode.getOppositeMode();
-         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepAdjustmentMode, mode);
-      }
-
       if (rPressed.getAndSet(false))
       {
          frame = frame.getOppositeMode();
