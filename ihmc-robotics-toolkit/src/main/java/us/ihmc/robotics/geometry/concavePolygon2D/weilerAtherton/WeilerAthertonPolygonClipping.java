@@ -1,16 +1,9 @@
 package us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton;
 
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
 import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
-import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.LinkedPoint;
-import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.LinkedPointList;
-
-import java.util.List;
 
 public class WeilerAthertonPolygonClipping
 {
@@ -34,7 +27,7 @@ public class WeilerAthertonPolygonClipping
       LinkedPoint linkedPoint = activeList.getLinkedPointAtLocation(startVertex);
       clippedPolygon.clear();
       clippedPolygon.addVertex(startVertex);
-      while(true)
+      while (true)
       {
          linkedPoint = linkedPoint.getSuccessor();
          if (linkedPoint.getPoint().equals(startVertex))
@@ -59,6 +52,4 @@ public class WeilerAthertonPolygonClipping
    {
       return polygon.getVertexBufferView().stream().filter(point -> !clippingPolygon.isPointInside(point)).findFirst().orElse(null);
    }
-
-
 }
