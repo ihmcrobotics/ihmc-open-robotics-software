@@ -12,6 +12,7 @@ public class LevenbergMarquardtParameterOptimizer
    private int parameterDimension;
    private int outputDimension;
 
+   private static final boolean ENABLE_EARLY_TERMINAL = false;
    private FunctionOutputCalculator outputCalculator = null;
    private final DenseMatrix64F dampingCoefficient;
    private static final double DEFAULT_RESIDUAL_SCALER = 0.1;
@@ -31,7 +32,7 @@ public class LevenbergMarquardtParameterOptimizer
    private final DenseMatrix64F optimizeDirection;
 
    private boolean[] correspondence;
-   private double correspondenceThreshold = 0.3; // TODO:
+   private double correspondenceThreshold = 1.0;
 
    private double computationTime;
    private double initialQuality;
@@ -77,7 +78,7 @@ public class LevenbergMarquardtParameterOptimizer
    // TODO: set bound. especially, orientation.
    public void setBound()
    {
-      
+
    }
 
    public void setPerturbationVector(DenseMatrix64F purterbationVector)
@@ -125,12 +126,12 @@ public class LevenbergMarquardtParameterOptimizer
          }
       }
    }
-   
+
    private void updateDamping()
    {
-      if(quality < initialQuality)
+      if (quality < initialQuality)
          residualScaler = quality / initialQuality * DEFAULT_RESIDUAL_SCALER;
-      
+
       for (int i = 0; i < parameterDimension; i++)
       {
          for (int j = 0; j < parameterDimension; j++)
@@ -171,7 +172,8 @@ public class LevenbergMarquardtParameterOptimizer
       {
          System.out.println("Initial Quality = " + quality);
       }
-      // start.
+
+      // start.      
       for (int iter = 0; iter < terminalIteration; iter++)
       {
          iteration = iter;
@@ -228,27 +230,34 @@ public class LevenbergMarquardtParameterOptimizer
                correspondence[i] = false;
             }
          }
+
          quality = computeQuality(currentOutput, correspondence);
          double qualityDiff = previousQuality - quality;
          double regressionPercentage = qualityDiff / previousQuality * 100;
          if (DEBUG)
          {
-            System.out.println("# iter [" + iter + "] quality = " + quality + ", regression = " + regressionPercentage + " [%], residualScaler = " + residualScaler);
+            System.out.print("# iter [" + iter + "] quality = " + quality);
+            System.out.print(", regression = " + regressionPercentage + " [%]");
+            System.out.println(", residualScaler = " + residualScaler);
          }
-         
-         if(iter > 3 && qualityDiff < 0)
+
+         if (ENABLE_EARLY_TERMINAL)
          {
-            // revert updating parameter.
-            optimized = false;
-            quality = previousQuality;
-            CommonOps.subtract(currentInput, optimizeDirection, currentInput);
-            break;
-         }         
-         if(Math.abs(regressionPercentage) < terminalConvergencePercentage)
-         {
-            // terminal.
-            optimized = true;
-            break;
+            if (iter > 5 && qualityDiff < 0)
+            {
+               optimized = false;
+
+               // revert updating parameter.
+               quality = previousQuality;
+               CommonOps.add(currentInput, optimizeDirection, currentInput);
+               break;
+            }
+            if (Math.abs(regressionPercentage) < terminalConvergencePercentage && regressionPercentage > 0)
+            {
+               // terminal.
+               optimized = true;
+               break;
+            }
          }
       }
 
