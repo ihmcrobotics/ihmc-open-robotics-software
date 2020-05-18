@@ -47,8 +47,8 @@
                         </GridPane.margin>
                     </Label>
 
-                    <TableView fx:id="debugParentStepTable" maxHeight="24" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
-                    <TableView fx:id="debugChildStepTable" prefHeight="300" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
+                    <TableView fx:id="stanceStepTable" maxHeight="24" GridPane.columnIndex="1" GridPane.rowIndex="0"/>
+                    <TableView fx:id="candidateStepTable" prefHeight="300" GridPane.columnIndex="1" GridPane.rowIndex="1"/>
 
                     <columnConstraints>
                         <ColumnConstraints hgrow="SOMETIMES" />
