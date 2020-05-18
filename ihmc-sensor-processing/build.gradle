@@ -29,7 +29,7 @@ mainDependencies {
    api("org.boofcv:geo:0.19")
 
    api("us.ihmc:euclid-frame:0.14.1")
-   api("us.ihmc:ihmc-yovariables:0.6.0")
+   api("us.ihmc:ihmc-yovariables:0.7.0")
    api("us.ihmc:ihmc-graphics-description:0.16.0")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-java-toolkit:source")
