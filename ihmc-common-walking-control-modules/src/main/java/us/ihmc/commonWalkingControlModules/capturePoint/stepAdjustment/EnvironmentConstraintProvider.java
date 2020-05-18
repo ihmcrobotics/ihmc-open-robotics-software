@@ -186,7 +186,7 @@ public class EnvironmentConstraintProvider
 
       orientationTransform.getRotation().set(orientation);
 
-      footstepPolygon.applyTransform(orientationTransform);
+      footstepPolygon.applyTransform(orientationTransform, false);
    }
 
    private PlanarRegion findPlanarRegionUnderFoothold(FramePose3DReadOnly foothold)
