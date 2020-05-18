@@ -1,5 +1,7 @@
 package us.ihmc.humanoidBehaviors.ui.mapping.test;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -22,12 +24,18 @@ import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 
 public class LevenbergMarquardtICPTest
 {
+   private boolean visualize = false;
    private XYPlaneDrawer drawer;
    private JFrame frame;
 
    private List<Point2D> fullModel = new ArrayList<>();
    private List<Point2D> data1 = new ArrayList<>();
    private List<Point2D> data2 = new ArrayList<>();
+
+   double innerCircleLong = 2.0;
+   double innerCircleShort = 1.0;
+   double outterCircleLong = 4.0;
+   double outterCircleShort = 3.0;
 
    private void setupPointCloud()
    {
@@ -37,10 +45,6 @@ public class LevenbergMarquardtICPTest
       frame.setPreferredSize(drawer.getDimension());
       frame.setLocation(200, 100);
 
-      double innerCircleLong = 2.0;
-      double innerCircleShort = 1.0;
-      double outterCircleLong = 4.0;
-      double outterCircleShort = 3.0;
       fullModel.addAll(generatePointsOnEllipsoid(50, Math.toRadians(90.0), Math.toRadians(359.9), innerCircleLong, innerCircleShort));
       fullModel.addAll(generatePointsOnEllipsoid(70, Math.toRadians(90.0), Math.toRadians(359.9), outterCircleLong, outterCircleShort));
       fullModel.addAll(generatePointsOnLine(10, innerCircleShort, outterCircleShort, 0.0, true));
@@ -53,6 +57,7 @@ public class LevenbergMarquardtICPTest
       data2.addAll(generatePointsOnEllipsoid(50, Math.toRadians(130.0), Math.toRadians(359.9), innerCircleLong, innerCircleShort));
       data2.addAll(generatePointsOnEllipsoid(60, Math.toRadians(120.0), Math.toRadians(359.9), outterCircleLong, outterCircleShort));
       data2.addAll(generatePointsOnLine(10, innerCircleLong, outterCircleLong, 0.0, false));
+      assertTrue(true);
    }
 
    @Test
@@ -67,11 +72,13 @@ public class LevenbergMarquardtICPTest
       drawer.addPointCloud(data1, Color.red, false);
       drawer.addPointCloud(data2, Color.green, false);
 
-      frame.add(drawer);
-      frame.pack();
-      frame.setVisible(true);
-
-      ThreadTools.sleepForever();
+      if (visualize)
+      {
+         frame.add(drawer);
+         frame.pack();
+         frame.setVisible(true);
+         ThreadTools.sleepForever();
+      }
    }
 
    @Test
@@ -101,11 +108,13 @@ public class LevenbergMarquardtICPTest
          }
       }
 
-      frame.add(drawer);
-      frame.pack();
-      frame.setVisible(true);
-
-      ThreadTools.sleepForever();
+      if (visualize)
+      {
+         frame.add(drawer);
+         frame.pack();
+         frame.setVisible(true);
+         ThreadTools.sleepForever();
+      }
    }
 
    @Test
@@ -154,7 +163,6 @@ public class LevenbergMarquardtICPTest
             else
                perturbedParameter.set(j, 0, currentParameter.get(j, 0));
          }
-         perturbedParameter.print();
          purterbedData.clear();
          for (int k = 0; k < data1.size(); k++)
             purterbedData.add(new Point2D(data1.get(k)));
@@ -172,23 +180,25 @@ public class LevenbergMarquardtICPTest
             }
          }
       }
-      errorJacobian.print();
       DenseMatrix64F jacobianTranspose = new DenseMatrix64F(data1.size(), parameterDimension);
       jacobianTranspose.set(errorJacobian);
       CommonOps.transpose(jacobianTranspose);
 
       DenseMatrix64F squaredJacobian = new DenseMatrix64F(parameterDimension, parameterDimension);
       CommonOps.mult(jacobianTranspose, errorJacobian, squaredJacobian);
-      squaredJacobian.print();
       CommonOps.invert(squaredJacobian);
-      squaredJacobian.print();
 
       DenseMatrix64F invMultJacobianTranspose = new DenseMatrix64F(parameterDimension, data1.size());
       CommonOps.mult(squaredJacobian, jacobianTranspose, invMultJacobianTranspose);
 
       DenseMatrix64F direction = new DenseMatrix64F(parameterDimension, 1);
       CommonOps.mult(invMultJacobianTranspose, originalError, direction);
+      System.out.println("direction of the optimization is,");
       direction.print();
+
+      assertTrue(direction.get(0) > 0.0, "direction of the translation x     is correct.");
+      assertTrue(direction.get(1) > 0.0, "direction of the translation y     is correct.");
+      assertTrue(direction.get(2) > 0.0, "direction of the translation theta is correct.");
 
       purterbedData.clear();
       for (int k = 0; k < data1.size(); k++)
@@ -199,11 +209,13 @@ public class LevenbergMarquardtICPTest
          drawer.addPoint(purterbedData.get(i), Color.green, true);
       }
 
-      frame.add(drawer);
-      frame.pack();
-      frame.setVisible(true);
-
-      ThreadTools.sleepForever();
+      if (visualize)
+      {
+         frame.add(drawer);
+         frame.pack();
+         frame.setVisible(true);
+         ThreadTools.sleepForever();
+      }
    }
 
    @Test
@@ -211,7 +223,10 @@ public class LevenbergMarquardtICPTest
    {
       setupPointCloud();
 
-      transformPointCloud(data1, 0.3, 0.5, Math.toRadians(10.0));
+      double driftX = -0.3;
+      double driftY = 0.5;
+      double driftTheta = Math.toRadians(-30.0);
+      transformPointCloud(fullModel, driftX, driftY, driftTheta);
 
       drawer.addPointCloud(fullModel, Color.black, false);
       drawer.addPointCloud(data1, Color.red, false);
@@ -242,8 +257,8 @@ public class LevenbergMarquardtICPTest
       purterbationVector.set(2, 0.00001);
       optimizer.setPerturbationVector(purterbationVector);
       optimizer.setOutputCalculator(functionOutputCalculator);
-      boolean isSolved = optimizer.solve(30, 1.0);
-      LogTools.info("Computation is done " + optimizer.getComputationTime());
+      boolean isSolved = optimizer.solve(30, 0.1);
+      LogTools.info("Computation is done " + optimizer.getComputationTime() + " sec.");
       System.out.println("is solved? " + isSolved + " " + optimizer.getQuality());
       optimizer.getOptimalParameter().print();
 
@@ -253,13 +268,23 @@ public class LevenbergMarquardtICPTest
          transformedData.add(new Point2D(data1.get(i)));
       transformPointCloud(transformedData, optimalParameter.get(0, 0), optimalParameter.get(1, 0), optimalParameter.get(2, 0));
 
+      Point2D aPointOfDoughnut = new Point2D(0.0, innerCircleLong);
+      Point2D driftedPoint = new Point2D(aPointOfDoughnut);
+      Point2D correctedPoint = new Point2D(aPointOfDoughnut);
+
+      transformPoint(driftedPoint, driftX, driftY, driftTheta);
+      transformPoint(correctedPoint, optimalParameter.get(0, 0), optimalParameter.get(1, 0), optimalParameter.get(2, 0));
+      assertTrue(correctedPoint.distance(driftedPoint) < 0.05, "a point on the drifted doughnut corrected with icp.");
+
       drawer.addPointCloud(transformedData, Color.green, true);
 
-      frame.add(drawer);
-      frame.pack();
-      frame.setVisible(true);
-
-      ThreadTools.sleepForever();
+      if (visualize)
+      {
+         frame.add(drawer);
+         frame.pack();
+         frame.setVisible(true);
+         ThreadTools.sleepForever();
+      }
    }
 
    private double computeClosestDistance(Point2D point, List<Point2D> pointCloud)
@@ -283,17 +308,22 @@ public class LevenbergMarquardtICPTest
 
    private void transformPointCloud(List<Point2D> pointCloud, double translationX, double translationY, double theta)
    {
-      double sin = Math.sin(theta);
-      double cos = Math.cos(theta);
       for (int i = 0; i < pointCloud.size(); i++)
       {
          Point2D point = pointCloud.get(i);
-
-         double transformedX = cos * point.getX() - sin * point.getY() + translationX;
-         double transformedY = sin * point.getX() + cos * point.getY() + translationY;
-
-         point.set(transformedX, transformedY);
+         transformPoint(point, translationX, translationY, theta);
       }
+   }
+
+   private void transformPoint(Point2D point, double translationX, double translationY, double theta)
+   {
+      double sin = Math.sin(theta);
+      double cos = Math.cos(theta);
+
+      double transformedX = cos * point.getX() - sin * point.getY() + translationX;
+      double transformedY = sin * point.getX() + cos * point.getY() + translationY;
+
+      point.set(transformedX, transformedY);
    }
 
    private List<Point2D> generatePointsOnLine(int numberOfPoints, double start, double end, double fix, boolean isXFixed)
@@ -430,48 +460,5 @@ public class LevenbergMarquardtICPTest
       {
          return new Dimension(sizeU, sizeV);
       }
-   }
-
-   @Test
-   public void testMatrixOperations()
-   {
-      DenseMatrix64F testMatrix = new DenseMatrix64F(3, 3);
-      testMatrix.set(0, 0, 1);
-      testMatrix.set(1, 0, 2);
-      testMatrix.set(2, 0, 3);
-
-      testMatrix.set(0, 1, 4);
-      testMatrix.set(1, 1, 5);
-      testMatrix.set(2, 1, 6);
-
-      testMatrix.set(0, 2, 7);
-      testMatrix.set(1, 2, 8);
-      testMatrix.set(2, 2, 9);
-
-      System.out.println("testMatrix");
-      testMatrix.print();
-
-      DenseMatrix64F matrix2 = new DenseMatrix64F(3, 3);
-      matrix2.set(0, 0, 2);
-      matrix2.set(1, 0, 0);
-      matrix2.set(2, 0, 0);
-
-      matrix2.set(0, 1, 0);
-      matrix2.set(1, 1, 2);
-      matrix2.set(2, 1, 0);
-
-      matrix2.set(0, 2, 0);
-      matrix2.set(1, 2, 0);
-      matrix2.set(2, 2, 2);
-
-      System.out.println("matrix2");
-      matrix2.print();
-
-      DenseMatrix64F matrix3 = new DenseMatrix64F(3, 3);
-
-      CommonOps.mult(testMatrix, matrix2, matrix3);
-
-      System.out.println("matrix3");
-      matrix3.print();
    }
 }
