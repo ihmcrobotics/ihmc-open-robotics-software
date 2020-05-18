@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry.concaveHull.weilerAtherton;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.ClippingTools;
@@ -122,7 +123,70 @@ public class ClippingToolsTest
          pointOnB = pointOnB.getSuccessor();
       }
       assertTrue(pointOnB == pointListB.getFirstPoint());
+
+      LinkedPointList pointListAOther = ClippingTools.createLinkedPointList(polygonA);
+      LinkedPointList pointListBOther = ClippingTools.createLinkedPointList(polygonB);
+      ClippingTools.insertIntersections(pointListAOther, pointListBOther);
+
+      pointOnA = pointListAOther.getFirstPoint();
+      for (int i = 0; i < polygonAWithIntersectionsExpected.getNumberOfVertices(); i++)
+      {
+         EuclidCoreTestTools.assertPoint2DGeometricallyEquals("Failed at vertex " + i, polygonAWithIntersectionsExpected.getVertex(i), pointOnA.getPoint(), 1e-6);
+         pointOnA = pointOnA.getSuccessor();
+      }
+      assertTrue(pointOnA == pointListAOther.getFirstPoint());
+
+      pointOnB = pointListBOther.getFirstPoint();
+      for (int i = 0; i < polygonAWithIntersectionsExpected.getNumberOfVertices(); i++)
+      {
+         EuclidCoreTestTools.assertPoint2DGeometricallyEquals("Failed at vertex " + i, polygonBWithIntersectionsExpected.getVertex(i), pointOnB.getPoint(), 1e-6);
+         pointOnB = pointOnB.getSuccessor();
+      }
+      assertTrue(pointOnB == pointListBOther.getFirstPoint());
    }
 
+   @Test
+   public void testTrickyInsertIntersections()
+   {
+      ConcavePolygon2D polygonToClip = new ConcavePolygon2D();
+      polygonToClip.addVertex(-1.0, 1.0);
+      polygonToClip.addVertex(1.0, 1.0);
+      polygonToClip.addVertex(1.0, -1.0);
+      polygonToClip.addVertex(-1.0, -1.0);
+      polygonToClip.update();
+
+      ConcavePolygon2D clippingPolygon = new ConcavePolygon2D();
+      clippingPolygon.addVertex(0.5, 1.5);
+      clippingPolygon.addVertex(1.5, 1.5);
+      clippingPolygon.addVertex(0.5, 0.5);
+      clippingPolygon.update();
+
+      LinkedPointList listA = ClippingTools.createLinkedPointList(polygonToClip);
+      LinkedPointList listB = ClippingTools.createLinkedPointList(clippingPolygon);
+
+      ClippingTools.insertIntersections(listA, listB);
+
+      LinkedPoint pointA = listA.getFirstPoint();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, 1.0), pointA.getPoint(), 1e-7);
+      pointA = pointA.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.5, 1.0), pointA.getPoint(), 1e-7);
+      pointA = pointA.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.0, 1.0), pointA.getPoint(), 1e-7);
+      pointA = pointA.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.0, -1.0), pointA.getPoint(), 1e-7);
+      pointA = pointA.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, -1.0), pointA.getPoint(), 1e-7);
+
+      LinkedPoint pointB = listB.getFirstPoint();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.5, 1.5), pointB.getPoint(), 1e-7);
+      pointB = pointB.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.5, 1.5), pointB.getPoint(), 1e-7);
+      pointB = pointB.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.0, 1.0), pointB.getPoint(), 1e-7);
+      pointB = pointB.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.5, 0.5), pointB.getPoint(), 1e-7);
+      pointB = pointB.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.5, 1.0), pointB.getPoint(), 1e-7);
+   }
 
 }

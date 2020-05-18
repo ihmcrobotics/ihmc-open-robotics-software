@@ -16,8 +16,9 @@ public class WeilerAthertonPolygonClipping
       LinkedPointList polygonToClipList = ClippingTools.createLinkedPointList(polygonToClip);
 
       // FIXME this has a lot of duplicate calculations in it
-      ClippingTools.insertIntersectionsIntoList(polygonToClipList, clippingPolygon);
-      ClippingTools.insertIntersectionsIntoList(clippingPolygonList, polygonToClip);
+//      ClippingTools.insertIntersectionsIntoList(polygonToClipList, clippingPolygon);
+//      ClippingTools.insertIntersectionsIntoList(clippingPolygonList, polygonToClip);
+      ClippingTools.insertIntersections(clippingPolygonList, polygonToClipList);
 
       // gotta make this guy counter clockwise
       clippingPolygonList.reverse();

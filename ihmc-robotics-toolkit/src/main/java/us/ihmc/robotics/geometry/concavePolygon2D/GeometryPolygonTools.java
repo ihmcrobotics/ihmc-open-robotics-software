@@ -12,7 +12,6 @@ import java.util.List;
 
 public class GeometryPolygonTools
 {
-
    /**
     * Checks to see if the inner polygon is entirely inside the outer polygon.
     */
@@ -27,84 +26,42 @@ public class GeometryPolygonTools
       return true;
    }
 
-   // FIXME this doesn't work if there aren't vertices overlapping.
    public static boolean doPolygonsIntersect(ConcavePolygon2DReadOnly polygonA, ConcavePolygon2DReadOnly polygonB)
    {
+      if (!polygonA.getBoundingBox().intersectsInclusive(polygonB.getBoundingBox()))
+         return false;
+
       return doPolygonsIntersectBruteForce(polygonA, polygonB);
    }
 
    public static boolean doPolygonsIntersectBruteForce(ConcavePolygon2DReadOnly polygonA, ConcavePolygon2DReadOnly polygonB)
    {
-      boolean hasPointInside = false;
-      boolean hasPointOutside = false;
-
-      for (int vertexIdx = 0; vertexIdx < polygonB.getNumberOfVertices(); vertexIdx++)
+      for (int i = 0; i < polygonA.getNumberOfVertices(); i++)
       {
-         if (polygonA.isPointInside(polygonB.getVertex(vertexIdx)))
-            hasPointInside = true;
-         else
-            hasPointOutside = true;
+         Point2DReadOnly startVertex = polygonA.getVertex(i);
+         Point2DReadOnly endVertex = polygonA.getVertex(EuclidGeometryPolygonTools.next(i, polygonA.getNumberOfVertices()));
 
-         if (hasPointInside == hasPointOutside)
-            return true;
-      }
-
-      hasPointInside = false;
-      hasPointOutside = false;
-
-      for (int vertexIdx = 0; vertexIdx < polygonA.getNumberOfVertices(); vertexIdx++)
-      {
-         if (polygonB.isPointInside(polygonA.getVertex(vertexIdx)))
-            hasPointInside = true;
-         else
-            hasPointOutside = true;
-
-         if (hasPointInside == hasPointOutside)
+         if (doesLineSegment2DIntersectPolygon(startVertex, endVertex, polygonB))
             return true;
       }
 
       return false;
    }
 
-   public static int findIndexOfFirstVertexInsidePolygon(ConcavePolygon2DReadOnly containingPolygon, ConcavePolygon2DReadOnly polygonToCheck)
+   public static boolean doesLineSegment2DIntersectPolygon(Point2DReadOnly segmentStart, Point2DReadOnly segmentEnd, ConcavePolygon2DReadOnly polygon)
    {
-      return findIndexOfFirstVertexInsidePolygon(containingPolygon, polygonToCheck, 0);
+      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly startVertex = polygon.getVertex(i);
+         Point2DReadOnly endVertex = polygon.getVertex(EuclidGeometryPolygonTools.next(i, polygon.getNumberOfVertices()));
+
+         if (EuclidGeometryTools.doLineSegment2DsIntersect(segmentStart, segmentStart, startVertex, endVertex))
+            return true;
+      }
+
+      return false;
    }
 
-   public static int findIndexOfFirstVertexInsidePolygon(ConcavePolygon2DReadOnly containingPolygon, Vertex2DSupplier verticesToCheck, int vertexStart)
-   {
-      if (isPolygonInsideOtherPolygon(verticesToCheck, containingPolygon))
-         return -1;
-
-      while (containingPolygon.isPointInside(verticesToCheck.getVertex(vertexStart)))
-         vertexStart = EuclidGeometryPolygonTools.previous(vertexStart, verticesToCheck.getNumberOfVertices());
-
-      int vertexIdx = vertexStart + 1;
-      while (!containingPolygon.isPointInside(verticesToCheck.getVertex(vertexIdx)))
-         vertexIdx = EuclidGeometryPolygonTools.next(vertexIdx, verticesToCheck.getNumberOfVertices());
-
-      return vertexIdx;
-   }
-
-   public static int findIndexOfFirstVertexOutsidePolygon(ConcavePolygon2DReadOnly containingPolygon, ConcavePolygon2DReadOnly polygonToCheck)
-   {
-      return findIndexOfFirstVertexOutsidePolygon(containingPolygon, polygonToCheck, 0);
-   }
-
-   public static int findIndexOfFirstVertexOutsidePolygon(ConcavePolygon2DReadOnly containingPolygon, Vertex2DSupplier verticesToCheck, int vertexStart)
-   {
-      if (isPolygonInsideOtherPolygon(verticesToCheck, containingPolygon))
-         return -1;
-
-      while (!containingPolygon.isPointInside(verticesToCheck.getVertex(vertexStart)))
-         vertexStart = EuclidGeometryPolygonTools.previous(vertexStart, verticesToCheck.getNumberOfVertices());
-
-      int vertexIdx = vertexStart + 1;
-      while (containingPolygon.isPointInside(verticesToCheck.getVertex(vertexIdx)))
-         vertexIdx = EuclidGeometryPolygonTools.next(vertexIdx, verticesToCheck.getNumberOfVertices());
-
-      return vertexIdx;
-   }
 
    public static boolean isClockwiseOrdered(List<? extends Point2DReadOnly> concaveHullVertices, int numberOfVertices)
    {
