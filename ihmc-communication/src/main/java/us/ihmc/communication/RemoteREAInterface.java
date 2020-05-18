@@ -56,6 +56,7 @@ public class RemoteREAInterface
       return stopwatch.lapElapsed();
    }
 
+   // TODO Remove this from this class? It might not belong here
    public boolean getPlanarRegionsListExpired(double expirationDuration)
    {
       return Double.isNaN(timeSinceLastUpdate()) || timeSinceLastUpdate() > expirationDuration;
