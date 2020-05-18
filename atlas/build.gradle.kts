@@ -30,7 +30,7 @@ mainDependencies {
    api("com.github.wendykierp:JTransforms:3.1")
    api("org.boofcv:recognition:0.24.1")
 
-   api("us.ihmc:euclid:0.14.1")
+   api("us.ihmc:euclid:0.14.2")
    api("us.ihmc:ihmc-yovariables:0.7.0")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.16.0")
    api("us.ihmc:simulation-construction-set:0.16.0")
