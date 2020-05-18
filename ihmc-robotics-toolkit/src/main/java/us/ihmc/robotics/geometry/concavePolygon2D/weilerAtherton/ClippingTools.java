@@ -44,15 +44,15 @@ public class ClippingTools
    {
       LinkedPoint startPoint = list.getFirstPoint();
 
-      boolean shouldContinue = true;
-      while (shouldContinue)
+      while (true)
       {
          LinkedPoint nextPoint = startPoint.getSuccessor();
-         Point2DReadOnly intersection = findFirstIntersections(startPoint.getPoint(), nextPoint.getPoint(), polygonToIntersect);
+         Point2DReadOnly intersection = findFirstIntersection(startPoint.getPoint(), nextPoint.getPoint(), polygonToIntersect);
          if (intersection == null)
          {
             startPoint = startPoint.getSuccessor();
-            shouldContinue = startPoint != list.getFirstPoint();
+            if (startPoint == list.getFirstPoint())
+               break;
          }
          else
          {
@@ -61,7 +61,7 @@ public class ClippingTools
       }
    }
 
-   private static Point2DReadOnly findFirstIntersections(Point2DReadOnly edgeStart, Point2DReadOnly edgeEnd, ConcavePolygon2DReadOnly polygonToIntersect)
+   private static Point2DReadOnly findFirstIntersection(Point2DReadOnly edgeStart, Point2DReadOnly edgeEnd, ConcavePolygon2DReadOnly polygonToIntersect)
    {
       Point2D intersection = new Point2D();
       for (int i = 0; i < polygonToIntersect.getNumberOfVertices(); i++)
@@ -79,6 +79,48 @@ public class ClippingTools
       return null;
    }
 
+   public static void insertIntersections(LinkedPointList listA, LinkedPointList listB)
+   {
+      LinkedPoint startSegmentA = listA.getFirstPoint();
+      Point2DBasics intersection = new Point2D();
+
+      while (true)
+      {
+         LinkedPoint endSegmentA = startSegmentA.getSuccessor();
+
+         if (insertFirstEdgeIntersection(startSegmentA.getPoint(), endSegmentA.getPoint(), listB, intersection))
+         {
+            listA.insertPoint(new LinkedPoint(intersection, true), startSegmentA);
+         }
+         else
+         {
+            startSegmentA = startSegmentA.getSuccessor();
+            if (startSegmentA == listA.getFirstPoint())
+               break;
+         }
+      }
+   }
+
+   public static boolean insertFirstEdgeIntersection(Point2DReadOnly edgeStart, Point2DReadOnly edgeEnd, LinkedPointList list, Point2DBasics intersectionToPack)
+   {
+      LinkedPoint startSegment = list.getFirstPoint();
+      while (true)
+      {
+         LinkedPoint endSegment = startSegment.getSuccessor();
+         if (intersectionBetweenLineSegmentsExclusive(edgeStart, edgeEnd, startSegment.getPoint(), endSegment.getPoint(), intersectionToPack, 1e-7))
+         {
+            list.insertPoint(new LinkedPoint(intersectionToPack, true), startSegment);
+            return true;
+         }
+         else
+         {
+            startSegment = startSegment.getSuccessor();
+            if (startSegment == list.getFirstPoint())
+               return false;
+         }
+      }
+   }
+
    // FIXME there's probably a much faster way to do this.
    private static boolean intersectionBetweenLineSegmentsExclusive(Point2DReadOnly edge1Start,
                                                                    Point2DReadOnly edge1End,
@@ -89,10 +131,10 @@ public class ClippingTools
    {
       if (EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(edge1Start, edge1End, edge2Start, edge2End, intersectionToPack))
       {
-         if (intersectionToPack.distanceSquared(edge1Start) < endPointEpsilon)
-            return false;
-         if (intersectionToPack.distanceSquared(edge1End) < endPointEpsilon)
-            return false;
+//         if (intersectionToPack.distanceSquared(edge1Start) < endPointEpsilon)
+//            return false;
+//         if (intersectionToPack.distanceSquared(edge1End) < endPointEpsilon)
+//            return false;
          if (intersectionToPack.distanceSquared(edge2Start) < endPointEpsilon)
             return false;
          if (intersectionToPack.distanceSquared(edge2End) < endPointEpsilon)
