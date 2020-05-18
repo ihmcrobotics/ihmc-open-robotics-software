@@ -96,7 +96,7 @@ public class LinkedPointList
       return isForwardList;
    }
 
-   public void reverse()
+   public void reverseOrder()
    {
       isForwardList = !isForwardList;
       points.forEach(LinkedPoint::reverse);

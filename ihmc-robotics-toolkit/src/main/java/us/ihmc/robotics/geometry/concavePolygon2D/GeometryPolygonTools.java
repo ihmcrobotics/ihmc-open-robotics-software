@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.concavePolygon2D;
 
+import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -7,6 +8,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import java.util.List;
 
@@ -61,7 +63,6 @@ public class GeometryPolygonTools
 
       return false;
    }
-
 
    public static boolean isClockwiseOrdered(List<? extends Point2DReadOnly> concaveHullVertices, int numberOfVertices)
    {
@@ -125,6 +126,16 @@ public class GeometryPolygonTools
                                                         Point2DBasics intersectionToPack)
    {
       checkNumberOfVertices(polygon, numberOfVertices);
+
+      // check if point is on perimeter
+      for (int i = 0; i < numberOfVertices; i++)
+      {
+         Point2DReadOnly vertex = polygon.get(i);
+         Point2DReadOnly nextVertex = polygon.get((i + 1) % numberOfVertices);
+
+         if (EuclidCoreMissingTools.isPoint2DOnLineSegment2D(pointX, pointY, vertex, nextVertex))
+            return true;
+      }
 
       if (numberOfVertices < 3)
       {

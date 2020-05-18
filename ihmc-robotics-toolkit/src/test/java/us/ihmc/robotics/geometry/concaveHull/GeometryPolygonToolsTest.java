@@ -123,4 +123,17 @@ public class GeometryPolygonToolsTest
       assertTrue(polygonToClip.epsilonEquals(polygonToClipUnmodified, 1e-8));
       assertTrue(clippingPolygon.epsilonEquals(clippingPolygonUnmodified, 1e-8));
    }
+
+   @Test
+   public void testIsPoint2DInsideSimplePolygon2D()
+   {
+      ConcavePolygon2D polygon = new ConcavePolygon2D();
+      polygon.addVertex(1.5, 1.5);
+      polygon.addVertex(0.0, 0.0);
+      polygon.addVertex(-1.5, 1.5);
+      polygon.update();
+
+      assertTrue(GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(1.0, 1.0, polygon.getVertexBufferView(), 3));
+      assertTrue(GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(-1.0, 1.0, polygon.getVertexBufferView(), 3));
+   }
 }

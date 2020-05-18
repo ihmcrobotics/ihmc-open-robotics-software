@@ -15,17 +15,16 @@ public class WeilerAthertonPolygonClipping
       LinkedPointList clippingPolygonList = ClippingTools.createLinkedPointList(clippingPolygon);
       LinkedPointList polygonToClipList = ClippingTools.createLinkedPointList(polygonToClip);
 
-      // FIXME this has a lot of duplicate calculations in it
-//      ClippingTools.insertIntersectionsIntoList(polygonToClipList, clippingPolygon);
-//      ClippingTools.insertIntersectionsIntoList(clippingPolygonList, polygonToClip);
-      ClippingTools.insertIntersections(clippingPolygonList, polygonToClipList);
+      ClippingTools.insertIntersectionsIntoList(polygonToClipList, clippingPolygon);
+      ClippingTools.insertIntersectionsIntoList(clippingPolygonList, polygonToClip);
 
       // gotta make this guy counter clockwise
-      clippingPolygonList.reverse();
+      clippingPolygonList.reverseOrder();
 
       Point2DReadOnly startVertex = findVertexOutsideOfClip(clippingPolygon, polygonToClip);
       LinkedPointList activeList = polygonToClipList;
       LinkedPoint linkedPoint = activeList.getLinkedPointAtLocation(startVertex);
+
       clippedPolygon.clear();
       clippedPolygon.addVertex(startVertex);
       while (true)

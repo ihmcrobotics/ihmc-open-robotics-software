@@ -123,26 +123,6 @@ public class ClippingToolsTest
          pointOnB = pointOnB.getSuccessor();
       }
       assertTrue(pointOnB == pointListB.getFirstPoint());
-
-      LinkedPointList pointListAOther = ClippingTools.createLinkedPointList(polygonA);
-      LinkedPointList pointListBOther = ClippingTools.createLinkedPointList(polygonB);
-      ClippingTools.insertIntersections(pointListAOther, pointListBOther);
-
-      pointOnA = pointListAOther.getFirstPoint();
-      for (int i = 0; i < polygonAWithIntersectionsExpected.getNumberOfVertices(); i++)
-      {
-         EuclidCoreTestTools.assertPoint2DGeometricallyEquals("Failed at vertex " + i, polygonAWithIntersectionsExpected.getVertex(i), pointOnA.getPoint(), 1e-6);
-         pointOnA = pointOnA.getSuccessor();
-      }
-      assertTrue(pointOnA == pointListAOther.getFirstPoint());
-
-      pointOnB = pointListBOther.getFirstPoint();
-      for (int i = 0; i < polygonAWithIntersectionsExpected.getNumberOfVertices(); i++)
-      {
-         EuclidCoreTestTools.assertPoint2DGeometricallyEquals("Failed at vertex " + i, polygonBWithIntersectionsExpected.getVertex(i), pointOnB.getPoint(), 1e-6);
-         pointOnB = pointOnB.getSuccessor();
-      }
-      assertTrue(pointOnB == pointListBOther.getFirstPoint());
    }
 
    @Test
@@ -164,7 +144,8 @@ public class ClippingToolsTest
       LinkedPointList listA = ClippingTools.createLinkedPointList(polygonToClip);
       LinkedPointList listB = ClippingTools.createLinkedPointList(clippingPolygon);
 
-      ClippingTools.insertIntersections(listA, listB);
+      ClippingTools.insertIntersectionsIntoList(listA, clippingPolygon);
+      ClippingTools.insertIntersectionsIntoList(listB, polygonToClip);
 
       LinkedPoint pointA = listA.getFirstPoint();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, 1.0), pointA.getPoint(), 1e-7);
