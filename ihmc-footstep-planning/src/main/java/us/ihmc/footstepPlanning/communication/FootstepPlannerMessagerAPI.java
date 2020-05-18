@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.communication;
 
 import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.Pair;
+import org.apache.commons.lang3.tuple.Triple;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -162,13 +163,13 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<String> GenerateLogStatus = topic("GenerateLogStatus");
    public static final Topic<String> LoadLogStatus = topic("LoadLogStatus");
    public static final Topic<Pair<Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData>, List<FootstepPlannerIterationData>>> GraphData = topic("GraphData");
-   public static final Topic<Pair<RigidBodyTransform, ConvexPolygon2D>> parentDebugStep = topic("ParentDebugStep");
-   public static final Topic<Pair<RigidBodyTransform, ConvexPolygon2D>> childDebugStep = topic("ChildDebugStep");
-   public static final Topic<RigidBodyTransform> idealDebugStep = topic("IdealDebugStep");
+   public static final Topic<Pair<RigidBodyTransform, ConvexPolygon2D>> LoggedStanceStepToVisualize = topic("LoggedStanceStepToVisualize");
+   public static final Topic<FootstepPlannerEdgeData> LoggedCandidateStepToVisualize = topic("LoggedCandidateStepToVisualize");
+   public static final Topic<RigidBodyTransform> LoggedIdealStep = topic("LoggedIdealStep");
 
    // Test dashboard, only shown if launched from test class
-   public static final Topic<List<DataSet>> testDataSets = topic("testDataSets");
-   public static final Topic<DataSet> testDataSetSelected = topic("testDataSetSelected");
+   public static final Topic<List<DataSet>> TestDataSets = topic("TestDataSets");
+   public static final Topic<DataSet> TestDataSetSelected = topic("TestDataSetSelected");
 
    // Walking preview
    public static final Topic<WalkingControllerPreviewInputMessage> RequestWalkingPreview = topic("RequestWalkingPreview");
