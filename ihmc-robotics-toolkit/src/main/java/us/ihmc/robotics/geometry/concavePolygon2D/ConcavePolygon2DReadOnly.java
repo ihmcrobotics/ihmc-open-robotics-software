@@ -3,6 +3,7 @@ package us.ihmc.robotics.geometry.concavePolygon2D;
 import us.ihmc.euclid.geometry.exceptions.EmptyPolygonException;
 import us.ihmc.euclid.geometry.exceptions.OutdatedPolygonException;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -65,5 +66,20 @@ public interface ConcavePolygon2DReadOnly extends Vertex2DSupplier
    {
       if (!isUpToDate())
          throw new OutdatedPolygonException("Call the update method before doing any other calculation!");
+   }
+
+   default boolean epsilonEquals(ConcavePolygon2DReadOnly other, double epsilon)
+   {
+      if (getNumberOfVertices() != other.getNumberOfVertices())
+         return false;
+
+      for (int i = 0; i < other.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly thisVertex = getVertexBufferView().get(i);
+         if (!other.getVertexBufferView().contains(thisVertex))
+            return false;
+      }
+
+      return true;
    }
 }

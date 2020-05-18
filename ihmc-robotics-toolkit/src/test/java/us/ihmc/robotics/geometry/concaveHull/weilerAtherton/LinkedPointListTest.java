@@ -44,7 +44,7 @@ public class LinkedPointListTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, 1.0), firstPoint.getPoint(), 1e-12);
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, -1.0), lastPoint.getPoint(), 1e-12);
 
-      list.reverse();
+      list.reverseOrder();
 
       assertTrue(list.getFirstPoint().equals(fourthLink));
       assertTrue(list.getLastPoint().equals(firstLink));

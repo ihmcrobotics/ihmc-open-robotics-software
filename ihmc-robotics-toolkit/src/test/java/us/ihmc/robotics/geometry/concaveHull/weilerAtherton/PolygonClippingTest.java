@@ -119,7 +119,7 @@ public class PolygonClippingTest
    }
 
    @Test
-   public void testWithTriangleClippingEdge()
+   public void testWithTriangleClippingCornerOfSquare()
    {
       ConcavePolygon2D polygonToClip = new ConcavePolygon2D();
       polygonToClip.addVertex(-1.0, 1.0);
@@ -131,18 +131,110 @@ public class PolygonClippingTest
       assertTrue(polygonToClip.isPointInside(0.5, 0.5));
 
       ConcavePolygon2D clippingPolygon = new ConcavePolygon2D();
-      clippingPolygon.addVertex(1.0 + -0.5, 1.0 + 0.5);
-      clippingPolygon.addVertex(1.0 + 0.5, 1.0 + 0.5);
-      clippingPolygon.addVertex(1.0 + 0.5, 1.0 - 0.5);
+      clippingPolygon.addVertex(0.0, 1.5);
+      clippingPolygon.addVertex(1.5, 1.5);
+      clippingPolygon.addVertex(1.5, 0.0);
       clippingPolygon.update();
 
       ConcavePolygon2D clippedPolygonExpected = new ConcavePolygon2D();
       clippedPolygonExpected.addVertex(-1.0, 1.0);
       clippedPolygonExpected.addVertex(0.5, 1.0);
-      clippedPolygonExpected.addVertex(0.5, 0.5);
+      clippedPolygonExpected.addVertex(1.0, 0.5);
+      clippedPolygonExpected.addVertex(1.0, -1.0);
+      clippedPolygonExpected.addVertex(-1.0, -1.0);
+      clippedPolygonExpected.update();
+
+      ConcavePolygon2D clippedPolygon = new ConcavePolygon2D();
+      WeilerAthertonPolygonClipping.clip(clippingPolygon, polygonToClip, clippedPolygon);
+
+      assertTrue(clippedPolygon.epsilonEquals(clippedPolygonExpected, 1e-7));
+   }
+
+   @Test
+   public void testWithTriangleClippingTopEdgeOfSquare()
+   {
+      ConcavePolygon2D polygonToClip = new ConcavePolygon2D();
+      polygonToClip.addVertex(-1.0, 1.0);
+      polygonToClip.addVertex(1.0, 1.0);
+      polygonToClip.addVertex(1.0, -1.0);
+      polygonToClip.addVertex(-1.0, -1.0);
+      polygonToClip.update();
+
+      assertTrue(polygonToClip.isPointInside(0.5, 0.5));
+
+      ConcavePolygon2D clippingPolygon = new ConcavePolygon2D();
+      clippingPolygon.addVertex(-1.0, 1.5);
+      clippingPolygon.addVertex(1.0, 1.5);
+      clippingPolygon.addVertex(0.0, 0.5);
+      clippingPolygon.update();
+
+      ConcavePolygon2D clippedPolygonExpected = new ConcavePolygon2D();
+      clippedPolygonExpected.addVertex(-1.0, 1.0);
+      clippedPolygonExpected.addVertex(-0.5, 1.0);
+      clippedPolygonExpected.addVertex(0.0, 0.5);
+      clippedPolygonExpected.addVertex(0.5, 1.0);
       clippedPolygonExpected.addVertex(1.0, 1.0);
       clippedPolygonExpected.addVertex(1.0, -1.0);
       clippedPolygonExpected.addVertex(-1.0, -1.0);
+      clippedPolygonExpected.update();
+
+      ConcavePolygon2D clippedPolygon = new ConcavePolygon2D();
+//      WeilerAthertonPolygonClipping.clip(clippingPolygon, polygonToClip, clippedPolygon);
+
+//      assertTrue(clippedPolygon.epsilonEquals(clippedPolygonExpected, 1e-7));
+
+      clippingPolygon = new ConcavePolygon2D();
+      clippingPolygon.addVertex(-1.5, 1.5);
+      clippingPolygon.addVertex(1.5, 1.5);
+      clippingPolygon.addVertex(0.0, 0.0);
+      clippingPolygon.update();
+
+      clippedPolygonExpected = new ConcavePolygon2D();
+      clippedPolygonExpected.addVertex(-1.0, 1.0);
+      clippedPolygonExpected.addVertex(0.0, 0.0);
+      clippedPolygonExpected.addVertex(1.0, 1.0);
+      clippedPolygonExpected.addVertex(1.0, -1.0);
+      clippedPolygonExpected.addVertex(-1.0, -1.0);
+      clippedPolygonExpected.update();
+
+      clippedPolygon = new ConcavePolygon2D();
+      WeilerAthertonPolygonClipping.clip(clippingPolygon, polygonToClip, clippedPolygon);
+
+      assertTrue(clippedPolygon.epsilonEquals(clippedPolygonExpected, 1e-7));
+   }
+
+   @Test
+   public void testRemoveComplexShapeAcrossTopEdge()
+   {
+      ConcavePolygon2D polygonToClip = new ConcavePolygon2D();
+      polygonToClip.addVertex(-1.5, 1.0);
+      polygonToClip.addVertex(2.0, 1.0);
+      polygonToClip.addVertex(2.0, -1.0);
+      polygonToClip.addVertex(-1.5, -1.0);
+      polygonToClip.update();
+
+      assertTrue(polygonToClip.isPointInside(0.5, 0.5));
+
+      ConcavePolygon2D clippingPolygon = new ConcavePolygon2D();
+      clippingPolygon.addVertex(-1.0, 2.0);
+      clippingPolygon.addVertex(2.0, 2.0);
+      clippingPolygon.addVertex(2.0, 1.5);
+      clippingPolygon.addVertex(1.0, 0.5);
+      clippingPolygon.addVertex(0.0, 1.5);
+      clippingPolygon.addVertex(-1.0, 0.5);
+      clippingPolygon.update();
+
+      ConcavePolygon2D clippedPolygonExpected = new ConcavePolygon2D();
+      clippedPolygonExpected.addVertex(-1.5, 1.0);
+      clippedPolygonExpected.addVertex(-1.0, 1.0);
+      clippedPolygonExpected.addVertex(-1.0, 0.5);
+      clippedPolygonExpected.addVertex(-0.5, 1.0);
+      clippedPolygonExpected.addVertex(0.5, 1.0);
+      clippedPolygonExpected.addVertex(1.0, 0.5);
+      clippedPolygonExpected.addVertex(1.5, 1.0);
+      clippedPolygonExpected.addVertex(2.0, 1.0);
+      clippedPolygonExpected.addVertex(2.0, -1.0);
+      clippedPolygonExpected.addVertex(-1.5, -1.0);
       clippedPolygonExpected.update();
 
       ConcavePolygon2D clippedPolygon = new ConcavePolygon2D();

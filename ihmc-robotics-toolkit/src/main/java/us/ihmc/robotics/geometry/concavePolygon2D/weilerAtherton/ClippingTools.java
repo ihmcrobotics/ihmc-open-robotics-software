@@ -44,105 +44,70 @@ public class ClippingTools
    {
       LinkedPoint startPoint = list.getFirstPoint();
 
+      Point2DBasics intersection = new Point2D();
       while (true)
       {
          LinkedPoint nextPoint = startPoint.getSuccessor();
-         Point2DReadOnly intersection = findFirstIntersection(startPoint.getPoint(), nextPoint.getPoint(), polygonToIntersect);
-         if (intersection == null)
-         {
-            startPoint = startPoint.getSuccessor();
-            if (startPoint == list.getFirstPoint())
-               break;
-         }
-         else
+         IntersectionType intersectionKey = findFirstIntersection(startPoint.getPoint(), nextPoint.getPoint(), polygonToIntersect, intersection);
+         if (intersectionKey == IntersectionType.NEW)
          {
             list.insertPoint(new LinkedPoint(intersection, true), startPoint);
          }
-      }
-   }
-
-   private static Point2DReadOnly findFirstIntersection(Point2DReadOnly edgeStart, Point2DReadOnly edgeEnd, ConcavePolygon2DReadOnly polygonToIntersect)
-   {
-      Point2D intersection = new Point2D();
-      for (int i = 0; i < polygonToIntersect.getNumberOfVertices(); i++)
-      {
-         int next = EuclidGeometryPolygonTools.next(i, polygonToIntersect.getNumberOfVertices());
-         if (intersectionBetweenLineSegmentsExclusive(edgeStart,
-                                                      edgeEnd,
-                                                      polygonToIntersect.getVertex(i),
-                                                      polygonToIntersect.getVertex(next),
-                                                      intersection,
-                                                      1e-7))
-            return intersection;
-      }
-
-      return null;
-   }
-
-   public static void insertIntersections(LinkedPointList listA, LinkedPointList listB)
-   {
-      LinkedPoint startSegmentA = listA.getFirstPoint();
-      Point2DBasics intersection = new Point2D();
-
-      while (true)
-      {
-         LinkedPoint endSegmentA = startSegmentA.getSuccessor();
-
-         if (insertFirstEdgeIntersection(startSegmentA.getPoint(), endSegmentA.getPoint(), listB, intersection))
-         {
-            listA.insertPoint(new LinkedPoint(intersection, true), startSegmentA);
-         }
          else
          {
-            startSegmentA = startSegmentA.getSuccessor();
-            if (startSegmentA == listA.getFirstPoint())
+            if (intersectionKey == IntersectionType.BOTH || intersectionKey == IntersectionType.START)
+               startPoint.setIsIntersectionPoint(true);
+            if (intersectionKey == IntersectionType.BOTH || intersectionKey == IntersectionType.END)
+               nextPoint.setIsIntersectionPoint(true);
+
+            startPoint = nextPoint;
+            if (startPoint == list.getFirstPoint())
                break;
          }
       }
    }
 
-   public static boolean insertFirstEdgeIntersection(Point2DReadOnly edgeStart, Point2DReadOnly edgeEnd, LinkedPointList list, Point2DBasics intersectionToPack)
+   private static IntersectionType findFirstIntersection(Point2DReadOnly edgeStart,
+                                            Point2DReadOnly edgeEnd,
+                                            ConcavePolygon2DReadOnly polygonToIntersect,
+                                            Point2DBasics intersectionToPack)
    {
-      LinkedPoint startSegment = list.getFirstPoint();
-      while (true)
+      intersectionToPack.setToNaN();
+
+      IntersectionType type = IntersectionType.NONE;
+
+      for (int i = 0; i < polygonToIntersect.getNumberOfVertices(); i++)
       {
-         LinkedPoint endSegment = startSegment.getSuccessor();
-         if (intersectionBetweenLineSegmentsExclusive(edgeStart, edgeEnd, startSegment.getPoint(), endSegment.getPoint(), intersectionToPack, 1e-7))
+         int next = EuclidGeometryPolygonTools.next(i, polygonToIntersect.getNumberOfVertices());
+         if (EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(edgeStart,
+                                                                      edgeEnd,
+                                                                      polygonToIntersect.getVertex(i),
+                                                                      polygonToIntersect.getVertex(next),
+                                                                      intersectionToPack))
          {
-            list.insertPoint(new LinkedPoint(intersectionToPack, true), startSegment);
-            return true;
-         }
-         else
-         {
-            startSegment = startSegment.getSuccessor();
-            if (startSegment == list.getFirstPoint())
-               return false;
+            if (intersectionToPack.distanceSquared(edgeEnd) < 1e-7)
+            {
+               if (type == IntersectionType.NONE)
+                  type = IntersectionType.END;
+               if (type == IntersectionType.START)
+                  type = IntersectionType.BOTH;
+            }
+            else if (intersectionToPack.distanceSquared(edgeStart) < 1e-7)
+            {
+               if (type == IntersectionType.NONE)
+                  type = IntersectionType.START;
+               if (type == IntersectionType.END)
+                  type = IntersectionType.BOTH;
+            }
+            else
+            {
+               return IntersectionType.NEW;
+            }
          }
       }
+
+      return type;
    }
 
-   // FIXME there's probably a much faster way to do this.
-   private static boolean intersectionBetweenLineSegmentsExclusive(Point2DReadOnly edge1Start,
-                                                                   Point2DReadOnly edge1End,
-                                                                   Point2DReadOnly edge2Start,
-                                                                   Point2DReadOnly edge2End,
-                                                                   Point2DBasics intersectionToPack,
-                                                                   double endPointEpsilon)
-   {
-      if (EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(edge1Start, edge1End, edge2Start, edge2End, intersectionToPack))
-      {
-//         if (intersectionToPack.distanceSquared(edge1Start) < endPointEpsilon)
-//            return false;
-//         if (intersectionToPack.distanceSquared(edge1End) < endPointEpsilon)
-//            return false;
-         if (intersectionToPack.distanceSquared(edge2Start) < endPointEpsilon)
-            return false;
-         if (intersectionToPack.distanceSquared(edge2End) < endPointEpsilon)
-            return false;
-
-         return true;
-      }
-
-      return false;
-   }
+   private enum IntersectionType {START, END, BOTH, NEW, NONE}
 }

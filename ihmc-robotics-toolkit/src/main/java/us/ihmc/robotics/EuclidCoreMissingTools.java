@@ -41,6 +41,28 @@ public class EuclidCoreMissingTools
    }
 
    /**
+    * Tests if the point 2D is located on the infinitely long line 2D.
+    * <p>
+    * The test is performed by computing the distance between the point and the line, if that distance
+    * is below {@link #IS_POINT_ON_LINE_EPS} this method returns {@code true}.
+    * </p>
+    *
+    * @param point            the coordinates of the query. Not modified.
+    * @param lineSegmentStart the first endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd   the second endpoint of the line segment. Not modified.
+    * @return {@code true} if the query is considered to be lying on the line, {@code false} otherwise.
+    */
+   public static boolean isPoint2DOnLineSegment2D(double pointX, double pointY, Point2DReadOnly lineSegmentStart, Point2DReadOnly lineSegmentEnd)
+   {
+      return EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(pointX,
+                                                                    pointY,
+                                                                    lineSegmentStart.getX(),
+                                                                    lineSegmentStart.getY(),
+                                                                    lineSegmentEnd.getX(),
+                                                                    lineSegmentEnd.getY()) < EuclidGeometryTools.IS_POINT_ON_LINE_EPS;
+   }
+
+   /**
     * Projects the provided {@code rotation} onto {@code axis} such that the original rotation can be
     * decomposed into a rotation around {@code axis} and one around an orthogonal axis.
     * <p>
