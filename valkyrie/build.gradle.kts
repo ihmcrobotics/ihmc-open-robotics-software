@@ -24,7 +24,7 @@ mainDependencies {
    api("us.ihmc.thirdparty.jinput:jinput:200128")
 
    api("us.ihmc:euclid:0.14.1")
-   api("us.ihmc:ihmc-yovariables:0.6.0")
+   api("us.ihmc:ihmc-yovariables:0.7.0")
    api("us.ihmc:ihmc-realtime:1.3.0")
    api("us.ihmc:IHMCRosControl:0.5.0") {
       setChanging(true)

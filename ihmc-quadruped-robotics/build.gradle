@@ -23,7 +23,7 @@ mainDependencies {
 
    api("us.ihmc:euclid-frame:0.14.1")
    api("us.ihmc:euclid-shape:0.14.1")
-   api("us.ihmc:ihmc-yovariables:0.6.0")
+   api("us.ihmc:ihmc-yovariables:0.7.0")
    api("us.ihmc:ihmc-commons:0.29.0")
    api("us.ihmc:ihmc-graphics-description:0.16.0")
    api("us.ihmc:ihmc-robot-description:0.16.0")
