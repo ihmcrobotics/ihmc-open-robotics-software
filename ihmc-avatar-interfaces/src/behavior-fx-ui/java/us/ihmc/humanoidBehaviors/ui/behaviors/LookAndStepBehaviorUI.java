@@ -162,14 +162,16 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       placeGoalActionMap.start();
    }
 
-   @FXML public void takeStep()
+   @FXML public void approve()
    {
-      behaviorMessager.submitMessage(TakeStep, new Object());
+//      behaviorMessager.submitMessage(TakeStep, new Object());
+      behaviorMessager.submitMessage(Approval, true);
    }
 
-   @FXML public void rePlan()
+   @FXML public void reject()
    {
-      behaviorMessager.submitMessage(RePlan, new Object());
+//      behaviorMessager.submitMessage(RePlan, new Object());
+      behaviorMessager.submitMessage(Approval, false);
    }
 
    @FXML public void saveLookAndStepParameters()
