@@ -88,14 +88,16 @@ public class LookAndStepBehavior implements BehaviorInterface
       rea = helper.getOrCreateREAInterface();
       environmentMap = helper.getOrCreateEnvironmentMapInterface();
       robot = helper.getOrCreateRobotInterface();
-      operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
+      footstepPlanningModule = helper.getOrCreateFootstepPlanner();
+
+      visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
+
       helper.createUICallback(LookAndStepParameters, lookAndStepParameters::setAllFromStrings);
       footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
       helper.createUICallback(FootstepPlannerParameters, footstepPlannerParameters::setAllFromStrings);
-      approvalNotification = helper.createUITypedNotification(Approval);
 
-      footstepPlanningModule = helper.getOrCreateFootstepPlanner();
-      visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
+      operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
+      approvalNotification = helper.createUITypedNotification(Approval);
 
       // TODO: Want to be able to wire up behavior here and see all present modules
 
@@ -106,6 +108,9 @@ public class LookAndStepBehavior implements BehaviorInterface
       environmentMap.addPlanarRegionsListCallback(this::footstepPlanningAcceptNearPlanarRegions);
 
 //      helper.createUICallback(RePlan, this::);
+
+      helper.setCommunicationCallbacksEnabled(true);
+      helper.setCommunicationCallbacksEnabled(false);
 
    }
 
@@ -126,39 +131,50 @@ public class LookAndStepBehavior implements BehaviorInterface
    // not failed recently?
    private void bodyPathModuleAcceptREARegions(PlanarRegionsList planarRegionsList)
    {
+//      LogTools.debug("bodyPathModuleAcceptREARegions, {}", planarRegionsList);
       bodyPathModulePlanarRegionsList = planarRegionsList;
       bodyPathModulePlanarRegionExpirationTimer.reset();
+
+      //helper.publishToUI(MapRegionsForUI, bodyPathModulePlanarRegionsList); // TODO This takes forever?
+
+//      bodyPathModuleEvaluteAndRun();
    }
 
    private void bodyPathModuleAcceptGoalPlacement(Pose3D goalInput)
    {
+      LogTools.debug("bodyPathModuleAcceptGoalPlacement, {}", goalInput);
       bodyPathModuleGoalInput = goalInput;
+
+      bodyPathModuleEvaluteAndRun();
    }
 
-   private void bodyPathModuleEvaluteEntry()
+   private void bodyPathModuleEvaluteAndRun()
    {
       // TODO Goal input comes from user click / Kryo thread
       boolean hasGoal = bodyPathModuleGoalInput != null && !bodyPathModuleGoalInput.containsNaN();
-      if (!hasGoal)
-         return;
+      LogTools.debug("bodyPathModuleEvaluteAndRun, hasGoal = {}", hasGoal);
+      if (!hasGoal) return;
 
       boolean regionsOK =
             bodyPathModulePlanarRegionsList != null && !bodyPathModulePlanarRegionExpirationTimer.isPastOrNaN(lookAndStepParameters.getPlanarRegionsExpiration()) && !bodyPathModulePlanarRegionsList.isEmpty();
-      if (!regionsOK)
-         return;
+      LogTools.debug("bodyPathModuleEvaluteAndRun, regionsOK = {}", regionsOK);
+      if (!regionsOK) return;
 
       boolean robotReachedGoal = isRobotAtGoal();
-      if (!robotReachedGoal)
-         return;
+      LogTools.debug("bodyPathModuleEvaluteAndRun, robotReachedGoal = {}", robotReachedGoal);
+      if (!robotReachedGoal) return;
 
       // TODO: This could be "run recently" instead of failed recently
       boolean failedRecently = !bodyPathModuleFailedTimer.isPastOrNaN(lookAndStepParameters.get(LookAndStepBehaviorParameters.waitTimeAfterPlanFailed));
-      if (failedRecently)
-         return;
+      LogTools.debug("bodyPathModuleEvaluteAndRun, failedRecently = {}", failedRecently);
+      if (failedRecently) return;
 
       if (bodyPathBeingReviewed) return;
+      LogTools.debug("bodyPathModuleEvaluteAndRun, bodyPathBeingReviewed = {}", bodyPathBeingReviewed);
 
       // TODO: Add robot standing still for 20s for real robot
+
+      helper.publishToUI(MapRegionsForUI, bodyPathModulePlanarRegionsList);
 
       LogTools.info("Planning body path...");
 
@@ -210,7 +226,9 @@ public class LookAndStepBehavior implements BehaviorInterface
    private void reviewBodyPathPlan(ArrayList<Pose3D> bodyPathPlan) // TODO: Extract review logic?
    {
       bodyPathBeingReviewed = true;
+      LogTools.info("Waiting for body path operator review...");
       boolean approved = approvalNotification.blockingPoll();
+      LogTools.info("Operator reviewed: {}", approved);
       bodyPathBeingReviewed = false;
 
       if (approved)
@@ -227,6 +245,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private void footstepPlanningAcceptBodyPath(ArrayList<Pose3D> bodyPathPlan)
    {
+      LogTools.debug("footstepPlanningAcceptBodyPath, {}", bodyPathPlan);
       footstepPlanningBodyPathPlan = bodyPathPlan;
 
       footstepPlanningEvaluateAndRun();
@@ -236,19 +255,22 @@ public class LookAndStepBehavior implements BehaviorInterface
    {
       boolean regionsOK = footstepPlanningNearRegions != null && !footstepPlanningNearRegions.isEmpty();
       regionsOK &= !footstepPlanningNearRegionsExpirationTimer.isPastOrNaN(lookAndStepParameters.getPlanarRegionsExpiration());
+      LogTools.debug("footstepPlanningEvaluateAndRun, regionsOK = {}", regionsOK);
       if (!regionsOK) return;
 
       boolean failedRecently = !footstepPlanningModuleFailedTimer.isPastOrNaN(lookAndStepParameters.get(LookAndStepBehaviorParameters.waitTimeAfterPlanFailed));
+      LogTools.debug("footstepPlanningEvaluateAndRun, failedRecently = {}", failedRecently);
       if (failedRecently) return;
 
       boolean bodyPathOkay = footstepPlanningBodyPathPlan != null && !footstepPlanningBodyPathPlan.isEmpty();
+      LogTools.debug("footstepPlanningEvaluateAndRun, bodyPathOkay = {}", bodyPathOkay);
       if (!bodyPathOkay) return;
 
+      LogTools.debug("footstepPlanningEvaluateAndRun, footstepPlanBeingReviewed = {}", footstepPlanBeingReviewed);
       if (footstepPlanBeingReviewed) return;
 
       LogTools.info("Entering plan state");
-      PlanarRegionsList latestPlanarRegionList = environmentMap.getLatestCombinedRegionsList();
-      helper.publishToUI(MapRegionsForUI, latestPlanarRegionList);
+      helper.publishToUI(MapRegionsForUI, footstepPlanningNearRegions);
 
       HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
       FramePose3D initialPoseBetweenFeet = new FramePose3D();
@@ -376,7 +398,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
       footstepPlannerRequest.setStartFootPoses(leftSolePose, rightSolePose);
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPoseBetweenFeet);
-      footstepPlannerRequest.setPlanarRegionsList(latestPlanarRegionList);
+      footstepPlannerRequest.setPlanarRegionsList(footstepPlanningNearRegions);
       footstepPlannerRequest.setTimeout(lookAndStepParameters.get(LookAndStepBehaviorParameters.footstepPlannerTimeout));
 
       footstepPlanningModule.getFootstepPlannerParameters().set(footstepPlannerParameters);
@@ -417,7 +439,9 @@ public class LookAndStepBehavior implements BehaviorInterface
    private void reviewFootstepPlan(FootstepPlan footstepPlan)
    {
       footstepPlanBeingReviewed = true;
+      LogTools.info("Waiting for footstep plan operator review...");
       boolean approved = approvalNotification.blockingPoll();
+      LogTools.info("Operator reviewed footstep plan: {}", approved);
       footstepPlanBeingReviewed = false;
 
       if (approved)
@@ -428,6 +452,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private void robotWalkingModuleAcceptFootstepPlan(FootstepPlan footstepPlan)
    {
+      LogTools.debug("robotWalkingModuleAcceptFootstepPlan, {}", footstepPlan);
       robotWalkingModuleFootstepPlan = footstepPlan;
 
       robotWalkingEvaluateAndRun();
@@ -436,6 +461,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private void robotWalkingEvaluateAndRun()
    {
       boolean footstepPlanOK = robotWalkingModuleFootstepPlan != null && robotWalkingModuleFootstepPlan.getNumberOfSteps() > 0;
+      LogTools.debug("robotWalkingEvaluateAndRun, footstepPlanOK = {}", footstepPlanOK);
       if (!footstepPlanOK) return;
 
       FootstepPlan shortenedFootstepPlan = new FootstepPlan();
@@ -461,11 +487,13 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private void robotWalkingThread(TypedNotification<WalkingStatusMessage> walkingStatusNotification)
    {
+      LogTools.info("Waiting for robot walking...");
       walkingStatusNotification.blockingPoll();
+      LogTools.info("Robot walk complete.");
 
       if (isRobotAtGoal())
       {
-         bodyPathModuleEvaluteEntry();
+         bodyPathModuleEvaluteAndRun();
       }
       else
       {
@@ -475,6 +503,8 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private boolean isRobotAtGoal()
    {
+      if (footstepPlanningBodyPathPlan == null || footstepPlanningBodyPathPlan.isEmpty()) return true;
+
       // if close to goal, far, else near
       HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
       FramePose3D initialPoseBetweenFeet = new FramePose3D();

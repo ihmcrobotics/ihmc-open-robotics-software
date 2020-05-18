@@ -31,12 +31,12 @@
                         <Insets bottom="5.0" />
                      </padding>
                   </CheckBox>
-                  <Button fx:id="rePlan" mnemonicParsing="false" onAction="#rePlan" text="Re-plan">
+                  <Button fx:id="reject" mnemonicParsing="false" onAction="#reject" text="Reject">
                      <VBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </VBox.margin>
                   </Button>
-                      <Button fx:id="takeStep" mnemonicParsing="false" onAction="#takeStep" text="Take Step">
+                      <Button fx:id="approve" mnemonicParsing="false" onAction="#approve" text="Approve">
                      <VBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                      </VBox.margin></Button>
