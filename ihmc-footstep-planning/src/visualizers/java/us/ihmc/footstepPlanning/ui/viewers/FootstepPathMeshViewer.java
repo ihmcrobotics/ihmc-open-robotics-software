@@ -13,6 +13,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
@@ -73,6 +74,8 @@ public class FootstepPathMeshViewer extends AnimationTimer
       {
          footstepMeshes.add(new FootstepMeshManager(i));
       }
+
+      messager.registerTopicListener(ShowFootstepPlan, show -> footstepMeshes.forEach(mesh -> mesh.meshHolder.meshView.setVisible(show)));
    }
 
    private synchronized void computeAllMeshes(FootstepDataListMessage footstepPlanResponse)
