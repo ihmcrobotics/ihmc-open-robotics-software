@@ -75,6 +75,17 @@ public class FootstepPlannerLogVisualizerController
    @FXML
    private Button stepBack;
 
+   @FXML
+   private CheckBox showStanceStep;
+   @FXML
+   private CheckBox showUnsnappedStep;
+   @FXML
+   private CheckBox showSnappedStep;
+   @FXML
+   private CheckBox showSnapAndWiggledStep;
+   @FXML
+   private CheckBox showIdealStep;
+
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
@@ -87,6 +98,21 @@ public class FootstepPlannerLogVisualizerController
       AtomicReference<PlanarRegionsList> planarRegionData = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.GraphData,
                                      graphData -> Platform.runLater(() -> updateGraphData(planarRegionData.get(), graphData.getLeft(), graphData.getRight())));
+
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedStanceStep, showStanceStep.selectedProperty(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedUnsnappedCandidateStep, showUnsnappedStep.selectedProperty(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedSnappedCandidateStep, showSnappedStep.selectedProperty(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedWiggledCandidateStep, showSnapAndWiggledStep.selectedProperty(), true);
+      messager.bindBidirectional(FootstepPlannerMessagerAPI.ShowLoggedIdealStep, showIdealStep.selectedProperty(), true);
+
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLogGraphics, show ->
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.ShowLoggedStanceStep, show);
+         messager.submitMessage(FootstepPlannerMessagerAPI.ShowLoggedUnsnappedCandidateStep, show);
+         messager.submitMessage(FootstepPlannerMessagerAPI.ShowLoggedSnappedCandidateStep, show);
+         messager.submitMessage(FootstepPlannerMessagerAPI.ShowLoggedWiggledCandidateStep, show);
+         messager.submitMessage(FootstepPlannerMessagerAPI.ShowLoggedIdealStep, show);
+      });
    }
 
    public void onPrimaryStageLoaded()
@@ -333,7 +359,7 @@ public class FootstepPlannerLogVisualizerController
       childColumnHolder.totalCostColumn.setSortType(TableColumn.SortType.ASCENDING);
       candidateStepTable.sort();
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.LoggedStanceStepToVisualize, Pair.of(stepProperty.snappedNodeTransform, stepProperty.snapData.getCroppedFoothold()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.LoggedStanceStepToVisualize, Pair.of(stepProperty.stanceNode, stepProperty.snapData));
       messager.submitMessage(FootstepPlannerMessagerAPI.LoggedIdealStep, stepProperty.idealStepTransform);
 
       candidateStepTable.getSelectionModel().selectedItemProperty().addListener(onStepSelected());

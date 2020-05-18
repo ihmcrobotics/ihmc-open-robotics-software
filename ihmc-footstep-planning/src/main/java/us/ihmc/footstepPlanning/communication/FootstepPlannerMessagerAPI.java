@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.BodyPathPlanningResult;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.FootstepPlanningResult;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -163,9 +164,15 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<String> GenerateLogStatus = topic("GenerateLogStatus");
    public static final Topic<String> LoadLogStatus = topic("LoadLogStatus");
    public static final Topic<Pair<Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData>, List<FootstepPlannerIterationData>>> GraphData = topic("GraphData");
-   public static final Topic<Pair<RigidBodyTransform, ConvexPolygon2D>> LoggedStanceStepToVisualize = topic("LoggedStanceStepToVisualize");
+   public static final Topic<Pair<FootstepNode, FootstepNodeSnapData>> LoggedStanceStepToVisualize = topic("LoggedStanceStepToVisualize");
    public static final Topic<FootstepPlannerEdgeData> LoggedCandidateStepToVisualize = topic("LoggedCandidateStepToVisualize");
    public static final Topic<RigidBodyTransform> LoggedIdealStep = topic("LoggedIdealStep");
+
+   public static final Topic<Boolean> ShowLoggedStanceStep = topic("ShowLoggedStanceStep");
+   public static final Topic<Boolean> ShowLoggedUnsnappedCandidateStep = topic("ShowLoggedUnsnappedCandidateStep");
+   public static final Topic<Boolean> ShowLoggedSnappedCandidateStep = topic("ShowLoggedSnappedCandidateStep");
+   public static final Topic<Boolean> ShowLoggedWiggledCandidateStep = topic("ShowLoggedWiggledCandidateStep");
+   public static final Topic<Boolean> ShowLoggedIdealStep = topic("ShowLoggedIdealStep");
 
    // Test dashboard, only shown if launched from test class
    public static final Topic<List<DataSet>> TestDataSets = topic("TestDataSets");
