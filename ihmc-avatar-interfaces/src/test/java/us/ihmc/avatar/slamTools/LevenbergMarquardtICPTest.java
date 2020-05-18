@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.mapping.test;
+package us.ihmc.avatar.slamTools;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
