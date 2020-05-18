@@ -8,7 +8,7 @@ import us.ihmc.commons.Conversions;
 
 public class LevenbergMarquardtParameterOptimizer
 {
-   private boolean DEBUG = true;
+   private static final boolean DEBUG = false;
    private int parameterDimension;
    private int outputDimension;
 
@@ -72,13 +72,23 @@ public class LevenbergMarquardtParameterOptimizer
    {
       this.parameterDimension = parameterDimension;
       this.outputDimension = outputDimension;
-      // TODO: reshape all DenseMatrix64F.
-   }
 
-   // TODO: set bound. especially, orientation.
-   public void setBound()
-   {
+      dampingCoefficient.reshape(parameterDimension, parameterDimension);
 
+      currentInput.reshape(parameterDimension, 1);
+      currentOutput.reshape(outputDimension, 1);
+      purterbationVector.reshape(parameterDimension, 1);
+      perturbedInput.reshape(parameterDimension, 1);
+      perturbedOutput.reshape(outputDimension, 1);
+      jacobian.reshape(outputDimension, parameterDimension);
+
+      jacobianTranspose.reshape(outputDimension, parameterDimension);
+      squaredJacobian.reshape(parameterDimension, parameterDimension);
+      invMultJacobianTranspose.reshape(parameterDimension, outputDimension);
+
+      optimizeDirection.reshape(parameterDimension, 1);
+
+      correspondence = new boolean[outputDimension];
    }
 
    public void setPerturbationVector(DenseMatrix64F purterbationVector)
