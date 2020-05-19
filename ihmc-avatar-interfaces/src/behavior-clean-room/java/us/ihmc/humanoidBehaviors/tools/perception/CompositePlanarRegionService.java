@@ -27,7 +27,7 @@ public class CompositePlanarRegionService
 
    private PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
 
-   public CompositePlanarRegionService(Ros2NodeInterface ros2Node, List<String> topicNames, Supplier<PlanarRegionsList>... planarRegionSuppliers)
+   public CompositePlanarRegionService(Ros2NodeInterface ros2Node, List<String> topicNames, double period, Supplier<PlanarRegionsList>... planarRegionSuppliers)
    {
       this.planarRegionSuppliers = planarRegionSuppliers;
 
@@ -40,7 +40,7 @@ public class CompositePlanarRegionService
                                                                                  ROS2Tools.REA_MODULE,
                                                                                  ROS2Tools.ROS2TopicQualifier.OUTPUT);
       combinedPlanarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, topicGenerator);
-      thread = new PausablePeriodicThread(getClass().getSimpleName(), 0.5, this::process);
+      thread = new PausablePeriodicThread(getClass().getSimpleName(), period, this::process);
    }
 
    public void start()
