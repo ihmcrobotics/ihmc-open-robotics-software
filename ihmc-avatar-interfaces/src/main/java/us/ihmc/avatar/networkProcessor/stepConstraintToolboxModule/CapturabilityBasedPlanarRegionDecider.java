@@ -39,15 +39,7 @@ public class CapturabilityBasedPlanarRegionDecider
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final double maxNormalAngleFromVertical = 0.3;
-   private static final double minimumAreaToConsider = 0.01;
-
    private static final double minimumIntersectionForSearch = 0.005;
-
-   private static final Vector3D verticalAxis = new Vector3D(0.0, 0.0, 1.0);
-
-   private final YoDouble maxAngleForSteppable;
-   private final YoDouble minimumAreaForSteppable;
 
    private final List<PlanarRegion> steppableRegions = new ArrayList<>();
 
@@ -74,11 +66,6 @@ public class CapturabilityBasedPlanarRegionDecider
    {
       this.icpControlPlane = new ICPControlPlane(centerOfMassFrame, gravityZ, registry);
 
-      maxAngleForSteppable = new YoDouble("maxAngleForSteppable", registry);
-      minimumAreaForSteppable = new YoDouble("minimumAreaForSteppable", registry);
-      maxAngleForSteppable.set(maxNormalAngleFromVertical);
-      minimumAreaForSteppable.set(minimumAreaToConsider);
-
       constraintRegionChanged = new YoBoolean("constraintRegionChanged", registry);
 
       switchPlanarRegionConstraintsAutomatically = new YoBoolean("switchPlanarRegionConstraintsAutomatically", registry);
@@ -99,11 +86,10 @@ public class CapturabilityBasedPlanarRegionDecider
       }
    }
 
-   public void setPlanarRegions(java.util.List<PlanarRegion> planarRegions)
+   public void setPlanarRegions(List<PlanarRegion> planarRegions)
    {
       steppableRegions.clear();
-      steppableRegions.addAll(planarRegions.stream().filter(this::isRegionValidForStepping).collect(Collectors.toList()));
-      return;
+      steppableRegions.addAll(planarRegions);
    }
 
    public void setCaptureRegion(FrameConvexPolygon2DReadOnly captureRegion)
@@ -175,16 +161,6 @@ public class CapturabilityBasedPlanarRegionDecider
    public PlanarRegion getConstraintRegion()
    {
       return planarRegionToConstrainTo;
-   }
-
-   private boolean isRegionValidForStepping(PlanarRegion planarRegion)
-   {
-      double angle = planarRegion.getNormal().angle(verticalAxis);
-
-      if (angle > maxAngleForSteppable.getValue())
-         return false;
-
-      return PlanarRegionTools.computePlanarRegionArea(planarRegion) > minimumAreaForSteppable.getValue();
    }
 
    private PlanarRegion findPlanarRegionUnderFoothold(FramePoint3DReadOnly foothold)
