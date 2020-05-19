@@ -67,7 +67,10 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
 
       livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(false);
-      behaviorMessager.registerTopicListener(MapRegionsForUI, livePlanarRegionsGraphic::acceptPlanarRegions);
+      behaviorMessager.registerTopicListener(MapRegionsForUI, planarRegions -> {
+         behaviorState.setText("" + planarRegions.hashCode());
+         livePlanarRegionsGraphic.acceptPlanarRegions(planarRegions);
+      });
 
       goalGraphic = new PoseGraphic("Goal", Color.CADETBLUE, 0.03);
 
