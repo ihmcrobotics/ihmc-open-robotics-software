@@ -1,7 +1,5 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
@@ -484,14 +482,14 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * generator is capable of swinging over.
     * </p>
     */
-   default double getCliffHeightToAvoid()
+   default double getCliffBaseHeightToAvoid()
    {
-      return get(cliffHeightToAvoid);
+      return get(cliffBaseHeightToAvoid);
    }
 
    /**
     * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
-    * nearby that is {@link #getCliffHeightToAvoid} higher than the candidate footstep, it will move away from it
+    * nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
     * until it is minimumDistanceFromCliffBottoms away from it.
     *
     * <p>
@@ -503,6 +501,38 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default double getMinimumDistanceFromCliffBottoms()
    {
       return get(minimumDistanceFromCliffBottoms);
+   }
+
+   /**
+    * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
+    * nearby that is cliffTopHeightToAvoid higher than the candidate footstep, it will move away from it
+    * until it is minimumDistanceFromCliffTops away from it.
+    *
+    * <p>
+    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+    * generator is capable of swinging over.
+    * </p>
+    */
+   default double getCliffTopHeightToAvoid()
+   {
+      return get(cliffTopHeightToAvoid);
+   }
+
+   /**
+    * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
+    * nearby that is {@link #getCliffTopHeightToAvoid} higher than the candidate footstep, it will move away from it
+    * until it is minimumDistanceFromCliffBottoms away from it.
+    *
+    * <p>
+    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+    * generator is capable of swinging over.
+    * </p>
+    */
+   default double getMinimumDistanceFromCliffTops()
+   {
+      return get(minimumDistanceFromCliffTops);
    }
 
    /**

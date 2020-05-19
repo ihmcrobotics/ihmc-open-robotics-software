@@ -40,11 +40,11 @@ public class PlanarRegionCliffAvoider
 
    public boolean isNodeValid(FootstepNode node)
    {
-      double cliffBottomHeightToAvoid = parameters.getCliffHeightToAvoid();
+      double cliffBottomHeightToAvoid = parameters.getCliffBaseHeightToAvoid();
       double minimumDistanceFromCliffBottoms = parameters.getMinimumDistanceFromCliffBottoms();
 
-      double cliffTopHeightToAvoid = cliffBottomHeightToAvoid;
-      double minimumDistanceFromCliffTops = minimumDistanceFromCliffBottoms;
+      double cliffTopHeightToAvoid = parameters.getCliffTopHeightToAvoid();
+      double minimumDistanceFromCliffTops = parameters.getMinimumDistanceFromCliffTops();
 
       RigidBodyTransformReadOnly soleTransform = snapper.snapFootstepNode(node).getSnappedNodeTransform(node);
 
@@ -64,7 +64,7 @@ public class PlanarRegionCliffAvoider
       {
          ArrayList<LineSegment2D> lineSegmentsInSoleFrame = createLineSegmentsToProject(node, minimumDistanceFromCliffTops);
          double minCliffHeight = findExtremumHeightInFrame(planarRegionsList, soleTransform, lineSegmentsInSoleFrame, false);
-         if (minCliffHeight < cliffTopHeightToAvoid)
+         if (Math.abs(minCliffHeight) > cliffTopHeightToAvoid)
          {
             return false;
          }

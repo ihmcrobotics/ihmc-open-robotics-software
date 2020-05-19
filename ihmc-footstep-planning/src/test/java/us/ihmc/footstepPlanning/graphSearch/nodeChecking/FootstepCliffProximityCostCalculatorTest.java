@@ -64,7 +64,7 @@ public class FootstepCliffProximityCostCalculatorTest
       double minimumDistanceFromCliffBottom = 0.2 - epsilon;
       FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
       new YoVariablesForFootstepPlannerParameters(registry, parameters);
-      parameters.setCliffHeightToAvoid(0.01);
+      parameters.setCliffBaseHeightToAvoid(0.01);
       parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
 
       double footLength = 0.2;
@@ -121,7 +121,7 @@ public class FootstepCliffProximityCostCalculatorTest
 
       FootstepPlannerParametersBasics parameters = new DefaultFootstepPlannerParameters();
       new YoVariablesForFootstepPlannerParameters(registry, parameters);
-      parameters.setCliffHeightToAvoid(cliffHeightToAvoid);
+      parameters.setCliffBaseHeightToAvoid(cliffHeightToAvoid);
       parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottom);
 
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
