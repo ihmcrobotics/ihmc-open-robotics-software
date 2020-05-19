@@ -43,7 +43,7 @@ public abstract class AbstractBehavior implements RobotController
    KryoMessager messager;
 
    protected final Ros2Node ros2Node;
-   private final Map<ROS2Topic, IHMCROS2Publisher<?>> publishers = new HashMap<>();
+   private final Map<ROS2Topic<?>, IHMCROS2Publisher<?>> publishers = new HashMap<>();
 
    protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>> localListeningNetworkQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>>();
 
@@ -129,14 +129,15 @@ public abstract class AbstractBehavior implements RobotController
    }
 
    @SuppressWarnings("unchecked")
-   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic topicName)
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic<?> topicName)
    {
-      IHMCROS2Publisher<T> publisher = (IHMCROS2Publisher<T>) publishers.get(topicName);
+      ROS2Topic<T> typedNamedTopic = topicName.withType(messageType);
+      IHMCROS2Publisher<T> publisher = (IHMCROS2Publisher<T>) publishers.get(typedNamedTopic);
 
       if (publisher == null) // !containsKey
       {
-         publisher = ROS2Tools.createPublisherTypeNamed(ros2Node, messageType, topicName);
-         publishers.put(topicName, publisher);
+         publisher = ROS2Tools.createPublisher(ros2Node, messageType, topicName);
+         publishers.put(typedNamedTopic, publisher);
       }
 
       return publisher;
