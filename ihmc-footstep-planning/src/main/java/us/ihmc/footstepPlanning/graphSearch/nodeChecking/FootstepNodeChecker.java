@@ -24,7 +24,7 @@ public class FootstepNodeChecker
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepPlannerEdgeData edgeData;
 
-   private final PlanarRegionBaseOfCliffAvoider cliffAvoider;
+   private final PlanarRegionCliffAvoider cliffAvoider;
    private final ObstacleBetweenNodesChecker obstacleBetweenNodesChecker;
    private final FootstepNodeBodyCollisionDetector collisionDetector;
    private final GoodFootstepPositionChecker goodPositionChecker;
@@ -43,7 +43,7 @@ public class FootstepNodeChecker
       this.snapper = snapper;
       this.edgeData = edgeData;
       this.footPolygons = footPolygons;
-      this.cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
+      this.cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper, footPolygons);
       this.obstacleBetweenNodesChecker = new ObstacleBetweenNodesChecker(parameters, snapper);
       this.collisionDetector = new FootstepNodeBodyCollisionDetector(parameters);
       this.goodPositionChecker = new GoodFootstepPositionChecker(parameters, snapper, edgeData);
