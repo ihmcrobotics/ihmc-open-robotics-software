@@ -94,6 +94,10 @@ public class FootstepPlannerParametersTest
       parameters.setMinimumSurfaceInclineRadians(minSurfaceIncline);
       assertEquals(minSurfaceIncline, parameters.getMinimumSurfaceInclineRadians(), epsilon);
 
+      boolean wiggleWhilePlanning = random.nextBoolean();
+      parameters.setWiggleWhilePlanning(wiggleWhilePlanning);
+      assertEquals(wiggleWhilePlanning, parameters.getWiggleWhilePlanning());
+
       boolean enableConcaveHullWiggler = RandomNumbers.nextBoolean(random, 0.5);
       parameters.setEnableConcaveHullWiggler(enableConcaveHullWiggler);
       assertEquals(enableConcaveHullWiggler, parameters.getEnableConcaveHullWiggler());
@@ -149,6 +153,10 @@ public class FootstepPlannerParametersTest
       double bodyBoxBaseZ = RandomNumbers.nextDouble(random, 10.0);
       parameters.setBodyBoxBaseZ(bodyBoxBaseZ);
       assertEquals(bodyBoxBaseZ, parameters.getBodyBoxBaseZ(), epsilon);
+
+      double maximumSnapHeight = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setMaximumSnapHeight(maximumSnapHeight);
+      assertEquals(maximumSnapHeight, parameters.getMaximumSnapHeight(), epsilon);
 
       double finalTurnProximity = RandomNumbers.nextDouble(random, 10.0);
       parameters.setFinalTurnProximity(finalTurnProximity);

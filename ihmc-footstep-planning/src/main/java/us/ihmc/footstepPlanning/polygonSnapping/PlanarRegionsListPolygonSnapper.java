@@ -21,9 +21,9 @@ public class PlanarRegionsListPolygonSnapper
     * @param planarRegionsListToSnapTo PlanarRegionsList that the polygon will be snapped to.
     * @return RigidBodyTransform Transform required to snap the polygon down onto the PlanarRegion.
     */
-   public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2D polygonToSnap, PlanarRegionsList planarRegionsListToSnapTo)
+   public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2D polygonToSnap, PlanarRegionsList planarRegionsListToSnapTo, double maximumRegionHeightToConsider)
    {
-      return snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsListToSnapTo, null);
+      return snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsListToSnapTo, maximumRegionHeightToConsider, null);
    }
 
    /**
@@ -34,12 +34,12 @@ public class PlanarRegionsListPolygonSnapper
     * @param regionToPack the planar region that this snaps to will be packed here (can be null).
     * @return RigidBodyTransform Transform required to snap the polygon down onto the PlanarRegion.
     */
-   public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2DReadOnly polygonToSnap, PlanarRegionsList planarRegionsListToSnapTo, PlanarRegion regionToPack)
+   public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2DReadOnly polygonToSnap, PlanarRegionsList planarRegionsListToSnapTo, double maximumRegionHeightToConsider, PlanarRegion regionToPack)
    {
-      return snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsListToSnapTo.getPlanarRegionsAsList(), regionToPack);
+      return snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsListToSnapTo.getPlanarRegionsAsList(), maximumRegionHeightToConsider, regionToPack);
    }
 
-   public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2DReadOnly polygonToSnap, List<PlanarRegion> planarRegionsListToSnapTo, PlanarRegion regionToPack)
+   public static RigidBodyTransform snapPolygonToPlanarRegionsList(ConvexPolygon2DReadOnly polygonToSnap, List<PlanarRegion> planarRegionsListToSnapTo, double maximumRegionHeightToConsider, PlanarRegion regionToPack)
    {
       double allowableExtraZ = 0.003; // For close ones. When close, take one that is flatter...
       List<PlanarRegion> intersectingRegions = PlanarRegionTools.findPlanarRegionsIntersectingPolygon(polygonToSnap, planarRegionsListToSnapTo);
@@ -64,13 +64,17 @@ public class PlanarRegionsListPolygonSnapper
 
          RigidBodyTransform snapTransform = PlanarRegionPolygonSnapper.snapPolygonToPlanarRegion(polygonToSnap, planarRegion, highestVertexInWorld);
 
+         if (highestVertexInWorld.getZ() > maximumRegionHeightToConsider)
+         {
+            continue;
+         }
+
          if (highestVertexInWorld.getZ() > highestZ + allowableExtraZ)
          {
             highestZ = highestVertexInWorld.getZ();
             highestTransform = snapTransform;
             highestPlanarRegion = planarRegion;
          }
-
          else if (highestVertexInWorld.getZ() > highestZ - allowableExtraZ)
          {
             // Tie. Let's take the one with the flatter surface normal.
@@ -84,6 +88,11 @@ public class PlanarRegionsListPolygonSnapper
                highestPlanarRegion = planarRegion;
             }
          }
+      }
+
+      if (highestPlanarRegion == null)
+      {
+         return null;
       }
 
       //TODO: For now, just ignore Planar Regions that are tilted too much.

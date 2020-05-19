@@ -85,7 +85,7 @@ public class SnapAndWiggleSingleStep
    {
       PlanarRegion regionToMoveTo = new PlanarRegion();
       PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, regionToMoveTo);
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, Double.POSITIVE_INFINITY, regionToMoveTo);
       if (snapTransform == null)
       {
          throw new SnappingFailedException();

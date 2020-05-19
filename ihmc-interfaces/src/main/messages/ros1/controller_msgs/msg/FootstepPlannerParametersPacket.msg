@@ -239,6 +239,12 @@
 
 
 
+
+
+
+
+
+
 float64 DEFAULT_NO_VALUE=-11.1
 
 
@@ -745,6 +751,18 @@ float64 minimum_surface_incline_radians
 
 
 
+# The wiggler can either run as a post-processor on a resulting plan or on each candidate step while planning.
+
+# If true, this wiggles each candidate step, which will slow down plan times but resulting plans will be guarunteed to match step constraints.
+
+
+
+bool wiggle_while_planning
+
+
+
+
+
 # There are two solvers for wiggling the step, one constrains to the region's convex hull and the other to the region's concave hull,
 
 # this toggles between them.
@@ -980,6 +998,20 @@ float64 body_box_base_y
 # Field default value -11.1
 
 float64 body_box_base_z
+
+
+
+
+
+# Maximum height above a stance step that a candidate step is snapped to. Regions above this height are ignored.
+
+# Intended to avoid ceilings or obstacles that are above the top of the robot
+
+
+
+# Field default value -11.1
+
+float64 maximum_snap_height
 
 
 

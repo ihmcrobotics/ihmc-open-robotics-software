@@ -14,13 +14,11 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.SimplePlanarRegionFootstepNodeSnapper;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.nodeExpansion.IdealStepCalculator;
@@ -42,8 +40,7 @@ public class AStarFootstepPlanner
 {
    private final AStarFootstepPlannerIterationConductor footstepPlanner;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
-   private final SimplePlanarRegionFootstepNodeSnapper snapper;
-   private final FootstepNodeSnapAndWiggler snapAndWiggler;
+   private final FootstepNodeSnapAndWiggler snapper;
    private final ParameterBasedNodeExpansion expansion;
    private final FootstepNodeChecker checker;
    private final FootstepPlannerHeuristicCalculator distanceAndYawHeuristics;
@@ -56,6 +53,7 @@ public class AStarFootstepPlanner
    private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
    private final List<FootstepPlannerTerminationCondition> customTerminationConditions = new ArrayList<>();
 
+   private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FramePose3D goalMidFootPose = new FramePose3D();
    private final AtomicBoolean haltRequested = new AtomicBoolean();
 
@@ -72,8 +70,8 @@ public class AStarFootstepPlanner
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.bodyPathPlanHolder = bodyPathPlanHolder;
-      this.snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
-      this.snapAndWiggler = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlannerParameters);
+      this.footPolygons = footPolygons;
+      this.snapper = new FootstepNodeSnapAndWiggler(footPolygons, footstepPlannerParameters);
 
       this.checker = new FootstepNodeChecker(footstepPlannerParameters, footPolygons, snapper, edgeData);
       this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker::isNodeValid, bodyPathPlanHolder);
@@ -111,7 +109,6 @@ public class AStarFootstepPlanner
       PlanarRegionsList planarRegionsList = flatGroundMode ? null : request.getPlanarRegionsList();
 
       snapper.setPlanarRegions(planarRegionsList);
-      snapAndWiggler.setPlanarRegions(planarRegionsList);
       checker.setPlanarRegions(planarRegionsList);
       idealStepCalculator.setPlanarRegionsList(planarRegionsList);
 
@@ -139,6 +136,7 @@ public class AStarFootstepPlanner
       idealStepCalculator.initialize(goalNodes, request.getDesiredHeading());
       completionChecker.initialize(startNode, goalNodes, request.getGoalDistanceProximity(), request.getGoalYawProximity());
       expansion.initialize();
+      snapper.initialize();
 
       // Check valid goal
       if (!snapAndCheckGoalNodes(goalNodes, imposeHorizonLength, request))
@@ -228,25 +226,8 @@ public class AStarFootstepPlanner
          SimpleFootstep footstep = new SimpleFootstep();
 
          footstep.setRobotSide(path.get(i).getRobotSide());
-
-         RigidBodyTransform footstepPose = new RigidBodyTransform();
-         footstepPose.setRotationYawAndZeroTranslation(path.get(i).getYaw());
-         footstepPose.getTranslation().setX(path.get(i).getX());
-         footstepPose.getTranslation().setY(path.get(i).getY());
-
-         FootstepNodeSnapData snapData;
-         if (footstepPlannerParameters.getMaximumXYWiggleDistance() > 0.0 || footstepPlannerParameters.getMaximumYawWiggle() > 0.0)
-         {
-            snapData = snapAndWiggler.snapFootstepNode(path.get(i));
-         }
-         else
-         {
-            snapData = snapper.snapFootstepNode(path.get(i));
-         }
-
-         RigidBodyTransform snapTransform = snapData.getSnapTransform();
-         snapTransform.transform(footstepPose);
-         footstep.getSoleFramePose().set(footstepPose);
+         FootstepNodeSnapData snapData = snapper.snapFootstepNode(path.get(i), null, true);
+         footstep.getSoleFramePose().set(snapData.getSnappedNodeTransform(path.get(i)));
 
          if (request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty())
          {
@@ -295,7 +276,7 @@ public class AStarFootstepPlanner
          loggedData = new FootstepPlannerIterationData();
          loggedData.setStanceNode(iterationData.getParentNode());
          loggedData.setIdealStep(idealStepCalculator.computeIdealStep(iterationData.getParentNode()));
-         loggedData.setStanceNodeSnapData(snapper.getSnapData(iterationData.getParentNode()));
+         loggedData.setStanceNodeSnapData(snapper.snapFootstepNode(iterationData.getParentNode()));
          this.iterationData.add(loggedData);
       }
 
@@ -390,8 +371,9 @@ public class AStarFootstepPlanner
    {
       FootstepNode footstepNode = new FootstepNode(footstepPose.getX(), footstepPose.getY(), footstepPose.getYaw(), side);
       FootstepNodeSnapData snapData = new FootstepNodeSnapData(FootstepNodeSnappingTools.computeSnapTransform(footstepNode, footstepPose));
+      snapData.getCroppedFoothold().set(footPolygons.get(side));
+      snapData.getWiggleTransformInWorld().setIdentity();
       snapper.addSnapData(footstepNode, snapData);
-      snapAndWiggler.addSnapData(footstepNode, snapData);
    }
 
    private static FootstepNode createStartNode(FootstepPlannerRequest request)
@@ -410,7 +392,7 @@ public class AStarFootstepPlanner
                                      });
    }
 
-   public SimplePlanarRegionFootstepNodeSnapper getSnapper()
+   public FootstepNodeSnapAndWiggler getSnapper()
    {
       return snapper;
    }

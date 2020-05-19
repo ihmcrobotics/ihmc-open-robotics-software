@@ -9,16 +9,13 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.footstepPlanning.FootstepPlanHeading;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDataReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapperReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.geometry.AngleTools;
-import us.ihmc.yoVariables.providers.DoubleProvider;
-
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
 
 public class FootstepPlannerHeuristicCalculator
 {
@@ -57,7 +54,7 @@ public class FootstepPlannerHeuristicCalculator
    {
       midfootPoint.set(node.getOrComputeMidFootPoint(parameters.getIdealFootstepWidth()), 0.0);
 
-      FootstepNodeSnapData snapData = snapper.getSnapData(node);
+      FootstepNodeSnapDataReadOnly snapData = snapper.snapFootstepNode(node);
       if (snapData != null && !snapData.getSnapTransform().containsNaN())
          snapData.getSnapTransform().transform(midfootPoint);
 

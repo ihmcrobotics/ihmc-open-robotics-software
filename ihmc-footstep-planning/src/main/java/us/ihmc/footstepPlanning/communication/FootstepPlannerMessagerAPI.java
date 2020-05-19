@@ -3,6 +3,7 @@ package us.ihmc.footstepPlanning.communication;
 import controller_msgs.msg.dds.*;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -63,6 +64,19 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> HaltPlanning = topic("HaltPlanning");
    public static final Topic<Boolean> PostProcessPlan = topic("PostProcessPlan");
    public static final Topic<Boolean> BindStartToRobot = topic("BindStartToRobot");
+
+   // Override planned path
+   public static final Topic<Boolean> OverrideStepTimings = topic("overrideStepTimings");
+   public static final Topic<Double> ManualSwingTime = topic("manualSwingTime");
+   public static final Topic<Double> ManualTransferTime = topic("manualTransferTime");
+
+   public static final Topic<Boolean> OverrideSwingHeight = topic("overrideSwingHeight");
+   public static final Topic<Double> ManualSwingHeight = topic("manualSwingHeight");
+
+   public static final Topic<Pair<Integer, FootstepDataMessage>> SelectedFootstep = topic("SelectedFootstep"); // table or click >>> ManualFootstepAdjustmentListener
+   public static final Topic<Pair<Integer, Pose3D>> ManuallyAdjustmentedStep = topic("ManualStepAdjustment"); // ManualFootstepAdjustmentListener >>> UIFootstepPlanManager
+   public static final Topic<Pair<Integer, FootstepDataMessage>> FootstepToUpdateViz = topic("FootstepToUpdateViz"); // UIFootstepPlanManager >>> FootstepPathMeshViewer
+   public static final Topic<UIStepAdjustmentFrame> FootstepAdjustmentFrame = topic("FootstepAdjustmentFrame"); // ManualFootstepAdjustmentListener >>> table
 
    // Parameters
    public static final Topic<FootstepPostProcessingParametersReadOnly> PostProcessingParametersTopic = topic("FootstepPostProcessingParameters");
@@ -130,6 +144,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<VisibilityMapHolder> InterRegionVisibilityMap = topic("InterRegionVisibilityMap");
 
    // Footstep planner output
+   public static final Topic<Boolean> SendPlan = topic("SendPlan");
    public static final Topic<FootstepDataListMessage> FootstepPlanResponse = topic("FootstepPlanResponse");
    public static final Topic<FootstepDataListMessage> FootstepPlanToRobot = topic("FootstepPlanToRobot");
    public static final Topic<Point3D> LowLevelGoalPosition = topic("LowLevelGoalPosition");
