@@ -32,7 +32,7 @@ import java.util.Random;
 
 import static us.ihmc.robotics.Assert.*;
 
-public class PlanarRegionBaseOfCliffAvoiderTest
+public class FootstepCliffProximityCostCalculatorTest
 {
    private boolean visualize = false;
    private final Random random = new Random(4587L);
@@ -71,7 +71,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
       double footWidth = 0.1;
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
       FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
-      PlanarRegionBaseOfCliffAvoider avoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
+      FootstepCliffProximityCostCalculator avoider = new FootstepCliffProximityCostCalculator(parameters, snapper, footPolygons);
       avoider.setPlanarRegionsList(planarRegionsList);
       snapper.setPlanarRegions(planarRegionsList);
 
@@ -126,7 +126,7 @@ public class PlanarRegionBaseOfCliffAvoiderTest
 
       SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createFootPolygons(footLength, footWidth);
       FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
-      PlanarRegionBaseOfCliffAvoider cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
+      FootstepCliffProximityCostCalculator cliffAvoider = new FootstepCliffProximityCostCalculator(parameters, snapper, footPolygons);
 
       double centerX = 1.0;
       double centerY = 1.0;
@@ -180,6 +180,6 @@ public class PlanarRegionBaseOfCliffAvoiderTest
 
    public static void main(String[] args)
    {
-      MutationTestFacilitator.facilitateMutationTestForClass(PlanarRegionBaseOfCliffAvoider.class, PlanarRegionBaseOfCliffAvoiderTest.class);
+      MutationTestFacilitator.facilitateMutationTestForClass(FootstepCliffProximityCostCalculator.class, FootstepCliffProximityCostCalculatorTest.class);
    }
 }
