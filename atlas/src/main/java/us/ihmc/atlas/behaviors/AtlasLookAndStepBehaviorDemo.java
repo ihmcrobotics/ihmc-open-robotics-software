@@ -13,7 +13,6 @@ import us.ihmc.humanoidBehaviors.tools.PlanarRegionSLAMMapper;
 import us.ihmc.humanoidBehaviors.tools.perception.CompositePlanarRegionService;
 import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
-import us.ihmc.humanoidBehaviors.tools.perception.VisiblePlanarRegionService;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
@@ -76,8 +75,10 @@ public class AtlasLookAndStepBehaviorDemo
                                                      ROS2Tools.REA_MODULE + "/multisense",
                                                      ROS2Tools.ROS2TopicQualifier.OUTPUT).generateTopicName(PlanarRegionsListMessage.class));
 
+      double period = 1.0;
       CompositePlanarRegionService allRegionsPublisher = new CompositePlanarRegionService(ros2Node,
                                                                                           topicNames,
+                                                                                          period,
                                                                                           () -> realsenseSLAM.update(realsense.get()),
                                                                                           multisense);
       allRegionsPublisher.start();
