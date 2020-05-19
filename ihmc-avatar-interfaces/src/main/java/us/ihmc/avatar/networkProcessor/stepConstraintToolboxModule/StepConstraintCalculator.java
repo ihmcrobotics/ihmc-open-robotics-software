@@ -77,7 +77,7 @@ public class StepConstraintCalculator
                                    double gravityZ)
    {
       this.timeProvider = timeProvider;
-      this.steppableRegionsCalculator = new SteppableRegionsCalculator(registry);
+      this.steppableRegionsCalculator = new SteppableRegionsCalculator(kinematicStepRange, registry);
       this.captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange, soleZUpFrames, registry, null);
       this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, gravityZ, registry, null);
       this.reachabilityConstraintCalculator = new ReachabilityConstraintCalculator(soleZUpFrames,

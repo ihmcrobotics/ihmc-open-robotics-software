@@ -666,9 +666,9 @@ public class ClusterTools
       return verticalExtrusion ? ClusterType.MULTI_LINE : ClusterType.POLYGON;
    }
 
-   private static ExtrusionHull projectPointsVerticallyToPlanarRegionLocal(PlanarRegion planarRegionToProjectOnto,
+   public static ExtrusionHull projectPointsVerticallyToPlanarRegionLocal(PlanarRegion planarRegionToProjectOnto,
                                                                                    List<? extends Point2DReadOnly> pointsToProjectInWorld,
-                                                                                   RigidBodyTransform transformFromWorldToPlanarRegion)
+                                                                                   RigidBodyTransformReadOnly transformFromWorldToPlanarRegion)
    {
       ExtrusionHull navigableExtrusionsInHomeRegionLocal = new ExtrusionHull();
       for (int i = 0; i < pointsToProjectInWorld.size(); i++)
@@ -685,7 +685,7 @@ public class ClusterTools
       return navigableExtrusionsInHomeRegionLocal;
    }
 
-   private static List<? extends Point2DReadOnly> computeObstacleNonNavigableExtrusionsInLocal(ClusterType type, List<Point3DReadOnly> rawClusterPoints,
+   public static List<? extends Point2DReadOnly> computeObstacleNonNavigableExtrusionsInLocal(ClusterType type, List<Point3DReadOnly> rawClusterPoints,
                                                                                                ObstacleExtrusionDistanceCalculator calculator)
    {
       int numberOfExtrusionsAtEndpoints = 5;
@@ -724,7 +724,7 @@ public class ClusterTools
     * @param poppingPointsDistanceSquaredThreshold
     * @return
     */
-   static List<Point3DReadOnly> filterVerticalPolygonForMultiLineExtrusion(List<? extends Point3DReadOnly> verticalPolygonVertices,
+   public static List<Point3DReadOnly> filterVerticalPolygonForMultiLineExtrusion(List<? extends Point3DReadOnly> verticalPolygonVertices,
                                                                    double poppingPointsDistanceSquaredThreshold)
    {
       if (verticalPolygonVertices.size() <= 2)
