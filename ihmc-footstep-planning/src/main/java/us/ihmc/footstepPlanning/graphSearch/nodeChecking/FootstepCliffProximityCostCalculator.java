@@ -17,7 +17,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.DoubleSupplier;
 
 public class FootstepCliffProximityCostCalculator
 {
@@ -40,7 +39,7 @@ public class FootstepCliffProximityCostCalculator
 
    public boolean isNodeValid(FootstepNode node)
    {
-      double cliffHeightToAvoid = parameters.getCliffHeightToAvoid();
+      double cliffHeightToAvoid = parameters.getCliffBaseHeightToAvoid();
       double minimumDistanceFromCliffBottoms = parameters.getMinimumDistanceFromCliffBottoms();
 
       if(minimumDistanceFromCliffBottoms <= 0.0 || Double.isInfinite(cliffHeightToAvoid) || (cliffHeightToAvoid <= 0.0))
