@@ -6,6 +6,7 @@ import us.ihmc.euclid.geometry.*;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.interfaces.Transformable;
@@ -117,7 +118,7 @@ public class PlanarRegion implements SupportingVertexHolder
     * @param convexPolygon a single convex polygon that represents the planar region. Expressed in
     *           local coordinate system.
     */
-   public PlanarRegion(RigidBodyTransform transformToWorld, ConvexPolygon2D convexPolygon)
+   public PlanarRegion(RigidBodyTransformReadOnly transformToWorld, Vertex2DSupplier convexPolygon)
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
@@ -130,7 +131,7 @@ public class PlanarRegion implements SupportingVertexHolder
       checkConcaveHullRepeatVertices(false);
 
       convexPolygons = new ArrayList<>();
-      convexPolygons.add(convexPolygon);
+      convexPolygons.add(new ConvexPolygon2D(convexPolygon));
       updateBoundingBox();
       updateConvexHull();
    }
