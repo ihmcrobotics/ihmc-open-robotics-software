@@ -32,14 +32,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -47,6 +40,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -128,6 +122,7 @@ public class WalkingMessageHandler
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final CenterOfMassTrajectoryHandler comTrajectoryHandler;
    private final PlanarRegionsListHandler planarRegionsListHandler;
+   private final PlanarRegionHandler planarRegionStepConstraintHandler;
 
    private final YoBoolean offsettingXYPlanWithFootstepError = new YoBoolean("offsettingXYPlanWithFootstepError", registry);
    private final YoBoolean offsettingHeightPlanWithFootstepError = new YoBoolean("offsettingHeightPlanWithFootstepError", registry);
@@ -188,6 +183,7 @@ public class WalkingMessageHandler
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
       planarRegionsListHandler = new PlanarRegionsListHandler(statusOutputManager, registry);
+      planarRegionStepConstraintHandler = new PlanarRegionHandler(registry);
 
       parentRegistry.addChild(registry);
    }
@@ -335,9 +331,19 @@ public class WalkingMessageHandler
       planarRegionsListHandler.handlePlanarRegionsListCommand(planarRegionsListCommand);
    }
 
+   public void handlePlanarRegionConstraint(PlanarRegionCommand planarRegionCommand)
+   {
+      planarRegionStepConstraintHandler.handlePlanarRegionsListCommand(planarRegionCommand);
+   }
+
    public PlanarRegionsListHandler getPlanarRegionsListHandler()
    {
       return planarRegionsListHandler;
+   }
+
+   public PlanarRegionHandler getPlanarRegionStepConstraintHandler()
+   {
+      return planarRegionStepConstraintHandler;
    }
 
    public void handleAdjustFootstepCommand(AdjustFootstepCommand command)

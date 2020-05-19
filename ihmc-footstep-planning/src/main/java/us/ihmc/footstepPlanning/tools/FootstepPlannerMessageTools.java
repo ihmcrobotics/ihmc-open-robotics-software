@@ -75,6 +75,7 @@ public class FootstepPlannerMessageTools
       packet.setTranslationScaleFromGrandparentNode(parameters.getTranslationScaleFromGrandparentNode());
       packet.setMinimumFootholdPercent(parameters.getMinimumFootholdPercent());
       packet.setMinimumSurfaceInclineRadians(parameters.getMinimumSurfaceInclineRadians());
+      packet.setWiggleWhilePlanning(parameters.getWiggleWhilePlanning());
       packet.setEnableConcaveHullWiggler(parameters.getEnableConcaveHullWiggler());
       packet.setMaximumXyWiggleDistance(parameters.getMaximumXYWiggleDistance());
       packet.setMaximumYawWiggle(parameters.getMaximumYawWiggle());
@@ -88,6 +89,7 @@ public class FootstepPlannerMessageTools
       packet.setBodyBoxBaseX(parameters.getBodyBoxBaseX());
       packet.setBodyBoxBaseY(parameters.getBodyBoxBaseY());
       packet.setBodyBoxBaseZ(parameters.getBodyBoxBaseZ());
+      packet.setMaximumSnapHeight(parameters.getMaximumSnapHeight());
       packet.setMinXClearanceFromStance(parameters.getMinXClearanceFromStance());
       packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
       packet.setFinalTurnProximity(parameters.getFinalTurnProximity());

@@ -36,7 +36,7 @@ public class PlanarRegion implements SupportingVertexHolder
    public static final double DEFAULT_BOUNDING_BOX_EPSILON = 0.0;
 
    private int regionId = NO_REGION_ID;
-   
+
    /**
     * This transform also represents the pose of the PlanarRegion.
     */
@@ -363,7 +363,7 @@ public class PlanarRegion implements SupportingVertexHolder
     * @param convexPolygonInWorld Polygon to project
     * @return new projected ConvexPolygon2d
     */
-   private ConvexPolygon2D projectPolygonVerticallyToRegion(ConvexPolygon2DReadOnly convexPolygonInWorld)
+   public ConvexPolygon2D projectPolygonVerticallyToRegion(ConvexPolygon2DReadOnly convexPolygonInWorld)
    {
       ConvexPolygon2D projectedPolygon = new ConvexPolygon2D();
 
@@ -886,6 +886,15 @@ public class PlanarRegion implements SupportingVertexHolder
    }
 
    /**
+    * Retrieves the origin of this planar region in the world frame and stores it in the given {@link Point3D}.
+    * @param originToPack
+    */
+   public void getOrigin(Point3DBasics originToPack)
+   {
+      originToPack.set(fromLocalToWorldTransform.getM03(), fromLocalToWorldTransform.getM13(), fromLocalToWorldTransform.getM23());
+   }
+
+   /**
     * Returns true if this PlanarRegion is purely vertical, as far as numerical roundoff is
     * concerned. Checks z component of surface normal. If absolute value is really small, then
     * returns true.
@@ -1063,6 +1072,7 @@ public class PlanarRegion implements SupportingVertexHolder
 
    public void set(PlanarRegion other)
    {
+      regionId = other.regionId;
       fromLocalToWorldTransform.set(other.fromLocalToWorldTransform);
       fromWorldToLocalTransform.set(other.fromWorldToLocalTransform);
       convexPolygons.clear();

@@ -181,26 +181,5 @@ public class REAModuleAPI
    public static final Topic<Boolean> SaveBufferConfiguration = OcTreeCategory.child(Buffer).topic(Save);
    public static final Topic<Boolean> SaveRegionUpdaterConfiguration = PlanarRegionsCategory.topic(Save);
 
-   public static final Topic<Boolean> SLAMEnable = SLAMCategory.topic(Enable);
-   public static final Topic<Boolean> SLAMClear = SLAMCategory.topic(Clear);
-   public static final Topic<Boolean> SLAMVizClear = SLAMCategory.child(UI).topic(Clear);
-   public static final Topic<DisplayType> SLAMOcTreeDisplayType = SLAMCategory.child(OcTree).topic(Display);
-   public static final Topic<NormalOcTreeMessage> SLAMOctreeMapState = SLAMCategory.child(OcTree).topic(Data);
-   public static final Topic<StereoVisionPointCloudMessage> IhmcSLAMFrameState = SLAMCategory.child(Buffer).topic(Data);
-   public static final Topic<PlanarRegionsListMessage> SLAMPlanarRegionsState = SLAMCategory.child(PlanarRegions).topic(Data);
-   public static final Topic<Pose3D> SLAMSensorFrameState = SLAMCategory.child(SensorFrame).topic(Data);
-
-   public static final Topic<RandomICPSLAMParameters> SLAMParameters = SLAMCategory.topic(Parameters);
-
-   public static final Topic<Boolean> ShowLatestFrame = SLAMCategory.child(UI).child(DepthCloud).child(Buffer).topic(Enable);
-   public static final Topic<Boolean> ShowOriginalOctreeMap = SLAMCategory.child(UI).child(OcTree).child(Custom).topic(Enable);
-   public static final Topic<Boolean> ShowSLAMOctreeMap = SLAMCategory.child(UI).child(OcTree).topic(Enable);
-   public static final Topic<Boolean> ShowOriginalSensorTrajectory = SLAMCategory.child(UI).child(SensorFrame).child(Custom).topic(Enable);
-   public static final Topic<Boolean> ShowSLAMSensorTrajectory = SLAMCategory.child(UI).child(SensorFrame).topic(Enable);
-   public static final Topic<Boolean> ShowPlanarRegionsMap = SLAMCategory.child(UI).child(PlanarRegions).topic(Enable);
-
-   public static final Topic<String> QueuedBuffers = SLAMCategory.child(SLAMFrame).child(Buffer).topic(Status);
-   public static final Topic<String> SLAMStatus = SLAMCategory.child(SLAMFrame).topic(Status);
-
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }

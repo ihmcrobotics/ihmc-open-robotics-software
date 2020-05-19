@@ -44,7 +44,7 @@ public class PlanarRegionsListPolygonSnapperTest
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
       PlanarRegion planarRegion = new PlanarRegion();
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList, planarRegion);
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList, Double.POSITIVE_INFINITY, planarRegion);
 
       if (polygonSnapperVisualizer != null)
       {
@@ -85,7 +85,7 @@ public class PlanarRegionsListPolygonSnapperTest
       PlanarRegionsList planarRegionsList = generator.getPlanarRegionsList();
 
       PlanarRegion planarRegion = new PlanarRegion();
-      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList, planarRegion);
+      RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList, Double.POSITIVE_INFINITY, planarRegion);
 
       if (polygonSnapperVisualizer != null)
       {
@@ -193,7 +193,7 @@ public class PlanarRegionsListPolygonSnapperTest
          polygonToSnap.applyTransform(nonSnappedTransform, false);
 
          PlanarRegion planarRegionIntersection = new PlanarRegion();
-         RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList, planarRegionIntersection);
+         RigidBodyTransform snapTransform = PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(polygonToSnap, planarRegionsList, Double.POSITIVE_INFINITY, planarRegionIntersection);
          //         PlanarRegionPolygonSnapperTest.assertSurfaceNormalsMatchAndSnapPreservesXFromAbove(snapTransform, planarRegionTransform);
 
          //         System.out.println(snapTransform);

@@ -10,6 +10,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple4D.Vector4D;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
@@ -31,7 +32,8 @@ public class SimplePlanarRegionFootstepNodeSnapperTest
    private final Random random = new Random(1209L);
    private final double epsilon = 1e-8;
    private final SideDependentList<ConvexPolygon2D> footPolygons = PlannerTools.createDefaultFootPolygons();
-   private final SimplePlanarRegionFootstepNodeSnapper snapper = new SimplePlanarRegionFootstepNodeSnapper(footPolygons);
+   private final DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+   private final FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
    private final ConvexPolygon2D unitSquare = new ConvexPolygon2D();
 
    private boolean visualize = true;
