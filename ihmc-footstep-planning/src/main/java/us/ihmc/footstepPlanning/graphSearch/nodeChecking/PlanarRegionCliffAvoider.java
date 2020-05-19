@@ -64,7 +64,7 @@ public class PlanarRegionCliffAvoider
       {
          ArrayList<LineSegment2D> lineSegmentsInSoleFrame = createLineSegmentsToProject(node, minimumDistanceFromCliffTops);
          double minCliffHeight = findExtremumHeightInFrame(planarRegionsList, soleTransform, lineSegmentsInSoleFrame, false);
-         if (Math.abs(minCliffHeight) > cliffTopHeightToAvoid)
+         if (minCliffHeight < -cliffTopHeightToAvoid)
          {
             return false;
          }
