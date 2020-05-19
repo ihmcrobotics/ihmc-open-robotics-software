@@ -26,6 +26,7 @@ import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class StepConstraintCalculator
 {
+   private final SteppableRegionsCalculator steppableRegionsCalculator;
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleProvider timeProvider;
@@ -76,6 +77,7 @@ public class StepConstraintCalculator
                                    double gravityZ)
    {
       this.timeProvider = timeProvider;
+      this.steppableRegionsCalculator = new SteppableRegionsCalculator(registry);
       this.captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange, soleZUpFrames, registry, null);
       this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, gravityZ, registry, null);
       this.reachabilityConstraintCalculator = new ReachabilityConstraintCalculator(soleZUpFrames,
@@ -149,9 +151,10 @@ public class StepConstraintCalculator
       {
          updateCaptureRegion(currentStep);
 
-         PlanarRegionsList planarRegionsList = this.planarRegionsList.getAndSet(null);
-         if (planarRegionsList != null)
-            planarRegionDecider.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+         steppableRegionsCalculator.setPlanarRegions(planarRegionsList.get().getPlanarRegionsAsList());
+         List<PlanarRegion> steppableRegions = steppableRegionsCalculator.computeSteppableRegions();
+
+         planarRegionDecider.setPlanarRegions(steppableRegions);
          planarRegionDecider.setOmega0(omega);
          planarRegionDecider.setCaptureRegion(captureRegionCalculator.getCaptureRegion());
          planarRegionDecider.updatePlanarRegionConstraintForStep(currentStep.getStepPose());
