@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2NodeInterface;
 
@@ -27,7 +28,10 @@ public class RemoteREAInterface
    public void addPlanarRegionsListCallback(Consumer<PlanarRegionsList> planarRegionsListConsumer)
    {
       planarRegionsListInput.addCallback(planarRegionsListMessage ->
-                                          planarRegionsListConsumer.accept(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage)));
+      {
+         LogTools.debug("Receiving planarRegionsListMessage sequenceId: {}", planarRegionsListMessage.getSequenceId());
+         planarRegionsListConsumer.accept(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+      });
    }
 
    public PlanarRegionsList getLatestPlanarRegionsList()

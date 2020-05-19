@@ -26,6 +26,7 @@ public class CompositePlanarRegionService
    private final PausablePeriodicThread thread;
 
    private PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
+   private long sequenceId = 0;
 
    public CompositePlanarRegionService(Ros2NodeInterface ros2Node, List<String> topicNames, double period, Supplier<PlanarRegionsList>... planarRegionSuppliers)
    {
@@ -79,6 +80,7 @@ public class CompositePlanarRegionService
       }
 
       message = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsListToPublish);
+      message.setSequenceId(++sequenceId);
       combinedPlanarRegionPublisher.publish(message);
    }
 }

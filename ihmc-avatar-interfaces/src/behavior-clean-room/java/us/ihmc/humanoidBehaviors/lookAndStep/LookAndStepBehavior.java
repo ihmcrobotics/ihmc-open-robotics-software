@@ -38,6 +38,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
@@ -153,6 +154,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       LogTools.debug("bodyPathModuleEvaluteAndRun, hasGoal = {}", hasGoal);
       if (!hasGoal)
       {
+         LogTools.debug("Sending planar regions to UI: {}: {}", LocalDateTime.now(), bodyPathModulePlanarRegionsList.hashCode());
          helper.publishToUI(MapRegionsForUI, bodyPathModulePlanarRegionsList);
          return;
       }
