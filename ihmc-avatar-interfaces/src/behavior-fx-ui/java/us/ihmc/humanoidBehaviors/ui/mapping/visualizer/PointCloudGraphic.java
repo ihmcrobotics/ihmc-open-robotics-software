@@ -114,6 +114,22 @@ public class PointCloudGraphic extends Group
          meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), scanPoint, colorToViz);
       }
    }
+   
+   /**
+    * default size is 0.005.
+    */
+   public void addPointsMeshes(Point3DReadOnly[] points, Color colorToViz, double size)
+   {
+      Point3D32 scanPoint = new Point3D32();
+
+      int numberOfScanPoints = points.length;
+      int sizeOfPointCloudToVisualize = Math.min(numberOfScanPoints, NUMBER_OF_POINTS_PER_MESSAGE);
+      for (int j = 0; j < sizeOfPointCloudToVisualize; j++)
+      {
+         scanPoint.set(points[j]);
+         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(size), scanPoint, colorToViz);
+      }
+   }
 
    public void addSensorPoseMesh(RigidBodyTransformReadOnly sensorPose, Color colorToViz)
    {
