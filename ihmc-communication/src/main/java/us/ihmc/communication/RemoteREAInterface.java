@@ -29,7 +29,6 @@ public class RemoteREAInterface
    {
       planarRegionsListInput.addCallback(planarRegionsListMessage ->
       {
-         LogTools.debug("Receiving planarRegionsListMessage sequenceId: {}", planarRegionsListMessage.getSequenceId());
          planarRegionsListConsumer.accept(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
       });
    }
