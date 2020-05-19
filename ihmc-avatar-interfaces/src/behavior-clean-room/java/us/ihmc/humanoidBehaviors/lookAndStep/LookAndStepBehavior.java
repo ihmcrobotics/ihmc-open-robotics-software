@@ -120,24 +120,22 @@ public class LookAndStepBehavior implements BehaviorInterface
       LogTools.info("Look and step behavior selected = {}", enabled);
 
       helper.setCommunicationCallbacksEnabled(enabled);
+
+      robot.pitchHeadWithRespectToChest(0.38);
+//      Commanding neck trajectory: slider: 43.58974358974359 angle: 0.3824055641025641
    }
 
    // TODO: Use data input-callback classes ?
 
-   // body path module
-   // not parallel
-   // regions recent?
-   // robot been stopped for 20s?
-   // not failed recently?
    private void bodyPathModuleAcceptREARegions(PlanarRegionsList planarRegionsList)
    {
 //      LogTools.debug("bodyPathModuleAcceptREARegions, {}", planarRegionsList);
       bodyPathModulePlanarRegionsList = planarRegionsList;
       bodyPathModulePlanarRegionExpirationTimer.reset();
 
-      //helper.publishToUI(MapRegionsForUI, bodyPathModulePlanarRegionsList); // TODO This takes forever?
+//      helper.publishToUI(MapRegionsForUI, bodyPathModulePlanarRegionsList); // TODO This takes forever?
 
-//      bodyPathModuleEvaluteAndRun();
+      bodyPathModuleEvaluteAndRun();
    }
 
    private void bodyPathModuleAcceptGoalPlacement(Pose3D goalInput)
@@ -153,7 +151,11 @@ public class LookAndStepBehavior implements BehaviorInterface
       // TODO Goal input comes from user click / Kryo thread
       boolean hasGoal = bodyPathModuleGoalInput != null && !bodyPathModuleGoalInput.containsNaN();
       LogTools.debug("bodyPathModuleEvaluteAndRun, hasGoal = {}", hasGoal);
-      if (!hasGoal) return;
+      if (!hasGoal)
+      {
+         helper.publishToUI(MapRegionsForUI, bodyPathModulePlanarRegionsList);
+         return;
+      }
 
       boolean regionsOK =
             bodyPathModulePlanarRegionsList != null && !bodyPathModulePlanarRegionExpirationTimer.isPastOrNaN(lookAndStepParameters.getPlanarRegionsExpiration()) && !bodyPathModulePlanarRegionsList.isEmpty();
@@ -169,8 +171,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       LogTools.debug("bodyPathModuleEvaluteAndRun, failedRecently = {}", failedRecently);
       if (failedRecently) return;
 
-      if (bodyPathBeingReviewed) return;
       LogTools.debug("bodyPathModuleEvaluteAndRun, bodyPathBeingReviewed = {}", bodyPathBeingReviewed);
+      if (bodyPathBeingReviewed) return;
 
       // TODO: Add robot standing still for 20s for real robot
 
@@ -192,7 +194,6 @@ public class LookAndStepBehavior implements BehaviorInterface
       rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
       bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
       Stopwatch stopwatch = new Stopwatch().start();
-      LogTools.info("Planning body path...");
       final ArrayList<Pose3D> bodyPathPlan = new ArrayList<>(); // TODO Review making this final
       bodyPathPlanner.planWaypoints();
       LogTools.info("Body path planning took {}", stopwatch.totalElapsed()); // 0.1 s
