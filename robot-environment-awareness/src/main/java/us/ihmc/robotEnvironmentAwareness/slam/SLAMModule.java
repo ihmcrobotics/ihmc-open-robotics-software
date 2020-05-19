@@ -68,7 +68,7 @@ public class SLAMModule
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
-   protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
+   protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
    private final AtomicReference<Boolean> robotStatus;
    private final AtomicReference<Boolean> velocityStatus;
