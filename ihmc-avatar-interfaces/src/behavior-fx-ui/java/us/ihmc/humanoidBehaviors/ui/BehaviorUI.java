@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.ui;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SubScene;
 import javafx.scene.control.ChoiceBox;
@@ -10,6 +11,8 @@ import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
@@ -85,12 +88,15 @@ public class BehaviorUI
             tabPane.getTabs().add(tab);
          }
 
-         View3DFactory view3dFactory = View3DFactory.createSubscene();
-         view3dFactory.addCameraController(0.05, 2000.0,true);
-         view3dFactory.addWorldCoordinateSystem(0.3);
-         view3dFactory.addDefaultLighting();
-         SubScene subScene = view3dFactory.getSubScene();
-         Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
+         View3DFactory view3DFactory = View3DFactory.createSubscene();
+         view3DFactory.addCameraController(0.05, 2000.0,true);
+         view3DFactory.addWorldCoordinateSystem(0.3);
+         view3DFactory.addDefaultLighting();
+         SubScene subScene = view3DFactory.getSubScene();
+         Pane view3DSubSceneWrappedInsidePane = view3DFactory.getSubSceneWrappedInsidePane();
+
+         Group view2DGroup = new Group();
+         Scene view2DScene = new Scene(view2DGroup, Color.WHITE);
 
          behaviorSelector.getItems().add("None");
          behaviorSelector.setValue("None");
@@ -103,16 +109,16 @@ public class BehaviorUI
          for (BehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces.values())
          {
             behaviorUIInterface.init(subScene, ros2Node, behaviorMessager, robotModel);
-            view3dFactory.addNodeToView(behaviorUIInterface);
+            view3DFactory.addNodeToView(behaviorUIInterface);
          }
 
          behaviorSelector.valueProperty().addListener(this::onBehaviorSelection);
 
          directRobotUIController.init(subScene, ros2Node, robotModel);
-         view3dFactory.addNodeToView(directRobotUIController);
-         view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
+         view3DFactory.addNodeToView(directRobotUIController);
+         view3DFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
-         mainPane.setCenter(subSceneWrappedInsidePane);
+         mainPane.setCenter(view3DSubSceneWrappedInsidePane);
          Stage primaryStage = new Stage();
          primaryStage.setTitle(getClass().getSimpleName());
          primaryStage.setMaximized(false);
