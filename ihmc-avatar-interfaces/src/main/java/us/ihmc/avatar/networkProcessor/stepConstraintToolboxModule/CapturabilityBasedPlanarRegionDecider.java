@@ -1,39 +1,26 @@
 package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
-import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
-import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHull;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullTools;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.yoVariables.parameters.DoubleParameter;
-import us.ihmc.yoVariables.providers.DoubleProvider;
+import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
-import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
-import java.util.function.ToDoubleFunction;
-import java.util.stream.Collectors;
 
 public class CapturabilityBasedPlanarRegionDecider
 {
@@ -41,7 +28,7 @@ public class CapturabilityBasedPlanarRegionDecider
 
    private static final double minimumIntersectionForSearch = 0.005;
 
-   private final List<PlanarRegion> steppableRegions = new ArrayList<>();
+   private final List<StepConstraintRegion> stepConstraintRegions = new ArrayList<>();
 
    private final YoBoolean switchPlanarRegionConstraintsAutomatically;
 
@@ -57,7 +44,7 @@ public class CapturabilityBasedPlanarRegionDecider
 
    private final ICPControlPlane icpControlPlane;
 
-   private PlanarRegion planarRegionToConstrainTo = null;
+   private StepConstraintRegion planarRegionToConstrainTo = null;
 
    public CapturabilityBasedPlanarRegionDecider(ReferenceFrame centerOfMassFrame,
                                                 double gravityZ,
@@ -86,10 +73,10 @@ public class CapturabilityBasedPlanarRegionDecider
       }
    }
 
-   public void setPlanarRegions(List<PlanarRegion> planarRegions)
+   public void setConstraintRegions(List<StepConstraintRegion> constraintRegions)
    {
-      steppableRegions.clear();
-      steppableRegions.addAll(planarRegions);
+      stepConstraintRegions.clear();
+      stepConstraintRegions.addAll(constraintRegions);
    }
 
    public void setCaptureRegion(FrameConvexPolygon2DReadOnly captureRegion)
@@ -114,15 +101,15 @@ public class CapturabilityBasedPlanarRegionDecider
       yoConvexHullConstraintInControlPlane.clear();
    }
 
-   private void computeShrunkAndProjectedConvexHulls(PlanarRegion planarRegion)
+   private void computeShrunkAndProjectedConvexHulls(StepConstraintRegion constraintRegion)
    {
-      yoConvexHullConstraint.set(planarRegion.getConvexHull());
-      yoConvexHullConstraint.applyTransform(planarRegion.getTransformToWorld(), false);
+      yoConvexHullConstraint.set(constraintRegion.getConvexHullInConstraintRegion());
+      yoConvexHullConstraint.applyTransform(constraintRegion.getTransformToWorld(), false);
 
-      icpControlPlane.projectConvexHullOntoControlPlane(planarRegion.getConvexHull(), planarRegion.getTransformToWorld(), yoConvexHullConstraintInControlPlane);
+      icpControlPlane.projectVerticesOntoControlPlane(constraintRegion.getConvexHullInConstraintRegion(), constraintRegion.getTransformToWorld(), yoConvexHullConstraintInControlPlane);
    }
 
-   public PlanarRegion updatePlanarRegionConstraintForStep(FramePose3DReadOnly footstepPose)
+   public StepConstraintRegion updatePlanarRegionConstraintForStep(FramePose3DReadOnly footstepPose)
    {
       constraintRegionChanged.set(false);
 
@@ -141,7 +128,7 @@ public class CapturabilityBasedPlanarRegionDecider
 
       if (switchPlanarRegionConstraintsAutomatically.getBooleanValue() && !checkIfCurrentPlanarRegionIsValid(captureRegion))
       {
-         PlanarRegion betterRegion = findBestPlanarRegionToStepTo(captureRegion);
+         StepConstraintRegion betterRegion = findBestPlanarRegionToStepTo(captureRegion);
          if (betterRegion != null)
          {
             planarRegionToConstrainTo = betterRegion;
@@ -158,15 +145,15 @@ public class CapturabilityBasedPlanarRegionDecider
       return constraintRegionChanged.getBooleanValue();
    }
 
-   public PlanarRegion getConstraintRegion()
+   public StepConstraintRegion getConstraintRegion()
    {
       return planarRegionToConstrainTo;
    }
 
-   private PlanarRegion findPlanarRegionUnderFoothold(FramePoint3DReadOnly foothold)
+   private StepConstraintRegion findPlanarRegionUnderFoothold(FramePoint3DReadOnly foothold)
    {
-      PlanarRegion highestRegionUnderFoot = new PlanarRegion();
-      Point3D projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(foothold, steppableRegions, highestRegionUnderFoot);
+      StepConstraintRegion highestRegionUnderFoot = new StepConstraintRegion();
+      Point3D projectedPoint = PlanarRegionTools.projectPointToPlanesVertically(foothold, stepConstraintRegions, highestRegionUnderFoot);
 
       return projectedPoint == null ? null : highestRegionUnderFoot;
    }
@@ -178,14 +165,14 @@ public class CapturabilityBasedPlanarRegionDecider
       return intersectionArea > minimumIntersectionForSearch;
    }
 
-   private PlanarRegion findBestPlanarRegionToStepTo(FrameConvexPolygon2DReadOnly captureRegion)
+   private StepConstraintRegion findBestPlanarRegionToStepTo(FrameConvexPolygon2DReadOnly captureRegion)
    {
       double maxArea = 0.0;
-      PlanarRegion activePlanarRegion = null;
+      StepConstraintRegion activePlanarRegion = null;
 
-      for (int regionIndex = 0; regionIndex < steppableRegions.size(); regionIndex++)
+      for (int regionIndex = 0; regionIndex < stepConstraintRegions.size(); regionIndex++)
       {
-         PlanarRegion planarRegion = steppableRegions.get(regionIndex);
+         StepConstraintRegion planarRegion = stepConstraintRegions.get(regionIndex);
 
          double intersectionArea = findIntersectionAreaWithCaptureRegion(captureRegion, planarRegion);
 
@@ -199,15 +186,15 @@ public class CapturabilityBasedPlanarRegionDecider
       return activePlanarRegion;
    }
 
-   private double findIntersectionAreaWithCaptureRegion(FrameConvexPolygon2DReadOnly captureRegionInControlPlane, PlanarRegion planarRegion)
+   private double findIntersectionAreaWithCaptureRegion(FrameConvexPolygon2DReadOnly captureRegionInControlPlane, StepConstraintRegion planarRegion)
    {
-      if (!planarRegion.isPolygonIntersecting(captureRegionInControlPlane))
+      if (!planarRegion.isPolygonInWorldIntersecting(captureRegionInControlPlane))
          return 0.0;
 
       double intersectionArea = 0.0;
-      for (ConvexPolygon2DReadOnly convexPolygon : planarRegion.getConvexPolygons())
+      for (ConcavePolygon2DReadOnly convexPolygon : planarRegion.getHolesInConstraintRegion())
       {
-         icpControlPlane.projectConvexHullOntoControlPlane(convexPolygon, planarRegion.getTransformToWorld(), convexHullConstraintInControlPlane);
+         icpControlPlane.projectVerticesOntoControlPlane(convexPolygon, planarRegion.getTransformToWorld(), convexHullConstraintInControlPlane);
          intersectionArea += convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegionInControlPlane, convexHullConstraintInControlPlane);
       }
 

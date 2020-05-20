@@ -1,6 +1,8 @@
 package us.ihmc.robotics.geometry.concavePolygon2D;
 
+import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -30,13 +32,23 @@ public class GeometryPolygonTools
 
    public static boolean doPolygonsIntersect(ConcavePolygon2DReadOnly polygonA, ConcavePolygon2DReadOnly polygonB)
    {
-      if (!polygonA.getBoundingBox().intersectsInclusive(polygonB.getBoundingBox()))
+      return doPolygonsIntersect(polygonA.getBoundingBox(), polygonB.getBoundingBox(), polygonA, polygonB);
+   }
+
+   public static boolean doPolygonsIntersect(BoundingBox2DReadOnly boundingBoxA, BoundingBox2DReadOnly boundingBoxB, Vertex2DSupplier polygonA, Vertex2DSupplier polygonB)
+   {
+      if (!boundingBoxA.intersectsInclusive(boundingBoxB))
          return false;
 
+      return doPolygonsIntersect(polygonA, polygonB);
+   }
+
+   public static boolean doPolygonsIntersect(Vertex2DSupplier polygonA, Vertex2DSupplier polygonB)
+   {
       return doPolygonsIntersectBruteForce(polygonA, polygonB);
    }
 
-   public static boolean doPolygonsIntersectBruteForce(ConcavePolygon2DReadOnly polygonA, ConcavePolygon2DReadOnly polygonB)
+   public static boolean doPolygonsIntersectBruteForce(Vertex2DSupplier polygonA, Vertex2DSupplier polygonB)
    {
       for (int i = 0; i < polygonA.getNumberOfVertices(); i++)
       {
@@ -50,14 +62,14 @@ public class GeometryPolygonTools
       return false;
    }
 
-   public static boolean doesLineSegment2DIntersectPolygon(Point2DReadOnly segmentStart, Point2DReadOnly segmentEnd, ConcavePolygon2DReadOnly polygon)
+   public static boolean doesLineSegment2DIntersectPolygon(Point2DReadOnly segmentStart, Point2DReadOnly segmentEnd, Vertex2DSupplier polygon)
    {
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
          Point2DReadOnly startVertex = polygon.getVertex(i);
          Point2DReadOnly endVertex = polygon.getVertex(EuclidGeometryPolygonTools.next(i, polygon.getNumberOfVertices()));
 
-         if (EuclidGeometryTools.doLineSegment2DsIntersect(segmentStart, segmentStart, startVertex, endVertex))
+         if (EuclidGeometryTools.doLineSegment2DsIntersect(segmentStart, segmentEnd, startVertex, endVertex))
             return true;
       }
 

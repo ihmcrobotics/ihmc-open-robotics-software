@@ -7,6 +7,7 @@ import us.ihmc.euclid.interfaces.Transformable;
 import us.ihmc.euclid.transform.interfaces.Transform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 
 import java.util.List;
 
@@ -73,6 +74,11 @@ public interface ConcavePolygon2DBasics extends ConcavePolygon2DReadOnly, Transf
    }
 
    default void addVertex(Point2DReadOnly vertex)
+   {
+      this.addVertex(vertex.getX(), vertex.getY());
+   }
+
+   default void addVertex(Point3DReadOnly vertex)
    {
       this.addVertex(vertex.getX(), vertex.getY());
    }

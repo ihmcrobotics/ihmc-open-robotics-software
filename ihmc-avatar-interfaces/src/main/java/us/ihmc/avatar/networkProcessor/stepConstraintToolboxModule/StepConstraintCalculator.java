@@ -152,9 +152,9 @@ public class StepConstraintCalculator
          updateCaptureRegion(currentStep);
 
          steppableRegionsCalculator.setPlanarRegions(planarRegionsList.get().getPlanarRegionsAsList());
-         List<PlanarRegion> steppableRegions = steppableRegionsCalculator.computeSteppableRegions();
+         List<StepConstraintRegion> steppableRegions = steppableRegionsCalculator.computeSteppableRegions();
 
-         planarRegionDecider.setPlanarRegions(steppableRegions);
+         planarRegionDecider.setConstraintRegions(steppableRegions);
          planarRegionDecider.setOmega0(omega);
          planarRegionDecider.setCaptureRegion(captureRegionCalculator.getCaptureRegion());
          planarRegionDecider.updatePlanarRegionConstraintForStep(currentStep.getStepPose());
@@ -176,29 +176,29 @@ public class StepConstraintCalculator
 
    public void updateReachabilityRegionInControlPlane(RobotSide supportSide)
    {
-      PlanarRegion planarRegionForConstraint = planarRegionDecider.getConstraintRegion();
+      StepConstraintRegion stepConstraintRegion = planarRegionDecider.getConstraintRegion();
 
-      if (planarRegionForConstraint == null)
+      if (stepConstraintRegion == null)
          return;
 
       FrameConvexPolygon2DReadOnly reachabilityRegion = reachabilityConstraintCalculator.getReachabilityPolygon(supportSide);
       reachabilityRegionInConstraintPlane.clear();
       reachabilityRegionInConstraintPlane.setIncludingFrame(reachabilityRegion);
       reachabilityRegionInConstraintPlane.changeFrame(worldFrame);
-      reachabilityRegionInConstraintPlane.applyTransform(planarRegionForConstraint.getTransformToLocal(), false);
+      reachabilityRegionInConstraintPlane.applyTransform(stepConstraintRegion.getTransformToLocal(), false);
    }
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
    private StepConstraintRegion computeConstraintRegion()
    {
-      PlanarRegion planarRegionForConstraint = planarRegionDecider.getConstraintRegion();
+      StepConstraintRegion planarRegionForConstraint = planarRegionDecider.getConstraintRegion();
 
       if (planarRegionForConstraint == null)
          return null;
 
       ConvexPolygon2D constraintConvexHull = new ConvexPolygon2D();
-      convexPolygonTools.computeIntersectionOfPolygons(planarRegionForConstraint.getConvexHull(), reachabilityRegionInConstraintPlane, constraintConvexHull);
+      convexPolygonTools.computeIntersectionOfPolygons(planarRegionForConstraint.getConvexHullInConstraintRegion(), reachabilityRegionInConstraintPlane, constraintConvexHull);
 
       return new StepConstraintRegion(planarRegionForConstraint.getTransformToWorld(), constraintConvexHull);
    }

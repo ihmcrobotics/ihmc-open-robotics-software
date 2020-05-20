@@ -15,6 +15,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.*;
+import us.ihmc.robotics.RegionInWorldInterface;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1085,13 +1086,14 @@ public class PlanarRegionTools
     * Will return the intersection point between a line and a single planar region. If the line does
     * not intersect the region this method will return null.
     */
-   public static Point3D intersectRegionWithLine(PlanarRegion region, Line3DReadOnly projectionLineInWorld)
+   public static Point3D intersectRegionWithLine(RegionInWorldInterface region, Line3DReadOnly projectionLineInWorld)
    {
       RigidBodyTransformReadOnly regionToWorld = region.getTransformToWorld();
       RigidBodyTransformReadOnly regionToLocal = region.getTransformToLocal();
 
       Vector3DReadOnly planeNormal = new Vector3D(0.0, 0.0, 1.0);
-      Point3DReadOnly pointOnPlane = new Point3D(region.getConvexPolygon(0).getVertex(0));
+      Point3D pointOnPlane = new Point3D();
+      region.getOrigin(pointOnPlane);
 
       Point3DBasics pointOnLineInLocal = new Point3D(projectionLineInWorld.getPoint());
       Vector3DBasics directionOfLineInLocal = new Vector3D(projectionLineInWorld.getDirection());
@@ -1208,7 +1210,7 @@ public class PlanarRegionTools
       return projectPointToPlanesVertically(pointInWorld, regions, null);
    }
 
-   public static Point3D projectPointToPlanesVertically(Point3DReadOnly pointInWorld, List<PlanarRegion> regions, PlanarRegion highestRegionToPack)
+   public static <T extends RegionInWorldInterface> Point3D projectPointToPlanesVertically(Point3DReadOnly pointInWorld, List<T> regions, T highestRegionToPack)
    {
       Point3D highestIntersection = null;
 
@@ -1218,7 +1220,7 @@ public class PlanarRegionTools
       if (regions == null)
          return null;
 
-      for (PlanarRegion region : regions)
+      for (T region : regions)
       {
          Point3D intersection = intersectRegionWithLine(region, verticalLine);
          if (intersection == null)
