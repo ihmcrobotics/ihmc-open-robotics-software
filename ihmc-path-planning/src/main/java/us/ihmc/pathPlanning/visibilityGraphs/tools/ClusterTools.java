@@ -27,6 +27,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DBasics;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ExtrusionSide;
@@ -580,28 +581,12 @@ public class ClusterTools
 
       RigidBodyTransformReadOnly transformFromObstacleToWorld = obstacleRegion.getTransformToWorld();
 
-      // Transform the obstacle to world and also Project the obstacle to z = 0:
       List<Point3DReadOnly> obstacleConcaveHullInWorld = new ArrayList<>();
       List<Point3DReadOnly> obstacleClusterPointsWithZeroZ = new ArrayList<>();
-      for (int i = 0; i < concaveHull.size(); i++)
-      {
-         Point2DReadOnly obstacleConcaveHullVertexInLocal = concaveHull.get(i);
-         Point3D obstacleConcaveHullVertexInWorld = new Point3D(obstacleConcaveHullVertexInLocal);
-         obstacleConcaveHullVertexInWorld.applyTransform(transformFromObstacleToWorld);
+      // Transform the obstacle to world and also Project the obstacle to z = 0
+      calculatePointsInWorldAtRegionHeight(concaveHull, transformFromObstacleToWorld, homeRegion, obstacleConcaveHullInWorld, obstacleClusterPointsWithZeroZ);
 
-         obstacleConcaveHullInWorld.add(obstacleConcaveHullVertexInWorld);
-
-         double zInHomeRegion = homeRegion.getPlaneZGivenXY(obstacleConcaveHullVertexInWorld.getX(), obstacleConcaveHullVertexInWorld.getY());
-
-         double obstacleHeight = obstacleConcaveHullVertexInWorld.getZ() - zInHomeRegion;
-         Point3D temporaryClusterPoint = new Point3D(obstacleConcaveHullVertexInWorld);
-         temporaryClusterPoint.setZ(obstacleHeight);
-
-         obstacleClusterPointsWithZeroZ.add(temporaryClusterPoint);
-      }
-
-
-      Vector3D obstacleNormal = obstacleRegion.getNormal();
+      Vector3DReadOnly obstacleNormal = obstacleRegion.getNormal();
       boolean verticalObstacle = Math.abs(obstacleNormal.getZ()) < zThresholdBeforeOrthogonal;
 
       ClusterType obstacleClusterType = getClusterType(verticalObstacle);
@@ -659,6 +644,35 @@ public class ClusterTools
       cluster.setNonNavigableExtrusionsInLocal(nonNavigableExtrusionsInHomeRegionLocal);
 
       return cluster;
+   }
+
+   public static void calculatePointsInWorldAtRegionHeight(List<? extends Point2DReadOnly> points,
+                                                            RigidBodyTransformReadOnly transformToWorld,
+                                                            PlanarRegion region,
+                                                            List<Point3DReadOnly> pointsInWorldToPack,
+                                                            List<Point3DReadOnly> pointsOnRegionInWorldToPack)
+   {
+      if (pointsInWorldToPack != null)
+         pointsInWorldToPack.clear();
+      pointsOnRegionInWorldToPack.clear();
+
+      for (int i = 0; i < points.size(); i++)
+      {
+         Point2DReadOnly point = points.get(i);
+         Point3D pointInWorld = new Point3D(point);
+         pointInWorld.applyTransform(transformToWorld);
+
+         if (pointsInWorldToPack != null)
+            pointsInWorldToPack.add(pointInWorld);
+
+         double zInHomeRegion = region.getPlaneZGivenXY(pointInWorld.getX(), pointInWorld.getY());
+
+         double obstacleHeight = pointInWorld.getZ() - zInHomeRegion;
+         Point3D tempPoint = new Point3D(pointInWorld);
+         tempPoint.setZ(obstacleHeight);
+
+         pointsOnRegionInWorldToPack.add(tempPoint);
+      }
    }
 
    private static ClusterType getClusterType(boolean verticalExtrusion)
