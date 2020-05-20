@@ -9,8 +9,16 @@ public class WeilerAthertonPolygonClipping
 {
    public static void clip(ConcavePolygon2DReadOnly clippingPolygon, ConcavePolygon2DReadOnly polygonToClip, ConcavePolygon2DBasics clippedPolygon)
    {
-      if (!GeometryPolygonTools.doPolygonsIntersect(clippingPolygon, polygonToClip))
-         throw new IllegalArgumentException("Polygons don't intersect.");
+      if (GeometryPolygonTools.isPolygonInsideOtherPolygon(clippingPolygon, polygonToClip))
+      {
+         clippedPolygon.set(clippingPolygon);
+         return;
+      }
+      else if (!GeometryPolygonTools.doPolygonsIntersect(clippingPolygon, polygonToClip))
+      {
+         clippedPolygon.set(polygonToClip);
+         return;
+      }
 
       LinkedPointList clippingPolygonList = ClippingTools.createLinkedPointList(clippingPolygon);
       LinkedPointList polygonToClipList = ClippingTools.createLinkedPointList(polygonToClip);
