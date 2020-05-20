@@ -32,6 +32,7 @@ public class EnvironmentConstraintHandler
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private static final double distanceInsideRegion = 0.04;
+   private static final boolean usePredictedContactPoints = false;
 
    private final ConvexPolygonScaler scaler = new ConvexPolygonScaler();
 
@@ -140,7 +141,7 @@ public class EnvironmentConstraintHandler
 
    private void computeFootstepPolygon(RobotSide upcomingFootstepSide, List<? extends Point2DBasics> predictedContactPoints, Orientation3DReadOnly orientation)
    {
-      if (predictedContactPoints.isEmpty())
+      if (predictedContactPoints.isEmpty() || !usePredictedContactPoints)
          predictedContactPoints = contactableFeet.get(upcomingFootstepSide).getContactPoints2d();
 
       footstepPolygon.clear();
