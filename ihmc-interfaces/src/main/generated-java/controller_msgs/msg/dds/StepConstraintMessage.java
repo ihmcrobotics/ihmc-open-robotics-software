@@ -19,9 +19,9 @@ public class StepConstraintMessage extends Packet<StepConstraintMessage> impleme
 
    public int concave_hull_size_;
 
-   public int number_of_convex_polygons_;
+   public int number_of_holes_in_region_;
 
-   public us.ihmc.idl.IDLSequence.Integer  convex_polygons_size_;
+   public us.ihmc.idl.IDLSequence.Integer  hole_polygons_size_;
 
    public StepConstraintMessage()
    {
@@ -36,7 +36,7 @@ public class StepConstraintMessage extends Packet<StepConstraintMessage> impleme
 
 
 
-      convex_polygons_size_ = new us.ihmc.idl.IDLSequence.Integer (20, "type_2");
+      hole_polygons_size_ = new us.ihmc.idl.IDLSequence.Integer (20, "type_2");
 
 
    }
@@ -61,10 +61,10 @@ public class StepConstraintMessage extends Packet<StepConstraintMessage> impleme
       concave_hull_size_ = other.concave_hull_size_;
 
 
-      number_of_convex_polygons_ = other.number_of_convex_polygons_;
+      number_of_holes_in_region_ = other.number_of_holes_in_region_;
 
 
-      convex_polygons_size_.set(other.convex_polygons_size_);
+      hole_polygons_size_.set(other.hole_polygons_size_);
    }
 
 
@@ -106,20 +106,20 @@ public class StepConstraintMessage extends Packet<StepConstraintMessage> impleme
    }
 
 
-   public void setNumberOfConvexPolygons(int number_of_convex_polygons)
+   public void setNumberOfHolesInRegion(int number_of_holes_in_region)
    {
-      number_of_convex_polygons_ = number_of_convex_polygons;
+      number_of_holes_in_region_ = number_of_holes_in_region;
    }
-   public int getNumberOfConvexPolygons()
+   public int getNumberOfHolesInRegion()
    {
-      return number_of_convex_polygons_;
+      return number_of_holes_in_region_;
    }
 
 
 
-   public us.ihmc.idl.IDLSequence.Integer  getConvexPolygonsSize()
+   public us.ihmc.idl.IDLSequence.Integer  getHolePolygonsSize()
    {
-      return convex_polygons_size_;
+      return hole_polygons_size_;
    }
 
 
@@ -158,10 +158,10 @@ public class StepConstraintMessage extends Packet<StepConstraintMessage> impleme
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.concave_hull_size_, other.concave_hull_size_, epsilon)) return false;
 
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_convex_polygons_, other.number_of_convex_polygons_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.number_of_holes_in_region_, other.number_of_holes_in_region_, epsilon)) return false;
 
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.convex_polygons_size_, other.convex_polygons_size_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsIntegerSequence(this.hole_polygons_size_, other.hole_polygons_size_, epsilon)) return false;
 
 
       return true;
@@ -188,10 +188,10 @@ public class StepConstraintMessage extends Packet<StepConstraintMessage> impleme
       if(this.concave_hull_size_ != otherMyClass.concave_hull_size_) return false;
 
 
-      if(this.number_of_convex_polygons_ != otherMyClass.number_of_convex_polygons_) return false;
+      if(this.number_of_holes_in_region_ != otherMyClass.number_of_holes_in_region_) return false;
 
 
-      if (!this.convex_polygons_size_.equals(otherMyClass.convex_polygons_size_)) return false;
+      if (!this.hole_polygons_size_.equals(otherMyClass.hole_polygons_size_)) return false;
 
       return true;
    }
@@ -218,11 +218,11 @@ public class StepConstraintMessage extends Packet<StepConstraintMessage> impleme
       builder.append("concave_hull_size=");
       builder.append(this.concave_hull_size_);      builder.append(", ");
 
-      builder.append("number_of_convex_polygons=");
-      builder.append(this.number_of_convex_polygons_);      builder.append(", ");
+      builder.append("number_of_holes_in_region=");
+      builder.append(this.number_of_holes_in_region_);      builder.append(", ");
 
-      builder.append("convex_polygons_size=");
-      builder.append(this.convex_polygons_size_);
+      builder.append("hole_polygons_size=");
+      builder.append(this.hole_polygons_size_);
       builder.append("}");
       return builder.toString();
    }

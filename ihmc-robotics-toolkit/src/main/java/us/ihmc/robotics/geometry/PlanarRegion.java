@@ -25,13 +25,14 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.RegionInWorldInterface;
 import us.ihmc.robotics.random.RandomGeometry;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-public class PlanarRegion implements SupportingVertexHolder
+public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterface<PlanarRegion>
 {
    public static final int NO_REGION_ID = -1;
    public static final double DEFAULT_BOUNDING_BOX_EPSILON = 0.0;
@@ -147,7 +148,8 @@ public class PlanarRegion implements SupportingVertexHolder
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
 
       convexPolygons.clear();
-      convexPolygons.addAll(planarRegionConvexPolygons);
+      for (int i = 0; i < planarRegionConvexPolygons.size(); i++)
+         convexPolygons.add(planarRegionConvexPolygons.get(i));
 
       updateBoundingBox();
       updateConvexHull();
