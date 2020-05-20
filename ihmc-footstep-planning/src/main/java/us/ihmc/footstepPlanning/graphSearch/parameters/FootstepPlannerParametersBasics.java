@@ -28,9 +28,19 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.minimumDistanceFromCliffBottoms, distance);
    }
 
-   default void setCliffHeightToAvoid(double height)
+   default void setCliffBaseHeightToAvoid(double height)
    {
-      set(FootstepPlannerParameterKeys.cliffHeightToAvoid, height);
+      set(FootstepPlannerParameterKeys.cliffBaseHeightToAvoid, height);
+   }
+
+   default void setMinimumDistanceFromCliffTops(double distance)
+   {
+      set(FootstepPlannerParameterKeys.minimumDistanceFromCliffTops, distance);
+   }
+
+   default void setCliffTopHeightToAvoid(double height)
+   {
+      set(FootstepPlannerParameterKeys.cliffTopHeightToAvoid, height);
    }
 
    default void setMaximumStepReach(double reach)
@@ -370,10 +380,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximumZPenetrationOnValleyRegions(parametersPacket.getMaximumZPenetrationOnValleyRegions());
       if (parametersPacket.getMaximumStepWidth() != noValue)
          setMaximumStepWidth(parametersPacket.getMaximumStepWidth());
-      if (parametersPacket.getCliffHeightToAvoid() != noValue)
-         setCliffHeightToAvoid(parametersPacket.getCliffHeightToAvoid());
+      if (parametersPacket.getCliffBaseHeightToAvoid() != noValue)
+         this.setCliffBaseHeightToAvoid(parametersPacket.getCliffBaseHeightToAvoid());
       if (parametersPacket.getMinimumDistanceFromCliffBottoms() != noValue)
          setMinimumDistanceFromCliffBottoms(parametersPacket.getMinimumDistanceFromCliffBottoms());
+      if (parametersPacket.getCliffTopHeightToAvoid() != noValue)
+         this.setCliffTopHeightToAvoid(parametersPacket.getCliffTopHeightToAvoid());
+      if (parametersPacket.getMinimumDistanceFromCliffTops() != noValue)
+         setMinimumDistanceFromCliffTops(parametersPacket.getMinimumDistanceFromCliffTops());
       if (parametersPacket.getBodyBoxHeight() != noValue)
          setBodyBoxHeight(parametersPacket.getBodyBoxHeight());
       if (parametersPacket.getBodyBoxDepth() != noValue)

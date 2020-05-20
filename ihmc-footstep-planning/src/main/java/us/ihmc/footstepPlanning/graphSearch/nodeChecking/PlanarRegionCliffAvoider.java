@@ -2,6 +2,7 @@ package us.ihmc.footstepPlanning.graphSearch.nodeChecking;
 
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.interfaces.LineSegment2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -17,30 +18,19 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.DoubleSupplier;
 
-public class PlanarRegionBaseOfCliffAvoider
+public class PlanarRegionCliffAvoider
 {
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepNodeSnapperReadOnly snapper;
-   private final DoubleSupplier minimumDistanceFromCliffBottoms;
-   private final DoubleSupplier cliffHeightToAvoid;
+   private final FootstepPlannerParametersReadOnly parameters;
    private PlanarRegionsList planarRegionsList;
 
-   public PlanarRegionBaseOfCliffAvoider(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapperReadOnly snapper, SideDependentList<ConvexPolygon2D> footPolygons)
+   public PlanarRegionCliffAvoider(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapperReadOnly snapper, SideDependentList<ConvexPolygon2D> footPolygons)
    {
-      this(snapper, footPolygons, parameters::getMinimumDistanceFromCliffBottoms, parameters::getCliffHeightToAvoid);
-   }
-
-   public PlanarRegionBaseOfCliffAvoider(FootstepNodeSnapperReadOnly snapper,
-                                         SideDependentList<ConvexPolygon2D> footPolygons,
-                                         DoubleSupplier minimumDistanceFromCliffBottoms,
-                                         DoubleSupplier cliffHeightToAvoid)
-   {
-      this.footPolygons = footPolygons;
+      this.parameters = parameters;
       this.snapper = snapper;
-      this.minimumDistanceFromCliffBottoms = minimumDistanceFromCliffBottoms;
-      this.cliffHeightToAvoid = cliffHeightToAvoid;
+      this.footPolygons = footPolygons;
    }
 
    public void setPlanarRegionsList(PlanarRegionsList planarRegionsList)
@@ -50,14 +40,41 @@ public class PlanarRegionBaseOfCliffAvoider
 
    public boolean isNodeValid(FootstepNode node)
    {
-      double cliffHeightToAvoid = this.cliffHeightToAvoid.getAsDouble();
-      double minimumDistanceFromCliffBottoms = this.minimumDistanceFromCliffBottoms.getAsDouble();
+      double cliffBottomHeightToAvoid = parameters.getCliffBaseHeightToAvoid();
+      double minimumDistanceFromCliffBottoms = parameters.getMinimumDistanceFromCliffBottoms();
 
-      if(minimumDistanceFromCliffBottoms <= 0.0 || Double.isInfinite(cliffHeightToAvoid) || (cliffHeightToAvoid <= 0.0))
-         return true;
+      double cliffTopHeightToAvoid = parameters.getCliffTopHeightToAvoid();
+      double minimumDistanceFromCliffTops = parameters.getMinimumDistanceFromCliffTops();
 
       RigidBodyTransformReadOnly soleTransform = snapper.snapFootstepNode(node).getSnappedNodeTransform(node);
 
+      boolean checkCliffBottom = minimumDistanceFromCliffBottoms > 0.0 && cliffBottomHeightToAvoid > 0.0;
+      if (checkCliffBottom)
+      {
+         ArrayList<LineSegment2D> lineSegmentsInSoleFrame = createLineSegmentsToProject(node, minimumDistanceFromCliffBottoms);
+         double maxCliffHeight = findExtremumHeightInFrame(planarRegionsList, soleTransform, lineSegmentsInSoleFrame, true);
+         if (maxCliffHeight > cliffBottomHeightToAvoid)
+         {
+            return false;
+         }
+      }
+
+      boolean checkCliffTop = minimumDistanceFromCliffTops > 0.0 && cliffTopHeightToAvoid > 0.0;
+      if (checkCliffTop)
+      {
+         ArrayList<LineSegment2D> lineSegmentsInSoleFrame = createLineSegmentsToProject(node, minimumDistanceFromCliffTops);
+         double minCliffHeight = findExtremumHeightInFrame(planarRegionsList, soleTransform, lineSegmentsInSoleFrame, false);
+         if (minCliffHeight < -cliffTopHeightToAvoid)
+         {
+            return false;
+         }
+      }
+
+      return true;
+   }
+
+   private ArrayList<LineSegment2D> createLineSegmentsToProject(FootstepNode node, double distance)
+   {
       ArrayList<LineSegment2D> lineSegmentsInSoleFrame = new ArrayList<>();
       ConvexPolygon2D footPolygon = footPolygons.get(node.getRobotSide());
       for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
@@ -66,33 +83,24 @@ public class PlanarRegionBaseOfCliffAvoider
          Point2D extendedPoint1 = new Point2D(footPoint);
          Point2D extendedPoint2 = new Point2D(footPoint);
 
-         extendedPoint1.addX(minimumDistanceFromCliffBottoms * Math.signum(footPoint.getX()));
-         extendedPoint2.addY(minimumDistanceFromCliffBottoms * Math.signum(footPoint.getY()));
+         extendedPoint1.addX(distance * Math.signum(footPoint.getX()));
+         extendedPoint2.addY(distance * Math.signum(footPoint.getY()));
 
          lineSegmentsInSoleFrame.add(new LineSegment2D(footPoint.getX(), footPoint.getY(), extendedPoint1.getX(), extendedPoint1.getY()));
          lineSegmentsInSoleFrame.add(new LineSegment2D(footPoint.getX(), footPoint.getY(), extendedPoint2.getX(), extendedPoint2.getY()));
       }
-
-      Point3D highestPointInSoleFrame = new Point3D();
-      LineSegment2D highestLineSegmentInSoleFrame = new LineSegment2D();
-
-      double maximumCliffZInSoleFrame = findHighestPointInFrame(planarRegionsList, soleTransform, lineSegmentsInSoleFrame, highestPointInSoleFrame, highestLineSegmentInSoleFrame, new Point3D());
-
-      boolean cliffDetected = maximumCliffZInSoleFrame >= cliffHeightToAvoid;
-      return !cliffDetected;
+      return lineSegmentsInSoleFrame;
    }
 
-   public static double findHighestPointInFrame(PlanarRegionsList planarRegionsList, RigidBodyTransformReadOnly soleTransform, ArrayList<LineSegment2D> lineSegmentsInSoleFrame,
-                                                Point3D highestPointInSoleFrameToPack, LineSegment2D highestLineSegmentInSoleFrameToPack, Point3D closestCliffPointToPack)
+   private double findExtremumHeightInFrame(PlanarRegionsList planarRegionsList, RigidBodyTransformReadOnly soleTransform, List<LineSegment2D> lineSegmentsInSoleFrame, boolean findMaximumHeight)
    {
-      double maxZInSoleFrame = Double.NEGATIVE_INFINITY;
-      double closestCliffPointDistance = Double.POSITIVE_INFINITY;
+      double extremumHeight = findMaximumHeight ? Double.NEGATIVE_INFINITY : Double.POSITIVE_INFINITY;
 
       LineSegment2D lineSegmentInWorldFrame = new LineSegment2D();
       Point3D pointOneInWorldFrame = new Point3D();
       Point3D pointTwoInWorldFrame = new Point3D();
 
-      for (LineSegment2D lineSegmentInSoleFrame : lineSegmentsInSoleFrame)
+      for (LineSegment2DReadOnly lineSegmentInSoleFrame : lineSegmentsInSoleFrame)
       {
          pointOneInWorldFrame.set(lineSegmentInSoleFrame.getFirstEndpointX(), lineSegmentInSoleFrame.getFirstEndpointY(), 0.0);
          pointTwoInWorldFrame.set(lineSegmentInSoleFrame.getSecondEndpointX(), lineSegmentInSoleFrame.getSecondEndpointY(), 0.0);
@@ -120,24 +128,26 @@ public class PlanarRegionBaseOfCliffAvoider
                   regionTransformToWorld.transform(pointInOriginalSoleFrame);
                   soleTransform.inverseTransform(pointInOriginalSoleFrame);
 
-                  if(pointInOriginalSoleFrame.getZ() > 0.03 && pointInOriginalSoleFrame.distanceFromOrigin() < closestCliffPointDistance)
+                  if (findMaximumHeight)
                   {
-                     closestCliffPointDistance = pointInOriginalSoleFrame.distanceFromOrigin();
-                     closestCliffPointToPack.set(pointInOriginalSoleFrame);
+                     if (pointInOriginalSoleFrame.getZ() > extremumHeight)
+                     {
+                        extremumHeight = pointInOriginalSoleFrame.getZ();
+                     }
                   }
-
-                  if (pointInOriginalSoleFrame.getZ() > maxZInSoleFrame)
+                  else
                   {
-                     maxZInSoleFrame = pointInOriginalSoleFrame.getZ();
-                     highestPointInSoleFrameToPack.set(pointInOriginalSoleFrame);
-                     highestLineSegmentInSoleFrameToPack.set(lineSegmentInSoleFrame);
+                     if (pointInOriginalSoleFrame.getZ() < extremumHeight)
+                     {
+                        extremumHeight = pointInOriginalSoleFrame.getZ();
+                     }
                   }
                }
             }
          }
       }
 
-      return maxZInSoleFrame;
+      return extremumHeight;
    }
 
 }
