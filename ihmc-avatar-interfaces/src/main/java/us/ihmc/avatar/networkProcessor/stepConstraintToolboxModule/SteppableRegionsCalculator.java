@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
@@ -39,7 +40,6 @@ public class SteppableRegionsCalculator
    private static final double defaultCanEasilyStepOverHeight = 0.1;
    private static final double defaultOrthogonalAngle = Math.toRadians(75.0);
    private static final double defaultMinimumDistanceFromCliffBottoms = 0.1;
-
 
    private static final Vector3D verticalAxis = new Vector3D(0.0, 0.0, 1.0);
 
@@ -113,7 +113,6 @@ public class SteppableRegionsCalculator
       canEasilyStepOverHeight.set(defaultCanEasilyStepOverHeight);
       orthogonalAngle.set(defaultOrthogonalAngle);
       minimumDistanceFromCliffBottoms.set(defaultMinimumDistanceFromCliffBottoms);
-
    }
 
    public void setPlanarRegions(List<PlanarRegion> planarRegions)
@@ -214,39 +213,26 @@ public class SteppableRegionsCalculator
       RigidBodyTransformReadOnly transformFromObstacleToWorld = obstacleRegion.getTransformToWorld();
 
       // Transform the obstacle to world and also Project the obstacle to z = 0:
-      List<Point3DReadOnly> obstacleClusterPointsWithZeroZ = new ArrayList<>();
-      for (int i = 0; i < concaveHull.size(); i++)
-      {
-         Point2DReadOnly obstacleConcaveHullVertexInLocal = concaveHull.get(i);
-         Point3D obstacleConcaveHullVertexInWorld = new Point3D(obstacleConcaveHullVertexInLocal);
-         obstacleConcaveHullVertexInWorld.applyTransform(transformFromObstacleToWorld);
+      List<Point3DReadOnly> obstacleClustersInWorld = new ArrayList<>();
+      ClusterTools.calculatePointsInWorldAtRegionHeight(concaveHull, transformFromObstacleToWorld, homeRegion, null, obstacleClustersInWorld);
 
-         double zInHomeRegion = homeRegion.getPlaneZGivenXY(obstacleConcaveHullVertexInWorld.getX(), obstacleConcaveHullVertexInWorld.getY());
+      Vector3DReadOnly obstacleNormal = obstacleRegion.getNormal();
+      boolean isObstacleWall = Math.abs(obstacleNormal.getZ()) < zThresholdBeforeOrthogonal;
 
-         double obstacleHeight = obstacleConcaveHullVertexInWorld.getZ() - zInHomeRegion;
-         Point3D temporaryClusterPoint = new Point3D(obstacleConcaveHullVertexInWorld);
-         temporaryClusterPoint.setZ(obstacleHeight);
-
-         obstacleClusterPointsWithZeroZ.add(temporaryClusterPoint);
-      }
-
-      Vector3D obstacleNormal = obstacleRegion.getNormal();
-      boolean verticalObstacle = Math.abs(obstacleNormal.getZ()) < zThresholdBeforeOrthogonal;
-
-      ClusterType obstacleClusterType = verticalObstacle ? ClusterType.MULTI_LINE : ClusterType.POLYGON;
-      if (verticalObstacle)
-         obstacleClusterPointsWithZeroZ = ClusterTools.filterVerticalPolygonForMultiLineExtrusion(obstacleClusterPointsWithZeroZ,
+      ClusterType obstacleClusterType = isObstacleWall ? ClusterType.MULTI_LINE : ClusterType.POLYGON;
+      if (isObstacleWall)
+         obstacleClustersInWorld = ClusterTools.filterVerticalPolygonForMultiLineExtrusion(obstacleClustersInWorld,
                                                                                                   POPPING_MULTILINE_POINTS_THRESHOLD);
 
       // actually extrude the points
-      List<? extends Point2DReadOnly> nonNavigableExtrusionsInFlatWorld = ClusterTools.computeObstacleNonNavigableExtrusionsInLocal(obstacleClusterType,
-                                                                                                                                    obstacleClusterPointsWithZeroZ,
-                                                                                                                                    extrusionDistanceCalculator);
+      List<? extends Point2DReadOnly> extrusionInFlatWorld = ClusterTools.computeObstacleNonNavigableExtrusionsInLocal(obstacleClusterType,
+                                                                                                                       obstacleClustersInWorld,
+                                                                                                                       extrusionDistanceCalculator);
 
       // Project the points back up to the home region.
       RigidBodyTransformReadOnly transformFromWorldToHome = homeRegion.getTransformToLocal();
       ExtrusionHull nonNavigableExtrusionsInHomeRegionLocal = ClusterTools.projectPointsVerticallyToPlanarRegionLocal(homeRegion,
-                                                                                                                      nonNavigableExtrusionsInFlatWorld,
+                                                                                                                      extrusionInFlatWorld,
                                                                                                                       transformFromWorldToHome);
 
       return nonNavigableExtrusionsInHomeRegionLocal.getPoints();
