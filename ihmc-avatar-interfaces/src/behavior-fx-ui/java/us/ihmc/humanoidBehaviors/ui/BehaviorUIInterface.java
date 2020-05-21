@@ -8,7 +8,7 @@ import us.ihmc.ros2.Ros2NodeInterface;
 
 public abstract class BehaviorUIInterface extends Group
 {
-   public abstract void init(SubScene sceneNode, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel);
+   public abstract void init(SubScene sceneNode, SubScene sceneNode2D, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel);
 
    public abstract void setEnabled(boolean enabled);
 }

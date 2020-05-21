@@ -23,7 +23,7 @@ public class NavigationBehaviorUI extends BehaviorUIInterface
    private BodyPathPlanGraphic bodyPathPlanGraphic;
 
    @Override
-   public void init(SubScene sceneNode, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
+   public void init(SubScene sceneNode, SubScene sceneNode2D, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
 
