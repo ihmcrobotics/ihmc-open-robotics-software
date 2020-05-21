@@ -8,11 +8,9 @@ import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
@@ -89,18 +87,17 @@ public class BehaviorUI
          }
 
          View3DFactory view3DFactory = View3DFactory.createSubscene();
-         view3DFactory.addCameraController(0.05, 2000.0,true);
+         view3DFactory.addCameraController(0.05, 2000.0, true);
          view3DFactory.addWorldCoordinateSystem(0.3);
          view3DFactory.addDefaultLighting();
          SubScene subScene3D = view3DFactory.getSubScene();
          Pane view3DSubSceneWrappedInsidePane = view3DFactory.getSubSceneWrappedInsidePane();
 
-         Group view2DGroup = new Group();
-         SubScene view2DScene = new SubScene(view2DGroup, -1, -1, false, SceneAntialiasing.BALANCED);
-         view2DScene.setFill(Color.WHITE);
-         Pane view2DPane = new Pane(view2DScene);
-         view2DScene.heightProperty().bind(view2DPane.heightProperty());
-         view2DScene.widthProperty().bind(view2DPane.widthProperty());
+         View3DFactory view2DFactory = View3DFactory.createSubscene(false, SceneAntialiasing.BALANCED);
+         view2DFactory.addCameraController(0.05, 2000.0, true);
+         view2DFactory.setBackgroundColor(Color.WHITE);
+         Group view2DGroup = view2DFactory.getRoot();
+         Pane view2DPane = view2DFactory.getSubSceneWrappedInsidePane();
 
          behaviorSelector.getItems().add("None");
          behaviorSelector.setValue("None");
@@ -112,7 +109,7 @@ public class BehaviorUI
 
          for (BehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces.values())
          {
-            behaviorUIInterface.init(subScene3D, view2DScene, ros2Node, behaviorMessager, robotModel);
+            behaviorUIInterface.init(subScene3D, view2DGroup, ros2Node, behaviorMessager, robotModel);
             view3DFactory.addNodeToView(behaviorUIInterface);
          }
 
@@ -127,7 +124,7 @@ public class BehaviorUI
          view3DSubSceneWrappedInsidePane.setPrefWidth(500.0);
          mainSplitPane.getItems().add(view3DSubSceneWrappedInsidePane);
          mainSplitPane.getItems().add(view2DPane);
-         
+
          Stage primaryStage = new Stage();
          primaryStage.setTitle(getClass().getSimpleName());
          primaryStage.setMaximized(false);

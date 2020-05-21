@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.ui.behaviors;
 
 import javafx.fxml.FXML;
+import javafx.scene.Group;
 import javafx.scene.SubScene;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.humanoidBehaviors.fancyPoses.FancyPosesBehavior;
@@ -16,7 +17,7 @@ public class FancyPosesBehaviorUI extends BehaviorUIInterface
    private Messager behaviorMessager;
 
    @Override
-   public void init(SubScene sceneNode, SubScene sceneNode2D, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
+   public void init(SubScene sceneNode, Group group2D, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
    }
