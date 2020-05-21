@@ -114,7 +114,7 @@ public class PointCloudGraphic extends Group
          meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), scanPoint, colorToViz);
       }
    }
-   
+
    /**
     * default size is 0.005.
     */
@@ -129,6 +129,11 @@ public class PointCloudGraphic extends Group
          scanPoint.set(points[j]);
          meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(size), scanPoint, colorToViz);
       }
+   }
+
+   public void addLineMesh(Point3DReadOnly from, Point3DReadOnly to, Color color, double width)
+   {
+      meshBuilder.addMesh(MeshDataGenerator.Line(from, to, width), new Point3D(), color);
    }
 
    public void addSensorPoseMesh(RigidBodyTransformReadOnly sensorPose, Color colorToViz)
