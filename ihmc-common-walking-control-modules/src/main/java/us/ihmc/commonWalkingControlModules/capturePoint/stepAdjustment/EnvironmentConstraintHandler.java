@@ -151,6 +151,6 @@ public class EnvironmentConstraintHandler
 
       footOrientationTransform.getRotation().set(orientation);
 
-      footstepPolygon.applyTransform(footOrientationTransform);
+      footstepPolygon.applyTransform(footOrientationTransform, false);
    }
 }
