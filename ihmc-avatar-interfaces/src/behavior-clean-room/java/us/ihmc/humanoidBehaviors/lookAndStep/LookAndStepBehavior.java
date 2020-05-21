@@ -418,10 +418,11 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private void footstepPlanningThread(FootstepPlannerRequest footstepPlannerRequest)
    {
-      LogTools.info("Footstep planner started");
+      LogTools.info("Footstep planner started...");
+      Stopwatch stopwatch = new Stopwatch().start();
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.handleRequest(footstepPlannerRequest);
       
-      LogTools.info("Footstep planner completed!");
+      LogTools.info("Footstep planner completed in {} s!", stopwatch.totalElapsed());
       
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
       footstepPlannerLogger.logSession();
