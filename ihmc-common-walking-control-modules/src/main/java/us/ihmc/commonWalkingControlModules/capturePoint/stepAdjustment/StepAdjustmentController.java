@@ -277,6 +277,10 @@ public class StepAdjustmentController
          return;
       }
 
+      environmentConstraintProvider.setReachabilityRegion(reachabilityConstraintHandler.getReachabilityConstraint());
+      if (!environmentConstraintProvider.validateConvexityOfPlanarRegion())
+         return;
+
       footstepMultiplier.set(computeFootstepAdjustmentMultiplier(omega0));
       if (useActualErrorInsteadOfResidual.getValue())
       {
@@ -314,7 +318,6 @@ public class StepAdjustmentController
       icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, adjustedSolutionInControlPlane, tempPoint, upcomingFootstep.getPosition().getZ());
       footstepSolution.getPosition().set(tempPoint);
 
-      environmentConstraintProvider.setReachabilityRegion(reachabilityConstraintHandler.getReachabilityConstraint());
       environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(), footstepSolution, upcomingFootstepContactPoints);
 
       if (wasFootstepAdjusted() && CONTINUOUSLY_UPDATE_DESIRED_POSITION)

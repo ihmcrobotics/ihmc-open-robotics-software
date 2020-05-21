@@ -125,6 +125,11 @@ public class StepConstraintRegion
       return z;
    }
 
+   public List<? extends Point2DReadOnly> getConcaveHullVertices()
+   {
+      return concaveHullsVertices;
+   }
+
    public int getConcaveHullSize()
    {
       return concaveHullsVertices.size();
@@ -146,7 +151,7 @@ public class StepConstraintRegion
       originToPack.set(fromLocalToWorldTransform.getTranslation());
    }
 
-   public ConvexPolygon2DReadOnly getConvexHullInCosntraintRegion()
+   public ConvexPolygon2DReadOnly getConvexHullInConstraintRegion()
    {
       return convexHull;
    }
