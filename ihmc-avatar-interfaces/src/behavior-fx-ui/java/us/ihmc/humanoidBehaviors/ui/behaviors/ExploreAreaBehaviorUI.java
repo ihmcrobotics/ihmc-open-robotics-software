@@ -53,7 +53,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    private HashMap<Integer, Integer> numberOfPolygonsMap = new HashMap<>();
    private HashMap<Integer, ArrayList<ConvexPolygon2D>> polygonsMap = new HashMap<>();
 
-   public void init(SubScene sceneNode, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
+   public void init(SubScene sceneNode, SubScene sceneNode2D, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ObservationPosition,
