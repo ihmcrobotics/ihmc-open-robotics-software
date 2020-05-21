@@ -211,6 +211,23 @@ public class SLAMTools
 
       return Math.sqrt(nearestHitDistanceSquared.getValue());
    }
+   
+   public static double computeDistanceToNormalOctreeAndPackCorrespondingPoint(NormalOcTree octree, Point3DReadOnly point, int maximumSearchingSize, Point3D correspondingPointToPack)
+   {
+      OcTreeKey occupiedKey = octree.coordinateToKey(point);
+      OcTreeKey nearestKey = new OcTreeKey();
+      OcTreeNearestNeighborTools.findNearestNeighbor(octree.getRoot(), octree.keyToCoordinate(occupiedKey), nearestKey);
+
+      MutableDouble nearestHitDistanceSquared = new MutableDouble(Double.POSITIVE_INFINITY);
+
+      OcTreeNearestNeighborTools.findRadiusNeighbors(octree.getRoot(), octree.keyToCoordinate(nearestKey), octree.getResolution(), node ->
+      {
+         nearestHitDistanceSquared.setValue(Math.min(nearestHitDistanceSquared.doubleValue(), node.getHitLocationCopy().distanceSquared(point)));
+         correspondingPointToPack.set(node.getHitLocationCopy());
+      });
+
+      return Math.sqrt(nearestHitDistanceSquared.getValue());
+   }
 
    /**
     * Computes the convex hull of all the {@code mapOctree} nodes in the sensor frame (z-axis is
