@@ -23,6 +23,7 @@ public class PLYAsciiFormatFileLoader extends Application
       BufferedReader bufferedReader = null;
       try
       {
+         System.out.println(dataFile.getAbsolutePath());
          bufferedReader = new BufferedReader(new FileReader(dataFile));
       }
       catch (FileNotFoundException e1)
@@ -84,7 +85,7 @@ public class PLYAsciiFormatFileLoader extends Application
             if(indexOfPoints == numberOfVertex)
                break;
             xyzArray = lineJustFetched.split(" ");
-            pointCloudBuffer[indexOfPoints] = new Point3D(Double.parseDouble(xyzArray[0])/1000, Double.parseDouble(xyzArray[1])/1000, Double.parseDouble(xyzArray[2])/1000);
+            pointCloudBuffer[indexOfPoints] = new Point3D(Double.parseDouble(xyzArray[0]), Double.parseDouble(xyzArray[1]), Double.parseDouble(xyzArray[2]));
             indexOfPoints++;
          }
       }
