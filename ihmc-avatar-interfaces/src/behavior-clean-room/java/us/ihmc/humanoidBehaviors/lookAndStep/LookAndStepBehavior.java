@@ -272,7 +272,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       LogTools.debug("footstepPlanningEvaluateAndRun, footstepPlanBeingReviewed = {}", footstepPlanBeingReviewed);
       if (footstepPlanBeingReviewed) return;
 
-      LogTools.info("Entering plan state");
+      LogTools.info("Finding next sub goal for footstep planning...");
       helper.publishToUI(MapRegionsForUI, footstepPlanningNearRegions);
 
       HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
@@ -478,23 +478,27 @@ public class LookAndStepBehavior implements BehaviorInterface
       double transferTime = lookAndStepParameters.get(LookAndStepBehaviorParameters.transferTime);
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(shortenedFootstepPlan,
                                                                                                                     swingTime,
-                                                                                                                    transferTime, ExecutionMode.OVERRIDE);
+                                                                                                                    transferTime,
+                                                                                                                    ExecutionMode.QUEUE);
       TypedNotification<WalkingStatusMessage> walkingStatusNotification = robot.requestWalk(footstepDataListMessage,
                                                                                             robot.pollHumanoidRobotState(),
                                                                                             environmentMap.getLatestCombinedRegionsList());
 
       helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepDataListMessage));
 
+      ThreadTools.startAsDaemon(() -> sleepForPartOfSwingThread(swingTime), "RobotWalking");
       ThreadTools.startAsDaemon(() -> robotWalkingThread(walkingStatusNotification), "RobotWalking");
    }
 
-   private void robotWalkingThread(TypedNotification<WalkingStatusMessage> walkingStatusNotification)
+   private void sleepForPartOfSwingThread(double swingTime)
    {
-      LogTools.info("Waiting for robot walking...");
-      walkingStatusNotification.blockingPoll();
-      LogTools.info("Robot walk complete.");
+      double percentSwingToWait = lookAndStepParameters.get(LookAndStepBehaviorParameters.percentSwingToWait);
+      double waitTime = swingTime * percentSwingToWait;
+      LogTools.info("Waiting {} for {} % of swing...", waitTime, percentSwingToWait);
+      ThreadTools.sleepSeconds(waitTime);
+      LogTools.info("{} % of swing complete!", percentSwingToWait);
 
-      if (isRobotAtGoal())
+      if (isRobotAtGoal()) // TODO this is a test
       {
          bodyPathModuleEvaluteAndRun();
       }
@@ -502,6 +506,13 @@ public class LookAndStepBehavior implements BehaviorInterface
       {
          footstepPlanningEvaluateAndRun();
       }
+   }
+
+   private void robotWalkingThread(TypedNotification<WalkingStatusMessage> walkingStatusNotification)
+   {
+      LogTools.info("Waiting for robot walking...");
+      walkingStatusNotification.blockingPoll();
+      LogTools.info("Robot walk complete.");
    }
 
    private boolean isRobotAtGoal()
