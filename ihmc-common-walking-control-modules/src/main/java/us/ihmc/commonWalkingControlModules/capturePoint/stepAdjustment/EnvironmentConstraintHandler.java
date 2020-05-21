@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -22,8 +23,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
 import java.awt.*;
@@ -35,9 +38,13 @@ public class EnvironmentConstraintHandler
 
    private static final double defaultDesiredDistanceInside = 0.04;
    private static final boolean defaultUsePredictedContactPoints = false;
+   private static final double defaultMaxConcaveEstimateRatio = 1.1;
 
    private final DoubleProvider desiredDistanceInsideConstraint;
-   private final BooleanParameter usePredictedContactPoints;
+   private final BooleanProvider usePredictedContactPoints;
+   private final DoubleProvider maxConcaveEstimateRatio;
+
+   private final YoBoolean isEnvironmentConstraintValid;
 
    private final ConvexPolygonScaler scaler = new ConvexPolygonScaler();
 
@@ -69,6 +76,9 @@ public class EnvironmentConstraintHandler
 
       desiredDistanceInsideConstraint = new DoubleParameter("desiredDistanceInsideEnvironmentConstraint", registry, defaultDesiredDistanceInside);
       usePredictedContactPoints = new BooleanParameter("usePredictedContactPointsInStep", registry, defaultUsePredictedContactPoints);
+      maxConcaveEstimateRatio = new DoubleParameter("maxConcaveEstimateRatio", registry, defaultMaxConcaveEstimateRatio);
+
+      isEnvironmentConstraintValid = new YoBoolean("isEnvironmentConstraintValid", registry);
 
       yoConvexHullConstraint = new YoFrameConvexPolygon2D(yoNamePrefix + "ConvexHullConstraint", "", worldFrame, 12, registry);
       yoShrunkConvexHullConstraint = new YoFrameConvexPolygon2D(yoNamePrefix + "ShrunkConvexHullConstraint", "", worldFrame, 12, registry);
@@ -97,6 +107,7 @@ public class EnvironmentConstraintHandler
       stepConstraintRegion = null;
       yoConvexHullConstraint.clear();
       yoShrunkConvexHullConstraint.clear();
+      isEnvironmentConstraintValid.set(false);
    }
 
    public void setReachabilityRegion(FrameConvexPolygon2DReadOnly reachabilityRegion)
@@ -114,6 +125,26 @@ public class EnvironmentConstraintHandler
          reachabilityRegionInConstraintPlane.addVertex(projectedReachablePoint);
       }
       reachabilityRegionInConstraintPlane.update();
+   }
+
+   private final Point2DBasics centroidToThrowAway = new Point2D();
+
+   public boolean validateConvexityOfPlanarRegion()
+   {
+      if (stepConstraintRegion == null)
+      {
+         isEnvironmentConstraintValid.set(true);
+         return isEnvironmentConstraintValid.getBooleanValue();
+      }
+
+      double concaveHullArea = EuclidGeometryPolygonTools.computeConvexPolygon2DArea(stepConstraintRegion.getConcaveHullVertices(),
+                                                                                     stepConstraintRegion.getConcaveHullSize(),
+                                                                                     true,
+                                                                                     centroidToThrowAway);
+      double convexHullArea = stepConstraintRegion.getConvexHullInConstraintRegion().getArea();
+
+      isEnvironmentConstraintValid.set(concaveHullArea / convexHullArea < maxConcaveEstimateRatio.getValue());
+      return isEnvironmentConstraintValid.getBooleanValue();
    }
 
    public void applyEnvironmentConstraintToFootstep(RobotSide upcomingFootstepSide,
@@ -139,7 +170,7 @@ public class EnvironmentConstraintHandler
    {
       computeFootstepPolygon(upcomingFootstepSide, predictedContactPoints, orientation);
 
-      yoConvexHullConstraint.set(stepConstraintRegion.getConvexHullInCosntraintRegion());
+      yoConvexHullConstraint.set(stepConstraintRegion.getConvexHullInConstraintRegion());
       yoConvexHullConstraint.applyTransform(stepConstraintRegion.getTransformToWorld(), false);
 
       scaler.scaleConvexPolygonToContainInteriorPolygon(yoConvexHullConstraint,
