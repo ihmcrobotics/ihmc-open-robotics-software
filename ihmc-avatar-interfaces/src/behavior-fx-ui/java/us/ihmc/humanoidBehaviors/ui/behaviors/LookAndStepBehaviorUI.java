@@ -2,12 +2,14 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 
 import javafx.application.Platform;
 import javafx.fxml.FXML;
+import javafx.scene.Group;
 import javafx.scene.SubScene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -59,9 +61,13 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @FXML private TableView footstepPlannerParameterTable;
 
    @Override
-   public void init(SubScene sceneNode, SubScene sceneNode2D, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
+   public void init(SubScene sceneNode, Group group2D, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
+
+      Rectangle rectangle = new Rectangle(0.0, 0.0, 50.0, 50.0);
+      rectangle.setFill(Color.BLUE);
+      group2D.getChildren().add(rectangle);
 
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
       behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
