@@ -49,7 +49,7 @@ public class LinkedPointList
 
    public LinkedPoint getLinkedPointAtLocation(Point2DReadOnly location)
    {
-      return points.stream().filter(linkedPoint -> linkedPoint.getPoint().equals(location)).findFirst().orElse(null);
+      return points.stream().filter(linkedPoint -> linkedPoint.getPoint().epsilonEquals(location, 1e-7)).findFirst().orElse(null);
    }
 
    public void insertPoint(LinkedPoint pointToInsert, LinkedPoint predecessor)

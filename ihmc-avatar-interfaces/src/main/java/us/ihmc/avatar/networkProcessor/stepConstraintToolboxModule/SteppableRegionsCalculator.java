@@ -9,7 +9,6 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -24,7 +23,7 @@ import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
-import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.WeilerAthertonPolygonClipping;
+import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.PolygonClippingAndMerging;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -127,6 +126,21 @@ public class SteppableRegionsCalculator
       this.stanceFootPosition.set(stanceFootPosition);
    }
 
+   public void setCanEasilyStepOverHeight(double canEasilyStepOverHeight)
+   {
+      this.canEasilyStepOverHeight.set(canEasilyStepOverHeight);
+   }
+
+   public void setMinimumDistanceFromCliffBottoms(double minimumDistanceFromCliffBottoms)
+   {
+      this.minimumDistanceFromCliffBottoms.set(minimumDistanceFromCliffBottoms);
+   }
+
+   public void setOrthogonalAngle(double orthogonalAngle)
+   {
+      this.orthogonalAngle.set(orthogonalAngle);
+   }
+
    public List<StepConstraintRegion> computeSteppableRegions()
    {
       List<PlanarRegion> candidateRegions = allPlanarRegions.stream().filter(this::isRegionValidForStepping).collect(Collectors.toList());
@@ -142,7 +156,7 @@ public class SteppableRegionsCalculator
       if (angle > maxAngleForSteppable.getValue())
          return false;
 
-      if (PlanarRegionTools.computePlanarRegionArea(planarRegion) > minimumAreaForSteppable.getValue())
+      if (PlanarRegionTools.computePlanarRegionArea(planarRegion) < minimumAreaForSteppable.getValue())
          return false;
 
       return isRegionWithinReach(stanceFootPosition, maximumStepReach.getDoubleValue(), planarRegion);
@@ -180,9 +194,16 @@ public class SteppableRegionsCalculator
       double zThresholdBeforeOrthogonal = Math.cos(orthogonalAngle.getDoubleValue());
 
       List<ConcavePolygon2D> listOfHoles = new ArrayList<>();
-      obstacleRegions.forEach(region -> removeObstacleFromSteppableArea(candidateConstraintRegion, candidateRegion, region, zThresholdBeforeOrthogonal, listOfHoles));
+      // TODO what if, once there's a chunk removed, that causes another one to be hole?
+      obstacleRegions.forEach(region -> removeObstacleFromSteppableArea(candidateConstraintRegion,
+                                                                        candidateRegion,
+                                                                        region,
+                                                                        zThresholdBeforeOrthogonal,
+                                                                        listOfHoles));
 
-      StepConstraintRegion constraintRegion = new StepConstraintRegion(candidateRegion.getTransformToWorld(), candidateConstraintRegion);
+      mergeAllTheHoles(listOfHoles);
+
+      StepConstraintRegion constraintRegion = new StepConstraintRegion(candidateRegion.getTransformToWorld(), candidateConstraintRegion, listOfHoles);
       return constraintRegion;
    }
 
@@ -199,6 +220,7 @@ public class SteppableRegionsCalculator
 
       ConcavePolygon2D obstacleConcaveHull = new ConcavePolygon2D();
       obstacleConcaveHull.addVertices(Vertex2DSupplier.asVertex2DSupplier(obstacleExtrusion));
+      obstacleConcaveHull.update();
 
       if (GeometryPolygonTools.isPolygonInsideOtherPolygon(obstacleConcaveHull, constraintArea))
       {
@@ -207,15 +229,57 @@ public class SteppableRegionsCalculator
       }
 
       ConcavePolygon2D clippedArea = new ConcavePolygon2D();
-      WeilerAthertonPolygonClipping.clip(obstacleConcaveHull, constraintArea, clippedArea);
+      PolygonClippingAndMerging.removeAreaInsideClip(obstacleConcaveHull, constraintArea, clippedArea);
 
       constraintArea.set(clippedArea);
    }
 
-   private static List<Point2DReadOnly> createObstacleExtrusion(PlanarRegion homeRegion,
-                                                                PlanarRegion obstacleRegion,
-                                                                ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
-                                                                double zThresholdBeforeOrthogonal)
+   private static void mergeAllTheHoles(List<ConcavePolygon2D> listOfHolesToPack)
+   {
+      // check holes if they can be merged
+      int i = 0;
+      while (i < listOfHolesToPack.size())
+      {
+         ConcavePolygon2D polygonA = listOfHolesToPack.get(i);
+         int j = i + 1;
+         boolean shouldRemoveA = false;
+         while (j < listOfHolesToPack.size())
+         {
+            ConcavePolygon2D polygonB = listOfHolesToPack.get(j);
+            if (GeometryPolygonTools.doPolygonsIntersect(polygonA, polygonB))
+            {
+               ConcavePolygon2D newPolygon = new ConcavePolygon2D();
+               PolygonClippingAndMerging.merge(polygonA, polygonB, newPolygon);
+
+               listOfHolesToPack.set(i, newPolygon);
+               listOfHolesToPack.remove(j);
+            }
+            else if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonB, polygonA))
+            {
+               listOfHolesToPack.remove(j);
+            }
+            else if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonA, polygonB))
+            {
+               shouldRemoveA = true;
+               break;
+            }
+            else
+            {
+               j++;
+            }
+         }
+
+         if (shouldRemoveA)
+            listOfHolesToPack.remove(i);
+         else
+            i++;
+      }
+   }
+
+   static List<Point2DReadOnly> createObstacleExtrusion(PlanarRegion homeRegion,
+                                                        PlanarRegion obstacleRegion,
+                                                        ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
+                                                        double zThresholdBeforeOrthogonal)
    {
       List<Point2D> concaveHull = obstacleRegion.getConcaveHull();
 
@@ -230,8 +294,7 @@ public class SteppableRegionsCalculator
 
       ClusterType obstacleClusterType = isObstacleWall ? ClusterType.MULTI_LINE : ClusterType.POLYGON;
       if (isObstacleWall)
-         obstacleClustersInWorld = ClusterTools.filterVerticalPolygonForMultiLineExtrusion(obstacleClustersInWorld,
-                                                                                                  POPPING_MULTILINE_POINTS_THRESHOLD);
+         obstacleClustersInWorld = ClusterTools.filterVerticalPolygonForMultiLineExtrusion(obstacleClustersInWorld, POPPING_MULTILINE_POINTS_THRESHOLD);
 
       // actually extrude the points
       List<? extends Point2DReadOnly> extrusionInFlatWorld = ClusterTools.computeObstacleNonNavigableExtrusionsInLocal(obstacleClusterType,

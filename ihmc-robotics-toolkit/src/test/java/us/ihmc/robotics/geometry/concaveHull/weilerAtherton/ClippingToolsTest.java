@@ -4,11 +4,9 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
-import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.ClippingTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.LinkedPoint;
 import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.LinkedPointList;
-import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.WeilerAthertonPolygonClipping;
 
 import static us.ihmc.robotics.Assert.assertFalse;
 import static us.ihmc.robotics.Assert.assertTrue;

@@ -56,7 +56,7 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       this(transformToWorld, vertexSupplier, new ArrayList<>());
    }
 
-   public StepConstraintRegion(RigidBodyTransformReadOnly transformToWorld, Vertex2DSupplier vertexSupplier, List<ConcavePolygon2DReadOnly> holesInRegion)
+   public StepConstraintRegion(RigidBodyTransformReadOnly transformToWorld, Vertex2DSupplier vertexSupplier, List<? extends ConcavePolygon2DReadOnly> holesInRegion)
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
@@ -258,6 +258,9 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
          return false;
 
       if (!concaveHull.epsilonEquals(other.concaveHull, epsilon))
+         return false;
+
+      if (getNumberOfHolesInRegion() != other.getNumberOfHolesInRegion())
          return false;
 
       for (int i = 0; i < getNumberOfHolesInRegion(); i++)
