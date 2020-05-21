@@ -1,7 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
-import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
@@ -15,12 +14,15 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.parameters.BooleanParameter;
+import us.ihmc.yoVariables.parameters.DoubleParameter;
+import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
 
@@ -31,8 +33,11 @@ public class EnvironmentConstraintHandler
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final double distanceInsideRegion = 0.04;
-   private static final boolean usePredictedContactPoints = false;
+   private static final double defaultDesiredDistanceInside = 0.04;
+   private static final boolean defaultUsePredictedContactPoints = false;
+
+   private final DoubleProvider desiredDistanceInsideConstraint;
+   private final BooleanParameter usePredictedContactPoints;
 
    private final ConvexPolygonScaler scaler = new ConvexPolygonScaler();
 
@@ -61,6 +66,9 @@ public class EnvironmentConstraintHandler
    {
       this.icpControlPlane = icpControlPlane;
       this.contactableFeet = contactableFeet;
+
+      desiredDistanceInsideConstraint = new DoubleParameter("desiredDistanceInsideEnvironmentConstraint", registry, defaultDesiredDistanceInside);
+      usePredictedContactPoints = new BooleanParameter("usePredictedContactPointsInStep", registry, defaultUsePredictedContactPoints);
 
       yoConvexHullConstraint = new YoFrameConvexPolygon2D(yoNamePrefix + "ConvexHullConstraint", "", worldFrame, 12, registry);
       yoShrunkConvexHullConstraint = new YoFrameConvexPolygon2D(yoNamePrefix + "ShrunkConvexHullConstraint", "", worldFrame, 12, registry);
@@ -134,14 +142,17 @@ public class EnvironmentConstraintHandler
       yoConvexHullConstraint.set(stepConstraintRegion.getConvexHullInCosntraintRegion());
       yoConvexHullConstraint.applyTransform(stepConstraintRegion.getTransformToWorld(), false);
 
-      scaler.scaleConvexPolygonToContainInteriorPolygon(yoConvexHullConstraint, footstepPolygon, distanceInsideRegion, shrunkHullConstraint);
+      scaler.scaleConvexPolygonToContainInteriorPolygon(yoConvexHullConstraint,
+                                                        footstepPolygon,
+                                                        desiredDistanceInsideConstraint.getValue(),
+                                                        shrunkHullConstraint);
 
       convexPolygonTools.computeIntersectionOfPolygons(shrunkHullConstraint, reachabilityRegionInConstraintPlane, yoShrunkConvexHullConstraint);
    }
 
    private void computeFootstepPolygon(RobotSide upcomingFootstepSide, List<? extends Point2DBasics> predictedContactPoints, Orientation3DReadOnly orientation)
    {
-      if (predictedContactPoints.isEmpty() || !usePredictedContactPoints)
+      if (predictedContactPoints.isEmpty() || !usePredictedContactPoints.getValue())
          predictedContactPoints = contactableFeet.get(upcomingFootstepSide).getContactPoints2d();
 
       footstepPolygon.clear();
