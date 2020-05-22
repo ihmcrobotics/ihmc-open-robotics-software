@@ -40,13 +40,18 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
+
+      current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -63,14 +68,19 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getOrientation(), current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getAngularVelocity(), current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getLinearAcceleration(), current_alignment);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -81,22 +91,32 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
 
    public static void write(controller_msgs.msg.dds.IMUPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
+
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getOrientation(), cdr);
+
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getAngularVelocity(), cdr);
+
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getLinearAcceleration(), cdr);
+
       cdr.write_type_6(data.getTime());
 
    }
 
    public static void read(controller_msgs.msg.dds.IMUPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getOrientation(), cdr);	
+
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getAngularVelocity(), cdr);	
+
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getLinearAcceleration(), cdr);	
+
       data.setTime(cdr.read_type_6());
       	
 
@@ -105,12 +125,17 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
    @Override
    public final void serialize(controller_msgs.msg.dds.IMUPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
+
 
       ser.write_type_a("angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getAngularVelocity());
 
+
       ser.write_type_a("linear_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearAcceleration());
+
 
       ser.write_type_6("time", data.getTime());
    }
@@ -118,12 +143,17 @@ public class IMUPacketPubSubType implements us.ihmc.pubsub.TopicDataType<control
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.IMUPacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_a("orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getOrientation());
+
 
       ser.read_type_a("angular_velocity", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getAngularVelocity());
 
+
       ser.read_type_a("linear_acceleration", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getLinearAcceleration());
+
 
       data.setTime(ser.read_type_6("time"));
    }

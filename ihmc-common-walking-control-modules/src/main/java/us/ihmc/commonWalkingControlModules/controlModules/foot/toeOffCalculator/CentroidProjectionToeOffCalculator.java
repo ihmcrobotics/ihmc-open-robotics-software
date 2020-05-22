@@ -124,7 +124,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       }
 
       footPolygon.intersectionWithRay(rayThroughExitCMP, intersectionWithRay[0], intersectionWithRay[1]);
-      toeOffContactPoint2d.set(intersectionWithRay[0]);
+      toeOffContactPoint2d.setIncludingFrame(intersectionWithRay[0]);
 
       hasComputedToeOffContactPoint.set(true);
    }
@@ -145,8 +145,8 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
 
       ReferenceFrame referenceFrame = footPolygon.getReferenceFrame();
       toeOffContactLine2d.setToZero(referenceFrame);
-      toeOffContactLine2d.setFirstEndpoint(referenceFrame, Double.NEGATIVE_INFINITY, 0.0);
-      toeOffContactLine2d.setSecondEndpoint(referenceFrame, Double.NEGATIVE_INFINITY, 0.0);
+      toeOffContactLine2d.getFirstEndpoint().set(referenceFrame, Double.NEGATIVE_INFINITY, 0.0);
+      toeOffContactLine2d.getSecondEndpoint().set(referenceFrame, Double.NEGATIVE_INFINITY, 0.0);
 
       // gets the leading two toe points
       for (int i = 0; i < footPolygon.getNumberOfVertices(); i++)
@@ -155,11 +155,11 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
          if (tmpPoint2d.getX() > toeOffContactLine2d.getFirstEndpoint().getX())
          { // further ahead than leading point
             toeOffContactLine2d.flipDirection();
-            toeOffContactLine2d.setFirstEndpoint(tmpPoint2d);
+            toeOffContactLine2d.getFirstEndpoint().set(tmpPoint2d);
          }
          else if (tmpPoint2d.getX() > toeOffContactLine2d.getSecondEndpoint().getX())
          { // further ahead than second leading point
-            toeOffContactLine2d.setSecondEndpoint(tmpPoint2d);
+            toeOffContactLine2d.getSecondEndpoint().set(tmpPoint2d);
          }
       }
 
@@ -181,8 +181,7 @@ public class CentroidProjectionToeOffCalculator implements ToeOffCalculator
       footPolygon.clear(soleFrame);
       for (int i = 0; i < contactPoints.get(trailingLeg).size(); i++)
       {
-         contactPoints.get(trailingLeg).get(i).getPosition2d(toeOffContactPoint2d);
-         footPolygon.addVertex(toeOffContactPoint2d);
+         footPolygon.addVertex(contactPoints.get(trailingLeg).get(i));
       }
       footPolygon.update();
    }

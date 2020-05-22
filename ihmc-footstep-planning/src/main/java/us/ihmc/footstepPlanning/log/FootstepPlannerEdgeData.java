@@ -23,6 +23,7 @@ public class FootstepPlannerEdgeData
    private double edgeCost = Double.POSITIVE_INFINITY;
    private double heuristicCost = Double.NaN;
    private boolean solutionEdge = false;
+   private int stepIndex = -1;
 
    public void clear()
    {
@@ -39,6 +40,7 @@ public class FootstepPlannerEdgeData
       edgeCost = Double.POSITIVE_INFINITY;
       heuristicCost = Double.NaN;
       solutionEdge = false;
+      stepIndex = -1;
    }
 
    public FootstepPlannerEdgeData getCopyAndClear()
@@ -57,6 +59,7 @@ public class FootstepPlannerEdgeData
       copy.edgeCost = edgeCost;
       copy.heuristicCost = heuristicCost;
       copy.solutionEdge = solutionEdge;
+      copy.stepIndex = stepIndex;
       clear();
       return copy;
    }
@@ -128,6 +131,11 @@ public class FootstepPlannerEdgeData
       return solutionEdge;
    }
 
+   public int getStepIndex()
+   {
+      return stepIndex;
+   }
+
    //////////////// SETTERS ////////////////
 
    public void setStanceNode(FootstepNode stanceNode)
@@ -193,5 +201,10 @@ public class FootstepPlannerEdgeData
    public void setSolutionEdge(boolean solutionEdge)
    {
       this.solutionEdge = solutionEdge;
+   }
+
+   public void setStepIndex(int stepIndex)
+   {
+      this.stepIndex = stepIndex;
    }
 }

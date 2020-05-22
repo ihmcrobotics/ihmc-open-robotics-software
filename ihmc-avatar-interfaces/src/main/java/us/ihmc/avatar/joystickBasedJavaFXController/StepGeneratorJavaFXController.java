@@ -266,7 +266,7 @@ public class StepGeneratorJavaFXController
       FramePose3D adjustedBasedOnStanceFoot = new FramePose3D();
       adjustedBasedOnStanceFoot.getPosition().set(footstepPose.getPosition());
       adjustedBasedOnStanceFoot.setZ(continuousStepGenerator.getCurrentSupportFootPose().getZ());
-      adjustedBasedOnStanceFoot.setOrientation(footstepPose.getOrientation());
+      adjustedBasedOnStanceFoot.getOrientation().set(footstepPose.getOrientation());
 
       if (planarRegionsList.get() != null)
       {
@@ -450,14 +450,15 @@ public class StepGeneratorJavaFXController
       if (planarRegionsList.get() == null)
          return true;
 
-      tempTransform.setTranslation(touchdownPose.getPosition().getX(), touchdownPose.getPosition().getY(), 0.0);
-      tempTransform.setRotationYaw(touchdownPose.getYaw());
+      tempTransform.getTranslation().set(touchdownPose.getPosition().getX(), touchdownPose.getPosition().getY(), 0.0);
+      tempTransform.getRotation().setToYawOrientation(touchdownPose.getYaw());
 
       footPolygon.set(footPolygons.get(swingSide));
       footPolygon.applyTransform(tempTransform, false);
 
       PlanarRegionsList planarRegionsList = this.planarRegionsList.get();
-      return PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, tempRegion) != null;
+
+      return PlanarRegionsListPolygonSnapper.snapPolygonToPlanarRegionsList(footPolygon, planarRegionsList, Double.POSITIVE_INFINITY, tempRegion) != null;
    }
 
    private void processToggleFlamingoMode(RobotSide robotSide, ButtonState state)

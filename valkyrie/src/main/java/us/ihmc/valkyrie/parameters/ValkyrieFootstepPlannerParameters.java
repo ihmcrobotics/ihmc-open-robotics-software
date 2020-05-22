@@ -23,19 +23,16 @@ public class ValkyrieFootstepPlannerParameters extends StoredPropertySet impleme
       setMinimumStepWidth(0.2);
       setMaximumStepWidth(0.4);
       setMaximumStepZ(0.15);
-      setReturnBestEffortPlan(false);
       setBodyBoxBaseX(0.03);
       setBodyBoxBaseY(0.2);
       setBodyBoxBaseZ(0.3);
       setBodyBoxWidth(0.85);
       setBodyBoxDepth(0.4);
-      setMinimumStepsForBestEffortPlan(3);
       setMinXClearanceFromStance(0.2);
       setMinYClearanceFromStance(0.2);
-      setCliffHeightToAvoid(0.07);
+      this.setCliffBaseHeightToAvoid(0.07);
       setMinimumDistanceFromCliffBottoms(0.04);
       setWiggleInsideDelta(0.03);
-      setWiggleIntoConvexHullOfPlanarRegions(true);
       setMaximumXYWiggleDistance(0.04);
       setMaximumYawWiggle(0.3);
       setMaximumStepZWhenSteppingUp(0.05);
@@ -44,18 +41,10 @@ public class ValkyrieFootstepPlannerParameters extends StoredPropertySet impleme
       setMaximumStepXWhenForwardAndDown(0.23);
       setAStarHeuristicsWeight(5.0);
       setYawWeight(0.15);
-      setUseQuadraticDistanceCost(true);
       setForwardWeight(2.5);
       setMaximum2dDistanceFromBoundingBoxToPenalize(0.05);
-      setBoundingBoxCost(0.0);
 
       load();
-   }
-
-   @Override
-   public AdaptiveSwingParameters getAdaptiveSwingParameters()
-   {
-      return new ValkyrieAdaptiveSwingParameters();
    }
 
    public static void main(String[] args)

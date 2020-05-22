@@ -193,7 +193,7 @@ public class RandomICPSLAMTest
       double stairLength = 0.25;
 
       RigidBodyTransform sensorPoseOne = new RigidBodyTransform();
-      sensorPoseOne.setTranslation(0.0, 0.0, fixedHeight);
+      sensorPoseOne.getTranslation().set(0.0, 0.0, fixedHeight);
       sensorPoseOne.appendPitchRotation(sensorPitchAngle);
       sensorPoseOne.appendYawRotation(Math.toRadians(-90.0));
       StereoVisionPointCloudMessage messageOne = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageSimpleStair(sensorPoseOne,
@@ -209,11 +209,11 @@ public class RandomICPSLAMTest
       double translationZ = 0.0;
       double rotateY = Math.toRadians(0.0);
       RigidBodyTransform preMultiplier = new RigidBodyTransform();
-      preMultiplier.setTranslation(translationX, translationY, translationZ);
+      preMultiplier.getTranslation().set(translationX, translationY, translationZ);
       preMultiplier.appendPitchRotation(rotateY);
 
       RigidBodyTransform sensorPoseTwo = new RigidBodyTransform();
-      sensorPoseTwo.setTranslation(movingForward, 0.0, fixedHeight);
+      sensorPoseTwo.getTranslation().set(movingForward, 0.0, fixedHeight);
       sensorPoseTwo.appendPitchRotation(sensorPitchAngle);
       sensorPoseTwo.appendYawRotation(Math.toRadians(-90.0));
 
@@ -297,7 +297,7 @@ public class RandomICPSLAMTest
    {
       double sizeOfCinderBlocks = 0.5;
       RigidBodyTransform sensorPose = new RigidBodyTransform();
-      sensorPose.setTranslation(0.8, 0.0, 1.0);
+      sensorPose.getTranslation().set(0.8, 0.0, 1.0);
       sensorPose.appendPitchRotation(Math.toRadians(90.0 + 70.0));
       sensorPose.appendYawRotation(Math.toRadians(-90.0));
       StereoVisionPointCloudMessage messageOne = SimulatedStereoVisionPointCloudMessageLibrary.generateMessageCinderBlocks(sensorPose,

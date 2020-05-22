@@ -65,9 +65,23 @@ public class StereoVisionPointCloudDataLoader
          }
       }
 
+      Point3D[] pointCloudBufferResized = new Point3D[lineIndex];
+      int[] colorBufferResized = new int[lineIndex];
+
+      for (int i = 0; i < lineIndex; i++)
+      {
+         pointCloudBufferResized[i] = pointCloudBuffer[i];
+         colorBufferResized[i] = colorBuffer[i];
+      }
+
       long timestamp = System.nanoTime();
       double minimumResolution = 0.001;
-      StereoVisionPointCloudMessage message = PointCloudCompression.compressPointCloud(timestamp, pointCloudBuffer, colorBuffer, lineIndex, minimumResolution, null);
+      StereoVisionPointCloudMessage message = PointCloudCompression.compressPointCloud(timestamp,
+                                                                                       pointCloudBufferResized,
+                                                                                       colorBufferResized,
+                                                                                       lineIndex,
+                                                                                       minimumResolution,
+                                                                                       null);
       return message;
    }
 
@@ -185,7 +199,7 @@ public class StereoVisionPointCloudDataLoader
 
       return messagesInTimeOrder;
    }
-   
+
    public static List<Long> extractTimestamps(File selectedDataFolder)
    {
       File[] listOfFiles = selectedDataFolder.listFiles();

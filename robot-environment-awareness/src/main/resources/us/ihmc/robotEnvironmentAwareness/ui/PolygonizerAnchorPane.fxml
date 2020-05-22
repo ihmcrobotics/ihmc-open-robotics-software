@@ -12,7 +12,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="221.0" prefWidth="1197.0" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.PolygonizerAnchorPaneController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="221.0" prefWidth="1197.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.robotEnvironmentAwareness.ui.controller.PolygonizerAnchorPaneController">
    <children>
       <HBox layoutX="14.0" layoutY="14.0" spacing="15.0">
          <children>
@@ -36,6 +36,7 @@
                   <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
                   <RowConstraints minHeight="10.0" vgrow="SOMETIMES" />
+                  <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
                </rowConstraints>
                <children>
                   <Spinner fx:id="concaveHullThresholdSpinner" editable="true" prefWidth="100.0" GridPane.columnIndex="1" />
@@ -74,6 +75,11 @@
                         <Tooltip prefWidth="200.0" text="Threshold used for decomposing the concave hull into convex polygons. Describes the maximum depth of a concavity before the concave hull gets split in 2." wrapText="true" />
                      </tooltip>
                   </Label>
+                  <ToggleButton fx:id="enableNarrowPassageFilterButton" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Cut concave hull narrow passage" GridPane.columnSpan="2" GridPane.rowIndex="3">
+                     <tooltip>
+                        <Tooltip prefWidth="250.0" text="Enable/disable concave hull narrow passage cutter. The filter splits concave hulls at any passage that is narrower than twice the minimum edge length. For instance, 2 squares touching at their corner may result in a single hull, with this filter, the hull is splitted at the common corner of the 2 squares resulting in 2 simpler hulls." wrapText="true" />
+                     </tooltip>
+                  </ToggleButton>
                </children>
             </GridPane>
             <GridPane hgap="5.0" style="-fx-padding: 3; -fx-border-width: 2; -fx-border-color: lightblue; -fx-border-radius: 5;" vgap="5.0">

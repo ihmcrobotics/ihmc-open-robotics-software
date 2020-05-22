@@ -88,7 +88,7 @@ public class CaptureRegionMathTools
       rotatedFromA.set(directionA.getX(), directionA.getY(), 0.0);
 
       axisAngle.set(negZRotationAxis, angleBetweenDirectionsToSetLine);
-      rotation.setRotation(axisAngle);
+      rotation.getRotation().set(axisAngle);
       rotatedFromA.applyTransform(rotation);
 
       rotatedFromA.normalize();

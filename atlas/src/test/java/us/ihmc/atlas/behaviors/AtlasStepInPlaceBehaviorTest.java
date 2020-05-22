@@ -40,14 +40,14 @@ public class AtlasStepInPlaceBehaviorTest
       LogTools.info("Set stepping true");
       messager.submitMessage(StepInPlaceBehavior.API.Stepping, true);
 
-      AtlasTestScripts.takeSteps(conductor, variables, 4, 6.0);
+      AtlasTestScripts.awaitSteps(conductor, variables, 4, 6.0);
 
       messager.submitMessage(StepInPlaceBehavior.API.Stepping, false);
       messager.submitMessage(StepInPlaceBehavior.API.Abort, true);
 
-      AtlasTestScripts.wait(conductor, variables, 3.0);
+      AtlasTestScripts.awaitDuration(conductor, variables, 3.0);
 
-      AtlasTestScripts.holdDoubleSupport(conductor, variables, 3.0, 6.0);
+      AtlasTestScripts.awaitDoubleSupportReachedAndHeld(conductor, variables, 3.0, 6.0);
    }
 
    @AfterEach
@@ -68,7 +68,7 @@ public class AtlasStepInPlaceBehaviorTest
       conductor = new GoalOrientedTestConductor(scs, simulationTestingParameters);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      AtlasTestScripts.standUp(conductor, variables);
+      AtlasTestScripts.awaitStandUp(conductor, variables);
    }
 
    @AfterAll

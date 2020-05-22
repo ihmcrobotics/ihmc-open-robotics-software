@@ -73,7 +73,7 @@ public class FootstepPlanningWithBodyPathTest
 
       FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName());
       FootstepPlannerOutput plannerOutput = planner.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
 
       if (visualize)
          PlanningTestTools.visualizeAndSleep(null, plannerOutput.getFootstepPlan(), goalPose, bodyPath);
@@ -115,7 +115,7 @@ public class FootstepPlanningWithBodyPathTest
       FramePose3D initialMidFootPose = new FramePose3D();
       initialMidFootPose.setX(startPos.getX());
       initialMidFootPose.setY(startPos.getY());
-      initialMidFootPose.setOrientationYawPitchRoll(startPose.getYaw(), 0.0, 0.0);
+      initialMidFootPose.getOrientation().setYawPitchRoll(startPose.getYaw(), 0.0, 0.0);
       PoseReferenceFrame midFootFrame = new PoseReferenceFrame("InitialMidFootFrame", initialMidFootPose);
 
       RobotSide initialStanceFootSide = RobotSide.RIGHT;
@@ -126,7 +126,7 @@ public class FootstepPlanningWithBodyPathTest
       FramePose3D goalPose = new FramePose3D();
       goalPose.setX(finalPose.getX());
       goalPose.setY(finalPose.getY());
-      goalPose.setOrientationYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
+      goalPose.getOrientation().setYawPitchRoll(finalPose.getYaw(), 0.0, 0.0);
 
       PlanarRegionsList planarRegionsList = new PlanarRegionsList(regions);
       FootstepPlanningModule planner = new FootstepPlanningModule(getClass().getSimpleName());
@@ -140,7 +140,7 @@ public class FootstepPlanningWithBodyPathTest
       request.getBodyPathWaypoints().addAll(waypoints);
 
       FootstepPlannerOutput plannerOutput = planner.handleRequest(request);
-      Assertions.assertTrue(plannerOutput.getResult().validForExecution());
+      Assertions.assertTrue(plannerOutput.getFootstepPlanningResult().validForExecution());
 
       if (visualize)
          PlanningTestTools.visualizeAndSleep(planarRegionsList, plannerOutput.getFootstepPlan(), goalPose, bodyPath);

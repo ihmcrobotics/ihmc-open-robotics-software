@@ -40,22 +40,31 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 1000; ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);}
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (20 * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
@@ -72,27 +81,36 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getRegionOrigin(), current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.QuaternionPubSubType.getCdrSerializedSize(data.getRegionOrientation(), current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getRegionNormal(), current_alignment);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       for(int i0 = 0; i0 < data.getVertexBuffer().size(); ++i0)
       {
           current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getVertexBuffer().get(i0), current_alignment);}
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -105,20 +123,29 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void write(controller_msgs.msg.dds.PlanarRegionMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_2(data.getRegionId());
 
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getRegionOrigin(), cdr);
+
       geometry_msgs.msg.dds.QuaternionPubSubType.write(data.getRegionOrientation(), cdr);
+
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getRegionNormal(), cdr);
+
       if(data.getVertexBuffer().size() <= 1000)
       cdr.write_type_e(data.getVertexBuffer());else
           throw new RuntimeException("vertex_buffer field exceeds the maximum length");
 
+
       cdr.write_type_2(data.getConcaveHullSize());
 
+
       cdr.write_type_2(data.getNumberOfConvexPolygons());
+
 
       if(data.getConvexPolygonsSize().size() <= 20)
       cdr.write_type_e(data.getConvexPolygonsSize());else
@@ -128,18 +155,27 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
 
    public static void read(controller_msgs.msg.dds.PlanarRegionMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setRegionId(cdr.read_type_2());
       	
+
       geometry_msgs.msg.dds.PointPubSubType.read(data.getRegionOrigin(), cdr);	
+
       geometry_msgs.msg.dds.QuaternionPubSubType.read(data.getRegionOrientation(), cdr);	
+
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getRegionNormal(), cdr);	
+
       cdr.read_type_e(data.getVertexBuffer());	
+
       data.setConcaveHullSize(cdr.read_type_2());
       	
+
       data.setNumberOfConvexPolygons(cdr.read_type_2());
       	
+
       cdr.read_type_e(data.getConvexPolygonsSize());	
 
    }
@@ -147,34 +183,52 @@ public class PlanarRegionMessagePubSubType implements us.ihmc.pubsub.TopicDataTy
    @Override
    public final void serialize(controller_msgs.msg.dds.PlanarRegionMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_2("region_id", data.getRegionId());
+
       ser.write_type_a("region_origin", new geometry_msgs.msg.dds.PointPubSubType(), data.getRegionOrigin());
+
 
       ser.write_type_a("region_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRegionOrientation());
 
+
       ser.write_type_a("region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRegionNormal());
 
+
       ser.write_type_e("vertex_buffer", data.getVertexBuffer());
+
       ser.write_type_2("concave_hull_size", data.getConcaveHullSize());
+
       ser.write_type_2("number_of_convex_polygons", data.getNumberOfConvexPolygons());
+
       ser.write_type_e("convex_polygons_size", data.getConvexPolygonsSize());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PlanarRegionMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setRegionId(ser.read_type_2("region_id"));
+
       ser.read_type_a("region_origin", new geometry_msgs.msg.dds.PointPubSubType(), data.getRegionOrigin());
+
 
       ser.read_type_a("region_orientation", new geometry_msgs.msg.dds.QuaternionPubSubType(), data.getRegionOrientation());
 
+
       ser.read_type_a("region_normal", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getRegionNormal());
 
+
       ser.read_type_e("vertex_buffer", data.getVertexBuffer());
+
       data.setConcaveHullSize(ser.read_type_2("concave_hull_size"));
+
       data.setNumberOfConvexPolygons(ser.read_type_2("number_of_convex_polygons"));
+
       ser.read_type_e("convex_polygons_size", data.getConvexPolygonsSize());
    }
 

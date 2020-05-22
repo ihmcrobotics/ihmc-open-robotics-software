@@ -11,6 +11,7 @@ import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
+import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
@@ -31,14 +32,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -46,6 +40,7 @@ import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.EuclideanTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -127,6 +122,7 @@ public class WalkingMessageHandler
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final CenterOfMassTrajectoryHandler comTrajectoryHandler;
    private final PlanarRegionsListHandler planarRegionsListHandler;
+   private final PlanarRegionHandler planarRegionStepConstraintHandler;
 
    private final YoBoolean offsettingXYPlanWithFootstepError = new YoBoolean("offsettingXYPlanWithFootstepError", registry);
    private final YoBoolean offsettingHeightPlanWithFootstepError = new YoBoolean("offsettingHeightPlanWithFootstepError", registry);
@@ -187,6 +183,7 @@ public class WalkingMessageHandler
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
       planarRegionsListHandler = new PlanarRegionsListHandler(statusOutputManager, registry);
+      planarRegionStepConstraintHandler = new PlanarRegionHandler(registry);
 
       parentRegistry.addChild(registry);
    }
@@ -334,9 +331,19 @@ public class WalkingMessageHandler
       planarRegionsListHandler.handlePlanarRegionsListCommand(planarRegionsListCommand);
    }
 
+   public void handlePlanarRegionConstraint(PlanarRegionCommand planarRegionCommand)
+   {
+      planarRegionStepConstraintHandler.handlePlanarRegionsListCommand(planarRegionCommand);
+   }
+
    public PlanarRegionsListHandler getPlanarRegionsListHandler()
    {
       return planarRegionsListHandler;
+   }
+
+   public PlanarRegionHandler getPlanarRegionStepConstraintHandler()
+   {
+      return planarRegionStepConstraintHandler;
    }
 
    public void handleAdjustFootstepCommand(AdjustFootstepCommand command)
@@ -874,47 +881,21 @@ public class WalkingMessageHandler
          footstepListVisualizer.updateFirstFootstep(adjustedFootstep);
    }
 
-   private final TransferToAndNextFootstepsData transferToAndNextFootstepsData = new TransferToAndNextFootstepsData();
+   private final NewTransferToAndNextFootstepsData transferToAndNextFootstepsData = new NewTransferToAndNextFootstepsData();
 
-   public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide)
+
+   public NewTransferToAndNextFootstepsData createTransferToAndNextFootstepDataForDoubleSupport(RobotSide transferToSide)
    {
-      Footstep transferFromFootstep = getFootstepAtCurrentLocation(transferToSide.getOppositeSide());
-      Footstep transferToFootstep = getFootstepAtCurrentLocation(transferToSide);
-
-      transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
-      transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
+      transferToAndNextFootstepsData.setTransferToPosition(soleFrames.get(transferToSide));
       transferToAndNextFootstepsData.setTransferToSide(transferToSide);
-      transferToAndNextFootstepsData.setTransferFromDesiredFootstep(null);
-
-      if (getCurrentNumberOfFootsteps() > 0)
-      {
-         transferToAndNextFootstepsData.setNextFootstep(upcomingFootsteps.get(0));
-      }
-      else
-      {
-         transferToAndNextFootstepsData.setNextFootstep(null);
-      }
 
       return transferToAndNextFootstepsData;
    }
 
-   public TransferToAndNextFootstepsData createTransferToAndNextFootstepDataForSingleSupport(Footstep transferToFootstep, RobotSide swingSide)
+   public NewTransferToAndNextFootstepsData createTransferToAndNextFootstepDataForSingleSupport(Footstep transferToFootstep, RobotSide swingSide)
    {
-      Footstep transferFromFootstep = getFootstepAtCurrentLocation(swingSide.getOppositeSide());
-
-      transferToAndNextFootstepsData.setTransferFromFootstep(transferFromFootstep);
-      transferToAndNextFootstepsData.setTransferToFootstep(transferToFootstep);
+      transferToAndNextFootstepsData.setTransferToPosition(transferToFootstep.getFootstepPose().getPosition());
       transferToAndNextFootstepsData.setTransferToSide(swingSide);
-      transferToAndNextFootstepsData.setTransferFromDesiredFootstep(null);
-
-      if (getCurrentNumberOfFootsteps() > 0)
-      {
-         transferToAndNextFootstepsData.setNextFootstep(upcomingFootsteps.get(0));
-      }
-      else
-      {
-         transferToAndNextFootstepsData.setNextFootstep(null);
-      }
 
       return transferToAndNextFootstepsData;
    }

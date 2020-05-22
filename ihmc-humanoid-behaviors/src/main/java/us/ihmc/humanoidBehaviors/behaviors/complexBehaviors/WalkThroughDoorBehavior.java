@@ -30,6 +30,7 @@ import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
@@ -104,8 +105,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
       this.referenceFrames = referenceFrames;
       doorOpenDetectorBehaviorService = new DoorOpenDetectorBehaviorService(robotName, yoNamePrefix + "DoorOpenService", ros2Node, yoGraphicsListRegistry);
-      doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
-      doorOpenDetectorBehaviorService.setExpectedFiducialSize(0.2032);
+      //doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
+      //doorOpenDetectorBehaviorService.setExpectedFiducialSize(0.2032);
       registry.addChild(doorOpenDetectorBehaviorService.getYoVariableRegistry());
       addBehaviorService(doorOpenDetectorBehaviorService);
 
@@ -148,6 +149,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
 
       if (doorOpenDetectorBehaviorService.newPose != null)
       {
+         
          Point3D location = new Point3D();
          Quaternion orientation = new Quaternion();
          doorOpenDetectorBehaviorService.newPose.get(location, orientation);
@@ -241,6 +243,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          public void onEntry()
          {
             publishTextToSpeech("Searching For The Door");
+            lookDown();
             super.onEntry();
          }
       };
@@ -250,7 +253,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
          @Override
          public void onEntry()
          {
-            publishTextToSpeech("Confirm door location before walking through");
+            publishTextToSpeech("Confirm door location before trying to open");
 
             super.onEntry();
          }
@@ -385,6 +388,11 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       factory.addStateAndDoneTransition(WalkThroughDoorBehaviorState.FAILED, failedState, WalkThroughDoorBehaviorState.DONE);
       factory.addState(WalkThroughDoorBehaviorState.DONE, doneState);
 
+      factory.addStateChangedListener((from, to) -> {
+         publishTextToSpeech((from == null ? null : from.name()) + " -> " + (to == null ? null : to.name()));
+      });
+
+
       return WalkThroughDoorBehaviorState.SETUP_ROBOT;
    }
 
@@ -481,7 +489,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, 0.8);
       Quaternion headOrientation = new Quaternion();
       headOrientation.set(orientationAxisAngle);
-      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0, headOrientation, ReferenceFrame.getWorldFrame(),
+      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0, headOrientation, atlasPrimitiveActions.referenceFrames.getChestFrame(),
                                                                                                      atlasPrimitiveActions.referenceFrames.getChestFrame());
       headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       headTrajectoryPublisher.publish(headTrajectoryMessage);
@@ -492,7 +500,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       AxisAngle orientationAxisAngle = new AxisAngle(0.0, 1.0, 0.0, 0);
       Quaternion headOrientation = new Quaternion();
       headOrientation.set(orientationAxisAngle);
-      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0, headOrientation, ReferenceFrame.getWorldFrame(),
+      HeadTrajectoryMessage headTrajectoryMessage = HumanoidMessageTools.createHeadTrajectoryMessage(1.0, headOrientation,atlasPrimitiveActions.referenceFrames.getChestFrame(),
                                                                                                      atlasPrimitiveActions.referenceFrames.getChestFrame());
       headTrajectoryMessage.setDestination(PacketDestination.CONTROLLER.ordinal());
       headTrajectoryPublisher.publish(headTrajectoryMessage);

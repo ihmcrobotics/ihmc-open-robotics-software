@@ -55,7 +55,7 @@ public class AvatarLiftOffAndTouchDownTest
 
       footstepPose.changeFrame(ReferenceFrame.getWorldFrame());
       footstepPose.setZ(0.0);
-      footstepPose.setOrientationYawPitchRoll(footstepPose.getYaw(), 0.0, 0.0);
+      footstepPose.getOrientation().setYawPitchRoll(footstepPose.getYaw(), 0.0, 0.0);
       step.setRobotSide(side.toByte());
       step.getLocation().set(footstepPose.getPosition());
       step.getOrientation().set(footstepPose.getOrientation());
@@ -70,7 +70,7 @@ public class AvatarLiftOffAndTouchDownTest
       SE3TrajectoryPointMessage waypoint0 = step.getSwingTrajectory().add();
       waypoint0.setTime(0.0);
       FramePose3D waypointPose0 = new FramePose3D(soleFrame);
-      waypointPose0.setOrientationYawPitchRoll(waypointPose0.getYaw(), startPitch, waypointPose0.getRoll());
+      waypointPose0.getOrientation().setYawPitchRoll(waypointPose0.getYaw(), startPitch, waypointPose0.getRoll());
       waypointPose0.setZ(waypointPose0.getZ() + footLength * Math.sin(Math.abs(startPitch)) / 2.0);
       waypointPose0.changeFrame(ReferenceFrame.getWorldFrame());
 
@@ -81,7 +81,7 @@ public class AvatarLiftOffAndTouchDownTest
       waypoint2.setTime(swingDuration);
       FramePose3D waypointPose2 = new FramePose3D(footstepPose);
       waypointPose2.changeFrame(soleFrame);
-      waypointPose2.setOrientationYawPitchRoll(waypointPose2.getYaw(), finalPitch, waypointPose2.getRoll());
+      waypointPose2.getOrientation().setYawPitchRoll(waypointPose2.getYaw(), finalPitch, waypointPose2.getRoll());
       waypointPose2.changeFrame(ReferenceFrame.getWorldFrame());
       waypointPose2.setZ(waypointPose2.getZ() + footLength * Math.sin(Math.abs(finalPitch)) / 2.0);
 

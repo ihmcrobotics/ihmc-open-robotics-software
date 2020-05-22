@@ -4,7 +4,7 @@ import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.PlaneContactStat
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoContactPoint;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.FootRotationCalculationModule;
+import us.ihmc.commonWalkingControlModules.controlModules.foot.partialFoothold.PartialFootholdCropperModule;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
@@ -12,13 +12,7 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamic
 import us.ihmc.commonWalkingControlModules.momentumBasedController.ParameterProvider;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -45,12 +39,11 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * This is the active foot state when the foot is in flat support. Usually the command to the QP
- * should be a zero acceleration command. When the foot is barely loaded or the CoP gets close
- * to the edges of the foot polygon some of the directions start becoming feedback controlled. E.g.
- * when barely loaded x and y position as well as foot yaw are controlled to remain constant.
- *
- * The state also contains the ability to shift the CoP around within the foothold in case the
- * support area needs to be explored.
+ * should be a zero acceleration command. When the foot is barely loaded or the CoP gets close to
+ * the edges of the foot polygon some of the directions start becoming feedback controlled. E.g.
+ * when barely loaded x and y position as well as foot yaw are controlled to remain constant. The
+ * state also contains the ability to shift the CoP around within the foothold in case the support
+ * area needs to be explored.
  */
 public class SupportState extends AbstractFootControlState
 {
@@ -114,8 +107,6 @@ public class SupportState extends AbstractFootControlState
    private final YoDouble toeLoadingDuration;
    private final YoDouble fullyLoadedMagnitude;
 
-   private final FramePoint3D tempPoint = new FramePoint3D();
-
    private Vector3DReadOnly angularWeight;
    private Vector3DReadOnly linearWeight;
 
@@ -126,8 +117,7 @@ public class SupportState extends AbstractFootControlState
    private final DoubleProvider footDamping;
    private final PIDSE3Gains localGains = new DefaultPIDSE3Gains();
 
-   private final FootRotationDetector footRotationDetector;
-   private final FootRotationCalculationModule footRotationCalculationModule;
+   private final PartialFootholdCropperModule footRotationCalculationModule;
 
    private final YoBoolean liftOff;
    private final YoBoolean touchDown;
@@ -211,13 +201,13 @@ public class SupportState extends AbstractFootControlState
 
       MovingReferenceFrame soleFrame = fullRobotModel.getSoleFrame(robotSide);
       double dt = controllerToolbox.getControlDT();
-      footRotationDetector = new FootRotationDetector(robotSide, soleFrame, dt, registry, graphicsListRegistry);
-      footRotationCalculationModule = new FootRotationCalculationModule(robotSide,
-                                                                        soleFrame,
-                                                                        footControlHelper.getFootholdRotationParameters(),
-                                                                        dt,
-                                                                        registry,
-                                                                        graphicsListRegistry);
+      footRotationCalculationModule = new PartialFootholdCropperModule(robotSide,
+                                                                       soleFrame,
+                                                                       footControlHelper.getContactableFoot().getContactPoints2d(),
+                                                                       footControlHelper.getFootholdRotationParameters(),
+                                                                       dt,
+                                                                       registry,
+                                                                       graphicsListRegistry);
 
       String feetManagerName = FeetManager.class.getSimpleName();
       String paramRegistryName = getClass().getSimpleName() + "Parameters";
@@ -242,6 +232,9 @@ public class SupportState extends AbstractFootControlState
       for (int i = 0; i < dofs; i++)
          isDirectionFeedbackControlled[i] = false;
 
+      computeFootPolygon();
+      footRotationCalculationModule.initialize(footPolygon);
+
       footBarelyLoaded.set(false);
       copOnEdge.set(false);
       liftOff.set(false);
@@ -257,7 +250,6 @@ public class SupportState extends AbstractFootControlState
       if (frameViz != null)
          frameViz.hide();
       explorationHelper.stopExploring();
-      footRotationDetector.reset();
       footRotationCalculationModule.reset();
 
       liftOff.set(false);
@@ -312,8 +304,7 @@ public class SupportState extends AbstractFootControlState
          for (int i = 0; i < planeContactState.getTotalNumberOfContactPoints(); i++)
          {
             YoContactPoint contactPoint = planeContactState.getContactPoints().get(i);
-            contactPoint.getPosition(tempPoint);
-            double percentAlongFoot = (tempPoint.getX() - minContactPointX) / (maxContactPointX - minContactPointX);
+            double percentAlongFoot = (contactPoint.getX() - minContactPointX) / (maxContactPointX - minContactPointX);
             double contactPointMagnitude = InterpolationTools.linearInterpolate(fullyLoadedMagnitude.getDoubleValue(), leadingToeMagnitude, percentAlongFoot);
 
             planeContactState.setMaxContactPointNormalForce(contactPoint, contactPointMagnitude);
@@ -347,9 +338,12 @@ public class SupportState extends AbstractFootControlState
       localGains.set(gains);
       boolean dampingRotations = false;
 
-      footRotationCalculationModule.compute(cop2d);
+      footRotationCalculationModule.compute(cop2d, desiredCoP);
+      YoPlaneContactState contactState = controllerToolbox.getFootContactState(robotSide);
+      if (footRotationCalculationModule.applyShrunkenFoothold(contactState))
+         contactState.notifyContactStateHasChanged();
 
-      if (footRotationDetector.compute() && avoidFootRotations.getValue())
+      if (footRotationCalculationModule.isRotating() && avoidFootRotations.getValue())
       {
          if (dampFootRotations.getValue())
          {
@@ -380,7 +374,12 @@ public class SupportState extends AbstractFootControlState
       desiredCopPosition.setReferenceFrame(desiredSoleFrame);
       desiredCopPosition.changeFrame(worldFrame);
       spatialFeedbackControlCommand.setControlFrameFixedInEndEffector(bodyFixedControlledPose);
-      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredCopPosition, desiredAngularVelocity, desiredLinearVelocity, desiredAngularAcceleration, desiredLinearAcceleration);
+      spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation,
+                                                       desiredCopPosition,
+                                                       desiredAngularVelocity,
+                                                       desiredLinearVelocity,
+                                                       desiredAngularAcceleration,
+                                                       desiredLinearAcceleration);
       spatialFeedbackControlCommand.setWeightsForSolver(angularWeight, linearWeight);
       spatialFeedbackControlCommand.setGains(localGains);
 
@@ -410,7 +409,7 @@ public class SupportState extends AbstractFootControlState
          isDirectionFeedbackControlled[1] = true; // control y orientation
       }
 
-      for (int i = dofs-1; i >= 0; i--)
+      for (int i = dofs - 1; i >= 0; i--)
       {
          if (isDirectionFeedbackControlled[i])
             accelerationSelectionMatrix.selectAxis(i, false);
@@ -425,7 +424,6 @@ public class SupportState extends AbstractFootControlState
       if (frameViz != null)
          frameViz.setToReferenceFrame(controlFrame);
    }
-
 
    private void computeFootPolygon()
    {
@@ -509,13 +507,13 @@ public class SupportState extends AbstractFootControlState
    }
 
    /**
-    * Will cause the support state to perform a foot lift off. This should be called before a step is taken and the desired
-    * foot pitch at the start of swing is provided. This method will enable toe or heel contact points depending on the direction
-    * of the pitch motion.
+    * Will cause the support state to perform a foot lift off. This should be called before a step is
+    * taken and the desired foot pitch at the start of swing is provided. This method will enable toe
+    * or heel contact points depending on the direction of the pitch motion.
     *
-    * @param finalPitchInSoleZUp is the final desired foot pitch at lift off.
+    * @param finalPitchInSoleZUp         is the final desired foot pitch at lift off.
     * @param finalPitchVelocityInSoleZUp is the final desired foot pitch velocity at lift off.
-    * @param duration the time until expected foot lift off.
+    * @param duration                    the time until expected foot lift off.
     */
    public void liftOff(double finalPitchInSoleZUp, double finalPitchVelocityInSoleZUp, double duration)
    {
@@ -538,14 +536,15 @@ public class SupportState extends AbstractFootControlState
    }
 
    /**
-    * Will cause the support state to perform a foot touch down. This should be called right after a step is finished
-    * (if the foot did not land flat on the ground) and the final flat foot pitch provided. This method will enable toe
-    * or heel contact points depending on the direction of the pitch motion.
+    * Will cause the support state to perform a foot touch down. This should be called right after a
+    * step is finished (if the foot did not land flat on the ground) and the final flat foot pitch
+    * provided. This method will enable toe or heel contact points depending on the direction of the
+    * pitch motion.
     *
-    * @param initialPitchInSoleZUp is the initial pitch at touchdown.
+    * @param initialPitchInSoleZUp         is the initial pitch at touchdown.
     * @param initialPitchVelocityInSoleZUp is the initial pitch velocity at touchdown.
-    * @param finalPitchInSoleZUp is the final desired foot pitch for full support.
-    * @param duration the time until the foot should enter full support.
+    * @param finalPitchInSoleZUp           is the final desired foot pitch for full support.
+    * @param duration                      the time until the foot should enter full support.
     */
    public void touchDown(double initialPitchInSoleZUp, double initialPitchVelocityInSoleZUp, double finalPitchInSoleZUp, double duration)
    {
@@ -610,7 +609,6 @@ public class SupportState extends AbstractFootControlState
 
       return inverseDynamicsCommandsList;
    }
-
 
    @Override
    public SpatialFeedbackControlCommand getFeedbackControlCommand()

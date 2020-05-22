@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.environments.planarRegionEnvironments;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 
@@ -69,20 +69,20 @@ public class ObstacleCoursePlanarRegionEnvironment extends PlanarRegionEnvironme
       generator.translate(numberOfSteps * stepLength + 0.5 * startingBlockLength, 0.0, stepHeight * numberOfSteps);
       generator.addRectangle(startingBlockLength + stepLength, startingBlockLength);
       generator.translate(numberOfSteps * stepLength + 0.5 * startingBlockLength, 0.0, -stepHeight * numberOfSteps);
-      generator.rotate(Math.PI, Axis.Z);
+      generator.rotate(Math.PI, Axis3D.Z);
       generator.addRampReferencedAtBottomMiddle((numberOfSteps - 0.5) * stepLength, 1.0, stepHeight * numberOfSteps);
 
       // cinder blocks
       generator.identity();
       generator.translate(-1.5, 0.0, -0.05);
-      generator.rotate(Math.PI, Axis.Z);
+      generator.rotate(Math.PI, Axis3D.Z);
       PlanarRegionsListExamples.generateCinderBlockField(generator, 0.4, 0.1, 9, 6, 0.05);
 
       // stepping stones
       generator.identity();
       double steppingStoneHeight = 0.3;
       generator.translate(0.0, 1.5, 0.0);
-      generator.rotate(0.5 * Math.PI, Axis.Z);
+      generator.rotate(0.5 * Math.PI, Axis3D.Z);
       generator.addRampReferencedAtBottomMiddle(1.0, 1.0, steppingStoneHeight);
       generator.translate(1.4, 0.0, 0.0);
       generator.addCubeReferencedAtBottomMiddle(0.8, 1.0, steppingStoneHeight);
@@ -120,7 +120,7 @@ public class ObstacleCoursePlanarRegionEnvironment extends PlanarRegionEnvironme
       generator.translate(2.0 + 0.5 * 0.3 + 0.1 + 0.6, 0.0, 0.0);
       generator.addCubeReferencedAtBottomMiddle(1.2, 1.0, steppingStoneHeight);
       generator.translate(0.0, -(0.5 + 1.0), 0.0);
-      generator.rotate(0.5 * Math.PI, Axis.Z);
+      generator.rotate(0.5 * Math.PI, Axis3D.Z);
       generator.addRampReferencedAtBottomMiddle(1.0, 1.2, steppingStoneHeight);
 
       addPlanarRegionsToTerrain(YoAppearance.Gray());

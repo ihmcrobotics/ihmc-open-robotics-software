@@ -2,6 +2,7 @@ package us.ihmc.robotics.geometry;
 
 import java.util.ArrayList;
 
+import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -9,7 +10,6 @@ import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools.Bound;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -215,8 +215,8 @@ public class ConvexPolygonScaler
     * remain inside an exterior polygon. The distance inside that the interior polygon can achieve is set by {@param distanceInside}, where positive
     * represents an interior offset, and negative represents an exterior offset.
     */
-   public boolean scaleConvexPolygonToContainInteriorPolygon(ConvexPolygon2D exteriorPolygon, ConvexPolygon2D interiorPolygon, double distanceInside,
-                                                             ConvexPolygon2D scaledPolygonToPack)
+   public boolean scaleConvexPolygonToContainInteriorPolygon(ConvexPolygon2DReadOnly exteriorPolygon, ConvexPolygon2DReadOnly interiorPolygon, double distanceInside,
+                                                             ConvexPolygon2DBasics scaledPolygonToPack)
    {
       if (Math.abs(distanceInside) < 1.0e-10 && interiorPolygon.getArea() <= 1.0e-10)
       {
@@ -261,7 +261,7 @@ public class ConvexPolygonScaler
          }
 
 
-         edgeOnQ.negateDirection();
+         edgeOnQ.getDirection().negate();
          double extraDistanceToPoint2 = 0.0;
 
          leftMostIndexOnInteriorPolygon = EuclidGeometryPolygonTools.findVertexIndex(interiorPolygon, true, Bound.MIN, Bound.MIN);

@@ -303,12 +303,15 @@ public class PelvisLinearStateUpdater
       kinematicsBasedLinearStateCalculator.updateKinematics();
       kinematicsBasedLinearStateCalculator.updateFeetPositionsWhenTrustingIMUOnly(yoRootJointPosition);
       kinematicsBasedLinearStateCalculator.setPelvisLinearVelocityToZero();
+      // Reset the IMU updater
+      imuBasedLinearStateCalculator.initialize();
 
       // Set the rootJoint twist to zero.
       rootJointTwist.setIncludingFrame(rootJoint.getJointTwist());
       rootJointTwist.setToZero();
       rootJoint.setJointTwist(rootJointTwist);
       rootJoint.updateFramesRecursively();
+      yoRootJointVelocity.setToZero();
 
       updateCoMState();
    }

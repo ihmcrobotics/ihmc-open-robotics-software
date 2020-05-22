@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.cart;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -95,19 +95,19 @@ public class TriWheelCartDescription extends RobotDescription
       // Passive joint on caster axis.
       PinJointDescription casterAxisJoint = new PinJointDescription("casterAxis", new Vector3D(-lengthBody / 2.0 * wheelPlacementRatio, 0.0,
                                                                                                -heightBody / 2.0 - offsetZCasterWheel),
-                                                                    Axis.Z);
+                                                                    Axis3D.Z);
       LinkDescription casterAxisLink = new LinkDescription("casterAxisLink");
       casterAxisLink.setCenterOfMassOffset(new Vector3D(0.0, 0.0, 0.0));
       casterAxisLink.setMassAndRadiiOfGyration(massCasterAxis, radiusActiveWheel, radiusOffset, radiusOffset);
 
       LinkGraphicsDescription wheelGraphics = new LinkGraphicsDescription();
       AppearanceDefinition wheelAppearance = YoAppearance.Green();
-      wheelGraphics.rotate(-Math.PI / 2.0, Axis.Y);
+      wheelGraphics.rotate(-Math.PI / 2.0, Axis3D.Y);
       wheelGraphics.addCylinder(offsetXCasterWheel, radiusOffset, wheelAppearance);
       casterAxisLink.setLinkGraphics(wheelGraphics);
 
       CollisionMeshDescription casterAxisCollisionMesh = new CollisionMeshDescription();
-      casterAxisCollisionMesh.rotate(-Math.PI / 2.0, Axis.Y);
+      casterAxisCollisionMesh.rotate(-Math.PI / 2.0, Axis3D.Y);
       casterAxisCollisionMesh.addCylinderReferencedAtBottomMiddle(radiusOffset, offsetXCasterWheel);
       casterAxisCollisionMesh.setCollisionGroup(collisionGroup);
       casterAxisCollisionMesh.setCollisionMask(collisionMask);
@@ -125,23 +125,23 @@ public class TriWheelCartDescription extends RobotDescription
 
    private PinJointDescription createWheelJoint(String jointName, Vector3D vectorToParent, double radius, double thickness, AppearanceDefinition yoAppearance)
    {
-      PinJointDescription wheelJoint = new PinJointDescription(jointName, vectorToParent, Axis.Y);
+      PinJointDescription wheelJoint = new PinJointDescription(jointName, vectorToParent, Axis3D.Y);
       LinkDescription wheelLink = new LinkDescription(jointName + "link");
       wheelLink.setCenterOfMassOffset(new Vector3D(0.0, 0.0, 0.0));
       wheelLink.setMassAndRadiiOfGyration(massActiveWheel, offsetXCasterWheel, thickness, radius);
 
       LinkGraphicsDescription wheelGraphics = new LinkGraphicsDescription();
-      wheelGraphics.rotate(Math.PI / 2.0, Axis.X);
+      wheelGraphics.rotate(Math.PI / 2.0, Axis3D.X);
       wheelGraphics.translate(new Vector3D(0.0, 0.0, -thickness / 2.0));
       wheelGraphics.addCylinder(thickness, radius, yoAppearance);
       wheelGraphics.identity();
       wheelGraphics.translate(new Vector3D(radius, thickness / 2.0, 0.0));
-      wheelGraphics.rotate(Math.PI / 2.0, Axis.X);
+      wheelGraphics.rotate(Math.PI / 2.0, Axis3D.X);
       wheelGraphics.addCylinder(thickness, radius * 0.1, YoAppearance.AliceBlue());
       wheelLink.setLinkGraphics(wheelGraphics);
 
       CollisionMeshDescription wheelCollisionMesh = new CollisionMeshDescription();
-      wheelCollisionMesh.rotate(Math.PI / 2.0, Axis.X);
+      wheelCollisionMesh.rotate(Math.PI / 2.0, Axis3D.X);
       wheelCollisionMesh.translate(new Vector3D(0.0, 0.0, -thickness / 2.0));
       wheelCollisionMesh.addCylinderReferencedAtBottomMiddle(radius, thickness);
       wheelCollisionMesh.setCollisionGroup(collisionGroup);

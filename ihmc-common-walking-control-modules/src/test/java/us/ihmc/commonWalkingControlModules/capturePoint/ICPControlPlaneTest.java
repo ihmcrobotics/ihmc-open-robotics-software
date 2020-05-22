@@ -339,7 +339,7 @@ public class ICPControlPlaneTest
       FramePoint3D projectedPoint = new FramePoint3D(worldFrame);
       FramePoint3D expectedProjectedPoint = new FramePoint3D(centerOfMassFrame);
 
-      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, -0.1);
+      icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, -0.1);
 
       expectedProjectedPoint.setX(1.1 * 0.15);
       expectedProjectedPoint.setY(1.1 * 0.15);
@@ -355,7 +355,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 0.1);
+      icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 0.1);
 
       expectedProjectedPoint.setX(0.9 * 0.15);
       expectedProjectedPoint.setY(0.9 * 0.15);
@@ -371,7 +371,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 0.0);
+      icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 0.0);
 
       expectedProjectedPoint.setX(0.15);
       expectedProjectedPoint.setY(0.15);
@@ -387,7 +387,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 0.05);
+      icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 0.05);
 
       expectedProjectedPoint.setX(0.95 * 0.15);
       expectedProjectedPoint.setY(0.95 * 0.15);
@@ -404,7 +404,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, -0.05);
+      icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, -0.05);
 
       expectedProjectedPoint.setX(1.05 * 0.15);
       expectedProjectedPoint.setY(1.05 * 0.15);
@@ -420,7 +420,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 0.01);
+      icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 0.01);
 
       expectedProjectedPoint.setX(0.99 * 0.15);
       expectedProjectedPoint.setY(0.99 * 0.15);
@@ -436,7 +436,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, -0.01);
+      icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, -0.01);
 
       expectedProjectedPoint.setX(1.01 * 0.15);
       expectedProjectedPoint.setY(1.01 * 0.15);
@@ -452,7 +452,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, -1.0);
+      icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, -1.0);
 
       expectedProjectedPoint.setX(0.3);
       expectedProjectedPoint.setY(0.3);
@@ -468,7 +468,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 0.95);
+      icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 0.95);
 
       expectedProjectedPoint.setX(0.05 * 0.15);
       expectedProjectedPoint.setY(0.05 * 0.15);
@@ -484,7 +484,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 1.05);
+      icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 1.05);
 
       expectedProjectedPoint.setX(-0.05 * 0.15);
       expectedProjectedPoint.setY(-0.05 * 0.15);
@@ -500,7 +500,7 @@ public class ICPControlPlaneTest
       projectedPoint.setToZero(worldFrame);
       expectedProjectedPoint.setToZero(centerOfMassFrame);
 
-      icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 1.5);
+      icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, 1.5);
 
       expectedProjectedPoint.setX(-0.075);
       expectedProjectedPoint.setY(-0.075);
@@ -543,7 +543,7 @@ public class ICPControlPlaneTest
          FramePoint3D projectedPoint = new FramePoint3D(worldFrame);
          FramePoint3D expectedProjectedPoint = new FramePoint3D(centerOfMassFrame);
 
-         icpControlPlane.projectPointFromPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, zSurfacePosition);
+         icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, pointToProject, projectedPoint, zSurfacePosition);
 
          expectedProjectedPoint.setX(xPointPosition * (zSurfacePosition - zCoMPosition) / planeHeightInCoMFrame);
          expectedProjectedPoint.setY(yPointPosition * (zSurfacePosition - zCoMPosition) / planeHeightInCoMFrame);

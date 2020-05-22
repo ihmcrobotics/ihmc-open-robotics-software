@@ -40,16 +40,22 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 100; ++i0)
       {
           current_alignment += controller_msgs.msg.dds.QuadrupedTimedStepMessagePubSubType.getMaxCdrSerializedSize(current_alignment);}
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -66,7 +72,9 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -74,12 +82,16 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
       {
           current_alignment += controller_msgs.msg.dds.QuadrupedTimedStepMessagePubSubType.getCdrSerializedSize(data.getQuadrupedStepList().get(i0), current_alignment);}
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += controller_msgs.msg.dds.QueueableMessagePubSubType.getCdrSerializedSize(data.getQueueingProperties(), current_alignment);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -91,16 +103,22 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
 
    public static void write(controller_msgs.msg.dds.QuadrupedTimedStepListMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       if(data.getQuadrupedStepList().size() <= 100)
       cdr.write_type_e(data.getQuadrupedStepList());else
           throw new RuntimeException("quadruped_step_list field exceeds the maximum length");
 
+
       cdr.write_type_7(data.getIsExpressedInAbsoluteTime());
 
+
       controller_msgs.msg.dds.QueueableMessagePubSubType.write(data.getQueueingProperties(), cdr);
+
       cdr.write_type_7(data.getAreStepsAdjustable());
+
 
       cdr.write_type_7(data.getOffsetStepsHeightWithExecutionError());
 
@@ -108,14 +126,20 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
 
    public static void read(controller_msgs.msg.dds.QuadrupedTimedStepListMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       cdr.read_type_e(data.getQuadrupedStepList());	
+
       data.setIsExpressedInAbsoluteTime(cdr.read_type_7());
       	
+
       controller_msgs.msg.dds.QueueableMessagePubSubType.read(data.getQueueingProperties(), cdr);	
+
       data.setAreStepsAdjustable(cdr.read_type_7());
       	
+
       data.setOffsetStepsHeightWithExecutionError(cdr.read_type_7());
       	
 
@@ -124,24 +148,36 @@ public class QuadrupedTimedStepListMessagePubSubType implements us.ihmc.pubsub.T
    @Override
    public final void serialize(controller_msgs.msg.dds.QuadrupedTimedStepListMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_e("quadruped_step_list", data.getQuadrupedStepList());
+
       ser.write_type_7("is_expressed_in_absolute_time", data.getIsExpressedInAbsoluteTime());
+
       ser.write_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
+
       ser.write_type_7("are_steps_adjustable", data.getAreStepsAdjustable());
+
       ser.write_type_7("offset_steps_height_with_execution_error", data.getOffsetStepsHeightWithExecutionError());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.QuadrupedTimedStepListMessage data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_e("quadruped_step_list", data.getQuadrupedStepList());
+
       data.setIsExpressedInAbsoluteTime(ser.read_type_7("is_expressed_in_absolute_time"));
+
       ser.read_type_a("queueing_properties", new controller_msgs.msg.dds.QueueableMessagePubSubType(), data.getQueueingProperties());
 
+
       data.setAreStepsAdjustable(ser.read_type_7("are_steps_adjustable"));
+
       data.setOffsetStepsHeightWithExecutionError(ser.read_type_7("offset_steps_height_with_execution_error"));
    }
 

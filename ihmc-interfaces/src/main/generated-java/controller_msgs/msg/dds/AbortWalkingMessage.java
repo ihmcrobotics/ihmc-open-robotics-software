@@ -7,18 +7,26 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-       * This message is part of the IHMC whole-body controller API.
-       * This message is used to abort walking, forcing the robot to switch back to double support and clear the footstep list.
-       */
+   
+ * This message is part of the IHMC whole-body controller API.
+   
+ * This message is used to abort walking, forcing the robot to switch back to double support and clear the footstep list.
+   
+ */
 public class AbortWalkingMessage extends Packet<AbortWalkingMessage> implements Settable<AbortWalkingMessage>, EpsilonComparable<AbortWalkingMessage>
 {
+
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long sequence_id_;
 
    public AbortWalkingMessage()
    {
+
+
    }
 
    public AbortWalkingMessage(AbortWalkingMessage other)
@@ -29,20 +37,26 @@ public class AbortWalkingMessage extends Packet<AbortWalkingMessage> implements 
 
    public void set(AbortWalkingMessage other)
    {
+
       sequence_id_ = other.sequence_id_;
 
    }
 
+
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-            * Unique ID used to identify this message, should preferably be consecutively increasing.
-            */
+       
+    * Unique ID used to identify this message, should preferably be consecutively increasing.
+       
+    */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -66,7 +80,9 @@ public class AbortWalkingMessage extends Packet<AbortWalkingMessage> implements 
       if(other == null) return false;
       if(other == this) return true;
 
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
+
 
       return true;
    }
@@ -80,6 +96,7 @@ public class AbortWalkingMessage extends Packet<AbortWalkingMessage> implements 
 
       AbortWalkingMessage otherMyClass = (AbortWalkingMessage) other;
 
+
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
 
@@ -92,6 +109,7 @@ public class AbortWalkingMessage extends Packet<AbortWalkingMessage> implements 
       StringBuilder builder = new StringBuilder();
 
       builder.append("AbortWalkingMessage {");
+
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);
       builder.append("}");

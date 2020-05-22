@@ -40,7 +40,9 @@ public class PlanOffsetStatusPubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -57,7 +59,9 @@ public class PlanOffsetStatusPubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += geometry_msgs.msg.dds.Vector3PubSubType.getCdrSerializedSize(data.getOffsetVector(), current_alignment);
@@ -68,15 +72,19 @@ public class PlanOffsetStatusPubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void write(controller_msgs.msg.dds.PlanOffsetStatus data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       geometry_msgs.msg.dds.Vector3PubSubType.write(data.getOffsetVector(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.PlanOffsetStatus data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       geometry_msgs.msg.dds.Vector3PubSubType.read(data.getOffsetVector(), cdr);	
 
    }
@@ -84,7 +92,9 @@ public class PlanOffsetStatusPubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void serialize(controller_msgs.msg.dds.PlanOffsetStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_a("offset_vector", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getOffsetVector());
 
    }
@@ -92,7 +102,9 @@ public class PlanOffsetStatusPubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.PlanOffsetStatus data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_a("offset_vector", new geometry_msgs.msg.dds.Vector3PubSubType(), data.getOffsetVector());
 
    }

@@ -65,7 +65,7 @@ public abstract class HumanoidKinematicsSimulationTest
       conductor = new GoalOrientedTestConductor(scs, simulationTestingParameters);
       BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
 
-      AvatarTestScripts.standUp(conductor, variables);
+      AvatarTestScripts.awaitStandUp(conductor, variables);
    }
 
    @AfterAll

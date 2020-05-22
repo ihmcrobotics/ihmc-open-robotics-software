@@ -40,15 +40,21 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getMaxCdrSerializedSize(current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.TwistPubSubType.getMaxCdrSerializedSize(current_alignment);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
 
@@ -64,17 +70,23 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += geometry_msgs.msg.dds.PosePubSubType.getCdrSerializedSize(data.getPose(), current_alignment);
 
+
       current_alignment += geometry_msgs.msg.dds.TwistPubSubType.getCdrSerializedSize(data.getTwist(), current_alignment);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getFrameId().length() + 1;
@@ -85,13 +97,19 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void write(controller_msgs.msg.dds.StampedPosePacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
+
       geometry_msgs.msg.dds.PosePubSubType.write(data.getPose(), cdr);
+
       geometry_msgs.msg.dds.TwistPubSubType.write(data.getTwist(), cdr);
+
       cdr.write_type_11(data.getTimestamp());
 
+
       cdr.write_type_6(data.getConfidenceFactor());
+
 
       if(data.getFrameId().length() <= 255)
       cdr.write_type_d(data.getFrameId());else
@@ -101,14 +119,20 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
 
    public static void read(controller_msgs.msg.dds.StampedPosePacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       geometry_msgs.msg.dds.PosePubSubType.read(data.getPose(), cdr);	
+
       geometry_msgs.msg.dds.TwistPubSubType.read(data.getTwist(), cdr);	
+
       data.setTimestamp(cdr.read_type_11());
       	
+
       data.setConfidenceFactor(cdr.read_type_6());
       	
+
       cdr.read_type_d(data.getFrameId());	
 
    }
@@ -116,26 +140,38 @@ public class StampedPosePacketPubSubType implements us.ihmc.pubsub.TopicDataType
    @Override
    public final void serialize(controller_msgs.msg.dds.StampedPosePacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
+
 
       ser.write_type_a("twist", new geometry_msgs.msg.dds.TwistPubSubType(), data.getTwist());
 
+
       ser.write_type_11("timestamp", data.getTimestamp());
+
       ser.write_type_6("confidence_factor", data.getConfidenceFactor());
+
       ser.write_type_d("frame_id", data.getFrameId());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.StampedPosePacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_a("pose", new geometry_msgs.msg.dds.PosePubSubType(), data.getPose());
+
 
       ser.read_type_a("twist", new geometry_msgs.msg.dds.TwistPubSubType(), data.getTwist());
 
+
       data.setTimestamp(ser.read_type_11("timestamp"));
+
       data.setConfidenceFactor(ser.read_type_6("confidence_factor"));
+
       ser.read_type_d("frame_id", data.getFrameId());
    }
 

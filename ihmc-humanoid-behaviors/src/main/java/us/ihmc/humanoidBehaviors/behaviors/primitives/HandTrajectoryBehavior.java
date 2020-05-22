@@ -198,7 +198,7 @@ public class HandTrajectoryBehavior extends AbstractBehavior
          stopArmMotion();
         
    }
-
+ 
    @Override
    public void onBehaviorResumed()
    {
