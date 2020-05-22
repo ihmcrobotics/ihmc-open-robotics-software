@@ -2,9 +2,7 @@ package us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton;
 
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
+import java.util.*;
 
 public class LinkedPointList
 {
@@ -103,6 +101,19 @@ public class LinkedPointList
       LinkedPoint oldFirstPoint = firstPoint;
       firstPoint = lastPoint;
       lastPoint = oldFirstPoint;
+   }
+
+   public Collection<LinkedPoint> getPoints()
+   {
+      return points;
+   }
+
+   public Collection<LinkedPoint> getPointsCopy()
+   {
+      List<LinkedPoint> pointsCopy = new ArrayList<>();
+      for (LinkedPoint point : points)
+         pointsCopy.add(new LinkedPoint(point));
+      return pointsCopy;
    }
 
 }
