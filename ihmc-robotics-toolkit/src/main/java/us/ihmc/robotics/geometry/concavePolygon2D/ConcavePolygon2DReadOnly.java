@@ -16,6 +16,11 @@ public interface ConcavePolygon2DReadOnly extends Vertex2DSupplier
 
    List<? extends Point2DReadOnly> getVertexBufferView();
 
+   default List<? extends Point2DReadOnly> getPolygonVerticesView()
+   {
+      return getVertexBufferView().subList(0, getNumberOfVertices());
+   }
+
    BoundingBox2DReadOnly getBoundingBox();
 
    boolean isClockwiseOrdered();
@@ -76,10 +81,21 @@ public interface ConcavePolygon2DReadOnly extends Vertex2DSupplier
       for (int i = 0; i < other.getNumberOfVertices(); i++)
       {
          Point2DReadOnly thisVertex = getVertexBufferView().get(i);
-         if (!other.getVertexBufferView().contains(thisVertex))
+         if (!other.epsilonContains(thisVertex, epsilon))
             return false;
       }
 
       return true;
+   }
+
+   default boolean epsilonContains(Point2DReadOnly thisVertex, double epsilon)
+   {
+      for (int i = 0; i < getNumberOfVertices(); i++)
+      {
+         if (getVertexBufferView().get(i).epsilonEquals(thisVertex, epsilon))
+            return true;
+      }
+
+      return false;
    }
 }

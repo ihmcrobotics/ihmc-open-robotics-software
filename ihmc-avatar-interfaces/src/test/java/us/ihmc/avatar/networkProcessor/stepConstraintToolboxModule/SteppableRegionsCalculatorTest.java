@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.concaveHull.GeometryPolygonTestTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.PolygonClippingAndMerging;
@@ -92,11 +93,10 @@ public class SteppableRegionsCalculatorTest
 
       List<StepConstraintRegion> constraintRegions = calculator.computeSteppableRegions();
 
-      List<Point2DReadOnly> holeVertices =  SteppableRegionsCalculator.createObstacleExtrusion(groundRegion,
-                                                                                               blockRegion,
-                                                                                               extrusionDistanceCalculator,
-                                                                                               Math.cos(orthogonalAngle));
-      ConcavePolygon2D expectedHole = new ConcavePolygon2D(Vertex2DSupplier.asVertex2DSupplier(holeVertices));
+      ConcavePolygon2D expectedHole =  SteppableRegionsCalculator.createObstacleExtrusion(groundRegion,
+                                                                                          blockRegion,
+                                                                                          extrusionDistanceCalculator,
+                                                                                          Math.cos(orthogonalAngle));
 
       List<ConcavePolygon2D> holes = new ArrayList<>();
       holes.add(expectedHole);
@@ -207,8 +207,10 @@ public class SteppableRegionsCalculatorTest
       calculator.setOrthogonalAngle(orthogonalAngle);
       calculator.setPlanarRegions(listOfRegions);
 
-      List<Point2DReadOnly> obstacleVertices = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion, blockRegion, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
-      ConcavePolygon2D obstacle = new ConcavePolygon2D(Vertex2DSupplier.asVertex2DSupplier(obstacleVertices));
+      ConcavePolygon2D obstacle =  SteppableRegionsCalculator.createObstacleExtrusion(groundRegion,
+                                                                                          blockRegion,
+                                                                                          extrusionDistanceCalculator,
+                                                                                          Math.cos(orthogonalAngle));
 
       ConcavePolygon2D groundConcavePOlygon = new ConcavePolygon2D(groundPolygon);
       ConcavePolygon2D croppedGroundPolygon = new ConcavePolygon2D();
@@ -278,8 +280,11 @@ public class SteppableRegionsCalculatorTest
       calculator.setOrthogonalAngle(orthogonalAngle);
       calculator.setPlanarRegions(listOfRegions);
 
-      List<Point2DReadOnly> obstacleVertices = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion, blockRegion, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
-      ConcavePolygon2D obstacle = new ConcavePolygon2D(Vertex2DSupplier.asVertex2DSupplier(obstacleVertices));
+      ConcavePolygon2D obstacle1 = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion, blockRegion, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
+      ConcavePolygon2D obstacle2 = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion, blockRegion2, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
+
+      ConcavePolygon2D obstacle = new ConcavePolygon2D();
+      PolygonClippingAndMerging.merge(obstacle1, obstacle2, obstacle);
 
       ConcavePolygon2D groundConcavePOlygon = new ConcavePolygon2D(groundPolygon);
       ConcavePolygon2D croppedGroundPolygon = new ConcavePolygon2D();
@@ -298,8 +303,11 @@ public class SteppableRegionsCalculatorTest
       StepConstraintRegion returnedBlockRegion = constraintRegions.get(1);
       StepConstraintRegion returnedBlockRegion2 = constraintRegions.get(2);
 
+      assertEquals(0, returnedBlockRegion.getNumberOfHolesInRegion());
+
       assertTrue(expectedGroundRegion.epsilonEquals(returnedGroundRegion, 1e-7));
       assertTrue(expectedBlockRegion.epsilonEquals(returnedBlockRegion, 1e-7));
+      assertTrue(expectedBlockRegion2.epsilonEquals(returnedBlockRegion2, 1e-7));
    }
 
 
@@ -307,7 +315,8 @@ public class SteppableRegionsCalculatorTest
    @Test
    public void testCreateObstacleExtrusionForHorizontalObstacle()
    {
-      ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator = (p, d) -> 1.0;
+      double extrusionDistance1 = 0.1;
+      ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator = (p, d) -> extrusionDistance1;
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
@@ -329,8 +338,158 @@ public class SteppableRegionsCalculatorTest
       PlanarRegion blockRegion = new PlanarRegion(blockTransform, blockPolygon);
       double orthogonalAngle = Math.toRadians(75.0);
 
-      List<Point2DReadOnly> vertices = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion, blockRegion, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
-      fail();
+      ConcavePolygon2D extrusion = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion, blockRegion, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
+
+      double angleDistance = extrusionDistance1 * Math.sqrt(2) / 2.0;
+
+      ConcavePolygon2D expectedExtrusion = new ConcavePolygon2D();
+      expectedExtrusion.addVertex(-0.1 - extrusionDistance1, 0.1);
+      expectedExtrusion.addVertex(-0.1 - angleDistance, 0.1 + angleDistance);
+      expectedExtrusion.addVertex(-0.1, 0.1 + extrusionDistance1);
+      expectedExtrusion.addVertex(0.1, 0.1 + extrusionDistance1);
+      expectedExtrusion.addVertex(0.1 + angleDistance, 0.1 + angleDistance);
+      expectedExtrusion.addVertex(0.1 + extrusionDistance1, 0.1);
+      expectedExtrusion.addVertex(0.1 + extrusionDistance1, -0.1);
+      expectedExtrusion.addVertex(0.1 + angleDistance, -0.1 - angleDistance);
+      expectedExtrusion.addVertex(0.1, -0.1 - extrusionDistance1);
+      expectedExtrusion.addVertex(-0.1, -0.1 - extrusionDistance1);
+      expectedExtrusion.addVertex(-0.1 - angleDistance, -0.1 - angleDistance);
+      expectedExtrusion.addVertex(-0.1 - extrusionDistance1, -0.1);
+      expectedExtrusion.update();
+
+      assertTrue(expectedExtrusion.epsilonEquals(extrusion, 1e-7));
+
+
+
+      double extrusionDistance2 = 0.1;
+      extrusionDistanceCalculator = (p, d) -> extrusionDistance2;
+
+      groundPolygon = new ConvexPolygon2D();
+      groundPolygon.addVertex(1.0, 1.0);
+      groundPolygon.addVertex(1.0, -1.0);
+      groundPolygon.addVertex(-1.0, 1.0);
+      groundPolygon.addVertex(-1.0, -1.0);
+      groundPolygon.update();
+
+      blockPolygon = new ConvexPolygon2D();
+      blockPolygon.addVertex(0.1, 0.1);
+      blockPolygon.addVertex(0.1, -0.1);
+      blockPolygon.addVertex(-0.1, 0.1);
+      blockPolygon.addVertex(-0.1, -0.1);
+      blockPolygon.update();
+      blockTransform = new RigidBodyTransform();
+      blockTransform.appendTranslation(0, 0, 0.2);
+
+      groundRegion = new PlanarRegion(new RigidBodyTransform(), groundPolygon);
+      blockRegion = new PlanarRegion(blockTransform, blockPolygon);
+
+      extrusion = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion, blockRegion, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
+
+      angleDistance = extrusionDistance2 * Math.sqrt(2) / 2.0;
+
+      expectedExtrusion = new ConcavePolygon2D();
+      expectedExtrusion.addVertex(-0.1 - extrusionDistance2, 0.1);
+      expectedExtrusion.addVertex(-0.1 - angleDistance, 0.1 + angleDistance);
+      expectedExtrusion.addVertex(-0.1, 0.1 + extrusionDistance2);
+      expectedExtrusion.addVertex(0.1, 0.1 + extrusionDistance2);
+      expectedExtrusion.addVertex(0.1 + angleDistance, 0.1 + angleDistance);
+      expectedExtrusion.addVertex(0.1 + extrusionDistance2, 0.1);
+      expectedExtrusion.addVertex(0.1 + extrusionDistance2, -0.1);
+      expectedExtrusion.addVertex(0.1 + angleDistance, -0.1 - angleDistance);
+      expectedExtrusion.addVertex(0.1, -0.1 - extrusionDistance2);
+      expectedExtrusion.addVertex(-0.1, -0.1 - extrusionDistance2);
+      expectedExtrusion.addVertex(-0.1 - angleDistance, -0.1 - angleDistance);
+      expectedExtrusion.addVertex(-0.1 - extrusionDistance2, -0.1);
+      expectedExtrusion.update();
+
+      assertTrue(expectedExtrusion.epsilonEquals(extrusion, 1e-7));
+   }
+
+   @Test
+   public void testCreateObstacleExtrusionForVerticalObstacle()
+   {
+      double extrusionDistance1 = 0.1;
+      ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator = (p, d) -> extrusionDistance1;
+
+      ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
+      groundPolygon.addVertex(1.0, 1.0);
+      groundPolygon.addVertex(1.0, -1.0);
+      groundPolygon.addVertex(-1.0, 1.0);
+      groundPolygon.addVertex(-1.0, -1.0);
+      groundPolygon.update();
+
+      ConvexPolygon2D blockPolygon = new ConvexPolygon2D();
+      blockPolygon.addVertex(0.1, 0.1);
+      blockPolygon.addVertex(0.1, -0.1);
+      blockPolygon.addVertex(-0.1, 0.1);
+      blockPolygon.addVertex(-0.1, -0.1);
+      blockPolygon.update();
+      RigidBodyTransform blockTransform = new RigidBodyTransform();
+      blockTransform.appendPitchRotation(Math.toRadians(90.0));
+
+      PlanarRegion groundRegion = new PlanarRegion(new RigidBodyTransform(), groundPolygon);
+      PlanarRegion blockRegion = new PlanarRegion(blockTransform, blockPolygon);
+      double orthogonalAngle = Math.toRadians(75.0);
+
+      ConcavePolygon2D extrusion = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion, blockRegion, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
+
+      double angleDistance = extrusionDistance1 * Math.sqrt(2) / 2.0;
+
+      ConcavePolygon2D expectedExtrusion = new ConcavePolygon2D();
+      expectedExtrusion.addVertex(-extrusionDistance1, 0.1);
+      expectedExtrusion.addVertex(-angleDistance, 0.1 + angleDistance);
+      expectedExtrusion.addVertex(0.0, 0.1 + extrusionDistance1);
+      expectedExtrusion.addVertex(angleDistance, 0.1 + angleDistance);
+      expectedExtrusion.addVertex(extrusionDistance1, 0.1);
+      expectedExtrusion.addVertex(extrusionDistance1, -0.1);
+      expectedExtrusion.addVertex(angleDistance, -0.1 - angleDistance);
+      expectedExtrusion.addVertex(0.0, -0.1 - extrusionDistance1);
+      expectedExtrusion.addVertex(-angleDistance, -0.1 - angleDistance);
+      expectedExtrusion.addVertex(-extrusionDistance1, -0.1);
+      expectedExtrusion.update();
+
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(expectedExtrusion, extrusion, 1e-7);
+
+      double extrusionDistance2 = 0.15;
+      extrusionDistanceCalculator = (p, d) -> extrusionDistance2;
+
+      groundPolygon = new ConvexPolygon2D();
+      groundPolygon.addVertex(1.0, 1.0);
+      groundPolygon.addVertex(1.0, -1.0);
+      groundPolygon.addVertex(-1.0, 1.0);
+      groundPolygon.addVertex(-1.0, -1.0);
+      groundPolygon.update();
+
+      blockPolygon = new ConvexPolygon2D();
+      blockPolygon.addVertex(0.1, 0.1);
+      blockPolygon.addVertex(0.1, -0.1);
+      blockPolygon.addVertex(-0.1, 0.1);
+      blockPolygon.addVertex(-0.1, -0.1);
+      blockPolygon.update();
+      blockTransform = new RigidBodyTransform();
+      blockTransform.appendPitchRotation(Math.toRadians(90.0));
+
+      groundRegion = new PlanarRegion(new RigidBodyTransform(), groundPolygon);
+      blockRegion = new PlanarRegion(blockTransform, blockPolygon);
+
+      extrusion = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion, blockRegion, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
+
+      angleDistance = extrusionDistance2 * Math.sqrt(2) / 2.0;
+
+      expectedExtrusion = new ConcavePolygon2D();
+      expectedExtrusion.addVertex(-extrusionDistance2, 0.1);
+      expectedExtrusion.addVertex(-angleDistance, 0.1 + angleDistance);
+      expectedExtrusion.addVertex(0.0, 0.1 + extrusionDistance2);
+      expectedExtrusion.addVertex(angleDistance, 0.1 + angleDistance);
+      expectedExtrusion.addVertex(extrusionDistance2, 0.1);
+      expectedExtrusion.addVertex(extrusionDistance2, -0.1);
+      expectedExtrusion.addVertex(angleDistance, -0.1 - angleDistance);
+      expectedExtrusion.addVertex(0.0, -0.1 - extrusionDistance2);
+      expectedExtrusion.addVertex(-angleDistance, -0.1 - angleDistance);
+      expectedExtrusion.addVertex(-extrusionDistance2, -0.1);
+      expectedExtrusion.update();
+
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(expectedExtrusion, extrusion, 1e-7);
    }
 
    private static ObstacleExtrusionDistanceCalculator getExtrusionCalculator(double canEasilyStepOverHeight, double minimumDistanceFromCliffBottoms)
