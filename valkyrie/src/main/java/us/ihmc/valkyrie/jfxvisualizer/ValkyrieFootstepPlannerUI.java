@@ -18,6 +18,7 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.valkyrie.ValkyrieNetworkProcessor;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
+import us.ihmc.valkyrie.parameters.ValkyrieAdaptiveSwingParameters;
 import us.ihmc.valkyrie.parameters.ValkyrieFootstepPostProcessorParameters;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
@@ -62,7 +63,7 @@ public class ValkyrieFootstepPlannerUI extends Application
 
       if(!ValkyrieNetworkProcessor.isFootstepPlanningModuleStarted())
       {
-         FootstepPlanningModule plannerModule = FootstepPlanningModuleLauncher.createModule(model, DomainFactory.PubSubImplementation.FAST_RTPS);
+         FootstepPlanningModule plannerModule = FootstepPlanningModuleLauncher.createModule(model, DomainFactory.PubSubImplementation.FAST_RTPS, new ValkyrieAdaptiveSwingParameters());
 
          // Create logger and connect to messager
          FootstepPlannerLogger logger = new FootstepPlannerLogger(plannerModule);
