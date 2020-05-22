@@ -109,7 +109,7 @@ public class FourBarTools
       double BD = BDDiag.getLength();
 
       A.setAngleDot(angleDot);
-      double BDDt = DA * AB * Math.sin(angle) * angleDot / BD;
+      double BDDt = DA * AB * Math.sin(A.getAngle()) * angleDot / BD;
       BDDiag.setLengthDot(BDDt);
       C.setAngleDot(FourBarTools.angleDotWithCosineLaw(BC, CD, 0.0, BD, BDDt));
       double angleDtABD = FourBarTools.angleDotWithCosineLaw(AB, BD, BDDt, DA, 0.0);
@@ -161,7 +161,7 @@ public class FourBarTools
       double BDDt = BDDiag.getLengthDot();
 
       A.setAngleDDot(angleDDot);
-      double BDDt2 = DA * AB / BD * (Math.cos(angle) * angleDot * angleDot + Math.sin(angle) * (angleDDot - BDDt * angleDot / BD));
+      double BDDt2 = DA * AB / BD * (Math.cos(A.getAngle()) * angleDot * angleDot + Math.sin(A.getAngle()) * (angleDDot - BDDt * angleDot / BD));
       BDDiag.setLengthDDot(BDDt2);
       C.setAngleDDot(FourBarTools.angleDDotWithCosineLaw(BC, CD, 0.0, 0.0, BD, BDDt, BDDt2));
       if (!C.isConvex())
@@ -179,7 +179,8 @@ public class FourBarTools
          B.setAngleDDot(-B.getAngleDDot());
       D.setAngleDDot(-A.getAngleDDot() - B.getAngleDDot() - C.getAngleDDot());
 
-      double ACDt2 = AB * BC / AC * (Math.cos(B.getAngle()) * B.getAngleDot() * B.getAngleDot() + Math.sin(B.getAngle()) * (B.getAngleDDot() - ACDt * B.getAngleDot() / AC));
+      double ACDt2 = AB * BC / AC
+            * (Math.cos(B.getAngle()) * B.getAngleDot() * B.getAngleDot() + Math.sin(B.getAngle()) * (B.getAngleDDot() - ACDt * B.getAngleDot() / AC));
       ACDiag.setLengthDDot(ACDt2);
 
       return limit;
