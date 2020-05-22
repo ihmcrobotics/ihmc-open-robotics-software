@@ -22,6 +22,15 @@ public class LinkedPoint
       this(other.getX(), other.getY());
    }
 
+   public LinkedPoint(LinkedPoint other)
+   {
+      this(other.getPoint());
+
+      setIsIntersectionPoint(other.isIntersectionPoint);
+      setPredecessor(other.predecessor);
+      setSuccessor(other.successor);
+   }
+
    public LinkedPoint(double x, double y)
    {
       this(x, y, false);

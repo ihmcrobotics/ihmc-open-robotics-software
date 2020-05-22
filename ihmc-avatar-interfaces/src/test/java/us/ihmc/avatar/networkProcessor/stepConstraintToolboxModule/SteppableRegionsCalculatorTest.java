@@ -13,7 +13,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanc
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.concaveHull.GeometryPolygonTestTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
-import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
+import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.PolygonClippingAndMerging;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
@@ -213,8 +213,7 @@ public class SteppableRegionsCalculatorTest
                                                                                           Math.cos(orthogonalAngle));
 
       ConcavePolygon2D groundConcavePOlygon = new ConcavePolygon2D(groundPolygon);
-      ConcavePolygon2D croppedGroundPolygon = new ConcavePolygon2D();
-      PolygonClippingAndMerging.removeAreaInsideClip(obstacle, groundConcavePOlygon, croppedGroundPolygon);
+      ConcavePolygon2DBasics croppedGroundPolygon = PolygonClippingAndMerging.removeAreaInsideClip(obstacle, groundConcavePOlygon).get(0);
 
       List<StepConstraintRegion> constraintRegions = calculator.computeSteppableRegions();
 
@@ -287,8 +286,7 @@ public class SteppableRegionsCalculatorTest
       PolygonClippingAndMerging.merge(obstacle1, obstacle2, obstacle);
 
       ConcavePolygon2D groundConcavePOlygon = new ConcavePolygon2D(groundPolygon);
-      ConcavePolygon2D croppedGroundPolygon = new ConcavePolygon2D();
-      PolygonClippingAndMerging.removeAreaInsideClip(obstacle, groundConcavePOlygon, croppedGroundPolygon);
+      ConcavePolygon2DBasics croppedGroundPolygon = PolygonClippingAndMerging.removeAreaInsideClip(obstacle, groundConcavePOlygon).get(0);
 
       List<StepConstraintRegion> constraintRegions = calculator.computeSteppableRegions();
 

@@ -231,11 +231,7 @@ public class SteppableRegionsCalculator
 
    private boolean removeObstacleFromSteppableArea(ConcavePolygon2DBasics constraintArea, ConcavePolygon2DReadOnly obstacleConcaveHull)
    {
-
-      ConcavePolygon2D clippedArea = new ConcavePolygon2D();
-      PolygonClippingAndMerging.removeAreaInsideClip(obstacleConcaveHull, constraintArea, clippedArea);
-
-      constraintArea.set(clippedArea);
+      constraintArea.set(PolygonClippingAndMerging.removeAreaInsideClip(obstacleConcaveHull, obstacleConcaveHull).get(0));
 
       return false;
    }
