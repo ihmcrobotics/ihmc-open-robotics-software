@@ -225,6 +225,11 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       originToPack.set(fromLocalToWorldTransform.getM03(), fromLocalToWorldTransform.getM13(), fromLocalToWorldTransform.getM23());
    }
 
+   public ConcavePolygon2DReadOnly getConcaveHull()
+   {
+      return concaveHull;
+   }
+
    public Point2DReadOnly getConcaveHullVertexInRegionFrame(int i)
    {
       return concaveHull.getVertex(i);

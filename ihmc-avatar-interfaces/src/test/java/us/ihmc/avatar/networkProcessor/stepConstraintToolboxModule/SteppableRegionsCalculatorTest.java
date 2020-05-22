@@ -118,6 +118,79 @@ public class SteppableRegionsCalculatorTest
    }
 
    @Test
+   public void testEasyGroundWithWallThatSplitsInHalf()
+   {
+      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoVariableRegistry("test"));
+
+      ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
+      groundPolygon.addVertex(1.0, 1.0);
+      groundPolygon.addVertex(1.0, -1.0);
+      groundPolygon.addVertex(-1.0, 1.0);
+      groundPolygon.addVertex(-1.0, -1.0);
+      groundPolygon.update();
+
+      ConvexPolygon2D blockPolygon = new ConvexPolygon2D();
+      blockPolygon.addVertex(1.0, 1.0);
+      blockPolygon.addVertex(1.0, -1.0);
+      blockPolygon.addVertex(-1.0, 1.0);
+      blockPolygon.addVertex(-1.0, -1.0);
+      blockPolygon.update();
+      RigidBodyTransform blockTransform = new RigidBodyTransform();
+      blockTransform.appendPitchRotation(Math.toRadians(90));
+
+      PlanarRegion groundRegion = new PlanarRegion(new RigidBodyTransform(), groundPolygon);
+      PlanarRegion blockRegion = new PlanarRegion(blockTransform, blockPolygon);
+
+      List<PlanarRegion> listOfRegions = new ArrayList<>();
+      listOfRegions.add(groundRegion);
+      listOfRegions.add(blockRegion);
+
+      double minimumDistanceFromCliffBottoms = 0.1;
+      double canEasilyStepOverHeight = 0.1;
+      double orthogonalAngle = Math.toRadians(75.0);
+
+      ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator = getExtrusionCalculator(canEasilyStepOverHeight, minimumDistanceFromCliffBottoms);
+
+      calculator.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottoms);
+      calculator.setCanEasilyStepOverHeight(canEasilyStepOverHeight);
+      calculator.setOrthogonalAngle(orthogonalAngle);
+      calculator.setPlanarRegions(listOfRegions);
+
+      List<StepConstraintRegion> constraintRegions = calculator.computeSteppableRegions();
+
+      ConcavePolygon2D splittingHole =  SteppableRegionsCalculator.createObstacleExtrusion(groundRegion,
+                                                                                          blockRegion,
+                                                                                          extrusionDistanceCalculator,
+                                                                                          Math.cos(orthogonalAngle));
+
+
+      ConcavePolygon2D splitPolygon1 = new ConcavePolygon2D();
+      splitPolygon1.addVertex(-1.0, -0.1);
+      splitPolygon1.addVertex(1.0, -0.1);
+      splitPolygon1.addVertex(1.0, -1.0);
+      splitPolygon1.addVertex(-1.0, -1.0);
+      ConcavePolygon2D splitPolygon2 = new ConcavePolygon2D();
+      splitPolygon2.addVertex(-1.0, 0.1);
+      splitPolygon2.addVertex(-1.0, 1.0);
+      splitPolygon2.addVertex(1.0, 1.0);
+      splitPolygon2.addVertex(1.0, 0.1);
+
+      StepConstraintRegion expectedGroundRegion1 = new StepConstraintRegion(new RigidBodyTransform(), splitPolygon1);
+      StepConstraintRegion expectedGroundRegion2 = new StepConstraintRegion(new RigidBodyTransform(), splitPolygon2);
+
+      assertEquals(2, constraintRegions.size());
+
+      StepConstraintRegion returnedGroundRegion1 = constraintRegions.get(0);
+      StepConstraintRegion returnedGroundRegion2 = constraintRegions.get(1);
+
+      assertEquals(0, returnedGroundRegion1.getNumberOfHolesInRegion());
+      assertEquals(0, returnedGroundRegion2.getNumberOfHolesInRegion());
+
+      assertTrue(expectedGroundRegion1.epsilonEquals(returnedGroundRegion1, 1e-7));
+      assertTrue(expectedGroundRegion2.epsilonEquals(returnedGroundRegion2, 1e-7));
+   }
+
+   @Test
    public void testEasyGroundWithABlockBelow()
    {
       SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoVariableRegistry("test"));
@@ -231,7 +304,7 @@ public class SteppableRegionsCalculatorTest
    }
 
    @Test
-   public void testEasyGroundWithBlockThatMergesWithAWhole()
+   public void testEasyGroundWithBlockThatMergesWithAHole()
    {
       SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoVariableRegistry("test"));
 
@@ -302,6 +375,9 @@ public class SteppableRegionsCalculatorTest
       StepConstraintRegion returnedBlockRegion2 = constraintRegions.get(2);
 
       assertEquals(0, returnedBlockRegion.getNumberOfHolesInRegion());
+
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(expectedGroundRegion.getConcaveHull(), returnedGroundRegion.getConcaveHull(), 1e-7);
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(expectedBlockRegion.getConcaveHull(), returnedBlockRegion.getConcaveHull(), 1e-7);
 
       assertTrue(expectedGroundRegion.epsilonEquals(returnedGroundRegion, 1e-7));
       assertTrue(expectedBlockRegion.epsilonEquals(returnedBlockRegion, 1e-7));
