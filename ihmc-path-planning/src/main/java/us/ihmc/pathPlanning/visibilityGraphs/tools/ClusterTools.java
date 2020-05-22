@@ -716,7 +716,7 @@ public class ClusterTools
       }
    }
 
-   private static List<? extends Point2DReadOnly> computeObstacleNavigableExtrusionsInLocal(ClusterType type, List<Point3DReadOnly> rawClusterPoints,
+   public static List<? extends Point2DReadOnly> computeObstacleNavigableExtrusionsInLocal(ClusterType type, List<Point3DReadOnly> rawClusterPoints,
                                                                                             ObstacleExtrusionDistanceCalculator calculator)
    {
       int numberOfExtrusionsAtEndpoints = 5;
