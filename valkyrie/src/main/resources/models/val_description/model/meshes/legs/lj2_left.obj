@@ -445,7 +445,7 @@ vt 0.1602 0.7214 0.0000
 vt 0.1042 0.6292 0.0000
 # 182 texture coords
 
-o Cube
+#o Cube
 g Cube
 usemtl Material
 s off

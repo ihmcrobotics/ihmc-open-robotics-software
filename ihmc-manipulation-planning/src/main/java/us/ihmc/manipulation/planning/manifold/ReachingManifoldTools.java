@@ -175,8 +175,8 @@ public class ReachingManifoldTools
 
       RigidBodyTransform handControlFrameTransformToBodyFixedFrame = new RigidBodyTransform();
       handControlFrame.getTransformToDesiredFrame(handControlFrameTransformToBodyFixedFrame, hand.getBodyFixedFrame());
-      trajectory.getControlFramePositionInEndEffector().set(handControlFrameTransformToBodyFixedFrame.getTranslationVector());
-      trajectory.getControlFrameOrientationInEndEffector().set(handControlFrameTransformToBodyFixedFrame.getRotationMatrix());
+      trajectory.getControlFramePositionInEndEffector().set(handControlFrameTransformToBodyFixedFrame.getTranslation());
+      trajectory.getControlFrameOrientationInEndEffector().set(handControlFrameTransformToBodyFixedFrame.getRotation());
 
       handTrajectories.add(trajectory);
 
@@ -368,12 +368,12 @@ public class ReachingManifoldTools
       Point3D pointToPack = new Point3D();
       RotationMatrix orientationToPack = new RotationMatrix();
 
-      packExtrapolatedPoint(from.getTranslationVector(), to.getTranslationVector(), ratio, pointToPack);
-      packExtrapolatedOrienation(from.getRotationMatrix(), to.getRotationMatrix(), ratio, orientationToPack);
+      packExtrapolatedPoint(from.getTranslation(), to.getTranslation(), ratio, pointToPack);
+      packExtrapolatedOrienation(from.getRotation(), to.getRotation(), ratio, orientationToPack);
 
       toPack.setIdentity();
-      toPack.setTranslation(pointToPack);
-      toPack.setRotation(orientationToPack);
+      toPack.getTranslation().set(pointToPack);
+      toPack.getRotation().set(orientationToPack);
    }
 
    public static double getDistance(RigidBodyTransform origin, RigidBodyTransform end, RigidBodyTransform to, double positionWeight, double orientationWeight)
@@ -395,11 +395,11 @@ public class ReachingManifoldTools
 
    public static double getDistance(RigidBodyTransform from, RigidBodyTransform to, double positionWeight, double orientationWeight)
    {
-      Point3D pointFrom = new Point3D(from.getTranslationVector());
-      Quaternion orientationFrom = new Quaternion(from.getRotationMatrix());
+      Point3D pointFrom = new Point3D(from.getTranslation());
+      Quaternion orientationFrom = new Quaternion(from.getRotation());
 
-      Point3D pointTo = new Point3D(to.getTranslationVector());
-      Quaternion orientationTo = new Quaternion(to.getRotationMatrix());
+      Point3D pointTo = new Point3D(to.getTranslation());
+      Quaternion orientationTo = new Quaternion(to.getRotation());
 
       double positionDistance = positionWeight * pointFrom.distance(pointTo);
       double orientationDistance = orientationWeight * orientationFrom.distance(orientationTo);
@@ -478,7 +478,7 @@ public class ReachingManifoldTools
 
       rigidBodyTransformToPack.setIdentity();
       rigidBodyTransformToPack.appendTranslation(reachingManifoldCommand.getManifoldOriginPosition());
-      rigidBodyTransformToPack.setRotation(reachingManifoldCommand.getManifoldOriginOrientation());
+      rigidBodyTransformToPack.getRotation().set(reachingManifoldCommand.getManifoldOriginOrientation());
 
       for (int i = 0; i < reachingManifoldCommand.getDimensionOfManifold(); i++)
       {
@@ -497,8 +497,8 @@ public class ReachingManifoldTools
          throw new MismatchedSizeException("configuration space size and name size are not matched.");
 
       rigidBodyTransformToPack.setIdentity();
-      rigidBodyTransformToPack.setTranslation(reachingManifoldCommand.getManifoldOriginPosition());
-      rigidBodyTransformToPack.setRotation(reachingManifoldCommand.getManifoldOriginOrientation());
+      rigidBodyTransformToPack.getTranslation().set(reachingManifoldCommand.getManifoldOriginPosition());
+      rigidBodyTransformToPack.getRotation().set(reachingManifoldCommand.getManifoldOriginOrientation());
 
       for (int i = 0; i < configurations.size(); i++)
       {

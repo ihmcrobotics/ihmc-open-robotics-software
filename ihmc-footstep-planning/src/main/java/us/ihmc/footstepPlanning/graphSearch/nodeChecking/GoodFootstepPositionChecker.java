@@ -7,7 +7,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapper;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -22,7 +22,7 @@ import java.util.function.UnaryOperator;
 public class GoodFootstepPositionChecker
 {
    private final FootstepPlannerParametersReadOnly parameters;
-   private final FootstepNodeSnapper snapper;
+   private final FootstepNodeSnapAndWiggler snapper;
    private final FootstepPlannerEdgeData edgeData;
 
    private final TransformReferenceFrame startOfSwingFrame = new TransformReferenceFrame("startOfSwingFrame", ReferenceFrame.getWorldFrame());
@@ -42,7 +42,7 @@ public class GoodFootstepPositionChecker
    private double stepHeight;
    private double stepReachXY;
 
-   public GoodFootstepPositionChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapper snapper, FootstepPlannerEdgeData edgeData)
+   public GoodFootstepPositionChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapAndWiggler snapper, FootstepPlannerEdgeData edgeData)
    {
       this.parameters = parameters;
       this.snapper = snapper;
@@ -61,8 +61,8 @@ public class GoodFootstepPositionChecker
       FootstepNodeSnapData candidateNodeSnapData = snapper.snapFootstepNode(candidateNode);
       FootstepNodeSnapData stanceNodeSnapData = snapper.snapFootstepNode(stanceNode);
 
-      candidateFootFrame.setTransformAndUpdate(candidateNodeSnapData.getOrComputeSnappedNodeTransform(candidateNode));
-      stanceFootFrame.setTransformAndUpdate(stanceNodeSnapData.getOrComputeSnappedNodeTransform(stanceNode));
+      candidateFootFrame.setTransformAndUpdate(candidateNodeSnapData.getSnappedNodeTransform(candidateNode));
+      stanceFootFrame.setTransformAndUpdate(stanceNodeSnapData.getSnappedNodeTransform(stanceNode));
       stanceFootZUpFrame.update();
 
       candidateFootPose.setToZero(candidateFootFrame);
@@ -73,8 +73,7 @@ public class GoodFootstepPositionChecker
 
       stepLength = candidateFootPose.getX();
       stepWidth = stepSide.negateIfRightSide(candidateFootPose.getY());
-      stepReachXY = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPose.getX()),
-                                                                       Math.abs(stepWidth - parameters.getIdealFootstepWidth()));
+      stepReachXY = EuclidGeometryTools.pythagorasGetHypotenuse(Math.abs(candidateFootPose.getX()), Math.abs(stepWidth - parameters.getIdealFootstepWidth()));
       stepHeight = candidateFootPose.getZ();
 
       if (stepWidth < parameters.getMinimumStepWidth())
@@ -98,14 +97,17 @@ public class GoodFootstepPositionChecker
          return false;
       }
 
-      double alpha = Math.max(0.0, - stanceFootPose.getPitch() / parameters.getMinimumSurfaceInclineRadians());
-      double minZ = InterpolationTools.linearInterpolate(Math.abs(parameters.getMaximumStepZ()), Math.abs(parameters.getMinimumStepZWhenFullyPitched()), alpha);
-      double minX = InterpolationTools.linearInterpolate(Math.abs(parameters.getMaximumStepReach()), parameters.getMaximumStepXWhenFullyPitched(), alpha);
-      double stepDownFraction = - stepHeight / minZ;
-      double stepForwardFraction = stepLength / minX;
+      double alphaPitchedBack = Math.max(0.0, - stanceFootPose.getPitch() / parameters.getMinimumSurfaceInclineRadians());
+      double minZFromPitchContraint = InterpolationTools.linearInterpolate(Math.abs(parameters.getMaximumStepZ()), Math.abs(parameters.getMinimumStepZWhenFullyPitched()), alphaPitchedBack);
+      double maxXFromPitchContraint = InterpolationTools.linearInterpolate(Math.abs(parameters.getMaximumStepReach()), parameters.getMaximumStepXWhenFullyPitched(), alphaPitchedBack);
+      double stepDownFraction = - stepHeight / minZFromPitchContraint;
+      double stepForwardFraction = stepLength / maxXFromPitchContraint;
 
-      // TODO eliminate the 1.5, and look at the actual max step z and max step reach to ensure those are valid if there's not any pitching
-      if (stepDownFraction > 1.0 || stepForwardFraction > 1.0 || (stepDownFraction + stepForwardFraction > 1.5))
+      boolean stepIsPitchedBack = alphaPitchedBack > 0.0;
+      boolean stepTooLow = stepLength > 0.0 && stepDownFraction > 1.0;
+      boolean stepTooForward = stepHeight < 0.0 && stepForwardFraction > 1.0;
+
+      if (stepIsPitchedBack && (stepTooLow || stepTooForward))
       {
          rejectionReason = BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED;
          return false;
@@ -172,7 +174,7 @@ public class GoodFootstepPositionChecker
       if (alphaSoS > 0.0 && parentNodeSupplier != null && (grandParentNode = parentNodeSupplier.apply(stanceNode)) != null
           && (grandparentNodeSnapData = snapper.snapFootstepNode(grandParentNode)) != null)
       {
-         startOfSwingFrame.setTransformAndUpdate(grandparentNodeSnapData.getOrComputeSnappedNodeTransform(grandParentNode));
+         startOfSwingFrame.setTransformAndUpdate(grandparentNodeSnapData.getSnappedNodeTransform(grandParentNode));
          startOfSwingZUpFrame.update();
          candidateFootPose.changeFrame(startOfSwingZUpFrame);
          double swingHeight = candidateFootPose.getZ();

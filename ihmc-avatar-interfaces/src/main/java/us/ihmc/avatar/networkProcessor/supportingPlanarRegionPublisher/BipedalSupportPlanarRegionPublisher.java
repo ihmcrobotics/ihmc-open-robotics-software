@@ -215,7 +215,7 @@ public class BipedalSupportPlanarRegionPublisher implements CloseableAndDisposab
       ReferenceFrame leftSoleFrame = contactableFeet.get(RobotSide.LEFT).getSoleFrame();
       ReferenceFrame rightSoleFrame = contactableFeet.get(RobotSide.RIGHT).getSoleFrame();
       RigidBodyTransform relativeSoleTransform = leftSoleFrame.getTransformToDesiredFrame(rightSoleFrame);
-      RotationMatrixReadOnly relativeOrientation = relativeSoleTransform.getRotationMatrix();
+      RotationMatrixReadOnly relativeOrientation = relativeSoleTransform.getRotation();
 
       double rotationEpsilon = Math.toRadians(3.0);
       double translationEpsilon = 0.02;

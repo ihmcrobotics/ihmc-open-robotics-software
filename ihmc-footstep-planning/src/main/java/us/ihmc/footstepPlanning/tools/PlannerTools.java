@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.tools;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -8,26 +7,18 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanner;
-import us.ihmc.footstepPlanning.FootstepPlannerGoal;
-import us.ihmc.footstepPlanning.FootstepPlannerGoalType;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -36,8 +27,8 @@ public class PlannerTools
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final double footLength = 0.2;
-   private static final double footWidth = 0.1;
+   public static final double footLength = 0.2;
+   public static final double footWidth = 0.1;
 
    public static ConvexPolygon2D createFootPolygon(double footLength, double heelWidth, double toeWidth)
    {
@@ -110,42 +101,6 @@ public class PlannerTools
 //      graphicsListRegistry.registerYoGraphic("vizOrientation", new YoGraphicVector("GoalOrientationViz", yoGoal, yoGoalOrientation, 1.0, YoAppearance.White()));
    }
 
-   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose,
-                                         PlanarRegionsList planarRegionsList)
-   {
-      return runPlanner(planner, initialStanceFootPose, initialStanceSide, goalPose, planarRegionsList, true);
-   }
-
-   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FramePose3D goalPose,
-                                         PlanarRegionsList planarRegionsList, boolean assertPlannerReturnedResult)
-   {
-      planner.setPlanningHorizonLength(100.0);
-      FootstepPlannerGoal goal = new FootstepPlannerGoal();
-      goal.setFootstepPlannerGoalType(FootstepPlannerGoalType.POSE_BETWEEN_FEET);
-      goal.setGoalPoseBetweenFeet(goalPose);
-
-      return runPlanner(planner, initialStanceFootPose, initialStanceSide, goal, planarRegionsList, assertPlannerReturnedResult);
-   }
-
-   public static FootstepPlan runPlanner(FootstepPlanner planner, FramePose3D initialStanceFootPose, RobotSide initialStanceSide, FootstepPlannerGoal goal,
-                                         PlanarRegionsList planarRegionsList, boolean assertPlannerReturnedResult)
-   {
-      planner.setPlanarRegions(planarRegionsList);
-      planner.setInitialStanceFoot(initialStanceFootPose, initialStanceSide);
-      planner.setGoal(goal);
-
-      ExecutionTimer timer = new ExecutionTimer("Timer", 0.0, new YoVariableRegistry("Timer"));
-      timer.startMeasurement();
-      FootstepPlanningResult result = planner.plan();
-      timer.stopMeasurement();
-      PrintTools.info("Planning took " + timer.getCurrentTime().getDoubleValue() + "s");
-
-      FootstepPlan footstepPlan = planner.getPlan();
-      if (assertPlannerReturnedResult && !result.validForExecution())
-         throw new RuntimeException("Planner was not able to provide valid result. Result: " + result);
-      return footstepPlan;
-   }
-
    public static boolean isGoalNextToLastStep(FramePose3D goalPose, FootstepPlan footstepPlan)
    {
       return isGoalNextToLastStep(goalPose, footstepPlan, 0.5);
@@ -171,7 +126,7 @@ public class PlannerTools
       FramePose3D achievedGoal = new FramePose3D(stepPose);
       Point3D goalPosition = new Point3D(achievedGoal.getPosition());
       goalPosition.add(goalOffset);
-      achievedGoal.setPosition(goalPosition);
+      achievedGoal.getPosition().set(goalPosition);
 
       if (achievedGoal.epsilonEquals(goalPose, epsilon))
          return true;

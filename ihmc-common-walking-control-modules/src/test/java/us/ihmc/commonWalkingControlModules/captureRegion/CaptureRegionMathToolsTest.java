@@ -44,12 +44,12 @@ public class CaptureRegionMathToolsTest
 
       double angleFromExpectedToA = RandomNumbers.nextDouble(random, 0.0, Math.PI);
       FrameVector2D directionA = new FrameVector2D(directionToExpectedPoint);
-      rotationMatrix.setToYawMatrix(angleFromExpectedToA);
+      rotationMatrix.setToYawOrientation(angleFromExpectedToA);
       directionA.applyTransform(new RigidBodyTransform(rotationMatrix, new Vector3D()));
 
       double angleFromExpectedToB = RandomNumbers.nextDouble(random, -Math.PI, 0.0);
       FrameVector2D directionB = new FrameVector2D(directionToExpectedPoint);
-      rotationMatrix.setToYawMatrix(angleFromExpectedToB);
+      rotationMatrix.setToYawOrientation(angleFromExpectedToB);
       directionB.applyTransform(new RigidBodyTransform(rotationMatrix, new Vector3D()));
 
       double alpha = Math.abs(angleFromExpectedToA / (angleFromExpectedToA - angleFromExpectedToB));

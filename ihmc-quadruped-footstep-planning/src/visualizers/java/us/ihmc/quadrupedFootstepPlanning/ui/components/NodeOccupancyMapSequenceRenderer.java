@@ -195,7 +195,7 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
             double y = node.getYIndex(movingQuadrant) * PawNode.gridSizeXY;
             double z = getHeightAtPoint(x, y) + nodeOffsetZ;
             RigidBodyTransform transform = new RigidBodyTransform();
-            transform.setTranslation(x, y, z);
+            transform.getTranslation().set(x, y, z);
 
             meshBuilder.addPolygon(transform, cellPolygon, pathColors.get(movingQuadrant));
          }
@@ -224,7 +224,7 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
          ArrowGraphic orientationArrow = new ArrowGraphic(0.2 * coneRadius, cylinderLength, Color.GREEN);
 
          Quaternion orientation = new Quaternion();
-         orientation.setToYawQuaternion(yaw);
+         orientation.setToYawOrientation(yaw);
          PoseReferenceFrame xGaitFrame = new PoseReferenceFrame("xGaitFrame", ReferenceFrame.getWorldFrame());
          xGaitFrame.setPoseAndUpdate(centerPosition, orientation);
 
@@ -248,14 +248,14 @@ public class NodeOccupancyMapSequenceRenderer extends AnimationTimer
             double y = parentNode.getYIndex(robotQuadrant) * PawNode.gridSizeXY;
             double z = getHeightAtPoint(x, y) + nodeOffsetZ;
             RigidBodyTransform transform = new RigidBodyTransform();
-            transform.setTranslation(x, y, z);
+            transform.getTranslation().set(x, y, z);
 
             FramePoint3D xGaitFoot = new FramePoint3D(xGaitFrame, 0.5 * robotQuadrant.getEnd().negateIfHindEnd(parentNode.getNominalStanceLength()),
                                                       0.5 * robotQuadrant.getSide().negateIfRightSide(parentNode.getNominalStanceWidth()), 0.0);
             xGaitFoot.changeFrame(ReferenceFrame.getWorldFrame());
             xGaitFoot.setZ(getHeightAtPoint(xGaitFoot.getX(), xGaitFoot.getY()) + nodeOffsetZ);
 
-            parentFeetMeshBuilder.addCone(coneHeight, coneRadius, transform.getTranslationVector(), color);
+            parentFeetMeshBuilder.addCone(coneHeight, coneRadius, transform.getTranslation(), color);
             parentFeetMeshBuilder.addCone(0.5 * coneHeight, coneRadius, xGaitFoot, Color.LIGHTBLUE);
          }
 

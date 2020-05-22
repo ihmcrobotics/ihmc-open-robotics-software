@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.springflamingo;
 
 import java.util.ArrayList;
 
-import us.ihmc.euclid.Axis;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -83,13 +83,13 @@ public class SpringFlamingoRobotDescription extends RobotDescription
       plane.addCameraSensor(robotCam);
 
       RigidBodyTransform imuTransform = new RigidBodyTransform();
-      imuTransform.setTranslation(new Vector3D(0.0, 0.0, 0.2));
+      imuTransform.getTranslation().set(new Vector3D(0.0, 0.0, 0.2));
       IMUSensorDescription imuMount = new IMUSensorDescription("FlamingoIMU", imuTransform);
       plane.addIMUSensor(imuMount);
 
       /** ************************ Right limb ********************************** */
 
-      rightHip = new PinJointDescription("rh", new Vector3D(0.0, -HIP_OFFSET_Y, 0.0), Axis.Y); // right hip joint
+      rightHip = new PinJointDescription("rh", new Vector3D(0.0, -HIP_OFFSET_Y, 0.0), Axis3D.Y); // right hip joint
       LinkDescription r_upper_leg = upper_leg("r_upper_leg");
       rightHip.setLink(r_upper_leg);
       plane.addJoint(rightHip);
@@ -97,7 +97,7 @@ public class SpringFlamingoRobotDescription extends RobotDescription
       JointWrenchSensorDescription rightHipWrenchSensor = new JointWrenchSensorDescription("rightHipWrenchSensor", new Vector3D());
       rightHip.addJointWrenchSensor(rightHipWrenchSensor);
 
-      rightKnee = new PinJointDescription("rk", new Vector3D(0.0, 0.0, -UPPER_LINK_LENGTH), Axis.Y); // right knee joint
+      rightKnee = new PinJointDescription("rk", new Vector3D(0.0, 0.0, -UPPER_LINK_LENGTH), Axis3D.Y); // right knee joint
       LinkDescription r_lower_leg = lower_leg("r_lower_leg");
       rightKnee.setLink(r_lower_leg);
       rightHip.addJoint(rightKnee);
@@ -106,7 +106,7 @@ public class SpringFlamingoRobotDescription extends RobotDescription
       JointWrenchSensorDescription rightKneeWrenchSensor = new JointWrenchSensorDescription("rightKneeWrenchSensor", new Vector3D());
       rightKnee.addJointWrenchSensor(rightKneeWrenchSensor);
 
-      rightAnkle = new PinJointDescription("ra", new Vector3D(0.0, 0.0, -LOWER_LINK_LENGTH), Axis.Y); // right ankle joint
+      rightAnkle = new PinJointDescription("ra", new Vector3D(0.0, 0.0, -LOWER_LINK_LENGTH), Axis3D.Y); // right ankle joint
       LinkDescription r_foot = foot("r_foot");
       rightAnkle.setLink(r_foot);
       rightKnee.addJoint(rightAnkle);
@@ -125,7 +125,7 @@ public class SpringFlamingoRobotDescription extends RobotDescription
 
       /** ************************ Left limb ********************************** */
 
-      leftHip = new PinJointDescription("lh", new Vector3D(0.0, HIP_OFFSET_Y, 0.0), Axis.Y); // left hip joint
+      leftHip = new PinJointDescription("lh", new Vector3D(0.0, HIP_OFFSET_Y, 0.0), Axis3D.Y); // left hip joint
       LinkDescription l_upper_leg = upper_leg("l_upper_leg");
       leftHip.setLink(l_upper_leg);
       plane.addJoint(leftHip);
@@ -133,7 +133,7 @@ public class SpringFlamingoRobotDescription extends RobotDescription
       JointWrenchSensorDescription leftHipWrenchSensor = new JointWrenchSensorDescription("leftHipWrenchSensor", new Vector3D());
       leftHip.addJointWrenchSensor(leftHipWrenchSensor);
 
-      leftKnee = new PinJointDescription("lk", new Vector3D(0.0, 0.0, -UPPER_LINK_LENGTH), Axis.Y); // left knee joint
+      leftKnee = new PinJointDescription("lk", new Vector3D(0.0, 0.0, -UPPER_LINK_LENGTH), Axis3D.Y); // left knee joint
       LinkDescription l_lower_leg = lower_leg("l_lower_leg");
       leftKnee.setLink(l_lower_leg);
       leftHip.addJoint(leftKnee);
@@ -142,7 +142,7 @@ public class SpringFlamingoRobotDescription extends RobotDescription
       JointWrenchSensorDescription leftKneeWrenchSensor = new JointWrenchSensorDescription("leftKneeWrenchSensor", new Vector3D());
       leftKnee.addJointWrenchSensor(leftKneeWrenchSensor);
 
-      leftAnkle = new PinJointDescription("la", new Vector3D(0.0, 0.0, -LOWER_LINK_LENGTH), Axis.Y); // left ankle joint
+      leftAnkle = new PinJointDescription("la", new Vector3D(0.0, 0.0, -LOWER_LINK_LENGTH), Axis3D.Y); // left ankle joint
       LinkDescription l_foot = foot("l_foot");
       leftAnkle.setLink(l_foot);
       leftKnee.addJoint(leftAnkle);
@@ -178,81 +178,81 @@ public class SpringFlamingoRobotDescription extends RobotDescription
       {
          /* For left half */
          linkGraphics.translate(0.0, HIP_OFFSET_Y, 0.0);
-         linkGraphics.rotate(-55.0 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(-55.0 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
 
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
 
          linkGraphics.identity();
 
          // For right half
          linkGraphics.translate(0.0, -HIP_OFFSET_Y, 0.0);
-         linkGraphics.rotate(-55.0 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(-55.0 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
 
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
-         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis.Y);
+         linkGraphics.rotate(7.333 * Math.PI / 180.0, Axis3D.Y);
          linkGraphics.addCube(BODY_X, BODY_Y, BODY_Z, bodyAppearance);
 
          linkGraphics.identity();
 
-         linkGraphics.rotate(Math.PI / 2.0, Axis.X);
+         linkGraphics.rotate(Math.PI / 2.0, Axis3D.X);
          linkGraphics.translate(0.0, 0.0, -0.37 / 2.0);
 
          linkGraphics.addCylinder(0.37, 0.025);
@@ -293,13 +293,13 @@ public class SpringFlamingoRobotDescription extends RobotDescription
 
          linkGraphics.identity();
          linkGraphics.translate(0.0, 0.0, -UPPER_LINK_LENGTH);
-         linkGraphics.rotate(Math.PI / 2.0, Axis.X);
+         linkGraphics.rotate(Math.PI / 2.0, Axis3D.X);
          linkGraphics.translate(0.0, 0.0, -0.005);
          linkGraphics.addCylinder(0.01, 0.033, pulleyAppearance); /* Pulley */
 
          linkGraphics.identity();
          linkGraphics.translate(0.0, 0.0, -UPPER_LINK_LENGTH);
-         linkGraphics.rotate(Math.PI / 2.0, Axis.X);
+         linkGraphics.rotate(Math.PI / 2.0, Axis3D.X);
          linkGraphics.translate(0.0, 0.0, -0.013);
          linkGraphics.addCylinder(0.025, 0.015, pulleyAppearance); /* Pulley */
       }

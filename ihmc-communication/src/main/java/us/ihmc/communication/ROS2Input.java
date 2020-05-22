@@ -1,10 +1,13 @@
 package us.ihmc.communication;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.ros2.Ros2NodeInterface;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 
 /**
  * An atomic reference to the latest received message through an optional filter.
@@ -18,6 +21,7 @@ public class ROS2Input<T>
    private boolean hasReceivedFirstMessage = false;
    private ROS2Callback<T> ros2Callback;
    private TypedNotification<T> messageNotification = new TypedNotification<>();
+   private List<Consumer<T>> userCallbacks = new ArrayList<>();
 
    public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String robotName, ROS2ModuleIdentifier identifier)
    {
@@ -58,9 +62,23 @@ public class ROS2Input<T>
                     T initialValue,
                     MessageFilter<T> messageFilter)
    {
+      this(ros2Node,
+           messageType,
+           ROS2Tools.generateDefaultTopicName(messageType, robotName, moduleTopicQualifier, ioTopicQualifier),
+           initialValue,
+           messageFilter);
+   }
+
+   public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName)
+   {
+      this(ros2Node, messageType, topicName, ROS2Tools.newMessageInstance(messageType), message -> true);
+   }
+
+   public ROS2Input(Ros2NodeInterface ros2Node, Class<T> messageType, String topicName, T initialValue, MessageFilter<T> messageFilter)
+   {
       atomicReference = new AtomicReference<>(initialValue);
       this.messageFilter = messageFilter;
-      ros2Callback = new ROS2Callback<>(ros2Node, messageType, robotName, moduleTopicQualifier, ioTopicQualifier, this::messageReceivedCallback);
+      ros2Callback = new ROS2Callback<>(ros2Node, messageType, topicName, this::messageReceivedCallback);
    }
 
    public interface MessageFilter<T>
@@ -73,7 +91,11 @@ public class ROS2Input<T>
       if (messageFilter.accept(incomingData))
       {
          atomicReference.set(incomingData);
-         messageNotification.add(incomingData);
+         messageNotification.set(incomingData);
+         for (Consumer<T> userCallback : userCallbacks)
+         {
+            userCallback.accept(incomingData);
+         }
          hasReceivedFirstMessage = true;
       }
    }
@@ -96,6 +118,11 @@ public class ROS2Input<T>
    public void setEnabled(boolean enabled)
    {
       ros2Callback.setEnabled(enabled);
+   }
+
+   public void addCallback(Consumer<T> messageReceivedCallback)
+   {
+      userCallbacks.add(messageReceivedCallback);
    }
 
    public void destroy()

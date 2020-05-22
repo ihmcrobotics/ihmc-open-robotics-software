@@ -3,6 +3,7 @@ package us.ihmc.atlas.roughTerrainWalking;
 import java.io.InputStream;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
@@ -34,6 +35,7 @@ public class AtlasFootWobbleTest extends AvatarFootWobbleTest
       };
    }
 
+   @Disabled
    @Override
    @Test
    public void testDampingIsActivated() throws SimulationExceededMaximumTimeException

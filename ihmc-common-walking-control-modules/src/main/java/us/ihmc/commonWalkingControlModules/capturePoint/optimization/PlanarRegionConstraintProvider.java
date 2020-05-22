@@ -25,9 +25,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
@@ -74,9 +74,11 @@ public class PlanarRegionConstraintProvider
    private final RigidBodyTransform planeTransformToWorld = new RigidBodyTransform();
    private final ReferenceFrame planeReferenceFrame;
 
+   private final ConvexPolygonScaler scaler = new ConvexPolygonScaler();
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
    private final ConvexPolygon2D tempProjectedPolygon = new ConvexPolygon2D();
+   private final ConvexPolygon2D tempShrunkProjectedPolygon = new ConvexPolygon2D();
 
    private final FramePoint2D tempPoint2D = new FramePoint2D();
 
@@ -309,7 +311,9 @@ public class PlanarRegionConstraintProvider
          }
          footstepPolygon.update();
       }
-      icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, footstepPolygon, projectedAndShrunkConvexHull, distanceFromEdgeForStepping);
+      scaler.scaleConvexPolygonToContainInteriorPolygon(activePlanarRegion.getConvexHull(), footstepPolygon, distanceFromEdgeForSwitching, tempShrunkProjectedPolygon);
+      icpControlPlane.projectConvexHullOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), projectedAndShrunkConvexHull);
+
       yoShrunkActivePlanarRegion.set(projectedAndShrunkConvexHull);
 
       return projectedAndShrunkConvexHull;
@@ -350,7 +354,8 @@ public class PlanarRegionConstraintProvider
       FrameConvexPolygon2D captureRegion = captureRegionCalculator.getCaptureRegion();
       captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
-      icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(activePlanarRegion, tempProjectedPolygon, distanceFromEdgeForSwitching);
+      scaler.scaleConvexPolygon(activePlanarRegion.getConvexHull(), distanceFromEdgeForSwitching, tempShrunkProjectedPolygon);
+      icpControlPlane.projectConvexHullOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), tempProjectedPolygon);
 
       double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, tempProjectedPolygon);
 
@@ -385,7 +390,8 @@ public class PlanarRegionConstraintProvider
       {
          PlanarRegion planarRegion = planarRegionsList.get(regionIndex);
 
-         icpControlPlane.scaleAndProjectPlanarRegionConvexHullOntoControlPlane(planarRegion, tempProjectedPolygon, distanceFromEdgeForSwitching);
+         scaler.scaleConvexPolygon(activePlanarRegion.getConvexHull(), distanceFromEdgeForSwitching, tempShrunkProjectedPolygon);
+         icpControlPlane.projectConvexHullOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), tempProjectedPolygon);
 
          double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, tempProjectedPolygon);
 
@@ -460,7 +466,7 @@ public class PlanarRegionConstraintProvider
       footstepNormal.set(0.0, 0.0, 1.0);
       footstepPose.getOrientation().transform(footstepNormal);
       activePlanarRegion.getNormal(planarRegionNormal);
-      EuclidGeometryTools.axisAngleFromFirstToSecondVector3D(footstepNormal, planarRegionNormal, rotation);
+      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(footstepNormal, planarRegionNormal, rotation);
 
       // get the height
       footstepXYPosition.changeFrameAndProjectToXYPlane(worldFrame);
@@ -469,7 +475,7 @@ public class PlanarRegionConstraintProvider
       // change the foot pose to be correct
       footstepPose.prependRotation(rotation);
 
-      footstepPose.setPosition(footstepXYPosition);
+      footstepPose.getPosition().set(footstepXYPosition);
       footstepPose.setZ(zPosition);
 
       boolean wasAdjusted = false;

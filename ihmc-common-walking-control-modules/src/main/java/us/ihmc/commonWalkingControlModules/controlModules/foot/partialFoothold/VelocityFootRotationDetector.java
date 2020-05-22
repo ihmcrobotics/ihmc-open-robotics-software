@@ -62,19 +62,13 @@ public class VelocityFootRotationDetector implements FootRotationDetector
    {
       // Using the twist of the foot
       TwistReadOnly soleFrameTwist = soleFrame.getTwistOfFrame();
-      double omegaSquared = soleFrameTwist.getAngularPart().lengthSquared();
-      absoluteFootOmega.set(Math.sqrt(omegaSquared));
+      absoluteFootOmega.set(soleFrameTwist.getAngularPart().length());
       if (absoluteFootOmega.getValue() > omegaThresholdForEstimation.getValue())
       {
-         // TODO does the account for rotating back the other direction
-         double omega = Math.sqrt(omegaSquared);
-         integratedRotationAngle.add(dt * omega);
+         integratedRotationAngle.add(dt * absoluteFootOmega.getValue());
       }
 
-      if (!isRotating.getValue())
-      {
-         isRotating.set(integratedRotationAngle.getValue() > rotationThreshold.getValue());
-      }
+      isRotating.set(integratedRotationAngle.getValue() > rotationThreshold.getValue());
       integratedRotationAngle.mul(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(decayBreakFrequency.getValue(), dt));
 
       return isRotating.getValue();

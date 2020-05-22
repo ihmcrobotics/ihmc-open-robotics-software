@@ -84,6 +84,14 @@ public class AtlasEndToEndArmTrajectoryMessageTest extends EndToEndArmTrajectory
    @Tag("controller-api-slow-4")
    @Override
    @Test
+   public void testForceExecutionWithSingleTrajectoryPoint() throws Exception
+   {
+      super.testForceExecutionWithSingleTrajectoryPoint();
+   }
+
+   @Tag("controller-api-slow-4")
+   @Override
+   @Test
    public void testStopAllTrajectory() throws Exception
    {
       super.testStopAllTrajectory();

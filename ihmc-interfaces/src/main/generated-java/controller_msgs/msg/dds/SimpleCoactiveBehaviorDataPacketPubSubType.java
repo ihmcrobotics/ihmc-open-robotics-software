@@ -40,9 +40,12 @@ public class SimpleCoactiveBehaviorDataPacketPubSubType implements us.ihmc.pubsu
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + 255 + 1;
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
@@ -58,10 +61,13 @@ public class SimpleCoactiveBehaviorDataPacketPubSubType implements us.ihmc.pubsu
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4) + data.getKey().length() + 1;
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -72,11 +78,14 @@ public class SimpleCoactiveBehaviorDataPacketPubSubType implements us.ihmc.pubsu
 
    public static void write(controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       if(data.getKey().length() <= 255)
       cdr.write_type_d(data.getKey());else
           throw new RuntimeException("key field exceeds the maximum length");
+
 
       cdr.write_type_6(data.getValue());
 
@@ -84,9 +93,12 @@ public class SimpleCoactiveBehaviorDataPacketPubSubType implements us.ihmc.pubsu
 
    public static void read(controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       cdr.read_type_d(data.getKey());	
+
       data.setValue(cdr.read_type_6());
       	
 
@@ -95,16 +107,22 @@ public class SimpleCoactiveBehaviorDataPacketPubSubType implements us.ihmc.pubsu
    @Override
    public final void serialize(controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_d("key", data.getKey());
+
       ser.write_type_6("value", data.getValue());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.SimpleCoactiveBehaviorDataPacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       ser.read_type_d("key", data.getKey());
+
       data.setValue(ser.read_type_6("value"));
    }
 

@@ -13,6 +13,8 @@ import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class StringStretcher2dTest
@@ -34,17 +36,17 @@ public class StringStretcher2dTest
 
       stringStretcher2d.addMinMaxPoints(minPoint1, maxPoint1);
 
-      Point2D worstMinViolator = stringStretcher2d.findWorstMinViolator(startPoint, endPoint);
-      Point2D worstMaxViolator = stringStretcher2d.findWorstMaxViolator(startPoint, endPoint);
+      Point2DReadOnly worstMinViolator = stringStretcher2d.findWorstMinViolator(startPoint, endPoint);
+      Point2DReadOnly worstMaxViolator = stringStretcher2d.findWorstMaxViolator(startPoint, endPoint);
 
       assertNull(worstMinViolator);
       assertNull(worstMaxViolator);
 
-      ArrayList<Point2D> waypoints = new ArrayList<Point2D>();
+      List<Point2DBasics> waypoints = new ArrayList<>();
       stringStretcher2d.findWaypoints(waypoints);
 
       assertEquals(0, waypoints.size());
-      List<Point2D> solution = new ArrayList<>();
+      List<Point2DBasics> solution = new ArrayList<>();
       stringStretcher2d.stretchString(solution);
       assertEquals(3, solution.size());
 
@@ -69,7 +71,7 @@ public class StringStretcher2dTest
 
       stringStretcher2d.addMinMaxPoints(minPoint, maxPoint);
 
-      ArrayList<Point2D> waypoints = new ArrayList<Point2D>();
+      List<Point2DBasics> waypoints = new ArrayList<>();
       stringStretcher2d.findWaypoints(waypoints);
 
       assertEquals(1, waypoints.size());
@@ -103,7 +105,7 @@ public class StringStretcher2dTest
 
       stringStretcher2d.addMinMaxPoints(minPoint3, maxPoint3);
 
-      ArrayList<Point2D> waypoints = new ArrayList<Point2D>();
+      List<Point2DBasics> waypoints = new ArrayList<>();
       stringStretcher2d.findWaypoints(waypoints);
 
       assertEquals(3, waypoints.size());
@@ -126,7 +128,7 @@ public class StringStretcher2dTest
       stringStretcher2d.setStartPoint(startPoint);
       stringStretcher2d.setEndPoint(endPoint);
 
-      List<Point2D> waypoints = new ArrayList<>();
+      List<Point2DBasics> waypoints = new ArrayList<>();
       stringStretcher2d.stretchString(waypoints);
       assertEquals(2, waypoints.size());
       EuclidCoreTestTools.assertTuple2DEquals(startPoint, waypoints.get(0), 1e-7);
@@ -165,15 +167,15 @@ public class StringStretcher2dTest
 
       }
 
-      ArrayList<Point2D> waypoints = new ArrayList<Point2D>();
+      List<Point2DBasics> waypoints = new ArrayList<>();
       stringStretcher2d.findWaypoints(waypoints);
 
-      List<Point2D> stretchedString = new ArrayList<>();
+      List<Point2DBasics> stretchedString = new ArrayList<>();
       stringStretcher2d.stretchString(stretchedString);
       assertEquals(numberOfPoints + 2, stretchedString.size());
 
       double previousX = Double.NEGATIVE_INFINITY;
-      for (Point2D point2d : stretchedString)
+      for (Point2DBasics point2d : stretchedString)
       {
          double x = point2d.getX();
          if (x <= previousX)
@@ -194,7 +196,7 @@ public class StringStretcher2dTest
       }
    }
 
-   private boolean hasSameX(Point2D pointA, Point2D pointB)
+   private boolean hasSameX(Point2DReadOnly pointA, Point2DReadOnly pointB)
    {
       return (Math.abs(pointA.getX() - pointB.getX()) < 1e-7);
    }

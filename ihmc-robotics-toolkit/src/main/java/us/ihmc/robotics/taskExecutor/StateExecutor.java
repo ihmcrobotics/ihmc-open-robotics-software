@@ -41,7 +41,7 @@ public class StateExecutor
    {
       if (currentTask.isDone(clock.getTimeInCurrentState()))
       {
-         currentTask.onExit();
+         currentTask.onExit(clock.getTimeInCurrentState());
 
          if (!taskQueue.isEmpty())
          {
@@ -98,5 +98,10 @@ public class StateExecutor
    public void setPrintDebugStatements(boolean printDebugStatements)
    {
       this.printDebugStatements = printDebugStatements;
+   }
+   
+   protected StateMachineClock getClock()
+   {
+      return clock;
    }
 }

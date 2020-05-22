@@ -1,10 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint;
 
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector2D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
+import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepShiftFractions;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
@@ -245,6 +242,17 @@ public interface ICPPlannerInterface
     * @param desiredCenterOfMassPositionToPack the current CoM position. Modified.
     */
    void getDesiredCenterOfMassPosition(YoFramePoint3D desiredCenterOfMassPositionToPack);
+
+   /**
+    * Gets the current CoM velocity.
+    * <p>
+    * The ICP planner has to be updated every control tick using the method
+    * {@link #compute(double)}.
+    * </p>
+    *
+    * @param desiredCenterOfMassVelocityToPack the current CoM position. Modified.
+    */
+   void getDesiredCenterOfMassVelocity(FixedFrameVector2DBasics desiredCenterOfMassVelocityToPack);
 
    /**
     * Gets the current ICP velocity.
@@ -501,7 +509,13 @@ public interface ICPPlannerInterface
     *
     * @param finalDesiredCenterOfMassPositionToPack the final desired ICP position. Modified.
     */
-   void getFinalDesiredCenterOfMassPosition(FramePoint3D finalDesiredCenterOfMassPositionToPack);
+   default void getFinalDesiredCenterOfMassPosition(FramePoint3DBasics finalDesiredCenterOfMassPositionToPack)
+   {
+      finalDesiredCenterOfMassPositionToPack.setReferenceFrame(ReferenceFrame.getWorldFrame());
+      getFinalDesiredCenterOfMassPosition((FixedFramePoint3DBasics) finalDesiredCenterOfMassPositionToPack);
+   }
+
+   void getFinalDesiredCenterOfMassPosition(FixedFramePoint3DBasics finalDesiredCenterOfMassPositionToPack);
 
    /**
     * Retrieves the position of the next exit CMP.

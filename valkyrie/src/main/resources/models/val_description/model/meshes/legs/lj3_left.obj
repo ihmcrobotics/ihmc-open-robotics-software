@@ -1482,7 +1482,7 @@ vt 0.0002 0.9425 0.0000
 vt 0.1671 0.1697 0.0000
 # 483 texture coords
 
-o CylinderDAE
+#o CylinderDAE
 g CylinderDAE
 usemtl Material
 s off

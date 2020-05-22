@@ -40,13 +40,18 @@ public class REAStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += controller_msgs.msg.dds.REASensorDataFilterParametersMessagePubSubType.getMaxCdrSerializedSize(current_alignment);
 
@@ -63,16 +68,21 @@ public class REAStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += controller_msgs.msg.dds.REASensorDataFilterParametersMessagePubSubType.getCdrSerializedSize(data.getCurrentSensorFilterParameters(), current_alignment);
@@ -83,27 +93,37 @@ public class REAStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void write(controller_msgs.msg.dds.REAStatusMessage data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_7(data.getIsRunning());
+
 
       cdr.write_type_7(data.getIsUsingLidar());
 
+
       cdr.write_type_7(data.getIsUsingStereoVision());
 
+
       cdr.write_type_7(data.getHasCleared());
+
 
       controller_msgs.msg.dds.REASensorDataFilterParametersMessagePubSubType.write(data.getCurrentSensorFilterParameters(), cdr);
    }
 
    public static void read(controller_msgs.msg.dds.REAStatusMessage data, us.ihmc.idl.CDR cdr)
    {
+
       data.setIsRunning(cdr.read_type_7());
       	
+
       data.setIsUsingLidar(cdr.read_type_7());
       	
+
       data.setIsUsingStereoVision(cdr.read_type_7());
       	
+
       data.setHasCleared(cdr.read_type_7());
       	
+
       controller_msgs.msg.dds.REASensorDataFilterParametersMessagePubSubType.read(data.getCurrentSensorFilterParameters(), cdr);	
 
    }
@@ -111,10 +131,15 @@ public class REAStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void serialize(controller_msgs.msg.dds.REAStatusMessage data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_7("is_running", data.getIsRunning());
+
       ser.write_type_7("is_using_lidar", data.getIsUsingLidar());
+
       ser.write_type_7("is_using_stereo_vision", data.getIsUsingStereoVision());
+
       ser.write_type_7("has_cleared", data.getHasCleared());
+
       ser.write_type_a("current_sensor_filter_parameters", new controller_msgs.msg.dds.REASensorDataFilterParametersMessagePubSubType(), data.getCurrentSensorFilterParameters());
 
    }
@@ -122,10 +147,15 @@ public class REAStatusMessagePubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.REAStatusMessage data)
    {
+
       data.setIsRunning(ser.read_type_7("is_running"));
+
       data.setIsUsingLidar(ser.read_type_7("is_using_lidar"));
+
       data.setIsUsingStereoVision(ser.read_type_7("is_using_stereo_vision"));
+
       data.setHasCleared(ser.read_type_7("has_cleared"));
+
       ser.read_type_a("current_sensor_filter_parameters", new controller_msgs.msg.dds.REASensorDataFilterParametersMessagePubSubType(), data.getCurrentSensorFilterParameters());
 
    }

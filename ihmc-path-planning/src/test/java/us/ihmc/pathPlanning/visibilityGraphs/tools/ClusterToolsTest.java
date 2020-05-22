@@ -388,7 +388,7 @@ public class ClusterToolsTest
       zAxisForTransform.normalize();
 
       RigidBodyTransform transformToWorldOops = new RigidBodyTransform();
-      transformToWorldOops.setTranslation(arbitraryTranslationX, arbitraryTranslationY, 0.0);
+      transformToWorldOops.getTranslation().set(arbitraryTranslationX, arbitraryTranslationY, 0.0);
 
       RigidBodyTransform transformToWorld0 = createTransformFromPointAndZAxis(new Point3D(), zAxisForTransform);
       transformToWorld0.multiply(transformToWorldOops);
@@ -422,7 +422,7 @@ public class ClusterToolsTest
       Point2D pointHInLocal = new Point2D(0.7, 0.3);
 
       RigidBodyTransform transformToWorld1 = new RigidBodyTransform();
-      transformToWorld1.setTranslation(0.0, 0.0, 0.5);
+      transformToWorld1.getTranslation().set(0.0, 0.0, 0.5);
 
       Vertex2DSupplier vertices1 = Vertex2DSupplier.asVertex2DSupplier(pointEInLocal, pointFInLocal, pointGInLocal, pointHInLocal);
       ConvexPolygon2D convexPolygon1 = new ConvexPolygon2D(vertices1);
@@ -576,8 +576,8 @@ public class ClusterToolsTest
       ConvexPolygon2D polygon1_0 = new ConvexPolygon2D(Vertex2DSupplier.asVertex2DSupplier(pointE, pointF, pointG, pointH));
 
       RigidBodyTransform transform0 = new RigidBodyTransform();
-      transform0.setRotationEuler(0.0, Math.PI / 2.0, 0.0);
-      transform0.setTranslation(0.0, 0.0, 1.0);
+      transform0.getRotation().setEuler(0.0, Math.PI / 2.0, 0.0);
+      transform0.getTranslation().set(0.0, 0.0, 1.0);
       PlanarRegion planarRegion0 = new PlanarRegion(transform0, polygon0_0);
 
       ObstacleExtrusionDistanceCalculator preferredExtrusionDistanceCalculator = new ObstacleExtrusionDistanceCalculator()
@@ -600,7 +600,7 @@ public class ClusterToolsTest
 
       double baseRotationAngle = 0.0;
       RigidBodyTransform transform1 = new RigidBodyTransform();
-      transform1.setRotationEuler(0.0, baseRotationAngle, 0.0);
+      transform1.getRotation().setEuler(0.0, baseRotationAngle, 0.0);
       PlanarRegion planarRegion1 = new PlanarRegion(transform1, polygon1_0);
 
       List<PlanarRegion> obstacleRegions = new ArrayList<>();
@@ -623,7 +623,7 @@ public class ClusterToolsTest
 
       baseRotationAngle = 0.2;
       transform1 = new RigidBodyTransform();
-      transform1.setRotationEuler(0.0, baseRotationAngle, 0.0);
+      transform1.getRotation().setEuler(0.0, baseRotationAngle, 0.0);
       planarRegion1 = new PlanarRegion(transform1, polygon1_0);
 
       obstacleRegions = new ArrayList<>();
@@ -734,8 +734,13 @@ public class ClusterToolsTest
 
       Point2D[] region1_1Points = new Point2D[] {new Point2D(0.0, 0.0), new Point2D(0.0, 0.2), new Point2D(0.1, 0.2), new Point2D(0.1, 0.0)};
       Point2D[] region1_2Points = new Point2D[] {new Point2D(0.1, 0.0), new Point2D(0.1, 0.4), new Point2D(0.2, 0.4), new Point2D(0.2, 0.0)};
-      Point2D[] concaveHull = new Point2D[] {new Point2D(0.0, 0.0), new Point2D(0.0, 0.2), new Point2D(0.1, 0.2), new Point2D(0.1, 0.4), new Point2D(0.2, 0.4),
-            new Point2D(0.2, 0.0)};
+      List<Point2D> concaveHull = new ArrayList<>();
+      concaveHull.add(new Point2D(0.0, 0.0));
+      concaveHull.add(new Point2D(0.0, 0.2));
+      concaveHull.add(new Point2D(0.1, 0.2));
+      concaveHull.add(new Point2D(0.1, 0.4));
+      concaveHull.add(new Point2D(0.2, 0.4));
+      concaveHull.add(new Point2D(0.2, 0.0));
       Vector3D normal1_1 = new Vector3D(0.0, -1.0, 0.0);
       normal1_1.normalize();
       RigidBodyTransform transform1_1 = createTransformFromPointAndZAxis(new Point3D(0.0, 0.0, 0.014), normal1_1);
@@ -1085,7 +1090,7 @@ public class ClusterToolsTest
       return planarRegion;
    }
 
-   private PlanarRegion createPlanarRegionFromSeveralPolygons(Point2D[] concaveHullVertices, RigidBodyTransform transform, Point2D[]... listOfPoints)
+   private PlanarRegion createPlanarRegionFromSeveralPolygons(List<Point2D> concaveHullVertices, RigidBodyTransform transform, Point2D[]... listOfPoints)
    {
       ArrayList<ConvexPolygon2D> polygons = new ArrayList<>();
 
@@ -1162,8 +1167,8 @@ public class ClusterToolsTest
    private static RigidBodyTransform createTransformFromPointAndZAxis(Point3DReadOnly point, Vector3DReadOnly zAxis)
    {
       RigidBodyTransform ret = new RigidBodyTransform();
-      ret.setRotation(EuclidGeometryTools.axisAngleFromZUpToVector3D(zAxis));
-      ret.setTranslation(point);
+      ret.getRotation().set(EuclidGeometryTools.axisAngleFromZUpToVector3D(zAxis));
+      ret.getTranslation().set(point);
       return ret;
    }
 

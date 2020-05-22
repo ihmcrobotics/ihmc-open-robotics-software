@@ -5,10 +5,10 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.heuristics.CostToGoHeuristics;
+import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.pathPlanning.graph.search.AStarIterationData;
-import us.ihmc.pathPlanning.graph.search.AStarPathPlanner;
+import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
+import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
 import us.ihmc.pathPlanning.graph.structure.DirectedGraph;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.robotics.geometry.AngleTools;
@@ -24,8 +24,8 @@ public class FootstepPlannerCompletionChecker
    private static final double yawEpsilonForSquaredUp = Math.toRadians(20.0);
 
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
-   private final AStarPathPlanner<FootstepNode> footstepPlanner;
-   private final CostToGoHeuristics heuristics;
+   private final AStarFootstepPlannerIterationConductor iterationConductor;
+   private final FootstepPlannerHeuristicCalculator heuristics;
 
    private final SquaredUpStepComparator squaredUpStepComparator;
    private final GoalProximityComparator goalProximityComparator;
@@ -38,15 +38,16 @@ public class FootstepPlannerCompletionChecker
    private double goalYawProximity;
 
    private FootstepNode startNode, endNode;
+   private int endNodePathSize;
    private SideDependentList<FootstepNode> goalNodes;
    private double endNodeCost;
 
    public FootstepPlannerCompletionChecker(FootstepPlannerParametersBasics footstepPlannerParameters,
-                                           AStarPathPlanner<FootstepNode> footstepPlanner,
-                                           CostToGoHeuristics heuristics)
+                                           AStarFootstepPlannerIterationConductor iterationConductor,
+                                           FootstepPlannerHeuristicCalculator heuristics)
    {
       this.footstepPlannerParameters = footstepPlannerParameters;
-      this.footstepPlanner = footstepPlanner;
+      this.iterationConductor = iterationConductor;
       this.heuristics = heuristics;
 
       squaredUpStepComparator = new SquaredUpStepComparator();
@@ -57,6 +58,7 @@ public class FootstepPlannerCompletionChecker
    {
       this.startNode = startNode;
       this.goalNodes = goalNodes;
+      this.endNodePathSize = 0;
 
       this.goalDistanceProximity = goalDistanceProximity;
       this.goalYawProximity = goalYawProximity;
@@ -81,7 +83,7 @@ public class FootstepPlannerCompletionChecker
             FootstepNode childNode = iterationData.getValidChildNodes().get(i);
             midFootPose.set(childNode.getOrComputeMidFootPoint(footstepPlannerParameters.getIdealFootstepWidth()), childNode.getYaw());
 
-            boolean validYawProximity = midFootPose.getOrientationDistance(goalMidFootPose) <= goalYawProximity;
+            boolean validYawProximity = midFootPose.getOrientation().distance(goalMidFootPose.getOrientation()) <= goalYawProximity;
             boolean validDistanceProximity = midFootPose.getPosition().distanceSquared(goalMidFootPose.getPosition()) <= MathTools.square(goalDistanceProximity);
 
             if (validYawProximity && validDistanceProximity && searchForSquaredUpStepInProximity(iterationData.getParentNode(), childNode))
@@ -99,7 +101,7 @@ public class FootstepPlannerCompletionChecker
             if (childNode.equals(goalNode))
             {
                endNode = goalNodes.get(childNode.getRobotSide().getOppositeSide());
-               footstepPlanner.getGraph().checkAndSetEdge(childNode, endNode, 0.0);
+               iterationConductor.getGraph().checkAndSetEdge(childNode, endNode, 0.0);
                return true;
             }
          }
@@ -109,11 +111,12 @@ public class FootstepPlannerCompletionChecker
       {
          FootstepNode childNode = iterationData.getValidChildNodes().get(i);
 
-         double cost = footstepPlanner.getGraph().getCostFromStart(childNode) + heuristics.compute(childNode);
+         double cost = iterationConductor.getGraph().getCostFromStart(childNode) + heuristics.compute(childNode);
          if (cost < endNodeCost || endNode.equals(startNode))
          {
             endNode = childNode;
             endNodeCost = cost;
+            endNodePathSize = iterationConductor.getGraph().getPathLengthFromStart(endNode);
          }
       }
 
@@ -129,11 +132,11 @@ public class FootstepPlannerCompletionChecker
     */
    private boolean searchForSquaredUpStepInProximity(FootstepNode parentNode, FootstepNode nodeInProximity)
    {
-      DirectedGraph<FootstepNode> graph = footstepPlanner.getGraph();
+      DirectedGraph<FootstepNode> graph = iterationConductor.getGraph();
       if (!graph.getOutgoingEdges().containsKey(nodeInProximity))
       {
          // this step hasn't been expanded yet, perform iteration now
-         footstepPlanner.doPlanningIteration(nodeInProximity);
+         iterationConductor.doPlanningIteration(nodeInProximity, false);
       }
 
       // grab all outgoing edges
@@ -171,6 +174,11 @@ public class FootstepPlannerCompletionChecker
    public FootstepNode getEndNode()
    {
       return endNode;
+   }
+
+   public int getEndNodePathSize()
+   {
+      return endNodePathSize;
    }
 
    private class GoalProximityComparator implements Comparator<FootstepNode>

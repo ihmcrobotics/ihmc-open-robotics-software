@@ -7,6 +7,7 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Line2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
@@ -15,7 +16,6 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Line2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.LineSegment2DBasics;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools.Bound;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
@@ -1008,20 +1008,41 @@ public class ConvexPolygonTools
       {
          int index = -1;
          double longestEdgeLength = Double.NEGATIVE_INFINITY;
-         for (int i = 0; i < vertices; i++)
+         Point2DReadOnly lastVertex = polygon.getVertex(0);
+         for (int i = 1; i < vertices + 1; i++)
          {
-            Point2DReadOnly vertex = polygon.getVertex(i);
-            Point2DReadOnly nextVertex = polygon.getNextVertex(i);
-            double edgeLength = vertex.distance(nextVertex);
+            Point2DReadOnly nextVertex = null;
+            if (i == vertices)
+            {
+               nextVertex = polygon.getVertex(0);
+            }
+            else
+            {
+               nextVertex = polygon.getVertex(i);
+            }
+
+            double edgeLength = lastVertex.distance(nextVertex);
             if (edgeLength > longestEdgeLength)
             {
                longestEdgeLength = edgeLength;
                index = i;
             }
+            lastVertex = nextVertex;
          }
 
-         int idx1 = index;
-         int idx2 = polygon.getNextVertexIndex(index);
+         int idx1 = -1;
+         int idx2 = -1;
+
+         if (index == vertices)
+         {
+            idx1 = vertices - 1;
+            idx2 = 0;
+         }
+         else
+         {
+            idx1 = index - 1;
+            idx2 = index;
+         }
 
          Point2DReadOnly vertexA = polygon.getVertex(idx1);
          Point2DReadOnly vertexB = polygon.getVertex(idx2);

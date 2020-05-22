@@ -33,6 +33,8 @@ public class PolygonizerAnchorPaneController extends REABasicUIController
    private Spinner<Double> minEdgeLengthSpinner;
    @FXML
    private Spinner<Double> depthThresholdSpinner;
+   @FXML
+   private ToggleButton enableNarrowPassageFilterButton;
 
    private final ConcaveHullFactoryParametersProperty concaveHullFactoryParametersProperty = new ConcaveHullFactoryParametersProperty(this, "concaveHullParameters");
    private final PolygonizerParametersProperty polygonizerParametersProperty = new PolygonizerParametersProperty(this, "polygonizerParameters");
@@ -96,6 +98,7 @@ public class PolygonizerAnchorPaneController extends REABasicUIController
       polygonizerParametersProperty.bindBidirectionalShallowAngleThreshold(shallowAngleThresholdSpinner.getValueFactory().valueProperty());
       polygonizerParametersProperty.bindBidirectionalLengthThreshold(minEdgeLengthSpinner.getValueFactory().valueProperty());
       polygonizerParametersProperty.bindBidirectionalDepthThreshold(depthThresholdSpinner.getValueFactory().valueProperty());
+      polygonizerParametersProperty.bindBidirectionalEnableNarrowPassageFilter(enableNarrowPassageFilterButton.selectedProperty());
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.PlanarRegionsPolygonizerParameters, polygonizerParametersProperty);
 
       intersectionEstimationParametersProperty.bindBidirectionalMaxDistanceToRegion(maxDistanceToRegionSpinner.getValueFactory().valueProperty());

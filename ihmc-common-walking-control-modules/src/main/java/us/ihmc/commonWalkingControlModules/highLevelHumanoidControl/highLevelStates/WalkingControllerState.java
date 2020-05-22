@@ -27,6 +27,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.time.ExecutionTimer;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
@@ -111,8 +112,8 @@ public class WalkingControllerState extends HighLevelControllerState
 
       linearMomentumRateControlModule = new LinearMomentumRateControlModule(referenceFrames, contactableFeet, elevator, walkingControllerParameters, yoTime,
                                                                             gravityZ, controlDT, registry, yoGraphicsListRegistry);
-      PlanarRegionsListHandler planarRegionsListHandler = controllerToolbox.getWalkingMessageHandler().getPlanarRegionsListHandler();
-      linearMomentumRateControlModule.setPlanarRegionsListHandler(planarRegionsListHandler);
+      linearMomentumRateControlModule.setPlanarRegionsListHandler(controllerToolbox.getWalkingMessageHandler().getPlanarRegionsListHandler());
+      linearMomentumRateControlModule.setPlanarRegionStepConstraintHandler(controllerToolbox.getWalkingMessageHandler().getPlanarRegionStepConstraintHandler());
 
       registry.addChild(walkingController.getYoVariableRegistry());
    }

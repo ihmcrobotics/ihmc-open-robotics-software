@@ -16,13 +16,11 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.tools.thread.TypedNotification;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.humanoidBehaviors.navigation.NavigationBehavior.NavigationBehaviorAPI.StepThroughAlgorithm;
 
 /**
  * Class for entry methods for developing robot behaviors. The idea is to have this be the one-stop
@@ -61,6 +59,7 @@ public class BehaviorHelper
    private RemoteHumanoidRobotInterface robot;
    private RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private RemoteREAInterface rea;
+   private RemoteEnvironmentMapInterface environmentMap;
 
    public BehaviorHelper(DRCRobotModel robotModel, Messager messager, Ros2Node ros2Node)
    {
@@ -93,6 +92,13 @@ public class BehaviorHelper
       if (rea == null)
          rea = new RemoteREAInterface(managedROS2Node);
       return rea; // REA toolbox
+   }
+
+   public RemoteEnvironmentMapInterface getOrCreateEnvironmentMapInterface()
+   {
+      if (environmentMap == null)
+         environmentMap = new RemoteEnvironmentMapInterface(managedROS2Node);
+      return environmentMap;
    }
 
    // UI Communication Methods:
@@ -128,7 +134,7 @@ public class BehaviorHelper
    public <T> TypedNotification<T> createUITypedNotification(Topic<T> topic)
    {
       TypedNotification<T> typedNotification = new TypedNotification<>();
-      createUICallback(topic, message -> typedNotification.add(message));
+      createUICallback(topic, message -> typedNotification.set(message));
       return typedNotification;
    }
 

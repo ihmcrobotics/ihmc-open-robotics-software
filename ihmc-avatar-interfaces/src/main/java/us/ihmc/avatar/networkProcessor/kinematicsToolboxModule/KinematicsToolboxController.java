@@ -5,7 +5,13 @@ import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOL
 import static controller_msgs.msg.dds.KinematicsToolboxOutputStatus.CURRENT_TOOLBOX_STATE_RUNNING;
 
 import java.awt.Color;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -15,8 +21,6 @@ import controller_msgs.msg.dds.KinematicsToolboxOutputStatus;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import gnu.trove.map.hash.TObjectDoubleHashMap;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollidable;
-import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.collision.KinematicsCollisionResult;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.configurations.JointPrivilegedConfigurationParameters;
@@ -27,10 +31,18 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommandBuffer;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.*;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
@@ -39,6 +51,7 @@ import us.ihmc.concurrent.ConcurrentCopier;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.collision.EuclidFrameShape3DCollisionResult;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
@@ -60,11 +73,17 @@ import us.ihmc.robotics.controllers.pidGains.GainCoupling;
 import us.ihmc.robotics.controllers.pidGains.YoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.DefaultYoPIDSE3Gains;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPIDGains;
+import us.ihmc.robotics.physics.Collidable;
+import us.ihmc.robotics.physics.CollisionResult;
 import us.ihmc.robotics.screwTheory.SelectionMatrix6D;
 import us.ihmc.robotics.time.ThreadTimer;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFramePoint3D;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 /**
  * {@code KinematicsToolboxController} is used as a whole-body inverse kinematics solver.
@@ -231,13 +250,13 @@ public class KinematicsToolboxController extends ToolboxController
    private final YoBoolean preserveUserCommandHistory = new YoBoolean("preserveUserCommandHistory", registry);
 
    /** Represents the collision model of the robot. */
-   private final List<KinematicsCollidable> robotCollidables = new ArrayList<>();
+   private final List<Collidable> robotCollidables = new ArrayList<>();
    /**
     * User parameter updated via {@link KinematicsToolboxConfigurationMessage}. Collision is only
     * handled when this is set to {@code true}.
     */
    private final YoBoolean enableCollisionAvoidance = new YoBoolean("enableCollisionAvoidance", registry);
-   private final RecyclingArrayList<KinematicsCollisionResult> collisionResults = new RecyclingArrayList<>(KinematicsCollisionResult::new);
+   private final RecyclingArrayList<CollisionResult> collisionResults = new RecyclingArrayList<>(CollisionResult::new);
    private final RecyclingArrayList<KinematicsCollisionFrame> collisionFrames = new RecyclingArrayList<>(new Supplier<KinematicsCollisionFrame>()
    {
       int collisionIndex = 0;
@@ -424,7 +443,7 @@ public class KinematicsToolboxController extends ToolboxController
     * 
     * @param collidable the new collidable to consider.
     */
-   public void registerCollidable(KinematicsCollidable collidable)
+   public void registerCollidable(Collidable collidable)
    {
       robotCollidables.add(collidable);
    }
@@ -434,9 +453,9 @@ public class KinematicsToolboxController extends ToolboxController
     * 
     * @param collidables the new collidables to consider.
     */
-   public void registerCollidables(KinematicsCollidable... collidables)
+   public void registerCollidables(Collidable... collidables)
    {
-      for (KinematicsCollidable collidable : collidables)
+      for (Collidable collidable : collidables)
          robotCollidables.add(collidable);
    }
 
@@ -445,9 +464,9 @@ public class KinematicsToolboxController extends ToolboxController
     * 
     * @param collidables the new collidables to consider.
     */
-   public void registerCollidables(Iterable<? extends KinematicsCollidable> collidables)
+   public void registerCollidables(Iterable<? extends Collidable> collidables)
    {
-      for (KinematicsCollidable collidable : collidables)
+      for (Collidable collidable : collidables)
          robotCollidables.add(collidable);
    }
 
@@ -886,26 +905,28 @@ public class KinematicsToolboxController extends ToolboxController
 
       for (int collidableAIndex = 0; collidableAIndex < robotCollidables.size(); collidableAIndex++)
       {
-         KinematicsCollidable collidableA = robotCollidables.get(collidableAIndex);
+         Collidable collidableA = robotCollidables.get(collidableAIndex);
 
          for (int collidableBIndex = collidableAIndex + 1; collidableBIndex < robotCollidables.size(); collidableBIndex++)
          {
-            KinematicsCollidable collidableB = robotCollidables.get(collidableBIndex);
+            Collidable collidableB = robotCollidables.get(collidableBIndex);
 
             if (!collidableA.isCollidableWith(collidableB))
                continue;
 
-            KinematicsCollisionResult collisionResult = collisionResults.add();
+            CollisionResult collisionResult = collisionResults.add();
             collidableA.evaluateCollision(collidableB, collisionResult);
 
-            if (collisionResult.getSignedDistance() > collisionActivationDistanceThreshold.getValue())
+            EuclidFrameShape3DCollisionResult collisionData = collisionResult.getCollisionData();
+
+            if (collisionData.getSignedDistance() > collisionActivationDistanceThreshold.getValue())
                continue;
 
             if (collisionIndex < numberOfCollisionsToVisualize)
             {
-               yoCollisionDistances[collisionIndex].set(collisionResult.getSignedDistance());
-               yoCollisionPointAs[collisionIndex].setMatchingFrame(collisionResult.getPointOnA());
-               yoCollisionPointBs[collisionIndex].setMatchingFrame(collisionResult.getPointOnB());
+               yoCollisionDistances[collisionIndex].set(collisionData.getSignedDistance());
+               yoCollisionPointAs[collisionIndex].setMatchingFrame(collisionData.getPointOnA());
+               yoCollisionPointBs[collisionIndex].setMatchingFrame(collisionData.getPointOnB());
             }
 
             collisionIndex++;
@@ -919,7 +940,7 @@ public class KinematicsToolboxController extends ToolboxController
     * @param collisions   the previously computed collisions.
     * @param bufferToPack buffer used to store the constraints to submit to the controller core.
     */
-   public void computeCollisionCommands(List<KinematicsCollisionResult> collisions, InverseKinematicsCommandBuffer bufferToPack)
+   public void computeCollisionCommands(List<CollisionResult> collisions, InverseKinematicsCommandBuffer bufferToPack)
    {
       if (collisions.isEmpty() || !enableCollisionAvoidance.getValue())
          return;
@@ -929,16 +950,18 @@ public class KinematicsToolboxController extends ToolboxController
 
       for (int i = 0; i < collisions.size(); i++)
       {
-         KinematicsCollisionResult collision = collisions.get(i);
-         KinematicsCollidable collidableA = collision.getCollidableA();
-         KinematicsCollidable collidableB = collision.getCollidableB();
+         CollisionResult collision = collisions.get(i);
+         Collidable collidableA = collision.getCollidableA();
+         Collidable collidableB = collision.getCollidableB();
 
-         if (collision.getSignedDistance() > collisionActivationDistanceThreshold.getValue())
+         EuclidFrameShape3DCollisionResult collisionData = collision.getCollisionData();
+
+         if (collisionData.getSignedDistance() > collisionActivationDistanceThreshold.getValue())
             continue;
 
          RigidBodyBasics bodyA = collidableA.getRigidBody();
 
-         double sigma = -collision.getSignedDistance();
+         double sigma = -collisionData.getSignedDistance();
          double sigmaDot = sigma / updateDT;
          sigmaDot = Math.min(sigmaDot, maxCollisionResolutionVelocity.getValue());
 

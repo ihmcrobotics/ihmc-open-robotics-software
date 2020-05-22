@@ -40,9 +40,12 @@ public class FrameInformationPubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
@@ -59,10 +62,13 @@ public class FrameInformationPubSubType implements us.ihmc.pubsub.TopicDataType<
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
@@ -74,9 +80,12 @@ public class FrameInformationPubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void write(controller_msgs.msg.dds.FrameInformation data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
+
       cdr.write_type_11(data.getTrajectoryReferenceFrameId());
+
 
       cdr.write_type_11(data.getDataReferenceFrameId());
 
@@ -84,10 +93,13 @@ public class FrameInformationPubSubType implements us.ihmc.pubsub.TopicDataType<
 
    public static void read(controller_msgs.msg.dds.FrameInformation data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setTrajectoryReferenceFrameId(cdr.read_type_11());
       	
+
       data.setDataReferenceFrameId(cdr.read_type_11());
       	
 
@@ -96,16 +108,22 @@ public class FrameInformationPubSubType implements us.ihmc.pubsub.TopicDataType<
    @Override
    public final void serialize(controller_msgs.msg.dds.FrameInformation data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_11("trajectory_reference_frame_id", data.getTrajectoryReferenceFrameId());
+
       ser.write_type_11("data_reference_frame_id", data.getDataReferenceFrameId());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.FrameInformation data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setTrajectoryReferenceFrameId(ser.read_type_11("trajectory_reference_frame_id"));
+
       data.setDataReferenceFrameId(ser.read_type_11("data_reference_frame_id"));
    }
 

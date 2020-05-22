@@ -34,7 +34,7 @@ public class OnlineLeastSquaresRegressionTest
             linearRegression.update(x, y);
 
             double residual = y - linearRegression.computeY(x);
-            if (!Double.isNaN(residual))
+            if (!Double.isNaN(residual) && value > 0 )
                residualStats.update(residual);
          }
 

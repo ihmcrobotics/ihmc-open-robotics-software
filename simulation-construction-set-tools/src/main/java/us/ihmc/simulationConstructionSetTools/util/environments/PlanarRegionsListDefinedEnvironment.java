@@ -1,8 +1,7 @@
 package us.ihmc.simulationConstructionSetTools.util.environments;
 
-import us.ihmc.commons.PrintTools;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
@@ -28,12 +27,28 @@ public class PlanarRegionsListDefinedEnvironment implements CommonAvatarEnvironm
       this(PlanarRegionsListDefinedEnvironment.class.getSimpleName(), planarRegionsList, allowablePenetrationThickness, generateGroundPlane);
    }
 
-   public PlanarRegionsListDefinedEnvironment(String name, PlanarRegionsList planarRegionsList, double allowablePenetrationThickness, boolean generateGroundPlane)
+   public PlanarRegionsListDefinedEnvironment(String name,
+                                              PlanarRegionsList planarRegionsList,
+                                              double allowablePenetrationThickness,
+                                              boolean generateGroundPlane)
    {
-      this(name, new PlanarRegionsList[]{planarRegionsList}, null, allowablePenetrationThickness, generateGroundPlane);
+      this(name, new PlanarRegionsList[] {planarRegionsList}, null, allowablePenetrationThickness, generateGroundPlane);
    }
 
-   public PlanarRegionsListDefinedEnvironment(String environmentName, PlanarRegionsList[] planarRegionsList, AppearanceDefinition[] appearances, double allowablePenetrationThickness, boolean generateGroundPlane)
+   public PlanarRegionsListDefinedEnvironment(String name,
+                                              PlanarRegionsList planarRegionsList,
+                                              AppearanceDefinition appearance,
+                                              double allowablePenetrationThickness,
+                                              boolean generateGroundPlane)
+   {
+      this(name, new PlanarRegionsList[] {planarRegionsList}, new AppearanceDefinition[] {appearance}, allowablePenetrationThickness, generateGroundPlane);
+   }
+
+   public PlanarRegionsListDefinedEnvironment(String environmentName,
+                                              PlanarRegionsList[] planarRegionsList,
+                                              AppearanceDefinition[] appearances,
+                                              double allowablePenetrationThickness,
+                                              boolean generateGroundPlane)
    {
       this.environmentName = environmentName;
       this.planarRegionsLists = planarRegionsList;
@@ -72,6 +87,7 @@ public class PlanarRegionsListDefinedEnvironment implements CommonAvatarEnvironm
             }
             else
             {
+               LogTools.info("Applying appearance {} of type {}", i, appearances[i].getClass());
                combinedTerrainObject3D.addTerrainObject(new PlanarRegionTerrainObject(planarRegion, allowablePenetrationThickness, appearances[i]));
             }
          }
@@ -94,20 +110,20 @@ public class PlanarRegionsListDefinedEnvironment implements CommonAvatarEnvironm
    @Override
    public List<? extends Robot> getEnvironmentRobots()
    {
-      PrintTools.warn(this, "Environment robots currently unimplemented for this class");
+      LogTools.warn("Environment robots currently unimplemented for this class");
       return null;
    }
 
    @Override
    public void createAndSetContactControllerToARobot()
    {
-      PrintTools.warn(this, "Contact points currently unimplemented for this class");
+      LogTools.warn("Contact points currently unimplemented for this class");
    }
 
    @Override
    public void addContactPoints(List<? extends ExternalForcePoint> externalForcePoints)
    {
-      PrintTools.warn(this, "Contact points currently unimplemented for this class");
+      LogTools.warn("Contact points currently unimplemented for this class");
    }
 
    @Override

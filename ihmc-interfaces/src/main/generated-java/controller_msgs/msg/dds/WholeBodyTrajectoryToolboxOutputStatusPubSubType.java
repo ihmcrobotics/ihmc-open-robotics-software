@@ -40,11 +40,15 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
-      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+      current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);current_alignment += (50 * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);for(int i0 = 0; i0 < 50; ++i0)
       {
@@ -62,14 +66,18 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType implements us.ihmc
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
       current_alignment += (data.getTrajectoryTimes().size() * 8) + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
@@ -83,13 +91,17 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType implements us.ihmc
 
    public static void write(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
 
+
       cdr.write_type_2(data.getPlanningResult());
+
 
       if(data.getTrajectoryTimes().size() <= 50)
       cdr.write_type_e(data.getTrajectoryTimes());else
           throw new RuntimeException("trajectory_times field exceeds the maximum length");
+
 
       if(data.getRobotConfigurations().size() <= 50)
       cdr.write_type_e(data.getRobotConfigurations());else
@@ -99,11 +111,15 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType implements us.ihmc
 
    public static void read(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setPlanningResult(cdr.read_type_2());
       	
+
       cdr.read_type_e(data.getTrajectoryTimes());	
+
       cdr.read_type_e(data.getRobotConfigurations());	
 
    }
@@ -111,18 +127,26 @@ public class WholeBodyTrajectoryToolboxOutputStatusPubSubType implements us.ihmc
    @Override
    public final void serialize(controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_2("planning_result", data.getPlanningResult());
+
       ser.write_type_e("trajectory_times", data.getTrajectoryTimes());
+
       ser.write_type_e("robot_configurations", data.getRobotConfigurations());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.WholeBodyTrajectoryToolboxOutputStatus data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setPlanningResult(ser.read_type_2("planning_result"));
+
       ser.read_type_e("trajectory_times", data.getTrajectoryTimes());
+
       ser.read_type_e("robot_configurations", data.getRobotConfigurations());
    }
 

@@ -49,7 +49,7 @@ public class FootstepPlannerLoggerTest
       Assertions.assertTrue(success, "Error generating footstep planner log");
 
       FootstepPlannerLogLoader logLoader = new FootstepPlannerLogLoader();
-      success = logLoader.load(new File(logDirectory));
+      success = logLoader.load(new File(logger.getLatestLogDirectory()));
       Assertions.assertTrue(success, "Error loading footstep planner log");
 
       FootstepPlannerLog log = logLoader.getLog();

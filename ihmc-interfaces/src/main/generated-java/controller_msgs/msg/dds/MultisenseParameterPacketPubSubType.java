@@ -40,21 +40,30 @@ public class MultisenseParameterPacketPubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
@@ -71,28 +80,37 @@ public class MultisenseParameterPacketPubSubType implements us.ihmc.pubsub.Topic
    {
       int initial_alignment = current_alignment;
 
+
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
 
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
+      current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
@@ -104,21 +122,30 @@ public class MultisenseParameterPacketPubSubType implements us.ihmc.pubsub.Topic
 
    public static void write(controller_msgs.msg.dds.MultisenseParameterPacket data, us.ihmc.idl.CDR cdr)
    {
+
       cdr.write_type_4(data.getSequenceId());
+
 
       cdr.write_type_7(data.getInitialize());
 
+
       cdr.write_type_6(data.getGain());
+
 
       cdr.write_type_6(data.getMotorSpeed());
 
+
       cdr.write_type_7(data.getLedEnable());
+
 
       cdr.write_type_7(data.getFlashEnable());
 
+
       cdr.write_type_6(data.getDutyCycle());
 
+
       cdr.write_type_7(data.getAutoExposure());
+
 
       cdr.write_type_7(data.getAutoWhiteBalance());
 
@@ -126,22 +153,31 @@ public class MultisenseParameterPacketPubSubType implements us.ihmc.pubsub.Topic
 
    public static void read(controller_msgs.msg.dds.MultisenseParameterPacket data, us.ihmc.idl.CDR cdr)
    {
+
       data.setSequenceId(cdr.read_type_4());
       	
+
       data.setInitialize(cdr.read_type_7());
       	
+
       data.setGain(cdr.read_type_6());
       	
+
       data.setMotorSpeed(cdr.read_type_6());
       	
+
       data.setLedEnable(cdr.read_type_7());
       	
+
       data.setFlashEnable(cdr.read_type_7());
       	
+
       data.setDutyCycle(cdr.read_type_6());
       	
+
       data.setAutoExposure(cdr.read_type_7());
       	
+
       data.setAutoWhiteBalance(cdr.read_type_7());
       	
 
@@ -150,28 +186,46 @@ public class MultisenseParameterPacketPubSubType implements us.ihmc.pubsub.Topic
    @Override
    public final void serialize(controller_msgs.msg.dds.MultisenseParameterPacket data, us.ihmc.idl.InterchangeSerializer ser)
    {
+
       ser.write_type_4("sequence_id", data.getSequenceId());
+
       ser.write_type_7("initialize", data.getInitialize());
+
       ser.write_type_6("gain", data.getGain());
+
       ser.write_type_6("motor_speed", data.getMotorSpeed());
+
       ser.write_type_7("led_enable", data.getLedEnable());
+
       ser.write_type_7("flash_enable", data.getFlashEnable());
+
       ser.write_type_6("duty_cycle", data.getDutyCycle());
+
       ser.write_type_7("auto_exposure", data.getAutoExposure());
+
       ser.write_type_7("auto_white_balance", data.getAutoWhiteBalance());
    }
 
    @Override
    public final void deserialize(us.ihmc.idl.InterchangeSerializer ser, controller_msgs.msg.dds.MultisenseParameterPacket data)
    {
+
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
       data.setInitialize(ser.read_type_7("initialize"));
+
       data.setGain(ser.read_type_6("gain"));
+
       data.setMotorSpeed(ser.read_type_6("motor_speed"));
+
       data.setLedEnable(ser.read_type_7("led_enable"));
+
       data.setFlashEnable(ser.read_type_7("flash_enable"));
+
       data.setDutyCycle(ser.read_type_6("duty_cycle"));
+
       data.setAutoExposure(ser.read_type_7("auto_exposure"));
+
       data.setAutoWhiteBalance(ser.read_type_7("auto_white_balance"));
    }
 

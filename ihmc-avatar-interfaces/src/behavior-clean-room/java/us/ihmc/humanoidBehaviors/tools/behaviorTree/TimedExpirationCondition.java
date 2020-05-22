@@ -10,23 +10,23 @@ import java.util.function.DoubleSupplier;
 public class TimedExpirationCondition extends BehaviorTreeCondition
 {
    private final Stopwatch stopwatch = new Stopwatch();
-   private final DoubleSupplier expirationTimeSupplier;
-   private final Double expirationTime;
+   private final DoubleSupplier expirationDurationSupplier;
+   private final Double expirationDuration;
 
    private boolean hasBeenRenewed = false; // initial condition is failure
 
-   public TimedExpirationCondition(DoubleSupplier expirationTimeSupplier)
+   public TimedExpirationCondition(DoubleSupplier expirationDurationSupplier)
    {
       super(null);
-      this.expirationTimeSupplier = expirationTimeSupplier;
-      this.expirationTime = null;
+      this.expirationDurationSupplier = expirationDurationSupplier;
+      this.expirationDuration = null;
    }
 
-   public TimedExpirationCondition(double expirationTime)
+   public TimedExpirationCondition(double expirationDuration)
    {
       super(null);
-      this.expirationTime = expirationTime;
-      this.expirationTimeSupplier = null;
+      this.expirationDuration = expirationDuration;
+      this.expirationDurationSupplier = null;
    }
 
    public void update()
@@ -35,15 +35,15 @@ public class TimedExpirationCondition extends BehaviorTreeCondition
       stopwatch.reset();
    }
 
-   private double getExpirationTime()
+   private double getExpirationDuration()
    {
-      if (expirationTime == null)
+      if (expirationDuration == null)
       {
-         return expirationTimeSupplier.getAsDouble();
+         return expirationDurationSupplier.getAsDouble();
       }
       else
       {
-         return expirationTime;
+         return expirationDuration;
       }
    }
 
@@ -54,7 +54,7 @@ public class TimedExpirationCondition extends BehaviorTreeCondition
          return false;
 
       double elapsed = stopwatch.lapElapsed();
-      boolean expired = elapsed >= getExpirationTime();
+      boolean expired = elapsed >= getExpirationDuration();
       boolean success = !expired;
       return success;
    }
