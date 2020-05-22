@@ -446,7 +446,7 @@ public class InvertedFourBarTest
       }
    }
 
-   static class Viewer
+   public static class Viewer
    {
       double span = 10.0;
       Point2D center = new Point2D();
@@ -454,6 +454,11 @@ public class InvertedFourBarTest
       Scene scene;
       Group root;
       final CountDownLatch countDownLatch = new CountDownLatch(1);
+
+      public void updateFOV(List<? extends Point2DReadOnly> points)
+      {
+         updateFOV(points.toArray(new Point2DReadOnly[0]));
+      }
 
       public void updateFOV(Point2DReadOnly... points)
       {
