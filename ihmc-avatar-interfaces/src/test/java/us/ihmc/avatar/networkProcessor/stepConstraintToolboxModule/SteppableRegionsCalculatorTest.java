@@ -6,6 +6,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
@@ -186,8 +187,8 @@ public class SteppableRegionsCalculatorTest
       assertEquals(0, returnedGroundRegion1.getNumberOfHolesInRegion());
       assertEquals(0, returnedGroundRegion2.getNumberOfHolesInRegion());
 
-      assertTrue(expectedGroundRegion1.epsilonEquals(returnedGroundRegion1, 1e-7));
       assertTrue(expectedGroundRegion2.epsilonEquals(returnedGroundRegion2, 1e-7));
+      assertTrue(expectedGroundRegion1.epsilonEquals(returnedGroundRegion1, 1e-7));
    }
 
    @Test
@@ -382,6 +383,168 @@ public class SteppableRegionsCalculatorTest
       assertTrue(expectedGroundRegion.epsilonEquals(returnedGroundRegion, 1e-7));
       assertTrue(expectedBlockRegion.epsilonEquals(returnedBlockRegion, 1e-7));
       assertTrue(expectedBlockRegion2.epsilonEquals(returnedBlockRegion2, 1e-7));
+   }
+
+
+
+
+   @Test
+   public void testSplitThatTurnsHoleIntoAClip()
+   {
+      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoVariableRegistry("test"));
+
+      ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
+      groundPolygon.addVertex(1.0, 1.0);
+      groundPolygon.addVertex(1.0, -1.0);
+      groundPolygon.addVertex(-1.0, 1.0);
+      groundPolygon.addVertex(-1.0, -1.0);
+      groundPolygon.update();
+      RigidBodyTransformReadOnly groundTransform = new RigidBodyTransform();
+
+      ConvexPolygon2D wallPolygon = new ConvexPolygon2D();
+      wallPolygon.addVertex(1.0, 1.0);
+      wallPolygon.addVertex(1.0, -1.0);
+      wallPolygon.addVertex(-1.0, 1.0);
+      wallPolygon.addVertex(-1.0, -1.0);
+      wallPolygon.update();
+      RigidBodyTransform wallTransform = new RigidBodyTransform();
+      wallTransform.appendRollRotation(Math.toRadians(90));
+
+      ConvexPolygon2D blockPolygon = new ConvexPolygon2D();
+      blockPolygon.addVertex(1.1, 0.95);
+      blockPolygon.addVertex(1.1, -0.95);
+      blockPolygon.addVertex(0.5, 0.95);
+      blockPolygon.addVertex(0.5, -0.95);
+      blockPolygon.update();
+      RigidBodyTransform blockTransform = new RigidBodyTransform();
+      blockTransform.appendTranslation(0, 0, 0.2);
+
+
+      PlanarRegion groundRegion = new PlanarRegion(groundTransform, groundPolygon);
+      PlanarRegion blockRegion = new PlanarRegion(blockTransform, blockPolygon);
+      PlanarRegion wallRegion = new PlanarRegion(wallTransform, wallPolygon);
+
+      List<PlanarRegion> listOfRegions = new ArrayList<>();
+      listOfRegions.add(groundRegion);
+      listOfRegions.add(wallRegion);
+      listOfRegions.add(blockRegion);
+
+
+      double minimumDistanceFromCliffBottoms = 0.1;
+      double canEasilyStepOverHeight = 0.1;
+      double orthogonalAngle = Math.toRadians(75.0);
+
+      ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator = getExtrusionCalculator(canEasilyStepOverHeight, minimumDistanceFromCliffBottoms);
+
+      calculator.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottoms);
+      calculator.setCanEasilyStepOverHeight(canEasilyStepOverHeight);
+      calculator.setOrthogonalAngle(orthogonalAngle);
+      calculator.setPlanarRegions(listOfRegions);
+
+      ConcavePolygon2D wallObstacle = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion, wallRegion, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
+      ConcavePolygon2D holeObstacle = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion, blockRegion, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
+
+      List<ConcavePolygon2DBasics> groundConcavePolygons = PolygonClippingAndMerging.removeAreaInsideClip(wallObstacle, new ConcavePolygon2D(groundPolygon));
+      ConcavePolygon2DBasics groundConcavePolygon1 = PolygonClippingAndMerging.removeAreaInsideClip(holeObstacle, groundConcavePolygons.get(0)).get(0);
+      ConcavePolygon2DBasics groundConcavePolygon2 = PolygonClippingAndMerging.removeAreaInsideClip(holeObstacle, groundConcavePolygons.get(1)).get(0);
+
+      List<ConcavePolygon2DBasics> blockConcavePolygons = PolygonClippingAndMerging.removeAreaInsideClip(wallObstacle, new ConcavePolygon2D(blockPolygon));
+
+      List<StepConstraintRegion> constraintRegions = calculator.computeSteppableRegions();
+
+      StepConstraintRegion expectedGroundRegion1 = new StepConstraintRegion(groundTransform, groundConcavePolygon1);
+      StepConstraintRegion expectedGroundRegion2 = new StepConstraintRegion(groundTransform, groundConcavePolygon2);
+      StepConstraintRegion expectedBlockRegion1 = new StepConstraintRegion(blockTransform, blockConcavePolygons.get(0));
+      StepConstraintRegion expectedBlockRegion2 = new StepConstraintRegion(blockTransform, blockConcavePolygons.get(1));
+
+      assertEquals(4, constraintRegions.size());
+
+      StepConstraintRegion returnedGroundRegion1 = constraintRegions.get(0);
+      StepConstraintRegion returnedGroundRegion2 = constraintRegions.get(1);
+      StepConstraintRegion returnedBlockRegion1 = constraintRegions.get(2);
+      StepConstraintRegion returnedBlockRegion2 = constraintRegions.get(3);
+
+      assertTrue(expectedGroundRegion1.epsilonEquals(returnedGroundRegion1, 1e-7));
+      assertTrue(expectedGroundRegion2.epsilonEquals(returnedGroundRegion2, 1e-7));
+      assertTrue(expectedBlockRegion1.epsilonEquals(returnedBlockRegion1, 1e-7));
+      assertTrue(expectedBlockRegion2.epsilonEquals(returnedBlockRegion2, 1e-7));
+   }
+
+   @Test
+   public void testTwoWalls()
+   {
+      SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoVariableRegistry("test"));
+
+      ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
+      groundPolygon.addVertex(1.0, 1.0);
+      groundPolygon.addVertex(1.0, -1.0);
+      groundPolygon.addVertex(-1.0, 1.0);
+      groundPolygon.addVertex(-1.0, -1.0);
+      groundPolygon.update();
+      RigidBodyTransformReadOnly groundTransform = new RigidBodyTransform();
+
+      ConvexPolygon2D wallPolygon1 = new ConvexPolygon2D();
+      wallPolygon1.addVertex(1.0, 1.0);
+      wallPolygon1.addVertex(1.0, -1.0);
+      wallPolygon1.addVertex(-1.0, 1.0);
+      wallPolygon1.addVertex(-1.0, -1.0);
+      wallPolygon1.update();
+      RigidBodyTransform wallTransform1 = new RigidBodyTransform();
+      wallTransform1.appendRollRotation(Math.toRadians(90));
+
+      ConvexPolygon2D wallPolygon2 = new ConvexPolygon2D();
+      wallPolygon2.addVertex(-1.0, 1.0);
+      wallPolygon2.addVertex(0.0, 1.0);
+      wallPolygon2.addVertex(0.0, -1.0);
+      wallPolygon2.addVertex(-1.0, -1.0);
+      wallPolygon2.update();
+      RigidBodyTransform wallTransform2 = new RigidBodyTransform();
+      wallTransform2.appendPitchRotation(Math.toRadians(90));
+
+
+      PlanarRegion groundRegion = new PlanarRegion(groundTransform, groundPolygon);
+      PlanarRegion wallRegion1 = new PlanarRegion(wallTransform1, wallPolygon1);
+      PlanarRegion wallRegion2 = new PlanarRegion(wallTransform2, wallPolygon2);
+
+      List<PlanarRegion> listOfRegions = new ArrayList<>();
+      listOfRegions.add(groundRegion);
+      listOfRegions.add(wallRegion1);
+      listOfRegions.add(wallRegion2);
+
+
+      double minimumDistanceFromCliffBottoms = 0.1;
+      double canEasilyStepOverHeight = 0.1;
+      double orthogonalAngle = Math.toRadians(75.0);
+
+      ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator = getExtrusionCalculator(canEasilyStepOverHeight, minimumDistanceFromCliffBottoms);
+
+      calculator.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliffBottoms);
+      calculator.setCanEasilyStepOverHeight(canEasilyStepOverHeight);
+      calculator.setOrthogonalAngle(orthogonalAngle);
+      calculator.setPlanarRegions(listOfRegions);
+
+      ConcavePolygon2D wallObstacle1 = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion, wallRegion1, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
+      ConcavePolygon2D wallObstacle2 = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion, wallRegion2, extrusionDistanceCalculator, Math.cos(orthogonalAngle));
+
+      List<ConcavePolygon2DBasics> groundConcavePolygons = PolygonClippingAndMerging.removeAreaInsideClip(wallObstacle2, new ConcavePolygon2D(groundPolygon));
+      groundConcavePolygons = PolygonClippingAndMerging.removeAreaInsideClip(wallObstacle1, groundConcavePolygons.get(0));
+
+      List<StepConstraintRegion> constraintRegions = calculator.computeSteppableRegions();
+
+
+      assertEquals(3, constraintRegions.size());
+
+      StepConstraintRegion expectedGroundRegion1 = new StepConstraintRegion(groundTransform, groundConcavePolygons.get(0));
+      StepConstraintRegion expectedGroundRegion2 = new StepConstraintRegion(groundTransform, groundConcavePolygons.get(1));
+      StepConstraintRegion expectedGroundRegion3 = new StepConstraintRegion(groundTransform, groundConcavePolygons.get(2));
+
+      StepConstraintRegion returnedGroundRegion1 = constraintRegions.get(0);
+      StepConstraintRegion returnedGroundRegion2 = constraintRegions.get(1);
+      StepConstraintRegion returnedGroundRegion3 = constraintRegions.get(2);
+
+      assertTrue(expectedGroundRegion1.epsilonEquals(returnedGroundRegion1, 1e-7));
+      assertTrue(expectedGroundRegion2.epsilonEquals(returnedGroundRegion2, 1e-7));
+      assertTrue(expectedGroundRegion3.epsilonEquals(returnedGroundRegion3, 1e-7));
    }
 
 
