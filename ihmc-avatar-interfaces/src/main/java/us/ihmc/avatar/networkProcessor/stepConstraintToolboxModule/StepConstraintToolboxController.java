@@ -3,6 +3,8 @@ package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxHelper;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.avatar.stepConstraintModule.SimpleStep;
+import us.ihmc.avatar.stepConstraintModule.StepConstraintCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;

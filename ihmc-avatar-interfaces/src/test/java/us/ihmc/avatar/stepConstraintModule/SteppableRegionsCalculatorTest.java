@@ -1,17 +1,17 @@
-package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
+package us.ihmc.avatar.stepConstraintModule;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.InterpolationTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.concaveHull.GeometryPolygonTestTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
@@ -25,6 +25,19 @@ import static us.ihmc.robotics.Assert.*;
 
 public class SteppableRegionsCalculatorTest
 {
+   private  StepConstraintViewerApplication ui;
+
+   private static final boolean visualize = true;
+
+   @AfterEach
+   public void destroy() throws Exception
+   {
+      if (ui != null)
+      {
+         ui.stop();
+         ui = null;
+      }
+   }
    @Test
    public void testEasyJustGround()
    {
@@ -58,6 +71,9 @@ public class SteppableRegionsCalculatorTest
    {
       SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoVariableRegistry("test"));
 
+      if (visualize)
+         createUI();
+
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
       groundPolygon.addVertex(1.0, 1.0);
       groundPolygon.addVertex(1.0, -1.0);
@@ -80,6 +96,11 @@ public class SteppableRegionsCalculatorTest
       List<PlanarRegion> listOfRegions = new ArrayList<>();
       listOfRegions.add(groundRegion);
       listOfRegions.add(blockRegion);
+
+      if (visualize)
+      {
+         ui.submitPlanarRegionsListToVisualizer(new PlanarRegionsList(listOfRegions));
+      }
 
       double minimumDistanceFromCliffBottoms = 0.1;
       double canEasilyStepOverHeight = 0.1;
@@ -104,7 +125,10 @@ public class SteppableRegionsCalculatorTest
       StepConstraintRegion expectedGroundRegion = new StepConstraintRegion(new RigidBodyTransform(), groundPolygon, holes);
       StepConstraintRegion expectedBlockRegion = new StepConstraintRegion(blockTransform, blockPolygon);
 
-
+      if (visualize)
+      {
+         ThreadTools.sleepForever();
+      }
 
       assertEquals(2, constraintRegions.size());
 
@@ -752,4 +776,11 @@ public class SteppableRegionsCalculatorTest
          }
       };
    }
+
+   private void createUI()
+   {
+      ui = new StepConstraintViewerApplication();
+      ui.startOnAThread();
+   }
+
 }
