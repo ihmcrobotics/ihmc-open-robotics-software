@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
+package us.ihmc.avatar.stepConstraintModule;
 
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -8,7 +8,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-class SimpleStep
+public class SimpleStep
 {
    private RobotSide swingSide;
    private double swingDuration;

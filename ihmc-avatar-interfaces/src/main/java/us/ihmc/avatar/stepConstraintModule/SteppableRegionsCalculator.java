@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
+package us.ihmc.avatar.stepConstraintModule;
 
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
