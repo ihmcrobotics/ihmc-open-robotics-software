@@ -116,7 +116,24 @@ public class LevenbergMarquardtParameterOptimizer
       return norm;
    }
 
-   private void initialize()
+   private void updateDamping()
+   {
+      if (quality < initialQuality)
+         residualScaler = quality / initialQuality * DEFAULT_RESIDUAL_SCALER;
+
+      for (int i = 0; i < parameterDimension; i++)
+      {
+         for (int j = 0; j < parameterDimension; j++)
+         {
+            if (i == j)
+            {
+               dampingCoefficient.set(i, j, residualScaler);
+            }
+         }
+      }
+   }
+
+   public void initialize()
    {
       iteration = 0;
       optimized = false;
@@ -137,21 +154,89 @@ public class LevenbergMarquardtParameterOptimizer
       }
    }
 
-   private void updateDamping()
+   public double iterate()
    {
-      if (quality < initialQuality)
-         residualScaler = quality / initialQuality * DEFAULT_RESIDUAL_SCALER;
+      long startTime = System.nanoTime();
 
+      DenseMatrix64F newInput = new DenseMatrix64F(parameterDimension, 1);
+
+      // compute correspondence space.
+      currentOutput.set(outputCalculator.computeOutput(currentInput));
+      for (int i = 0; i < outputDimension; i++)
+      {
+         if (currentOutput.get(i, 0) < correspondenceThreshold)
+         {
+            correspondence[i] = true;
+         }
+         else
+         {
+            correspondence[i] = false;
+         }
+      }
+      quality = computeQuality(currentOutput, correspondence);
+      initialQuality = quality;
+      if (DEBUG)
+      {
+         System.out.println("Initial Quality = " + quality);
+      }
+
+      // start.      
+      // compute jacobian.
       for (int i = 0; i < parameterDimension; i++)
       {
-         for (int j = 0; j < parameterDimension; j++)
+         perturbedInput.set(currentInput);
+         perturbedInput.add(i, 0, purterbationVector.get(i));
+
+         perturbedOutput.set(outputCalculator.computeOutput(perturbedInput));
+         for (int j = 0; j < outputDimension; j++)
          {
-            if (i == j)
+            if (correspondence[j])
             {
-               dampingCoefficient.set(i, j, residualScaler);
+               double partialValue = (perturbedOutput.get(j) - currentOutput.get(j)) / purterbationVector.get(i);
+               jacobian.set(j, i, partialValue);
+            }
+            else
+            {
+               jacobian.set(j, i, 0.0);
             }
          }
       }
+
+      // compute direction.
+      jacobianTranspose.set(jacobian);
+      CommonOps.transpose(jacobianTranspose);
+
+      CommonOps.mult(jacobianTranspose, jacobian, squaredJacobian);
+      updateDamping();
+
+      CommonOps.add(squaredJacobian, dampingCoefficient, squaredJacobian);
+      CommonOps.invert(squaredJacobian);
+
+      CommonOps.mult(squaredJacobian, jacobianTranspose, invMultJacobianTranspose);
+      CommonOps.mult(invMultJacobianTranspose, currentOutput, optimizeDirection);
+
+      // update currentInput.
+      CommonOps.subtract(currentInput, optimizeDirection, newInput);
+
+      // compute new quality.
+      currentInput.set(newInput);
+      currentOutput.set(outputCalculator.computeOutput(currentInput));
+      for (int i = 0; i < outputDimension; i++)
+      {
+         if (currentOutput.get(i, 0) < correspondenceThreshold)
+         {
+            correspondence[i] = true;
+         }
+         else
+         {
+            correspondence[i] = false;
+         }
+      }
+
+      quality = computeQuality(currentOutput, correspondence);
+
+      double iterateTime = Conversions.nanosecondsToSeconds(System.nanoTime() - startTime);
+      return iterateTime;
    }
 
    public boolean solve(int terminalIteration, double terminalConvergencePercentage)
