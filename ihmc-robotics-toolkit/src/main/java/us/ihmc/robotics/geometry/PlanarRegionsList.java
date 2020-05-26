@@ -285,6 +285,19 @@ public class PlanarRegionsList
       return findClosestPlanarRegionToPointByProjectionOntoXYPlane(point.getX(), point.getY());
    }
 
+   public PlanarRegion getRegionWithId(int id)
+   {
+      for (int i = 0; i < regions.size(); i++)
+      {
+         if (regions.get(i).getRegionId() == id)
+         {
+            return regions.get(i);
+         }
+      }
+
+      return null;
+   }
+
    /**
     * Find the closest planar region to the given point. The algorithm is equivalent to
     * projecting all the regions onto the XY-plane and then finding the closest one to the point.

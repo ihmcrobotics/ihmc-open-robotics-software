@@ -48,7 +48,6 @@ import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.
 public class MainTabController
 {
    private static final boolean verbose = false;
-   private static final double safetyRadiusToDiscardSteps = 0.8;
 
    // control
    @FXML
@@ -158,45 +157,7 @@ public class MainTabController
    @FXML
    public void sendPlan()
    {
-      FootstepDataListMessage footstepDataListMessage = footstepPlanReference.get();
-      if (footstepDataListMessage == null)
-         return;
-
-      if (overrideTiming.isSelected())
-      {
-         Object<FootstepDataMessage> footstepDataList = footstepDataListMessage.getFootstepDataList();
-         for (int i = 0; i < footstepDataList.size(); i++)
-         {
-            FootstepDataMessage footstepDataMessage = footstepDataList.get(i);
-            footstepDataMessage.setSwingDuration(swingTimeSpinner.getValue());
-            footstepDataMessage.setTransferDuration(transferTimeSpinner.getValue());
-         }
-      }
-
-      if (overrideSwingHeight.isSelected())
-      {
-         Object<FootstepDataMessage> footstepDataList = footstepDataListMessage.getFootstepDataList();
-         for (int i = 0; i < footstepDataList.size(); i++)
-         {
-            FootstepDataMessage footstepDataMessage = footstepDataList.get(i);
-            footstepDataMessage.setSwingHeight(swingHeightSpinner.getValue());
-         }
-      }
-
-      us.ihmc.idl.IDLSequence.Object<controller_msgs.msg.dds.FootstepDataMessage> footstepSequence = footstepDataListMessage.getFootstepDataList();
-      for (int i = 1; i < footstepSequence.size(); i++)
-      {
-         Point3D previousLocation = footstepSequence.get(i - 1).getLocation();
-         Point3D location = footstepSequence.get(i).getLocation();
-
-         if (previousLocation.distance(location) >= safetyRadiusToDiscardSteps)
-         {
-            footstepSequence.remove(i);
-            i--;
-         }
-      }
-
-      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListMessage);
+      messager.submitMessage(FootstepPlannerMessagerAPI.SendPlan, true);
    }
 
    @FXML
@@ -243,12 +204,12 @@ public class MainTabController
       distanceProximity.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(-100.0, 100.0, 0.0, 0.1));
       yawProximity.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, Math.PI, 0.0, 0.1));
 
-      swingTimeSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 3.5, 1.2, 0.1));
-      transferTimeSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 3.5, 0.8, 0.1));
+      swingTimeSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(- Double.MAX_VALUE, Double.MAX_VALUE, 1.2, 0.1));
+      transferTimeSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(- Double.MAX_VALUE, Double.MAX_VALUE, 0.8, 0.1));
       swingHeightSpinner.setValueFactory(new SpinnerValueFactory.DoubleSpinnerValueFactory(0.0, 1.0, 0.05, 0.01));
 
-      overrideTiming.setSelected(true);
-      overrideSwingHeight.setSelected(true);
+      overrideTiming.setSelected(false);
+      overrideSwingHeight.setSelected(false);
 
       overrideTiming.selectedProperty().addListener(s ->
                                                     {
@@ -267,7 +228,14 @@ public class MainTabController
       pathHeading.setItems(FXCollections.observableArrayList(FootstepPlanHeading.values()));
       pathHeading.setValue(FootstepPlanHeading.FORWARD);
 
-      messager.bindTopic(IgnorePartialFootholds, ignorePartialFootholds.selectedProperty());
+      messager.bindBidirectional(IgnorePartialFootholds, ignorePartialFootholds.selectedProperty(), true);
+      messager.bindBidirectional(OverrideStepTimings, overrideTiming.selectedProperty(), true);
+      messager.bindBidirectional(ManualSwingTime, swingTimeSpinner.valueFactoryProperty().getValue().valueProperty(), true);
+      messager.bindBidirectional(ManualTransferTime, transferTimeSpinner.valueFactoryProperty().getValue().valueProperty(), true);
+
+      messager.bindBidirectional(OverrideSwingHeight, overrideSwingHeight.selectedProperty(), true);
+      messager.bindBidirectional(ManualSwingHeight, swingHeightSpinner.valueFactoryProperty().getValue().valueProperty(), true);
+
       messager.bindTopic(AutoPostProcess, autoPostProcess.selectedProperty());
       messager.bindBidirectional(SnapGoalSteps, snapGoalSteps.selectedProperty(), true);
       messager.bindBidirectional(AbortIfGoalStepSnapFails, abortIfGoalStepSnapFails.selectedProperty(), true);

@@ -11,6 +11,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreIOTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -292,8 +293,9 @@ public class FootstepPlannerLogger
    private void writeSnapData(int numTabs, FootstepNodeSnapData snapData) throws IOException
    {
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
-      Quaternion quaternion = new Quaternion(snapTransform.getRotation());
-      writeTransform(numTabs, "snapTransform: ", quaternion, snapTransform.getTranslation());
+      writeTransform(numTabs, "snapTransform: ", new Quaternion(snapTransform.getRotation()), snapTransform.getTranslation());
+      RigidBodyTransform wiggleTransform = snapData.getWiggleTransformInWorld();
+      writeTransform(numTabs, "wiggleTransform: ", new Quaternion(wiggleTransform.getRotation()), snapTransform.getTranslation());
 
       ConvexPolygon2D croppedFoothold = snapData.getCroppedFoothold();
       if (croppedFoothold.isEmpty() || croppedFoothold.containsNaN())

@@ -4,11 +4,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
-import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
@@ -17,6 +17,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.Random;
 
 public class FootstepNodeSnapAndWigglerTest
 {
@@ -195,5 +197,54 @@ public class FootstepNodeSnapAndWigglerTest
 
       snapData = snapper.snapFootstepNode(new FootstepNode(3.0, 0.0), stanceNode, false);
       Assertions.assertTrue(EuclidCoreTools.epsilonEquals(snapData.getSnapTransform().getRotation().getPitch(), 0.0, epsilon));
+   }
+
+   @Test
+   public void testOverlapDetection()
+   {
+      double epsilon = 1e-8;
+
+      ConvexPolygon2D unitSquare = new ConvexPolygon2D();
+      unitSquare.addVertex(1.0, 1.0);
+      unitSquare.addVertex(1.0, -1.0);
+      unitSquare.addVertex(-1.0, 1.0);
+      unitSquare.addVertex(-1.0, -1.0);
+      unitSquare.update();
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(() -> new ConvexPolygon2D(unitSquare));
+
+      DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
+
+      FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
+
+      FootstepNodeSnapData snapData1 = new FootstepNodeSnapData();
+      FootstepNodeSnapData snapData2 = new FootstepNodeSnapData();
+
+      FootstepNode node1 = new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT);
+      FootstepNode node2 = new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT);
+
+      snapData1.getSnapTransform().setIdentity();
+      snapData2.getSnapTransform().setIdentity();
+      snapData1.getWiggleTransformInWorld().setIdentity();
+      snapData2.getWiggleTransformInWorld().setIdentity();
+
+      boolean overlap = snapper.doStepsOverlap(node1, snapData1, node2, snapData2);
+      Assertions.assertTrue(overlap);
+
+      snapData2.getSnapTransform().getTranslation().set(2.0 - epsilon, 0.0, 0.0);
+      overlap = snapper.doStepsOverlap(node1, snapData1, node2, snapData2);
+      Assertions.assertTrue(overlap);
+
+      snapData2.getSnapTransform().getTranslation().set(2.0 + epsilon, 0.0, 0.0);
+      overlap = snapper.doStepsOverlap(node1, snapData1, node2, snapData2);
+      Assertions.assertFalse(overlap);
+
+      snapData1.getSnapTransform().getRotation().setYawPitchRoll(0.0, 0.0, Math.toRadians(45.0));
+      snapData2.getSnapTransform().getTranslation().set(0.0, 1.0 + Math.sqrt(0.5) - epsilon, 0.0);
+      overlap = snapper.doStepsOverlap(node1, snapData1, node2, snapData2);
+      Assertions.assertTrue(overlap);
+
+      snapData2.getSnapTransform().getTranslation().set(0.0, 1.0 + Math.sqrt(0.5) + epsilon, 0.0);
+      overlap = snapper.doStepsOverlap(node1, snapData1, node2, snapData2);
+      Assertions.assertFalse(overlap);
    }
 }

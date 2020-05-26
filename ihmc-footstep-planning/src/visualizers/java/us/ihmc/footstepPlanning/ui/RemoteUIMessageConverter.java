@@ -195,13 +195,10 @@ public class RemoteUIMessageConverter
       ROS2Tools.createCallbackSubscription(ros2Node, CapturabilityBasedStatus.class,
                                            ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
                                            s -> processCapturabilityStatus(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepStatusMessage.class,
+      ROS2Tools.createCallbackSubscription(ros2Node,
+                                           FootstepStatusMessage.class,
                                            ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                                           s ->
-                                           {
-                                              messager.submitMessage(FootstepPlannerMessagerAPI.FootstepStatusMessage, s.takeNextData());
-                                              System.out.println("fdsjklsdf");
-                                           });
+                                           s -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepStatusMessage, s.takeNextData()));
 
       MessageTopicNameGenerator controllerPreviewOutputTopicNameGenerator = getTopicNameGenerator(robotName, ROS2Tools.WALKING_PREVIEW_TOOLBOX, ROS2TopicQualifier.OUTPUT);
       ROS2Tools.createCallbackSubscription(ros2Node, WalkingControllerPreviewOutputMessage.class, controllerPreviewOutputTopicNameGenerator, s -> messager.submitMessage(FootstepPlannerMessagerAPI.WalkingPreviewOutput, s.takeNextData()));
@@ -244,17 +241,7 @@ public class RemoteUIMessageConverter
          walkingPreviewRequestPublisher.publish(request);
       });
 
-
-
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListMessage ->
-      {
-         if(ignorePartialFootholds.get())
-         {
-            footstepDataListMessage.getFootstepDataList().forEach(m -> m.getPredictedContactPoints2d().clear());
-         }
-
-         footstepDataListPublisher.publish(footstepDataListMessage);
-      });
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.FootstepPlanToRobot, footstepDataListPublisher::publish);
 
       IHMCRealtimeROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher = ROS2Tools
             .createPublisher(ros2Node, BipedalSupportPlanarRegionParametersMessage.class,
@@ -320,7 +307,12 @@ public class RemoteUIMessageConverter
 
       ThreadTools.sleep(100);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);
+      boolean broadcastFootstepPlan = footstepPlanningResult.terminalResult() || !footstepDataListMessage.getFootstepDataList().isEmpty();
+      if (broadcastFootstepPlan)
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);         
+      }
+      
       messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanId, plannerRequestId);
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathPlanningResultTopic, bodyPathPlanningResult);
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, footstepPlanningResult);

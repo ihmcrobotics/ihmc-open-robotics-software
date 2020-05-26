@@ -253,7 +253,6 @@ public class BipedSupportPolygons
       return footPolygonsInSoleZUpFrame;
    }
 
-
    public FrameConvexPolygon2DReadOnly getFootPolygonInWorldFrame(RobotSide robotSide)
    {
       return footPolygonsInWorldFrame.get(robotSide);

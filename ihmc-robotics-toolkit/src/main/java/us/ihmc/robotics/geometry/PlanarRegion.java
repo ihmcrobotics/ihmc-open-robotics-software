@@ -36,7 +36,7 @@ public class PlanarRegion implements SupportingVertexHolder
    public static final double DEFAULT_BOUNDING_BOX_EPSILON = 0.0;
 
    private int regionId = NO_REGION_ID;
-   
+
    /**
     * This transform also represents the pose of the PlanarRegion.
     */
@@ -883,6 +883,15 @@ public class PlanarRegion implements SupportingVertexHolder
       normalToPack.setX(fromLocalToWorldTransform.getM02());
       normalToPack.setY(fromLocalToWorldTransform.getM12());
       normalToPack.setZ(fromLocalToWorldTransform.getM22());
+   }
+
+   /**
+    * Retrieves the origin of this planar region in the world frame and stores it in the given {@link Point3D}.
+    * @param originToPack
+    */
+   public void getOrigin(Point3DBasics originToPack)
+   {
+      originToPack.set(fromLocalToWorldTransform.getM03(), fromLocalToWorldTransform.getM13(), fromLocalToWorldTransform.getM23());
    }
 
    /**

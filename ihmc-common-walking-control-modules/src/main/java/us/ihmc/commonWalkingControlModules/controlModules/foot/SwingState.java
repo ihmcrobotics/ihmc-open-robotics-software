@@ -41,6 +41,7 @@ import us.ihmc.mecano.spatial.SpatialAcceleration;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3GainsReadOnly;
 import us.ihmc.robotics.math.filters.RateLimitedYoFramePose;
+import us.ihmc.robotics.math.trajectories.BlendedPositionTrajectoryGeneratorVisualizer;
 import us.ihmc.robotics.math.trajectories.MultipleWaypointsBlendedPoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.PoseTrajectoryGenerator;
 import us.ihmc.robotics.math.trajectories.generators.MultipleWaypointsPoseTrajectoryGenerator;
@@ -64,6 +65,7 @@ import us.ihmc.yoVariables.variable.YoInteger;
 
 public class SwingState extends AbstractFootControlState
 {
+   private static final boolean visualizeAdjustedSwing = false;
    private static final boolean USE_ALL_LEG_JOINT_SWING_CORRECTOR = false;
 
    private final YoBoolean replanTrajectory;
@@ -77,6 +79,7 @@ public class SwingState extends AbstractFootControlState
 
    private final TwoWaypointSwingGenerator swingTrajectoryOptimizer;
    private final MultipleWaypointsBlendedPoseTrajectoryGenerator blendedSwingTrajectory;
+   private final BlendedPositionTrajectoryGeneratorVisualizer swingVisualizer;
    private final SoftTouchdownPoseTrajectoryGenerator touchdownTrajectory;
    private double swingTrajectoryBlendDuration = 0.0;
 
@@ -333,6 +336,11 @@ public class SwingState extends AbstractFootControlState
       swingDuration = new YoDouble(namePrefix + "Duration", registry);
       swingHeight = new YoDouble(namePrefix + "Height", registry);
 
+      if (visualizeAdjustedSwing)
+         swingVisualizer = new BlendedPositionTrajectoryGeneratorVisualizer(namePrefix, blendedSwingTrajectory, swingDuration, registry, yoGraphicsListRegistry);
+      else
+         swingVisualizer = null;
+
       swingTimeSpeedUpFactor = new YoDouble(namePrefix + "TimeSpeedUpFactor", registry);
       minSwingTimeForDisturbanceRecovery = new YoDouble(namePrefix + "MinTimeForDisturbanceRecovery", registry);
       minSwingTimeForDisturbanceRecovery.set(walkingControllerParameters.getMinimumSwingTimeForDisturbanceRecovery());
@@ -564,7 +572,11 @@ public class SwingState extends AbstractFootControlState
       }
 
       if (activeTrajectoryType.getEnumValue() != TrajectoryType.WAYPOINTS && swingTrajectoryOptimizer.doOptimizationUpdate()) // haven't finished original planning
+      {
          fillAndInitializeTrajectories(false);
+         if (swingVisualizer != null)
+            swingVisualizer.visualize();
+      }
       else if (replanTrajectory.getBooleanValue()) // need to update the beginning and end blending
          fillAndInitializeBlendedTrajectories();
       replanTrajectory.set(false);
@@ -750,6 +762,8 @@ public class SwingState extends AbstractFootControlState
    {
       double swingDuration = this.swingDuration.getDoubleValue();
       blendedSwingTrajectory.clear();
+      if (swingVisualizer != null)
+         swingVisualizer.hideVisualization();
       if (swingTrajectoryBlendDuration > 0.0)
       {
          initialPose.changeFrame(worldFrame);
@@ -780,6 +794,8 @@ public class SwingState extends AbstractFootControlState
       }
       blendedSwingTrajectory.initialize();
       touchdownTrajectory.initialize();
+      if (swingVisualizer != null)
+         swingVisualizer.visualize();
 
       if (!swingWaypointsForViz.isEmpty() && activeTrajectoryType.getEnumValue() == TrajectoryType.WAYPOINTS)
       {

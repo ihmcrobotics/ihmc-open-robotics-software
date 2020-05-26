@@ -21,10 +21,7 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerPar
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
 import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
-import us.ihmc.footstepPlanning.ui.components.FootPoseFromMidFootUpdater;
-import us.ihmc.footstepPlanning.ui.components.FootstepCompletionListener;
-import us.ihmc.footstepPlanning.ui.components.GoalOrientationEditor;
-import us.ihmc.footstepPlanning.ui.components.OccupancyMapRenderer;
+import us.ihmc.footstepPlanning.ui.components.*;
 import us.ihmc.footstepPlanning.ui.controllers.*;
 import us.ihmc.footstepPlanning.ui.viewers.*;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -80,6 +77,7 @@ public class FootstepPlannerUI
    private final JavaFXRobotVisualizer robotVisualizer;
    private final JavaFXRobotVisualizer walkingPreviewVisualizer;
    private final FootstepPlannerLogRenderer footstepPlannerLogRenderer;
+   private final ManualFootstepAdjustmentListener manualFootstepAdjustmentListener;
 
    private final List<Runnable> shutdownHooks = new ArrayList<>();
 
@@ -221,6 +219,8 @@ public class FootstepPlannerUI
       this.visibilityGraphsRenderer = new VisibilityGraphsRenderer(messager);
       this.occupancyMapRenderer = new OccupancyMapRenderer(messager);
       this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(defaultContactPoints, messager);
+      new UIFootstepPlanManager(messager);
+      this.manualFootstepAdjustmentListener = new ManualFootstepAdjustmentListener(messager, view3dFactory.getSubScene());
 
       startGoalPositionViewer.setShowStartGoalTopics(ShowStart, ShowGoal, ShowGoal);
 
@@ -266,7 +266,6 @@ public class FootstepPlannerUI
       if(walkingControllerParameters != null)
       {
          mainTabController.setDefaultTiming(walkingControllerParameters.getDefaultSwingTime(), walkingControllerParameters.getDefaultTransferTime());
-         pathViewer.setDefaultWaypointProportions(walkingControllerParameters.getSwingTrajectoryParameters().getSwingWaypointProportions());
       }
 
       if(defaultContactPoints != null)
@@ -288,6 +287,7 @@ public class FootstepPlannerUI
       visibilityGraphsRenderer.start();
       occupancyMapRenderer.start();
       footstepPlannerLogRenderer.start();
+      manualFootstepAdjustmentListener.start();
       new FootPoseFromMidFootUpdater(messager).start();
       new FootstepCompletionListener(messager).start();
 
