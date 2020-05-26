@@ -3,9 +3,7 @@ package us.ihmc.avatar.slamTools;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.ejml.data.DenseMatrix64F;
@@ -14,15 +12,14 @@ import org.junit.jupiter.api.Test;
 import javafx.scene.paint.Color;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.PLYAsciiFormatFileLoader;
 import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.SLAMViewer;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotEnvironmentAwareness.slam.tools.PLYasciiFormatFormatDataImporter;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpdater;
 import us.ihmc.robotics.optimization.FunctionOutputCalculator;
@@ -37,7 +34,7 @@ public class LevenbergMarquardt3DICPTest
    {
       String cowPLYPath = "C:\\PointCloudData\\PLY\\Cow\\cow.ply";
       File cowPointCloudFile = new File(cowPLYPath);
-      Point3D[] originalCowPointCloud = PLYAsciiFormatFileLoader.getPointsFromFile(cowPointCloudFile);
+      Point3D[] originalCowPointCloud = PLYasciiFormatFormatDataImporter.getPointsFromFile(cowPointCloudFile);
       Point3D[] driftedCowPointCloud = new Point3D[originalCowPointCloud.length];
 
       RigidBodyTransform driftingTransform = new RigidBodyTransform();
@@ -68,7 +65,7 @@ public class LevenbergMarquardt3DICPTest
    {
       String cowPLYPath = "C:\\PointCloudData\\PLY\\Cow\\cow.ply";
       File cowPointCloudFile = new File(cowPLYPath);
-      Point3D[] originalCowPointCloud = PLYAsciiFormatFileLoader.getPointsFromFile(cowPointCloudFile);
+      Point3D[] originalCowPointCloud = PLYasciiFormatFormatDataImporter.getPointsFromFile(cowPointCloudFile);
       Point3D[] driftedCowPointCloud = new Point3D[originalCowPointCloud.length];
 
       RigidBodyTransform driftingTransform = new RigidBodyTransform();
@@ -134,7 +131,7 @@ public class LevenbergMarquardt3DICPTest
    {
       String cowPLYPath = "C:\\PointCloudData\\PLY\\Cow\\cow.ply";
       File cowPointCloudFile = new File(cowPLYPath);
-      Point3D[] originalCowPointCloud = PLYAsciiFormatFileLoader.getPointsFromFile(cowPointCloudFile);
+      Point3D[] originalCowPointCloud = PLYasciiFormatFormatDataImporter.getPointsFromFile(cowPointCloudFile);
       Point3D[] driftedCowPointCloud = new Point3D[originalCowPointCloud.length];
 
       RigidBodyTransform driftingTransform = new RigidBodyTransform();
@@ -197,7 +194,7 @@ public class LevenbergMarquardt3DICPTest
             return distance;
          }
       };
-      
+
       DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
       purterbationVector.set(0, 0.00001);
       purterbationVector.set(1, 0.00001);
