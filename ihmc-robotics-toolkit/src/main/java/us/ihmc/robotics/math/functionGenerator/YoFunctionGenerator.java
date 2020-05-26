@@ -291,7 +291,7 @@ public class YoFunctionGenerator
 
    public double getValueDotTest()
    {
-      return valueDot.getDoubleValue()
+      return valueDot.getDoubleValue();
    }
 
    public boolean getStopAfterResetTime()
