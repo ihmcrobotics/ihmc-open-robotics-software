@@ -1,11 +1,19 @@
 package us.ihmc.robotics.screwTheory;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.log.LogTools;
+import us.ihmc.mecano.algorithms.ExplicitLoopClosureFunction;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
+import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
+import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.kinematics.fourbar.FourBar;
 import us.ihmc.robotics.kinematics.fourbar.FourBarAngle;
 import us.ihmc.robotics.kinematics.fourbar.FourBarVertex;
@@ -27,7 +35,7 @@ import us.ihmc.robotics.screwTheory.FourBarKinematicLoopTools.FourBarToJointConv
  *   end-effector    end-effector
  * </pre>
  */
-public class FourBarKinematicLoop
+public class FourBarKinematicLoop implements ExplicitLoopClosureFunction
 {
    private static final double EPSILON = 1.0e-7;
 
@@ -37,7 +45,7 @@ public class FourBarKinematicLoop
    private final RevoluteJointBasics jointB;
    private final RevoluteJointBasics jointC;
    private final RevoluteJointBasics jointD;
-   private final RevoluteJointBasics[] joints;
+   private final List<RevoluteJointBasics> joints;
 
    private final FourBarToJointConverter converterA = new FourBarToJointConverter();
    private final FourBarToJointConverter converterB = new FourBarToJointConverter();
@@ -59,7 +67,7 @@ public class FourBarKinematicLoop
       this.name = name;
 
       this.masterJointIndex = FourBarKinematicLoopTools.configureFourBarKinematics(joints, converters, fourBar, masterJointIndex, EPSILON);
-      this.joints = joints;
+      this.joints = Arrays.asList(joints);
       this.jointA = joints[0];
       this.jointB = joints[1];
       this.jointC = joints[2];
@@ -70,7 +78,7 @@ public class FourBarKinematicLoop
    {
       clampMasterJointPosition();
 
-      RevoluteJointBasics masterJoint = joints[masterJointIndex];
+      RevoluteJointBasics masterJoint = getMasterJoint();
       FourBarToJointConverter masterConverter = converters[masterJointIndex];
       double angle = masterConverter.toFourBarInteriorAngle(masterJoint.getQ());
       double angleDot = masterConverter.toFourBarInteriorAngularDerivative(masterJoint.getQd());
@@ -83,7 +91,7 @@ public class FourBarKinematicLoop
          if (i == masterJointIndex)
             continue;
 
-         RevoluteJointBasics joint = joints[i];
+         RevoluteJointBasics joint = joints.get(i);
          FourBarToJointConverter converter = converters[i];
          FourBarVertex fourBarVertex = fourBar.getVertex(FourBarAngle.values[i]);
 
@@ -101,7 +109,7 @@ public class FourBarKinematicLoop
 
       for (int i = 0; i < 4; i++)
       {
-         RevoluteJointBasics joint = joints[i];
+         RevoluteJointBasics joint = joints.get(i);
          tau += innerJacobianMatrix.get(i, 0) * joint.getTau();
          joint.setTau(0.0);
       }
@@ -123,9 +131,55 @@ public class FourBarKinematicLoop
       }
    }
 
+   @Override
+   public List<? extends JointReadOnly> getKinematicLoopJoints()
+   {
+      return joints;
+   }
+
+   private final DMatrixRMaj[] jointTauMatrices = new DMatrixRMaj[4];
+   private final FixedFrameWrenchBasics[] jointWrenches = new FixedFrameWrenchBasics[4];
+   private final double[] jointTauOld = new double[4];
+   private final Wrench wrenchForPredecessor = new Wrench();
+
+   @Override
+   public void recomputeJointEfforts(Map<JointReadOnly, JointEffortData> jointDataToUpdate, SpatialForceReadOnly spatialForceFromChildren)
+   {
+      updateInnerJacobian();
+
+      double masterTau = 0.0;
+
+      for (int i = 0; i < 4; i++)
+      {
+         RevoluteJointBasics joint = joints.get(i);
+         JointEffortData jointEffortData = jointDataToUpdate.get(joint);
+
+         DMatrixRMaj jointTau = jointEffortData.getTau();
+         jointTauMatrices[i] = jointTau;
+         jointWrenches[i] = jointEffortData.getJointWrench();
+         jointTauOld[i] = jointTau.get(0);
+
+         masterTau += innerJacobianMatrix.get(i, 0) * jointTau.get(0);
+         jointTau.set(0, 0.0);
+      }
+
+      // Let's use the wrench on jointA and add the tau of the master joint to it.
+      wrenchForPredecessor.setIncludingFrame(jointWrenches[0]);
+      wrenchForPredecessor.changeFrame(jointWrenches[1].getReferenceFrame());
+      wrenchForPredecessor.add((SpatialForceReadOnly) jointWrenches[1]);
+      
+      jointTauMatrices[masterJointIndex].set(0, masterTau);
+   }
+
+   @Override
+   public WrenchReadOnly getWrenchForPredecessor()
+   {
+      return wrenchForPredecessor;
+   }
+
    private void clampMasterJointPosition()
    {
-      RevoluteJointBasics masterJoint = joints[masterJointIndex];
+      RevoluteJointBasics masterJoint = getMasterJoint();
 
       if (masterJoint.getQ() < masterJoint.getJointLimitLower())
       {
@@ -166,7 +220,7 @@ public class FourBarKinematicLoop
 
    public RevoluteJointBasics getMasterJoint()
    {
-      return joints[masterJointIndex];
+      return joints.get(masterJointIndex);
    }
 
    public DMatrixRMaj getInnerJacobianMatrix()
