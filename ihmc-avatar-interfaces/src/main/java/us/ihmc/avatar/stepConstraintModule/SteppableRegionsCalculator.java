@@ -205,16 +205,15 @@ public class SteppableRegionsCalculator
 
    private List<StepConstraintRegion> createSteppableRegions(RigidBodyTransformReadOnly transformToWorld,
                                                              ConcavePolygon2DBasics uncroppedPolygon,
-                                                             List<ConcavePolygon2DBasics> allObstacleExtrusions)
+                                                             List<ConcavePolygon2DBasics> obstacleExtrusions)
    {
-      if (allObstacleExtrusions.stream().anyMatch(region -> isRegionMasked(uncroppedPolygon, region)))
+      if (obstacleExtrusions.stream().anyMatch(region -> isRegionMasked(uncroppedPolygon, region)))
          return null;
 
-      List<ConcavePolygon2DBasics> listOfHoles = allObstacleExtrusions.stream()
+      List<ConcavePolygon2DBasics> listOfHoles = obstacleExtrusions.stream()
                                                                       .filter(region -> isObstacleAHole(uncroppedPolygon, region))
                                                                       .collect(Collectors.toList());
-      List<ConcavePolygon2DBasics> obstacleExtrusions = new ArrayList<>(allObstacleExtrusions);
-      allObstacleExtrusions.removeAll(listOfHoles);
+      obstacleExtrusions.removeAll(listOfHoles);
 
       List<ConcavePolygon2DBasics> croppedPolygons = new ArrayList<>();
       croppedPolygons.add(uncroppedPolygon);
@@ -286,51 +285,11 @@ public class SteppableRegionsCalculator
                                                                                                               obstacleExtrusionDistanceCalculator,
                                                                                                               zThresholdBeforeOrthogonal))
                                                                        .collect(Collectors.toList());
-      mergeAllExtrusions(obstacleExtrusions);
+      PolygonClippingAndMerging.mergeAllPossible(obstacleExtrusions);
 
       return obstacleExtrusions;
    }
 
-   private static void mergeAllExtrusions(List<ConcavePolygon2DBasics> extrusions)
-   {
-      int i = 0;
-      while (i < extrusions.size())
-      {
-         ConcavePolygon2DBasics polygonA = extrusions.get(i);
-         int j = i + 1;
-         boolean shouldRemoveA = false;
-         while (j < extrusions.size())
-         {
-            ConcavePolygon2DBasics polygonB = extrusions.get(j);
-            if (GeometryPolygonTools.doPolygonsIntersect(polygonA, polygonB))
-            {
-               ConcavePolygon2D newPolygon = new ConcavePolygon2D();
-               PolygonClippingAndMerging.merge(polygonA, polygonB, newPolygon);
-
-               extrusions.set(i, newPolygon);
-               extrusions.remove(j);
-            }
-            else if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonB, polygonA))
-            {
-               extrusions.remove(j);
-            }
-            else if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonA, polygonB))
-            {
-               shouldRemoveA = true;
-               break;
-            }
-            else
-            {
-               j++;
-            }
-         }
-
-         if (shouldRemoveA)
-            extrusions.remove(i);
-         else
-            i++;
-      }
-   }
 
    static ConcavePolygon2D createObstacleExtrusion(PlanarRegion homeRegion,
                                                    PlanarRegion obstacleRegion,
