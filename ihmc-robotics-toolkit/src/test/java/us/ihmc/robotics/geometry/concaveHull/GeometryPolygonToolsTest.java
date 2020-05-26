@@ -63,6 +63,30 @@ public class GeometryPolygonToolsTest
    }
 
    @Test
+   public void testPolygonInsideOtherPolygonTricky()
+   {
+      ConcavePolygon2D uPolygon = new ConcavePolygon2D();
+      uPolygon.addVertex(-1.0, 1.0);
+      uPolygon.addVertex(-0.9, 1.0);
+      uPolygon.addVertex(-0.9, -0.9);
+      uPolygon.addVertex(0.9, -0.9);
+      uPolygon.addVertex(0.9, 1.0);
+      uPolygon.addVertex(1.0, 1.0);
+      uPolygon.addVertex(1.0, -1.0);
+      uPolygon.addVertex(-1.0, -1.0);
+      uPolygon.update();
+
+      ConcavePolygon2D hat = new ConcavePolygon2D();
+      hat.addVertex(-1.0, 1.0);
+      hat.addVertex(1.0, 1.0);
+      hat.addVertex(1.0, 0.9);
+      hat.addVertex(-1.0, 0.9);
+      hat.update();
+
+      assertFalse(GeometryPolygonTools.isPolygonInsideOtherPolygon(hat, uPolygon));
+   }
+
+   @Test
    public void testEasyInteriorPolygon()
    {
       ConcavePolygon2D outerPolygon = new ConcavePolygon2D();
@@ -91,6 +115,29 @@ public class GeometryPolygonToolsTest
 
       assertFalse(GeometryPolygonTools.isPolygonInsideOtherPolygon(innerPolygon, outerPolygon));
    }
+
+   @Test
+   public void testIsPolygonInsideOtherPolygon()
+   {
+      ConcavePolygon2D polygon1 = new ConcavePolygon2D();
+      polygon1.addVertex(-0.1, 1.0);
+      polygon1.addVertex(0.1, 1.0);
+      polygon1.addVertex(0.1, -1.0);
+      polygon1.addVertex(-0.1, -1.0);
+      polygon1.update();
+
+      ConcavePolygon2D polygon2 = new ConcavePolygon2D();
+      polygon2.addVertex(0.9, 1.0);
+      polygon2.addVertex(1.1, 1.0);
+      polygon2.addVertex(1.1, -1.0);
+      polygon2.addVertex(0.9, -1.0);
+      polygon2.update();
+
+      assertFalse(GeometryPolygonTools.isPolygonInsideOtherPolygon(polygon1, polygon2));
+      assertFalse(GeometryPolygonTools.isPolygonInsideOtherPolygon(polygon2, polygon1));
+
+   }
+
 
    @Test
    public void doPolygonIntersectTest()
@@ -135,5 +182,26 @@ public class GeometryPolygonToolsTest
 
       assertTrue(GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(1.0, 1.0, polygon.getVertexBufferView(), 3));
       assertTrue(GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(-1.0, 1.0, polygon.getVertexBufferView(), 3));
+
+      ConcavePolygon2D polygon1 = new ConcavePolygon2D();
+      polygon1.addVertex(-0.1, 1.0);
+      polygon1.addVertex(0.1, 1.0);
+      polygon1.addVertex(0.1, -1.0);
+      polygon1.addVertex(-0.1, -1.0);
+      polygon1.update();
+
+      ConcavePolygon2D polygon2 = new ConcavePolygon2D();
+      polygon2.addVertex(0.9, 1.0);
+      polygon2.addVertex(1.1, 1.0);
+      polygon2.addVertex(1.1, -1.0);
+      polygon2.addVertex(0.9, -1.0);
+      polygon2.update();
+
+      for (int i = 0; i < 4; i++)
+      {
+         assertFalse(GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(polygon1.getVertex(i), polygon2.getVertexBufferView(), 4));
+         assertFalse(GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(polygon2.getVertex(i), polygon1.getVertexBufferView(), 4));
+      }
+
    }
 }

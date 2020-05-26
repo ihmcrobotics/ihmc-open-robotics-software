@@ -25,7 +25,6 @@ public class EuclidCoreMissingTools
       tuple3d.setX(MathTools.floorToPrecision(tuple3d.getX(), precision));
       tuple3d.setY(MathTools.floorToPrecision(tuple3d.getY(), precision));
       tuple3d.setZ(MathTools.floorToPrecision(tuple3d.getZ(), precision));
-
    }
 
    public static void roundToGivenPrecision(Tuple3DBasics tuple3d, double precision)
@@ -44,22 +43,21 @@ public class EuclidCoreMissingTools
     * Tests if the point 2D is located on the infinitely long line 2D.
     * <p>
     * The test is performed by computing the distance between the point and the line, if that distance
-    * is below {@link #IS_POINT_ON_LINE_EPS} this method returns {@code true}.
+    * is below {@link EuclidGeometryTools#IS_POINT_ON_LINE_EPS} this method returns {@code true}.
     * </p>
     *
-    * @param point            the coordinates of the query. Not modified.
     * @param lineSegmentStart the first endpoint of the line segment. Not modified.
-    * @param lineSegmentEnd   the second endpoint of the line segment. Not modified.
+    * @param lineSegmentEnd the second endpoint of the line segment. Not modified.
     * @return {@code true} if the query is considered to be lying on the line, {@code false} otherwise.
     */
    public static boolean isPoint2DOnLineSegment2D(double pointX, double pointY, Point2DReadOnly lineSegmentStart, Point2DReadOnly lineSegmentEnd)
    {
-      return EuclidGeometryTools.distanceFromPoint2DToLineSegment2D(pointX,
-                                                                    pointY,
-                                                                    lineSegmentStart.getX(),
-                                                                    lineSegmentStart.getY(),
-                                                                    lineSegmentEnd.getX(),
-                                                                    lineSegmentEnd.getY()) < EuclidGeometryTools.IS_POINT_ON_LINE_EPS;
+      return EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(pointX,
+                                                                           pointY,
+                                                                           lineSegmentStart.getX(),
+                                                                           lineSegmentStart.getY(),
+                                                                           lineSegmentEnd.getX(),
+                                                                           lineSegmentEnd.getY()) < EuclidGeometryTools.IS_POINT_ON_LINE_EPS;
    }
 
    /**
@@ -70,9 +68,9 @@ public class EuclidCoreMissingTools
     * </p>
     *
     * @param rotation is the original rotation to be projected onto {@code axis}
-    * @param axis     is the desired rotation axis of the result.
-    * @param result   will be modified to contain the component of {@code rotation} that is around
-    *                 {@code axis}
+    * @param axis is the desired rotation axis of the result.
+    * @param result will be modified to contain the component of {@code rotation} that is around
+    *       {@code axis}
     */
    public static void projectRotationOnAxis(QuaternionReadOnly rotation, Vector3DReadOnly axis, QuaternionBasics result)
    {
@@ -87,8 +85,11 @@ public class EuclidCoreMissingTools
       result.normalize();
    }
 
-   public static boolean intersectionBetweenTwoLine2Ds(Point2DReadOnly firstPointOnLine1, Point2DReadOnly secondPointOnLine1, Point2DReadOnly firstPointOnLine2,
-                                                       Point2DReadOnly secondPointOnLine2, Point2DBasics intersectionToPack)
+   public static boolean intersectionBetweenTwoLine2Ds(Point2DReadOnly firstPointOnLine1,
+                                                       Point2DReadOnly secondPointOnLine1,
+                                                       Point2DReadOnly firstPointOnLine2,
+                                                       Point2DReadOnly secondPointOnLine2,
+                                                       Point2DBasics intersectionToPack)
    {
       double pointOnLine1x = firstPointOnLine1.getX();
       double pointOnLine1y = firstPointOnLine1.getY();
@@ -123,19 +124,25 @@ public class EuclidCoreMissingTools
     * </ul>
     * </p>
     *
-    * @param startPoint1x   x-coordinate of a point located on the first line.
-    * @param startPoint1y   y-coordinate of a point located on the first line.
+    * @param startPoint1x x-coordinate of a point located on the first line.
+    * @param startPoint1y y-coordinate of a point located on the first line.
     * @param segmentTravel1x x-component of the first line direction.
     * @param segmentTravel1y y-component of the first line direction.
-    * @param startPoint2x   x-coordinate of a point located on the second line.
-    * @param startPoint2y   y-coordinate of a point located on the second line.
+    * @param startPoint2x x-coordinate of a point located on the second line.
+    * @param startPoint2y y-coordinate of a point located on the second line.
     * @param segmentTravel2x x-component of the second line direction.
     * @param segmentTravel2y y-component of the second line direction.
     * @return {@code alpha} the percentage along the first line of the intersection location. This
-    *         method returns {@link Double#NaN} if the lines do not intersect.
+    *       method returns {@link Double#NaN} if the lines do not intersect.
     */
-   public static double percentageOfIntersectionBetweenTwoLine2DsInfCase(double startPoint1x, double startPoint1y, double segmentTravel1x, double segmentTravel1y,
-                                                                         double startPoint2x, double startPoint2y, double segmentTravel2x, double segmentTravel2y)
+   public static double percentageOfIntersectionBetweenTwoLine2DsInfCase(double startPoint1x,
+                                                                         double startPoint1y,
+                                                                         double segmentTravel1x,
+                                                                         double segmentTravel1y,
+                                                                         double startPoint2x,
+                                                                         double startPoint2y,
+                                                                         double segmentTravel2x,
+                                                                         double segmentTravel2y)
    {
       //      We solve for x the problem of the form: A * x = b
       //            A      *     x     =      b
@@ -183,9 +190,9 @@ public class EuclidCoreMissingTools
     * {@link EuclidGeometryTools#orientation3DFromZUpToVector3D(Vector3DReadOnly, Orientation3DBasics)}
     * except that it does not rely on {@code Math#acos(double)} making it faster.
     *
-    * @param vector         the vector that is rotated with respect to {@code zUp}. Not modified.
+    * @param vector the vector that is rotated with respect to {@code zUp}. Not modified.
     * @param rotationToPack the minimum rotation from {@code zUp} to the given {@code vector}.
-    *                       Modified.
+    *       Modified.
     * @see EuclidGeometryTools#orientation3DFromZUpToVector3D(Vector3DReadOnly, Orientation3DBasics)
     */
    public static void rotationMatrix3DFromZUpToVector3D(Vector3DReadOnly vector, CommonMatrix3DBasics rotationToPack)
@@ -198,15 +205,16 @@ public class EuclidCoreMissingTools
     * {@link EuclidGeometryTools#orientation3DFromFirstToSecondVector3D(Vector3DReadOnly, Vector3DReadOnly, Orientation3DBasics)}
     * except that it does not rely on {@code Math#acos(double)} making it faster.
     *
-    * @param firstVector    the first vector. Not modified.
-    * @param secondVector   the second vector that is rotated with respect to the first vector. Not
-    *                       modified.
+    * @param firstVector the first vector. Not modified.
+    * @param secondVector the second vector that is rotated with respect to the first vector. Not
+    *       modified.
     * @param rotationToPack the minimum rotation from {@code firstVector} to the {@code secondVector}.
-    *                       Modified.
+    *       Modified.
     * @see EuclidGeometryTools#orientation3DFromFirstToSecondVector3D(Vector3DReadOnly,
-    *      Vector3DReadOnly, Orientation3DBasics)
+    *       Vector3DReadOnly, Orientation3DBasics)
     */
-   public static void rotationMatrix3DFromFirstToSecondVector3D(Vector3DReadOnly firstVector, Vector3DReadOnly secondVector,
+   public static void rotationMatrix3DFromFirstToSecondVector3D(Vector3DReadOnly firstVector,
+                                                                Vector3DReadOnly secondVector,
                                                                 CommonMatrix3DBasics rotationToPack)
    {
       rotationMatrix3DFromFirstToSecondVector3D(firstVector.getX(),
@@ -223,22 +231,27 @@ public class EuclidCoreMissingTools
     * {@link EuclidGeometryTools#orientation3DFromFirstToSecondVector3D(double, double, double, double, double, double, Orientation3DBasics)}
     * except that it does not rely on {@code Math#acos(double)} making it faster.
     *
-    * @param firstVectorX   x-component of the first vector.
-    * @param firstVectorY   y-component of the first vector.
-    * @param firstVectorZ   z-component of the first vector.
-    * @param secondVectorX  x-component of the second vector that is rotated with respect to the first
-    *                       vector.
-    * @param secondVectorY  y-component of the second vector that is rotated with respect to the first
-    *                       vector.
-    * @param secondVectorZ  z-component of the second vector that is rotated with respect to the first
-    *                       vector.
+    * @param firstVectorX x-component of the first vector.
+    * @param firstVectorY y-component of the first vector.
+    * @param firstVectorZ z-component of the first vector.
+    * @param secondVectorX x-component of the second vector that is rotated with respect to the first
+    *       vector.
+    * @param secondVectorY y-component of the second vector that is rotated with respect to the first
+    *       vector.
+    * @param secondVectorZ z-component of the second vector that is rotated with respect to the first
+    *       vector.
     * @param rotationToPack the minimum rotation from {@code firstVector} to the {@code secondVector}.
-    *                       Modified.
+    *       Modified.
     * @see EuclidGeometryTools#orientation3DFromFirstToSecondVector3D(double, double, double, double,
-    *      double, double, Orientation3DBasics)
+    *       double, double, Orientation3DBasics)
     */
-   public static void rotationMatrix3DFromFirstToSecondVector3D(double firstVectorX, double firstVectorY, double firstVectorZ, double secondVectorX,
-                                                                double secondVectorY, double secondVectorZ, CommonMatrix3DBasics rotationToPack)
+   public static void rotationMatrix3DFromFirstToSecondVector3D(double firstVectorX,
+                                                                double firstVectorY,
+                                                                double firstVectorZ,
+                                                                double secondVectorX,
+                                                                double secondVectorY,
+                                                                double secondVectorZ,
+                                                                CommonMatrix3DBasics rotationToPack)
    {
       double firstVectorLengthInv = 1.0 / Math.sqrt(normSquared(firstVectorX, firstVectorY, firstVectorZ));
       double secondVectorLengthInv = 1.0 / Math.sqrt(normSquared(secondVectorX, secondVectorY, secondVectorZ));
@@ -306,14 +319,17 @@ public class EuclidCoreMissingTools
     * @param lineSegmentStart2 the first endpoint of the second line segment. Not modified.
     * @param lineSegmentEnd2 the second endpoint of the second line segment. Not modified.
     * @param closestPointOnLineSegment1ToPack the 2D coordinates of the point P are packed in this 2D
-    *           point. Modified. Can be {@code null}.
+    *       point. Modified. Can be {@code null}.
     * @param closestPointOnLineSegment2ToPack the 2D coordinates of the point Q are packed in this 2D
-    *           point. Modified. Can be {@code null}.
+    *       point. Modified. Can be {@code null}.
     * @return the minimum distance between the two line segments.
     */
-   public static double closestPoint2DsBetweenTwoLineSegment2Ds(Point2DReadOnly lineSegmentStart1, Point2DReadOnly lineSegmentEnd1,
-                                                                Point2DReadOnly lineSegmentStart2, Point2DReadOnly lineSegmentEnd2,
-                                                                Point2DBasics closestPointOnLineSegment1ToPack, Point2DBasics closestPointOnLineSegment2ToPack)
+   public static double closestPoint2DsBetweenTwoLineSegment2Ds(Point2DReadOnly lineSegmentStart1,
+                                                                Point2DReadOnly lineSegmentEnd1,
+                                                                Point2DReadOnly lineSegmentStart2,
+                                                                Point2DReadOnly lineSegmentEnd2,
+                                                                Point2DBasics closestPointOnLineSegment1ToPack,
+                                                                Point2DBasics closestPointOnLineSegment2ToPack)
    {
       // Switching to the notation used in http://geomalgorithms.com/a07-_distance.html.
       // The line1 is defined by (P0, u) and the line2 by (Q0, v).
@@ -423,7 +439,9 @@ public class EuclidCoreMissingTools
     * @param lineSegmentEnd2 the second endpoint of the second line segment. Not modified.
     * @return the minimum distance between the two line segments.
     */
-   public static double distanceBetweenTwoLineSegment2Ds(Point2DReadOnly lineSegmentStart1, Point2DReadOnly lineSegmentEnd1, Point2DReadOnly lineSegmentStart2,
+   public static double distanceBetweenTwoLineSegment2Ds(Point2DReadOnly lineSegmentStart1,
+                                                         Point2DReadOnly lineSegmentEnd1,
+                                                         Point2DReadOnly lineSegmentStart2,
                                                          Point2DReadOnly lineSegmentEnd2)
    {
       return closestPoint2DsBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2, null, null);

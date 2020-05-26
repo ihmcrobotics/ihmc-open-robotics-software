@@ -37,6 +37,9 @@ public interface ConcavePolygon2DReadOnly extends Vertex2DSupplier
    default boolean isPointInside(double x, double y)
    {
       checkIfUpToDate();
+      if (!getBoundingBox().isInsideInclusive(x, y))
+         return false;
+
       return GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(x, y, getVertexBufferView(), getNumberOfVertices());
    }
    default boolean isEmpty()

@@ -1,6 +1,5 @@
 package us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton;
 
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
@@ -12,6 +11,7 @@ import java.util.List;
 
 public class PolygonClippingAndMerging
 {
+   private static final int STUPID_LARGE = 1000;
    public static void mergeAllPossible(List<ConcavePolygon2DBasics> regionsToMerge)
    {
       int i = 0;
@@ -56,17 +56,19 @@ public class PolygonClippingAndMerging
             i++;
       }
    }
-   public static void merge(ConcavePolygon2DReadOnly polygonA, ConcavePolygon2DReadOnly polygonB, ConcavePolygon2DBasics mergedPolygon)
+   public static List<ConcavePolygon2DBasics> merge(ConcavePolygon2DReadOnly polygonA, ConcavePolygon2DReadOnly polygonB, ConcavePolygon2DBasics mergedPolygon)
    {
+      List<ConcavePolygon2DBasics> holesToReturn = new ArrayList<>();
+
       if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonA, polygonB))
       {
          mergedPolygon.set(polygonB);
-         return;
+         return holesToReturn;
       }
       else if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonB, polygonA))
       {
          mergedPolygon.set(polygonA);
-         return;
+         return holesToReturn;
       }
 
       LinkedPointList polygonAList = ClippingTools.createLinkedPointList(polygonA);
@@ -75,9 +77,36 @@ public class PolygonClippingAndMerging
       ClippingTools.insertIntersectionsIntoList(polygonBList, polygonA);
       ClippingTools.insertIntersectionsIntoList(polygonAList, polygonB);
 
-      LinkedPoint linkedPoint = findVertexOutsideOfClip(polygonA, polygonBList.getPoints());
+      Collection<LinkedPoint> unassignedPoints = polygonBList.getPointsCopy();
 
-      walkAlongEdgeOfPolygon(linkedPoint, polygonBList, polygonAList, mergedPolygon);
+      LinkedPoint linkedPoint = findVertexOutsideOfPolygon(polygonA, polygonBList.getPoints());
+      LinkedPointList startList = polygonBList;
+      LinkedPointList otherList = polygonAList;
+      if (linkedPoint == null)
+      {
+         linkedPoint = findVertexOutsideOfPolygon(polygonB, polygonAList.getPoints());
+         startList = polygonAList;
+         otherList = polygonBList;
+      }
+
+      List<LinkedPoint> pointsInPolygon = walkAlongEdgeOfPolygon(linkedPoint, startList, otherList, mergedPolygon);
+      removePointsFromList(unassignedPoints, pointsInPolygon);
+
+      polygonBList.reverseOrder();
+      // FIXME this is a bad way to start. It has to start on an incoming edge
+      LinkedPoint startPoint = findIntersectionPoint(unassignedPoints);
+      int counter = 0;
+      while (startPoint != null && counter++ < STUPID_LARGE)
+      {
+         ConcavePolygon2D holePolygon = new ConcavePolygon2D();
+         pointsInPolygon = walkAlongEdgeOfPolygon(startPoint, polygonAList, polygonBList, holePolygon);
+         holesToReturn.add(holePolygon);
+
+         removePointsFromList(unassignedPoints, pointsInPolygon);
+         startPoint = findIntersectionPoint(unassignedPoints);
+      }
+
+      return holesToReturn;
    }
 
    public static List<ConcavePolygon2DBasics> removeAreaInsideClip(ConcavePolygon2DReadOnly clippingPolygon, ConcavePolygon2DReadOnly polygonToClip)
@@ -108,16 +137,17 @@ public class PolygonClippingAndMerging
       clippingPolygonList.reverseOrder();
 
       Collection<LinkedPoint> unassignedPoints = polygonToClipList.getPointsCopy();
-      LinkedPoint startPoint = findVertexOutsideOfClip(clippingPolygon, unassignedPoints);
+      LinkedPoint startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedPoints);
 
-      while (startPoint != null)
+      int counter = 0;
+      while (startPoint != null && counter++ < STUPID_LARGE)
       {
          ConcavePolygon2D clippedPolygon = new ConcavePolygon2D();
          List<LinkedPoint> pointsInPolygon = walkAlongEdgeOfPolygon(startPoint, polygonToClipList, clippingPolygonList, clippedPolygon);
          clippedPolygonsToReturn.add(clippedPolygon);
 
          removePointsFromList(unassignedPoints, pointsInPolygon);
-         startPoint = findVertexOutsideOfClip(clippingPolygon, unassignedPoints);
+         startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedPoints);
       }
 
       return clippedPolygonsToReturn;
@@ -135,7 +165,8 @@ public class PolygonClippingAndMerging
       pointsInPolygon.add(linkedPoint);
 
       polygonToPack.addVertex(startPointOfPolygon.getPoint());
-      while (true)
+      int counter = 0;
+      while (counter++ < STUPID_LARGE)
       {
          linkedPoint = linkedPoint.getSuccessor();
          if (linkedPoint.getPoint().equals(startPointOfPolygon.getPoint()))
@@ -160,16 +191,33 @@ public class PolygonClippingAndMerging
       return pointsInPolygon;
    }
 
-   private static Point2DReadOnly findVertexOutsideOfClip(ConcavePolygon2DReadOnly clippingPolygon, ConcavePolygon2DReadOnly polygon)
+   private static LinkedPoint findVertexOutsideOfPolygon(ConcavePolygon2DReadOnly polygon, Collection<LinkedPoint> points)
    {
-      return polygon.getVertexBufferView().stream().filter(point -> !clippingPolygon.isPointInside(point)).findFirst().orElse(null);
+      for (LinkedPoint point : points)
+      {
+         if (!polygon.isPointInside(point.getPoint()))
+            return point;
+      }
+
+      return null;
    }
 
-   private static LinkedPoint findVertexOutsideOfClip(ConcavePolygon2DReadOnly clippingPolygon, Collection<LinkedPoint> polygon)
+   private static LinkedPoint findIntersectionInsideOfPolygon(ConcavePolygon2DReadOnly polygon, Collection<LinkedPoint> points)
+   {
+      for (LinkedPoint point : points)
+      {
+         if (polygon.isPointInside(point.getPoint()))
+            return point;
+      }
+
+      return null;
+   }
+
+   private static LinkedPoint findIntersectionPoint( Collection<LinkedPoint> polygon)
    {
       for (LinkedPoint point : polygon)
       {
-         if (!clippingPolygon.isPointInside(point.getPoint()))
+         if (point.getIsIntersectionPoint())
             return point;
       }
 

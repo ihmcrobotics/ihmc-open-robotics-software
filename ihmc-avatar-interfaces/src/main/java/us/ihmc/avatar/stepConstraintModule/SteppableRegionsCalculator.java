@@ -270,12 +270,6 @@ public class SteppableRegionsCalculator
       return GeometryPolygonTools.isPolygonInsideOtherPolygon(region, candidateMask);
    }
 
-   private List<ConcavePolygon2DBasics> removeObstacleHullFromConstraintRegions(ConcavePolygon2DReadOnly constraintRegionHull,
-                                                                                ConcavePolygon2DReadOnly obstacleConcaveHull)
-   {
-      return PolygonClippingAndMerging.removeAreaInsideClip(obstacleConcaveHull, constraintRegionHull);
-   }
-
    private List<ConcavePolygon2DBasics> createObstacleExtrusions(PlanarRegion candidateRegion, List<PlanarRegion> obstacleRegions)
    {
       double zThresholdBeforeOrthogonal = Math.cos(orthogonalAngle.getDoubleValue());
