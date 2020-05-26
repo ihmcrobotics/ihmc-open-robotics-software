@@ -12,6 +12,50 @@ import java.util.List;
 
 public class PolygonClippingAndMerging
 {
+   public static void mergeAllPossible(List<ConcavePolygon2DBasics> regionsToMerge)
+   {
+      int i = 0;
+      // don't need to iterate on the last one
+      while (i < regionsToMerge.size() - 1)
+      {
+         int j = i + 1;
+         boolean shouldRemoveA = false;
+         while (j < regionsToMerge.size())
+         {
+            ConcavePolygon2DBasics polygonA = regionsToMerge.get(i);
+            ConcavePolygon2DBasics polygonB = regionsToMerge.get(j);
+            if (GeometryPolygonTools.doPolygonsIntersect(polygonA, polygonB))
+            {
+               ConcavePolygon2D newPolygon = new ConcavePolygon2D();
+               PolygonClippingAndMerging.merge(polygonA, polygonB, newPolygon);
+
+               regionsToMerge.set(i, newPolygon);
+               regionsToMerge.remove(j);
+
+               // reset the search, as we modified the first polygon
+               j = i + 1;
+            }
+            else if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonB, polygonA))
+            {
+               regionsToMerge.remove(j);
+            }
+            else if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonA, polygonB))
+            {
+               shouldRemoveA = true;
+               break;
+            }
+            else
+            {
+               j++;
+            }
+         }
+
+         if (shouldRemoveA)
+            regionsToMerge.remove(i);
+         else
+            i++;
+      }
+   }
    public static void merge(ConcavePolygon2DReadOnly polygonA, ConcavePolygon2DReadOnly polygonB, ConcavePolygon2DBasics mergedPolygon)
    {
       if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonA, polygonB))
