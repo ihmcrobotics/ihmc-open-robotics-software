@@ -1,10 +1,6 @@
 package us.ihmc.avatar.slamTools;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,7 +10,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCoordinateSystem;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
@@ -23,6 +18,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
+import us.ihmc.robotEnvironmentAwareness.slam.tools.PLYasciiFormatFormatDataImporter;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotEnvironmentAwareness.updaters.AdaptiveRayMissProbabilityUpdater;
 import us.ihmc.robotics.optimization.FunctionOutputCalculator;
@@ -71,15 +67,15 @@ public class LevenbergMarquardtICPVisualizer
 
       String cowPLYPath = "C:\\PointCloudData\\PLY\\Cow\\cow.ply";
       File cowPointCloudFile = new File(cowPLYPath);
-      Point3D[] modelPointCloud = getPointsFromFile(cowPointCloudFile);
+      Point3D[] modelPointCloud = PLYasciiFormatFormatDataImporter.getPointsFromFile(cowPointCloudFile);
       Point3D[] driftedCowPointCloud = new Point3D[modelPointCloud.length];
       numberOfPoints = modelPointCloud.length;
 
       RigidBodyTransform driftingTransform = new RigidBodyTransform();
-      driftingTransform.setTranslationAndIdentityRotation(0.0, 0.0, 0.1);
-      driftingTransform.appendRollRotation(Math.toRadians(30.0));
+      driftingTransform.setTranslationAndIdentityRotation(0.15, -0.23, 1.4);
+      driftingTransform.appendRollRotation(Math.toRadians(70.0));
       driftingTransform.appendPitchRotation(Math.toRadians(-10.0));
-      driftingTransform.appendRollRotation(Math.toRadians(5.0));
+      driftingTransform.appendYawRotation(Math.toRadians(30.0));
       for (int i = 0; i < driftedCowPointCloud.length; i++)
       {
          driftedCowPointCloud[i] = new Point3D(modelPointCloud[i]);
@@ -227,89 +223,4 @@ public class LevenbergMarquardtICPVisualizer
          transform.transform(point);
       }
    }
-
-   // TODO: replace or remove with PLYAsciiFormatFileLoader.
-   private Point3D[] getPointsFromFile(File dataFile)
-   {
-      if (!dataFile.canRead())
-         new NullPointerException("No dataFile");
-
-      BufferedReader bufferedReader = null;
-      try
-      {
-         System.out.println(dataFile.getAbsolutePath());
-         bufferedReader = new BufferedReader(new FileReader(dataFile));
-      }
-      catch (FileNotFoundException e1)
-      {
-         e1.printStackTrace();
-      }
-
-      int numberOfVertex = 0;
-      while (true)
-      {
-         String lineJustFetched = null;
-         String[] infoArray = null;
-         try
-         {
-            lineJustFetched = bufferedReader.readLine();
-            System.out.println(lineJustFetched);
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
-         }
-         if (lineJustFetched.contains("format"))
-         {
-            if (!lineJustFetched.contains("ascii"))
-               return null;
-         }
-         if (lineJustFetched.contains("element vertex"))
-         {
-            infoArray = lineJustFetched.split(" ");
-            numberOfVertex = Integer.parseInt(infoArray[2]);
-            System.out.println("number of vertex is " + numberOfVertex);
-         }
-         if (lineJustFetched.contains("end_header"))
-         {
-            break;
-         }
-      }
-      Point3D[] pointCloudBuffer = new Point3D[numberOfVertex];
-
-      int indexOfPoints = 0;
-      while (true)
-      {
-         String lineJustFetched = null;
-         String[] xyzArray;
-         try
-         {
-            lineJustFetched = bufferedReader.readLine();
-         }
-         catch (IOException e)
-         {
-            e.printStackTrace();
-         }
-         if (lineJustFetched == null)
-         {
-            break;
-         }
-         else
-         {
-            if (indexOfPoints == numberOfVertex)
-               break;
-            xyzArray = lineJustFetched.split(" ");
-            pointCloudBuffer[indexOfPoints] = new Point3D(Double.parseDouble(xyzArray[0]), Double.parseDouble(xyzArray[1]), Double.parseDouble(xyzArray[2]));
-            indexOfPoints++;
-         }
-      }
-      Point3D[] points = new Point3D[indexOfPoints];
-      for (int i = 0; i < indexOfPoints; i++)
-      {
-         points[i] = pointCloudBuffer[i];
-      }
-
-      return points;
-   }
-
 }
