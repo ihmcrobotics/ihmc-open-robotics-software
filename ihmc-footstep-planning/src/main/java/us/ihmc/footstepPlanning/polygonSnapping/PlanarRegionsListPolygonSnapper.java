@@ -90,6 +90,11 @@ public class PlanarRegionsListPolygonSnapper
          }
       }
 
+      if (highestPlanarRegion == null)
+      {
+         return null;
+      }
+
       //TODO: For now, just ignore Planar Regions that are tilted too much.
       //TODO: But later, we need to make sure they are not obstacles that need to be avoided...
       highestPlanarRegion.getNormal(highestSurfaceNormal);

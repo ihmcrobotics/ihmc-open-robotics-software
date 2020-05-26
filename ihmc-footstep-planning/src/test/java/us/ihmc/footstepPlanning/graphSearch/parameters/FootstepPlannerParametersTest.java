@@ -115,8 +115,8 @@ public class FootstepPlannerParametersTest
       assertEquals(maxZpenetration, parameters.getMaximumZPenetrationOnValleyRegions(), epsilon);
 
       double cliffHeightToAvoid = RandomNumbers.nextDouble(random, 10.00);
-      parameters.setCliffHeightToAvoid(cliffHeightToAvoid);
-      assertEquals(cliffHeightToAvoid, parameters.getCliffHeightToAvoid());
+      parameters.setCliffBaseHeightToAvoid(cliffHeightToAvoid);
+      assertEquals(cliffHeightToAvoid, parameters.getCliffBaseHeightToAvoid());
 
       double minimumDistanceFromCliff = RandomNumbers.nextDouble(random, 10.0);
       parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliff);

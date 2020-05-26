@@ -12,6 +12,8 @@
 <?import javafx.scene.layout.Region?>
 
 <?import javafx.scene.text.Text?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.HBox?>
 <VBox xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" alignment="TOP_CENTER"
       fx:controller="us.ihmc.footstepPlanning.ui.controllers.FootstepPlannerStatusBarController">
 
@@ -64,13 +66,40 @@
             <Label text="Iterations" GridPane.columnIndex="0" GridPane.rowIndex="11" GridPane.halignment="RIGHT"/>
             <Text fx:id="iterationsTaken" GridPane.columnIndex="1" GridPane.rowIndex="11" />
 
-            <Separator prefHeight="10" GridPane.columnIndex="0" GridPane.rowIndex="12" GridPane.columnSpan="2"/>
-
             <Button fx:id="viewExceptionButton" text="View exception" GridPane.columnIndex="0" GridPane.rowIndex="13" GridPane.columnSpan="2"
                     GridPane.halignment="CENTER"/>
 
+            <Separator prefHeight="10" GridPane.columnIndex="0" GridPane.rowIndex="12" GridPane.columnSpan="2"/>
+
             <!-- Add region to enlarge default width of status bar -->
             <Region GridPane.columnIndex="1" GridPane.rowIndex="14" prefWidth="150"/>
+
+            <TableView fx:id="footstepPlanTable" GridPane.rowIndex="15" GridPane.columnSpan="2"/>
         </children>
     </GridPane>
+
+    <Region prefHeight="5"/>
+
+    <Label alignment="CENTER" contentDisplay="CENTER" text="Manual Adjustment" textAlignment="CENTER">
+        <font>
+            <Font size="16.0"/>
+        </font>
+    </Label>
+
+    <Region prefHeight="5"/>
+
+    <GridPane alignment="TOP_CENTER" hgap="12" vgap="5">
+        <Label GridPane.columnIndex="0" GridPane.rowIndex="0" text="Frame (R)"/>
+        <Label GridPane.columnIndex="1" GridPane.rowIndex="0" fx:id="regionFrameLabel" text="Region"/>
+        <Label GridPane.columnIndex="2" GridPane.rowIndex="0" fx:id="worldFrameLabel" text="World"/>
+    </GridPane>
+
+    <Region prefHeight="5"/>
+    <Label alignment="TOP_LEFT" text="Translate: Numpad 2/4/6/8"/>
+    <Region prefHeight="5"/>
+    <Label alignment="TOP_LEFT" text="Trans vertical: Ctrl"/>
+    <Region prefHeight="5"/>
+    <Label alignment="TOP_LEFT" text="Rotate: Numpad 7/9"/>
+    <Region prefHeight="5"/>
+    <Label alignment="TOP_LEFT" text="Fine adjust: Shift"/>
 </VBox>

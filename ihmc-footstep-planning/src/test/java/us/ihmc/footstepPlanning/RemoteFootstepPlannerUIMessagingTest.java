@@ -719,9 +719,12 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Max Z penetration isn't equal.", parameters.getMaximumZPenetrationOnValleyRegions(), packet.getMaximumZPenetrationOnValleyRegions(),
                    epsilon);
       assertEquals("Max step width isn't equal.", parameters.getMaximumStepWidth(), packet.getMaximumStepWidth(), epsilon);
-      assertEquals("Cliff height to avoid isn't equal.", parameters.getCliffHeightToAvoid(), packet.getCliffHeightToAvoid(), epsilon);
+      assertEquals("Cliff base height to avoid isn't equal.", parameters.getCliffBaseHeightToAvoid(), packet.getCliffBaseHeightToAvoid(), epsilon);
       assertEquals("Minimum distance from cliff bottoms isn't equal.", parameters.getMinimumDistanceFromCliffBottoms(),
                    packet.getMinimumDistanceFromCliffBottoms(), epsilon);
+      assertEquals("Cliff top height to avoid isn't equal.", parameters.getCliffTopHeightToAvoid(), packet.getCliffTopHeightToAvoid(), epsilon);
+      assertEquals("Minimum distance from cliff tops isn't equal.", parameters.getMinimumDistanceFromCliffTops(),
+                   packet.getMinimumDistanceFromCliffTops(), epsilon);
       assertEquals("Body box heigth isn't equal.", parameters.getBodyBoxHeight(), packet.getBodyBoxHeight(), epsilon);
       assertEquals("Body box depth isn't equal.", parameters.getBodyBoxDepth(), packet.getBodyBoxDepth(), epsilon);
       assertEquals("Body box width isn't equal.", parameters.getBodyBoxWidth(), packet.getBodyBoxWidth(), epsilon);
