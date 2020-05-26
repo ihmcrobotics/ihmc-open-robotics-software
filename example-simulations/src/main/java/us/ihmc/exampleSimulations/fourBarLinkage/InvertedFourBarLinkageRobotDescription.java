@@ -12,7 +12,7 @@ import us.ihmc.mecano.tools.MecanoTools;
 import us.ihmc.mecano.tools.MomentOfInertiaFactory;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LinkGraphicsDescription;
-import us.ihmc.robotics.robotDescription.LoopClosureConstraintDescription;
+import us.ihmc.robotics.robotDescription.LoopClosurePinConstraintDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 
@@ -35,9 +35,29 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
  *     |
  *     EE
  * </pre>
+ * 
+ * <pre>
+ *                 A     C
+ *                 O     O
+ *                 |\   /|
+ *     shoulder    | \ / |
+ * |----O----------|  X  |--------- end-effector
+ *                 | / \ |
+ *                 |/   \|
+ *                 O     O
+ *                 D     B
+ * </pre>
  */
 public class InvertedFourBarLinkageRobotDescription extends RobotDescription
 {
+   public static final boolean HAS_SHOULDER_JOINT = true;
+
+   private final String shoulderJointName = "shoulder";
+   private final String jointAName = "fourBarA";
+   private final String jointBName = "fourBarB";
+   private final String jointCName = "fourBarC";
+   private final String jointDName = "fourBarD";
+
    public InvertedFourBarLinkageRobotDescription()
    {
       super("InvertedFourBarLinkageRobot");
@@ -48,68 +68,111 @@ public class InvertedFourBarLinkageRobotDescription extends RobotDescription
       double lengthDA = 0.2;
       double upperarmLength = 0.5;
       double forearmLength = 0.5;
-      UnitVector3D axisAB = new UnitVector3D(0.1, 0.0, 0.1);
-      UnitVector3D axisCD = new UnitVector3D(-0.1, 0.0, 0.1);
+      UnitVector3D axisAB = new UnitVector3D(+0.1, 0.0, -0.1);
+      UnitVector3D axisCD = new UnitVector3D(-0.1, 0.0, -0.1);
 
-      Vector3D rootJointOffset = new Vector3D(0.0, 0.0, 1.5);
-      Vector3D jointAOffset = new Vector3D(0.5 * lengthDA, 0.0, -upperarmLength);
+      Vector3D rootJointOffset = new Vector3D(0.0, 0.0, 0.0);
+      Vector3D jointAOffset = new Vector3D(upperarmLength, 0.0, 0.5 * lengthDA);
       Vector3D jointBOffset = new Vector3D();
-      jointBOffset.setAndScale(-lengthAB, axisAB);
+      jointBOffset.setAndScale(lengthAB, axisAB);
       Vector3D jointCOffsetFromD = new Vector3D();
       jointCOffsetFromD.setAndScale(-lengthCD, axisCD);
-      Vector3D jointCOffsetFromB = new Vector3D(lengthBC, 0.0, 0.0);
-      Vector3D jointDOffset = new Vector3D(-0.5 * lengthDA, 0.0, -upperarmLength);
+      Vector3D jointCOffsetFromB = new Vector3D(0.0, 0.0, lengthBC);
+      Vector3D jointDOffset = new Vector3D(upperarmLength, 0.0, -0.5 * lengthDA);
 
-      PinJointDescription shoulderJoint = new PinJointDescription("shoulder", rootJointOffset, Axis3D.Y);
+      PinJointDescription shoulderJoint = null;
+      if (HAS_SHOULDER_JOINT)
+      {
+         shoulderJoint = new PinJointDescription(shoulderJointName, rootJointOffset, Axis3D.Y);
+         shoulderJoint.setLimitStops(-Math.PI, Math.PI, 100.0, 10.0);
+      }
 
-      PinJointDescription fourBarJointA = new PinJointDescription("fourBarA", jointAOffset, Axis3D.Y);
-      PinJointDescription fourBarJointB = new PinJointDescription("fourBarB", jointBOffset, Axis3D.Y);
-      LoopClosureConstraintDescription fourBarJointC = LoopClosureConstraintDescription.createPinConstraintDescription("fourBarC",
-                                                                                                                       jointCOffsetFromD,
-                                                                                                                       jointCOffsetFromB,
-                                                                                                                       Axis3D.Y);
-      fourBarJointC.setGains(5000.0, 150.0);
-
-      PinJointDescription fourBarJointD = new PinJointDescription("fourBarD", jointDOffset, Axis3D.Y);
+      PinJointDescription fourBarJointA = new PinJointDescription(jointAName, jointAOffset, Axis3D.Y);
+      PinJointDescription fourBarJointB = new PinJointDescription(jointBName, jointBOffset, Axis3D.Y);
+      LoopClosurePinConstraintDescription fourBarJointC = new LoopClosurePinConstraintDescription(jointCName, jointCOffsetFromD, jointCOffsetFromB, Axis3D.Y);
+      fourBarJointC.setGains(1.0e6, 5000.0);
+      PinJointDescription fourBarJointD = new PinJointDescription(jointDName, jointDOffset, Axis3D.Y);
 
       Vector3D offsetAB = new Vector3D();
-      offsetAB.setAndScale(-0.5 * lengthAB, axisAB);
-      LinkDescription linkAB = newCylinderLinkDescription("fourBarAB", lengthAB, 0.01, 0.1, axisAB, offsetAB, YoAppearance.BlackMetalMaterial());
+      offsetAB.setAndScale(0.5 * lengthAB, axisAB);
+      LinkDescription linkAB = newCylinderLinkDescription("fourBarAB", lengthAB, 0.01, 0.5, axisAB, offsetAB, YoAppearance.BlackMetalMaterial(), false);
 
       Vector3D offsetCD = new Vector3D();
       offsetCD.setAndScale(-0.5 * lengthCD, axisCD);
-      LinkDescription linkCD = newCylinderLinkDescription("fourBarCD", lengthCD, 0.01, 0.1, axisCD, offsetCD, YoAppearance.BlackMetalMaterial());
+      LinkDescription linkCD = newCylinderLinkDescription("fourBarCD", lengthCD, 0.01, 0.5, axisCD, offsetCD, YoAppearance.BlackMetalMaterial(), false);
 
-      Vector3D offsetDA = new Vector3D(0.0, 0.0, -upperarmLength);
-      LinkDescription linkDA = newCylinderLinkDescription("fourBarDA", lengthDA, 0.015, 0.1, Axis3D.X, offsetDA, YoAppearance.Grey());
+      Vector3D offsetDA = new Vector3D(upperarmLength, 0.0, 0.0);
+      LinkDescription linkDA = newCylinderLinkDescription("fourBarDA", lengthDA, 0.015, 0.1, Axis3D.Z, offsetDA, YoAppearance.Grey(), true);
 
-      Vector3D offsetBC = new Vector3D(0.5 * lengthBC, 0.0, 0.0);
-      LinkDescription linkBC = newCylinderLinkDescription("fourBarBC", lengthBC, 0.015, 0.1, Axis3D.X, offsetBC, YoAppearance.Grey());
+      Vector3D offsetBC = new Vector3D(0.0, 0.0, 0.5 * lengthBC);
+      LinkDescription linkBC = newCylinderLinkDescription("fourBarBC", lengthBC, 0.015, 0.1, Axis3D.Z, offsetBC, YoAppearance.Grey(), true);
 
-      Vector3D upperarmOffset = new Vector3D(0.0, 0.0, -0.5 * upperarmLength);
-      LinkDescription upperarm = newCylinderLinkDescription("upperarm", upperarmLength, 0.025, 1.0, Axis3D.Z, upperarmOffset, YoAppearance.AliceBlue());
-      upperarm = merge("upperarm", linkDA, upperarm);
-      Vector3D forearmOffset = new Vector3D(0.5 * lengthBC, 0.0, -0.5 * forearmLength);
-      LinkDescription forearm = newCylinderLinkDescription("forearm", forearmLength, 0.025, 1.0, Axis3D.Z, forearmOffset, YoAppearance.BlueViolet());
+      LinkDescription upperarm = null;
+
+      if (HAS_SHOULDER_JOINT)
+      {
+         Vector3D upperarmOffset = new Vector3D(0.5 * upperarmLength, 0.0, 0.0);
+         upperarm = newCylinderLinkDescription("upperarm", upperarmLength, 0.025, 1.0, Axis3D.X, upperarmOffset, YoAppearance.AliceBlue(), true);
+         upperarm = merge("upperarm", linkDA, upperarm);
+      }
+      Vector3D forearmOffset = new Vector3D(0.5 * forearmLength, 0.0, 0.5 * lengthBC);
+      LinkDescription forearm = newCylinderLinkDescription("forearm", forearmLength, 0.025, 1.0, Axis3D.X, forearmOffset, YoAppearance.BlueViolet(), true);
       forearm = merge("forearm", linkBC, forearm);
 
-      shoulderJoint.setLink(upperarm);
+      if (HAS_SHOULDER_JOINT)
+         shoulderJoint.setLink(upperarm);
       fourBarJointA.setLink(linkAB);
       fourBarJointB.setLink(forearm);
       fourBarJointC.setLink(forearm);
       fourBarJointD.setLink(linkCD);
 
-      shoulderJoint.addJoint(fourBarJointA);
-      shoulderJoint.addJoint(fourBarJointD);
+      if (HAS_SHOULDER_JOINT)
+      {
+         shoulderJoint.addJoint(fourBarJointA);
+         shoulderJoint.addJoint(fourBarJointD);
+         addRootJoint(shoulderJoint);
+      }
+      else
+      {
+         addRootJoint(fourBarJointA);
+         addRootJoint(fourBarJointD);
+      }
 
       fourBarJointA.addJoint(fourBarJointB);
       fourBarJointD.addConstraint(fourBarJointC);
 
-      addRootJoint(shoulderJoint);
+   }
+
+   public String getShoulderJointName()
+   {
+      if (HAS_SHOULDER_JOINT)
+         return shoulderJointName;
+      else
+         return null;
+   }
+
+   public String getJointAName()
+   {
+      return jointAName;
+   }
+
+   public String getJointBName()
+   {
+      return jointBName;
+   }
+
+   public String getJointCName()
+   {
+      return jointCName;
+   }
+
+   public String getJointDName()
+   {
+      return jointDName;
    }
 
    private static LinkDescription newCylinderLinkDescription(String name, double length, double radius, double mass, Vector3DReadOnly axis,
-                                                             Vector3DReadOnly comOffset, AppearanceDefinition appearance)
+                                                             Vector3DReadOnly comOffset, AppearanceDefinition appearance, boolean showMassProperties)
    {
       LinkDescription linkDescription = new LinkDescription(name);
       linkDescription.setMass(mass);
@@ -123,9 +186,12 @@ public class InvertedFourBarLinkageRobotDescription extends RobotDescription
       linkGraphicsDescription.addCylinder(length, radius, appearance);
       linkDescription.setLinkGraphics(linkGraphicsDescription);
 
-      AppearanceDefinition inertiaAppearance = YoAppearance.LightGreen();
-      inertiaAppearance.setTransparency(0.5);
-      linkDescription.addEllipsoidFromMassProperties(inertiaAppearance);
+      if (showMassProperties)
+      {
+         AppearanceDefinition inertiaAppearance = YoAppearance.LightGreen();
+         inertiaAppearance.setTransparency(0.5);
+         linkDescription.addEllipsoidFromMassProperties(inertiaAppearance);
+      }
 
       return linkDescription;
    }
