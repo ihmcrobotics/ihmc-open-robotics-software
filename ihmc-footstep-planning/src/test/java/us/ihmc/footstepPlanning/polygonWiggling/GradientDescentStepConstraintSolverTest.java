@@ -4,7 +4,7 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.polygonWiggling.ConcavePolygonWiggler;
+import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintSolver;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PointInPolygonSolver;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
@@ -18,11 +18,6 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.pathPlanning.DataSet;
-import us.ihmc.pathPlanning.DataSetIOTools;
-import us.ihmc.pathPlanning.DataSetName;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -30,11 +25,11 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConcavePolygonWigglerTest
+public class GradientDescentStepConstraintSolverTest
 {
    private static boolean visualize = false;
 
-   private ConcavePolygonWiggler concavePolygonWiggler;
+   private GradientDescentStepConstraintSolver gradientDescentStepConstraintSolver;
    private SimulationConstructionSet scs;
    private YoGraphicsListRegistry graphicsListRegistry;
    private YoVariableRegistry registry;
@@ -51,7 +46,7 @@ public class ConcavePolygonWigglerTest
          scs = new SimulationConstructionSet(new Robot("testRobot"));
          registry = new YoVariableRegistry(getClass().getSimpleName());
          graphicsListRegistry = new YoGraphicsListRegistry();
-         concavePolygonWiggler = new ConcavePolygonWiggler(scs, graphicsListRegistry, registry);
+         gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver(scs, graphicsListRegistry, registry);
          graphicsListRegistry.addArtifactListsToPlotter(scs.createSimulationOverheadPlotterFactory().createOverheadPlotter().getPlotter());
          scs.addYoGraphicsListRegistry(graphicsListRegistry);
          scs.getRootRegistry().addChild(registry);
@@ -59,7 +54,7 @@ public class ConcavePolygonWigglerTest
       }
       else
       {
-         concavePolygonWiggler = new ConcavePolygonWiggler();
+         gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver();
       }
    }
 
@@ -167,7 +162,7 @@ public class ConcavePolygonWigglerTest
       runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
 
       // foot position 4
-      concavePolygonWiggler.setAlpha(0.25);
+      gradientDescentStepConstraintSolver.setAlpha(0.25);
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(0.0));
       initialFootTransform.getTranslation().set(0.3, -0.8, 0.0);
       runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
@@ -246,7 +241,7 @@ public class ConcavePolygonWigglerTest
    {
       ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       initialFoot.applyTransform(initialFootTransform, false);
-      RigidBodyTransform transform = concavePolygonWiggler.wigglePolygon(initialFoot, polygon, wiggleParameters);
+      RigidBodyTransform transform = gradientDescentStepConstraintSolver.wigglePolygon(initialFoot, polygon, wiggleParameters);
 
       ConvexPolygon2D transformedFoot = new ConvexPolygon2D(initialFoot);
       transformedFoot.applyTransform(transform, false);
@@ -258,7 +253,7 @@ public class ConcavePolygonWigglerTest
             Point2DReadOnly vertex = transformedFoot.getVertex(i);
             boolean isInPolygon = PointInPolygonSolver.isPointInsidePolygon(polygon, vertex);
             double distanceFromPolygon = distanceFromPolygon(polygon, vertex);
-            double epsilon = concavePolygonWiggler.getGradientMagnitudeToTerminate() / concavePolygonWiggler.getAlpha();
+            double epsilon = gradientDescentStepConstraintSolver.getGradientMagnitudeToTerminate() / gradientDescentStepConstraintSolver.getAlpha();
 
             double signedDistanceFromPolygon = isInPolygon ? - distanceFromPolygon : distanceFromPolygon;
             Assertions.assertTrue(signedDistanceFromPolygon < - wiggleParameters.deltaInside + epsilon);
@@ -306,7 +301,7 @@ public class ConcavePolygonWigglerTest
       testConfigs.add(new TimingTestConfiguration(getCrazyPolygon2(), 0.9, -0.9, Math.toRadians(0.0), 0.0));
       testConfigs.add(new TimingTestConfiguration(getCrazyPolygon2(), 0.9, -0.9, Math.toRadians(0.0), 0.01));
 
-      ConcavePolygonWiggler wiggler = new ConcavePolygonWiggler();
+      GradientDescentStepConstraintSolver wiggler = new GradientDescentStepConstraintSolver();
       int numWarmupLoops = 5;
       int numTestLoops = 1;
 
