@@ -18,13 +18,31 @@ public class GeometryPolygonTools
 {
    /**
     * Checks to see if the inner polygon is entirely inside the outer polygon.
+    * // FIXME this assumes the polygons are convex
     */
    public static boolean isPolygonInsideOtherPolygon(Vertex2DSupplier innerPolygon, ConcavePolygon2DReadOnly outerPolygon)
    {
+      // if any of the points are outside, it fails.
       for (int i = 0; i < innerPolygon.getNumberOfVertices(); i++)
       {
          if (!outerPolygon.isPointInside(innerPolygon.getVertex(i)))
             return false;
+      }
+
+      // if any of the points cross, it fails.
+      for (int i = 0; i < innerPolygon.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly vertex = innerPolygon.getVertex(i);
+         Point2DReadOnly nextVertex = innerPolygon.getVertex((i + 1) % innerPolygon.getNumberOfVertices());
+
+         for (int j = 0; j < outerPolygon.getNumberOfVertices(); j++)
+         {
+            Point2DReadOnly otherVertex = outerPolygon.getVertex(j);
+            Point2DReadOnly otherNextVertex = outerPolygon.getVertex((i + 1) % outerPolygon.getNumberOfVertices());
+
+            if (EuclidGeometryTools.doLineSegment2DsIntersect(vertex, nextVertex, otherVertex, otherNextVertex))
+               return false;
+         }
       }
 
       return true;
@@ -35,7 +53,10 @@ public class GeometryPolygonTools
       return doPolygonsIntersect(polygonA.getBoundingBox(), polygonB.getBoundingBox(), polygonA, polygonB);
    }
 
-   public static boolean doPolygonsIntersect(BoundingBox2DReadOnly boundingBoxA, BoundingBox2DReadOnly boundingBoxB, Vertex2DSupplier polygonA, Vertex2DSupplier polygonB)
+   public static boolean doPolygonsIntersect(BoundingBox2DReadOnly boundingBoxA,
+                                             BoundingBox2DReadOnly boundingBoxB,
+                                             Vertex2DSupplier polygonA,
+                                             Vertex2DSupplier polygonB)
    {
       if (!boundingBoxA.intersectsInclusive(boundingBoxB))
          return false;
@@ -160,6 +181,21 @@ public class GeometryPolygonTools
       {
          Point2DReadOnly vertex = polygon.get(i);
          Point2DReadOnly nextVertex = polygon.get((i + 1) % numberOfVertices);
+
+         // if the lines are collinear, then we don't count this one, as it intersects with both the start and end of the next one.
+         boolean linesAreCollinear = EuclidGeometryTools.areLine2DsCollinear(pointX,
+                                                                             pointY,
+                                                                             lineDirectionX,
+                                                                             lineDirectionY,
+                                                                             vertex.getX(),
+                                                                             vertex.getY(),
+                                                                             nextVertex.getX() - vertex.getX(),
+                                                                             nextVertex.getY() - vertex.getY(),
+                                                                             1e-7,
+                                                                             1e-7);
+
+         if (linesAreCollinear)
+            continue;
 
          boolean intersects = EuclidGeometryTools.intersectionBetweenRay2DAndLineSegment2D(pointX,
                                                                                            pointY,
