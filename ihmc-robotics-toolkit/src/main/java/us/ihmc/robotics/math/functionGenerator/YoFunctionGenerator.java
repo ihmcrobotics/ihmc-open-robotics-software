@@ -37,7 +37,7 @@ public class YoFunctionGenerator
    private final Random random = new Random(1776L);
 
    private final YoDouble value, offset, amplitude, frequency, phase, resetTime, pauseTime, chirpRate, chirpFrequency, chirpFrequencyMax;
-   private final YoDouble valueDot, valueDotTest;
+   private final YoDouble valueDot;
    private final FilteredVelocityYoVariable valueDotFromFilter;
 
    private final YoDouble timeModeChanged;
@@ -89,7 +89,6 @@ public class YoFunctionGenerator
       value = new YoDouble(name + "Value", registry);
 
       valueDot = new YoDouble(name + "ValueDot", registry);
-      valueDotTest = new YoDouble(name + "ValueDotTest", registry);
       if (dT != -1.0)
          valueDotFromFilter = new FilteredVelocityYoVariable(name + "ValueDotFromFilter", "", 0.0, value, dT, registry);
       else
@@ -289,11 +288,6 @@ public class YoFunctionGenerator
       return valueDot.getDoubleValue();
    }
 
-   public double getValueDotTest()
-   {
-      return valueDot.getDoubleValue();
-   }
-
    public boolean getStopAfterResetTime()
    {
       return stopAfterResetTime.getBooleanValue();
@@ -350,8 +344,6 @@ public class YoFunctionGenerator
                * Math.sin(2.0 * Math.PI * frequencyFiltered.getDoubleValue() * timeInCurrentMode.getDoubleValue() + phaseFiltered.getDoubleValue()));
 
          valueDot.set(amplitudeFiltered.getDoubleValue() * Math.PI * 2.0 * frequencyFiltered.getDoubleValue()
-               * Math.cos(2.0 * Math.PI * frequencyFiltered.getDoubleValue() * timeInCurrentMode.getDoubleValue()));
-         valueDotTest.set(amplitudeFiltered.getDoubleValue() * Math.PI * 2.0 * frequencyFiltered.getDoubleValue()
                           * Math.cos(2.0 * Math.PI * frequencyFiltered.getDoubleValue() * timeInCurrentMode.getDoubleValue() + phaseFiltered.getDoubleValue()));
          if (valueDotFromFilter != null)
             valueDotFromFilter.update();
