@@ -31,6 +31,8 @@ public class LevenbergMarquardtParameterOptimizer
 
    private final DenseMatrix64F optimizeDirection;
 
+   // higher : make quick approach when the model and the data are in long distance.
+   // lowe   : slower approach but better accuracy in near distance.
    private boolean[] correspondence;
    private double correspondenceThreshold = 1.0;
 
@@ -101,6 +103,11 @@ public class LevenbergMarquardtParameterOptimizer
    public void setOutputCalculator(FunctionOutputCalculator functionOutputCalculator)
    {
       outputCalculator = functionOutputCalculator;
+   }
+
+   public void setCorrespondenceThreshold(double correspondenceThreshold)
+   {
+      this.correspondenceThreshold = correspondenceThreshold;
    }
 
    private double computeQuality(DenseMatrix64F space, boolean[] correspondence)
@@ -236,7 +243,9 @@ public class LevenbergMarquardtParameterOptimizer
       quality = computeQuality(currentOutput, correspondence);
 
       double iterateTime = Conversions.nanosecondsToSeconds(System.nanoTime() - startTime);
-      return iterateTime;
+      if (DEBUG)
+         System.out.println("elapsed iteration time is " + iterateTime);
+      return quality;
    }
 
    public boolean solve(int terminalIteration, double terminalConvergencePercentage)
@@ -274,59 +283,9 @@ public class LevenbergMarquardtParameterOptimizer
          iteration = iter;
          previousQuality = quality;
 
-         // compute jacobian.
-         for (int i = 0; i < parameterDimension; i++)
-         {
-            perturbedInput.set(currentInput);
-            perturbedInput.add(i, 0, purterbationVector.get(i));
+         iterate();
 
-            perturbedOutput.set(outputCalculator.computeOutput(perturbedInput));
-            for (int j = 0; j < outputDimension; j++)
-            {
-               if (correspondence[j])
-               {
-                  double partialValue = (perturbedOutput.get(j) - currentOutput.get(j)) / purterbationVector.get(i);
-                  jacobian.set(j, i, partialValue);
-               }
-               else
-               {
-                  jacobian.set(j, i, 0.0);
-               }
-            }
-         }
-
-         // compute direction.
-         jacobianTranspose.set(jacobian);
-         CommonOps.transpose(jacobianTranspose);
-
-         CommonOps.mult(jacobianTranspose, jacobian, squaredJacobian);
-         updateDamping();
-
-         CommonOps.add(squaredJacobian, dampingCoefficient, squaredJacobian);
-         CommonOps.invert(squaredJacobian);
-
-         CommonOps.mult(squaredJacobian, jacobianTranspose, invMultJacobianTranspose);
-         CommonOps.mult(invMultJacobianTranspose, currentOutput, optimizeDirection);
-
-         // update currentInput.
-         CommonOps.subtract(currentInput, optimizeDirection, newInput);
-
-         // compute new quality.
-         currentInput.set(newInput);
-         currentOutput.set(outputCalculator.computeOutput(currentInput));
-         for (int i = 0; i < outputDimension; i++)
-         {
-            if (currentOutput.get(i, 0) < correspondenceThreshold)
-            {
-               correspondence[i] = true;
-            }
-            else
-            {
-               correspondence[i] = false;
-            }
-         }
-
-         quality = computeQuality(currentOutput, correspondence);
+         quality = iterate();
          double qualityDiff = previousQuality - quality;
          double regressionPercentage = qualityDiff / previousQuality * 100;
          if (DEBUG)
