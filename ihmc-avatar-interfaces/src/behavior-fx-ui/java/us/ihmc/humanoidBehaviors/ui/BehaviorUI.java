@@ -99,17 +99,8 @@ public class BehaviorUI
          SubScene subScene3D = view3DFactory.getSubScene();
          Pane view3DSubSceneWrappedInsidePane = view3DFactory.getSubSceneWrappedInsidePane();
 
+//         AnchorPane sideVisualizationArea = new AnchorPane();
          VBox sideVisualizationArea = new VBox();
-
-         View3DFactory view2DFactory = View3DFactory.createSubscene(false, SceneAntialiasing.BALANCED);
-         view2DFactory.addCameraController(0.05, 2000.0, true);
-         view2DFactory.setBackgroundColor(Color.WHITE);
-         Group view2DGroup = view2DFactory.getRoot();
-         Pane view2DPane = view2DFactory.getSubSceneWrappedInsidePane();
-
-         Rectangle rectangle = new Rectangle(0.0, 0.0, 50.0, 50.0);
-         rectangle.setFill(Color.BLUE);
-         view2DGroup.getChildren().add(rectangle);
 
          behaviorSelector.getItems().add("None");
          behaviorSelector.setValue("None");
@@ -132,9 +123,8 @@ public class BehaviorUI
          view3DFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
          SplitPane mainSplitPane = (SplitPane) mainPane.getCenter();
-         view2DPane.setPrefWidth(200.0);
          sideVisualizationArea.setPrefWidth(200.0);
-         view3DSubSceneWrappedInsidePane.setPrefWidth(500.0);
+//         view3DSubSceneWrappedInsidePane.setPrefWidth(500.0);
          mainSplitPane.getItems().add(view3DSubSceneWrappedInsidePane);
          mainSplitPane.getItems().add(sideVisualizationArea);
 

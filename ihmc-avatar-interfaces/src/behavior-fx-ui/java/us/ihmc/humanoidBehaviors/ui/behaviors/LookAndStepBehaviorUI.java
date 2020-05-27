@@ -71,6 +71,17 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    {
       this.behaviorMessager = behaviorMessager;
 
+      View3DFactory view2DFactory = View3DFactory.createSubscene(false, SceneAntialiasing.BALANCED);
+      view2DFactory.addCameraController(0.05, 2000.0, true);
+      view2DFactory.setBackgroundColor(Color.WHITE);
+      Group view2DGroup = view2DFactory.getRoot();
+      Pane view2DPane = view2DFactory.getSubSceneWrappedInsidePane();
+      // TODO: Find out why the the view2D can't be added to the VBox
+
+      Rectangle rectangle = new Rectangle(0.0, 0.0, 50.0, 50.0);
+      rectangle.setFill(Color.BLUE);
+      view2DGroup.getChildren().add(rectangle);
+
       NumberAxis xAxis = new NumberAxis(0.0, 10.0, 1.0);
       NumberAxis yAxis = new NumberAxis(0.0, 10.0, 1.0);
       ScatterChart<Number, Number> scatterChart = new ScatterChart<>(xAxis, yAxis);
@@ -90,7 +101,10 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       series1.getData().add(new XYChart.Data(10.0, 3.0));
 
       scatterChart.getData().add(series1);
-      visualizationPane.getChildren().add(scatterChart);
+
+//      scatterChart.setPrefWidth(200.0);
+
+      visualizationPane.getChildren().addAll(scatterChart);
 
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
       behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
