@@ -4,13 +4,19 @@ import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.*;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.ScatterChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
+import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.ROS2Tools;
@@ -93,11 +99,17 @@ public class BehaviorUI
          SubScene subScene3D = view3DFactory.getSubScene();
          Pane view3DSubSceneWrappedInsidePane = view3DFactory.getSubSceneWrappedInsidePane();
 
+         VBox sideVisualizationArea = new VBox();
+
          View3DFactory view2DFactory = View3DFactory.createSubscene(false, SceneAntialiasing.BALANCED);
          view2DFactory.addCameraController(0.05, 2000.0, true);
          view2DFactory.setBackgroundColor(Color.WHITE);
          Group view2DGroup = view2DFactory.getRoot();
          Pane view2DPane = view2DFactory.getSubSceneWrappedInsidePane();
+
+         Rectangle rectangle = new Rectangle(0.0, 0.0, 50.0, 50.0);
+         rectangle.setFill(Color.BLUE);
+         view2DGroup.getChildren().add(rectangle);
 
          behaviorSelector.getItems().add("None");
          behaviorSelector.setValue("None");
@@ -109,7 +121,7 @@ public class BehaviorUI
 
          for (BehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces.values())
          {
-            behaviorUIInterface.init(subScene3D, view2DGroup, ros2Node, behaviorMessager, robotModel);
+            behaviorUIInterface.init(subScene3D, sideVisualizationArea, ros2Node, behaviorMessager, robotModel);
             view3DFactory.addNodeToView(behaviorUIInterface);
          }
 
@@ -121,9 +133,10 @@ public class BehaviorUI
 
          SplitPane mainSplitPane = (SplitPane) mainPane.getCenter();
          view2DPane.setPrefWidth(200.0);
+         sideVisualizationArea.setPrefWidth(200.0);
          view3DSubSceneWrappedInsidePane.setPrefWidth(500.0);
          mainSplitPane.getItems().add(view3DSubSceneWrappedInsidePane);
-         mainSplitPane.getItems().add(view2DPane);
+         mainSplitPane.getItems().add(sideVisualizationArea);
 
          Stage primaryStage = new Stage();
          primaryStage.setTitle(getClass().getSimpleName());
