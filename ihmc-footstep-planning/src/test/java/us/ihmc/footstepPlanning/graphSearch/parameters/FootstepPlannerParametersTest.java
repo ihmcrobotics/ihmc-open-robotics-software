@@ -217,5 +217,25 @@ public class FootstepPlannerParametersTest
       double deltaYawFromReferenceTolerance = RandomNumbers.nextDouble(random, 10.0);
       parameters.setDeltaYawFromReferenceTolerance(deltaYawFromReferenceTolerance);
       assertEquals(deltaYawFromReferenceTolerance, parameters.getDeltaYawFromReferenceTolerance(), epsilon);
+
+      boolean enableShinCollision = random.nextBoolean();
+      parameters.setEnableShinCollisionCheck(enableShinCollision);
+      assertEquals(enableShinCollision, parameters.getEnableShinCollisionCheck());
+
+      double shinRadius = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setShinRadius(shinRadius);
+      assertEquals(shinRadius, parameters.getShinRadius());
+
+      double shinLength = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setShinLength(shinLength);
+      assertEquals(shinLength, parameters.getShinLength());
+
+      double shinHeightOffset = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setShinHeightOffset(shinHeightOffset);
+      assertEquals(shinHeightOffset, parameters.getShinHeightOffset());
+
+      double shinPitch = RandomNumbers.nextDouble(random, Math.PI);
+      parameters.setShinPitch(shinPitch);
+      assertEquals(shinPitch, parameters.getShinPitch());
    }
 }
