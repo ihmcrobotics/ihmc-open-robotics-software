@@ -182,8 +182,10 @@ public class GradientDescentStepConstraintSolver
                                                                      footPlacementGradient);
          legCollisionConstraintCalculator.calculateLegCollisionGradient(transformedPose, localToWorld, planarRegionsList, legCollisionGradient);
 
-         footPlacementGradient.scale(1.0 / (1.0 + legCollisionSolverGain));
-         legCollisionGradient.scale(legCollisionSolverGain / (1.0 + legCollisionSolverGain));
+         double alphaFootPlacement = footPlacementGradient.lengthSquared();
+         double alphaLegCollision = legCollisionSolverGain * legCollisionGradient.lengthSquared();
+         footPlacementGradient.scale(alphaFootPlacement / (alphaFootPlacement + alphaLegCollision));
+         legCollisionGradient.scale(alphaLegCollision / (alphaFootPlacement + alphaLegCollision));
          gradient.add(footPlacementGradient, legCollisionGradient);
 
          if (!xTranslationAllowed)
