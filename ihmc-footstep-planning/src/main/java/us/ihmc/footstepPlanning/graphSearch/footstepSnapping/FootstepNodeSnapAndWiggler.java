@@ -164,7 +164,20 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       ConvexPolygon2D footPolygonInRegionFrame = FootstepNodeSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
 
       RigidBodyTransform wiggleTransformInLocal;
-      if (parameters.getEnableConcaveHullWiggler() && !planarRegionToPack.getConcaveHull().isEmpty())
+      boolean concaveWigglerRequested = parameters.getEnableConcaveHullWiggler() && !planarRegionToPack.getConcaveHull().isEmpty();
+      if (concaveWigglerRequested && parameters.getEnableShinCollisionCheck())
+      {
+         RigidBodyTransform snappedNodeTransform = snapData.getSnappedNodeTransform(footstepNode);
+         tempTransform.set(snappedNodeTransform);
+         tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
+
+         wiggleTransformInLocal = gradientDescentStepConstraintSolver.wigglePolygon(footPolygonInRegionFrame,
+                                                                                    wiggleParameters,
+                                                                                    tempTransform,
+                                                                                    planarRegionToPack,
+                                                                                    planarRegionsList);
+      }
+      else if (concaveWigglerRequested)
       {
          wiggleTransformInLocal = gradientDescentStepConstraintSolver.wigglePolygon(footPolygonInRegionFrame,
                                                                                     Vertex2DSupplier.asVertex2DSupplier(planarRegionToPack.getConcaveHull()),
