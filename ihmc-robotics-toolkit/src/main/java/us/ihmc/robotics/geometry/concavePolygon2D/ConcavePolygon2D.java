@@ -49,6 +49,13 @@ public class ConcavePolygon2D implements ConcavePolygon2DBasics
    }
 
    @Override
+   public void clearAndUpdate()
+   {
+      clear();
+      isUpToDate = true;
+   }
+
+   @Override
    public boolean isClockwiseOrdered()
    {
       return clockwiseOrdered;

@@ -97,8 +97,8 @@ public class PolygonClippingAndMergingTest
 
       assertEquals(2, clippedPolygons.size());
 
-      GeometryPolygonTestTools.assertConcavePolygon2DEquals(clippedPolygonExpected2, clippedPolygons.get(0), 1e-7);
-      GeometryPolygonTestTools.assertConcavePolygon2DEquals(clippedPolygonExpected1, clippedPolygons.get(1), 1e-7);
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(clippedPolygonExpected1, clippedPolygons.get(0), 1e-7);
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(clippedPolygonExpected2, clippedPolygons.get(1), 1e-7);
    }
 
    @Test
