@@ -76,7 +76,6 @@ public class LinkedPointList
          lastPoint = predecessor;
 
       points.remove(pointToRemove);
-      throw new RuntimeException("This is untested.");
    }
 
    public LinkedPoint getFirstPoint()

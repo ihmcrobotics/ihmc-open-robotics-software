@@ -49,7 +49,7 @@ public class LinkedPoint
 
    public void setIsIntersectionPoint(boolean isIntersectionPoint)
    {
-      this.isIntersectionPoint = true;
+      this.isIntersectionPoint = isIntersectionPoint;
    }
 
    public boolean getIsIntersectionPoint()
