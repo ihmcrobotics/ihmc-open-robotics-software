@@ -1,6 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
+import us.ihmc.tools.property.BooleanStoredPropertyKey;
+import us.ihmc.tools.property.DoubleStoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -784,5 +786,46 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default boolean getEnabledExpansionMask()
    {
       return get(enableExpansionMask);
+   }
+
+   /**
+    * If true will try to wiggle steps away from shin collisions. Collisions are checked against all regions.
+    * Enable concave hull wiggler must be true in order for the shin collision checker to run.
+    */
+   default boolean getEnableShinCollisionCheck()
+   {
+      return get(enableShinCollisionCheck);
+   }
+
+   /**
+    * Radius of the shin collidable cylinder
+    */
+   default double getShinRadius()
+   {
+      return get(shinRadius);
+   }
+
+   /**
+    * Length of the shin collidable cylinder
+    */
+   default double getShinLength()
+   {
+      return get(shinLength);
+   }
+
+   /**
+    * Pitch of the shin collidable cylinder
+    */
+   default double getShinPitch()
+   {
+      return get(shinPitch);
+   }
+
+   /**
+    * Height offset of shin collidable cylinder
+    */
+   default double getShinHeightOffset()
+   {
+      return get(shinHeightOffet);
    }
 }
