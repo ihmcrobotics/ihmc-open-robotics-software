@@ -7,6 +7,7 @@ import javafx.scene.SubScene;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -53,7 +54,7 @@ public class ExploreAreaBehaviorUI extends BehaviorUIInterface
    private HashMap<Integer, Integer> numberOfPolygonsMap = new HashMap<>();
    private HashMap<Integer, ArrayList<ConvexPolygon2D>> polygonsMap = new HashMap<>();
 
-   public void init(SubScene sceneNode, Group group2D, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
+   public void init(SubScene sceneNode, Pane visualizationPane, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
       behaviorMessager.registerTopicListener(ExploreAreaBehaviorAPI.ObservationPosition,

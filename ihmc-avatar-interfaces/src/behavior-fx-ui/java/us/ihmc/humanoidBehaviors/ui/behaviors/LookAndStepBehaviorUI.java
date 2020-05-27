@@ -3,11 +3,16 @@ package us.ihmc.humanoidBehaviors.ui.behaviors;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.Group;
+import javafx.scene.SceneAntialiasing;
 import javafx.scene.SubScene;
+import javafx.scene.chart.NumberAxis;
+import javafx.scene.chart.ScatterChart;
+import javafx.scene.chart.XYChart;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
+import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -27,6 +32,7 @@ import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIActionMap;
 import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
+import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyTable;
 import us.ihmc.messager.Messager;
 import us.ihmc.ros2.Ros2NodeInterface;
@@ -61,13 +67,30 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @FXML private TableView footstepPlannerParameterTable;
 
    @Override
-   public void init(SubScene sceneNode, Group group2D, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
+   public void init(SubScene sceneNode, Pane visualizationPane, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
 
-      Rectangle rectangle = new Rectangle(0.0, 0.0, 50.0, 50.0);
-      rectangle.setFill(Color.BLUE);
-      group2D.getChildren().add(rectangle);
+      NumberAxis xAxis = new NumberAxis(0.0, 10.0, 1.0);
+      NumberAxis yAxis = new NumberAxis(0.0, 10.0, 1.0);
+      ScatterChart<Number, Number> scatterChart = new ScatterChart<>(xAxis, yAxis);
+
+      XYChart.Series series1 = new XYChart.Series();
+      series1.setName("Set1");
+      series1.getData().add(new XYChart.Data(0.0, 3.0));
+      series1.getData().add(new XYChart.Data(1.0, 5.0));
+      series1.getData().add(new XYChart.Data(2.0, 3.0));
+      series1.getData().add(new XYChart.Data(3.0, 3.0));
+      series1.getData().add(new XYChart.Data(4.0, 3.0));
+      series1.getData().add(new XYChart.Data(5.0, 3.0));
+      series1.getData().add(new XYChart.Data(6.0, 3.0));
+      series1.getData().add(new XYChart.Data(7.0, 3.0));
+      series1.getData().add(new XYChart.Data(8.0, 3.0));
+      series1.getData().add(new XYChart.Data(9.0, 3.0));
+      series1.getData().add(new XYChart.Data(10.0, 3.0));
+
+      scatterChart.getData().add(series1);
+      visualizationPane.getChildren().add(scatterChart);
 
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
       behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
