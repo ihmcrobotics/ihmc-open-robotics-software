@@ -20,8 +20,8 @@ mainDependencies {
    api("org.glassfish.jaxb:jaxb-runtime:2.3.2")
 
    api("us.ihmc:ihmc-yovariables:0.7.0")
-   api("us.ihmc:ihmc-javafx-toolkit:0.16.0")
-   api("us.ihmc:ihmc-robot-data-logger:0.17.0")
+   api("us.ihmc:ihmc-javafx-toolkit:0.17.0")
+   api("us.ihmc:ihmc-robot-data-logger:0.18.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
 }
 
