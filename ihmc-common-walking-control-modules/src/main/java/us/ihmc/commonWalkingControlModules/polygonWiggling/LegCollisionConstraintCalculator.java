@@ -11,12 +11,10 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCylinder;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicVector;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.*;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
@@ -30,7 +28,6 @@ public class LegCollisionConstraintCalculator
 
    private Cylinder3D legCollisionShape = null;
    private final RigidBodyTransform legShapeTransformToSoleFrame = new RigidBodyTransform();
-   private final RigidBodyTransform soleFrameToRegionFrame = new RigidBodyTransform();
    private final RigidBodyTransform legShapeToWorld = new RigidBodyTransform();
 
    private final Vector3D collisionDirection = new Vector3D();
@@ -81,7 +78,7 @@ public class LegCollisionConstraintCalculator
       parentRegistry.addChild(registry);
    }
 
-   public void calculateLegCollisionGradient(Pose2DReadOnly poseInLocal,
+   public void calculateLegCollisionGradient(RigidBodyTransformReadOnly soleFrameToRegionFrame,
                                              RigidBodyTransformReadOnly regionToWorld,
                                              PlanarRegionsList planarRegionsList,
                                              Tuple3DBasics gradientToPack)
@@ -92,9 +89,6 @@ public class LegCollisionConstraintCalculator
       {
          return;
       }
-
-      soleFrameToRegionFrame.getTranslation().set(poseInLocal.getX(), poseInLocal.getY(), 0.0);
-      soleFrameToRegionFrame.getRotation().setToYawOrientation(poseInLocal.getYaw());
 
       legShapeToWorld.set(legShapeTransformToSoleFrame);
       legShapeToWorld.preMultiply(soleFrameToRegionFrame);

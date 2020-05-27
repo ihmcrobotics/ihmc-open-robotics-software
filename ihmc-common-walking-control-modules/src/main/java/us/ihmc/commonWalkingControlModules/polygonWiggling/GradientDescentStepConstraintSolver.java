@@ -2,13 +2,10 @@ package us.ihmc.commonWalkingControlModules.polygonWiggling;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.graphicsDescription.yoGraphics.YoGraphicCylinder;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -51,14 +48,13 @@ public class GradientDescentStepConstraintSolver
 
    private final RecyclingArrayList<Point2D> transformedVertices = new RecyclingArrayList<>(5, Point2D::new);
    private final RecyclingArrayList<Vector2D> rotationVectors = new RecyclingArrayList<>(5, Vector2D::new);
-   private final Pose2D initialPose = new Pose2D();
-   private final Pose2D transformedPose = new Pose2D();
+   private final RigidBodyTransform transformedSoleToRegionFrame = new RigidBodyTransform();
 
    private final TickAndUpdatable tickAndUpdatable;
    private final YoFrameLineSegment2D[] initialPolygonToWiggle = new YoFrameLineSegment2D[5];
    private final YoFrameLineSegment2D[] linearizedTransformedPolygonToWiggle = new YoFrameLineSegment2D[5];
    private final YoFrameLineSegment2D[] transformedPolygonToWiggle = new YoFrameLineSegment2D[5];
-   private final YoFrameLineSegment2D[] constraintPolygon = new YoFrameLineSegment2D[100];
+   private final YoFrameLineSegment2D[] constraintPolygon = new YoFrameLineSegment2D[500];
    private final YoFrameLineSegment2D[] yoRotationVectors = new YoFrameLineSegment2D[5];
    private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
@@ -130,7 +126,7 @@ public class GradientDescentStepConstraintSolver
    private RigidBodyTransform wigglePolygon(ConvexPolygon2DReadOnly polygonToWiggle,
                                             Vertex2DSupplier concavePolygonToWiggleInto,
                                             WiggleParameters wiggleParameters,
-                                            RigidBodyTransformReadOnly footTransformInLocal,
+                                            RigidBodyTransformReadOnly footTransformInRegionFrame,
                                             RigidBodyTransformReadOnly localToWorld,
                                             PlanarRegionsList planarRegionsList)
    {
@@ -138,7 +134,13 @@ public class GradientDescentStepConstraintSolver
       accumulatedTransform.setToZero();
       rotationVectors.clear();
       transformedVertices.clear();
-      initialPose.set(footTransformInLocal.getTranslationX(), footTransformInLocal.getTranslationY(), footTransformInLocal.getRotation().getYaw());
+      footPlacementGradient.setToZero();
+      legCollisionGradient.setToZero();
+
+      if (footTransformInRegionFrame != null)
+      {
+         transformedSoleToRegionFrame.set(footTransformInRegionFrame);
+      }
 
       for (int i = 0; i < polygonToWiggle.getNumberOfVertices(); i++)
       {
@@ -174,19 +176,21 @@ public class GradientDescentStepConstraintSolver
 
          updateGraphics(polygonToWiggle);
 
-         transformedPose.set(initialPose);
-         transformedPose.appendTranslation(accumulatedTransform.getX(), accumulatedTransform.getY());
-         transformedPose.appendRotation(accumulatedTransform.getZ());
-
          footPlacementConstraintCalculator.calculateFootAreaGradient(transformedVertices, rotationVectors, concavePolygonToWiggleInto, wiggleParameters,
                                                                      footPlacementGradient);
-         legCollisionConstraintCalculator.calculateLegCollisionGradient(transformedPose, localToWorld, planarRegionsList, legCollisionGradient);
+         if (planarRegionsList != null)
+         {
+            legCollisionConstraintCalculator.calculateLegCollisionGradient(transformedSoleToRegionFrame, localToWorld, planarRegionsList, legCollisionGradient);
+         }
 
-         double alphaFootPlacement = footPlacementGradient.lengthSquared();
-         double alphaLegCollision = legCollisionSolverGain * legCollisionGradient.lengthSquared();
-         footPlacementGradient.scale(alphaFootPlacement / (alphaFootPlacement + alphaLegCollision));
-         legCollisionGradient.scale(alphaLegCollision / (alphaFootPlacement + alphaLegCollision));
-         gradient.add(footPlacementGradient, legCollisionGradient);
+         if (legCollisionGradient.lengthSquared() > 1e-10)
+         {
+            gradient.set(legCollisionGradient);
+         }
+         else
+         {
+            gradient.set(footPlacementGradient);
+         }
 
          if (!xTranslationAllowed)
          {
@@ -223,6 +227,9 @@ public class GradientDescentStepConstraintSolver
             transformedVertices.get(i).addX(gradient.getZ() * rotationVectors.get(i).getX());
             transformedVertices.get(i).addY(gradient.getZ() * rotationVectors.get(i).getY());
          }
+
+         transformedSoleToRegionFrame.getTranslation().add(gradient.getX(), gradient.getY(), 0.0);
+         transformedSoleToRegionFrame.getRotation().appendYawRotation(gradient.getZ());
 
          if (iterations > 0)
          {

@@ -7,7 +7,6 @@ import us.ihmc.commonWalkingControlModules.polygonWiggling.LegCollisionConstrain
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -84,7 +83,7 @@ public class LegCollisionConstraintCalculatorTest
       PlanarRegion firstStep = stairCaseRegions.getPlanarRegion(1);
 
       visualizePlanarRegions(stairCaseRegions);
-      collisionConstraintCalculator.calculateLegCollisionGradient(new Pose2D(), firstStep.getTransformToWorld(), stairCaseRegions, new Vector3D());
+      collisionConstraintCalculator.calculateLegCollisionGradient(new RigidBodyTransform(), firstStep.getTransformToWorld(), stairCaseRegions, new Vector3D());
 
       if (visualize)
       {
