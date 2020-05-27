@@ -38,7 +38,7 @@ public class GeometryPolygonTools
          for (int j = 0; j < outerPolygon.getNumberOfVertices(); j++)
          {
             Point2DReadOnly otherVertex = outerPolygon.getVertex(j);
-            Point2DReadOnly otherNextVertex = outerPolygon.getVertex((i + 1) % outerPolygon.getNumberOfVertices());
+            Point2DReadOnly otherNextVertex = outerPolygon.getNextVertex(j);
 
             if (EuclidGeometryTools.doLineSegment2DsIntersect(vertex, nextVertex, otherVertex, otherNextVertex))
                return false;
@@ -175,12 +175,33 @@ public class GeometryPolygonTools
          return false;
       }
 
-      int intersections = 0;
 
+      int intersectionsPositive = getNumberOfIntersections(pointX, pointY, lineDirectionX, lineDirectionY, polygon, numberOfVertices, intersectionToPack);
+      int intersectionsNegative = getNumberOfIntersections(pointX, pointY, -lineDirectionX, -lineDirectionY, polygon, numberOfVertices, intersectionToPack);
+
+      if (intersectionsNegative == 0 || intersectionsPositive == 0)
+         return false;
+
+      boolean evenNumberOfIntersections = (intersectionsPositive + intersectionsNegative) % 2 == 0;
+      return evenNumberOfIntersections;
+   }
+
+   private static int getNumberOfIntersections(double pointX,
+                                               double pointY,
+                                               double lineDirectionX,
+                                               double lineDirectionY,
+                                               List<? extends Point2DReadOnly> polygon,
+                                               int numberOfVertices,
+                                               Point2DBasics intersectionToPack)
+   {
+      int intersections = 0;
       for (int i = 0; i < numberOfVertices; i++)
       {
          Point2DReadOnly vertex = polygon.get(i);
          Point2DReadOnly nextVertex = polygon.get((i + 1) % numberOfVertices);
+
+//         if (EuclidGeometryTools.isPoint2DOnLine2D(nextVertex.getX(), nextVertex.getY(), pointX, pointY, lineDirectionX, lineDirectionY))
+//            continue;
 
          // if the lines are collinear, then we don't count this one, as it intersects with both the start and end of the next one.
          boolean linesAreCollinear = EuclidGeometryTools.areLine2DsCollinear(pointX,
@@ -213,8 +234,7 @@ public class GeometryPolygonTools
          }
       }
 
-      boolean oddNumberOfIntersections = intersections % 2 == 1;
-      return oddNumberOfIntersections;
+      return intersections;
    }
 
    public static boolean isSimplePolygon(List<? extends Point2DReadOnly> concaveHullVertices, int numberOfVertices)

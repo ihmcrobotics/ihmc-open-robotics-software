@@ -76,6 +76,41 @@ public interface ConcavePolygon2DReadOnly extends Vertex2DSupplier
          throw new OutdatedPolygonException("Call the update method before doing any other calculation!");
    }
 
+   default int getNextVertexIndex(int currentVertexIndex)
+   {
+      checkIfUpToDate();
+      checkIndexInBoundaries(currentVertexIndex);
+      checkNonEmpty();
+
+      if (currentVertexIndex < getNumberOfVertices() - 1)
+         return currentVertexIndex + 1;
+      else
+         return 0;
+   }
+
+   default int getPreviousVertexIndex(int currentVertexIndex)
+   {
+      checkIfUpToDate();
+      checkIndexInBoundaries(currentVertexIndex);
+      checkNonEmpty();
+
+      if (currentVertexIndex < 1)
+         return getNumberOfVertices() - 1;
+      else
+         return currentVertexIndex - 1;
+   }
+
+   default Point2DReadOnly getNextVertex(int index)
+   {
+      return getVertex(getNextVertexIndex(index));
+   }
+
+   default Point2DReadOnly getPreviousVertex(int index)
+   {
+      return getVertex(getPreviousVertexIndex(index));
+   }
+
+
    default boolean epsilonEquals(ConcavePolygon2DReadOnly other, double epsilon)
    {
       if (getNumberOfVertices() != other.getNumberOfVertices())

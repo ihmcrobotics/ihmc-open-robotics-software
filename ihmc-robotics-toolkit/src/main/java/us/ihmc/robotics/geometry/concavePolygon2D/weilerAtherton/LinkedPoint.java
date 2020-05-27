@@ -3,14 +3,14 @@ package us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Tuple2DReadOnly;
 
 public class LinkedPoint
 {
    private LinkedPoint predecessor;
    private LinkedPoint successor;
 
-   private boolean isIntersectionPoint = false;
+   private boolean isIncomingIntersection = false;
+   private boolean isOutgoingIntersection = false;
 
    private final Point2DBasics point = new Point2D();
 
@@ -26,35 +26,52 @@ public class LinkedPoint
    {
       this(other.getPoint());
 
-      setIsIntersectionPoint(other.isIntersectionPoint);
+      setIsIncomingIntersection(other.isIncomingIntersection);
+      setIsOutgoingIntersection(other.isOutgoingIntersection);
       setPredecessor(other.predecessor);
       setSuccessor(other.successor);
    }
 
    public LinkedPoint(double x, double y)
    {
-      this(x, y, false);
+      this(x, y, false, false);
    }
 
-   public LinkedPoint(Point2DReadOnly other, boolean isIntersectionPoint)
+   public LinkedPoint(Point2DReadOnly other, boolean isIncomingIntersection, boolean isOutgoingIntersection)
    {
-      this(other.getX(), other.getY(), isIntersectionPoint);
+      this(other.getX(), other.getY(), isIncomingIntersection, isOutgoingIntersection);
    }
 
-   public LinkedPoint(double x, double y, boolean isIntersectionPoint)
+   public LinkedPoint(double x, double y, boolean isIncomingIntersection, boolean isOutgoingIntersection)
    {
-      this.isIntersectionPoint = isIntersectionPoint;
+      this.isIncomingIntersection = isIncomingIntersection;
+      this.isOutgoingIntersection = isOutgoingIntersection;
       setPoint(x, y);
    }
 
-   public void setIsIntersectionPoint(boolean isIntersectionPoint)
+   public void setIsIncomingIntersection(boolean isIncomingIntersection)
    {
-      this.isIntersectionPoint = isIntersectionPoint;
+      this.isIncomingIntersection = isIncomingIntersection;
+   }
+
+   public void setIsOutgoingIntersection(boolean isOutgoingIntersection)
+   {
+      this.isOutgoingIntersection = isOutgoingIntersection;
    }
 
    public boolean getIsIntersectionPoint()
    {
-      return isIntersectionPoint;
+      return isIncomingIntersection != isOutgoingIntersection;
+   }
+
+   public boolean isIncomingIntersection()
+   {
+      return isIncomingIntersection;
+   }
+
+   public boolean isOutgoingIntersection()
+   {
+      return isOutgoingIntersection;
    }
 
    public void set(LinkedPoint other)
