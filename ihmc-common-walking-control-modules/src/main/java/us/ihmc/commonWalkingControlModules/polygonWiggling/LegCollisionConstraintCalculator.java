@@ -41,7 +41,6 @@ public class LegCollisionConstraintCalculator
    private final YoFramePoint3D legShapeBase = new YoFramePoint3D("legShapeBase", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D legShapeDirection = new YoFrameVector3D("legShapeDirection", ReferenceFrame.getWorldFrame(), registry);
    private final YoGraphicCylinder legCollisionShapeGraphic;
-   private final YoGraphicPlanarRegionsList planarRegionsListGraphic;
    private final YoFramePoint3D legIntersectionPosition = new YoFramePoint3D("legIntersectionPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFramePoint3D regionIntersectionPosition = new YoFramePoint3D("regionIntersectionPosition", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D gradientDirection = new YoFrameVector3D("intersectionNormal", ReferenceFrame.getWorldFrame(), registry);
@@ -52,7 +51,6 @@ public class LegCollisionConstraintCalculator
    public LegCollisionConstraintCalculator()
    {
       legCollisionShapeGraphic = null;
-      planarRegionsListGraphic = null;
       legIntersectionPositionGraphic = null;
       regionIntersectionPositionGraphic = null;
       gradientDirectionGraphic = null;
@@ -64,7 +62,6 @@ public class LegCollisionConstraintCalculator
       appearance.setTransparency(0.85);
 
       legCollisionShapeGraphic = new YoGraphicCylinder("legCollisionGraphic", legShapeBase, legShapeDirection, appearance, 0.05);
-      planarRegionsListGraphic = new YoGraphicPlanarRegionsList("planarRegionsGraphic", 150, 100, registry);
       legIntersectionPositionGraphic = new YoGraphicPosition("intersectionPositionGraphic", legIntersectionPosition, 0.01, YoAppearance.Orange());
       regionIntersectionPositionGraphic = new YoGraphicPosition("regionIntersectionPositionGraphic", regionIntersectionPosition, 0.01, YoAppearance.Black());
       gradientDirectionGraphic = new YoGraphicVector("intersectionDirectionGraphic", legIntersectionPosition, gradientDirection, 1.0, YoAppearance.Orange(), true, 0.01);
@@ -74,9 +71,8 @@ public class LegCollisionConstraintCalculator
 
       String graphicListName = getClass().getSimpleName();
       graphicsListRegistry.registerYoGraphic(graphicListName, legCollisionShapeGraphic);
-      graphicsListRegistry.registerYoGraphic(graphicListName, planarRegionsListGraphic);
       graphicsListRegistry.registerYoGraphic(graphicListName, legIntersectionPositionGraphic);
-      graphicsListRegistry.registerYoGraphic(graphicListName, regionIntersectionPositionGraphic);
+//      graphicsListRegistry.registerYoGraphic(graphicListName, regionIntersectionPositionGraphic);
       graphicsListRegistry.registerYoGraphic(graphicListName, gradientDirectionGraphic);
 
       legIntersectionPosition.setToNaN();
@@ -107,8 +103,7 @@ public class LegCollisionConstraintCalculator
       legCollisionShape.getAxis().set(legShapeToWorld.getM02(), legShapeToWorld.getM12(), legShapeToWorld.getM22());
 
       legCollisionShape.getBoundingBox(legBoundingBox);
-
-      updateGraphics(planarRegionsList);
+      updateGraphics();
 
       for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
       {
@@ -134,14 +129,12 @@ public class LegCollisionConstraintCalculator
       }
    }
 
-   private void updateGraphics(PlanarRegionsList planarRegionsList)
+   private void updateGraphics()
    {
       if (legCollisionShapeGraphic == null)
       {
          return;
       }
-
-      planarRegionsListGraphic.submitPlanarRegionsListToRender(planarRegionsList);
 
       legShapeDirection.set(legCollisionShape.getAxis());
       legShapeDirection.scale(legCollisionShape.getLength());
@@ -149,6 +142,8 @@ public class LegCollisionConstraintCalculator
       legShapeBase.set(legShapeDirection);
       legShapeBase.scale(-0.5);
       legShapeBase.add(legCollisionShape.getPosition());
+
+      legCollisionShapeGraphic.update();
    }
 
    private void updateGraphics(Point3D legIntersectionPoint, Point3D regionIntersectionPoint)
@@ -161,13 +156,7 @@ public class LegCollisionConstraintCalculator
       this.legIntersectionPosition.set(legIntersectionPoint);
       this.regionIntersectionPosition.set(regionIntersectionPoint);
       this.gradientDirection.set(collisionDirection);
-   }
 
-   public void update()
-   {
-      planarRegionsListGraphic.processPlanarRegionsListQueue();
-      planarRegionsListGraphic.update();
-      legCollisionShapeGraphic.update();
       legIntersectionPositionGraphic.update();
       regionIntersectionPositionGraphic.update();
       gradientDirectionGraphic.update();
