@@ -3,10 +3,13 @@ package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintSolver;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
@@ -15,6 +18,7 @@ import us.ihmc.footstepPlanning.polygonSnapping.PlanarRegionsListPolygonSnapper;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.HashMap;
@@ -28,6 +32,9 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
    private final WiggleParameters wiggleParameters = new WiggleParameters();
    private final PlanarRegion planarRegionToPack = new PlanarRegion();
    private final ConvexPolygon2D footPolygon = new ConvexPolygon2D();
+   private final Cylinder3D legCollisionShape = new Cylinder3D();
+   private final RigidBodyTransform legCollisionShapeToSoleTransform = new RigidBodyTransform();
+   private final RigidBodyTransformGenerator transformGenerator = new RigidBodyTransformGenerator();
 
    private final HashMap<FootstepNode, FootstepNodeSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
@@ -170,6 +177,14 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
          RigidBodyTransform snappedNodeTransform = snapData.getSnappedNodeTransform(footstepNode);
          tempTransform.set(snappedNodeTransform);
          tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
+
+         legCollisionShape.setSize(parameters.getShinLength(), parameters.getShinRadius());
+         transformGenerator.identity();
+         transformGenerator.translate(0.0, 0.0, parameters.getShinHeightOffset());
+         transformGenerator.rotate(parameters.getShinPitch(), Axis3D.Y);
+         transformGenerator.translate(0.0, 0.0, 0.5 * parameters.getShinLength());
+         transformGenerator.getRigidyBodyTransform(legCollisionShapeToSoleTransform);
+         gradientDescentStepConstraintSolver.setLegCollisionShape(legCollisionShape, 15.0, legCollisionShapeToSoleTransform);
 
          wiggleTransformInLocal = gradientDescentStepConstraintSolver.wigglePolygon(footPolygonInRegionFrame,
                                                                                     wiggleParameters,
