@@ -1,4 +1,4 @@
-package us.ihmc.avatar.stepConstraintModule;
+package us;
 
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;

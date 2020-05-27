@@ -1,7 +1,8 @@
-package us.ihmc.avatar.stepConstraintModule;
+package us;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import us.ihmc.avatar.stepConstraintModule.StepConstraintViewerApplication;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;

@@ -1,4 +1,4 @@
-package us.ihmc.avatar.stepConstraintModule;
+package us;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
