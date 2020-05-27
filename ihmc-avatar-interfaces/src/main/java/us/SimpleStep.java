@@ -1,4 +1,4 @@
-package us.ihmc.avatar.stepConstraintModule;
+package us;
 
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;

@@ -1,4 +1,4 @@
-package us.ihmc.avatar.stepConstraintModule;
+package us;
 
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;

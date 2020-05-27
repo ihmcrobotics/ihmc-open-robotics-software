@@ -1,4 +1,4 @@
-package us.ihmc.avatar.stepConstraintModule;
+package us;
 
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;

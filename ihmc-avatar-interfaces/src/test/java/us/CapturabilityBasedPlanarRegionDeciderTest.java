@@ -1,4 +1,4 @@
-package us.ihmc.avatar.stepConstraintModule;
+package us;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
