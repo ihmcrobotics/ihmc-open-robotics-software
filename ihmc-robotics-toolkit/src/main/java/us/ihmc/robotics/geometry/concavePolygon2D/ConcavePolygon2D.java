@@ -98,8 +98,13 @@ public class ConcavePolygon2D implements ConcavePolygon2DBasics
       if (isUpToDate)
          return;
 
+      Collections.reverse(vertexBuffer);
       if (!GeometryPolygonTools.isClockwiseOrdered(vertexBuffer, numberOfVertices))
-         throw new RuntimeException("Vertices are not clockwise ordered.");
+      {
+         Collections.reverse(vertexBuffer);
+         if (!GeometryPolygonTools.isClockwiseOrdered(vertexBuffer, numberOfVertices))
+            throw new RuntimeException("Vertices are not clockwise ordered.");
+      }
       if (!GeometryPolygonTools.isSimplePolygon(vertexBuffer, numberOfVertices))
          throw new RuntimeException("Polygon is not simple, as in it has self intersections.");
 
