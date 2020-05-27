@@ -13,6 +13,7 @@ import java.util.List;
 public class PolygonClippingAndMerging
 {
    private static final int STUPID_LARGE = 1000;
+
    public static void mergeAllPossible(List<ConcavePolygon2DBasics> regionsToMerge)
    {
       int i = 0;
@@ -57,10 +58,10 @@ public class PolygonClippingAndMerging
             i++;
       }
    }
+
    public static void merge(ConcavePolygon2DReadOnly polygonA, ConcavePolygon2DReadOnly polygonB, ConcavePolygon2DBasics mergedPolygon)
    {
-      List<ConcavePolygon2DBasics> holesToReturn = new ArrayList<>();
-
+      List<ConcavePolygon2D> partialListOfHoles = new ArrayList<>();
       if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonA, polygonB))
       {
          mergedPolygon.set(polygonB);
@@ -80,66 +81,49 @@ public class PolygonClippingAndMerging
 
       Collection<LinkedPoint> unassignedAPoints = polygonAList.getPointsCopy();
       Collection<LinkedPoint> unassignedBPoints = polygonBList.getPointsCopy();
-      LinkedPointProvider pointProvider = getPointProvider(polygonA, polygonAList, unassignedAPoints, true, polygonB, polygonBList, unassignedBPoints, true);
 
-      // FIXME the point provider should iterate over points on the outside.
-      while (pointProvider != null)
+      LinkedPointProvider pointProvider = new LinkedPointProvider(polygonAList, polygonBList, unassignedAPoints, unassignedBPoints);
+
+      boolean startOnListA = true;
+      LinkedPoint startPoint = findVertexOutsideOfPolygon(polygonB, unassignedAPoints);
+      if (startPoint == null)
       {
+         startPoint = findVertexOutsideOfPolygon(polygonA, unassignedBPoints);
+         startOnListA = false;
+      }
+
+      mergedPolygon.clear();
+      mergedPolygon.update();
+
+      while (startPoint != null)
+      {
+         pointProvider.setStart(startPoint, startOnListA);
+
          ConcavePolygon2D polygon = new ConcavePolygon2D();
          walkAlongEdgeOfPolygon(pointProvider, polygon);
-         holesToReturn.add(polygon);
 
-         pointProvider = getPointProvider(polygonA, polygonAList, unassignedAPoints, true, polygonB, polygonBList, unassignedBPoints, true);
-      }
-
-      ConcavePolygon2DBasics polygonWithLargestArea = holesToReturn.get(0);
-      double largestArea = polygonWithLargestArea.getArea();
-      for (int i = 1; i < holesToReturn.size(); i++)
-      {
-         ConcavePolygon2DBasics polygon = holesToReturn.get(i);
-         if (polygon.getArea() > largestArea)
+         if (Double.isNaN(mergedPolygon.getArea()))
          {
-            polygonWithLargestArea = polygon;
-            largestArea = polygon.getArea();
+            mergedPolygon.set(polygon);
+         }
+         else if (polygon.getArea() > mergedPolygon.getArea())
+         {
+            partialListOfHoles.add(new ConcavePolygon2D(mergedPolygon));
+            mergedPolygon.set(polygon);
+         }
+         else
+         {
+            partialListOfHoles.add(polygon);
+         }
+
+         startPoint = findVertexOutsideOfPolygon(mergedPolygon, unassignedAPoints);
+         startOnListA = true;
+         if (startPoint == null)
+         {
+            findVertexOutsideOfPolygon(mergedPolygon, unassignedBPoints);
+            startOnListA = false;
          }
       }
-
-      holesToReturn.remove(polygonWithLargestArea);
-      mergedPolygon.set(polygonWithLargestArea);
-   }
-
-   public static LinkedPointProvider getPointProvider(ConcavePolygon2DReadOnly polygonA,
-                                                      LinkedPointList polygonAList,
-                                                      Collection<LinkedPoint> unassignedListA,
-                                                      boolean checkOnListA,
-                                                      ConcavePolygon2DReadOnly polygonB,
-                                                      LinkedPointList polygonBList,
-                                                      Collection<LinkedPoint> unassignedListB,
-                                                      boolean checkOnListB)
-   {
-      LinkedPoint linkedPoint = null;
-      boolean useListA = false;
-      if (checkOnListB)
-      {
-         linkedPoint = findVertexOutsideOfPolygon(polygonA, unassignedListB);
-         useListA = false;
-      }
-      if (linkedPoint == null && checkOnListA)
-      {
-         linkedPoint = findVertexOutsideOfPolygon(polygonB, unassignedListA);
-         useListA = true;
-      }
-
-//      if (linkedPoint == null)
-//      {
-//         linkedPoint = findIntersectionPoint(unassignedListB);
-//         useListA = false;
-//      }
-
-      if (linkedPoint == null)
-         return null;
-
-      return new LinkedPointProvider(linkedPoint, polygonAList, polygonBList, unassignedListA, unassignedListB, useListA);
    }
 
    public static List<ConcavePolygon2DBasics> removeAreaInsideClip(ConcavePolygon2DReadOnly clippingPolygon, ConcavePolygon2DReadOnly polygonToClip)
@@ -171,16 +155,19 @@ public class PolygonClippingAndMerging
 
       Collection<LinkedPoint> unassignedToClipPoints = polygonToClipList.getPointsCopy();
       Collection<LinkedPoint> unassignedClippingPoints = clippingPolygonList.getPointsCopy();
-      LinkedPointProvider pointProvider = getPointProvider(clippingPolygon, clippingPolygonList, unassignedClippingPoints, false, polygonToClip, polygonToClipList, unassignedToClipPoints, true);
+      LinkedPointProvider pointProvider = new LinkedPointProvider(clippingPolygonList, polygonToClipList, unassignedClippingPoints, unassignedToClipPoints);
 
-      int counter = 0;
-      while (pointProvider != null && counter++ < STUPID_LARGE)
+      LinkedPoint startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedToClipPoints);
+
+      while (startPoint != null)
       {
+         pointProvider.setStart(startPoint, false);
+
          ConcavePolygon2D clippedPolygon = new ConcavePolygon2D();
          walkAlongEdgeOfPolygon(pointProvider, clippedPolygon);
          clippedPolygonsToReturn.add(clippedPolygon);
 
-         pointProvider = getPointProvider(clippingPolygon, clippingPolygonList, unassignedClippingPoints, false, polygonToClip, polygonToClipList, unassignedToClipPoints, true);
+         startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedToClipPoints);
       }
 
       return clippedPolygonsToReturn;
@@ -230,42 +217,5 @@ public class PolygonClippingAndMerging
       }
 
       return null;
-   }
-
-   private static LinkedPoint findIntersectionInsideOfPolygon(ConcavePolygon2DReadOnly polygon, Collection<LinkedPoint> points)
-   {
-      for (LinkedPoint point : points)
-      {
-         if (polygon.isPointInside(point.getPoint()))
-            return point;
-      }
-
-      return null;
-   }
-
-   private static LinkedPoint findIntersectionPoint( Collection<LinkedPoint> polygon)
-   {
-      for (LinkedPoint point : polygon)
-      {
-         if (point.getIsIntersectionPoint())
-            return point;
-      }
-
-      return null;
-   }
-
-   private static void removePointsFromList(Collection<LinkedPoint> listToEdit, Collection<LinkedPoint> pointsToRemove)
-   {
-      for (LinkedPoint pointToRemove : pointsToRemove)
-      {
-         for (LinkedPoint other : listToEdit)
-         {
-            if (other.getPoint().epsilonEquals(pointToRemove.getPoint(), 1e-7))
-            {
-               listToEdit.remove(other);
-               break;
-            }
-         }
-      }
    }
 }

@@ -6,31 +6,35 @@ class LinkedPointProvider
 {
    private final LinkedPointList listA;
    private final LinkedPointList listB;
-   private final LinkedPoint startVertex;
 
    private final Collection<LinkedPoint> listAPool;
    private final Collection<LinkedPoint> listBPool;
 
+   private LinkedPoint startVertex;
    private LinkedPointList activeList;
    private LinkedPoint currentPoint;
    private boolean usingListA;
 
-   public LinkedPointProvider(LinkedPoint startVertex,
-                              LinkedPointList listA,
+   public LinkedPointProvider(LinkedPointList listA,
                               LinkedPointList listB,
                               Collection<LinkedPoint> listAPool,
-                              Collection<LinkedPoint> listBPool,
-                              boolean usingListA)
+                              Collection<LinkedPoint> listBPool)
    {
-      this.startVertex = startVertex;
       this.listA = listA;
       this.listB = listB;
       this.listAPool = listAPool;
       this.listBPool = listBPool;
-      this.usingListA = usingListA;
+   }
 
-      activeList = listA;
-      currentPoint = startVertex;
+   public void setStart(LinkedPoint startVertex, boolean usingListA)
+   {
+      this.startVertex = startVertex;
+      this.usingListA = usingListA;
+      this.currentPoint = startVertex;
+      if (usingListA)
+         activeList = listA;
+      else
+         activeList = listB;
    }
 
    public LinkedPoint switchList()

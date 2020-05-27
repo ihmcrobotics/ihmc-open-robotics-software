@@ -19,6 +19,8 @@ public interface ConcavePolygon2DBasics extends ConcavePolygon2DReadOnly, Transf
 
    void clear();
 
+   void clearAndUpdate();
+
    default void setToZero()
    {
       this.clear();
