@@ -2,18 +2,12 @@ package us.ihmc.robotics.screwTheory;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.algorithms.ExplicitLoopClosureFunction;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
-import us.ihmc.mecano.spatial.Wrench;
-import us.ihmc.mecano.spatial.interfaces.FixedFrameWrenchBasics;
-import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
-import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.robotics.kinematics.fourbar.FourBar;
 import us.ihmc.robotics.kinematics.fourbar.FourBarAngle;
 import us.ihmc.robotics.kinematics.fourbar.FourBarVertex;
@@ -35,7 +29,7 @@ import us.ihmc.robotics.screwTheory.FourBarKinematicLoopTools.FourBarToJointConv
  *   end-effector    end-effector
  * </pre>
  */
-public class FourBarKinematicLoop implements ExplicitLoopClosureFunction
+public class FourBarKinematicLoop
 {
    private static final double EPSILON = 1.0e-7;
 
@@ -131,50 +125,9 @@ public class FourBarKinematicLoop implements ExplicitLoopClosureFunction
       }
    }
 
-   @Override
    public List<? extends JointReadOnly> getKinematicLoopJoints()
    {
       return joints;
-   }
-
-   private final DMatrixRMaj[] jointTauMatrices = new DMatrixRMaj[4];
-   private final FixedFrameWrenchBasics[] jointWrenches = new FixedFrameWrenchBasics[4];
-   private final double[] jointTauOld = new double[4];
-   private final Wrench wrenchForPredecessor = new Wrench();
-
-   @Override
-   public void recomputeJointEfforts(Map<JointReadOnly, JointEffortData> jointDataToUpdate, SpatialForceReadOnly spatialForceFromChildren)
-   {
-      updateInnerJacobian();
-
-      double masterTau = 0.0;
-
-      for (int i = 0; i < 4; i++)
-      {
-         RevoluteJointBasics joint = joints.get(i);
-         JointEffortData jointEffortData = jointDataToUpdate.get(joint);
-
-         DMatrixRMaj jointTau = jointEffortData.getTau();
-         jointTauMatrices[i] = jointTau;
-         jointWrenches[i] = jointEffortData.getJointWrench();
-         jointTauOld[i] = jointTau.get(0);
-
-         masterTau += innerJacobianMatrix.get(i, 0) * jointTau.get(0);
-         jointTau.set(0, 0.0);
-      }
-
-      // Let's use the wrench on jointA and add the tau of the master joint to it.
-      wrenchForPredecessor.setIncludingFrame(jointWrenches[0]);
-      wrenchForPredecessor.changeFrame(jointWrenches[1].getReferenceFrame());
-      wrenchForPredecessor.add((SpatialForceReadOnly) jointWrenches[1]);
-      
-      jointTauMatrices[masterJointIndex].set(0, masterTau);
-   }
-
-   @Override
-   public WrenchReadOnly getWrenchForPredecessor()
-   {
-      return wrenchForPredecessor;
    }
 
    private void clampMasterJointPosition()
