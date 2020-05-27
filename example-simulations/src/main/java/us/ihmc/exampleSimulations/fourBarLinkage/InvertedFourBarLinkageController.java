@@ -1,6 +1,8 @@
 package us.ihmc.exampleSimulations.fourBarLinkage;
 
-import java.util.Collections;
+import static us.ihmc.exampleSimulations.fourBarLinkage.InvertedFourBarLinkageRobotDescription.HAS_SHOULDER_JOINT;
+import static us.ihmc.exampleSimulations.fourBarLinkage.InvertedFourBarLinkageRobotDescription.HAS_WRIST_JOINT;
+
 import java.util.List;
 import java.util.Random;
 
@@ -33,7 +35,6 @@ import us.ihmc.robotics.robotDescription.JointDescription;
 import us.ihmc.robotics.robotDescription.LinkDescription;
 import us.ihmc.robotics.robotDescription.LoopClosureConstraintDescription;
 import us.ihmc.robotics.robotDescription.LoopClosurePinConstraintDescription;
-import us.ihmc.robotics.robotDescription.LoopClosureSliderConstraintDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
@@ -48,8 +49,6 @@ import us.ihmc.yoVariables.variable.YoDouble;
 
 public class InvertedFourBarLinkageController implements RobotController
 {
-   private static final boolean HAS_SHOULDER_JOINT = InvertedFourBarLinkageRobotDescription.HAS_SHOULDER_JOINT;
-
    private final YoVariableRegistry registry = new YoVariableRegistry(getName());
    private final RigidBodyBasics rootBody;
    private final FourBarKinematicLoop fourBarKinematicLoop;
@@ -59,12 +58,14 @@ public class InvertedFourBarLinkageController implements RobotController
 
    private final SineGenerator shoulderFunctionGenerator;
    private final SineGenerator fourBarFunctionGenerator;
+   private final SineGenerator wristFunctionGenerator;
    private final RevoluteJointBasics shoulderJoint;
    private final RevoluteJointBasics masterJoint;
    private final RevoluteJointBasics jointA;
    private final RevoluteJointBasics jointB;
    private final RevoluteJointBasics jointC;
    private final RevoluteJointBasics jointD;
+   private final RevoluteJointBasics wristJoint;
    private final MultiBodySystemBasics multiBodySystem;
 
    private final YoDouble kp = new YoDouble("kp", registry);
@@ -87,9 +88,9 @@ public class InvertedFourBarLinkageController implements RobotController
       jointD = findJoint(robotDescription.getJointDName());
       fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", new RevoluteJointBasics[] {jointA, jointB, jointC, jointD}, 0);
       masterJoint = fourBarKinematicLoop.getMasterJoint();
+      wristJoint = HAS_WRIST_JOINT ? findJoint(robotDescription.getWristJointName()) : null;
 
       inverseDynamicsCalculator = new InverseDynamicsCalculator(rootBody);
-      inverseDynamicsCalculator.configureKinematicLoops(Collections.singletonList(fourBarKinematicLoop));
       inverseDynamicsCalculator.setGravitionalAcceleration(robot.getGravityX(), robot.getGravityY(), robot.getGravityZ());
 
       Random random = new Random(461);
@@ -116,6 +117,20 @@ public class InvertedFourBarLinkageController implements RobotController
       fourBarFunctionGenerator.setFrequency(EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0));
       fourBarFunctionGenerator.setPhase(EuclidCoreRandomTools.nextDouble(random, Math.PI));
       fourBarFunctionGenerator.setOffset(masterJointMidRange);
+
+      if (HAS_WRIST_JOINT)
+      {
+         wristFunctionGenerator = new SineGenerator("wristFunction", robot.getYoTime());
+         double wristRange = wristJoint.getJointLimitUpper() - wristJoint.getJointLimitLower();
+         wristFunctionGenerator.setAmplitude(EuclidCoreRandomTools.nextDouble(random, 0.0, 0.5 * wristRange));
+         wristFunctionGenerator.setFrequency(EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0));
+         wristFunctionGenerator.setPhase(EuclidCoreRandomTools.nextDouble(random, Math.PI));
+         wristFunctionGenerator.setOffset(EuclidCoreRandomTools.nextDouble(random, 0.5 * wristRange - wristFunctionGenerator.amplitude.getValue()));
+      }
+      else
+      {
+         wristFunctionGenerator = null;
+      }
 
       kp.set(10.0);
       zeta.set(1.0);
@@ -187,6 +202,8 @@ public class InvertedFourBarLinkageController implements RobotController
       if (HAS_SHOULDER_JOINT)
          shoulderFunctionGenerator.update();
       fourBarFunctionGenerator.update();
+      if (HAS_WRIST_JOINT)
+         wristFunctionGenerator.update();
 
       double kd = GainCalculator.computeDerivativeGain(kp.getValue(), zeta.getValue());
 
@@ -207,6 +224,16 @@ public class InvertedFourBarLinkageController implements RobotController
       double qdd_d_master = kp.getValue() * (q_d_master - q_master) + kd * (qd_d_master - qd_master) + fourBarFunctionGenerator.getAcceleration();
       masterJoint.setQdd(qdd_d_master);
 
+      if (HAS_WRIST_JOINT)
+      {
+         double q_d_wrist = wristFunctionGenerator.getPosition();
+         double q_wrist = wristJoint.getQ();
+         double qd_d_wrist = wristFunctionGenerator.getVelocity();
+         double qd_wrist = wristJoint.getQd();
+         double qdd_d_wrist = kp.getValue() * (q_d_wrist - q_wrist) + kd * (qd_d_wrist - qd_wrist) + wristFunctionGenerator.getAcceleration();
+         wristJoint.setQdd(qdd_d_wrist);
+      }
+
       fourBarKinematicLoop.update();
 
       for (int i = 0; i < oneDoFJoints.length; i++)
@@ -216,6 +243,7 @@ public class InvertedFourBarLinkageController implements RobotController
 
       inverseDynamicsCalculator.compute();
       inverseDynamicsCalculator.writeComputedJointWrenches(multiBodySystem.getAllJoints());
+      fourBarKinematicLoop.updateEffort();
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -320,12 +348,6 @@ public class InvertedFourBarLinkageController implements RobotController
          {
             Vector3DBasics axis = ((LoopClosurePinConstraintDescription) constraintDescription).getAxis();
             RevoluteJoint constraintJoint = new RevoluteJoint(name, constraintPredecessor, offsetFromParentJoint, axis);
-            constraintJoint.setupLoopClosure(constraintSuccessor, new RigidBodyTransform(new Quaternion(), offsetFromLinkParentJoint));
-         }
-         else if (constraintDescription instanceof LoopClosureSliderConstraintDescription)
-         {
-            Vector3DBasics axis = ((LoopClosureSliderConstraintDescription) constraintDescription).getAxis();
-            PrismaticJoint constraintJoint = new PrismaticJoint(name, constraintPredecessor, offsetFromParentJoint, axis);
             constraintJoint.setupLoopClosure(constraintSuccessor, new RigidBodyTransform(new Quaternion(), offsetFromLinkParentJoint));
          }
          else

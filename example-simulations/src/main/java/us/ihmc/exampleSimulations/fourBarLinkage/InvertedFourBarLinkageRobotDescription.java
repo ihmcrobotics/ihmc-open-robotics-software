@@ -51,12 +51,14 @@ import us.ihmc.robotics.robotDescription.RobotDescription;
 public class InvertedFourBarLinkageRobotDescription extends RobotDescription
 {
    public static final boolean HAS_SHOULDER_JOINT = true;
+   public static final boolean HAS_WRIST_JOINT = true;
 
    private final String shoulderJointName = "shoulder";
    private final String jointAName = "fourBarA";
    private final String jointBName = "fourBarB";
    private final String jointCName = "fourBarC";
    private final String jointDName = "fourBarD";
+   private final String wristJointName = "wrist";
 
    public InvertedFourBarLinkageRobotDescription()
    {
@@ -79,6 +81,7 @@ public class InvertedFourBarLinkageRobotDescription extends RobotDescription
       jointCOffsetFromD.setAndScale(-lengthCD, axisCD);
       Vector3D jointCOffsetFromB = new Vector3D(0.0, 0.0, lengthBC);
       Vector3D jointDOffset = new Vector3D(upperarmLength, 0.0, -0.5 * lengthDA);
+      Vector3D wristJointOffset = new Vector3D(forearmLength, 0.0, 0.5 * lengthBC);
 
       PinJointDescription shoulderJoint = null;
       if (HAS_SHOULDER_JOINT)
@@ -92,6 +95,14 @@ public class InvertedFourBarLinkageRobotDescription extends RobotDescription
       LoopClosurePinConstraintDescription fourBarJointC = new LoopClosurePinConstraintDescription(jointCName, jointCOffsetFromD, jointCOffsetFromB, Axis3D.Y);
       fourBarJointC.setGains(1.0e6, 5000.0);
       PinJointDescription fourBarJointD = new PinJointDescription(jointDName, jointDOffset, Axis3D.Y);
+
+      PinJointDescription wristJoint = null;
+
+      if (HAS_WRIST_JOINT)
+      {
+         wristJoint = new PinJointDescription(wristJointName, wristJointOffset, Axis3D.Y);
+         wristJoint.setLimitStops(-Math.PI, Math.PI, 100.0, 10.0);
+      }
 
       Vector3D offsetAB = new Vector3D();
       offsetAB.setAndScale(0.5 * lengthAB, axisAB);
@@ -119,12 +130,23 @@ public class InvertedFourBarLinkageRobotDescription extends RobotDescription
       LinkDescription forearm = newCylinderLinkDescription("forearm", forearmLength, 0.025, 1.0, Axis3D.X, forearmOffset, YoAppearance.BlueViolet(), true);
       forearm = merge("forearm", linkBC, forearm);
 
+      LinkDescription hand = null;
+
+      if (HAS_WRIST_JOINT)
+      {
+         double handLength = 0.2;
+         Vector3D handOffset = new Vector3D(0.5 * handLength, 0.0, 0.0);
+         hand = newCylinderLinkDescription("hand", handLength, 0.0125, 1.0, Axis3D.X, handOffset, YoAppearance.CornflowerBlue(), false);
+      }
+
       if (HAS_SHOULDER_JOINT)
          shoulderJoint.setLink(upperarm);
       fourBarJointA.setLink(linkAB);
       fourBarJointB.setLink(forearm);
       fourBarJointC.setLink(forearm);
       fourBarJointD.setLink(linkCD);
+      if (HAS_WRIST_JOINT)
+         wristJoint.setLink(hand);
 
       if (HAS_SHOULDER_JOINT)
       {
@@ -141,6 +163,10 @@ public class InvertedFourBarLinkageRobotDescription extends RobotDescription
       fourBarJointA.addJoint(fourBarJointB);
       fourBarJointD.addConstraint(fourBarJointC);
 
+      if (HAS_WRIST_JOINT)
+      {
+         fourBarJointB.addJoint(wristJoint);
+      }
    }
 
    public String getShoulderJointName()
@@ -169,6 +195,14 @@ public class InvertedFourBarLinkageRobotDescription extends RobotDescription
    public String getJointDName()
    {
       return jointDName;
+   }
+
+   public String getWristJointName()
+   {
+      if (HAS_WRIST_JOINT)
+         return wristJointName;
+      else
+         return null;
    }
 
    private static LinkDescription newCylinderLinkDescription(String name, double length, double radius, double mass, Vector3DReadOnly axis,
