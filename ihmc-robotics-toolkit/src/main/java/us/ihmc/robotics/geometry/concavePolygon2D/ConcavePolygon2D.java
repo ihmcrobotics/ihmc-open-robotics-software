@@ -5,6 +5,7 @@ import us.ihmc.euclid.geometry.interfaces.BoundingBox2DBasics;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -115,6 +116,8 @@ public class ConcavePolygon2D implements ConcavePolygon2DBasics
       if (!GeometryPolygonTools.isSimplePolygon(vertexBuffer, numberOfVertices))
          throw new RuntimeException("Polygon is not simple, as in it has self intersections.");
 
+      removePointsThatAreNotVertices();
+
       // TODO should maybe do alpha shape?
       isUpToDate = true;
 
@@ -193,5 +196,21 @@ public class ConcavePolygon2D implements ConcavePolygon2DBasics
       while (i >= vertexBuffer.size())
          vertexBuffer.add(new Point2D());
       vertexBuffer.get(i).set(x, y);
+   }
+
+   private void removePointsThatAreNotVertices()
+   {
+      int i = 0;
+      while (i < getNumberOfVertices())
+      {
+         Point2DReadOnly previousVertex = getVertex(EuclidGeometryPolygonTools.previous(i, getNumberOfVertices()));
+         Point2DReadOnly vertex = getVertex(i);
+         Point2DReadOnly nextVertex = getVertex(EuclidGeometryPolygonTools.next(i, getNumberOfVertices()));
+
+         if (EuclidGeometryTools.areLine2DsCollinear(previousVertex, vertex, vertex, nextVertex, 1e-2, 1e-5))
+            removeVertex(i);
+         else
+            i++;
+      }
    }
 }

@@ -566,6 +566,61 @@ public class PolygonClippingAndMergingTest
    }
 
    @Test
+   public void testClippingWithOneCommonVertex()
+   {
+      ConcavePolygon2D polygonToClip = new ConcavePolygon2D();
+      polygonToClip.addVertex(1.0, 1.0);
+      polygonToClip.addVertex(1.0, -1.0);
+      polygonToClip.addVertex(-1.0, -1.0);
+      polygonToClip.addVertex(-1.0, 1.0);
+      polygonToClip.update();
+
+      ConcavePolygon2D clippingPolygon = new ConcavePolygon2D();
+      clippingPolygon.addVertex(-0.5, 1.5);
+      clippingPolygon.addVertex(0.5, 1.5);
+      clippingPolygon.addVertex(0, 1.0);
+      clippingPolygon.update();
+
+      ConcavePolygon2D clippedPolygonExpected = new ConcavePolygon2D();
+      clippedPolygonExpected.addVertex(1.0, 1.0);
+      clippedPolygonExpected.addVertex(1.0, -1.0);
+      clippedPolygonExpected.addVertex(-1.0, -1.0);
+      clippedPolygonExpected.addVertex(-1.0, 1.0);
+      clippedPolygonExpected.addVertex(0.0, 1.0);
+      clippedPolygonExpected.update();
+
+      List<ConcavePolygon2DBasics> clippedPolygons = PolygonClippingAndMerging.removeAreaInsideClip(clippingPolygon, polygonToClip);
+
+      assertEquals(1, clippedPolygons.size());
+
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(clippedPolygonExpected, clippedPolygons.get(0), 1e-7);
+   }
+
+   @Test
+   public void testMergingWithOneCommonVertex()
+   {
+      ConcavePolygon2D polygonToClip = new ConcavePolygon2D();
+      polygonToClip.addVertex(1.0, 1.0);
+      polygonToClip.addVertex(1.0, -1.0);
+      polygonToClip.addVertex(-1.0, -1.0);
+      polygonToClip.addVertex(-1.0, 1.0);
+      polygonToClip.update();
+
+      ConcavePolygon2D clippingPolygon = new ConcavePolygon2D();
+      clippingPolygon.addVertex(-0.5, 1.5);
+      clippingPolygon.addVertex(0.5, 1.5);
+      clippingPolygon.addVertex(0, 1.0);
+      clippingPolygon.update();
+
+      ConcavePolygon2D mergedPolygonExpected = new ConcavePolygon2D(clippingPolygon);
+      ConcavePolygon2D mergedPolygon = new ConcavePolygon2D();
+      assertTrue(GeometryPolygonTools.doPolygonsIntersect(polygonToClip, clippingPolygon));
+      PolygonClippingAndMerging.merge(clippingPolygon, polygonToClip, mergedPolygon);
+
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(mergedPolygonExpected, mergedPolygon, 1e-7);
+   }
+
+   @Test
    public void testClippingRemoveComplexShapeAcrossTopEdge()
    {
       ConcavePolygon2D polygonToClip = new ConcavePolygon2D();

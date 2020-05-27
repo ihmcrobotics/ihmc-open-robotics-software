@@ -8,8 +8,9 @@ import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.ClippingTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.LinkedPoint;
 import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.LinkedPointList;
 
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
+import javax.sound.sampled.Clip;
+
+import static us.ihmc.robotics.Assert.*;
 
 public class ClippingToolsTest
 {
@@ -92,7 +93,6 @@ public class ClippingToolsTest
       polygonAWithIntersectionsExpected.addVertex(-1.0, -1.0);
       polygonAWithIntersectionsExpected.update();
 
-
       ConcavePolygon2D polygonBWithIntersectionsExpected = new ConcavePolygon2D();
       polygonBWithIntersectionsExpected.addVertex(0.5, 0.5);
       polygonBWithIntersectionsExpected.addVertex(1.0, 0.5);
@@ -105,22 +105,86 @@ public class ClippingToolsTest
       ClippingTools.insertIntersectionsIntoList(pointListA, polygonB);
 
       LinkedPoint pointOnA = pointListA.getFirstPoint();
-      for (int i = 0; i < polygonAWithIntersectionsExpected.getNumberOfVertices(); i++)
-      {
-         EuclidCoreTestTools.assertPoint2DGeometricallyEquals("Failed at vertex " + i, polygonAWithIntersectionsExpected.getVertex(i), pointOnA.getPoint(), 1e-6);
-         pointOnA = pointOnA.getSuccessor();
-      }
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals("Failed at vertex 0" ,
+                                                           polygonAWithIntersectionsExpected.getVertex(0),
+                                                           pointOnA.getPoint(),
+                                                           1e-6);
+      pointOnA = pointOnA.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals("Failed at vertex 1" ,
+                                                           polygonAWithIntersectionsExpected.getVertex(1),
+                                                           pointOnA.getPoint(),
+                                                           1e-6);
+      pointOnA = pointOnA.getSuccessor();// midpoint
+      pointOnA = pointOnA.getSuccessor();// midpoint
+      pointOnA = pointOnA.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals("Failed at vertex 2" ,
+                                                           polygonAWithIntersectionsExpected.getVertex(2),
+                                                           pointOnA.getPoint(),
+                                                           1e-6);
+      pointOnA = pointOnA.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals("Failed at vertex 3" ,
+                                                           polygonAWithIntersectionsExpected.getVertex(3),
+                                                           pointOnA.getPoint(),
+                                                           1e-6);
+      pointOnA = pointOnA.getSuccessor();
+      assertEquals(4, polygonAWithIntersectionsExpected.getNumberOfVertices());
       assertTrue(pointOnA == pointListA.getFirstPoint());
 
       ClippingTools.insertIntersectionsIntoList(pointListB, polygonA);
 
       LinkedPoint pointOnB = pointListB.getFirstPoint();
-      for (int i = 0; i < polygonAWithIntersectionsExpected.getNumberOfVertices(); i++)
-      {
-         EuclidCoreTestTools.assertPoint2DGeometricallyEquals("Failed at vertex " + i, polygonBWithIntersectionsExpected.getVertex(i), pointOnB.getPoint(), 1e-6);
-         pointOnB = pointOnB.getSuccessor();
-      }
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals("Failed at vertex 0" ,
+                                                           polygonBWithIntersectionsExpected.getVertex(0),
+                                                           pointOnB.getPoint(),
+                                                           1e-6);
+      pointOnB = pointOnB.getSuccessor();
+      pointOnB = pointOnB.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals("Failed at vertex 1" ,
+                                                           polygonBWithIntersectionsExpected.getVertex(1),
+                                                           pointOnB.getPoint(),
+                                                           1e-6);
+      pointOnB = pointOnB.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals("Failed at vertex 2" ,
+                                                           polygonBWithIntersectionsExpected.getVertex(2),
+                                                           pointOnB.getPoint(),
+                                                           1e-6);
+      pointOnB = pointOnB.getSuccessor();
+      pointOnB = pointOnB.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals("Failed at vertex 3" ,
+                                                           polygonBWithIntersectionsExpected.getVertex(3),
+                                                           pointOnB.getPoint(),
+                                                           1e-6);
+
+      pointOnB = pointOnB.getSuccessor();
       assertTrue(pointOnB == pointListB.getFirstPoint());
+   }
+
+   @Test
+   public void testSingleVertexIntersection()
+   {
+      ConcavePolygon2D polygonToClip = new ConcavePolygon2D();
+      polygonToClip.addVertex(1.0, 1.0);
+      polygonToClip.addVertex(1.0, -1.0);
+      polygonToClip.addVertex(-1.0, -1.0);
+      polygonToClip.addVertex(-1.0, 1.0);
+      polygonToClip.update();
+
+      ConcavePolygon2D clippingPolygon = new ConcavePolygon2D();
+      clippingPolygon.addVertex(-0.5, 1.5);
+      clippingPolygon.addVertex(0.5, 1.5);
+      clippingPolygon.addVertex(0, 1.0);
+      clippingPolygon.update();
+
+      LinkedPointList pointList = ClippingTools.createLinkedPointList(polygonToClip);
+      ClippingTools.insertIntersectionsIntoList(pointList, clippingPolygon);
+
+      LinkedPoint vertex = pointList.getFirstPoint();
+      do
+      {
+         assertFalse(vertex.getIsIntersectionPoint());
+         vertex = vertex.getSuccessor();
+      }
+      while (vertex != pointList.getFirstPoint());
    }
 
    @Test
@@ -168,4 +232,221 @@ public class ClippingToolsTest
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.5, 1.0), pointB.getPoint(), 1e-7);
    }
 
+   @Test
+   public void testInsertIntersections()
+   {
+      ConcavePolygon2D polygon1 = new ConcavePolygon2D();
+      polygon1.addVertex(-1.0, 1.0);
+      polygon1.addVertex(1.0, 1.0);
+      polygon1.addVertex(1.0, -1.0);
+      polygon1.addVertex(-1.0, -1.0);
+      polygon1.update();
+
+      ConcavePolygon2D polygon2 = new ConcavePolygon2D();
+      polygon2.addVertex(0.5, 0.5);
+      polygon2.addVertex(1.5, 0.5);
+      polygon2.addVertex(1.5, -0.5);
+      polygon2.addVertex(0.5, -0.5);
+      polygon2.update();
+
+      LinkedPointList list = ClippingTools.createLinkedPointList(polygon1);
+      ClippingTools.insertIntersectionsIntoList(list, polygon2);
+
+      LinkedPoint point = list.getFirstPoint();
+      point = point.getSuccessor();
+      point = point.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.0, 0.5), point.getPoint(), 1e-7);
+      assertTrue(point.getIsIntersectionPoint());
+      assertTrue(point.isIncomingIntersection());
+      assertFalse(point.isOutgoingIntersection());
+
+      point = point.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.0, -0.5), point.getPoint(), 1e-7);
+      assertTrue(point.getIsIntersectionPoint());
+      assertFalse(point.isIncomingIntersection());
+      assertTrue(point.isOutgoingIntersection());
+   }
+
+   @Test
+   public void testInsertIntersections2()
+   {
+      ConcavePolygon2D polygon1 = new ConcavePolygon2D();
+      polygon1.addVertex(-1.0, 1.0);
+      polygon1.addVertex(1.0, 1.0);
+      polygon1.addVertex(1.0, -1.0);
+      polygon1.addVertex(-1.0, -1.0);
+      polygon1.update();
+
+      ConcavePolygon2D polygon2 = new ConcavePolygon2D();
+      polygon2.addVertex(-1.0, 1.5);
+      polygon2.addVertex(1.0, 1.5);
+      polygon2.addVertex(0.0, 0.5);
+      polygon2.update();
+
+      LinkedPointList list = ClippingTools.createLinkedPointList(polygon1);
+      ClippingTools.insertIntersectionsIntoList(list, polygon2);
+
+      LinkedPoint point = list.getFirstPoint();
+      point = point.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-0.5, 1.0), point.getPoint(), 1e-7);
+      assertTrue(point.getIsIntersectionPoint());
+      assertTrue(point.isIncomingIntersection());
+      assertFalse(point.isOutgoingIntersection());
+
+      point = point.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.5, 1.0), point.getPoint(), 1e-7);
+      assertTrue(point.getIsIntersectionPoint());
+      assertTrue(point.isOutgoingIntersection());
+      assertFalse(point.isIncomingIntersection());
+
+      list = ClippingTools.createLinkedPointList(polygon2);
+      ClippingTools.insertIntersectionsIntoList(list, polygon1);
+      point = list.getFirstPoint();
+      point = point.getSuccessor();
+      point = point.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.5, 1.0), point.getPoint(), 1e-7);
+      assertTrue(point.getIsIntersectionPoint());
+      assertTrue(point.isIncomingIntersection());
+      assertFalse(point.isOutgoingIntersection());
+
+      point = point.getSuccessor();
+      point = point.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-0.5, 1.0), point.getPoint(), 1e-7);
+      assertTrue(point.getIsIntersectionPoint());
+      assertFalse(point.isIncomingIntersection());
+      assertTrue(point.isOutgoingIntersection());
+   }
+
+   @Test
+   public void testInsertIntersections3()
+   {
+      ConcavePolygon2D polygon1 = new ConcavePolygon2D();
+      polygon1.addVertex(-1.0, 1.0);
+      polygon1.addVertex(1.0, 1.0);
+      polygon1.addVertex(1.0, -1.0);
+      polygon1.addVertex(-1.0, -1.0);
+      polygon1.update();
+
+      ConcavePolygon2D polygon2 = new ConcavePolygon2D();
+      polygon2.addVertex(-0.5, 1.5);
+      polygon2.addVertex(0.5, 1.5);
+      polygon2.addVertex(0.0, 1.0);
+      polygon2.update();
+
+      LinkedPointList list = ClippingTools.createLinkedPointList(polygon1);
+      ClippingTools.insertIntersectionsIntoList(list, polygon2);
+
+      LinkedPoint point = list.getFirstPoint();
+      point = point.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0, 1.0), point.getPoint(), 1e-7);
+      assertFalse(point.getIsIntersectionPoint());
+      assertTrue(point.isIncomingIntersection());
+      assertTrue(point.isOutgoingIntersection());
+
+      list = ClippingTools.createLinkedPointList(polygon2);
+      ClippingTools.insertIntersectionsIntoList(list, polygon1);
+      point = list.getFirstPoint();
+      point = point.getSuccessor();
+      point = point.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.0, 1.0), point.getPoint(), 1e-7);
+      assertFalse(point.getIsIntersectionPoint());
+      assertTrue(point.isIncomingIntersection());
+      assertTrue(point.isOutgoingIntersection());
+   }
+
+   @Test
+   public void testInsertIntersections4()
+   {
+      ConcavePolygon2D uPolygon = new ConcavePolygon2D();
+      uPolygon.addVertex(-1.0, 1.0);
+      uPolygon.addVertex(-0.9, 1.0);
+      uPolygon.addVertex(-0.9, -0.9);
+      uPolygon.addVertex(0.9, -0.9);
+      uPolygon.addVertex(0.9, 1.0);
+      uPolygon.addVertex(1.0, 1.0);
+      uPolygon.addVertex(1.0, -1.0);
+      uPolygon.addVertex(-1.0, -1.0);
+      uPolygon.update();
+
+      ConcavePolygon2D hat = new ConcavePolygon2D();
+      hat.addVertex(-1.0, 1.0);
+      hat.addVertex(1.0, 1.0);
+      hat.addVertex(1.0, 0.9);
+      hat.addVertex(-1.0, 0.9);
+      hat.update();
+
+      LinkedPointList list = ClippingTools.createLinkedPointList(uPolygon);
+      ClippingTools.insertIntersectionsIntoList(list, hat);
+
+      LinkedPoint point = list.getFirstPoint();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, 1.0), point.getPoint(), 1e-7);
+      assertFalse(point.getIsIntersectionPoint());
+      assertTrue(point.isIncomingIntersection());
+      assertTrue(point.isOutgoingIntersection());
+
+      point = point.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-0.9, 1.0), point.getPoint(), 1e-7);
+      assertTrue(point.getIsIntersectionPoint());
+      assertFalse(point.isIncomingIntersection());
+      assertTrue(point.isOutgoingIntersection());
+
+      point = point.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, 0.9), point.getPoint(), 1e-7);
+      assertFalse(point.getIsIntersectionPoint());
+      assertTrue(point.isIncomingIntersection());
+      assertTrue(point.isOutgoingIntersection());
+
+   }
+
+   @Test
+   public void testInsertIntersections5()
+   {
+      ConcavePolygon2D polygon1 = new ConcavePolygon2D();
+      polygon1.addVertex(1.0, 1.0);
+      polygon1.addVertex(1.0, -1.0);
+      polygon1.addVertex(-1.0, -1.0);
+      polygon1.addVertex(-1.0, 1.0);
+      polygon1.update();
+
+      ConcavePolygon2D polygon2 = new ConcavePolygon2D();
+      polygon2.addVertex(-0.1, 1.0);
+      polygon2.addVertex(0.0, 1.1);
+      polygon2.addVertex(0.1, 1.0);
+      polygon2.addVertex(0.1, -1.0);
+      polygon2.addVertex(0.0, -1.1);
+      polygon2.addVertex(-0.1, -1.0);
+      polygon2.update();
+
+      LinkedPointList list = ClippingTools.createLinkedPointList(polygon1);
+      ClippingTools.insertIntersectionsIntoList(list, polygon2);
+
+      LinkedPoint point = list.getFirstPoint();
+      point = point.getSuccessor();
+      point = point.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.1, -1.0), point.getPoint(), 1e-7);
+      assertTrue(point.getIsIntersectionPoint());
+      assertTrue(point.isIncomingIntersection());
+      assertFalse(point.isOutgoingIntersection());
+
+      point = point.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-0.1, -1.0), point.getPoint(), 1e-7);
+      assertTrue(point.getIsIntersectionPoint());
+      assertFalse(point.isIncomingIntersection());
+      assertTrue(point.isOutgoingIntersection());
+
+      point = point.getSuccessor();
+      point = point.getSuccessor();
+      point = point.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-0.1, 1.0), point.getPoint(), 1e-7);
+      assertTrue(point.getIsIntersectionPoint());
+      assertTrue(point.isIncomingIntersection());
+      assertFalse(point.isOutgoingIntersection());
+
+      point = point.getSuccessor();
+      EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.1, 1.0), point.getPoint(), 1e-7);
+      assertTrue(point.getIsIntersectionPoint());
+      assertFalse(point.isIncomingIntersection());
+      assertTrue(point.isOutgoingIntersection());
+
+   }
 }

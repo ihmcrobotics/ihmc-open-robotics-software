@@ -185,21 +185,16 @@ public class SteppableRegionsCalculatorTest
 
       List<StepConstraintRegion> constraintRegions = calculator.computeSteppableRegions();
 
-      ConcavePolygon2D splittingHole = SteppableRegionsCalculator.createObstacleExtrusion(groundRegion,
-                                                                                          blockRegion,
-                                                                                          extrusionDistanceCalculator,
-                                                                                          Math.cos(orthogonalAngle));
-
       ConcavePolygon2D splitPolygon1 = new ConcavePolygon2D();
-      splitPolygon1.addVertex(-1.0, -0.1);
-      splitPolygon1.addVertex(1.0, -0.1);
-      splitPolygon1.addVertex(1.0, -1.0);
       splitPolygon1.addVertex(-1.0, -1.0);
+      splitPolygon1.addVertex(-1.0, 1.0);
+      splitPolygon1.addVertex(-0.1, 1.0);
+      splitPolygon1.addVertex(-0.1, -1.0);
       ConcavePolygon2D splitPolygon2 = new ConcavePolygon2D();
-      splitPolygon2.addVertex(-1.0, 0.1);
-      splitPolygon2.addVertex(-1.0, 1.0);
+      splitPolygon2.addVertex(0.1, 1.0);
       splitPolygon2.addVertex(1.0, 1.0);
-      splitPolygon2.addVertex(1.0, 0.1);
+      splitPolygon2.addVertex(1.0, -1.0);
+      splitPolygon2.addVertex(0.1, -1.0);
 
       StepConstraintRegion expectedGroundRegion1 = new StepConstraintRegion(new RigidBodyTransform(), splitPolygon1);
       StepConstraintRegion expectedGroundRegion2 = new StepConstraintRegion(new RigidBodyTransform(), splitPolygon2);
@@ -212,8 +207,8 @@ public class SteppableRegionsCalculatorTest
       assertEquals(0, returnedGroundRegion1.getNumberOfHolesInRegion());
       assertEquals(0, returnedGroundRegion2.getNumberOfHolesInRegion());
 
-      assertStepConstraintRegionsEqual(expectedGroundRegion2, returnedGroundRegion2, epsilon);
       assertStepConstraintRegionsEqual(expectedGroundRegion1, returnedGroundRegion1, epsilon);
+      assertStepConstraintRegionsEqual(expectedGroundRegion2, returnedGroundRegion2, epsilon);
    }
 
    @Test
@@ -517,7 +512,7 @@ public class SteppableRegionsCalculatorTest
       wallPolygon1.addVertex(-1.0, -1.0);
       wallPolygon1.update();
       RigidBodyTransform wallTransform1 = new RigidBodyTransform();
-      wallTransform1.appendRollRotation(Math.toRadians(90));
+      wallTransform1.appendPitchRotation(Math.toRadians(90));
 
       ConvexPolygon2D wallPolygon2 = new ConvexPolygon2D();
       wallPolygon2.addVertex(-1.0, 1.0);
@@ -526,7 +521,7 @@ public class SteppableRegionsCalculatorTest
       wallPolygon2.addVertex(-1.0, -1.0);
       wallPolygon2.update();
       RigidBodyTransform wallTransform2 = new RigidBodyTransform();
-      wallTransform2.appendPitchRotation(Math.toRadians(90));
+      wallTransform2.appendRollRotation(Math.toRadians(90));
 
       PlanarRegion groundRegion = new PlanarRegion(groundTransform, groundPolygon);
       PlanarRegion wallRegion1 = new PlanarRegion(wallTransform1, wallPolygon1);

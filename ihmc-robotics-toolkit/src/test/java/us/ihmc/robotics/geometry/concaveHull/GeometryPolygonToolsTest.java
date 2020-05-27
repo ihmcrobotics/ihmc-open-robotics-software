@@ -1,9 +1,12 @@
 package us.ihmc.robotics.geometry.concaveHull;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -12,6 +15,7 @@ import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static us.ihmc.robotics.Assert.*;
 
@@ -138,6 +142,79 @@ public class GeometryPolygonToolsTest
 
    }
 
+   @Test
+   public void testIsPointInside()
+   {
+      ConvexPolygon2D convexPolygon = new ConvexPolygon2D();
+      convexPolygon.addVertex(-0.1, 1.0);
+      convexPolygon.addVertex(0.0, 1.1);
+      convexPolygon.addVertex(0.1, 1.0);
+      convexPolygon.addVertex(0.1, -1.0);
+      convexPolygon.addVertex(0.0, -1.1);
+      convexPolygon.addVertex(-0.1, -1.0);
+      convexPolygon.update();
+
+      ConcavePolygon2D concavePolygon = new ConcavePolygon2D(convexPolygon);
+      ConcavePolygon2D concavePolygonOther = new ConcavePolygon2D();
+      concavePolygonOther.addVertex(-0.1, 1.0);
+      concavePolygonOther.addVertex(0.0, 1.1);
+      concavePolygonOther.addVertex(0.1, 1.0);
+      concavePolygonOther.addVertex(0.1, -1.0);
+      concavePolygonOther.addVertex(0.0, -1.1);
+      concavePolygonOther.addVertex(-0.1, -1.0);
+      concavePolygonOther.update();
+
+
+      assertTrue(convexPolygon.isPointInside(0.08, -1.0));
+      assertTrue(concavePolygonOther.isPointInside(0.08, -1.0));
+
+      // test interior points
+      Random random = new Random(1738L);
+      for (int i = 0; i < 10000; i++)
+      {
+         Point2DReadOnly interiorPoint = getRandomInteriorPoint(random, convexPolygon);
+         assertTrue(convexPolygon.isPointInside(interiorPoint));
+         assertTrue(concavePolygon.isPointInside(interiorPoint));
+         assertTrue(concavePolygonOther.isPointInside(interiorPoint));
+         assertTrue(GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(interiorPoint, concavePolygon.getVertexBufferView(), concavePolygon.getNumberOfVertices()));
+      }
+
+      // test point on edge
+      for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
+      {
+         for (int j = 0; j < 100; j++)
+         {
+            Point2DReadOnly vertex = convexPolygon.getVertex(i);
+            Point2DReadOnly nextVertex = convexPolygon.getNextVertex(i);
+
+            Point2D edgePoint = new Point2D();
+            edgePoint.interpolate(vertex, nextVertex, j / 100);
+
+            assertTrue(convexPolygon.isPointInside(edgePoint));
+            assertTrue(concavePolygon.isPointInside(edgePoint));
+            assertTrue(concavePolygonOther.isPointInside(edgePoint));
+
+            assertTrue(GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(edgePoint, concavePolygon.getVertexBufferView(), concavePolygon.getNumberOfVertices()));
+         }
+      }
+   }
+
+   private static Point2DReadOnly getRandomInteriorPoint(Random random, ConvexPolygon2DReadOnly polygon2D)
+   {
+      int numberOfPoints = polygon2D.getNumberOfVertices();
+      double maxAlpha = 1.0;
+      Point2D randomPoint = new Point2D();
+      for (int i = 0; i < numberOfPoints; i++)
+      {
+         double alpha = RandomNumbers.nextDouble(random, 0.0, maxAlpha);
+         maxAlpha -= alpha;
+
+         randomPoint.scaleAdd(alpha, polygon2D.getVertex(i), randomPoint);
+      }
+
+      return randomPoint;
+   }
+
 
    @Test
    public void doPolygonIntersectTest()
@@ -202,6 +279,35 @@ public class GeometryPolygonToolsTest
          assertFalse(GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(polygon1.getVertex(i), polygon2.getVertexBufferView(), 4));
          assertFalse(GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(polygon2.getVertex(i), polygon1.getVertexBufferView(), 4));
       }
+   }
 
+   @Test
+   public void testNastyPointInsideBug()
+   {
+      ConcavePolygon2D polygon1 = new ConcavePolygon2D();
+      polygon1.addVertex(-0.1, 1.0);
+      polygon1.addVertex(0.1, 1.0);
+      polygon1.addVertex(0.1, -1.0);
+      polygon1.addVertex(-0.1, -1.0);
+      polygon1.update();
+
+      assertFalse(GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(-0.3, 1.0, polygon1.getVertexBufferView(), 4));
+   }
+
+   @Test
+   public void testPointInside()
+   {
+      ConcavePolygon2D polygon2 = new ConcavePolygon2D();
+      polygon2.addVertex(-1.0, 1.5);
+      polygon2.addVertex(1.0, 1.5);
+      polygon2.addVertex(0.0, 0.5);
+      polygon2.update();
+
+      ConvexPolygon2D convexPolygon2D = new ConvexPolygon2D(polygon2);
+
+      assertTrue(convexPolygon2D.isPointInside(0.499, 1.0));
+      assertTrue(polygon2.isPointInside(0.499, 1.0));
+      assertFalse(convexPolygon2D.isPointInside(0.501, 1.0));
+      assertFalse(polygon2.isPointInside(0.501, 1.0));
    }
 }
