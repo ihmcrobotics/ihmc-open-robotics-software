@@ -190,7 +190,7 @@ public class PolygonClippingAndMerging
 
          polygonToPack.addVertex(linkedPoint.getPoint());
 
-         if (linkedPoint.getIsIntersectionPoint())
+         if (linkedPoint.getIsIntersectionPoint() && linkedPoint.isIncomingIntersection())
          {
             // we're switching polygons
             previousPoint = linkedPoint;
