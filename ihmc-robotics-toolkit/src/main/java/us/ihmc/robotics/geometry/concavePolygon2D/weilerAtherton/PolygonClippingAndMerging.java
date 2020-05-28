@@ -100,7 +100,7 @@ public class PolygonClippingAndMerging
          pointProvider.setStart(startPoint, startOnListA);
 
          ConcavePolygon2D polygon = new ConcavePolygon2D();
-         walkAlongEdgeOfPolygon(pointProvider, polygon);
+         walkAlongEdgeOfPolygon(pointProvider, polygon, false);
 
          if (Double.isNaN(mergedPolygon.getArea()))
          {
@@ -164,7 +164,7 @@ public class PolygonClippingAndMerging
          pointProvider.setStart(startPoint, false);
 
          ConcavePolygon2D clippedPolygon = new ConcavePolygon2D();
-         walkAlongEdgeOfPolygon(pointProvider, clippedPolygon);
+         walkAlongEdgeOfPolygon(pointProvider, clippedPolygon, true);
          clippedPolygonsToReturn.add(clippedPolygon);
 
          startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedToClipPoints);
@@ -173,13 +173,14 @@ public class PolygonClippingAndMerging
       return clippedPolygonsToReturn;
    }
 
-   static void walkAlongEdgeOfPolygon(LinkedPointProvider pointProvider, ConcavePolygon2DBasics polygonToPack)
+   static void walkAlongEdgeOfPolygon(LinkedPointProvider pointProvider, ConcavePolygon2DBasics polygonToPack, boolean isClipping)
    {
       LinkedPoint linkedPoint = pointProvider.getCurrentPoint();
       LinkedPoint previousPoint = linkedPoint;
 
       polygonToPack.addVertex(linkedPoint.getPoint());
       int counter = 0;
+      boolean isInside = false;
       while (counter++ < STUPID_LARGE)
       {
          linkedPoint = pointProvider.incrementPoint();
@@ -190,8 +191,10 @@ public class PolygonClippingAndMerging
 
          polygonToPack.addVertex(linkedPoint.getPoint());
 
-         if (linkedPoint.getIsIntersectionPoint() && linkedPoint.isIncomingIntersection())
+         boolean shouldSwitch = (!isClipping && linkedPoint.isIncomingIntersection()) || (isClipping && isInside == linkedPoint.isOutgoingIntersection());
+         if (linkedPoint.getIsIntersectionPoint() && shouldSwitch)
          {
+            isInside = !isInside;
             // we're switching polygons
             previousPoint = linkedPoint;
             linkedPoint = pointProvider.switchList();

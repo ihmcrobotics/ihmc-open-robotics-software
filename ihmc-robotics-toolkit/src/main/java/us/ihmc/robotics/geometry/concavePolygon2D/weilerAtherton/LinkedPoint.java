@@ -86,6 +86,10 @@ public class LinkedPoint
       LinkedPoint oldSuccessor = successor;
       successor = predecessor;
       predecessor = oldSuccessor;
+
+      boolean oldIsIncoming = isIncomingIntersection;
+      isIncomingIntersection = isOutgoingIntersection;
+      isOutgoingIntersection = oldIsIncoming;
    }
 
    public void setPoint(Point2DReadOnly point)
