@@ -34,6 +34,9 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
    private final long publishPeriod;
    private long lastPublishTime = -1;
 
+   // Counter to keep track of configuration data sequence number
+   private long sequenceId = 0;
+
    /**
     * Intended to be instantiated only using {@link RobotConfigurationDataPublisherFactory}.
     * 
@@ -82,6 +85,11 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
 
       lastPublishTime = timestampHolder.getMonotonicTime();
 
+      // update sequence id for each new message
+      this.sequenceId++;
+      // set the sequence id for the robot configuration data
+      robotConfigurationData.setSequenceId(sequenceId);
+
       // Write timestamps
       robotConfigurationData.setWallTime(timestampHolder.getWallTime());
       robotConfigurationData.setMonotonicTime(timestampHolder.getMonotonicTime());
@@ -117,6 +125,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
             IMUSensorReadOnly imuSensor = imuSensorData.get(i);
             IMUPacket imuPacketToPack = robotConfigurationData.getImuSensorData().add();
 
+            imuPacketToPack.setSequenceId(robotConfigurationData.getSequenceId());
             imuPacketToPack.getOrientation().set(imuSensor.getOrientationMeasurement());
             imuPacketToPack.getAngularVelocity().set(imuSensor.getAngularVelocityMeasurement());
             imuPacketToPack.getLinearAcceleration().set(imuSensor.getLinearAccelerationMeasurement());
@@ -131,6 +140,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
          for (int i = 0; i < forceSensorData.size(); i++)
          {
             SpatialVectorMessage forceDataToPack = robotConfigurationData.getForceSensorData().add();
+            forceDataToPack.setSequenceId(robotConfigurationData.getSequenceId());
             forceSensorData.get(i).getWrench(forceDataToPack.getAngularPart(), forceDataToPack.getLinearPart());
          }
       }
