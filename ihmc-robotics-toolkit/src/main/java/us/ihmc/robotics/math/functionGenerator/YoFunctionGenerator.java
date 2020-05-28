@@ -344,7 +344,7 @@ public class YoFunctionGenerator
                * Math.sin(2.0 * Math.PI * frequencyFiltered.getDoubleValue() * timeInCurrentMode.getDoubleValue() + phaseFiltered.getDoubleValue()));
 
          valueDot.set(amplitudeFiltered.getDoubleValue() * Math.PI * 2.0 * frequencyFiltered.getDoubleValue()
-               * Math.cos(2.0 * Math.PI * frequencyFiltered.getDoubleValue() * timeInCurrentMode.getDoubleValue()));
+                          * Math.cos(2.0 * Math.PI * frequencyFiltered.getDoubleValue() * timeInCurrentMode.getDoubleValue() + phaseFiltered.getDoubleValue()));
          if (valueDotFromFilter != null)
             valueDotFromFilter.update();
 
