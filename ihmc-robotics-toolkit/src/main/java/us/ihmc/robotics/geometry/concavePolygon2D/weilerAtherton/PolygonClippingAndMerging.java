@@ -6,6 +6,7 @@ import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
 import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
 
+import javax.sound.sampled.Clip;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -78,6 +79,7 @@ public class PolygonClippingAndMerging
 
       ClippingTools.insertIntersectionsIntoList(polygonBList, polygonA);
       ClippingTools.insertIntersectionsIntoList(polygonAList, polygonB);
+      ClippingTools.linkSharedVertices(polygonAList, polygonBList);
 
       Collection<LinkedPoint> unassignedAPoints = polygonAList.getPointsCopy();
       Collection<LinkedPoint> unassignedBPoints = polygonBList.getPointsCopy();
@@ -100,7 +102,7 @@ public class PolygonClippingAndMerging
          pointProvider.setStart(startPoint, startOnListA);
 
          ConcavePolygon2D polygon = new ConcavePolygon2D();
-         walkAlongEdgeOfPolygon(pointProvider, polygon, false);
+         walkAlongEdgeOfPolygon(pointProvider, polygon);
 
          if (Double.isNaN(mergedPolygon.getArea()))
          {
@@ -149,6 +151,7 @@ public class PolygonClippingAndMerging
 
       ClippingTools.insertIntersectionsIntoList(polygonToClipList, clippingPolygon);
       ClippingTools.insertIntersectionsIntoList(clippingPolygonList, polygonToClip);
+      ClippingTools.linkSharedVertices(polygonToClipList, clippingPolygonList);
 
       // gotta make this guy counter clockwise
       clippingPolygonList.reverseOrder();
@@ -164,7 +167,7 @@ public class PolygonClippingAndMerging
          pointProvider.setStart(startPoint, false);
 
          ConcavePolygon2D clippedPolygon = new ConcavePolygon2D();
-         walkAlongEdgeOfPolygon(pointProvider, clippedPolygon, true);
+         walkAlongEdgeOfPolygon(pointProvider, clippedPolygon);
          clippedPolygonsToReturn.add(clippedPolygon);
 
          startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedToClipPoints);
@@ -173,17 +176,16 @@ public class PolygonClippingAndMerging
       return clippedPolygonsToReturn;
    }
 
-   static void walkAlongEdgeOfPolygon(LinkedPointProvider pointProvider, ConcavePolygon2DBasics polygonToPack, boolean isClipping)
+   static void walkAlongEdgeOfPolygon(LinkedPointProvider pointProvider, ConcavePolygon2DBasics polygonToPack)
    {
       LinkedPoint linkedPoint = pointProvider.getCurrentPoint();
       LinkedPoint previousPoint = linkedPoint;
 
       polygonToPack.addVertex(linkedPoint.getPoint());
       int counter = 0;
-      boolean isInside = false;
       while (counter++ < STUPID_LARGE)
       {
-         linkedPoint = pointProvider.incrementPoint();
+         linkedPoint = linkedPoint.getSuccessor();
          pointProvider.removePoint(previousPoint);
 
          if (linkedPoint.getPoint().epsilonEquals(pointProvider.getStartVertex().getPoint(), 1e-7))
@@ -191,13 +193,14 @@ public class PolygonClippingAndMerging
 
          polygonToPack.addVertex(linkedPoint.getPoint());
 
-         boolean shouldSwitch = (!isClipping && linkedPoint.isIncomingIntersection()) || (isClipping && isInside == linkedPoint.isOutgoingIntersection());
-         if (linkedPoint.getIsIntersectionPoint() && shouldSwitch)
+         boolean shouldSwitch = linkedPoint.getIsIntersectionPoint() && linkedPoint.isIncomingIntersection();
+         shouldSwitch |= linkedPoint.isLinkedToOtherList() && linkedPoint.getPointOnOtherList().getIsIntersectionPoint();
+
+         if (shouldSwitch)
          {
-            isInside = !isInside;
             // we're switching polygons
             previousPoint = linkedPoint;
-            linkedPoint = pointProvider.switchList();
+            linkedPoint = linkedPoint.getPointOnOtherList();
 
             if (linkedPoint == null)
                throw new RuntimeException("Was unable to find the intersection point in the other list.");

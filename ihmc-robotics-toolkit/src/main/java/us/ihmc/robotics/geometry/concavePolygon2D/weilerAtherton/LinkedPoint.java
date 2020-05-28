@@ -14,6 +14,8 @@ public class LinkedPoint
 
    private final Point2DBasics point = new Point2D();
 
+   private LinkedPoint pointOnOtherList = null;
+
    public LinkedPoint()
    {}
 
@@ -79,6 +81,21 @@ public class LinkedPoint
       setPoint(other.point);
       setPredecessor(other.predecessor);
       setSuccessor(other.successor);
+   }
+
+   public void linkToOtherList(LinkedPoint pointOnOtherList)
+   {
+      this.pointOnOtherList = pointOnOtherList;
+   }
+
+   public boolean isLinkedToOtherList()
+   {
+      return pointOnOtherList != null;
+   }
+
+   public LinkedPoint getPointOnOtherList()
+   {
+      return pointOnOtherList;
    }
 
    public void reverse()
