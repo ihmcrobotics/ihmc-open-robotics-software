@@ -212,7 +212,7 @@ public class PolygonClippingAndMerging
    {
       for (LinkedPoint point : points)
       {
-         if (!polygon.isPointInside(point.getPoint()))
+         if (!polygon.isPointInsideEpsilon(point.getPoint(), 1e-5))
             return point;
       }
 
