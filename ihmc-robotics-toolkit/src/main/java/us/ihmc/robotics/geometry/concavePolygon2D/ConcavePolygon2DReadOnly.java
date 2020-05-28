@@ -42,6 +42,21 @@ public interface ConcavePolygon2DReadOnly extends Vertex2DSupplier
 
       return GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(x, y, getVertexBufferView(), getNumberOfVertices());
    }
+
+   default boolean isPointInsideEpsilon(Point2DReadOnly point, double epsilon)
+   {
+      return isPointInsideEpsilon(point.getX(), point.getY(), epsilon);
+   }
+
+   default boolean isPointInsideEpsilon(double x, double y, double epsilon)
+   {
+      checkIfUpToDate();
+      if (!getBoundingBox().isInsideEpsilon(x, y, epsilon))
+         return false;
+
+      return GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(x, y, getVertexBufferView(), getNumberOfVertices(), epsilon);
+   }
+
    default boolean isEmpty()
    {
       return getNumberOfVertices() == 0;

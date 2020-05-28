@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.concavePolygon2D;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.BoundingBox2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
@@ -150,6 +151,58 @@ public class GeometryPolygonTools
       return isPoint2DInsideSimplePolygon2D(pointX, pointY, 1.0, 0.0, polygon, numberOfVertices, null);
    }
 
+   public static boolean isPoint2DInsideSimplePolygon2D(Point2DReadOnly queryPoint, List<? extends Point2DReadOnly> polygon, int numberOfVertices, double epsilon)
+   {
+      return isPoint2DInsideSimplePolygon2D(queryPoint.getX(), queryPoint.getY(), polygon, numberOfVertices, epsilon);
+   }
+
+   public static boolean isPoint2DInsideSimplePolygon2D(double pointX, double pointY, List<? extends Point2DReadOnly> polygon, int numberOfVertices, double epsilon)
+   {
+      return isPoint2DInsideSimplePolygon2D(pointX, pointY, 1.0, 0.0, polygon, numberOfVertices, null, epsilon);
+   }
+
+
+   public static boolean isPoint2DInsideSimplePolygon2D(double pointX,
+                                                        double pointY,
+                                                        double lineDirectionX,
+                                                        double lineDirectionY,
+                                                        List<? extends Point2DReadOnly> polygon,
+                                                        int numberOfVertices,
+                                                        Point2DBasics intersectionToPack,
+                                                        double epsilon)
+   {
+      checkNumberOfVertices(polygon, numberOfVertices);
+      double epsilonSquared = MathTools.square(epsilon);
+
+      // check if point is on perimeter
+      for (int i = 0; i < numberOfVertices; i++)
+      {
+         Point2DReadOnly vertex = polygon.get(i);
+         Point2DReadOnly nextVertex = polygon.get((i + 1) % numberOfVertices);
+
+         if (EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(pointX, pointY, vertex, nextVertex) < epsilonSquared)
+            return true;
+      }
+
+      if (numberOfVertices < 3)
+      {
+         return false;
+      }
+
+
+      int intersectionsPositive = getNumberOfIntersections(pointX, pointY, lineDirectionX, lineDirectionY, polygon, numberOfVertices, intersectionToPack, epsilon);
+      int intersectionsNegative = getNumberOfIntersections(pointX, pointY, -lineDirectionX, -lineDirectionY, polygon, numberOfVertices, intersectionToPack, epsilon);
+
+      if (intersectionsNegative == 0 || intersectionsPositive == 0)
+         return false;
+
+      if (intersectionsPositive % 2 == 0 && intersectionsNegative % 2 == 0)
+         return false;
+
+      boolean evenNumberOfIntersections = (intersectionsPositive + intersectionsNegative) % 2 == 0;
+      return evenNumberOfIntersections;
+   }
+
    public static boolean isPoint2DInsideSimplePolygon2D(double pointX,
                                                         double pointY,
                                                         double lineDirectionX,
@@ -176,10 +229,13 @@ public class GeometryPolygonTools
       }
 
 
-      int intersectionsPositive = getNumberOfIntersections(pointX, pointY, lineDirectionX, lineDirectionY, polygon, numberOfVertices, intersectionToPack);
-      int intersectionsNegative = getNumberOfIntersections(pointX, pointY, -lineDirectionX, -lineDirectionY, polygon, numberOfVertices, intersectionToPack);
+      int intersectionsPositive = getNumberOfIntersections(pointX, pointY, lineDirectionX, lineDirectionY, polygon, numberOfVertices, intersectionToPack, 1e-7);
+      int intersectionsNegative = getNumberOfIntersections(pointX, pointY, -lineDirectionX, -lineDirectionY, polygon, numberOfVertices, intersectionToPack, 1e-7);
 
       if (intersectionsNegative == 0 || intersectionsPositive == 0)
+         return false;
+
+      if (intersectionsPositive % 2 == 0 && intersectionsNegative % 2 == 0)
          return false;
 
       boolean evenNumberOfIntersections = (intersectionsPositive + intersectionsNegative) % 2 == 0;
@@ -192,7 +248,8 @@ public class GeometryPolygonTools
                                                double lineDirectionY,
                                                List<? extends Point2DReadOnly> polygon,
                                                int numberOfVertices,
-                                               Point2DBasics intersectionToPack)
+                                               Point2DBasics intersectionToPack,
+                                               double epsilon)
    {
       int intersections = 0;
       for (int i = 0; i < numberOfVertices; i++)
@@ -200,10 +257,26 @@ public class GeometryPolygonTools
          Point2DReadOnly vertex = polygon.get(i);
          Point2DReadOnly nextVertex = polygon.get((i + 1) % numberOfVertices);
 
-//         if (EuclidGeometryTools.isPoint2DOnLine2D(nextVertex.getX(), nextVertex.getY(), pointX, pointY, lineDirectionX, lineDirectionY))
-//            continue;
+         // skip the first point. That intersection should get captured on the loop closure.
+         if (EuclidGeometryTools.distanceFromPoint2DToRay2D(vertex.getX(), vertex.getY(), pointX, pointY, lineDirectionX, lineDirectionY) < epsilon)
+         {
+            boolean linesAreCollinear = EuclidGeometryTools.areLine2DsCollinear(pointX,
+                                                                                pointY,
+                                                                                lineDirectionX,
+                                                                                lineDirectionY,
+                                                                                vertex.getX(),
+                                                                                vertex.getY(),
+                                                                                nextVertex.getX() - vertex.getX(),
+                                                                                nextVertex.getY() - vertex.getY(),
+                                                                                1e-7,
+                                                                                epsilon);
+            if (linesAreCollinear)
+               intersections++;
+            continue;
+         }
 
          // if the lines are collinear, then we don't count this one, as it intersects with both the start and end of the next one.
+         /*
          boolean linesAreCollinear = EuclidGeometryTools.areLine2DsCollinear(pointX,
                                                                              pointY,
                                                                              lineDirectionX,
@@ -217,6 +290,8 @@ public class GeometryPolygonTools
 
          if (linesAreCollinear)
             continue;
+
+          */
 
          boolean intersects = EuclidGeometryTools.intersectionBetweenRay2DAndLineSegment2D(pointX,
                                                                                            pointY,
