@@ -282,7 +282,7 @@ public class SkippyRobotV2 extends Robot
 
    public Point3D getFootLocation()
    {
-      return footContactPoint.getPositionPoint();
+      return footContactPoint.getPositionCopy();
    }
 
    public RigidBodyBasics getSkippyFoot()
@@ -292,7 +292,7 @@ public class SkippyRobotV2 extends Robot
 
    public Point3D computeFootLocation()
    {
-      return footContactPoint.getPositionPoint();
+      return footContactPoint.getPositionCopy();
    }
 
    public boolean getFootFS()

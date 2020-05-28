@@ -1,6 +1,5 @@
 package us.ihmc.simulationConstructionSetTools.grahics;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -67,7 +66,7 @@ public class GraphicsIDRobot extends GraphicsRobot
       return graphicsJoint;
    }
 
-   private Graphics3DObject generateGraphics3DObjectFromCollisionMeshes(ArrayList<CollisionMeshDescription> collisionObjects)
+   private Graphics3DObject generateGraphics3DObjectFromCollisionMeshes(List<CollisionMeshDescription> collisionObjects)
    {
       System.err.println("Need to implement " + getClass().getSimpleName() + ".generateGraphics3DObjectFromCollisionMesh()!");
       return null;

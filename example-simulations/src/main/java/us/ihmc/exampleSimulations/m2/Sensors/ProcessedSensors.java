@@ -1,17 +1,17 @@
 package us.ihmc.exampleSimulations.m2.Sensors;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.exampleSimulations.m2.ContactPointName;
 import us.ihmc.exampleSimulations.m2.JointName;
 import us.ihmc.exampleSimulations.m2.RobotAxis;
 import us.ihmc.exampleSimulations.m2.RobotOrientation;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 /**
  * <p>
@@ -513,7 +513,7 @@ public class ProcessedSensors
 
    public ProcessedSensors()
    {
-      ArrayList<YoVariable<?>> variables = registry.getAllVariablesIncludingDescendants();
+      List<YoVariable<?>> variables = registry.getAllVariablesIncludingDescendants();
       allVariables = new YoDouble[variables.size()];
       variables.toArray(allVariables);
    }

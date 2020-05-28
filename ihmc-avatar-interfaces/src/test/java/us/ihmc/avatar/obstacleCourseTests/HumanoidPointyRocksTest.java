@@ -4,6 +4,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -1126,7 +1127,7 @@ public abstract class HumanoidPointyRocksTest implements MultiRobotTestInterface
       System.out.println("Changing contact points at time " + time);
 
       int pointIndex = 0;
-      ArrayList<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
+      List<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
 
       for (GroundContactPoint point : allGroundContactPoints)
       {

@@ -7,7 +7,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.simulationconstructionset.NewDataListener;
 
@@ -30,7 +30,7 @@ public class GUISideProtocolListenerThread implements Runnable
       this(socket, commandListener, null);
    }
 
-   public GUISideProtocolListenerThread(Socket socket, GUISideAbstractCommandListener commandListener, ArrayList<NewDataListener> newDataListeners)
+   public GUISideProtocolListenerThread(Socket socket, GUISideAbstractCommandListener commandListener, List<NewDataListener> newDataListeners)
    {
       try
       {

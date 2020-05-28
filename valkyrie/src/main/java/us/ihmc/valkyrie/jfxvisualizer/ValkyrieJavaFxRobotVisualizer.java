@@ -1,5 +1,10 @@
 package us.ihmc.valkyrie.jfxvisualizer;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
 import javafx.animation.AnimationTimer;
 import javafx.application.Application;
 import javafx.scene.AmbientLight;
@@ -20,11 +25,6 @@ import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.graphics.GraphicsRobot;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.configuration.ValkyrieRobotVersion;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
 
 public class ValkyrieJavaFxRobotVisualizer extends Application
 {
@@ -64,7 +64,7 @@ public class ValkyrieJavaFxRobotVisualizer extends Application
 
             Graphics3DObject linkGraphics = new Graphics3DObject(instructions);
 
-            ArrayList<Graphics3DPrimitiveInstruction> graphics3DInstructions = oldLinkGraphics.getGraphics3DInstructions();
+            List<Graphics3DPrimitiveInstruction> graphics3DInstructions = oldLinkGraphics.getGraphics3DInstructions();
             for (Graphics3DPrimitiveInstruction graphics3DInstruction : graphics3DInstructions)
             {
                linkGraphics.addInstruction(graphics3DInstruction);
@@ -134,7 +134,7 @@ public class ValkyrieJavaFxRobotVisualizer extends Application
       }
    }
 
-   private static HashSet<Link> getAllLinks(ArrayList<Joint> joints, HashSet<Link> links)
+   private static HashSet<Link> getAllLinks(List<Joint> joints, HashSet<Link> links)
    {
       for (Joint joint : joints)
       {
