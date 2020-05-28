@@ -344,8 +344,8 @@ public class ClippingToolsTest
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0, 1.0), point.getPoint(), 1e-7);
       assertFalse(point.getIsIntersectionPoint());
-//      assertTrue(point.isIncomingIntersection());
-//      assertTrue(point.isOutgoingIntersection());
+      assertFalse(point.isIncomingIntersection());
+      assertFalse(point.isOutgoingIntersection());
 
       list = ClippingTools.createLinkedPointList(polygon2);
       ClippingTools.insertIntersectionsIntoList(list, polygon1);
@@ -354,8 +354,8 @@ public class ClippingToolsTest
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.0, 1.0), point.getPoint(), 1e-7);
       assertFalse(point.getIsIntersectionPoint());
-      assertTrue(point.isIncomingIntersection());
-      assertTrue(point.isOutgoingIntersection());
+      assertFalse(point.isIncomingIntersection());
+      assertFalse(point.isOutgoingIntersection());
    }
 
    @Test
@@ -390,8 +390,8 @@ public class ClippingToolsTest
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-0.9, 1.0), point.getPoint(), 1e-7);
-      assertTrue(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
+      assertFalse(point.getIsIntersectionPoint());
+      assertTrue(point.isIncomingIntersection());
       assertTrue(point.isOutgoingIntersection());
 
       point = point.getSuccessor();
@@ -442,8 +442,8 @@ public class ClippingToolsTest
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.0, 0.9), point.getPoint(), 1e-7);
-      assertTrue(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
+      assertFalse(point.getIsIntersectionPoint());
+      assertTrue(point.isIncomingIntersection());
       assertTrue(point.isOutgoingIntersection());
 
       point = point.getSuccessor();
@@ -460,9 +460,9 @@ public class ClippingToolsTest
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, 0.9), point.getPoint(), 1e-7);
-      assertTrue(point.getIsIntersectionPoint());
+      assertFalse(point.getIsIntersectionPoint());
       assertTrue(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertTrue(point.isOutgoingIntersection());
    }
 
    @Test
