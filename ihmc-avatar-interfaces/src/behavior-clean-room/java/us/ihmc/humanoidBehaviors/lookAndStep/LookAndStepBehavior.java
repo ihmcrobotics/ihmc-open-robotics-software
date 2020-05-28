@@ -9,6 +9,7 @@ import us.ihmc.communication.util.SimpleTimer;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.humanoidBehaviors.tools.RemoteEnvironmentMapInterface;
 import us.ihmc.communication.RemoteREAInterface;
@@ -354,6 +355,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       }
       LogTools.info("closestPointAlongPath: {}, closestDistance: {}, closestLineSegmentIndex: {}", closestPointAlongPath, closestDistance, closestSegmentIndex);
 
+      helper.publishToUI(ClosestPointForUI, new Pose3D(closestPointAlongPath, new Quaternion()));
+
       // move point along body path plan by plan horizon
       Point3D goalPoint = new Point3D(closestPointAlongPath);
 
@@ -436,6 +439,10 @@ public class LookAndStepBehavior implements BehaviorInterface
       lastStanceSide = stanceSide;
 
       helper.publishToUI(SubGoalForUI, new Pose3D(goalPoseBetweenFeet));
+      ArrayList<Pair<RobotSide, Pose3D>> startFootPoses = new ArrayList<>();
+      startFootPoses.add(Pair.of(RobotSide.LEFT, new Pose3D(leftSolePose)));
+      startFootPoses.add(Pair.of(RobotSide.RIGHT, new Pose3D(rightSolePose)));
+      helper.publishToUI(StartAndGoalFootPosesForUI, startFootPoses);
 
       footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.get(LookAndStepBehaviorParameters.idealFootstepLengthOverride));
       footstepPlannerParameters.setWiggleInsideDelta(lookAndStepParameters.get(LookAndStepBehaviorParameters.wiggleInsideDeltaOverride));
@@ -472,7 +479,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule);
       footstepPlannerLogger.logSession();
-      FootstepPlannerLogger.deleteOldLogs(10);
+      FootstepPlannerLogger.deleteOldLogs(30);
 
       helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan()));
 
@@ -611,8 +618,10 @@ public class LookAndStepBehavior implements BehaviorInterface
       public static final Topic<Object> RePlan = topic("RePlan"); // TODO remove?
       public static final Topic<Boolean> Approval = topic("Approval");
       public static final Topic<Boolean> OperatorReviewEnabled = topic("OperatorReview");
-      public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlan");
-      public static final Topic<Pose3D> SubGoalForUI = topic("GoalForUI");
+      public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> StartAndGoalFootPosesForUI = topic("StartAndGoalFootPosesForUI");
+      public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlanForUI");
+      public static final Topic<Pose3D> ClosestPointForUI = topic("ClosestPointForUI");
+      public static final Topic<Pose3D> SubGoalForUI = topic("SubGoalForUI");
       public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
       public static final Topic<List<String>> LookAndStepParameters = topic("LookAndStepParameters");
       public static final Topic<List<String>> FootstepPlannerParameters = topic("FootstepPlannerParameters");

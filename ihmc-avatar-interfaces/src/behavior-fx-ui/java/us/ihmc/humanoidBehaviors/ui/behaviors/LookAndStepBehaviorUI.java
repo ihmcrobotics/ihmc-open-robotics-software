@@ -50,7 +50,9 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
    private Messager behaviorMessager;
    private FootstepPlanGraphic footstepPlanGraphic;
+   private FootstepPlanGraphic startAndGoalFootPoses;
    private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
+   private PoseGraphic closestPointAlongPathGraphic;
    private PoseGraphic subGoalGraphic;
    private BodyPathPlanGraphic bodyPathPlanGraphic;
    private PoseGraphic goalGraphic;
@@ -106,6 +108,8 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
       visualizationPane.getChildren().addAll(scatterChart);
 
+      startAndGoalFootPoses = new FootstepPlanGraphic(robotModel);
+      behaviorMessager.registerTopicListener(StartAndGoalFootPosesForUI, startAndGoalFootPoses::generateMeshesAsynchronously);
       footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
       behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
 
@@ -117,6 +121,8 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
       goalGraphic = new PoseGraphic("Goal", Color.CADETBLUE, 0.03);
 
+      closestPointAlongPathGraphic = new PoseGraphic("Closest", Color.BLUE, 0.027);
+      behaviorMessager.registerTopicListener(ClosestPointForUI, pose -> Platform.runLater(() -> closestPointAlongPathGraphic.setPose(pose)));
       subGoalGraphic = new PoseGraphic("Sub goal", Color.YELLOW, 0.027);
       behaviorMessager.registerTopicListener(SubGoalForUI, pose -> Platform.runLater(() -> subGoalGraphic.setPose(pose)));
 
@@ -176,19 +182,24 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       if (!enabled)
       {
          livePlanarRegionsGraphic.clear();
+         startAndGoalFootPoses.clear();
          footstepPlanGraphic.clear();
+         Platform.runLater(() -> getChildren().remove(closestPointAlongPathGraphic));
          Platform.runLater(() -> getChildren().remove(subGoalGraphic));
          Platform.runLater(() -> getChildren().remove(goalGraphic));
          Platform.runLater(() -> getChildren().remove(bodyPathPlanGraphic));
          Platform.runLater(() -> getChildren().remove(livePlanarRegionsGraphic));
+         Platform.runLater(() -> getChildren().remove(startAndGoalFootPoses));
          Platform.runLater(() -> getChildren().remove(footstepPlanGraphic));
       }
       else
       {
+         Platform.runLater(() -> getChildren().add(closestPointAlongPathGraphic));
          Platform.runLater(() -> getChildren().add(subGoalGraphic));
          Platform.runLater(() -> getChildren().add(goalGraphic));
          Platform.runLater(() -> getChildren().add(bodyPathPlanGraphic));
          Platform.runLater(() -> getChildren().add(livePlanarRegionsGraphic));
+         Platform.runLater(() -> getChildren().add(startAndGoalFootPoses));
          Platform.runLater(() -> getChildren().add(footstepPlanGraphic));
       }
    }
