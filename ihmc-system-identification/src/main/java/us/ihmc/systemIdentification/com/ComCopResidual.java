@@ -11,20 +11,21 @@ package us.ihmc.systemIdentification.com;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 
 import org.ddogleg.optimization.functions.FunctionNtoM;
 
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.plotting.artifact.CircleArtifact;
 import us.ihmc.plotting.Plotter;
 import us.ihmc.plotting.PlotterPanel;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 
 /** Todo
  * 
@@ -65,7 +66,7 @@ public class ComCopResidual implements FunctionNtoM
       System.out.println("target link " + targetLink.getName() + "mass " + targetLink.getMass() + "kg, com " + getCurrentLinkCom());
 
       //select subframes
-      ArrayList<Integer> keyPoints = dataBuffer.getKeyPoints();
+      List<Integer> keyPoints = dataBuffer.getKeyPoints();
       if (numSubsampleBetweenInOut < 0)
       {
          System.out.println("Using key frames");

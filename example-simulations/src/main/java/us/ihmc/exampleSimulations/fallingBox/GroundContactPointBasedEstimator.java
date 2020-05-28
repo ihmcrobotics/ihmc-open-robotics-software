@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.fallingBox;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -30,7 +30,7 @@ public class GroundContactPointBasedEstimator implements RobotController
       registry = new YoVariableRegistry(robot.getName() + "_registry");
 
       Joint joint = robot.getJoint("bodyJoint");
-      ArrayList<GroundContactPoint> groundContactPoints = robot.getAllGroundContactPoints();
+      List<GroundContactPoint> groundContactPoints = robot.getAllGroundContactPoints();
       wrenchCalculator = new GroundContactPointBasedWrenchCalculator(robot.getName() + "_ft", groundContactPoints, joint, new RigidBodyTransform(), registry);
 
       wrench = new YoFixedFrameWrench(robot.getName() + "_wrench", worldFrame, worldFrame, registry);

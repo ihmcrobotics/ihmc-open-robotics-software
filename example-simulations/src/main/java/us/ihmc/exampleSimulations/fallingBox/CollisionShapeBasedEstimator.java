@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.fallingBox;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.ejml.data.DenseMatrix64F;
 
@@ -30,7 +30,7 @@ public class CollisionShapeBasedEstimator implements RobotController
       registry = new YoVariableRegistry(robot.getName() + "_registry");
 
       Joint joint = robot.getJoint("bodyJoint");
-      ArrayList<ExternalForcePoint> contactingExternalForcePoints = robot.getAllExternalForcePoints();
+      List<ExternalForcePoint> contactingExternalForcePoints = robot.getAllExternalForcePoints();
 
       wrenchCalculator = new CollisionShapeBasedWrenchCalculator(robot.getName() + "_ft", contactingExternalForcePoints, joint, new RigidBodyTransform(),
                                                                  registry);

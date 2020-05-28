@@ -160,8 +160,8 @@ public abstract class FootstepPlannerDataSetTest
 
       if (VISUALIZE)
       {
-         messager.submitMessage(FootstepPlannerMessagerAPI.testDataSets, dataSets);
-         messager.registerTopicListener(FootstepPlannerMessagerAPI.testDataSetSelected, this::runAssertions);
+         messager.submitMessage(FootstepPlannerMessagerAPI.TestDataSets, dataSets);
+         messager.registerTopicListener(FootstepPlannerMessagerAPI.TestDataSetSelected, this::runAssertions);
 
          AtomicBoolean uiHasClosed = new AtomicBoolean();
          ui.addShutdownHook(() ->

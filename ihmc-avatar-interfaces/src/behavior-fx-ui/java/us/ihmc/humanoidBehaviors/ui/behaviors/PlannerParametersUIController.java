@@ -50,7 +50,7 @@ public class PlannerParametersUIController
       Platform.runLater(() ->
       {
       cliffClearance      .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMinimumDistanceFromCliffBottoms() , 0.05   ));
-      cliffHeight         .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getCliffHeightToAvoid()              , 0.05   ));
+      cliffHeight         .setValueFactory(new DoubleSpinnerValueFactory(-10.0   , 10.0   , footstepPlannerParameters.getCliffBaseHeightToAvoid()              , 0.05   ));
       maxStepLength       .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepReach()                , 0.05   ));
       maxStepWidth        .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepWidth()                , 0.05   ));
       maxStepYaw          .setValueFactory(new DoubleSpinnerValueFactory(-10.0   ,10.0   ,footstepPlannerParameters.getMaximumStepYaw()                  , 0.05   ));

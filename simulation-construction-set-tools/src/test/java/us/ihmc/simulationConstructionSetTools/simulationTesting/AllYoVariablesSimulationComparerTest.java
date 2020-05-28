@@ -1,15 +1,15 @@
 package us.ihmc.simulationConstructionSetTools.simulationTesting;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.simulationconstructionset.Link;
@@ -148,7 +148,7 @@ public class AllYoVariablesSimulationComparerTest
 		yoDouble3.set(1.0);
 		yoDouble4.set(2.0);
 		assertFalse(comparerWithZeroEpsilon.compare(scs1, scs2));
-		ArrayList<YoVariable<?>[]> differences = comparerWithZeroEpsilon.getDifferences();
+		List<YoVariable<?>[]> differences = comparerWithZeroEpsilon.getDifferences();
 		assertEquals(1, differences.size());
 		assertEquals(yoDouble2, differences.get(0)[0]);
 		assertEquals(yoDouble4, differences.get(0)[1]);

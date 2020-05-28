@@ -13,6 +13,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.Messager;
@@ -41,7 +42,9 @@ public class FootstepPathMeshViewer extends AnimationTimer
    private SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
 
    private final AtomicBoolean reset = new AtomicBoolean(false);
-   private final AtomicReference<Boolean> ignorePartialFootholds;
+   private final AtomicBoolean ignorePartialFootholds = new AtomicBoolean();
+   private final AtomicReference<FootstepDataListMessage> footstepPlanResponse = new AtomicReference<>();
+   private final AtomicBoolean updateAllMeshes = new AtomicBoolean();
 
    private final AtomicReference<Integer> previousSelectedStep = new AtomicReference<>(-1);
    private final AtomicReference<Pair<Integer, FootstepDataMessage>> selectedStep;
@@ -51,13 +54,21 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
    private final List<FootstepMeshManager> footstepMeshes = new ArrayList<>();
    private final AtomicReference<Pair<Integer, FootstepDataMessage>> updateStep = new AtomicReference<>();
-   private final AtomicBoolean updateAllMeshes = new AtomicBoolean();
-
+   
    public FootstepPathMeshViewer(Messager messager)
    {
       // call these on separate thread since they update all meshes
-      messager.registerTopicListener(FootstepPlanResponse, footstepPlan -> executorService.submit(() -> computeAllMeshes(footstepPlan)));
-      messager.registerTopicListener(IgnorePartialFootholds, b -> executorService.submit(() -> computeAllMeshes(null)));
+      messager.registerTopicListener(FootstepPlanResponse, footstepPlan -> 
+      {
+         footstepPlanResponse.set(footstepPlan);
+         updateAllMeshes.set(true);
+      });
+
+      messager.registerTopicListener(IgnorePartialFootholds, ignore ->
+      {
+         ignorePartialFootholds.set(ignore);
+         updateAllMeshes.set(true);
+      });
 
       // call this on animation timer update thread since it updates a single step and might come in at higher frequency
       messager.registerTopicListener(FootstepToUpdateViz, updateStep::set);
@@ -67,15 +78,15 @@ public class FootstepPathMeshViewer extends AnimationTimer
       messager.registerTopicListener(ComputePath, data -> reset.set(true));
       messager.registerTopicListener(GlobalReset, data -> reset.set(true));
 
-      ignorePartialFootholds = messager.createInput(IgnorePartialFootholds, false);
-
       for (int i = 0; i < 200; i++)
       {
          footstepMeshes.add(new FootstepMeshManager(i));
       }
+
+      messager.registerTopicListener(ShowFootstepPlan, show -> footstepMeshes.forEach(mesh -> mesh.meshHolder.meshView.setVisible(show)));
    }
 
-   private synchronized void computeAllMeshes(FootstepDataListMessage footstepPlanResponse)
+   private void computeAllMeshes(FootstepDataListMessage footstepPlanResponse)
    {
       if (footstepPlanResponse != null)
       {
@@ -194,6 +205,11 @@ public class FootstepPathMeshViewer extends AnimationTimer
    @Override
    public void handle(long now)
    {
+      if (updateAllMeshes.getAndSet(false))
+      {
+         computeAllMeshes(footstepPlanResponse.getAndSet(null));
+      }
+      
       Pair<Integer, FootstepDataMessage> updateStep = this.updateStep.getAndSet(null);
       if (updateStep != null)
       {

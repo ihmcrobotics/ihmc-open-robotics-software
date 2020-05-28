@@ -1,6 +1,6 @@
 package us.ihmc.atlas;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.avatar.DRCObstacleCourseStartingLocation;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
@@ -55,7 +55,7 @@ public class AtlasObstacleCourseNoUI
       SimulationConstructionSet simulationConstructionSet = simulationStarter.getSimulationConstructionSet();
       YoVariableRegistry rootRegistry = simulationConstructionSet.getRootRegistry();
 
-      ArrayList<YoVariable<?>> allVariablesIncludingDescendants = rootRegistry.getAllVariablesIncludingDescendants();
+      List<YoVariable<?>> allVariablesIncludingDescendants = rootRegistry.getAllVariablesIncludingDescendants();
       System.out.println("Size = " + allVariablesIncludingDescendants.size());
       for (YoVariable<?> yoVariable : allVariablesIncludingDescendants)
       {

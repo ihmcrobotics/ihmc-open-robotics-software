@@ -47,22 +47,18 @@ import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 
 /**
- * Main entry point for the visualizer.
- *
- * To make a custom visualizer for your robot, do NOT copy, instead extend.
+ * Main entry point for the visualizer. To make a custom visualizer for your robot, do NOT copy,
+ * instead extend.
  *
  * @author jesper
- *
  */
 public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionListener, SCSVisualizerStateListener
 {
    private final static String DISCONNECT_DISCONNECT = "Disconnect";
    private final static String DISCONNECT_RECONNECT = "Reconnect";
 
-
    private YoVariableRegistry registry;
    private SimulationConstructionSet scs;
-
 
    private final ArrayList<JointUpdater> jointUpdaters = new ArrayList<>();
    private YoVariableClientInterface yoVariableClientInterface;
@@ -79,7 +75,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    private final DecimalFormat delayFormat = new DecimalFormat("0000");
    private final JLabel delayValue = new JLabel();
-
 
    private volatile long lastTimestamp;
 
@@ -129,7 +124,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void disconnected()
    {
-      synchronized(disconnectLock)
+      synchronized (disconnectLock)
       {
          LogTools.info("Disconnected. Sliders now enabled.");
          disconnectButton.setText(DISCONNECT_RECONNECT);
@@ -141,7 +136,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    @Override
    public void connected()
    {
-      synchronized(disconnectLock)
+      synchronized (disconnectLock)
       {
          setVariableUpdateRate(variableUpdateRate);
 
@@ -161,7 +156,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    {
       return true;
    }
-
 
    @Override
    public boolean updateYoVariables()
@@ -193,13 +187,12 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       }
    }
 
-
    /**
-    * On connect, the variable update rate is send to the server. The server will limit the amount of data to approximately the desired rate, depending on the update rate of the underlying threads.
-    *
-    * Set to zero to update variables as fast as the server produces them.
-    *
-    * Note: If the server does not send data at a constant period or does not set the timestamp, setting the variable update rate will result in no data being received.
+    * On connect, the variable update rate is send to the server. The server will limit the amount of
+    * data to approximately the desired rate, depending on the update rate of the underlying threads.
+    * Set to zero to update variables as fast as the server produces them. Note: If the server does not
+    * send data at a constant period or does not set the timestamp, setting the variable update rate
+    * will result in no data being received.
     *
     * @param updateRateInMilliseconds Update rate in milliseconds. Set to zero to disable rate limiting
     */
@@ -207,9 +200,9 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    {
       synchronized (disconnectLock)
       {
-         if(yoVariableClientInterface != null)
+         if (yoVariableClientInterface != null)
          {
-            if(yoVariableClientInterface.isConnected())
+            if (yoVariableClientInterface.isConnected())
             {
                yoVariableClientInterface.setVariableUpdateRate(updateRateInMilliseconds);
             }
@@ -220,10 +213,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          updateRateField.setText(String.valueOf(updateRateInMilliseconds));
       }
 
-
    }
-
-
 
    private void setVariableUpdateRate(String text)
    {
@@ -232,7 +222,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       {
          newUpdateRate = MathTools.clamp(Integer.parseInt(text.trim()), 0, 99999);
       }
-      catch(NumberFormatException e)
+      catch (NumberFormatException e)
       {
          newUpdateRate = 0;
       }
@@ -241,9 +231,9 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
    @Deprecated
    /**
-    * This functionality has been replaced with setVariableUpdateRate()
-    *
-    * For backwards compatibility, this function will print a big fat warning and set the variable update rate to displayOneInNPackets * 1 ms
+    * This functionality has been replaced with setVariableUpdateRate() For backwards compatibility,
+    * this function will print a big fat warning and set the variable update rate to
+    * displayOneInNPackets * 1 ms
     *
     * @param displayOneInNPackets
     */
@@ -275,9 +265,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    }
 
    @Override
-   public final void start(YoVariableClientInterface yoVariableClientInterface,
-                           LogHandshake handshake,
-                           YoVariableHandshakeParser handshakeParser,
+   public final void start(YoVariableClientInterface yoVariableClientInterface, LogHandshake handshake, YoVariableHandshakeParser handshakeParser,
                            DebugRegistry debugRegistry)
    {
       this.yoVariableClientInterface = yoVariableClientInterface;
@@ -304,7 +292,10 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       parameters.setDataBufferSize(this.bufferSize);
 
       this.scs = new SimulationConstructionSet(robot, parameters);
-      if (hideViewport) { scs.hideViewport(); }
+      if (hideViewport)
+      {
+         scs.hideViewport();
+      }
       this.registry = scs.getRootRegistry();
       scs.setScrollGraphsEnabled(false);
       scs.setGroundVisible(false);
@@ -340,7 +331,9 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
                      }
                      else
                      {
-                        JOptionPane.showMessageDialog(scs.getJFrame(), "Cannot reconnect. No matching sessions found.", "Cannot reconnect",
+                        JOptionPane.showMessageDialog(scs.getJFrame(),
+                                                      "Cannot reconnect. No matching sessions found.",
+                                                      "Cannot reconnect",
                                                       JOptionPane.ERROR_MESSAGE);
                         LogTools.warn("Reconnect failed. Enabling sliders.");
                         scs.setScrollGraphsEnabled(true);
@@ -363,7 +356,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
 
       updateRateField.addActionListener((e) -> setVariableUpdateRate(updateRateField.getText()));
 
-
       scs.addButton(clearLogButton);
       clearLogButton.addActionListener(new ActionListener()
       {
@@ -377,8 +369,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
             }
          }
       });
-
-
 
       scs.addJLabel(delayValue);
 
@@ -404,8 +394,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
          SCSVisualizerStateListener stateListener = stateListeners.get(i);
          stateListener.starting(scs, robot, this.registry);
       }
-
-
 
       for (String yoVariableName : buttons.keySet())
       {
@@ -439,9 +427,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    }
 
    /**
-    * Overridable method to update local variables.
-    *
-    * Needs to return in less than your visualization dt.
+    * Overridable method to update local variables. Needs to return in less than your visualization dt.
     */
    public void updateLocalVariables()
    {
@@ -462,7 +448,6 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
    {
       lastTimestamp = timestamp;
    }
-
 
    private PlaybackListener createYoGraphicsUpdater()
    {
@@ -494,7 +479,7 @@ public class SCSVisualizer implements YoVariablesUpdatedListener, ExitActionList
       List<YoGraphicsList> yoGraphicsLists = yoGraphicsListRegistry.getYoGraphicsLists();
       for (YoGraphicsList yoGraphicsList : yoGraphicsLists)
       {
-         ArrayList<YoGraphic> yoGraphics = yoGraphicsList.getYoGraphics();
+         List<YoGraphic> yoGraphics = yoGraphicsList.getYoGraphics();
          for (YoGraphic yoGraphic : yoGraphics)
             yoGraphic.update();
       }

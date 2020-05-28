@@ -302,7 +302,12 @@ public class RemoteUIMessageConverter
 
       ThreadTools.sleep(100);
 
-      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);
+      boolean broadcastFootstepPlan = footstepPlanningResult.terminalResult() || !footstepDataListMessage.getFootstepDataList().isEmpty();
+      if (broadcastFootstepPlan)
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);         
+      }
+      
       messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanId, plannerRequestId);
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathPlanningResultTopic, bodyPathPlanningResult);
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanningResultTopic, footstepPlanningResult);
