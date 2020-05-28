@@ -24,7 +24,10 @@ import java.util.List;
  */
 public class LidarScanMessageImporter
 {
-   private static final long publishPeriodMillis = 100;
+   private static final long WAYMO_PUBLISH_PERIOD = 100; // 10Hz update rate
+   private static final long CATPACK_PUBLISH_PERIOD = 10; // 100Hz update rate
+
+   private static final long PUBLISH_PERIOD = CATPACK_PUBLISH_PERIOD;
 
    public LidarScanMessageImporter(InputStream inputStream) throws IOException
    {
@@ -47,10 +50,11 @@ public class LidarScanMessageImporter
 
       for (int i = 0; i < lidarScanMessages.size(); i++)
       {
-         System.out.println("Publishing message " + i);
          publisher.publish(lidarScanMessages.get(i));
-         ThreadTools.sleep(publishPeriodMillis);
+         ThreadTools.sleep(PUBLISH_PERIOD);
       }
+
+      System.out.println("Finished publishing");
    }
 
    public static void main(String[] args) throws IOException
