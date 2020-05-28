@@ -126,7 +126,7 @@ public class BehaviorUI
          sideVisualizationArea.setPrefWidth(200.0);
 //         view3DSubSceneWrappedInsidePane.setPrefWidth(500.0);
          mainSplitPane.getItems().add(view3DSubSceneWrappedInsidePane);
-         mainSplitPane.getItems().add(sideVisualizationArea);
+//         mainSplitPane.getItems().add(sideVisualizationArea);
 
          Stage primaryStage = new Stage();
          primaryStage.setTitle(getClass().getSimpleName());
