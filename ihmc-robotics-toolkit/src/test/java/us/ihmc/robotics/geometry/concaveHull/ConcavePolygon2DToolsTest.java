@@ -72,11 +72,12 @@ public class ConcavePolygon2DToolsTest
       assertEquals(4, polygon.getNumberOfVertices());
       assertEquals(area, polygon.getArea(), 1e-7);
 
-      polygon.insertVertex(1, 0.0, 1.0);
+      polygon.insertVertex(1, 0.0, 0.9);
       assertFalse(polygon.isUpToDate());
 
       polygon.update();
 
+      area = area - 1.0 * 0.1;
       assertTrue(polygon.isUpToDate());
       assertEquals(5, polygon.getNumberOfVertices());
       assertEquals(area, polygon.getArea(), 1e-7);
@@ -86,6 +87,7 @@ public class ConcavePolygon2DToolsTest
 
       polygon.update();
 
+      area = 4.0;
       assertTrue(polygon.isUpToDate());
       assertEquals(4, polygon.getNumberOfVertices());
       assertEquals(area, polygon.getArea(), 1e-7);

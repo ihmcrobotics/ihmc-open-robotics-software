@@ -11,6 +11,7 @@ import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
 import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
@@ -108,11 +109,21 @@ public class ClippingTools
 
     */
 
+   private static final double epsilonForSamePoint = 1e-7;
+   private static final double epsilonSquaredForSamePoint = epsilonForSamePoint * epsilonForSamePoint;
+   private static final double wiggleDistance = 5e-4;
+
    public static void insertIntersectionsIntoList(LinkedPointList list, ConcavePolygon2DReadOnly polygonToIntersect)
    {
       LinkedPoint startPoint = list.getFirstPoint();
 
-      List<Point2DReadOnly> points = list.getPoints().stream().map(point -> new Point2D(point.getPoint())).collect(Collectors.toList());
+      List<Point2DReadOnly> pointsList = new ArrayList<>();
+      do
+      {
+         pointsList.add(new Point2D(startPoint.getPoint()));
+         startPoint = startPoint.getSuccessor();
+      }
+      while (startPoint != list.getFirstPoint());
 
       Collection<Point2DReadOnly> intersections = new HashSet<>();
 
@@ -122,12 +133,12 @@ public class ClippingTools
          Point2DReadOnly vertex = polygonToIntersect.getVertex(i);
          Point2DReadOnly nextVertex = polygonToIntersect.getNextVertex(i);
 
-         if (EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(startPoint.getPoint(), vertex, nextVertex) < 1e-7)
+         if (EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(startPoint.getPoint(), vertex, nextVertex) < epsilonSquaredForSamePoint)
          {
             // check to see if it's a corner
             double distanceToStartEdge = startPoint.getPoint().distanceSquared(vertex);
             double distanceToEndEdge = startPoint.getPoint().distanceSquared(nextVertex);
-            boolean isCornerOnOtherPolygon = distanceToStartEdge < 1e-5 || distanceToEndEdge < 1e-5;
+            boolean isCornerOnOtherPolygon = distanceToStartEdge < epsilonForSamePoint || distanceToEndEdge < epsilonForSamePoint;
 
             if (isCornerOnOtherPolygon)
             {
@@ -139,15 +150,41 @@ public class ClippingTools
             }
 
             // So the intersection is on the edge of the other polygon. Is it an incoming or outgoing intersection?
-            Point2DReadOnly slightlyBeforeIntersection = getPointSlightlyAfterIntersection(startPoint.getPoint(), vertex, 5e-4);
-            Point2DReadOnly slightlyAfterIntersection = getPointSlightlyAfterIntersection(startPoint.getPoint(), nextVertex, 5e-4);
+            Point2DReadOnly slightlyBeforeIntersection = getPointSlightlyAfterIntersection(startPoint.getPoint(), startPoint.getPredecessor().getPoint(), wiggleDistance);
+            Point2DReadOnly slightlyAfterIntersection = getPointSlightlyAfterIntersection(startPoint.getPoint(), startPoint.getSuccessor().getPoint(), wiggleDistance);
 
-            boolean isBeforeInside = GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(slightlyBeforeIntersection, points, points.size());
-            boolean isAfterInside = GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(slightlyAfterIntersection, points, points.size());
+            boolean isBeforeInside = polygonToIntersect.isPointInsideEpsilon(slightlyBeforeIntersection, epsilonForSamePoint);
+            boolean isAfterInside = polygonToIntersect.isPointInsideEpsilon(slightlyAfterIntersection, epsilonForSamePoint);
 
-            startPoint.setIsIncomingIntersection(!isBeforeInside);
-            startPoint.setIsOutgoingIntersection(!isAfterInside);
+            if (isAfterInside == isBeforeInside)
+            {
+
+               Point2DReadOnly slightlyBeforeIntersectionOtherEdge = getPointSlightlyAfterIntersection(startPoint.getPoint(),
+                                                                                                       vertex,
+                                                                                                       wiggleDistance);
+               Point2DReadOnly slightlyAfterIntersectionOtherEdge = getPointSlightlyAfterIntersection(startPoint.getPoint(),
+                                                                                                      nextVertex,
+                                                                                                      wiggleDistance);
+
+               boolean isOtherEdgeBeforeInside = GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(slightlyBeforeIntersectionOtherEdge,
+                                                                                                     pointsList,
+                                                                                                     pointsList.size(),
+                                                                                                     epsilonForSamePoint);
+               boolean isOtherEdgeAfterInside = GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(slightlyAfterIntersectionOtherEdge,
+                                                                                                    pointsList,
+                                                                                                    pointsList.size(),
+                                                                                                    epsilonForSamePoint);
+
+               startPoint.setIsIncomingIntersection(!isOtherEdgeBeforeInside);
+               startPoint.setIsOutgoingIntersection(!isOtherEdgeAfterInside);
+            }
+            else
+            {
+               startPoint.setIsOutgoingIntersection(isBeforeInside);
+               startPoint.setIsIncomingIntersection(isAfterInside);
+            }
             intersections.add(new Point2D(startPoint.getPoint()));
+
 
             break;
          }
@@ -162,15 +199,14 @@ public class ClippingTools
          if (intersectionInfo.getIntersectionType() == IntersectionType.NEW)
          {
             Point2DReadOnly intersection = intersectionInfo.getIntersection();
-            Point2DReadOnly slightlyBeforeIntersection = getPointSlightlyAfterIntersection(intersection, startPoint.getPoint(), 1e-3);
-            Point2DReadOnly slightlyAfterIntersection = getPointSlightlyAfterIntersection(intersection, nextPoint.getPoint(), 5e-4);
-            IntersectionBehavior intersectionBehavior = findIntersectionBehavior(slightlyBeforeIntersection, slightlyAfterIntersection, polygonToIntersect);
+            Point2DReadOnly slightlyBeforeIntersection = getPointSlightlyAfterIntersection(intersection, startPoint.getPoint(), wiggleDistance);
+            Point2DReadOnly slightlyAfterIntersection = getPointSlightlyAfterIntersection(intersection, nextPoint.getPoint(), wiggleDistance);
 
-            boolean incoming = intersectionBehavior == IntersectionBehavior.INCOMING || intersectionBehavior == IntersectionBehavior.BOTH;
-            boolean outgoing = intersectionBehavior == IntersectionBehavior.OUTGOING || intersectionBehavior == IntersectionBehavior.BOTH;
+            boolean beforeInside = polygonToIntersect.isPointInsideEpsilon(slightlyBeforeIntersection, epsilonForSamePoint);
+            boolean afterInside = polygonToIntersect.isPointInsideEpsilon(slightlyAfterIntersection, epsilonForSamePoint);
 
             intersections.add(intersection);
-            list.insertPoint(new LinkedPoint(intersection, incoming, outgoing), startPoint);
+            list.insertPoint(new LinkedPoint(intersection, afterInside, beforeInside), startPoint);
 
             continue;
          }
@@ -182,7 +218,7 @@ public class ClippingTools
             Point2DReadOnly intersection = intersectionInfo.getIntersection();
             double distanceToStartEdge = intersection.distanceSquared(intersectionInfo.getStartVertexOfIntersectingEdge());
             double distanceToEndEdge = intersection.distanceSquared(intersectionInfo.getEndVertexOfIntersectingEdge());
-            boolean isCornerOnOtherPolygon = distanceToStartEdge < 1e-5 || distanceToEndEdge < 1e-5;
+            boolean isCornerOnOtherPolygon = distanceToStartEdge < epsilonForSamePoint || distanceToEndEdge < epsilonForSamePoint;
 
             if (isCornerOnOtherPolygon)
             {
@@ -198,14 +234,39 @@ public class ClippingTools
             }
 
             // So the intersection is on the edge of the other polygon. Is it an incoming or outgoing intersection?
-            Point2DReadOnly slightlyBeforeIntersection = getPointSlightlyAfterIntersection(intersection, intersectionInfo.getStartVertexOfIntersectingEdge(), 5e-4);
-            Point2DReadOnly slightlyAfterIntersection = getPointSlightlyAfterIntersection(intersection, intersectionInfo.getEndVertexOfIntersectingEdge(), 5e-4);
+            Point2DReadOnly slightlyBeforeIntersection = getPointSlightlyAfterIntersection(intersection, startPoint.getPoint(), wiggleDistance);
+            Point2DReadOnly slightlyAfterIntersection = getPointSlightlyAfterIntersection(intersection, nextPoint.getSuccessor().getPoint(), wiggleDistance);
 
-            boolean isBeforeInside = GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(slightlyBeforeIntersection, points, points.size());
-            boolean isAfterInside = GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(slightlyAfterIntersection, points, points.size());
+            boolean isBeforeInside = polygonToIntersect.isPointInsideEpsilon(slightlyBeforeIntersection, epsilonForSamePoint);
+            boolean isAfterInside = polygonToIntersect.isPointInsideEpsilon(slightlyAfterIntersection, epsilonForSamePoint);
 
-            nextPoint.setIsIncomingIntersection(!isBeforeInside);
-            nextPoint.setIsOutgoingIntersection(!isAfterInside);
+            if (isAfterInside == isBeforeInside)
+            {
+
+               Point2DReadOnly slightlyBeforeIntersectionOtherEdge = getPointSlightlyAfterIntersection(intersection,
+                                                                                                       intersectionInfo.getStartVertexOfIntersectingEdge(),
+                                                                                                       wiggleDistance);
+               Point2DReadOnly slightlyAfterIntersectionOtherEdge = getPointSlightlyAfterIntersection(intersection,
+                                                                                                      intersectionInfo.getEndVertexOfIntersectingEdge(),
+                                                                                                      wiggleDistance);
+
+               boolean isOtherEdgeBeforeInside = GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(slightlyBeforeIntersectionOtherEdge,
+                                                                                                     pointsList,
+                                                                                                     pointsList.size(),
+                                                                                                     epsilonForSamePoint);
+               boolean isOtherEdgeAfterInside = GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(slightlyAfterIntersectionOtherEdge,
+                                                                                                    pointsList,
+                                                                                                    pointsList.size(),
+                                                                                                    epsilonForSamePoint);
+
+               nextPoint.setIsIncomingIntersection(!isOtherEdgeBeforeInside);
+               nextPoint.setIsOutgoingIntersection(!isOtherEdgeAfterInside);
+            }
+            else
+            {
+               nextPoint.setIsOutgoingIntersection(isBeforeInside);
+               nextPoint.setIsIncomingIntersection(isAfterInside);
+            }
             intersections.add(intersection);
          }
 
@@ -279,9 +340,9 @@ public class ClippingTools
                                                                       polygonToIntersect.getVertex(next),
                                                                       intersectionToPack))
          {
-            if (EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(edgeEnd, polygonToIntersect.getVertex(i), polygonToIntersect.getVertex(next)) < 1e-7)
+            if (EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(edgeEnd, polygonToIntersect.getVertex(i), polygonToIntersect.getVertex(next)) < epsilonSquaredForSamePoint)
                info = new IntersectionInfo(IntersectionType.END, edgeEnd, polygonToIntersect.getVertex(i), polygonToIntersect.getVertex(next));
-            else if (intersectionToPack.distanceSquared(edgeStart) > 1e-7)
+            else if (intersectionToPack.distanceSquared(edgeStart) > epsilonSquaredForSamePoint)
                return new IntersectionInfo(IntersectionType.NEW, intersectionToPack, polygonToIntersect.getVertex(i), polygonToIntersect.getVertex(next));
          }
       }
@@ -305,8 +366,8 @@ public class ClippingTools
                                                                 Point2DReadOnly littleAfter,
                                                                 ConcavePolygon2DReadOnly polygonToIntersect)
    {
-      boolean beforeInside = polygonToIntersect.isPointInside(littleBefore);
-      boolean afterInside = polygonToIntersect.isPointInside(littleAfter);
+      boolean beforeInside = polygonToIntersect.isPointInsideEpsilon(littleBefore, epsilonForSamePoint);
+      boolean afterInside = polygonToIntersect.isPointInsideEpsilon(littleAfter, epsilonForSamePoint);
 
       if (beforeInside && !afterInside)
          return IntersectionBehavior.OUTGOING;

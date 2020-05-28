@@ -105,6 +105,13 @@ public class GeometryPolygonToolsTest
       uPolygon.update();
 
       assertFalse(uPolygon.isPointInside(0.0, 1.0));
+
+      assertFalse(uPolygon.isPointInside(-0.8995, 1.0));
+      assertFalse(uPolygon.isPointInsideEpsilon(-0.8995, 1.0, 1e-5));
+      //assertTrue(uPolygon.isPointInsideEpsilon(-0.8995, 1.0, 5e-4));
+
+      Point2D pointToTest = new Point2D(-0.8995000000000001, 1.0);
+      assertFalse(GeometryPolygonTools.isPoint2DInsideSimplePolygon2D(pointToTest, uPolygon.getVertexBufferView(), uPolygon.getNumberOfVertices(), 1e-7));
    }
 
    @Test
