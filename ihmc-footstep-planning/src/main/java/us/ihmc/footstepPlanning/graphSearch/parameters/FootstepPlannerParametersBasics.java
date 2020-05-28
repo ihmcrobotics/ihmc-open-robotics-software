@@ -3,8 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
-import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.deltaYawFromReferenceTolerance;
-import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.distanceFromPathTolerance;
+import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.*;
 
 public interface FootstepPlannerParametersBasics extends FootstepPlannerParametersReadOnly, StoredPropertySetBasics
 {
@@ -318,6 +317,31 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.enableExpansionMask, enableExpansionMask);
    }
 
+   default void setEnableShinCollisionCheck(boolean enableShinCollisionCheck)
+   {
+      set(FootstepPlannerParameterKeys.enableShinCollisionCheck, enableShinCollisionCheck);
+   }
+
+   default void setShinRadius(double shinRadius)
+   {
+      set(FootstepPlannerParameterKeys.shinRadius, shinRadius);
+   }
+
+   default void setShinLength(double shinLength)
+   {
+      set(FootstepPlannerParameterKeys.shinLength, shinLength);
+   }
+
+   default void setShinPitch(double shinPitch)
+   {
+      set(FootstepPlannerParameterKeys.shinPitch, shinPitch);
+   }
+
+   default void setShinHeightOffset(double shinHeightOffet)
+   {
+      set(FootstepPlannerParameterKeys.shinHeightOffet, shinHeightOffet);
+   }
+
    default void set(FootstepPlannerParametersPacket parametersPacket)
    {
       double noValue = FootstepPlannerParametersPacket.DEFAULT_NO_VALUE;
@@ -439,5 +463,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setDistanceFromPathTolerance(parametersPacket.getDistanceFromPathTolerance());
       if (parametersPacket.getDeltaYawFromReferenceTolerance() != noValue)
          setDeltaYawFromReferenceTolerance(parametersPacket.getDeltaYawFromReferenceTolerance());
+      setEnableShinCollisionCheck(parametersPacket.getEnableShinCollisionCheck());
+      if (parametersPacket.getShinLength() != noValue)
+         setShinLength(parametersPacket.getShinLength());
+      if (parametersPacket.getShinRadius() != noValue)
+         setShinRadius(parametersPacket.getShinRadius());
+      if (parametersPacket.getShinHeightOffet() != noValue)
+         setShinHeightOffset(parametersPacket.getShinHeightOffet());
+      if (parametersPacket.getShinPitch() != noValue)
+         setShinPitch(parametersPacket.getShinPitch());
    }
 }

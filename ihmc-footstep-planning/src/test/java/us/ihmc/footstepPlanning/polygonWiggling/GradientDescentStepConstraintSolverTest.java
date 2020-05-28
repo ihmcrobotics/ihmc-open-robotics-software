@@ -1,18 +1,18 @@
 package us.ihmc.footstepPlanning.polygonWiggling;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.polygonWiggling.ConcavePolygonWiggler;
+import org.junit.jupiter.api.*;
+import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintSolver;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PointInPolygonSolver;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.shape.primitives.Cylinder3D;
+import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -23,6 +23,8 @@ import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
+import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -30,11 +32,11 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConcavePolygonWigglerTest
+public class GradientDescentStepConstraintSolverTest
 {
-   private static boolean visualize = false;
+   private static boolean visualize = true;
 
-   private ConcavePolygonWiggler concavePolygonWiggler;
+   private GradientDescentStepConstraintSolver gradientDescentStepConstraintSolver;
    private SimulationConstructionSet scs;
    private YoGraphicsListRegistry graphicsListRegistry;
    private YoVariableRegistry registry;
@@ -49,9 +51,10 @@ public class ConcavePolygonWigglerTest
       if (visualize)
       {
          scs = new SimulationConstructionSet(new Robot("testRobot"));
+         scs.setGroundVisible(false);
          registry = new YoVariableRegistry(getClass().getSimpleName());
          graphicsListRegistry = new YoGraphicsListRegistry();
-         concavePolygonWiggler = new ConcavePolygonWiggler(scs, graphicsListRegistry, registry);
+         gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver(scs, graphicsListRegistry, registry);
          graphicsListRegistry.addArtifactListsToPlotter(scs.createSimulationOverheadPlotterFactory().createOverheadPlotter().getPlotter());
          scs.addYoGraphicsListRegistry(graphicsListRegistry);
          scs.getRootRegistry().addChild(registry);
@@ -59,7 +62,7 @@ public class ConcavePolygonWigglerTest
       }
       else
       {
-         concavePolygonWiggler = new ConcavePolygonWiggler();
+         gradientDescentStepConstraintSolver = new GradientDescentStepConstraintSolver();
       }
    }
 
@@ -167,7 +170,7 @@ public class ConcavePolygonWigglerTest
       runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
 
       // foot position 4
-      concavePolygonWiggler.setAlpha(0.25);
+      gradientDescentStepConstraintSolver.setAlpha(0.25);
       initialFootTransform.setRotationYawAndZeroTranslation(Math.toRadians(0.0));
       initialFootTransform.getTranslation().set(0.3, -0.8, 0.0);
       runTests(polygon, initialFootTransform, -0.01, 0.0, 0.01);
@@ -246,7 +249,7 @@ public class ConcavePolygonWigglerTest
    {
       ConvexPolygon2D initialFoot = PlannerTools.createDefaultFootPolygon();
       initialFoot.applyTransform(initialFootTransform, false);
-      RigidBodyTransform transform = concavePolygonWiggler.wigglePolygon(initialFoot, polygon, wiggleParameters);
+      RigidBodyTransform transform = gradientDescentStepConstraintSolver.wigglePolygon(initialFoot, polygon, wiggleParameters);
 
       ConvexPolygon2D transformedFoot = new ConvexPolygon2D(initialFoot);
       transformedFoot.applyTransform(transform, false);
@@ -258,7 +261,7 @@ public class ConcavePolygonWigglerTest
             Point2DReadOnly vertex = transformedFoot.getVertex(i);
             boolean isInPolygon = PointInPolygonSolver.isPointInsidePolygon(polygon, vertex);
             double distanceFromPolygon = distanceFromPolygon(polygon, vertex);
-            double epsilon = concavePolygonWiggler.getGradientMagnitudeToTerminate() / concavePolygonWiggler.getAlpha();
+            double epsilon = gradientDescentStepConstraintSolver.getGradientMagnitudeToTerminate() / gradientDescentStepConstraintSolver.getAlpha();
 
             double signedDistanceFromPolygon = isInPolygon ? - distanceFromPolygon : distanceFromPolygon;
             Assertions.assertTrue(signedDistanceFromPolygon < - wiggleParameters.deltaInside + epsilon);
@@ -306,7 +309,7 @@ public class ConcavePolygonWigglerTest
       testConfigs.add(new TimingTestConfiguration(getCrazyPolygon2(), 0.9, -0.9, Math.toRadians(0.0), 0.0));
       testConfigs.add(new TimingTestConfiguration(getCrazyPolygon2(), 0.9, -0.9, Math.toRadians(0.0), 0.01));
 
-      ConcavePolygonWiggler wiggler = new ConcavePolygonWiggler();
+      GradientDescentStepConstraintSolver wiggler = new GradientDescentStepConstraintSolver();
       int numWarmupLoops = 5;
       int numTestLoops = 1;
 
@@ -398,5 +401,206 @@ public class ConcavePolygonWigglerTest
          }
          convexPolygon.update();
       }
+   }
+
+   @Disabled
+   @Test
+   public void testShinCollisionOnSimpleStairs()
+   {
+      double stepHeight = 0.3;
+      double stepLength = 0.25;
+      double stepWidth = 0.8;
+      int steps = 4;
+
+      PlanarRegionsListGenerator planarRegionsListGenerator = new PlanarRegionsListGenerator();
+      planarRegionsListGenerator.addRectangle(4.0, 4.0);
+      planarRegionsListGenerator.translate(0.5 * stepLength, 0.0, 0.0);
+
+      for (int i = 0; i < steps; i++)
+      {
+         planarRegionsListGenerator.translate(stepLength, 0.0, stepHeight);
+         planarRegionsListGenerator.rotate(Math.PI, Axis3D.Z);
+         planarRegionsListGenerator.addRectangle(stepLength, stepWidth);
+         planarRegionsListGenerator.rotate(-Math.PI, Axis3D.Z);
+      }
+
+      PlanarRegionsList stairCaseRegions = planarRegionsListGenerator.getPlanarRegionsList();
+      PlanarRegion firstStep = stairCaseRegions.getPlanarRegion(1);
+
+      ConvexPolygon2D footPolygon = PlannerTools.createDefaultFootPolygon();
+      WiggleParameters wiggleParameters = new WiggleParameters();
+      wiggleParameters.deltaInside = -0.1;
+
+      double shinPitch = Math.toRadians(25.0);
+      double shinRadius = 0.05;
+      double shinLength = 0.4;
+      Cylinder3D legCylinder = new Cylinder3D(shinLength, shinRadius);
+
+      RigidBodyTransformGenerator transformGenerator = new RigidBodyTransformGenerator();
+      transformGenerator.translate(0.0, 0.0, 0.05);
+      transformGenerator.rotate(shinPitch, Axis3D.Y);
+      transformGenerator.translate(0.0, 0.0, 0.5 * shinLength);
+      RigidBodyTransform transformToSoleFrame = transformGenerator.getRigidBodyTransformCopy();
+      gradientDescentStepConstraintSolver.setLegCollisionShape(legCylinder, 15.0, transformToSoleFrame);
+
+      RigidBodyTransform footTransformInLocal = new RigidBodyTransform();
+      footTransformInLocal.appendYawRotation(Math.toRadians(180.0));
+//      footTransformInLocal.appendTranslation(0.02, 0.01, 0.0);
+
+      footPolygon.applyTransform(footTransformInLocal);
+
+      gradientDescentStepConstraintSolver.wigglePolygon(footPolygon, wiggleParameters, footTransformInLocal, firstStep, stairCaseRegions);
+   }
+
+   @Disabled
+   @Test
+   public void testShinCollisionOnDataSet()
+   {
+      DataSet stairsDataSet = DataSetIOTools.loadDataSet(DataSetName._20200513_151318_StairsIHMC);
+      PlanarRegionsList stairsRegions = stairsDataSet.getPlanarRegionsList();
+
+      ConvexPolygon2D footPolygon = new ConvexPolygon2D();
+      RigidBodyTransform footTransformInLocal = new RigidBodyTransform();
+
+      int stepIndex = 8;
+      PlanarRegion step = packStep(stepIndex, stairsRegions, footPolygon, footTransformInLocal);
+
+      double shinPitch = Math.toRadians(25.0);
+      double shinRadius = 0.05;
+      double shinLength = 0.4;
+      Cylinder3D legCylinder = new Cylinder3D(shinLength, shinRadius);
+
+      RigidBodyTransformGenerator transformGenerator = new RigidBodyTransformGenerator();
+      transformGenerator.translate(0.0, 0.0, 0.05);
+      transformGenerator.rotate(shinPitch, Axis3D.Y);
+      transformGenerator.translate(0.0, 0.0, 0.5 * shinLength);
+      RigidBodyTransform transformToSoleFrame = transformGenerator.getRigidBodyTransformCopy();
+
+      gradientDescentStepConstraintSolver.setLegCollisionShape(legCylinder, 15.0, transformToSoleFrame);
+
+      gradientDescentStepConstraintSolver.wigglePolygon(footPolygon, new WiggleParameters(), footTransformInLocal, step, stairsRegions);
+   }
+
+   private PlanarRegion packStep(int stepIndex, PlanarRegionsList stairsRegions, ConvexPolygon2D footPolygon, RigidBodyTransform footTransformInLocal)
+   {
+      if (stepIndex == 0)
+      {
+         footPolygon.addVertex(-0.658,  0.307 );
+         footPolygon.addVertex(-0.456,  0.394 );
+         footPolygon.addVertex(-0.418,  0.291 );
+         footPolygon.addVertex(-0.629,  0.228 );
+         footPolygon.update();
+
+         footTransformInLocal.getRotation().setToYawOrientation(EuclidCoreTools.atan2(-0.342, -0.940));
+         footTransformInLocal.getTranslation().set(-0.54, 0.305, 0.0);
+
+         return stairsRegions.getRegionWithId(1477610134);
+      }
+      if (stepIndex == 1)
+      {
+         footPolygon.addVertex(-0.094, -0.230 );
+         footPolygon.addVertex( 0.091, -0.109 );
+         footPolygon.addVertex( 0.146, -0.204 );
+         footPolygon.addVertex(-0.051, -0.304 );
+         footPolygon.update();
+
+         footTransformInLocal.getRotation().setToYawOrientation(EuclidCoreTools.atan2(-0.5, -0.866));
+         footTransformInLocal.getTranslation().set(0.023, -0.212, 0.0);
+
+         return stairsRegions.getRegionWithId(1207074051);
+      }
+      if (stepIndex == 2)
+      {
+         footPolygon.addVertex(-0.756,  0.432 );
+         footPolygon.addVertex(-0.741,  0.516 );
+         footPolygon.addVertex(-0.523,  0.490 );
+         footPolygon.addVertex(-0.542,  0.382 );
+         footPolygon.update();
+
+         footTransformInLocal.getRotation().setToYawOrientation(EuclidCoreTools.atan2(0.174, -0.985));
+         footTransformInLocal.getTranslation().set(-0.640, 0.455, 0.0);
+
+         return stairsRegions.getRegionWithId(1477610134);
+      }
+      if (stepIndex == 3)
+      {
+         footPolygon.addVertex(-0.708,  0.157 );
+         footPolygon.addVertex(-0.506,  0.244 );
+         footPolygon.addVertex(-0.468,  0.141 );
+         footPolygon.addVertex(-0.679,  0.078 );
+         footPolygon.update();
+
+         footTransformInLocal.getRotation().setToYawOrientation(EuclidCoreTools.atan2(-0.342, -0.940));
+         footTransformInLocal.getTranslation().set(-0.590, 0.155, 0.0);
+
+         return stairsRegions.getRegionWithId(1477610134);
+      }
+      if (stepIndex == 6)
+      {
+         footPolygon.addVertex(-0.146,  0.255 );
+         footPolygon.addVertex(-0.131,  0.339 );
+         footPolygon.addVertex( 0.088,  0.313 );
+         footPolygon.addVertex( 0.069,  0.205 );
+         footPolygon.update();
+
+         footTransformInLocal.getRotation().setToYawOrientation(EuclidCoreTools.atan2(0.174, -0.985));
+         footTransformInLocal.getTranslation().set(-0.030, 0.278, 0.0);
+
+         return stairsRegions.getRegionWithId(1695211678);
+      }
+      if (stepIndex == 7)
+      {
+         footPolygon.addVertex(-0.126,  0.176 );
+         footPolygon.addVertex( 0.088,  0.227 );
+         footPolygon.addVertex( 0.107,  0.118 );
+         footPolygon.addVertex(-0.112,  0.092 );
+         footPolygon.update();
+
+         footTransformInLocal.getRotation().setToYawOrientation(EuclidCoreTools.atan2(-0.174, -0.985));
+         footTransformInLocal.getTranslation().set(-0.030, 0.278, 0.0);
+
+         return stairsRegions.getRegionWithId(1695211678);
+      }
+      if (stepIndex == 8)
+      {
+         footPolygon.addVertex(-0.156,  0.416 );
+         footPolygon.addVertex( 0.046,  0.503 );
+         footPolygon.addVertex( 0.084,  0.400 );
+         footPolygon.addVertex(-0.127,  0.337 );
+         footPolygon.update();
+
+         footTransformInLocal.getRotation().setToYawOrientation(EuclidCoreTools.atan2(-0.342, -0.940));
+         footTransformInLocal.getTranslation().set(-0.030, 0.278, 0.0);
+
+         return stairsRegions.getRegionWithId(507821362);
+      }
+      if (stepIndex == 9)
+      {
+         footPolygon.addVertex( 0.408,  0.115 );
+         footPolygon.addVertex( 0.623,  0.165 );
+         footPolygon.addVertex( 0.642,  0.057 );
+         footPolygon.addVertex( 0.423,  0.031 );
+         footPolygon.update();
+
+         footTransformInLocal.getRotation().setToYawOrientation(EuclidCoreTools.atan2(-0.174, -0.985));
+         footTransformInLocal.getTranslation().set(0.524, 0.092, 0.0);
+
+         return stairsRegions.getRegionWithId(1816290613);
+      }
+      if (stepIndex == 10)
+      {
+         footPolygon.addVertex( 0.264,  0.335 );
+         footPolygon.addVertex( 0.484,  0.347 );
+         footPolygon.addVertex( 0.484,  0.237 );
+         footPolygon.addVertex( 0.264,  0.250 );
+         footPolygon.update();
+
+         footTransformInLocal.getRotation().setToYawOrientation(EuclidCoreTools.atan2(0.0, -1.0));
+         footTransformInLocal.getTranslation().set(0.374, 0.292, 0.0);
+
+         return stairsRegions.getRegionWithId(1816290613);
+      }
+
+      throw new RuntimeException("dataa not present for step index" + stepIndex);
    }
 }
