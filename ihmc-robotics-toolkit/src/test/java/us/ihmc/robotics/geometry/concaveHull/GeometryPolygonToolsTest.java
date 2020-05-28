@@ -108,6 +108,23 @@ public class GeometryPolygonToolsTest
    }
 
    @Test
+   public void testTrickyIsPointInside2()
+   {
+      ConcavePolygon2D polygon = new ConcavePolygon2D();
+      polygon.addVertex(1.5, 1.5);
+      polygon.addVertex(1.5, 0.5);
+      polygon.addVertex(1.0, 0.5);
+      polygon.addVertex(1.0, -1.0);
+      polygon.addVertex(-1.0, -1.0);
+      polygon.addVertex(-1.0, 1.0);
+      polygon.addVertex(0.5, 1.0);
+      polygon.addVertex(0.5, 1.5);
+      polygon.update();
+
+      assertTrue(polygon.isPointInside(0.5, 0.5));
+   }
+
+   @Test
    public void testEasyInteriorPolygon()
    {
       ConcavePolygon2D outerPolygon = new ConcavePolygon2D();
