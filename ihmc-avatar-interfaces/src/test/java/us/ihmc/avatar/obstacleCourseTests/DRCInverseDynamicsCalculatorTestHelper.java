@@ -683,8 +683,8 @@ public class DRCInverseDynamicsCalculatorTestHelper
 
    public void setRobotsExternalForcesToMatchOtherRobot(FloatingRootJointRobot otherRobot)
    {
-      ArrayList<GroundContactPoint> otherGroundContactPoints = otherRobot.getAllGroundContactPoints();
-      ArrayList<GroundContactPoint> groundContactPoints = robot.getAllGroundContactPoints();
+      List<GroundContactPoint> otherGroundContactPoints = otherRobot.getAllGroundContactPoints();
+      List<GroundContactPoint> groundContactPoints = robot.getAllGroundContactPoints();
 
       for (int i = 0; i < otherGroundContactPoints.size(); i++)
       {

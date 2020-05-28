@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static us.ihmc.humanoidRobotics.communication.packets.KinematicsToolboxMessageFactory.holdRigidBodyCurrentPose;
 
 import java.awt.Color;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
@@ -562,7 +561,7 @@ public final class KinematicsToolboxControllerTest
 
       if (linkGraphics != null)
       {
-         ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructions = linkGraphics.getGraphics3DInstructions();
+         List<Graphics3DPrimitiveInstruction> graphics3dInstructions = linkGraphics.getGraphics3DInstructions();
 
          if (graphics3dInstructions == null)
             return;

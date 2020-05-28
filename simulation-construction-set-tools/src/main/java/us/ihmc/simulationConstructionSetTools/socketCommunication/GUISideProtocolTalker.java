@@ -4,10 +4,11 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
+import us.ihmc.simulationconstructionset.NewDataListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.simulationconstructionset.NewDataListener;
 
 public class GUISideProtocolTalker
 {
@@ -16,9 +17,9 @@ public class GUISideProtocolTalker
    private static final byte IN_SYNC_BYTE = (byte) 33;
    private static final byte OUT_SYNC_BYTE = (byte) 79;
 
-   private final ArrayList<NewDataListener> newDataListeners;
+   private final List<NewDataListener> newDataListeners;
 
-   public GUISideProtocolTalker(DataOutputStream dataOutputStream, ArrayList<NewDataListener> newDataListeners)
+   public GUISideProtocolTalker(DataOutputStream dataOutputStream, List<NewDataListener> newDataListeners)
    {
       this.dataOutputStream = dataOutputStream;
       this.newDataListeners = newDataListeners;

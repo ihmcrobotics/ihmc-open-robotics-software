@@ -583,7 +583,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
          HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
 
          int pointIndex = 0;
-         ArrayList<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
+         List<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
 
          for (GroundContactPoint point : allGroundContactPoints)
          {
