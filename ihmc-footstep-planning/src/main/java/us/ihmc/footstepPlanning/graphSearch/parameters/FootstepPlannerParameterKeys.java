@@ -60,6 +60,11 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  deltaYawFromReferenceTolerance               = keys.addDoubleKey("Delta yaw from reference tolerance", 0.35);
    public static final IntegerStoredPropertyKey maximumBranchFactor                          = keys.addIntegerKey ("Max branch factor", -1);
    public static final BooleanStoredPropertyKey enableExpansionMask                          = keys.addBooleanKey("Enable expansion mask", true);
+   public static final BooleanStoredPropertyKey enableShinCollisionCheck                     = keys.addBooleanKey("Enable shin collision check", false);
+   public static final DoubleStoredPropertyKey  shinRadius                                   = keys.addDoubleKey("Shin radius", 0.12);
+   public static final DoubleStoredPropertyKey  shinLength                                   = keys.addDoubleKey("Shin length", 0.45);
+   public static final DoubleStoredPropertyKey  shinPitch                                    = keys.addDoubleKey("Shin pitch", 0.0);
+   public static final DoubleStoredPropertyKey  shinHeightOffet                              = keys.addDoubleKey("Shin height offet", 0.05);
 
    // cost parameters
    public static final DoubleStoredPropertyKey  aStarHeuristicsWeight                        = keys.addDoubleKey ("AStar heuristics weight", 1.5);
