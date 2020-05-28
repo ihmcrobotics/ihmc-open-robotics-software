@@ -16,7 +16,7 @@ public class SimpleTimer
       return Double.isNaN(timePassedSinceReset()) || timePassedSinceReset() > time;
    }
 
-   private double timePassedSinceReset()
+   public double timePassedSinceReset()
    {
       return stopwatch.totalElapsed();
    }
