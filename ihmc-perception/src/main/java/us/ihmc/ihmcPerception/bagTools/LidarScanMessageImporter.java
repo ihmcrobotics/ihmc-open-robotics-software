@@ -24,7 +24,7 @@ import java.util.List;
  */
 public class LidarScanMessageImporter
 {
-   private static final long publishPeriodMillis = 85;
+   private static final long publishPeriodMillis = 100;
 
    public LidarScanMessageImporter(InputStream inputStream) throws IOException
    {
