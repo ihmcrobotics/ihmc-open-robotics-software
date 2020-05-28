@@ -135,7 +135,7 @@ public class AtlasSDFViewer
       }
    }
 
-   private static HashSet<Link> getAllLinks(ArrayList<Joint> joints, HashSet<Link> links)
+   private static HashSet<Link> getAllLinks(List<Joint> joints, HashSet<Link> links)
    {
       for (Joint joint : joints)
       {

@@ -246,16 +246,34 @@ float64 maximum_step_width -11.1
 # If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
 # hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
 # generator is capable of swinging over.
-float64 cliff_height_to_avoid -11.1
+float64 cliff_base_height_to_avoid -11.1
 
 # The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
-# nearby that is {@link #getCliffHeightToAvoid} higher than the candidate footstep, it will move away from it
+# nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
 # until it is minimumDistanceFromCliffBottoms away from it.
 #
 # If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
 # hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
 # generator is capable of swinging over.
 float64 minimum_distance_from_cliff_bottoms -11.1
+
+# The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
+# nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
+# until it is minimumDistanceFromCliffTops away from it.
+#
+# If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+# hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+# generator is capable of swinging over.
+float64 cliff_top_height_to_avoid -11.1
+
+# The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
+# nearby that is {@link #getCliffTopHeightToAvoid} higher than the candidate footstep, it will move away from it
+# until it is minimumDistanceFromCliffBottoms away from it.
+#
+# If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+# hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+# generator is capable of swinging over.
+float64 minimum_distance_from_cliff_tops -11.1
 
 # Some node checkers will check if a bounding box that describes the body of the robot will move
 # through a planar region (e.g. a wall) when going from one footstep to the next one. To avoid these
@@ -367,3 +385,19 @@ int32 maximum_branch_factor -1
 
 # If true, enables a mask that reduces the number of calculated steps away from the ideal step
 bool enable_expansion_mask true
+
+# If true will try to wiggle steps away from shin collisions. Collisions are checked against all regions.
+# Enable concave hull wiggler must be true in order for the shin collision checker to run.
+bool enable_shin_collision_check
+
+# Radius of the shin collidable cylinder
+float64 shin_radius -11.1
+
+# Length of the shin collidable cylinder
+float64 shin_length -11.1
+
+# Pitch of the shin collidable cylinder
+float64 shin_pitch -11.1
+
+# Height offset of shin collidable cylinder
+float64 shin_height_offet -11.1

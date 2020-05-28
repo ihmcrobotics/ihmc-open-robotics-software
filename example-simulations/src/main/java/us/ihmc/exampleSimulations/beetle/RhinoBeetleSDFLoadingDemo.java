@@ -3,6 +3,7 @@ package us.ihmc.exampleSimulations.beetle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -61,7 +62,7 @@ public class RhinoBeetleSDFLoadingDemo
       }
    }
 
-   private HashSet<Link> getAllLinks(ArrayList<Joint> joints, HashSet<Link> links)
+   private HashSet<Link> getAllLinks(List<Joint> joints, HashSet<Link> links)
    {
       for (Joint joint : joints)
       {

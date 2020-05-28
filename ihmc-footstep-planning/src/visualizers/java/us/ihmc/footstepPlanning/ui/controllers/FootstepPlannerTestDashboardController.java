@@ -21,7 +21,7 @@ public class FootstepPlannerTestDashboardController
 
    public void bindControls()
    {
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.testDataSets,
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.TestDataSets,
                                      dataSets -> testDashboardDataSets.setItems(FXCollections.observableArrayList(dataSets)));
 
       testDashboardDataSets.getSelectionModel()
@@ -31,6 +31,6 @@ public class FootstepPlannerTestDashboardController
 
    private void broadcastDataSetSelected(DataSet dataSet)
    {
-      new Thread(() -> messager.submitMessage(FootstepPlannerMessagerAPI.testDataSetSelected, dataSet)).start();
+      new Thread(() -> messager.submitMessage(FootstepPlannerMessagerAPI.TestDataSetSelected, dataSet)).start();
    }
 }

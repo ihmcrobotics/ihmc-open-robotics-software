@@ -536,13 +536,13 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
     * generator is capable of swinging over.
        
     */
-   public double cliff_height_to_avoid_ = -11.1;
+   public double cliff_base_height_to_avoid_ = -11.1;
 
    /**
        
     * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
        
-    * nearby that is {@link #getCliffHeightToAvoid} higher than the candidate footstep, it will move away from it
+    * nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
        
     * until it is minimumDistanceFromCliffBottoms away from it.
        
@@ -556,6 +556,44 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
        
     */
    public double minimum_distance_from_cliff_bottoms_ = -11.1;
+
+   /**
+       
+    * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
+       
+    * nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
+       
+    * until it is minimumDistanceFromCliffTops away from it.
+       
+    * 
+       
+    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+       
+    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+       
+    * generator is capable of swinging over.
+       
+    */
+   public double cliff_top_height_to_avoid_ = -11.1;
+
+   /**
+       
+    * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
+       
+    * nearby that is {@link #getCliffTopHeightToAvoid} higher than the candidate footstep, it will move away from it
+       
+    * until it is minimumDistanceFromCliffBottoms away from it.
+       
+    * 
+       
+    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+       
+    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+       
+    * generator is capable of swinging over.
+       
+    */
+   public double minimum_distance_from_cliff_tops_ = -11.1;
 
    /**
        
@@ -806,8 +844,52 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
     */
    public boolean enable_expansion_mask_ = true;
 
+   /**
+       
+    * If true will try to wiggle steps away from shin collisions. Collisions are checked against all regions.
+       
+    * Enable concave hull wiggler must be true in order for the shin collision checker to run.
+       
+    */
+   public boolean enable_shin_collision_check_;
+
+   /**
+       
+    * Radius of the shin collidable cylinder
+       
+    */
+   public double shin_radius_ = -11.1;
+
+   /**
+       
+    * Length of the shin collidable cylinder
+       
+    */
+   public double shin_length_ = -11.1;
+
+   /**
+       
+    * Pitch of the shin collidable cylinder
+       
+    */
+   public double shin_pitch_ = -11.1;
+
+   /**
+       
+    * Height offset of shin collidable cylinder
+       
+    */
+   public double shin_height_offet_ = -11.1;
+
    public FootstepPlannerParametersPacket()
    {
+
+
+
+
+
+
+
 
 
 
@@ -981,10 +1063,16 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       maximum_step_width_ = other.maximum_step_width_;
 
 
-      cliff_height_to_avoid_ = other.cliff_height_to_avoid_;
+      cliff_base_height_to_avoid_ = other.cliff_base_height_to_avoid_;
 
 
       minimum_distance_from_cliff_bottoms_ = other.minimum_distance_from_cliff_bottoms_;
+
+
+      cliff_top_height_to_avoid_ = other.cliff_top_height_to_avoid_;
+
+
+      minimum_distance_from_cliff_tops_ = other.minimum_distance_from_cliff_tops_;
 
 
       body_box_height_ = other.body_box_height_;
@@ -1066,6 +1154,21 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
       enable_expansion_mask_ = other.enable_expansion_mask_;
+
+
+      enable_shin_collision_check_ = other.enable_shin_collision_check_;
+
+
+      shin_radius_ = other.shin_radius_;
+
+
+      shin_length_ = other.shin_length_;
+
+
+      shin_pitch_ = other.shin_pitch_;
+
+
+      shin_height_offet_ = other.shin_height_offet_;
 
    }
 
@@ -2195,9 +2298,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
     * generator is capable of swinging over.
        
     */
-   public void setCliffHeightToAvoid(double cliff_height_to_avoid)
+   public void setCliffBaseHeightToAvoid(double cliff_base_height_to_avoid)
    {
-      cliff_height_to_avoid_ = cliff_height_to_avoid;
+      cliff_base_height_to_avoid_ = cliff_base_height_to_avoid;
    }
    /**
        
@@ -2216,9 +2319,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
     * generator is capable of swinging over.
        
     */
-   public double getCliffHeightToAvoid()
+   public double getCliffBaseHeightToAvoid()
    {
-      return cliff_height_to_avoid_;
+      return cliff_base_height_to_avoid_;
    }
 
 
@@ -2226,7 +2329,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
        
     * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
        
-    * nearby that is {@link #getCliffHeightToAvoid} higher than the candidate footstep, it will move away from it
+    * nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
        
     * until it is minimumDistanceFromCliffBottoms away from it.
        
@@ -2247,7 +2350,7 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
        
     * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
        
-    * nearby that is {@link #getCliffHeightToAvoid} higher than the candidate footstep, it will move away from it
+    * nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
        
     * until it is minimumDistanceFromCliffBottoms away from it.
        
@@ -2263,6 +2366,94 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    public double getMinimumDistanceFromCliffBottoms()
    {
       return minimum_distance_from_cliff_bottoms_;
+   }
+
+
+   /**
+       
+    * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
+       
+    * nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
+       
+    * until it is minimumDistanceFromCliffTops away from it.
+       
+    * 
+       
+    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+       
+    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+       
+    * generator is capable of swinging over.
+       
+    */
+   public void setCliffTopHeightToAvoid(double cliff_top_height_to_avoid)
+   {
+      cliff_top_height_to_avoid_ = cliff_top_height_to_avoid;
+   }
+   /**
+       
+    * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
+       
+    * nearby that is cliffHeightToShiftAwayFrom higher than the candidate footstep, it will move away from it
+       
+    * until it is minimumDistanceFromCliffTops away from it.
+       
+    * 
+       
+    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+       
+    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+       
+    * generator is capable of swinging over.
+       
+    */
+   public double getCliffTopHeightToAvoid()
+   {
+      return cliff_top_height_to_avoid_;
+   }
+
+
+   /**
+       
+    * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
+       
+    * nearby that is {@link #getCliffTopHeightToAvoid} higher than the candidate footstep, it will move away from it
+       
+    * until it is minimumDistanceFromCliffBottoms away from it.
+       
+    * 
+       
+    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+       
+    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+       
+    * generator is capable of swinging over.
+       
+    */
+   public void setMinimumDistanceFromCliffTops(double minimum_distance_from_cliff_tops)
+   {
+      minimum_distance_from_cliff_tops_ = minimum_distance_from_cliff_tops;
+   }
+   /**
+       
+    * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
+       
+    * nearby that is {@link #getCliffTopHeightToAvoid} higher than the candidate footstep, it will move away from it
+       
+    * until it is minimumDistanceFromCliffBottoms away from it.
+       
+    * 
+       
+    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+       
+    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+       
+    * generator is capable of swinging over.
+       
+    */
+   public double getMinimumDistanceFromCliffTops()
+   {
+      return minimum_distance_from_cliff_tops_;
    }
 
 
@@ -2926,6 +3117,110 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
 
+   /**
+       
+    * If true will try to wiggle steps away from shin collisions. Collisions are checked against all regions.
+       
+    * Enable concave hull wiggler must be true in order for the shin collision checker to run.
+       
+    */
+   public void setEnableShinCollisionCheck(boolean enable_shin_collision_check)
+   {
+      enable_shin_collision_check_ = enable_shin_collision_check;
+   }
+   /**
+       
+    * If true will try to wiggle steps away from shin collisions. Collisions are checked against all regions.
+       
+    * Enable concave hull wiggler must be true in order for the shin collision checker to run.
+       
+    */
+   public boolean getEnableShinCollisionCheck()
+   {
+      return enable_shin_collision_check_;
+   }
+
+
+   /**
+       
+    * Radius of the shin collidable cylinder
+       
+    */
+   public void setShinRadius(double shin_radius)
+   {
+      shin_radius_ = shin_radius;
+   }
+   /**
+       
+    * Radius of the shin collidable cylinder
+       
+    */
+   public double getShinRadius()
+   {
+      return shin_radius_;
+   }
+
+
+   /**
+       
+    * Length of the shin collidable cylinder
+       
+    */
+   public void setShinLength(double shin_length)
+   {
+      shin_length_ = shin_length;
+   }
+   /**
+       
+    * Length of the shin collidable cylinder
+       
+    */
+   public double getShinLength()
+   {
+      return shin_length_;
+   }
+
+
+   /**
+       
+    * Pitch of the shin collidable cylinder
+       
+    */
+   public void setShinPitch(double shin_pitch)
+   {
+      shin_pitch_ = shin_pitch;
+   }
+   /**
+       
+    * Pitch of the shin collidable cylinder
+       
+    */
+   public double getShinPitch()
+   {
+      return shin_pitch_;
+   }
+
+
+   /**
+       
+    * Height offset of shin collidable cylinder
+       
+    */
+   public void setShinHeightOffet(double shin_height_offet)
+   {
+      shin_height_offet_ = shin_height_offet;
+   }
+   /**
+       
+    * Height offset of shin collidable cylinder
+       
+    */
+   public double getShinHeightOffet()
+   {
+      return shin_height_offet_;
+   }
+
+
    public static Supplier<FootstepPlannerParametersPacketPubSubType> getPubSubType()
    {
       return FootstepPlannerParametersPacketPubSubType::new;
@@ -3043,10 +3338,16 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.maximum_step_width_, other.maximum_step_width_, epsilon)) return false;
 
 
-      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cliff_height_to_avoid_, other.cliff_height_to_avoid_, epsilon)) return false;
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cliff_base_height_to_avoid_, other.cliff_base_height_to_avoid_, epsilon)) return false;
 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_distance_from_cliff_bottoms_, other.minimum_distance_from_cliff_bottoms_, epsilon)) return false;
+
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.cliff_top_height_to_avoid_, other.cliff_top_height_to_avoid_, epsilon)) return false;
+
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.minimum_distance_from_cliff_tops_, other.minimum_distance_from_cliff_tops_, epsilon)) return false;
 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.body_box_height_, other.body_box_height_, epsilon)) return false;
@@ -3128,6 +3429,21 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_expansion_mask_, other.enable_expansion_mask_, epsilon)) return false;
+
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_shin_collision_check_, other.enable_shin_collision_check_, epsilon)) return false;
+
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_radius_, other.shin_radius_, epsilon)) return false;
+
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_length_, other.shin_length_, epsilon)) return false;
+
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_pitch_, other.shin_pitch_, epsilon)) return false;
+
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_height_offet_, other.shin_height_offet_, epsilon)) return false;
 
 
       return true;
@@ -3242,10 +3558,16 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.maximum_step_width_ != otherMyClass.maximum_step_width_) return false;
 
 
-      if(this.cliff_height_to_avoid_ != otherMyClass.cliff_height_to_avoid_) return false;
+      if(this.cliff_base_height_to_avoid_ != otherMyClass.cliff_base_height_to_avoid_) return false;
 
 
       if(this.minimum_distance_from_cliff_bottoms_ != otherMyClass.minimum_distance_from_cliff_bottoms_) return false;
+
+
+      if(this.cliff_top_height_to_avoid_ != otherMyClass.cliff_top_height_to_avoid_) return false;
+
+
+      if(this.minimum_distance_from_cliff_tops_ != otherMyClass.minimum_distance_from_cliff_tops_) return false;
 
 
       if(this.body_box_height_ != otherMyClass.body_box_height_) return false;
@@ -3327,6 +3649,21 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
       if(this.enable_expansion_mask_ != otherMyClass.enable_expansion_mask_) return false;
+
+
+      if(this.enable_shin_collision_check_ != otherMyClass.enable_shin_collision_check_) return false;
+
+
+      if(this.shin_radius_ != otherMyClass.shin_radius_) return false;
+
+
+      if(this.shin_length_ != otherMyClass.shin_length_) return false;
+
+
+      if(this.shin_pitch_ != otherMyClass.shin_pitch_) return false;
+
+
+      if(this.shin_height_offet_ != otherMyClass.shin_height_offet_) return false;
 
 
       return true;
@@ -3438,11 +3775,17 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append("maximum_step_width=");
       builder.append(this.maximum_step_width_);      builder.append(", ");
 
-      builder.append("cliff_height_to_avoid=");
-      builder.append(this.cliff_height_to_avoid_);      builder.append(", ");
+      builder.append("cliff_base_height_to_avoid=");
+      builder.append(this.cliff_base_height_to_avoid_);      builder.append(", ");
 
       builder.append("minimum_distance_from_cliff_bottoms=");
       builder.append(this.minimum_distance_from_cliff_bottoms_);      builder.append(", ");
+
+      builder.append("cliff_top_height_to_avoid=");
+      builder.append(this.cliff_top_height_to_avoid_);      builder.append(", ");
+
+      builder.append("minimum_distance_from_cliff_tops=");
+      builder.append(this.minimum_distance_from_cliff_tops_);      builder.append(", ");
 
       builder.append("body_box_height=");
       builder.append(this.body_box_height_);      builder.append(", ");
@@ -3523,7 +3866,22 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.maximum_branch_factor_);      builder.append(", ");
 
       builder.append("enable_expansion_mask=");
-      builder.append(this.enable_expansion_mask_);
+      builder.append(this.enable_expansion_mask_);      builder.append(", ");
+
+      builder.append("enable_shin_collision_check=");
+      builder.append(this.enable_shin_collision_check_);      builder.append(", ");
+
+      builder.append("shin_radius=");
+      builder.append(this.shin_radius_);      builder.append(", ");
+
+      builder.append("shin_length=");
+      builder.append(this.shin_length_);      builder.append(", ");
+
+      builder.append("shin_pitch=");
+      builder.append(this.shin_pitch_);      builder.append(", ");
+
+      builder.append("shin_height_offet=");
+      builder.append(this.shin_height_offet_);
       builder.append("}");
       return builder.toString();
    }

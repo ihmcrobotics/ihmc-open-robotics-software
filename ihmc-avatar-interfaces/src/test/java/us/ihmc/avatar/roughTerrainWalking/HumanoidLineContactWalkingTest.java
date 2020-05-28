@@ -4,6 +4,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.awt.Color;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -555,7 +556,7 @@ public abstract class HumanoidLineContactWalkingTest implements MultiRobotTestIn
          HumanoidFloatingRootJointRobot robot = drcSimulationTestHelper.getRobot();
 
          int pointIndex = 0;
-         ArrayList<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
+         List<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
 
          for (GroundContactPoint point : allGroundContactPoints)
          {

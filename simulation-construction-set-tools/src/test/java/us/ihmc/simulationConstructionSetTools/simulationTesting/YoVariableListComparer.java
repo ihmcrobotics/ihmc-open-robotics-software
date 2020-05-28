@@ -3,6 +3,7 @@ package us.ihmc.simulationConstructionSetTools.simulationTesting;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.List;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.yoVariables.variable.YoVariable;
@@ -10,15 +11,15 @@ import us.ihmc.yoVariables.variable.YoVariable;
 public class YoVariableListComparer
 {
    private final double epsilon;
-   private final ArrayList<YoVariable<?>[]> differences = new ArrayList<YoVariable<?>[]>();
-   private ArrayList<String> exceptions = new ArrayList<String>();
+   private final List<YoVariable<?>[]> differences = new ArrayList<YoVariable<?>[]>();
+   private List<String> exceptions = new ArrayList<String>();
 
    public YoVariableListComparer(double epsilon)
    {
       this.epsilon = epsilon;
    }
 
-   public boolean compare(ArrayList<YoVariable<?>> allVariables0, ArrayList<YoVariable<?>> allVariables1)
+   public boolean compare(List<YoVariable<?>> allVariables0, List<YoVariable<?>> allVariables1)
    {
       differences.clear();
 
@@ -88,9 +89,9 @@ public class YoVariableListComparer
       return differences.isEmpty();
    }
 
-   private ArrayList<YoVariable<?>> removeExceptionalVariables(ArrayList<YoVariable<?>> variables) 
+   private List<YoVariable<?>> removeExceptionalVariables(List<YoVariable<?>> variables) 
    {
-      ArrayList<YoVariable<?>> variablesWithoutExceptions = new ArrayList<YoVariable<?>>();
+      List<YoVariable<?>> variablesWithoutExceptions = new ArrayList<YoVariable<?>>();
 
       for (int i=0; i<variables.size(); i++)
       {
@@ -110,7 +111,7 @@ public class YoVariableListComparer
       differences.add(difference);
    }
 
-   public ArrayList<YoVariable<?>[]> getDifferences()
+   public List<YoVariable<?>[]> getDifferences()
    {
       return differences;
    }
@@ -137,7 +138,7 @@ public class YoVariableListComparer
       exceptions.add(exception);
    }
 
-   private static boolean isException(ArrayList<String> exceptions, YoVariable<?> variable)
+   private static boolean isException(List<String> exceptions, YoVariable<?> variable)
    {
       boolean isException = false;
 

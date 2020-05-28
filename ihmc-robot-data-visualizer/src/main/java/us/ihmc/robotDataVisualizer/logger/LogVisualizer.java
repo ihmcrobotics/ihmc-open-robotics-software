@@ -9,7 +9,6 @@ import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JLabel;
@@ -104,7 +103,7 @@ public class LogVisualizer
    private void printOutYoVariableNames()
    {
       YoVariableRegistry rootRegistry = scs.getRootRegistry();
-      ArrayList<YoVariable<?>> allVariablesIncludingDescendants = rootRegistry.getAllVariablesIncludingDescendants();
+      List<YoVariable<?>> allVariablesIncludingDescendants = rootRegistry.getAllVariablesIncludingDescendants();
 
       for (YoVariable<?> yoVariable : allVariablesIncludingDescendants)
       {
@@ -339,7 +338,7 @@ public class LogVisualizer
       List<YoGraphicsList> yoGraphicsLists = yoGraphicsListRegistry.getYoGraphicsLists();
       for (YoGraphicsList yoGraphicsList : yoGraphicsLists)
       {
-         ArrayList<YoGraphic> yoGraphics = yoGraphicsList.getYoGraphics();
+         List<YoGraphic> yoGraphics = yoGraphicsList.getYoGraphics();
          for (YoGraphic yoGraphic : yoGraphics)
             yoGraphic.update();
       }

@@ -4,6 +4,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 import static us.ihmc.robotics.Assert.fail;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import org.junit.jupiter.api.AfterEach;
@@ -591,7 +592,7 @@ public abstract class AvatarICPPlannerFlatGroundTest implements MultiRobotTestIn
       System.out.println("Changing contact points at time " + time);
 
       int pointIndex = 0;
-      ArrayList<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
+      List<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
 
       for (GroundContactPoint point : allGroundContactPoints)
       {

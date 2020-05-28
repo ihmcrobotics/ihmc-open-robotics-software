@@ -1,8 +1,8 @@
 package us.ihmc.simulationConstructionSetTools.util.tracks;
 
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -22,12 +22,13 @@ public class TrackGroundContactPoint extends GroundContactPoint
       dz_track = new YoDouble(name + "_dz_track", registry);
    }
 
-   public void getTrackVelocity(Vector3D trackVelocityToPack)
+   public void getTrackVelocity(Vector3DBasics trackVelocityToPack)
    {
       trackVelocityToPack.set(dx_track.getDoubleValue(), dy_track.getDoubleValue(), dz_track.getDoubleValue());
    }
+
    @Override
-   protected void updatePointPosition(RigidBodyTransform transform3D)
+   protected void updatePointPosition(RigidBodyTransformReadOnly transform3D)
    {
       // +++JEP: OPTIMIZE: Don't compute if point is turned off...
       if (this.isDisabled())
@@ -46,6 +47,4 @@ public class TrackGroundContactPoint extends GroundContactPoint
          super.updatePointVelocity(R0_i, comOffset, v_i, w_i);
 
    }
-
-
 }
