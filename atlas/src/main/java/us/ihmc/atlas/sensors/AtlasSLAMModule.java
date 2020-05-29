@@ -48,14 +48,14 @@ public class AtlasSLAMModule extends SLAMModule
    {
       super(messager, configurationFile);
 
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           RobotConfigurationData.class,
-                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(drcRobotModel.getSimpleRobotName()),
-                                           this::updateStationaryStatus);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    RobotConfigurationData.class,
+                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()),
+                                                    this::updateStationaryStatus);
 
-      String generateTopicName = ControllerAPIDefinition.getPublisherTopicNameGenerator(drcRobotModel.getSimpleRobotName())
-                                                        .generateTopicName(StampedPosePacket.class);
-      estimatedPelvisPublisher = ROS2Tools.createPublisher(ros2Node, StampedPosePacket.class, generateTopicName);
+      estimatedPelvisPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                    StampedPosePacket.class,
+                                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()));
       sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToDepthCamera);
       sensorPoseToPelvisTransformer.invert();
    }

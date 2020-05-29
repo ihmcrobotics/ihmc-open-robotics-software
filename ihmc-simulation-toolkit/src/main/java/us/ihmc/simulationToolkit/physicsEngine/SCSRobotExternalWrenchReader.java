@@ -31,10 +31,10 @@ public class SCSRobotExternalWrenchReader implements ExternalWrenchReader
 
    public void addRobot(RigidBodyBasics rootBody, Robot scsRobot)
    {
-      ArrayList<ArrayList<GroundContactPoint>> allGroundContactPointsGroupedByJoint = scsRobot.getAllGroundContactPointsGroupedByJoint();
+      List<List<GroundContactPoint>> allGroundContactPointsGroupedByJoint = scsRobot.getAllGroundContactPointsGroupedByJoint();
       JointReadOnly[] allJoint = MultiBodySystemTools.collectSubtreeJoints(rootBody);
 
-      for (ArrayList<GroundContactPoint> groundContactPointBundle : allGroundContactPointsGroupedByJoint)
+      for (List<GroundContactPoint> groundContactPointBundle : allGroundContactPointsGroupedByJoint)
       {
          if (groundContactPointBundle.isEmpty())
             continue;

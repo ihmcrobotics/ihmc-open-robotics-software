@@ -1,6 +1,7 @@
 package us.ihmc.sensorProcessing.simulatedSensors;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -48,7 +49,7 @@ public class SimulatedSensorHolderAndReaderFromRobotFactory implements SensorRea
    public void build(FloatingJointBasics rootJoint, IMUDefinition[] imuDefinition, ForceSensorDefinition[] forceSensorDefinitions,
                      JointDesiredOutputListBasics estimatorDesiredJointDataHolder, YoVariableRegistry parentRegistry)
    {
-      ArrayList<Joint> rootJoints = robot.getRootJoints();
+      List<Joint> rootJoints = robot.getRootJoints();
       if (rootJoints.size() > 1)
       {
          throw new RuntimeException("Robot has more than 1 rootJoint");

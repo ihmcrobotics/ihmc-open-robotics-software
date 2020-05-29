@@ -5,14 +5,15 @@ import java.net.Socket;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 
+import us.ihmc.simulationconstructionset.NewDataListener;
+import us.ihmc.simulationconstructionset.gui.RegistrySettingsChangedListener;
+import us.ihmc.simulationconstructionset.gui.YoEntryBox;
+import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
 import us.ihmc.yoVariables.listener.VariableChangedListener;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.simulationconstructionset.NewDataListener;
-import us.ihmc.simulationconstructionset.gui.YoEntryBox;
-import us.ihmc.simulationconstructionset.gui.yoVariableSearch.YoVariablePanel;
-import us.ihmc.simulationconstructionset.gui.RegistrySettingsChangedListener;
 
 public class RobotSocketConnection implements RobotConnection, VariableChangedListener, DoDisconnectListener, RegistrySettingsChangedListener
 {
@@ -22,7 +23,7 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
    private GUISideProtocolListener protocolListener;
    private GUISideProtocolTalker guiSideProtocolTalker;
 
-   private ArrayList<NewDataListener> newDataListeners;
+   private List<NewDataListener> newDataListeners;
    private int registrySettingsIdentifier = 0;
    private final String host;
    public static int PORT = 24608;
@@ -36,7 +37,7 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
    }
 
    public RobotSocketConnection(String host, GUISideCommandListener commandListener, YoVariableRegistry rootRegistry,
-                                ArrayList<NewDataListener> newDataListeners)
+                                List<NewDataListener> newDataListeners)
    {
       this(host, commandListener, rootRegistry);
       if (newDataListeners != null)
@@ -57,7 +58,7 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
       newDataListeners.add(listener);
    }
 
-   private void addNewDataListeners(ArrayList<NewDataListener> listeners)
+   private void addNewDataListeners(List<NewDataListener> listeners)
    {
       if (newDataListeners == null)
          newDataListeners = new ArrayList<NewDataListener>();
@@ -215,7 +216,7 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
       return commandListener.getRegistrySettingsProcessed();
    }
 
-   private void sendRegistrySettings(ArrayList<YoVariableRegistry> registriesToSendSettingsOf)
+   private void sendRegistrySettings(List<YoVariableRegistry> registriesToSendSettingsOf)
    {
       registrySettingsIdentifier++;
 
@@ -316,7 +317,7 @@ public class RobotSocketConnection implements RobotConnection, VariableChangedLi
    }
 
    @Override
-   public void registrySettingsChanged(ArrayList<YoVariableRegistry> changedRegistries)
+   public void registrySettingsChanged(List<YoVariableRegistry> changedRegistries)
    {
 //      sendRegistrySettings();
       if (commandListener.isConnected())

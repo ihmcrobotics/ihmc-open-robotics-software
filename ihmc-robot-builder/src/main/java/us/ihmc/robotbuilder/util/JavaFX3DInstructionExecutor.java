@@ -1,7 +1,7 @@
 package us.ihmc.robotbuilder.util;
 
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -17,7 +17,7 @@ import javafx.scene.transform.MatrixType;
 import javafx.scene.transform.Scale;
 import javafx.scene.transform.Transform;
 import javafx.scene.transform.Translate;
-import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D32;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.Vector3D32;
@@ -52,107 +52,115 @@ import us.ihmc.graphicsDescription.instructions.primitives.Graphics3DTranslateIn
 import us.ihmc.tools.FloatArrayCollector;
 
 /**
- * Converts a {@link us.ihmc.graphicsDescription.Graphics3DObject} to a {@link MeshView}
- * which can be used in a JavaFX Scene.
+ * Converts a {@link us.ihmc.graphicsDescription.Graphics3DObject} to a {@link MeshView} which can
+ * be used in a JavaFX Scene.
  */
-public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
-    private TriangleMesh outputMesh = new TriangleMesh();
-    private Transform outputRotation = new Affine(), outputScale = new Affine(), outputTranslation = new Affine();
-    private Material outputMaterial = new PhongMaterial(Color.GRAY);
+public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor
+{
+   private TriangleMesh outputMesh = new TriangleMesh();
+   private Transform outputRotation = new Affine(), outputScale = new Affine(), outputTranslation = new Affine();
+   private Material outputMaterial = new PhongMaterial(Color.GRAY);
 
-    public JavaFX3DInstructionExecutor(ArrayList<Graphics3DPrimitiveInstruction> instructions) {
-        setUpGraphicsFromDefinition(instructions);
-    }
+   public JavaFX3DInstructionExecutor(List<Graphics3DPrimitiveInstruction> instructions)
+   {
+      setUpGraphicsFromDefinition(instructions);
+   }
 
-    @Override
-    protected void doAddMeshDataInstruction(Graphics3DAddMeshDataInstruction graphics3DAddMeshData) {
-        graphics3DAddMeshData.getMeshData().getVertices();
-        outputMesh = interpretMeshData(graphics3DAddMeshData.getMeshData());
-        outputMaterial = convertMaterial(graphics3DAddMeshData.getAppearance());
-    }
+   @Override
+   protected void doAddMeshDataInstruction(Graphics3DAddMeshDataInstruction graphics3DAddMeshData)
+   {
+      graphics3DAddMeshData.getMeshData().getVertices();
+      outputMesh = interpretMeshData(graphics3DAddMeshData.getMeshData());
+      outputMaterial = convertMaterial(graphics3DAddMeshData.getAppearance());
+   }
 
-    @Override
-    protected void doAddHeightMapInstruction(Graphics3DAddHeightMapInstruction graphics3DAddHeightMap) {
-        // not implemented yet
-    }
+   @Override
+   protected void doAddHeightMapInstruction(Graphics3DAddHeightMapInstruction graphics3DAddHeightMap)
+   {
+      // not implemented yet
+   }
 
-    @Override
-    protected void doAddExtrusionInstruction(Graphics3DAddExtrusionInstruction graphics3DAddText) {
-        // not implemented yet
-    }
+   @Override
+   protected void doAddExtrusionInstruction(Graphics3DAddExtrusionInstruction graphics3DAddText)
+   {
+      // not implemented yet
+   }
 
-    @Override
-    protected void doAddModelFileInstruction(Graphics3DAddModelFileInstruction graphics3DAddModelFile) {
-        // not implemented yet
-    }
+   @Override
+   protected void doAddModelFileInstruction(Graphics3DAddModelFileInstruction graphics3DAddModelFile)
+   {
+      // not implemented yet
+   }
 
-    @Override
-    protected void doIdentityInstruction() {
+   @Override
+   protected void doIdentityInstruction()
+   {
 
-    }
+   }
 
-    @Override
-    protected void doRotateInstruction(Graphics3DRotateInstruction rot) {
-        RotationMatrix mat = rot.getRotationMatrix();
-        outputRotation = new Affine(new double[] {
-                mat.getM00(), mat.getM01(), mat.getM02(), 0,
-                mat.getM10(), mat.getM11(), mat.getM12(), 0,
-                mat.getM20(), mat.getM21(), mat.getM22(), 0,
-                0, 0, 0, 1
-        }, MatrixType.MT_3D_4x4, 0);
-    }
+   @Override
+   protected void doRotateInstruction(Graphics3DRotateInstruction rot)
+   {
+      RotationMatrixReadOnly mat = rot.getRotationMatrix();
+      outputRotation = new Affine(new double[] {mat.getM00(), mat.getM01(), mat.getM02(), 0, mat.getM10(), mat.getM11(), mat.getM12(), 0, mat.getM20(),
+            mat.getM21(), mat.getM22(), 0, 0, 0, 0, 1}, MatrixType.MT_3D_4x4, 0);
+   }
 
-    @Override
-    protected void doScaleInstruction(Graphics3DScaleInstruction graphics3DScale) {
-        Vector3D scale = graphics3DScale.getScaleFactor();
-        outputScale = new Scale(scale.getX(), scale.getY(), scale.getZ());
-    }
+   @Override
+   protected void doScaleInstruction(Graphics3DScaleInstruction graphics3DScale)
+   {
+      Vector3D scale = graphics3DScale.getScaleFactor();
+      outputScale = new Scale(scale.getX(), scale.getY(), scale.getZ());
+   }
 
-    @Override
-    protected void doTranslateInstruction(Graphics3DTranslateInstruction graphics3DTranslate) {
-        Vector3D t = graphics3DTranslate.getTranslation();
-        outputTranslation = new Translate(t.getX(), t.getY(), t.getZ());
-    }
+   @Override
+   protected void doTranslateInstruction(Graphics3DTranslateInstruction graphics3DTranslate)
+   {
+      Vector3D t = graphics3DTranslate.getTranslation();
+      outputTranslation = new Translate(t.getX(), t.getY(), t.getZ());
+   }
 
-    public Node getResult() {
-        MeshView result = new MeshView();
-        result.setMesh(outputMesh);
-        result.getTransforms().addAll(outputRotation, outputScale, outputTranslation);
-        result.setMaterial(outputMaterial);
-        //result.setDrawMode(DrawMode.LINE);
-        return result;
-    }
+   public Node getResult()
+   {
+      MeshView result = new MeshView();
+      result.setMesh(outputMesh);
+      result.getTransforms().addAll(outputRotation, outputScale, outputTranslation);
+      result.setMaterial(outputMaterial);
+      //result.setDrawMode(DrawMode.LINE);
+      return result;
+   }
 
-    private static Material convertMaterial(AppearanceDefinition appearance) {
-        Color color = new Color(appearance.getColor().getX(), appearance.getColor().getY(), appearance.getColor().getZ(), appearance.getTransparency());
-        PhongMaterial res = new PhongMaterial();
-        res.setDiffuseColor(color);
-        res.setSpecularColor(Color.WHITE);
-        return res;
-    }
+   private static Material convertMaterial(AppearanceDefinition appearance)
+   {
+      Color color = new Color(appearance.getColor().getX(), appearance.getColor().getY(), appearance.getColor().getZ(), appearance.getTransparency());
+      PhongMaterial res = new PhongMaterial();
+      res.setDiffuseColor(color);
+      res.setSpecularColor(Color.WHITE);
+      return res;
+   }
 
-    private static TriangleMesh interpretMeshData(MeshDataHolder meshData)
-    {
-        Point3D32[] vertices = meshData.getVertices();
-        TexCoord2f[] textureCoords = meshData.getTexturePoints();
-        int[] triangleIndices = meshData.getTriangleIndices();
-        Vector3D32[] normals = meshData.getVertexNormals();
+   private static TriangleMesh interpretMeshData(MeshDataHolder meshData)
+   {
+      Point3D32[] vertices = meshData.getVertices();
+      TexCoord2f[] textureCoords = meshData.getTexturePoints();
+      int[] triangleIndices = meshData.getTriangleIndices();
+      Vector3D32[] normals = meshData.getVertexNormals();
 
-        TriangleMesh mesh = new TriangleMesh(VertexFormat.POINT_NORMAL_TEXCOORD);
-        int[] indices = Arrays.stream(triangleIndices).flatMap(x -> IntStream.of(x, x, x)).toArray();
-        mesh.getFaces().addAll(indices);
+      TriangleMesh mesh = new TriangleMesh(VertexFormat.POINT_NORMAL_TEXCOORD);
+      int[] indices = Arrays.stream(triangleIndices).flatMap(x -> IntStream.of(x, x, x)).toArray();
+      mesh.getFaces().addAll(indices);
 
-        float[] vertexBuffer = Arrays.stream(vertices).flatMap(v -> Stream.of(v.getX(), v.getY(), v.getZ())).collect(FloatArrayCollector.create());
-        mesh.getPoints().addAll(vertexBuffer);
+      float[] vertexBuffer = Arrays.stream(vertices).flatMap(v -> Stream.of(v.getX(), v.getY(), v.getZ())).collect(FloatArrayCollector.create());
+      mesh.getPoints().addAll(vertexBuffer);
 
-        float[] texCoordBuffer = Arrays.stream(textureCoords).flatMap(v -> Stream.of(v.x, v.y)).collect(FloatArrayCollector.create());
-        mesh.getTexCoords().addAll(texCoordBuffer);
+      float[] texCoordBuffer = Arrays.stream(textureCoords).flatMap(v -> Stream.of(v.x, v.y)).collect(FloatArrayCollector.create());
+      mesh.getTexCoords().addAll(texCoordBuffer);
 
-        float[] normalBuffer = Arrays.stream(normals).flatMap(n -> Stream.of(n.getX(), n.getY(), n.getZ())).collect(FloatArrayCollector.create());
-        mesh.getPoints().addAll(normalBuffer);
+      float[] normalBuffer = Arrays.stream(normals).flatMap(n -> Stream.of(n.getX(), n.getY(), n.getZ())).collect(FloatArrayCollector.create());
+      mesh.getPoints().addAll(normalBuffer);
 
-        return mesh;
-    }
+      return mesh;
+   }
 
    @Override
    protected void doAddPrimitiveInstruction(PrimitiveGraphics3DInstruction primitiveInstruction)
@@ -161,8 +169,11 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
       {
          CubeGraphics3DInstruction cubeInstruction = (CubeGraphics3DInstruction) primitiveInstruction;
 
-         MeshDataHolder meshData = MeshDataGenerator.Cube(cubeInstruction.getLength(), cubeInstruction.getWidth(), cubeInstruction.getHeight(),
-                                                          cubeInstruction.getCenteredInTheCenter(), cubeInstruction.getTextureFaces());
+         MeshDataHolder meshData = MeshDataGenerator.Cube(cubeInstruction.getLength(),
+                                                          cubeInstruction.getWidth(),
+                                                          cubeInstruction.getHeight(),
+                                                          cubeInstruction.getCenteredInTheCenter(),
+                                                          cubeInstruction.getTextureFaces());
          Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, cubeInstruction.getAppearance());
 
          doAddMeshDataInstruction(meshDataInstruction);
@@ -171,12 +182,14 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
       {
          SphereGraphics3DInstruction sphereInstruction = (SphereGraphics3DInstruction) primitiveInstruction;
 
-         MeshDataHolder meshData = MeshDataGenerator.Sphere(sphereInstruction.getRadius(), sphereInstruction.getResolution(), sphereInstruction.getResolution());
+         MeshDataHolder meshData = MeshDataGenerator.Sphere(sphereInstruction.getRadius(),
+                                                            sphereInstruction.getResolution(),
+                                                            sphereInstruction.getResolution());
          Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, sphereInstruction.getAppearance());
 
          doAddMeshDataInstruction(meshDataInstruction);
       }
-      else if(primitiveInstruction instanceof WedgeGraphics3DInstruction)
+      else if (primitiveInstruction instanceof WedgeGraphics3DInstruction)
       {
          WedgeGraphics3DInstruction wedgeInstruction = (WedgeGraphics3DInstruction) primitiveInstruction;
 
@@ -189,9 +202,12 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
       {
          CapsuleGraphics3DInstruction capsuleInstruction = (CapsuleGraphics3DInstruction) primitiveInstruction;
 
-         MeshDataHolder meshData = MeshDataGenerator
-               .Capsule(capsuleInstruction.getHeight(), capsuleInstruction.getXRadius(), capsuleInstruction.getYRadius(), capsuleInstruction.getZRadius(),
-                        capsuleInstruction.getResolution(), capsuleInstruction.getResolution());
+         MeshDataHolder meshData = MeshDataGenerator.Capsule(capsuleInstruction.getHeight(),
+                                                             capsuleInstruction.getXRadius(),
+                                                             capsuleInstruction.getYRadius(),
+                                                             capsuleInstruction.getZRadius(),
+                                                             capsuleInstruction.getResolution(),
+                                                             capsuleInstruction.getResolution());
          Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, capsuleInstruction.getAppearance());
 
          doAddMeshDataInstruction(meshDataInstruction);
@@ -200,18 +216,21 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
       {
          EllipsoidGraphics3DInstruction ellipsoidInstruction = (EllipsoidGraphics3DInstruction) primitiveInstruction;
 
-         MeshDataHolder meshData = MeshDataGenerator
-               .Ellipsoid(ellipsoidInstruction.getXRadius(), ellipsoidInstruction.getYRadius(), ellipsoidInstruction.getZRadius(),
-                          ellipsoidInstruction.getResolution(), ellipsoidInstruction.getResolution());
+         MeshDataHolder meshData = MeshDataGenerator.Ellipsoid(ellipsoidInstruction.getXRadius(),
+                                                               ellipsoidInstruction.getYRadius(),
+                                                               ellipsoidInstruction.getZRadius(),
+                                                               ellipsoidInstruction.getResolution(),
+                                                               ellipsoidInstruction.getResolution());
          Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, ellipsoidInstruction.getAppearance());
          doAddMeshDataInstruction(meshDataInstruction);
       }
-      else if(primitiveInstruction instanceof CylinderGraphics3DInstruction)
+      else if (primitiveInstruction instanceof CylinderGraphics3DInstruction)
       {
          CylinderGraphics3DInstruction cylinderInstruction = (CylinderGraphics3DInstruction) primitiveInstruction;
 
-         MeshDataHolder meshData = MeshDataGenerator
-               .Cylinder(cylinderInstruction.getRadius(), cylinderInstruction.getHeight(), cylinderInstruction.getResolution());
+         MeshDataHolder meshData = MeshDataGenerator.Cylinder(cylinderInstruction.getRadius(),
+                                                              cylinderInstruction.getHeight(),
+                                                              cylinderInstruction.getResolution());
          Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, cylinderInstruction.getAppearance());
          doAddMeshDataInstruction(meshDataInstruction);
       }
@@ -227,9 +246,12 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
       {
          TruncatedConeGraphics3DInstruction truncatedConeInstruction = (TruncatedConeGraphics3DInstruction) primitiveInstruction;
 
-         MeshDataHolder meshData = MeshDataGenerator
-               .GenTruncatedCone(truncatedConeInstruction.getHeight(), truncatedConeInstruction.getXBaseRadius(), truncatedConeInstruction.getYBaseRadius(),
-                                 truncatedConeInstruction.getXTopRadius(), truncatedConeInstruction.getYTopRadius(), truncatedConeInstruction.getResolution());
+         MeshDataHolder meshData = MeshDataGenerator.GenTruncatedCone(truncatedConeInstruction.getHeight(),
+                                                                      truncatedConeInstruction.getXBaseRadius(),
+                                                                      truncatedConeInstruction.getYBaseRadius(),
+                                                                      truncatedConeInstruction.getXTopRadius(),
+                                                                      truncatedConeInstruction.getYTopRadius(),
+                                                                      truncatedConeInstruction.getResolution());
          Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, truncatedConeInstruction.getAppearance());
          doAddMeshDataInstruction(meshDataInstruction);
       }
@@ -237,29 +259,38 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
       {
          HemiEllipsoidGraphics3DInstruction hemiEllipsoidInstruction = (HemiEllipsoidGraphics3DInstruction) primitiveInstruction;
 
-         MeshDataHolder meshData = MeshDataGenerator
-               .HemiEllipsoid(hemiEllipsoidInstruction.getXRadius(), hemiEllipsoidInstruction.getYRadius(), hemiEllipsoidInstruction.getZRadius(),
-                              hemiEllipsoidInstruction.getResolution(), hemiEllipsoidInstruction.getResolution());
+         MeshDataHolder meshData = MeshDataGenerator.HemiEllipsoid(hemiEllipsoidInstruction.getXRadius(),
+                                                                   hemiEllipsoidInstruction.getYRadius(),
+                                                                   hemiEllipsoidInstruction.getZRadius(),
+                                                                   hemiEllipsoidInstruction.getResolution(),
+                                                                   hemiEllipsoidInstruction.getResolution());
          Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, hemiEllipsoidInstruction.getAppearance());
          doAddMeshDataInstruction(meshDataInstruction);
       }
-      else if(primitiveInstruction instanceof ArcTorusGraphics3DInstruction)
+      else if (primitiveInstruction instanceof ArcTorusGraphics3DInstruction)
       {
          ArcTorusGraphics3DInstruction arcTorusInstruction = (ArcTorusGraphics3DInstruction) primitiveInstruction;
 
-         MeshDataHolder meshData = MeshDataGenerator.ArcTorus(arcTorusInstruction.getStartAngle(), arcTorusInstruction.getEndAngle(), arcTorusInstruction.getMajorRadius(), arcTorusInstruction.getMinorRadius(), arcTorusInstruction.getResolution());
+         MeshDataHolder meshData = MeshDataGenerator.ArcTorus(arcTorusInstruction.getStartAngle(),
+                                                              arcTorusInstruction.getEndAngle(),
+                                                              arcTorusInstruction.getMajorRadius(),
+                                                              arcTorusInstruction.getMinorRadius(),
+                                                              arcTorusInstruction.getResolution());
          Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, arcTorusInstruction.getAppearance());
          doAddMeshDataInstruction(meshDataInstruction);
       }
-      else if(primitiveInstruction instanceof PyramidCubeGraphics3DInstruction)
+      else if (primitiveInstruction instanceof PyramidCubeGraphics3DInstruction)
       {
          PyramidCubeGraphics3DInstruction pyramidInstruction = (PyramidCubeGraphics3DInstruction) primitiveInstruction;
 
-         MeshDataHolder meshData = MeshDataGenerator.PyramidCube(pyramidInstruction.getLengthX(), pyramidInstruction.getWidthY(), pyramidInstruction.getHeightZ(), pyramidInstruction.getPyramidHeight());
+         MeshDataHolder meshData = MeshDataGenerator.PyramidCube(pyramidInstruction.getLengthX(),
+                                                                 pyramidInstruction.getWidthY(),
+                                                                 pyramidInstruction.getHeightZ(),
+                                                                 pyramidInstruction.getPyramidHeight());
          Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, pyramidInstruction.getAppearance());
          doAddMeshDataInstruction(meshDataInstruction);
       }
-      else if(primitiveInstruction instanceof PolygonGraphics3DInstruction)
+      else if (primitiveInstruction instanceof PolygonGraphics3DInstruction)
       {
          PolygonGraphics3DInstruction polygonInstruction = (PolygonGraphics3DInstruction) primitiveInstruction;
 
@@ -267,12 +298,14 @@ public class JavaFX3DInstructionExecutor extends Graphics3DInstructionExecutor {
          Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, polygonInstruction.getAppearance());
          doAddMeshDataInstruction(meshDataInstruction);
       }
-      else if(primitiveInstruction instanceof ExtrudedPolygonGraphics3DInstruction)
+      else if (primitiveInstruction instanceof ExtrudedPolygonGraphics3DInstruction)
       {
          ExtrudedPolygonGraphics3DInstruction extrudedPolygonInstruction = (ExtrudedPolygonGraphics3DInstruction) primitiveInstruction;
 
-         MeshDataHolder meshData = MeshDataGenerator.ExtrudedPolygon(extrudedPolygonInstruction.getPolygonPoints(), extrudedPolygonInstruction.getExtrusionHeight());
-         Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData, extrudedPolygonInstruction.getAppearance());
+         MeshDataHolder meshData = MeshDataGenerator.ExtrudedPolygon(extrudedPolygonInstruction.getPolygonPoints(),
+                                                                     extrudedPolygonInstruction.getExtrusionHeight());
+         Graphics3DAddMeshDataInstruction meshDataInstruction = Graphics3DObject.createMeshDataInstruction(meshData,
+                                                                                                           extrudedPolygonInstruction.getAppearance());
          doAddMeshDataInstruction(meshDataInstruction);
       }
       else

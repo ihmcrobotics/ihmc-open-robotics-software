@@ -6,13 +6,14 @@ import java.util.concurrent.Executors;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.communication.ROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 
 public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
@@ -26,19 +27,14 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
 
    public LivePlanarRegionsGraphic(Ros2Node ros2Node, boolean initializeToFlatGround)
    {
-      this(ros2Node, "", initializeToFlatGround);
+      this(ros2Node, ROS2Tools.REA.withOutput().withType(PlanarRegionsListMessage.class), initializeToFlatGround);
    }
 
-   public LivePlanarRegionsGraphic(Ros2Node ros2Node, String topicSpecifier, boolean initializeToFlatGround)
+   public LivePlanarRegionsGraphic(Ros2Node ros2Node, ROS2Topic<PlanarRegionsListMessage> topic, boolean initializeToFlatGround)
    {
       super(initializeToFlatGround);
 
-      String topicName = ROS2Tools.generateDefaultTopicName(PlanarRegionsListMessage.class,
-                                                            null,
-                                                            ROS2Tools.REA_MODULE + topicSpecifier,
-                                                            ROS2Tools.ROS2TopicQualifier.OUTPUT);
-
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, topicName, this::acceptPlanarRegions);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, topic, this::acceptPlanarRegions);
       animationTimer.start();
    }
 

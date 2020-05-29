@@ -2,14 +2,14 @@ package us.ihmc.simulationConstructionSetTools.tools;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
+import java.util.List;
 
+import us.ihmc.simulationconstructionset.DataFileReader;
+import us.ihmc.simulationconstructionset.DataFileWriter;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.yoVariables.variable.YoVariableList;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.simulationconstructionset.DataFileReader;
-import us.ihmc.simulationconstructionset.DataFileWriter;
 
 public class BinaryToASCIIDataFileConverter
 {
@@ -44,7 +44,7 @@ public class BinaryToASCIIDataFileConverter
       boolean binary = false;
       boolean compress = false;
 
-      ArrayList<YoVariable<?>> varsToWrite = newVars.getVariables();
+      List<YoVariable<?>> varsToWrite = newVars.getVariables();
 
       dataFileWriter.writeData("ConvertedData", 0.001, dataBuffer, varsToWrite, binary, compress);
    }

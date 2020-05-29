@@ -1238,6 +1238,72 @@ module controller_msgs
         boolean enable_expansion_mask;
 
 
+    
+    /**
+    
+     * If true will try to wiggle steps away from shin collisions. Collisions are checked against all regions.
+    
+     * Enable concave hull wiggler must be true in order for the shin collision checker to run.
+    
+     */
+    
+
+
+    boolean enable_shin_collision_check;
+
+
+    
+    /**
+    
+     * Radius of the shin collidable cylinder
+    
+     */
+    
+
+    @defaultValue(value=-11.1)
+
+        double shin_radius;
+
+
+    
+    /**
+    
+     * Length of the shin collidable cylinder
+    
+     */
+    
+
+    @defaultValue(value=-11.1)
+
+        double shin_length;
+
+
+    
+    /**
+    
+     * Pitch of the shin collidable cylinder
+    
+     */
+    
+
+    @defaultValue(value=-11.1)
+
+        double shin_pitch;
+
+
+    
+    /**
+    
+     * Height offset of shin collidable cylinder
+    
+     */
+    
+
+    @defaultValue(value=-11.1)
+
+        double shin_height_offet;
+
+
 
       };
 

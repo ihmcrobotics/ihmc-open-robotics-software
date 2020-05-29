@@ -342,7 +342,7 @@ public class FootstepPlannerUI
 
       if (linkGraphics != null)
       {
-         ArrayList<Graphics3DPrimitiveInstruction> graphics3dInstructions = linkGraphics.getGraphics3DInstructions();
+         List<Graphics3DPrimitiveInstruction> graphics3dInstructions = linkGraphics.getGraphics3DInstructions();
 
          if (graphics3dInstructions == null)
             return;

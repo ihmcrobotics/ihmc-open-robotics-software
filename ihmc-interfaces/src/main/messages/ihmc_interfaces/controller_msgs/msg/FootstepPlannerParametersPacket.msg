@@ -385,3 +385,19 @@ int32 maximum_branch_factor -1
 
 # If true, enables a mask that reduces the number of calculated steps away from the ideal step
 bool enable_expansion_mask true
+
+# If true will try to wiggle steps away from shin collisions. Collisions are checked against all regions.
+# Enable concave hull wiggler must be true in order for the shin collision checker to run.
+bool enable_shin_collision_check
+
+# Radius of the shin collidable cylinder
+float64 shin_radius -11.1
+
+# Length of the shin collidable cylinder
+float64 shin_length -11.1
+
+# Pitch of the shin collidable cylinder
+float64 shin_pitch -11.1
+
+# Height offset of shin collidable cylinder
+float64 shin_height_offet -11.1

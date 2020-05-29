@@ -23,7 +23,7 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
    {
       super(robotName, namePrefix, ros2Node);
 
-      IHMCROS2Publisher<VideoPacket> publisher = createBehaviorOutputPublisher(VideoPacket.class);
+      IHMCROS2Publisher<VideoPacket> publisher = createBehaviorPublisher(VideoPacket.class);
       videoDataServer = CompressedVideoDataFactory.createCompressedVideoDataServer(new UIVideoHandler(publisher));
    }
 

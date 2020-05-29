@@ -23,7 +23,7 @@ public class GetLidarScanExampleBehavior extends AbstractBehavior
    {
       super(robotName, ros2Node);
       //      coactiveBehaviorsNetworkManager = ros2Node; FIXME
-      createSubscriber(PointCloudWorldPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), pointCloudQueue::put);
+      createSubscriber(PointCloudWorldPacket.class, ROS2Tools.IHMC_ROOT, pointCloudQueue::put);
    }
 
    @Override

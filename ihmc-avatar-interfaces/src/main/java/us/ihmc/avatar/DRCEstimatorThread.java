@@ -14,11 +14,9 @@ import gnu.trove.map.TObjectDoubleMap;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.controlModules.ForceSensorToJointTorqueProjector;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.ControllerCrashLocation;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -44,6 +42,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
 import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataPublisherFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -152,9 +151,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
       rawSensorOutputMap = sensorReader.getRawSensorOutputMap();
 
       if (realtimeRos2Node != null)
-         controllerCrashPublisher = ROS2Tools.createPublisher(realtimeRos2Node,
-                                                              ControllerCrashNotificationPacket.class,
-                                                              ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName));
+         controllerCrashPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node,
+                                                                       ControllerCrashNotificationPacket.class, ROS2Tools.getControllerOutputTopic(robotName));
       else
          controllerCrashPublisher = null;
 
@@ -179,10 +177,10 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          if (realtimeRos2Node != null)
          {
             RequestWristForceSensorCalibrationSubscriber requestWristForceSensorCalibrationSubscriber = new RequestWristForceSensorCalibrationSubscriber();
-            MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-            ROS2Tools.createCallbackSubscription(realtimeRos2Node,
-                                                 RequestWristForceSensorCalibrationPacket.class,
-                                                 subscriberTopicNameGenerator,
+            ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
+            ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
+                                                          RequestWristForceSensorCalibrationPacket.class,
+                                                          inputTopic,
                                                  subscriber -> requestWristForceSensorCalibrationSubscriber.receivedPacket(subscriber.takeNextData()));
             forceSensorStateUpdater.setRequestWristForceSensorCalibrationSubscriber(requestWristForceSensorCalibrationSubscriber);
          }
@@ -250,7 +248,7 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
          factory.setDefinitionsToPublish(estimatorFullRobotModel);
          factory.setSensorSource(estimatorFullRobotModel, forceSensorDataHolderToSend, rawSensorOutputMap);
          factory.setRobotMotionStatusHolder(robotMotionStatusFromController);
-         factory.setROS2Info(realtimeRos2Node, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName));
+         factory.setROS2Info(realtimeRos2Node, ROS2Tools.getControllerOutputTopic(robotName));
 
          estimatorController.setRawOutputWriter(factory.createRobotConfigurationDataPublisher());
       }
@@ -354,8 +352,8 @@ public class DRCEstimatorThread implements MultiThreadedRobotControlElement
    public void setupHighLevelControllerCallback(String robotName, RealtimeRos2Node realtimeRos2Node,
                                                 Map<HighLevelControllerName, StateEstimatorMode> stateModeMap)
    {
-      MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, publisherTopicNameGenerator, subscriber ->
+      ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, outputTopic, subscriber ->
       {
          HighLevelStateChangeStatusMessage message = subscriber.takeNextData();
          LogTools.debug("Estimator recieved message: controller going to {}", HighLevelControllerName.fromByte(message.getEndHighLevelControllerName()));

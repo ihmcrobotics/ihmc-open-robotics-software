@@ -9,7 +9,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
-import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.Action;
 import javax.swing.ActionMap;
@@ -25,6 +25,7 @@ import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -35,12 +36,9 @@ import us.ihmc.robotDataLogger.logger.YoVariableLoggerListener;
 import us.ihmc.robotDataVisualizer.logger.MultiVideoDataPlayer;
 import us.ihmc.robotDataVisualizer.logger.YoVariableLogPlaybackRobot;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.yoVariables.variable.YoVariable;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.yoVariables.dataBuffer.DataBuffer;
-import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -48,8 +46,10 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.simulationconstructionset.SimulationDoneListener;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.tools.gui.SwingUtils;
-import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.wholeBodyController.DRCRobotJointMap;
+import us.ihmc.yoVariables.dataBuffer.DataBuffer;
+import us.ihmc.yoVariables.dataBuffer.DataBufferEntry;
+import us.ihmc.yoVariables.variable.YoVariable;
 
 public class AtlasMultiDataExporter implements SimulationDoneListener
 {
@@ -511,7 +511,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
          Vector3D cameraPosition = new Vector3D(radius * Math.sin(angle), radius * Math.cos(angle), height);
 
          Robot[] robot = exportM3Data.scs.getRobots();
-         ArrayList<Joint> joint = robot[0].getRootJoints();
+         List<Joint> joint = robot[0].getRootJoints();
          joint.get(0).getTransformToWorld(ret);
          ret.transform(cameraPosition);
          cameraFix.set(ret.getTranslation());
@@ -550,7 +550,7 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
          DataBuffer dataBuffer = exportData.scs.getDataBuffer();
 
-         ArrayList<YoVariable<?>> varsYo = exportData.scs.getVars(vars, new String[0]);
+         List<YoVariable<?>> varsYo = exportData.scs.getVars(vars, new String[0]);
          writeSpreadsheetFormattedData(chosenFile, dataBuffer, varsYo, timeVariable);
       }
 
@@ -596,9 +596,9 @@ public class AtlasMultiDataExporter implements SimulationDoneListener
 
       }
 
-      private void writeSpreadsheetFormattedData(File chosenFile, DataBuffer dataBuffer, ArrayList<? extends YoVariable<?>> vars, String timeVariable)
+      private void writeSpreadsheetFormattedData(File chosenFile, DataBuffer dataBuffer, List<? extends YoVariable<?>> vars, String timeVariable)
       {
-         ArrayList<DataBufferEntry> entries = dataBuffer.getEntries();
+         List<DataBufferEntry> entries = dataBuffer.getEntries();
 
          try
          {

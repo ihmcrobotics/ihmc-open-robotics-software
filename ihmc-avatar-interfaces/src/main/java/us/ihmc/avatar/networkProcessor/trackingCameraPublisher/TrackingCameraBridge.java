@@ -16,7 +16,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -24,6 +23,7 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.robotModels.FullRobotModel;
 import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.communication.producers.RobotConfigurationDataBuffer;
@@ -57,39 +57,39 @@ public class TrackingCameraBridge
    private final IHMCROS2Publisher<StampedPosePacket> stampedPosePacketPublisher;
    private final IHMCRealtimeROS2Publisher<StampedPosePacket> stampedPosePacketRealtimePublisher;
 
-   public TrackingCameraBridge(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName)
+   public TrackingCameraBridge(FullRobotModelFactory modelFactory, Ros2Node ros2Node, ROS2Topic robotConfigurationDataTopicName)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
-           ROS2Tools.getDefaultTopicNameGenerator());
+           ROS2Tools.IHMC_ROOT);
    }
 
-   public TrackingCameraBridge(FullRobotModelFactory modelFactory, Ros2Node ros2Node, String robotConfigurationDataTopicName,
-                                  MessageTopicNameGenerator defaultTopicNameGenerator)
+   public TrackingCameraBridge(FullRobotModelFactory modelFactory, Ros2Node ros2Node, ROS2Topic robotConfigurationDataTopicName,
+                                  ROS2Topic defaultTopicName)
    {
       this(modelFactory.getRobotDescription().getName(), modelFactory.createFullRobotModel(), ros2Node, null, robotConfigurationDataTopicName,
-           defaultTopicNameGenerator);
+           defaultTopicName);
    }
 
    public TrackingCameraBridge(String robotName, FullRobotModel fullRobotModel, Ros2Node ros2Node, RealtimeRos2Node realtimeRos2Node,
-                                  String robotConfigurationDataTopicName, MessageTopicNameGenerator defaultTopicNameGenerator)
+                               ROS2Topic robotConfigurationDataTopicName, ROS2Topic defaultTopicName)
    {
       this.robotName = robotName;
       this.fullRobotModel = fullRobotModel;
 
-      String generateTopicName = defaultTopicNameGenerator.generateTopicName(messageTypeToPublish);
+      ROS2Topic generateTopicName = defaultTopicName.withType(messageTypeToPublish);
       if (ros2Node != null)
       {
-         ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
+         ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
-         stampedPosePacketPublisher = ROS2Tools.createPublisher(ros2Node, messageTypeToPublish, generateTopicName);
+         stampedPosePacketPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, messageTypeToPublish, generateTopicName);
          stampedPosePacketRealtimePublisher = null;
       }
       else
       {
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, robotConfigurationDataTopicName,
                                               s -> robotConfigurationDataBuffer.receivedPacket(s.takeNextData()));
          stampedPosePacketPublisher = null;
-         stampedPosePacketRealtimePublisher = ROS2Tools.createPublisher(realtimeRos2Node, messageTypeToPublish, generateTopicName);
+         stampedPosePacketRealtimePublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, messageTypeToPublish, generateTopicName);
       }
    }
 

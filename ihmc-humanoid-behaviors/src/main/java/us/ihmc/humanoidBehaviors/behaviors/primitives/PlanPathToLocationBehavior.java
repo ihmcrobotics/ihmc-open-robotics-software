@@ -73,13 +73,13 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
       super(robotName, ros2Node);
       pipeLine = new PipeLine<>(yoTime);
       this.footstepPlannerParameters = footstepPlannerParameters;
-      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, footPlanStatusQueue::put);
-      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
+      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopic, footPlanStatusQueue::put);
+      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic, planarRegions::set);
 
-      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlanningToolboxSubGenerator);
-      footstepPlanningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlanningToolboxSubGenerator);
-      footstepPlannerParametersPublisher = createPublisher(FootstepPlannerParametersPacket.class, footstepPlanningToolboxSubGenerator);
-      goalFootstepToUIVisualization = createBehaviorOutputPublisher(FootstepDataListMessage.class);
+      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlannerInputTopic);
+      footstepPlanningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlannerInputTopic);
+      footstepPlannerParametersPublisher = createPublisher(FootstepPlannerParametersPacket.class, footstepPlannerInputTopic);
+      goalFootstepToUIVisualization = createBehaviorPublisher(FootstepDataListMessage.class);
 
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
    }

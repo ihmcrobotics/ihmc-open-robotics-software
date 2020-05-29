@@ -76,13 +76,13 @@ public class WalkToLocationPlannedBehavior extends StateMachineBehavior<WalkToLo
 
    private void createSubscribers()
    {
-      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, plannerResult::set);
+      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopic, plannerResult::set);
 
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class,
                                     (packet) -> newGoalPose.set(new FramePose3D(ReferenceFrame.getWorldFrame(),
                                                                                 packet.getPosition(),
                                                                                 packet.getOrientation())));
-      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.publisherTopicNameGenerator, planarRegions::set);
+      createSubscriber(PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic, planarRegions::set);
    }
 
    public void setTarget(FramePose3D targetPoseInWorld)

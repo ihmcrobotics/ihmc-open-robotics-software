@@ -251,6 +251,21 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 float64 DEFAULT_NO_VALUE=-11.1
 
 
@@ -1340,6 +1355,66 @@ int32 maximum_branch_factor
 # Field default value True
 
 bool enable_expansion_mask
+
+
+
+
+
+# If true will try to wiggle steps away from shin collisions. Collisions are checked against all regions.
+
+# Enable concave hull wiggler must be true in order for the shin collision checker to run.
+
+
+
+bool enable_shin_collision_check
+
+
+
+
+
+# Radius of the shin collidable cylinder
+
+
+
+# Field default value -11.1
+
+float64 shin_radius
+
+
+
+
+
+# Length of the shin collidable cylinder
+
+
+
+# Field default value -11.1
+
+float64 shin_length
+
+
+
+
+
+# Pitch of the shin collidable cylinder
+
+
+
+# Field default value -11.1
+
+float64 shin_pitch
+
+
+
+
+
+# Height offset of shin collidable cylinder
+
+
+
+# Field default value -11.1
+
+float64 shin_height_offet
 
 
 
