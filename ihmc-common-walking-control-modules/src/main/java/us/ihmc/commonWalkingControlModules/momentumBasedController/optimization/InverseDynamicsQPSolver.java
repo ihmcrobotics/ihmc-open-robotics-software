@@ -27,6 +27,8 @@ public class InverseDynamicsQPSolver
    private final YoBoolean addRateRegularization = new YoBoolean("AddRateRegularization", registry);
    private final ActiveSetQPSolverWithInactiveVariablesInterface qpSolver;
 
+   private final QPVariableSubstitution accelerationVariablesSubstitution = new QPVariableSubstitution();
+
    private final DMatrixRMaj solverInput_H;
    private final DMatrixRMaj solverInput_f;
 
@@ -186,6 +188,8 @@ public class InverseDynamicsQPSolver
    {
       for (int i = 0; i < numberOfDoFs; i++)
          regularizationMatrix.set(i, i, jointAccelerationRegularization.getDoubleValue());
+
+      accelerationVariablesSubstitution.reset();
 
       solverInput_H.zero();
 
@@ -564,6 +568,11 @@ public class InverseDynamicsQPSolver
       hasWrenchesEquilibriumConstraintBeenSetup = true;
    }
 
+   public void addAccelerationSubstitution(QPVariableSubstitution substitution)
+   {
+      this.accelerationVariablesSubstitution.concatenate(substitution);
+   }
+
    private final DMatrixRMaj tempWrenchConstraint_J = new DMatrixRMaj(Wrench.SIZE, 200);
    private final DMatrixRMaj tempWrenchConstraint_LHS = new DMatrixRMaj(Wrench.SIZE, 1);
    private final DMatrixRMaj tempWrenchConstraint_RHS = new DMatrixRMaj(Wrench.SIZE, 1);
@@ -590,13 +599,14 @@ public class InverseDynamicsQPSolver
 
       numberOfActiveVariables.set((int) CommonOps_DDRM.elementSum(solverInput_activeIndices));
 
+      applySubstitution();
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
       qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
       qpSolver.setActiveVariables(solverInput_activeIndices);
       qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
-
       numberOfIterations.set(qpSolver.solve(solverOutput));
+      removeSubstitution();
 
       qpSolverTimer.stopMeasurement();
 
@@ -634,6 +644,21 @@ public class InverseDynamicsQPSolver
       solverInput_ub_previous.set(solverInput_ub);
 
       return true;
+   }
+
+   private void applySubstitution()
+   {
+      if (accelerationVariablesSubstitution.isEmpty())
+         return;
+
+      DMatrixRMaj transformation = accelerationVariablesSubstitution.transformation;
+   }
+
+   private void removeSubstitution()
+   {
+      if (accelerationVariablesSubstitution.isEmpty())
+         return;
+      
    }
 
    private void printForJerry()
