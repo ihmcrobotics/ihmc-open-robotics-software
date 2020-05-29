@@ -30,13 +30,13 @@ class ROS2ToolsTest
       assertEquals("/ihmc/atlas/rea/input/rea_state_request",
                    ROS2Tools.IHMC_ROOT.withType(REAStateRequestMessage.class).withRobot("atlas").withModule("rea").withInput().toString());
 
-      ROS2Topic defaultTopicName = ROS2Tools.IHMC_ROOT;
+      ROS2Topic<?> defaultTopicName = ROS2Tools.IHMC_ROOT;
       assertEquals("/ihmc/rea_state_request", defaultTopicName.withType(REAStateRequestMessage.class).toString());
 
-      ROS2Topic defaultTopicNameWithRobot = ROS2Tools.IHMC_ROOT.withRobot("atlas");
+      ROS2Topic<?> defaultTopicNameWithRobot = ROS2Tools.IHMC_ROOT.withRobot("atlas");
       assertEquals("/ihmc/atlas/rea_state_request", defaultTopicNameWithRobot.withType(REAStateRequestMessage.class).toString());
 
-      ROS2Topic defaultTopicName3 = ROS2Tools.IHMC_ROOT.withRobot("atlas").withModule("rea").withOutput();
+      ROS2Topic<?> defaultTopicName3 = ROS2Tools.IHMC_ROOT.withRobot("atlas").withModule("rea").withOutput();
       assertEquals("/ihmc/atlas/rea/output/rea_state_request", defaultTopicName3.withType(REAStateRequestMessage.class).toString());
 
       assertEquals("/ihmc/atlas/toolbox/teleop/step_teleop/output", ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot("atlas").withOutput().toString());
@@ -46,7 +46,7 @@ class ROS2ToolsTest
    {
       Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
 
-      IHMCROS2Publisher intPublisher = new IHMCROS2Publisher(ros2Node, Int64.class, ROS2Tools.IHMC_ROOT);
+      IHMCROS2Publisher<Int64> intPublisher = new IHMCROS2Publisher<>(ros2Node, Int64.class, ROS2Tools.IHMC_ROOT);
 
       new ROS2Callback<>(ros2Node, Int64.class, ROS2Tools.IHMC_ROOT, this::acceptMessage);
 
