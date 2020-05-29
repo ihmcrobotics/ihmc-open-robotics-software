@@ -12,9 +12,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.FireFighterStanceBehavior;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.TestDoorOpenBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.WalkThroughDoorBehavior;
+import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.*;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DiagnosticBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.dispatcher.BehaviorControlModeSubscriber;
@@ -320,7 +318,7 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 //                                                                wholeBodyControllerParameters,
 //                                                                atlasPrimitiveActions));
 //
-//      dispatcher.addBehavior(HumanoidBehaviorType.RESET_ROBOT, new ResetRobotBehavior(robotName, ros2Node, yoTime));
+      dispatcher.addBehavior(HumanoidBehaviorType.RESET_ROBOT, new ResetRobotBehavior(robotName, ros2Node, yoTime));
 //
 //      dispatcher.addBehavior(HumanoidBehaviorType.BASIC_TIMER_BEHAVIOR, new TimingBehaviorHelper(robotName, ros2Node));
 //
@@ -347,17 +345,17 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                                          wholeBodyControllerParameters,
                                                          atlasPrimitiveActions,
                                                          yoGraphicsListRegistry));
-//      dispatcher.addBehavior(HumanoidBehaviorType.SIMPLE_WALK_THROUGH_DOOR,
-//                             new SimplifiedWalkThroughDoorBehavior(robotName,
-//                                                         "VRWalkDoor",
-//                                                         ros2Node,
-//                                                         yoTime,
-//                                                         yoDoubleSupport,
-//                                                         fullRobotModel,
-//                                                         referenceFrames,
-//                                                         wholeBodyControllerParameters,
-//                                                         atlasPrimitiveActions,
-//                                                         yoGraphicsListRegistry));
+      dispatcher.addBehavior(HumanoidBehaviorType.SIMPLE_WALK_THROUGH_DOOR,
+                             new SimplifiedWalkThroughDoorBehavior(robotName,
+                                                         "VRWalkDoor",
+                                                         ros2Node,
+                                                         yoTime,
+                                                         yoDoubleSupport,
+                                                         fullRobotModel,
+                                                         referenceFrames,
+                                                         wholeBodyControllerParameters,
+                                                         atlasPrimitiveActions,
+                                                         yoGraphicsListRegistry));
 //
 //
 //      dispatcher.addBehavior(HumanoidBehaviorType.WALK_THROUGH_DOOR_OPERATOR_TIMING_BEHAVIOR, new DoorTimingBehavior(robotName, yoTime, ros2Node, true));
