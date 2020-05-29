@@ -114,7 +114,7 @@ public class ConcavePolygon2D implements ConcavePolygon2DBasics
             throw new RuntimeException("Vertices are not clockwise ordered.");
       }
       if (!GeometryPolygonTools.isSimplePolygon(vertexBuffer, numberOfVertices))
-         throw new RuntimeException("Polygon is not simple, as in it has self intersections.");
+         throw new ComplexPolygonException("Polygon is not simple, as in it has self intersections.");
 
       removePointsThatAreNotVertices();
 

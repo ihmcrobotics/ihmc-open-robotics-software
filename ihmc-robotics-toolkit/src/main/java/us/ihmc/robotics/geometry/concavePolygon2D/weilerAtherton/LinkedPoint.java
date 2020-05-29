@@ -9,8 +9,8 @@ public class LinkedPoint
    private LinkedPoint predecessor;
    private LinkedPoint successor;
 
-   private boolean isIncomingIntersection = false;
-   private boolean isOutgoingIntersection = false;
+   private boolean isPointAfterInsideOther = false;
+   private boolean isPointBeforeInsideOther = false;
 
    private final Point2DBasics point = new Point2D();
 
@@ -28,8 +28,8 @@ public class LinkedPoint
    {
       this(other.getPoint());
 
-      setIsIncomingIntersection(other.isIncomingIntersection);
-      setIsOutgoingIntersection(other.isOutgoingIntersection);
+      setIsPointAfterInsideOther(other.isPointAfterInsideOther);
+      setIsPointBeforeInsideOther(other.isPointBeforeInsideOther);
       setPredecessor(other.predecessor);
       setSuccessor(other.successor);
    }
@@ -39,41 +39,41 @@ public class LinkedPoint
       this(x, y, false, false);
    }
 
-   public LinkedPoint(Point2DReadOnly other, boolean isIncomingIntersection, boolean isOutgoingIntersection)
+   public LinkedPoint(Point2DReadOnly other, boolean isPointAfterInsideOther, boolean isPointBeforeInsideOther)
    {
-      this(other.getX(), other.getY(), isIncomingIntersection, isOutgoingIntersection);
+      this(other.getX(), other.getY(), isPointAfterInsideOther, isPointBeforeInsideOther);
    }
 
-   public LinkedPoint(double x, double y, boolean isIncomingIntersection, boolean isOutgoingIntersection)
+   public LinkedPoint(double x, double y, boolean isPointAfterInsideOther, boolean isPointBeforeInsideOther)
    {
-      this.isIncomingIntersection = isIncomingIntersection;
-      this.isOutgoingIntersection = isOutgoingIntersection;
+      this.isPointAfterInsideOther = isPointAfterInsideOther;
+      this.isPointBeforeInsideOther = isPointBeforeInsideOther;
       setPoint(x, y);
    }
 
-   public void setIsIncomingIntersection(boolean isIncomingIntersection)
+   public void setIsPointAfterInsideOther(boolean isPointAfterInsideOther)
    {
-      this.isIncomingIntersection = isIncomingIntersection;
+      this.isPointAfterInsideOther = isPointAfterInsideOther;
    }
 
-   public void setIsOutgoingIntersection(boolean isOutgoingIntersection)
+   public void setIsPointBeforeInsideOther(boolean isOutgoingIntersection)
    {
-      this.isOutgoingIntersection = isOutgoingIntersection;
+      this.isPointBeforeInsideOther = isOutgoingIntersection;
    }
 
    public boolean getIsIntersectionPoint()
    {
-      return isIncomingIntersection != isOutgoingIntersection;
+      return isPointAfterInsideOther || isPointBeforeInsideOther;
    }
 
-   public boolean isIncomingIntersection()
+   public boolean isPointAfterInsideOther()
    {
-      return isIncomingIntersection;
+      return isPointAfterInsideOther;
    }
 
-   public boolean isOutgoingIntersection()
+   public boolean isPointBeforeInsideOther()
    {
-      return isOutgoingIntersection;
+      return isPointBeforeInsideOther;
    }
 
    public void set(LinkedPoint other)
@@ -104,9 +104,9 @@ public class LinkedPoint
       successor = predecessor;
       predecessor = oldSuccessor;
 
-      boolean oldIsIncoming = isIncomingIntersection;
-      isIncomingIntersection = isOutgoingIntersection;
-      isOutgoingIntersection = oldIsIncoming;
+      boolean oldIsIncoming = isPointAfterInsideOther;
+      isPointAfterInsideOther = isPointBeforeInsideOther;
+      isPointBeforeInsideOther = oldIsIncoming;
    }
 
    public void setPoint(Point2DReadOnly point)

@@ -8,6 +8,7 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
@@ -148,7 +149,7 @@ public class GeometryPolygonTools
     */
    public static boolean isPoint2DInsideSimplePolygon2D(double pointX, double pointY, List<? extends Point2DReadOnly> polygon, int numberOfVertices)
    {
-      return isPoint2DInsideSimplePolygon2D(pointX, pointY, 1.0, 0.0, polygon, numberOfVertices, null);
+      return isPoint2DInsideSimplePolygon2D(pointX, pointY, polygon, numberOfVertices, null, 1e-7);
    }
 
    public static boolean isPoint2DInsideSimplePolygon2D(Point2DReadOnly queryPoint,
@@ -165,17 +166,33 @@ public class GeometryPolygonTools
                                                         int numberOfVertices,
                                                         double epsilon)
    {
-      return isPoint2DInsideSimplePolygon2D(pointX, pointY, 1.0, 0.0, polygon, numberOfVertices, null, epsilon);
+      return isPoint2DInsideSimplePolygon2D(pointX, pointY, polygon, numberOfVertices, null, epsilon);
    }
 
    public static boolean isPoint2DInsideSimplePolygon2D(double pointX,
                                                         double pointY,
-                                                        double lineDirectionX,
-                                                        double lineDirectionY,
                                                         List<? extends Point2DReadOnly> polygon,
                                                         int numberOfVertices,
                                                         Point2DBasics intersectionToPack,
                                                         double epsilon)
+   {
+      // check if point is on perimeter
+      if (isPoint2DOnPerimeterOfSimplePolygon2D(pointX, pointY, polygon, numberOfVertices, epsilon))
+         return true;
+
+      return isPoint2DStrictlyInsideSimplePolygon2D(pointX, pointY, polygon, numberOfVertices, intersectionToPack, false, epsilon);
+   }
+
+   public static boolean isPoint2DOnPerimeterOfSimplePolygon2D(Point2DReadOnly point, List<? extends Point2DReadOnly> polygon, int numberOfVertices, double epsilon)
+   {
+      return isPoint2DOnPerimeterOfSimplePolygon2D(point.getX(), point.getY(), polygon, numberOfVertices, epsilon);
+   }
+
+   public static boolean isPoint2DOnPerimeterOfSimplePolygon2D(double pointX,
+                                                               double pointY,
+                                                               List<? extends Point2DReadOnly> polygon,
+                                                               int numberOfVertices,
+                                                               double epsilon)
    {
       checkNumberOfVertices(polygon, numberOfVertices);
       double epsilonSquared = MathTools.square(epsilon);
@@ -190,10 +207,56 @@ public class GeometryPolygonTools
             return true;
       }
 
-      if (numberOfVertices < 3)
-      {
+      return false;
+   }
+
+   public static boolean isPoint2DStrictlyInsideSimplePolygon2D(Point2DReadOnly point,
+                                                                List<? extends Point2DReadOnly> polygon,
+                                                                int numberOfVertices,
+                                                                Point2DBasics intersectionToPack,
+                                                                double epsilon)
+   {
+      return isPoint2DStrictlyInsideSimplePolygon2D(point, polygon, numberOfVertices, intersectionToPack, true, epsilon);
+   }
+
+   public static boolean isPoint2DStrictlyInsideSimplePolygon2D(double pointX,
+                                                                double pointY,
+                                                                List<? extends Point2DReadOnly> polygon,
+                                                                int numberOfVertices,
+                                                                Point2DBasics intersectionToPack,
+                                                                double epsilon)
+   {
+      return isPoint2DStrictlyInsideSimplePolygon2D(pointX, pointY, polygon, numberOfVertices, intersectionToPack, true, epsilon);
+   }
+
+   public static boolean isPoint2DStrictlyInsideSimplePolygon2D(Point2DReadOnly point,
+                                                                List<? extends Point2DReadOnly> polygon,
+                                                                int numberOfVertices,
+                                                                Point2DBasics intersectionToPack,
+                                                                boolean checkPerimeter,
+                                                                double epsilon)
+   {
+      return isPoint2DStrictlyInsideSimplePolygon2D(point.getX(), point.getY(), polygon, numberOfVertices, intersectionToPack, checkPerimeter, epsilon);
+   }
+
+   public static boolean isPoint2DStrictlyInsideSimplePolygon2D(double pointX,
+                                                                double pointY,
+                                                                List<? extends Point2DReadOnly> polygon,
+                                                                int numberOfVertices,
+                                                                Point2DBasics intersectionToPack,
+                                                                boolean checkPerimeter,
+                                                                double epsilon)
+   {
+      if (checkPerimeter && isPoint2DOnPerimeterOfSimplePolygon2D(pointX, pointY, polygon, numberOfVertices, epsilon))
          return false;
-      }
+
+      checkNumberOfVertices(polygon, numberOfVertices);
+
+      if (numberOfVertices < 3)
+         return false;
+
+      double lineDirectionX = 1.0;
+      double lineDirectionY = 0.0;
 
       int intersectionsPositive = getNumberOfIntersections(pointX,
                                                            pointY,
@@ -222,50 +285,6 @@ public class GeometryPolygonTools
       return evenNumberOfIntersections;
    }
 
-   public static boolean isPoint2DInsideSimplePolygon2D(double pointX,
-                                                        double pointY,
-                                                        double lineDirectionX,
-                                                        double lineDirectionY,
-                                                        List<? extends Point2DReadOnly> polygon,
-                                                        int numberOfVertices,
-                                                        Point2DBasics intersectionToPack)
-   {
-      checkNumberOfVertices(polygon, numberOfVertices);
-
-      // check if point is on perimeter
-      for (int i = 0; i < numberOfVertices; i++)
-      {
-         Point2DReadOnly vertex = polygon.get(i);
-         Point2DReadOnly nextVertex = polygon.get((i + 1) % numberOfVertices);
-
-         if (EuclidCoreMissingTools.isPoint2DOnLineSegment2D(pointX, pointY, vertex, nextVertex))
-            return true;
-      }
-
-      if (numberOfVertices < 3)
-      {
-         return false;
-      }
-
-      int intersectionsPositive = getNumberOfIntersections(pointX, pointY, lineDirectionX, lineDirectionY, polygon, numberOfVertices, intersectionToPack, 1e-7);
-      int intersectionsNegative = getNumberOfIntersections(pointX,
-                                                           pointY,
-                                                           -lineDirectionX,
-                                                           -lineDirectionY,
-                                                           polygon,
-                                                           numberOfVertices,
-                                                           intersectionToPack,
-                                                           1e-7);
-
-      if (intersectionsNegative == 0 || intersectionsPositive == 0)
-         return false;
-
-      if (intersectionsPositive % 2 == 0 && intersectionsNegative % 2 == 0)
-         return false;
-
-      boolean evenNumberOfIntersections = (intersectionsPositive + intersectionsNegative) % 2 == 0;
-      return evenNumberOfIntersections;
-   }
 
    private static int getNumberOfIntersections(double pointX,
                                                double pointY,

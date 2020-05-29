@@ -1,15 +1,12 @@
 package us.ihmc.robotics.geometry.concaveHull.weilerAtherton;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.ClippingTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.LinkedPoint;
 import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.LinkedPointList;
-
-import javax.sound.sampled.Clip;
 
 import static us.ihmc.robotics.Assert.*;
 
@@ -258,20 +255,19 @@ public class ClippingToolsTest
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.0, 0.5), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertTrue(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertTrue(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.0, -0.5), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertTrue(point.isOutgoingIntersection());
+      assertFalse(point.isPointAfterInsideOther());
+      assertTrue(point.isPointBeforeInsideOther());
    }
 
    @Test
    public void testInsertIntersections2()
    {
-      /*
       ConcavePolygon2D polygon1 = new ConcavePolygon2D();
       polygon1.addVertex(-1.0, 1.0);
       polygon1.addVertex(1.0, 1.0);
@@ -292,14 +288,14 @@ public class ClippingToolsTest
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-0.5, 1.0), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertTrue(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertTrue(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.5, 1.0), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertTrue(point.isOutgoingIntersection());
-      assertFalse(point.isIncomingIntersection());
+      assertTrue(point.isPointBeforeInsideOther());
+      assertFalse(point.isPointAfterInsideOther());
 
       list = ClippingTools.createLinkedPointList(polygon2);
       ClippingTools.insertIntersectionsIntoList(list, polygon1);
@@ -308,17 +304,15 @@ public class ClippingToolsTest
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.5, 1.0), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertTrue(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertTrue(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-0.5, 1.0), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertTrue(point.isOutgoingIntersection());
-
-       */
+      assertFalse(point.isPointAfterInsideOther());
+      assertTrue(point.isPointBeforeInsideOther());
    }
 
    @Test
@@ -344,8 +338,8 @@ public class ClippingToolsTest
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0, 1.0), point.getPoint(), 1e-7);
       assertFalse(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertFalse(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
 
       list = ClippingTools.createLinkedPointList(polygon2);
       ClippingTools.insertIntersectionsIntoList(list, polygon1);
@@ -354,8 +348,8 @@ public class ClippingToolsTest
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.0, 1.0), point.getPoint(), 1e-7);
       assertFalse(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertFalse(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
    }
 
    @Test
@@ -384,33 +378,33 @@ public class ClippingToolsTest
 
       LinkedPoint point = list.getFirstPoint();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, 1.0), point.getPoint(), 1e-7);
-      assertFalse(point.getIsIntersectionPoint());
-      assertTrue(point.isIncomingIntersection());
-      assertTrue(point.isOutgoingIntersection());
+      assertTrue(point.getIsIntersectionPoint());
+      assertFalse(point.isPointAfterInsideOther());
+      assertTrue(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-0.9, 1.0), point.getPoint(), 1e-7);
-      assertFalse(point.getIsIntersectionPoint());
-      assertTrue(point.isIncomingIntersection());
-      assertTrue(point.isOutgoingIntersection());
+      assertTrue(point.getIsIntersectionPoint());
+      assertFalse(point.isPointAfterInsideOther());
+      assertTrue(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-0.9, 0.9), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertTrue(point.isOutgoingIntersection());
+      assertFalse(point.isPointAfterInsideOther());
+      assertTrue(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-0.9, -0.9), point.getPoint(), 1e-7);
       assertFalse(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertFalse(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.9, -0.9), point.getPoint(), 1e-7);
       assertFalse(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertFalse(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
 
       // TODO do the other side
       list = ClippingTools.createLinkedPointList(hat);
@@ -418,51 +412,51 @@ public class ClippingToolsTest
 
       point = list.getFirstPoint();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, 1.0), point.getPoint(), 1e-7);
-      assertFalse(point.getIsIntersectionPoint());
-      assertTrue(point.isIncomingIntersection());
-      assertTrue(point.isOutgoingIntersection());
+      assertTrue(point.getIsIntersectionPoint());
+      assertFalse(point.isPointAfterInsideOther());
+      assertTrue(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-0.9, 1.0), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertTrue(point.isOutgoingIntersection());
+      assertFalse(point.isPointAfterInsideOther());
+      assertTrue(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.9, 1.0), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertTrue(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertTrue(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.0, 1.0), point.getPoint(), 1e-7);
-      assertFalse(point.getIsIntersectionPoint());
-      assertTrue(point.isIncomingIntersection());
-      assertTrue(point.isOutgoingIntersection());
+      assertTrue(point.getIsIntersectionPoint());
+      assertFalse(point.isPointAfterInsideOther());
+      assertTrue(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.0, 0.9), point.getPoint(), 1e-7);
-      assertFalse(point.getIsIntersectionPoint());
-      assertTrue(point.isIncomingIntersection());
-      assertTrue(point.isOutgoingIntersection());
+      assertTrue(point.getIsIntersectionPoint());
+      assertFalse(point.isPointAfterInsideOther());
+      assertTrue(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.9, 0.9), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertTrue(point.isOutgoingIntersection());
+      assertFalse(point.isPointAfterInsideOther());
+      assertTrue(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-0.9, 0.9), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertTrue(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertTrue(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, 0.9), point.getPoint(), 1e-7);
-      assertFalse(point.getIsIntersectionPoint());
-      assertTrue(point.isIncomingIntersection());
-      assertTrue(point.isOutgoingIntersection());
+      assertTrue(point.getIsIntersectionPoint());
+      assertFalse(point.isPointAfterInsideOther());
+      assertTrue(point.isPointBeforeInsideOther());
    }
 
    @Test
@@ -496,14 +490,14 @@ public class ClippingToolsTest
       LinkedPoint point = list.getFirstPoint();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(point.getPoint(), new Point2D(-1.0, 1.0), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertTrue(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertTrue(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(point.getPoint(), new Point2D(1.0, 1.0), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertTrue(point.isOutgoingIntersection());
+      assertFalse(point.isPointAfterInsideOther());
+      assertTrue(point.isPointBeforeInsideOther());
    }
 
    @Test
@@ -533,28 +527,28 @@ public class ClippingToolsTest
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.1, -1.0), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertTrue(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertTrue(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-0.1, -1.0), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertTrue(point.isOutgoingIntersection());
+      assertFalse(point.isPointAfterInsideOther());
+      assertTrue(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       point = point.getSuccessor();
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-0.1, 1.0), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertTrue(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertTrue(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.1, 1.0), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertTrue(point.isOutgoingIntersection());
+      assertFalse(point.isPointAfterInsideOther());
+      assertTrue(point.isPointBeforeInsideOther());
    }
 
    @Test
@@ -581,38 +575,38 @@ public class ClippingToolsTest
       LinkedPoint point = list.getFirstPoint();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, 1.0), point.getPoint(), 1e-7);
       assertFalse(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertFalse(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.5, 1.0), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertTrue(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertTrue(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.0, 1.0), point.getPoint(), 1e-7);
       assertFalse(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertFalse(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(0.75, 0.5), point.getPoint(), 1e-7);
       assertTrue(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertTrue(point.isOutgoingIntersection());
+      assertFalse(point.isPointAfterInsideOther());
+      assertTrue(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(1.0, -1.0), point.getPoint(), 1e-7);
       assertFalse(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertFalse(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
 
       point = point.getSuccessor();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, -1.0), point.getPoint(), 1e-7);
       assertFalse(point.getIsIntersectionPoint());
-      assertFalse(point.isIncomingIntersection());
-      assertFalse(point.isOutgoingIntersection());
+      assertFalse(point.isPointAfterInsideOther());
+      assertFalse(point.isPointBeforeInsideOther());
 
       assertEquals(list.getFirstPoint(), point.getSuccessor());
    }
