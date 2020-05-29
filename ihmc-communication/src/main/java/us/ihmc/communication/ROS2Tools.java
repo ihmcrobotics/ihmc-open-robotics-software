@@ -78,6 +78,7 @@ public class ROS2Tools
    public static final ROS2Topic<?> REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
 
    public static final ROS2Topic<PlanarRegionsListMessage> LIDAR_REA_REGIONS = REA.withOutput().withType(PlanarRegionsListMessage.class);
+   public static final ROS2Topic<PlanarRegionsListMessage> REALSENSE_SLAM_REGIONS = REALSENSE_SLAM_MAP.withOutput().withType(PlanarRegionsListMessage.class);
 
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
