@@ -1,8 +1,11 @@
 package us;
 
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.stepConstraintModule.StepConstraintViewerApplication;
+import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -29,7 +32,13 @@ public class SteppableRegionsCalculatorTest
    private StepConstraintViewerApplication ui;
 
    private static final double epsilon = 1e-7;
-   private static final boolean visualize = false;
+   private static boolean visualize = false;
+
+   @BeforeAll
+   public void setup()
+   {
+      visualize &= !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   }
 
    @AfterEach
    public void destroy() throws Exception
@@ -519,6 +528,9 @@ public class SteppableRegionsCalculatorTest
    @Test
    public void testTwoWalls()
    {
+      if (visualize)
+         createUI();
+
       SteppableRegionsCalculator calculator = new SteppableRegionsCalculator(1.0, new YoVariableRegistry("test"));
 
       ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
@@ -583,6 +595,13 @@ public class SteppableRegionsCalculatorTest
       PolygonClippingAndMerging.merge(wallObstacle1, wallObstacle2, mergedWall);
 
       List<StepConstraintRegion> constraintRegions = calculator.computeSteppableRegions();
+
+      if (visualize)
+      {
+         ui.submitPlanarRegionsListToVisualizer(new PlanarRegionsList(listOfRegions));
+         ui.submitStepConstraintRegionsToVisualizer(constraintRegions);
+         ThreadTools.sleepForever();
+      }
 
       assertEquals(3, constraintRegions.size());
 
