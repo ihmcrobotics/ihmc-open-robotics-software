@@ -3,10 +3,12 @@ package us.ihmc.avatar.stepConstraintModule;
 import javafx.application.Application;
 import javafx.stage.Stage;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 public class StepConstraintViewerApplication extends Application
@@ -72,5 +74,11 @@ public class StepConstraintViewerApplication extends Application
    {
       messager.submitMessage(StepConstraintCalculatorViewerAPI.PlanarRegionData, planarRegionsList);
    }
+
+   public void submitStepConstraintRegionsToVisualizer(List<StepConstraintRegion> stepConstraintRegionList)
+   {
+      messager.submitMessage(StepConstraintCalculatorViewerAPI.StepConstraintRegionData, stepConstraintRegionList);
+   }
+
 
 }
