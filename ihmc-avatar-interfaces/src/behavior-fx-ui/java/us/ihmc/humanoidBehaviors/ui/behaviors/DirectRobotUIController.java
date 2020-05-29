@@ -90,7 +90,7 @@ public class DirectRobotUIController extends Group
       pumpPSI.valueProperty().addListener((ChangeListener) -> sendPumpPSI());
       pumpPSI.getSelectionModel().select(1);
 
-      livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, false);
+      livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.MAP_REGIONS, false);
       livePlanarRegionsGraphic.setEnabled(false);
       getChildren().add(livePlanarRegionsGraphic);
       reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.withInput());

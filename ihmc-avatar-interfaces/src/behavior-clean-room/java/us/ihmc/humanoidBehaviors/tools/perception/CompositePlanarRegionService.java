@@ -7,7 +7,6 @@ import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2NodeInterface;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
@@ -37,8 +36,7 @@ public class CompositePlanarRegionService
          planarRegionPublishers.add(ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, topicNames.get(i)));
       }
 
-      ROS2Topic<?> topic = ROS2Tools.REA.withOutput();
-      combinedPlanarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, topic);
+      combinedPlanarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.MAP_REGIONS);
       thread = new PausablePeriodicThread(getClass().getSimpleName(), period, this::process);
    }
 
