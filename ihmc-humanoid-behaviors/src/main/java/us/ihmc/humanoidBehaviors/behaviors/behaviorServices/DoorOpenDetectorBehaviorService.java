@@ -85,7 +85,6 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
          latestDoorLocationPacketRecieved = doorLocationQueue.getAndSet(null);
          if (latestDoorLocationPacketRecieved != null)
          {
-            System.out.println("recieved pose");
             newPose = new FramePose3D(ReferenceFrame.getWorldFrame(), latestDoorLocationPacketRecieved.getDoorTransformToWorld());
             // getReportedGoalPoseWorldFrame(newPose);
 
