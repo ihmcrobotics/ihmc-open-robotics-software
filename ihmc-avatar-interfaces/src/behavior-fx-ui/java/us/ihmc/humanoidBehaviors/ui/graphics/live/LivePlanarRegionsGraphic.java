@@ -27,7 +27,7 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
 
    public LivePlanarRegionsGraphic(Ros2Node ros2Node, boolean initializeToFlatGround)
    {
-      this(ros2Node, ROS2Tools.REA.withOutput().withType(PlanarRegionsListMessage.class), initializeToFlatGround);
+      this(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, initializeToFlatGround);
    }
 
    public LivePlanarRegionsGraphic(Ros2Node ros2Node, ROS2Topic<PlanarRegionsListMessage> topic, boolean initializeToFlatGround)
