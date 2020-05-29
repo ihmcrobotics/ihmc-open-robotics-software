@@ -70,10 +70,12 @@ public class AtlasLookAndStepBehaviorDemo
       // might be a weird delay with threads at 0.5 hz depending on each other
 
       ArrayList<String> topicNames = new ArrayList<>();
-      topicNames.add(ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME);
-      topicNames.add(ROS2Tools.getTopicNameGenerator(null,
-                                                     ROS2Tools.REA_MODULE + "/multisense",
-                                                     ROS2Tools.ROS2TopicQualifier.OUTPUT).generateTopicName(PlanarRegionsListMessage.class));
+      topicNames.add(ROS2Tools.REALSENSE_SLAM_MAP.withOutput().withType(PlanarRegionsListMessage.class).withNaming(typeName -> typeName + "_slam").getName());
+      topicNames.add(ROS2Tools.IHMC_ROOT.withModule(ROS2Tools.REA_MODULE_NAME + "/multisense")
+                                        .withOutput()
+                                        .withType(PlanarRegionsListMessage.class)
+                                        .withNaming(typeName -> typeName)
+                                        .getName());
 
       double period = 1.0;
       CompositePlanarRegionService allRegionsPublisher = new CompositePlanarRegionService(ros2Node,

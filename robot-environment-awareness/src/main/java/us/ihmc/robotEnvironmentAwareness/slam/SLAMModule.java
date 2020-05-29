@@ -92,7 +92,7 @@ public class SLAMModule
 
       reaMessager.registerTopicListener(SLAMModuleAPI.SLAMClear, (content) -> clearSLAM());
 
-      planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP);
+      planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.withOutput());
 
       robotStatus = reaMessager.createInput(SLAMModuleAPI.SensorStatus, false);
       velocityStatus = reaMessager.createInput(SLAMModuleAPI.VelocityLimitStatus, true);

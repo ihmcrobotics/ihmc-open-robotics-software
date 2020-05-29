@@ -17,17 +17,14 @@ import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
-import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.wholeBodyController.RobotContactPointParameters;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
@@ -164,9 +161,8 @@ public class BehaviorHelper
 
    public ROS2PlanarRegionsInput createPlanarRegionsInput(String specifier)
    {
-      String lidarRegionsTopic = ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE + specifier, ROS2Tools.ROS2TopicQualifier.OUTPUT)
-                                          .generateTopicName(PlanarRegionsListMessage.class);
-      return new ROS2PlanarRegionsInput(managedROS2Node, PlanarRegionsListMessage.class, lidarRegionsTopic);
+      ROS2Topic topic = ROS2Tools.REA.withOutput().withType(PlanarRegionsListMessage.class).withNaming(typeName -> typeName + "_" + specifier);
+      return new ROS2PlanarRegionsInput(managedROS2Node, PlanarRegionsListMessage.class, topic.getName());
    }
 
    // Thread and Schedule Methods:
