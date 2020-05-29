@@ -5,6 +5,7 @@ import java.net.InetAddress;
 import java.util.function.Function;
 
 import controller_msgs.msg.dds.DoorParameterPacket;
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commons.exception.ExceptionHandler;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -75,6 +76,8 @@ public class ROS2Tools
    public static final ROS2Topic<?> REALSENSE_SLAM_MAP = IHMC_ROOT.withModule(REALSENSE_SLAM_MODULE_NAME);
 
    public static final ROS2Topic<?> REA_SUPPORT_REGIONS = REA.withSuffix(REA_CUSTOM_REGION_NAME);
+
+   public static final ROS2Topic<PlanarRegionsListMessage> LIDAR_REA_REGIONS = REA.withOutput().withType(PlanarRegionsListMessage.class);
 
    public static final Function<String, String> NAMED_BY_TYPE = typeName -> typeName;
 
