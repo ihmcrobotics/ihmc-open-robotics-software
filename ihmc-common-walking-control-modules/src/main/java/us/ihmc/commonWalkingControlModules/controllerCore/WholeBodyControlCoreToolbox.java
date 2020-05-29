@@ -2,6 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import static us.ihmc.commonWalkingControlModules.visualizer.WrenchVisualizer.createWrenchVisualizerWithContactableBodies;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -47,6 +48,7 @@ public class WholeBodyControlCoreToolbox
    private final double gravityZ;
    private final FloatingJointBasics rootJoint;
    private final MultiBodySystemBasics multiBodySystemInput;
+   private final List<KinematicLoopControllerFunction> kinematicLoopControllerFunctions = new ArrayList<>();
    private final ReferenceFrame centerOfMassFrame;
    private final ControllerCoreOptimizationSettings optimizationSettings;
    private FeedbackControllerSettings feedbackControllerSettings = FeedbackControllerSettings.getDefault();
@@ -165,6 +167,11 @@ public class WholeBodyControlCoreToolbox
       rigidBodyAccelerationProvider = inverseDynamicsCalculator.getAccelerationProvider();
 
       parentRegistry.addChild(registry);
+   }
+
+   public void addKinematicLoopFunction(KinematicLoopControllerFunction function)
+   {
+      kinematicLoopControllerFunctions.add(function);
    }
 
    /**
@@ -292,6 +299,11 @@ public class WholeBodyControlCoreToolbox
    public MultiBodySystemBasics getMultiBodySystemInput()
    {
       return multiBodySystemInput;
+   }
+
+   public List<KinematicLoopControllerFunction> getKinematicLoopControllerFunctions()
+   {
+      return kinematicLoopControllerFunctions;
    }
 
    public MotionQPInputCalculator getMotionQPInputCalculator()
