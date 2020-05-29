@@ -193,9 +193,6 @@ public class RobotConfigurationData extends Packet<RobotConfigurationData> imple
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
-      // update the sequence ID for the sensor data as well
-      this.imu_sensor_data_.forEach(x -> x.setSequenceId(sequence_id));
-      this.force_sensor_data_.forEach(x -> x.setSequenceId(sequence_id));
    }
    /**
        

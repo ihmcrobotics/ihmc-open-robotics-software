@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.ros2.ROS2Topic;
@@ -150,9 +151,8 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       // update sequence id for each new message
       this.sequenceId++;
 
-      // Set the sequence id for the robot configuration data
-      // This also propagates it to the sensor data
-      robotConfigurationData.setSequenceId(this.sequenceId);
+      // Set the sequence id for the robot configuration data and propagate it to the sensor data
+      MessageTools.setRobotConfigurationDataSequenceId(robotConfigurationData, this.sequenceId);
 
       robotConfigurationDataPublisher.publish(robotConfigurationData);
    }
