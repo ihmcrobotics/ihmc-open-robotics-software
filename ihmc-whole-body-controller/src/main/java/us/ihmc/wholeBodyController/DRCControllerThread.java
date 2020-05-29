@@ -6,7 +6,6 @@ import controller_msgs.msg.dds.ControllerCrashNotificationPacket;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextTools;
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.visualizer.CommonInertiaEllipsoidsVisualizer;
 import us.ihmc.commons.Conversions;
@@ -129,8 +128,8 @@ public class DRCControllerThread implements MultiThreadedRobotControlElement
 
       closeableAndDisposableRegistry.registerCloseableAndDisposable(controllerFactory);
 
-      crashNotificationPublisher = ROS2Tools.createPublisher(realtimeRos2Node, ControllerCrashNotificationPacket.class,
-                                                             ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName));
+      crashNotificationPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, ControllerCrashNotificationPacket.class,
+                                                                      ROS2Tools.getControllerOutputTopic(robotName));
 
       if (ALLOW_MODEL_CORRUPTION)
       {

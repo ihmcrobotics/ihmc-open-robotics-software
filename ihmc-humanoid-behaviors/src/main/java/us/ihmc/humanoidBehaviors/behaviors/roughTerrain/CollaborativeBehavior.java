@@ -28,7 +28,7 @@ public class CollaborativeBehavior extends AbstractBehavior
                                 WalkingControllerParameters walkingControllerParameters, YoGraphicsListRegistry graphicsListRegistry)
    {
       super(robotName, ros2Node);
-      createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), cameraData::put);
+      createSubscriber(VideoPacket.class, ROS2Tools.IHMC_ROOT, cameraData::put);
       AvatarRobotCameraParameters[] robotCameraParameters = robotSensorInfo.getCameraParameters();
    }
 

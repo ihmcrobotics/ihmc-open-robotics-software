@@ -844,8 +844,50 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
     */
    public boolean enable_expansion_mask_ = true;
 
+   /**
+       
+    * If true will try to wiggle steps away from shin collisions. Collisions are checked against all regions.
+       
+    * Enable concave hull wiggler must be true in order for the shin collision checker to run.
+       
+    */
+   public boolean enable_shin_collision_check_;
+
+   /**
+       
+    * Radius of the shin collidable cylinder
+       
+    */
+   public double shin_radius_ = -11.1;
+
+   /**
+       
+    * Length of the shin collidable cylinder
+       
+    */
+   public double shin_length_ = -11.1;
+
+   /**
+       
+    * Pitch of the shin collidable cylinder
+       
+    */
+   public double shin_pitch_ = -11.1;
+
+   /**
+       
+    * Height offset of shin collidable cylinder
+       
+    */
+   public double shin_height_offet_ = -11.1;
+
    public FootstepPlannerParametersPacket()
    {
+
+
+
+
+
 
 
 
@@ -1112,6 +1154,21 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
       enable_expansion_mask_ = other.enable_expansion_mask_;
+
+
+      enable_shin_collision_check_ = other.enable_shin_collision_check_;
+
+
+      shin_radius_ = other.shin_radius_;
+
+
+      shin_length_ = other.shin_length_;
+
+
+      shin_pitch_ = other.shin_pitch_;
+
+
+      shin_height_offet_ = other.shin_height_offet_;
 
    }
 
@@ -3060,6 +3117,110 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
 
+   /**
+       
+    * If true will try to wiggle steps away from shin collisions. Collisions are checked against all regions.
+       
+    * Enable concave hull wiggler must be true in order for the shin collision checker to run.
+       
+    */
+   public void setEnableShinCollisionCheck(boolean enable_shin_collision_check)
+   {
+      enable_shin_collision_check_ = enable_shin_collision_check;
+   }
+   /**
+       
+    * If true will try to wiggle steps away from shin collisions. Collisions are checked against all regions.
+       
+    * Enable concave hull wiggler must be true in order for the shin collision checker to run.
+       
+    */
+   public boolean getEnableShinCollisionCheck()
+   {
+      return enable_shin_collision_check_;
+   }
+
+
+   /**
+       
+    * Radius of the shin collidable cylinder
+       
+    */
+   public void setShinRadius(double shin_radius)
+   {
+      shin_radius_ = shin_radius;
+   }
+   /**
+       
+    * Radius of the shin collidable cylinder
+       
+    */
+   public double getShinRadius()
+   {
+      return shin_radius_;
+   }
+
+
+   /**
+       
+    * Length of the shin collidable cylinder
+       
+    */
+   public void setShinLength(double shin_length)
+   {
+      shin_length_ = shin_length;
+   }
+   /**
+       
+    * Length of the shin collidable cylinder
+       
+    */
+   public double getShinLength()
+   {
+      return shin_length_;
+   }
+
+
+   /**
+       
+    * Pitch of the shin collidable cylinder
+       
+    */
+   public void setShinPitch(double shin_pitch)
+   {
+      shin_pitch_ = shin_pitch;
+   }
+   /**
+       
+    * Pitch of the shin collidable cylinder
+       
+    */
+   public double getShinPitch()
+   {
+      return shin_pitch_;
+   }
+
+
+   /**
+       
+    * Height offset of shin collidable cylinder
+       
+    */
+   public void setShinHeightOffet(double shin_height_offet)
+   {
+      shin_height_offet_ = shin_height_offet;
+   }
+   /**
+       
+    * Height offset of shin collidable cylinder
+       
+    */
+   public double getShinHeightOffet()
+   {
+      return shin_height_offet_;
+   }
+
+
    public static Supplier<FootstepPlannerParametersPacketPubSubType> getPubSubType()
    {
       return FootstepPlannerParametersPacketPubSubType::new;
@@ -3270,6 +3431,21 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_expansion_mask_, other.enable_expansion_mask_, epsilon)) return false;
 
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.enable_shin_collision_check_, other.enable_shin_collision_check_, epsilon)) return false;
+
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_radius_, other.shin_radius_, epsilon)) return false;
+
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_length_, other.shin_length_, epsilon)) return false;
+
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_pitch_, other.shin_pitch_, epsilon)) return false;
+
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_height_offet_, other.shin_height_offet_, epsilon)) return false;
+
+
       return true;
    }
 
@@ -3475,6 +3651,21 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.enable_expansion_mask_ != otherMyClass.enable_expansion_mask_) return false;
 
 
+      if(this.enable_shin_collision_check_ != otherMyClass.enable_shin_collision_check_) return false;
+
+
+      if(this.shin_radius_ != otherMyClass.shin_radius_) return false;
+
+
+      if(this.shin_length_ != otherMyClass.shin_length_) return false;
+
+
+      if(this.shin_pitch_ != otherMyClass.shin_pitch_) return false;
+
+
+      if(this.shin_height_offet_ != otherMyClass.shin_height_offet_) return false;
+
+
       return true;
    }
 
@@ -3675,7 +3866,22 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.maximum_branch_factor_);      builder.append(", ");
 
       builder.append("enable_expansion_mask=");
-      builder.append(this.enable_expansion_mask_);
+      builder.append(this.enable_expansion_mask_);      builder.append(", ");
+
+      builder.append("enable_shin_collision_check=");
+      builder.append(this.enable_shin_collision_check_);      builder.append(", ");
+
+      builder.append("shin_radius=");
+      builder.append(this.shin_radius_);      builder.append(", ");
+
+      builder.append("shin_length=");
+      builder.append(this.shin_length_);      builder.append(", ");
+
+      builder.append("shin_pitch=");
+      builder.append(this.shin_pitch_);      builder.append(", ");
+
+      builder.append("shin_height_offet=");
+      builder.append(this.shin_height_offet_);
       builder.append("}");
       return builder.toString();
    }

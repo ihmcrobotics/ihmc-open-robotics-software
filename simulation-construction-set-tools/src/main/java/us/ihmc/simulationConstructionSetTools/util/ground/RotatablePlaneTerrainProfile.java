@@ -1,6 +1,6 @@
 package us.ihmc.simulationConstructionSetTools.util.ground;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
@@ -11,6 +11,8 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex3DSupplier;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -56,7 +58,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
 
    private YoFramePoint3D desiredGroundPosition = new YoFramePoint3D("desiredGroundPosition", WORLD_FRAME, registry);
    private final YoFramePoseUsingYawPitchRoll yoPlanePose = new YoFramePoseUsingYawPitchRoll(desiredGroundPosition, filteredDesiredGroundOrientation);
-   private ArrayList<GroundContactPoint> groundContactPoints;
+   private List<GroundContactPoint> groundContactPoints;
    
    public RotatablePlaneTerrainProfile(Point3D center, Robot robot, YoGraphicsListRegistry graphicsRegistry, double dt)
    {
@@ -118,7 +120,7 @@ public class RotatablePlaneTerrainProfile implements GroundProfile3D, RobotContr
     * Returns true if inside the ground object. If inside, must pack the intersection and normal. If not inside, packing those is optional.
     */
    @Override
-   public boolean checkIfInside(double x, double y, double z, Point3D intersectionToPack, Vector3D normalToPack)
+   public boolean checkIfInside(double x, double y, double z, Point3DBasics intersectionToPack, Vector3DBasics normalToPack)
    {
       testPoint.setIncludingFrame(WORLD_FRAME, x, y, z);
       testPoint.changeFrame(plane.getReferenceFrame());

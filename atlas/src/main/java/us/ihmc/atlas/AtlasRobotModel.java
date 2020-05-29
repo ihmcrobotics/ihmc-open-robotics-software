@@ -24,8 +24,8 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -431,9 +431,8 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
          case ROBOTIQ:
             return new SimulatedRobotiqHandsController(simulatedRobot,
                                                        this,
-                                                       realtimeRos2Node,
-                                                       ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()),
-                                                       ControllerAPIDefinition.getSubscriberTopicNameGenerator(getSimpleRobotName()));
+                                                       realtimeRos2Node, ROS2Tools.getControllerOutputTopic(getSimpleRobotName()),
+                                                       ROS2Tools.getControllerInputTopic(getSimpleRobotName()));
 
          default:
             return null;

@@ -96,7 +96,7 @@ public class HexapodSimulationController implements RobotController
 
    private void setupPlaneContactStateUpdaters(FullRobotModel fullRobotModel, FloatingRootJointRobot sdfRobot)
    {
-      ArrayList<GroundContactPoint> groundContactPoints = sdfRobot.getAllGroundContactPoints();
+      List<GroundContactPoint> groundContactPoints = sdfRobot.getAllGroundContactPoints();
       ArrayList<SimulatedPlaneContactStateUpdater> contactStateUpdatersList = new ArrayList<>();
       RhinoBeetleJointNameMapAndContactDefinition jointMap = new RhinoBeetleJointNameMapAndContactDefinition();
       for (RobotSextant robotSextant : RobotSextant.values)

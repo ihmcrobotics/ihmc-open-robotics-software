@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.ROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomPlanarRegionHandler;
@@ -27,12 +27,10 @@ public class RemoteEnvironmentMapInterface
 
    public RemoteEnvironmentMapInterface(Ros2NodeInterface ros2Node)
    {
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME, this::acceptRealsenseSLAMRegions);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.withOutput(), this::acceptRealsenseSLAMRegions);
 
-      new ROS2Callback<>(ros2Node,
-                         PlanarRegionsListMessage.class,
-                         ROS2Tools.REA_SUPPORT_REGIONS_TOPIC_NAME,
-                         this::acceptAdditionalRegionList);
+      // used to be "/ihmc/rea/custom_region/input/planar_regions_list"
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA_SUPPORT_REGIONS.withOutput(), this::acceptAdditionalRegionList);
    }
 
    public synchronized PlanarRegionsList getLatestCombinedRegionsList()

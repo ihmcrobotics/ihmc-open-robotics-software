@@ -3,6 +3,7 @@ package us.ihmc.communication;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.Ros2NodeInterface;
 
 public class ROS2PlanarRegionsInput extends ROS2Input<PlanarRegionsListMessage>

@@ -4,7 +4,8 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.robotics.EuclidCoreMissingTools;
+import us.ihmc.euclid.shape.primitives.Cylinder3D;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -14,15 +15,16 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
-import us.ihmc.yoVariables.variable.YoFrameVector3D;
+import us.ihmc.yoVariables.variable.*;
 
 import java.awt.*;
 
-public class ConcavePolygonWiggler
+public class GradientDescentStepConstraintSolver
 {
    private final String name = getClass().getSimpleName();
    private final YoVariableRegistry registry = new YoVariableRegistry(name);
@@ -32,33 +34,42 @@ public class ConcavePolygonWiggler
    private double alphaForSmallGradient = 0.35;
    private double gradientMagnitudeToTerminate = 1e-5;
    private double gradientMagnitudeToApplyStandardAlpha = 1e-3;
+   private double legCollisionSolverGain = 15.0;
    private final YoDouble gradientMagnitude = new YoDouble("gradientMagnitude", registry);
+
+   private final FootPlacementConstraintCalculator footPlacementConstraintCalculator = new FootPlacementConstraintCalculator();
+   private final LegCollisionConstraintCalculator legCollisionConstraintCalculator;
 
    private final Vector3D previousGradient = new Vector3D();
    private final YoFrameVector3D gradient = new YoFrameVector3D("gradient", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D footPlacementGradient = new YoFrameVector3D("footPlacementGradient", ReferenceFrame.getWorldFrame(), registry);
+   private final YoFrameVector3D legCollisionGradient = new YoFrameVector3D("legCollisionGradient", ReferenceFrame.getWorldFrame(), registry);
    private final YoFrameVector3D accumulatedTransform = new YoFrameVector3D("accumulatedTransformient", ReferenceFrame.getWorldFrame(), registry);
 
-   private final Point2D closestPerimeterPoint = new Point2D();
-   private final Vector2D directionToClosestPoint = new Vector2D();
    private final RecyclingArrayList<Point2D> transformedVertices = new RecyclingArrayList<>(5, Point2D::new);
    private final RecyclingArrayList<Vector2D> rotationVectors = new RecyclingArrayList<>(5, Vector2D::new);
+   private final RigidBodyTransform transformedSoleToRegionFrame = new RigidBodyTransform();
 
    private final TickAndUpdatable tickAndUpdatable;
    private final YoFrameLineSegment2D[] initialPolygonToWiggle = new YoFrameLineSegment2D[5];
    private final YoFrameLineSegment2D[] linearizedTransformedPolygonToWiggle = new YoFrameLineSegment2D[5];
    private final YoFrameLineSegment2D[] transformedPolygonToWiggle = new YoFrameLineSegment2D[5];
-   private final YoFrameLineSegment2D[] constraintPolygon = new YoFrameLineSegment2D[100];
+   private final YoFrameLineSegment2D[] constraintPolygon = new YoFrameLineSegment2D[500];
    private final YoFrameLineSegment2D[] yoRotationVectors = new YoFrameLineSegment2D[5];
+   private final YoGraphicPlanarRegionsList yoGraphicPlanarRegionsList;
 
-   public ConcavePolygonWiggler()
+   public GradientDescentStepConstraintSolver()
    {
       this.tickAndUpdatable = null;
+      this.legCollisionConstraintCalculator = new LegCollisionConstraintCalculator();
+      this.yoGraphicPlanarRegionsList = null;
    }
 
-   public ConcavePolygonWiggler(TickAndUpdatable tickAndUpdatable, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
+   public GradientDescentStepConstraintSolver(TickAndUpdatable tickAndUpdatable, YoGraphicsListRegistry graphicsListRegistry, YoVariableRegistry registry)
    {
       registry.addChild(this.registry);
       this.tickAndUpdatable = tickAndUpdatable;
+      this.legCollisionConstraintCalculator = new LegCollisionConstraintCalculator(graphicsListRegistry, registry);
 
       for (int i = 0; i < 5; i++)
       {
@@ -80,14 +91,56 @@ public class ConcavePolygonWiggler
          constraintPolygon[i] = new YoFrameLineSegment2D("polygonEdge" + i, ReferenceFrame.getWorldFrame(), registry);
          graphicsListRegistry.registerArtifact(name, new YoArtifactLineSegment2d("graphicPolygonEdge" + i, constraintPolygon[i], Color.BLACK, 0.0, 0.0));
       }
+
+      this.yoGraphicPlanarRegionsList = new YoGraphicPlanarRegionsList("planarRegions", 150, 100, registry);
+      graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), yoGraphicPlanarRegionsList);
    }
 
-   public RigidBodyTransform wigglePolygon(ConvexPolygon2DReadOnly polygonToWiggle, Vertex2DSupplier concavePolygonToWiggleInto, WiggleParameters wiggleParameters)
+   /**
+    * Wiggles into concave hull without leg collision check
+    */
+   public RigidBodyTransform wigglePolygon(ConvexPolygon2DReadOnly polygonToWiggle,
+                                           Vertex2DSupplier concavePolygonToWiggleInto,
+                                           WiggleParameters wiggleParameters)
+   {
+      return wigglePolygon(polygonToWiggle, concavePolygonToWiggleInto, wiggleParameters, null, null, null);
+   }
+
+   /**
+    * Wiggles into concave hull with leg collision check
+    */
+   public RigidBodyTransform wigglePolygon(ConvexPolygon2DReadOnly polygonToWiggle,
+                                           WiggleParameters wiggleParameters,
+                                           RigidBodyTransformReadOnly footTransformInLocal,
+                                           PlanarRegion regionToStep,
+                                           PlanarRegionsList allRegions)
+   {
+      return wigglePolygon(polygonToWiggle,
+                           Vertex2DSupplier.asVertex2DSupplier(regionToStep.getConcaveHull()),
+                           wiggleParameters,
+                           footTransformInLocal,
+                           regionToStep.getTransformToWorld(),
+                           allRegions);
+   }
+
+   private RigidBodyTransform wigglePolygon(ConvexPolygon2DReadOnly polygonToWiggle,
+                                            Vertex2DSupplier concavePolygonToWiggleInto,
+                                            WiggleParameters wiggleParameters,
+                                            RigidBodyTransformReadOnly footTransformInRegionFrame,
+                                            RigidBodyTransformReadOnly localToWorld,
+                                            PlanarRegionsList planarRegionsList)
    {
       int iterations = 0;
       accumulatedTransform.setToZero();
       rotationVectors.clear();
       transformedVertices.clear();
+      footPlacementGradient.setToZero();
+      legCollisionGradient.setToZero();
+
+      if (footTransformInRegionFrame != null)
+      {
+         transformedSoleToRegionFrame.set(footTransformInRegionFrame);
+      }
 
       for (int i = 0; i < polygonToWiggle.getNumberOfVertices(); i++)
       {
@@ -101,7 +154,7 @@ public class ConcavePolygonWiggler
 
       if (tickAndUpdatable != null)
       {
-         initializeConstraintGraphics(polygonToWiggle, concavePolygonToWiggleInto);
+         initializeConstraintGraphics(polygonToWiggle, concavePolygonToWiggleInto, planarRegionsList);
          tickAndUpdatable.tickAndUpdate();
       }
 
@@ -121,45 +174,35 @@ public class ConcavePolygonWiggler
             break;
          }
 
-         gradient.setToZero();
          updateGraphics(polygonToWiggle);
 
-         for (int i = 0; i < polygonToWiggle.getNumberOfVertices(); i++)
+         footPlacementConstraintCalculator.calculateFootAreaGradient(transformedVertices, rotationVectors, concavePolygonToWiggleInto, wiggleParameters,
+                                                                     footPlacementGradient);
+         if (planarRegionsList != null)
          {
-            Point2DReadOnly vertex = transformedVertices.get(i);
+            legCollisionConstraintCalculator.calculateLegCollisionGradient(transformedSoleToRegionFrame, localToWorld, planarRegionsList, legCollisionGradient);
+         }
 
-            boolean pointIsInside = PointInPolygonSolver.isPointInsidePolygon(concavePolygonToWiggleInto, vertex);
-            double distanceSquaredFromPerimeter = distanceSquaredFromPerimeter(concavePolygonToWiggleInto, vertex, closestPerimeterPoint);
+         if (legCollisionGradient.lengthSquared() > 1e-10)
+         {
+            gradient.set(legCollisionGradient);
+         }
+         else
+         {
+            gradient.set(footPlacementGradient);
+         }
 
-            double signedDistanceSquared = pointIsInside ? - distanceSquaredFromPerimeter : distanceSquaredFromPerimeter;
-            double deltaOutside = - wiggleParameters.deltaInside;
-            double signedDeltaOutsideSquared = Math.signum(deltaOutside) * MathTools.square(deltaOutside);
-            boolean pointDoesNotMeetConstraints = signedDistanceSquared > signedDeltaOutsideSquared;
-
-            if (pointDoesNotMeetConstraints)
-            {
-               directionToClosestPoint.sub(closestPerimeterPoint, vertex);
-               if (signedDistanceSquared < 0.0)
-               {
-                  directionToClosestPoint.scale(-1.0);
-               }
-
-               double distanceSquaredFromConstraint = signedDistanceSquared - signedDeltaOutsideSquared;
-               directionToClosestPoint.scale(Math.sqrt(distanceSquaredFromConstraint / directionToClosestPoint.lengthSquared()));
-               
-               if (xTranslationAllowed)
-               {
-                  gradient.addX(directionToClosestPoint.getX());
-               }
-               if (yTranslationAllowed)
-               {
-                  gradient.addY(directionToClosestPoint.getY());
-               }
-               if (rotationAllowed)
-               {
-                  gradient.addZ(directionToClosestPoint.dot(rotationVectors.get(i)) / wiggleParameters.rotationWeight);
-               }
-            }
+         if (!xTranslationAllowed)
+         {
+            gradient.setX(0.0);
+         }
+         if (!yTranslationAllowed)
+         {
+            gradient.setY(0.0);
+         }
+         if (!rotationAllowed)
+         {
+            gradient.setZ(0.0);
          }
 
          if (tickAndUpdatable != null)
@@ -167,7 +210,6 @@ public class ConcavePolygonWiggler
             gradientMagnitude.set(gradient.length());
             tickAndUpdatable.tickAndUpdate();
          }
-
 
          if (gradient.lengthSquared() > MathTools.square(gradientMagnitudeToApplyStandardAlpha))
          {
@@ -185,6 +227,9 @@ public class ConcavePolygonWiggler
             transformedVertices.get(i).addX(gradient.getZ() * rotationVectors.get(i).getX());
             transformedVertices.get(i).addY(gradient.getZ() * rotationVectors.get(i).getY());
          }
+
+         transformedSoleToRegionFrame.getTranslation().add(gradient.getX(), gradient.getY(), 0.0);
+         transformedSoleToRegionFrame.getRotation().appendYawRotation(gradient.getZ());
 
          if (iterations > 0)
          {
@@ -219,7 +264,7 @@ public class ConcavePolygonWiggler
       transform.appendTranslation(-polygonToWiggle.getCentroid().getX(), -polygonToWiggle.getCentroid().getY(), 0.0);
    }
 
-   private void initializeConstraintGraphics(ConvexPolygon2DReadOnly polygonToWiggle, Vertex2DSupplier concavePolygonToWiggleInto)
+   private void initializeConstraintGraphics(ConvexPolygon2DReadOnly polygonToWiggle, Vertex2DSupplier concavePolygonToWiggleInto, PlanarRegionsList planarRegionsList)
    {
       if (tickAndUpdatable == null)
       {
@@ -240,6 +285,17 @@ public class ConcavePolygonWiggler
       {
          constraintPolygon[i].getFirstEndpoint().set(concavePolygonToWiggleInto.getVertex(i));
          constraintPolygon[i].getSecondEndpoint().set(concavePolygonToWiggleInto.getVertex((i + 1) % concavePolygonToWiggleInto.getNumberOfVertices()));
+      }
+
+      if (planarRegionsList != null)
+      {
+         yoGraphicPlanarRegionsList.clear();
+         yoGraphicPlanarRegionsList.submitPlanarRegionsListToRender(planarRegionsList);
+         for (int i = 0; i < 100; i++)
+         {
+            yoGraphicPlanarRegionsList.processPlanarRegionsListQueue();
+            tickAndUpdatable.tickAndUpdate();
+         }
       }
    }
 
@@ -266,33 +322,6 @@ public class ConcavePolygonWiggler
       }
    }
 
-   private static double distanceSquaredFromPerimeter(Vertex2DSupplier polygon, Point2DReadOnly queryPoint, Point2D closestPointToPack)
-   {
-      double minimumDistanceSquared = Double.MAX_VALUE;
-      Point2D tempPoint = new Point2D();
-
-      for (int i = 0; i < polygon.getNumberOfVertices(); i++)
-      {
-         Point2DReadOnly vertex = polygon.getVertex(i);
-         Point2DReadOnly nextVertex = polygon.getVertex((i + 1) % polygon.getNumberOfVertices());
-
-         double distanceSquared = EuclidCoreMissingTools.distanceSquaredFromPoint2DToLineSegment2D(queryPoint.getX(),
-                                                                                                   queryPoint.getY(),
-                                                                                                   vertex.getX(),
-                                                                                                   vertex.getY(),
-                                                                                                   nextVertex.getX(),
-                                                                                                   nextVertex.getY(),
-                                                                                                   tempPoint);
-         if (distanceSquared < minimumDistanceSquared)
-         {
-            minimumDistanceSquared = distanceSquared;
-            closestPointToPack.set(tempPoint);
-         }
-      }
-
-      return minimumDistanceSquared;
-   }
-
    public RecyclingArrayList<Point2D> getTransformedVertices()
    {
       return transformedVertices;
@@ -311,6 +340,12 @@ public class ConcavePolygonWiggler
    public void setGradientMagnitudeToTerminate(double gradientMagnitudeToTerminate)
    {
       this.gradientMagnitudeToTerminate = gradientMagnitudeToTerminate;
+   }
+
+   public void setLegCollisionShape(Cylinder3D legCollisionShape, double solverGain, RigidBodyTransform legShapeTransformToSoleFrame)
+   {
+      this.legCollisionSolverGain = solverGain;
+      this.legCollisionConstraintCalculator.setLegCollisionShape(legCollisionShape, legShapeTransformToSoleFrame);
    }
 
    public double getGradientMagnitudeToTerminate()

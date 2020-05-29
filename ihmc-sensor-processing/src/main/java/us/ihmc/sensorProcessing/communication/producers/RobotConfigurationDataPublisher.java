@@ -7,9 +7,9 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.communication.packets.dataobjects.RobotConfigurationDataFactory;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
@@ -38,7 +38,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
     * Intended to be instantiated only using {@link RobotConfigurationDataPublisherFactory}.
     * 
     * @param realtimeRos2Node            the ROS 2 node to create the publisher with.
-    * @param publisherTopicNameGenerator the generator to use to create the name of the topic.
+    * @param outputTopic the generator to use to create the name of the topic.
     * @param rootJointSensorData         the data provider for the root joint.
     * @param jointSensorData             the data providers for the 1-DoF joints.
     * @param imuSensorData               the data providers for the IMUs.
@@ -48,7 +48,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
     * @param publishPeriod               period in nanoseconds to publish.
     */
    public RobotConfigurationDataPublisher(RealtimeRos2Node realtimeRos2Node,
-                                          MessageTopicNameGenerator publisherTopicNameGenerator,
+                                          ROS2Topic outputTopic,
                                           FloatingJointStateReadOnly rootJointSensorData,
                                           List<? extends OneDoFJointStateReadOnly> jointSensorData,
                                           List<? extends IMUSensorReadOnly> imuSensorData,
@@ -66,7 +66,7 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       this.publishPeriod = publishPeriod;
 
       robotConfigurationData.setJointNameHash(RobotConfigurationDataFactory.calculateJointNameHash(jointSensorData, forceSensorData, imuSensorData));
-      robotConfigurationDataPublisher = ROS2Tools.createPublisher(realtimeRos2Node, RobotConfigurationData.class, publisherTopicNameGenerator);
+      robotConfigurationDataPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, RobotConfigurationData.class, outputTopic);
    }
 
    @Override

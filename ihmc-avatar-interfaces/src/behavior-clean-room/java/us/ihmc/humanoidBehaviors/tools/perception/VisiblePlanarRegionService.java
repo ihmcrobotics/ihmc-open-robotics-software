@@ -25,16 +25,13 @@ public class VisiblePlanarRegionService
 
    public VisiblePlanarRegionService(Ros2NodeInterface ros2Node, Supplier<PlanarRegionsList>... planarRegionSuppliers)
    {
-      this(ros2Node,
-           ROS2Tools.getTopicNameGenerator(null, ROS2Tools.REA_MODULE, ROS2Tools.ROS2TopicQualifier.OUTPUT).generateTopicName(PlanarRegionsListMessage.class),
-           planarRegionSuppliers);
+      this(ros2Node, ROS2Tools.LIDAR_REA_REGIONS.getName(), planarRegionSuppliers);
    }
 
    public VisiblePlanarRegionService(Ros2NodeInterface ros2Node, String topicName, Supplier<PlanarRegionsList>... planarRegionSuppliers)
    {
       this.planarRegionSuppliers = planarRegionSuppliers;
-
-      planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, topicName);
+      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, topicName); // TODO add name "visible"
       thread = new PausablePeriodicThread(getClass().getSimpleName(), 0.5, this::process);
    }
 

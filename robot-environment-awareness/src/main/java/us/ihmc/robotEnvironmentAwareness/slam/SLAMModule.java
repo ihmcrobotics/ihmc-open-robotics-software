@@ -15,7 +15,6 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -67,10 +66,9 @@ public class SLAMModule
 
    private final AtomicReference<RandomICPSLAMParameters> ihmcSLAMParameters;
 
-   private static final String PLANAR_REGIONS_LIST_TOPIC_SURFIX = "_slam";
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
-   protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
+   protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
    private final AtomicReference<Boolean> robotStatus;
    private final AtomicReference<Boolean> velocityStatus;
@@ -94,9 +92,7 @@ public class SLAMModule
 
       reaMessager.registerTopicListener(SLAMModuleAPI.SLAMClear, (content) -> clearSLAM());
 
-      MessageTopicNameGenerator publisherTopicNameGenerator;
-      publisherTopicNameGenerator = (Class<?> T) -> ROS2Tools.appendTypeToTopicName(ROS2Tools.IHMC_ROS_TOPIC_PREFIX, T) + PLANAR_REGIONS_LIST_TOPIC_SURFIX;
-      planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
+      planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP);
 
       robotStatus = reaMessager.createInput(SLAMModuleAPI.SensorStatus, false);
       velocityStatus = reaMessager.createInput(SLAMModuleAPI.VelocityLimitStatus, true);

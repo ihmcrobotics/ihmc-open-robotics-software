@@ -1,11 +1,11 @@
 package us.ihmc.simulationConstructionSetTools.socketCommunication;
 
-import java.util.ArrayList;
+import java.util.List;
 
-import us.ihmc.yoVariables.variable.YoVariable;
-import us.ihmc.yoVariables.variable.YoVariableList;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.gui.CreatedNewVariablesListener;
+import us.ihmc.yoVariables.variable.YoVariable;
+import us.ihmc.yoVariables.variable.YoVariableList;
 
 public class RobotConnectionGUIUpdater implements CreatedNewVariablesListener, ReceivedDataListener
 {
@@ -17,7 +17,7 @@ public class RobotConnectionGUIUpdater implements CreatedNewVariablesListener, R
    }
 
    @Override
-   public void receivedData(ArrayList<YoVariable<?>> sendVariables)
+   public void receivedData(List<YoVariable<?>> sendVariables)
    {
       scs.tickAndUpdateLeisurely(4);    // +++JEP 050722: Make GUI more responsive...
    }

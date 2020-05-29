@@ -20,7 +20,6 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ContactableBodiesFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.WalkingProvider;
 import us.ihmc.communication.ROS2Tools;
@@ -154,7 +153,7 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
    public static final double gravity = 9.80665;
 
    public static final String VALKYRIE_IHMC_ROS_ESTIMATOR_NODE_NAME = "valkyrie_ihmc_state_estimator";
-   public static final String VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME = ROS2Tools.HUMANOID_CONTROLLER.getNodeName("valkyrie");
+   public static final String VALKYRIE_IHMC_ROS_CONTROLLER_NODE_NAME = "valkyrie_" + ROS2Tools.HUMANOID_CONTROLLER_NODE_NAME;
 
    private static final WalkingProvider walkingProvider = WalkingProvider.DATA_PRODUCER;
 
@@ -381,10 +380,9 @@ public class ValkyrieRosControlController extends IHMCWholeRobotControlJavaBridg
 
       PelvisPoseCorrectionCommunicatorInterface externalPelvisPoseSubscriber = null;
       externalPelvisPoseSubscriber = new PelvisPoseCorrectionCommunicator(null, null);
-      ROS2Tools.createCallbackSubscription(estimatorRealtimeRos2Node,
-                                           StampedPosePacket.class,
-                                           ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName),
-                                           externalPelvisPoseSubscriber);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(estimatorRealtimeRos2Node,
+                                                    StampedPosePacket.class, ROS2Tools.getControllerInputTopic(robotName),
+                                                    externalPelvisPoseSubscriber);
 
       /*
        * Build controller
