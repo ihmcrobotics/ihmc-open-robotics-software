@@ -7,13 +7,12 @@ import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 import java.util.ArrayList;
@@ -51,9 +50,9 @@ public class StepConstraintToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
-      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2Topic controllerPubGenerator = ControllerAPIDefinition.getOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
       {
          if (controller != null)
          {
@@ -61,7 +60,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
          }
       });
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
       {
          if (controller != null)
          {
@@ -77,12 +76,12 @@ public class StepConstraintToolboxModule extends ToolboxModule
          }
       });
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
                                            PlanarRegionsListMessage.class,
-                                           REACommunicationProperties.publisherTopicNameGenerator,
+                                           REACommunicationProperties.outputTopic,
                                            s -> updatePlanarRegion(s.takeNextData()));
 
-      constraintRegionPublisher = ROS2Tools.createPublisher(realtimeRos2Node, StepConstraintMessage.class, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
+      constraintRegionPublisher = ROS2Tools.createPublisher(realtimeRos2Node, StepConstraintMessage.class, ControllerAPIDefinition.getInputTopic(robotName));
    }
 
    public void setSwitchPlanarRegionConstraintsAutomatically(boolean switchAutomatically)
@@ -125,24 +124,24 @@ public class StepConstraintToolboxModule extends ToolboxModule
    }
 
    @Override
-   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   public ROS2Topic getOutputTopic()
    {
-      return getPublisherTopicNameGenerator(robotName);
+      return getOutputTopic(robotName);
    }
 
-   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.STEP_CONSTRAINT_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.STEP_CONSTRAINT_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   public ROS2Topic getInputTopic()
    {
-      return getSubscriberTopicNameGenerator(robotName);
+      return getInputTopic(robotName);
    }
 
-   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   public static ROS2Topic getInputTopic(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.STEP_CONSTRAINT_TOOLBOX, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.STEP_CONSTRAINT_TOOLBOX.withRobot(robotName).withInput();
    }
 }
