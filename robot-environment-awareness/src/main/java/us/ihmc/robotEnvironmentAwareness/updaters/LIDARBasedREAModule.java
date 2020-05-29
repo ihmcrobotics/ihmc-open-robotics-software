@@ -1,8 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.publisherTopicNameGenerator;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicNameGenerator;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberTopicNameGenerator;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
 
 import java.io.File;
 import java.io.IOException;
@@ -58,7 +58,7 @@ public class LIDARBasedREAModule
 
    protected static final boolean DEBUG = true;
 
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA.getNodeName());
+   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
    private final AtomicReference<Double> octreeResolution;
 
@@ -106,13 +106,13 @@ public class LIDARBasedREAModule
       new REAModuleROS2Subscription<StampedPosePacket>(ros2Node, reaMessager, "/ihmc/stamped_pose_T265", StampedPosePacket.class,
                                                        this::dispatchStampedPosePacket, REAModuleAPI.DepthCloudBufferEnable);
 
-      ROS2Tools.createCallbackSubscription(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicNameGenerator,
-                                           this::dispatchCustomPlanarRegion);
-      ROS2Tools.createCallbackSubscription(ros2Node, RequestPlanarRegionsListMessage.class, subscriberTopicNameGenerator,
-                                           this::handleRequestPlanarRegionsListMessage);
-      ROS2Tools.createCallbackSubscription(ros2Node, REAStateRequestMessage.class, subscriberTopicNameGenerator, this::handleREAStateRequestMessage);
-      ROS2Tools.createCallbackSubscription(ros2Node, REASensorDataFilterParametersMessage.class, subscriberTopicNameGenerator,
-                                           this::handleREASensorDataFilterParametersMessage);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicName,
+                                                    this::dispatchCustomPlanarRegion);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RequestPlanarRegionsListMessage.class, inputTopic,
+                                                    this::handleRequestPlanarRegionsListMessage);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopic, this::handleREAStateRequestMessage);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REASensorDataFilterParametersMessage.class, inputTopic,
+                                                    this::handleREASensorDataFilterParametersMessage);
 
       FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
       loadConfigurationFile(filePropertyHelper);
@@ -124,8 +124,8 @@ public class LIDARBasedREAModule
       reaMessager.registerTopicListener(REAModuleAPI.SaveRegionUpdaterConfiguration,
                                         (content) -> planarRegionFeatureUpdater.saveConfiguration(filePropertyHelper));
 
-      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager, planarRegionFeatureUpdater, ros2Node, publisherTopicNameGenerator,
-                                                                             subscriberTopicNameGenerator);
+      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager, planarRegionFeatureUpdater, ros2Node, outputTopic,
+                                                                             inputTopic);
       clearOcTree = reaMessager.createInput(REAModuleAPI.OcTreeClear, false);
 
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.

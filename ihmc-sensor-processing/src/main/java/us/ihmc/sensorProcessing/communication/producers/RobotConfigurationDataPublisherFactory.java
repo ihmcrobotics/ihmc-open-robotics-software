@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.Optional;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
-import us.ihmc.commons.Conversions;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
@@ -17,6 +15,7 @@ import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDefinition;
 import us.ihmc.robotics.sensors.IMUDefinition;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.imu.IMUSensor;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
@@ -26,7 +25,6 @@ import us.ihmc.sensorProcessing.sensorProcessors.OneDoFJointStateReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorOutputMapReadOnly;
 import us.ihmc.sensorProcessing.sensorProcessors.SensorTimestampHolder;
 import us.ihmc.sensorProcessing.stateEstimation.IMUSensorReadOnly;
-import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.factories.FactoryTools;
 import us.ihmc.tools.factories.OptionalFactoryField;
 import us.ihmc.tools.factories.RequiredFactoryField;
@@ -47,7 +45,7 @@ public class RobotConfigurationDataPublisherFactory
    private final OptionalFactoryField<RobotMotionStatusHolder> robotMotionStatusHolderField = new OptionalFactoryField<>("robotMotionStatusHolder");
 
    private final RequiredFactoryField<RealtimeRos2Node> realtimeRos2NodeField = new RequiredFactoryField<>("realtimeRos2Node");
-   private final RequiredFactoryField<MessageTopicNameGenerator> publisherTopicNameGeneratorField = new RequiredFactoryField<>("publisherTopicNameGenerator");
+   private final RequiredFactoryField<ROS2Topic> outputTopicField = new RequiredFactoryField<>("outputTopic");
 
    public RobotConfigurationDataPublisherFactory()
    {
@@ -177,12 +175,12 @@ public class RobotConfigurationDataPublisherFactory
     * ROS 2 necessary information to create the real-time publisher.
     * 
     * @param ros2Node                    the real-time node to create the publisher with.
-    * @param publisherTopicNameGenerator the generator to use for creating the topic name.
+    * @param outputTopic the generator to use for creating the topic name.
     */
-   public void setROS2Info(RealtimeRos2Node ros2Node, MessageTopicNameGenerator publisherTopicNameGenerator)
+   public void setROS2Info(RealtimeRos2Node ros2Node, ROS2Topic outputTopic)
    {
       realtimeRos2NodeField.set(ros2Node);
-      publisherTopicNameGeneratorField.set(publisherTopicNameGenerator);
+      outputTopicField.set(outputTopic);
    }
 
    /**
@@ -209,7 +207,7 @@ public class RobotConfigurationDataPublisherFactory
       List<ForceSensorDataReadOnly> forceSensorDataToPublish = filterForceSensorDataToPublish();
 
       RobotConfigurationDataPublisher publisher = new RobotConfigurationDataPublisher(realtimeRos2NodeField.get(),
-                                                                                      publisherTopicNameGeneratorField.get(),
+                                                                                      outputTopicField.get(),
                                                                                       rootJointSensorData.get(),
                                                                                       jointSensorDataToPublish,
                                                                                       imuSensorDataToPublish,

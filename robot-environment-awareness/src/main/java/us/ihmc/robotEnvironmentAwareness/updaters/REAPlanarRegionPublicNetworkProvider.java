@@ -7,11 +7,11 @@ import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
 import controller_msgs.msg.dds.REAStatusMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 
 public class REAPlanarRegionPublicNetworkProvider
@@ -28,14 +28,14 @@ public class REAPlanarRegionPublicNetworkProvider
    private final REAStatusMessage currentState = new REAStatusMessage();
 
    public REAPlanarRegionPublicNetworkProvider(Messager messager, RegionFeaturesProvider regionFeaturesProvider, Ros2Node ros2Node,
-                                               MessageTopicNameGenerator publisherTopicNameGenerator, MessageTopicNameGenerator subscriberTopicNameGenerator)
+                                               ROS2Topic outputTopic, ROS2Topic inputTopic)
    {
       this.regionFeaturesProvider = regionFeaturesProvider;
-      planarRegionPublisher = ROS2Tools.createPublisher(ros2Node, PlanarRegionsListMessage.class, publisherTopicNameGenerator);
+      planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, outputTopic);
 
       if (messager != null)
       {
-         currentStatePublisher = ROS2Tools.createPublisher(ros2Node, REAStatusMessage.class, publisherTopicNameGenerator);
+         currentStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStatusMessage.class, outputTopic);
          isRunning = messager.createInput(REAModuleAPI.OcTreeEnable);
          // This should be the only input with a default value, the rest gets populated at the very start.
          hasCleared = messager.createInput(REAModuleAPI.OcTreeClear, false);

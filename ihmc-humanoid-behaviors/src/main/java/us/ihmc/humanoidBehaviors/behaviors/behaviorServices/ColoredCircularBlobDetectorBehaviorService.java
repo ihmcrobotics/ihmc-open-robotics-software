@@ -48,7 +48,7 @@ public class ColoredCircularBlobDetectorBehaviorService extends ThreadedBehavior
    {
       super(robotName, ColoredCircularBlobDetectorBehaviorService.class.getSimpleName(), ros2Node);
 
-      createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), videoPacketQueue::put); // FIXME Need to figure out the topic name for video streams
+      createSubscriber(VideoPacket.class, ROS2Tools.IHMC_ROOT, videoPacketQueue::put); // FIXME Need to figure out the topic name for video streams
       createSubscriberFromController(RobotConfigurationData.class, robotConfigurationDataQueue::put);
 
       videoPublisher = createBehaviorOutputPublisher(VideoPacket.class, "/video");

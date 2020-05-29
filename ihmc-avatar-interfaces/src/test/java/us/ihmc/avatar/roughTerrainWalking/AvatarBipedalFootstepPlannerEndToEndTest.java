@@ -118,16 +118,16 @@ public abstract class AvatarBipedalFootstepPlannerEndToEndTest implements MultiR
       ros2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "ihmc_footstep_planner_test");
       footstepPlanningModule = FootstepPlanningModuleLauncher.createModule(getRobotModel(), PubSubImplementation.INTRAPROCESS);
 
-      footstepPlanningRequestPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlanningRequestPacket.class,
-                                                                   FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
-      footstepPlannerParametersPublisher = ROS2Tools.createPublisher(ros2Node, FootstepPlannerParametersPacket.class,
-                                                                     FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
+      footstepPlanningRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepPlanningRequestPacket.class,
+                                                                            FootstepPlannerCommunicationProperties.inputTopic(getSimpleRobotName()));
+      footstepPlannerParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepPlannerParametersPacket.class,
+                                                                              FootstepPlannerCommunicationProperties.inputTopic(getSimpleRobotName()));
 
       toolboxStatePublisher = ROS2Tools
-            .createPublisher(ros2Node, ToolboxStateMessage.class, FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(getSimpleRobotName()));
+            .createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, FootstepPlannerCommunicationProperties.inputTopic(getSimpleRobotName()));
 
-      ROS2Tools.createCallbackSubscription(ros2Node, FootstepPlanningToolboxOutputStatus.class,
-                                           FootstepPlannerCommunicationProperties.publisherTopicNameGenerator(getSimpleRobotName()),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlanningToolboxOutputStatus.class,
+                                                    FootstepPlannerCommunicationProperties.outputTopic(getSimpleRobotName()),
                                            s -> setOutputStatus(s.takeNextData()));
 
       FullHumanoidRobotModel fullHumanoidRobotModel = getRobotModel().createFullRobotModel();

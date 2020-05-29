@@ -77,7 +77,7 @@ public class TurnValveBehaviorStateMachine extends StateMachineBehavior<TurnValv
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
       graspAndTurnValveBehavior = new GraspAndTurnValveBehavior(robotName, yoTime, ros2Node, atlasPrimitiveActions);
       userValidationExampleBehavior = new GetUserValidationBehavior(robotName, ros2Node);
-      publisher = createBehaviorOutputPublisher(ValveLocationPacket.class);
+      publisher = createBehaviorPublisher(ValveLocationPacket.class);
       setupStateMachine();
    }
 

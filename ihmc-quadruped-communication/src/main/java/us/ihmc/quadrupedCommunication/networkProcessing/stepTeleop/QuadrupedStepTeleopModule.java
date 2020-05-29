@@ -2,12 +2,11 @@ package us.ihmc.quadrupedCommunication.networkProcessing.stepTeleop;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pubsub.DomainFactory;
-import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.quadrupedPlanning.QuadrupedXGaitSettingsReadOnly;
 import us.ihmc.quadrupedPlanning.footstepChooser.PointFootSnapperParameters;
 import us.ihmc.quadrupedCommunication.networkProcessing.QuadrupedToolboxController;
@@ -21,8 +20,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static us.ihmc.communication.ROS2Tools.getTopicNameGenerator;
 
 public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
 {
@@ -48,27 +45,27 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    public void registerExtraSubscribers(RealtimeRos2Node realtimeRos2Node)
    {
       // status messages from the controller
-      ROS2Tools.MessageTopicNameGenerator controllerPubGenerator = QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator,
+      ROS2Topic controllerOutputTopic = ROS2Tools.getQuadrupedControllerOutputTopic(robotName);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopic,
                                            s -> processTimestamp(s.takeNextData().getMonotonicTime()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateMessage.class, controllerPubGenerator, s -> setPaused(true));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HighLevelStateMessage.class, controllerOutputTopic, s -> setPaused(true));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HighLevelStateChangeStatusMessage.class, controllerOutputTopic,
                                            s -> processHighLevelStateChangeMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedFootstepStatusMessage.class, controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedFootstepStatusMessage.class, controllerOutputTopic,
                                            s -> processFootstepStatusMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedSteppingStateChangeMessage.class, controllerOutputTopic,
                                            s -> processSteppingStateChangeMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedGroundPlaneMessage.class, controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedGroundPlaneMessage.class, controllerOutputTopic,
                                            s -> processGroundPlaneMessage(s.takeNextData()));
 
       // inputs to this module
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedBodyPathPlanMessage.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedBodyPathPlanMessage.class, getInputTopic(),
                                            s -> processBodyPathPlanMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedXGaitSettingsPacket.class, getInputTopic(),
                                            s -> processXGaitSettingsPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, QuadrupedTeleopDesiredVelocity.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, QuadrupedTeleopDesiredVelocity.class, getInputTopic(),
                                            s -> processTeleopDesiredVelocity(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, PlanarRegionsListMessage.class, getSubscriberTopicNameGenerator(),
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, PlanarRegionsListMessage.class, getInputTopic(),
                                            s -> processPlanarRegionsListMessage(s.takeNextData()));
    }
 
@@ -145,28 +142,28 @@ public class QuadrupedStepTeleopModule extends QuadrupedToolboxModule
    }
 
    @Override
-   public Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> createMapOfSupportedOutputMessages()
+   public Map<Class<? extends Settable<?>>, ROS2Topic> createMapOfSupportedOutputMessages()
    {
-      Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> messages = new HashMap<>();
+      Map<Class<? extends Settable<?>>, ROS2Topic> messages = new HashMap<>();
 
-      ROS2Tools.MessageTopicNameGenerator controllerSubGenerator = QuadrupedControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-      messages.put(QuadrupedTimedStepListMessage.class, controllerSubGenerator);
-      messages.put(QuadrupedBodyOrientationMessage.class, controllerSubGenerator);
-      messages.put(AbortWalkingMessage.class, controllerSubGenerator);
+      ROS2Topic controllerInputTopic = ROS2Tools.getQuadrupedControllerInputTopic(robotName);
+      messages.put(QuadrupedTimedStepListMessage.class, controllerInputTopic);
+      messages.put(QuadrupedBodyOrientationMessage.class, controllerInputTopic);
+      messages.put(AbortWalkingMessage.class, controllerInputTopic);
 
       return messages;
    }
 
    @Override
-   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   public ROS2Topic getOutputTopic()
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   public ROS2Topic getInputTopic()
    {
-      return getTopicNameGenerator(robotName, ROS2Tools.STEP_TELEOP_TOOLBOX, ROS2Tools.ROS2TopicQualifier.INPUT);
+      return ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName).withInput();
    }
 
    @Override

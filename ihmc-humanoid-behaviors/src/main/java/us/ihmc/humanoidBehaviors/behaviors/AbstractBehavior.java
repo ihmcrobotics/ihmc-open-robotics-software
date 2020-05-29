@@ -5,21 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import controller_msgs.msg.dds.TextToSpeechPacket;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.FormattingTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.net.ObjectConsumer;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.BehaviorService;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.log.LogTools;
@@ -48,7 +43,7 @@ public abstract class AbstractBehavior implements RobotController
    KryoMessager messager;
 
    protected final Ros2Node ros2Node;
-   private final Map<MessageTopicPair<?>, IHMCROS2Publisher<?>> publishers = new HashMap<>();
+   private final Map<ROS2Topic<?>, IHMCROS2Publisher<?>> publishers = new HashMap<>();
 
    protected final HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>> localListeningNetworkQueues = new HashMap<Class<?>, ArrayList<ConcurrentListeningQueue<?>>>();
 
@@ -72,12 +67,12 @@ public abstract class AbstractBehavior implements RobotController
 
    protected final String robotName;
 
-   protected final MessageTopicNameGenerator controllerSubGenerator, controllerPubGenerator;
-   protected final MessageTopicNameGenerator behaviorSubGenerator, behaviorPubGenerator;
+   protected final ROS2Topic controllerInputTopic, controllerOutputTopic;
+   protected final ROS2Topic behaviorInputTopic, behaviorOutputTopic;
 
-   protected final MessageTopicNameGenerator footstepPlanningToolboxSubGenerator, footstepPlanningToolboxPubGenerator;
-   protected final MessageTopicNameGenerator kinematicsToolboxSubGenerator, kinematicsToolboxPubGenerator;
-   protected final MessageTopicNameGenerator kinematicsPlanningToolboxSubGenerator, kinematicsPlanningToolboxPubGenerator;
+   protected final ROS2Topic footstepPlannerInputTopic, footstepPlannerOutputTopic;
+   protected final ROS2Topic kinematicsToolboxInputTopic, kinematicsToolboxOutputTopic;
+   protected final ROS2Topic kinematicsPlanningToolboxInputTopic, kinematicsPlanningToolboxOutputTopic;
 
    private static int behaviorUniqID = 0;
    
@@ -102,23 +97,21 @@ public abstract class AbstractBehavior implements RobotController
 
       behaviorsServices = new ArrayList<>();
 
-      footstepPlanningToolboxSubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2TopicQualifier.INPUT);
-      footstepPlanningToolboxPubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.FOOTSTEP_PLANNER_MODULE, ROS2TopicQualifier.OUTPUT);
-      kinematicsToolboxSubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX, ROS2TopicQualifier.INPUT);
-      kinematicsToolboxPubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_TOOLBOX, ROS2TopicQualifier.OUTPUT);
-      kinematicsPlanningToolboxSubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_PLANNING_TOOLBOX, ROS2TopicQualifier.INPUT);
-      kinematicsPlanningToolboxPubGenerator = ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_PLANNING_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+      footstepPlannerInputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput();
+      footstepPlannerOutputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withOutput();
+      kinematicsToolboxInputTopic = ROS2Tools.KINEMATICS_TOOLBOX.withRobot(robotName).withInput();
+      kinematicsToolboxOutputTopic = ROS2Tools.KINEMATICS_TOOLBOX.withRobot(robotName).withOutput();
+      kinematicsPlanningToolboxInputTopic = ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withInput();
+      kinematicsPlanningToolboxOutputTopic = ROS2Tools.KINEMATICS_PLANNING_TOOLBOX.withRobot(robotName).withOutput();
 
-      controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-      controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      behaviorSubGenerator = IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName);
-      behaviorPubGenerator = IHMCHumanoidBehaviorManager.getPublisherTopicNameGenerator(robotName);
+      controllerInputTopic = ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withInput();
+      controllerOutputTopic = ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotName).withOutput();
+      behaviorInputTopic = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();
+      behaviorOutputTopic = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
 
-      textToSpeechPublisher = createPublisher(TextToSpeechPacket.class, ROS2Tools.getDefaultTopicNameGenerator());
-      uiPositionCheckerPacketpublisher = createBehaviorOutputPublisher(UIPositionCheckerPacket.class);
-
+      textToSpeechPublisher = createPublisher(TextToSpeechPacket.class, ROS2Tools.IHMC_ROOT);
+      uiPositionCheckerPacketpublisher = createBehaviorPublisher(UIPositionCheckerPacket.class);
    }
-
 
    public MessagerAPI getBehaviorAPI()
    {
@@ -127,61 +120,42 @@ public abstract class AbstractBehavior implements RobotController
 
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
-      return createPublisher(messageType, controllerSubGenerator);
+      return createPublisher(messageType, controllerInputTopic);
    }
 
-   public <T> IHMCROS2Publisher<T> createBehaviorOutputPublisher(Class<T> messageType)
+   public <T> IHMCROS2Publisher<T> createBehaviorPublisher(Class<T> messageType)
    {
-      return createPublisher(messageType, behaviorPubGenerator);
-   }
-   
-   public <T> IHMCROS2Publisher<T> createBehaviorInputPublisher(Class<T> messageType)
-   {
-      return createPublisher(messageType, behaviorSubGenerator);
-   }
-
-   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, MessageTopicNameGenerator topicNameGenerator)
-   {
-      return createPublisher(messageType, topicNameGenerator.generateTopicName(messageType));
+      return createPublisher(messageType, behaviorOutputTopic);
    }
 
    @SuppressWarnings("unchecked")
-   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, String topicName)
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic<?> topicName)
    {
-      MessageTopicPair<T> key = new MessageTopicPair<>(messageType, topicName);
-      IHMCROS2Publisher<T> publisher = (IHMCROS2Publisher<T>) publishers.get(key);
+      ROS2Topic<T> typedNamedTopic = topicName.withType(messageType);
+      IHMCROS2Publisher<T> publisher = (IHMCROS2Publisher<T>) publishers.get(typedNamedTopic);
 
-      if (publisher != null)
-         return publisher;
+      if (publisher == null) // !containsKey
+      {
+         publisher = ROS2Tools.createPublisher(ros2Node, messageType, typedNamedTopic);
+         publishers.put(typedNamedTopic, publisher);
+      }
 
-      publisher = ROS2Tools.createPublisher(ros2Node, messageType, topicName);
-      publishers.put(key, publisher);
       return publisher;
    }
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      createSubscriber(messageType, controllerPubGenerator, consumer);
+      createSubscriber(messageType, controllerOutputTopic, consumer);
    }
 
    public <T> void createBehaviorInputSubscriber(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      createSubscriber(messageType, behaviorSubGenerator, consumer);
+      createSubscriber(messageType, behaviorInputTopic, consumer);
    }
 
-   public <T> void createBehaviorInputSubscriber(Class<T> messageType, String topicSuffix, ObjectConsumer<T> consumer)
+   public <T> void createSubscriber(Class<T> messageType, ROS2Topic topicName, ObjectConsumer<T> consumer)
    {
-      createSubscriber(messageType, IHMCHumanoidBehaviorManager.getBehaviorInputRosTopicPrefix(robotName) + topicSuffix, consumer);
-   }
-
-   public <T> void createSubscriber(Class<T> messageType, MessageTopicNameGenerator topicNameGenerator, ObjectConsumer<T> consumer)
-   {
-      createSubscriber(messageType, topicNameGenerator.generateTopicName(messageType), consumer);
-   }
-
-   public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)
-   {
-      ROS2Tools.createCallbackSubscription(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, messageType, topicName, s -> consumer.consumeObject(s.takeNextData()));
    }
 
    public void addBehaviorService(BehaviorService behaviorService)
@@ -335,37 +309,6 @@ public abstract class AbstractBehavior implements RobotController
    public String getDescription()
    {
       return this.getClass().getCanonicalName();
-   }
-
-   public static class MessageTopicPair<T> extends Pair<Class<T>, String>
-   {
-      private static final long serialVersionUID = 7511864115932037512L;
-      private final Class<T> messageType;
-      private final String topicName;
-
-      public MessageTopicPair(Class<T> messageType, String topicName)
-      {
-         this.messageType = messageType;
-         this.topicName = topicName;
-      }
-
-      @Override
-      public Class<T> getLeft()
-      {
-         return messageType;
-      }
-
-      @Override
-      public String getRight()
-      {
-         return topicName;
-      }
-
-      @Override
-      public String setValue(String value)
-      {
-         throw new UnsupportedOperationException();
-      }
    }
 }
 

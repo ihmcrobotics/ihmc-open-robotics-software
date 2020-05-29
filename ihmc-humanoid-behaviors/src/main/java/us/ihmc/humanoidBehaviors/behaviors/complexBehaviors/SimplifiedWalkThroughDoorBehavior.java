@@ -25,7 +25,6 @@ import us.ihmc.humanoidBehaviors.behaviors.primitives.AtlasPrimitiveActions;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.BehaviorAction;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SimpleDoNothingBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors.SleepBehavior;
-import us.ihmc.humanoidBehaviors.dispatcher.BehaviorDispatcher;
 import us.ihmc.humanoidBehaviors.stateMachine.StateMachineBehavior;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
@@ -128,8 +127,8 @@ public class SimplifiedWalkThroughDoorBehavior extends StateMachineBehavior<Walk
       openDoorBehavior = new OpenDoorBehavior(robotName, yoNamePrefix, yoTime, ros2Node, atlasPrimitiveActions, doorOpenDetectorBehaviorService,
                                               yoGraphicsListRegistry);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
-      doorToBehaviorPublisher = createBehaviorOutputPublisher(DoorLocationPacket.class);
-      doorToUIPublisher = createBehaviorInputPublisher(DoorLocationPacket.class);
+      doorToBehaviorPublisher = createBehaviorPublisher(DoorLocationPacket.class);
+      doorToUIPublisher = createBehaviorPublisher(DoorLocationPacket.class);
       
 
       //setup publisher for sending door location to UI

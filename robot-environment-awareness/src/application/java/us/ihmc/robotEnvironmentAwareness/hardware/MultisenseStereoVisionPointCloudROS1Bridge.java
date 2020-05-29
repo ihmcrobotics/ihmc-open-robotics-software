@@ -59,7 +59,7 @@ public class MultisenseStereoVisionPointCloudROS1Bridge extends AbstractRosTopic
 
       rosMainNode.execute();
 
-      stereoVisionPublisher = ROS2Tools.createPublisher(ros2Node, StereoVisionPointCloudMessage.class, ROS2Tools.getDefaultTopicNameGenerator());
+      stereoVisionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, StereoVisionPointCloudMessage.class, ROS2Tools.IHMC_ROOT);
 
       commandScanner = new Scanner(System.in);
       Runnable inputReader = new Runnable()

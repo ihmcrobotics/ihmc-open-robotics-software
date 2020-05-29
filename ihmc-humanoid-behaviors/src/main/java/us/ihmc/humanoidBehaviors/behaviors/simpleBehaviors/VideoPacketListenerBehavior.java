@@ -23,7 +23,7 @@ public abstract class VideoPacketListenerBehavior extends AbstractBehavior imple
 
       videoDataClient = CompressedVideoDataFactory.createCompressedVideoDataClient(this);
 
-      createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), cameraData::put);
+      createSubscriber(VideoPacket.class, ROS2Tools.IHMC_ROOT, cameraData::put);
    }
 
    @Override

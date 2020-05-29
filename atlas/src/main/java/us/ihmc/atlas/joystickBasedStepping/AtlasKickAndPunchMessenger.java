@@ -5,10 +5,8 @@ import static us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTool
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotKickMessenger;
 import us.ihmc.avatar.joystickBasedJavaFXController.HumanoidRobotPunchMessenger;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -18,6 +16,7 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SegmentDependentList;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 
 public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, HumanoidRobotKickMessenger, RobotLowLevelMessenger
@@ -31,13 +30,13 @@ public class AtlasKickAndPunchMessenger implements HumanoidRobotPunchMessenger, 
 
    public AtlasKickAndPunchMessenger(Ros2Node ros2Node, String robotName)
    {
-      MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-      armTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, ArmTrajectoryMessage.class, subscriberTopicNameGenerator);
-      footTrajectoryPublisher = ROS2Tools.createPublisher(ros2Node, FootTrajectoryMessage.class, subscriberTopicNameGenerator);
-      footLoadBearingPublisher = ROS2Tools.createPublisher(ros2Node, FootLoadBearingMessage.class, subscriberTopicNameGenerator);
-      atlasLowLevelControlModePublisher = ROS2Tools.createPublisher(ros2Node, AtlasLowLevelControlModeMessage.class, subscriberTopicNameGenerator);
-      abortWalkingPublisher = ROS2Tools.createPublisher(ros2Node, AbortWalkingMessage.class, subscriberTopicNameGenerator);
-      pauseWalkingPublisher = ROS2Tools.createPublisher(ros2Node, PauseWalkingMessage.class, subscriberTopicNameGenerator);
+      ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      armTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ArmTrajectoryMessage.class, inputTopic);
+      footTrajectoryPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootTrajectoryMessage.class, inputTopic);
+      footLoadBearingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootLoadBearingMessage.class, inputTopic);
+      atlasLowLevelControlModePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AtlasLowLevelControlModeMessage.class, inputTopic);
+      abortWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, AbortWalkingMessage.class, inputTopic);
+      pauseWalkingPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PauseWalkingMessage.class, inputTopic);
    }
 
    @Override

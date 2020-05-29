@@ -6,7 +6,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.ROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -86,7 +86,7 @@ public class NavigationBehavior implements BehaviorInterface
       this.helper = helper;
 
       // create map subscriber
-      mapRegionsInput = new ROS2Input<>(helper.getManagedROS2Node(), PlanarRegionsListMessage.class, null, ROS2Tools.MAPPING_MODULE);
+      mapRegionsInput = new ROS2Input<>(helper.getManagedROS2Node(), PlanarRegionsListMessage.class, ROS2Tools.MAPPING_MODULE.withOutput());
 
       robot = helper.getOrCreateRobotInterface();
 
