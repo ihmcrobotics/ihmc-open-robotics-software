@@ -207,8 +207,16 @@ public class SteppableRegionsCalculatorTest
       assertEquals(0, returnedGroundRegion1.getNumberOfHolesInRegion());
       assertEquals(0, returnedGroundRegion2.getNumberOfHolesInRegion());
 
-      assertStepConstraintRegionsEqual(expectedGroundRegion1, returnedGroundRegion1, epsilon);
-      assertStepConstraintRegionsEqual(expectedGroundRegion2, returnedGroundRegion2, epsilon);
+      for (int i = 0; i < 2; i++)
+      {
+         StepConstraintRegion constraintRegion = constraintRegions.get(i);
+         if (constraintRegion.epsilonEquals(expectedGroundRegion1, epsilon))
+            assertStepConstraintRegionsEqual(expectedGroundRegion1, constraintRegion, epsilon);
+         else if (constraintRegion.epsilonEquals(expectedGroundRegion2, epsilon))
+            assertStepConstraintRegionsEqual(expectedGroundRegion2, constraintRegion, epsilon);
+         else
+            fail("Didn't return the region");
+      }
    }
 
    @Test
@@ -486,10 +494,20 @@ public class SteppableRegionsCalculatorTest
       StepConstraintRegion returnedBlockRegion1 = constraintRegions.get(2);
       StepConstraintRegion returnedBlockRegion2 = constraintRegions.get(3);
 
-      assertStepConstraintRegionsEqual(expectedGroundRegion1, returnedGroundRegion2, epsilon);
-      assertStepConstraintRegionsEqual(expectedGroundRegion2, returnedGroundRegion1, epsilon);
-      assertStepConstraintRegionsEqual(expectedBlockRegion1, returnedBlockRegion1, epsilon);
-      assertStepConstraintRegionsEqual(expectedBlockRegion2, returnedBlockRegion2, epsilon);
+      for (int i = 0; i < 4; i++)
+      {
+         StepConstraintRegion constraintRegion = constraintRegions.get(i);
+         if (constraintRegion.epsilonEquals(expectedGroundRegion1, epsilon))
+            assertStepConstraintRegionsEqual(expectedGroundRegion1, constraintRegion, epsilon);
+         else if (constraintRegion.epsilonEquals(expectedGroundRegion2, epsilon))
+            assertStepConstraintRegionsEqual(expectedGroundRegion2, constraintRegion, epsilon);
+         else if (constraintRegion.epsilonEquals(expectedBlockRegion1, epsilon))
+            assertStepConstraintRegionsEqual(expectedBlockRegion1, constraintRegion, epsilon);
+         else if (constraintRegion.epsilonEquals(expectedBlockRegion2, epsilon))
+            assertStepConstraintRegionsEqual(expectedBlockRegion2, constraintRegion, epsilon);
+         else
+            fail("Didn't return the right region.");
+      }
    }
 
    @Test
@@ -555,6 +573,9 @@ public class SteppableRegionsCalculatorTest
       List<ConcavePolygon2DBasics> groundConcavePolygons = PolygonClippingAndMerging.removeAreaInsideClip(wallObstacle2, new ConcavePolygon2D(groundPolygon));
       groundConcavePolygons = PolygonClippingAndMerging.removeAreaInsideClip(wallObstacle1, groundConcavePolygons.get(0));
 
+      ConcavePolygon2D mergedWall = new ConcavePolygon2D();
+      PolygonClippingAndMerging.merge(wallObstacle1, wallObstacle2, mergedWall);
+
       List<StepConstraintRegion> constraintRegions = calculator.computeSteppableRegions();
 
       assertEquals(3, constraintRegions.size());
@@ -563,13 +584,18 @@ public class SteppableRegionsCalculatorTest
       StepConstraintRegion expectedGroundRegion2 = new StepConstraintRegion(groundTransform, groundConcavePolygons.get(1));
       StepConstraintRegion expectedGroundRegion3 = new StepConstraintRegion(groundTransform, groundConcavePolygons.get(2));
 
-      StepConstraintRegion returnedGroundRegion1 = constraintRegions.get(0);
-      StepConstraintRegion returnedGroundRegion2 = constraintRegions.get(1);
-      StepConstraintRegion returnedGroundRegion3 = constraintRegions.get(2);
-
-      assertStepConstraintRegionsEqual(expectedGroundRegion1, returnedGroundRegion1, epsilon);
-      assertStepConstraintRegionsEqual(expectedGroundRegion2, returnedGroundRegion2, epsilon);
-      assertStepConstraintRegionsEqual(expectedGroundRegion3, returnedGroundRegion3, epsilon);
+      for (int i = 0; i < 3; i++)
+      {
+         StepConstraintRegion returnedGroundRegion = constraintRegions.get(i);
+         if (returnedGroundRegion.getConcaveHull().epsilonEquals(expectedGroundRegion1.getConcaveHull(), epsilon))
+            assertStepConstraintRegionsEqual(returnedGroundRegion, expectedGroundRegion1, epsilon);
+         else if (returnedGroundRegion.getConcaveHull().epsilonEquals(expectedGroundRegion2.getConcaveHull(), epsilon))
+            assertStepConstraintRegionsEqual(returnedGroundRegion, expectedGroundRegion2, epsilon);
+         else if (returnedGroundRegion.getConcaveHull().epsilonEquals(expectedGroundRegion3.getConcaveHull(), epsilon))
+            assertStepConstraintRegionsEqual(returnedGroundRegion, expectedGroundRegion3, epsilon);
+         else
+            fail("Didn't return a region.");
+      }
    }
 
    @Test
@@ -830,7 +856,38 @@ public class SteppableRegionsCalculatorTest
 
       List<StepConstraintRegion> stepConstraintRegions = calculator.computeSteppableRegions();
 
-      assertEquals(6, stepConstraintRegions.size());
+      assertEquals(5, stepConstraintRegions.size());
+
+      List<StepConstraintRegion> expectedConstraintRegions = new ArrayList<>();
+      expectedConstraintRegions.add(new StepConstraintRegion(blockTransform1, blockPolygon1));
+      expectedConstraintRegions.add(new StepConstraintRegion(blockTransform2, blockPolygon2));
+      expectedConstraintRegions.add(new StepConstraintRegion(blockTransform3, blockPolygon3));
+      expectedConstraintRegions.add(new StepConstraintRegion(blockTransform4, blockPolygon4));
+
+      StepConstraintRegion expectedGroundRegion = new StepConstraintRegion(groundTransform, groundPolygon);
+
+      expectedConstraintRegions.add(expectedGroundRegion);
+
+      for (int i = 0; i < 5; i++)
+      {
+         StepConstraintRegion constraintRegion = stepConstraintRegions.get(i);
+         boolean foundSolution = false;
+
+         for (int j = 0; j < 5; j++)
+         {
+            StepConstraintRegion expectedConstraintRegion = expectedConstraintRegions.get(j);
+
+            if (constraintRegion.getConcaveHull().epsilonEquals(expectedConstraintRegion.getConcaveHull(), epsilon))
+            {
+               assertStepConstraintRegionsEqual(expectedConstraintRegion, constraintRegion, epsilon);
+               foundSolution = true;
+               break;
+            }
+         }
+
+         if (!foundSolution)
+            fail("Unable to find a reigon.");
+      }
 
    }
 

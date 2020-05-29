@@ -3,6 +3,9 @@ package us.ihmc.robotics.geometry.concaveHull.weilerAtherton;
 import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.robotics.geometry.concaveHull.GeometryPolygonTestTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
@@ -289,16 +292,16 @@ public class PolygonClippingAndMergingTest
 
       ConcavePolygon2D mergedPolygonOther1 = new ConcavePolygon2D();
       ConcavePolygon2D mergedPolygonOther2 = new ConcavePolygon2D();
-//      PolygonClippingAndMerging.merge(polygon1, polygon3, mergedPolygonOther1);
-//      PolygonClippingAndMerging.merge(mergedPolygonOther1, polygon2, mergedPolygonOther2);
+      PolygonClippingAndMerging.merge(polygon1, polygon3, mergedPolygonOther1);
+      PolygonClippingAndMerging.merge(mergedPolygonOther1, polygon2, mergedPolygonOther2);
 
 
-//      PolygonClippingAndMerging.mergeAllPossible(polygons);
+      PolygonClippingAndMerging.mergeAllPossible(polygons);
 
-//      assertEquals(1, polygons.size());
+      assertEquals(1, polygons.size());
 //
-//      GeometryPolygonTestTools.assertConcavePolygon2DEquals(mergedPolygonExpected, mergedPolygonOther2, 1e-7);
-//      GeometryPolygonTestTools.assertConcavePolygon2DEquals(mergedPolygonExpected, polygons.get(0), 1e-7);
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(mergedPolygonExpected, mergedPolygonOther2, 1e-7);
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(mergedPolygonExpected, polygons.get(0), 1e-7);
 
       polygon1 = new ConcavePolygon2D();
       polygon1.addVertex(-0.1, 1.0);
@@ -352,6 +355,152 @@ public class PolygonClippingAndMergingTest
       GeometryPolygonTestTools.assertConcavePolygon2DEquals(mergedPolygonExpected, polygons.get(0), 1e-7);
    }
 
+   @Test
+   public void testMergeAll()
+   {
+      ConcavePolygon2D blockPolygon1 = new ConcavePolygon2D();
+      blockPolygon1.addVertex(-0.1, 0.2);
+      blockPolygon1.addVertex(-0.1, -0.2);
+      blockPolygon1.addVertex(-0.2, -0.2);
+      blockPolygon1.addVertex(-0.2, 0.2);
+      blockPolygon1.update();
+
+      ConcavePolygon2D blockPolygon2 = new ConcavePolygon2D();
+      blockPolygon2.addVertex(0.1, 0.2);
+      blockPolygon2.addVertex(0.2, 0.2);
+      blockPolygon2.addVertex(0.2, -0.2);
+      blockPolygon2.addVertex(0.1, -0.2);
+      blockPolygon2.update();
+
+      ConcavePolygon2D blockPolygon3 = new ConcavePolygon2D();
+      blockPolygon3.addVertex(-0.2, -0.1);
+      blockPolygon3.addVertex(0.2, -0.1);
+      blockPolygon3.addVertex(0.2, -0.2);
+      blockPolygon3.addVertex(-0.2, -0.2);
+      blockPolygon3.update();
+
+      ConcavePolygon2D blockPolygon4 = new ConcavePolygon2D();
+      blockPolygon4.addVertex(-0.2, 0.2);
+      blockPolygon4.addVertex(0.2, 0.2);
+      blockPolygon4.addVertex(0.2, 0.1);
+      blockPolygon4.addVertex(-0.2, 0.1);
+      blockPolygon4.update();
+
+      List<ConcavePolygon2DBasics> polygons = new ArrayList<>();
+      polygons.add(blockPolygon1);
+      polygons.add(blockPolygon2);
+      polygons.add(blockPolygon3);
+      polygons.add(blockPolygon4);
+
+      PolygonClippingAndMerging.mergeAllPossible(polygons);
+
+      ConcavePolygon2D mergedPolygonExpected = new ConcavePolygon2D();
+      mergedPolygonExpected.addVertex(-0.2, 0.2);
+      mergedPolygonExpected.addVertex(0.2, 0.2);
+      mergedPolygonExpected.addVertex(0.2, -0.2);
+      mergedPolygonExpected.addVertex(-0.2, -0.2);
+      mergedPolygonExpected.update();
+
+      assertEquals(1, polygons.size());
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(mergedPolygonExpected, polygons.get(0), 1e-7);
+
+      ConcavePolygon2D extrudedBlockPolygon1 = new ConcavePolygon2D();
+      extrudedBlockPolygon1.addVertex(0.0, 0.2);
+      extrudedBlockPolygon1.addVertex(0.0, -0.2);
+      extrudedBlockPolygon1.addVertex(-0.1, -0.3);
+      extrudedBlockPolygon1.addVertex(-0.2, -0.3);
+      extrudedBlockPolygon1.addVertex(-0.3, -0.2);
+      extrudedBlockPolygon1.addVertex(-0.3, 0.2);
+      extrudedBlockPolygon1.addVertex(-0.2, 0.3);
+      extrudedBlockPolygon1.addVertex(-0.1, 0.3);
+      extrudedBlockPolygon1.update();
+
+      ConcavePolygon2D extrudedBlockPolygon2 = new ConcavePolygon2D();
+      extrudedBlockPolygon2.addVertex(0.0, 0.2);
+      extrudedBlockPolygon2.addVertex(0.0, -0.2);
+      extrudedBlockPolygon2.addVertex(-0.1, -0.3);
+      extrudedBlockPolygon2.addVertex(-0.2, -0.3);
+      extrudedBlockPolygon2.addVertex(-0.3, -0.2);
+      extrudedBlockPolygon2.addVertex(-0.3, 0.2);
+      extrudedBlockPolygon2.addVertex(-0.2, 0.3);
+      extrudedBlockPolygon2.addVertex(-0.1, 0.3);
+      extrudedBlockPolygon2.update();
+
+      ConcavePolygon2D extrudedBlockPolygon3 = new ConcavePolygon2D();
+      extrudedBlockPolygon3.addVertex(-0.3, 0.2);
+      extrudedBlockPolygon3.addVertex(-0.2, 0.3);
+      extrudedBlockPolygon3.addVertex(0.2, 0.3);
+      extrudedBlockPolygon3.addVertex(0.3, 0.2);
+      extrudedBlockPolygon3.addVertex(0.3, 0.1);
+      extrudedBlockPolygon3.addVertex(0.2, 0.0);
+      extrudedBlockPolygon3.addVertex(-0.2, 0.0);
+      extrudedBlockPolygon3.addVertex(-0.3, 0.1);
+      extrudedBlockPolygon3.update();
+
+      ConcavePolygon2D extrudedBlockPolygon4 = new ConcavePolygon2D();
+      extrudedBlockPolygon4.addVertex(-0.3, -0.2);
+      extrudedBlockPolygon4.addVertex(-0.3, -0.1);
+      extrudedBlockPolygon4.addVertex(-0.2, 0.0);
+      extrudedBlockPolygon4.addVertex(0.2, 0.0);
+      extrudedBlockPolygon4.addVertex(0.3, -0.1);
+      extrudedBlockPolygon4.addVertex(0.3, -0.2);
+      extrudedBlockPolygon4.addVertex(0.2, -0.3);
+      extrudedBlockPolygon4.addVertex(-0.2, -0.3);
+      extrudedBlockPolygon4.update();
+
+      polygons = new ArrayList<>();
+      polygons.add(extrudedBlockPolygon1);
+      polygons.add(extrudedBlockPolygon2);
+      polygons.add(extrudedBlockPolygon3);
+      polygons.add(extrudedBlockPolygon4);
+
+      PolygonClippingAndMerging.mergeAllPossible(polygons);
+
+      mergedPolygonExpected = new ConcavePolygon2D();
+      mergedPolygonExpected.addVertex(-0.2, 0.3);
+      mergedPolygonExpected.addVertex(0.2, 0.3);
+      mergedPolygonExpected.addVertex(0.3, 0.2);
+      mergedPolygonExpected.addVertex(0.3, 0.1);
+      mergedPolygonExpected.addVertex(0.2, 0.0);
+      mergedPolygonExpected.addVertex(0.3, -0.1);
+      mergedPolygonExpected.addVertex(0.3, -0.2);
+      mergedPolygonExpected.addVertex(0.2, -0.3);
+      mergedPolygonExpected.addVertex(-0.2, -0.3);
+      mergedPolygonExpected.addVertex(-0.3, -0.2);
+      mergedPolygonExpected.addVertex(-0.3, -0.1);
+      mergedPolygonExpected.addVertex(-0.2, -0.0);
+      mergedPolygonExpected.addVertex(-0.3, 0.1);
+      mergedPolygonExpected.addVertex(-0.3, 0.2);
+      mergedPolygonExpected.update();
+
+      assertEquals(1, polygons.size());
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(mergedPolygonExpected, polygons.get(0), 1e-7);
+   }
+
+   @Test
+   public void testAwfulMerge()
+   {
+      ConcavePolygon2D polygon1 = new ConcavePolygon2D();
+      polygon1.addVertex(-0.1, 1.0);
+      polygon1.addVertex(0.1, 1.0);
+      polygon1.addVertex(0.1, -1.0);
+      polygon1.addVertex(-0.1, -1.0);
+      polygon1.update();
+
+
+
+      ConcavePolygon2D polygon3 = new ConcavePolygon2D();
+      polygon3.addVertex(-0.1, 0.1);
+      polygon3.addVertex(1.0, 0.1);
+      polygon3.addVertex(1.0, -0.1);
+      polygon3.addVertex(-0.1, -0.1);
+      polygon3.update();
+
+      ConcavePolygon2D mergedPolygon = new ConcavePolygon2D();
+
+      PolygonClippingAndMerging.merge(polygon1, polygon3, mergedPolygon);
+
+   }
    @Test
    public void testMergingCreatesHole()
    {
@@ -874,5 +1023,200 @@ public class PolygonClippingAndMergingTest
       PolygonClippingAndMerging.merge(polygonA, polygonB, mergedPolygon);
 
       GeometryPolygonTestTools.assertConcavePolygon2DEquals(mergedPolygonExpected, mergedPolygon, 1e-8);
+   }
+
+   @Test
+   public void testClipL()
+   {
+      ConcavePolygon2D polygonA = new ConcavePolygon2D();
+      polygonA.addVertex(-1.0, -1.0);
+      polygonA.addVertex(-1.0, 1.0);
+      polygonA.addVertex(-0.9, 1.0);
+      polygonA.addVertex(-0.9, -1.0);
+      polygonA.update();
+
+      ConcavePolygon2D polygonB = new ConcavePolygon2D();
+      polygonB.addVertex(-1.0, 1.0);
+      polygonB.addVertex(1.0, 1.0);
+      polygonB.addVertex(1.0, 0.9);
+      polygonB.addVertex(-1.0, 0.9);
+      polygonB.update();
+
+      ConcavePolygon2D clippedPolygonExpected = new ConcavePolygon2D();
+      clippedPolygonExpected.addVertex(-1.0, -1.0);
+      clippedPolygonExpected.addVertex(-1.0, 0.9);
+      clippedPolygonExpected.addVertex(-0.9, 0.9);
+      clippedPolygonExpected.addVertex(-0.9, -1.0);
+      clippedPolygonExpected.update();
+
+      List<ConcavePolygon2DBasics> clippedPolygons = PolygonClippingAndMerging.removeAreaInsideClip(polygonB, polygonA);
+
+      assertEquals(1, clippedPolygons.size());
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(clippedPolygonExpected, clippedPolygons.get(0), 1e-8);
+   }
+
+   @Test
+   public void testClippingWeirdU()
+   {
+      ConcavePolygon2D uPolygon = new ConcavePolygon2D();
+      uPolygon.addVertex(-1.0, 1.0);
+      uPolygon.addVertex(-0.9, 1.0);
+      uPolygon.addVertex(-0.9, -0.9);
+      uPolygon.addVertex(0.9, -0.9);
+      uPolygon.addVertex(0.9, 1.0);
+      uPolygon.addVertex(1.0, 1.0);
+      uPolygon.addVertex(1.0, -1.0);
+      uPolygon.addVertex(-1.0, -1.0);
+      uPolygon.update();
+
+      ConcavePolygon2D hat = new ConcavePolygon2D();
+      hat.addVertex(-1.0, 1.0);
+      hat.addVertex(1.0, 1.0);
+      hat.addVertex(1.0, 0.9);
+      hat.addVertex(-1.0, 0.9);
+      hat.update();
+
+      ConcavePolygon2D clippedPolygonExpected = new ConcavePolygon2D();
+      clippedPolygonExpected.addVertex(-1.0, 0.9);
+      clippedPolygonExpected.addVertex(-0.9, 0.9);
+      clippedPolygonExpected.addVertex(-0.9, -0.9);
+      clippedPolygonExpected.addVertex(0.9, -0.9);
+      clippedPolygonExpected.addVertex(0.9, 0.9);
+      clippedPolygonExpected.addVertex(1.0, 0.9);
+      clippedPolygonExpected.addVertex(1.0, -1.0);
+      clippedPolygonExpected.addVertex(-1.0, -1.0);
+      clippedPolygonExpected.update();
+
+      List<ConcavePolygon2DBasics> clippedPolygons = PolygonClippingAndMerging.removeAreaInsideClip(hat, uPolygon);
+
+      assertEquals(1, clippedPolygons.size());
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(clippedPolygonExpected, clippedPolygons.get(0), 1e-7);
+
+
+      // TODO this is an edge case that currently doesn't work.
+      /*
+      clippedPolygonExpected = new ConcavePolygon2D();
+      clippedPolygonExpected.addVertex(-0.9, 1.0);
+      clippedPolygonExpected.addVertex(0.9, 1.0);
+      clippedPolygonExpected.addVertex(0.9, 0.9);
+      clippedPolygonExpected.addVertex(-0.9, 0.9);
+      clippedPolygonExpected.update();
+
+      clippedPolygons = PolygonClippingAndMerging.removeAreaInsideClip(uPolygon, hat);
+
+      assertEquals(1, clippedPolygons.size());
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(clippedPolygonExpected, clippedPolygons.get(0), 1e-7);
+
+       */
+   }
+
+   @Test
+   public void testTrickyCut()
+   {
+      ConcavePolygon2D polygonToClip = new ConcavePolygon2D();
+      polygonToClip.addVertex(1.0, 1.0);
+      polygonToClip.addVertex(1.0, -1.0);
+      polygonToClip.addVertex(-1.0, -1.0);
+      polygonToClip.addVertex(-1.0, -0.1);
+      polygonToClip.addVertex(0.0, -0.1);
+      polygonToClip.addVertex(0.1, 0.0);
+      polygonToClip.addVertex(0.0, 0.1);
+      polygonToClip.addVertex(-1.0, 0.1);
+      polygonToClip.addVertex(-1.0, 1.0);
+      polygonToClip.update();
+
+      ConcavePolygon2D clippingPolygon = new ConcavePolygon2D();
+      clippingPolygon.addVertex(-0.1, 1.0);
+      clippingPolygon.addVertex(0.0, 1.1);
+      clippingPolygon.addVertex(0.1, 1.0);
+      clippingPolygon.addVertex(0.1, -1.0);
+      clippingPolygon.addVertex(0.0, -1.1);
+      clippingPolygon.addVertex(-0.1, -1.0);
+      clippingPolygon.update();
+
+      List<ConcavePolygon2DBasics> clippedPolygons = PolygonClippingAndMerging.removeAreaInsideClip(clippingPolygon, polygonToClip);
+
+      ConcavePolygon2D clippedPolygonExpected1 = new ConcavePolygon2D();
+      clippedPolygonExpected1.addVertex(1.0, 1.0);
+      clippedPolygonExpected1.addVertex(1.0, -1.0);
+      clippedPolygonExpected1.addVertex(0.1, -1.0);
+      clippedPolygonExpected1.addVertex(0.1, 1.0);
+      clippedPolygonExpected1.update();
+
+      ConcavePolygon2D clippedPolygonExpected2 = new ConcavePolygon2D();
+      clippedPolygonExpected2.addVertex(-1.0, 1.0);
+      clippedPolygonExpected2.addVertex(-0.1, 1.0);
+      clippedPolygonExpected2.addVertex(-0.1, 0.1);
+      clippedPolygonExpected2.addVertex(-1.0, 0.1);
+      clippedPolygonExpected2.update();
+
+      ConcavePolygon2D clippedPolygonExpected3 = new ConcavePolygon2D();
+      clippedPolygonExpected3.addVertex(-1.0, -1.0);
+      clippedPolygonExpected3.addVertex(-1.0, -0.1);
+      clippedPolygonExpected3.addVertex(-0.1, -0.1);
+      clippedPolygonExpected3.addVertex(-0.1, -1.0);
+      clippedPolygonExpected3.update();
+
+      boolean has1 = false;
+      boolean has2 = false;
+      boolean has3 = false;
+      for (int i = 0; i < 3; i++)
+      {
+         if (clippedPolygonExpected1.epsilonEquals(clippedPolygons.get(i), 1e-7))
+            has1 = true;
+         if (clippedPolygonExpected2.epsilonEquals(clippedPolygons.get(i), 1e-7))
+            has2 = true;
+         if (clippedPolygonExpected3.epsilonEquals(clippedPolygons.get(i), 1e-7))
+            has3 = true;
+      }
+      assertTrue(has1);
+      assertTrue(has2);
+      assertTrue(has3);
+   }
+
+   @Test
+   public void testDumbMerge()
+   {
+      ConcavePolygon2D wall1 = new ConcavePolygon2D();
+      wall1.addVertex(-1.1, 0.0);
+      wall1.addVertex(-1.0, 0.1);
+      wall1.addVertex(0.0, 0.1);
+      wall1.addVertex(0.1, 0.0);
+      wall1.addVertex(0.0, -0.1);
+      wall1.addVertex(-1.0, -0.1);
+      wall1.update();
+
+      ConcavePolygon2D wall2 = new ConcavePolygon2D();
+      wall2.addVertex(0.0, 1.1);
+      wall2.addVertex(0.1, 1.0);
+      wall2.addVertex(0.1, -1.0);
+      wall2.addVertex(0.0, -1.1);
+      wall2.addVertex(-0.1, -1.0);
+      wall2.addVertex(-0.1, 1.0);
+      wall2.update();
+
+      ConcavePolygon2D mergedPolygonExpected = new ConcavePolygon2D();
+      ConcavePolygon2D mergedPolygon = new ConcavePolygon2D();
+
+      mergedPolygonExpected.addVertex(-0.1, 1.0);
+      mergedPolygonExpected.addVertex(0.0, 1.1);
+      mergedPolygonExpected.addVertex(0.1, 1.0);
+      mergedPolygonExpected.addVertex(0.1, -1.0);
+      mergedPolygonExpected.addVertex(0.0, -1.1);
+      mergedPolygonExpected.addVertex(-0.1, -1.0);
+      mergedPolygonExpected.addVertex(-0.1, -0.1);
+      mergedPolygonExpected.addVertex(-1.0, -0.1);
+      mergedPolygonExpected.addVertex(-1.1, 0.0);
+      mergedPolygonExpected.addVertex(-1.0, 0.1);
+      mergedPolygonExpected.addVertex(-0.1, 0.1);
+      mergedPolygonExpected.update();
+
+      PolygonClippingAndMerging.merge(wall1, wall2, mergedPolygon);
+
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(mergedPolygonExpected, mergedPolygon, 1e-7);
+
+      PolygonClippingAndMerging.merge(wall2, wall1, mergedPolygon);
+
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(mergedPolygonExpected, mergedPolygon, 1e-7);
    }
 }
