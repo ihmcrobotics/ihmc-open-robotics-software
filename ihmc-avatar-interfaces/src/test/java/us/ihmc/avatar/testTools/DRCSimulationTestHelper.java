@@ -36,7 +36,6 @@ import us.ihmc.commons.ContinuousIntegrationTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.communication.net.LocalObjectCommunicator;
 import us.ihmc.communication.net.ObjectConsumer;
@@ -54,6 +53,8 @@ import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Topic;
+import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -142,7 +143,7 @@ public class DRCSimulationTestHelper
 
       for (Class<? extends Command<?, ?>> command : controllerSupportedCommands)
       {
-         Class<?> messageClass = ROS2Tools.newMessageInstance(command).getMessageClass();
+         Class<?> messageClass = ROS2TopicNameTools.newMessageInstance(command).getMessageClass();
          IHMCROS2Publisher<?> defaultPublisher = createPublisherForController(messageClass);
          defaultControllerPublishers.put(messageClass, defaultPublisher);
       }
@@ -693,12 +694,12 @@ public class DRCSimulationTestHelper
 
    public <T> IHMCROS2Publisher<T> createPublisherForController(Class<T> messageType)
    {
-      return createPublisher(messageType, ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
+      return createPublisher(messageType, ROS2Tools.getControllerInputTopic(robotName));
    }
 
-   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, MessageTopicNameGenerator generator)
+   public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, ROS2Topic generator)
    {
-      return ROS2Tools.createPublisher(ros2Node, messageType, generator);
+      return ROS2Tools.createPublisherTypeNamed(ros2Node, messageType, generator);
    }
 
    public <T> IHMCROS2Publisher<T> createPublisher(Class<T> messageType, String topicName)
@@ -708,12 +709,12 @@ public class DRCSimulationTestHelper
 
    public <T> void createSubscriberFromController(Class<T> messageType, ObjectConsumer<T> consumer)
    {
-      createSubscriber(messageType, ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName), consumer);
+      createSubscriber(messageType, ROS2Tools.getControllerOutputTopic(robotName), consumer);
    }
 
-   public <T> void createSubscriber(Class<T> messageType, MessageTopicNameGenerator generator, ObjectConsumer<T> consumer)
+   public <T> void createSubscriber(Class<T> messageType, ROS2Topic generator, ObjectConsumer<T> consumer)
    {
-      ROS2Tools.createCallbackSubscription(ros2Node, messageType, generator, s -> consumer.consumeObject(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, messageType, generator, s -> consumer.consumeObject(s.takeNextData()));
    }
 
    public <T> void createSubscriber(Class<T> messageType, String topicName, ObjectConsumer<T> consumer)

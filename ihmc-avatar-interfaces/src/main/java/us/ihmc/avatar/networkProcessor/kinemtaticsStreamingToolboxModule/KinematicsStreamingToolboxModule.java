@@ -9,13 +9,11 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WholeBodySetpointParameters;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
@@ -82,14 +80,14 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
-      MessageTopicNameGenerator controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2Topic controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
-      outputPublisher = ROS2Tools.createPublisher(realtimeRos2Node, WholeBodyTrajectoryMessage.class, controllerSubGenerator);
+      outputPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, WholeBodyTrajectoryMessage.class, controllerInputTopic);
 
       RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopic, s ->
       {
          if (controller != null)
          {
@@ -100,7 +98,7 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
 
       CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, CapturabilityBasedStatus.class, controllerOutputTopic, s ->
       {
          if (controller != null)
          {
@@ -146,24 +144,24 @@ public class KinematicsStreamingToolboxModule extends ToolboxModule
    }
 
    @Override
-   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   public ROS2Topic getOutputTopic()
    {
-      return getPublisherTopicNameGenerator(robotName);
+      return getOutputTopic(robotName);
    }
 
-   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_STREAMING_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   public ROS2Topic getInputTopic()
    {
-      return getSubscriberTopicNameGenerator(robotName);
+      return getInputTopic(robotName);
    }
 
-   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   public static ROS2Topic getInputTopic(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.KINEMATICS_STREAMING_TOOLBOX, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.KINEMATICS_STREAMING_TOOLBOX.withRobot(robotName).withInput();
    }
 }

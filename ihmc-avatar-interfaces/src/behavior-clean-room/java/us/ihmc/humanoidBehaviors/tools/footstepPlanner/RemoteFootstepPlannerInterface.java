@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Callback;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -76,22 +76,21 @@ public class RemoteFootstepPlannerInterface
       }
 
       toolboxStatePublisher =
-            ROS2Tools.createPublisher(ros2Node,
-                                      ToolboxStateMessage.class,
-                                      FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                               ToolboxStateMessage.class,
+                                               FootstepPlannerCommunicationProperties.inputTopic(robotModel.getSimpleRobotName()));
       footstepPlanningRequestPublisher =
-            ROS2Tools.createPublisher(ros2Node,
-                                      FootstepPlanningRequestPacket.class,
-                                      FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                               FootstepPlanningRequestPacket.class,
+                                               FootstepPlannerCommunicationProperties.inputTopic(robotModel.getSimpleRobotName()));
       parametersPublisher =
-            ROS2Tools.createPublisher(ros2Node,
-                                      FootstepPlannerParametersPacket.class,
-                                      FootstepPlannerCommunicationProperties.subscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                               FootstepPlannerParametersPacket.class,
+                                               FootstepPlannerCommunicationProperties.inputTopic(robotModel.getSimpleRobotName()));
 
       new ROS2Callback<>(ros2Node,
                          FootstepPlanningToolboxOutputStatus.class,
-                         robotModel.getSimpleRobotName(),
-                         ROS2Tools.FOOTSTEP_PLANNER,
+                         ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotModel.getSimpleRobotName()).withOutput(),
                          this::acceptFootstepPlannerResult);
    }
 

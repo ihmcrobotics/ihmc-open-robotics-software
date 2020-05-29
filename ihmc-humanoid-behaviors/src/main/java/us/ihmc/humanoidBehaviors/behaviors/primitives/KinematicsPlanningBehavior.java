@@ -63,10 +63,10 @@ public class KinematicsPlanningBehavior extends AbstractBehavior
       keyFrameTimes = new TDoubleArrayList();
       rigidBodyMessages = new ArrayList<KinematicsPlanningToolboxRigidBodyMessage>();
 
-      createSubscriber(KinematicsPlanningToolboxOutputStatus.class, kinematicsPlanningToolboxPubGenerator, toolboxOutputQueue::put);
-      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, kinematicsPlanningToolboxSubGenerator);
-      rigidBodyMessagePublisher = createPublisher(KinematicsPlanningToolboxRigidBodyMessage.class, kinematicsPlanningToolboxSubGenerator);
-      comMessagePublisher = createPublisher(KinematicsPlanningToolboxCenterOfMassMessage.class, kinematicsPlanningToolboxSubGenerator);
+      createSubscriber(KinematicsPlanningToolboxOutputStatus.class, kinematicsPlanningToolboxOutputTopic, toolboxOutputQueue::put);
+      toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, kinematicsPlanningToolboxInputTopic);
+      rigidBodyMessagePublisher = createPublisher(KinematicsPlanningToolboxRigidBodyMessage.class, kinematicsPlanningToolboxInputTopic);
+      comMessagePublisher = createPublisher(KinematicsPlanningToolboxCenterOfMassMessage.class, kinematicsPlanningToolboxInputTopic);
       wholeBodyTrajectoryPublisher = createPublisherForController(WholeBodyTrajectoryMessage.class);
    }
 

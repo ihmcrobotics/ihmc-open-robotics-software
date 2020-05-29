@@ -2,14 +2,13 @@ package us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule;
 
 import com.google.common.base.CaseFormat;
 import controller_msgs.msg.dds.*;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 
 import java.io.File;
@@ -65,18 +64,18 @@ public class ExternalForceEstimationMessageLogger
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation,
                                                   "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "ExternalForceEstimationMessageLogger"));
 
-      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotConfigurationData.set(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotDesiredConfigurationData.class, controllerPubGenerator, s -> robotDesiredConfigurationData.set(s.takeNextData()));
+      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s -> robotConfigurationData.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotDesiredConfigurationData.class, controllerOutputTopic, s -> robotDesiredConfigurationData.set(s.takeNextData()));
 
-      MessageTopicNameGenerator toolboxSubTopicNameGenerator = ExternalForceEstimationToolboxModule.getSubscriberTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           ToolboxStateMessage.class,
-                                           toolboxSubTopicNameGenerator,
+      ROS2Topic toolboxInputTopic = ExternalForceEstimationToolboxModule.getInputTopic(robotName);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    ToolboxStateMessage.class,
+                                                    toolboxInputTopic,
                                            s -> processToolboxStateMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           ExternalForceEstimationConfigurationMessage.class,
-                                           toolboxSubTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    ExternalForceEstimationConfigurationMessage.class,
+                                                    toolboxInputTopic,
                                            s -> externalForceEstimationConfigurationMessage.set(s.takeNextData()));
 
       ros2Node.spin();

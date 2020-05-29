@@ -18,10 +18,8 @@ import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextData;
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextDataFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelHumanoidControllerFactory;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.concurrent.runtime.barrierScheduler.implicitContext.BarrierScheduler.TaskOverrunBehavior;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -41,6 +39,7 @@ import us.ihmc.robotics.partNames.JointRole;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
@@ -236,8 +235,8 @@ public class AvatarSimulationFactory
    {
       String robotName = robotModel.get().getSimpleRobotName();
 
-      MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
 
       PelvisPoseCorrectionCommunicatorInterface pelvisPoseCorrectionCommunicator;
       if (externalPelvisCorrectorSubscriber.hasValue())
@@ -246,10 +245,10 @@ public class AvatarSimulationFactory
       }
       else
       {
-         pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeRos2Node.get(), publisherTopicNameGenerator);
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node.get(),
-                                              StampedPosePacket.class,
-                                              subscriberTopicNameGenerator,
+         pelvisPoseCorrectionCommunicator = new PelvisPoseCorrectionCommunicator(realtimeRos2Node.get(), outputTopic);
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node.get(),
+                                                       StampedPosePacket.class,
+                                                       inputTopic,
                                               s -> pelvisPoseCorrectionCommunicator.receivedPacket(s.takeNextData()));
       }
 

@@ -59,7 +59,7 @@ public class AtlasLookAndStepBehaviorDemo
    private void reaModule()
    {
       LogTools.info("Creating simulated multisense stereo regions module");
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, ROS2Tools.REA.getNodeName());
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, ROS2Tools.REA_NODE_NAME);
       MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(environment.get(), createRobotModel(), ros2Node);
       RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(environment.get(), createRobotModel(), ros2Node);
       VisiblePlanarRegionService visiblePlanarRegionService = new VisiblePlanarRegionService(ros2Node, realsense);

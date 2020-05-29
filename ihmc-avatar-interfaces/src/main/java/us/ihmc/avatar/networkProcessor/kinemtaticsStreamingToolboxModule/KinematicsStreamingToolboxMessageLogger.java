@@ -15,14 +15,13 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.google.common.base.CaseFormat;
 
 import controller_msgs.msg.dds.*;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.Conversions;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.packets.Packet;
 import us.ihmc.idl.serializers.extra.JSONSerializer;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 
@@ -72,31 +71,31 @@ public class KinematicsStreamingToolboxMessageLogger implements CloseableAndDisp
       ros2Node = ROS2Tools.createRealtimeRos2Node(pubSubImplementation,
                                                   "ihmc_" + CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, "KinematicsStreamingToolboxMessageLogger"));
 
-      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(ros2Node, RobotConfigurationData.class, controllerPubGenerator, s -> robotConfigurationData.set(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           CapturabilityBasedStatus.class,
-                                           controllerPubGenerator,
+      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class, controllerOutputTopic, s -> robotConfigurationData.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    CapturabilityBasedStatus.class,
+                                                    controllerOutputTopic,
                                            s -> capturabilityBasedStatus.set(s.takeNextData()));
 
-      MessageTopicNameGenerator toolboxSubTopicNameGenerator = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           ToolboxStateMessage.class,
-                                           toolboxSubTopicNameGenerator,
+      ROS2Topic toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    ToolboxStateMessage.class,
+                                                    toolboxInputTopic,
                                            s -> processToolboxStateMessage(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           KinematicsToolboxConfigurationMessage.class,
-                                           toolboxSubTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    KinematicsToolboxConfigurationMessage.class,
+                                                    toolboxInputTopic,
                                            s -> kinematicsToolboxConfigurationMessage.set(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           KinematicsStreamingToolboxInputMessage.class,
-                                           toolboxSubTopicNameGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    KinematicsStreamingToolboxInputMessage.class,
+                                                    toolboxInputTopic,
                                            s -> kinematicsStreamingToolboxInputMessage.set(s.takeNextData()));
 
-      MessageTopicNameGenerator toolboxPubTopicNameGenerator = KinematicsStreamingToolboxModule.getPublisherTopicNameGenerator(robotName);
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           KinematicsToolboxOutputStatus.class,
-                                           toolboxPubTopicNameGenerator,
+      ROS2Topic toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    KinematicsToolboxOutputStatus.class,
+                                                    toolboxOutputTopic,
                                            s -> kinematicsToolboxOutputStatus.set(s.takeNextData()));
 
       ros2Node.spin();

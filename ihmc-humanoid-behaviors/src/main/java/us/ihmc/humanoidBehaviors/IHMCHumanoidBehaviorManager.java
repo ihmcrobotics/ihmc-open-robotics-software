@@ -8,10 +8,8 @@ import controller_msgs.msg.dds.CapturabilityBasedStatus;
 import controller_msgs.msg.dds.HumanoidBehaviorTypePacket;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.complexBehaviors.*;
@@ -133,11 +131,11 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
 
       HumanoidReferenceFrames referenceFrames = robotDataReceiver.getReferenceFrames();
 
-      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           RobotConfigurationData.class,
-                                           controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    RobotConfigurationData.class,
+                                                    controllerOutputTopic,
                                            s -> robotDataReceiver.receivedPacket(s.takeNextData()));
 
       BehaviorControlModeSubscriber desiredBehaviorControlSubscriber = new BehaviorControlModeSubscriber();
@@ -156,9 +154,9 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                             yoGraphicsListRegistry);
 
       CapturabilityBasedStatusSubscriber capturabilityBasedStatusSubsrciber = new CapturabilityBasedStatusSubscriber();
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           CapturabilityBasedStatus.class,
-                                           controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    CapturabilityBasedStatus.class,
+                                                    controllerOutputTopic,
                                            s -> capturabilityBasedStatusSubsrciber.receivedPacket(s.takeNextData()));
 
       CapturePointUpdatable capturePointUpdatable = new CapturePointUpdatable(capturabilityBasedStatusSubsrciber, yoGraphicsListRegistry, registry);
@@ -217,15 +215,15 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
                                     footstepPlannerParameters);
       }
 
-      MessageTopicNameGenerator behaviorSubGenerator = getSubscriberTopicNameGenerator(robotName);
+      ROS2Topic behaviorInputTopic = getInputTopic(robotName);
       dispatcher.finalizeStateMachine();
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           BehaviorControlModePacket.class,
-                                           behaviorSubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    BehaviorControlModePacket.class,
+                                                    behaviorInputTopic,
                                            s -> desiredBehaviorControlSubscriber.receivedPacket(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           HumanoidBehaviorTypePacket.class,
-                                           behaviorSubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    HumanoidBehaviorTypePacket.class,
+                                                    behaviorInputTopic,
                                            s -> desiredBehaviorSubscriber.receivedPacket(s.takeNextData()));
 
       if (startYoVariableServer)
@@ -537,29 +535,29 @@ public class IHMCHumanoidBehaviorManager implements CloseableAndDisposable
       return ihmcHumanoidBehaviorManager;
    }
 
-   public static String getBehaviorRosTopicPrefix(String robotName, ROS2TopicQualifier qualifier)
+   public static ROS2Topic getBehaviorRosTopicPrefix(String robotName, String suffix)
    {
-      return ROS2Tools.IHMC_ROS_TOPIC_PREFIX + "/" + robotName.toLowerCase() + ROS2Tools.BEHAVIOR_MODULE + qualifier.toString();
+      return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withSuffix(suffix);
    }
 
-   public static String getBehaviorOutputRosTopicPrefix(String robotName)
+   public static ROS2Topic getBehaviorOutputRosTopicPrefix(String robotName)
    {
-      return getBehaviorRosTopicPrefix(robotName, ROS2TopicQualifier.OUTPUT);
+      return getBehaviorRosTopicPrefix(robotName, ROS2Tools.OUTPUT);
    }
 
-   public static String getBehaviorInputRosTopicPrefix(String robotName)
+   public static ROS2Topic getBehaviorInputRosTopicPrefix(String robotName)
    {
-      return getBehaviorRosTopicPrefix(robotName, ROS2TopicQualifier.INPUT);
+      return getBehaviorRosTopicPrefix(robotName, ROS2Tools.INPUT);
    }
 
-   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BEHAVIOR_MODULE_QUALIFIER, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
    }
 
-   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   public static ROS2Topic getInputTopic(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.BEHAVIOR_MODULE_QUALIFIER, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withInput();
    }
 
    @Override

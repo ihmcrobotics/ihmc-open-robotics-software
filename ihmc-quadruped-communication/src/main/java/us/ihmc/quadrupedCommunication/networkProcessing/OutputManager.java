@@ -1,10 +1,10 @@
 package us.ihmc.quadrupedCommunication.networkProcessing;
 
 import us.ihmc.commons.PrintTools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.concurrent.Builder;
 import us.ihmc.euclid.interfaces.Settable;
+import us.ihmc.ros2.ROS2Topic;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,7 +30,7 @@ public class OutputManager
 {
    /** Local copies of the messages reported by the controller. */
    private final Map<Class<? extends Settable<?>>, Settable<?>> outputClassToObjectMap = new HashMap<>();
-   private final Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> outputClassToTopicMap = new HashMap<>();
+   private final Map<Class<? extends Settable<?>>, ROS2Topic> outputClassToTopicMap = new HashMap<>();
 
    /** Exhaustive list of all the supported messages that this API can process. */
    private final List<Class<? extends Settable<?>>> listOfSupportedMessages = new ArrayList<>();
@@ -45,7 +45,7 @@ public class OutputManager
     *
     * @param outputMessagesToRegister list of the output messages that this API should support.
     */
-   public OutputManager(Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> outputMessagesToRegister)
+   public OutputManager(Map<Class<? extends Settable<?>>, ROS2Topic> outputMessagesToRegister)
    {
       registerOutputMessages(outputMessagesToRegister);
    }
@@ -56,7 +56,7 @@ public class OutputManager
     * @param outputMessageClasses
     */
    @SuppressWarnings("unchecked")
-   private <S extends Settable<S>> void registerOutputMessages(Map<Class<? extends Settable<?>>, MessageTopicNameGenerator> outputMessageClasses)
+   private <S extends Settable<S>> void registerOutputMessages(Map<Class<? extends Settable<?>>, ROS2Topic> outputMessageClasses)
    {
       for (Class<? extends Settable<?>> outputMessageClass : outputMessageClasses.keySet())
       {
@@ -69,11 +69,11 @@ public class OutputManager
     * It is used to register in the API a output message.
     * @param outputMessageClass
     */
-   public <S extends Settable<S>> void registerOutputMessage(Class<S> outputMessageClass, MessageTopicNameGenerator topicNameGenerator)
+   public <S extends Settable<S>> void registerOutputMessage(Class<S> outputMessageClass, ROS2Topic topicName)
    {
       Builder<S> builder = CommandInputManager.createBuilderWithEmptyConstructor(outputMessageClass);
       outputClassToObjectMap.put(outputMessageClass, builder.newInstance());
-      outputClassToTopicMap.put(outputMessageClass, topicNameGenerator);
+      outputClassToTopicMap.put(outputMessageClass, topicName);
       listOfSupportedMessages.add(outputMessageClass);
    }
 
@@ -175,7 +175,7 @@ public class OutputManager
       return listOfSupportedMessages;
    }
 
-   public MessageTopicNameGenerator getMessageTopicNameGenerator(Class<? extends Settable<?>> messageClass)
+   public ROS2Topic getMessageTopicName(Class<? extends Settable<?>> messageClass)
    {
       return outputClassToTopicMap.get(messageClass);
    }

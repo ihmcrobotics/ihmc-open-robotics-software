@@ -33,8 +33,7 @@ public class DetectedObjectViewer
 
    public DetectedObjectViewer(Ros2Node ros2Node)
    {
-      String doorParameterPacketTopicName = ROS2Tools.getDefaultTopicNameGenerator().generateTopicName(DoorParameterPacket.class);
-      ROS2Tools.createCallbackSubscription(ros2Node, DoorParameterPacket.class, doorParameterPacketTopicName, this::renderDoor);
+      ROS2Tools.createCallbackSubscription(ros2Node, ROS2Tools.getDoorParameterTopic(), this::renderDoor);
    }
 
    public void renderDoor(Subscriber<DoorParameterPacket> subscriber)

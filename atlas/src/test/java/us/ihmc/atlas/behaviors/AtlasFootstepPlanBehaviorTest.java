@@ -8,7 +8,6 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -20,6 +19,7 @@ import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AbortWalking
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.ros2.ROS2TopicNameTools;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
@@ -71,12 +71,12 @@ public class AtlasFootstepPlanBehaviorTest
       ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
 
       footstepDataListPublisher = ROS2Tools
-            .createPublisher(ros2Node, ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
-                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            .createPublisherTypeNamed(ros2Node, ROS2TopicNameTools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
+                                      ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName()));
 
       abortPublisher = ROS2Tools
-            .createPublisher(ros2Node, ROS2Tools.newMessageInstance(AbortWalkingCommand.class).getMessageClass(),
-                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            .createPublisherTypeNamed(ros2Node, ROS2TopicNameTools.newMessageInstance(AbortWalkingCommand.class).getMessageClass(),
+                                      ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName()));
 
       RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
       remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, null);
@@ -139,8 +139,8 @@ public class AtlasFootstepPlanBehaviorTest
       FootstepPlanningToolboxOutputStatus output = setupForFootstepTest();
 
       footstepDataListPublisher = ROS2Tools
-            .createPublisher(ros2Node, ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
-                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            .createPublisherTypeNamed(ros2Node, ROS2TopicNameTools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
+                                      ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName()));
 
       footstepDataListPublisher.publish(output.getFootstepDataList());
 
@@ -158,12 +158,12 @@ public class AtlasFootstepPlanBehaviorTest
       ros2Node = new Ros2Node(PubSubImplementation.INTRAPROCESS, getClass().getSimpleName());
 
       footstepDataListPublisher = ROS2Tools
-            .createPublisher(ros2Node, ROS2Tools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
-                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            .createPublisherTypeNamed(ros2Node, ROS2TopicNameTools.newMessageInstance(FootstepDataListCommand.class).getMessageClass(),
+                                      ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName()));
 
       abortPublisher = ROS2Tools
-            .createPublisher(ros2Node, ROS2Tools.newMessageInstance(AbortWalkingCommand.class).getMessageClass(),
-                             ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotModel.getSimpleRobotName()));
+            .createPublisherTypeNamed(ros2Node, ROS2TopicNameTools.newMessageInstance(AbortWalkingCommand.class).getMessageClass(),
+                                      ROS2Tools.getControllerInputTopic(robotModel.getSimpleRobotName()));
 
       RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
       RemoteFootstepPlannerInterface remoteFootstepPlannerInterface = new RemoteFootstepPlannerInterface(ros2Node, robotModel, null);

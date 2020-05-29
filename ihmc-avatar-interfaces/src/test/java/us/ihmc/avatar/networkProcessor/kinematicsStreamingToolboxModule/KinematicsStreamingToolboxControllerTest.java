@@ -37,11 +37,9 @@ import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.Kinemat
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxModule;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
@@ -72,6 +70,7 @@ import us.ihmc.robotics.physics.RobotCollisionModel;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.bambooTools.BambooTools;
@@ -116,10 +115,10 @@ public abstract class KinematicsStreamingToolboxControllerTest
    protected Ros2Node ros2Node;
    protected IHMCROS2Publisher<KinematicsStreamingToolboxInputMessage> inputPublisher;
    protected IHMCROS2Publisher<ToolboxStateMessage> statePublisher;
-   protected MessageTopicNameGenerator controllerSubGenerator;
-   protected MessageTopicNameGenerator controllerPubGenerator;
-   protected MessageTopicNameGenerator toolboxSubGenerator;
-   protected MessageTopicNameGenerator toolboxPubGenerator;
+   protected ROS2Topic controllerInputTopic;
+   protected ROS2Topic controllerOutputTopic;
+   protected ROS2Topic toolboxInputTopic;
+   protected ROS2Topic toolboxOutputTopic;
    protected ScheduledExecutorService executor;
 
    /**
@@ -144,32 +143,32 @@ public abstract class KinematicsStreamingToolboxControllerTest
 
       ros2Node = drcSimulationTestHelper.getRos2Node();
 
-      controllerSubGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
-      controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      toolboxSubGenerator = KinematicsStreamingToolboxModule.getSubscriberTopicNameGenerator(robotName);
-      toolboxPubGenerator = KinematicsStreamingToolboxModule.getPublisherTopicNameGenerator(robotName);
+      controllerInputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      toolboxInputTopic = KinematicsStreamingToolboxModule.getInputTopic(robotName);
+      toolboxOutputTopic = KinematicsStreamingToolboxModule.getOutputTopic(robotName);
 
       RealtimeRos2Node toolboxRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "toolbox_node");
-      new ControllerNetworkSubscriber(toolboxSubGenerator, commandInputManager, toolboxPubGenerator, statusOutputManager, toolboxRos2Node);
-      IHMCROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher = ROS2Tools.createPublisher(ros2Node,
-                                                                                                WholeBodyTrajectoryMessage.class,
-                                                                                                controllerSubGenerator);
+      new ControllerNetworkSubscriber(toolboxInputTopic, commandInputManager, toolboxOutputTopic, statusOutputManager, toolboxRos2Node);
+      IHMCROS2Publisher<WholeBodyTrajectoryMessage> outputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                                                         WholeBodyTrajectoryMessage.class,
+                                                                                                         controllerInputTopic);
       toolboxController.setOutputPublisher(outputPublisher::publish);
 
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           RobotConfigurationData.class,
-                                           controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    RobotConfigurationData.class,
+                                                    controllerOutputTopic,
                                            s -> toolboxController.updateRobotConfigurationData(s.takeNextData()));
-      ROS2Tools.createCallbackSubscription(ros2Node,
-                                           CapturabilityBasedStatus.class,
-                                           controllerPubGenerator,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    CapturabilityBasedStatus.class,
+                                                    controllerOutputTopic,
                                            s -> toolboxController.updateCapturabilityBasedStatus(s.takeNextData()));
 
-      inputPublisher = ROS2Tools.createPublisher(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxSubGenerator);
-      statePublisher = ROS2Tools.createPublisher(ros2Node, ToolboxStateMessage.class, toolboxSubGenerator);
+      inputPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, KinematicsStreamingToolboxInputMessage.class, toolboxInputTopic);
+      statePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, toolboxInputTopic);
 
       AtomicReference<KinematicsToolboxOutputStatus> toolboxViz = new AtomicReference<>(null);
-      ROS2Tools.createCallbackSubscription(ros2Node, KinematicsToolboxOutputStatus.class, toolboxPubGenerator, s -> toolboxViz.set(s.takeNextData()));
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, KinematicsToolboxOutputStatus.class, toolboxOutputTopic, s -> toolboxViz.set(s.takeNextData()));
 
       ghost.setController(new RobotController()
       {

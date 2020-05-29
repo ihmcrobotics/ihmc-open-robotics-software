@@ -12,7 +12,7 @@ import us.ihmc.avatar.kinematicsSimulation.HumanoidKinematicsSimulationParameter
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.ROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -182,7 +182,8 @@ public class AtlasCorridorNavigationTest
       ThreadTools.sleepSeconds(5.0); // wait a bit for other threads to start
 
       // create map subscriber
-      ROS2Input<PlanarRegionsListMessage> mapRegionsInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP_TOPIC_NAME);
+      ROS2Input<PlanarRegionsListMessage> mapRegionsInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class,
+                                                                            ROS2Tools.REALSENSE_SLAM_MAP.withOutput());
 
       // subscribe to robot pose
       RemoteHumanoidRobotInterface robot = new RemoteHumanoidRobotInterface(ros2Node, createRobotModel());

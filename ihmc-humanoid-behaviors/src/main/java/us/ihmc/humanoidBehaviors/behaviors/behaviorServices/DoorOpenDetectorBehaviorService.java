@@ -33,7 +33,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
    {
       super(robotName, ThreadName, ros2Node);//, yoGraphicsListRegistry);
 
-      createSubscriber(DoorLocationPacket.class, IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName), doorLocationQueue::set);
+      createSubscriber(DoorLocationPacket.class, IHMCHumanoidBehaviorManager.getInputTopic(robotName), doorLocationQueue::set);
 
       initialize();
    }

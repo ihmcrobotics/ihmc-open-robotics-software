@@ -14,7 +14,6 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.RunEvent;
 import us.ihmc.humanoidBehaviors.behaviors.diagnostic.SQLBehaviorDatabaseManager;
-import us.ihmc.humanoidBehaviors.behaviors.diagnostic.DoorTimingBehavior.DoorTimingBehaviorStates;
 import us.ihmc.ros2.Ros2Node;
 
 public class TimingBehaviorHelper extends AbstractBehavior
@@ -35,20 +34,20 @@ public class TimingBehaviorHelper extends AbstractBehavior
    {
       super(robotName, ros2Node);
 
-      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlanningToolboxPubGenerator, plannerResult::set);
-      createSubscriber(FootstepPlanningRequestPacket.class, footstepPlanningToolboxSubGenerator, footstepPlanningRequestPacket::set);
+      createSubscriber(FootstepPlanningToolboxOutputStatus.class, footstepPlannerOutputTopic, plannerResult::set);
+      createSubscriber(FootstepPlanningRequestPacket.class, footstepPlannerInputTopic, footstepPlanningRequestPacket::set);
 
-      createSubscriber(FootstepStatusMessage.class, controllerSubGenerator, footstepStatusMessage::set);
-      createSubscriber(HandTrajectoryMessage.class, controllerSubGenerator, handTrajectoryMessage::set);
-      createSubscriber(ArmTrajectoryMessage.class, controllerSubGenerator, armTrajectoryMessage::set);
-      createSubscriber(FootstepDataListMessage.class, controllerSubGenerator, footstepDataListMessage::set);
-      createSubscriber(WalkingStatusMessage.class, controllerSubGenerator, walkingStatusMessage::set);
+      createSubscriber(FootstepStatusMessage.class, controllerInputTopic, footstepStatusMessage::set);
+      createSubscriber(HandTrajectoryMessage.class, controllerInputTopic, handTrajectoryMessage::set);
+      createSubscriber(ArmTrajectoryMessage.class, controllerInputTopic, armTrajectoryMessage::set);
+      createSubscriber(FootstepDataListMessage.class, controllerInputTopic, footstepDataListMessage::set);
+      createSubscriber(WalkingStatusMessage.class, controllerInputTopic, walkingStatusMessage::set);
 
-      createSubscriber(FootstepStatusMessage.class, controllerPubGenerator, footstepStatusMessage::set);
-      createSubscriber(HandTrajectoryMessage.class, controllerPubGenerator, handTrajectoryMessage::set);
-      createSubscriber(ArmTrajectoryMessage.class, controllerPubGenerator, armTrajectoryMessage::set);
-      createSubscriber(FootstepDataListMessage.class, controllerPubGenerator, footstepDataListMessage::set);
-      createSubscriber(WalkingStatusMessage.class, controllerPubGenerator, walkingStatusMessage::set);
+      createSubscriber(FootstepStatusMessage.class, controllerOutputTopic, footstepStatusMessage::set);
+      createSubscriber(HandTrajectoryMessage.class, controllerOutputTopic, handTrajectoryMessage::set);
+      createSubscriber(ArmTrajectoryMessage.class, controllerOutputTopic, armTrajectoryMessage::set);
+      createSubscriber(FootstepDataListMessage.class, controllerOutputTopic, footstepDataListMessage::set);
+      createSubscriber(WalkingStatusMessage.class, controllerOutputTopic, walkingStatusMessage::set);
       createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationMessage::set);
       createBehaviorInputSubscriber(WalkOverTerrainGoalPacket.class, walkOverTerrainGoalMessage::set);
       dataBase = new SQLBehaviorDatabaseManager();
