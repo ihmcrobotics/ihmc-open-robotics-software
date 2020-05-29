@@ -1,8 +1,10 @@
 package us.ihmc.avatar.stepConstraintModule;
 
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.List;
 
 public class StepConstraintCalculatorViewerAPI
 {
@@ -11,8 +13,10 @@ public class StepConstraintCalculatorViewerAPI
    private static final MessagerAPIFactory.CategoryTheme StepConstraint = apiFactory.createCategoryTheme("StepConstraint");
 
    public static final MessagerAPIFactory.Topic<PlanarRegionsList> PlanarRegionData = topic("PlanarRegionData");
+   public static final MessagerAPIFactory.Topic<List<StepConstraintRegion>> StepConstraintRegionData = topic("StepConstraintRegionData");
 
    public static final MessagerAPIFactory.Topic<Boolean> ShowPlanarRegions = topic("ShowPlanarRegions");
+   public static final MessagerAPIFactory.Topic<Boolean> ShowStepConstraintRegions = topic("ShowStepConstraintRegions");
 
    public static final MessagerAPIFactory.MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 

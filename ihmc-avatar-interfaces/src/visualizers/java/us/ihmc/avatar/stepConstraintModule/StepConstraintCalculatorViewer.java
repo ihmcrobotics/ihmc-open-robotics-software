@@ -19,6 +19,7 @@ public class StepConstraintCalculatorViewer
    private final Stage primaryStage;
    private final JavaFXMessager messager;
    private final PlanarRegionViewer planarRegionViewer;
+   private final StepConstraintRegionViewer stepConstraintRegionViewer;
 
    @FXML
    private BorderPane mainPane;
@@ -45,8 +46,18 @@ public class StepConstraintCalculatorViewer
       this.planarRegionViewer = new PlanarRegionViewer(messager,
                                                        StepConstraintCalculatorViewerAPI.PlanarRegionData,
                                                        StepConstraintCalculatorViewerAPI.ShowPlanarRegions);
+      this.stepConstraintRegionViewer = new StepConstraintRegionViewer(messager,
+                                                                       StepConstraintCalculatorViewerAPI.StepConstraintRegionData,
+                                                                       StepConstraintCalculatorViewerAPI.ShowStepConstraintRegions);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
+      view3dFactory.addNodeToView(stepConstraintRegionViewer.getRoot());
+
+      messager.bindBidirectional(StepConstraintCalculatorViewerAPI.ShowPlanarRegions, showPlanarRegions.selectedProperty(), false);
+      messager.bindBidirectional(StepConstraintCalculatorViewerAPI.ShowStepConstraintRegions, showConstraintRegions.selectedProperty(), false);
+
+      messager.submitMessage(StepConstraintCalculatorViewerAPI.ShowPlanarRegions, false);
+      messager.submitMessage(StepConstraintCalculatorViewerAPI.ShowStepConstraintRegions, true);
 
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);
@@ -60,11 +71,13 @@ public class StepConstraintCalculatorViewer
    {
       primaryStage.show();
       planarRegionViewer.start();
+      stepConstraintRegionViewer.start();
    }
 
    public void stop()
    {
       planarRegionViewer.stop();
+      stepConstraintRegionViewer.stop();
       try
       {
          messager.closeMessager();
