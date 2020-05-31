@@ -2,8 +2,6 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
@@ -63,6 +61,9 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final VisibilityGraphsParametersBasics visibilityGraphParameters;
    private final Supplier<PlanarRegionsList> realsenseSLAMRegions;
 
+   private final LookAndStepReviewPart<ArrayList<Pose3D>> bodyPathReview;
+   private final LookAndStepReviewPart<FootstepPlan> footstepPlanReview;
+
    private final AtomicReference<Boolean> operatorReviewEnabledInput;
    private final TypedNotification<Boolean> approvalNotification;
    private final FramePose3D goalPoseBetweenFeet = new FramePose3D();
@@ -74,15 +75,10 @@ public class LookAndStepBehavior implements BehaviorInterface
    private SimpleTimer bodyPathModuleFailedTimer = new SimpleTimer();
    private volatile Pose3D bodyPathModuleGoalInput;
 
-   // TODO: Add String for what is being reviewed
-   private volatile boolean bodyPathBeingReviewed = false;
-
    private PlanarRegionsList footstepPlanningNearRegions;
    private SimpleTimer footstepPlanningNearRegionsExpirationTimer = new SimpleTimer();
    private volatile ArrayList<Pose3D> footstepPlanningBodyPathPlan;
    private SimpleTimer footstepPlanningModuleFailedTimer = new SimpleTimer();
-
-   private volatile boolean footstepPlanBeingReviewed = false;
 
    private FootstepPlan robotWalkingModuleFootstepPlan;
 
@@ -101,6 +97,9 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
       approvalNotification = helper.createUITypedNotification(Approval);
+
+      bodyPathReview = new LookAndStepReviewPart<>("body path", approvalNotification, this::footstepPlanningAcceptBodyPath);
+      footstepPlanReview = new LookAndStepReviewPart<>("footstep plan", approvalNotification, this::robotWalkingModuleAcceptFootstepPlan);
 
       // TODO: Want to be able to wire up behavior here and see all present modules
 
@@ -190,7 +189,7 @@ public class LookAndStepBehavior implements BehaviorInterface
          return;
       }
 
-      if (bodyPathBeingReviewed)
+      if (bodyPathReview.isBeingReviewed())
       {
          LogTools.debug("Body path: bodyPathBeingReviewed = true");
          return;
@@ -237,7 +236,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       {
          if (operatorReviewEnabledInput.get())
          {
-            ThreadTools.startAsDaemon(() -> reviewBodyPathPlan(bodyPathPlanForReview), "BodyPathReview");
+            ThreadTools.startAsDaemon(() -> bodyPathReview.review(bodyPathPlanForReview), "BodyPathReview");
          }
          else
          {
@@ -247,20 +246,6 @@ public class LookAndStepBehavior implements BehaviorInterface
       else
       {
          bodyPathModuleFailedTimer.reset();
-      }
-   }
-
-   private void reviewBodyPathPlan(ArrayList<Pose3D> bodyPathPlan) // TODO: Extract review logic?
-   {
-      bodyPathBeingReviewed = true;
-      LogTools.info("Waiting for body path operator review...");
-      boolean approved = approvalNotification.blockingPoll();
-      LogTools.info("Operator reviewed: {}", approved);
-      bodyPathBeingReviewed = false;
-
-      if (approved)
-      {
-         footstepPlanningAcceptBodyPath(bodyPathPlan);
       }
    }
 
@@ -307,7 +292,7 @@ public class LookAndStepBehavior implements BehaviorInterface
          return;
       }
 
-      if (footstepPlanBeingReviewed)
+      if (footstepPlanReview.isBeingReviewed())
       {
          LogTools.warn("Find next footstep planning goal: footstepPlanBeingReviewed = true");
          return;
@@ -513,25 +498,11 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       if (operatorReviewEnabledInput.get())
       {
-         ThreadTools.startAsDaemon(() -> reviewFootstepPlan(footstepPlannerOutput.getFootstepPlan()), "FootstepPlanReview");
+         ThreadTools.startAsDaemon(() -> footstepPlanReview.review(footstepPlannerOutput.getFootstepPlan()), "FootstepPlanReview");
       }
       else
       {
          robotWalkingModuleAcceptFootstepPlan(footstepPlannerOutput.getFootstepPlan());
-      }
-   }
-
-   private void reviewFootstepPlan(FootstepPlan footstepPlan)
-   {
-      footstepPlanBeingReviewed = true;
-      LogTools.info("Waiting for footstep plan operator review...");
-      boolean approved = approvalNotification.blockingPoll();
-      LogTools.info("Operator reviewed footstep plan: {}", approved);
-      footstepPlanBeingReviewed = false;
-
-      if (approved)
-      {
-         robotWalkingModuleAcceptFootstepPlan(footstepPlan);
       }
    }
 
