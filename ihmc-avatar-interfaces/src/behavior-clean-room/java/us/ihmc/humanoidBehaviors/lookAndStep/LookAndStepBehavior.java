@@ -2,17 +2,17 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import org.apache.commons.lang3.tuple.MutablePair;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.SimpleTimer;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
-import us.ihmc.humanoidBehaviors.tools.RemoteEnvironmentMapInterface;
-import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -26,6 +26,8 @@ import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
+import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
@@ -43,6 +45,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.*;
 
@@ -53,12 +56,11 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
 
    private final BehaviorHelper helper;
-   private final RemoteREAInterface rea;
-   private final RemoteEnvironmentMapInterface environmentMap;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final RemoteHumanoidRobotInterface robot;
    private final FootstepPlanningModule footstepPlanningModule;
    private final VisibilityGraphsParametersBasics visibilityGraphParameters;
+   private final Supplier<PlanarRegionsList> realsenseSLAMRegions;
 
    private final AtomicReference<Boolean> operatorReviewEnabledInput;
    private final TypedNotification<Boolean> approvalNotification;
@@ -66,6 +68,8 @@ public class LookAndStepBehavior implements BehaviorInterface
    private RobotSide lastStanceSide = null;
    private FramePose3D leftFootPoseTemp = new FramePose3D();
    private FramePose3D rightFootPoseTemp = new FramePose3D();
+   private FramePose3D lastLeftFootGoalPose = null;
+   private FramePose3D lastRightFootGoalPose = null;
 
    private PlanarRegionsList bodyPathModulePlanarRegionsList;
    private SimpleTimer bodyPathModulePlanarRegionExpirationTimer = new SimpleTimer();
@@ -87,10 +91,9 @@ public class LookAndStepBehavior implements BehaviorInterface
    public LookAndStepBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
-      rea = helper.getOrCreateREAInterface();
-      environmentMap = helper.getOrCreateEnvironmentMapInterface();
       robot = helper.getOrCreateRobotInterface();
       footstepPlanningModule = helper.getOrCreateFootstepPlanner();
+      realsenseSLAMRegions = helper.createROS2PlanarRegionsListInput(ROS2Tools.REALSENSE_SLAM_REGIONS);
 
       visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
 
@@ -104,10 +107,10 @@ public class LookAndStepBehavior implements BehaviorInterface
       // TODO: Want to be able to wire up behavior here and see all present modules
 
       // build event flow
-      rea.addPlanarRegionsListCallback(this::bodyPathModuleAcceptREARegions);
+      helper.createROS2PlanarRegionsListCallback(ROS2Tools.MAP_REGIONS, this::bodyPathModuleAcceptREARegions);
       helper.createUICallback(GoalInput, this::bodyPathModuleAcceptGoalPlacement);
 
-      environmentMap.addPlanarRegionsListCallback(this::footstepPlanningAcceptNearPlanarRegions);
+      helper.createROS2PlanarRegionsListCallback(ROS2Tools.REALSENSE_SLAM_REGIONS, this::footstepPlanningAcceptNearPlanarRegions);
 
 //      helper.createUICallback(RePlan, this::);
 
@@ -413,10 +416,24 @@ public class LookAndStepBehavior implements BehaviorInterface
       goalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get(segmentIndexOfGoal + 1).getOrientation());
 
       FramePose3D leftSolePose = new FramePose3D();
-      leftSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.LEFT));
+      if (lastLeftFootGoalPose == null)
+      {
+         leftSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.LEFT));
+      }
+      else
+      {
+         leftSolePose.set(lastLeftFootGoalPose);
+      }
       leftSolePose.changeFrame(ReferenceFrame.getWorldFrame());
       FramePose3D rightSolePose = new FramePose3D();
-      rightSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.RIGHT));
+      if (lastRightFootGoalPose == null)
+      {
+         rightSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.RIGHT));
+      }
+      else
+      {
+         leftSolePose.set(lastRightFootGoalPose);
+      }
       rightSolePose.changeFrame(ReferenceFrame.getWorldFrame());
 
       RobotSide stanceSide;
@@ -439,9 +456,9 @@ public class LookAndStepBehavior implements BehaviorInterface
       lastStanceSide = stanceSide;
 
       helper.publishToUI(SubGoalForUI, new Pose3D(goalPoseBetweenFeet));
-      ArrayList<Pair<RobotSide, Pose3D>> startFootPoses = new ArrayList<>();
-      startFootPoses.add(Pair.of(RobotSide.LEFT, new Pose3D(leftSolePose)));
-      startFootPoses.add(Pair.of(RobotSide.RIGHT, new Pose3D(rightSolePose)));
+      ArrayList<FootstepForUI> startFootPoses = new ArrayList<>();
+      startFootPoses.add(new FootstepForUI(RobotSide.LEFT, new Pose3D(leftSolePose), "Start"));
+      startFootPoses.add(new FootstepForUI(RobotSide.RIGHT, new Pose3D(rightSolePose), "Start"));
       helper.publishToUI(StartAndGoalFootPosesForUI, startFootPoses);
 
       footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.get(LookAndStepBehaviorParameters.idealFootstepLengthOverride));
@@ -466,7 +483,19 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private void footstepPlanningStatusUpdate(FootstepPlannerOutput status)
    {
-      helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(status.getFootstepPlan()));
+      helper.publishToUI(FootstepPlanForUI, reduceFootstepPlanForUIMessager2(status.getFootstepPlan(), "Update"));
+   }
+
+   public static ArrayList<FootstepForUI> reduceFootstepPlanForUIMessager2(FootstepPlan footstepPlan, String description)
+   {
+      ArrayList<FootstepForUI> footstepLocations = new ArrayList<>();
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
+      {
+         FramePose3D soleFramePoseToPack = new FramePose3D();
+         footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
+         footstepLocations.add(new FootstepForUI(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack), description));
+      }
+      return footstepLocations;
    }
 
    private void footstepPlanningThread(FootstepPlannerRequest footstepPlannerRequest)
@@ -481,7 +510,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlannerLogger.logSession();
       FootstepPlannerLogger.deleteOldLogs(30);
 
-      helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan()));
+      helper.publishToUI(FootstepPlanForUI, reduceFootstepPlanForUIMessager2(footstepPlannerOutput.getFootstepPlan(), "Planned"));
 
       if (operatorReviewEnabledInput.get())
       {
@@ -509,7 +538,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private void robotWalkingModuleAcceptFootstepPlan(FootstepPlan footstepPlan)
    {
-      LogTools.debug("robotWalkingModuleAcceptFootstepPlan, {}", footstepPlan);
+      LogTools.debug("robotWalkingModuleAcceptFootstepPlan, {} steps", footstepPlan.getNumberOfSteps());
       robotWalkingModuleFootstepPlan = footstepPlan;
 
       robotWalkingEvaluateAndRun();
@@ -530,7 +559,17 @@ public class LookAndStepBehavior implements BehaviorInterface
       FootstepPlan shortenedFootstepPlan = new FootstepPlan();
       if (robotWalkingModuleFootstepPlan.getNumberOfSteps() > 0)
       {
-         shortenedFootstepPlan.addFootstep(robotWalkingModuleFootstepPlan.getFootstep(0));
+         SimpleFootstep footstepToTake = robotWalkingModuleFootstepPlan.getFootstep(0);
+         shortenedFootstepPlan.addFootstep(footstepToTake);
+
+         if (footstepToTake.getRobotSide() == RobotSide.LEFT)
+         {
+            lastLeftFootGoalPose = new FramePose3D(footstepToTake.getSoleFramePose());
+         }
+         else
+         {
+            lastRightFootGoalPose = new FramePose3D(footstepToTake.getSoleFramePose());
+         }
       }
 
       LogTools.info("Requesting walk");
@@ -542,9 +581,10 @@ public class LookAndStepBehavior implements BehaviorInterface
                                                                                                                     ExecutionMode.QUEUE);
       TypedNotification<WalkingStatusMessage> walkingStatusNotification = robot.requestWalk(footstepDataListMessage,
                                                                                             robot.pollHumanoidRobotState(),
-                                                                                            environmentMap.getLatestCombinedRegionsList());
+                                                                                            realsenseSLAMRegions.get());
 
-      helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepDataListMessage));
+      helper.publishToUI(FootstepPlanForUI,
+                         reduceFootstepPlanForUIMessager2(FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage), "Stepping"));
 
       ThreadTools.startAsDaemon(() -> sleepForPartOfSwingThread(swingTime), "RobotWalking");
       ThreadTools.startAsDaemon(() -> robotWalkingThread(walkingStatusNotification), "RobotWalking");
@@ -618,8 +658,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       public static final Topic<Object> RePlan = topic("RePlan"); // TODO remove?
       public static final Topic<Boolean> Approval = topic("Approval");
       public static final Topic<Boolean> OperatorReviewEnabled = topic("OperatorReview");
-      public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> StartAndGoalFootPosesForUI = topic("StartAndGoalFootPosesForUI");
-      public static final Topic<ArrayList<Pair<RobotSide, Pose3D>>> FootstepPlanForUI = topic("FootstepPlanForUI");
+      public static final Topic<ArrayList<FootstepForUI>> StartAndGoalFootPosesForUI = topic("StartAndGoalFootPosesForUI");
+      public static final Topic<ArrayList<FootstepForUI>> FootstepPlanForUI = topic("FootstepPlanForUI");
       public static final Topic<Pose3D> ClosestPointForUI = topic("ClosestPointForUI");
       public static final Topic<Pose3D> SubGoalForUI = topic("SubGoalForUI");
       public static final Topic<PlanarRegionsList> MapRegionsForUI = topic("MapRegionsForUI");
