@@ -5,22 +5,16 @@ import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
-import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
 import us.ihmc.javafx.graphics.LabelGraphic;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
@@ -62,7 +56,6 @@ public class FootstepPlanWithTextGraphic extends Group
    public void generateMeshesAsynchronously(ArrayList<FootstepForUI> plan)
    {
       executorService.submit(() -> {
-         LogTools.trace("Received footstep plan containing {} steps", plan.size());
          generateMeshes(plan);
       });
    }
@@ -70,27 +63,16 @@ public class FootstepPlanWithTextGraphic extends Group
    public void generateMeshes(ArrayList<FootstepForUI> message)
    {
       meshBuilder.clear();
-      labelsToAdd.clear();
 
-//      FramePose3D footPose = new FramePose3D();
       RigidBodyTransform transformToWorld = new RigidBodyTransform();
       ConvexPolygon2D foothold = new ConvexPolygon2D();
 
-//      FootstepPlan plan = new FootstepPlan();
-//      message.forEach(forUI -> plan.addFootstep(forUI.getSide(), new FramePose3D(forUI.getSolePoseInWorld())));
-
-//      for (int i = 0; i < message.size(); i++)
-//      {
-//         message.get(i).setFoothold(defaultContactPoints.get(message.get(i).getSide()));
-//      }
-
+      ArrayList<LabelGraphic> tempLabelsToAdd = new ArrayList<>();
       for (int i = 0; i < message.size(); i++)
       {
          FootstepForUI footstepForUI = message.get(i);
-//         Pose3D solePose = message.get(i).getSolePoseInWorld();
          Color regionColor = footstepForUI.getSide() == RobotSide.LEFT ? Color.RED : Color.GREEN;
 
-//         footPose.set(footstepForUI.getSolePoseInWorld());
          footstepForUI.getSolePoseInWorld().get(transformToWorld);
          transformToWorld.appendTranslation(0.0, 0.0, 0.01);
 
@@ -108,12 +90,10 @@ public class FootstepPlanWithTextGraphic extends Group
          meshBuilder.addMultiLine(transformToWorld, vertices, 0.01, regionColor, true);
          meshBuilder.addPolygon(transformToWorld, foothold, regionColor);
 
-         LogTools.trace("Drawing a footstep: pose: {}, side: {}, vertices: {}", footstepForUI.getSolePoseInWorld(), footstepForUI.getSide(), vertices);
-
          LabelGraphic labelGraphic = new LabelGraphic(footstepForUI.getDescription());
          labelGraphic.getPose().set(footstepForUI.getSolePoseInWorld());
          labelGraphic.update();
-         labelsToAdd.add(labelGraphic);
+         tempLabelsToAdd.add(labelGraphic);
       }
 
       Mesh mesh = meshBuilder.generateMesh();
@@ -123,6 +103,9 @@ public class FootstepPlanWithTextGraphic extends Group
       {
          this.mesh = mesh;
          this.material = material;
+
+         labelsToAdd.clear();
+         labelsToAdd.addAll(tempLabelsToAdd);
       }
    }
 
