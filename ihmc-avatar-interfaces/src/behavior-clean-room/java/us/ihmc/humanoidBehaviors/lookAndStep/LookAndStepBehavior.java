@@ -39,6 +39,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidancePro
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.thread.TypedNotification;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.time.LocalDateTime;
@@ -65,11 +66,8 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final AtomicReference<Boolean> operatorReviewEnabledInput;
    private final TypedNotification<Boolean> approvalNotification;
    private final FramePose3D goalPoseBetweenFeet = new FramePose3D();
-   private RobotSide lastStanceSide = null;
-   private FramePose3D leftFootPoseTemp = new FramePose3D();
-   private FramePose3D rightFootPoseTemp = new FramePose3D();
-   private FramePose3D lastLeftFootGoalPose = null;
-   private FramePose3D lastRightFootGoalPose = null;
+   private volatile RobotSide lastStanceSide = null;
+   private volatile SideDependentList<FramePose3D> lastSteppedSolePoses = new SideDependentList<>();
 
    private PlanarRegionsList bodyPathModulePlanarRegionsList;
    private SimpleTimer bodyPathModulePlanarRegionExpirationTimer = new SimpleTimer();
@@ -116,7 +114,6 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       helper.setCommunicationCallbacksEnabled(true);
       helper.setCommunicationCallbacksEnabled(false);
-
    }
 
    @Override
@@ -215,7 +212,9 @@ public class LookAndStepBehavior implements BehaviorInterface
       bodyPathPlanner.setGoal(goal);
       bodyPathPlanner.setPlanarRegionsList(bodyPathModulePlanarRegionsList);
       HumanoidRobotState humanoidRobotState = robot.pollHumanoidRobotState();
+      FramePose3D leftFootPoseTemp = new FramePose3D();
       leftFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.LEFT));
+      FramePose3D rightFootPoseTemp = new FramePose3D();
       rightFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.RIGHT));
       leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
       rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
@@ -415,35 +414,28 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       goalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get(segmentIndexOfGoal + 1).getOrientation());
 
-      FramePose3D leftSolePose = new FramePose3D();
-      if (lastLeftFootGoalPose == null)
+      // update last stepped poses to plan from; initialize to current poses
+      for (RobotSide side : RobotSide.values)
       {
-         leftSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.LEFT));
+         if (!lastSteppedSolePoses.containsKey(side))
+         {
+            lastSteppedSolePoses.put(side, new FramePose3D(latestHumanoidRobotState.getSoleZUpFrame(side)));
+            sendLastSteppedSolePoses();
+         }
+
+         // make sure world frame
+         lastSteppedSolePoses.get(side).changeFrame(ReferenceFrame.getWorldFrame());
       }
-      else
-      {
-         leftSolePose.set(lastLeftFootGoalPose);
-      }
-      leftSolePose.changeFrame(ReferenceFrame.getWorldFrame());
-      FramePose3D rightSolePose = new FramePose3D();
-      if (lastRightFootGoalPose == null)
-      {
-         rightSolePose.setToZero(latestHumanoidRobotState.getSoleZUpFrame(RobotSide.RIGHT));
-      }
-      else
-      {
-         leftSolePose.set(lastRightFootGoalPose);
-      }
-      rightSolePose.changeFrame(ReferenceFrame.getWorldFrame());
 
       RobotSide stanceSide;
       if (lastStanceSide != null)
       {
          stanceSide = lastStanceSide.getOppositeSide();
       }
-      else
+      else // if first step, step with furthest foot from the goal
       {
-         if (leftSolePose.getPosition().distance(goalPoseBetweenFeet.getPosition()) <= rightSolePose.getPosition().distance(goalPoseBetweenFeet.getPosition()))
+         if (lastSteppedSolePoses.get(RobotSide.LEFT) .getPosition().distance(goalPoseBetweenFeet.getPosition())
+          <= lastSteppedSolePoses.get(RobotSide.RIGHT).getPosition().distance(goalPoseBetweenFeet.getPosition()))
          {
             stanceSide = RobotSide.LEFT;
          }
@@ -456,10 +448,6 @@ public class LookAndStepBehavior implements BehaviorInterface
       lastStanceSide = stanceSide;
 
       helper.publishToUI(SubGoalForUI, new Pose3D(goalPoseBetweenFeet));
-      ArrayList<FootstepForUI> startFootPoses = new ArrayList<>();
-      startFootPoses.add(new FootstepForUI(RobotSide.LEFT, new Pose3D(leftSolePose), "Start"));
-      startFootPoses.add(new FootstepForUI(RobotSide.RIGHT, new Pose3D(rightSolePose), "Start"));
-      helper.publishToUI(StartAndGoalFootPosesForUI, startFootPoses);
 
       footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.get(LookAndStepBehaviorParameters.idealFootstepLengthOverride));
       footstepPlannerParameters.setWiggleInsideDelta(lookAndStepParameters.get(LookAndStepBehaviorParameters.wiggleInsideDeltaOverride));
@@ -469,7 +457,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       FootstepPlannerRequest footstepPlannerRequest = new FootstepPlannerRequest();
       footstepPlannerRequest.setPlanBodyPath(false);
       footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
-      footstepPlannerRequest.setStartFootPoses(leftSolePose, rightSolePose);
+      footstepPlannerRequest.setStartFootPoses(lastSteppedSolePoses.get(RobotSide.LEFT), lastSteppedSolePoses.get(RobotSide.RIGHT));
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.getIdealFootstepWidth(), goalPoseBetweenFeet);
       footstepPlannerRequest.setPlanarRegionsList(footstepPlanningNearRegions);
       footstepPlannerRequest.setTimeout(lookAndStepParameters.get(LookAndStepBehaviorParameters.footstepPlannerTimeout));
@@ -481,9 +469,19 @@ public class LookAndStepBehavior implements BehaviorInterface
       ThreadTools.startAsDaemon(() -> footstepPlanningThread(footstepPlannerRequest), "FootstepPlanner");
    }
 
+   private void sendLastSteppedSolePoses()
+   {
+      ArrayList<FootstepForUI> startFootPoses = new ArrayList<>();
+      if (lastSteppedSolePoses.containsKey(RobotSide.LEFT))
+         startFootPoses.add(new FootstepForUI(RobotSide.LEFT, new Pose3D(lastSteppedSolePoses.get(RobotSide.LEFT)), "Left Start"));
+      if (lastSteppedSolePoses.containsKey(RobotSide.RIGHT))
+         startFootPoses.add(new FootstepForUI(RobotSide.RIGHT, new Pose3D(lastSteppedSolePoses.get(RobotSide.RIGHT)), "Right Start"));
+      helper.publishToUI(StartAndGoalFootPosesForUI, startFootPoses);
+   }
+
    private void footstepPlanningStatusUpdate(FootstepPlannerOutput status)
    {
-      helper.publishToUI(FootstepPlanForUI, reduceFootstepPlanForUIMessager2(status.getFootstepPlan(), "Update"));
+//      helper.publishToUI(FootstepPlanForUI, reduceFootstepPlanForUIMessager2(status.getFootstepPlan(), "Update"));
    }
 
    public static ArrayList<FootstepForUI> reduceFootstepPlanForUIMessager2(FootstepPlan footstepPlan, String description)
@@ -493,6 +491,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       {
          FramePose3D soleFramePoseToPack = new FramePose3D();
          footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
+         soleFramePoseToPack.changeFrame(ReferenceFrame.getWorldFrame());
          footstepLocations.add(new FootstepForUI(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack), description));
       }
       return footstepLocations;
@@ -561,15 +560,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       {
          SimpleFootstep footstepToTake = robotWalkingModuleFootstepPlan.getFootstep(0);
          shortenedFootstepPlan.addFootstep(footstepToTake);
-
-         if (footstepToTake.getRobotSide() == RobotSide.LEFT)
-         {
-            lastLeftFootGoalPose = new FramePose3D(footstepToTake.getSoleFramePose());
-         }
-         else
-         {
-            lastRightFootGoalPose = new FramePose3D(footstepToTake.getSoleFramePose());
-         }
+         lastSteppedSolePoses.put(footstepToTake.getRobotSide(), new FramePose3D(footstepToTake.getSoleFramePose()));
+         sendLastSteppedSolePoses();
       }
 
       LogTools.info("Requesting walk");
