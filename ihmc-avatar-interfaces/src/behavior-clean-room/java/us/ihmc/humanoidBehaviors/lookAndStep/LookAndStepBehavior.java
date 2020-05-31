@@ -38,7 +38,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -557,16 +556,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       ThreadTools.sleepSeconds(waitTime);
       LogTools.info("{} % of swing complete!", percentSwingToWait);
 
-//      if (isRobotAtGoal()) // TODO this is a test
-//      {
-//         LogTools.warn("Step {}% complete: Robot reached goal: Body path planning...", percentSwingToWait);
-//         bodyPathModuleEvaluteAndRun();
-//      }
-//      else
-//      {
-         LogTools.warn("Step {}% complete: Robot not reached goal: Find next footstep planning goal...", percentSwingToWait);
-         footstepPlanningEvaluateAndRun();
-//      }
+      LogTools.warn("Step {}% complete: Robot not reached goal: Find next footstep planning goal...", percentSwingToWait);
+      footstepPlanningEvaluateAndRun();
    }
 
    private void robotWalkingThread(TypedNotification<WalkingStatusMessage> walkingStatusNotification)
@@ -574,35 +565,5 @@ public class LookAndStepBehavior implements BehaviorInterface
       LogTools.info("Waiting for robot walking...");
       walkingStatusNotification.blockingPoll();
       LogTools.info("Robot walk complete.");
-   }
-
-   private boolean isRobotAtGoal()
-   {
-      List<Pose3D> bodyPathPlan = footstepPlanningBodyPathPlan;
-      if (bodyPathPlan == null || bodyPathPlan.isEmpty())
-      {
-         LogTools.warn("No body path plan yet: {}, isEmpty: {}",
-                       bodyPathPlan,
-                       bodyPathPlan == null ? null : true);
-         return true;
-      }
-
-      // if close to goal, far, else near
-      HumanoidRobotState latestHumanoidRobotState = robot.pollHumanoidRobotState();
-      FramePose3D initialPoseBetweenFeet = new FramePose3D();
-      initialPoseBetweenFeet.setToZero(latestHumanoidRobotState.getMidFeetZUpFrame());
-      initialPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
-      double midFeetZ = initialPoseBetweenFeet.getZ();
-
-      FramePose3D pelvisMidFeetPose = new FramePose3D();
-      pelvisMidFeetPose.setToZero(latestHumanoidRobotState.getPelvisFrame());
-      pelvisMidFeetPose.changeFrame(ReferenceFrame.getWorldFrame());
-      pelvisMidFeetPose.setZ(midFeetZ);
-
-      double distanceToEnd = bodyPathPlan.get(bodyPathPlan.size() - 1).getPosition().distanceXY(pelvisMidFeetPose.getPosition());
-
-      boolean robotReachedGoal = distanceToEnd < lookAndStepParameters.getGoalSatisfactionRadius();
-
-      return robotReachedGoal;
    }
 }
