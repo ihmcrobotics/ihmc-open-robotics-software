@@ -8,9 +8,9 @@ import java.util.function.Supplier;
 
 public class JavaFXLinuxGUIRecorder extends LinuxGUIRecorder
 {
-   public JavaFXLinuxGUIRecorder(Stage primaryStage, int fps, float quality, String filename)
+   public JavaFXLinuxGUIRecorder(Stage primaryStage, int fps, double quality, String guiName)
    {
-      super(createWindowBoundsProvider(primaryStage), fps, quality, filename);
+      super(createWindowBoundsProvider(primaryStage), fps, quality, guiName);
    }
 
    public static Supplier<Rectangle> createWindowBoundsProvider(Stage primaryStage)
@@ -21,6 +21,7 @@ public class JavaFXLinuxGUIRecorder extends LinuxGUIRecorder
          int y = (int) primaryStage.getY();
          int width = (int) primaryStage.getWidth();
          int height = (int) primaryStage.getHeight();
+
          return new Rectangle(x, y, width, height);
       };
    }
