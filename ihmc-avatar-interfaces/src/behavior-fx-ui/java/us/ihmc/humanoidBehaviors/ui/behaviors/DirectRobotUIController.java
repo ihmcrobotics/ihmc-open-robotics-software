@@ -30,9 +30,12 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class DirectRobotUIController extends Group
 {
    @FXML private ComboBox<Integer> pumpPSI;
-   @FXML private CheckBox showRegions;
    @FXML private CheckBox enableSupportRegions;
    @FXML private Spinner<Double> supportRegionScale;
+   @FXML private CheckBox showLidarRegions;
+   @FXML private CheckBox showRealsenseRegions;
+   @FXML private CheckBox showMapRegions;
+   @FXML private CheckBox showSupportRegions;
    @FXML private Slider stanceHeightSlider;
    @FXML private Slider leanForwardSlider;
    @FXML private Slider neckSlider;
@@ -42,7 +45,10 @@ public class DirectRobotUIController extends Group
    private IHMCROS2Publisher<BipedalSupportPlanarRegionParametersMessage> supportRegionsParametersPublisher;
    private IHMCROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher;
    private IHMCROS2Publisher<NeckTrajectoryMessage> neckTrajectoryPublisher;
-   private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
+   private LivePlanarRegionsGraphic lidarRegionsGraphic;
+   private LivePlanarRegionsGraphic realsenseRegionsGraphic;
+   private LivePlanarRegionsGraphic mapRegionsGraphic;
+   private LivePlanarRegionsGraphic supportRegionsGraphic;
 
    public void init(SubScene subScene, Ros2Node ros2Node, DRCRobotModel robotModel)
    {
@@ -90,9 +96,19 @@ public class DirectRobotUIController extends Group
       pumpPSI.valueProperty().addListener((ChangeListener) -> sendPumpPSI());
       pumpPSI.getSelectionModel().select(1);
 
-      livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.MAP_REGIONS, false);
-      livePlanarRegionsGraphic.setEnabled(false);
-      getChildren().add(livePlanarRegionsGraphic);
+      lidarRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, false);
+      lidarRegionsGraphic.setEnabled(false);
+      getChildren().add(lidarRegionsGraphic);
+      realsenseRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REALSENSE_SLAM_REGIONS, false);
+      realsenseRegionsGraphic.setEnabled(false);
+      getChildren().add(realsenseRegionsGraphic);
+      mapRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.MAP_REGIONS, false);
+      mapRegionsGraphic.setEnabled(false);
+      getChildren().add(mapRegionsGraphic);
+      supportRegionsGraphic = new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.BIPEDAL_SUPPORT_REGIONS, false);
+      supportRegionsGraphic.setEnabled(false);
+      getChildren().add(supportRegionsGraphic);
+
       reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.withInput());
 
       supportRegionScale.setValueFactory(new DoubleSpinnerValueFactory(0.0, 10.0, BipedalSupportPlanarRegionPublisher.defaultScaleFactor, 0.1));
@@ -161,10 +177,28 @@ public class DirectRobotUIController extends Group
       supportRegionsParametersPublisher.publish(supportPlanarRegionParametersMessage);
    }
 
-   @FXML public void showRegions()
+   @FXML public void showLidarRegions()
    {
-      livePlanarRegionsGraphic.setEnabled(showRegions.isSelected());
-      livePlanarRegionsGraphic.clear();
+      lidarRegionsGraphic.setEnabled(showLidarRegions.isSelected());
+      lidarRegionsGraphic.clear();
+   }
+
+   @FXML public void showRealsenseRegions()
+   {
+      realsenseRegionsGraphic.setEnabled(showRealsenseRegions.isSelected());
+      realsenseRegionsGraphic.clear();
+   }
+
+   @FXML public void showMapRegions()
+   {
+      mapRegionsGraphic.setEnabled(showMapRegions.isSelected());
+      mapRegionsGraphic.clear();
+   }
+
+   @FXML public void showSupportRegions()
+   {
+      supportRegionsGraphic.setEnabled(showSupportRegions.isSelected());
+      supportRegionsGraphic.clear();
    }
 
    @FXML public void clearREA()
