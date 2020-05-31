@@ -4,24 +4,20 @@ import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.*;
-import javafx.scene.chart.NumberAxis;
-import javafx.scene.chart.ScatterChart;
-import javafx.scene.chart.XYChart;
 import javafx.scene.control.ChoiceBox;
 import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
-import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.shape.Rectangle;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
 import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
+import us.ihmc.javafx.JavaFXLinuxGUIRecorder;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.javafx.graphics.LabelGraphic;
@@ -133,9 +129,21 @@ public class BehaviorUI
          primaryStage.setMaximized(false);
          Scene mainScene = new Scene(mainPane, 1750, 1000);
 
+         JavaFXLinuxGUIRecorder guiRecorder = new JavaFXLinuxGUIRecorder(primaryStage, 24, 0.8f, getClass().getSimpleName());
+
          primaryStage.setScene(mainScene);
          primaryStage.show();
          primaryStage.toFront();
+
+         ThreadTools.scheduleSingleExecution("DelayRecordingStart", () -> {
+            LogTools.info("Starting recording...");
+            guiRecorder.start();
+         }, 2.0);
+
+         primaryStage.setOnCloseRequest(event -> {
+            LogTools.info("Handling on close request");
+            guiRecorder.stop();
+         });
       });
    }
 
