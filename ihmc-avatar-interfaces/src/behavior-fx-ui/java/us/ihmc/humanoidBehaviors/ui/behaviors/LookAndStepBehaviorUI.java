@@ -28,7 +28,6 @@ import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor.EditMode;
 import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
-import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanWithTextGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIActionMap;
@@ -40,7 +39,7 @@ import us.ihmc.ros2.Ros2NodeInterface;
 
 import java.util.ArrayList;
 
-import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior.LookAndStepBehaviorAPI.*;
+import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepBehaviorUI extends BehaviorUIInterface
 {
