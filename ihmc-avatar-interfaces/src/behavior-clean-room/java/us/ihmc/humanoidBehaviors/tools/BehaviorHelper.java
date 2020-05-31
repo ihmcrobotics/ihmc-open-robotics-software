@@ -7,6 +7,7 @@ import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ROS2PlanarRegionsInput;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.RemoteREAInterface;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -17,8 +18,11 @@ import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Callback;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ActivationReference;
@@ -28,6 +32,8 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Class for entry methods for developing robot behaviors. The idea is to have this be the one-stop
@@ -94,6 +100,30 @@ public class BehaviorHelper
       if (footstepPlannerToolbox == null)
          footstepPlannerToolbox = new RemoteFootstepPlannerInterface(managedROS2Node, robotModel, managedMessager);
       return footstepPlannerToolbox; // planner toolbox
+   }
+
+   public <T> void createROS2Callback(ROS2Topic<T> topic, Consumer<T> callback)
+   {
+      new ROS2Callback<>(managedROS2Node, topic.getType(), topic, callback);
+   }
+
+   public void createROS2PlanarRegionsListCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)
+   {
+      createROS2Callback(topic, planarRegionsListMessage ->
+      {
+         callback.accept(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+      });
+   }
+
+   public Supplier<PlanarRegionsList> createROS2PlanarRegionsListInput(ROS2Topic<PlanarRegionsListMessage> topic)
+   {
+      ROS2Input<PlanarRegionsListMessage> input = new ROS2Input<>(managedROS2Node, topic.getType(), topic);
+      return () -> PlanarRegionMessageConverter.convertToPlanarRegionsList(input.getLatest());
+   }
+
+   public <T> ROS2Input<T> createROS2Input(ROS2Topic<T> topic)
+   {
+      return new ROS2Input<>(managedROS2Node, topic.getType(), topic);
    }
 
    public RemoteREAInterface getOrCreateREAInterface()

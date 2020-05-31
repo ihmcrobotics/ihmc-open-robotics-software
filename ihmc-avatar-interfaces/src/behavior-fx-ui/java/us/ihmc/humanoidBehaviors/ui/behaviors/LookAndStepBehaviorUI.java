@@ -29,6 +29,7 @@ import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor;
 import us.ihmc.humanoidBehaviors.ui.editors.SnappedPositionEditor.EditMode;
 import us.ihmc.humanoidBehaviors.ui.graphics.BodyPathPlanGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanGraphic;
+import us.ihmc.humanoidBehaviors.ui.graphics.FootstepPlanWithTextGraphic;
 import us.ihmc.humanoidBehaviors.ui.graphics.live.LivePlanarRegionsGraphic;
 import us.ihmc.humanoidBehaviors.ui.model.FXUIActionMap;
 import us.ihmc.humanoidBehaviors.ui.model.FXUITrigger;
@@ -49,8 +50,8 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private FootstepPlannerParametersBasics footstepPlannerParameters;
 
    private Messager behaviorMessager;
-   private FootstepPlanGraphic footstepPlanGraphic;
-   private FootstepPlanGraphic startAndGoalFootPoses;
+   private FootstepPlanWithTextGraphic footstepPlanGraphic;
+   private FootstepPlanWithTextGraphic startAndGoalFootPoses;
    private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
    private PoseGraphic closestPointAlongPathGraphic;
    private PoseGraphic subGoalGraphic;
@@ -108,14 +109,14 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
 
       visualizationPane.getChildren().addAll(scatterChart);
 
-      startAndGoalFootPoses = new FootstepPlanGraphic(robotModel);
+      startAndGoalFootPoses = new FootstepPlanWithTextGraphic(robotModel);
       behaviorMessager.registerTopicListener(StartAndGoalFootPosesForUI, startAndGoalFootPoses::generateMeshesAsynchronously);
-      footstepPlanGraphic = new FootstepPlanGraphic(robotModel);
+      footstepPlanGraphic = new FootstepPlanWithTextGraphic(robotModel);
       behaviorMessager.registerTopicListener(FootstepPlanForUI, footstepPlanGraphic::generateMeshesAsynchronously);
 
       livePlanarRegionsGraphic = new LivePlanarRegionsGraphic(false);
       behaviorMessager.registerTopicListener(MapRegionsForUI, planarRegions -> {
-         behaviorState.setText("" + planarRegions.hashCode());
+//         behaviorState.setText("" + planarRegions.hashCode());
          livePlanarRegionsGraphic.acceptPlanarRegions(planarRegions);
       });
 
