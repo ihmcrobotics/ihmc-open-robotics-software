@@ -140,6 +140,11 @@ public class BehaviorUI
             guiRecorder.start();
          }, 2.0);
 
+         ThreadTools.scheduleSingleExecution("SafetyStop", () -> {
+            LogTools.info("Stopping recording to save disk space.");
+            guiRecorder.stop();
+         }, 300.0);
+
          primaryStage.setOnCloseRequest(event -> {
             LogTools.info("Handling on close request");
             guiRecorder.stop();
