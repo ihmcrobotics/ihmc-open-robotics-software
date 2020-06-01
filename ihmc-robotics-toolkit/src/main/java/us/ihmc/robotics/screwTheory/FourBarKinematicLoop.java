@@ -6,7 +6,6 @@ import java.util.List;
 import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.robotics.kinematics.fourbar.FourBar;
 import us.ihmc.robotics.kinematics.fourbar.FourBarAngle;
@@ -15,21 +14,21 @@ import us.ihmc.robotics.screwTheory.FourBarKinematicLoopTools.FourBarToJointConv
 
 /**
  * <pre>
- *      root            root     
- *        |               |      
- *        |               |      
- *   A O-----O B     A O-----O B 
- *     |     |          \   /   
- *     |     |           \ /   
- *     |     |    or      X   
+ *      root            root
+ *        |               |
+ *        |               |
+ *   A O-----O B     A O-----O B
+ *     |     |          \   /
+ *     |     |           \ /
+ *     |     |    or      X
  *     |     |           / \
  *     |     |          /   \
- *   D O-----O C     C O-----O D 
- *        |               |      
+ *   D O-----O C     C O-----O D
+ *        |               |
  *   end-effector    end-effector
  * </pre>
  */
-public class FourBarKinematicLoop
+public class FourBarKinematicLoop implements KinematicLoopFunction
 {
    private static final double EPSILON = 1.0e-7;
 
@@ -47,7 +46,8 @@ public class FourBarKinematicLoop
    private final FourBarToJointConverter converterD = new FourBarToJointConverter();
    private final FourBarToJointConverter[] converters = {converterA, converterB, converterC, converterD};
 
-   private final DMatrixRMaj innerJacobianMatrix = new DMatrixRMaj(4, 1);
+   private final DMatrixRMaj loopJacobianMatrix = new DMatrixRMaj(4, 1);
+   private final DMatrixRMaj loopConvectiveTermMatrix = new DMatrixRMaj(4, 1);
 
    private final int masterJointIndex;
 
@@ -62,10 +62,10 @@ public class FourBarKinematicLoop
 
       this.masterJointIndex = FourBarKinematicLoopTools.configureFourBarKinematics(joints, converters, fourBar, masterJointIndex, EPSILON);
       this.joints = Arrays.asList(joints);
-      this.jointA = joints[0];
-      this.jointB = joints[1];
-      this.jointC = joints[2];
-      this.jointD = joints[3];
+      jointA = joints[0];
+      jointB = joints[1];
+      jointC = joints[2];
+      jointD = joints[3];
    }
 
    public void updateState(boolean updateAcceleration)
@@ -101,27 +101,45 @@ public class FourBarKinematicLoop
          if (updateAcceleration)
             joint.setQdd(converter.toJointDerivative(fourBarVertex.getAngleDDot()));
       }
+
+      updateLoopJacobian();
+      updateLoopConvectiveTerm();
    }
 
    public void updateEffort()
    {
-      updateInnerJacobian();
-
       double tau = 0.0;
 
       for (int i = 0; i < 4; i++)
       {
          RevoluteJointBasics joint = joints.get(i);
-         tau += innerJacobianMatrix.get(i, 0) * joint.getTau();
+         tau += loopJacobianMatrix.get(i, 0) * joint.getTau();
          joint.setTau(0.0);
       }
 
-      getMasterJoint().setTau(tau / innerJacobianMatrix.get(masterJointIndex, 0));
+      getMasterJoint().setTau(tau / loopJacobianMatrix.get(masterJointIndex, 0));
    }
 
-   public void updateInnerJacobian()
+   @Override
+   public void computeTau(DMatrixRMaj tauJoints)
    {
-      clampMasterJointPosition();
+      if (tauJoints.getNumRows() != 4)
+         throw new IllegalArgumentException("Unexpected matrix size. Expected 4 rows, was: " + tauJoints.getNumRows());
+
+      double tau = 0.0;
+
+      for (int i = 0; i < 4; i++)
+      {
+         tau += loopJacobianMatrix.get(i, 0) * tauJoints.get(i);
+         tauJoints.set(i, 0.0);
+      }
+
+      tauJoints.set(masterJointIndex, tau / loopJacobianMatrix.get(masterJointIndex, 0));
+   }
+
+   private void updateLoopJacobian()
+   {
+      // Definitely not the most effective to compute the Jacobian but should not matter compared to the rest of the controller's computational load.
       double angle = converters[masterJointIndex].toFourBarInteriorAngle(getMasterJoint().getQ());
       double angleDot = converters[masterJointIndex].toFourBarInteriorAngularDerivative(1.0);
       fourBar.update(FourBarAngle.values[masterJointIndex], angle, angleDot);
@@ -129,11 +147,27 @@ public class FourBarKinematicLoop
       for (int i = 0; i < 4; i++)
       {
          FourBarVertex fourBarVertex = fourBar.getVertex(FourBarAngle.values[i]);
-         innerJacobianMatrix.set(i, 0, converters[i].toJointDerivative(fourBarVertex.getAngleDot()));
+         loopJacobianMatrix.set(i, 0, converters[i].toJointDerivative(fourBarVertex.getAngleDot()));
       }
    }
 
-   public List<? extends JointReadOnly> getKinematicLoopJoints()
+   private void updateLoopConvectiveTerm()
+   {
+      // Definitely not the most effective to compute the convective term but should not matter compared to the rest of the controller's computational load.
+      double angle = converters[masterJointIndex].toFourBarInteriorAngle(getMasterJoint().getQ());
+      double angleDot = converters[masterJointIndex].toFourBarInteriorAngularDerivative(getMasterJoint().getQd());
+      double angleDDot = 0.0;
+      fourBar.update(FourBarAngle.values[masterJointIndex], angle, angleDot, angleDDot);
+
+      for (int i = 0; i < 4; i++)
+      {
+         FourBarVertex fourBarVertex = fourBar.getVertex(FourBarAngle.values[i]);
+         loopConvectiveTermMatrix.set(i, 0, converters[i].toJointDerivative(fourBarVertex.getAngleDDot()));
+      }
+   }
+
+   @Override
+   public List<RevoluteJointBasics> getLoopJoints()
    {
       return joints;
    }
@@ -184,9 +218,16 @@ public class FourBarKinematicLoop
       return joints.get(masterJointIndex);
    }
 
-   public DMatrixRMaj getInnerJacobianMatrix()
+   @Override
+   public DMatrixRMaj getLoopJacobian()
    {
-      return innerJacobianMatrix;
+      return loopJacobianMatrix;
+   }
+
+   @Override
+   public DMatrixRMaj getLoopConvectiveTerm()
+   {
+      return loopConvectiveTermMatrix;
    }
 
    public FourBar getFourBar()
