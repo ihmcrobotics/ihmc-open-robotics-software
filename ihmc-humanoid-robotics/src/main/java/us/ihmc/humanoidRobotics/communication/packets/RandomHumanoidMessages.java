@@ -484,17 +484,6 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static FootstepPlanRequestPacket nextFootstepPlanRequestPacket(Random random)
-   {
-      FootstepPlanRequestPacket next = new FootstepPlanRequestPacket();
-      next.getStartFootstep().set(nextFootstepDataMessage(random));
-      next.setThetaStart(random.nextDouble());
-      next.setMaxSubOptimality(random.nextDouble());
-      MessageTools.copyData(nextFootstepDataMessages(random), next.getGoals());
-      next.setFootstepPlanRequestType(RandomNumbers.nextEnum(random, FootstepPlanRequestType.class).toByte());
-      return next;
-   }
-
    public static HeatMapPacket nextHeatMapPacket(Random random)
    {
       HeatMapPacket next = new HeatMapPacket();

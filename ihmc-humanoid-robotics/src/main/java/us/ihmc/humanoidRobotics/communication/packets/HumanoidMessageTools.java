@@ -38,7 +38,6 @@ import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepPathPlanPacket;
-import controller_msgs.msg.dds.FootstepPlanRequestPacket;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.GoHomeMessage;
@@ -1198,29 +1197,6 @@ public class HumanoidMessageTools
       message.setCuttingRadius(cuttingRadius);
       message.getCenterPosition().set(centerPosition);
       message.getCenterOrientation().set(new Quaternion(rotationMatrix));
-      return message;
-   }
-
-   public static FootstepPlanRequestPacket createFootstepPlanRequestPacket(FootstepPlanRequestType requestType, FootstepDataMessage startFootstep,
-                                                                           double thetaStart, List<FootstepDataMessage> goals)
-   {
-      FootstepPlanRequestPacket message = new FootstepPlanRequestPacket();
-      message.setFootstepPlanRequestType(requestType.toByte());
-      message.getStartFootstep().set(startFootstep);
-      message.setThetaStart(thetaStart);
-      MessageTools.copyData(goals, message.getGoals());
-      return message;
-   }
-
-   public static FootstepPlanRequestPacket createFootstepPlanRequestPacket(FootstepPlanRequestType requestType, FootstepDataMessage startFootstep,
-                                                                           double thetaStart, List<FootstepDataMessage> goals, double maxSuboptimality)
-   {
-      FootstepPlanRequestPacket message = new FootstepPlanRequestPacket();
-      message.setFootstepPlanRequestType(requestType.toByte());
-      message.getStartFootstep().set(startFootstep);
-      message.setThetaStart(thetaStart);
-      MessageTools.copyData(goals, message.getGoals());
-      message.setMaxSubOptimality(maxSuboptimality);
       return message;
    }
 
