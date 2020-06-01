@@ -139,11 +139,7 @@ public class StepConstraintRegionCommand implements Command<StepConstraintRegion
 
    public void getStepConstraintRegion(StepConstraintRegion stepConstraintRegion)
    {
-<<<<<<< HEAD
-      stepConstraintRegion.set(fromLocalToWorldTransform, concaveHullsVertices, convexPolygons);
-=======
       stepConstraintRegion.set(fromLocalToWorldTransform, concaveHullsVertices, holes);
->>>>>>> overhauled the step constraint region, and made a common interface with the planar region to allow reuse of some of the tools
    }
 
    @Override
