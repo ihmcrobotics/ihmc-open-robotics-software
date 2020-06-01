@@ -26,13 +26,6 @@ public class Footstep implements Settable<Footstep>
 {
    public static final int maxNumberOfSwingWaypoints = 10;
 
-   // --- TODO: GW nuke this:
-   public static enum FootstepType
-   {
-      FULL_FOOTSTEP, PARTIAL_FOOTSTEP, BAD_FOOTSTEP
-   }
-
-   private FootstepType footstepType = FootstepType.FULL_FOOTSTEP;
    private static int counter = 0;
    private final PoseReferenceFrame footstepSoleFrame = new PoseReferenceFrame(counter++ + "_FootstepSoleFrame", ReferenceFrame.getWorldFrame());
    private boolean scriptedFootstep = false;
@@ -116,7 +109,6 @@ public class Footstep implements Settable<Footstep>
    public void set(Footstep other)
    {
       this.robotSide = other.robotSide;
-      this.footstepType = other.footstepType;
       this.swingTrajectoryBlendDuration = other.swingTrajectoryBlendDuration;
       this.trustHeight = other.trustHeight;
       this.isAdjustable = other.isAdjustable;
@@ -212,7 +204,6 @@ public class Footstep implements Settable<Footstep>
    public void clear()
    {
       robotSide = null;
-      footstepType = FootstepType.FULL_FOOTSTEP;
       footstepPose.setToZero(ReferenceFrame.getWorldFrame());
       predictedContactPoints.clear();
       customWaypointProportions.clear();
@@ -336,6 +327,11 @@ public class Footstep implements Settable<Footstep>
       return predictedContactPoints;
    }
 
+   public boolean hasPredictedContactPoints()
+   {
+      return !predictedContactPoints.isEmpty();
+   }
+
    public void setX(double x)
    {
       footstepPose.setX(x);
@@ -437,23 +433,6 @@ public class Footstep implements Settable<Footstep>
    public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientationToPack.setIncludingFrame(footstepPose.getOrientation());
-   }
-
-   public void setFootstepType(FootstepType footstepType)
-   {
-      this.footstepType = footstepType;
-   }
-
-   public FootstepType getFootstepType()
-   {
-      if (predictedContactPoints.isEmpty())
-      {
-         return FootstepType.FULL_FOOTSTEP;
-      }
-      else
-      {
-         return FootstepType.PARTIAL_FOOTSTEP;
-      }
    }
 
    public boolean isScriptedFootstep()

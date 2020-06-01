@@ -69,7 +69,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
    }
 
    @Override
-   public Footstep.FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap)
+   public FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap)
    {
       // can only snap footsteps in world frame
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
@@ -84,9 +84,8 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
       originalFootstep.getOrientation().set(orientation);
 
       //get the footstep
-      Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
+      FootstepType type = snapFootstep(originalFootstep, heightMap);
       footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(originalFootstep));
-      footstep.setFootstepType(type);
       FramePose3D solePoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);
 
@@ -97,7 +96,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
    }
 
    @Override
-   public Footstep.FootstepType snapFootstep(FootstepDataMessage footstep, HeightMapWithPoints heightMap)
+   public FootstepType snapFootstep(FootstepDataMessage footstep, HeightMapWithPoints heightMap)
    {
       Quaternion orientation = footstep.getOrientation();
       Point3D position = footstep.getLocation();
@@ -133,7 +132,7 @@ public class SimpleFootstepSnapper implements QuadTreeFootstepSnapper
       }
 
       adjustFootstepWithoutHeightmap(footstep, height, surfaceNormal);
-      return Footstep.FootstepType.FULL_FOOTSTEP;
+      return FootstepType.FULL_FOOTSTEP;
    }
 
    @Override
