@@ -7,10 +7,8 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC whole-body controller API.
-   
- */
+       * This message is part of the IHMC whole-body controller API.
+       */
 public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket> implements Settable<StateEstimatorModePacket>, EpsilonComparable<StateEstimatorModePacket>
 {
 
@@ -19,10 +17,8 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket> i
    public static final byte FROZEN = (byte) 1;
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    public byte requested_state_estimator_mode_ = (byte) 255;
@@ -52,19 +48,15 @@ public class StateEstimatorModePacket extends Packet<StateEstimatorModePacket> i
 
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
