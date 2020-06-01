@@ -34,6 +34,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.screwTheory.GravityCoriolisExternalWrenchMatrixCalculator;
+import us.ihmc.robotics.screwTheory.KinematicLoopFunction;
 import us.ihmc.robotics.screwTheory.TotalMassCalculator;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -48,7 +49,7 @@ public class WholeBodyControlCoreToolbox
    private final double gravityZ;
    private final FloatingJointBasics rootJoint;
    private final MultiBodySystemBasics multiBodySystemInput;
-   private final List<KinematicLoopControllerFunction> kinematicLoopControllerFunctions = new ArrayList<>();
+   private final List<KinematicLoopFunction> kinematicLoopFunctions = new ArrayList<>();
    private final ReferenceFrame centerOfMassFrame;
    private final ControllerCoreOptimizationSettings optimizationSettings;
    private FeedbackControllerSettings feedbackControllerSettings = FeedbackControllerSettings.getDefault();
@@ -169,9 +170,9 @@ public class WholeBodyControlCoreToolbox
       parentRegistry.addChild(registry);
    }
 
-   public void addKinematicLoopFunction(KinematicLoopControllerFunction function)
+   public void addKinematicLoopFunction(KinematicLoopFunction function)
    {
-      kinematicLoopControllerFunctions.add(function);
+      kinematicLoopFunctions.add(function);
    }
 
    /**
@@ -301,9 +302,9 @@ public class WholeBodyControlCoreToolbox
       return multiBodySystemInput;
    }
 
-   public List<KinematicLoopControllerFunction> getKinematicLoopControllerFunctions()
+   public List<KinematicLoopFunction> getKinematicLoopFunctions()
    {
-      return kinematicLoopControllerFunctions;
+      return kinematicLoopFunctions;
    }
 
    public MotionQPInputCalculator getMotionQPInputCalculator()
