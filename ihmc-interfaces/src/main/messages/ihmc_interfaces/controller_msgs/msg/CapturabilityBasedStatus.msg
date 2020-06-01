@@ -6,6 +6,8 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+# This is the current value of omega, which is the time constant of the inverted pendulum.
+float64 omega
 # This is the measured position in world of the robot's capture point. Only x and y coordinates are relevant.
 geometry_msgs/Point capture_point_2d
 # This is the desired position in world for the robot's capture point. Only x and y coordinates are relevant.

@@ -39,7 +39,7 @@ public class OneStepCaptureRegionCalculator
    private final double footWidth;
    private final double kinematicStepRange;
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
-   private final SideDependentList<FrameConvexPolygon2D> reachableRegions;
+   private final SideDependentList<FrameConvexPolygon2D> reachableRegions = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
 
    private final RecyclingArrayList<FramePoint2D> visibleVertices = new RecyclingArrayList<>(MAX_CAPTURE_REGION_POLYGON_POINTS, FramePoint2D.class);
 
@@ -87,8 +87,7 @@ public class OneStepCaptureRegionCalculator
 //      this.midFootAnkleXOffset = midFootAnkleXOffset;
       this.footWidth = footWidth;
 
-      reachableRegions = new SideDependentList<FrameConvexPolygon2D>();
-      calculateReachableRegions();
+      calculateReachableRegions(footWidth);
 
       // set up registry and visualizer
       parentRegistry.addChild(registry);
@@ -98,11 +97,11 @@ public class OneStepCaptureRegionCalculator
       }
    }
 
-   private void calculateReachableRegions()
+   private void calculateReachableRegions(double footWidth)
    {
       for (RobotSide side : RobotSide.values)
       {
-         FrameConvexPolygon2D reachableRegion = new FrameConvexPolygon2D();
+         FrameConvexPolygon2D reachableRegion = reachableRegions.get(side);
          reachableRegion.clear(soleZUpFrames.get(side));
          double sign = side.negateIfLeftSide(1.0);
 
@@ -117,7 +116,6 @@ public class OneStepCaptureRegionCalculator
          }
          reachableRegion.addVertex(soleZUpFrames.get(side), 0, sign * footWidth / 2.0);
          reachableRegion.update();
-         reachableRegions.set(side, reachableRegion);
       }
    }
 
@@ -261,7 +259,7 @@ public class OneStepCaptureRegionCalculator
    public void setReachableRegionCutoffAngle(double reachableRegionCutoffAngle)
    {
       this.reachableRegionCutoffAngle = reachableRegionCutoffAngle;
-      calculateReachableRegions();
+      calculateReachableRegions(footWidth);
    }
 
    public FrameConvexPolygon2D getReachableRegion(RobotSide robotSide)

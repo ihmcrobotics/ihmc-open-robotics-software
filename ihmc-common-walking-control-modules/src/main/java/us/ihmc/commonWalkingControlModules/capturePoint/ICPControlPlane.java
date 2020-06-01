@@ -10,12 +10,14 @@ import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -100,6 +102,29 @@ public class ICPControlPlane
                                                             FramePoint3D projectionToPack,
                                                             PlanarRegion planarRegion)
    {
+      planarRegion.getOrigin(planeOrigin);
+      planarRegion.getNormal(planeNormal);
+
+      projectPointFromControlPlaneOntoRegion(desiredReferenceFrame, pointToProject, projectionToPack, planeOrigin, planeNormal);
+   }
+
+   public void projectPointFromControlPlaneOntoConstraintRegion(ReferenceFrame desiredReferenceFrame,
+                                                                FramePoint2DReadOnly pointToProject,
+                                                                FramePoint3D projectionToPack,
+                                                                StepConstraintRegion stepConstraintRegion)
+   {
+      stepConstraintRegion.getNormalInWorld(planeNormal);
+      stepConstraintRegion.getRegionOriginInWorld(planeOrigin);
+
+      projectPointFromControlPlaneOntoRegion(desiredReferenceFrame, pointToProject, projectionToPack, planeOrigin, planeNormal);
+   }
+
+   public void projectPointFromControlPlaneOntoRegion(ReferenceFrame desiredReferenceFrame,
+                                                                FramePoint2DReadOnly pointToProject,
+                                                                FramePoint3D projectionToPack,
+                                                                Point3DReadOnly regionOrigin,
+                                                                FrameVector3DReadOnly regionNormal)
+   {
       tempFramePoint.setIncludingFrame(pointToProject, 0.0);
       tempFramePoint.changeFrame(centerOfMassFrame);
       tempFramePoint.setZ(controlPlaneHeight.getDoubleValue());
@@ -113,17 +138,13 @@ public class ICPControlPlane
 
       projectionToPack.setToZero(worldFrame);
 
-      planarRegion.getOrigin(planeOrigin);
-      planarRegion.getNormal(planeNormal);
-
-      EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(planeOrigin, planeNormal, centerOfMassPosition, rayDirection, projectionToPack);
+      EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(regionOrigin, regionNormal, centerOfMassPosition, rayDirection, projectionToPack);
 
       projectionToPack.changeFrame(desiredReferenceFrame);
    }
 
    public void projectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
    {
-
       projectConvexHullOntoControlPlane(planarRegion.getConvexHull(), planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
    }
 
