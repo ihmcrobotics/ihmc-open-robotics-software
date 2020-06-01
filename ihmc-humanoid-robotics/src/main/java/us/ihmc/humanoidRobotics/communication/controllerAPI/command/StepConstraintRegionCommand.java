@@ -141,7 +141,7 @@ public class StepConstraintRegionCommand implements Command<StepConstraintRegion
 
    public void getStepConstraintRegion(StepConstraintRegion stepConstraintRegion)
    {
-      stepConstraintRegion.set(fromLocalToWorldTransform, convexPolygons);
+      stepConstraintRegion.set(fromLocalToWorldTransform, concaveHullsVertices, convexPolygons);
    }
 
    @Override
