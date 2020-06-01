@@ -53,6 +53,7 @@ public class StepAdjustmentController
 
    private final YoBoolean useStepAdjustment = new YoBoolean(yoNamePrefix + "UseStepAdjustment", registry);
    private final YoBoolean footstepIsAdjustable = new YoBoolean(yoNamePrefix + "FootstepIsAdjustable", registry);
+   private final YoBoolean hasPlanarRegionBeenAssigned = new YoBoolean(yoNamePrefix + "HasPlanarRegionBeenAssigned", registry);
 
    private final YoDouble swingDuration = new YoDouble(yoNamePrefix + "SwingDuration", registry);
    private final YoDouble nextTransferDuration = new YoDouble(yoNamePrefix + "NextTransferDuration", registry);
@@ -192,6 +193,7 @@ public class StepAdjustmentController
       upcomingFootstep.setToNaN();
       footstepSolution.setToNaN();
       footstepWasAdjusted.set(false);
+      hasPlanarRegionBeenAssigned.set(false);
       captureRegionCalculator.hideCaptureRegion();
       environmentConstraintProvider.reset();
    }
@@ -239,6 +241,11 @@ public class StepAdjustmentController
       environmentConstraintProvider.setStepConstraintRegion(stepConstraintRegion);
    }
 
+   public boolean hasStepConstraintRegion()
+   {
+      return environmentConstraintProvider.hasStepConstraintRegion();
+   }
+
    public void initialize(double initialTime, RobotSide supportSide)
    {
       isInSwing.set(true);
@@ -273,14 +280,40 @@ public class StepAdjustmentController
 
       if (icpError.length() < minICPErrorForStepAdjustment.getValue())
       {
-         footstepWasAdjusted.set(false);
-         return;
+         if (environmentConstraintProvider.hasStepConstraintRegion() && !hasPlanarRegionBeenAssigned.getBooleanValue())
+         {
+            hasPlanarRegionBeenAssigned.set(true);
+            environmentConstraintProvider.setReachabilityRegion(reachabilityConstraintHandler.getReachabilityConstraint());
+            if (!environmentConstraintProvider.validateConvexityOfPlanarRegion())
+               return;
+
+            footstepWasAdjusted.set(environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(), footstepSolution, upcomingFootstepContactPoints));
+            return;
+         }
+         else
+         {
+            footstepWasAdjusted.set(false);
+            return;
+         }
       }
+
 
       environmentConstraintProvider.setReachabilityRegion(reachabilityConstraintHandler.getReachabilityConstraint());
       if (!environmentConstraintProvider.validateConvexityOfPlanarRegion())
          return;
 
+      applyStepAdjustmentFromError(residualICPError, omega0);
+
+      boolean adjusted = environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(), footstepSolution, upcomingFootstepContactPoints);
+      footstepWasAdjusted.set(footstepWasAdjusted.getValue() || adjusted);
+
+      if (wasFootstepAdjusted() && CONTINUOUSLY_UPDATE_DESIRED_POSITION)
+         upcomingFootstep.set(footstepSolution);
+   }
+
+   private void applyStepAdjustmentFromError(FrameVector2DReadOnly residualICPError,
+                                             double omega0)
+   {
       footstepMultiplier.set(computeFootstepAdjustmentMultiplier(omega0));
       if (useActualErrorInsteadOfResidual.getValue())
       {
@@ -317,11 +350,6 @@ public class StepAdjustmentController
 
       icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, adjustedSolutionInControlPlane, tempPoint, upcomingFootstep.getPosition().getZ());
       footstepSolution.getPosition().set(tempPoint);
-
-      environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(), footstepSolution, upcomingFootstepContactPoints);
-
-      if (wasFootstepAdjusted() && CONTINUOUSLY_UPDATE_DESIRED_POSITION)
-         upcomingFootstep.set(footstepSolution);
    }
 
    public FramePose3DReadOnly getFootstepSolution()

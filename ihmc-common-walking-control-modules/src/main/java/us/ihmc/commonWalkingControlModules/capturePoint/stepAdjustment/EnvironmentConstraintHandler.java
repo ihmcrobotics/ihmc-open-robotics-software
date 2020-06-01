@@ -102,6 +102,11 @@ public class EnvironmentConstraintHandler
       this.stepConstraintRegion = stepConstraintRegion;
    }
 
+   public boolean hasStepConstraintRegion()
+   {
+      return stepConstraintRegion != null;
+   }
+
    public void reset()
    {
       stepConstraintRegion = null;
@@ -147,20 +152,24 @@ public class EnvironmentConstraintHandler
       return isEnvironmentConstraintValid.getBooleanValue();
    }
 
-   public void applyEnvironmentConstraintToFootstep(RobotSide upcomingFootstepSide,
+   public boolean applyEnvironmentConstraintToFootstep(RobotSide upcomingFootstepSide,
                                                     FixedFramePose3DBasics footstepPoseToPack,
                                                     List<Point2D> predictedContactPoints)
    {
       if (stepConstraintRegion == null)
-         return;
+         return false;
 
       computeShrunkConvexHull(stepConstraintRegion, upcomingFootstepSide, predictedContactPoints, footstepPoseToPack.getOrientation());
 
       stepXY.set(footstepPoseToPack.getPosition());
       yoShrunkConvexHullConstraint.orthogonalProjection(stepXY);
 
+      boolean adjusted = stepXY.distanceXYSquared(footstepPoseToPack.getPosition()) > 0.0;
+
       footstepPoseToPack.getPosition().set(stepXY, stepConstraintRegion.getPlaneZGivenXY(stepXY.getX(), stepXY.getY()));
       footstepPoseToPack.getOrientation().set(stepConstraintRegion.getTransformToWorld().getRotation());
+
+      return adjusted;
    }
 
    private void computeShrunkConvexHull(StepConstraintRegion stepConstraintRegion,
