@@ -1,19 +1,14 @@
 package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
 
-import org.ojalgo.function.multiary.MultiaryFunction.Convex;
-import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
-import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
@@ -129,7 +124,6 @@ public class StepConstraintCalculator
    public void setPlanarRegions(PlanarRegionsList planarRegions)
    {
       planarRegionsList.set(planarRegions);
-      planarRegionDecider.setPlanarRegions(planarRegions.getPlanarRegionsAsList());
    }
 
    public void setSwitchPlanarRegionConstraintsAutomatically(boolean switchAutomatically)
@@ -155,6 +149,9 @@ public class StepConstraintCalculator
       {
          updateCaptureRegion(currentStep);
 
+         PlanarRegionsList planarRegionsList = this.planarRegionsList.getAndSet(null);
+         if (planarRegionsList != null)
+            planarRegionDecider.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
          planarRegionDecider.setOmega0(omega);
          planarRegionDecider.setCaptureRegion(captureRegionCalculator.getCaptureRegion());
          planarRegionDecider.updatePlanarRegionConstraintForStep(currentStep.getStepPose());
