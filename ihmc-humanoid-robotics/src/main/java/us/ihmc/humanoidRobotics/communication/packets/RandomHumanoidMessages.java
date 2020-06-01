@@ -641,24 +641,6 @@ public final class RandomHumanoidMessages
       return next;
    }
 
-   public static FootstepPathPlanPacket nextFootstepPathPlanPacket(Random random)
-   {
-      FootstepPathPlanPacket next = new FootstepPathPlanPacket();
-      next.setGoalsValid(random.nextBoolean());
-      next.getStart().set(nextFootstepDataMessage(random));
-      MessageTools.copyData(nextFootstepDataMessages(random), next.getOriginalGoals());
-      MessageTools.copyData(nextFootstepDataMessages(random), next.getPathPlan());
-      int size = Math.abs(random.nextInt(1000));
-      for (int i = 0; i < size; i++)
-      {
-         next.getFootstepUnknown().add((byte) random.nextInt(2));
-      }
-      next.setSubOptimality(random.nextDouble());
-      next.setPathCost(random.nextDouble());
-
-      return next;
-   }
-
    public static AtlasWristSensorCalibrationRequestPacket nextAtlasWristSensorCalibrationRequestPacket(Random random)
    {
       AtlasWristSensorCalibrationRequestPacket next = new AtlasWristSensorCalibrationRequestPacket();

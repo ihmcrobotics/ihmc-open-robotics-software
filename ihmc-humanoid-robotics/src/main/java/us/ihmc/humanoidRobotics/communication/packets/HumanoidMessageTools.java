@@ -37,7 +37,6 @@ import controller_msgs.msg.dds.FootLoadBearingMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPathPlanPacket;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.GoHomeMessage;
@@ -572,21 +571,6 @@ public class HumanoidMessageTools
       message.getExplorationRangeUpperLimits().add(explorationRangeUpperLimits);
       message.getExplorationRangeLowerLimits().add(explorationRangeLowerLimits);
 
-      return message;
-   }
-
-   public static FootstepPathPlanPacket createFootstepPathPlanPacket(boolean goalsValid, FootstepDataMessage start, List<FootstepDataMessage> originalGoals,
-                                                                     List<FootstepDataMessage> ADStarPathPlan, List<Boolean> footstepUnknown,
-                                                                     double subOptimality, double cost)
-   {
-      FootstepPathPlanPacket message = new FootstepPathPlanPacket();
-      message.setGoalsValid(goalsValid);
-      message.getStart().set(start);
-      MessageTools.copyData(originalGoals, message.getOriginalGoals());
-      MessageTools.copyData(ADStarPathPlan, message.getPathPlan());
-      footstepUnknown.stream().forEach(message.getFootstepUnknown()::add);
-      message.setSubOptimality(subOptimality);
-      message.setPathCost(cost);
       return message;
    }
 
