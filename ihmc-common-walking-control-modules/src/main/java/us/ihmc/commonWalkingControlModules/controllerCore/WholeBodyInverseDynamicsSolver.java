@@ -44,6 +44,7 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
+import us.ihmc.robotics.screwTheory.KinematicLoopFunction;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
@@ -78,7 +79,7 @@ public class WholeBodyInverseDynamicsSolver
 
    private final OneDoFJointBasics[] controlledOneDoFJoints;
    private final JointBasics[] jointsToOptimizeFor;
-   private List<KinematicLoopControllerFunction> kinematicLoopControllerFunctions;
+   private List<KinematicLoopFunction> kinematicLoopFunctions;
 
    private final YoFrameVector3D yoDesiredMomentumRateLinear;
    private final YoFrameVector3D yoDesiredMomentumRateAngular;
@@ -115,7 +116,7 @@ public class WholeBodyInverseDynamicsSolver
       JointIndexHandler jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
-      kinematicLoopControllerFunctions = toolbox.getKinematicLoopControllerFunctions();
+      kinematicLoopFunctions = toolbox.getKinematicLoopFunctions();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, JointDesiredControlMode.EFFORT);
 
@@ -236,7 +237,7 @@ public class WholeBodyInverseDynamicsSolver
             jointDesiredOutput.setDesiredTorque(tauSolution.get(jointIndex, 0));
          }
 
-         if (!kinematicLoopControllerFunctions.isEmpty())
+         if (!kinematicLoopFunctions.isEmpty())
             throw new UnsupportedOperationException("The use of the dyncamic matrix calculator in the presence of kinematic loop(s) has not been implemented nor tested.");
       }
       else
@@ -289,22 +290,22 @@ public class WholeBodyInverseDynamicsSolver
 
    public void updateKinematicLoopJointEfforts()
    {
-      for (int i = 0; i < kinematicLoopControllerFunctions.size(); i++)
+      for (int i = 0; i < kinematicLoopFunctions.size(); i++)
       {
-         KinematicLoopControllerFunction kinematicLoopControllerFunction = kinematicLoopControllerFunctions.get(i);
-         List<? extends OneDoFJointReadOnly> loopJoints = kinematicLoopControllerFunction.getLoopJoints();
+         KinematicLoopFunction kinematicLoopFunction = kinematicLoopFunctions.get(i);
+         List<? extends OneDoFJointReadOnly> loopJoints = kinematicLoopFunction.getLoopJoints();
          int nDofs = MultiBodySystemTools.computeDegreesOfFreedom(loopJoints);
          kinematicLoopJointTau.reshape(nDofs, 1);
          MultiBodySystemTools.extractJointsState(loopJoints, JointStateType.EFFORT, kinematicLoopJointTau);
-         kinematicLoopControllerFunction.computeTau(kinematicLoopJointTau);
+         kinematicLoopFunction.computeTau(kinematicLoopJointTau);
 
          int tauIndex = 0;
 
          for (int j = 0; j < loopJoints.size(); j++)
          {
             OneDoFJointReadOnly loopJoint = loopJoints.get(j);
-            if (loopJoint instanceof OneDoFJointBasics)
-               lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque((OneDoFJointBasics) loopJoints.get(j), kinematicLoopJointTau.get(tauIndex));
+            // TODO The following cast is ugly and does not seem like it should be needed.
+            lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque((OneDoFJointBasics) loopJoints.get(j), kinematicLoopJointTau.get(tauIndex));
             tauIndex += loopJoint.getDegreesOfFreedom();
          }
       }

@@ -68,7 +68,7 @@ public class FourBarKinematicLoop
       this.jointD = joints[3];
    }
 
-   public void update()
+   public void updateState(boolean updateAcceleration)
    {
       clampMasterJointPosition();
 
@@ -76,9 +76,16 @@ public class FourBarKinematicLoop
       FourBarToJointConverter masterConverter = converters[masterJointIndex];
       double angle = masterConverter.toFourBarInteriorAngle(masterJoint.getQ());
       double angleDot = masterConverter.toFourBarInteriorAngularDerivative(masterJoint.getQd());
-      double angleDDot = masterConverter.toFourBarInteriorAngularDerivative(masterJoint.getQdd());
 
-      fourBar.update(FourBarAngle.values[masterJointIndex], angle, angleDot, angleDDot);
+      if (updateAcceleration)
+      {
+         double angleDDot = masterConverter.toFourBarInteriorAngularDerivative(masterJoint.getQdd());
+         fourBar.update(FourBarAngle.values[masterJointIndex], angle, angleDot, angleDDot);
+      }
+      else
+      {
+         fourBar.update(FourBarAngle.values[masterJointIndex], angle, angleDot);
+      }
 
       for (int i = 0; i < 4; i++)
       {
@@ -91,7 +98,8 @@ public class FourBarKinematicLoop
 
          joint.setQ(converter.toJointAngle(fourBarVertex.getAngle()));
          joint.setQd(converter.toJointDerivative(fourBarVertex.getAngleDot()));
-         joint.setQdd(converter.toJointDerivative(fourBarVertex.getAngleDDot()));
+         if (updateAcceleration)
+            joint.setQdd(converter.toJointDerivative(fourBarVertex.getAngleDDot()));
       }
    }
 

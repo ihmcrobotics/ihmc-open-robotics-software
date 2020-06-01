@@ -6,7 +6,6 @@ import java.util.Map;
 
 import org.ejml.data.DMatrixRMaj;
 
-import us.ihmc.commonWalkingControlModules.controllerCore.KinematicLoopControllerFunction;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
@@ -36,6 +35,7 @@ import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.spatial.interfaces.WrenchReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
+import us.ihmc.robotics.screwTheory.KinematicLoopFunction;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -62,7 +62,7 @@ public class InverseDynamicsOptimizationControlModule
    private final ExternalWrenchHandler externalWrenchHandler;
 
    private final JointBasics[] jointsToOptimizeFor;
-   private final List<KinematicLoopControllerFunction> kinematicLoopFunctions;
+   private final List<KinematicLoopFunction> kinematicLoopFunctions;
    private final int numberOfDoFs;
    private final int rhoSize;
 
@@ -95,7 +95,7 @@ public class InverseDynamicsOptimizationControlModule
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
-      kinematicLoopFunctions = toolbox.getKinematicLoopControllerFunctions();
+      kinematicLoopFunctions = toolbox.getKinematicLoopFunctions();
       this.dynamicsMatrixCalculator = dynamicsMatrixCalculator;
 
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
