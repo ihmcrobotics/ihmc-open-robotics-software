@@ -1,16 +1,8 @@
-
-
-
 #ifndef __controller_msgs__msg__StereoVisionPointCloudMessage__idl__
 #define __controller_msgs__msg__StereoVisionPointCloudMessage__idl__
 
-
-
 #include "geometry_msgs/msg/./Point_.idl"
-
 #include "geometry_msgs/msg/./Quaternion_.idl"
-
-
 module controller_msgs
 {
   module msg
@@ -18,153 +10,58 @@ module controller_msgs
     module dds
     {
 
-   
-   /**
-   
-    * Should disappear for the ROS equivalent.
-   
-    */
-   
-   @TypeCode(type="controller_msgs::msg::dds_::StereoVisionPointCloudMessage_")
+      /**
+       * Should disappear for the ROS equivalent.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::StereoVisionPointCloudMessage_")
       struct StereoVisionPointCloudMessage
       {
-
-
-    
-    /**
-    
-     * Unique ID used to identify this message, should preferably be consecutively increasing.
-    
-     */
-    
-
-
-    unsigned long sequence_id;
-
-
-    
-
-
-    long long timestamp;
-
-
-    
-
-
-    geometry_msgs::msg::dds::Point sensor_position;
-
-
-    
-
-
-    geometry_msgs::msg::dds::Quaternion sensor_orientation;
-
-
-    
-    /**
-    
-     * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
-    
-     * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
-    
-     * The confidence of the sensor pose represents the quality of the pose estimation.
-    
-     */
-    
-
-    @defaultValue(value=1.0)
-
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        long long timestamp;
+        geometry_msgs::msg::dds::Point sensor_position;
+        geometry_msgs::msg::dds::Quaternion sensor_orientation;
+        /**
+         * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+         * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+         * The confidence of the sensor pose represents the quality of the pose estimation.
+         */
+        @defaultValue(value=1.0)
         double sensor_pose_confidence;
-
-
-    
-    /**
-    
-     * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
-    
-     * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
-    
-     * The confidence of the point cloud represents the quality of the collected point cloud data.
-    
-     */
-    
-
-    @defaultValue(value=1.0)
-
+        /**
+         * There are two types of confidence value noticing the quality of the data for sensor pose and point cloud.
+         * The range of confidence is from 0.0 with the worst quality to 1.0 with the best quality.
+         * The confidence of the point cloud represents the quality of the collected point cloud data.
+         */
+        @defaultValue(value=1.0)
         double point_cloud_confidence;
-
-
-    
-    /**
-    
-     * The center location of the bounding box of all the points.
-    
-     * The location of each point in the pointcloud is with respect to this location.
-    
-     */
-    
-
-
-    geometry_msgs::msg::dds::Point point_cloud_center;
-
-
-    
-    /**
-    
-     * The pointcloud is compressed by using an octree.
-    
-     * This indicates the resolution used for the octree, the octree depth is 16.
-    
-     */
-    
-
-
-    double resolution;
-
-
-    
-    /**
-    
-     * The number of points in this frame.
-    
-     */
-    
-
-
-    long number_of_points;
-
-
-    
-    /**
-    
-     * The compressed pointcloud.
-    
-     * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
-    
-     */
-    
-
-
-    sequence<octet, 2000000> point_cloud;
-
-
-    
-    /**
-    
-     * The compressed colors.
-    
-     * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
-    
-     */
-    
-
-
-    sequence<octet, 700000> colors;
-
-
-
+        /**
+         * The center location of the bounding box of all the points.
+         * The location of each point in the pointcloud is with respect to this location.
+         */
+        geometry_msgs::msg::dds::Point point_cloud_center;
+        /**
+         * The pointcloud is compressed by using an octree.
+         * This indicates the resolution used for the octree, the octree depth is 16.
+         */
+        double resolution;
+        /**
+         * The number of points in this frame.
+         */
+        long number_of_points;
+        /**
+         * The compressed pointcloud.
+         * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+         */
+        sequence<octet, 2000000> point_cloud;
+        /**
+         * The compressed colors.
+         * See us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression for more info on the compression protocol.
+         */
+        sequence<octet, 700000> colors;
       };
-
     };
   };
 };

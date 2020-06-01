@@ -7,12 +7,9 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the Quix controller API.
-   
- * This message is used to notify the crutch display of some important system state that might otherwise be hard to recognize.
-   
- */
+       * This message is part of the Quix controller API.
+       * This message is used to notify the crutch display of some important system state that might otherwise be hard to recognize.
+       */
 public class QuixUrgentUserInfoMessage extends Packet<QuixUrgentUserInfoMessage> implements Settable<QuixUrgentUserInfoMessage>, EpsilonComparable<QuixUrgentUserInfoMessage>
 {
 

@@ -7,12 +7,9 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC whole-body controller API.
-   
- * This message is used to notify the crutch display of the current flat-ground walking state.
-   
- */
+       * This message is part of the IHMC whole-body controller API.
+       * This message is used to notify the crutch display of the current flat-ground walking state.
+       */
 public class QuixFlatGroundStateMessage extends Packet<QuixFlatGroundStateMessage> implements Settable<QuixFlatGroundStateMessage>, EpsilonComparable<QuixFlatGroundStateMessage>
 {
 
@@ -33,17 +30,13 @@ public class QuixFlatGroundStateMessage extends Packet<QuixFlatGroundStateMessag
    public static final byte TRANSFER_TO_STANDING = (byte) 7;
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    /**
-       
-    * Specifies which state the controller should transition into.
-       
-    */
+            * Specifies which state the controller should transition into.
+            */
    public byte flat_ground_state_name_ = (byte) 255;
 
    public QuixFlatGroundStateMessage()
@@ -71,19 +64,15 @@ public class QuixFlatGroundStateMessage extends Packet<QuixFlatGroundStateMessag
 
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -91,19 +80,15 @@ public class QuixFlatGroundStateMessage extends Packet<QuixFlatGroundStateMessag
 
 
    /**
-       
-    * Specifies which state the controller should transition into.
-       
-    */
+            * Specifies which state the controller should transition into.
+            */
    public void setFlatGroundStateName(byte flat_ground_state_name)
    {
       flat_ground_state_name_ = flat_ground_state_name;
    }
    /**
-       
-    * Specifies which state the controller should transition into.
-       
-    */
+            * Specifies which state the controller should transition into.
+            */
    public byte getFlatGroundStateName()
    {
       return flat_ground_state_name_;
