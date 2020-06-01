@@ -104,7 +104,7 @@ public class LevenbergMarquardt3DICPTest
       for (int i = 0; i < driftedCowPointCloud.length; i++)
       {
          Point3D pairedPoint = new Point3D();
-         double distance = SLAMTools.computeDistanceToNormalOctreeAndPackCorrespondingPoint(octree, driftedCowPointCloud[i], 10, pairedPoint);
+         double distance = SLAMTools.computeDistanceToNormalOctreeAndPackCorrespondingPoint(octree, driftedCowPointCloud[i], pairedPoint);
 
          correspondingPairs.put(driftedCowPointCloud[i], pairedPoint);
       }
@@ -190,7 +190,7 @@ public class LevenbergMarquardt3DICPTest
 
          private double computeClosestDistance(Point3D point, Point3D[] originalCowPointCloud)
          {
-            double distance = SLAMTools.computeDistanceToNormalOctree(octree, point, 10);
+            double distance = SLAMTools.computeDistanceToNormalOctree(octree, point);
             return distance;
          }
       };

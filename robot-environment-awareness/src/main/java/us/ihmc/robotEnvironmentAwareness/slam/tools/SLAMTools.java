@@ -9,6 +9,7 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -196,7 +197,7 @@ public class SLAMTools
       return rawData;
    }
 
-   public static double computeDistanceToNormalOctree(NormalOcTree octree, Point3DReadOnly point, int maximumSearchingSize)
+   public static double computeDistanceToNormalOctree(NormalOcTree octree, Point3DReadOnly point)
    {
       OcTreeKey occupiedKey = octree.coordinateToKey(point);
       OcTreeKey nearestKey = new OcTreeKey();
@@ -211,8 +212,25 @@ public class SLAMTools
 
       return Math.sqrt(nearestHitDistanceSquared.getValue());
    }
-   
-   public static double computeDistanceToNormalOctreeAndPackCorrespondingPoint(NormalOcTree octree, Point3DReadOnly point, int maximumSearchingSize, Point3D correspondingPointToPack)
+
+   public static double computePerpendicularDistanceToNormalOctree(NormalOcTree octree, Point3DReadOnly point)
+   {
+      OcTreeKey occupiedKey = octree.coordinateToKey(point);
+      OcTreeKey nearestKey = new OcTreeKey();
+      OcTreeNearestNeighborTools.findNearestNeighbor(octree.getRoot(), octree.keyToCoordinate(occupiedKey), nearestKey);
+
+      MutableDouble nearestHitDistanceSquared = new MutableDouble(Double.POSITIVE_INFINITY);
+
+      OcTreeNearestNeighborTools.findRadiusNeighbors(octree.getRoot(), octree.keyToCoordinate(nearestKey), octree.getResolution(), node ->
+      {
+         nearestHitDistanceSquared.setValue(Math.min(nearestHitDistanceSquared.doubleValue(),
+                                                     EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, node.getHitLocationCopy(), node.getNormalCopy())));
+      });
+
+      return Math.sqrt(nearestHitDistanceSquared.getValue());
+   }
+
+   public static double computeDistanceToNormalOctreeAndPackCorrespondingPoint(NormalOcTree octree, Point3DReadOnly point, Point3D correspondingPointToPack)
    {
       OcTreeKey occupiedKey = octree.coordinateToKey(point);
       OcTreeKey nearestKey = new OcTreeKey();
@@ -334,8 +352,7 @@ public class SLAMTools
       return sourcePoints;
    }
 
-   public static int countNumberOfInliers(NormalOcTree octree, RigidBodyTransformReadOnly sensorPoseToWorld, Point3DReadOnly[] sourcePointsToSensor,
-                                          int maximumSearchingSize)
+   public static int countNumberOfInliers(NormalOcTree octree, RigidBodyTransformReadOnly sensorPoseToWorld, Point3DReadOnly[] sourcePointsToSensor)
    {
       int numberOfInliers = 0;
       Point3D newSourcePointToWorld = new Point3D();
@@ -344,7 +361,7 @@ public class SLAMTools
          newSourcePointToWorld.set(sourcePoint);
          sensorPoseToWorld.transform(newSourcePointToWorld);
 
-         double distance = SLAMTools.computeDistanceToNormalOctree(octree, newSourcePointToWorld, maximumSearchingSize);
+         double distance = SLAMTools.computeDistanceToNormalOctree(octree, newSourcePointToWorld);
 
          if (distance >= 0)
          {

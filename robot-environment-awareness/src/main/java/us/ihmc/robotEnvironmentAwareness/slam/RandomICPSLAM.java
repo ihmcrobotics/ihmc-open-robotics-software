@@ -188,8 +188,7 @@ public class RandomICPSLAM extends SLAMBasics
          {
             int numberOfInliers = SLAMTools.countNumberOfInliers(octree,
                                                                  transformWorldToSensorPose,
-                                                                 sourcePointsToSensor,
-                                                                 parameters.getMaximumICPSearchingSize());
+                                                                 sourcePointsToSensor);
             if (numberOfInliers > parameters.getMinimumInliersRatioOfKeyFrame() * sourcePointsToSensor.length)
             {
                if (DEBUG)
@@ -289,7 +288,7 @@ public class RandomICPSLAM extends SLAMBasics
             newSensorPose.transform(newSourcePointToWorld);
 
             int maximumICPSearchingSize = parameters.get().getMaximumICPSearchingSize();
-            double distance = SLAMTools.computeDistanceToNormalOctree(octree, newSourcePointToWorld, maximumICPSearchingSize);
+            double distance = SLAMTools.computeDistanceToNormalOctree(octree, newSourcePointToWorld);
 
             if (distance < 0)
             {
