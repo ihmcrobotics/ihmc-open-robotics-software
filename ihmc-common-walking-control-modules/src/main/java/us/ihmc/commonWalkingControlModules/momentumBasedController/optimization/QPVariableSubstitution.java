@@ -32,6 +32,7 @@ public class QPVariableSubstitution
    public int numberOfVariablesToSubstitute;
    /** Refers to the index of each element in {@code x} that is to be substituted. */
    public int[] variableIndices = new int[4];
+   private int[] inactiveIndices = new int[4];
 
    /** Refers to the transformation matrix {@code G}. */
    public final DMatrixRMaj transformation = new DMatrixRMaj(4, 1);
@@ -125,6 +126,26 @@ public class QPVariableSubstitution
    public boolean isEmpty()
    {
       return numberOfVariablesToSubstitute == 0;
+   }
+
+   public int[] getInactiveIndices()
+   {
+      /*
+       * After substitution, the number of variables for this part of this problem goes from
+       * numberOfVariablesToSubstitute down to transformation.getNumCols(). We will use the
+       * (transformation.getNumCols()) first variables only after substitution, we want to disable the
+       * other.
+       */
+      int numberOfInactiveIndices = numberOfVariablesToSubstitute - transformation.getNumCols();
+      if (inactiveIndices.length < numberOfInactiveIndices)
+         inactiveIndices = new int[numberOfInactiveIndices];
+
+      for (int i = 0; i < numberOfInactiveIndices; i++)
+      {
+         inactiveIndices[i] = variableIndices[transformation.getNumCols() + i];
+      }
+
+      return inactiveIndices;
    }
 
    /**

@@ -661,6 +661,11 @@ public class InverseDynamicsQPSolver
       accelerationVariablesSubstitution.applySubstitutionToLinearConstraint(solverInput_Aeq, solverInput_beq);
       accelerationVariablesSubstitution.applySubstitutionToLinearConstraint(solverInput_Ain, solverInput_bin);
       accelerationVariablesSubstitution.applySubstitutionToBounds(solverInput_lb, solverInput_ub, solverInput_Ain, solverInput_bin);
+      int[] inactiveIndices = accelerationVariablesSubstitution.getInactiveIndices();
+      for (int inactiveIndex : inactiveIndices)
+      {
+         qpSolver.setVariableInactive(inactiveIndex);
+      }
    }
 
    private void removeSubstitution()
