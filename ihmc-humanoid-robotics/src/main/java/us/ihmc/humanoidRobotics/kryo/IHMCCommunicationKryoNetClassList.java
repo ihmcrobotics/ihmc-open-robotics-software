@@ -406,7 +406,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(HumanoidKinematicsToolboxConfigurationMessagePubSubType.class);
       registerPacketField(BatteryStatePubSubType.class);
       registerPacketField(SO3TrajectoryMessagePubSubType.class);
-      registerPacketField(FootstepPathPlanPacketPubSubType.class);
       registerPacketField(NeckTrajectoryMessagePubSubType.class);
       registerPacketField(BytePubSubType.class);
       registerPacketField(DiagnosticArrayPubSubType.class);
@@ -779,9 +778,6 @@ public class IHMCCommunicationKryoNetClassList extends NetClassList
       registerPacketField(CurrentBehaviorStatus.class);
 
       registerPacketClass(CapturabilityBasedStatus.class);
-
-      // Planning
-      registerPacketClass(FootstepPathPlanPacket.class);
 
       // Localization
       registerPacketClass(LocalizationPacket.class);
