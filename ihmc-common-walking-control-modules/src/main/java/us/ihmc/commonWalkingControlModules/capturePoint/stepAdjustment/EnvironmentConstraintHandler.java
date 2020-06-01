@@ -4,10 +4,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -152,6 +149,8 @@ public class EnvironmentConstraintHandler
       return isEnvironmentConstraintValid.getBooleanValue();
    }
 
+   private final FramePose3D originalPose = new FramePose3D();
+
    public boolean applyEnvironmentConstraintToFootstep(RobotSide upcomingFootstepSide,
                                                     FixedFramePose3DBasics footstepPoseToPack,
                                                     List<Point2D> predictedContactPoints)
@@ -164,12 +163,12 @@ public class EnvironmentConstraintHandler
       stepXY.set(footstepPoseToPack.getPosition());
       yoShrunkConvexHullConstraint.orthogonalProjection(stepXY);
 
-      boolean adjusted = stepXY.distanceXYSquared(footstepPoseToPack.getPosition()) > 0.0;
+      originalPose.set(footstepPoseToPack);
 
       footstepPoseToPack.getPosition().set(stepXY, stepConstraintRegion.getPlaneZGivenXY(stepXY.getX(), stepXY.getY()));
       footstepPoseToPack.getOrientation().set(stepConstraintRegion.getTransformToWorld().getRotation());
 
-      return adjusted;
+      return originalPose.getPositionDistance(footstepPoseToPack) > 1e-5 || originalPose.getOrientationDistance(footstepPoseToPack) > 1e-5;
    }
 
    private void computeShrunkConvexHull(StepConstraintRegion stepConstraintRegion,

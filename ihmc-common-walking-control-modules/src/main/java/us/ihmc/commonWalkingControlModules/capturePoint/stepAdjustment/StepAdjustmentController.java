@@ -6,6 +6,7 @@ import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commons.MathTools;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -278,42 +279,35 @@ public class StepAdjustmentController
 
       icpError.sub(desiredICP, currentICP);
 
-      if (icpError.length() < minICPErrorForStepAdjustment.getValue())
-      {
-         if (environmentConstraintProvider.hasStepConstraintRegion() && !hasPlanarRegionBeenAssigned.getBooleanValue())
-         {
-            hasPlanarRegionBeenAssigned.set(true);
-            environmentConstraintProvider.setReachabilityRegion(reachabilityConstraintHandler.getReachabilityConstraint());
-            if (!environmentConstraintProvider.validateConvexityOfPlanarRegion())
-               return;
-
-            footstepWasAdjusted.set(environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(), footstepSolution, upcomingFootstepContactPoints));
-            return;
-         }
-         else
-         {
-            footstepWasAdjusted.set(false);
-            return;
-         }
-      }
-
-
       environmentConstraintProvider.setReachabilityRegion(reachabilityConstraintHandler.getReachabilityConstraint());
       if (!environmentConstraintProvider.validateConvexityOfPlanarRegion())
          return;
 
-      applyStepAdjustmentFromError(residualICPError, omega0);
+      boolean errorAboveThreshold = icpError.lengthSquared() > MathTools.square(minICPErrorForStepAdjustment.getValue());
+      boolean wasAdjusted = false;
 
-      boolean adjusted = environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(), footstepSolution, upcomingFootstepContactPoints);
-      footstepWasAdjusted.set(footstepWasAdjusted.getValue() || adjusted);
+      if (errorAboveThreshold)
+      {
+         wasAdjusted = adjustStepForError(residualICPError, omega0);
+      }
+
+      if (environmentConstraintProvider.hasStepConstraintRegion() && (wasAdjusted || !hasPlanarRegionBeenAssigned.getBooleanValue()))
+      {
+         hasPlanarRegionBeenAssigned.set(true);
+         wasAdjusted |= environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(),
+                                                                                           footstepSolution,
+                                                                                           upcomingFootstepContactPoints);
+      }
+
+      footstepWasAdjusted.set(wasAdjusted);
 
       if (wasFootstepAdjusted() && CONTINUOUSLY_UPDATE_DESIRED_POSITION)
          upcomingFootstep.set(footstepSolution);
    }
 
-   private void applyStepAdjustmentFromError(FrameVector2DReadOnly residualICPError,
-                                             double omega0)
+   private boolean adjustStepForError(FrameVector2DReadOnly residualICPError, double omega0)
    {
+      boolean adjusted;
       footstepMultiplier.set(computeFootstepAdjustmentMultiplier(omega0));
       if (useActualErrorInsteadOfResidual.getValue())
       {
@@ -328,12 +322,12 @@ public class StepAdjustmentController
 
       if (footstepAdjustmentInControlPlane.length() < footstepDeadband.getValue())
       {
-         footstepWasAdjusted.set(false);
+         adjusted = false;
          deadbandedAdjustment.setToZero();
       }
       else
       {
-         footstepWasAdjusted.set(true);
+         adjusted = true;
          deadbandedAdjustment.set(footstepAdjustmentInControlPlane);
       }
 
@@ -350,6 +344,8 @@ public class StepAdjustmentController
 
       icpControlPlane.projectPointFromControlPlaneOntoSurface(worldFrame, adjustedSolutionInControlPlane, tempPoint, upcomingFootstep.getPosition().getZ());
       footstepSolution.getPosition().set(tempPoint);
+
+      return adjusted;
    }
 
    public FramePose3DReadOnly getFootstepSolution()
