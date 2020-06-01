@@ -21,6 +21,11 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
    public long sequence_id_;
 
    /**
+            * This is the current value of omega, which is the time constant of the inverted pendulum.
+            */
+   public double omega_;
+
+   /**
             * This is the measured position in world of the robot's capture point. Only x and y coordinates are relevant.
             */
    public us.ihmc.euclid.tuple3D.Point3D capture_point_2d_;
@@ -49,6 +54,7 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
    {
 
 
+
       capture_point_2d_ = new us.ihmc.euclid.tuple3D.Point3D();
 
       desired_capture_point_2d_ = new us.ihmc.euclid.tuple3D.Point3D();
@@ -71,6 +77,9 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
    {
 
       sequence_id_ = other.sequence_id_;
+
+
+      omega_ = other.omega_;
 
 
       geometry_msgs.msg.dds.PointPubSubType.staticCopy(other.capture_point_2d_, capture_point_2d_);
@@ -98,6 +107,22 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+
+   /**
+            * This is the current value of omega, which is the time constant of the inverted pendulum.
+            */
+   public void setOmega(double omega)
+   {
+      omega_ = omega;
+   }
+   /**
+            * This is the current value of omega, which is the time constant of the inverted pendulum.
+            */
+   public double getOmega()
+   {
+      return omega_;
    }
 
 
@@ -172,6 +197,9 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.omega_, other.omega_, epsilon)) return false;
+
+
       if (!this.capture_point_2d_.epsilonEquals(other.capture_point_2d_, epsilon)) return false;
 
       if (!this.desired_capture_point_2d_.epsilonEquals(other.desired_capture_point_2d_, epsilon)) return false;
@@ -210,6 +238,9 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
 
+      if(this.omega_ != otherMyClass.omega_) return false;
+
+
       if (!this.capture_point_2d_.equals(otherMyClass.capture_point_2d_)) return false;
 
       if (!this.desired_capture_point_2d_.equals(otherMyClass.desired_capture_point_2d_)) return false;
@@ -232,6 +263,9 @@ public class CapturabilityBasedStatus extends Packet<CapturabilityBasedStatus> i
 
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+
+      builder.append("omega=");
+      builder.append(this.omega_);      builder.append(", ");
 
       builder.append("capture_point_2d=");
       builder.append(this.capture_point_2d_);      builder.append(", ");

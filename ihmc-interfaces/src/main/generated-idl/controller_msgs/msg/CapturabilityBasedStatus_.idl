@@ -23,6 +23,10 @@ module controller_msgs
          */
         unsigned long sequence_id;
         /**
+         * This is the current value of omega, which is the time constant of the inverted pendulum.
+         */
+        double omega;
+        /**
          * This is the measured position in world of the robot's capture point. Only x and y coordinates are relevant.
          */
         geometry_msgs::msg::dds::Point capture_point_2d;

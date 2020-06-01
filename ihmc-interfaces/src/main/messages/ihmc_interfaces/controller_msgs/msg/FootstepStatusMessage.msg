@@ -11,8 +11,7 @@ byte ROBOT_SIDE_RIGHT = 1
 uint32 sequence_id
 
 # The current footstep status enum value.
-byte footstep_status 255
-# footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
+byte footstep_status 255 # footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
 int32 footstep_index
 # The robot side (left or right) that this footstep status correlates to.
 byte robot_side 255
@@ -24,3 +23,5 @@ geometry_msgs/Quaternion desired_foot_orientation_in_world
 geometry_msgs/Point actual_foot_position_in_world
 # Specifies the orientation of where the foot actually landed.
 geometry_msgs/Quaternion actual_foot_orientation_in_world
+# This is the swing duration of the step.
+float64 swing_duration
