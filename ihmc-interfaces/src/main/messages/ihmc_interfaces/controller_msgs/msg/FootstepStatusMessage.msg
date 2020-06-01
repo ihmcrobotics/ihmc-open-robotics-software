@@ -11,8 +11,7 @@ byte ROBOT_SIDE_RIGHT = 1
 uint32 sequence_id
 
 # The current footstep status enum value.
-byte footstep_status 255
-# footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
+byte footstep_status 255 # footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
 int32 footstep_index
 # The robot side (left or right) that this footstep status correlates to.
 byte robot_side 255
