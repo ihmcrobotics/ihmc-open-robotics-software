@@ -47,7 +47,11 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-public class InvertedFourBarLinkageController implements RobotController
+/**
+ * Controller demonstrating the usage of the {@link InverseDynamicsCalculator} in the presence of a
+ * four bar linkage.
+ */
+public class InvertedFourBarLinkageIDController implements RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getName());
    private final RigidBodyBasics rootBody;
@@ -77,7 +81,7 @@ public class InvertedFourBarLinkageController implements RobotController
    private final YoDouble[] desiredJointAccelerations;
    private final YoDouble[] inverseDynamicsJointEfforts;
 
-   public InvertedFourBarLinkageController(InvertedFourBarLinkageRobotDescription robotDescription, Robot robot)
+   public InvertedFourBarLinkageIDController(InvertedFourBarLinkageRobotDescription robotDescription, Robot robot)
    {
       rootBody = toInverseDynamicsRobot(robotDescription);
       multiBodySystem = MultiBodySystemBasics.toMultiBodySystemBasics(rootBody);

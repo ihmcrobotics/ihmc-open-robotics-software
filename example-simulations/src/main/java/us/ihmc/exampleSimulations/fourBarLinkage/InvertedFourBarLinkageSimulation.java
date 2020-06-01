@@ -13,7 +13,7 @@ public class InvertedFourBarLinkageSimulation
       InvertedFourBarLinkageRobotDescription robotDescription = new InvertedFourBarLinkageRobotDescription();
       RobotFromDescription robot = new RobotFromDescription(robotDescription);
 
-      InvertedFourBarLinkageController controller = new InvertedFourBarLinkageController(robotDescription, robot);
+      InvertedFourBarLinkageIDController controller = new InvertedFourBarLinkageIDController(robotDescription, robot);
       robot.setController(controller);
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, new SimulationConstructionSetParameters(1 << 17));
