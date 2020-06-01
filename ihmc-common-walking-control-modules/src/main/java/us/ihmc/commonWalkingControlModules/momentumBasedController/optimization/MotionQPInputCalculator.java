@@ -243,6 +243,8 @@ public class MotionQPInputCalculator
       {
          qpVariableSubstitutionToPack.variableIndices[i] = jointIndexHandler.getOneDoFJointIndex(loopJoints.get(i));
       }
+      qpVariableSubstitutionToPack.sortIndices();
+
       return true;
    }
 
