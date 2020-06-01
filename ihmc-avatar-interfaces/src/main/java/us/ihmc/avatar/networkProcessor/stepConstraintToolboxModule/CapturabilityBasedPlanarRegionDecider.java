@@ -49,7 +49,7 @@ public class CapturabilityBasedPlanarRegionDecider
    private final YoDouble maxAngleForSteppable;
    private final YoDouble minimumAreaForSteppable;
 
-   private List<PlanarRegion> steppableRegions = new ArrayList<>();
+   private final List<PlanarRegion> steppableRegions = new ArrayList<>();
 
    private final YoBoolean switchPlanarRegionConstraintsAutomatically;
 
@@ -101,7 +101,9 @@ public class CapturabilityBasedPlanarRegionDecider
 
    public void setPlanarRegions(java.util.List<PlanarRegion> planarRegions)
    {
-      steppableRegions = planarRegions.stream().filter(this::isRegionValidForStepping).collect(Collectors.toList());
+      steppableRegions.clear();
+      steppableRegions.addAll(planarRegions.stream().filter(this::isRegionValidForStepping).collect(Collectors.toList()));
+      return;
    }
 
    public void setCaptureRegion(FrameConvexPolygon2DReadOnly captureRegion)

@@ -68,7 +68,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
          }
       });
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
       {
          if (controller != null)
          {
@@ -81,7 +81,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
                                            REACommunicationProperties.outputTopic,
                                            s -> updatePlanarRegion(s.takeNextData()));
 
-      constraintRegionPublisher = ROS2Tools.createPublisher(realtimeRos2Node, StepConstraintMessage.class, ControllerAPIDefinition.getInputTopic(robotName));
+      constraintRegionPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, StepConstraintMessage.class, ControllerAPIDefinition.getInputTopic(robotName));
    }
 
    public void setSwitchPlanarRegionConstraintsAutomatically(boolean switchAutomatically)
