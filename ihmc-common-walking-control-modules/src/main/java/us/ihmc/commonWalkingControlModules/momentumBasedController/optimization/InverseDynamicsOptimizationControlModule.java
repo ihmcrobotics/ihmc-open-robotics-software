@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.ejml.data.DMatrixRMaj;
 
+import us.ihmc.commonWalkingControlModules.controllerCore.KinematicLoopControllerFunction;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
@@ -55,11 +56,13 @@ public class InverseDynamicsOptimizationControlModule
    private final InverseDynamicsQPSolver qpSolver;
    private final QPInput motionQPInput;
    private final QPInput rhoQPInput;
+   private final QPVariableSubstitution motionQPVariableSubstitution;
    private final MotionQPInputCalculator motionQPInputCalculator;
    private final WholeBodyControllerBoundCalculator boundCalculator;
    private final ExternalWrenchHandler externalWrenchHandler;
 
    private final JointBasics[] jointsToOptimizeFor;
+   private final List<KinematicLoopControllerFunction> kinematicLoopFunctions;
    private final int numberOfDoFs;
    private final int rhoSize;
 
@@ -92,6 +95,7 @@ public class InverseDynamicsOptimizationControlModule
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       oneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
+      kinematicLoopFunctions = toolbox.getKinematicLoopControllerFunctions();
       this.dynamicsMatrixCalculator = dynamicsMatrixCalculator;
 
       ReferenceFrame centerOfMassFrame = toolbox.getCenterOfMassFrame();
@@ -115,6 +119,7 @@ public class InverseDynamicsOptimizationControlModule
 
       motionQPInput = new QPInput(numberOfDoFs);
       rhoQPInput = new QPInput(rhoSize);
+      motionQPVariableSubstitution = new QPVariableSubstitution();
       externalWrenchHandler = new ExternalWrenchHandler(gravityZ, centerOfMassFrame, toolbox.getTotalRobotMass(), contactablePlaneBodies);
 
       motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
@@ -187,6 +192,12 @@ public class InverseDynamicsOptimizationControlModule
          computeJointAccelerationLimits();
          qpSolver.setMinJointAccelerations(qDDotMinMatrix);
          qpSolver.setMaxJointAccelerations(qDDotMaxMatrix);
+      }
+
+      for (int i = 0; i < kinematicLoopFunctions.size(); i++)
+      {
+         motionQPInputCalculator.convertKinematicLoopFunction(kinematicLoopFunctions.get(i), motionQPVariableSubstitution);
+         qpSolver.addAccelerationSubstitution(motionQPVariableSubstitution);
       }
 
       qpSolver.setMaxNumberOfIterations(maximumNumberOfIterations.getIntegerValue());

@@ -12,5 +12,7 @@ public interface KinematicLoopControllerFunction
 
    DMatrixRMaj getLoopConvectiveTerm();
 
+   void computeTau(DMatrixRMaj tauJoints);
+
    List<? extends OneDoFJointReadOnly> getLoopJoints();
 }
