@@ -21,7 +21,6 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.humanoidRobotics.footstep.Footstep.FootstepType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -152,7 +151,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
          MessageTools.copyData(waypoints, footstepDataMessage.getCustomPositionWaypoints());
 
-         if (footstep.getFootstepType() == FootstepType.PARTIAL_FOOTSTEP)
+         if (footstep.hasPredictedContactPoints())
          {
             partialFootholdPolygon.clear();
             partialFootholdPolygon.addVertices(Vertex2DSupplier.asVertex2DSupplier(footstep.getPredictedContactPoints()));
