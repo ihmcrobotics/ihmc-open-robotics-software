@@ -107,30 +107,15 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       convexHull.set(concaveHull);
    }
 
-<<<<<<< HEAD
-   public void set(RigidBodyTransform transformToWorld, List<Point2D> concaveHullVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
-=======
    public void set(RigidBodyTransform transformToWorld, List<? extends Point2DReadOnly> concaveHullsVertices, List<ConcavePolygon2D> holesInRegion)
->>>>>>> overhauled the step constraint region, and made a common interface with the planar region to allow reuse of some of the tools
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
 
-<<<<<<< HEAD
-      convexPolygons.clear();
-      for (int i = 0; i < planarRegionConvexPolygons.size(); i++)
-         convexPolygons.add(planarRegionConvexPolygons.get(i));
-
-      this.concaveHullsVertices.clear();
-      for (int i = 0; i < concaveHullVertices.size(); i++)
-         this.concaveHullsVertices.add(concaveHullVertices.get(i));
-      checkConcaveHullRepeatVertices();
-=======
       this.concaveHull.clear();
       for (int i = 0; i < concaveHullsVertices.size(); i++)
          concaveHull.addVertex(concaveHullsVertices.get(i));
       concaveHull.update();
->>>>>>> overhauled the step constraint region, and made a common interface with the planar region to allow reuse of some of the tools
 
       updateConvexHull();
       updateBoundingBox();
@@ -165,7 +150,7 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
 
    public List<? extends Point2DReadOnly> getConcaveHullVertices()
    {
-      return concaveHullsVertices;
+      return concaveHull.getVertexBufferView();
    }
 
    public int getConcaveHullSize()
