@@ -133,15 +133,16 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       assertTrue(smallRegionPlane.epsilonEquals(constraintCalculator.getConstraintRegion(), 1e-8));
 
       captureRegion.clear();
-      captureRegion.addVertex(stepLength + 0.05 + 0.05, -0.05 + 0.05);
-      captureRegion.addVertex(stepLength + 0.05 - 0.05, -0.05 + 0.05);
-      captureRegion.addVertex(stepLength + 0.05 - 0.05, -0.05 - 0.05);
-      captureRegion.addVertex(stepLength + 0.05 + 0.05, -0.05 - 0.05);
+      captureRegion.addVertex(stepLength + 0.05 + 0.05, 0.5 * stanceWidth + 0.05 - 0.2);
+      captureRegion.addVertex(stepLength + 0.05 - 0.05, 0.5 * stanceWidth + 0.05 - 0.2);
+      captureRegion.addVertex(stepLength + 0.05 - 0.05, 0.5 * stanceWidth - 0.05 - 0.2);
+      captureRegion.addVertex(stepLength + 0.05 + 0.05, 0.5 * stanceWidth - 0.05 - 0.2);
       captureRegion.update();
 
       constraintCalculator.setCaptureRegion(captureRegion);
 
       constraintCalculator.updatePlanarRegionConstraintForStep(stepPose);
+
       GeometryPolygonTestTools.assertConcavePolygon2DEquals(groundPlane.getConcaveHull(), constraintCalculator.getConstraintRegion().getConcaveHull(), 1e-8);
       assertTrue(groundPlane.epsilonEquals(constraintCalculator.getConstraintRegion(), 1e-8));
    }
