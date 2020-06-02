@@ -87,8 +87,8 @@ public class LookAndStepBodyPathPart
       task.setHumanoidRobotState(helper.getOrCreateRobotInterface().pollHumanoidRobotState());
       task.setIsBeingReviewed(isBeingReviewed);
       task.setMapRegionsExpirationStatus(mapRegionsExpirationTimer.getStatus(lookAndStepParameters.getPlanarRegionsExpiration()));
-      task.setPlanningFailedTimerStatus(planningFailedTimer.getStatus(lookAndStepParameters.get(LookAndStepBehaviorParameters.waitTimeAfterPlanFailed)));
-      task.setResetPlanningFailedTimer(() -> planningFailedTimer.reset());
+      task.setPlanningFailedTimerStatus(planningFailedTimer.getStatus(lookAndStepParameters.getWaitTimeAfterPlanFailed()));
+      task.setResetPlanningFailedTimer(planningFailedTimer::reset);
       task.setReviewInitiator(review);
       task.setSuccessfulPlanConsumer(successfulPlanConsumer);
       task.setVisibilityGraphParameters(visibilityGraphParameters);
