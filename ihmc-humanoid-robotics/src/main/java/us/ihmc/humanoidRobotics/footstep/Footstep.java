@@ -28,8 +28,6 @@ public class Footstep implements Settable<Footstep>
 
    private static int counter = 0;
    private final PoseReferenceFrame footstepSoleFrame = new PoseReferenceFrame(counter++ + "_FootstepSoleFrame", ReferenceFrame.getWorldFrame());
-   private boolean scriptedFootstep = false;
-   // ---
 
    private RobotSide robotSide;
    private final FramePose3D footstepPose = new FramePose3D();
@@ -112,7 +110,6 @@ public class Footstep implements Settable<Footstep>
       this.swingTrajectoryBlendDuration = other.swingTrajectoryBlendDuration;
       this.trustHeight = other.trustHeight;
       this.isAdjustable = other.isAdjustable;
-      this.scriptedFootstep = other.scriptedFootstep;
       this.trajectoryType = other.trajectoryType;
       this.swingHeight = other.swingHeight;
 
@@ -212,7 +209,6 @@ public class Footstep implements Settable<Footstep>
       swingTrajectoryBlendDuration = 0.0;
       trustHeight = true;
       isAdjustable = false;
-      scriptedFootstep = false;
       trajectoryType = TrajectoryType.DEFAULT;
       swingHeight = 0.0;
    }
@@ -433,16 +429,6 @@ public class Footstep implements Settable<Footstep>
    public void getOrientation(FrameQuaternion orientationToPack)
    {
       orientationToPack.setIncludingFrame(footstepPose.getOrientation());
-   }
-
-   public boolean isScriptedFootstep()
-   {
-      return scriptedFootstep;
-   }
-
-   public void setScriptedFootstep(boolean scriptedFootstep)
-   {
-      this.scriptedFootstep = scriptedFootstep;
    }
 
    public boolean epsilonEquals(Footstep otherFootstep, double epsilon)
