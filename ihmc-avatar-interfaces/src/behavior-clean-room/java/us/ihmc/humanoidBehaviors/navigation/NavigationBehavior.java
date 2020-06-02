@@ -300,8 +300,7 @@ public class NavigationBehavior implements BehaviorInterface
       TypedNotification<WalkingStatusMessage> walkingStatusNotification = robot.requestWalk(FootstepDataMessageConverter.createFootstepDataListFromPlan(
             shortenedFootstepPlan,
             1.0,
-            0.5,
-            ExecutionMode.OVERRIDE));
+            0.5));
 
       // wait for robot to finish walking
       Stopwatch stopwatch = new Stopwatch().start();
