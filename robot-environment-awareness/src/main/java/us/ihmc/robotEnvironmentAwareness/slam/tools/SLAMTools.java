@@ -8,6 +8,9 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.geometry.interfaces.Plane3DBasics;
+import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -81,6 +84,15 @@ public class SLAMTools
       }
 
       return convertedPoints;
+   }
+   
+   public static Plane3D createConvertedSurfaceElementToSensorPose(RigidBodyTransformReadOnly sensorPose, Plane3DReadOnly surfaceElement)
+   {
+      Plane3D convertedSurfel = new Plane3D();
+      sensorPose.inverseTransform(surfaceElement.getPoint(), convertedSurfel.getPoint());
+      sensorPose.inverseTransform(surfaceElement.getNormal(), convertedSurfel.getNormal());
+
+      return convertedSurfel;
    }
 
    public static Point3D createConvertedPointToSensorPose(RigidBodyTransformReadOnly sensorPose, Point3DReadOnly point)
@@ -230,6 +242,25 @@ public class SLAMTools
       {
          nearestHitDistanceSquared.setValue(Math.min(nearestHitDistanceSquared.doubleValue(),
                                                      EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, node.getHitLocationCopy(), node.getNormalCopy())));
+      });
+
+      return nearestHitDistanceSquared.getValue();
+   }
+
+   public static double computeSurfaceElementDistanceToNormalOctree(NormalOcTree octree, Plane3DBasics surfel)
+   {
+      OcTreeKey occupiedKey = octree.coordinateToKey(surfel.getPoint());
+      OcTreeKey nearestKey = new OcTreeKey();
+      OcTreeNearestNeighborTools.findNearestNeighbor(octree.getRoot(), octree.keyToCoordinate(occupiedKey), nearestKey);
+
+      MutableDouble nearestHitDistanceSquared = new MutableDouble(Double.POSITIVE_INFINITY);
+
+      OcTreeNearestNeighborTools.findRadiusNeighbors(octree.getRoot(), octree.keyToCoordinate(nearestKey), octree.getResolution(), node ->
+      {
+         double distanceToSurfel = EuclidGeometryTools.distanceFromPoint3DToPlane3D(surfel.getPoint(), node.getHitLocationCopy(), node.getNormalCopy());
+         double distanceToMap = EuclidGeometryTools.distanceFromPoint3DToPlane3D(node.getHitLocationCopy(), surfel.getPoint(), surfel.getNormal());
+         double distance = Math.min(distanceToSurfel, distanceToMap);
+         nearestHitDistanceSquared.setValue(Math.min(nearestHitDistanceSquared.doubleValue(), distance));
       });
 
       return nearestHitDistanceSquared.getValue();
