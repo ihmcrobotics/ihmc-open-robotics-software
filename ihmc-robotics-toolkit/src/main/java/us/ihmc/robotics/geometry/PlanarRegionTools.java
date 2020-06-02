@@ -32,7 +32,8 @@ public class PlanarRegionTools
     *
     * @param regionA PlanarRegion to check to see if it is above the other region.
     * @param regionB PlanarRegion to check to see if it is below the other region.
-    * @param epsilon Margin of error. If epsilon is positive, then will still return true even if there are points in regionB higher than regionA by at most epsilon.
+    * @param epsilon Margin of error. If epsilon is positive, then will still return true even if there are points in regionB higher than regionA by at
+    *       most epsilon.
     * @return true if regionA is above regionB, else false.
     */
    public static boolean isPlanarRegionAAbovePlanarRegionB(PlanarRegion regionA, PlanarRegion regionB, double epsilon)
@@ -111,12 +112,11 @@ public class PlanarRegionTools
    /**
     * Return true if the given point is contained inside the boundary.
     * https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
-    *
+    * <p>
     * Also check https://en.wikipedia.org/wiki/Point_in_polygon.
     *
     * @param test The point to check
     * @return true if the point is inside the boundary, false otherwise
-    *
     */
    public static boolean isPointInsideConcaveHull(List<? extends Point2DReadOnly> polygon, Point2DReadOnly test)
    {
@@ -126,12 +126,11 @@ public class PlanarRegionTools
    /**
     * Return true if the given point is contained inside the boundary.
     * https://stackoverflow.com/questions/8721406/how-to-determine-if-a-point-is-inside-a-2d-convex-polygon
-    *
+    * <p>
     * Also check https://en.wikipedia.org/wiki/Point_in_polygon.
     *
     * @param test The point to check
     * @return true if the point is inside the boundary, false otherwise
-    *
     */
    public static boolean isPointInsideConcaveHull(List<? extends Point2DReadOnly> polygon, double testX, double testY)
    {
@@ -647,13 +646,15 @@ public class PlanarRegionTools
 
    /**
     * Finds the minimum height between the convex hulls of two PlanarRegions when projected vertically.
-    * It does this by projecting all the vertices of one of the convex hulls to the other PlanarRegion's plane vertically in world. It then finds the minimum distance of those projections.
+    * It does this by projecting all the vertices of one of the convex hulls to the other PlanarRegion's plane vertically in world. It then finds the minimum
+    * distance of those projections.
     * Next it does the same thing for the other convex hull projected vertically onto the other region's plane. Finally, it takes the max of the two.
     * If one of the Planar Regions are vertical, such that the points of the other cannot be projected vertical on it, then that projection is ignored.
     *
     * @param regionA PlanarRegion to test height of points of its convex hull above the plane. Not modified.
     * @param regionB PlanarRegion that defines the plane that the points will be projected down onto. Not modified.
-    * @return Minimum vertical projection of {@code regionA} vertices onto the plane of regionB. The returned value is negative if the lowest vertex is below {@code region B}.
+    * @return Minimum vertical projection of {@code regionA} vertices onto the plane of regionB. The returned value is negative if the lowest vertex is below
+    *       {@code region B}.
     */
    public static double computeMinHeightOfRegionAAboveRegionB(PlanarRegion regionA, PlanarRegion regionB)
    {
@@ -761,7 +762,7 @@ public class PlanarRegionTools
     *
     * @param convexPolygon the query.
     * @return the list of planar regions intersecting with the given polygon. Returns null when no
-    *         region intersects.
+    *       region intersects.
     */
    public static List<PlanarRegion> findPlanarRegionsIntersectingPolygon(ConvexPolygon2DReadOnly convexPolygon, PlanarRegionsList regions)
    {
@@ -775,7 +776,7 @@ public class PlanarRegionTools
     *
     * @param convexPolygon the query.
     * @return the list of planar regions intersecting with the given polygon. Returns null when no
-    *         region intersects.
+    *       region intersects.
     */
    public static List<PlanarRegion> findPlanarRegionsIntersectingPolygon(ConvexPolygon2DReadOnly convexPolygon, List<PlanarRegion> regions)
    {
@@ -803,9 +804,9 @@ public class PlanarRegionTools
     *
     * @param point the query coordinates.
     * @param maximumOrthogonalDistance tolerance expressed as maximum orthogonal distance from the
-    *           region.
+    *       region.
     * @return the list of planar regions containing the query. Returns null when no region contains
-    *         the query.
+    *       the query.
     */
    public static List<PlanarRegion> findPlanarRegionsContainingPoint(List<PlanarRegion> planarRegionsToCheck,
                                                                      Point3DReadOnly point,
@@ -835,7 +836,7 @@ public class PlanarRegionTools
     * @param planarRegionsToCheck the list of the planar regions to look through
     * @param point the query coordinates.
     * @return the list of planar regions containing the query. Returns null when no region contains
-    *         the query.
+    *       the query.
     */
    public static List<PlanarRegion> findPlanarRegionsContainingPointByProjectionOntoXYPlane(List<PlanarRegion> planarRegionsToCheck, Point2DReadOnly point)
    {
@@ -851,7 +852,7 @@ public class PlanarRegionTools
     * @param x the query x-coordinate.
     * @param y the query y-coordinate.
     * @return the list of planar regions containing the query. Returns null when no region contains
-    *         the query.
+    *       the query.
     */
    public static List<PlanarRegion> findPlanarRegionsContainingPointByProjectionOntoXYPlane(List<PlanarRegion> planarRegionsToCheck, double x, double y)
    {
@@ -1088,32 +1089,28 @@ public class PlanarRegionTools
     */
    public static Point3D intersectRegionWithLine(RegionInWorldInterface region, Line3DReadOnly projectionLineInWorld)
    {
-      RigidBodyTransformReadOnly regionToWorld = region.getTransformToWorld();
-      RigidBodyTransformReadOnly regionToLocal = region.getTransformToLocal();
-
-      Vector3DReadOnly planeNormal = new Vector3D(0.0, 0.0, 1.0);
+      Vector3D planeNormal = new Vector3D();
       Point3D pointOnPlane = new Point3D();
+      region.getNormal(planeNormal);
       region.getOrigin(pointOnPlane);
 
-      Point3DBasics pointOnLineInLocal = new Point3D(projectionLineInWorld.getPoint());
-      Vector3DBasics directionOfLineInLocal = new Vector3D(projectionLineInWorld.getDirection());
+      Point3D intersectionWithPlane = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane,
+                                                                                              planeNormal,
+                                                                                              projectionLineInWorld.getPoint(),
+                                                                                              projectionLineInWorld.getDirection());
 
-      pointOnLineInLocal.applyTransform(regionToLocal);
-      directionOfLineInLocal.applyTransform(regionToLocal);
-
-      Point3D intersectionWithPlaneInLocal = EuclidGeometryTools.intersectionBetweenLine3DAndPlane3D(pointOnPlane,
-                                                                                                     planeNormal,
-                                                                                                     pointOnLineInLocal,
-                                                                                                     directionOfLineInLocal);
-      if (intersectionWithPlaneInLocal == null)
+      if (intersectionWithPlane == null)
       {
          return null;
       }
 
-      if (region.isPointInside(intersectionWithPlaneInLocal.getX(), intersectionWithPlaneInLocal.getY()))
+      RigidBodyTransformReadOnly regionToLocal = region.getTransformToLocal();
+      Point3DBasics intersectionInLocal = new Point3D(intersectionWithPlane);
+      regionToLocal.transform(intersectionInLocal);
+
+      if (region.isPointInside(intersectionInLocal.getX(), intersectionInLocal.getY()))
       {
-         intersectionWithPlaneInLocal.applyTransform(regionToWorld);
-         return intersectionWithPlaneInLocal;
+         return intersectionWithPlane;
       }
 
       return null;
