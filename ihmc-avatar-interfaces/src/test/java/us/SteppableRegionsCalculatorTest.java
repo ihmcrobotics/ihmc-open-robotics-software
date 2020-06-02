@@ -24,6 +24,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import static us.ihmc.robotics.Assert.*;
 
@@ -75,6 +76,9 @@ public class SteppableRegionsCalculatorTest
 
       assertEquals(1, constraintRegions.size());
       assertStepConstraintRegionsEqual(expectedRegion, constraintRegions.get(0), epsilon);
+
+      Random random = new Random(1738L);
+      SteppableRegionsCalculatorTestHelper.assertSteppableRegionsAreValid(random, constraintRegions, new PlanarRegionsList(listOfRegions));
    }
 
    @Test
@@ -157,6 +161,9 @@ public class SteppableRegionsCalculatorTest
 
       assertStepConstraintRegionsEqual(expectedGroundRegion, returnedGroundRegion, epsilon);
       assertStepConstraintRegionsEqual(expectedBlockRegion, returnedBlockRegion, epsilon);
+
+      Random random = new Random(1738L);
+      SteppableRegionsCalculatorTestHelper.assertSteppableRegionsAreValid(random, constraintRegions, new PlanarRegionsList(listOfRegions));
    }
 
    @Test
@@ -232,6 +239,9 @@ public class SteppableRegionsCalculatorTest
          else
             fail("Didn't return the region");
       }
+
+      Random random = new Random(1738L);
+      SteppableRegionsCalculatorTestHelper.assertSteppableRegionsAreValid(random, constraintRegions, new PlanarRegionsList(listOfRegions));
    }
 
    @Test
@@ -281,6 +291,9 @@ public class SteppableRegionsCalculatorTest
 
       StepConstraintRegion returnedGroundRegion = constraintRegions.get(0);
       assertStepConstraintRegionsEqual(expectedGroundRegion, returnedGroundRegion, epsilon);
+
+      Random random = new Random(1738L);
+      SteppableRegionsCalculatorTestHelper.assertSteppableRegionsAreValid(random, constraintRegions, new PlanarRegionsList(listOfRegions));
    }
 
    @Test
@@ -342,6 +355,9 @@ public class SteppableRegionsCalculatorTest
 
       assertStepConstraintRegionsEqual(expectedGroundRegion, returnedGroundRegion, epsilon);
       assertStepConstraintRegionsEqual(expectedBlockRegion, returnedBlockRegion, epsilon);
+
+      Random random = new Random(1738L);
+      SteppableRegionsCalculatorTestHelper.assertSteppableRegionsAreValid(random, constraintRegions, new PlanarRegionsList(listOfRegions));
    }
 
    @Test
@@ -427,6 +443,9 @@ public class SteppableRegionsCalculatorTest
       assertStepConstraintRegionsEqual(expectedGroundRegion, returnedGroundRegion, epsilon);
       assertStepConstraintRegionsEqual(expectedBlockRegion, returnedBlockRegion, epsilon);
       assertStepConstraintRegionsEqual(expectedBlockRegion2, returnedBlockRegion2, epsilon);
+
+      Random random = new Random(1738L);
+      SteppableRegionsCalculatorTestHelper.assertSteppableRegionsAreValid(random, constraintRegions, new PlanarRegionsList(listOfRegions));
    }
 
    @Test
@@ -504,11 +523,6 @@ public class SteppableRegionsCalculatorTest
 
       assertEquals(4, constraintRegions.size());
 
-      StepConstraintRegion returnedGroundRegion1 = constraintRegions.get(0);
-      StepConstraintRegion returnedGroundRegion2 = constraintRegions.get(1);
-      StepConstraintRegion returnedBlockRegion1 = constraintRegions.get(2);
-      StepConstraintRegion returnedBlockRegion2 = constraintRegions.get(3);
-
       for (int i = 0; i < 4; i++)
       {
          StepConstraintRegion constraintRegion = constraintRegions.get(i);
@@ -523,6 +537,9 @@ public class SteppableRegionsCalculatorTest
          else
             fail("Didn't return the right region.");
       }
+
+      Random random = new Random(1738L);
+      SteppableRegionsCalculatorTestHelper.assertSteppableRegionsAreValid(random, constraintRegions, new PlanarRegionsList(listOfRegions));
    }
 
    @Test
@@ -621,6 +638,9 @@ public class SteppableRegionsCalculatorTest
          else
             fail("Didn't return a region.");
       }
+
+      Random random = new Random(1738L);
+      SteppableRegionsCalculatorTestHelper.assertSteppableRegionsAreValid(random, constraintRegions, new PlanarRegionsList(listOfRegions));
    }
 
    @Test
@@ -934,6 +954,8 @@ public class SteppableRegionsCalculatorTest
             fail("Unable to find a reigon.");
       }
 
+      Random random = new Random(1738L);
+      SteppableRegionsCalculatorTestHelper.assertSteppableRegionsAreValid(random, stepConstraintRegions, new PlanarRegionsList(listOfRegions));
    }
 
    private static ObstacleExtrusionDistanceCalculator getExtrusionCalculator(double canEasilyStepOverHeight, double minimumDistanceFromCliffBottoms)
