@@ -11,6 +11,10 @@ byte FOOTSTEP_PLAN_HEADING_BACKWARD = 1
 byte FOOTSTEP_PLAN_HEADING_LEFT = 2
 byte FOOTSTEP_PLAN_HEADING_RIGHT = 3
 
+byte SWING_PLANNER_TYPE_NONE = 0
+byte SWING_PLANNER_TYPE_POSITION = 1
+byte SWING_PLANNER_TYPE_PROPORTION = 2
+
 int32 NO_PLAN_ID = -1
 
 # Starting left foot pose
@@ -57,6 +61,8 @@ bool assume_flat_ground
 int32 planner_request_id -1
 # Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
 float64 status_publish_period 1.0
+# Specifies swing planner to use. See the above enumeration
+byte requested_swing_planner 0
 
 # Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
 # For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
