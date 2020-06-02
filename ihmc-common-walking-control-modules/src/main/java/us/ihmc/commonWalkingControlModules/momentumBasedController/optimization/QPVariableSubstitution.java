@@ -9,8 +9,8 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.matrixlib.MatrixTools;
 
 /**
- * Configures the QP solver to substitute some of the variables being optimize {@code x} to to set
- * of variables {@code y}. The 2 sets of variables are related via the following equation:
+ * Configures the QP solver to substitute some of the variables being optimize {@code x} to a set of
+ * variables {@code y}. The 2 sets of variables are related via the following equation:
  * 
  * <pre>
  * x = G y + g
@@ -18,7 +18,7 @@ import us.ihmc.matrixlib.MatrixTools;
  * <p>
  * This is to facilitate the optimization of {@code x} when some of its components are not
  * independent and that the actual number of independent variables, i.e. represented by {@code y},
- * is smaller than the number of element in {@code x}.
+ * is smaller than the number of elements in {@code x}.
  * </p>
  * <p>
  * The original implementation was for handling four bar linkages which have 4 1-DoF joints but only
