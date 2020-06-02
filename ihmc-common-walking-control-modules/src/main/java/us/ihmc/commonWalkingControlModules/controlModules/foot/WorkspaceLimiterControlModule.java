@@ -176,7 +176,7 @@ public class WorkspaceLimiterControlModule
 
       maxPercentOfLegLengthForSingularityAvoidanceInSupport.set(0.98);
       maxPercentOfLegLengthForSingularityAvoidanceInSwing.set(0.97);
-      minPercentOfLegLengthForSingularityAvoidanceInSwing.set(0.5);
+      minPercentOfLegLengthForSingularityAvoidanceInSwing.set(0.45);
 
       percentOfLegLengthMarginToEnableSingularityAvoidance.set(0.1);
       percentOfLegLengthMarginToDisableSingularityAvoidance.set(0.12);
