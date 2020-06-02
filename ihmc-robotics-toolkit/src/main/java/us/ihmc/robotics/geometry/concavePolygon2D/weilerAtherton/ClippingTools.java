@@ -78,14 +78,6 @@ public class ClippingTools
    {
       LinkedPoint startPoint = list.getFirstPoint();
 
-      List<Point2DReadOnly> pointsList = new ArrayList<>();
-      do
-      {
-         pointsList.add(new Point2D(startPoint.getPoint()));
-         startPoint = startPoint.getSuccessor();
-      }
-      while (startPoint != list.getFirstPoint());
-
       Collection<Point2DReadOnly> intersections = new HashSet<>();
 
       // First, check to see if the start point is an intersection
@@ -96,24 +88,6 @@ public class ClippingTools
 
          if (EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(startPoint.getPoint(), vertex, nextVertex) < epsilonSquaredForSamePoint)
          {
-            // check to see if it's a corner
-            double distanceToStartEdge = startPoint.getPoint().distanceSquared(vertex);
-            double distanceToEndEdge = startPoint.getPoint().distanceSquared(nextVertex);
-            boolean isCornerOnOtherPolygon = distanceToStartEdge < epsilonForSamePoint || distanceToEndEdge < epsilonForSamePoint;
-
-            // FIXME this is pretty much guaranteed to be wrong.
-            /*
-            if (isCornerOnOtherPolygon)
-            {
-               startPoint.setIsIncomingIntersection(true);
-               startPoint.setIsOutgoingIntersection(true);
-               intersections.add(new Point2D(startPoint.getPoint()));
-
-               break;
-            }
-
-             */
-
             // So the intersection is on the edge of the other polygon. Is it an incoming or outgoing intersection?
             Point2DReadOnly slightlyBeforeIntersection = getPointSlightlyAfterIntersection(startPoint.getPoint(),
                                                                                            startPoint.getPredecessor().getPoint(),
@@ -162,26 +136,6 @@ public class ClippingTools
                startPoint.setIsPointBeforeInsideOther(true);
                startPoint.setIsPointBeforeInsideOther(true);
             }
-
-            /*
-            else if (isBeforeOnEdge && isAfterOnEdge)
-            {
-               isBeforeInside = false;
-               isAfterInside = false;
-            }
-            else if (!isBeforeOnEdge)
-            {
-               isAfterInside = isAfterOnEdge || isAfterInside;
-            }
-            else
-            {
-               isBeforeInside = isBeforeOnEdge || isBeforeInside;
-            }
-
-            startPoint.setIsPointBeforeInsideOther(isBeforeInside);
-            startPoint.setIsPointAfterInsideOther(isAfterInside);
-
-             */
 
             intersections.add(new Point2D(startPoint.getPoint()));
 
@@ -256,25 +210,6 @@ public class ClippingTools
 
             // Check to see if the corner on the list is also a corner on the other polygon
             Point2DReadOnly intersection = intersectionInfo.getIntersection();
-            double distanceToStartEdge = intersection.distanceSquared(intersectionInfo.getStartVertexOfIntersectingEdge());
-            double distanceToEndEdge = intersection.distanceSquared(intersectionInfo.getEndVertexOfIntersectingEdge());
-            boolean isCornerOnOtherPolygon = distanceToStartEdge < epsilonForSamePoint || distanceToEndEdge < epsilonForSamePoint;
-
-            /*
-            if (isCornerOnOtherPolygon)
-            {
-               nextPoint.setIsIncomingIntersection(true);
-               nextPoint.setIsOutgoingIntersection(true);
-               intersections.add(intersection);
-
-               startPoint = nextPoint;
-               if (startPoint == list.getFirstPoint())
-                  break;
-
-               continue;
-            }
-
-             */
 
             // So the intersection is on the edge of the other polygon. Is it an incoming or outgoing intersection?
             Point2DReadOnly slightlyBeforeIntersection = getPointSlightlyAfterIntersection(intersection, startPoint.getPoint(), wiggleDistance);
@@ -323,8 +258,6 @@ public class ClippingTools
                nextPoint.setIsPointBeforeInsideOther(true);
             }
 
-//            nextPoint.setIsPointBeforeInsideOther(isBeforeInside);
-//            nextPoint.setIsPointAfterInsideOther(isAfterInside);
             intersections.add(intersection);
          }
 
