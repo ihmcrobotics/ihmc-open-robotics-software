@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
@@ -76,18 +76,16 @@ public class FootstepPlanGraphic extends Group
 
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
-         Footstep footstep = plan.getFootstep(i);
+         PlannedFootstep footstep = plan.getFootstep(i);
          Color regionColor = footstep.getRobotSide() == RobotSide.LEFT ? Color.RED : Color.GREEN;
 
-         footstep.getPose(footPose);
+         footstep.getFootstepPose(footPose);
          footPose.get(transformToWorld);
          transformToWorld.appendTranslation(0.0, 0.0, 0.01);
 
          if (footstep.hasPredictedContactPoints())
          {
-            foothold.clear();
-            footstep.getPredictedContactPoints().forEach(foothold::addVertex);
-            foothold.update();
+            foothold.set(footstep.getFoothold());
          }
          else
          {

@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
@@ -9,7 +8,7 @@ import java.util.Collections;
 
 public class FootstepPlan
 {
-   private final ArrayList<Footstep> footsteps = new ArrayList<>();
+   private final ArrayList<PlannedFootstep> footsteps = new ArrayList<>();
 
    public FootstepPlan()
    {
@@ -20,19 +19,19 @@ public class FootstepPlan
       return footsteps.size();
    }
 
-   public Footstep getFootstep(int footstepIndex)
+   public PlannedFootstep getFootstep(int footstepIndex)
    {
       return footsteps.get(footstepIndex);
    }
 
-   public void addFootstep(Footstep footstep)
+   public void addFootstep(PlannedFootstep footstep)
    {
       footsteps.add(footstep);
    }
 
-   public Footstep addFootstep(RobotSide robotSide, FramePose3D soleFramePose)
+   public PlannedFootstep addFootstep(RobotSide robotSide, FramePose3D soleFramePose)
    {
-      Footstep simpleFootstep = new Footstep(robotSide, soleFramePose);
+      PlannedFootstep simpleFootstep = new PlannedFootstep(robotSide, soleFramePose);
       footsteps.add(simpleFootstep);
       return simpleFootstep;
    }
