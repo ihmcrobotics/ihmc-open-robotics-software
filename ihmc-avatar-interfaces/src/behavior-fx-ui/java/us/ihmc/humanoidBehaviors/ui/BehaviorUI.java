@@ -135,6 +135,7 @@ public class BehaviorUI
          primaryStage.show();
          primaryStage.toFront();
 
+         // TODO: Make a property to toggle video recording
          ThreadTools.scheduleSingleExecution("DelayRecordingStart", () -> {
             LogTools.info("Starting recording...");
             guiRecorder.start();
