@@ -60,7 +60,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple3DReadOnly;
-import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -802,8 +802,8 @@ public class CrossRobotCommandResolver
       out.setInitializeForTransfer(in.getInitializeForTransfer());
       out.setKeepCoPInsideSupportPolygon(in.getKeepCoPInsideSupportPolygon());
       out.setMinimizeAngularMomentumRateZ(in.getMinimizeAngularMomentumRateZ());
-      RecyclingArrayList<SimpleAdjustableFootstep> outFootsteps = out.getFootsteps();
-      RecyclingArrayList<SimpleAdjustableFootstep> inFootsteps = in.getFootsteps();
+      RecyclingArrayList<SimpleFootstep> outFootsteps = out.getFootsteps();
+      RecyclingArrayList<SimpleFootstep> inFootsteps = in.getFootsteps();
       outFootsteps.clear();
       for (int i = 0; i < inFootsteps.size(); i++)
          resolveSimpleAdjustableFootstep(inFootsteps.get(i), outFootsteps.add());
@@ -824,7 +824,7 @@ public class CrossRobotCommandResolver
       resolveFramePose3D(in.getFootstepSolution(), out.getFootstepSolution());
    }
 
-   public void resolveSimpleAdjustableFootstep(SimpleAdjustableFootstep in, SimpleAdjustableFootstep out)
+   public void resolveSimpleAdjustableFootstep(SimpleFootstep in, SimpleFootstep out)
    {
       out.setIsAdjustable(in.getIsAdjustable());
       out.setRobotSide(in.getRobotSide());
