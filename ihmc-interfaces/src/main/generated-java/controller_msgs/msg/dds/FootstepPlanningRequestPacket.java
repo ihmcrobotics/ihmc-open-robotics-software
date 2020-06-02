@@ -24,6 +24,12 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
    public static final byte FOOTSTEP_PLAN_HEADING_RIGHT = (byte) 3;
 
+   public static final byte SWING_PLANNER_TYPE_NONE = (byte) 0;
+
+   public static final byte SWING_PLANNER_TYPE_POSITION = (byte) 1;
+
+   public static final byte SWING_PLANNER_TYPE_PROPORTION = (byte) 2;
+
    public static final int NO_PLAN_ID = -1;
 
    /**
@@ -137,6 +143,11 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public double status_publish_period_ = 1.0;
 
    /**
+            * Specifies swing planner to use. See the above enumeration
+            */
+   public byte requested_swing_planner_;
+
+   /**
             * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
             * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
             */
@@ -169,6 +180,7 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
       planar_regions_list_message_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
+
 
 
 
@@ -243,6 +255,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
       status_publish_period_ = other.status_publish_period_;
+
+
+      requested_swing_planner_ = other.requested_swing_planner_;
 
 
       generate_log_ = other.generate_log_;
@@ -567,6 +582,22 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
+            * Specifies swing planner to use. See the above enumeration
+            */
+   public void setRequestedSwingPlanner(byte requested_swing_planner)
+   {
+      requested_swing_planner_ = requested_swing_planner;
+   }
+   /**
+            * Specifies swing planner to use. See the above enumeration
+            */
+   public byte getRequestedSwingPlanner()
+   {
+      return requested_swing_planner_;
+   }
+
+
+   /**
             * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
             * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
             */
@@ -668,6 +699,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.status_publish_period_, other.status_publish_period_, epsilon)) return false;
 
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_swing_planner_, other.requested_swing_planner_, epsilon)) return false;
+
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.generate_log_, other.generate_log_, epsilon)) return false;
 
 
@@ -742,6 +776,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
       if(this.status_publish_period_ != otherMyClass.status_publish_period_) return false;
+
+
+      if(this.requested_swing_planner_ != otherMyClass.requested_swing_planner_) return false;
 
 
       if(this.generate_log_ != otherMyClass.generate_log_) return false;
@@ -822,6 +859,9 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       builder.append("status_publish_period=");
       builder.append(this.status_publish_period_);      builder.append(", ");
+
+      builder.append("requested_swing_planner=");
+      builder.append(this.requested_swing_planner_);      builder.append(", ");
 
       builder.append("generate_log=");
       builder.append(this.generate_log_);

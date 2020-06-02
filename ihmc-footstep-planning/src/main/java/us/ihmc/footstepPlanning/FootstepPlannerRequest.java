@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -111,6 +112,11 @@ public class FootstepPlannerRequest
     */
    private double statusPublishPeriod;
 
+   /**
+    * Requested swing planner. Sets swing parameters to avoid collisions
+    */
+   private SwingPlannerType swingPlannerType = SwingPlannerType.NONE;
+
    public FootstepPlannerRequest()
    {
       clear();
@@ -137,6 +143,7 @@ public class FootstepPlannerRequest
       assumeFlatGround = false;
       bodyPathWaypoints.clear();
       statusPublishPeriod = 1.0;
+      swingPlannerType = SwingPlannerType.NONE;
    }
 
    public void setRequestId(int requestId)
@@ -269,6 +276,11 @@ public class FootstepPlannerRequest
       this.statusPublishPeriod = statusPublishPeriod;
    }
 
+   public void setSwingPlannerType(SwingPlannerType swingPlannerType)
+   {
+      this.swingPlannerType = swingPlannerType;
+   }
+
    public int getRequestId()
    {
       return requestId;
@@ -364,6 +376,11 @@ public class FootstepPlannerRequest
       return statusPublishPeriod;
    }
 
+   public SwingPlannerType getSwingPlannerType()
+   {
+      return swingPlannerType;
+   }
+
    public void setFromPacket(FootstepPlanningRequestPacket requestPacket)
    {
       clear();
@@ -390,6 +407,9 @@ public class FootstepPlannerRequest
       setAssumeFlatGround(requestPacket.getAssumeFlatGround());
       setStatusPublishPeriod(requestPacket.getStatusPublishPeriod());
 
+      SwingPlannerType swingPlannerType = SwingPlannerType.fromByte(requestPacket.getRequestedSwingPlanner());
+      if (swingPlannerType != null)
+         setSwingPlannerType(swingPlannerType);
       FootstepPlanHeading desiredHeading = FootstepPlanHeading.fromByte(requestPacket.getRequestedPathHeading());
       if (desiredHeading != null)
          setDesiredHeading(desiredHeading);
@@ -425,6 +445,7 @@ public class FootstepPlannerRequest
       requestPacket.setHorizonLength(getHorizonLength());
       requestPacket.setAssumeFlatGround(getAssumeFlatGround());
       requestPacket.setStatusPublishPeriod(getStatusPublishPeriod());
+      requestPacket.setRequestedSwingPlanner(getSwingPlannerType().toByte());
 
       requestPacket.getBodyPathWaypoints().clear();
       for (int i = 0; i < bodyPathWaypoints.size(); i++)

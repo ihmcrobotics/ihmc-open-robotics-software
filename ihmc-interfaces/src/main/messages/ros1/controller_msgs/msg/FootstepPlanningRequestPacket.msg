@@ -12,6 +12,12 @@ int8 FOOTSTEP_PLAN_HEADING_LEFT=2
 
 int8 FOOTSTEP_PLAN_HEADING_RIGHT=3
 
+int8 SWING_PLANNER_TYPE_NONE=0
+
+int8 SWING_PLANNER_TYPE_POSITION=1
+
+int8 SWING_PLANNER_TYPE_PROPORTION=2
+
 int32 NO_PLAN_ID=-1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
@@ -89,6 +95,9 @@ int32 planner_request_id
 # Period of time in seconds the planner will publish it's status. If this is a non-positive number no status is published until it's completed.
 # Field default value 1.0
 float64 status_publish_period
+
+# Specifies swing planner to use. See the above enumeration
+int8 requested_swing_planner
 
 # Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
 # For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/

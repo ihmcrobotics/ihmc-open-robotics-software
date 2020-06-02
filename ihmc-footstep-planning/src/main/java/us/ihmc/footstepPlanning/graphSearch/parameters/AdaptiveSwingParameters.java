@@ -36,7 +36,6 @@ public interface AdaptiveSwingParameters
    /**
     * Parameters for calculating custom waypoint proportions
     */
-
    double getFootStubClearance();
 
    double getWaypointProportionShiftForStubAvoidance();

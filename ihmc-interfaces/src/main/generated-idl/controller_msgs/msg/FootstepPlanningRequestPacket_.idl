@@ -27,6 +27,15 @@ module controller_msgs
       const octet FOOTSTEP_PLAN_HEADING_RIGHT =
       3;
 
+      const octet SWING_PLANNER_TYPE_NONE =
+      0;
+
+      const octet SWING_PLANNER_TYPE_POSITION =
+      1;
+
+      const octet SWING_PLANNER_TYPE_PROPORTION =
+      2;
+
       const long NO_PLAN_ID =
       -1;
 
@@ -135,6 +144,10 @@ module controller_msgs
          */
         @defaultValue(value=1.0)
         double status_publish_period;
+        /**
+         * Specifies swing planner to use. See the above enumeration
+         */
+        octet requested_swing_planner;
         /**
          * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
          * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
