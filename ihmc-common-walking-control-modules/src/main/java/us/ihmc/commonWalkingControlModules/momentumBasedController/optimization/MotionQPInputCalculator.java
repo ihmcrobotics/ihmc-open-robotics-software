@@ -229,7 +229,21 @@ public class MotionQPInputCalculator
       return true;
    }
 
-   public boolean convertKinematicLoopFunction(KinematicLoopFunction function, QPVariableSubstitution qpVariableSubstitutionToPack)
+   /**
+    * Configures the appropriate variable substitution to perform in the QP for satisfying the physical
+    * constraint for a kinematic loop.
+    * <p>
+    * The {@code qpVariableSubstitutionToPack} can then be add to the QP to register an additional
+    * substitution perform.
+    * </p>
+    * 
+    * @param function                     the explicit function representing a kinematic loop in the
+    *                                     multi-body system.
+    * @param qpVariableSubstitutionToPack the variable substitution to be configured. Modified.
+    * @see InverseDynamicsQPSolver#addAccelerationSubstitution(QPVariableSubstitution)
+    * @see InverseKinematicsQPSolver#addVariableSubstitution(QPVariableSubstitution)
+    */
+   public void convertKinematicLoopFunction(KinematicLoopFunction function, QPVariableSubstitution qpVariableSubstitutionToPack)
    {
       DMatrixRMaj loopJacobian = function.getLoopJacobian();
       DMatrixRMaj loopConvectiveTerm = function.getLoopConvectiveTerm();
@@ -243,8 +257,6 @@ public class MotionQPInputCalculator
       {
          qpVariableSubstitutionToPack.variableIndices[i] = jointIndexHandler.getOneDoFJointIndex(loopJoints.get(i));
       }
-
-      return true;
    }
 
    /**
