@@ -20,10 +20,11 @@ public class StepConstraintCalculatorViewer
    private final JavaFXMessager messager;
    private final PlanarRegionViewer planarRegionViewer;
    private final StepConstraintRegionViewer stepConstraintRegionViewer;
+   private final ObstacleExtrusionViewer obstacleExtrusionViewer;
 
    @FXML
    private BorderPane mainPane;
-   @FXML
+   `@FXML
    private CheckBox showPlanarRegions, showConstraintRegions;
 
 
@@ -49,6 +50,9 @@ public class StepConstraintCalculatorViewer
       this.stepConstraintRegionViewer = new StepConstraintRegionViewer(messager,
                                                                        StepConstraintCalculatorViewerAPI.StepConstraintRegionData,
                                                                        StepConstraintCalculatorViewerAPI.ShowStepConstraintRegions);
+      this.obstacleExtrusionViewer = new ObstacleExtrusionViewer(messager);
+      obstacleExtrusionViewer.setTopics(null, StepConstraintCalculatorViewerAPI.ShowExtrusionPoints, StepConstraintCalculatorViewerAPI.ShowObstacleExtrusions,
+                                        StepConstraintCalculatorViewerAPI.ObstacleExtrusionsData);
 
       view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(stepConstraintRegionViewer.getRoot());
@@ -58,6 +62,8 @@ public class StepConstraintCalculatorViewer
 
       messager.submitMessage(StepConstraintCalculatorViewerAPI.ShowPlanarRegions, false);
       messager.submitMessage(StepConstraintCalculatorViewerAPI.ShowStepConstraintRegions, true);
+      messager.submitMessage(StepConstraintCalculatorViewerAPI.ShowObstacleExtrusions, true);
+      messager.submitMessage(StepConstraintCalculatorViewerAPI.ShowExtrusionPoints, true);
 
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);

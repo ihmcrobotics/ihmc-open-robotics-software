@@ -193,14 +193,26 @@ public class ClusterTools
 
    public static List<Point2DReadOnly> extrudePolygon(boolean extrudeToTheLeft, List<Point3DReadOnly> rawPoints, ObstacleExtrusionDistanceCalculator calculator)
    {
+      return extrudePolygon(extrudeToTheLeft, rawPoints, calculator, false);
+   }
+
+   public static List<Point2DReadOnly> extrudePolygon(boolean extrudeToTheLeft, List<Point3DReadOnly> rawPoints, ObstacleExtrusionDistanceCalculator calculator, boolean uniformExtrusionDistance)
+   {
       double[] extrusionDistances = new double[rawPoints.size()];
       List<Point2DReadOnly> rawPoints2D = new ArrayList<>();
+      double maxValue = Double.NEGATIVE_INFINITY;
       for (int i = 0; i < rawPoints.size(); i++)
       {
          Point3DReadOnly rawPoint = rawPoints.get(i);
          Point2DReadOnly rawPoint2D = new Point2D(rawPoint);
          rawPoints2D.add(rawPoint2D);
          extrusionDistances[i] = calculator.computeExtrusionDistance(rawPoint2D, rawPoint.getZ());
+         maxValue = Math.max(maxValue, extrusionDistances[i]);
+      }
+      if (uniformExtrusionDistance)
+      {
+         for (int i = 0; i < rawPoints.size(); i++)
+            extrusionDistances[i] = maxValue;
       }
       return extrudePolygon(extrudeToTheLeft, rawPoints2D, extrusionDistances);
    }
@@ -717,7 +729,14 @@ public class ClusterTools
    }
 
    public static List<? extends Point2DReadOnly> computeObstacleNavigableExtrusionsInLocal(ClusterType type, List<Point3DReadOnly> rawClusterPoints,
-                                                                                            ObstacleExtrusionDistanceCalculator calculator)
+                                                                                           ObstacleExtrusionDistanceCalculator calculator)
+   {
+      return computeObstacleNavigableExtrusionsInLocal(type, rawClusterPoints, calculator, false);
+   }
+
+   public static List<? extends Point2DReadOnly> computeObstacleNavigableExtrusionsInLocal(ClusterType type, List<Point3DReadOnly> rawClusterPoints,
+                                                                                            ObstacleExtrusionDistanceCalculator calculator,
+                                                                                           boolean useUniformExtrusionDistance)
    {
       int numberOfExtrusionsAtEndpoints = 5;
 
@@ -726,7 +745,7 @@ public class ClusterTools
       case MULTI_LINE:
          return extrudeMultiLine(rawClusterPoints, calculator, numberOfExtrusionsAtEndpoints);
       case POLYGON:
-         return extrudePolygon(true, rawClusterPoints, calculator);
+         return extrudePolygon(true, rawClusterPoints, calculator, useUniformExtrusionDistance);
       default:
          throw new RuntimeException("Unhandled cluster type: " + type);
       }
