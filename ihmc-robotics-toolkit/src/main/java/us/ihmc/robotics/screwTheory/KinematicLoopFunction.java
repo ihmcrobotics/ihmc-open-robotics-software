@@ -37,6 +37,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
  * space, this is also referred to as the <b>loop convective term</b>.
  * </ul>
  * </p>
+ * <p>
+ * The framework is inspired from R. Featherstone's book on
+ * <a href="https://bcourses.berkeley.edu/files/70847609/download?download_frd=1">Rigid-Body
+ * Dynamics Algorithms - Chapter 8: Closed Loop Systems</a>.
+ * </p>
  * 
  * @author Sylvain Bertrand
  */
