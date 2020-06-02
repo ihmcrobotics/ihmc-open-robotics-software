@@ -20,14 +20,13 @@ public class GeometryPolygonTools
 {
    /**
     * Checks to see if the inner polygon is entirely inside the outer polygon.
-    * // FIXME this assumes the polygons are convex
     */
    public static boolean isPolygonInsideOtherPolygon(Vertex2DSupplier innerPolygon, ConcavePolygon2DReadOnly outerPolygon)
    {
       // if any of the points are outside, it fails.
       for (int i = 0; i < innerPolygon.getNumberOfVertices(); i++)
       {
-         if (!outerPolygon.isPointInside(innerPolygon.getVertex(i)))
+         if (!outerPolygon.isPointInsideEpsilon(innerPolygon.getVertex(i), 1e-7))
             return false;
       }
 
