@@ -50,7 +50,7 @@ public class StepConstraintToolboxModule extends ToolboxModule
             DEFAULT_UPDATE_PERIOD_MILLISECONDS,
             pubSubImplementation);
 
-      setTimeWithoutInputsBeforeGoingToSleep(3.0);
+      setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
       controller = new StepConstraintToolboxController(statusOutputManager,
                                                        constraintRegionPublisher,
                                                        robotModel.getWalkingControllerParameters(),
@@ -98,6 +98,17 @@ public class StepConstraintToolboxModule extends ToolboxModule
          {
             s.takeNextData(capturabilityBasedStatus, null);
             controller.updateCapturabilityBasedStatus(capturabilityBasedStatus);
+         }
+      });
+
+      FootstepStatusMessage statusMessage = new FootstepStatusMessage();
+
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
+      {
+         if (controller != null)
+         {
+            s.takeNextData(statusMessage, null);
+            controller.updateFootstepStatus(statusMessage);
          }
       });
 
