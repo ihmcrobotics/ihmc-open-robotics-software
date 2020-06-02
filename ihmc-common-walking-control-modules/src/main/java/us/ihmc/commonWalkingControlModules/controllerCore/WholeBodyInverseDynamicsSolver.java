@@ -42,7 +42,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.KinematicLoopFunction;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
@@ -78,7 +77,7 @@ public class WholeBodyInverseDynamicsSolver
 
    private final OneDoFJointBasics[] controlledOneDoFJoints;
    private final JointBasics[] jointsToOptimizeFor;
-   private List<KinematicLoopFunction> kinematicLoopFunctions;
+   private final List<KinematicLoopFunction> kinematicLoopFunctions;
 
    private final YoFrameVector3D yoDesiredMomentumRateLinear;
    private final YoFrameVector3D yoDesiredMomentumRateAngular;
@@ -287,14 +286,13 @@ public class WholeBodyInverseDynamicsSolver
 
    private final DMatrixRMaj kinematicLoopJointTau = new DMatrixRMaj(4, 1);
 
-   public void updateKinematicLoopJointEfforts()
+   private void updateKinematicLoopJointEfforts()
    {
       for (int i = 0; i < kinematicLoopFunctions.size(); i++)
       {
          KinematicLoopFunction kinematicLoopFunction = kinematicLoopFunctions.get(i);
          List<? extends OneDoFJointReadOnly> loopJoints = kinematicLoopFunction.getLoopJoints();
-         int nDofs = MultiBodySystemTools.computeDegreesOfFreedom(loopJoints);
-         kinematicLoopJointTau.reshape(nDofs, 1);
+         kinematicLoopJointTau.reshape(loopJoints.size(), 1);
 
          for (int j = 0; j < loopJoints.size(); j++)
          {
@@ -303,7 +301,7 @@ public class WholeBodyInverseDynamicsSolver
             kinematicLoopJointTau.set(j, tau);
          }
 
-         kinematicLoopFunction.computeTau(kinematicLoopJointTau);
+         kinematicLoopFunction.adjustTau(kinematicLoopJointTau);
 
          for (int j = 0; j < loopJoints.size(); j++)
          {
