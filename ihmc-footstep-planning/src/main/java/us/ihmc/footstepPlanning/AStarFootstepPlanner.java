@@ -223,12 +223,10 @@ public class AStarFootstepPlanner
       List<FootstepNode> path = footstepPlanner.getGraph().getPathFromStart(completionChecker.getEndNode());
       for (int i = 1; i < path.size(); i++)
       {
-         Footstep footstep = new Footstep();
-
-         footstep.setRobotSide(path.get(i).getRobotSide());
-
-         FootstepNodeSnapData snapData = snapper.snapFootstepNode(path.get(i), path.get(i - 1), true);
-         footstep.setPose(snapData.getSnappedNodeTransform(path.get(i)));
+         FootstepNode footstepNode = path.get(i);
+         FootstepNodeSnapData snapData = snapper.snapFootstepNode(footstepNode, path.get(i - 1), true);
+         PlannedFootstep footstep = new PlannedFootstep(footstepNode.getRobotSide());
+         footstep.getFootstepPose().set(snapData.getSnappedNodeTransform(footstepNode));
 
          if (request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty())
          {
@@ -236,7 +234,7 @@ public class AStarFootstepPlanner
             footstep.getFootstepPose().setZ(flatGroundHeight);
          }
 
-         footstep.setPredictedContactPoints(snapData.getCroppedFoothold().getVertexBufferView());
+         footstep.getFoothold().set(snapData.getCroppedFoothold());
          outputToPack.getFootstepPlan().addFootstep(footstep);
       }
 
