@@ -21,7 +21,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -199,7 +199,7 @@ public class StepAdjustmentController
       environmentConstraintProvider.reset();
    }
 
-   public void setFootstepToAdjust(SimpleAdjustableFootstep footstep, double swingDuration, double nextTransferDuration)
+   public void setFootstepToAdjust(SimpleFootstep footstep, double swingDuration, double nextTransferDuration)
    {
       FramePose3DReadOnly footstepPose = footstep.getSoleFramePose();
       footstepPose.checkReferenceFrameMatch(worldFrame);

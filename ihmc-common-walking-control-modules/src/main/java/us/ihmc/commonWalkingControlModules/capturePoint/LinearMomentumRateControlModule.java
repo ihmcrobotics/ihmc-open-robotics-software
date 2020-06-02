@@ -34,7 +34,7 @@ import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
-import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.dataStructures.parameters.ParameterVector3D;
@@ -148,7 +148,7 @@ public class LinearMomentumRateControlModule
    private boolean keepCoPInsideSupportPolygon;
    private double finalTransferDuration;
    private double remainingTimeInSwingUnderDisturbance;
-   private final RecyclingArrayList<SimpleAdjustableFootstep> footsteps = new RecyclingArrayList<>(SimpleAdjustableFootstep.class);
+   private final RecyclingArrayList<SimpleFootstep> footsteps = new RecyclingArrayList<>(SimpleFootstep.class);
    private final TDoubleArrayList swingDurations = new TDoubleArrayList();
    private final TDoubleArrayList transferDurations = new TDoubleArrayList();
 
