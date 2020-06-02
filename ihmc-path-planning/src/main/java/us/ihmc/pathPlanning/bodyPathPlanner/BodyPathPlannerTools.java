@@ -44,6 +44,9 @@ public class BodyPathPlannerTools
       return Math.atan2(deltaY, deltaX);
    }
 
+   /**
+    * @return segment index closest point is on
+    */
    public static int findClosestPointAlongPath(List<? extends Pose3DReadOnly> bodyPathPlan, Point3DReadOnly nearbyPoint, Point3DBasics closestPointToPack)
    {
       closestPointToPack.set(bodyPathPlan.get(0).getPosition());
@@ -74,5 +77,46 @@ public class BodyPathPlannerTools
       LogTools.trace("closestPointAlongPath: {}, closestDistance: {}, closestLineSegmentIndex: {}", closestPointToPack, closestDistance, closestSegmentIndex);
 
       return closestSegmentIndex;
+   }
+
+   /**
+    * Move point along body path plan by a distance.
+    *
+    * @return segment index moved point ends up on
+    */
+   public static int movePointAlongBodyPath(List<? extends Pose3DReadOnly> bodyPathPlan,
+                                             Point3DReadOnly pointOnBodyPath,
+                                             Point3DBasics movedPointToPack,
+                                             int segmentToStartOn,
+                                             double distance)
+   {
+      double moveAmountToGo = distance;
+      Point3D previousComparisonPoint = new Point3D(pointOnBodyPath);
+      Point3D endOfSegment = new Point3D();
+      int segmentIndexOfGoal = segmentToStartOn;
+      for (int i = segmentToStartOn; i < bodyPathPlan.size() - 1 && moveAmountToGo > 0; i++)
+      {
+         endOfSegment.set((bodyPathPlan.get(i + 1).getPosition()));
+
+         double distanceToEndOfSegment = endOfSegment.distance(previousComparisonPoint);
+         LogTools.trace("Evaluating segment {}, moveAmountToGo: {}, distanceToEndOfSegment: {}", i, moveAmountToGo, distanceToEndOfSegment);
+
+         if (distanceToEndOfSegment < moveAmountToGo)
+         {
+            previousComparisonPoint.set(bodyPathPlan.get(i + 1).getPosition()));
+            moveAmountToGo -= distanceToEndOfSegment;
+         }
+         else
+         {
+            movedPointToPack.interpolate(previousComparisonPoint, endOfSegment, moveAmountToGo / distanceToEndOfSegment);
+            moveAmountToGo = 0;
+         }
+
+         movedPointToPack.set(previousComparisonPoint);
+         segmentIndexOfGoal = i;
+      }
+      LogTools.trace("previousComparisonPoint: {}, goalPoint: {}", previousComparisonPoint, movedPointToPack);
+
+      return segmentIndexOfGoal;
    }
 }

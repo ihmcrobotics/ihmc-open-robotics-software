@@ -193,34 +193,12 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.publishToUI(ClosestPointForUI, new Pose3D(closestPointAlongPath, new Quaternion()));
 
       // move point along body path plan by plan horizon
-      Point3D goalPoint = new Point3D(closestPointAlongPath);
-
-      double moveAmountToGo = lookAndStepParameters.get(LookAndStepBehaviorParameters.planHorizon);
-
-      Point3D previousComparisonPoint = closestPointAlongPath;
-      int segmentIndexOfGoal = closestSegmentIndex;
-      for (int i = closestSegmentIndex; i < bodyPathPlan.size() - 1 && moveAmountToGo > 0; i++)
-      {
-         Point3D endOfSegment = bodyPathPlan.get(i + 1).getPosition();
-
-         double distanceToEndOfSegment = endOfSegment.distance(previousComparisonPoint);
-         LogTools.info("Evaluating segment {}, moveAmountToGo: {}, distanceToEndOfSegment: {}", i, moveAmountToGo, distanceToEndOfSegment);
-
-         if (distanceToEndOfSegment < moveAmountToGo)
-         {
-            previousComparisonPoint = bodyPathPlan.get(i + 1).getPosition();
-            moveAmountToGo -= distanceToEndOfSegment;
-         }
-         else
-         {
-            goalPoint.interpolate(previousComparisonPoint, endOfSegment, moveAmountToGo / distanceToEndOfSegment);
-            moveAmountToGo = 0;
-         }
-
-         goalPoint.set(previousComparisonPoint);
-         segmentIndexOfGoal = i;
-      }
-      LogTools.info("previousComparisonPoint: {}, goalPoint: {}", previousComparisonPoint, goalPoint);
+      Point3D goalPoint = new Point3D();
+      int segmentIndexOfGoal = BodyPathPlannerTools.movePointAlongBodyPath(bodyPathPlan,
+                                                                           closestPointAlongPath,
+                                                                           goalPoint,
+                                                                           closestSegmentIndex,
+                                                                           lookAndStepParameters.get(LookAndStepBehaviorParameters.planHorizon));
 
       if (closestPointAlongPath.distanceXY(goalPoint) < lookAndStepParameters.get(LookAndStepBehaviorParameters.goalSatisfactionRadius))
       {
