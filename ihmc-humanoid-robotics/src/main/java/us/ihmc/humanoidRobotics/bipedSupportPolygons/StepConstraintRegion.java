@@ -56,7 +56,9 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       this(transformToWorld, vertexSupplier, new ArrayList<>());
    }
 
-   public StepConstraintRegion(RigidBodyTransformReadOnly transformToWorld, Vertex2DSupplier vertexSupplier, List<? extends ConcavePolygon2DReadOnly> holesInRegion)
+   public StepConstraintRegion(RigidBodyTransformReadOnly transformToWorld,
+                               Vertex2DSupplier vertexSupplier,
+                               List<? extends ConcavePolygon2DReadOnly> holesInRegion)
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
@@ -81,7 +83,6 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       convexHull.set(other.convexHull);
       updateBoundingBox();
    }
-
 
    private void checkConcaveHullRepeatVertices()
    {
@@ -228,7 +229,7 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
    public boolean isPointInside(double xInLocal, double yInLocal)
    {
       if (!concaveHull.isPointInside(xInLocal, yInLocal))
-         return true;
+         return false;
 
       for (int i = 0; i < getNumberOfHolesInRegion(); i++)
       {
@@ -281,9 +282,10 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
 
       for (int i = 0; i < concaveHull.getNumberOfVertices(); i++)
       {
-            Point2DReadOnly vertex = concaveHull.getVertex(i);
-            tempPointForConvexPolygonProjection.set(vertex.getX(), vertex.getY(), 0.0);
-            fromLocalToWorldTransform.transform(tempPointForConvexPolygonProjection);
+         Point2DReadOnly vertex = concaveHull.getVertex(i);
+         tempPointForConvexPolygonProjection.set(vertex.getX(), vertex.getY(), 0.0);
+         fromLocalToWorldTransform.transform(tempPointForConvexPolygonProjection);
+         this.boundingBox3dInWorld.updateToIncludePoint(tempPointForConvexPolygonProjection);
       }
 
       Point3DReadOnly minPoint = boundingBox3dInWorld.getMinPoint();
