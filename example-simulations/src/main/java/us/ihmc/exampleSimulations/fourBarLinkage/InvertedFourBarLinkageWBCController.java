@@ -204,7 +204,7 @@ public class InvertedFourBarLinkageWBCController implements RobotController
    public void doControl()
    {
       readState();
-      fourBarKinematicLoop.updateState(false);
+      fourBarKinematicLoop.updateState(true, false);
       rootBody.updateFramesRecursively();
 
       if (HAS_SHOULDER_JOINT)

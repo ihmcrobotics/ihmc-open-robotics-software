@@ -194,7 +194,7 @@ public class InvertedFourBarLinkageIDController implements RobotController
    public void doControl()
    {
       readState();
-      fourBarKinematicLoop.updateState(false);
+      fourBarKinematicLoop.updateState(true, false);
       rootBody.updateFramesRecursively();
 
       for (int i = 0; i < oneDoFJoints.length; i++)
@@ -238,7 +238,7 @@ public class InvertedFourBarLinkageIDController implements RobotController
          wristJoint.setQdd(qdd_d_wrist);
       }
 
-      fourBarKinematicLoop.updateState(true);
+      fourBarKinematicLoop.updateState(true, true);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
