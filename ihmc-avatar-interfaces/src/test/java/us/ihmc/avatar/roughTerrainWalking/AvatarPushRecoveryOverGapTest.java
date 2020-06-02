@@ -78,10 +78,6 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
 
       drcSimulationTestHelper.publishToController(planarRegionsListMessage);
-
-      stepConstraintModule = new StepConstraintToolboxModule(robotModel, true, PubSubImplementation.INTRAPROCESS, 9.81);
-      stepConstraintModule.setSwitchPlanarRegionConstraintsAutomatically(true);
-      stepConstraintModule.wakeUp();
       stepConstraintModule.updatePlanarRegion(planarRegionsListMessage);
 
       double z = getForcePointOffsetZInChestFrame();
@@ -140,7 +136,6 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    @Test
    public void testForwardPush() throws SimulationExceededMaximumTimeException
    {
-      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
 
       double totalMass  = getRobotModel().createFullRobotModel().getTotalMass();
