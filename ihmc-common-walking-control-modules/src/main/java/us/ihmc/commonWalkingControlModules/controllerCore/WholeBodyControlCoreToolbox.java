@@ -173,6 +173,11 @@ public class WholeBodyControlCoreToolbox
       parentRegistry.addChild(registry);
    }
 
+   /**
+    * Registers an new function for handling a kinematic loop in the multi-body system.
+    * 
+    * @param function the constraint function for one kinematic loop.
+    */
    public void addKinematicLoopFunction(KinematicLoopFunction function)
    {
       kinematicLoopFunctions.add(function);
