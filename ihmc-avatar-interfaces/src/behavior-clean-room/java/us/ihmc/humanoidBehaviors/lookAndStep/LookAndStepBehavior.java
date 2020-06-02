@@ -59,6 +59,8 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final LookAndStepReviewPart<ArrayList<Pose3D>> bodyPathReview;
    private final LookAndStepReviewPart<FootstepPlan> footstepPlanReview;
 
+   private final LookAndStepBodyPathPart bodyPathPart;
+
    private final AtomicReference<Boolean> operatorReviewEnabledInput;
    private final TypedNotification<Boolean> approvalNotification;
    private final FramePose3D goalPoseBetweenFeet = new FramePose3D();
@@ -85,6 +87,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       realsenseSLAMRegions = helper.createROS2PlanarRegionsListInput(ROS2Tools.REALSENSE_SLAM_REGIONS);
 
       visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
+      visibilityGraphParameters.setIncludePreferredExtrusions(false);
 
       helper.createUICallback(LookAndStepParameters, lookAndStepParameters::setAllFromStrings);
       footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
@@ -95,6 +98,14 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       bodyPathReview = new LookAndStepReviewPart<>("body path", approvalNotification, this::footstepPlanningAcceptBodyPath);
       footstepPlanReview = new LookAndStepReviewPart<>("footstep plan", approvalNotification, this::robotWalkingModuleAcceptFootstepPlan);
+
+      bodyPathPart = new LookAndStepBodyPathPart(helper,
+                                                 bodyPathReview::isBeingReviewed,
+                                                 lookAndStepParameters,
+                                                 visibilityGraphParameters,
+                                                 callback -> helper.createROS2Callback(ROS2Tools.MAP_REGIONS, callback),
+                                                 callback -> helper.createUICallback(GoalInput, callback),
+                                                 this::footstepPlanningAcceptBodyPath);
 
       // TODO: Want to be able to wire up behavior here and see all present modules
 
@@ -231,7 +242,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       {
          if (operatorReviewEnabledInput.get())
          {
-            ThreadTools.startAsDaemon(() -> bodyPathReview.review(bodyPathPlanForReview), "BodyPathReview");
+            bodyPathReview.review(bodyPathPlanForReview);
          }
          else
          {
@@ -493,7 +504,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       if (operatorReviewEnabledInput.get())
       {
-         ThreadTools.startAsDaemon(() -> footstepPlanReview.review(footstepPlannerOutput.getFootstepPlan()), "FootstepPlanReview");
+         footstepPlanReview.review(footstepPlannerOutput.getFootstepPlan());
       }
       else
       {
