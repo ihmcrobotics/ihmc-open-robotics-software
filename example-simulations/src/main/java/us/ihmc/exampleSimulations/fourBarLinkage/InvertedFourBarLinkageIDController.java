@@ -101,7 +101,7 @@ public class InvertedFourBarLinkageIDController implements RobotController
 
       if (HAS_SHOULDER_JOINT)
       {
-         shoulderFunctionGenerator = new SineGenerator("shoulderFunction", robot.getYoTime());
+         shoulderFunctionGenerator = new SineGenerator("shoulderFunction", robot.getYoTime(), registry);
          double shoulderRange = shoulderJoint.getJointLimitUpper() - shoulderJoint.getJointLimitLower();
          shoulderFunctionGenerator.setAmplitude(EuclidCoreRandomTools.nextDouble(random, 0.0, 0.5 * shoulderRange));
          shoulderFunctionGenerator.setFrequency(EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0));
@@ -113,7 +113,7 @@ public class InvertedFourBarLinkageIDController implements RobotController
          shoulderFunctionGenerator = null;
       }
 
-      fourBarFunctionGenerator = new SineGenerator("fourBarFunction", robot.getYoTime());
+      fourBarFunctionGenerator = new SineGenerator("fourBarFunction", robot.getYoTime(), registry);
       double masterJointMidRange = 0.5 * (masterJoint.getJointLimitUpper() + masterJoint.getJointLimitLower());
       double masterJointMin = EuclidCoreRandomTools.nextDouble(random, masterJoint.getJointLimitLower(), masterJointMidRange);
       double masterJointMax = EuclidCoreRandomTools.nextDouble(random, masterJointMidRange, masterJoint.getJointLimitUpper());
@@ -124,7 +124,7 @@ public class InvertedFourBarLinkageIDController implements RobotController
 
       if (HAS_WRIST_JOINT)
       {
-         wristFunctionGenerator = new SineGenerator("wristFunction", robot.getYoTime());
+         wristFunctionGenerator = new SineGenerator("wristFunction", robot.getYoTime(), registry);
          double wristRange = wristJoint.getJointLimitUpper() - wristJoint.getJointLimitLower();
          wristFunctionGenerator.setAmplitude(EuclidCoreRandomTools.nextDouble(random, 0.0, 0.5 * wristRange));
          wristFunctionGenerator.setFrequency(EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0));
@@ -364,7 +364,7 @@ public class InvertedFourBarLinkageIDController implements RobotController
          addLoopClosureConstraintRecursive(childJoint, constraintPredecessor);
    }
 
-   private class SineGenerator
+   static class SineGenerator
    {
       private final YoDouble position;
       private final YoDouble velocity;
@@ -377,7 +377,7 @@ public class InvertedFourBarLinkageIDController implements RobotController
 
       private final DoubleProvider time;
 
-      public SineGenerator(String name, DoubleProvider timeProvider)
+      public SineGenerator(String name, DoubleProvider timeProvider, YoVariableRegistry registry)
       {
          this.time = timeProvider;
          position = new YoDouble(name + "Position", registry);
@@ -431,6 +431,26 @@ public class InvertedFourBarLinkageIDController implements RobotController
       public double getAcceleration()
       {
          return acceleration.getValue();
+      }
+
+      public double getAmplitude()
+      {
+         return amplitude.getValue();
+      }
+
+      public double getFrequency()
+      {
+         return frequency.getValue();
+      }
+
+      public double getPhase()
+      {
+         return phase.getValue();
+      }
+
+      public double getOffset()
+      {
+         return offset.getValue();
       }
    }
 }

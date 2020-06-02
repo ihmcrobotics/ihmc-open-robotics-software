@@ -5,7 +5,6 @@ import static us.ihmc.exampleSimulations.fourBarLinkage.InvertedFourBarLinkageRo
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
@@ -16,45 +15,22 @@ import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCor
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
-import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.exampleSimulations.controllerCore.RobotArmControllerCoreOptimizationSettings;
-import us.ihmc.log.LogTools;
-import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
-import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
-import us.ihmc.mecano.multiBodySystem.RigidBody;
-import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
+import us.ihmc.exampleSimulations.fourBarLinkage.InvertedFourBarLinkageIDController.SineGenerator;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
-import us.ihmc.robotics.robotDescription.FloatingJointDescription;
-import us.ihmc.robotics.robotDescription.JointDescription;
-import us.ihmc.robotics.robotDescription.LinkDescription;
-import us.ihmc.robotics.robotDescription.LoopClosureConstraintDescription;
-import us.ihmc.robotics.robotDescription.LoopClosurePinConstraintDescription;
-import us.ihmc.robotics.robotDescription.PinJointDescription;
-import us.ihmc.robotics.robotDescription.RobotDescription;
-import us.ihmc.robotics.robotDescription.SliderJointDescription;
 import us.ihmc.robotics.screwTheory.FourBarKinematicLoop;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
-import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
  * Controller demonstrating the usage of the {@link WholeBodyControllerCore} in the presence of a
@@ -86,7 +62,7 @@ public class InvertedFourBarLinkageWBCController implements RobotController
 
    public InvertedFourBarLinkageWBCController(InvertedFourBarLinkageRobotDescription robotDescription, Robot robot, double controlDT)
    {
-      rootBody = toInverseDynamicsRobot(robotDescription);
+      rootBody = InvertedFourBarLinkageIDController.toInverseDynamicsRobot(robotDescription);
       shoulderJoint = HAS_SHOULDER_JOINT ? findJoint(robotDescription.getShoulderJointName()) : null;
       jointA = findJoint(robotDescription.getJointAName());
       jointB = findJoint(robotDescription.getJointBName());
@@ -100,19 +76,19 @@ public class InvertedFourBarLinkageWBCController implements RobotController
 
       if (HAS_SHOULDER_JOINT)
       {
-         shoulderFunctionGenerator = new SineGenerator("shoulderFunction", robot.getYoTime());
+         shoulderFunctionGenerator = new SineGenerator("shoulderFunction", robot.getYoTime(), registry);
          double shoulderRange = shoulderJoint.getJointLimitUpper() - shoulderJoint.getJointLimitLower();
          shoulderFunctionGenerator.setAmplitude(EuclidCoreRandomTools.nextDouble(random, 0.0, 0.5 * shoulderRange));
          shoulderFunctionGenerator.setFrequency(EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0));
          shoulderFunctionGenerator.setPhase(EuclidCoreRandomTools.nextDouble(random, Math.PI));
-         shoulderFunctionGenerator.setOffset(EuclidCoreRandomTools.nextDouble(random, 0.5 * shoulderRange - shoulderFunctionGenerator.amplitude.getValue()));
+         shoulderFunctionGenerator.setOffset(EuclidCoreRandomTools.nextDouble(random, 0.5 * shoulderRange - shoulderFunctionGenerator.getAmplitude()));
       }
       else
       {
          shoulderFunctionGenerator = null;
       }
 
-      fourBarFunctionGenerator = new SineGenerator("fourBarFunction", robot.getYoTime());
+      fourBarFunctionGenerator = new SineGenerator("fourBarFunction", robot.getYoTime(), registry);
       double masterJointMidRange = 0.5 * (masterJoint.getJointLimitUpper() + masterJoint.getJointLimitLower());
       double masterJointMin = EuclidCoreRandomTools.nextDouble(random, masterJoint.getJointLimitLower(), masterJointMidRange);
       double masterJointMax = EuclidCoreRandomTools.nextDouble(random, masterJointMidRange, masterJoint.getJointLimitUpper());
@@ -123,12 +99,12 @@ public class InvertedFourBarLinkageWBCController implements RobotController
 
       if (HAS_WRIST_JOINT)
       {
-         wristFunctionGenerator = new SineGenerator("wristFunction", robot.getYoTime());
+         wristFunctionGenerator = new SineGenerator("wristFunction", robot.getYoTime(), registry);
          double wristRange = wristJoint.getJointLimitUpper() - wristJoint.getJointLimitLower();
          wristFunctionGenerator.setAmplitude(EuclidCoreRandomTools.nextDouble(random, 0.0, 0.5 * wristRange));
          wristFunctionGenerator.setFrequency(EuclidCoreRandomTools.nextDouble(random, 0.0, 2.0));
          wristFunctionGenerator.setPhase(EuclidCoreRandomTools.nextDouble(random, Math.PI));
-         wristFunctionGenerator.setOffset(EuclidCoreRandomTools.nextDouble(random, 0.5 * wristRange - wristFunctionGenerator.amplitude.getValue()));
+         wristFunctionGenerator.setOffset(EuclidCoreRandomTools.nextDouble(random, 0.5 * wristRange - wristFunctionGenerator.getAmplitude()));
       }
       else
       {
@@ -273,165 +249,5 @@ public class InvertedFourBarLinkageWBCController implements RobotController
    public YoVariableRegistry getYoVariableRegistry()
    {
       return registry;
-   }
-
-   static RigidBodyBasics toInverseDynamicsRobot(RobotDescription description)
-   {
-      RigidBody rootBody = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
-      for (JointDescription rootJoint : description.getRootJoints())
-         addJointRecursive(rootJoint, rootBody);
-      for (JointDescription rootJoint : description.getRootJoints())
-         addLoopClosureConstraintRecursive(rootJoint, rootBody);
-      return rootBody;
-   }
-
-   static void addJointRecursive(JointDescription jointDescription, RigidBodyBasics parentBody)
-   {
-      JointBasics joint;
-      String name = jointDescription.getName();
-      Vector3D jointOffset = new Vector3D();
-      jointDescription.getOffsetFromParentJoint(jointOffset);
-
-      if (jointDescription instanceof PinJointDescription)
-      {
-         Vector3D jointAxis = new Vector3D();
-         PinJointDescription pinJointDescription = (PinJointDescription) jointDescription;
-         pinJointDescription.getJointAxis(jointAxis);
-         RevoluteJoint revoluteJoint = new RevoluteJoint(name, parentBody, jointOffset, jointAxis);
-         revoluteJoint.setJointLimits(pinJointDescription.getLowerLimit(), pinJointDescription.getUpperLimit());
-         joint = revoluteJoint;
-      }
-      else if (jointDescription instanceof SliderJointDescription)
-      {
-         Vector3D jointAxis = new Vector3D();
-         SliderJointDescription sliderJointDescription = (SliderJointDescription) jointDescription;
-         sliderJointDescription.getJointAxis(jointAxis);
-         PrismaticJoint prismaticJoint = new PrismaticJoint(name, parentBody, jointOffset, jointAxis);
-         prismaticJoint.setJointLimits(sliderJointDescription.getLowerLimit(), sliderJointDescription.getUpperLimit());
-         joint = prismaticJoint;
-      }
-      else if (jointDescription instanceof FloatingJointDescription)
-      {
-         RigidBodyTransform transformToParent = new RigidBodyTransform();
-         transformToParent.getTranslation().set(jointOffset);
-         joint = new SixDoFJoint(name, parentBody, transformToParent);
-      }
-      else
-      {
-         throw new IllegalStateException("Joint type not handled.");
-      }
-
-      LinkDescription linkDescription = jointDescription.getLink();
-
-      String bodyName = linkDescription.getName();
-      Matrix3DReadOnly momentOfInertia = linkDescription.getMomentOfInertiaCopy();
-      double mass = linkDescription.getMass();
-      Tuple3DReadOnly centerOfMassOffset = linkDescription.getCenterOfMassOffset();
-      RigidBody successor = new RigidBody(bodyName, joint, momentOfInertia, mass, centerOfMassOffset);
-
-      for (JointDescription childJoint : jointDescription.getChildrenJoints())
-         addJointRecursive(childJoint, successor);
-   }
-
-   static void addLoopClosureConstraintRecursive(JointDescription jointDescription, RigidBodyBasics parentBody)
-   {
-      JointBasics joint = parentBody.getChildrenJoints().stream().filter(child -> child.getName().equals(jointDescription.getName())).findFirst().get();
-      RigidBodyBasics constraintPredecessor = joint.getSuccessor();
-
-      List<LoopClosureConstraintDescription> constraintDescriptions = jointDescription.getChildrenConstraintDescriptions();
-
-      for (LoopClosureConstraintDescription constraintDescription : constraintDescriptions)
-      {
-         String name = constraintDescription.getName();
-         Vector3DBasics offsetFromParentJoint = constraintDescription.getOffsetFromParentJoint();
-         Vector3DBasics offsetFromLinkParentJoint = constraintDescription.getOffsetFromLinkParentJoint();
-         RigidBodyBasics constraintSuccessor = MultiBodySystemTools.getRootBody(parentBody).subtreeStream()
-                                                                   .filter(body -> body.getName().equals(constraintDescription.getLink().getName())).findFirst()
-                                                                   .get();
-
-         if (constraintDescription instanceof LoopClosurePinConstraintDescription)
-         {
-            Vector3DBasics axis = ((LoopClosurePinConstraintDescription) constraintDescription).getAxis();
-            RevoluteJoint constraintJoint = new RevoluteJoint(name, constraintPredecessor, offsetFromParentJoint, axis);
-            constraintJoint.setupLoopClosure(constraintSuccessor, new RigidBodyTransform(new Quaternion(), offsetFromLinkParentJoint));
-         }
-         else
-         {
-            LogTools.error("The constraint type {} is not handled, skipping it.", constraintDescription.getClass().getSimpleName());
-         }
-      }
-
-      for (JointDescription childJoint : jointDescription.getChildrenJoints())
-         addLoopClosureConstraintRecursive(childJoint, constraintPredecessor);
-   }
-
-   private class SineGenerator
-   {
-      private final YoDouble position;
-      private final YoDouble velocity;
-      private final YoDouble acceleration;
-
-      private final YoDouble amplitude;
-      private final YoDouble frequency;
-      private final YoDouble phase;
-      private final YoDouble offset;
-
-      private final DoubleProvider time;
-
-      public SineGenerator(String name, DoubleProvider timeProvider)
-      {
-         this.time = timeProvider;
-         position = new YoDouble(name + "Position", registry);
-         velocity = new YoDouble(name + "Velocity", registry);
-         acceleration = new YoDouble(name + "Acceleration", registry);
-
-         amplitude = new YoDouble(name + "Amplitude", registry);
-         frequency = new YoDouble(name + "Frequency", registry);
-         phase = new YoDouble(name + "Phase", registry);
-         offset = new YoDouble(name + "Offset", registry);
-      }
-
-      public void setAmplitude(double amplitude)
-      {
-         this.amplitude.set(amplitude);
-      }
-
-      public void setFrequency(double frequency)
-      {
-         this.frequency.set(frequency);
-      }
-
-      public void setPhase(double phase)
-      {
-         this.phase.set(phase);
-      }
-
-      public void setOffset(double offset)
-      {
-         this.offset.set(offset);
-      }
-
-      public void update()
-      {
-         double omega = 2.0 * Math.PI * frequency.getValue();
-         position.set(offset.getValue() + amplitude.getValue() * Math.sin(omega * time.getValue() + phase.getValue()));
-         velocity.set(omega * amplitude.getValue() * Math.cos(omega * time.getValue() + phase.getValue()));
-         acceleration.set(-omega * omega * amplitude.getValue() * Math.sin(omega * time.getValue() + phase.getValue()));
-      }
-
-      public double getPosition()
-      {
-         return position.getValue();
-      }
-
-      public double getVelocity()
-      {
-         return velocity.getValue();
-      }
-
-      public double getAcceleration()
-      {
-         return acceleration.getValue();
-      }
    }
 }
