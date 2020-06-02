@@ -42,7 +42,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
-import us.ihmc.mecano.tools.JointStateType;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.KinematicLoopFunction;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
@@ -296,17 +295,21 @@ public class WholeBodyInverseDynamicsSolver
          List<? extends OneDoFJointReadOnly> loopJoints = kinematicLoopFunction.getLoopJoints();
          int nDofs = MultiBodySystemTools.computeDegreesOfFreedom(loopJoints);
          kinematicLoopJointTau.reshape(nDofs, 1);
-         MultiBodySystemTools.extractJointsState(loopJoints, JointStateType.EFFORT, kinematicLoopJointTau);
-         kinematicLoopFunction.computeTau(kinematicLoopJointTau);
 
-         int tauIndex = 0;
+         for (int j = 0; j < loopJoints.size(); j++)
+         {
+            OneDoFJointReadOnly loopJoint = loopJoints.get(j);
+            double tau = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointTorque((OneDoFJointBasics) loopJoint);
+            kinematicLoopJointTau.set(j, tau);
+         }
+
+         kinematicLoopFunction.computeTau(kinematicLoopJointTau);
 
          for (int j = 0; j < loopJoints.size(); j++)
          {
             OneDoFJointReadOnly loopJoint = loopJoints.get(j);
             // TODO The following cast is ugly and does not seem like it should be needed.
-            lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque((OneDoFJointBasics) loopJoints.get(j), kinematicLoopJointTau.get(tauIndex));
-            tauIndex += loopJoint.getDegreesOfFreedom();
+            lowLevelOneDoFJointDesiredDataHolder.setDesiredJointTorque((OneDoFJointBasics) loopJoint, kinematicLoopJointTau.get(j));
          }
       }
    }

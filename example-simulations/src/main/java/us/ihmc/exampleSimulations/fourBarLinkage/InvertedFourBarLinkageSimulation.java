@@ -13,8 +13,9 @@ public class InvertedFourBarLinkageSimulation
       InvertedFourBarLinkageRobotDescription robotDescription = new InvertedFourBarLinkageRobotDescription();
       RobotFromDescription robot = new RobotFromDescription(robotDescription);
 
-      InvertedFourBarLinkageIDController controller = new InvertedFourBarLinkageIDController(robotDescription, robot);
-      robot.setController(controller);
+      double dt = 1.0e-5;
+      //      robot.setController(new InvertedFourBarLinkageIDController(robotDescription, robot));
+      robot.setController(new InvertedFourBarLinkageWBCController(robotDescription, robot, dt));
 
       SimulationConstructionSet scs = new SimulationConstructionSet(robot, new SimulationConstructionSetParameters(1 << 17));
       Graphics3DObject graphics3dObject = new Graphics3DObject();
@@ -22,7 +23,7 @@ public class InvertedFourBarLinkageSimulation
       scs.addStaticLinkGraphics(graphics3dObject);
       scs.setFastSimulate(true);
       scs.setGroundVisible(false);
-      scs.setDT(1.0e-5, 10);
+      scs.setDT(dt, 10);
       scs.startOnAThread();
       scs.simulate(0.5);
    }
