@@ -35,7 +35,7 @@ public class SteppableRegionsCalculatorTest
    private static boolean visualize = false;
 
    @BeforeAll
-   public void setup()
+   public static void setup()
    {
       visualize &= !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
    }
