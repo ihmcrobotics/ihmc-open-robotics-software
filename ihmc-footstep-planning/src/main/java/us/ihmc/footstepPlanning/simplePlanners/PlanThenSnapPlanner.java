@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.simplePlanners.SnapAndWiggleSingleStep.SnappingFailedException;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -56,14 +57,14 @@ public class PlanThenSnapPlanner
       int numberOfFootsteps = footstepPlan.getNumberOfSteps();
       for (int i = 0; i < numberOfFootsteps; i++)
       {
-         SimpleFootstep footstep = footstepPlan.getFootstep(i);
+         Footstep footstep = footstepPlan.getFootstep(i);
          FramePose3D solePose = new FramePose3D();
-         footstep.getSoleFramePose(solePose);
+         footstep.getPose(solePose);
          ConvexPolygon2D footHold = snapAndWiggleSingleStep.snapAndWiggle(solePose, footPolygons.get(footstep.getRobotSide()), true);
-         footstep.setSoleFramePose(solePose);
+         footstep.setPose(solePose);
          if (footHold != null)
          {
-            footstep.setFoothold(footHold);
+            footstep.setPredictedContactPoints(footHold.getVertexBufferView());
          }
       }
       return result;

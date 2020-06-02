@@ -14,7 +14,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
@@ -76,22 +76,23 @@ public class FootstepPlanGraphic extends Group
 
       for (int i = 0; i < plan.getNumberOfSteps(); i++)
       {
-         plan.getFootstep(i).setFoothold(defaultContactPoints.get(plan.getFootstep(i).getRobotSide()));
-      }
-
-      for (int i = 0; i < plan.getNumberOfSteps(); i++)
-      {
-         SimpleFootstep footstep = plan.getFootstep(i);
+         Footstep footstep = plan.getFootstep(i);
          Color regionColor = footstep.getRobotSide() == RobotSide.LEFT ? Color.RED : Color.GREEN;
 
-         footstep.getSoleFramePose(footPose);
+         footstep.getPose(footPose);
          footPose.get(transformToWorld);
          transformToWorld.appendTranslation(0.0, 0.0, 0.01);
 
-         if (footstep.hasFoothold())
-            footstep.getFoothold(foothold);
+         if (footstep.hasPredictedContactPoints())
+         {
+            foothold.clear();
+            footstep.getPredictedContactPoints().forEach(foothold::addVertex);
+            foothold.update();
+         }
          else
+         {
             foothold.set(defaultContactPoints.get(plan.getFootstep(i).getRobotSide()));
+         }
 
          Point2D[] vertices = new Point2D[foothold.getNumberOfVertices()];
          for (int j = 0; j < vertices.length; j++)
