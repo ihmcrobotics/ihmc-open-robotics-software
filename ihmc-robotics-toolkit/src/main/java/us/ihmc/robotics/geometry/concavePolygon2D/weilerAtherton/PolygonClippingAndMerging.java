@@ -212,8 +212,17 @@ public class PolygonClippingAndMerging
          boolean outgoingPoint = linkedPoint.isPointBeforeInsideOther() && !linkedPoint.isPointAfterInsideOther();
 
          shouldSwitch |= linkedPoint.isLinkedToOtherList() && shouldSwitch(linkedPoint.getPointOnOtherList());
-//         if (isClipping &&  linkedPoint.isPointAfterInsideOther() && linkedPoint.isPointBeforeInsideOther())
-//            shouldSwitch = false;
+
+         if (isClipping && linkedPoint.isLinkedToOtherList())
+         {
+            LinkedPoint clippingPoint = isOnOtherList ? linkedPoint : linkedPoint.getPointOnOtherList();
+            LinkedPoint clippedPoint = isOnOtherList ? linkedPoint.getPointOnOtherList() : linkedPoint;
+            if (clippingPoint.isPointBeforeInsideOther() && clippingPoint.isPointAfterInsideOther() && (!clippedPoint.isPointBeforeInsideOther()
+                                                                                                        && !clippedPoint.isPointAfterInsideOther()))
+            {
+               shouldSwitch = true;
+            }
+         }
          if (!isClipping && !linkedPoint.isPointAfterInsideOther() && !linkedPoint.isPointBeforeInsideOther())
             shouldSwitch = false;
          if (!isClipping && outgoingPoint)
