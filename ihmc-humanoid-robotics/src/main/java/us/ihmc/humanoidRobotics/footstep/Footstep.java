@@ -26,11 +26,9 @@ public class Footstep implements Settable<Footstep>
 {
    public static final int maxNumberOfSwingWaypoints = 10;
 
-   private static int counter = 0;
-   private final PoseReferenceFrame footstepSoleFrame = new PoseReferenceFrame(counter++ + "_FootstepSoleFrame", ReferenceFrame.getWorldFrame());
-
-   private RobotSide robotSide;
+   private final PoseReferenceFrame footstepSoleFrame = new PoseReferenceFrame("FootstepSoleFrame", ReferenceFrame.getWorldFrame());
    private final FramePose3D footstepPose = new FramePose3D();
+   private RobotSide robotSide;
 
    private final RecyclingArrayList<Point2D> predictedContactPoints = new RecyclingArrayList<>(6, Point2D.class);
    private final RecyclingArrayList<MutableDouble> customWaypointProportions = new RecyclingArrayList<>(2, MutableDouble.class);
