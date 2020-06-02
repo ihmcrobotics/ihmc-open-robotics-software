@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.concaveHull.GeometryPolygonTestTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
@@ -401,6 +402,10 @@ public class PolygonClippingAndMergingTest
       mergedPolygonExpected.addVertex(-0.2, -0.2);
       mergedPolygonExpected.update();
 
+      if (polygons.size() > 1)
+      {
+         LogTools.info("Polygons intersect : " + GeometryPolygonTools.doPolygonsIntersect(polygons.get(0), polygons.get(1)));
+      }
       assertEquals(1, polygons.size());
       GeometryPolygonTestTools.assertConcavePolygon2DEquals(mergedPolygonExpected, polygons.get(0), 1e-7);
 

@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton;
 
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.*;
 
 import java.util.ArrayList;
@@ -32,8 +33,17 @@ public class PolygonClippingAndMerging
                }
                catch (ComplexPolygonException exception)
                {
-                  j++;
-                  continue;
+                  try
+                  {
+                     // sometimes, because of errors, the numerics screw up and we have to try again.
+                     PolygonClippingAndMerging.merge(polygonA, polygonB, newPolygon);
+                  }
+                  catch (ComplexPolygonException repeatException)
+                  {
+                     j++;
+                     LogTools.info("Caught an error when trying to merge.");
+                     continue;
+                  }
                }
 
                regionsToMerge.set(i, newPolygon);
@@ -198,11 +208,15 @@ public class PolygonClippingAndMerging
 
          polygonToPack.addVertex(linkedPoint.getPoint());
 
-         boolean shouldSwitch = shouldSwitch(linkedPoint, isClipping);
-         shouldSwitch |= linkedPoint.isLinkedToOtherList() && shouldSwitch(linkedPoint.getPointOnOtherList(), isClipping);
-         if (isClipping &&  linkedPoint.isPointAfterInsideOther() && linkedPoint.isPointBeforeInsideOther())
-            shouldSwitch = false;
+         boolean shouldSwitch = shouldSwitch(linkedPoint);
+         boolean outgoingPoint = linkedPoint.isPointBeforeInsideOther() && !linkedPoint.isPointAfterInsideOther();
+
+         shouldSwitch |= linkedPoint.isLinkedToOtherList() && shouldSwitch(linkedPoint.getPointOnOtherList());
+//         if (isClipping &&  linkedPoint.isPointAfterInsideOther() && linkedPoint.isPointBeforeInsideOther())
+//            shouldSwitch = false;
          if (!isClipping && !linkedPoint.isPointAfterInsideOther() && !linkedPoint.isPointBeforeInsideOther())
+            shouldSwitch = false;
+         if (!isClipping && outgoingPoint)
             shouldSwitch = false;
 
          if (shouldSwitch)
@@ -224,15 +238,9 @@ public class PolygonClippingAndMerging
       polygonToPack.update();
    }
 
-   private static boolean shouldSwitch(LinkedPoint linkedPoint, boolean isClipping)
+   private static boolean shouldSwitch(LinkedPoint linkedPoint)
    {
-      boolean incomingPoint = !linkedPoint.isPointBeforeInsideOther() && linkedPoint.isPointAfterInsideOther();
-      boolean outgoingPoint = linkedPoint.isPointBeforeInsideOther() && !linkedPoint.isPointAfterInsideOther();
-
-      boolean shouldSwitch = incomingPoint || outgoingPoint;
-      shouldSwitch |= isClipping && linkedPoint.isPointAfterInsideOther() && linkedPoint.isPointBeforeInsideOther();
-
-      return shouldSwitch;
+      return linkedPoint.isPointAfterInsideOther() != linkedPoint.isPointBeforeInsideOther();
    }
 
    private static LinkedPoint findVertexOutsideOfPolygon(ConcavePolygon2DReadOnly polygon, Collection<LinkedPoint> points)

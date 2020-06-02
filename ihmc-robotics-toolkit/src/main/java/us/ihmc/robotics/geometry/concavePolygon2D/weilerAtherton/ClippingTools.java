@@ -70,9 +70,9 @@ public class ClippingTools
       while (linkA != listA.getFirstPoint());
    }
 
-   private static final double epsilonForSamePoint = 1e-7;
+   private static final double epsilonForSamePoint = 1e-6;
    private static final double epsilonSquaredForSamePoint = epsilonForSamePoint * epsilonForSamePoint;
-   private static final double wiggleDistance = 1e-3;
+   private static final double wiggleDistance = 5e-3;
 
    public static void insertIntersectionsIntoList(LinkedPointList list, ConcavePolygon2DReadOnly polygonToIntersect)
    {
@@ -89,53 +89,7 @@ public class ClippingTools
          if (EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(startPoint.getPoint(), vertex, nextVertex) < epsilonSquaredForSamePoint)
          {
             // So the intersection is on the edge of the other polygon. Is it an incoming or outgoing intersection?
-            Point2DReadOnly slightlyBeforeIntersection = getPointSlightlyAfterIntersection(startPoint.getPoint(),
-                                                                                           startPoint.getPredecessor().getPoint(),
-                                                                                           wiggleDistance);
-            Point2DReadOnly slightlyAfterIntersection = getPointSlightlyAfterIntersection(startPoint.getPoint(),
-                                                                                          startPoint.getSuccessor().getPoint(),
-                                                                                          wiggleDistance);
-
-            boolean isBeforeOnEdge = GeometryPolygonTools.isPoint2DOnPerimeterOfSimplePolygon2D(slightlyBeforeIntersection,
-                                                                                                polygonToIntersect.getVertexBufferView(),
-                                                                                                polygonToIntersect.getNumberOfVertices(),
-                                                                                                epsilonForSamePoint);
-            boolean isAfterOnEdge = GeometryPolygonTools.isPoint2DOnPerimeterOfSimplePolygon2D(slightlyAfterIntersection,
-                                                                                               polygonToIntersect.getVertexBufferView(),
-                                                                                               polygonToIntersect.getNumberOfVertices(),
-                                                                                               epsilonForSamePoint);
-
-            boolean isBeforeInside = GeometryPolygonTools.isPoint2DStrictlyInsideSimplePolygon2D(slightlyBeforeIntersection,
-                                                                                                                    polygonToIntersect.getVertexBufferView(),
-                                                                                                                    polygonToIntersect.getNumberOfVertices(),
-                                                                                                                    null,
-                                                                                                                    false,
-                                                                                                                    epsilonForSamePoint);
-            boolean isAfterInside = GeometryPolygonTools.isPoint2DStrictlyInsideSimplePolygon2D(slightlyAfterIntersection,
-                                                                                                                  polygonToIntersect.getVertexBufferView(),
-                                                                                                                  polygonToIntersect.getNumberOfVertices(),
-                                                                                                                  null,
-                                                                                                                  false,
-                                                                                                                  epsilonForSamePoint);
-
-            boolean trulyOutsideBefore = !isBeforeOnEdge && !isBeforeInside;
-            boolean trulyOutsideAfter = !isAfterOnEdge && !isAfterInside;
-
-            if (trulyOutsideAfter)
-            {
-               startPoint.setIsPointAfterInsideOther(false);
-               startPoint.setIsPointBeforeInsideOther(isBeforeInside || isBeforeOnEdge);
-            }
-            else if (trulyOutsideBefore)
-            {
-               startPoint.setIsPointAfterInsideOther(isAfterInside || isAfterOnEdge);
-               startPoint.setIsPointBeforeInsideOther(false);
-            }
-            else
-            {
-               startPoint.setIsPointBeforeInsideOther(true);
-               startPoint.setIsPointBeforeInsideOther(true);
-            }
+            setIntersectionInfo(startPoint, startPoint.getPredecessor().getPoint(), startPoint.getPoint(), startPoint.getSuccessor().getPoint(), polygonToIntersect);
 
             intersections.add(new Point2D(startPoint.getPoint()));
 
@@ -148,115 +102,23 @@ public class ClippingTools
       {
          LinkedPoint nextPoint = startPoint.getSuccessor();
          IntersectionInfo intersectionInfo = findFirstIntersectionInfo(startPoint.getPoint(), nextPoint.getPoint(), polygonToIntersect, new Point2D());
+         Point2DReadOnly intersection = intersectionInfo.getIntersection();
 
          if (intersectionInfo.getIntersectionType() == IntersectionType.NEW)
          {
-            Point2DReadOnly intersection = intersectionInfo.getIntersection();
-            Point2DReadOnly slightlyBeforeIntersection = getPointSlightlyAfterIntersection(intersection, startPoint.getPoint(), wiggleDistance);
-            Point2DReadOnly slightlyAfterIntersection = getPointSlightlyAfterIntersection(intersection, nextPoint.getPoint(), wiggleDistance);
-
-
-            boolean isBeforeOnEdge = GeometryPolygonTools.isPoint2DOnPerimeterOfSimplePolygon2D(slightlyBeforeIntersection,
-                                                                                                polygonToIntersect.getVertexBufferView(),
-                                                                                                polygonToIntersect.getNumberOfVertices(),
-                                                                                                epsilonForSamePoint);
-            boolean isAfterOnEdge = GeometryPolygonTools.isPoint2DOnPerimeterOfSimplePolygon2D(slightlyAfterIntersection,
-                                                                                               polygonToIntersect.getVertexBufferView(),
-                                                                                               polygonToIntersect.getNumberOfVertices(),
-                                                                                               epsilonForSamePoint);
-
-            boolean isBeforeInside = GeometryPolygonTools.isPoint2DStrictlyInsideSimplePolygon2D(slightlyBeforeIntersection,
-                                                                                                 polygonToIntersect.getVertexBufferView(),
-                                                                                                 polygonToIntersect.getNumberOfVertices(),
-                                                                                                 null,
-                                                                                                 false,
-                                                                                                 epsilonForSamePoint);
-            boolean isAfterInside = GeometryPolygonTools.isPoint2DStrictlyInsideSimplePolygon2D(slightlyAfterIntersection,
-                                                                                                polygonToIntersect.getVertexBufferView(),
-                                                                                                polygonToIntersect.getNumberOfVertices(),
-                                                                                                null,
-                                                                                                false,
-                                                                                                epsilonForSamePoint);
-
-            boolean trulyOutsideBefore = !isBeforeOnEdge && !isBeforeInside;
-            boolean trulyOutsideAfter = !isAfterOnEdge && !isAfterInside;
-
-            boolean afterInside, beforeInside;
-
-            if (trulyOutsideAfter)
-            {
-               afterInside = false;
-               beforeInside = isBeforeInside || isBeforeOnEdge;
-            }
-            else if (trulyOutsideBefore)
-            {
-               afterInside = isAfterInside || isAfterOnEdge;
-               beforeInside = false;
-            }
-            else
-            {
-               afterInside = true;
-               beforeInside = true;
-            }
+            LinkedPoint point = new LinkedPoint(intersection);
+            setIntersectionInfo(point, startPoint.getPoint(), intersection, nextPoint.getPoint(), polygonToIntersect);
 
             intersections.add(intersection);
-            list.insertPoint(new LinkedPoint(intersection, afterInside, beforeInside), startPoint);
+            list.insertPoint(point, startPoint);
 
             continue;
          }
          else if (intersectionInfo.getIntersectionType() == IntersectionType.END && !intersections.contains(intersectionInfo.getIntersection()))
-         {
-            // the intersection is a vertex in the current list on the other polygon. The question is, what kind of intersection is it?
+         { // the intersection is a vertex in the current list on the other polygon. The question is, what kind of intersection is it?
 
             // Check to see if the corner on the list is also a corner on the other polygon
-            Point2DReadOnly intersection = intersectionInfo.getIntersection();
-
-            // So the intersection is on the edge of the other polygon. Is it an incoming or outgoing intersection?
-            Point2DReadOnly slightlyBeforeIntersection = getPointSlightlyAfterIntersection(intersection, startPoint.getPoint(), wiggleDistance);
-            Point2DReadOnly slightlyAfterIntersection = getPointSlightlyAfterIntersection(intersection, nextPoint.getSuccessor().getPoint(), wiggleDistance);
-
-
-
-            boolean isBeforeOnEdge = GeometryPolygonTools.isPoint2DOnPerimeterOfSimplePolygon2D(slightlyBeforeIntersection,
-                                                                                                polygonToIntersect.getVertexBufferView(),
-                                                                                                polygonToIntersect.getNumberOfVertices(),
-                                                                                                epsilonForSamePoint);
-            boolean isAfterOnEdge = GeometryPolygonTools.isPoint2DOnPerimeterOfSimplePolygon2D(slightlyAfterIntersection,
-                                                                                               polygonToIntersect.getVertexBufferView(),
-                                                                                               polygonToIntersect.getNumberOfVertices(),
-                                                                                               epsilonForSamePoint);
-
-            boolean isBeforeInside = GeometryPolygonTools.isPoint2DStrictlyInsideSimplePolygon2D(slightlyBeforeIntersection,
-                                                                                                 polygonToIntersect.getVertexBufferView(),
-                                                                                                 polygonToIntersect.getNumberOfVertices(),
-                                                                                                 null,
-                                                                                                 false,
-                                                                                                 epsilonForSamePoint);
-            boolean isAfterInside = GeometryPolygonTools.isPoint2DStrictlyInsideSimplePolygon2D(slightlyAfterIntersection,
-                                                                                                polygonToIntersect.getVertexBufferView(),
-                                                                                                polygonToIntersect.getNumberOfVertices(),
-                                                                                                null,
-                                                                                                false,
-                                                                                                epsilonForSamePoint);
-
-            boolean trulyOutsideBefore = !isBeforeOnEdge && !isBeforeInside;
-            boolean trulyOutsideAfter = !isAfterOnEdge && !isAfterInside;
-
-            if (trulyOutsideAfter)
-            {
-               nextPoint.setIsPointAfterInsideOther(false);
-               nextPoint.setIsPointBeforeInsideOther(isBeforeInside || isBeforeOnEdge);
-            }
-            else if (trulyOutsideBefore)
-            {
-               nextPoint.setIsPointAfterInsideOther(isAfterInside || isAfterOnEdge);
-               nextPoint.setIsPointBeforeInsideOther(false);
-            }
-            else
-            {
-               nextPoint.setIsPointBeforeInsideOther(true);
-               nextPoint.setIsPointBeforeInsideOther(true);
-            }
+            setIntersectionInfo(nextPoint, startPoint.getPoint(), intersection, nextPoint.getSuccessor().getPoint(), polygonToIntersect);
 
             intersections.add(intersection);
          }
@@ -264,6 +126,57 @@ public class ClippingTools
          startPoint = nextPoint;
          if (startPoint == list.getFirstPoint())
             break;
+      }
+   }
+
+   private static void setIntersectionInfo(LinkedPoint pointToSet,
+                                           Point2DReadOnly pointBefore,
+                                           Point2DReadOnly intersection,
+                                           Point2DReadOnly pointAfter,
+                                           ConcavePolygon2DReadOnly polygonToIntersect)
+   {
+      Point2DReadOnly slightlyBeforeIntersection = getPointSlightlyAfterIntersection(intersection, pointBefore, wiggleDistance);
+      Point2DReadOnly slightlyAfterIntersection = getPointSlightlyAfterIntersection(intersection, pointAfter, wiggleDistance);
+
+      boolean isBeforeOnEdge = GeometryPolygonTools.isPoint2DOnPerimeterOfSimplePolygon2D(slightlyBeforeIntersection,
+                                                                                          polygonToIntersect.getVertexBufferView(),
+                                                                                          polygonToIntersect.getNumberOfVertices(),
+                                                                                          epsilonForSamePoint);
+      boolean isAfterOnEdge = GeometryPolygonTools.isPoint2DOnPerimeterOfSimplePolygon2D(slightlyAfterIntersection,
+                                                                                         polygonToIntersect.getVertexBufferView(),
+                                                                                         polygonToIntersect.getNumberOfVertices(),
+                                                                                         epsilonForSamePoint);
+
+      boolean isBeforeInside = GeometryPolygonTools.isPoint2DStrictlyInsideSimplePolygon2D(slightlyBeforeIntersection,
+                                                                                           polygonToIntersect.getVertexBufferView(),
+                                                                                           polygonToIntersect.getNumberOfVertices(),
+                                                                                           null,
+                                                                                           false,
+                                                                                           epsilonForSamePoint);
+      boolean isAfterInside = GeometryPolygonTools.isPoint2DStrictlyInsideSimplePolygon2D(slightlyAfterIntersection,
+                                                                                          polygonToIntersect.getVertexBufferView(),
+                                                                                          polygonToIntersect.getNumberOfVertices(),
+                                                                                          null,
+                                                                                          false,
+                                                                                          epsilonForSamePoint);
+
+      boolean trulyOutsideBefore = !isBeforeOnEdge && !isBeforeInside;
+      boolean trulyOutsideAfter = !isAfterOnEdge && !isAfterInside;
+
+      if (trulyOutsideAfter)
+      {
+         pointToSet.setIsPointAfterInsideOther(false);
+         pointToSet.setIsPointBeforeInsideOther(isBeforeInside || isBeforeOnEdge);
+      }
+      else if (trulyOutsideBefore)
+      {
+         pointToSet.setIsPointAfterInsideOther(isAfterInside || isAfterOnEdge);
+         pointToSet.setIsPointBeforeInsideOther(false);
+      }
+      else
+      {
+         pointToSet.setIsPointAfterInsideOther(true);
+         pointToSet.setIsPointBeforeInsideOther(true);
       }
    }
 
