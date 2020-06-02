@@ -11,7 +11,7 @@ import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
 public class SLAMFrame
 {
-   protected final SLAMFrame previousFrame;
+   private final SLAMFrame previousFrame;
 
    /**
     * original sensor pose from message.
@@ -26,7 +26,7 @@ public class SLAMFrame
    /**
     * parent.optimizedSensorPoseToWorld * transformFromPreviousFrame.
     */
-   protected final RigidBodyTransformReadOnly sensorPoseToWorld;
+   private final RigidBodyTransformReadOnly sensorPoseToWorld;
 
    /**
     * SLAM result.
@@ -36,11 +36,11 @@ public class SLAMFrame
    /**
     * this.sensorPoseToWorld * this.slamTransformer.
     */
-   protected final RigidBodyTransform optimizedSensorPoseToWorld = new RigidBodyTransform();
+   private final RigidBodyTransform optimizedSensorPoseToWorld = new RigidBodyTransform();
 
-   protected final Point3DReadOnly[] originalPointCloudToWorld; // For comparison after mapping.
-   protected final Point3DReadOnly[] pointCloudToSensorFrame;
-   protected final Point3D[] optimizedPointCloudToWorld;
+   private final Point3DReadOnly[] originalPointCloudToWorld; // For comparison after mapping.
+   private final Point3DReadOnly[] pointCloudToSensorFrame;
+   private final Point3D[] optimizedPointCloudToWorld;
    
    private double confidenceFactor;
 
