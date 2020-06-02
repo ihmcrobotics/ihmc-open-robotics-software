@@ -28,6 +28,7 @@ import us.ihmc.mecano.algorithms.CentroidalMomentumRateCalculator;
 import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.algorithms.InverseDynamicsCalculator;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyAccelerationProvider;
+import us.ihmc.mecano.frames.CenterOfMassReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
@@ -148,6 +149,9 @@ public class WholeBodyControlCoreToolbox
       this.controlDT = controlDT;
       this.gravityZ = gravityZ;
       this.rootJoint = rootJoint;
+      multiBodySystemInput = MultiBodySystemBasics.toMultiBodySystemBasics(controlledJoints);
+      if (centerOfMassFrame == null)
+         centerOfMassFrame = new CenterOfMassReferenceFrame("centerOfMassFrame", multiBodySystemInput.getInertialFrame(), multiBodySystemInput.getRootBody());
       this.centerOfMassFrame = centerOfMassFrame;
       this.optimizationSettings = controllerCoreOptimizationSettings;
       this.yoGraphicsListRegistry = yoGraphicsListRegistry;
@@ -160,7 +164,6 @@ public class WholeBodyControlCoreToolbox
          controlledJoints = controlledJointsWithRoot;
       }
 
-      multiBodySystemInput = MultiBodySystemBasics.toMultiBodySystemBasics(controlledJoints);
       jointIndexHandler = new JointIndexHandler(controlledJoints);
       totalRobotMass = TotalMassCalculator.computeSubTreeMass(multiBodySystemInput.getRootBody());
       inverseDynamicsCalculator = new InverseDynamicsCalculator(multiBodySystemInput);

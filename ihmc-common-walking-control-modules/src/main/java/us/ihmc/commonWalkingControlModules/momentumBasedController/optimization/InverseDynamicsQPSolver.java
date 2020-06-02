@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.spatial.Wrench;
@@ -605,12 +606,18 @@ public class InverseDynamicsQPSolver
 
       numberOfActiveVariables.set((int) CommonOps_DDRM.elementSum(solverInput_activeIndices));
 
-      applySubstitution(); // This needs to be done right before configuring the QP and solving.
+      TIntArrayList inactiveIndices = applySubstitution(); // This needs to be done right before configuring the QP and solving.
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f);
       qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
       qpSolver.setActiveVariables(solverInput_activeIndices);
       qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
+
+      for (int i = 0; i < inactiveIndices.size(); i++)
+      {
+         qpSolver.setVariableInactive(inactiveIndices.get(i));
+      }
+
       numberOfIterations.set(qpSolver.solve(solverOutput));
       removeSubstitution(); // This needs to be done right after solving.
 
@@ -652,20 +659,16 @@ public class InverseDynamicsQPSolver
       return true;
    }
 
-   private void applySubstitution()
+   private TIntArrayList applySubstitution()
    {
       if (accelerationVariablesSubstitution.isEmpty())
-         return;
+         return null;
 
       accelerationVariablesSubstitution.applySubstitutionToObjectiveFunction(solverInput_H, solverInput_f);
       accelerationVariablesSubstitution.applySubstitutionToLinearConstraint(solverInput_Aeq, solverInput_beq);
       accelerationVariablesSubstitution.applySubstitutionToLinearConstraint(solverInput_Ain, solverInput_bin);
       accelerationVariablesSubstitution.applySubstitutionToBounds(solverInput_lb, solverInput_ub, solverInput_Ain, solverInput_bin);
-      int[] inactiveIndices = accelerationVariablesSubstitution.getInactiveIndices();
-      for (int inactiveIndex : inactiveIndices)
-      {
-         qpSolver.setVariableInactive(inactiveIndex);
-      }
+      return accelerationVariablesSubstitution.getInactiveIndices();
    }
 
    private void removeSubstitution()

@@ -5,6 +5,7 @@ import java.util.Arrays;
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.matrixlib.MatrixTools;
 
 /**
@@ -32,26 +33,31 @@ public class QPVariableSubstitution
    public int numberOfVariablesToSubstitute;
    /** Refers to the index of each element in {@code x} that is to be substituted. */
    public int[] variableIndices = new int[4];
-   private int[] inactiveIndices = new int[4];
+   private TIntArrayList inactiveIndices = new TIntArrayList(4, -1);
 
    /** Refers to the transformation matrix {@code G}. */
    public final DMatrixRMaj transformation = new DMatrixRMaj(4, 1);
    /** Refers to the bias vector {@code g}. */
    public final DMatrixRMaj bias = new DMatrixRMaj(4, 1);
 
-   // For garbage-free operations
+   // For garbage-free operations during the variable substitution and concatenation
    private final DMatrixRMaj tempA = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj tempB = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj tempC = new DMatrixRMaj(1, 1);
    private final DMatrixRMaj tempD = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj tempE = new DMatrixRMaj(1, 1);
 
    public QPVariableSubstitution()
    {
+      reset();
    }
 
    public void reset()
    {
       numberOfVariablesToSubstitute = 0;
+      inactiveIndices.reset();
+      transformation.reshape(0, 0);
+      bias.reshape(0, 0);
    }
 
    public void reshape(int numberOfVariablesToSubstitute, int numberOfVariablesPostSubstitution)
@@ -108,7 +114,7 @@ public class QPVariableSubstitution
       {
          ordered = true;
 
-         for (int i = 0; i < variableIndices.length; i++)
+         for (int i = 0; i < variableIndices.length - 1; i++)
          {
             if (Integer.compare(variableIndices[i], variableIndices[i + 1]) > 0)
             {
@@ -128,21 +134,20 @@ public class QPVariableSubstitution
       return numberOfVariablesToSubstitute == 0;
    }
 
-   public int[] getInactiveIndices()
+   public TIntArrayList getInactiveIndices()
    {
       /*
        * After substitution, the number of variables for this part of this problem goes from
-       * numberOfVariablesToSubstitute down to transformation.getNumCols(). We will use the
+       * transformation.getNumRows() down to transformation.getNumCols(). We will use the
        * (transformation.getNumCols()) first variables only after substitution, we want to disable the
        * other.
        */
-      int numberOfInactiveIndices = numberOfVariablesToSubstitute - transformation.getNumCols();
-      if (inactiveIndices.length < numberOfInactiveIndices)
-         inactiveIndices = new int[numberOfInactiveIndices];
+      int numberOfInactiveIndices = transformation.getNumRows() - transformation.getNumCols();
+      inactiveIndices.reset();
 
       for (int i = 0; i < numberOfInactiveIndices; i++)
       {
-         inactiveIndices[i] = variableIndices[transformation.getNumCols() + i];
+         inactiveIndices.add(variableIndices[transformation.getNumCols() + i]);
       }
 
       return inactiveIndices;
@@ -219,13 +224,18 @@ public class QPVariableSubstitution
 
       // 2. Compute f = G^T*f + G^T*H*g (ignoring the size mismatch between the (H, f) and (G, g)).
       DMatrixRMaj GTf = tempD;
-      sub_f.reshape(G.getNumCols(), 1);
+      sub_f.reshape(G.getNumRows(), 1);
       CommonOps_DDRM.extract(f, variableIndices, variableIndices.length, sub_f);
       // G^T*f
       GTf.reshape(G.getNumCols(), 1);
       CommonOps_DDRM.multTransA(G, sub_f, GTf);
+
       // G^T*H*g
-      CommonOps_DDRM.mult(GTH, g, sub_f);
+      DMatrixRMaj sub_GTH = tempE;
+      sub_GTH.reshape(G.getNumCols(), variableIndices.length);
+      MatrixTools.extractColumns(GTH, variableIndices, sub_GTH, 0);
+      sub_f.reshape(G.getNumCols(), 1);
+      CommonOps_DDRM.mult(sub_GTH, g, sub_f);
       // G^T*f + G^T*H*g
       CommonOps_DDRM.addEquals(sub_f, GTf);
       // Re-inserting the elements into f. Since there are less elements than when we started, we'll add padding with zeros to prevent changing f size.
@@ -236,7 +246,7 @@ public class QPVariableSubstitution
          if (i < sub_f.getNumRows())
             f.set(row_f, sub_f.get(i));
          else
-            f.set(0, 0.0);
+            f.set(row_f, 0.0);
       }
 
       // 3. Compute H*G
@@ -458,7 +468,7 @@ public class QPVariableSubstitution
       }
 
       CommonOps_DDRM.mult(G, sub_y, sub_x);
-      CommonOps_DDRM.addEquals(sub_y, g);
+      CommonOps_DDRM.addEquals(sub_x, g);
 
       for (int i = 0; i < sub_x.getNumRows(); i++)
       {
