@@ -98,37 +98,6 @@ public class QPVariableSubstitution
       numberOfVariablesToSubstitute = newSizeX;
    }
 
-   /**
-    * Re-order the {@link #variableIndices} to observe an ascending order while updating the matrices.
-    * This step is necessary to simplify operations when applying the substitution to the QP problem.
-    */
-   // TODO I think this is not needed. Confirm and remove if so.
-   public void sortIndices()
-   {
-      /*
-       * This sorting procedure is pretty inefficient but shouldn't matter as the size of the data should
-       * be rather small, for instance 4 variables for a 4-bar linkage.
-       */
-      boolean ordered = false;
-      while (!ordered)
-      {
-         ordered = true;
-
-         for (int i = 0; i < variableIndices.length - 1; i++)
-         {
-            if (Integer.compare(variableIndices[i], variableIndices[i + 1]) > 0)
-            {
-               ordered = false;
-               int temp = variableIndices[i];
-               variableIndices[i] = variableIndices[i + 1];
-               variableIndices[i + 1] = temp;
-               MatrixTools.swapRows(i, i + 1, transformation);
-               MatrixTools.swapRows(i, i + 1, bias);
-            }
-         }
-      }
-   }
-
    public boolean isEmpty()
    {
       return numberOfVariablesToSubstitute == 0;
