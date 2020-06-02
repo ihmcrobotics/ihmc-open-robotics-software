@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.ejml.data.DMatrixRMaj;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.robotics.kinematics.fourbar.FourBar;
@@ -133,10 +134,27 @@ public class FourBarKinematicLoop implements KinematicLoopFunction
    }
 
    @Override
-   public void computeTau(DMatrixRMaj tauJoints)
+   public void adjustConfiguration(DMatrixRMaj jointConfigurations)
    {
-      if (tauJoints.getNumRows() != 4)
-         throw new IllegalArgumentException("Unexpected matrix size. Expected 4 rows, was: " + tauJoints.getNumRows());
+      if (jointConfigurations.getNumRows() != 4 || jointConfigurations.getNumCols() != 1)
+         throw new IllegalArgumentException("Unexpected matrix size. [row=" + jointConfigurations.getNumRows() + ", col=" + jointConfigurations.getNumCols()
+               + "].");
+
+      double angle = MathTools.clamp(jointConfigurations.get(masterJointIndex), getMasterJoint().getJointLimitLower(), getMasterJoint().getJointLimitUpper());
+      fourBar.update(FourBarAngle.values[masterJointIndex], converters[masterJointIndex].toFourBarInteriorAngle(angle));
+
+      for (int i = 0; i < 4; i++)
+      {
+         double q = converters[i].toJointAngle(fourBar.getVertex(FourBarAngle.values[i]).getAngle());
+         jointConfigurations.set(i, q);
+      }
+   }
+
+   @Override
+   public void adjustTau(DMatrixRMaj tauJoints)
+   {
+      if (tauJoints.getNumRows() != 4 || tauJoints.getNumCols() != 1)
+         throw new IllegalArgumentException("Unexpected matrix size. [row=" + tauJoints.getNumRows() + ", col=" + tauJoints.getNumCols() + "].");
 
       double tau = 0.0;
 

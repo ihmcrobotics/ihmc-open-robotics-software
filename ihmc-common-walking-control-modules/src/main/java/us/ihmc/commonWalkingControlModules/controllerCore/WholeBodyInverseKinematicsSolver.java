@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.ejml.data.DMatrixRMaj;
@@ -27,7 +28,9 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
+import us.ihmc.robotics.screwTheory.KinematicLoopFunction;
 import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -48,6 +51,7 @@ public class WholeBodyInverseKinematicsSolver
    private final FloatingJointBasics rootJoint;
    private final OneDoFJointBasics[] controlledOneDoFJoints;
    private final JointBasics[] jointsToOptimizeFor;
+   private final List<KinematicLoopFunction> kinematicLoopFunctions;
    private final JointIndexHandler jointIndexHandler;
 
    private final YoFrameVector3D yoDesiredMomentumLinear;
@@ -61,6 +65,7 @@ public class WholeBodyInverseKinematicsSolver
       jointIndexHandler = toolbox.getJointIndexHandler();
       jointsToOptimizeFor = jointIndexHandler.getIndexedJoints();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
+      kinematicLoopFunctions = toolbox.getKinematicLoopFunctions();
       lowLevelOneDoFJointDesiredDataHolder.registerJointsWithEmptyData(controlledOneDoFJoints);
       lowLevelOneDoFJointDesiredDataHolder.setJointsControlMode(controlledOneDoFJoints, JointDesiredControlMode.EFFORT);
 
@@ -138,6 +143,37 @@ public class WholeBodyInverseKinematicsSolver
          lowLevelOneDoFJointDesiredDataHolder.setDesiredJointPosition(joint, desiredPosition);
          jointPositionsSolution.get(joint).set(desiredPosition);
       }
+
+      updateKinematicLoopJointConfigurations();
+   }
+
+   private final DMatrixRMaj kinematicLoopJointConfiguration = new DMatrixRMaj(4, 1);
+
+   private void updateKinematicLoopJointConfigurations()
+   {
+      for (int i = 0; i < kinematicLoopFunctions.size(); i++)
+      {
+         KinematicLoopFunction kinematicLoopFunction = kinematicLoopFunctions.get(i);
+         List<? extends OneDoFJointReadOnly> loopJoints = kinematicLoopFunction.getLoopJoints();
+         kinematicLoopJointConfiguration.reshape(loopJoints.size(), 1);
+
+         for (int j = 0; j < loopJoints.size(); j++)
+         {
+            OneDoFJointReadOnly loopJoint = loopJoints.get(j);
+            double tau = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointPosition((OneDoFJointBasics) loopJoint);
+            kinematicLoopJointConfiguration.set(j, tau);
+         }
+
+         kinematicLoopFunction.adjustConfiguration(kinematicLoopJointConfiguration);
+
+         for (int j = 0; j < loopJoints.size(); j++)
+         {
+            OneDoFJointReadOnly loopJoint = loopJoints.get(j);
+            // TODO The following cast is ugly and does not seem like it should be needed.
+            lowLevelOneDoFJointDesiredDataHolder.setDesiredJointPosition((OneDoFJointBasics) loopJoint, kinematicLoopJointConfiguration.get(j));
+            jointPositionsSolution.get(loopJoint).set(kinematicLoopJointConfiguration.get(j));
+         }
+      }
    }
 
    public void submitInverseKinematicsCommandList(InverseKinematicsCommandList inverseKinematicsCommandList)
@@ -148,39 +184,39 @@ public class WholeBodyInverseKinematicsSolver
 
          switch (command.getCommandType())
          {
-         case TASKSPACE:
-            optimizationControlModule.submitSpatialVelocityCommand((SpatialVelocityCommand) command);
-            break;
-         case JOINTSPACE:
-            optimizationControlModule.submitJointspaceVelocityCommand((JointspaceVelocityCommand) command);
-            break;
-         case MOMENTUM:
-            optimizationControlModule.submitMomentumCommand((MomentumCommand) command);
-            recordMomentumRate((MomentumCommand) command);
-            break;
-         case MOMENTUM_CONVEX_CONSTRAINT:
-            optimizationControlModule.submitLinearMomentumConvexConstraint2DCommand((LinearMomentumConvexConstraint2DCommand) command);
-            break;
-         case PRIVILEGED_CONFIGURATION:
-            optimizationControlModule.submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
-            break;
-         case PRIVILEGED_JOINTSPACE_COMMAND:
-            optimizationControlModule.submitPrivilegedVelocityCommand((PrivilegedJointSpaceCommand) command);
-            break;
-         case LIMIT_REDUCTION:
-            optimizationControlModule.submitJointLimitReductionCommand((JointLimitReductionCommand) command);
-            break;
-         case JOINT_LIMIT_ENFORCEMENT:
-            optimizationControlModule.submitJointLimitEnforcementMethodCommand((JointLimitEnforcementMethodCommand) command);
-            break;
-         case COMMAND_LIST:
-            submitInverseKinematicsCommandList((InverseKinematicsCommandList) command);
-            break;
-         case OPTIMIZATION_SETTINGS:
-            optimizationControlModule.submitOptimizationSettingsCommand((InverseKinematicsOptimizationSettingsCommand) command);
-            break;
-         default:
-            throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
+            case TASKSPACE:
+               optimizationControlModule.submitSpatialVelocityCommand((SpatialVelocityCommand) command);
+               break;
+            case JOINTSPACE:
+               optimizationControlModule.submitJointspaceVelocityCommand((JointspaceVelocityCommand) command);
+               break;
+            case MOMENTUM:
+               optimizationControlModule.submitMomentumCommand((MomentumCommand) command);
+               recordMomentumRate((MomentumCommand) command);
+               break;
+            case MOMENTUM_CONVEX_CONSTRAINT:
+               optimizationControlModule.submitLinearMomentumConvexConstraint2DCommand((LinearMomentumConvexConstraint2DCommand) command);
+               break;
+            case PRIVILEGED_CONFIGURATION:
+               optimizationControlModule.submitPrivilegedConfigurationCommand((PrivilegedConfigurationCommand) command);
+               break;
+            case PRIVILEGED_JOINTSPACE_COMMAND:
+               optimizationControlModule.submitPrivilegedVelocityCommand((PrivilegedJointSpaceCommand) command);
+               break;
+            case LIMIT_REDUCTION:
+               optimizationControlModule.submitJointLimitReductionCommand((JointLimitReductionCommand) command);
+               break;
+            case JOINT_LIMIT_ENFORCEMENT:
+               optimizationControlModule.submitJointLimitEnforcementMethodCommand((JointLimitEnforcementMethodCommand) command);
+               break;
+            case COMMAND_LIST:
+               submitInverseKinematicsCommandList((InverseKinematicsCommandList) command);
+               break;
+            case OPTIMIZATION_SETTINGS:
+               optimizationControlModule.submitOptimizationSettingsCommand((InverseKinematicsOptimizationSettingsCommand) command);
+               break;
+            default:
+               throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled.");
          }
       }
       inverseKinematicsCommandList.clear();

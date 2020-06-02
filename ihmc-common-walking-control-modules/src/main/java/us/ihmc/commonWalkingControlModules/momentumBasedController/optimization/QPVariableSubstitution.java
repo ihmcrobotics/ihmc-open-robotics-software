@@ -39,6 +39,11 @@ public class QPVariableSubstitution
    public final DMatrixRMaj transformation = new DMatrixRMaj(4, 1);
    /** Refers to the bias vector {@code g}. */
    public final DMatrixRMaj bias = new DMatrixRMaj(4, 1);
+   /**
+    * When {@code true}, the operations related to concatenating and substituting will be simplified
+    * assuming that the bias is zero.
+    */
+   private boolean ignoreBias = false;
 
    // For garbage-free operations during the variable substitution and concatenation
    private final DMatrixRMaj tempA = new DMatrixRMaj(1, 1);
@@ -71,6 +76,11 @@ public class QPVariableSubstitution
       bias.reshape(numberOfVariablesPostSubstitution, 1);
    }
 
+   public void setIgnoreBias(boolean ignoreBias)
+   {
+      this.ignoreBias = ignoreBias;
+   }
+
    public void concatenate(QPVariableSubstitution other)
    {
       int oldSizeX = numberOfVariablesToSubstitute;
@@ -91,9 +101,12 @@ public class QPVariableSubstitution
       CommonOps_DDRM.insert(tempA, transformation, 0, 0);
       CommonOps_DDRM.insert(other.transformation, transformation, oldSizeX, oldSizeY);
 
-      // Since bias is a vector, it is safe to reshape it and trust that the coefficients won't be shifted.
-      bias.reshape(newSizeX, 1);
-      CommonOps_DDRM.insert(other.bias, bias, oldSizeX, 0);
+      if (!ignoreBias)
+      {
+         // Since bias is a vector, it is safe to reshape it and trust that the coefficients won't be shifted.
+         bias.reshape(newSizeX, 1);
+         CommonOps_DDRM.insert(other.bias, bias, oldSizeX, 0);
+      }
 
       numberOfVariablesToSubstitute = newSizeX;
    }
@@ -199,14 +212,22 @@ public class QPVariableSubstitution
       GTf.reshape(G.getNumCols(), 1);
       CommonOps_DDRM.multTransA(G, sub_f, GTf);
 
-      // G^T*H*g
-      DMatrixRMaj sub_GTH = tempE;
-      sub_GTH.reshape(G.getNumCols(), variableIndices.length);
-      MatrixTools.extractColumns(GTH, variableIndices, sub_GTH, 0);
-      sub_f.reshape(G.getNumCols(), 1);
-      CommonOps_DDRM.mult(sub_GTH, g, sub_f);
-      // G^T*f + G^T*H*g
-      CommonOps_DDRM.addEquals(sub_f, GTf);
+      if (ignoreBias)
+      {
+         sub_f.set(GTf);
+      }
+      else
+      {
+         // G^T*H*g
+         DMatrixRMaj sub_GTH = tempE;
+         sub_GTH.reshape(G.getNumCols(), variableIndices.length);
+         MatrixTools.extractColumns(GTH, variableIndices, sub_GTH, 0);
+         sub_f.reshape(G.getNumCols(), 1);
+         CommonOps_DDRM.mult(sub_GTH, g, sub_f);
+         // G^T*f + G^T*H*g
+         CommonOps_DDRM.addEquals(sub_f, GTf);
+      }
+
       // Re-inserting the elements into f. Since there are less elements than when we started, we'll add padding with zeros to prevent changing f size.
       for (int i = 0; i < variableIndices.length; i++)
       {
@@ -296,15 +317,18 @@ public class QPVariableSubstitution
             MatrixTools.zeroRow(colA, A);
       }
 
-      // 2. Compute b-A*g
-      DMatrixRMaj Ag = tempB;
-      Ag.reshape(g.getNumRows(), 1);
-      CommonOps_DDRM.mult(sub_A, g, Ag);
-
-      for (int i = 0; i < variableIndices.length; i++)
+      if (!ignoreBias)
       {
-         int row_b = variableIndices[i];
-         b.set(row_b, b.get(row_b) - Ag.get(i));
+         // 2. Compute b-A*g
+         DMatrixRMaj Ag = tempB;
+         Ag.reshape(g.getNumRows(), 1);
+         CommonOps_DDRM.mult(sub_A, g, Ag);
+
+         for (int i = 0; i < variableIndices.length; i++)
+         {
+            int row_b = variableIndices[i];
+            b.set(row_b, b.get(row_b) - Ag.get(i));
+         }
       }
    }
 
@@ -395,8 +419,16 @@ public class QPVariableSubstitution
          int row_b_min = row_g + offset_min;
          int row_b_max = row_g + offset_max;
 
-         bin.set(row_b_min, -(xMin.get(row_x) - g.get(row_g))); // The lower bound is negated to switch from greater-or-equal to less-or-equal as formulated in the QP.
-         bin.set(row_b_max, xMax.get(row_x) - g.get(row_g));
+         if (ignoreBias)
+         {
+            bin.set(row_b_min, -(xMin.get(row_x))); // The lower bound is negated to switch from greater-or-equal to less-or-equal as formulated in the QP.
+            bin.set(row_b_max, xMax.get(row_x));
+         }
+         else
+         {
+            bin.set(row_b_min, -(xMin.get(row_x) - g.get(row_g))); // The lower bound is negated to switch from greater-or-equal to less-or-equal as formulated in the QP.
+            bin.set(row_b_max, xMax.get(row_x) - g.get(row_g));
+         }
       }
 
       for (int variableIndex : variableIndices)
@@ -437,7 +469,8 @@ public class QPVariableSubstitution
       }
 
       CommonOps_DDRM.mult(G, sub_y, sub_x);
-      CommonOps_DDRM.addEquals(sub_x, g);
+      if (!ignoreBias)
+         CommonOps_DDRM.addEquals(sub_x, g);
 
       for (int i = 0; i < sub_x.getNumRows(); i++)
       {
