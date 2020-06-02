@@ -46,6 +46,66 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet
       return get(planarRegionsExpiration);
    }
 
+   public double getDirection()
+   {
+      return get(direction);
+   }
+
+   public double getWiggleInsideDeltaOverride()
+   {
+      return get(wiggleInsideDeltaOverride);
+   }
+
+   public double getPlanHorizon()
+   {
+      return get(planHorizon);
+   }
+
+   public double getIdealFootstepLengthOverride()
+   {
+      return get(idealFootstepLengthOverride);
+   }
+
+   public double getCliffBaseHeightToAvoidOverride()
+   {
+      return get(cliffBaseHeightToAvoidOverride);
+   }
+
+   public boolean getEnableConcaveHullWigglerOverride()
+   {
+      return get(enableConcaveHullWigglerOverride);
+   }
+
+   public double getFootstepPlannerTimeout()
+   {
+      return get(footstepPlannerTimeout);
+   }
+
+   public double getSwingTime()
+   {
+      return get(swingTime);
+   }
+
+   public double getTransferTime()
+   {
+      return get(transferTime);
+   }
+
+   public double getWaitTimeAfterPlanFailed()
+   {
+      return get(waitTimeAfterPlanFailed);
+   }
+
+   public boolean getReturnBestEffortPlanOverride()
+   {
+      return get(returnBestEffortPlanOverride);
+   }
+
+   public double getPercentSwingToWait()
+   {
+      return get(percentSwingToWait);
+   }
+
    public static void main(String[] args)
    {
       LookAndStepBehaviorParameters parameters = new LookAndStepBehaviorParameters();
