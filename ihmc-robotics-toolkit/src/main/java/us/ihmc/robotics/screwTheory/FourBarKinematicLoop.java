@@ -68,23 +68,34 @@ public class FourBarKinematicLoop implements KinematicLoopFunction
       jointD = joints[3];
    }
 
-   public void updateState(boolean updateAcceleration)
+   public void updateState(boolean updateVelocity, boolean updateAcceleration)
    {
+      if (updateAcceleration && !updateVelocity)
+         throw new IllegalArgumentException("updateVelocity needs to be true for updateAcceleration to be true.");
+
       clampMasterJointPosition();
 
       RevoluteJointBasics masterJoint = getMasterJoint();
       FourBarToJointConverter masterConverter = converters[masterJointIndex];
       double angle = masterConverter.toFourBarInteriorAngle(masterJoint.getQ());
-      double angleDot = masterConverter.toFourBarInteriorAngularDerivative(masterJoint.getQd());
 
-      if (updateAcceleration)
+      if (updateVelocity)
       {
-         double angleDDot = masterConverter.toFourBarInteriorAngularDerivative(masterJoint.getQdd());
-         fourBar.update(FourBarAngle.values[masterJointIndex], angle, angleDot, angleDDot);
+         double angleDot = masterConverter.toFourBarInteriorAngularDerivative(masterJoint.getQd());
+
+         if (updateAcceleration)
+         {
+            double angleDDot = masterConverter.toFourBarInteriorAngularDerivative(masterJoint.getQdd());
+            fourBar.update(FourBarAngle.values[masterJointIndex], angle, angleDot, angleDDot);
+         }
+         else
+         {
+            fourBar.update(FourBarAngle.values[masterJointIndex], angle, angleDot);
+         }
       }
       else
       {
-         fourBar.update(FourBarAngle.values[masterJointIndex], angle, angleDot);
+         fourBar.update(FourBarAngle.values[masterJointIndex], angle);
       }
 
       for (int i = 0; i < 4; i++)
@@ -97,7 +108,8 @@ public class FourBarKinematicLoop implements KinematicLoopFunction
          FourBarVertex fourBarVertex = fourBar.getVertex(FourBarAngle.values[i]);
 
          joint.setQ(converter.toJointAngle(fourBarVertex.getAngle()));
-         joint.setQd(converter.toJointDerivative(fourBarVertex.getAngleDot()));
+         if (updateVelocity)
+            joint.setQd(converter.toJointDerivative(fourBarVertex.getAngleDot()));
          if (updateAcceleration)
             joint.setQdd(converter.toJointDerivative(fourBarVertex.getAngleDDot()));
       }

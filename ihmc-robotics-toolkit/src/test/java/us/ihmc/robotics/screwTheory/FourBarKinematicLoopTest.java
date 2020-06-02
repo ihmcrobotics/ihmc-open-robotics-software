@@ -62,7 +62,7 @@ public class FourBarKinematicLoopTest
 
          masterJoint.setQ(0.01);
          MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, masterJoint);
-         fourBarKinematicLoop.updateState(false);
+         fourBarKinematicLoop.updateState(false, false);
          MultiBodySystemTools.getRootBody(masterJoint.getPredecessor()).updateFramesRecursively();
 
          FourBarVertices2D vertices = computeFourBarVertices2D(fourBarKinematicLoop);
@@ -138,7 +138,7 @@ public class FourBarKinematicLoopTest
 
          masterJoint.setQ(0.01);
          MultiBodySystemRandomTools.nextStateWithinJointLimits(random, JointStateType.CONFIGURATION, masterJoint);
-         fourBarKinematicLoop.updateState(false);
+         fourBarKinematicLoop.updateState(false, false);
          MultiBodySystemTools.getRootBody(masterJoint.getPredecessor()).updateFramesRecursively();
 
          FourBarVertices2D vertices = computeFourBarVertices2D(fourBarKinematicLoop);
