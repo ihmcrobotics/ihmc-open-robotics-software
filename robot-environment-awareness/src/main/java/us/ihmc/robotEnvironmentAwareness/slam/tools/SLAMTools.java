@@ -24,6 +24,7 @@ import us.ihmc.jOctoMap.pointCloud.PointCloud;
 import us.ihmc.jOctoMap.pointCloud.Scan;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.jOctoMap.tools.OcTreeNearestNeighborTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCalculator;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
@@ -46,25 +47,29 @@ public class SLAMTools
       return new Scan(new Point3D(sensorPosition), pointCloud);
    }
 
-   public static Scan toScan(Point3DReadOnly[] points, Tuple3DReadOnly sensorPosition, double minimumDepth, double maximumDepth)
+   public static Scan toScan(Point3DReadOnly[] points, Point3DReadOnly[] pointsToSensorFrame, RigidBodyTransformReadOnly sensorPose, NormalOcTree map,
+                             double windowMargin)
    {
-      PointCloud pointCloud = new PointCloud();
+      if (points.length != pointsToSensorFrame.length)
+      {
+         LogTools.error("size of point cloud are different " + points.length + " " + pointsToSensorFrame.length);
+         return null;
+      }
 
-      double minimumSquared = minimumDepth * minimumDepth;
-      double maximumSquared = maximumDepth * maximumDepth;
+      ConvexPolygon2D windowForMap = SLAMTools.computeMapConvexHullInSensorFrame(map, sensorPose);
+      PointCloud pointCloud = new PointCloud();
 
       for (int i = 0; i < points.length; i++)
       {
-         double x = points[i].getX();
-         double y = points[i].getY();
-         double z = points[i].getZ();
-         double depthSquared = (x - sensorPosition.getX()) * (x - sensorPosition.getX()) + (y - sensorPosition.getY()) * (y - sensorPosition.getY())
-               + (z - sensorPosition.getZ()) * (z - sensorPosition.getZ());
-
-         if (minimumSquared < depthSquared && depthSquared < maximumSquared)
+         if (windowForMap.isPointInside(pointsToSensorFrame[i].getX(), pointsToSensorFrame[i].getY(), -windowMargin))
+         {
+            double x = points[i].getX();
+            double y = points[i].getY();
+            double z = points[i].getZ();
             pointCloud.add(x, y, z);
+         }
       }
-      return new Scan(new Point3D(sensorPosition), pointCloud);
+      return new Scan(new Point3D(sensorPose.getTranslation()), pointCloud);
    }
 
    public static Point3D[] createConvertedPointsToSensorPose(RigidBodyTransformReadOnly sensorPose, Point3DReadOnly[] pointCloud)
@@ -227,7 +232,7 @@ public class SLAMTools
                                                      EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, node.getHitLocationCopy(), node.getNormalCopy())));
       });
 
-      return Math.sqrt(nearestHitDistanceSquared.getValue());
+      return nearestHitDistanceSquared.getValue();
    }
 
    public static double computeDistanceToNormalOctreeAndPackCorrespondingPoint(NormalOcTree octree, Point3DReadOnly point, Point3D correspondingPointToPack)

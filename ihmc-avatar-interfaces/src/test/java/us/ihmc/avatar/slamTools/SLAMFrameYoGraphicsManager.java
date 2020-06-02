@@ -1,5 +1,8 @@
 package us.ihmc.avatar.slamTools;
 
+import java.util.Random;
+
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -16,6 +19,7 @@ public class SLAMFrameYoGraphicsManager
 {
    private final SLAMFrame slamFrame;
    private final int sizeOfPointCloud;
+   private final TIntArrayList indicesArray = new TIntArrayList();
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
@@ -25,30 +29,54 @@ public class SLAMFrameYoGraphicsManager
    private final YoGraphicCoordinateSystem yoGraphicSensorPose;
    private final YoGraphicPosition[] yoGraphicPointCloud;
 
-   public SLAMFrameYoGraphicsManager(String prefix, SLAMFrame frame, AppearanceDefinition appearance, YoVariableRegistry registry,
+   public SLAMFrameYoGraphicsManager(String prefix, SLAMFrame frame, int size, AppearanceDefinition appearance, YoVariableRegistry registry,
                                      YoGraphicsListRegistry graphicsRegistry)
    {
       slamFrame = frame;
-      sizeOfPointCloud = slamFrame.getPointCloud().length;
 
       yoFrameSensorPose = new YoFramePose3D(prefix + "_SensorPoseFrame", worldFrame, registry);
-      yoFramePointCloud = new YoFramePoint3D[sizeOfPointCloud];
-      for (int i = 0; i < sizeOfPointCloud; i++)
-      {
-         yoFramePointCloud[i] = new YoFramePoint3D(prefix + "_PointCloud_" + i, worldFrame, registry);
-      }
-
       YoGraphicsList yoGraphicListRegistry = new YoGraphicsList(prefix + "_SLAM_Frame_Viz");
       yoGraphicSensorPose = new YoGraphicCoordinateSystem(prefix + "_SensorPoseViz", yoFrameSensorPose, 0.1, appearance);
       yoGraphicListRegistry.add(yoGraphicSensorPose);
+
+      if (size < 0 || slamFrame.getPointCloud().length < size)
+      {
+         sizeOfPointCloud = slamFrame.getPointCloud().length;
+         for (int i = 0; i < slamFrame.getPointCloud().length; i++)
+         {
+            indicesArray.add(i);
+         }
+      }
+      else
+      {
+         Random selector = new Random(0612L);
+         sizeOfPointCloud = size;
+         while(indicesArray.size() != sizeOfPointCloud)
+         {
+            int selectedIndex = selector.nextInt(slamFrame.getPointCloud().length);
+            if (!indicesArray.contains(selectedIndex))
+            {
+               indicesArray.add(selectedIndex);
+            }
+         }
+      }
+
+      yoFramePointCloud = new YoFramePoint3D[sizeOfPointCloud];
       yoGraphicPointCloud = new YoGraphicPosition[sizeOfPointCloud];
       for (int i = 0; i < sizeOfPointCloud; i++)
       {
+         yoFramePointCloud[i] = new YoFramePoint3D(prefix + "_PointCloud_" + i, worldFrame, registry);
          yoGraphicPointCloud[i] = new YoGraphicPosition(prefix + "_PointCloudViz_" + i, yoFramePointCloud[i], 0.003, appearance);
          yoGraphicListRegistry.add(yoGraphicPointCloud[i]);
       }
 
       graphicsRegistry.registerYoGraphicsList(yoGraphicListRegistry);
+   }
+
+   public SLAMFrameYoGraphicsManager(String prefix, SLAMFrame frame, AppearanceDefinition appearance, YoVariableRegistry registry,
+                                     YoGraphicsListRegistry graphicsRegistry)
+   {
+      this(prefix, frame, -1, appearance, registry, graphicsRegistry);
    }
 
    public void updateGraphics()
@@ -57,7 +85,7 @@ public class SLAMFrameYoGraphicsManager
       Point3DReadOnly[] pointCloud = slamFrame.getPointCloud();
       for (int i = 0; i < sizeOfPointCloud; i++)
       {
-         yoFramePointCloud[i].set(pointCloud[i]);
+         yoFramePointCloud[i].set(pointCloud[indicesArray.get(i)]);
       }
    }
 }
