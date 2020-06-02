@@ -23,7 +23,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.robotics.math.trajectories.YoPolynomial;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -230,9 +230,9 @@ public class ControllerBasedBodyPathTest
 
                for (int i = 0; i < stepsToVisualize; i++)
                {
-                  SimpleFootstep footstep = footstepPlan.getFootstep(i);
+                  Footstep footstep = footstepPlan.getFootstep(i);
                   FramePose3D footstepPose = new FramePose3D();
-                  footstep.getSoleFramePose(footstepPose);
+                  footstep.getPose(footstepPose);
 
                   RobotSide robotSide = footstep.getRobotSide();
                   MutableInt sideCount = counts.get(robotSide);

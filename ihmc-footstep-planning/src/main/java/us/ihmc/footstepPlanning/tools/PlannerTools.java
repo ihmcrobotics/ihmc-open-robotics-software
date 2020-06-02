@@ -15,6 +15,7 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -112,9 +113,9 @@ public class PlannerTools
       if (steps < 1)
          throw new RuntimeException("Did not get enough footsteps to check if goal is within feet.");
 
-      SimpleFootstep footstep = footstepPlan.getFootstep(steps - 1);
+      Footstep footstep = footstepPlan.getFootstep(steps - 1);
       FramePose3D stepPose = new FramePose3D();
-      footstep.getSoleFramePose(stepPose);
+      footstep.getPose(stepPose);
       RobotSide stepSide = footstep.getRobotSide();
 
       double midFeetOffset = stepSide.negateIfLeftSide(0.125);
@@ -155,9 +156,9 @@ public class PlannerTools
       if (steps < 1)
          throw new RuntimeException("Did not get enough footsteps to get end position.");
 
-      SimpleFootstep footstep = footstepPlan.getFootstep(steps - 1);
+      Footstep footstep = footstepPlan.getFootstep(steps - 1);
       FramePose3D stepPose = new FramePose3D();
-      footstep.getSoleFramePose(stepPose);
+      footstep.getPose(stepPose);
       RobotSide stepSide = footstep.getRobotSide();
 
       double midFeetOffset = stepSide.negateIfLeftSide(0.125);

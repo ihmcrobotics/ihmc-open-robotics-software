@@ -14,6 +14,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlanHolder;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
@@ -108,16 +109,16 @@ public class PlanningTestTools
 
          for (int i = 0; i < numberOfSteps; i++)
          {
-            SimpleFootstep footstep = footseps.getFootstep(i);
+            Footstep footstep = footseps.getFootstep(i);
             FramePose3D footstepPose = new FramePose3D();
-            footstep.getSoleFramePose(footstepPose);
+            footstep.getPose(footstepPose);
 
             AppearanceDefinition appearance = footstep.getRobotSide() == RobotSide.RIGHT ? YoAppearance.Green() : YoAppearance.Red();
             YoFramePoseUsingYawPitchRoll yoFootstepPose = new YoFramePoseUsingYawPitchRoll("footPose" + i, worldFrame, vizRegistry);
             yoFootstepPose.set(footstepPose);
             yoFootstepPose.setZ(yoFootstepPose.getZ() + (footstep.getRobotSide() == RobotSide.RIGHT ? 0.001 : 0.0));
 
-            if (!footstep.hasFoothold())
+            if (!footstep.hasPredictedContactPoints())
             {
                YoGraphicPolygon footstepViz = new YoGraphicPolygon("footstep" + i, yoDefaultFootPolygon, yoFootstepPose, 1.0, appearance);
                vizGraphicsListRegistry.registerYoGraphic("viz", footstepViz);
@@ -128,7 +129,9 @@ public class PlanningTestTools
                vizGraphicsListRegistry.registerYoGraphic("viz", fullFootstepViz);
 
                ConvexPolygon2D foothold = new ConvexPolygon2D();
-               footstep.getFoothold(foothold);
+               footstep.getPredictedContactPoints().forEach(foothold::addVertex);
+               foothold.update();
+
                ConvexPolygonTools.limitVerticesConservative(foothold, 4);
                YoFrameConvexPolygon2D yoFoothold = new YoFrameConvexPolygon2D("Foothold" + i, worldFrame, 4, vizRegistry);
                yoFoothold.set(foothold);
