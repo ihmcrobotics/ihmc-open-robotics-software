@@ -140,18 +140,7 @@ public class PolygonWiggler
       DMatrixRMaj A_full = new DMatrixRMaj(constraintsPerPoint * numberOfPoints + boundConstraints, 3 + constraintsPerPoint * numberOfPoints);
       DMatrixRMaj b_full = new DMatrixRMaj(constraintsPerPoint * numberOfPoints + boundConstraints, 1);
       // add limits on allowed rotation and translation
-      A_full.set(constraintsPerPoint * numberOfPoints , 0, 1.0);
-      b_full.set(constraintsPerPoint * numberOfPoints , parameters.maxX);
-      A_full.set(constraintsPerPoint * numberOfPoints + 1, 0, -1.0);
-      b_full.set(constraintsPerPoint * numberOfPoints + 1, -parameters.minX);
-      A_full.set(constraintsPerPoint * numberOfPoints + 2, 1, 1.0);
-      b_full.set(constraintsPerPoint * numberOfPoints + 2, parameters.maxY);
-      A_full.set(constraintsPerPoint * numberOfPoints + 3, 1, -1.0);
-      b_full.set(constraintsPerPoint * numberOfPoints + 3, -parameters.minY);
-      A_full.set(constraintsPerPoint * numberOfPoints + 4, 2, 1.0);
-      b_full.set(constraintsPerPoint * numberOfPoints + 4, parameters.maxYaw);
-      A_full.set(constraintsPerPoint * numberOfPoints + 5, 2, -1.0);
-      b_full.set(constraintsPerPoint * numberOfPoints + 5, -parameters.minYaw);
+      PolygonWiggler.addRotationAndTranslationConstraint(A_full, b_full, constraintsPerPoint * numberOfPoints, parameters);
 
       // The inequality constraints of form
       // Ax <= b
@@ -259,6 +248,22 @@ public class PolygonWiggler
       fullTransform.multiply(translationTransform);
 
       return fullTransform;
+   }
+
+   public static void addRotationAndTranslationConstraint(DenseMatrix64F A, DenseMatrix64F b, int constraintRowStart, WiggleParameters parameters)
+   {
+      A.set(constraintRowStart , 0, 1.0);
+      b.set(constraintRowStart , parameters.maxX);
+      A.set(constraintRowStart + 1, 0, -1.0);
+      b.set(constraintRowStart + 1, -parameters.minX);
+      A.set(constraintRowStart + 2, 1, 1.0);
+      b.set(constraintRowStart + 2, parameters.maxY);
+      A.set(constraintRowStart + 3, 1, -1.0);
+      b.set(constraintRowStart + 3, -parameters.minY);
+      A.set(constraintRowStart + 4, 2, 1.0);
+      b.set(constraintRowStart + 4, parameters.maxYaw);
+      A.set(constraintRowStart + 5, 2, -1.0);
+      b.set(constraintRowStart + 5, -parameters.minYaw);
    }
 
    /**

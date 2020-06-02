@@ -1,6 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPlane;
+import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
@@ -8,6 +9,7 @@ import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePose3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -62,6 +64,8 @@ public class EnvironmentConstraintHandler
    private final FramePoint2D stepXY = new FramePoint2D();
 
    private final ICPControlPlane icpControlPlane;
+
+   private final ConvexStepConstraintOptimizer stepConstraintOptimizer = new ConvexStepConstraintOptimizer();
 
    public EnvironmentConstraintHandler(ICPControlPlane icpControlPlane,
                                        SideDependentList<? extends ContactablePlaneBody> contactableFeet,
@@ -162,12 +166,17 @@ public class EnvironmentConstraintHandler
       computeShrunkConvexHull(stepConstraintRegion, upcomingFootstepSide, predictedContactPoints, footstepPoseToPack.getOrientation());
 
       stepXY.set(footstepPoseToPack.getPosition());
-      yoShrunkConvexHullConstraint.orthogonalProjection(stepXY);
 
+      RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findWiggleTransform(footstepPolygon, yoConvexHullConstraint, new WiggleParameters());
       originalPose.set(footstepPoseToPack);
 
-      footstepPoseToPack.getPosition().set(stepXY, stepConstraintRegion.getPlaneZGivenXY(stepXY.getX(), stepXY.getY()));
-      footstepPoseToPack.getOrientation().set(stepConstraintRegion.getTransformToWorld().getRotation());
+      footstepPoseToPack.applyTransform(wiggleTransform);
+
+//      yoShrunkConvexHullConstraint.orthogonalProjection(stepXY);
+//
+//
+//      footstepPoseToPack.getPosition().set(stepXY, stepConstraintRegion.getPlaneZGivenXY(stepXY.getX(), stepXY.getY()));
+//      footstepPoseToPack.getOrientation().set(stepConstraintRegion.getTransformToWorld().getRotation());
 
       return originalPose.getPositionDistance(footstepPoseToPack) > 1e-5 || originalPose.getOrientationDistance(footstepPoseToPack) > 1e-5;
    }
