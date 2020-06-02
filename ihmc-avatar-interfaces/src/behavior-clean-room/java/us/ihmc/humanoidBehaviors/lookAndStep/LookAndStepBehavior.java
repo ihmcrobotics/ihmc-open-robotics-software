@@ -6,12 +6,10 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.SimpleTimer;
-import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.*;
@@ -25,6 +23,7 @@ import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -188,32 +187,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       goalPoseBetweenFeet.setZ(midFeetZ);
 
       // find closest point along body path plan
-      Point3D closestPointAlongPath = bodyPathPlan.get(0).getPosition();
-      double closestDistance = closestPointAlongPath.distance(goalPoseBetweenFeet.getPosition());
-      int closestSegmentIndex = 0;
-      for (int i = 0; i < bodyPathPlan.size() - 1; i++)
-      {
-         LogTools.info("Finding closest point along body path. Segment: {}, closestDistance: {}", i, closestDistance);
-         LineSegment3D lineSegment = new LineSegment3D();
-         lineSegment.set(bodyPathPlan.get(i).getPosition(), bodyPathPlan.get(i + 1).getPosition());
-
-         Point3D closestPointOnBodyPathSegment = new Point3D();
-         EuclidGeometryTools.closestPoint3DsBetweenTwoLineSegment3Ds(lineSegment.getFirstEndpoint(),
-                                                                     lineSegment.getSecondEndpoint(),
-                                                                     goalPoseBetweenFeet.getPosition(),
-                                                                     goalPoseBetweenFeet.getPosition(),
-                                                                     closestPointOnBodyPathSegment,
-                                                                     new Point3D()); // TODO find a better way to do this
-
-         double distance = closestPointOnBodyPathSegment.distance(goalPoseBetweenFeet.getPosition());
-         if (distance < closestDistance)
-         {
-            closestPointAlongPath = closestPointOnBodyPathSegment;
-            closestDistance = distance;
-            closestSegmentIndex = i;
-         }
-      }
-      LogTools.info("closestPointAlongPath: {}, closestDistance: {}, closestLineSegmentIndex: {}", closestPointAlongPath, closestDistance, closestSegmentIndex);
+      Point3D closestPointAlongPath = new Point3D();
+      int closestSegmentIndex = BodyPathPlannerTools.findClosestPointAlongPath(bodyPathPlan, goalPoseBetweenFeet.getPosition(), closestPointAlongPath);
 
       helper.publishToUI(ClosestPointForUI, new Pose3D(closestPointAlongPath, new Quaternion()));
 
