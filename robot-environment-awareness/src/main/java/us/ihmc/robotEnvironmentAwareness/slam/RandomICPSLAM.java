@@ -97,11 +97,10 @@ public class RandomICPSLAM extends SLAMBasics
       RigidBodyTransformReadOnly sensorPose = frame.getSensorPose();
 
       ScanCollection scanCollection = new ScanCollection();
-      int numberOfPoints = getLatestFrame().getPointCloud().length;
+      int numberOfPoints = frame.getPointCloud().length;
 
       scanCollection.setSubSampleSize(numberOfPoints);
-      RandomICPSLAMParameters parameters = this.parameters.get();
-      scanCollection.addScan(SLAMTools.toScan(pointCloud, sensorPose.getTranslation(), parameters.getMinimumDepth(), parameters.getMaximumDepth()));
+      scanCollection.addScan(SLAMTools.toScan(pointCloud, sensorPose.getTranslation()));
 
       octree.insertScanCollection(scanCollection, false);
 
