@@ -54,10 +54,13 @@ public class SteppableRegionsCalculator
    private final YoDouble orthogonalAngle;
    private final YoDouble minimumDistanceFromCliffBottoms;
 
+   private HashMap<StepConstraintRegion, List<ConcavePolygon2DBasics>> obstacleExtrusions = new HashMap<>();
    private List<StepConstraintRegion> steppableRegions = new ArrayList<>();
    private List<PlanarRegion> allPlanarRegions = new ArrayList<>();
 
    private final FramePoint2D stanceFootPosition = new FramePoint2D();
+   private final Random random = new Random(1738L);
+
 
    /** See notes in {@link VisibilityGraphsparametersReadOnly} */
    private final ObstacleRegionFilter obstacleRegionFilter = new ObstacleRegionFilter()
@@ -87,8 +90,9 @@ public class SteppableRegionsCalculator
          }
          else if (obstacleHeight < canEasilyStepOverHeight.getDoubleValue())
          {
-            double alpha = obstacleHeight / canEasilyStepOverHeight.getDoubleValue();
-            return InterpolationTools.linearInterpolate(0.0, minimumDistanceFromCliffBottoms.getDoubleValue(), alpha);
+            return 0.01;
+//            double alpha = obstacleHeight / canEasilyStepOverHeight.getDoubleValue();
+//            return InterpolationTools.linearInterpolate(0.0, minimumDistanceFromCliffBottoms.getDoubleValue(), alpha);
          }
          else
          {
@@ -146,6 +150,7 @@ public class SteppableRegionsCalculator
       List<PlanarRegion> candidateRegions = allPlanarRegions.stream().filter(this::isRegionValidForStepping).collect(Collectors.toList());
 
       steppableRegions = new ArrayList<>();
+      obstacleExtrusions = new HashMap<>();
       for (PlanarRegion candidateRegion : candidateRegions)
       {
          List<StepConstraintRegion> regions = createSteppableRegionsFromPlanarRegion(candidateRegion, allPlanarRegions);
@@ -153,7 +158,15 @@ public class SteppableRegionsCalculator
             steppableRegions.addAll(regions);
       }
 
+      for (StepConstraintRegion stepConstraintRegion : steppableRegions)
+         stepConstraintRegion.setRegionId(random.nextInt());
+
       return steppableRegions;
+   }
+
+   public HashMap<StepConstraintRegion, List<ConcavePolygon2DBasics>> getObstacleExtrusions()
+   {
+      return obstacleExtrusions;
    }
 
    private boolean isRegionValidForStepping(PlanarRegion planarRegion)
@@ -166,6 +179,9 @@ public class SteppableRegionsCalculator
       if (PlanarRegionTools.computePlanarRegionArea(planarRegion) < minimumAreaForSteppable.getValue())
          return false;
 
+      if (stanceFootPosition.containsNaN())
+         return true;
+
       return isRegionWithinReach(stanceFootPosition, maximumStepReach.getDoubleValue(), planarRegion);
    }
 
@@ -173,13 +189,15 @@ public class SteppableRegionsCalculator
    {
       // TODO do a check on the bounding box distance first
 
-      if (planarRegion.getConvexHull().distance(point) > reach)
+      Point2D pointInRegion = new Point2D(point);
+      planarRegion.getTransformToLocal().transform(pointInRegion, false);
+      if (planarRegion.getConvexHull().distance(pointInRegion) > reach)
          return false;
 
       boolean closeEnough = false;
       for (ConvexPolygon2DReadOnly convexPolygon : planarRegion.getConvexPolygons())
       {
-         if (convexPolygon.distance(point) < reach)
+         if (convexPolygon.distance(pointInRegion) < reach)
          {
             closeEnough = true;
             break;
@@ -199,8 +217,15 @@ public class SteppableRegionsCalculator
                                                           .collect(Collectors.toList());
 
       List<ConcavePolygon2DBasics> obstacleExtrusions = createObstacleExtrusions(candidateRegion, obstacleRegions);
+      List<StepConstraintRegion> stepConstraintRegions = createSteppableRegions(candidateRegion.getTransformToWorld(), candidateConstraintRegion, obstacleExtrusions);
 
-      return createSteppableRegions(candidateRegion.getTransformToWorld(), candidateConstraintRegion, obstacleExtrusions);
+      if (stepConstraintRegions != null)
+      {
+         for (StepConstraintRegion stepConstraintRegion : stepConstraintRegions)
+            this.obstacleExtrusions.put(stepConstraintRegion, obstacleExtrusions);
+      }
+
+      return stepConstraintRegions;
    }
 
    private List<StepConstraintRegion> createSteppableRegions(RigidBodyTransformReadOnly transformToWorld,
@@ -211,8 +236,8 @@ public class SteppableRegionsCalculator
          return null;
 
       List<ConcavePolygon2DBasics> listOfHoles = obstacleExtrusions.stream()
-                                                                      .filter(region -> isObstacleAHole(uncroppedPolygon, region))
-                                                                      .collect(Collectors.toList());
+                                                                   .filter(region -> isObstacleAHole(uncroppedPolygon, region))
+                                                                   .collect(Collectors.toList());
       obstacleExtrusions.removeAll(listOfHoles);
 
       List<ConcavePolygon2DBasics> croppedPolygons = new ArrayList<>();
@@ -284,7 +309,6 @@ public class SteppableRegionsCalculator
       return obstacleExtrusions;
    }
 
-
    static ConcavePolygon2D createObstacleExtrusion(PlanarRegion homeRegion,
                                                    PlanarRegion obstacleRegion,
                                                    ObstacleExtrusionDistanceCalculator extrusionDistanceCalculator,
@@ -308,14 +332,37 @@ public class SteppableRegionsCalculator
       // actually extrude the points
       List<? extends Point2DReadOnly> extrusionInFlatWorld = ClusterTools.computeObstacleNavigableExtrusionsInLocal(obstacleClusterType,
                                                                                                                     obstacleClustersInWorld,
-                                                                                                                    extrusionDistanceCalculator);
+                                                                                                                    extrusionDistanceCalculator,
+                                                                                                                    true);
 
       // Project the points back up to the home region.
       RigidBodyTransformReadOnly transformFromWorldToHome = homeRegion.getTransformToLocal();
-      ExtrusionHull nonNavigableExtrusionsInHomeRegionLocal = ClusterTools.projectPointsVerticallyToPlanarRegionLocal(homeRegion,
-                                                                                                                      extrusionInFlatWorld,
-                                                                                                                      transformFromWorldToHome);
+      ExtrusionHull extrusionsInHomeRegion = ClusterTools.projectPointsVerticallyToPlanarRegionLocal(homeRegion,
+                                                                                                     extrusionInFlatWorld,
+                                                                                                     transformFromWorldToHome);
 
-      return new ConcavePolygon2D(Vertex2DSupplier.asVertex2DSupplier(nonNavigableExtrusionsInHomeRegionLocal.getPoints()));
+      removeDuplicatedPoints(extrusionsInHomeRegion, 1e-5);
+
+      return new ConcavePolygon2D(Vertex2DSupplier.asVertex2DSupplier(extrusionsInHomeRegion.getPoints()));
+   }
+
+   private static void removeDuplicatedPoints(ExtrusionHull hullToFilter, double distanceEpsilon)
+   {
+      double epsilonSquared = distanceEpsilon * distanceEpsilon;
+      int i = 0;
+      while (i < hullToFilter.getPoints().size())
+      {
+         Point2DReadOnly point = hullToFilter.get(i);
+         int j = i + 1;
+         while (j < hullToFilter.getPoints().size())
+         {
+            Point2DReadOnly otherPoint = hullToFilter.get(j);
+            if (point.distanceSquared(otherPoint) < epsilonSquared)
+               hullToFilter.getPoints().remove(j);
+            else
+               j++;
+         }
+         i++;
+      }
    }
 }

@@ -24,6 +24,7 @@ import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -115,19 +116,18 @@ public class StepConstraintRegionViewer
          JavaFXMeshBuilder meshBuilder = new JavaFXMeshBuilder();
          StepConstraintRegion planarRegion = stepConstraintRegions.get(regionIndex);
 
-//         int regionId = planarRegion.getRegionId();
-         int regionId = -1;
+         int regionId = planarRegion.getRegionId();
          RigidBodyTransform transformToWorld = new RigidBodyTransform(planarRegion.getTransformToWorld());
 
          meshBuilder.addMultiLine(transformToWorld, planarRegion.getConcaveHull().getVertexBufferView(), VisualizationParameters.CONCAVEHULL_LINE_THICKNESS, true);
+         meshBuilder.addPolygon(transformToWorld, planarRegion.getConvexHullInConstraintRegion());
 
          for (int polygonIndex = 0; polygonIndex < planarRegion.getNumberOfHolesInRegion(); polygonIndex++)
          {
             ConcavePolygon2DReadOnly hole = planarRegion.getHoleInConstraintRegion(polygonIndex);
             meshBuilder.addMultiLine(transformToWorld, hole.getVertexBufferView(), VisualizationParameters.CONCAVEHULL_LINE_THICKNESS, true);
 
-//            ConvexPolygon2D convexPolygon2d = planarRegion.getConvexPolygon(polygonIndex);
-//            meshBuilder.addPolygon(transformToWorld, convexPolygon2d);
+
          }
 
 

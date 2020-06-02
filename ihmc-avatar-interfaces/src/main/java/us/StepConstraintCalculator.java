@@ -6,6 +6,7 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
@@ -19,6 +20,7 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
@@ -38,7 +40,7 @@ public class StepConstraintCalculator
    private final FramePoint2D capturePoint = new FramePoint2D();
 
    private final SideDependentList<FrameConvexPolygon2D> supportPolygons = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
-
+   private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
    private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>();
 
    private SimpleStep currentStep;
@@ -76,6 +78,7 @@ public class StepConstraintCalculator
                                    double gravityZ)
    {
       this.timeProvider = timeProvider;
+      this.soleZUpFrames = soleZUpFrames;
       this.steppableRegionsCalculator = new SteppableRegionsCalculator(kinematicStepRange, registry);
       this.captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange, soleZUpFrames, registry, null);
       this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, gravityZ, registry, null);
@@ -151,6 +154,10 @@ public class StepConstraintCalculator
          updateCaptureRegion(currentStep);
 
          steppableRegionsCalculator.setPlanarRegions(planarRegionsList.get().getPlanarRegionsAsList());
+         FramePoint3D supportFoot = new FramePoint3D(soleZUpFrames.get(currentStep.getSwingSide().getOppositeSide()));
+         supportFoot.changeFrame(worldFrame);
+         steppableRegionsCalculator.setStanceFootPosition(supportFoot);
+
          List<StepConstraintRegion> steppableRegions = steppableRegionsCalculator.computeSteppableRegions();
 
          planarRegionDecider.setConstraintRegions(steppableRegions);

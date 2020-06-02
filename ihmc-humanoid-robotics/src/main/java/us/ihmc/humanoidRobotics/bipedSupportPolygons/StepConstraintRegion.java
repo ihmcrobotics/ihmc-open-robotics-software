@@ -39,11 +39,23 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
                                                                         new Point3D(Double.NaN, Double.NaN, Double.NaN));
    private final Point3D tempPointForConvexPolygonProjection = new Point3D();
 
+   private int regionId = -1;
+
    public StepConstraintRegion()
    {
       concaveHull = new ConcavePolygon2D();
       updateConvexHull();
       updateBoundingBox();
+   }
+
+   public void setRegionId(int regionId)
+   {
+      this.regionId = regionId;
+   }
+
+   public int getRegionId()
+   {
+      return regionId;
    }
 
    public StepConstraintRegion(RigidBodyTransformReadOnly transformToWorld, List<Point2D> concaveHullVertices)

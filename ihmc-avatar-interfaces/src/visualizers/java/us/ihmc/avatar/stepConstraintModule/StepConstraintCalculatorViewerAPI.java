@@ -2,23 +2,34 @@ package us.ihmc.avatar.stepConstraintModule;
 
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.messager.MessagerAPIFactory;
+import us.ihmc.messager.MessagerAPIFactory.Category;
+import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
+import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 
+import java.util.HashMap;
 import java.util.List;
+
+
 
 public class StepConstraintCalculatorViewerAPI
 {
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
-   private static final MessagerAPIFactory.Category Root = apiFactory.createRootCategory("Constraint");
-   private static final MessagerAPIFactory.CategoryTheme StepConstraint = apiFactory.createCategoryTheme("StepConstraint");
+   private static final Category Root = apiFactory.createRootCategory("Constraint");
+   private static final CategoryTheme StepConstraint = apiFactory.createCategoryTheme("StepConstraint");
 
-   public static final MessagerAPIFactory.Topic<PlanarRegionsList> PlanarRegionData = topic("PlanarRegionData");
-   public static final MessagerAPIFactory.Topic<List<StepConstraintRegion>> StepConstraintRegionData = topic("StepConstraintRegionData");
+   public static final Topic<PlanarRegionsList> PlanarRegionData = topic("PlanarRegionData");
+   public static final Topic<List<StepConstraintRegion>> StepConstraintRegionData = topic("StepConstraintRegionData");
+   public static final Topic<HashMap<StepConstraintRegion, List<ConcavePolygon2DBasics>>> ObstacleExtrusionsData = topic("ObstacleExtursionsData");
 
-   public static final MessagerAPIFactory.Topic<Boolean> ShowPlanarRegions = topic("ShowPlanarRegions");
-   public static final MessagerAPIFactory.Topic<Boolean> ShowStepConstraintRegions = topic("ShowStepConstraintRegions");
+   public static final Topic<Boolean> ShowPlanarRegions = topic("ShowPlanarRegions");
+   public static final Topic<Boolean> ShowStepConstraintRegions = topic("ShowStepConstraintRegions");
+   public static final Topic<Boolean> ShowObstacleExtrusions = topic("ShowObstacleExtrusions");
+   public static final Topic<Boolean> ShowExtrusionPoints = topic("ShowObstacleExtrusions");
 
-   public static final MessagerAPIFactory.MessagerAPI API = apiFactory.getAPIAndCloseFactory();
+   public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 
    private static final <T> MessagerAPIFactory.Topic<T> topic(String name)
    {
