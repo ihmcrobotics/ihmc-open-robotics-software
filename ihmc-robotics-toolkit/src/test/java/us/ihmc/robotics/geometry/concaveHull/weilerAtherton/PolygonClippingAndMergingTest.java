@@ -21,6 +21,28 @@ import static us.ihmc.robotics.Assert.*;
 public class PolygonClippingAndMergingTest
 {
    @Test
+   public void testClipCapturedRegion()
+   {
+      ConcavePolygon2D polygonToClip = new ConcavePolygon2D();
+      polygonToClip.addVertex(0.5, 0.95);
+      polygonToClip.addVertex(1.1, 0.95);
+      polygonToClip.addVertex(1.1, -0.95);
+      polygonToClip.addVertex(0.5, -0.95);
+      polygonToClip.update();
+
+      ConcavePolygon2D clippingPolygon = new ConcavePolygon2D();
+      clippingPolygon.addVertex(-1.0, -0.1);
+      clippingPolygon.addVertex(-1.1, -0.0);
+      clippingPolygon.addVertex(-1.0, 0.1);
+      clippingPolygon.addVertex(1.0, 0.1);
+      clippingPolygon.addVertex(1.1, 0.0);
+      clippingPolygon.addVertex(1.0, -0.1);
+      clippingPolygon.update();
+
+      ConcavePolygon2D clippedPolygon = new ConcavePolygon2D();
+      List<ConcavePolygon2DBasics> clippedPolygons = PolygonClippingAndMerging.removeAreaInsideClip(clippingPolygon, polygonToClip);
+   }
+   @Test
    public void testClippingRemoveSquareChunkFromSideOfSquare()
    {
       ConcavePolygon2D polygonToClip = new ConcavePolygon2D();
