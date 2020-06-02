@@ -7,10 +7,8 @@ import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.SimpleTimer;
 import us.ihmc.euclid.geometry.LineSegment3D;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -28,15 +26,11 @@ import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
 import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
-import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
@@ -67,11 +61,6 @@ public class LookAndStepBehavior implements BehaviorInterface
    private volatile RobotSide lastStanceSide = null;
    private volatile SideDependentList<FramePose3D> lastSteppedSolePoses = new SideDependentList<>();
 
-   private PlanarRegionsList bodyPathModulePlanarRegionsList;
-   private SimpleTimer bodyPathModulePlanarRegionExpirationTimer = new SimpleTimer();
-   private SimpleTimer bodyPathModuleFailedTimer = new SimpleTimer();
-   private volatile Pose3D bodyPathModuleGoalInput;
-
    private PlanarRegionsList footstepPlanningNearRegions;
    private SimpleTimer footstepPlanningNearRegionsExpirationTimer = new SimpleTimer();
    private volatile ArrayList<Pose3D> footstepPlanningBodyPathPlan;
@@ -99,19 +88,20 @@ public class LookAndStepBehavior implements BehaviorInterface
       bodyPathReview = new LookAndStepReviewPart<>("body path", approvalNotification, this::footstepPlanningAcceptBodyPath);
       footstepPlanReview = new LookAndStepReviewPart<>("footstep plan", approvalNotification, this::robotWalkingModuleAcceptFootstepPlan);
 
+
+
       bodyPathPart = new LookAndStepBodyPathPart(helper,
                                                  bodyPathReview::isBeingReviewed,
+                                                 operatorReviewEnabledInput::get,
                                                  lookAndStepParameters,
                                                  visibilityGraphParameters,
                                                  callback -> helper.createROS2Callback(ROS2Tools.MAP_REGIONS, callback),
                                                  callback -> helper.createUICallback(GoalInput, callback),
-                                                 this::footstepPlanningAcceptBodyPath);
+                                                 this::footstepPlanningAcceptBodyPath,
+                                                 bodyPathReview::review,
+                                                 needNewPlan);
 
       // TODO: Want to be able to wire up behavior here and see all present modules
-
-      // build event flow
-      helper.createROS2PlanarRegionsListCallback(ROS2Tools.MAP_REGIONS, this::bodyPathModuleAcceptREARegions);
-      helper.createUICallback(GoalInput, this::bodyPathModuleAcceptGoalPlacement);
 
       helper.createROS2PlanarRegionsListCallback(ROS2Tools.REALSENSE_SLAM_REGIONS, this::footstepPlanningAcceptNearPlanarRegions);
 
@@ -130,129 +120,6 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       robot.pitchHeadWithRespectToChest(0.38);
 //      Commanding neck trajectory: slider: 43.58974358974359 angle: 0.3824055641025641
-   }
-
-   // TODO: Use data input-callback classes ?
-
-   private void bodyPathModuleAcceptREARegions(PlanarRegionsList planarRegionsList)
-   {
-//      LogTools.debug("bodyPathModuleAcceptREARegions, {}", planarRegionsList);
-      bodyPathModulePlanarRegionsList = planarRegionsList;
-      bodyPathModulePlanarRegionExpirationTimer.reset();
-
-//      helper.publishToUI(MapRegionsForUI, bodyPathModulePlanarRegionsList); // TODO This takes forever?
-
-      bodyPathModuleEvaluteAndRun();
-   }
-
-   private void bodyPathModuleAcceptGoalPlacement(Pose3D goalInput)
-   {
-      LogTools.debug("bodyPathModuleAcceptGoalPlacement, {}", goalInput);
-      bodyPathModuleGoalInput = goalInput;
-
-      bodyPathModuleEvaluteAndRun();
-   }
-
-   private void bodyPathModuleEvaluteAndRun()
-   {
-      // TODO Goal input comes from user click / Kryo thread
-      Pose3D goal = bodyPathModuleGoalInput;
-      boolean hasGoal = goal != null && !goal.containsNaN();
-      if (!hasGoal)
-      {
-         LogTools.warn("Body path: does not have goal");
-         LogTools.debug("Sending planar regions to UI: {}: {}", LocalDateTime.now(), bodyPathModulePlanarRegionsList.hashCode());
-         helper.publishToUI(MapRegionsForUI, bodyPathModulePlanarRegionsList);
-         return;
-      }
-
-      boolean regionsOK = bodyPathModulePlanarRegionsList != null
-                      && !bodyPathModulePlanarRegionExpirationTimer.isPastOrNaN(lookAndStepParameters.getPlanarRegionsExpiration())
-                      && !bodyPathModulePlanarRegionsList.isEmpty();
-      if (!regionsOK)
-      {
-         LogTools.warn("Body path: Regions not OK: {}, timePassed: {}, isEmpty: {}",
-                       bodyPathModulePlanarRegionsList,
-                       bodyPathModulePlanarRegionExpirationTimer.timePassedSinceReset(),
-                       bodyPathModulePlanarRegionsList == null ? null : bodyPathModulePlanarRegionsList.isEmpty());
-         return;
-      }
-
-      ArrayList<Pose3D> bodyPathPlan = footstepPlanningBodyPathPlan;
-      if (hasGoal && bodyPathPlan != null && !bodyPathPlan.isEmpty())
-      {
-         LogTools.warn("Body path: Robot has goal and a body path {}, isEmpty: {}",
-                       bodyPathPlan,
-                       bodyPathPlan == null ? null : true);
-         return;
-      }
-
-      // TODO: This could be "run recently" instead of failed recently
-      boolean failedRecently = !bodyPathModuleFailedTimer.isPastOrNaN(lookAndStepParameters.get(LookAndStepBehaviorParameters.waitTimeAfterPlanFailed));
-      if (failedRecently)
-      {
-         LogTools.warn("Body path: failedRecently = true");
-         return;
-      }
-
-      if (bodyPathReview.isBeingReviewed())
-      {
-         LogTools.debug("Body path: bodyPathBeingReviewed = true");
-         return;
-      }
-
-      // TODO: Add robot standing still for 20s for real robot
-
-      helper.publishToUI(MapRegionsForUI, bodyPathModulePlanarRegionsList);
-
-      LogTools.info("Planning body path...");
-
-      // calculate and send body path plan
-      visibilityGraphParameters.setIncludePreferredExtrusions(false);
-      BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
-      VisibilityGraphPathPlanner bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters,
-                                                                                  pathPostProcessor,
-                                                                                  new YoVariableRegistry(getClass().getSimpleName()));
-
-      bodyPathPlanner.setGoal(goal);
-      bodyPathPlanner.setPlanarRegionsList(bodyPathModulePlanarRegionsList);
-      HumanoidRobotState humanoidRobotState = robot.pollHumanoidRobotState();
-      FramePose3D leftFootPoseTemp = new FramePose3D();
-      leftFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.LEFT));
-      FramePose3D rightFootPoseTemp = new FramePose3D();
-      rightFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.RIGHT));
-      leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
-      rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
-      bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
-      Stopwatch stopwatch = new Stopwatch().start();
-      final ArrayList<Pose3D> bodyPathPlanForReview = new ArrayList<>(); // TODO Review making this final
-      bodyPathPlanner.planWaypoints();
-      LogTools.info("Body path planning took {}", stopwatch.totalElapsed()); // 0.1 s
-      //      bodyPathPlan = bodyPathPlanner.getWaypoints();
-      if (bodyPathPlanner.getWaypoints() != null)
-      {
-         for (Pose3DReadOnly poseWaypoint : bodyPathPlanner.getWaypoints())
-         {
-            bodyPathPlanForReview.add(new Pose3D(poseWaypoint));
-         }
-         helper.publishToUI(BodyPathPlanForUI, bodyPathPlanForReview);
-      }
-
-      if (bodyPathPlanForReview.size() >= 2)
-      {
-         if (operatorReviewEnabledInput.get())
-         {
-            bodyPathReview.review(bodyPathPlanForReview);
-         }
-         else
-         {
-            footstepPlanningAcceptBodyPath(bodyPathPlanForReview);
-         }
-      }
-      else
-      {
-         bodyPathModuleFailedTimer.reset();
-      }
    }
 
    private void footstepPlanningAcceptNearPlanarRegions(PlanarRegionsList planarRegionsNear)
