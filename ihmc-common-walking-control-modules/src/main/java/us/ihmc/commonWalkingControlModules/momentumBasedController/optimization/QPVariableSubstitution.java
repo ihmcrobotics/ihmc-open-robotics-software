@@ -81,6 +81,11 @@ public class QPVariableSubstitution
       this.ignoreBias = ignoreBias;
    }
 
+   /**
+    * Combine this variable substitution with the other.
+    * 
+    * @param other the other substitution to add to this. Not modified.
+    */
    public void concatenate(QPVariableSubstitution other)
    {
       int oldSizeX = numberOfVariablesToSubstitute;
@@ -111,11 +116,22 @@ public class QPVariableSubstitution
       numberOfVariablesToSubstitute = newSizeX;
    }
 
+   /**
+    * When this substitution is empty, this signifies that there is no substitution to be applied in
+    * the QP.
+    * 
+    * @return {@code true} if there's no substitution to be performed, {@code false} otherwise.
+    */
    public boolean isEmpty()
    {
       return numberOfVariablesToSubstitute == 0;
    }
 
+   /**
+    * Gets the indices of the variables that should be removed/disabled from the optimization.
+    * 
+    * @return the indices of the inactive variables.
+    */
    public TIntArrayList getInactiveIndices()
    {
       /*
