@@ -252,6 +252,12 @@ public class PolygonWiggler
 
    public static void addRotationAndTranslationConstraint(DenseMatrix64F A, DenseMatrix64F b, int constraintRowStart, WiggleParameters parameters)
    {
+      addTranslationConstraint(A, b, constraintRowStart, parameters);
+      addRotationConstraint(A, b, constraintRowStart + 4, parameters);
+   }
+
+   public static void addTranslationConstraint(DenseMatrix64F A, DenseMatrix64F b, int constraintRowStart, WiggleParameters parameters)
+   {
       A.set(constraintRowStart , 0, 1.0);
       b.set(constraintRowStart , parameters.maxX);
       A.set(constraintRowStart + 1, 0, -1.0);
@@ -260,10 +266,14 @@ public class PolygonWiggler
       b.set(constraintRowStart + 2, parameters.maxY);
       A.set(constraintRowStart + 3, 1, -1.0);
       b.set(constraintRowStart + 3, -parameters.minY);
-      A.set(constraintRowStart + 4, 2, 1.0);
-      b.set(constraintRowStart + 4, parameters.maxYaw);
-      A.set(constraintRowStart + 5, 2, -1.0);
-      b.set(constraintRowStart + 5, -parameters.minYaw);
+   }
+
+   public static void addRotationConstraint(DenseMatrix64F A, DenseMatrix64F b, int constraintRowStart, WiggleParameters parameters)
+   {
+      A.set(constraintRowStart, 2, 1.0);
+      b.set(constraintRowStart, parameters.maxYaw);
+      A.set(constraintRowStart + 1, 2, -1.0);
+      b.set(constraintRowStart + 1, -parameters.minYaw);
    }
 
    /**
