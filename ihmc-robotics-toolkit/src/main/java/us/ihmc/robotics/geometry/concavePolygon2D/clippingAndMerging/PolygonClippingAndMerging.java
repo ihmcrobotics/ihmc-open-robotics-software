@@ -1,4 +1,4 @@
-package us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton;
+package us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging;
 
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.*;
@@ -6,7 +6,6 @@ import us.ihmc.robotics.geometry.concavePolygon2D.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.function.Function;
 
 public class PolygonClippingAndMerging
 {
@@ -107,20 +106,20 @@ public class PolygonClippingAndMerging
    }
 
    // TODO clean this up so that it works when the merge makes a hole.
-   public static List<ConcavePolygon2DBasics> merge(ConcavePolygon2DReadOnly polygonA, ConcavePolygon2DReadOnly polygonB, ConcavePolygon2DBasics mergedPolygon)
+   public static void  merge(ConcavePolygon2DReadOnly polygonA, ConcavePolygon2DReadOnly polygonB, ConcavePolygon2DBasics mergedPolygon)
    {
       List<ConcavePolygon2DBasics> partialListOfHoles = new ArrayList<>();
       if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonA, polygonB))
       {
          // FIXME this might have a hole
          mergedPolygon.set(polygonB);
-         return partialListOfHoles;
+         return;
       }
       else if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonB, polygonA))
       {
          // FIXME this might have a hole
          mergedPolygon.set(polygonA);
-         return partialListOfHoles;
+         return;
       }
 
       LinkedPointList polygonAList = ClippingTools.createLinkedPointList(polygonA);
@@ -133,14 +132,12 @@ public class PolygonClippingAndMerging
       Collection<LinkedPoint> unassignedAPoints = polygonAList.getPointsCopy();
       Collection<LinkedPoint> unassignedBPoints = polygonBList.getPointsCopy();
 
-      LinkedPointProvider pointProvider = new LinkedPointProvider(polygonAList, polygonBList, unassignedAPoints, unassignedBPoints);
+      LinkedPointListHolder listHolder = new LinkedPointListHolder(unassignedAPoints, unassignedBPoints);
 
-      boolean startOnListA = true;
       LinkedPoint startPoint = findVertexOutsideOfPolygon(polygonB, unassignedAPoints);
       if (startPoint == null)
       {
          startPoint = findVertexOutsideOfPolygon(polygonA, unassignedBPoints);
-         startOnListA = false;
       }
 
       mergedPolygon.clear();
@@ -148,11 +145,10 @@ public class PolygonClippingAndMerging
 
       while (startPoint != null)
       {
-         pointProvider.setStart(startPoint, startOnListA);
-
          ConcavePolygon2D polygon = new ConcavePolygon2D();
-         walkAlongEdgeOfPolygon(pointProvider, polygon, PolygonClippingAndMerging::shouldSwitchWhenMerging);
+         walkAlongEdgeOfPolygon(startPoint, listHolder, polygon, PolygonClippingAndMerging::shouldSwitchWhenMerging);
 
+         // We want the biggest of the polygons; that is, we want the outer most perimeter polygon.
          if (Double.isNaN(mergedPolygon.getArea()))
          {
             mergedPolygon.set(polygon);
@@ -167,16 +163,13 @@ public class PolygonClippingAndMerging
             partialListOfHoles.add(polygon);
          }
 
+         // check to see if there are any points outside the merged polygon on either list
          startPoint = findVertexOutsideOfPolygon(mergedPolygon, unassignedAPoints);
-         startOnListA = true;
          if (startPoint == null)
          {
             startPoint = findVertexOutsideOfPolygon(mergedPolygon, unassignedBPoints);
-            startOnListA = false;
          }
       }
-
-      return partialListOfHoles;
    }
 
    public static List<ConcavePolygon2DBasics> removeAreaInsideClip(ConcavePolygon2DReadOnly clippingPolygon, ConcavePolygon2DReadOnly polygonToClip)
@@ -204,14 +197,15 @@ public class PolygonClippingAndMerging
       ClippingTools.insertIntersectionsIntoList(clippingPolygonList, polygonToClip);
       ClippingTools.linkSharedVertices(polygonToClipList, clippingPolygonList);
 
-      // gotta make this guy counter clockwise
+      // gotta make the clipping list is counter clockwise
       clippingPolygonList.reverseOrder();
 
       Collection<LinkedPoint> unassignedToClipPoints = polygonToClipList.getPointsCopy();
       Collection<LinkedPoint> unassignedClippingPoints = clippingPolygonList.getPointsCopy();
-      LinkedPointProvider pointProvider = new LinkedPointProvider(clippingPolygonList, polygonToClipList, unassignedClippingPoints, unassignedToClipPoints);
+      LinkedPointListHolder listHolder = new LinkedPointListHolder(unassignedClippingPoints, unassignedToClipPoints);
 
       LinkedPoint startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedToClipPoints);
+      // There aren't any that are outside from the start. Instead, find a shared vertex, and make sure it's an "outgoing edge"
       if (startPoint == null)
       {
          for (LinkedPoint point : unassignedToClipPoints)
@@ -226,10 +220,8 @@ public class PolygonClippingAndMerging
 
       while (startPoint != null)
       {
-         pointProvider.setStart(startPoint, false);
-
          ConcavePolygon2D clippedPolygon = new ConcavePolygon2D();
-         walkAlongEdgeOfPolygon(pointProvider, clippedPolygon, PolygonClippingAndMerging::shouldSwitchWhenClipping);
+         walkAlongEdgeOfPolygon(startPoint, listHolder, clippedPolygon, PolygonClippingAndMerging::shouldSwitchWhenClipping);
          clippedPolygonsToReturn.add(clippedPolygon);
 
          startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedToClipPoints);
@@ -238,9 +230,9 @@ public class PolygonClippingAndMerging
       return clippedPolygonsToReturn;
    }
 
-   static void walkAlongEdgeOfPolygon(LinkedPointProvider pointProvider, ConcavePolygon2DBasics polygonToPack, SwitchingFunction switchFucntion)
+   static void walkAlongEdgeOfPolygon(LinkedPoint startVertex, LinkedPointListHolder listHolder, ConcavePolygon2DBasics polygonToPack, SwitchingFunction switchFunction)
    {
-      LinkedPoint linkedPoint = pointProvider.getCurrentPoint();
+      LinkedPoint linkedPoint = startVertex;
       LinkedPoint previousPoint = linkedPoint;
 
       polygonToPack.addVertex(linkedPoint.getPoint());
@@ -248,14 +240,14 @@ public class PolygonClippingAndMerging
       while (true)
       {
          linkedPoint = linkedPoint.getSuccessor();
-         pointProvider.removePoint(previousPoint);
+         listHolder.removePoint(previousPoint);
 
-         if (linkedPoint.getPoint().epsilonEquals(pointProvider.getStartVertex().getPoint(), 1e-7))
+         if (linkedPoint.getPoint().epsilonEquals(startVertex.getPoint(), 1e-7))
             break;
 
          polygonToPack.addVertex(linkedPoint.getPoint());
 
-         boolean shouldSwitch = switchFucntion.apply(linkedPoint, isOnOtherList);
+         boolean shouldSwitch = switchFunction.apply(linkedPoint, isOnOtherList);
 
          if (shouldSwitch)
          {

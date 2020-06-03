@@ -1,4 +1,4 @@
-package us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton;
+package us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging;
 
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -43,4 +43,7 @@ class IntersectionInfo
    {
       return endVertexOfIntersectingEdge;
    }
+
+   enum IntersectionType
+   {END, NEW, NONE}
 }
