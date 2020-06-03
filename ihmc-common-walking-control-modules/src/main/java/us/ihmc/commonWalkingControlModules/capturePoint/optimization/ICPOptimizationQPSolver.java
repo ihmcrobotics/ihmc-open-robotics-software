@@ -1083,7 +1083,7 @@ public class ICPOptimizationQPSolver
       solver.clear();
 
       if (useWarmStart && pollResetActiveSet() || previousTickFailed)
-         solver.resetActiveConstraints();
+         solver.resetActiveSet();
 
       solver.setQuadraticCostFunction(solverInput_H, solverInput_h, solverInputResidualCost.get(0, 0));
       solver.setLinearInequalityConstraints(solverInput_Aineq, solverInput_bineq);
