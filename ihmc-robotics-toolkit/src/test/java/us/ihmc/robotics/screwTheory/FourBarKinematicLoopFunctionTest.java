@@ -38,7 +38,7 @@ import us.ihmc.robotics.kinematics.fourbar.FourBarVertex;
 import us.ihmc.robotics.kinematics.fourbar.InvertedFourBarTest;
 import us.ihmc.robotics.kinematics.fourbar.InvertedFourBarTest.Viewer;
 
-public class FourBarKinematicLoopTest
+public class FourBarKinematicLoopFunctionTest
 {
    private static final int ITERATIONS = 1000;
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
@@ -76,7 +76,7 @@ public class FourBarKinematicLoopTest
                FramePoint2D curr = vertices.get(vertexIndex);
                FramePoint2D next = vertices.getNext(vertexIndex);
 
-               double expectedAngle = FourBarKinematicLoopTools.angleABC(prev, curr, next);
+               double expectedAngle = FourBarKinematicLoopFunctionTools.angleABC(prev, curr, next);
 
                double actualAngle = fourBarKinematicLoop.getFourBar().getVertex(fourBarAngle).getAngle();
                assertEquals(expectedAngle,
@@ -145,7 +145,7 @@ public class FourBarKinematicLoopTest
 
          boolean reverse = false;
 
-         if (FourBarKinematicLoopTools.angleABC(vertices.D, vertices.A, vertices.B) < 0.0 && fourBar.getVertex(FourBarAngle.DAB).isConvex())
+         if (FourBarKinematicLoopFunctionTools.angleABC(vertices.D, vertices.A, vertices.B) < 0.0 && fourBar.getVertex(FourBarAngle.DAB).isConvex())
             reverse = true;
 
          try
@@ -158,7 +158,7 @@ public class FourBarKinematicLoopTest
                FramePoint2D next = vertices.getNext(vertexIndex);
                FourBarVertex fourBarVertex = fourBar.getVertex(fourBarAngle);
 
-               double expectedAngle = FourBarKinematicLoopTools.angleABC(prev, curr, next);
+               double expectedAngle = FourBarKinematicLoopFunctionTools.angleABC(prev, curr, next);
 
                if (reverse)
                   expectedAngle = -expectedAngle;

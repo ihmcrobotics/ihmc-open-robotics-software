@@ -11,7 +11,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.robotics.kinematics.fourbar.FourBar;
 import us.ihmc.robotics.kinematics.fourbar.FourBarAngle;
 import us.ihmc.robotics.kinematics.fourbar.FourBarVertex;
-import us.ihmc.robotics.screwTheory.FourBarKinematicLoopTools.FourBarToJointConverter;
+import us.ihmc.robotics.screwTheory.FourBarKinematicLoopFunctionTools.FourBarToJointConverter;
 
 /**
  * This class can be used to help enforcing the physical constraint of a four bar linkage given its
@@ -69,7 +69,7 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
     *                         expected to be the only actuated joint.
     * @throws IllegalArgumentException if a four bar linkage could not be recognized from the given
     *                                  joints.
-    * @see FourBarKinematicLoopTools#configureFourBarKinematics(RevoluteJointBasics[],
+    * @see FourBarKinematicLoopFunctionTools#configureFourBarKinematics(RevoluteJointBasics[],
     *      FourBarToJointConverter[], FourBar, int, double)
     */
    public FourBarKinematicLoopFunction(String name, List<? extends RevoluteJointBasics> joints, int masterJointIndex)
@@ -88,14 +88,14 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
     *                         expected to be the only actuated joint.
     * @throws IllegalArgumentException if a four bar linkage could not be recognized from the given
     *                                  joints.
-    * @see FourBarKinematicLoopTools#configureFourBarKinematics(RevoluteJointBasics[],
+    * @see FourBarKinematicLoopFunctionTools#configureFourBarKinematics(RevoluteJointBasics[],
     *      FourBarToJointConverter[], FourBar, int, double)
     */
    public FourBarKinematicLoopFunction(String name, RevoluteJointBasics[] joints, int masterJointIndex)
    {
       this.name = name;
 
-      this.masterJointIndex = FourBarKinematicLoopTools.configureFourBarKinematics(joints, converters, fourBar, masterJointIndex, EPSILON);
+      this.masterJointIndex = FourBarKinematicLoopFunctionTools.configureFourBarKinematics(joints, converters, fourBar, masterJointIndex, EPSILON);
       this.joints = Arrays.asList(joints);
       jointA = joints[0];
       jointB = joints[1];
