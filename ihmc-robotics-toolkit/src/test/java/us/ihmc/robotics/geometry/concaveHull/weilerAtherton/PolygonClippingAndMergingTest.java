@@ -3,17 +3,19 @@ package us.ihmc.robotics.geometry.concaveHull.weilerAtherton;
 import jdk.nashorn.internal.ir.annotations.Ignore;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import sun.java2d.loops.DrawPolygons;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.concaveHull.GeometryPolygonTestTools;
-import us.ihmc.robotics.geometry.concavePolygon2D.ComplexPolygonException;
-import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
-import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
-import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
+import us.ihmc.robotics.geometry.concavePolygon2D.*;
 import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.PolygonClippingAndMerging;
 
+import javax.swing.*;
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -171,6 +173,35 @@ public class PolygonClippingAndMergingTest
       PolygonClippingAndMerging.merge(polygonA, polygonB, mergedPolygon);
 
       assertTrue(mergedPolygon.epsilonEquals(mergedPolygonExpected, 1e-7));
+   }
+
+   @Test
+   public void testOtherTrickyClip()
+   {
+      ConcavePolygon2D polygonToClip = new ConcavePolygon2D();
+      polygonToClip.addVertex(-0.2, 0.2);
+      polygonToClip.addVertex(0.2, 0.2);
+      polygonToClip.addVertex(0.2, -0.2);
+      polygonToClip.addVertex(-0.144, -0.2);
+      polygonToClip.addVertex(-0.159, -0.165);
+      polygonToClip.addVertex(-0.196, -0.150);
+      polygonToClip.addVertex(-0.2, -0.150);
+      polygonToClip.update();
+
+      ConcavePolygon2D clippingPolygon = new ConcavePolygon2D();
+      clippingPolygon.addVertex(-0.596, -0.250);
+      clippingPolygon.addVertex(-0.632, -0.235);
+      clippingPolygon.addVertex(-0.648, -0.2);
+      clippingPolygon.addVertex(-0.632, -0.165);
+      clippingPolygon.addVertex(-0.596, -0.150);
+      clippingPolygon.addVertex(-0.196, -0.150);
+      clippingPolygon.addVertex(-0.159, -0.165);
+      clippingPolygon.addVertex(-0.144, -0.2);
+      clippingPolygon.addVertex(-0.159, -0.235);
+      clippingPolygon.addVertex(-0.196, -0.250);
+      clippingPolygon.update();
+
+      PolygonClippingAndMerging.removeAreaInsideClip(clippingPolygon, polygonToClip);
    }
 
    @Test
@@ -755,9 +786,9 @@ public class PolygonClippingAndMergingTest
       mergedPolygonExpected.update();
 
       ConcavePolygon2D mergedPolygon = new ConcavePolygon2D();
-            PolygonClippingAndMerging.merge(polygonA, polygonB, mergedPolygon);
+      PolygonClippingAndMerging.merge(polygonA, polygonB, mergedPolygon);
 
-            assertTrue(mergedPolygon.epsilonEquals(mergedPolygonExpected, 1e-7));
+      assertTrue(mergedPolygon.epsilonEquals(mergedPolygonExpected, 1e-7));
 
       polygonB = new ConcavePolygon2D();
       polygonB.addVertex(-1.5, 1.5);

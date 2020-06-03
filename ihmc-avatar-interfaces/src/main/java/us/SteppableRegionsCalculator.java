@@ -339,7 +339,9 @@ public class SteppableRegionsCalculator
    {
       List<ConcavePolygon2DBasics> clippedPolygons = new ArrayList<>();
       for (ConcavePolygon2DBasics polygonToClip : polygonsToClip)
+      {
          clippedPolygons.addAll(PolygonClippingAndMerging.removeAreaInsideClip(clippingPolygon, polygonToClip));
+      }
 
       return clippedPolygons;
    }
@@ -364,7 +366,7 @@ public class SteppableRegionsCalculator
                                                                                                               zThresholdBeforeOrthogonal))
                                                                        .collect(Collectors.toList());
 
-      PolygonClippingAndMerging.mergeAllPossible(obstacleExtrusions);
+      PolygonClippingAndMerging.removeHolesFromList(obstacleExtrusions);
 
       return obstacleExtrusions;
    }
