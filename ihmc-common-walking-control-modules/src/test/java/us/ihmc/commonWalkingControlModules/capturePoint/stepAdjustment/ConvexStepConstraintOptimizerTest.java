@@ -5,6 +5,7 @@ import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -52,7 +53,7 @@ public class ConvexStepConstraintOptimizerTest
       initialFoot.applyTransform(initialFootTransform, false);
 
       ConvexStepConstraintOptimizer stepConstraintOptimizer = new ConvexStepConstraintOptimizer();
-      RigidBodyTransform wiggleTransfrom = stepConstraintOptimizer.wigglePolygonIntoConvexHullOfRegion(initialFoot, region, new WiggleParameters());
+      RigidBodyTransformReadOnly wiggleTransfrom = stepConstraintOptimizer.wigglePolygonIntoConvexHullOfRegion(initialFoot, region, new WiggleParameters(), true);
       assertFalse(wiggleTransfrom == null);
 
       ConvexPolygon2D foot = new ConvexPolygon2D(initialFoot);

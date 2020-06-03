@@ -167,7 +167,7 @@ public class EnvironmentConstraintHandler
 
       stepXY.set(footstepPoseToPack.getPosition());
 
-      RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findWiggleTransform(footstepPolygon, yoConvexHullConstraint, new WiggleParameters());
+      RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findWiggleTransform(footstepPolygon, yoConvexHullConstraint, new WiggleParameters(), true);
       originalPose.set(footstepPoseToPack);
 
       footstepPoseToPack.applyTransform(wiggleTransform);
