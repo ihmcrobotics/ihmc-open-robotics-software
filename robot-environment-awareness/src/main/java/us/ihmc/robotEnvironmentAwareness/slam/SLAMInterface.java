@@ -1,7 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
-import java.util.List;
-
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -14,8 +12,6 @@ public interface SLAMInterface
    abstract boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage);
 
    abstract void clear();
-
-   abstract List<RigidBodyTransformReadOnly> getSensorPoses();
 
    abstract PlanarRegionsList getPlanarRegionsMap();
 

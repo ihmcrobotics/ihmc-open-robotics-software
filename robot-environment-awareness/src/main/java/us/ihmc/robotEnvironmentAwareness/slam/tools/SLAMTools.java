@@ -259,7 +259,8 @@ public class SLAMTools
       {
          double distanceToSurfel = EuclidGeometryTools.distanceFromPoint3DToPlane3D(surfel.getPoint(), node.getHitLocationCopy(), node.getNormalCopy());
          double distanceToMap = EuclidGeometryTools.distanceFromPoint3DToPlane3D(node.getHitLocationCopy(), surfel.getPoint(), surfel.getNormal());
-         double distance = Math.min(distanceToSurfel, distanceToMap);
+         //double distance = Math.min(distanceToSurfel, distanceToMap);
+         double distance = Math.min(distanceToSurfel, distanceToSurfel);
          nearestHitDistanceSquared.setValue(Math.min(nearestHitDistanceSquared.doubleValue(), distance));
       });
 
