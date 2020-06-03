@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging;
 
+import sun.rmi.runtime.Log;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.*;
 
@@ -127,7 +128,8 @@ public class PolygonClippingAndMerging
 
       ClippingTools.insertIntersectionsIntoList(polygonAList, polygonB);
       ClippingTools.insertIntersectionsIntoList(polygonBList, polygonA);
-      ClippingTools.linkSharedVertices(polygonAList, polygonBList);
+
+      ClippingTools.linkSharedVertices(polygonAList, polygonBList, 5e-3);
 
       Collection<LinkedPoint> unassignedAPoints = polygonAList.getPointsCopy();
       Collection<LinkedPoint> unassignedBPoints = polygonBList.getPointsCopy();
@@ -195,7 +197,8 @@ public class PolygonClippingAndMerging
 
       ClippingTools.insertIntersectionsIntoList(polygonToClipList, clippingPolygon);
       ClippingTools.insertIntersectionsIntoList(clippingPolygonList, polygonToClip);
-      ClippingTools.linkSharedVertices(polygonToClipList, clippingPolygonList);
+
+      ClippingTools.linkSharedVertices(polygonToClipList, clippingPolygonList, 5e-3);
 
       // gotta make the clipping list is counter clockwise
       clippingPolygonList.reverseOrder();
@@ -237,12 +240,13 @@ public class PolygonClippingAndMerging
 
       polygonToPack.addVertex(linkedPoint.getPoint());
       boolean isOnOtherList = false;
-      while (true)
+      int counter = 0;
+      while (counter++ < 500)
       {
          linkedPoint = linkedPoint.getSuccessor();
          listHolder.removePoint(previousPoint);
 
-         if (linkedPoint.getPoint().epsilonEquals(startVertex.getPoint(), 1e-7))
+         if (linkedPoint.getPoint().epsilonEquals(startVertex.getPoint(), 5e-3 + 1e-6))
             break;
 
          polygonToPack.addVertex(linkedPoint.getPoint());
@@ -264,6 +268,9 @@ public class PolygonClippingAndMerging
             previousPoint = linkedPoint;
          }
       }
+
+      if (counter >= 500)
+         throw new RuntimeException("Bad.");
 
       polygonToPack.update();
    }

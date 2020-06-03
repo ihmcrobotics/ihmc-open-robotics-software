@@ -1,5 +1,6 @@
 package us;
 
+import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -99,9 +100,9 @@ public class SteppableRegionsCalculator
          }
          else if (obstacleHeight < canEasilyStepOverHeight.getDoubleValue())
          {
-            return 0.01;
-            //            double alpha = obstacleHeight / canEasilyStepOverHeight.getDoubleValue();
-            //            return InterpolationTools.linearInterpolate(0.0, minimumDistanceFromCliffBottoms.getDoubleValue(), alpha);
+//            return 0.01;
+                        double alpha = obstacleHeight / canEasilyStepOverHeight.getDoubleValue();
+                        return InterpolationTools.linearInterpolate(0.0, minimumDistanceFromCliffBottoms.getDoubleValue(), alpha);
          }
          else
          {
