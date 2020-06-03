@@ -244,7 +244,7 @@ public class InverseKinematicsQPSolver
       qpSolver.setUseWarmStart(useWarmStart);
       qpSolver.setMaxNumberOfIterations(maxNumberOfIterations);
       if (useWarmStart && pollResetActiveSet())
-         qpSolver.resetActiveConstraints();
+         qpSolver.resetActiveSet();
 
       qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
       qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);

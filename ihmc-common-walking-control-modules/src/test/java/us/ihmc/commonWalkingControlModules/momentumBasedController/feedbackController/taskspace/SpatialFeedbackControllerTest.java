@@ -323,7 +323,7 @@ public final class SpatialFeedbackControllerTest
 
          jerryQPSolver.clear();
          jerryQPSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
-         jerryQPSolver.solve(jointAccelerationsFromJerryQP, new DenseMatrix64F(1, 1), new DenseMatrix64F(1, 1));
+         jerryQPSolver.solve(jointAccelerationsFromJerryQP);
          oasesQPSolver.solve(solverInput_H, solverInput_f, solverInput_Aeq, solverInput_beq, solverInput_Ain, solverInput_bin, solverInput_lb, solverInput_ub,
                              jointAccelerationsFromQPOASES, true);
 

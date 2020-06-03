@@ -586,7 +586,7 @@ public class InverseDynamicsQPSolver
       qpSolver.setUseWarmStart(useWarmStart);
       qpSolver.setMaxNumberOfIterations(maxNumberOfIterations);
       if (useWarmStart && pollResetActiveSet())
-         qpSolver.resetActiveConstraints();
+         qpSolver.resetActiveSet();
 
       numberOfActiveVariables.set((int) CommonOps.elementSum(solverInput_activeIndices));
 
