@@ -20,7 +20,7 @@ import us.ihmc.robotics.kinematics.fourbar.FourBar;
 import us.ihmc.robotics.kinematics.fourbar.FourBarAngle;
 import us.ihmc.robotics.kinematics.fourbar.FourBarVertex;
 
-public class FourBarKinematicLoopTools
+public class FourBarKinematicLoopFunctionTools
 {
    private static final String A_NAME = "A";
    private static final String B_NAME = "B";
