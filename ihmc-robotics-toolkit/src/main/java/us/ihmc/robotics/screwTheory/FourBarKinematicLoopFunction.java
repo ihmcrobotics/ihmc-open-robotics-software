@@ -14,6 +14,10 @@ import us.ihmc.robotics.kinematics.fourbar.FourBarVertex;
 import us.ihmc.robotics.screwTheory.FourBarKinematicLoopTools.FourBarToJointConverter;
 
 /**
+ * This class can be used to help enforcing the physical constraint of a four bar linkage given its
+ * four joints.
+ * <p>
+ * Upon construction, the given joints are named to follow one of these layouts:
  * 
  * <pre>
  *      root            root
@@ -29,6 +33,7 @@ import us.ihmc.robotics.screwTheory.FourBarKinematicLoopTools.FourBarToJointConv
  *        |               |
  *   end-effector    end-effector
  * </pre>
+ * </p>
  */
 public class FourBarKinematicLoopFunction implements KinematicLoopFunction
 {
@@ -53,11 +58,39 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
 
    private final int masterJointIndex;
 
+   /**
+    * Creates a new function to manage the physical constraint of a four bar linkage given its 4
+    * joints.
+    * 
+    * @param name             the name of this four bar.
+    * @param joints           the four joints composing the four bar linkage.
+    * @param masterJointIndex the index among {@code joints} of the master joint, i.e. the only joint
+    *                         which state defines the entire state of the four bar and which is
+    *                         expected to be the only actuated joint.
+    * @throws IllegalArgumentException if a four bar linkage could not be recognized from the given
+    *                                  joints.
+    * @see FourBarKinematicLoopTools#configureFourBarKinematics(RevoluteJointBasics[],
+    *      FourBarToJointConverter[], FourBar, int, double)
+    */
    public FourBarKinematicLoopFunction(String name, List<? extends RevoluteJointBasics> joints, int masterJointIndex)
    {
       this(name, joints.toArray(new RevoluteJointBasics[0]), masterJointIndex);
    }
 
+   /**
+    * Creates a new function to manage the physical constraint of a four bar linkage given its 4
+    * joints.
+    * 
+    * @param name             the name of this four bar.
+    * @param joints           the four joints composing the four bar linkage.
+    * @param masterJointIndex the index among {@code joints} of the master joint, i.e. the only joint
+    *                         which state defines the entire state of the four bar and which is
+    *                         expected to be the only actuated joint.
+    * @throws IllegalArgumentException if a four bar linkage could not be recognized from the given
+    *                                  joints.
+    * @see FourBarKinematicLoopTools#configureFourBarKinematics(RevoluteJointBasics[],
+    *      FourBarToJointConverter[], FourBar, int, double)
+    */
    public FourBarKinematicLoopFunction(String name, RevoluteJointBasics[] joints, int masterJointIndex)
    {
       this.name = name;
@@ -70,6 +103,18 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
       jointD = joints[3];
    }
 
+   /**
+    * Assuming the state of the master joint has been set, this method computes and updates the state
+    * of the other joints such that the kinematic loop represents a proper four bar linkage with
+    * constant side lengths.
+    * <p>
+    * This method also updates the loop Jacobian and convective term.
+    * </p>
+    * 
+    * @param updateVelocity     whether the joint velocities should be computed and updated.
+    * @param updateAcceleration whether the joint accelerations should be computed and updated,
+    *                           requires {@code updateVelocity = true}.
+    */
    public void updateState(boolean updateVelocity, boolean updateAcceleration)
    {
       if (updateAcceleration && !updateVelocity)
@@ -120,6 +165,10 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
       updateLoopConvectiveTerm();
    }
 
+   /**
+    * Assuming the effort for each joint has been previously updated, this method centralizes the
+    * efforts on the master joint while preserving the resulting dynamics of the linkage.
+    */
    public void updateEffort()
    {
       double tau = 0.0;
@@ -134,6 +183,7 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
       getMasterJoint().setTau(tau / loopJacobianMatrix.get(masterJointIndex, 0));
    }
 
+   /** {@inheritDoc} */
    @Override
    public void adjustConfiguration(DMatrixRMaj jointConfigurations)
    {
@@ -151,6 +201,7 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
       }
    }
 
+   /** {@inheritDoc} */
    @Override
    public void adjustTau(DMatrixRMaj tauJoints)
    {
@@ -197,6 +248,7 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
       }
    }
 
+   /** {@inheritDoc} */
    @Override
    public List<RevoluteJointBasics> getLoopJoints()
    {
@@ -224,43 +276,139 @@ public class FourBarKinematicLoopFunction implements KinematicLoopFunction
       return name;
    }
 
+   /**
+    * Returns one of the two joints starting the linkage:
+    * 
+    * <pre>
+    *      root            root
+    *        |               |
+    *        |               |
+    *   A O-----O B     A O-----O B
+    *     |     |          \   /
+    *     |     |           \ /
+    *     |     |    or      X
+    *     |     |           / \
+    *     |     |          /   \
+    *   D O-----O C     C O-----O D
+    *        |               |
+    *   end-effector    end-effector
+    * </pre>
+    * 
+    * @return the reference to the joint A.
+    */
    public RevoluteJointBasics getJointA()
    {
       return jointA;
    }
 
+   /**
+    * Returns one of the two joints starting the linkage:
+    * 
+    * <pre>
+    *      root            root
+    *        |               |
+    *        |               |
+    *   A O-----O B     A O-----O B
+    *     |     |          \   /
+    *     |     |           \ /
+    *     |     |    or      X
+    *     |     |           / \
+    *     |     |          /   \
+    *   D O-----O C     C O-----O D
+    *        |               |
+    *   end-effector    end-effector
+    * </pre>
+    * 
+    * @return the reference to the joint B.
+    */
    public RevoluteJointBasics getJointB()
    {
       return jointB;
    }
 
+   /**
+    * Returns one of the two joints ending the linkage:
+    * 
+    * <pre>
+    *      root            root
+    *        |               |
+    *        |               |
+    *   A O-----O B     A O-----O B
+    *     |     |          \   /
+    *     |     |           \ /
+    *     |     |    or      X
+    *     |     |           / \
+    *     |     |          /   \
+    *   D O-----O C     C O-----O D
+    *        |               |
+    *   end-effector    end-effector
+    * </pre>
+    * 
+    * @return the reference to the joint C.
+    */
    public RevoluteJointBasics getJointC()
    {
       return jointC;
    }
 
+   /**
+    * Returns one of the two joints ending the linkage:
+    * 
+    * <pre>
+    *      root            root
+    *        |               |
+    *        |               |
+    *   A O-----O B     A O-----O B
+    *     |     |          \   /
+    *     |     |           \ /
+    *     |     |    or      X
+    *     |     |           / \
+    *     |     |          /   \
+    *   D O-----O C     C O-----O D
+    *        |               |
+    *   end-effector    end-effector
+    * </pre>
+    * 
+    * @return the reference to the joint D.
+    */
    public RevoluteJointBasics getJointD()
    {
       return jointD;
    }
 
+   /**
+    * Returns the reference to the master joint of this four bar, i.e. the only joint which state
+    * defines the entire state of the four bar and which is expected to be the only actuated joint.
+    * 
+    * @return the reference to the master joint.
+    */
    public RevoluteJointBasics getMasterJoint()
    {
       return joints.get(masterJointIndex);
    }
 
+   /** {@inheritDoc} */
    @Override
    public DMatrixRMaj getLoopJacobian()
    {
       return loopJacobianMatrix;
    }
 
+   /** {@inheritDoc} */
    @Override
    public DMatrixRMaj getLoopConvectiveTerm()
    {
       return loopConvectiveTermMatrix;
    }
 
+   /**
+    * Returns the reference to the internal calculator used for this kinematic loop.
+    * <p>
+    * Mainly used for testing.
+    * </p>
+    * 
+    * @return the reference to the four bar geometry calculator.
+    */
    public FourBar getFourBar()
    {
       return fourBar;
