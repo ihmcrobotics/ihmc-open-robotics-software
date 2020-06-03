@@ -11,6 +11,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMeshBuilder;
 import us.ihmc.javaFXVisualizers.IdMappedColorFunction;
@@ -18,9 +19,11 @@ import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pathPlanning.visibilityGraphs.dataStructure.VisibilityMapWithNavigableRegion;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.VisualizationParameters;
+import us.ihmc.robotics.RegionInWorldInterface;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,7 +46,7 @@ public class ObstacleExtrusionViewer extends AnimationTimer
    private AtomicReference<Boolean> showRawPoints;
    private AtomicReference<Boolean> showExtrusions;
 
-   private AtomicReference<HashMap<StepConstraintRegion, List<ConcavePolygon2DBasics>>> newRequestReference;
+   private AtomicReference<HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>>> newRequestReference;
 
    private final Messager messager;
 
@@ -68,7 +71,7 @@ public class ObstacleExtrusionViewer extends AnimationTimer
    }
 
    public void setTopics(Topic<Boolean> resetRequestedTopic, Topic<Boolean> showExtrusionsRawPointsTopic, Topic<Boolean> showObstacleExtrusionsTopic,
-                         Topic<HashMap<StepConstraintRegion, List<ConcavePolygon2DBasics>>> obstacleExtrusionsTopic)
+                         Topic<HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>>> obstacleExtrusionsTopic)
    {
 //      resetRequested = messager.createInput(resetRequestedTopic, false);
       showRawPoints = messager.createInput(showExtrusionsRawPointsTopic, false);
@@ -111,25 +114,25 @@ public class ObstacleExtrusionViewer extends AnimationTimer
 
       if (showRawPoints.get()  || showExtrusions.get())
       {
-         HashMap<StepConstraintRegion, List<ConcavePolygon2DBasics>> newRequest = newRequestReference.getAndSet(null);
+         HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>> newRequest = newRequestReference.getAndSet(null);
 
          if (newRequest != null)
             processNavigableRegionsOnThread(newRequest);
       }
    }
 
-   private void processNavigableRegionsOnThread(HashMap<StepConstraintRegion, List<ConcavePolygon2DBasics>> obstacleExtrusionsMap)
+   private void processNavigableRegionsOnThread(HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>> obstacleExtrusionsMap)
    {
       executorService.execute(() -> processNavigableRegions(obstacleExtrusionsMap));
    }
 
-   private void processNavigableRegions(HashMap<StepConstraintRegion, List<ConcavePolygon2DBasics>> obstacleExtrusionsMap)
+   private void processNavigableRegions(HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>> obstacleExtrusionsMap)
    {
       Map<Integer, JavaFXMeshBuilder> rawPointsMeshBuilders = new HashMap<>();
       Map<Integer, JavaFXMeshBuilder> extrusionMeshBuilders = new HashMap<>();
       Map<Integer, Material> navigableMaterials = new HashMap<>();
 
-      for (StepConstraintRegion constraintRegion : obstacleExtrusionsMap.keySet())
+      for (RegionInWorldInterface constraintRegion : obstacleExtrusionsMap.keySet())
       {
          int regionId = constraintRegion.getRegionId();
          JavaFXMeshBuilder rawPointsMeshBuilder = getOrCreate(rawPointsMeshBuilders, regionId);
@@ -176,13 +179,18 @@ public class ObstacleExtrusionViewer extends AnimationTimer
 
    private void buildExtrusion(JavaFXMeshBuilder extrusionMeshBuilder, RigidBodyTransformReadOnly transformToWorld, ConcavePolygon2DReadOnly extrusion)
    {
+      List<Point3DReadOnly> pointsInWorld = new ArrayList<>();
+
       for (Point2DReadOnly rawPoint : extrusion.getVertexBufferView())
       {
          Point3D pointInWorld = new Point3D(rawPoint);
          transformToWorld.transform(pointInWorld);
 
-         extrusionMeshBuilder.addTetrahedron(VisualizationParameters.CLUSTER_EXTRUDEDPOINT_SIZE, pointInWorld);
+         pointsInWorld.add(pointInWorld);
       }
+
+      extrusionMeshBuilder
+            .addMultiLine(pointsInWorld, VisualizationParameters.NAVIGABLECLUSTER_LINE_THICKNESS, true);
    }
 
    private JavaFXMeshBuilder getOrCreate(Map<Integer, JavaFXMeshBuilder> meshBuilders, int regionId)

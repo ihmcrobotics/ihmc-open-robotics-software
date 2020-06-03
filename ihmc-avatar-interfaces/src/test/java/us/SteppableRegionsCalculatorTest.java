@@ -1107,8 +1107,8 @@ public class SteppableRegionsCalculatorTest
    {
       CinderBlockFieldPlanarRegionEnvironment environment = new CinderBlockFieldPlanarRegionEnvironment();
 
-      double minimumDistanceFromCliffBottoms = 0.1;
-      double canEasilyStepOverHeight = 0.1;
+      double minimumDistanceFromCliffBottoms = 0.08;
+      double canEasilyStepOverHeight = 0.03;
       double orthogonalAngle = Math.toRadians(75.0);
 
       if (visualize)
@@ -1129,6 +1129,10 @@ public class SteppableRegionsCalculatorTest
          ui.submitPlanarRegionsListToVisualizer(environment.getPlanarRegionsList());
          ui.submitStepConstraintRegionsToVisualizer(calculator.computeSteppableRegions());
          ui.submitObstacleExtrusions(calculator.getObstacleExtrusions());
+         ui.submitTooSmallRegions(calculator.getTooSmallRegions());
+         ui.submitTooSteepRegions(calculator.getTooSteepRegions());
+         ui.submitMaskedRegions(calculator.getMaskedRegions());
+         ui.submitMaskedRegionsObstacleExtrusions(calculator.getMaskedRegionsObstacleExtrusions());
          ThreadTools.sleepForever();
       }
    }
