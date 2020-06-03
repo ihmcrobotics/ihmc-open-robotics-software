@@ -68,6 +68,9 @@ public class SplitFractionCalculatorParametersPacketPubSubType implements us.ihm
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       return current_alignment - initial_alignment;
    }
 
@@ -117,6 +120,10 @@ public class SplitFractionCalculatorParametersPacketPubSubType implements us.ihm
 
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
       return current_alignment - initial_alignment;
    }
 
@@ -124,6 +131,9 @@ public class SplitFractionCalculatorParametersPacketPubSubType implements us.ihm
    {
 
       cdr.write_type_4(data.getSequenceId());
+
+
+      cdr.write_type_6(data.getDefaultTransferSplitFraction());
 
 
       cdr.write_type_6(data.getStepHeightForLargeStepDown());
@@ -155,6 +165,9 @@ public class SplitFractionCalculatorParametersPacketPubSubType implements us.ihm
    {
 
       data.setSequenceId(cdr.read_type_4());
+      	
+
+      data.setDefaultTransferSplitFraction(cdr.read_type_6());
       	
 
       data.setStepHeightForLargeStepDown(cdr.read_type_6());
@@ -189,6 +202,8 @@ public class SplitFractionCalculatorParametersPacketPubSubType implements us.ihm
 
       ser.write_type_4("sequence_id", data.getSequenceId());
 
+      ser.write_type_6("default_transfer_split_fraction", data.getDefaultTransferSplitFraction());
+
       ser.write_type_6("step_height_for_large_step_down", data.getStepHeightForLargeStepDown());
 
       ser.write_type_6("largest_step_down_height", data.getLargestStepDownHeight());
@@ -211,6 +226,8 @@ public class SplitFractionCalculatorParametersPacketPubSubType implements us.ihm
    {
 
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
+      data.setDefaultTransferSplitFraction(ser.read_type_6("default_transfer_split_fraction"));
 
       data.setStepHeightForLargeStepDown(ser.read_type_6("step_height_for_large_step_down"));
 

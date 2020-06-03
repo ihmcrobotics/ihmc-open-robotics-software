@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning;
 
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commons.MathTools;
@@ -16,6 +17,10 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.icp.AreaBasedSplitFractionCalculator;
+import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.footstepPlanning.icp.PositionBasedSplitFractionCalculator;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
@@ -55,6 +60,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final VisibilityGraphsParametersBasics visibilityGraphParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final SwingPlannerParametersBasics swingPlannerParameters;
+   private final SplitFractionCalculatorParametersBasics splitFractionParameters;
 
    private final VisibilityGraphPathPlanner bodyPathPlanner;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
@@ -64,6 +70,9 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    private final AdaptiveSwingTrajectoryCalculator adaptiveSwingTrajectoryCalculator;
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
+
+   private final AreaBasedSplitFractionCalculator areaBasedSplitFractionCalculator;
+   private final PositionBasedSplitFractionCalculator positionBasedSplitFractionCalculator;
 
    private final AtomicBoolean isPlanning = new AtomicBoolean();
    private final FootstepPlannerRequest request = new FootstepPlannerRequest();
@@ -82,6 +91,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
            new DefaultVisibilityGraphParameters(),
            new DefaultFootstepPlannerParameters(),
            new DefaultSwingPlannerParameters(),
+           new DefaultSplitFractionCalculatorParameters(),
            null,
            PlannerTools.createDefaultFootPolygons());
    }
@@ -90,6 +100,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                  VisibilityGraphsParametersBasics visibilityGraphParameters,
                                  FootstepPlannerParametersBasics footstepPlannerParameters,
                                  SwingPlannerParametersBasics swingPlannerParameters,
+                                 SplitFractionCalculatorParametersBasics splitFractionParameters,
                                  WalkingControllerParameters walkingControllerParameters,
                                  SideDependentList<ConvexPolygon2D> footPolygons)
    {
@@ -97,6 +108,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.visibilityGraphParameters = visibilityGraphParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
       this.swingPlannerParameters = swingPlannerParameters;
+      this.splitFractionParameters = splitFractionParameters;
 
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
       this.bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters,
@@ -118,6 +130,9 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                                                                                                       registry,
                                                                                                       new YoGraphicsListRegistry());
       }
+
+      this.areaBasedSplitFractionCalculator = new AreaBasedSplitFractionCalculator(splitFractionParameters, footPolygons);
+      this.positionBasedSplitFractionCalculator = new PositionBasedSplitFractionCalculator(splitFractionParameters);
 
       addStatusCallback(output -> output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lapElapsed()));
       addStatusCallback(output -> output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed()));
@@ -303,6 +318,15 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                // TODO scale swing time
             }
          }
+      }
+
+      if (request.performPositionBasedSplitFractionCalculation())
+      {
+         positionBasedSplitFractionCalculator.computeSplitFractions(request, output.getFootstepPlan());
+      }
+      if (request.performAreaBasedSplitFractionCalculation())
+      {
+         areaBasedSplitFractionCalculator.computeSplitFractions(request, output.getFootstepPlan());
       }
 
       isPlanning.set(false);

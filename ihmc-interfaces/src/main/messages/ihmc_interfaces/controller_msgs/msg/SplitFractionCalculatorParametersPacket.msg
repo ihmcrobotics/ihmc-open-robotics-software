@@ -3,6 +3,9 @@
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
+# Default value for the ICP plan's transfer split fraction.
+float64 default_transfer_split_fraction -1.0
+
 # Sets the step down height for determining whether or not the transfer split fractions should be adjusted.
 # If the step height change relative to the stance foot is greater than this value, the split fraction and weight distribution
 # will be adjusted so that the CoM is in a more favorable position, kind of "dropping" onto the swing foot.

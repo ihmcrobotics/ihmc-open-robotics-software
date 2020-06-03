@@ -5,6 +5,7 @@ import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -49,11 +50,18 @@ public class FootstepPlanningModuleLauncher
       FootstepPlannerParametersBasics footstepPlannerParameters = robotModel.getFootstepPlannerParameters();
       VisibilityGraphsParametersBasics visibilityGraphsParameters = robotModel.getVisibilityGraphsParameters();
       SwingPlannerParametersBasics swingPlannerParameters = robotModel.getSwingPlannerParameters();
+      SplitFractionCalculatorParametersBasics splitFractionParameters = robotModel.getSplitFractionCalculatorParameters();
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
       SideDependentList<ConvexPolygon2D> footPolygons = createFootPolygons(robotModel);
 
-      return new FootstepPlanningModule(moduleName, visibilityGraphsParameters, footstepPlannerParameters, swingPlannerParameters, walkingControllerParameters, footPolygons);
+      return new FootstepPlanningModule(moduleName,
+                                        visibilityGraphsParameters,
+                                        footstepPlannerParameters,
+                                        swingPlannerParameters,
+                                        splitFractionParameters,
+                                        walkingControllerParameters,
+                                        footPolygons);
    }
 
    /**
@@ -61,7 +69,8 @@ public class FootstepPlanningModuleLauncher
     */
    public static FootstepPlanningModule createModule(DRCRobotModel robotModel, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      return createModule(robotModel, pubSubImplementation);
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "footstep_planner");
+      return createModule(ros2Node, robotModel);
    }
 
    /**

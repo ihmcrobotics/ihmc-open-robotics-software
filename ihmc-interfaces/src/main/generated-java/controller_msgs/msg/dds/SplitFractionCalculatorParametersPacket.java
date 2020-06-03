@@ -18,6 +18,11 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
    public long sequence_id_;
 
    /**
+            * Default value for the ICP plan's transfer split fraction.
+            */
+   public double default_transfer_split_fraction_ = -1.0;
+
+   /**
             * Sets the step down height for determining whether or not the transfer split fractions should be adjusted.
             * If the step height change relative to the stance foot is greater than this value, the split fraction and weight distribution
             * will be adjusted so that the CoM is in a more favorable position, kind of "dropping" onto the swing foot.
@@ -92,6 +97,7 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
 
 
 
+
    }
 
    public SplitFractionCalculatorParametersPacket(SplitFractionCalculatorParametersPacket other)
@@ -104,6 +110,9 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
    {
 
       sequence_id_ = other.sequence_id_;
+
+
+      default_transfer_split_fraction_ = other.default_transfer_split_fraction_;
 
 
       step_height_for_large_step_down_ = other.step_height_for_large_step_down_;
@@ -145,6 +154,22 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
    public long getSequenceId()
    {
       return sequence_id_;
+   }
+
+
+   /**
+            * Default value for the ICP plan's transfer split fraction.
+            */
+   public void setDefaultTransferSplitFraction(double default_transfer_split_fraction)
+   {
+      default_transfer_split_fraction_ = default_transfer_split_fraction;
+   }
+   /**
+            * Default value for the ICP plan's transfer split fraction.
+            */
+   public double getDefaultTransferSplitFraction()
+   {
+      return default_transfer_split_fraction_;
    }
 
 
@@ -343,6 +368,9 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.sequence_id_, other.sequence_id_, epsilon)) return false;
 
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.default_transfer_split_fraction_, other.default_transfer_split_fraction_, epsilon)) return false;
+
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.step_height_for_large_step_down_, other.step_height_for_large_step_down_, epsilon)) return false;
 
 
@@ -383,6 +411,9 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
       if(this.sequence_id_ != otherMyClass.sequence_id_) return false;
 
 
+      if(this.default_transfer_split_fraction_ != otherMyClass.default_transfer_split_fraction_) return false;
+
+
       if(this.step_height_for_large_step_down_ != otherMyClass.step_height_for_large_step_down_) return false;
 
 
@@ -419,6 +450,9 @@ public class SplitFractionCalculatorParametersPacket extends Packet<SplitFractio
 
       builder.append("sequence_id=");
       builder.append(this.sequence_id_);      builder.append(", ");
+
+      builder.append("default_transfer_split_fraction=");
+      builder.append(this.default_transfer_split_fraction_);      builder.append(", ");
 
       builder.append("step_height_for_large_step_down=");
       builder.append(this.step_height_for_large_step_down_);      builder.append(", ");
