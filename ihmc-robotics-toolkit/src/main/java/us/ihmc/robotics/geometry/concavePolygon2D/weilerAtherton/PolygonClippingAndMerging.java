@@ -6,6 +6,7 @@ import us.ihmc.robotics.geometry.concavePolygon2D.*;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.Function;
 
 public class PolygonClippingAndMerging
 {
@@ -105,6 +106,7 @@ public class PolygonClippingAndMerging
       }
    }
 
+   // TODO clean this up so that it works when the merge makes a hole.
    public static List<ConcavePolygon2DBasics> merge(ConcavePolygon2DReadOnly polygonA, ConcavePolygon2DReadOnly polygonB, ConcavePolygon2DBasics mergedPolygon)
    {
       List<ConcavePolygon2DBasics> partialListOfHoles = new ArrayList<>();
@@ -149,7 +151,7 @@ public class PolygonClippingAndMerging
          pointProvider.setStart(startPoint, startOnListA);
 
          ConcavePolygon2D polygon = new ConcavePolygon2D();
-         walkAlongEdgeOfPolygon(pointProvider, polygon, false);
+         walkAlongEdgeOfPolygon(pointProvider, polygon, PolygonClippingAndMerging::shouldSwitchWhenMerging);
 
          if (Double.isNaN(mergedPolygon.getArea()))
          {
@@ -227,7 +229,7 @@ public class PolygonClippingAndMerging
          pointProvider.setStart(startPoint, false);
 
          ConcavePolygon2D clippedPolygon = new ConcavePolygon2D();
-         walkAlongEdgeOfPolygon(pointProvider, clippedPolygon, true);
+         walkAlongEdgeOfPolygon(pointProvider, clippedPolygon, PolygonClippingAndMerging::shouldSwitchWhenClipping);
          clippedPolygonsToReturn.add(clippedPolygon);
 
          startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedToClipPoints);
@@ -236,7 +238,7 @@ public class PolygonClippingAndMerging
       return clippedPolygonsToReturn;
    }
 
-   static void walkAlongEdgeOfPolygon(LinkedPointProvider pointProvider, ConcavePolygon2DBasics polygonToPack, boolean isClipping)
+   static void walkAlongEdgeOfPolygon(LinkedPointProvider pointProvider, ConcavePolygon2DBasics polygonToPack, SwitchingFunction switchFucntion)
    {
       LinkedPoint linkedPoint = pointProvider.getCurrentPoint();
       LinkedPoint previousPoint = linkedPoint;
@@ -253,25 +255,7 @@ public class PolygonClippingAndMerging
 
          polygonToPack.addVertex(linkedPoint.getPoint());
 
-         boolean shouldSwitch = shouldSwitch(linkedPoint);
-         boolean outgoingPoint = linkedPoint.isPointBeforeInsideOther() && !linkedPoint.isPointAfterInsideOther();
-
-         shouldSwitch |= linkedPoint.isLinkedToOtherList() && shouldSwitch(linkedPoint.getPointOnOtherList());
-
-         if (isClipping && linkedPoint.isLinkedToOtherList())
-         {
-            LinkedPoint clippingPoint = isOnOtherList ? linkedPoint : linkedPoint.getPointOnOtherList();
-            LinkedPoint clippedPoint = isOnOtherList ? linkedPoint.getPointOnOtherList() : linkedPoint;
-            if (clippingPoint.isPointBeforeInsideOther() && clippingPoint.isPointAfterInsideOther() && (!clippedPoint.isPointBeforeInsideOther()
-                                                                                                        && !clippedPoint.isPointAfterInsideOther()))
-            {
-               shouldSwitch = true;
-            }
-         }
-         if (!isClipping && !linkedPoint.isPointAfterInsideOther() && !linkedPoint.isPointBeforeInsideOther())
-            shouldSwitch = false;
-         if (!isClipping && outgoingPoint)
-            shouldSwitch = false;
+         boolean shouldSwitch = switchFucntion.apply(linkedPoint, isOnOtherList);
 
          if (shouldSwitch)
          {
@@ -292,9 +276,51 @@ public class PolygonClippingAndMerging
       polygonToPack.update();
    }
 
+
    private static boolean shouldSwitch(LinkedPoint linkedPoint)
    {
       return linkedPoint.isPointAfterInsideOther() != linkedPoint.isPointBeforeInsideOther();
+   }
+
+   @FunctionalInterface
+   private interface SwitchingFunction
+   {
+      boolean apply(LinkedPoint point, boolean isOnOtherList);
+   }
+
+   private static boolean shouldSwitchWhenMerging(LinkedPoint linkedPoint, boolean isOnOtherList)
+   {
+      boolean shouldSwitch = shouldSwitch(linkedPoint);
+      boolean outgoingPoint = linkedPoint.isPointBeforeInsideOther() && !linkedPoint.isPointAfterInsideOther();
+
+      shouldSwitch |= linkedPoint.isLinkedToOtherList() && shouldSwitch(linkedPoint.getPointOnOtherList());
+
+      if (!linkedPoint.isPointAfterInsideOther() && !linkedPoint.isPointBeforeInsideOther())
+         shouldSwitch = false;
+      if (outgoingPoint)
+         shouldSwitch = false;
+
+      return shouldSwitch;
+   }
+
+   private static boolean shouldSwitchWhenClipping(LinkedPoint linkedPoint, boolean isOnOtherList)
+   {
+      boolean shouldSwitch = shouldSwitch(linkedPoint);
+
+      shouldSwitch |= linkedPoint.isLinkedToOtherList() && shouldSwitch(linkedPoint.getPointOnOtherList());
+
+      if (linkedPoint.isLinkedToOtherList())
+      {
+         LinkedPoint clippingPoint = isOnOtherList ? linkedPoint : linkedPoint.getPointOnOtherList();
+         LinkedPoint clippedPoint = isOnOtherList ? linkedPoint.getPointOnOtherList() : linkedPoint;
+         if (clippingPoint.isPointBeforeInsideOther() && clippingPoint.isPointAfterInsideOther() && (!clippedPoint.isPointBeforeInsideOther()
+                                                                                                     && !clippedPoint.isPointAfterInsideOther()))
+         {
+            shouldSwitch = true;
+         }
+      }
+
+      return shouldSwitch;
    }
 
    private static LinkedPoint findVertexOutsideOfPolygon(ConcavePolygon2DReadOnly polygon, Collection<LinkedPoint> points)
@@ -308,14 +334,4 @@ public class PolygonClippingAndMerging
       return null;
    }
 
-   private static LinkedPoint findVertexOnPerimeterOfPolygon(ConcavePolygon2DReadOnly polygon, Collection<LinkedPoint> points)
-   {
-      for (LinkedPoint point : points)
-      {
-         if (GeometryPolygonTools.isPoint2DOnPerimeterOfSimplePolygon2D(point.getPoint(), polygon.getVertexBufferView(), polygon.getNumberOfVertices(), 1e-5))
-            return point;
-      }
-
-      return null;
-   }
 }

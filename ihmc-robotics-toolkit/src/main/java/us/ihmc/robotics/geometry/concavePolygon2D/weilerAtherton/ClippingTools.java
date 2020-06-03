@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton;
 
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -72,7 +73,7 @@ public class ClippingTools
 
    private static final double epsilonForSamePoint = 1e-6;
    private static final double epsilonSquaredForSamePoint = epsilonForSamePoint * epsilonForSamePoint;
-   private static final double wiggleDistance = 5e-3;
+   private static final double wiggleDistance = 1e-3;
 
    public static void insertIntersectionsIntoList(LinkedPointList list, ConcavePolygon2DReadOnly polygonToIntersect)
    {

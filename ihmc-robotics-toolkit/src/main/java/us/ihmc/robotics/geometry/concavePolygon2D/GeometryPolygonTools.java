@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
+import java.util.Collection;
 import java.util.List;
 
 public class GeometryPolygonTools
@@ -98,7 +99,7 @@ public class GeometryPolygonTools
       }
 
       return false;
-   }
+  }
 
    public static boolean isClockwiseOrdered(List<? extends Point2DReadOnly> concaveHullVertices, int numberOfVertices)
    {

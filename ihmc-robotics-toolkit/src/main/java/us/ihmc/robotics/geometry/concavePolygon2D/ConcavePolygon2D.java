@@ -11,6 +11,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -106,13 +107,7 @@ public class ConcavePolygon2D implements ConcavePolygon2DBasics
       if (isUpToDate)
          return;
 
-      Collections.reverse(vertexBuffer);
-      if (!GeometryPolygonTools.isClockwiseOrdered(vertexBuffer, numberOfVertices))
-      {
-         Collections.reverse(vertexBuffer);
-         if (!GeometryPolygonTools.isClockwiseOrdered(vertexBuffer, numberOfVertices))
-            throw new RuntimeException("Vertices are not clockwise ordered.");
-      }
+      ensureClockwiseOrdering();
       if (!GeometryPolygonTools.isSimplePolygon(vertexBuffer, numberOfVertices))
          throw new ComplexPolygonException("Polygon is not simple, as in it has self intersections.");
 
@@ -123,6 +118,13 @@ public class ConcavePolygon2D implements ConcavePolygon2DBasics
 
       updateCentroidAndArea();
       updateBoundingBox();
+   }
+
+
+   private void ensureClockwiseOrdering()
+   {
+      if (!GeometryPolygonTools.isClockwiseOrdered(vertexBuffer, numberOfVertices))
+         Collections.reverse(vertexBuffer);
    }
 
    @Override
