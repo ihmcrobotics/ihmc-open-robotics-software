@@ -5,7 +5,7 @@ import us.ihmc.tools.property.DoubleStoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertyKeyList;
 import us.ihmc.tools.property.StoredPropertySet;
 
-public class LookAndStepBehaviorParameters extends StoredPropertySet
+public class LookAndStepBehaviorParameters extends StoredPropertySet implements LookAndStepBehaviorParametersReadOnly
 {
    public static final StoredPropertyKeyList keys = new StoredPropertyKeyList();
 
@@ -29,81 +29,6 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet
    {
       super(keys, LookAndStepBehaviorParameters.class, "ihmc-open-robotics-software", "ihmc-avatar-interfaces/src/behavior-clean-room/resources");
       load();
-   }
-
-   public double getMaxPlanStrayDistance()
-   {
-      return get(maxPlanStrayDistance);
-   }
-
-   public double getGoalSatisfactionRadius()
-   {
-      return get(goalSatisfactionRadius);
-   }
-
-   public double getPlanarRegionsExpiration()
-   {
-      return get(planarRegionsExpiration);
-   }
-
-   public double getDirection()
-   {
-      return get(direction);
-   }
-
-   public double getWiggleInsideDeltaOverride()
-   {
-      return get(wiggleInsideDeltaOverride);
-   }
-
-   public double getPlanHorizon()
-   {
-      return get(planHorizon);
-   }
-
-   public double getIdealFootstepLengthOverride()
-   {
-      return get(idealFootstepLengthOverride);
-   }
-
-   public double getCliffBaseHeightToAvoidOverride()
-   {
-      return get(cliffBaseHeightToAvoidOverride);
-   }
-
-   public boolean getEnableConcaveHullWigglerOverride()
-   {
-      return get(enableConcaveHullWigglerOverride);
-   }
-
-   public double getFootstepPlannerTimeout()
-   {
-      return get(footstepPlannerTimeout);
-   }
-
-   public double getSwingTime()
-   {
-      return get(swingTime);
-   }
-
-   public double getTransferTime()
-   {
-      return get(transferTime);
-   }
-
-   public double getWaitTimeAfterPlanFailed()
-   {
-      return get(waitTimeAfterPlanFailed);
-   }
-
-   public boolean getReturnBestEffortPlanOverride()
-   {
-      return get(returnBestEffortPlanOverride);
-   }
-
-   public double getPercentSwingToWait()
-   {
-      return get(percentSwingToWait);
    }
 
    public static void main(String[] args)
