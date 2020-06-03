@@ -1,9 +1,6 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
-import java.util.Random;
-
 import us.ihmc.commons.MathTools;
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.Bound;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -459,60 +456,5 @@ public class FourBarTools
       cosAngleDDot /= ACCubed * AB;
 
       return cosAngleDDot;
-   }
-
-   /**
-    * @param random
-    * @param sideLengths        index 0 is AB, index 1 is BC, ...
-    * @param validInitialAngles index 0 is angle A, index 1 is angle B, ...
-    * @param minSideLength
-    * @param maxSideLength
-    */
-   public static void generateRandomFourBar(Random random, double[] sideLengths, double[] validInitialAngles, double minSideLength, double maxSideLength)
-   {
-      double e = RandomNumbers.nextDouble(random, minSideLength, maxSideLength);
-      double k1 = random.nextDouble();
-      double k2 = random.nextDouble();
-      double d1 = e * Math.abs(random.nextGaussian());
-      double d2 = e * Math.abs(random.nextGaussian());
-
-      double DE = e * k1;
-      double DF = e * k2;
-      double BE = e * (1 - k1);
-      double BF = e * (1 - k2);
-
-      double AE = d1;
-      double CF = d2;
-
-      double DA = Math.sqrt(DE * DE + AE * AE);
-      double DAE = Math.atan2(DE, AE);
-      double ADE = Math.atan2(AE, DE);
-
-      double AB = Math.sqrt(AE * AE + BE * BE);
-      double BAE = Math.atan2(BE, AE);
-      double ABE = Math.atan2(AE, BE);
-
-      double CD = Math.sqrt(CF * CF + DF * DF);
-      double CDF = Math.atan2(CF, DF);
-      double DCF = Math.atan2(DF, CF);
-
-      double BC = Math.sqrt(BF * BF + CF * CF);
-      double CBF = Math.atan2(CF, BF);
-      double BCF = Math.atan2(BF, CF);
-
-      double A = DAE + BAE;
-      double B = ABE + CBF;
-      double C = BCF + DCF;
-      double D = ADE + CDF;
-
-      sideLengths[0] = AB;
-      sideLengths[1] = BC;
-      sideLengths[2] = CD;
-      sideLengths[3] = DA;
-
-      validInitialAngles[0] = A;
-      validInitialAngles[0] = B;
-      validInitialAngles[0] = C;
-      validInitialAngles[0] = D;
    }
 }
