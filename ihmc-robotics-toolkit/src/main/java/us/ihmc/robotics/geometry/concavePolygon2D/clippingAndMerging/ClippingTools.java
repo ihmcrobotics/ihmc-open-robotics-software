@@ -1,5 +1,6 @@
 package us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging;
 
+import sun.awt.image.ImageWatched.Link;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -10,6 +11,7 @@ import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
 import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
+import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.IntersectionInfo.IntersectionType;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -45,23 +47,33 @@ public class ClippingTools
       return polygon;
    }
 
-   public static void linkSharedVertices(LinkedPointList listA, LinkedPointList listB)
+   public static void linkSharedVertices(LinkedPointList listA, LinkedPointList listB, double epsilon)
    {
+      double epsilonSquared = epsilon * epsilon;
       LinkedPoint linkA = listA.getFirstPoint();
       do
       {
          LinkedPoint linkB = listB.getFirstPoint();
+         LinkedPoint closestLink = null;
+         double smallestDistanceSquared = epsilonSquared;
          do
          {
-            if (linkA.getPoint().distanceSquared(linkB.getPoint()) < epsilonSquaredForSamePoint)
+            double distanceSquared = linkA.getPoint().distanceSquared(linkB.getPoint());
+            if (distanceSquared < smallestDistanceSquared)
             {
-               linkA.linkToOtherList(linkB);
-               linkB.linkToOtherList(linkA);
+               smallestDistanceSquared = distanceSquared;
+               closestLink = linkB;
             }
 
             linkB = linkB.getSuccessor();
          }
          while (linkB != listB.getFirstPoint());
+
+         if (closestLink != null)
+         {
+            linkA.linkToOtherList(closestLink);
+            closestLink.linkToOtherList(linkA);
+         }
 
          linkA = linkA.getSuccessor();
       }
@@ -192,27 +204,39 @@ public class ClippingTools
 
       IntersectionInfo info = new IntersectionInfo(IntersectionInfo.IntersectionType.NONE, null, null, null);
 
+      double epsilonForOnLine = 1e-4;
+      double epsilonSquared = epsilonForOnLine * epsilonForOnLine;
       for (int i = 0; i < polygonToIntersect.getNumberOfVertices(); i++)
       {
+
+
          int next = EuclidGeometryPolygonTools.next(i, polygonToIntersect.getNumberOfVertices());
 
-         if (EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(edgeStart,
-                                                                      edgeEnd,
-                                                                      polygonToIntersect.getVertex(i),
-                                                                      polygonToIntersect.getVertex(next),
-                                                                      intersectionToPack))
+         Point2DReadOnly polygonVertex = polygonToIntersect.getVertex(i);
+         Point2DReadOnly polygonNextVertex = polygonToIntersect.getNextVertex(i);
+
+         if (EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(edgeEnd, polygonVertex, polygonNextVertex) < epsilonSquared)
          {
-            if (EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(edgeEnd, polygonToIntersect.getVertex(i), polygonToIntersect.getVertex(next))
-                < epsilonSquaredForSamePoint)
+            info = new IntersectionInfo(IntersectionInfo.IntersectionType.END, edgeEnd, polygonVertex, polygonNextVertex);
+         }
+         else
+         {
+            Point2DReadOnly candidateIntersection = null;
+            if (EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(edgeStart, edgeEnd, polygonVertex, polygonNextVertex, intersectionToPack))
             {
-               info = new IntersectionInfo(IntersectionInfo.IntersectionType.END, edgeEnd, polygonToIntersect.getVertex(i), polygonToIntersect.getVertex(next));
+               candidateIntersection = intersectionToPack;
             }
-            else if (intersectionToPack.distanceSquared(edgeStart) > epsilonSquaredForSamePoint)
+            else if (EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(polygonVertex, edgeStart, edgeEnd) < epsilonSquared)
             {
-               return new IntersectionInfo(IntersectionInfo.IntersectionType.NEW,
-                                           intersectionToPack,
-                                           polygonToIntersect.getVertex(i),
-                                           polygonToIntersect.getVertex(next));
+               candidateIntersection = polygonVertex;
+            }
+            else if (EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(polygonNextVertex, edgeStart, edgeEnd) < epsilonSquared)
+               candidateIntersection = polygonNextVertex;
+
+            if (candidateIntersection != null && candidateIntersection.distanceSquared(edgeStart) > epsilonSquaredForSamePoint
+                && candidateIntersection.distanceSquared(edgeEnd) > epsilonSquaredForSamePoint)
+            {
+               return new IntersectionInfo(IntersectionType.NEW, candidateIntersection, polygonVertex, polygonNextVertex);
             }
          }
       }

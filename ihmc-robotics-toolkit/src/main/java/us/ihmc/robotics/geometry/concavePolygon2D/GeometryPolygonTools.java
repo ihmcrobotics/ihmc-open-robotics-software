@@ -89,12 +89,17 @@ public class GeometryPolygonTools
 
    public static boolean doesLineSegment2DIntersectPolygon(Point2DReadOnly segmentStart, Point2DReadOnly segmentEnd, Vertex2DSupplier polygon)
    {
+      Point2D intersection = new Point2D();
       for (int i = 0; i < polygon.getNumberOfVertices(); i++)
       {
          Point2DReadOnly startVertex = polygon.getVertex(i);
          Point2DReadOnly endVertex = polygon.getVertex(EuclidGeometryPolygonTools.next(i, polygon.getNumberOfVertices()));
 
-         if (EuclidGeometryTools.doLineSegment2DsIntersect(segmentStart, segmentEnd, startVertex, endVertex))
+         // Don't count it if they're collinear.
+         if (EuclidGeometryTools.areLine2DsCollinear(segmentStart, segmentEnd, startVertex, endVertex, 1e-5, 1e-4))
+            continue;
+
+         if (EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(segmentStart, segmentEnd, startVertex, endVertex, intersection))
             return true;
       }
 

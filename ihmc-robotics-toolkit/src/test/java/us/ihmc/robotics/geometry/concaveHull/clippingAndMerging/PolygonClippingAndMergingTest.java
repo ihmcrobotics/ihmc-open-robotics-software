@@ -38,6 +38,66 @@ public class PolygonClippingAndMergingTest
    }
 
    @Test
+   public void testWeirdExtrusions()
+   {
+      ConcavePolygon2D polygonToClip = new ConcavePolygon2D();
+      polygonToClip.addVertex(-0.2, -0.2);
+      polygonToClip.addVertex(-0.2, 0.2);
+      polygonToClip.addVertex(0.2, 0.2);
+      polygonToClip.addVertex(0.2, -0.17453664879305636);
+      polygonToClip.addVertex(0.17167136405530758, -0.185870924065548);
+      polygonToClip.addVertex(0.16561245692541615, -0.2);
+      polygonToClip.update();
+
+      ConcavePolygon2D clippingPolygon = new ConcavePolygon2D();
+      clippingPolygon.addVertex(0.1565100954132479, 0.22700802202319176);
+      clippingPolygon.addVertex(0.17167136405530758, 0.2623633610825191);
+      clippingPolygon.addVertex(0.20827390443375116, 0.27700802202319175);
+      clippingPolygon.addVertex(0.6223843765977852, 0.27700802202319175);
+      clippingPolygon.addVertex(0.6589869169762288, 0.2623633610825191);
+      clippingPolygon.addVertex(0.6741481856182885, 0.22700802202319176);
+      clippingPolygon.addVertex(0.6741481856182885, -0.15936230849243557);
+      clippingPolygon.addVertex(0.6589869169762288, -0.19471764755176296);
+      clippingPolygon.addVertex(0.6223843765977852, -0.2093623084924356);
+      clippingPolygon.addVertex(0.20827390443375116, -0.2093623084924356);
+      clippingPolygon.addVertex(0.17167136405530758, -0.19471764755176296);
+      clippingPolygon.addVertex(0.1565100954132479, -0.15936230849243557);
+      clippingPolygon.update();
+
+      ConcavePolygon2D clippedPolygon = new ConcavePolygon2D();
+      List<ConcavePolygon2DBasics> clippedPolygons = PolygonClippingAndMerging.removeAreaInsideClip(clippingPolygon, polygonToClip);
+   }
+
+   @Test
+   public void testWeirdExtrusions2()
+   {
+      ConcavePolygon2D polygonToClip = new ConcavePolygon2D();
+      polygonToClip.addVertex(-0.2, 0.2);
+      polygonToClip.addVertex(0.2, 0.2);
+      polygonToClip.addVertex(0.2, -0.2);
+      polygonToClip.addVertex(-0.2, -0.2);
+      polygonToClip.update();
+
+      ConcavePolygon2D clippingPolygon = new ConcavePolygon2D();
+      clippingPolygon.addVertex(0.1565100954132479, 0.16700802202319176);
+      clippingPolygon.addVertex(0.17167136405530758, 0.20236336108251912);
+      clippingPolygon.addVertex(0.20827390443375116, 0.21700802202319175);
+      clippingPolygon.addVertex(0.6223843765977852, 0.21700802202319175);
+      clippingPolygon.addVertex(0.6589869169762288, 0.20236336108251912);
+      clippingPolygon.addVertex(0.6741481856182885, 0.16700802202319176);
+      clippingPolygon.addVertex(0.6741481856182885, -0.21936230849243565);
+      clippingPolygon.addVertex(0.6589869169762288, -0.25471764755176307);
+      clippingPolygon.addVertex(0.6223843765977852, -0.2693623084924357);
+      clippingPolygon.addVertex(0.20827390443375116, -0.2693623084924357);
+      clippingPolygon.addVertex(0.17167136405530758,-0.25471764755176307);
+      clippingPolygon.addVertex(0.1565100954132479, -0.21936230849243565);
+      clippingPolygon.update();
+
+      ConcavePolygon2D clippedPolygon = new ConcavePolygon2D();
+      List<ConcavePolygon2DBasics> clippedPolygons = PolygonClippingAndMerging.removeAreaInsideClip(clippingPolygon, polygonToClip);
+   }
+
+   @Test
    public void testClippingRemoveSquareChunkFromSideOfSquare()
    {
       ConcavePolygon2D polygonToClip = new ConcavePolygon2D();
