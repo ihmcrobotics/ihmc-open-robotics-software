@@ -2,14 +2,12 @@ package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
@@ -17,7 +15,6 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequestedAction;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.FootstepPlannerOccupancyMapAssembler;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
-import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
@@ -64,34 +61,13 @@ public class FootstepPlanningModuleLauncher
     */
    public static FootstepPlanningModule createModule(DRCRobotModel robotModel, DomainFactory.PubSubImplementation pubSubImplementation)
    {
-      return createModule(robotModel, pubSubImplementation, null);
-   }
-
-   /**
-    * Creates a FootstepPlanningModule and creates ROS 2 subscribers and publishers on a new ros node.
-    * Sets swing trajectories with the given AdaptiveSwingParameters
-    */
-   public static FootstepPlanningModule createModule(DRCRobotModel robotModel,
-                                                     DomainFactory.PubSubImplementation pubSubImplementation,
-                                                     AdaptiveSwingParameters swingParameters)
-   {
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, "footstep_planner");
-      return createModule(ros2Node, robotModel, swingParameters);
-   }
-
-   /**
-    * Creates a FootstepPlanningModule and creates ROS 2 subscribers and publishers on the given ros node.
-    * Sets swing trajectories with the given AdaptiveSwingParameters
-    */
-   public static FootstepPlanningModule createModule(Ros2Node ros2Node, DRCRobotModel robotModel)
-   {
-      return createModule(ros2Node, robotModel, null);
+      return createModule(robotModel, pubSubImplementation);
    }
 
    /**
     * Creates a FootstepPlannerModule object and creates ROS 2 subscribers and publishers
     */
-   public static FootstepPlanningModule createModule(Ros2Node ros2Node, DRCRobotModel robotModel, AdaptiveSwingParameters swingParameters)
+   public static FootstepPlanningModule createModule(Ros2Node ros2Node, DRCRobotModel robotModel)
    {
       FootstepPlanningModule footstepPlanningModule = createModule(robotModel);
       footstepPlanningModule.registerRosNode(ros2Node);
