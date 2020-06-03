@@ -2,22 +2,17 @@ package us.ihmc.avatar.slamTools;
 
 import java.io.File;
 import java.util.List;
-import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -26,9 +21,9 @@ import us.ihmc.jOctoMap.iterators.OcTreeIterable;
 import us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
+import us.ihmc.robotEnvironmentAwareness.slam.SurfaceElementICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotics.optimization.FunctionOutputCalculator;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
@@ -39,7 +34,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
-public class ICPBasedPointCloudDriftCorrectionVisualizer
+public class SurfaceElementICPBasedDriftCorrectionVisualizer
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
@@ -48,51 +43,50 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
    private final int recordFrequency = 1;
    private final int bufferSize = (int) (trajectoryTime / dt / recordFrequency + 3);
 
-   //private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200305_Simple\\PointCloud\\"; // 30 vs 33 : small drift, 33 vs 34 : drift and left right big movement.
-   //private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200601_LidarWalking_DownStairs\\PointCloud\\";  // 12 vs 13 : drift
    private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200601_LidarWalking_UpStairs2\\PointCloud\\";
-   private static final int INDEX_FRAME_ONE = 3;
-   private static final int INDEX_FRAME_TWO = 4;
+   private static final int INDEX_FRAME_ONE = 0;
+   private static final int INDEX_FRAME_TWO = 5;
    private static final int NUMBER_OF_POINTS_TO_VISUALIZE = 2000;
 
-   private static final boolean VISUALIZE_OCTREE = false;
-   
+   private static final boolean VISUALIZE_OCTREE = true;
+
    private final static double OCTREE_RESOLUTION = 0.02;
    private NormalOcTree octreeMap;
 
+   private final SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(OCTREE_RESOLUTION);
    private SLAMFrame frame1;
    private SLAMFrame frame2;
-   private SLAMFrame frameForSourcePoints;
 
    private final SLAMFrameYoGraphicsManager frame1GraphicsManager;
    private final SLAMFrameYoGraphicsManager frame2GraphicsManager;
-   private final SLAMFrameYoGraphicsManager sourcePointsFrameGraphicsManager;
 
    private final YoDouble optimizerQuality;
    private final YoInteger numberOfCorrespondingPoints;
-   private final YoInteger numberOfSourcePoints;
 
-   private final AppearanceDefinition octreeMapColor = YoAppearance.AliceBlue();
+   private final AppearanceDefinition octreeMapColor = YoAppearance.Coral();
    private final AppearanceDefinition frame1Appearance = YoAppearance.Blue();
    private final AppearanceDefinition frame2Appearance = YoAppearance.Green();
-   private final AppearanceDefinition sourcePointsAppearance = YoAppearance.Red();
 
-   public ICPBasedPointCloudDriftCorrectionVisualizer()
+   public SurfaceElementICPBasedDriftCorrectionVisualizer()
    {
       optimizerQuality = new YoDouble("optimizerQuality", registry);
       numberOfCorrespondingPoints = new YoInteger("numberOfCorrespondingPoints", registry);
-      numberOfSourcePoints = new YoInteger("numberOfSourcePoints", registry);
 
       // Define frames .
       setupTest();
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      frame1GraphicsManager = new SLAMFrameYoGraphicsManager("Frame1_", frame1, NUMBER_OF_POINTS_TO_VISUALIZE, frame1Appearance, registry, yoGraphicsListRegistry);
-      frame2GraphicsManager = new SLAMFrameYoGraphicsManager("Frame2_", frame2, NUMBER_OF_POINTS_TO_VISUALIZE, frame2Appearance, registry, yoGraphicsListRegistry);
-      sourcePointsFrameGraphicsManager = new SLAMFrameYoGraphicsManager("SourcePointFrame_",
-                                                                        frameForSourcePoints, NUMBER_OF_POINTS_TO_VISUALIZE, 
-                                                                        sourcePointsAppearance,
-                                                                        registry,
-                                                                        yoGraphicsListRegistry);
+      frame1GraphicsManager = new SLAMFrameYoGraphicsManager("Frame1_",
+                                                             frame1,
+                                                             NUMBER_OF_POINTS_TO_VISUALIZE,
+                                                             frame1Appearance,
+                                                             registry,
+                                                             yoGraphicsListRegistry);
+      frame2GraphicsManager = new SLAMFrameYoGraphicsManager("Frame2_",
+                                                             frame2,
+                                                             NUMBER_OF_POINTS_TO_VISUALIZE,
+                                                             frame2Appearance,
+                                                             registry,
+                                                             yoGraphicsListRegistry);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setCreateGUI(true);
@@ -108,6 +102,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       scs.addStaticLinkGraphics(linkGraphics);
       scs.setGroundVisible(false);
 
+      octreeMapColor.setTransparency(0.8);
       Graphics3DObject octreeGraphics = new Graphics3DObject();
       OcTreeIterable<NormalOcTreeNode> iterable = OcTreeIteratorFactory.createIterable(octreeMap.getRoot());
       for (NormalOcTreeNode node : iterable)
@@ -122,24 +117,23 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
          RotationMatrix rotation = new RotationMatrix();
          EuclidGeometryTools.orientation3DFromZUpToVector3D(normal, rotation);
          octreeGraphics.rotate(rotation);
-         octreeGraphics.addCube(OCTREE_RESOLUTION, OCTREE_RESOLUTION, OCTREE_RESOLUTION * 0.1, octreeMapColor);
+         octreeGraphics.addSphere(0.002, octreeMapColor);
+         //octreeGraphics.addCube(OCTREE_RESOLUTION, OCTREE_RESOLUTION, OCTREE_RESOLUTION * 0.1, octreeMapColor);
       }
-      if(VISUALIZE_OCTREE)
+      if (VISUALIZE_OCTREE)
          scs.addStaticLinkGraphics(octreeGraphics);
 
       // define optimizer.
-      LevenbergMarquardtParameterOptimizer optimizer = createOptimizer(octreeMap,
-                                                                       frameForSourcePoints.getOriginalPointCloudToSensorPose(),
-                                                                       frameForSourcePoints.getInitialSensorPoseToWorld());
+      LevenbergMarquardtParameterOptimizer optimizer = createOptimizer(octreeMap, frame2);
 
       RigidBodyTransform icpTransformer = new RigidBodyTransform();
-      RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frameForSourcePoints.getInitialSensorPoseToWorld());
+      RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame2.getInitialSensorPoseToWorld());
       correctedSensorPoseToWorld.multiply(icpTransformer);
 
-      Point3D[] correctedData = new Point3D[frameForSourcePoints.getOriginalPointCloudToSensorPose().length];
+      Point3D[] correctedData = new Point3D[frame2.getOriginalPointCloudToSensorPose().length];
       for (int i = 0; i < correctedData.length; i++)
       {
-         correctedData[i] = new Point3D(frameForSourcePoints.getOriginalPointCloudToSensorPose()[i]);
+         correctedData[i] = new Point3D(frame2.getOriginalPointCloudToSensorPose()[i]);
          icpTransformer.transform(correctedData[i]);
       }
 
@@ -152,26 +146,24 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
 
          // get parameter.
          icpTransformer.set(convertTransform(optimizer.getOptimalParameter().getData()));
-         correctedSensorPoseToWorld.set(frameForSourcePoints.getInitialSensorPoseToWorld());
+         correctedSensorPoseToWorld.set(frame2.getInitialSensorPoseToWorld());
          correctedSensorPoseToWorld.multiply(icpTransformer);
          for (int i = 0; i < correctedData.length; i++)
          {
-            correctedData[i].set(frameForSourcePoints.getOriginalPointCloudToSensorPose()[i]);
+            correctedData[i].set(frame2.getOriginalPointCloudToSensorPose()[i]);
             icpTransformer.transform(correctedData[i]);
          }
-         
+
          frame2.updateOptimizedCorrection(icpTransformer);
-         frameForSourcePoints.updateOptimizedCorrection(icpTransformer);
 
          // update viz.
          frame1GraphicsManager.updateGraphics();
          frame2GraphicsManager.updateGraphics();
-         sourcePointsFrameGraphicsManager.updateGraphics();
 
          // update yo variables.   
          optimizerQuality.set(optimizer.getQuality());
          numberOfCorrespondingPoints.set(optimizer.getNumberOfCoorespondingPoints());
-         
+
          scs.tickAndUpdate();
       }
 
@@ -181,7 +173,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
 
    public static void main(String[] args)
    {
-      new ICPBasedPointCloudDriftCorrectionVisualizer();
+      new SurfaceElementICPBasedDriftCorrectionVisualizer();
    }
 
    private RigidBodyTransform convertTransform(double... transformParameters)
@@ -195,40 +187,42 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       return transform;
    }
 
-   private LevenbergMarquardtParameterOptimizer createOptimizer(NormalOcTree map, Point3DReadOnly[] sourcePointsToSensorPose,
-                                                                RigidBodyTransformReadOnly sensorPoseToWorld)
+   private LevenbergMarquardtParameterOptimizer createOptimizer(NormalOcTree map, SLAMFrame frame)
    {
-      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(6, sourcePointsToSensorPose.length);
+      int numberOfSurfel = frame.getSurfaceElementsToSensor().size();
+      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(6, numberOfSurfel);
       FunctionOutputCalculator functionOutputCalculator = new FunctionOutputCalculator()
       {
          @Override
          public DenseMatrix64F computeOutput(DenseMatrix64F inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = convertTransform(inputParameter.getData());
-            RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(sensorPoseToWorld);
+            RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame.getOriginalSensorPose());
             correctedSensorPoseToWorld.multiply(driftCorrectionTransform);
 
-            Point3D[] correctedData = new Point3D[sourcePointsToSensorPose.length];
-            for (int i = 0; i < sourcePointsToSensorPose.length; i++)
+            Plane3D[] correctedSurfel = new Plane3D[numberOfSurfel];
+            for (int i = 0; i < numberOfSurfel; i++)
             {
-               correctedData[i] = new Point3D(sourcePointsToSensorPose[i]);
-               correctedSensorPoseToWorld.transform(correctedData[i]);
+               correctedSurfel[i] = new Plane3D();
+               correctedSurfel[i].set(frame.getSurfaceElementsToSensor().get(i));
+
+               correctedSensorPoseToWorld.transform(correctedSurfel[i].getPoint());
+               correctedSensorPoseToWorld.transform(correctedSurfel[i].getNormal());
             }
 
-            DenseMatrix64F errorSpace = new DenseMatrix64F(correctedData.length, 1);
-            for (int i = 0; i < correctedData.length; i++)
+            DenseMatrix64F errorSpace = new DenseMatrix64F(correctedSurfel.length, 1);
+            for (int i = 0; i < correctedSurfel.length; i++)
             {
-               double distance = computeClosestDistance(correctedData[i]);
+               double distance = computeClosestDistance(correctedSurfel[i]);
                errorSpace.set(i, distance);
             }
             return errorSpace;
+
          }
 
-         private double computeClosestDistance(Point3D point)
+         private double computeClosestDistance(Plane3D surfel)
          {
-            double linearDistance = SLAMTools.computeDistanceToNormalOctree(map, point);
-            double surfelDistance = SLAMTools.computePerpendicularDistanceToNormalOctree(map, point);
-            return Math.min(linearDistance, surfelDistance);
+            return SLAMTools.computeSurfaceElementDistanceToNormalOctree(map, surfel);
          }
       };
       DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
@@ -241,65 +235,26 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       optimizer.setPerturbationVector(purterbationVector);
       optimizer.setOutputCalculator(functionOutputCalculator);
       optimizer.initialize();
-      optimizer.setCorrespondenceThreshold(0.05);
+      optimizer.setCorrespondenceThreshold(OCTREE_RESOLUTION);
 
       return optimizer;
    }
-   
+
    private void setupTest()
    {
       // load data.
       File pointCloudFile = new File(DATA_PATH);
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
 
+      slam.addKeyFrame(messages.get(INDEX_FRAME_ONE));
+      octreeMap = slam.getOctree();
+      octreeMap.updateNormals();
+
       frame1 = new SLAMFrame(messages.get(INDEX_FRAME_ONE));
       frame2 = new SLAMFrame(frame1, messages.get(INDEX_FRAME_TWO));
-
-      // octree.
-      Point3D dummySensorLocation = new Point3D();
-      octreeMap = SLAMTools.computeOctreeData(frame1.getPointCloud(), dummySensorLocation, OCTREE_RESOLUTION);
-
-      // define source points.
+      double surfaceElementResolution = 0.04;
       double windowMargin = 0.05;
-      ConvexPolygon2D windowForMap = SLAMTools.computeMapConvexHullInSensorFrame(octreeMap, frame2.getSensorPose());
-
-      Point3DReadOnly[] newPointCloud = frame2.getPointCloud();
-      Point3DReadOnly[] newPointCloudToSensorPose = frame2.getOriginalPointCloudToSensorPose();
-      boolean[] isInPreviousView = new boolean[newPointCloudToSensorPose.length];
-      int numberOfPointsInWindow = 0;
-      for (int i = 0; i < newPointCloudToSensorPose.length; i++)
-      {
-         Point3DReadOnly point = newPointCloudToSensorPose[i];
-         isInPreviousView[i] = false;
-         if (windowForMap.isPointInside(point.getX(), point.getY(), -windowMargin))
-         {
-            isInPreviousView[i] = true;
-            numberOfPointsInWindow++;
-         }
-      }
-
-      // TODO: do icp for all points in window.
-      Point3D[] pointsInPreviousWindow = new Point3D[numberOfPointsInWindow];
-      int[] colors = new int[numberOfPointsInWindow];
-      int indexOfPointsInWindow = 0;
-      for (int i = 0; i < newPointCloudToSensorPose.length; i++)
-      {
-         if (isInPreviousView[i])
-         {
-            pointsInPreviousWindow[indexOfPointsInWindow] = new Point3D(newPointCloud[i]);
-            indexOfPointsInWindow++;
-         }
-      }
-      numberOfSourcePoints.set(numberOfPointsInWindow);
-
-      StereoVisionPointCloudMessage dummyMessageForSourcePoints = PointCloudCompression.compressPointCloud(0612L,
-                                                                                                           pointsInPreviousWindow,
-                                                                                                           colors,
-                                                                                                           pointsInPreviousWindow.length,
-                                                                                                           0.005,
-                                                                                                           null);
-      dummyMessageForSourcePoints.getSensorPosition().set(frame2.getSensorPose().getTranslation());
-      dummyMessageForSourcePoints.getSensorOrientation().set(frame2.getSensorPose().getRotation());
-      frameForSourcePoints = new SLAMFrame(frame1, dummyMessageForSourcePoints);
+      int minimumNumberOfHits = 10;
+      frame2.registerSurfaceElements(octreeMap, windowMargin, surfaceElementResolution, minimumNumberOfHits);
    }
 }

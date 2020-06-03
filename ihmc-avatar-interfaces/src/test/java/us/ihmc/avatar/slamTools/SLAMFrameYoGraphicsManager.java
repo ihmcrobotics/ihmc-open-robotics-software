@@ -127,4 +127,18 @@ public class SLAMFrameYoGraphicsManager
          yoFrameSurfelNormals[i].set(surfaceElements.get(i).getNormal());
       }
    }
+
+   public void hide()
+   {
+      yoFrameSensorPose.setToNaN();
+      for (int i = 0; i < sizeOfPointCloud; i++)
+      {
+         yoFramePointCloud[i].setToNaN();
+      }
+      for (int i = 0; i < slamFrame.getSurfaceElements().size(); i++)
+      {
+         yoFrameSurfelPoints[i].setToNaN();
+         yoFrameSurfelNormals[i].setToNaN();
+      }
+   }
 }

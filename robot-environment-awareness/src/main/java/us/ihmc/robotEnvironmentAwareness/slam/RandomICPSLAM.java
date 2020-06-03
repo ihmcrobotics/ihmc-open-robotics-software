@@ -30,8 +30,6 @@ public class RandomICPSLAM extends SLAMBasics
 
    private final AtomicReference<RandomICPSLAMParameters> parameters = new AtomicReference<>(new RandomICPSLAMParameters());
 
-   private final PlanarRegionSegmentationCalculator segmentationCalculator;
-
    private final GradientDescentModule optimizer;
    private static final double OPTIMIZER_POSITION_LIMIT = 0.1;
    private static final double OPTIMIZER_ANGLE_LIMIT = Math.toRadians(10.);
@@ -65,18 +63,6 @@ public class RandomICPSLAM extends SLAMBasics
    {
       super(octreeResolution);
 
-      segmentationCalculator = new PlanarRegionSegmentationCalculator();
-
-      SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
-      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
-      surfaceNormalFilterParameters.setSurfaceNormalLowerBound(Math.toRadians(-40.0));
-      surfaceNormalFilterParameters.setSurfaceNormalUpperBound(Math.toRadians(40.0));
-
-      segmentationCalculator.setParameters(planarRegionSegmentationParameters);
-      segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
-
-      polygonizerParameters.setConcaveHullThreshold(0.15);
-
       optimizer = new GradientDescentModule(null, INITIAL_INPUT);
       int maxIterations = 300;
       double convergenceThreshold = 1 * 10E-5;
@@ -89,62 +75,6 @@ public class RandomICPSLAM extends SLAMBasics
       optimizer.setStepSize(optimizerStepSize);
       optimizer.setPerturbationSize(optimizerPerturbationSize);
       optimizer.setReducingStepSizeRatio(2);
-   }
-
-   private void insertNewPointCloud(SLAMFrame frame)
-   {
-      Point3DReadOnly[] pointCloud = frame.getPointCloud();
-      RigidBodyTransformReadOnly sensorPose = frame.getSensorPose();
-
-      ScanCollection scanCollection = new ScanCollection();
-      int numberOfPoints = frame.getPointCloud().length;
-
-      scanCollection.setSubSampleSize(numberOfPoints);
-      scanCollection.addScan(SLAMTools.toScan(pointCloud, sensorPose.getTranslation()));
-
-      octree.insertScanCollection(scanCollection, false);
-
-      octree.enableParallelComputationForNormals(true);
-      octree.enableParallelInsertionOfMisses(true);
-      octree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
-
-      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
-      normalEstimationParameters.setNumberOfIterations(7);
-      octree.setNormalEstimationParameters(normalEstimationParameters);
-   }
-
-   @Override
-   public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage)
-   {
-      super.addKeyFrame(pointCloudMessage);
-
-      SLAMFrame firstFrame = getLatestFrame();
-
-      insertNewPointCloud(firstFrame);
-   }
-
-   @Override
-   public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage)
-   {
-      boolean success = super.addFrame(pointCloudMessage);
-
-      if (success)
-      {
-         SLAMFrame newFrame = getLatestFrame();
-         insertNewPointCloud(newFrame);
-      }
-
-      return success;
-   }
-
-   public void updatePlanarRegionsMap()
-   {
-      octree.updateNormals();
-      segmentationCalculator.setSensorPosition(getLatestFrame().getSensorPose().getTranslation());
-      segmentationCalculator.compute(octree.getRoot());
-
-      List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
-      planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
    }
 
    @Override

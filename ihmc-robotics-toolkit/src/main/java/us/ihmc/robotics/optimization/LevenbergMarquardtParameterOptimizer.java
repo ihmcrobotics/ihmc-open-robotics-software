@@ -8,7 +8,7 @@ import us.ihmc.commons.Conversions;
 
 public class LevenbergMarquardtParameterOptimizer
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
    private int parameterDimension;
    private int outputDimension;
 

@@ -73,6 +73,29 @@ public class SLAMFrame
 
       updateOptimizedPointCloudAndSensorPose();
    }
+   
+//   public SLAMFrame(SLAMFrame frame, StereoVisionPointCloudMessage message)
+//   {
+//      previousFrame = frame;
+//
+//      originalSensorPoseToWorld = MessageTools.unpackSensorPose(message);
+//
+//      RigidBodyTransform transformDiff = new RigidBodyTransform(originalSensorPoseToWorld);
+//      transformDiff.preMultiplyInvertOther(frame.originalSensorPoseToWorld);
+//      transformFromPreviousFrame = new RigidBodyTransform(transformDiff);
+//
+//      RigidBodyTransform transformToWorld = new RigidBodyTransform(frame.optimizedSensorPoseToWorld);
+//      transformToWorld.multiply(transformFromPreviousFrame);
+//      sensorPoseToWorld = new RigidBodyTransform(transformToWorld);
+//
+//      originalPointCloudToWorld = PointCloudCompression.decompressPointCloudToArray(message);
+//      pointCloudToSensorFrame = SLAMTools.createConvertedPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
+//      optimizedPointCloudToWorld = new Point3D[pointCloudToSensorFrame.length];
+//      for (int i = 0; i < optimizedPointCloudToWorld.length; i++)
+//         optimizedPointCloudToWorld[i] = new Point3D(pointCloudToSensorFrame[i]);
+//
+//      updateOptimizedPointCloudAndSensorPose();
+//   }
 
    public SLAMFrame(SLAMFrame frame, StereoVisionPointCloudMessage message)
    {
@@ -80,13 +103,8 @@ public class SLAMFrame
 
       originalSensorPoseToWorld = MessageTools.unpackSensorPose(message);
 
-      RigidBodyTransform transformDiff = new RigidBodyTransform(originalSensorPoseToWorld);
-      transformDiff.preMultiplyInvertOther(frame.originalSensorPoseToWorld);
-      transformFromPreviousFrame = new RigidBodyTransform(transformDiff);
-
-      RigidBodyTransform transformToWorld = new RigidBodyTransform(frame.optimizedSensorPoseToWorld);
-      transformToWorld.multiply(transformFromPreviousFrame);
-      sensorPoseToWorld = new RigidBodyTransform(transformToWorld);
+      transformFromPreviousFrame = new RigidBodyTransform();
+      sensorPoseToWorld = new RigidBodyTransform(originalSensorPoseToWorld);
 
       originalPointCloudToWorld = PointCloudCompression.decompressPointCloudToArray(message);
       pointCloudToSensorFrame = SLAMTools.createConvertedPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
@@ -153,7 +171,7 @@ public class SLAMFrame
       {
          if (node.getNumberOfHits() >= minimumNumberOfHits)
          {
-            //if (node.getNormalAverageDeviation() < 0.00005)
+            if (node.getNormalAverageDeviation() < 0.00005)
             {
                Plane3D surfaceElement = new Plane3D();
                node.getNormal(surfaceElement.getNormal());
