@@ -39,26 +39,13 @@ public class AreaBasedSplitFractionCalculator
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
    private final SplitFractionCalculatorParametersReadOnly parameters;
-   private final ICPPlannerParameters icpPlannerParameters;
-   private final SideDependentList<ConvexPolygon2D> defaultPolygons = new SideDependentList<>();
+   private final SideDependentList<ConvexPolygon2D> footPolygons;
 
    public AreaBasedSplitFractionCalculator(SplitFractionCalculatorParametersReadOnly parameters,
-                                           ICPPlannerParameters icpPlannerParameters,
-                                           SegmentDependentList<RobotSide, ArrayList<Point2D>> defaultContactPointParameters)
+                                           SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.parameters = parameters;
-      this.icpPlannerParameters = icpPlannerParameters;
-      for (RobotSide robotSide : RobotSide.values)
-      {
-         ConvexPolygon2D defaultPolygon = new ConvexPolygon2D();
-         if (defaultContactPointParameters != null)
-         {
-            for (Point2DReadOnly point : defaultContactPointParameters.get(robotSide))
-               defaultPolygon.addVertex(point);
-         }
-         defaultPolygon.update();
-         defaultPolygons.put(robotSide, defaultPolygon);
-      }
+      this.footPolygons = footPolygons;
    }
 
    public void computeSplitFractions(FootstepPlannerRequest request, FootstepPlan footstepPlan)
@@ -74,7 +61,7 @@ public class AreaBasedSplitFractionCalculator
       PoseReferenceFrame previousFrame = new PoseReferenceFrame("previousFrame", worldFrame);
       PoseReferenceFrame currentFrame = new PoseReferenceFrame("nextFrame", worldFrame);
 
-      double defaultTransferSplitFraction = icpPlannerParameters.getTransferSplitFraction();
+      double defaultTransferSplitFraction = parameters.getDefaultTransferSplitFraction();
       double defaultWeightDistribution = 0.5;
 
       for (int stepNumber = 0; stepNumber < footstepPlan.getNumberOfSteps(); stepNumber++)
@@ -85,7 +72,7 @@ public class AreaBasedSplitFractionCalculator
             previousFrame.setPoseAndUpdate(request.getStartFootPoses().get(stanceSide));
 
             // TODO add initial foothold to request message
-            previousPolygon.addVertices(defaultPolygons.get(stanceSide));
+            previousPolygon.set(footPolygons.get(stanceSide));
          }
          else
          {
@@ -102,8 +89,7 @@ public class AreaBasedSplitFractionCalculator
          }
          else
          {
-            currentPolygon.addVertices(defaultPolygons.get(currentStep.getRobotSide()));
-            currentPolygon.update();
+            currentPolygon.set(footPolygons.get(currentStep.getRobotSide()));
          }
 
          double currentArea = currentPolygon.getArea();

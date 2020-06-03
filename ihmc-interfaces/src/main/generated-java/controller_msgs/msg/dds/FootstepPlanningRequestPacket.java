@@ -148,6 +148,16 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
    public byte requested_swing_planner_;
 
    /**
+            * Enables the PositionBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to large steps
+            */
+   public boolean perform_position_based_split_fraction_calculation_;
+
+   /**
+            * Enables the AreaBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to steps with low area
+            */
+   public boolean perform_area_based_split_fraction_calculation_;
+
+   /**
             * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
             * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
             */
@@ -180,6 +190,8 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
       planar_regions_list_message_ = new controller_msgs.msg.dds.PlanarRegionsListMessage();
+
+
 
 
 
@@ -258,6 +270,12 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
       requested_swing_planner_ = other.requested_swing_planner_;
+
+
+      perform_position_based_split_fraction_calculation_ = other.perform_position_based_split_fraction_calculation_;
+
+
+      perform_area_based_split_fraction_calculation_ = other.perform_area_based_split_fraction_calculation_;
 
 
       generate_log_ = other.generate_log_;
@@ -598,6 +616,38 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
    /**
+            * Enables the PositionBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to large steps
+            */
+   public void setPerformPositionBasedSplitFractionCalculation(boolean perform_position_based_split_fraction_calculation)
+   {
+      perform_position_based_split_fraction_calculation_ = perform_position_based_split_fraction_calculation;
+   }
+   /**
+            * Enables the PositionBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to large steps
+            */
+   public boolean getPerformPositionBasedSplitFractionCalculation()
+   {
+      return perform_position_based_split_fraction_calculation_;
+   }
+
+
+   /**
+            * Enables the AreaBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to steps with low area
+            */
+   public void setPerformAreaBasedSplitFractionCalculation(boolean perform_area_based_split_fraction_calculation)
+   {
+      perform_area_based_split_fraction_calculation_ = perform_area_based_split_fraction_calculation;
+   }
+   /**
+            * Enables the AreaBasedSplitFractionCalculator, which sets the ICP plan timings to be more robust to steps with low area
+            */
+   public boolean getPerformAreaBasedSplitFractionCalculation()
+   {
+      return perform_area_based_split_fraction_calculation_;
+   }
+
+
+   /**
             * Generate log of this plan. Logs are written to ~/.ihmc/logs by default, set the environment variable IHMC_FOOTSTEP_PLANNER_LOG_DIR to override this directory.
             * For example, export IHMC_FOOTSTEP_PLANNER_LOG_DIR=/home/user/myLogs/
             */
@@ -702,6 +752,12 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.requested_swing_planner_, other.requested_swing_planner_, epsilon)) return false;
 
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_position_based_split_fraction_calculation_, other.perform_position_based_split_fraction_calculation_, epsilon)) return false;
+
+
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.perform_area_based_split_fraction_calculation_, other.perform_area_based_split_fraction_calculation_, epsilon)) return false;
+
+
       if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.generate_log_, other.generate_log_, epsilon)) return false;
 
 
@@ -779,6 +835,12 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
 
       if(this.requested_swing_planner_ != otherMyClass.requested_swing_planner_) return false;
+
+
+      if(this.perform_position_based_split_fraction_calculation_ != otherMyClass.perform_position_based_split_fraction_calculation_) return false;
+
+
+      if(this.perform_area_based_split_fraction_calculation_ != otherMyClass.perform_area_based_split_fraction_calculation_) return false;
 
 
       if(this.generate_log_ != otherMyClass.generate_log_) return false;
@@ -862,6 +924,12 @@ public class FootstepPlanningRequestPacket extends Packet<FootstepPlanningReques
 
       builder.append("requested_swing_planner=");
       builder.append(this.requested_swing_planner_);      builder.append(", ");
+
+      builder.append("perform_position_based_split_fraction_calculation=");
+      builder.append(this.perform_position_based_split_fraction_calculation_);      builder.append(", ");
+
+      builder.append("perform_area_based_split_fraction_calculation=");
+      builder.append(this.perform_area_based_split_fraction_calculation_);      builder.append(", ");
 
       builder.append("generate_log=");
       builder.append(this.generate_log_);

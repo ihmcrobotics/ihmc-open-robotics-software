@@ -11,6 +11,8 @@ import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.footstepPlanning.icp.AreaBasedSplitFractionCalculator;
+import us.ihmc.footstepPlanning.icp.PositionBasedSplitFractionCalculator;
 
 import java.util.ArrayList;
 
@@ -117,6 +119,16 @@ public class FootstepPlannerRequest
     */
    private SwingPlannerType swingPlannerType = SwingPlannerType.NONE;
 
+   /**
+    * Enables {@link PositionBasedSplitFractionCalculator}, which sets the ICP plan timings to be more robust to large steps
+    */
+   private boolean performPositionBasedSplitFractionCalculation = false;
+
+   /**
+    * Enables {@link AreaBasedSplitFractionCalculator}, which sets the ICP plan timings to be more robust to steps with low area
+    */
+   private boolean performAreaBasedSplitFractionCalculation = false;
+
    public FootstepPlannerRequest()
    {
       clear();
@@ -144,6 +156,8 @@ public class FootstepPlannerRequest
       bodyPathWaypoints.clear();
       statusPublishPeriod = 1.0;
       swingPlannerType = SwingPlannerType.NONE;
+      performPositionBasedSplitFractionCalculation = false;
+      performAreaBasedSplitFractionCalculation = false;
    }
 
    public void setRequestId(int requestId)
@@ -281,6 +295,16 @@ public class FootstepPlannerRequest
       this.swingPlannerType = swingPlannerType;
    }
 
+   public void setPerformPositionBasedSplitFractionCalculation(boolean performPositionBasedSplitFractionCalculation)
+   {
+      this.performPositionBasedSplitFractionCalculation = performPositionBasedSplitFractionCalculation;
+   }
+
+   public void setPerformAreaBasedSplitFractionCalculation(boolean performAreaBasedSplitFractionCalculation)
+   {
+      this.performAreaBasedSplitFractionCalculation = performAreaBasedSplitFractionCalculation;
+   }
+
    public int getRequestId()
    {
       return requestId;
@@ -381,6 +405,16 @@ public class FootstepPlannerRequest
       return swingPlannerType;
    }
 
+   public boolean performPositionBasedSplitFractionCalculation()
+   {
+      return performPositionBasedSplitFractionCalculation;
+   }
+
+   public boolean performAreaBasedSplitFractionCalculation()
+   {
+      return performAreaBasedSplitFractionCalculation;
+   }
+
    public void setFromPacket(FootstepPlanningRequestPacket requestPacket)
    {
       clear();
@@ -406,6 +440,8 @@ public class FootstepPlannerRequest
          setHorizonLength(requestPacket.getHorizonLength());
       setAssumeFlatGround(requestPacket.getAssumeFlatGround());
       setStatusPublishPeriod(requestPacket.getStatusPublishPeriod());
+      setPerformAreaBasedSplitFractionCalculation(requestPacket.getPerformAreaBasedSplitFractionCalculation());
+      setPerformPositionBasedSplitFractionCalculation(requestPacket.getPerformPositionBasedSplitFractionCalculation());
 
       SwingPlannerType swingPlannerType = SwingPlannerType.fromByte(requestPacket.getRequestedSwingPlanner());
       if (swingPlannerType != null)
@@ -446,6 +482,8 @@ public class FootstepPlannerRequest
       requestPacket.setAssumeFlatGround(getAssumeFlatGround());
       requestPacket.setStatusPublishPeriod(getStatusPublishPeriod());
       requestPacket.setRequestedSwingPlanner(getSwingPlannerType().toByte());
+      requestPacket.setPerformAreaBasedSplitFractionCalculation(performAreaBasedSplitFractionCalculation());
+      requestPacket.setPerformPositionBasedSplitFractionCalculation(performPositionBasedSplitFractionCalculation());
 
       requestPacket.getBodyPathWaypoints().clear();
       for (int i = 0; i < bodyPathWaypoints.size(); i++)
@@ -485,6 +523,9 @@ public class FootstepPlannerRequest
       this.horizonLength = other.horizonLength;
       this.assumeFlatGround = other.assumeFlatGround;
       this.statusPublishPeriod = other.statusPublishPeriod;
+      this.swingPlannerType = other.swingPlannerType;
+      this.performAreaBasedSplitFractionCalculation = other.performAreaBasedSplitFractionCalculation;
+      this.performPositionBasedSplitFractionCalculation = other.performPositionBasedSplitFractionCalculation;
 
       if(other.planarRegionsList != null)
       {

@@ -1,10 +1,20 @@
 package us.ihmc.footstepPlanning.icp;
 
 import controller_msgs.msg.dds.SplitFractionCalculatorParametersPacket;
+import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 public interface SplitFractionCalculatorParametersReadOnly extends StoredPropertySetReadOnly
 {
+   /**
+    * Default value for the transfer split fraction of the icp plan.
+    * @see ICPPlannerParameters#getTransferSplitFraction() 
+    */
+   default double getDefaultTransferSplitFraction()
+   {
+      return get(SplitFractionCalculatorParameterKeys.defaultTransferSplitFraction);
+   }
+
    /**
     * Sets the step down height for determining whether or not the transfer split fractions should be adjusted.
     * If the step height change relative to the stance foot is greater than this value, the split fraction and weight distribution

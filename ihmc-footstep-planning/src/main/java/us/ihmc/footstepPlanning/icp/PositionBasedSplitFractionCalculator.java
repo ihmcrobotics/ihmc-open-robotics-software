@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning.icp;
 
-import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -29,12 +28,10 @@ import us.ihmc.footstepPlanning.PlannedFootstep;
 public class PositionBasedSplitFractionCalculator
 {
    private final SplitFractionCalculatorParametersReadOnly parameters;
-   private final ICPPlannerParameters icpPlannerParameters;
 
-   public PositionBasedSplitFractionCalculator(SplitFractionCalculatorParametersReadOnly parameters, ICPPlannerParameters icpPlannerParameters)
+   public PositionBasedSplitFractionCalculator(SplitFractionCalculatorParametersReadOnly parameters)
    {
       this.parameters = parameters;
-      this.icpPlannerParameters = icpPlannerParameters;
    }
 
    public void computeSplitFractions(FootstepPlannerRequest request, FootstepPlan footstepPlan)
@@ -47,7 +44,7 @@ public class PositionBasedSplitFractionCalculator
       FramePose3D stanceFootPose = new FramePose3D();
       FramePose3D nextFootPose = new FramePose3D();
 
-      double defaultTransferSplitFraction = icpPlannerParameters.getTransferSplitFraction();
+      double defaultTransferSplitFraction = parameters.getDefaultTransferSplitFraction();
       double defaultWeightDistribution = 0.5;
 
       for (int stepNumber = 0; stepNumber < footstepPlan.getNumberOfSteps(); stepNumber++)

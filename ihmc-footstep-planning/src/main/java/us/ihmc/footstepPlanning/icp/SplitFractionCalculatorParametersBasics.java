@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.icp;
 
-import controller_msgs.msg.dds.FootstepPostProcessingParametersPacket;
+import controller_msgs.msg.dds.SplitFractionCalculatorParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 public interface SplitFractionCalculatorParametersBasics extends SplitFractionCalculatorParametersReadOnly, StoredPropertySetBasics
@@ -8,6 +8,11 @@ public interface SplitFractionCalculatorParametersBasics extends SplitFractionCa
    default void set(SplitFractionCalculatorParametersReadOnly parameters)
    {
       setAll(parameters.getAll());
+   }
+
+   default void setDefaultTransferSplitFraction(double defaultTransferSplitFraction)
+   {
+      set(SplitFractionCalculatorParameterKeys.defaultTransferSplitFraction, defaultTransferSplitFraction);
    }
 
    default void setStepHeightForLargeStepDown(double height)
@@ -50,8 +55,10 @@ public interface SplitFractionCalculatorParametersBasics extends SplitFractionCa
       set(SplitFractionCalculatorParameterKeys.fractionTimeOnFootIfOtherFootHasNoWidth, fraction);
    }
 
-   default void set(FootstepPostProcessingParametersPacket packet)
+   default void set(SplitFractionCalculatorParametersPacket packet)
    {
+      if (packet.getDefaultTransferSplitFraction() != -1.0)
+         setDefaultTransferSplitFraction(packet.getDefaultTransferSplitFraction());
       if (packet.getStepHeightForLargeStepDown() != -1.0)
          setStepHeightForLargeStepDown(packet.getStepHeightForLargeStepDown());
       if (packet.getLargestStepDownHeight() != -1.0)

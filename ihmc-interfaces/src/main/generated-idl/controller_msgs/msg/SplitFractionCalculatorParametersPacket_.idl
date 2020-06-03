@@ -19,6 +19,11 @@ module controller_msgs
          */
         unsigned long sequence_id;
         /**
+         * Default value for the ICP plan's transfer split fraction.
+         */
+        @defaultValue(value=-1.0)
+        double default_transfer_split_fraction;
+        /**
          * Sets the step down height for determining whether or not the transfer split fractions should be adjusted.
          * If the step height change relative to the stance foot is greater than this value, the split fraction and weight distribution
          * will be adjusted so that the CoM is in a more favorable position, kind of "dropping" onto the swing foot.
