@@ -23,7 +23,6 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -58,7 +57,8 @@ public class SLAMModule
    private final LinkedList<Boolean> stationaryFlagQueue = new LinkedList<Boolean>();
    private final LinkedList<Boolean> reasonableVelocityFlagQueue = new LinkedList<Boolean>();
 
-   private final RandomICPSLAM slam = new RandomICPSLAM(DEFAULT_OCTREE_RESOLUTION);
+   //private final RandomICPSLAM slam = new RandomICPSLAM(DEFAULT_OCTREE_RESOLUTION);
+   private final SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(DEFAULT_OCTREE_RESOLUTION);
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private static final int THREAD_PERIOD_MILLISECONDS = 1;
@@ -211,7 +211,8 @@ public class SLAMModule
          SLAMFrame latestFrame = slam.getLatestFrame();
          Point3DReadOnly[] originalPointCloud = latestFrame.getOriginalPointCloud();
          Point3DReadOnly[] correctedPointCloud = latestFrame.getPointCloud();
-         Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePointsToWorldLatestFrame();
+         //Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePointsToWorldLatestFrame();
+         Point3DReadOnly[] sourcePointsToWorld = null;
          if (originalPointCloud == null || sourcePointsToWorld == null || correctedPointCloud == null)
             return;
          StereoVisionPointCloudMessage latestStereoMessage = createLatestFrameStereoVisionPointCloudMessage(originalPointCloud,
@@ -291,7 +292,7 @@ public class SLAMModule
    private void updateSLAMParameters()
    {
       RandomICPSLAMParameters parameters = ihmcSLAMParameters.get();
-      slam.updateParameters(parameters);
+      //slam.updateParameters(parameters);
    }
 
    public void clearSLAM()
