@@ -1107,7 +1107,7 @@ public class SteppableRegionsCalculatorTest
    {
       CinderBlockFieldPlanarRegionEnvironment environment = new CinderBlockFieldPlanarRegionEnvironment();
 
-      double minimumDistanceFromCliffBottoms = 0.08;
+      double minimumDistanceFromCliffBottoms = 0.05;
       double canEasilyStepOverHeight = 0.03;
       double orthogonalAngle = Math.toRadians(75.0);
 

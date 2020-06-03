@@ -19,13 +19,11 @@ import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
+import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHull;
 import us.ihmc.robotics.RegionInWorldInterface;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
-import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
-import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
-import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
+import us.ihmc.robotics.geometry.concavePolygon2D.*;
 import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.PolygonClippingAndMerging;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -339,13 +337,10 @@ public class SteppableRegionsCalculator
 
    private List<ConcavePolygon2DBasics> clipPolygons(ConcavePolygon2DReadOnly clippingPolygon, List<ConcavePolygon2DBasics> polygonsToClip)
    {
-      int originalSize = polygonsToClip.size();
       List<ConcavePolygon2DBasics> clippedPolygons = new ArrayList<>();
       for (ConcavePolygon2DBasics polygonToClip : polygonsToClip)
          clippedPolygons.addAll(PolygonClippingAndMerging.removeAreaInsideClip(clippingPolygon, polygonToClip));
 
-      if (clippedPolygons.size() < 1)
-         LogTools.info("what?");
       return clippedPolygons;
    }
 
@@ -368,6 +363,7 @@ public class SteppableRegionsCalculator
                                                                                                               obstacleExtrusionDistanceCalculator,
                                                                                                               zThresholdBeforeOrthogonal))
                                                                        .collect(Collectors.toList());
+
       PolygonClippingAndMerging.mergeAllPossible(obstacleExtrusions);
 
       return obstacleExtrusions;
