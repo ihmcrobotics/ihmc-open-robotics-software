@@ -1,11 +1,16 @@
 package us.ihmc.footstepPlanning;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
@@ -16,7 +21,12 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
+import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
+import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
@@ -28,6 +38,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -41,14 +52,20 @@ import java.util.function.Consumer;
 public class FootstepPlanningModule implements CloseableAndDisposable
 {
    private final String name;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private Ros2Node ros2Node;
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final VisibilityGraphsParametersBasics visibilityGraphParameters;
+   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+   private final SwingPlannerParametersBasics swingPlannerParameters;
+
+   private final VisibilityGraphPathPlanner bodyPathPlanner;
+   private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
 
    private final PlanThenSnapPlanner planThenSnapPlanner;
    private final AStarFootstepPlanner aStarFootstepPlanner;
-   private final VisibilityGraphPathPlanner bodyPathPlanner;
-   private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
+
+   private final AdaptiveSwingTrajectoryCalculator adaptiveSwingTrajectoryCalculator;
+   private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
 
    private final AtomicBoolean isPlanning = new AtomicBoolean();
    private final FootstepPlannerRequest request = new FootstepPlannerRequest();
@@ -63,25 +80,46 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public FootstepPlanningModule(String name)
    {
-      this(name, new DefaultFootstepPlannerParameters(), new DefaultVisibilityGraphParameters(), PlannerTools.createDefaultFootPolygons());
+      this(name,
+           new DefaultVisibilityGraphParameters(),
+           new DefaultFootstepPlannerParameters(),
+           new DefaultSwingPlannerParameters(),
+           null,
+           PlannerTools.createDefaultFootPolygons());
    }
 
    public FootstepPlanningModule(String name,
-                                 FootstepPlannerParametersBasics footstepPlannerParameters,
                                  VisibilityGraphsParametersBasics visibilityGraphParameters,
+                                 FootstepPlannerParametersBasics footstepPlannerParameters,
+                                 SwingPlannerParametersBasics swingPlannerParameters,
+                                 WalkingControllerParameters walkingControllerParameters,
                                  SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.name = name;
-      this.footstepPlannerParameters = footstepPlannerParameters;
       this.visibilityGraphParameters = visibilityGraphParameters;
+      this.footstepPlannerParameters = footstepPlannerParameters;
+      this.swingPlannerParameters = swingPlannerParameters;
 
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
       this.bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters,
                                                             pathPostProcessor,
-                                                            new YoVariableRegistry(getClass().getSimpleName()));
+                                                            registry);
 
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters, footPolygons, bodyPathPlanHolder);
+
+      if (walkingControllerParameters == null)
+      {
+         this.adaptiveSwingTrajectoryCalculator = null;
+         this.swingOverPlanarRegionsTrajectoryExpander = null;
+      }
+      else
+      {
+         this.adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(null, walkingControllerParameters);
+         this.swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters,
+                                                                                                      registry,
+                                                                                                      new YoGraphicsListRegistry());
+      }
 
       addStatusCallback(output -> output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lapElapsed()));
       addStatusCallback(output -> output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed()));
@@ -207,6 +245,66 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
          output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lap());
          statusCallback.accept(output);
+      }
+
+      if (request.getSwingPlannerType() == SwingPlannerType.PROPORTION && adaptiveSwingTrajectoryCalculator != null && !flatGroundMode)
+      {
+         adaptiveSwingTrajectoryCalculator.setPlanarRegionsList(request.getPlanarRegionsList());
+         RobotSide initialStanceSide = request.getRequestedInitialStanceSide();
+         Pose3D initialStancePose = request.getStartFootPoses().get(initialStanceSide);
+         adaptiveSwingTrajectoryCalculator.setSwingParameters(initialStancePose, output.getFootstepPlan());
+      }
+      else if (request.getSwingPlannerType() == SwingPlannerType.POSITION && swingOverPlanarRegionsTrajectoryExpander != null && !flatGroundMode)
+      {
+         swingOverPlanarRegionsTrajectoryExpander.setDoInitialFastApproximation(swingPlannerParameters.getDoInitialFastApproximation());
+         swingOverPlanarRegionsTrajectoryExpander.setFastApproximationLessClearance(swingPlannerParameters.getFastApproximationLessClearance());
+         swingOverPlanarRegionsTrajectoryExpander.setNumberOfCheckpoints(swingPlannerParameters.getNumberOfChecksPerSwing());
+         swingOverPlanarRegionsTrajectoryExpander.setMaximumNumberOfTries(swingPlannerParameters.getMaximumNumberOfAdjustmentAttempts());
+         swingOverPlanarRegionsTrajectoryExpander.setMinimumSwingFootClearance(swingPlannerParameters.getMinimumSwingFootClearance());
+         swingOverPlanarRegionsTrajectoryExpander.setMinimumAdjustmentIncrementDistance(swingPlannerParameters.getMinimumAdjustmentIncrementDistance());
+         swingOverPlanarRegionsTrajectoryExpander.setMaximumAdjustmentIncrementDistance(swingPlannerParameters.getMaximumAdjustmentIncrementDistance());
+         swingOverPlanarRegionsTrajectoryExpander.setAdjustmentIncrementDistanceGain(swingPlannerParameters.getAdjustmentIncrementDistanceGain());
+         swingOverPlanarRegionsTrajectoryExpander.setMaximumAdjustmentDistance(swingPlannerParameters.getMaximumWaypointAdjustmentDistance());
+         swingOverPlanarRegionsTrajectoryExpander.setMinimumHeightAboveFloorForCollision(swingPlannerParameters.getMinimumHeightAboveFloorForCollision());
+
+         FootstepPlan footstepPlan = output.getFootstepPlan();
+         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+         {
+            PlannedFootstep footstep = footstepPlan.getFootstep(i);
+            FramePose3D swingEndPose = new FramePose3D(footstep.getFootstepPose());
+            FramePose3D swingStartPose = new FramePose3D();
+            FramePose3D stanceFootPose = new FramePose3D();
+
+            if(i == 0)
+            {
+               swingStartPose.set(request.getStartFootPoses().get(footstep.getRobotSide()));
+               stanceFootPose.set(request.getStartFootPoses().get(footstep.getRobotSide().getOppositeSide()));
+            }
+            else if (i == 1)
+            {
+               swingStartPose.set(request.getStartFootPoses().get(footstep.getRobotSide()));
+               stanceFootPose.set(footstepPlan.getFootstep(i - 1).getFootstepPose());
+            }
+            else
+            {
+               swingStartPose.set(footstepPlan.getFootstep(i - 2).getFootstepPose());
+               stanceFootPose.set(footstepPlan.getFootstep(i - 1).getFootstepPose());
+            }
+
+            double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose,
+                                                                                                                      swingStartPose,
+                                                                                                                      swingEndPose,
+                                                                                                                      planarRegionsList);
+            if (swingOverPlanarRegionsTrajectoryExpander.wereWaypointsAdjusted())
+            {
+               footstep.setTrajectoryType(TrajectoryType.CUSTOM);
+               Point3D waypointOne = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
+               Point3D waypointTwo = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
+               footstep.setCustomWaypointPositions(waypointOne, waypointTwo);
+
+               // TODO scale swing time
+            }
+         }
       }
 
       isPlanning.set(false);
