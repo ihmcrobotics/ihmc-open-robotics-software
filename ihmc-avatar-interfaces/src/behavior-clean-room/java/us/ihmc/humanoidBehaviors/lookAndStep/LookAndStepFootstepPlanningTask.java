@@ -34,24 +34,24 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepFootstepPlanningTask implements Builder
 {
-   private final Field<PlanarRegionsList> planarRegions = required();
-   private final Field<SimpleTimer.Status> planarRegionsExpirationStatus = required();
-   private final Field<SimpleTimer.Status> moduleFailedTimerStatus = required();
-   private final Field<List<Pose3D>> bodyPathPlan = required();
-   private final Field<Supplier<Boolean>> isBeingReviewedSupplier = required();
-   private final Field<UIPublisher> uiPublisher = required();
-   private final Field<HumanoidRobotState> robotState = required();
-   private final Field<LookAndStepBehaviorParametersReadOnly> lookAndStepBehaviorParameters = required();
-   private final Field<FootstepPlannerParametersReadOnly> footstepPlannerParameters = required();
-   private final Field<Runnable> newBodyPathGoalNeededNotifier = required();
-   private final Field<Function<RobotSide, FramePose3DReadOnly>> lastSteppedSolePoseSupplier = required();
-   private final Field<BiConsumer<RobotSide, FramePose3DReadOnly>> lastSteppedSolePoseConsumer = required();
-   private final Field<RobotSide> lastStanceSide = required();
-   private final Field<Consumer<RobotSide>> lastStanceSideSetter = required();
-   private final Field<FootstepPlanningModule> footstepPlanningModule = required();
-   private final Field<Supplier<Boolean>> operatorReviewEnabledSupplier = required();
-   private final Field<Consumer<FootstepPlan>> reviewPlanOutput = required();
-   private final Field<Consumer<FootstepPlan>> autonomousOutput = required();
+   private Field<PlanarRegionsList> planarRegions = required();
+   private Field<SimpleTimer.Status> planarRegionsExpirationStatus = required();
+   private Field<SimpleTimer.Status> moduleFailedTimerStatus = required();
+   private Field<List<Pose3D>> bodyPathPlan = required();
+   private Field<Supplier<Boolean>> isBeingReviewedSupplier = required();
+   private Field<UIPublisher> uiPublisher = required();
+   private Field<HumanoidRobotState> robotState = required();
+   private Field<LookAndStepBehaviorParametersReadOnly> lookAndStepBehaviorParameters = required();
+   private Field<FootstepPlannerParametersReadOnly> footstepPlannerParameters = required();
+   private Field<Runnable> newBodyPathGoalNeededNotifier = required();
+   private Field<Function<RobotSide, FramePose3DReadOnly>> lastSteppedSolePoseSupplier = required();
+   private Field<BiConsumer<RobotSide, FramePose3DReadOnly>> lastSteppedSolePoseConsumer = required();
+   private Field<RobotSide> lastStanceSide = required();
+   private Field<Consumer<RobotSide>> lastStanceSideSetter = required();
+   private Field<FootstepPlanningModule> footstepPlanningModule = required();
+   private Field<Supplier<Boolean>> operatorReviewEnabledSupplier = required();
+   private Field<Consumer<FootstepPlan>> reviewPlanOutput = required();
+   private Field<Consumer<FootstepPlan>> autonomousOutput = required();
 
    private boolean evaluateEntry()
    {
@@ -232,7 +232,7 @@ public class LookAndStepFootstepPlanningTask implements Builder
       }
    }
 
-   public static ArrayList<FootstepForUI> reduceFootstepPlanForUIMessager2(FootstepPlan footstepPlan, String description)
+   private static ArrayList<FootstepForUI> reduceFootstepPlanForUIMessager2(FootstepPlan footstepPlan, String description)
    {
       ArrayList<FootstepForUI> footstepLocations = new ArrayList<>();
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
@@ -257,4 +257,93 @@ public class LookAndStepFootstepPlanningTask implements Builder
       invalidate();
    }
 
+   public void setPlanarRegions(PlanarRegionsList planarRegions)
+   {
+      this.planarRegions.set(planarRegions);
+   }
+
+   public void setPlanarRegionsExpirationStatus(SimpleTimer.Status planarRegionsExpirationStatus)
+   {
+      this.planarRegionsExpirationStatus.set(planarRegionsExpirationStatus);
+   }
+
+   public void setModuleFailedTimerStatus(SimpleTimer.Status moduleFailedTimerStatus)
+   {
+      this.moduleFailedTimerStatus.set(moduleFailedTimerStatus);
+   }
+
+   public void setBodyPathPlan(List<Pose3D> bodyPathPlan)
+   {
+      this.bodyPathPlan.set(bodyPathPlan);
+   }
+
+   public void setIsBeingReviewedSupplier(Supplier<Boolean> isBeingReviewedSupplier)
+   {
+      this.isBeingReviewedSupplier.set(isBeingReviewedSupplier);
+   }
+
+   public void setUiPublisher(UIPublisher uiPublisher)
+   {
+      this.uiPublisher.set(uiPublisher);
+   }
+
+   public void setRobotState(HumanoidRobotState robotState)
+   {
+      this.robotState.set(robotState);
+   }
+
+   public void setLookAndStepBehaviorParameters(LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters)
+   {
+      this.lookAndStepBehaviorParameters.set(lookAndStepBehaviorParameters);
+   }
+
+   public void setFootstepPlannerParameters(FootstepPlannerParametersReadOnly footstepPlannerParameters)
+   {
+      this.footstepPlannerParameters.set(footstepPlannerParameters);
+   }
+
+   public void setNewBodyPathGoalNeededNotifier(Runnable newBodyPathGoalNeededNotifier)
+   {
+      this.newBodyPathGoalNeededNotifier.set(newBodyPathGoalNeededNotifier);
+   }
+
+   public void setLastSteppedSolePoseSupplier(Function<RobotSide, FramePose3DReadOnly> lastSteppedSolePoseSupplier)
+   {
+      this.lastSteppedSolePoseSupplier.set(lastSteppedSolePoseSupplier);
+   }
+
+   public void setLastSteppedSolePoseConsumer(BiConsumer<RobotSide, FramePose3DReadOnly> lastSteppedSolePoseConsumer)
+   {
+      this.lastSteppedSolePoseConsumer.set(lastSteppedSolePoseConsumer);
+   }
+
+   public void setLastStanceSide(RobotSide lastStanceSide)
+   {
+      this.lastStanceSide.set(lastStanceSide);
+   }
+
+   public void setLastStanceSideSetter(Consumer<RobotSide> lastStanceSideSetter)
+   {
+      this.lastStanceSideSetter.set(lastStanceSideSetter);
+   }
+
+   public void setFootstepPlanningModule(FootstepPlanningModule footstepPlanningModule)
+   {
+      this.footstepPlanningModule.set(footstepPlanningModule);
+   }
+
+   public void setOperatorReviewEnabledSupplier(Supplier<Boolean> operatorReviewEnabledSupplier)
+   {
+      this.operatorReviewEnabledSupplier.set(operatorReviewEnabledSupplier);
+   }
+
+   public void setReviewPlanOutput(Consumer<FootstepPlan> reviewPlanOutput)
+   {
+      this.reviewPlanOutput.set(reviewPlanOutput);
+   }
+
+   public void setAutonomousOutput(Consumer<FootstepPlan> autonomousOutput)
+   {
+      this.autonomousOutput.set(autonomousOutput);
+   }
 }

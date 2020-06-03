@@ -6,6 +6,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.SimpleTimer;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.communication.packets.ExecutionMode;
@@ -32,6 +33,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -46,7 +48,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final BehaviorHelper helper;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final RemoteHumanoidRobotInterface robot;
-   private final FootstepPlanningModule footstepPlanningModule;
+//   private final FootstepPlanningModule footstepPlanningModule;
    private final VisibilityGraphsParametersBasics visibilityGraphParameters;
    private final Supplier<PlanarRegionsList> realsenseSLAMRegions;
 
@@ -54,12 +56,13 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final LookAndStepReviewPart<FootstepPlan> footstepPlanReview;
 
    private final LookAndStepBodyPathModule bodyPathModule;
+   private final LookAndStepFootstepPlanningModule footstepPlanningModule;
 
    private final AtomicReference<Boolean> operatorReviewEnabledInput;
    private final TypedNotification<Boolean> approvalNotification;
    private final FramePose3D goalPoseBetweenFeet = new FramePose3D();
    private volatile RobotSide lastStanceSide = null;
-   private volatile SideDependentList<FramePose3D> lastSteppedSolePoses = new SideDependentList<>();
+   private volatile SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses = new SideDependentList<>();
 
    private PlanarRegionsList footstepPlanningNearRegions;
    private SimpleTimer footstepPlanningNearRegionsExpirationTimer = new SimpleTimer();
@@ -80,7 +83,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    {
       this.helper = helper;
       robot = helper.getOrCreateRobotInterface();
-      footstepPlanningModule = helper.getOrCreateFootstepPlanner();
+//      footstepPlanningModule = helper.getOrCreateFootstepPlanner();
       realsenseSLAMRegions = helper.createROS2PlanarRegionsListInput(ROS2Tools.REALSENSE_SLAM_REGIONS);
 
       visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
@@ -90,13 +93,21 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlannerParameters = helper.getRobotModel().getFootstepPlannerParameters();
       helper.createUICallback(FootstepPlannerParameters, footstepPlannerParameters::setAllFromStrings);
 
+      // hook up override parameters
+      footstepPlannerParameters.setIdealFootstepLength(lookAndStepParameters.getIdealFootstepLengthOverride());
+      footstepPlannerParameters.setWiggleInsideDelta(lookAndStepParameters.getWiggleInsideDeltaOverride());
+      footstepPlannerParameters.setCliffBaseHeightToAvoid(lookAndStepParameters.getCliffBaseHeightToAvoidOverride());
+      footstepPlannerParameters.setEnableConcaveHullWiggler(lookAndStepParameters.getEnableConcaveHullWigglerOverride());
+
       operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
       approvalNotification = helper.createUITypedNotification(Approval);
 
+      AtomicBoolean newBodyPathGoalNeeded = new AtomicBoolean(true);
+
+      // TODO: Want to be able to wire up behavior here and see all present modules
+
       bodyPathReview = new LookAndStepReviewPart<>("body path", approvalNotification, this::footstepPlanningAcceptBodyPath);
       footstepPlanReview = new LookAndStepReviewPart<>("footstep plan", approvalNotification, this::robotWalkingModuleAcceptFootstepPlan);
-
-      SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
       bodyPathModule = new LookAndStepBodyPathModule();
       helper.createROS2Callback(ROS2Tools.MAP_REGIONS, bodyPathModule::acceptMapRegions);
@@ -108,10 +119,11 @@ public class LookAndStepBehavior implements BehaviorInterface
       bodyPathModule.setVisibilityGraphParameters(visibilityGraphParameters);
       bodyPathModule.setInitiateReviewOutput(bodyPathReview::review);
       bodyPathModule.setAutonomousOutput(this::footstepPlanningAcceptBodyPath);
-      bodyPathModule.setNeedNewPlanSupplier(needsNewBodyPathPlan); // TODO: hook up to subgoal mover
+      bodyPathModule.setNeedNewPlanSupplier(newBodyPathGoalNeeded::get); // TODO: hook up to subgoal mover
       bodyPathModule.setUIPublisher(helper::publishToUI);
 
-      // TODO: Want to be able to wire up behavior here and see all present modules
+      footstepPlanningModule = new LookAndStepFootstepPlanningModule();
+
 
       helper.createROS2PlanarRegionsListCallback(ROS2Tools.REALSENSE_SLAM_REGIONS, this::footstepPlanningAcceptNearPlanarRegions);
 
