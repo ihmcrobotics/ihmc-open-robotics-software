@@ -13,10 +13,10 @@ int8 ROBOT_SIDE_RIGHT=1
 uint32 sequence_id
 
 # The current footstep status enum value.
-# footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
 # Field default value 255
 int8 footstep_status
 
+# footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
 int32 footstep_index
 
 # The robot side (left or right) that this footstep status correlates to.
