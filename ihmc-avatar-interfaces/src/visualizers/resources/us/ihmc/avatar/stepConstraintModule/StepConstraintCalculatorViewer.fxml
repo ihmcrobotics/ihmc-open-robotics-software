@@ -12,6 +12,12 @@
                      <children>
                         <CheckBox fx:id="showPlanarRegions" text="Show Planar Regions" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
                         <CheckBox fx:id="showConstraintRegions" text="Show Constraint Regions" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" />
+                        <CheckBox fx:id="showObstacleExtrusions" text="Show Obstacle Extrusions" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" />
+                        <CheckBox fx:id="showObstacleRawPoints" text="Show Extrusion Points" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" />
+                        <CheckBox fx:id="showTooSmallRegions" text="Show Too Small Regions" maxWidth="1.7976931348623157E308"  GridPane.rowIndex="1"
+                                  GridPane.columnIndex="1" />
+                        <CheckBox fx:id="showTooSteepRegions" text="Show Too Steep Regions" maxWidth="1.7976931348623157E308" GridPane.rowIndex="1" GridPane.columnIndex="2" />
+                        <CheckBox fx:id="showMaskedRegions" text="Show Masked Regions" maxWidth="1.7976931348623157E308" GridPane.rowIndex="1" GridPane.columnIndex="3" />
                      </children>
                   </GridPane>
                </children>

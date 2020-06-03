@@ -1,6 +1,6 @@
 package us;
 
-import us.ihmc.commons.InterpolationTools;
+import sun.rmi.runtime.Log;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -13,11 +13,13 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.Cluster.ClusterType;
 import us.ihmc.pathPlanning.visibilityGraphs.clusterManagement.ExtrusionHull;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleExtrusionDistanceCalculator;
 import us.ihmc.pathPlanning.visibilityGraphs.interfaces.ObstacleRegionFilter;
 import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
+import us.ihmc.robotics.RegionInWorldInterface;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
@@ -28,17 +30,20 @@ import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.PolygonClipping
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 public class SteppableRegionsCalculator
 {
    private static final double POPPING_MULTILINE_POINTS_THRESHOLD = MathTools.square(0.10);
 
-   private static final double maxNormalAngleFromVertical = 0.3;
+   private static final double maxNormalAngleFromVertical = 0.4;
    private static final double minimumAreaToConsider = 0.01;
    private static final double defaultCanDuckUnderHeight = 2.0;
-   private static final double defaultCanEasilyStepOverHeight = 0.1;
+   private static final double defaultCanEasilyStepOverHeight = 0.03;
    private static final double defaultOrthogonalAngle = Math.toRadians(75.0);
    private static final double defaultMinimumDistanceFromCliffBottoms = 0.1;
 
@@ -54,25 +59,34 @@ public class SteppableRegionsCalculator
    private final YoDouble orthogonalAngle;
    private final YoDouble minimumDistanceFromCliffBottoms;
 
-   private HashMap<StepConstraintRegion, List<ConcavePolygon2DBasics>> obstacleExtrusions = new HashMap<>();
+   private HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>> obstacleExtrusions = new HashMap<>();
    private List<StepConstraintRegion> steppableRegions = new ArrayList<>();
    private List<PlanarRegion> allPlanarRegions = new ArrayList<>();
+   private List<PlanarRegion> tooSmallRegions = new ArrayList<>();
+   private List<PlanarRegion> tooSteepRegions = new ArrayList<>();
+   private List<PlanarRegion> maskedRegions = new ArrayList<>();
+   private HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>> maskedRegionsExtrusions = new HashMap<>();
 
    private final FramePoint2D stanceFootPosition = new FramePoint2D();
    private final Random random = new Random(1738L);
 
-
-   /** See notes in {@link VisibilityGraphsparametersReadOnly} */
+   /**
+    * See notes in {@link VisibilityGraphsparametersReadOnly}
+    */
    private final ObstacleRegionFilter obstacleRegionFilter = new ObstacleRegionFilter()
    {
       @Override
       public boolean isRegionValidObstacle(PlanarRegion potentialObstacleRegion, PlanarRegion navigableRegion)
       {
+         if (potentialObstacleRegion == navigableRegion)
+            return false;
+
          if (!PlanarRegionTools.isRegionAOverlappingWithRegionB(potentialObstacleRegion, navigableRegion, minimumDistanceFromCliffBottoms.getDoubleValue()))
             return false;
 
-         if (potentialObstacleRegion.getBoundingBox3dInWorld().getMinZ()
-             > navigableRegion.getBoundingBox3dInWorld().getMaxZ() + canDuckUnderHeight.getDoubleValue())
+         boolean isCeiling = potentialObstacleRegion.getBoundingBox3dInWorld().getMinZ()
+                             > navigableRegion.getBoundingBox3dInWorld().getMaxZ() + canDuckUnderHeight.getDoubleValue();
+         if (isCeiling)
             return false;
 
          return PlanarRegionTools.isPlanarRegionAAbovePlanarRegionB(potentialObstacleRegion, navigableRegion, canEasilyStepOverHeight.getDoubleValue());
@@ -91,8 +105,8 @@ public class SteppableRegionsCalculator
          else if (obstacleHeight < canEasilyStepOverHeight.getDoubleValue())
          {
             return 0.01;
-//            double alpha = obstacleHeight / canEasilyStepOverHeight.getDoubleValue();
-//            return InterpolationTools.linearInterpolate(0.0, minimumDistanceFromCliffBottoms.getDoubleValue(), alpha);
+            //            double alpha = obstacleHeight / canEasilyStepOverHeight.getDoubleValue();
+            //            return InterpolationTools.linearInterpolate(0.0, minimumDistanceFromCliffBottoms.getDoubleValue(), alpha);
          }
          else
          {
@@ -147,26 +161,60 @@ public class SteppableRegionsCalculator
 
    public List<StepConstraintRegion> computeSteppableRegions()
    {
+      tooSmallRegions = new ArrayList<>();
+      tooSteepRegions = new ArrayList<>();
+      maskedRegions = new ArrayList<>();
       List<PlanarRegion> candidateRegions = allPlanarRegions.stream().filter(this::isRegionValidForStepping).collect(Collectors.toList());
 
       steppableRegions = new ArrayList<>();
       obstacleExtrusions = new HashMap<>();
+      maskedRegionsExtrusions = new HashMap<>();
       for (PlanarRegion candidateRegion : candidateRegions)
       {
          List<StepConstraintRegion> regions = createSteppableRegionsFromPlanarRegion(candidateRegion, allPlanarRegions);
          if (regions != null)
-            steppableRegions.addAll(regions);
+         {
+            for (StepConstraintRegion region : regions)
+            {
+               if (candidateRegion.getRegionId() != -1)
+                  region.setRegionId(candidateRegion.getRegionId());
+               steppableRegions.add(region);
+            }
+         }
       }
 
       for (StepConstraintRegion stepConstraintRegion : steppableRegions)
-         stepConstraintRegion.setRegionId(random.nextInt());
+      {
+         if (stepConstraintRegion.getRegionId() == -1)
+            stepConstraintRegion.setRegionId(random.nextInt());
+      }
 
       return steppableRegions;
    }
 
-   public HashMap<StepConstraintRegion, List<ConcavePolygon2DBasics>> getObstacleExtrusions()
+   public HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>> getObstacleExtrusions()
    {
       return obstacleExtrusions;
+   }
+
+   public List<PlanarRegion> getTooSmallRegions()
+   {
+      return tooSmallRegions;
+   }
+
+   public List<PlanarRegion> getTooSteepRegions()
+   {
+      return tooSteepRegions;
+   }
+
+   public List<PlanarRegion> getMaskedRegions()
+   {
+      return maskedRegions;
+   }
+
+   public HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>> getMaskedRegionsObstacleExtrusions()
+   {
+      return maskedRegionsExtrusions;
    }
 
    private boolean isRegionValidForStepping(PlanarRegion planarRegion)
@@ -174,10 +222,16 @@ public class SteppableRegionsCalculator
       double angle = planarRegion.getNormal().angle(verticalAxis);
 
       if (angle > maxAngleForSteppable.getValue())
+      {
+         tooSteepRegions.add(planarRegion);
          return false;
+      }
 
       if (PlanarRegionTools.computePlanarRegionArea(planarRegion) < minimumAreaForSteppable.getValue())
+      {
+         tooSmallRegions.add(planarRegion);
          return false;
+      }
 
       if (stanceFootPosition.containsNaN())
          return true;
@@ -203,6 +257,7 @@ public class SteppableRegionsCalculator
             break;
          }
       }
+
       return closeEnough;
    }
 
@@ -217,12 +272,21 @@ public class SteppableRegionsCalculator
                                                           .collect(Collectors.toList());
 
       List<ConcavePolygon2DBasics> obstacleExtrusions = createObstacleExtrusions(candidateRegion, obstacleRegions);
-      List<StepConstraintRegion> stepConstraintRegions = createSteppableRegions(candidateRegion.getTransformToWorld(), candidateConstraintRegion, obstacleExtrusions);
 
-      if (stepConstraintRegions != null)
+      if (obstacleExtrusions.stream().anyMatch(region -> isRegionMasked(candidateConstraintRegion, region)))
       {
-         for (StepConstraintRegion stepConstraintRegion : stepConstraintRegions)
-            this.obstacleExtrusions.put(stepConstraintRegion, obstacleExtrusions);
+         maskedRegions.add(candidateRegion);
+         maskedRegionsExtrusions.put(candidateRegion, obstacleExtrusions);
+         return null;
+      }
+
+      List<StepConstraintRegion> stepConstraintRegions = createSteppableRegions(candidateRegion.getTransformToWorld(),
+                                                                                candidateConstraintRegion,
+                                                                                obstacleExtrusions);
+
+      for (StepConstraintRegion stepConstraintRegion : stepConstraintRegions)
+      {
+         this.obstacleExtrusions.put(stepConstraintRegion, obstacleExtrusions);
       }
 
       return stepConstraintRegions;
@@ -232,9 +296,6 @@ public class SteppableRegionsCalculator
                                                              ConcavePolygon2DBasics uncroppedPolygon,
                                                              List<ConcavePolygon2DBasics> obstacleExtrusions)
    {
-      if (obstacleExtrusions.stream().anyMatch(region -> isRegionMasked(uncroppedPolygon, region)))
-         return null;
-
       List<ConcavePolygon2DBasics> listOfHoles = obstacleExtrusions.stream()
                                                                    .filter(region -> isObstacleAHole(uncroppedPolygon, region))
                                                                    .collect(Collectors.toList());
@@ -278,10 +339,13 @@ public class SteppableRegionsCalculator
 
    private List<ConcavePolygon2DBasics> clipPolygons(ConcavePolygon2DReadOnly clippingPolygon, List<ConcavePolygon2DBasics> polygonsToClip)
    {
+      int originalSize = polygonsToClip.size();
       List<ConcavePolygon2DBasics> clippedPolygons = new ArrayList<>();
       for (ConcavePolygon2DBasics polygonToClip : polygonsToClip)
          clippedPolygons.addAll(PolygonClippingAndMerging.removeAreaInsideClip(clippingPolygon, polygonToClip));
 
+      if (clippedPolygons.size() < 1)
+         LogTools.info("what?");
       return clippedPolygons;
    }
 

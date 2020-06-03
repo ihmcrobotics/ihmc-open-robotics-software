@@ -175,6 +175,17 @@ public class PolygonClippingAndMerging
       LinkedPointProvider pointProvider = new LinkedPointProvider(clippingPolygonList, polygonToClipList, unassignedClippingPoints, unassignedToClipPoints);
 
       LinkedPoint startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedToClipPoints);
+      if (startPoint == null)
+      {
+         for (LinkedPoint point : unassignedToClipPoints)
+         {
+            if (!point.isPointAfterInsideOther() && point.isPointBeforeInsideOther())
+            {
+               startPoint = point;
+               break;
+            }
+         }
+      }
 
       while (startPoint != null)
       {
@@ -187,6 +198,12 @@ public class PolygonClippingAndMerging
          startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedToClipPoints);
       }
 
+      if (clippedPolygonsToReturn.size() < 1)
+      {
+         LogTools.info("WHat?");
+         GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonToClip, clippingPolygon);
+         startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedToClipPoints);
+      }
       return clippedPolygonsToReturn;
    }
 
@@ -257,6 +274,17 @@ public class PolygonClippingAndMerging
       for (LinkedPoint point : points)
       {
          if (!polygon.isPointInsideEpsilon(point.getPoint(), 1e-5))
+            return point;
+      }
+
+      return null;
+   }
+
+   private static LinkedPoint findVertexOnPerimeterOfPolygon(ConcavePolygon2DReadOnly polygon, Collection<LinkedPoint> points)
+   {
+      for (LinkedPoint point : points)
+      {
+         if (GeometryPolygonTools.isPoint2DOnPerimeterOfSimplePolygon2D(point.getPoint(), polygon.getVertexBufferView(), polygon.getNumberOfVertices(), 1e-5))
             return point;
       }
 

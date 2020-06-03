@@ -19,13 +19,19 @@ public class StepConstraintCalculatorViewer
    private final Stage primaryStage;
    private final JavaFXMessager messager;
    private final PlanarRegionViewer planarRegionViewer;
+   private final PlanarRegionViewer tooSmallRegionViewer;
+   private final PlanarRegionViewer tooSteepRegionViewer;
+   private final PlanarRegionViewer maskedRegionsViewer;
    private final StepConstraintRegionViewer stepConstraintRegionViewer;
    private final ObstacleExtrusionViewer obstacleExtrusionViewer;
+   private final ObstacleExtrusionViewer maskedRegionsExtrusionsViewer;
 
    @FXML
    private BorderPane mainPane;
-   `@FXML
-   private CheckBox showPlanarRegions, showConstraintRegions;
+   @FXML
+   private CheckBox showPlanarRegions, showConstraintRegions, showObstacleExtrusions, showObstacleRawPoints, showTooSmallRegions, showTooSteepRegions;
+   @FXML
+   private CheckBox showMaskedRegions;
 
 
    public StepConstraintCalculatorViewer(Stage primaryStage, JavaFXMessager messager) throws Exception
@@ -47,23 +53,49 @@ public class StepConstraintCalculatorViewer
       this.planarRegionViewer = new PlanarRegionViewer(messager,
                                                        StepConstraintCalculatorViewerAPI.PlanarRegionData,
                                                        StepConstraintCalculatorViewerAPI.ShowPlanarRegions);
+      this.tooSmallRegionViewer = new PlanarRegionViewer(messager,
+                                                         StepConstraintCalculatorViewerAPI.TooSmallRegionData,
+                                                         StepConstraintCalculatorViewerAPI.ShowTooSmallRegions);
+      this.tooSteepRegionViewer = new PlanarRegionViewer(messager,
+                                                         StepConstraintCalculatorViewerAPI.TooSteepRegionData,
+                                                         StepConstraintCalculatorViewerAPI.ShowTooSteepRegions);
+      this.maskedRegionsViewer = new PlanarRegionViewer(messager,
+                                                        StepConstraintCalculatorViewerAPI.MaskedRegionsData,
+                                                        StepConstraintCalculatorViewerAPI.ShowMaskedRegions);
       this.stepConstraintRegionViewer = new StepConstraintRegionViewer(messager,
                                                                        StepConstraintCalculatorViewerAPI.StepConstraintRegionData,
                                                                        StepConstraintCalculatorViewerAPI.ShowStepConstraintRegions);
       this.obstacleExtrusionViewer = new ObstacleExtrusionViewer(messager);
       obstacleExtrusionViewer.setTopics(null, StepConstraintCalculatorViewerAPI.ShowExtrusionPoints, StepConstraintCalculatorViewerAPI.ShowObstacleExtrusions,
                                         StepConstraintCalculatorViewerAPI.ObstacleExtrusionsData);
+      this.maskedRegionsExtrusionsViewer = new ObstacleExtrusionViewer(messager);
+      maskedRegionsExtrusionsViewer.setTopics(null, StepConstraintCalculatorViewerAPI.ShowExtrusionPoints, StepConstraintCalculatorViewerAPI.ShowMaskedRegions,
+                                              StepConstraintCalculatorViewerAPI.MaskedRegionsObstacleExtrusionsData);
 
-      view3dFactory.addNodeToView(planarRegionViewer.getRoot());
+
+            view3dFactory.addNodeToView(planarRegionViewer.getRoot());
       view3dFactory.addNodeToView(stepConstraintRegionViewer.getRoot());
+      view3dFactory.addNodeToView(obstacleExtrusionViewer.getRoot());
+      view3dFactory.addNodeToView(tooSmallRegionViewer.getRoot());
+      view3dFactory.addNodeToView(tooSteepRegionViewer.getRoot());
+      view3dFactory.addNodeToView(maskedRegionsViewer.getRoot());
+      view3dFactory.addNodeToView(maskedRegionsExtrusionsViewer.getRoot());
 
       messager.bindBidirectional(StepConstraintCalculatorViewerAPI.ShowPlanarRegions, showPlanarRegions.selectedProperty(), false);
       messager.bindBidirectional(StepConstraintCalculatorViewerAPI.ShowStepConstraintRegions, showConstraintRegions.selectedProperty(), false);
+      messager.bindBidirectional(StepConstraintCalculatorViewerAPI.ShowObstacleExtrusions, showObstacleExtrusions.selectedProperty(), false);
+      messager.bindBidirectional(StepConstraintCalculatorViewerAPI.ShowExtrusionPoints, showObstacleRawPoints.selectedProperty(), false);
+      messager.bindBidirectional(StepConstraintCalculatorViewerAPI.ShowTooSmallRegions, showTooSmallRegions.selectedProperty(), false);
+      messager.bindBidirectional(StepConstraintCalculatorViewerAPI.ShowTooSteepRegions, showTooSteepRegions.selectedProperty(), false);
+      messager.bindBidirectional(StepConstraintCalculatorViewerAPI.ShowMaskedRegions, showMaskedRegions.selectedProperty(), false);
 
       messager.submitMessage(StepConstraintCalculatorViewerAPI.ShowPlanarRegions, false);
       messager.submitMessage(StepConstraintCalculatorViewerAPI.ShowStepConstraintRegions, true);
       messager.submitMessage(StepConstraintCalculatorViewerAPI.ShowObstacleExtrusions, true);
       messager.submitMessage(StepConstraintCalculatorViewerAPI.ShowExtrusionPoints, true);
+      messager.submitMessage(StepConstraintCalculatorViewerAPI.ShowTooSmallRegions, false);
+      messager.submitMessage(StepConstraintCalculatorViewerAPI.ShowTooSteepRegions, false);
+      messager.submitMessage(StepConstraintCalculatorViewerAPI.ShowMaskedRegions, false);
 
       primaryStage.setTitle(getClass().getSimpleName());
       primaryStage.setMaximized(true);
@@ -78,12 +110,22 @@ public class StepConstraintCalculatorViewer
       primaryStage.show();
       planarRegionViewer.start();
       stepConstraintRegionViewer.start();
+      obstacleExtrusionViewer.start();
+      maskedRegionsExtrusionsViewer.start();
+      tooSteepRegionViewer.start();
+      tooSmallRegionViewer.start();
+      maskedRegionsViewer.start();
    }
 
    public void stop()
    {
       planarRegionViewer.stop();
       stepConstraintRegionViewer.stop();
+      obstacleExtrusionViewer.stop();
+      maskedRegionsExtrusionsViewer.stop();
+      tooSteepRegionViewer.stop();
+      tooSmallRegionViewer.stop();
+      maskedRegionsViewer.stop();
       try
       {
          messager.closeMessager();

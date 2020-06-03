@@ -7,6 +7,8 @@ import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 
 public interface RegionInWorldInterface<T extends RegionInWorldInterface>
 {
+   int getRegionId();
+
    /**
     * Returns the transform from the world frame to the local frame.
     */

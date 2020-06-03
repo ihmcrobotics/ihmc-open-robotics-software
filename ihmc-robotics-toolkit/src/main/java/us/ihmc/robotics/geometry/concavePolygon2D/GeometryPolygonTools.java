@@ -26,9 +26,11 @@ public class GeometryPolygonTools
       // if any of the points are outside, it fails.
       for (int i = 0; i < innerPolygon.getNumberOfVertices(); i++)
       {
-         if (!outerPolygon.isPointInsideEpsilon(innerPolygon.getVertex(i), 1e-7))
+         if (!outerPolygon.isPointInsideEpsilon(innerPolygon.getVertex(i), 1e-5))
             return false;
       }
+
+      Point2D intersection = new Point2D();
 
       // if any of the points cross, it fails.
       for (int i = 0; i < innerPolygon.getNumberOfVertices(); i++)
@@ -41,7 +43,7 @@ public class GeometryPolygonTools
             Point2DReadOnly otherVertex = outerPolygon.getVertex(j);
             Point2DReadOnly otherNextVertex = outerPolygon.getNextVertex(j);
 
-            if (EuclidGeometryTools.doLineSegment2DsIntersect(vertex, nextVertex, otherVertex, otherNextVertex))
+            if (EuclidGeometryTools.intersectionBetweenTwoLineSegment2Ds(vertex, nextVertex, otherVertex, otherNextVertex, intersection))
                return false;
          }
       }

@@ -6,8 +6,9 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.RegionInWorldInterface;
+import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
-import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 
 import java.util.HashMap;
@@ -83,9 +84,28 @@ public class StepConstraintViewerApplication extends Application
       messager.submitMessage(StepConstraintCalculatorViewerAPI.StepConstraintRegionData, stepConstraintRegionList);
    }
 
-   public void submitObstacleExtrusions(HashMap<StepConstraintRegion, List<ConcavePolygon2DBasics>> obstacleExtrusions)
+   public void submitObstacleExtrusions(HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>> obstacleExtrusions)
    {
-      messager.submitMessage();
+      messager.submitMessage(StepConstraintCalculatorViewerAPI.ObstacleExtrusionsData, obstacleExtrusions);
    }
 
+   public void submitTooSmallRegions(List<PlanarRegion> tooSmallRegions)
+   {
+      messager.submitMessage(StepConstraintCalculatorViewerAPI.TooSmallRegionData, new PlanarRegionsList(tooSmallRegions));
+   }
+
+   public void submitTooSteepRegions(List<PlanarRegion> tooSteepRegions)
+   {
+      messager.submitMessage(StepConstraintCalculatorViewerAPI.TooSteepRegionData, new PlanarRegionsList(tooSteepRegions));
+   }
+
+   public void submitMaskedRegions(List<PlanarRegion> maskedRegions)
+   {
+      messager.submitMessage(StepConstraintCalculatorViewerAPI.MaskedRegionsData, new PlanarRegionsList(maskedRegions));
+   }
+
+   public void submitMaskedRegionsObstacleExtrusions(HashMap<RegionInWorldInterface, List<ConcavePolygon2DBasics>> extrusions)
+   {
+      messager.submitMessage(StepConstraintCalculatorViewerAPI.MaskedRegionsObstacleExtrusionsData, extrusions);
+   }
 }
