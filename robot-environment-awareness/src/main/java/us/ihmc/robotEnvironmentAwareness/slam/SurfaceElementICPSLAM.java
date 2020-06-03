@@ -2,11 +2,12 @@ package us.ihmc.robotEnvironmentAwareness.slam;
 
 import org.ejml.data.DenseMatrix64F;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotics.optimization.FunctionOutputCalculator;
@@ -15,7 +16,8 @@ import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 public class SurfaceElementICPSLAM extends SLAMBasics
 {
    public static final boolean DEBUG = false;
-   public Point3D[] correctedSourcePointsToWorld;
+   
+   private final AtomicDouble latestComputationTime = new AtomicDouble();
 
    public SurfaceElementICPSLAM(double octreeResolution)
    {
@@ -89,10 +91,11 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       // get parameter.
       RigidBodyTransform icpTransformer = new RigidBodyTransform();
       icpTransformer.set(convertTransform(optimizer.getOptimalParameter().getData()));
-      LogTools.info("icpTransformer");
-      System.out.println(optimizer.getOptimalParameter());
-      System.out.println("Computation Time = " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
-      System.out.println(icpTransformer);
+//      LogTools.info("icpTransformer");
+//      System.out.println(optimizer.getOptimalParameter());
+//      System.out.println("Computation Time = " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
+//      System.out.println(icpTransformer);
+      latestComputationTime.set((double) Math.round(Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) * 100) / 100);
       return icpTransformer;
    }
 
@@ -105,5 +108,10 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       transform.appendYawRotation(transformParameters[5]);
 
       return transform;
+   }
+   
+   public double getComputationTimeForLatestFrame()
+   {
+      return latestComputationTime.get();
    }
 }
