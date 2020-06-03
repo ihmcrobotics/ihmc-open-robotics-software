@@ -7,8 +7,8 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
-import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
@@ -27,8 +27,7 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.MapRe
 
 public class LookAndStepBodyPathTask implements Builder
 {
-   private final BehaviorHelper helper;
-
+   private final Field<UIPublisher> uiPublisher = required();
    private final Field<PlanarRegionsList> mapRegions = required();
    private final Field<Pose3D> goal = required();
    private final Field<HumanoidRobotState> humanoidRobotState = required();
@@ -42,11 +41,6 @@ public class LookAndStepBodyPathTask implements Builder
    private final Field<Supplier<Boolean>> isBeingReviewed = required();
    private final Field<Supplier<Boolean>> needNewPlan = required();
 
-   public LookAndStepBodyPathTask(BehaviorHelper helper)
-   {
-      this.helper = helper;
-   }
-
    private boolean evaluateEntry()
    {
       boolean proceed = true;
@@ -55,7 +49,7 @@ public class LookAndStepBodyPathTask implements Builder
       {
          LogTools.warn("Body path: does not have goal");
          LogTools.debug("Sending planar regions to UI: {}: {}", LocalDateTime.now(), mapRegions.hashCode());
-         helper.publishToUI(MapRegionsForUI, mapRegions.get());
+         uiPublisher.get().publishToUI(MapRegionsForUI, mapRegions.get());
          proceed = false;
       }
       else if (!regionsOK())
@@ -115,7 +109,7 @@ public class LookAndStepBodyPathTask implements Builder
    private void performTask()
    {
       // TODO: Add robot standing still for 20s for real robot?
-      helper.publishToUI(MapRegionsForUI, mapRegions.get());
+      uiPublisher.get().publishToUI(MapRegionsForUI, mapRegions.get());
 
       LogTools.info("Planning body path...");
 
@@ -123,7 +117,7 @@ public class LookAndStepBodyPathTask implements Builder
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters.get());
       VisibilityGraphPathPlanner bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters.get(),
                                                                                   pathPostProcessor,
-                                                                                  new YoVariableRegistry(LookAndStepBodyPathPart.class.getSimpleName()));
+                                                                                  new YoVariableRegistry(LookAndStepBodyPathModule.class.getSimpleName()));
 
       bodyPathPlanner.setGoal(goal.get());
       bodyPathPlanner.setPlanarRegionsList(mapRegions.get());
@@ -145,7 +139,7 @@ public class LookAndStepBodyPathTask implements Builder
          {
             bodyPathPlanForReview.add(new Pose3D(poseWaypoint));
          }
-         helper.publishToUI(BodyPathPlanForUI, bodyPathPlanForReview);
+         uiPublisher.get().publishToUI(BodyPathPlanForUI, bodyPathPlanForReview);
       }
 
       if (bodyPathPlanForReview.size() >= 2)
@@ -163,6 +157,11 @@ public class LookAndStepBodyPathTask implements Builder
       {
          resetPlanningFailedTimer.get().run();
       }
+   }
+
+   public void setUiPublisher(UIPublisher uiPublisher)
+   {
+      this.uiPublisher.set(uiPublisher);
    }
 
    public void setMapRegions(PlanarRegionsList mapRegions)
