@@ -1,6 +1,5 @@
-package us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton;
+package us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging;
 
-import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -12,10 +11,8 @@ import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
 import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.List;
 
 public class ClippingTools
 {
@@ -90,7 +87,11 @@ public class ClippingTools
          if (EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(startPoint.getPoint(), vertex, nextVertex) < epsilonSquaredForSamePoint)
          {
             // So the intersection is on the edge of the other polygon. Is it an incoming or outgoing intersection?
-            setIntersectionInfo(startPoint, startPoint.getPredecessor().getPoint(), startPoint.getPoint(), startPoint.getSuccessor().getPoint(), polygonToIntersect);
+            setIntersectionInfo(startPoint,
+                                startPoint.getPredecessor().getPoint(),
+                                startPoint.getPoint(),
+                                startPoint.getSuccessor().getPoint(),
+                                polygonToIntersect);
 
             intersections.add(new Point2D(startPoint.getPoint()));
 
@@ -105,7 +106,7 @@ public class ClippingTools
          IntersectionInfo intersectionInfo = findFirstIntersectionInfo(startPoint.getPoint(), nextPoint.getPoint(), polygonToIntersect, new Point2D());
          Point2DReadOnly intersection = intersectionInfo.getIntersection();
 
-         if (intersectionInfo.getIntersectionType() == IntersectionType.NEW)
+         if (intersectionInfo.getIntersectionType() == IntersectionInfo.IntersectionType.NEW)
          {
             LinkedPoint point = new LinkedPoint(intersection);
             setIntersectionInfo(point, startPoint.getPoint(), intersection, nextPoint.getPoint(), polygonToIntersect);
@@ -115,7 +116,8 @@ public class ClippingTools
 
             continue;
          }
-         else if (intersectionInfo.getIntersectionType() == IntersectionType.END && !intersections.contains(intersectionInfo.getIntersection()))
+         else if (intersectionInfo.getIntersectionType() == IntersectionInfo.IntersectionType.END
+                  && !intersections.contains(intersectionInfo.getIntersection()))
          { // the intersection is a vertex in the current list on the other polygon. The question is, what kind of intersection is it?
 
             // Check to see if the corner on the list is also a corner on the other polygon
@@ -188,7 +190,7 @@ public class ClippingTools
    {
       intersectionToPack.setToNaN();
 
-      IntersectionInfo info = new IntersectionInfo(IntersectionType.NONE, null, null, null);
+      IntersectionInfo info = new IntersectionInfo(IntersectionInfo.IntersectionType.NONE, null, null, null);
 
       for (int i = 0; i < polygonToIntersect.getNumberOfVertices(); i++)
       {
@@ -202,9 +204,16 @@ public class ClippingTools
          {
             if (EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(edgeEnd, polygonToIntersect.getVertex(i), polygonToIntersect.getVertex(next))
                 < epsilonSquaredForSamePoint)
-               info = new IntersectionInfo(IntersectionType.END, edgeEnd, polygonToIntersect.getVertex(i), polygonToIntersect.getVertex(next));
+            {
+               info = new IntersectionInfo(IntersectionInfo.IntersectionType.END, edgeEnd, polygonToIntersect.getVertex(i), polygonToIntersect.getVertex(next));
+            }
             else if (intersectionToPack.distanceSquared(edgeStart) > epsilonSquaredForSamePoint)
-               return new IntersectionInfo(IntersectionType.NEW, intersectionToPack, polygonToIntersect.getVertex(i), polygonToIntersect.getVertex(next));
+            {
+               return new IntersectionInfo(IntersectionInfo.IntersectionType.NEW,
+                                           intersectionToPack,
+                                           polygonToIntersect.getVertex(i),
+                                           polygonToIntersect.getVertex(next));
+            }
          }
       }
 

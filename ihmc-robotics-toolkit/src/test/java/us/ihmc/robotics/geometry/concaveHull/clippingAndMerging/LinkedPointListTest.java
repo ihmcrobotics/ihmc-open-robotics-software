@@ -1,10 +1,10 @@
-package us.ihmc.robotics.geometry.concaveHull.weilerAtherton;
+package us.ihmc.robotics.geometry.concaveHull.clippingAndMerging;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.LinkedPoint;
-import us.ihmc.robotics.geometry.concavePolygon2D.weilerAtherton.LinkedPointList;
+import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.LinkedPoint;
+import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.LinkedPointList;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
