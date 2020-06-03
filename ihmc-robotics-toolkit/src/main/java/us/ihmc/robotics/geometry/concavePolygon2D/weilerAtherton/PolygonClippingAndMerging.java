@@ -9,16 +9,58 @@ import java.util.List;
 
 public class PolygonClippingAndMerging
 {
-   private static final int STUPID_LARGE = 1000;
+   public static void removeHolesFromList(List<ConcavePolygon2DBasics> regionsToFilter)
+   {
+      int i = 0;
+
+      // first, remove all the polygons contained in another polygon
+      while (i < regionsToFilter.size())
+      {
+         ConcavePolygon2DBasics polygonA = regionsToFilter.get(i);
+
+         boolean shouldRemoveA = false;
+
+         int j = 0;
+         while (j < regionsToFilter.size())
+         {
+            if (i == j)
+            {
+               j++;
+               continue;
+            }
+
+            ConcavePolygon2DBasics polygonB = regionsToFilter.get(j);
+
+            if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonB, polygonA))
+            {
+               regionsToFilter.remove(j);
+               break;
+            }
+            if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonA, polygonB))
+            {
+               shouldRemoveA = true;
+               break;
+            }
+
+            j++;
+         }
+
+         if (shouldRemoveA)
+            regionsToFilter.remove(i);
+         else
+            i++;
+      }
+   }
 
    public static void mergeAllPossible(List<ConcavePolygon2DBasics> regionsToMerge)
    {
+      removeHolesFromList(regionsToMerge);
+
       int i = 0;
       // don't need to iterate on the last one
       while (i < regionsToMerge.size() - 1)
       {
          int j = i + 1;
-         boolean shouldRemoveA = false;
          while (j < regionsToMerge.size())
          {
             ConcavePolygon2DBasics polygonA = regionsToMerge.get(i);
@@ -52,40 +94,31 @@ public class PolygonClippingAndMerging
                // reset the search, as we modified the first polygon
                j = i + 1;
             }
-            else if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonB, polygonA))
-            {
-               regionsToMerge.remove(j);
-            }
-            else if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonA, polygonB))
-            {
-               shouldRemoveA = true;
-               break;
-            }
+
             else
             {
                j++;
             }
          }
 
-         if (shouldRemoveA)
-            regionsToMerge.remove(i);
-         else
-            i++;
+         i++;
       }
    }
 
-   public static void merge(ConcavePolygon2DReadOnly polygonA, ConcavePolygon2DReadOnly polygonB, ConcavePolygon2DBasics mergedPolygon)
+   public static List<ConcavePolygon2DBasics> merge(ConcavePolygon2DReadOnly polygonA, ConcavePolygon2DReadOnly polygonB, ConcavePolygon2DBasics mergedPolygon)
    {
-      List<ConcavePolygon2D> partialListOfHoles = new ArrayList<>();
+      List<ConcavePolygon2DBasics> partialListOfHoles = new ArrayList<>();
       if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonA, polygonB))
       {
+         // FIXME this might have a hole
          mergedPolygon.set(polygonB);
-         return;
+         return partialListOfHoles;
       }
       else if (GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonB, polygonA))
       {
+         // FIXME this might have a hole
          mergedPolygon.set(polygonA);
-         return;
+         return partialListOfHoles;
       }
 
       LinkedPointList polygonAList = ClippingTools.createLinkedPointList(polygonA);
@@ -136,10 +169,12 @@ public class PolygonClippingAndMerging
          startOnListA = true;
          if (startPoint == null)
          {
-            findVertexOutsideOfPolygon(mergedPolygon, unassignedBPoints);
+            startPoint = findVertexOutsideOfPolygon(mergedPolygon, unassignedBPoints);
             startOnListA = false;
          }
       }
+
+      return partialListOfHoles;
    }
 
    public static List<ConcavePolygon2DBasics> removeAreaInsideClip(ConcavePolygon2DReadOnly clippingPolygon, ConcavePolygon2DReadOnly polygonToClip)
@@ -198,12 +233,6 @@ public class PolygonClippingAndMerging
          startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedToClipPoints);
       }
 
-      if (clippedPolygonsToReturn.size() < 1)
-      {
-         LogTools.info("WHat?");
-         GeometryPolygonTools.isPolygonInsideOtherPolygon(polygonToClip, clippingPolygon);
-         startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedToClipPoints);
-      }
       return clippedPolygonsToReturn;
    }
 
@@ -213,9 +242,8 @@ public class PolygonClippingAndMerging
       LinkedPoint previousPoint = linkedPoint;
 
       polygonToPack.addVertex(linkedPoint.getPoint());
-      int counter = 0;
       boolean isOnOtherList = false;
-      while (counter++ < STUPID_LARGE)
+      while (true)
       {
          linkedPoint = linkedPoint.getSuccessor();
          pointProvider.removePoint(previousPoint);

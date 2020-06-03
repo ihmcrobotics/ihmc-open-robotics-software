@@ -66,7 +66,7 @@ class LinkedPointProvider
 
    public void removePoint(LinkedPoint pointToRemove)
    {
-      if (pointToRemove.getIsIntersectionPoint())
+      if (pointToRemove.isLinkedToOtherList())
       {
          removePointFromList(listAPool, pointToRemove);
          removePointFromList(listBPool, pointToRemove);
