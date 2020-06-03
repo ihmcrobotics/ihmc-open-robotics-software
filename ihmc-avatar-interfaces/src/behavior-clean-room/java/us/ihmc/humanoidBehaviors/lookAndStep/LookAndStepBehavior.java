@@ -31,6 +31,7 @@ import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -49,10 +50,10 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final VisibilityGraphsParametersBasics visibilityGraphParameters;
    private final Supplier<PlanarRegionsList> realsenseSLAMRegions;
 
-   private final LookAndStepReviewPart<ArrayList<Pose3D>> bodyPathReview;
+   private final LookAndStepReviewPart<List<Pose3D>> bodyPathReview;
    private final LookAndStepReviewPart<FootstepPlan> footstepPlanReview;
 
-   private final LookAndStepBodyPathPart bodyPathPart;
+   private final LookAndStepBodyPathModule bodyPathModule;
 
    private final AtomicReference<Boolean> operatorReviewEnabledInput;
    private final TypedNotification<Boolean> approvalNotification;
@@ -62,11 +63,19 @@ public class LookAndStepBehavior implements BehaviorInterface
 
    private PlanarRegionsList footstepPlanningNearRegions;
    private SimpleTimer footstepPlanningNearRegionsExpirationTimer = new SimpleTimer();
-   private volatile ArrayList<Pose3D> footstepPlanningBodyPathPlan;
+   private volatile List<Pose3D> footstepPlanningBodyPathPlan;
    private SimpleTimer footstepPlanningModuleFailedTimer = new SimpleTimer();
 
    private FootstepPlan robotWalkingModuleFootstepPlan;
 
+   /**
+    * We'll make the following assumptions/constraints about the data being passed around between task/modules:
+    * - Data output from module will be read only and the underlying data must not be modified after sending
+    * - Timers are considered parallel tasks/ modules
+    *
+    * Inputs can be polled or triggered by an event
+    * Outputs can be an event or polled by another task
+    */
    public LookAndStepBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
@@ -87,18 +96,20 @@ public class LookAndStepBehavior implements BehaviorInterface
       bodyPathReview = new LookAndStepReviewPart<>("body path", approvalNotification, this::footstepPlanningAcceptBodyPath);
       footstepPlanReview = new LookAndStepReviewPart<>("footstep plan", approvalNotification, this::robotWalkingModuleAcceptFootstepPlan);
 
+      SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
-
-      bodyPathPart = new LookAndStepBodyPathPart(helper,
-                                                 bodyPathReview::isBeingReviewed,
-                                                 operatorReviewEnabledInput::get,
-                                                 lookAndStepParameters,
-                                                 visibilityGraphParameters,
-                                                 callback -> helper.createROS2Callback(ROS2Tools.MAP_REGIONS, callback),
-                                                 callback -> helper.createUICallback(GoalInput, callback),
-                                                 this::footstepPlanningAcceptBodyPath,
-                                                 bodyPathReview::review,
-                                                 needNewPlan);
+      bodyPathModule = new LookAndStepBodyPathModule();
+      helper.createROS2Callback(ROS2Tools.MAP_REGIONS, bodyPathModule::acceptMapRegions);
+      helper.createUICallback(GoalInput, bodyPathModule::acceptGoal);
+      bodyPathModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
+      bodyPathModule.setIsBeingReviewedSupplier(bodyPathReview::isBeingReviewed);
+      bodyPathModule.setReviewEnabledSupplier(operatorReviewEnabledInput::get);
+      bodyPathModule.setLookAndStepBehaviorParameters(lookAndStepParameters);
+      bodyPathModule.setVisibilityGraphParameters(visibilityGraphParameters);
+      bodyPathModule.setInitiateReviewOutput(bodyPathReview::review);
+      bodyPathModule.setAutonomousOutput(this::footstepPlanningAcceptBodyPath);
+      bodyPathModule.setNeedNewPlanSupplier(needsNewBodyPathPlan); // TODO: hook up to subgoal mover
+      bodyPathModule.setUIPublisher(helper::publishToUI);
 
       // TODO: Want to be able to wire up behavior here and see all present modules
 
@@ -127,7 +138,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlanningNearRegionsExpirationTimer.reset();
    }
 
-   private void footstepPlanningAcceptBodyPath(ArrayList<Pose3D> bodyPathPlan)
+   private void footstepPlanningAcceptBodyPath(List<Pose3D> bodyPathPlan)
    {
       LogTools.debug("footstepPlanningAcceptBodyPath, {}", bodyPathPlan);
       footstepPlanningBodyPathPlan = bodyPathPlan;
