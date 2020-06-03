@@ -4,11 +4,13 @@ import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
+import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
@@ -20,7 +22,7 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class ConvexStepConstraintOptimizer
 {
-   private static final boolean DEBUG = false;
+   private static final boolean DEBUG = true;
    private static final boolean coldStart = true;
 
    /** Weight associated with moving into the polygon. */
@@ -32,39 +34,52 @@ public class ConvexStepConstraintOptimizer
 
    private static int[] emptyArray = new int[0];
 
+   private final DenseMatrix64F G = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F g = new DenseMatrix64F(0, 0);
+
+   private final DenseMatrix64F J = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F j = new DenseMatrix64F(0, 0);
+
    /**
     * If x is contained in the polygon, this can be expressed by Ax <= b
     */
    private final DenseMatrix64F A = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F b = new DenseMatrix64F(0, 0);
 
-   private final DenseMatrix64F V = new DenseMatrix64F(2, 3);
+   private final DenseMatrix64F Aineq = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F bineq = new DenseMatrix64F(0, 0);
+
    private final DenseMatrix64F p = new DenseMatrix64F(2, 1);
 
-   DenseMatrix64F bForPoint = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F bForPoint = new DenseMatrix64F(0, 1);
+   private final DenseMatrix64F solution = new DenseMatrix64F(1, 6);
 
-   private final QuadProgSolver solver = new QuadProgSolver();
+   private final JavaQuadProgSolver solver = new JavaQuadProgSolver();
 
-   private final Vector2D vectorToPoint = new Vector2D();
+   private final DenseMatrix64F identity = new DenseMatrix64F(0, 0);
+   private final RigidBodyTransform transformToReturn = new RigidBodyTransform();
 
-   public RigidBodyTransform wigglePolygonIntoConvexHullOfRegion(ConvexPolygon2DReadOnly polygonToWiggleInRegionFrame,
+   public RigidBodyTransformReadOnly wigglePolygonIntoConvexHullOfRegion(ConvexPolygon2DReadOnly polygonToWiggleInRegionFrame,
                                                                  PlanarRegion regionToWiggleInto,
-                                                                 WiggleParameters parameters)
+                                                                 WiggleParameters parameters,
+                                                                 boolean boundTranslation)
    {
-      return findWiggleTransform(polygonToWiggleInRegionFrame, regionToWiggleInto.getConvexHull(), parameters);
+      return findWiggleTransform(polygonToWiggleInRegionFrame, regionToWiggleInto.getConvexHull(), parameters, boundTranslation);
    }
 
-   public RigidBodyTransform findWiggleTransform(ConvexPolygon2DReadOnly polygonToWiggle,
-                                                 ConvexPolygon2DReadOnly planeToWiggleInto,
-                                                 WiggleParameters parameters)
-   {
-      return findWiggleTransform(polygonToWiggle, planeToWiggleInto, parameters, emptyArray);
-   }
-
-   public RigidBodyTransform findWiggleTransform(ConvexPolygon2DReadOnly polygonToWiggle,
+   public RigidBodyTransformReadOnly findWiggleTransform(ConvexPolygon2DReadOnly polygonToWiggle,
                                                  ConvexPolygon2DReadOnly planeToWiggleInto,
                                                  WiggleParameters parameters,
-                                                 int[] startingVerticesToIgnore)
+                                                 boolean boundTranslation)
+   {
+      return findWiggleTransform(polygonToWiggle, planeToWiggleInto, parameters, boundTranslation, emptyArray);
+   }
+
+   public RigidBodyTransformReadOnly findWiggleTransform(ConvexPolygon2DReadOnly polygonToWiggle,
+                                                         ConvexPolygon2DReadOnly planeToWiggleInto,
+                                                         WiggleParameters parameters,
+                                                         boolean boundTranslation,
+                                                         int[] startingVerticesToIgnore)
    {
       int numberOfPoints = polygonToWiggle.getNumberOfVertices();
 
@@ -77,11 +92,13 @@ public class ConvexStepConstraintOptimizer
       int slackVariables = constraintsPerPoint * numberOfPoints;
       int totalVariables = variables + slackVariables;
       int constraints = constraintsPerPoint * numberOfPoints;
-      int boundConstraints = 4;
-      DenseMatrix64F A_full = new DenseMatrix64F(constraints + boundConstraints, totalVariables);
-      DenseMatrix64F b_full = new DenseMatrix64F(constraints + boundConstraints, 1);
-      // add limits on allowed translation
-      PolygonWiggler.addTranslationConstraint(A_full, b_full, constraints, parameters);
+      int boundConstraints = boundTranslation ? 4 : 0;
+
+      Aineq.reshape(constraints + boundConstraints, totalVariables);
+      bineq.reshape(constraints + boundConstraints, 1);
+      // add limits on allowed translation // FIXME get rid of this?
+      if (boundTranslation)
+         PolygonWiggler.addTranslationConstraint(Aineq, bineq, constraints, parameters);
 
 
       // The inequality constraints of form
@@ -90,13 +107,13 @@ public class ConvexStepConstraintOptimizer
       // Ax - s - b == 0.0
       // s <= 0
       // The equality constraint will be converted to an objective causing the wiggler to do the best it can instead of failing when the wiggle is not possible.
-      DenseMatrix64F Aeq = new DenseMatrix64F(constraints, totalVariables);
-      DenseMatrix64F beq = new DenseMatrix64F(constraints, 1);
-      DenseMatrix64F identity = new DenseMatrix64F(constraints, slackVariables);
+      J.reshape(constraints, totalVariables);
+      j.reshape(constraints, 1);
+      identity.reshape(constraints, slackVariables);
       CommonOps.setIdentity(identity);
-      CommonOps.insert(identity, A_full, 0, variables);
+      CommonOps.insert(identity, Aineq, 0, variables);
       CommonOps.scale(-1.0, identity);
-      CommonOps.insert(identity, Aeq, 0, variables);
+      CommonOps.insert(identity, J, 0, variables);
 
       bForPoint.reshape(constraintsPerPoint, 1);
 
@@ -108,36 +125,36 @@ public class ConvexStepConstraintOptimizer
          bForPoint.set(b);
          CommonOps.multAdd(-1.0, A, p, bForPoint);
 
-         CommonOps.insert(A, Aeq, constraintsPerPoint * i, 0);
-         CommonOps.insert(bForPoint, beq, constraintsPerPoint * i, 0);
+         CommonOps.insert(A, J, constraintsPerPoint * i, 0);
+         CommonOps.insert(bForPoint, j, constraintsPerPoint * i, 0);
       }
 
       // Convert the inequality constraint for being inside the polygon to an objective.
-      // why 3?
-      DenseMatrix64F costMatrix = new DenseMatrix64F(totalVariables, totalVariables);
-      DenseMatrix64F costVector = new DenseMatrix64F(totalVariables, 1);
-      CommonOps.multInner(Aeq, costMatrix);
-      CommonOps.multTransA(-1.0, Aeq, beq, costVector);
-      CommonOps.scale(polygonWeight, costMatrix);
-      CommonOps.scale(polygonWeight, costVector);
+      G.reshape(totalVariables, totalVariables);
+      g.reshape(totalVariables, 1);
+      CommonOps.multInner(J, G);
+      CommonOps.multTransA(-polygonWeight, J, j, g);
+      CommonOps.scale(polygonWeight, G);
 
       // Add regularization
-      MatrixTools.addDiagonal(costMatrix, regularization);
+      MatrixTools.addDiagonal(G, regularization);
 
       // Add movement weight
       for (int i = 0; i < variables; i++)
-         costMatrix.add(i, i, moveWeight);
+         G.add(i, i, moveWeight);
 
-      DenseMatrix64F result = new DenseMatrix64F(totalVariables, 1);
-      Aeq = new DenseMatrix64F(0, totalVariables);
-      beq = new DenseMatrix64F(0, totalVariables);
+      solution.reshape(totalVariables, 1);
       try
       {
-         int iterations = solver.solve(costMatrix, costVector, Aeq, beq, A_full, b_full, result, coldStart);
+         solver.setQuadraticCostFunction(G, g, 0.0);
+         solver.setLinearInequalityConstraints(Aineq, bineq);
+         solver.setUseWarmStart(!coldStart);
+         int iterations = solver.solve(solution);
+
          if (DEBUG)
          {
             LogTools.info("Iterations: " + iterations);
-            LogTools.info("Result: " + result);
+            LogTools.info("Result: " + solution);
          }
       }
       catch (Exception e)
@@ -146,16 +163,15 @@ public class ConvexStepConstraintOptimizer
          return null;
       }
 
-      if (Double.isInfinite(solver.getCost()))
+      if (MatrixTools.containsNaN(solution))
       {
          LogTools.info("Could not wiggle!");
          return null;
       }
 
       // assemble the transform
-      RigidBodyTransform translationTransform = new RigidBodyTransform();
-      translationTransform.appendTranslation(result.get(0), result.get(1), 0.0);
+      transformToReturn.getTranslation().set(solution.get(0), solution.get(1), 0.0);
 
-      return translationTransform;
+      return transformToReturn;
    }
 }
