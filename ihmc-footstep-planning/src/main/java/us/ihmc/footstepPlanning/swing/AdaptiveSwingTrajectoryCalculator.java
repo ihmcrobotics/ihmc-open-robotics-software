@@ -1,4 +1,4 @@
-package us.ihmc.avatar.footstepPlanning;
+package us.ihmc.footstepPlanning.swing;
 
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
@@ -9,6 +9,8 @@ import us.ihmc.euclid.shape.collision.gjk.GilbertJohnsonKeerthiCollisionDetector
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
 import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -59,7 +61,7 @@ public class AdaptiveSwingTrajectoryCalculator
       return EuclidCoreTools.interpolate(adaptiveSwingParameters.getMinimumSwingHeight(), adaptiveSwingParameters.getMaximumSwingHeight(), alpha);
    }
 
-   public boolean checkForFootCollision(Pose3DReadOnly startPose, FootstepDataMessage step)
+   public boolean checkForFootCollision(Pose3DReadOnly startPose, PlannedFootstep step)
    {      
       if(planarRegionsList == null)
       {
@@ -67,7 +69,7 @@ public class AdaptiveSwingTrajectoryCalculator
       }
 
       double[] waypointProportions = walkingControllerParameters.getSwingTrajectoryParameters().getSwingWaypointProportions();      
-      Pose3D endPose = new Pose3D(step.getLocation(), step.getOrientation());
+      Pose3D endPose = new Pose3D(step.getFootstepPose());
       
       boolean toeIsClose = checkForToeOrHeelStub(startPose, true);
       boolean heelIsClose = checkForToeOrHeelStub(endPose, false);
@@ -118,33 +120,31 @@ public class AdaptiveSwingTrajectoryCalculator
       this.planarRegionsList = planarRegionsList;
    }
 
-   public void setSwingParameters(Pose3DReadOnly initialStanceFootPose, FootstepDataListMessage footstepDataListMessage)
+   public void setSwingParameters(Pose3DReadOnly initialStanceFootPose, FootstepPlan footstepPlan)
    {
-      IDLSequence.Object<FootstepDataMessage> footstepDataList = footstepDataListMessage.getFootstepDataList();
-      for (int i = 0; i < footstepDataList.size(); i++)
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {
-         FootstepDataMessage footstepDataMessage = footstepDataList.get(i);
+         PlannedFootstep footstep = footstepPlan.getFootstep(i);
          Pose3D startPose = new Pose3D();
-         Pose3D endPose = new Pose3D();
-
-         endPose.set(footstepDataMessage.getLocation(), footstepDataMessage.getOrientation());
+         Pose3D endPose = new Pose3D(footstep.getFootstepPose());
 
          if(i < 2)
          {
+            // TODO fixme
             startPose.set(initialStanceFootPose);
          }
          else
          {
-            FootstepDataMessage previousStep = footstepDataList.get(i - 2);
-            startPose.set(previousStep.getLocation(), previousStep.getOrientation());
+            PlannedFootstep previousStep = footstepPlan.getFootstep(i - 2);
+            startPose.set(previousStep.getFootstepPose());
          }
 
-         if(!checkForFootCollision(startPose, footstepDataMessage))
+         if(!checkForFootCollision(startPose, footstep))
          {
-            footstepDataMessage.setSwingHeight(calculateSwingHeight(startPose.getPosition(), endPose.getPosition()));
+            footstep.setSwingHeight(calculateSwingHeight(startPose.getPosition(), endPose.getPosition()));
          }
 
-         footstepDataMessage.setSwingDuration(calculateSwingTime(startPose.getPosition(), endPose.getPosition()));
+         footstep.setSwingDuration(calculateSwingTime(startPose.getPosition(), endPose.getPosition()));
       }
    }
 }
