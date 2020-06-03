@@ -33,6 +33,7 @@ public class ConvexStepConstraintOptimizerTest
       plane1.addVertex(0.5, 0.5);
       plane1.update();
       planes.add(plane1);
+
       ConvexPolygon2D plane2 = new ConvexPolygon2D();
       plane2.addVertex(-0.6, 0.0);
       plane2.addVertex(-0.1, 0.0);
