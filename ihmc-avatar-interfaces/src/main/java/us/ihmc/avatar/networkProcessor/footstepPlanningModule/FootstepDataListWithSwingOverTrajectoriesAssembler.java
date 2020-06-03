@@ -87,7 +87,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
          MessageTools.copyData(waypoints, footstepDataMessage.getCustomPositionWaypoints());
 
-         if (footstep.hasPredictedContactPoints())
+         if (footstep.hasFoothold())
          {
             partialFootholdPolygon.set(footstep.getFoothold());
             if (partialFootholdPolygon.getNumberOfVertices() != 4)

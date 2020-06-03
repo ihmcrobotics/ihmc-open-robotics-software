@@ -108,7 +108,7 @@ public class PlannedFootstep
       return foothold;
    }
 
-   public boolean hasPredictedContactPoints()
+   public boolean hasFoothold()
    {
       return !foothold.isEmpty();
    }

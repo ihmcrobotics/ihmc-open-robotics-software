@@ -18,7 +18,7 @@ import java.util.List;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
-public class AreaSplitFractionPostProcessingElementTest
+public class AreaBasedSplitFractionCalculatorTest
 {
    private static final double epsilon = 1e-7;
 

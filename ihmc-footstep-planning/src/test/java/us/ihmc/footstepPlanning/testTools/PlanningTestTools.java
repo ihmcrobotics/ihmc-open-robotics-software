@@ -116,7 +116,7 @@ public class PlanningTestTools
             yoFootstepPose.set(footstepPose);
             yoFootstepPose.setZ(yoFootstepPose.getZ() + (footstep.getRobotSide() == RobotSide.RIGHT ? 0.001 : 0.0));
 
-            if (!footstep.hasPredictedContactPoints())
+            if (!footstep.hasFoothold())
             {
                YoGraphicPolygon footstepViz = new YoGraphicPolygon("footstep" + i, yoDefaultFootPolygon, yoFootstepPose, 1.0, appearance);
                vizGraphicsListRegistry.registerYoGraphic("viz", footstepViz);

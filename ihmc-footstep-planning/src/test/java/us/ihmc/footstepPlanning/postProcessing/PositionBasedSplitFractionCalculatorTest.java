@@ -19,7 +19,7 @@ import java.util.List;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
-public class PositionSplitFractionPostProcessingElementTest
+public class PositionBasedSplitFractionCalculatorTest
 {
    private static final double epsilon = 1e-7;
 

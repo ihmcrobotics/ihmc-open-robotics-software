@@ -83,7 +83,7 @@ public class FootstepPlanGraphic extends Group
          footPose.get(transformToWorld);
          transformToWorld.appendTranslation(0.0, 0.0, 0.01);
 
-         if (footstep.hasPredictedContactPoints())
+         if (footstep.hasFoothold())
          {
             foothold.set(footstep.getFoothold());
          }
