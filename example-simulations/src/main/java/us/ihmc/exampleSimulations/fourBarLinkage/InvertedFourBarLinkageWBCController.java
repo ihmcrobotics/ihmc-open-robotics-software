@@ -24,7 +24,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RevoluteJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.robotics.controllers.pidGains.implementations.YoPDGains;
-import us.ihmc.robotics.screwTheory.FourBarKinematicLoop;
+import us.ihmc.robotics.screwTheory.FourBarKinematicLoopFunction;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
@@ -40,7 +40,7 @@ public class InvertedFourBarLinkageWBCController implements RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getName());
    private final RigidBodyBasics rootBody;
-   private final FourBarKinematicLoop fourBarKinematicLoop;
+   private final FourBarKinematicLoopFunction fourBarKinematicLoop;
    private final WholeBodyControllerCore controllerCore;
 
    private final Map<OneDoFJointBasics, OneDegreeOfFreedomJoint> jointMap;
@@ -68,7 +68,7 @@ public class InvertedFourBarLinkageWBCController implements RobotController
       jointB = findJoint(robotDescription.getJointBName());
       jointC = findJoint(robotDescription.getJointCName());
       jointD = findJoint(robotDescription.getJointDName());
-      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", new RevoluteJointBasics[] {jointA, jointB, jointC, jointD}, 0);
+      fourBarKinematicLoop = new FourBarKinematicLoopFunction("fourBar", new RevoluteJointBasics[] {jointA, jointB, jointC, jointD}, 0);
       masterJoint = fourBarKinematicLoop.getMasterJoint();
       wristJoint = HAS_WRIST_JOINT ? findJoint(robotDescription.getWristJointName()) : null;
 

@@ -56,7 +56,7 @@ public class FourBarKinematicLoopTest
          int masterJointIndex = random.nextInt(4);
          boolean flipAxesRandomly = true;
          boolean invertedFourBar = false;
-         FourBarKinematicLoop fourBarKinematicLoop = nextFourBar(random, clockwise, masterJointIndex, flipAxesRandomly, invertedFourBar);
+         FourBarKinematicLoopFunction fourBarKinematicLoop = nextFourBar(random, clockwise, masterJointIndex, flipAxesRandomly, invertedFourBar);
          RevoluteJointBasics masterJoint = fourBarKinematicLoop.getMasterJoint();
          FourBarVertices2D verticesZeroConfig = computeFourBarVertices2D(fourBarKinematicLoop);
 
@@ -131,7 +131,7 @@ public class FourBarKinematicLoopTest
          int masterJointIndex = random.nextInt(4);
          boolean flipAxesRandomly = true;
          boolean invertedFourBar = true;
-         FourBarKinematicLoop fourBarKinematicLoop = nextFourBar(random, clockwise, masterJointIndex, flipAxesRandomly, invertedFourBar);
+         FourBarKinematicLoopFunction fourBarKinematicLoop = nextFourBar(random, clockwise, masterJointIndex, flipAxesRandomly, invertedFourBar);
          FourBar fourBar = fourBarKinematicLoop.getFourBar();
          RevoluteJointBasics masterJoint = fourBarKinematicLoop.getMasterJoint();
          FourBarVertices2D verticesZeroConfig = computeFourBarVertices2D(fourBarKinematicLoop);
@@ -207,7 +207,7 @@ public class FourBarKinematicLoopTest
       }
    }
 
-   private static void assertFourBarIsClosed(int iteration, FourBarKinematicLoop fourBarKinematicLoop)
+   private static void assertFourBarIsClosed(int iteration, FourBarKinematicLoopFunction fourBarKinematicLoop)
    {
       RevoluteJointBasics closingJoint = null;
 
@@ -227,7 +227,7 @@ public class FourBarKinematicLoopTest
       assertEquals(0.0, error.distanceFromOrigin(), EPSILON, "Iteration: " + iteration);
    }
 
-   private static FourBarVertices2D computeFourBarVertices2D(FourBarKinematicLoop fourBarKinematicLoop)
+   private static FourBarVertices2D computeFourBarVertices2D(FourBarKinematicLoopFunction fourBarKinematicLoop)
    {
       RevoluteJointBasics jointA = fourBarKinematicLoop.getJointA();
       RevoluteJointBasics jointB = fourBarKinematicLoop.getJointB();
@@ -301,7 +301,7 @@ public class FourBarKinematicLoopTest
       }
    }
 
-   public FourBarKinematicLoop nextFourBar(Random random, boolean clockwise, int masterJointIndex, boolean flipAxesRandomly, boolean invertedFourBar)
+   public FourBarKinematicLoopFunction nextFourBar(Random random, boolean clockwise, int masterJointIndex, boolean flipAxesRandomly, boolean invertedFourBar)
    {
       List<Point2D> vertices = EuclidGeometryRandomTools.nextCircleBasedConvexPolygon2D(random, 10.0, 5.0, 4);
       if (invertedFourBar)
@@ -372,6 +372,6 @@ public class FourBarKinematicLoopTest
       jointC.setupLoopClosure(bodyCD, new RigidBodyTransform(new Quaternion(), jointCPosition));
       List<RevoluteJoint> joints = new ArrayList<>(Arrays.asList(jointA, jointB, jointC, jointD));
       Collections.shuffle(joints, random);
-      return new FourBarKinematicLoop("fourBar", joints, masterJointIndex);
+      return new FourBarKinematicLoopFunction("fourBar", joints, masterJointIndex);
    }
 }
