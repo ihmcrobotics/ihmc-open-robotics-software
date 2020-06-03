@@ -94,6 +94,7 @@ public class LookAndStepBodyPathTask implements Builder
       return !planningFailedTimerStatus.get().isPastOrNaN();
    }
 
+   // TODO: Extract as interface?
    public void run()
    {
       validate();
