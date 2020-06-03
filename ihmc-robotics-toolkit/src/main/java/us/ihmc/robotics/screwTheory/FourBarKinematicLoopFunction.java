@@ -14,6 +14,7 @@ import us.ihmc.robotics.kinematics.fourbar.FourBarVertex;
 import us.ihmc.robotics.screwTheory.FourBarKinematicLoopTools.FourBarToJointConverter;
 
 /**
+ * 
  * <pre>
  *      root            root
  *        |               |
@@ -29,7 +30,7 @@ import us.ihmc.robotics.screwTheory.FourBarKinematicLoopTools.FourBarToJointConv
  *   end-effector    end-effector
  * </pre>
  */
-public class FourBarKinematicLoop implements KinematicLoopFunction
+public class FourBarKinematicLoopFunction implements KinematicLoopFunction
 {
    private static final double EPSILON = 1.0e-7;
 
@@ -52,12 +53,12 @@ public class FourBarKinematicLoop implements KinematicLoopFunction
 
    private final int masterJointIndex;
 
-   public FourBarKinematicLoop(String name, List<? extends RevoluteJointBasics> joints, int masterJointIndex)
+   public FourBarKinematicLoopFunction(String name, List<? extends RevoluteJointBasics> joints, int masterJointIndex)
    {
       this(name, joints.toArray(new RevoluteJointBasics[0]), masterJointIndex);
    }
 
-   public FourBarKinematicLoop(String name, RevoluteJointBasics[] joints, int masterJointIndex)
+   public FourBarKinematicLoopFunction(String name, RevoluteJointBasics[] joints, int masterJointIndex)
    {
       this.name = name;
 

@@ -38,7 +38,7 @@ import us.ihmc.robotics.robotDescription.LoopClosurePinConstraintDescription;
 import us.ihmc.robotics.robotDescription.PinJointDescription;
 import us.ihmc.robotics.robotDescription.RobotDescription;
 import us.ihmc.robotics.robotDescription.SliderJointDescription;
-import us.ihmc.robotics.screwTheory.FourBarKinematicLoop;
+import us.ihmc.robotics.screwTheory.FourBarKinematicLoopFunction;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.util.RobotController;
@@ -55,7 +55,7 @@ public class InvertedFourBarLinkageIDController implements RobotController
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getName());
    private final RigidBodyBasics rootBody;
-   private final FourBarKinematicLoop fourBarKinematicLoop;
+   private final FourBarKinematicLoopFunction fourBarKinematicLoop;
    private final InverseDynamicsCalculator inverseDynamicsCalculator;
 
    private final PairList<OneDoFJointBasics, OneDegreeOfFreedomJoint> jointPairs;
@@ -90,7 +90,7 @@ public class InvertedFourBarLinkageIDController implements RobotController
       jointB = findJoint(robotDescription.getJointBName());
       jointC = findJoint(robotDescription.getJointCName());
       jointD = findJoint(robotDescription.getJointDName());
-      fourBarKinematicLoop = new FourBarKinematicLoop("fourBar", new RevoluteJointBasics[] {jointA, jointB, jointC, jointD}, 0);
+      fourBarKinematicLoop = new FourBarKinematicLoopFunction("fourBar", new RevoluteJointBasics[] {jointA, jointB, jointC, jointD}, 0);
       masterJoint = fourBarKinematicLoop.getMasterJoint();
       wristJoint = HAS_WRIST_JOINT ? findJoint(robotDescription.getWristJointName()) : null;
 
