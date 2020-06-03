@@ -1,7 +1,5 @@
 package us.ihmc.footstepPlanning.swing;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -11,8 +9,6 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.PlannedFootstep;
-import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
-import us.ihmc.idl.IDLSequence;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 /**
@@ -23,42 +19,42 @@ public class AdaptiveSwingTrajectoryCalculator
    private static final double boxHeight = 0.5;
    private static final double boxGroundClearance = 0.04;
 
-   private final AdaptiveSwingParameters adaptiveSwingParameters;
+   private final SwingPlannerParametersReadOnly parameters;
    private final WalkingControllerParameters walkingControllerParameters;
    private final GilbertJohnsonKeerthiCollisionDetector collisionDetector = new GilbertJohnsonKeerthiCollisionDetector();
    private PlanarRegionsList planarRegionsList;
 
-   public AdaptiveSwingTrajectoryCalculator(AdaptiveSwingParameters adaptiveSwingParameters, WalkingControllerParameters walkingControllerParameters)
+   public AdaptiveSwingTrajectoryCalculator(SwingPlannerParametersReadOnly parameters, WalkingControllerParameters walkingControllerParameters)
    {
-      this.adaptiveSwingParameters = adaptiveSwingParameters;
+      this.parameters = parameters;
       this.walkingControllerParameters = walkingControllerParameters;
    }
 
    public double calculateSwingTime(Point3DReadOnly startPosition, Point3DReadOnly endPosition)
    {
       double horizontalDistance = startPosition.distanceXY(endPosition);
-      double maximumTranslationForMinimumSwingTime = adaptiveSwingParameters.getMaximumStepTranslationForMinimumSwingTime();
-      double minimumTranslationForMaximumSwingTime = adaptiveSwingParameters.getMinimumStepTranslationForMaximumSwingTime();
+      double maximumTranslationForMinimumSwingTime = parameters.getMaximumStepTranslationForMinimumSwingTime();
+      double minimumTranslationForMaximumSwingTime = parameters.getMinimumStepTranslationForMaximumSwingTime();
       double alphaHorizontal = (horizontalDistance - maximumTranslationForMinimumSwingTime) / (minimumTranslationForMaximumSwingTime - maximumTranslationForMinimumSwingTime);
 
       double verticalDistance = Math.abs(startPosition.getZ() - endPosition.getZ());
-      double maximumStepHeightForMinimumSwingTime = adaptiveSwingParameters.getMaximumStepHeightForMinimumSwingTime();
-      double minimumStepHeightForMaximumSwingTime = adaptiveSwingParameters.getMinimumStepHeightForMaximumSwingTime();
+      double maximumStepHeightForMinimumSwingTime = parameters.getMaximumStepHeightForMinimumSwingTime();
+      double minimumStepHeightForMaximumSwingTime = parameters.getMinimumStepHeightForMaximumSwingTime();
       double alphaVertical = (verticalDistance - maximumStepHeightForMinimumSwingTime) / (minimumStepHeightForMaximumSwingTime - maximumStepHeightForMinimumSwingTime);
       
       double alpha = EuclidCoreTools.clamp(alphaHorizontal + alphaVertical, 0.0, 1.0);
-      return EuclidCoreTools.interpolate(adaptiveSwingParameters.getMinimumSwingTime(), adaptiveSwingParameters.getMaximumSwingTime(), alpha);
+      return EuclidCoreTools.interpolate(parameters.getMinimumSwingTime(), parameters.getMaximumSwingTime(), alpha);
    }
 
    public double calculateSwingHeight(Point3DReadOnly startPosition, Point3DReadOnly endPosition)
    {
       double verticalDistance = Math.abs(startPosition.getZ() - endPosition.getZ());
-      double maximumStepHeightForMinimumSwingHeight = adaptiveSwingParameters.getMaximumStepHeightForMinimumSwingHeight();
-      double minimumStepHeightForMaximumSwingHeight = adaptiveSwingParameters.getMinimumStepHeightForMaximumSwingHeight();
+      double maximumStepHeightForMinimumSwingHeight = parameters.getMaximumStepHeightForMinimumSwingHeight();
+      double minimumStepHeightForMaximumSwingHeight = parameters.getMinimumStepHeightForMaximumSwingHeight();
       double alpha = (verticalDistance - maximumStepHeightForMinimumSwingHeight) / (minimumStepHeightForMaximumSwingHeight - maximumStepHeightForMinimumSwingHeight);
       alpha = EuclidCoreTools.clamp(alpha, 0.0, 1.0);
       
-      return EuclidCoreTools.interpolate(adaptiveSwingParameters.getMinimumSwingHeight(), adaptiveSwingParameters.getMaximumSwingHeight(), alpha);
+      return EuclidCoreTools.interpolate(parameters.getMinimumSwingHeight(), parameters.getMaximumSwingHeight(), alpha);
    }
 
    public boolean checkForFootCollision(Pose3DReadOnly startPose, PlannedFootstep step)
@@ -76,17 +72,17 @@ public class AdaptiveSwingTrajectoryCalculator
             
       if(toeIsClose)
       {
-         waypointProportions[0] = waypointProportions[0] - adaptiveSwingParameters.getWaypointProportionShiftForStubAvoidance();
+         waypointProportions[0] = waypointProportions[0] - parameters.getWaypointProportionShiftForStubAvoidance();
       }
 
       if(heelIsClose)
       {
-         waypointProportions[1] = waypointProportions[1] + adaptiveSwingParameters.getWaypointProportionShiftForStubAvoidance();
+         waypointProportions[1] = waypointProportions[1] + parameters.getWaypointProportionShiftForStubAvoidance();
       }
 
       if(toeIsClose || heelIsClose)
       {
-         step.setSwingHeight(adaptiveSwingParameters.getMaximumSwingHeight());
+         step.setSwingHeight(parameters.getMaximumSwingHeight());
          step.getCustomWaypointProportions().add(waypointProportions);
       }
 
@@ -96,7 +92,7 @@ public class AdaptiveSwingTrajectoryCalculator
    private boolean checkForToeOrHeelStub(Pose3DReadOnly stepAtRiskOfToeStubbing, boolean checkToeStub)
    {
       Box3D footStubBox = new Box3D();
-      double stubClearance = adaptiveSwingParameters.getFootStubClearance();
+      double stubClearance = parameters.getFootStubClearance();
       footStubBox.getSize().set(stubClearance, walkingControllerParameters.getSteppingParameters().getFootWidth(), boxHeight);
 
       Pose3D boxCenter = new Pose3D(stepAtRiskOfToeStubbing);

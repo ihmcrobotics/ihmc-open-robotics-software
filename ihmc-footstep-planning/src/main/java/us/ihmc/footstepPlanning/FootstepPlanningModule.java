@@ -115,7 +115,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
       else
       {
-         this.adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(null, walkingControllerParameters);
+         this.adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(swingPlannerParameters, walkingControllerParameters);
          this.swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters,
                                                                                                       registry,
                                                                                                       new YoGraphicsListRegistry());
