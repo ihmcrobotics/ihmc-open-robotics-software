@@ -9,6 +9,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * TODO: Add shutdown exception limit?
+ */
 public class SingleThreadSizeOneQueueExecutor
 {
    private final Executor executor;
