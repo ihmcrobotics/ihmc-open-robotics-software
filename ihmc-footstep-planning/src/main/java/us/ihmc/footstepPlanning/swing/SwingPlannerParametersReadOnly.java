@@ -1,8 +1,8 @@
 package us.ihmc.footstepPlanning.swing;
 
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingKeys;
-import us.ihmc.tools.property.StoredPropertySetReadOnly;
+import controller_msgs.msg.dds.SwingPlannerParametersPacket;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.tools.property.StoredPropertySetReadOnly;
 
 /**
  * Parameters for swing planning as part of the planning pipeline in {@link FootstepPlanningModule}
@@ -116,7 +116,7 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
     */
    default double getMinimumSwingFootClearance()
    {
-      return get(FootstepPostProcessingKeys.minimumSwingFootClearance);
+      return get(SwingPlannerParameterKeys.minimumSwingFootClearance);
    }
 
    /**
@@ -180,5 +180,35 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
    default double getMinimumHeightAboveFloorForCollision()
    {
       return get(SwingPlannerParameterKeys.minimumHeightAboveFloorForCollision);
+   }
+
+   default SwingPlannerParametersPacket getAsPacket()
+   {
+      SwingPlannerParametersPacket packet = new SwingPlannerParametersPacket();
+
+      packet.setMinimumSwingHeight(getMinimumSwingHeight());
+      packet.setMaximumSwingHeight(getMaximumSwingHeight());
+      packet.setMaximumStepHeightForMinimumSwingHeight(getMaximumStepHeightForMinimumSwingHeight());
+      packet.setMinimumStepHeightForMaximumSwingHeight(getMinimumStepHeightForMaximumSwingHeight());
+      packet.setMinimumSwingTime(getMinimumSwingTime());
+      packet.setMaximumSwingTime(getMaximumSwingTime());
+      packet.setMaximumStepTranslationForMinimumSwingTime(getMaximumStepTranslationForMinimumSwingTime());
+      packet.setMinimumStepTranslationForMaximumSwingTime(getMinimumStepTranslationForMaximumSwingTime());
+      packet.setMaximumStepHeightForMinimumSwingTime(getMaximumStepHeightForMinimumSwingTime());
+      packet.setMinimumStepHeightForMaximumSwingTime(getMinimumStepHeightForMaximumSwingTime());
+      packet.setFootStubClearance(getFootStubClearance());
+      packet.setWaypointProportionShiftForStubAvoidance(getWaypointProportionShiftForStubAvoidance());
+      packet.setDoInitialFastApproximation(getDoInitialFastApproximation());
+      packet.setFastApproximationLessClearance(getFastApproximationLessClearance());
+      packet.setMinimumSwingFootClearance(getMinimumSwingFootClearance());
+      packet.setNumberOfChecksPerSwing(getNumberOfChecksPerSwing());
+      packet.setMaximumNumberOfAdjustmentAttempts(getMaximumNumberOfAdjustmentAttempts());
+      packet.setMaximumWaypointAdjustmentDistance(getMaximumWaypointAdjustmentDistance());
+      packet.setMinimumAdjustmentIncrementDistance(getMinimumAdjustmentIncrementDistance());
+      packet.setMaximumAdjustmentIncrementDistance(getMaximumAdjustmentIncrementDistance());
+      packet.setAdjustmentIncrementDistanceGain(getAdjustmentIncrementDistanceGain());
+      packet.setMinimumHeightAboveFloorForCollision(getMinimumHeightAboveFloorForCollision());
+
+      return packet;
    }
 }

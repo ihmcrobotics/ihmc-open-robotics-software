@@ -98,6 +98,7 @@ public interface SplitFractionCalculatorParametersReadOnly extends StoredPropert
    {
       SplitFractionCalculatorParametersPacket packet = new SplitFractionCalculatorParametersPacket();
 
+      packet.setDefaultTransferSplitFraction(getDefaultTransferSplitFraction());
       packet.setStepHeightForLargeStepDown(getStepHeightForLargeStepDown());
       packet.setLargestStepDownHeight(getLargestStepDownHeight());
       packet.setTransferSplitFractionAtFullDepth(getTransferSplitFractionAtFullDepth());

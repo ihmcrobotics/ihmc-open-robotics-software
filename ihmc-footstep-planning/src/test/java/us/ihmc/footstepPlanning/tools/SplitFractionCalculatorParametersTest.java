@@ -1,17 +1,13 @@
 package us.ihmc.footstepPlanning.tools;
 
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
-import controller_msgs.msg.dds.FootstepPostProcessingParametersPacket;
+import controller_msgs.msg.dds.SplitFractionCalculatorParametersPacket;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingKeys;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
+import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParameterKeys;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.tools.property.BooleanStoredPropertyKey;
 import us.ihmc.tools.property.DoubleStoredPropertyKey;
 import us.ihmc.tools.property.IntegerStoredPropertyKey;
@@ -22,7 +18,7 @@ import java.util.Random;
 import static us.ihmc.robotics.Assert.assertEquals;
 import static us.ihmc.robotics.Assert.assertNotEquals;
 
-public class FootstepPostProcessingParametersTest
+public class SplitFractionCalculatorParametersTest
 {
    private static final int iters = 1000;
    private static final double epsilon = 1e-8;
@@ -32,21 +28,21 @@ public class FootstepPostProcessingParametersTest
    {
       Random random = new Random(1738L);
 
-      FootstepPostProcessingParametersBasics parametersToSet = new DefaultFootstepPostProcessingParameters();
+      SplitFractionCalculatorParametersBasics parametersToSet = new DefaultSplitFractionCalculatorParameters();
 
       for (int iter = 0; iter < iters; iter++)
       {
-         FootstepPostProcessingParametersReadOnly randomParameters = getRandomParameters(random);
-         FootstepPostProcessingParametersPacket packet = randomParameters.getAsPacket();
+         SplitFractionCalculatorParametersReadOnly randomParameters = getRandomParameters(random);
+         SplitFractionCalculatorParametersPacket packet = randomParameters.getAsPacket();
          parametersToSet.set(packet);
 
          assertParametersEqual(randomParameters, parametersToSet, epsilon);
       }
    }
 
-   private static void assertParametersEqual(FootstepPostProcessingParametersReadOnly parametersA, FootstepPostProcessingParametersReadOnly parametersB, double epsilon)
+   private static void assertParametersEqual(SplitFractionCalculatorParametersReadOnly parametersA, SplitFractionCalculatorParametersReadOnly parametersB, double epsilon)
    {
-      for (StoredPropertyKey<?> key : FootstepPostProcessingKeys.keys.keys())
+      for (StoredPropertyKey<?> key : SplitFractionCalculatorParameterKeys.keys.keys())
       {
          String failureMessage = key.getTitleCasedName() + " has the wrong value.";
          if (key instanceof DoubleStoredPropertyKey)
@@ -68,30 +64,29 @@ public class FootstepPostProcessingParametersTest
       }
    }
 
-   private static FootstepPostProcessingParametersReadOnly getRandomParameters(Random random)
+   private static SplitFractionCalculatorParametersReadOnly getRandomParameters(Random random)
    {
-      FootstepPostProcessingParametersBasics footstepPlannerParameters = new DefaultFootstepPostProcessingParameters();
+      SplitFractionCalculatorParametersBasics parameters = new DefaultSplitFractionCalculatorParameters();
 
-      for (StoredPropertyKey<?> key : FootstepPostProcessingKeys.keys.keys())
+      for (StoredPropertyKey<?> key : SplitFractionCalculatorParameterKeys.keys.keys())
       {
          if (key instanceof DoubleStoredPropertyKey)
          {
             double randomValue = RandomNumbers.nextDouble(random, -10.0, 10.0);
-            footstepPlannerParameters.set(((DoubleStoredPropertyKey) key), randomValue);
+            parameters.set(((DoubleStoredPropertyKey) key), randomValue);
          }
          else if (key instanceof IntegerStoredPropertyKey)
          {
             int randomValue = RandomNumbers.nextInt(random, 1, 10);
-            footstepPlannerParameters.set(((IntegerStoredPropertyKey) key), randomValue);
+            parameters.set(((IntegerStoredPropertyKey) key), randomValue);
          }
          else if (key instanceof BooleanStoredPropertyKey)
          {
             boolean randomValue = RandomNumbers.nextBoolean(random, 0.5);
-            footstepPlannerParameters.set(((BooleanStoredPropertyKey) key), randomValue);
+            parameters.set(((BooleanStoredPropertyKey) key), randomValue);
          }
       }
 
-      return footstepPlannerParameters;
+      return parameters;
    }
-
 }
