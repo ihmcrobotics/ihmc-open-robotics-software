@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.util.SimpleTimer;
+import us.ihmc.communication.util.TimerSnapshot;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -49,10 +49,11 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    protected final Field<Supplier<Boolean>> operatorReviewEnabledSupplier = required();
    protected final Field<Consumer<RobotWalkRequest>> reviewPlanOutput = required();
    protected final Field<Consumer<RobotWalkRequest>> autonomousOutput = required();
+   protected final Field<Runnable> planningFailedNotifier = required();
 
    private final Field<PlanarRegionsList> planarRegions = requiredChanging();
-   private final Field<SimpleTimer.Status> planarRegionsExpirationStatus = requiredChanging();
-   private final Field<SimpleTimer.Status> moduleFailedTimerStatus = requiredChanging();
+   private final Field<TimerSnapshot> planarRegionReceptionTimerSnapshot = requiredChanging();
+   private final Field<TimerSnapshot> planningFailureTimerSnapshot = requiredChanging();
    private final Field<List<? extends Pose3DReadOnly>> bodyPathPlan = requiredChanging();
    private final Field<HumanoidRobotState> robotState = requiredChanging();
    private final Field<RobotSide> lastStanceSide = requiredChanging();
@@ -65,14 +66,14 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       {
          LogTools.warn("Find next footstep planning goal: Regions not OK: {}, timePassed: {}, isEmpty: {}",
                        planarRegions.get(),
-                       planarRegionsExpirationStatus.get().getTimePassedSinceReset(),
+                       planarRegionReceptionTimerSnapshot.get().getTimePassedSinceReset(),
                        planarRegions.get() == null ? null : planarRegions.get().isEmpty());
 
          proceed = false;
       }
-      else if (failedRecently())
+      else if (planningFailureTimerSnapshot.get().isRunning())
       {
-         LogTools.warn("Find next footstep planning goal: failedRecently = true");
+         LogTools.warn("Find next footstep planning goal: Planning failed recently");
          proceed = false;
       }
       else if (!bodyPathPlanOK())
@@ -91,12 +92,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
 
    private boolean regionsOK()
    {
-      return planarRegions.get() != null && !planarRegions.get().isEmpty() && !planarRegionsExpirationStatus.get().isPastOrNaN();
-   }
-
-   private boolean failedRecently()
-   {
-      return moduleFailedTimerStatus.get().isPastOrNaN();
+      return planarRegions.get() != null && !planarRegions.get().isEmpty() && planarRegionReceptionTimerSnapshot.get().isRunning();
    }
 
    private boolean bodyPathPlanOK()
@@ -226,6 +222,11 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
 
       uiPublisher.get().publishToUI(FootstepPlanForUI, FootstepForUI.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "Planned"));
 
+      if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() < 1) // failed
+      {
+         planningFailedNotifier.get().run();
+      }
+
       RobotWalkRequest robotWalkRequest = new RobotWalkRequest(footstepPlannerOutput.getFootstepPlan(), planarRegions.get());
 
       if (operatorReviewEnabledSupplier.get().get())
@@ -255,14 +256,14 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       this.planarRegions.set(planarRegions);
    }
 
-   protected void setPlanarRegionsExpirationStatus(SimpleTimer.Status planarRegionsExpirationStatus)
+   protected void setPlanarRegionReceptionTimerSnapshot(TimerSnapshot planarRegionReceptionTimerSnapshot)
    {
-      this.planarRegionsExpirationStatus.set(planarRegionsExpirationStatus);
+      this.planarRegionReceptionTimerSnapshot.set(planarRegionReceptionTimerSnapshot);
    }
 
-   protected void setModuleFailedTimerStatus(SimpleTimer.Status moduleFailedTimerStatus)
+   protected void setPlanningFailureTimerSnapshot(TimerSnapshot planningFailureTimerSnapshot)
    {
-      this.moduleFailedTimerStatus.set(moduleFailedTimerStatus);
+      this.planningFailureTimerSnapshot.set(planningFailureTimerSnapshot);
    }
 
    protected void setBodyPathPlan(List<? extends Pose3DReadOnly> bodyPathPlan)
@@ -338,5 +339,10 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    public void setAutonomousOutput(Consumer<RobotWalkRequest> autonomousOutput)
    {
       this.autonomousOutput.set(autonomousOutput);
+   }
+
+   protected void setPlanningFailedNotifier(Runnable planningFailedNotifier)
+   {
+      this.planningFailedNotifier.set(planningFailedNotifier);
    }
 }

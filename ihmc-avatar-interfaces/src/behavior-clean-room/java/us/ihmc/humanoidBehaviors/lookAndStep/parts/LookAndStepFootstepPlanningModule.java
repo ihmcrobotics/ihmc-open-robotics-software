@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.util.SimpleTimer;
+import us.ihmc.communication.util.Timer;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.humanoidBehaviors.lookAndStep.TypedInput;
@@ -20,8 +20,8 @@ public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanni
 
    private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
    private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
-   private SimpleTimer planarRegionsExpirationTimer = new SimpleTimer();
-   private SimpleTimer planningFailedTimer = new SimpleTimer();
+   private Timer planarRegionsExpirationTimer = new Timer();
+   private Timer planningFailedTimer = new Timer();
 
    public LookAndStepFootstepPlanningModule()
    {
@@ -29,6 +29,8 @@ public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanni
 
       planarRegionsInput.addCallback(data -> executor.execute(this::evaluateAndRun));
       bodyPathPlanInput.addCallback(data -> executor.execute(this::evaluateAndRun));
+
+      setPlanningFailedNotifier(planningFailedTimer::reset);
    }
 
    public void acceptPlanarRegions(PlanarRegionsListMessage planarRegionsListMessage)
@@ -50,8 +52,8 @@ public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanni
       setBodyPathPlan(bodyPathPlanInput.get());
       setRobotState(robotStateSupplier.get().get());
       setLastStanceSide(lastStanceSideSupplier.get().get());
-      setPlanarRegionsExpirationStatus(planarRegionsExpirationTimer.getStatus(lookAndStepBehaviorParameters.get().getPlanarRegionsExpiration()));
-      setModuleFailedTimerStatus(planningFailedTimer.getStatus(lookAndStepBehaviorParameters.get().getWaitTimeAfterPlanFailed()));
+      setPlanarRegionReceptionTimerSnapshot(planarRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.get().getPlanarRegionsExpiration()));
+      setPlanningFailureTimerSnapshot(planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.get().getWaitTimeAfterPlanFailed()));
 
       run();
    }
