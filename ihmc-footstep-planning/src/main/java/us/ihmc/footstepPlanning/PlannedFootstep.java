@@ -219,7 +219,7 @@ public class PlannedFootstep
 
    public void limitFootholdVertices()
    {
-      if (foothold.getNumberOfVertices() != 4)
+      if (!foothold.isEmpty() && foothold.getNumberOfVertices() != 4)
       {
          ConvexPolygonTools.limitVerticesConservative(foothold, 4);
       }
@@ -247,7 +247,7 @@ public class PlannedFootstep
       }
       for (int i = 0; i < customWaypointPositions.size(); i++)
       {
-         footstepDataMessage.getCustomPositionWaypoints().add();
+         footstepDataMessage.getCustomPositionWaypoints().add().set(customWaypointPositions.get(i));
       }
 
       footstepDataMessage.setSwingDuration(swingDuration);
