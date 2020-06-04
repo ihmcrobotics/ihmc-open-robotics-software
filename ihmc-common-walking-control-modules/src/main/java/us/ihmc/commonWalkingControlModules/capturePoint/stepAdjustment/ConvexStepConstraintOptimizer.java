@@ -87,7 +87,7 @@ public class ConvexStepConstraintOptimizer
 
       Aineq.reshape(constraints + boundConstraints, totalVariables);
       bineq.reshape(constraints + boundConstraints, 1);
-      // add limits on allowed translation // FIXME get rid of this?
+      // add limits on allowed translation
       if (parameters.getConstrainMaxAdjustment())
          PolygonWiggler.addTranslationConstraint(Aineq, bineq, constraints, parameters.getMaxX(), -parameters.getMaxX(), parameters.getMaxY(), -parameters.getMaxY());
 
