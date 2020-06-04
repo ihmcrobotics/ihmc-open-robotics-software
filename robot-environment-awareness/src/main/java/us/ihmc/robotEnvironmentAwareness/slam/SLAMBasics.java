@@ -4,14 +4,16 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.google.common.util.concurrent.AtomicDouble;
+
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.CustomRegionMergeParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCalculator;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
@@ -27,11 +29,12 @@ public class SLAMBasics implements SLAMInterface
    protected final NormalOcTree octree;
    private final AtomicInteger mapSize = new AtomicInteger();
 
+   private final AtomicDouble latestComputationTime = new AtomicDouble();
+
    private final PlanarRegionSegmentationCalculator segmentationCalculator;
    private PlanarRegionsList planarRegionsMap;
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
-   private final CustomRegionMergeParameters customRegionMergeParameters = new CustomRegionMergeParameters();
    private final PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
 
    public SLAMBasics(double octreeResolution)
@@ -40,7 +43,7 @@ public class SLAMBasics implements SLAMInterface
 
       planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.03);
       planarRegionSegmentationParameters.setMinRegionSize(150);
-      
+
       segmentationCalculator = new PlanarRegionSegmentationCalculator();
 
       SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
@@ -65,11 +68,11 @@ public class SLAMBasics implements SLAMInterface
       scanCollection.setSubSampleSize(numberOfPoints);
       scanCollection.addScan(SLAMTools.toScan(pointCloud, sensorPose.getTranslation()));
 
-      octree.insertScanCollection(scanCollection, false);
+      octree.insertScanCollection(scanCollection, true);
       octree.enableParallelComputationForNormals(true);
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
-      normalEstimationParameters.setNumberOfIterations(7);
+      normalEstimationParameters.setNumberOfIterations(10);
       octree.setNormalEstimationParameters(normalEstimationParameters);
    }
 
@@ -82,7 +85,7 @@ public class SLAMBasics implements SLAMInterface
       List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
       planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
    }
-   
+
    @Override
    public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage)
    {
@@ -96,7 +99,9 @@ public class SLAMBasics implements SLAMInterface
    {
       SLAMFrame frame = new SLAMFrame(getLatestFrame(), pointCloudMessage);
 
+      long startTime = System.nanoTime();
       RigidBodyTransformReadOnly optimizedMultiplier = computeFrameCorrectionTransformer(frame);
+      latestComputationTime.set((double) Math.round(Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) * 100) / 100);
 
       if (optimizedMultiplier == null)
       {
@@ -137,7 +142,7 @@ public class SLAMBasics implements SLAMInterface
    {
       return planarRegionsMap;
    }
-   
+
    public void setLatestFrame(SLAMFrame frameToSet)
    {
       latestSlamFrame.set(frameToSet);
@@ -157,5 +162,10 @@ public class SLAMBasics implements SLAMInterface
    public NormalOcTree getOctree()
    {
       return octree;
+   }
+
+   public double getComputationTimeForLatestFrame()
+   {
+      return latestComputationTime.get();
    }
 }

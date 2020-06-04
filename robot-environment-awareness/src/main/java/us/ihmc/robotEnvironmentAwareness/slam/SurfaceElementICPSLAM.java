@@ -8,7 +8,6 @@ import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotics.optimization.FunctionOutputCalculator;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
@@ -17,7 +16,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 {
    public static final boolean DEBUG = false;
    
-   private final AtomicDouble latestComputationTime = new AtomicDouble();
+   
 
    public SurfaceElementICPSLAM(double octreeResolution)
    {
@@ -27,15 +26,12 @@ public class SurfaceElementICPSLAM extends SLAMBasics
    @Override
    public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(SLAMFrame frame)
    {
-      long startTime = System.nanoTime();
-      LogTools.info("instance of true");
       double surfaceElementResolution = 0.04;
       double windowMargin = 0.05;
       int minimumNumberOfHits = 10;
-      frame.registerSurfaceElements(octree, windowMargin, surfaceElementResolution, minimumNumberOfHits);
+      frame.registerSurfaceElements(octree, windowMargin, surfaceElementResolution, minimumNumberOfHits, false);
 
       int numberOfSurfel = frame.getSurfaceElementsToSensor().size();
-      LogTools.info("numberOfSurfel " + numberOfSurfel);
       LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(6, numberOfSurfel);
       FunctionOutputCalculator functionOutputCalculator = new FunctionOutputCalculator()
       {
@@ -67,7 +63,9 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
          private double computeClosestDistance(Plane3D surfel)
          {
-            return SLAMTools.computeSurfaceElementDistanceToNormalOctree(octree, surfel);
+            return SLAMTools.computePerpendicularDistanceToNormalOctree(octree, surfel.getPoint());
+            //return SLAMTools.computeDistanceToNormalOctree(octree, surfel.getPoint());
+            //return SLAMTools.computeSurfaceElementDistanceToNormalOctree(octree, surfel);
          }
       };
       DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
@@ -91,11 +89,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       // get parameter.
       RigidBodyTransform icpTransformer = new RigidBodyTransform();
       icpTransformer.set(convertTransform(optimizer.getOptimalParameter().getData()));
-//      LogTools.info("icpTransformer");
-//      System.out.println(optimizer.getOptimalParameter());
-//      System.out.println("Computation Time = " + Conversions.nanosecondsToSeconds(System.nanoTime() - startTime));
-//      System.out.println(icpTransformer);
-      latestComputationTime.set((double) Math.round(Conversions.nanosecondsToSeconds(System.nanoTime() - startTime) * 100) / 100);
+      
       return icpTransformer;
    }
 
@@ -108,10 +102,5 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       transform.appendYawRotation(transformParameters[5]);
 
       return transform;
-   }
-   
-   public double getComputationTimeForLatestFrame()
-   {
-      return latestComputationTime.get();
    }
 }
