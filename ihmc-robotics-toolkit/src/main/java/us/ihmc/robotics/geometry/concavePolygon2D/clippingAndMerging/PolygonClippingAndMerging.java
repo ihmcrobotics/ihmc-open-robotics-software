@@ -122,6 +122,11 @@ public class PolygonClippingAndMerging
          mergedPolygon.set(polygonA);
          return;
       }
+      else if (polygonA.epsilonEquals(polygonB, 1e-5))
+      {
+         mergedPolygon.set(polygonA);
+         return;
+      }
 
       LinkedPointList polygonAList = ClippingTools.createLinkedPointList(polygonA);
       LinkedPointList polygonBList = ClippingTools.createLinkedPointList(polygonB);
@@ -144,6 +149,8 @@ public class PolygonClippingAndMerging
 
       mergedPolygon.clear();
       mergedPolygon.update();
+
+
 
       while (startPoint != null)
       {
