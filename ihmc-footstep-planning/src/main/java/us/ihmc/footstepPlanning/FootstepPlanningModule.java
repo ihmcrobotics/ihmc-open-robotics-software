@@ -268,62 +268,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
       else if (request.getSwingPlannerType() == SwingPlannerType.POSITION && swingOverPlanarRegionsTrajectoryExpander != null && !flatGroundMode)
       {
-         swingOverPlanarRegionsTrajectoryExpander.setDoInitialFastApproximation(swingPlannerParameters.getDoInitialFastApproximation());
-         swingOverPlanarRegionsTrajectoryExpander.setFastApproximationLessClearance(swingPlannerParameters.getFastApproximationLessClearance());
-         swingOverPlanarRegionsTrajectoryExpander.setNumberOfCheckpoints(swingPlannerParameters.getNumberOfChecksPerSwing());
-         swingOverPlanarRegionsTrajectoryExpander.setMaximumNumberOfTries(swingPlannerParameters.getMaximumNumberOfAdjustmentAttempts());
-         swingOverPlanarRegionsTrajectoryExpander.setMinimumSwingFootClearance(swingPlannerParameters.getMinimumSwingFootClearance());
-         swingOverPlanarRegionsTrajectoryExpander.setMinimumAdjustmentIncrementDistance(swingPlannerParameters.getMinimumAdjustmentIncrementDistance());
-         swingOverPlanarRegionsTrajectoryExpander.setMaximumAdjustmentIncrementDistance(swingPlannerParameters.getMaximumAdjustmentIncrementDistance());
-         swingOverPlanarRegionsTrajectoryExpander.setAdjustmentIncrementDistanceGain(swingPlannerParameters.getAdjustmentIncrementDistanceGain());
-         swingOverPlanarRegionsTrajectoryExpander.setMaximumAdjustmentDistance(swingPlannerParameters.getMaximumWaypointAdjustmentDistance());
-         swingOverPlanarRegionsTrajectoryExpander.setMinimumHeightAboveFloorForCollision(swingPlannerParameters.getMinimumHeightAboveFloorForCollision());
-
-         FootstepPlan footstepPlan = output.getFootstepPlan();
-         for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
-         {
-            PlannedFootstep footstep = footstepPlan.getFootstep(i);
-            FramePose3D swingEndPose = new FramePose3D(footstep.getFootstepPose());
-            FramePose3D swingStartPose = new FramePose3D();
-            FramePose3D stanceFootPose = new FramePose3D();
-
-            RobotSide swingSide = footstep.getRobotSide();
-            RobotSide stanceSide = swingSide.getOppositeSide();
-
-            if(i == 0)
-            {
-               swingStartPose.set(request.getStartFootPoses().get(swingSide));
-               stanceFootPose.set(request.getStartFootPoses().get(stanceSide));
-            }
-            else if (i == 1)
-            {
-               swingStartPose.set(request.getStartFootPoses().get(swingSide));
-               stanceFootPose.set(footstepPlan.getFootstep(i - 1).getFootstepPose());
-            }
-            else
-            {
-               swingStartPose.set(footstepPlan.getFootstep(i - 2).getFootstepPose());
-               stanceFootPose.set(footstepPlan.getFootstep(i - 1).getFootstepPose());
-            }
-
-            double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose,
-                                                                                                                      swingStartPose,
-                                                                                                                      swingEndPose,
-                                                                                                                      planarRegionsList);
-            if (swingOverPlanarRegionsTrajectoryExpander.wereWaypointsAdjusted())
-            {
-               footstep.setTrajectoryType(TrajectoryType.CUSTOM);
-               Point3D waypointOne = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
-               Point3D waypointTwo = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
-               footstep.setCustomWaypointPositions(waypointOne, waypointTwo);
-
-               System.out.println("step " + i + " was adjusted.");
-               System.out.println("\t waypoint 0: " + waypointOne);
-               System.out.println("\t waypoint 1: " + waypointTwo);
-
-               // TODO scale swing time
-            }
-         }
+         computeSwingWaypoints(request, output.getFootstepPlan());
       }
 
       if (request.performPositionBasedSplitFractionCalculation())
@@ -336,6 +281,66 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       }
 
       isPlanning.set(false);
+   }
+
+   // TODO make this a method of the swing trajectory solver after moving it to this package
+   public void computeSwingWaypoints(FootstepPlannerRequest request, FootstepPlan footstepPlan)
+   {
+      swingOverPlanarRegionsTrajectoryExpander.setDoInitialFastApproximation(swingPlannerParameters.getDoInitialFastApproximation());
+      swingOverPlanarRegionsTrajectoryExpander.setFastApproximationLessClearance(swingPlannerParameters.getFastApproximationLessClearance());
+      swingOverPlanarRegionsTrajectoryExpander.setNumberOfCheckpoints(swingPlannerParameters.getNumberOfChecksPerSwing());
+      swingOverPlanarRegionsTrajectoryExpander.setMaximumNumberOfTries(swingPlannerParameters.getMaximumNumberOfAdjustmentAttempts());
+      swingOverPlanarRegionsTrajectoryExpander.setMinimumSwingFootClearance(swingPlannerParameters.getMinimumSwingFootClearance());
+      swingOverPlanarRegionsTrajectoryExpander.setMinimumAdjustmentIncrementDistance(swingPlannerParameters.getMinimumAdjustmentIncrementDistance());
+      swingOverPlanarRegionsTrajectoryExpander.setMaximumAdjustmentIncrementDistance(swingPlannerParameters.getMaximumAdjustmentIncrementDistance());
+      swingOverPlanarRegionsTrajectoryExpander.setAdjustmentIncrementDistanceGain(swingPlannerParameters.getAdjustmentIncrementDistanceGain());
+      swingOverPlanarRegionsTrajectoryExpander.setMaximumAdjustmentDistance(swingPlannerParameters.getMaximumWaypointAdjustmentDistance());
+      swingOverPlanarRegionsTrajectoryExpander.setMinimumHeightAboveFloorForCollision(swingPlannerParameters.getMinimumHeightAboveFloorForCollision());
+
+      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
+      {
+         PlannedFootstep footstep = footstepPlan.getFootstep(i);
+         FramePose3D swingEndPose = new FramePose3D(footstep.getFootstepPose());
+         FramePose3D swingStartPose = new FramePose3D();
+         FramePose3D stanceFootPose = new FramePose3D();
+
+         RobotSide swingSide = footstep.getRobotSide();
+         RobotSide stanceSide = swingSide.getOppositeSide();
+
+         if(i == 0)
+         {
+            swingStartPose.set(request.getStartFootPoses().get(swingSide));
+            stanceFootPose.set(request.getStartFootPoses().get(stanceSide));
+         }
+         else if (i == 1)
+         {
+            swingStartPose.set(request.getStartFootPoses().get(swingSide));
+            stanceFootPose.set(footstepPlan.getFootstep(i - 1).getFootstepPose());
+         }
+         else
+         {
+            swingStartPose.set(footstepPlan.getFootstep(i - 2).getFootstepPose());
+            stanceFootPose.set(footstepPlan.getFootstep(i - 1).getFootstepPose());
+         }
+
+         double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose,
+                                                                                                                   swingStartPose,
+                                                                                                                   swingEndPose,
+                                                                                                                   request.getPlanarRegionsList());
+         if (swingOverPlanarRegionsTrajectoryExpander.wereWaypointsAdjusted())
+         {
+            footstep.setTrajectoryType(TrajectoryType.CUSTOM);
+            Point3D waypointOne = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
+            Point3D waypointTwo = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
+            footstep.setCustomWaypointPositions(waypointOne, waypointTwo);
+
+            System.out.println("step " + i + " was adjusted.");
+            System.out.println("\t waypoint 0: " + waypointOne);
+            System.out.println("\t waypoint 1: " + waypointTwo);
+
+            // TODO scale swing time
+         }
+      }
    }
 
    private void reportBodyPathPlan(BodyPathPlanningResult bodyPathPlanningResult)
