@@ -6,17 +6,19 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class FootstepPlan
+public class FootstepPlan implements FootstepPlanReadOnly
 {
    private final ArrayList<PlannedFootstep> footsteps = new ArrayList<>();
    private double finalTransferSplitFraction = -1.0;
    private double finalTransferWeightDistribution = -1.0;
 
+   @Override
    public int getNumberOfSteps()
    {
       return footsteps.size();
    }
 
+   @Override
    public PlannedFootstep getFootstep(int footstepIndex)
    {
       return footsteps.get(footstepIndex);
