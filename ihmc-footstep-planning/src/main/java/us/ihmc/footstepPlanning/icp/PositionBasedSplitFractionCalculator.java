@@ -74,16 +74,14 @@ public class PositionBasedSplitFractionCalculator
 
             if (stepNumber == footstepPlan.getNumberOfSteps() - 1)
             { // this is the last step
+               double currentSplitFraction = footstepPlan.getFinalTransferSplitFraction();
+               double currentWeightDistribution = footstepPlan.getFinalTransferWeightDistribution();
 
-               // TODO add final transfer values to FootstepPlan
-//               double currentSplitFraction = processedPlan.getFootstepDataList().getFinalTransferSplitFraction();
-//               double currentWeightDistribution = processedPlan.getFootstepDataList().getFinalTransferWeightDistribution();
-//
-//               double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
-//               double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
-//
-//               processedPlan.getFootstepDataList().setFinalTransferSplitFraction(splitFractionToSet);
-//               processedPlan.getFootstepDataList().setFinalTransferWeightDistribution(weightDistributionToSet);
+               double splitFractionToSet = SplitFractionTools.appendSplitFraction(transferSplitFraction, currentSplitFraction, defaultTransferSplitFraction);
+               double weightDistributionToSet = SplitFractionTools.appendWeightDistribution(transferWeightDistribution, currentWeightDistribution, defaultWeightDistribution);
+
+               footstepPlan.setFinalTransferSplitFraction(splitFractionToSet);
+               footstepPlan.setFinalTransferWeightDistribution(weightDistributionToSet);
             }
             else
             {
