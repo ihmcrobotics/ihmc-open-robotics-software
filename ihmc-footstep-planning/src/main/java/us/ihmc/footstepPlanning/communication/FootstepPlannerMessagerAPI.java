@@ -20,6 +20,7 @@ import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
@@ -61,7 +62,6 @@ public class FootstepPlannerMessagerAPI
 
    // UI control
    public static final Topic<Boolean> IgnorePartialFootholds = topic("IgnorePartialFootholds");
-   public static final Topic<Boolean> AutoPostProcess = topic("AutoPostProcess");
    public static final Topic<Boolean> GlobalReset = topic("GlobalReset");
    public static final Topic<Boolean> ComputePath = topic("ComputePath");
    public static final Topic<Boolean> HaltPlanning = topic("HaltPlanning");
@@ -123,8 +123,6 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Double> PlannerTimeout = topic("PlannerTimeout");
    public static final Topic<Integer> MaxIterations = topic("MaxIterations");
    public static final Topic<Double> PlannerHorizonLength = topic("PlannerHorizonLength");
-   public static final Topic<Boolean> PlanBodyPath = topic("PlanBodyPath");
-   public static final Topic<Boolean> PerformAStarSearch = topic("PerformAStarSearch");
    public static final Topic<RobotSide> InitialSupportSide = topic("InitialSupportSide");
    public static final Topic<Boolean> SnapGoalSteps = topic("SnapGoalSteps");
    public static final Topic<Boolean> AbortIfGoalStepSnapFails = topic("AbortIfGoalStepSnapFails");
@@ -135,7 +133,13 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Double> GoalDistanceProximity = topic("GoalDistanceProximity");
    public static final Topic<Double> GoalYawProximity = topic("GoalYawProximity");
    public static final Topic<FootstepPlanHeading> RequestedFootstepPlanHeading = topic("FootstepPlanHeading");
+
    public static final Topic<Boolean> AssumeFlatGround = topic("AssumeFlatGround");
+   public static final Topic<Boolean> PlanBodyPath = topic("PlanBodyPath");
+   public static final Topic<Boolean> PerformAStarSearch = topic("PerformAStarSearch");
+   public static final Topic<SwingPlannerType> RequestedSwingPlannerType = topic("RequestedSwingPlannerType");
+   public static final Topic<Boolean> PerformPositionBasedSplitFractionCalculation = topic("PerformPositionBasedSplitFractionCalculation");
+   public static final Topic<Boolean> PerformAreaBasedSplitFractionCalculation = topic("PerformAreaBasedSplitFractionCalculation");
 
    // Robot control
    public static final Topic<GoHomeMessage> GoHomeTopic = topic("GoHome");

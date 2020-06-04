@@ -62,8 +62,10 @@ public class AtlasFootstepPlannerUI extends Application
 
       ui = FootstepPlannerUI.createMessagerUI(primaryStage,
                                               messager,
-                                              drcRobotModel.getFootstepPlannerParameters(),
                                               drcRobotModel.getVisibilityGraphsParameters(),
+                                              drcRobotModel.getFootstepPlannerParameters(),
+                                              drcRobotModel.getSwingPlannerParameters(),
+                                              drcRobotModel.getSplitFractionCalculatorParameters(),
                                               drcRobotModel,
                                               previewModel,
                                               drcRobotModel.getContactPointParameters(),

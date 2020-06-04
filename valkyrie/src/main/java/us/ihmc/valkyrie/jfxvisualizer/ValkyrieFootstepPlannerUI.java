@@ -48,8 +48,10 @@ public class ValkyrieFootstepPlannerUI extends Application
 
       ui = FootstepPlannerUI.createMessagerUI(primaryStage,
                                               messager,
-                                              model.getFootstepPlannerParameters(),
                                               model.getVisibilityGraphsParameters(),
+                                              model.getFootstepPlannerParameters(),
+                                              model.getSwingPlannerParameters(),
+                                              model.getSplitFractionCalculatorParameters(),
                                               model,
                                               previewModel,
                                               model.getContactPointParameters(),
