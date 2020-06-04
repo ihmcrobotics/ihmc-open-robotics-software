@@ -54,21 +54,36 @@ public interface BehaviorBuilderPattern
          }
       }
 
-      private void validate(Class<? extends BehaviorBuilderPattern> caller, String name)
+      private void validateNonChanging(String name)
       {
-         if (!set)
+         if (!changing && !set)
          {
-            if (required)
-            {
-               throw new RuntimeException("Field not set: " + name + " " + clickableCodeLocation);
-            }
-            else
-            {
-               LogTools.info("Optional field not set: {} {}", name, clickableCodeLocation);
-            }
+            nonValidAction(name);
          }
 
          valid = true;
+      }
+
+      private void validateAll(String name)
+      {
+         if (!set)
+         {
+            nonValidAction(name);
+         }
+
+         valid = true;
+      }
+
+      private void nonValidAction(String name)
+      {
+         if (required)
+         {
+            throw new RuntimeException("Field not set: " + name + " " + clickableCodeLocation);
+         }
+         else
+         {
+            LogTools.info("Optional field not set: {} {}", name, clickableCodeLocation);
+         }
       }
 
       protected void checkValid()
@@ -255,7 +270,7 @@ public interface BehaviorBuilderPattern
       return new BooleanField(false, false, defaultValue);
    }
 
-   default void validate()
+   default void validateAll()
    {
       for (java.lang.reflect.Field field : FieldUtils.getAllFieldsList(getClass()))
       {
@@ -266,7 +281,28 @@ public interface BehaviorBuilderPattern
                field.setAccessible(true);
 
                FieldBasics member = (FieldBasics) field.get(this);
-               member.validate(getClass(), field.getName());
+               member.validateAll(field.getName());
+            }
+            catch (IllegalArgumentException | IllegalAccessException e)
+            {
+               throw new RuntimeException("Cannot validate field " + field.getName(), e);
+            }
+         }
+      }
+   }
+
+   default void validateNonChanging()
+   {
+      for (java.lang.reflect.Field field : FieldUtils.getAllFieldsList(getClass()))
+      {
+         if (FieldBasics.class.isAssignableFrom(field.getType()))
+         {
+            try
+            {
+               field.setAccessible(true);
+
+               FieldBasics member = (FieldBasics) field.get(this);
+               member.validateNonChanging(field.getName());
             }
             catch (IllegalArgumentException | IllegalAccessException e)
             {

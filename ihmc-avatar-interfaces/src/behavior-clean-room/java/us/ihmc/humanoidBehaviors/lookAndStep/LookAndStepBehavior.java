@@ -47,6 +47,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    public LookAndStepBehavior(BehaviorHelper helper)
    {
       this.helper = helper;
+
       robot = helper.getOrCreateRobotInterface();
 
       VisibilityGraphsParametersBasics visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
@@ -83,8 +84,6 @@ public class LookAndStepBehavior implements BehaviorInterface
                                                                                                approvalNotification,
                                                                                                robotMotionModule::acceptRobotWalkRequest);
 
-      helper.createROS2Callback(ROS2Tools.MAP_REGIONS, bodyPathModule::acceptMapRegions);
-      helper.createUICallback(GoalInput, bodyPathModule::acceptGoal);
       bodyPathModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
       bodyPathModule.setIsBeingReviewedSupplier(bodyPathReview::isBeingReviewed);
       bodyPathModule.setIsBeingReviewedSupplier(operatorReviewEnabledInput::get);
@@ -94,8 +93,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       bodyPathModule.setAutonomousOutput(footstepPlanningModule::acceptBodyPathPlan);
       bodyPathModule.setNeedNewPlan(newBodyPathGoalNeeded::get); // TODO: hook up to subgoal mover
       bodyPathModule.setUIPublisher(helper::publishToUI);
+      bodyPathModule.setOperatorReviewEnabled(operatorReviewEnabledInput::get);
 
-      helper.createROS2Callback(ROS2Tools.REALSENSE_SLAM_REGIONS, footstepPlanningModule::acceptPlanarRegions);
       footstepPlanningModule.setIsBeingReviewedSupplier(footstepPlanReview::isBeingReviewed);
       footstepPlanningModule.setUiPublisher(helper::publishToUI);
       footstepPlanningModule.setLookAndStepBehaviorParameters(lookAndStepParameters);
@@ -109,6 +108,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlanningModule.setReviewPlanOutput(footstepPlanReview::review);
       footstepPlanningModule.setAutonomousOutput(robotMotionModule::acceptRobotWalkRequest);
       footstepPlanningModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
+      footstepPlanningModule.setFootstepPlanningModule(helper.getOrCreateFootstepPlanner());
 
       robotMotionModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
       robotMotionModule.setLastSteppedSolePoseConsumer(lastSteppedSolePoses::put);
@@ -118,7 +118,11 @@ public class LookAndStepBehavior implements BehaviorInterface
       robotMotionModule.setRobotWalkRequester(robot::requestWalk);
       robotMotionModule.setUiPublisher(helper::publishToUI);
 
-      helper.setCommunicationCallbacksEnabled(true);
+      // TODO: For now, these cause trouble if they are setup earlier. Need to disable them on creation
+      helper.createROS2Callback(ROS2Tools.MAP_REGIONS, bodyPathModule::acceptMapRegions);
+      helper.createUICallback(GoalInput, bodyPathModule::acceptGoal);
+      helper.createROS2Callback(ROS2Tools.REALSENSE_SLAM_REGIONS, footstepPlanningModule::acceptPlanarRegions);
+
       helper.setCommunicationCallbacksEnabled(false);
    }
 

@@ -27,6 +27,8 @@ public class LookAndStepRobotMotionModule extends LookAndStepRobotMotionTask
 
    private void evaluateAndRun()
    {
+      validateNonChanging();
+
       // set changing stuff
       setFootstepPlan(robotWalkRequestInput.get().getFootstepPlan());
       setPlanarRegions(robotWalkRequestInput.get().getPlanarRegions());

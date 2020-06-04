@@ -114,7 +114,7 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
 
    public void run()
    {
-      validate();
+      validateAll();
 
       if (evaluateEntry())
       {

@@ -44,6 +44,8 @@ public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanni
 
    public void evaluateAndRun()
    {
+      validateNonChanging();
+
       setPlanarRegions(planarRegionsInput.get());
       setBodyPathPlan(bodyPathPlanInput.get());
       setRobotState(robotStateSupplier.get().get());

@@ -49,7 +49,7 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
 
    private void evaluateAndRun()
    {
-      validate();
+      validateNonChanging();
 
       setGoal(goalInput.get());
       setMapRegions(mapRegionsInput.get());
