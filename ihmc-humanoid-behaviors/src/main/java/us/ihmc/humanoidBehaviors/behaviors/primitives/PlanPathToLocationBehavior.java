@@ -165,8 +165,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
             footstepPlan.addFootstep(RobotSide.RIGHT, startLeftFootPose);
             FootstepDataListMessage footstepDataGoalStepForVisualization = FootstepDataMessageConverter.createFootstepDataListFromPlan(footstepPlan,
                                                                                                                                        0.0,
-                                                                                                                                       0.0,
-                                                                                                                                       ExecutionMode.OVERRIDE);
+                                                                                                                                       0.0);
 
             goalFootstepToUIVisualization.publish(footstepDataGoalStepForVisualization);
 

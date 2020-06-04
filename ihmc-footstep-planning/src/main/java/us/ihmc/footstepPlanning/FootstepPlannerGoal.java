@@ -1,14 +1,14 @@
 package us.ihmc.footstepPlanning;
 
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class FootstepPlannerGoal
 {
    private FramePose3D goalPoseBetweenFeet;
-   private SideDependentList<SimpleFootstep> doubleFootstepGoal;
+   private SideDependentList<FramePose3D> doubleFootstepGoal;
 
    private double distanceProximity;
    private double yawProximity;
@@ -48,12 +48,12 @@ public class FootstepPlannerGoal
       this.goalPoseBetweenFeet = goalPoseBetweenFeet;
    }
 
-   public SideDependentList<SimpleFootstep> getDoubleFootstepGoal()
+   public SideDependentList<? extends Pose3DReadOnly> getDoubleFootstepGoal()
    {
       return doubleFootstepGoal;
    }
 
-   public void setDoubleFootstepGoal(SideDependentList<SimpleFootstep> doubleFootstepGoal)
+   public void setDoubleFootstepGoal(SideDependentList<FramePose3D> doubleFootstepGoal)
    {
       this.doubleFootstepGoal = doubleFootstepGoal;
    }

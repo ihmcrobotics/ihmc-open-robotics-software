@@ -270,8 +270,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       double transferTime = lookAndStepParameters.get(LookAndStepBehaviorParameters.transferTime);
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(shortenedFootstepPlan,
                                                                                                                     swingTime,
-                                                                                                                    transferTime,
-                                                                                                                    ExecutionMode.OVERRIDE);
+                                                                                                                    transferTime);
       walkingStatusNotification = robot.requestWalk(footstepDataListMessage, robot.pollHumanoidRobotState(), environmentMap.getLatestCombinedRegionsList());
 
       helper.publishToUI(FootstepPlanForUI, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepDataListMessage));

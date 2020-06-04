@@ -1,14 +1,9 @@
 package us.ihmc.footstepPlanning.occlusion;
 
-import java.awt.Color;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInfo;
-
 import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.Axis3D;
@@ -31,7 +26,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.Assert;
@@ -45,6 +40,10 @@ import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.*;
+
+import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class SimpleOcclusionTests
 {
@@ -303,9 +302,9 @@ public class SimpleOcclusionTests
             int stepsToShow = Math.min(plan.getNumberOfSteps(), 2 * stepsPerSideToVisualize);
             for (int stepIdx = 0; stepIdx < stepsToShow; stepIdx++)
             {
-               SimpleFootstep footstep = plan.getFootstep(stepIdx);
+               Footstep footstep = plan.getFootstep(stepIdx);
                FramePose3D footstepPose = new FramePose3D();
-               footstep.getSoleFramePose(footstepPose);
+               footstep.getPose(footstepPose);
 
                List<YoFramePoseUsingYawPitchRoll> listOfPoses = solePosesForVisualization.get(footstep.getRobotSide());
                YoFramePoseUsingYawPitchRoll yoSolePose = listOfPoses.get(stepIdx / 2);
@@ -318,8 +317,8 @@ public class SimpleOcclusionTests
             stepPosesTaken.get(i).set(stancePose);
          }
 
-         SimpleFootstep firstStep = plan.getFootstep(0);
-         firstStep.getSoleFramePose(stancePose);
+         Footstep firstStep = plan.getFootstep(0);
+         firstStep.getPose(stancePose);
          stanceSide = firstStep.getRobotSide();
 
          Point3D bodyPoint = computeBodyPoint(stancePose, stanceSide, parameters, 0.0);
