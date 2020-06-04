@@ -110,6 +110,16 @@ public class FootstepPlanningModuleLauncher
          if (!footstepPlanningModule.isPlanning())
             footstepPlanningModule.getVisibilityGraphParameters().set(s.takeNextData());
       });
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, SwingPlannerParametersPacket.class, inputTopic, s ->
+      {
+         if (!footstepPlanningModule.isPlanning())
+            footstepPlanningModule.getSwingPlannerParameters().set(s.takeNextData());
+      });
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, SplitFractionCalculatorParametersPacket.class, inputTopic, s ->
+      {
+         if (!footstepPlanningModule.isPlanning())
+            footstepPlanningModule.getSplitFractionParameters().set(s.takeNextData());
+      });
    }
 
    private static void createRequestCallback(Ros2Node ros2Node,
