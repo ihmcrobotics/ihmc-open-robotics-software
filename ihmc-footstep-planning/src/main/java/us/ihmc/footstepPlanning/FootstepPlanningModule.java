@@ -287,14 +287,17 @@ public class FootstepPlanningModule implements CloseableAndDisposable
             FramePose3D swingStartPose = new FramePose3D();
             FramePose3D stanceFootPose = new FramePose3D();
 
+            RobotSide swingSide = footstep.getRobotSide();
+            RobotSide stanceSide = swingSide.getOppositeSide();
+
             if(i == 0)
             {
-               swingStartPose.set(request.getStartFootPoses().get(footstep.getRobotSide()));
-               stanceFootPose.set(request.getStartFootPoses().get(footstep.getRobotSide().getOppositeSide()));
+               swingStartPose.set(request.getStartFootPoses().get(swingSide));
+               stanceFootPose.set(request.getStartFootPoses().get(stanceSide));
             }
             else if (i == 1)
             {
-               swingStartPose.set(request.getStartFootPoses().get(footstep.getRobotSide()));
+               swingStartPose.set(request.getStartFootPoses().get(swingSide));
                stanceFootPose.set(footstepPlan.getFootstep(i - 1).getFootstepPose());
             }
             else
@@ -313,6 +316,10 @@ public class FootstepPlanningModule implements CloseableAndDisposable
                Point3D waypointOne = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
                Point3D waypointTwo = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
                footstep.setCustomWaypointPositions(waypointOne, waypointTwo);
+
+               System.out.println("step " + i + " was adjusted.");
+               System.out.println("\t waypoint 0: " + waypointOne);
+               System.out.println("\t waypoint 1: " + waypointTwo);
 
                // TODO scale swing time
             }
@@ -462,6 +469,26 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public List<FootstepPlannerIterationData> getIterationData()
    {
       return aStarFootstepPlanner.getIterationData();
+   }
+
+   public AdaptiveSwingTrajectoryCalculator getAdaptiveSwingTrajectoryCalculator()
+   {
+      return adaptiveSwingTrajectoryCalculator;
+   }
+
+   public SwingOverPlanarRegionsTrajectoryExpander getSwingOverPlanarRegionsTrajectoryExpander()
+   {
+      return swingOverPlanarRegionsTrajectoryExpander;
+   }
+
+   public AreaBasedSplitFractionCalculator getAreaBasedSplitFractionCalculator()
+   {
+      return areaBasedSplitFractionCalculator;
+   }
+
+   public PositionBasedSplitFractionCalculator getPositionBasedSplitFractionCalculator()
+   {
+      return positionBasedSplitFractionCalculator;
    }
 
    @Override
