@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.log.LogTools;
 
+import java.util.NoSuchElementException;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -11,16 +12,26 @@ import java.util.concurrent.TimeUnit;
 public class SingleThreadSizeOneQueueExecutor
 {
    private final Executor executor;
+   private final ArrayBlockingQueue<Runnable> sizeOneQueue;
 
    public SingleThreadSizeOneQueueExecutor(String prefix)
    {
-      ArrayBlockingQueue<Runnable> sizeOneQueue = new ArrayBlockingQueue<>(1);
+      sizeOneQueue = new ArrayBlockingQueue<>(1);
       executor = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS, sizeOneQueue, ThreadTools.createNamedThreadFactory(prefix));
    }
 
    public void execute(Runnable runnable)
    {
-      executor.execute(() -> exceptionHandlingWrapper(runnable));
+      try
+      {
+         sizeOneQueue.remove();
+      }
+      catch (NoSuchElementException e)
+      {
+         // This is fine. We are just trying to replace the one element.
+      }
+
+      executor.execute(runnable);
    }
 
    private void exceptionHandlingWrapper(Runnable runnable)
