@@ -1,6 +1,5 @@
 package us.ihmc.footstepPlanning;
 
-import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commons.MathTools;
