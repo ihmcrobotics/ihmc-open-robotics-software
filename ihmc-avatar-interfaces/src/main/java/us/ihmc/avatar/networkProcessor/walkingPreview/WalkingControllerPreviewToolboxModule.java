@@ -8,10 +8,8 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.WalkingControllerPreviewOutputMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
@@ -37,9 +35,9 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
-      MessageTopicNameGenerator controllerPubGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
+      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
 
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s -> {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerOutputTopic, s -> {
          if (controller != null)
             controller.updateRobotConfigurationData(s.takeNextData());
       });
@@ -74,25 +72,25 @@ public class WalkingControllerPreviewToolboxModule extends ToolboxModule
    }
 
    @Override
-   public MessageTopicNameGenerator getPublisherTopicNameGenerator()
+   public ROS2Topic getOutputTopic()
    {
-      return getPublisherTopicNameGenerator(robotName);
+      return getOutputTopic(robotName);
    }
 
-   public static MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.WALKING_PREVIEW_TOOLBOX, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
-   public MessageTopicNameGenerator getSubscriberTopicNameGenerator()
+   public ROS2Topic getInputTopic()
    {
-      return getSubscriberTopicNameGenerator(robotName);
+      return getInputTopic(robotName);
    }
 
-   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   public static ROS2Topic getInputTopic(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.WALKING_PREVIEW_TOOLBOX, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.WALKING_PREVIEW_TOOLBOX.withRobot(robotName).withInput();
    }
 
    public YoVariableRegistry getRegistry()

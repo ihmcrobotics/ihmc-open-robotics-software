@@ -69,7 +69,7 @@ public class GroundContactPointsSlipper implements RobotController
 
    public void addGroundContactPoint(Robot robot, String groundContactPointName)
    {
-      ArrayList<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
+      List<GroundContactPoint> allGroundContactPoints = robot.getAllGroundContactPoints();
 
       for (GroundContactPoint groundContactPoint : allGroundContactPoints)
       {

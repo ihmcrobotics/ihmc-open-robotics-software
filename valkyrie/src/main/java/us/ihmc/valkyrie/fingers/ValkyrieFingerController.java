@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
 import controller_msgs.msg.dds.ValkyrieHandFingerTrajectoryMessage;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
@@ -94,14 +93,12 @@ public class ValkyrieFingerController implements RobotController
    {
       for (RobotSide robotSide : RobotSide.values)
       {
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node,
-                                              HandDesiredConfigurationMessage.class,
-                                              ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName),
-                                              handDesiredConfigurationMessageSubscribers.get(robotSide));
-         ROS2Tools.createCallbackSubscription(realtimeRos2Node,
-                                              ValkyrieHandFingerTrajectoryMessage.class,
-                                              ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName),
-                                              valkyrieHandFingerTrajectoryMessageSubscribers.get(robotSide));
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
+                                                       HandDesiredConfigurationMessage.class, ROS2Tools.getControllerInputTopic(robotName),
+                                                       handDesiredConfigurationMessageSubscribers.get(robotSide));
+         ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
+                                                       ValkyrieHandFingerTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName),
+                                                       valkyrieHandFingerTrajectoryMessageSubscribers.get(robotSide));
       }
    }
 

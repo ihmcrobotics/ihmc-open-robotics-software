@@ -13,7 +13,6 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.quadrupedBasics.QuadrupedSteppingStateEnum;
-import us.ihmc.quadrupedCommunication.QuadrupedControllerAPIDefinition;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.RealtimeRos2Node;
 
@@ -39,11 +38,11 @@ public class QuadrupedREAStateUpdater
 
       ros2Node = ROS2Tools.createRealtimeRos2Node(implementation, "avatar_rea_state_updater");
 
-      reaStateRequestPublisher = ROS2Tools.createPublisher(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.subscriberTopicNameGenerator);
-      ROS2Tools.createCallbackSubscription(ros2Node, HighLevelStateChangeStatusMessage.class, QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                                           this::handleHighLevelStateChangeMessage);
-      ROS2Tools.createCallbackSubscription(ros2Node, QuadrupedSteppingStateChangeMessage.class, QuadrupedControllerAPIDefinition.getPublisherTopicNameGenerator(robotName),
-                                           this::handleSteppingStateMessage);
+      reaStateRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, REAStateRequestMessage.class, REACommunicationProperties.inputTopic);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, HighLevelStateChangeStatusMessage.class, ROS2Tools.getQuadrupedControllerOutputTopic(robotName),
+                                                    this::handleHighLevelStateChangeMessage);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, QuadrupedSteppingStateChangeMessage.class, ROS2Tools.getQuadrupedControllerOutputTopic(robotName),
+                                                    this::handleSteppingStateMessage);
 
       Runtime.getRuntime().addShutdownHook(new Thread(() -> {
          shutdown();

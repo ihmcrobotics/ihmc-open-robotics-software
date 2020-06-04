@@ -12,8 +12,7 @@ import controller_msgs.msg.dds.*;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.ControllerNetworkSubscriber.MessageValidator;
 import us.ihmc.commonWalkingControlModules.controllerAPI.input.MessageCollector.MessageIDExtractor;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
-import us.ihmc.communication.ROS2Tools.ROS2TopicQualifier;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
@@ -57,6 +56,7 @@ public class ControllerAPIDefinition
       commands.add(MomentumTrajectoryCommand.class);
       commands.add(CenterOfMassTrajectoryCommand.class);
       commands.add(PlanarRegionsListCommand.class);
+      commands.add(StepConstraintRegionCommand.class);
       commands.add(HandWrenchTrajectoryCommand.class);
 
       controllerSupportedCommands = Collections.unmodifiableList(commands);
@@ -89,14 +89,14 @@ public class ControllerAPIDefinition
       return controllerSupportedStatusMessages;
    }
 
-   public static MessageTopicNameGenerator getSubscriberTopicNameGenerator(String robotName)
+   public static ROS2Topic getInputTopic(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.HUMANOID_CONTROL_MODULE, ROS2TopicQualifier.INPUT);
+      return ROS2Tools.getControllerInputTopic(robotName);
    }
 
-   public static ROS2Tools.MessageTopicNameGenerator getPublisherTopicNameGenerator(String robotName)
+   public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ROS2Tools.getTopicNameGenerator(robotName, ROS2Tools.HUMANOID_CONTROL_MODULE, ROS2TopicQualifier.OUTPUT);
+      return ROS2Tools.getControllerOutputTopic(robotName);
    }
 
    public static MessageValidator createDefaultMessageValidation()

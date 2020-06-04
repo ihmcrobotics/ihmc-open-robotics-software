@@ -10,6 +10,8 @@ import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameTuple2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector2DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameTuple2DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 
@@ -23,14 +25,14 @@ public class ICPOptimizationControllerHelper
    private final RigidBodyTransform tempTransform = new RigidBodyTransform();
 
 
-   public double transformGainsFromDynamicsFrame(RowD1Matrix64F feedbackGainsToPack, FixedFrameVector2DBasics desiredICPVelocity, double parallelGain,
+   public double transformGainsFromDynamicsFrame(RowD1Matrix64F feedbackGainsToPack, FrameVector2DReadOnly desiredICPVelocity, double parallelGain,
                                                double orthogonalGain)
    {
       return transformFromDynamicsFrame(feedbackGainsToPack, desiredICPVelocity, parallelGain + 1.0, orthogonalGain + 1.0);
    }
 
-   public double transformFromDynamicsFrame(RowD1Matrix64F valuesToPack, FixedFrameVector2DBasics desiredICPVelocity, double parallelValue,
-                                          double orthogonalValue)
+   public double transformFromDynamicsFrame(RowD1Matrix64F valuesToPack, FrameVector2DReadOnly desiredICPVelocity, double parallelValue,
+                                            double orthogonalValue)
    {
       double epsilonZeroICPVelocity = 1e-5;
 
@@ -54,7 +56,7 @@ public class ICPOptimizationControllerHelper
    }
 
    private final FrameVector2D tempVector = new FrameVector2D();
-   public void transformFromDynamicsFrame(FixedFrameVector2DBasics valuesToPack, FixedFrameVector2DBasics desiredICPVelocity, double parallelValue,
+   public void transformFromDynamicsFrame(FixedFrameVector2DBasics valuesToPack, FrameVector2DReadOnly desiredICPVelocity, double parallelValue,
                                           double orthogonalValue)
    {
       double epsilonZeroICPVelocity = 1e-5;
@@ -107,7 +109,7 @@ public class ICPOptimizationControllerHelper
          xAxis = new FrameVector2D(parentFrame);
       }
 
-      public void setXAxis(FixedFrameTuple2DBasics xAxis)
+      public void setXAxis(FrameTuple2DReadOnly xAxis)
       {
          this.xAxis.setIncludingFrame(xAxis);
          this.xAxis.changeFrame(getParent());

@@ -44,6 +44,9 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getMaxCdrSerializedSize(current_alignment);
 
 
@@ -78,6 +81,10 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
 
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
       current_alignment += geometry_msgs.msg.dds.PointPubSubType.getCdrSerializedSize(data.getCapturePoint2d(), current_alignment);
 
 
@@ -108,6 +115,9 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
       cdr.write_type_4(data.getSequenceId());
 
 
+      cdr.write_type_6(data.getOmega());
+
+
       geometry_msgs.msg.dds.PointPubSubType.write(data.getCapturePoint2d(), cdr);
 
       geometry_msgs.msg.dds.PointPubSubType.write(data.getDesiredCapturePoint2d(), cdr);
@@ -131,6 +141,9 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
       data.setSequenceId(cdr.read_type_4());
       	
 
+      data.setOmega(cdr.read_type_6());
+      	
+
       geometry_msgs.msg.dds.PointPubSubType.read(data.getCapturePoint2d(), cdr);	
 
       geometry_msgs.msg.dds.PointPubSubType.read(data.getDesiredCapturePoint2d(), cdr);	
@@ -148,6 +161,8 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
    {
 
       ser.write_type_4("sequence_id", data.getSequenceId());
+
+      ser.write_type_6("omega", data.getOmega());
 
       ser.write_type_a("capture_point_2d", new geometry_msgs.msg.dds.PointPubSubType(), data.getCapturePoint2d());
 
@@ -168,6 +183,8 @@ public class CapturabilityBasedStatusPubSubType implements us.ihmc.pubsub.TopicD
    {
 
       data.setSequenceId(ser.read_type_4("sequence_id"));
+
+      data.setOmega(ser.read_type_6("omega"));
 
       ser.read_type_a("capture_point_2d", new geometry_msgs.msg.dds.PointPubSubType(), data.getCapturePoint2d());
 

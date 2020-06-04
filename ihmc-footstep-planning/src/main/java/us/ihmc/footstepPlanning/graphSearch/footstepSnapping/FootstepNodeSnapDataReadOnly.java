@@ -1,6 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
-import us.ihmc.commonWalkingControlModules.polygonWiggling.ConcavePolygonWiggler;
+import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintSolver;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -33,7 +33,7 @@ public interface FootstepNodeSnapDataReadOnly
     * <br>
     * The wiggle transform is set to NaN by default.
     * {@link PolygonWiggler#findWiggleTransform}
-    * {@link ConcavePolygonWiggler#wigglePolygon}
+    * {@link GradientDescentStepConstraintSolver#wigglePolygon}
     */
    RigidBodyTransformReadOnly getWiggleTransformInWorld();
 

@@ -1,0 +1,30 @@
+#ifndef __controller_msgs__msg__QuixCrutchMessage__idl__
+#define __controller_msgs__msg__QuixCrutchMessage__idl__
+
+#include "controller_msgs/msg/./QuixMotionStateMessage_.idl"
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+
+      /**
+       * This message is part of the Quix controller API.
+       * This message is used to allow the crutch to communicate a desired change in behavior.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::QuixCrutchMessage_")
+      struct QuixCrutchMessage
+      {
+        unsigned long sequence_id;
+        boolean user_enable;
+        boolean rewiggle;
+        boolean start_behavior;
+        controller_msgs::msg::dds::QuixMotionStateMessage requested_motion_state;
+        boolean execute_behavior;
+      };
+    };
+  };
+};
+
+#endif

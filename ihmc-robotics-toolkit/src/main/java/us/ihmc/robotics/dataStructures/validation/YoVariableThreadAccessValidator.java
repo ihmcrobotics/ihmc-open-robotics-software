@@ -2,7 +2,7 @@ package us.ihmc.robotics.dataStructures.validation;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
+import java.util.List;
 
 import javassist.CannotCompileException;
 import javassist.ClassPool;
@@ -129,7 +129,7 @@ public class YoVariableThreadAccessValidator
 
    public void start()
    {
-      ArrayList<YoVariable<?>> variables = root.getAllVariablesIncludingDescendants();
+      List<YoVariable<?>> variables = root.getAllVariablesIncludingDescendants();
       
       Field validator = null;
       if(REGISTERED_ACCESS_VALIDATOR)

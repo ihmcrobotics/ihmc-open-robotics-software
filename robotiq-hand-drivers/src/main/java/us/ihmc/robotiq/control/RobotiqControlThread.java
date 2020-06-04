@@ -11,17 +11,16 @@ import controller_msgs.msg.dds.ManualHandControlPacket;
 import us.ihmc.avatar.handControl.HandControlThread;
 import us.ihmc.avatar.handControl.packetsAndConsumers.HandJointAngleCommunicator;
 import us.ihmc.avatar.handControl.packetsAndConsumers.ManualHandControlProvider;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.ROS2Tools.MessageTopicNameGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HandConfiguration;
 import us.ihmc.humanoidRobotics.communication.subscribers.HandDesiredConfigurationMessageSubscriber;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotiq.RobotiqHandCommunicator;
 import us.ihmc.robotiq.data.RobotiqHandSensorData;
+import us.ihmc.ros2.ROS2Topic;
 
 public class RobotiqControlThread extends HandControlThread
 {
@@ -42,15 +41,15 @@ public class RobotiqControlThread extends HandControlThread
       handDesiredConfigurationMessageSubscriber = new HandDesiredConfigurationMessageSubscriber(robotSide);
       manualHandControlProvider = new ManualHandControlProvider(robotSide);
 
-      MessageTopicNameGenerator publisherTopicNameGenerator = ControllerAPIDefinition.getPublisherTopicNameGenerator(robotName);
-      MessageTopicNameGenerator subscriberTopicNameGenerator = ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName);
+      ROS2Topic outputTopic = ROS2Tools.getControllerOutputTopic(robotName);
+      ROS2Topic inputTopic = ROS2Tools.getControllerInputTopic(robotName);
 
-      IHMCRealtimeROS2Publisher<HandJointAnglePacket> handJointAnglePublisher = ROS2Tools.createPublisher(realtimeRos2Node, HandJointAnglePacket.class,
-                                                                                                          publisherTopicNameGenerator);
+      IHMCRealtimeROS2Publisher<HandJointAnglePacket> handJointAnglePublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, HandJointAnglePacket.class,
+                                                                                                                   outputTopic);
       jointAngleCommunicator = new HandJointAngleCommunicator(robotSide, handJointAnglePublisher);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, HandDesiredConfigurationMessage.class, subscriberTopicNameGenerator,
-                                           handDesiredConfigurationMessageSubscriber);
-      ROS2Tools.createCallbackSubscription(realtimeRos2Node, ManualHandControlPacket.class, subscriberTopicNameGenerator, manualHandControlProvider);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, HandDesiredConfigurationMessage.class, inputTopic,
+                                                    handDesiredConfigurationMessageSubscriber);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, ManualHandControlPacket.class, inputTopic, manualHandControlProvider);
       realtimeRos2Node.spin();
    }
 

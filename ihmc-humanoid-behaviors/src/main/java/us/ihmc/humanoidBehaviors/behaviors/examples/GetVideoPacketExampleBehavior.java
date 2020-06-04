@@ -21,7 +21,7 @@ public class GetVideoPacketExampleBehavior extends AbstractBehavior
    {
       super(robotName, ros2Node);
 //      coactiveBehaviorsNetworkManager = ros2Node; FIXME
-      createSubscriber(VideoPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), videoPacketQueue::put);
+      createSubscriber(VideoPacket.class, ROS2Tools.IHMC_ROOT, videoPacketQueue::put);
    }
 
    @Override

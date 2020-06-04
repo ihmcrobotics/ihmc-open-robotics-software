@@ -568,7 +568,7 @@ public class FootstepNodeCheckerTest
       }
 
       @Override
-      protected FootstepNodeSnapData computeSnapTransform(FootstepNode footstepNode)
+      protected FootstepNodeSnapData computeSnapTransform(FootstepNode footstepNode, FootstepNode stanceNode)
       {
          throw new RuntimeException("In this test snapper add nodes manually.");
       }

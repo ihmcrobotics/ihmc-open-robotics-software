@@ -82,18 +82,26 @@ public class FootstepPlannerMessageTools
       packet.setMaximumZPenetrationOnValleyRegions(parameters.getMaximumZPenetrationOnValleyRegions());
       packet.setMaximumStepWidth(parameters.getMaximumStepWidth());
       packet.setMinimumDistanceFromCliffBottoms(parameters.getMinimumDistanceFromCliffBottoms());
-      packet.setCliffHeightToAvoid(parameters.getCliffHeightToAvoid());
+      packet.setCliffBaseHeightToAvoid(parameters.getCliffBaseHeightToAvoid());
+      packet.setMinimumDistanceFromCliffTops(parameters.getMinimumDistanceFromCliffTops());
+      packet.setCliffTopHeightToAvoid(parameters.getCliffTopHeightToAvoid());
       packet.setBodyBoxHeight(parameters.getBodyBoxHeight());
       packet.setBodyBoxDepth(parameters.getBodyBoxDepth());
       packet.setBodyBoxWidth(parameters.getBodyBoxWidth());
       packet.setBodyBoxBaseX(parameters.getBodyBoxBaseX());
       packet.setBodyBoxBaseY(parameters.getBodyBoxBaseY());
       packet.setBodyBoxBaseZ(parameters.getBodyBoxBaseZ());
+      packet.setMaximumSnapHeight(parameters.getMaximumSnapHeight());
       packet.setMinXClearanceFromStance(parameters.getMinXClearanceFromStance());
       packet.setMinYClearanceFromStance(parameters.getMinYClearanceFromStance());
       packet.setFinalTurnProximity(parameters.getFinalTurnProximity());
       packet.setMaximumBranchFactor(parameters.getMaximumBranchFactor());
       packet.setEnableExpansionMask(parameters.getEnabledExpansionMask());
+      packet.setEnableShinCollisionCheck(parameters.getEnableShinCollisionCheck());
+      packet.setShinRadius(parameters.getShinRadius());
+      packet.setShinLength(parameters.getShinLength());
+      packet.setShinPitch(parameters.getShinPitch());
+      packet.setShinHeightOffet(parameters.getShinHeightOffset());
 
       packet.setAStarHeuristicsWeight(parameters.getAStarHeuristicsWeight().getValue());
       packet.setYawWeight(parameters.getYawWeight());

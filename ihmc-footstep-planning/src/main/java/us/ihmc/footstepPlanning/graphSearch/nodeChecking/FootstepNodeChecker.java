@@ -24,7 +24,7 @@ public class FootstepNodeChecker
    private final SideDependentList<ConvexPolygon2D> footPolygons;
    private final FootstepPlannerEdgeData edgeData;
 
-   private final PlanarRegionBaseOfCliffAvoider cliffAvoider;
+   private final PlanarRegionCliffAvoider cliffAvoider;
    private final ObstacleBetweenNodesChecker obstacleBetweenNodesChecker;
    private final FootstepNodeBodyCollisionDetector collisionDetector;
    private final GoodFootstepPositionChecker goodPositionChecker;
@@ -43,7 +43,7 @@ public class FootstepNodeChecker
       this.snapper = snapper;
       this.edgeData = edgeData;
       this.footPolygons = footPolygons;
-      this.cliffAvoider = new PlanarRegionBaseOfCliffAvoider(parameters, snapper, footPolygons);
+      this.cliffAvoider = new PlanarRegionCliffAvoider(parameters, snapper, footPolygons);
       this.obstacleBetweenNodesChecker = new ObstacleBetweenNodesChecker(parameters, snapper);
       this.collisionDetector = new FootstepNodeBodyCollisionDetector(parameters);
       this.goodPositionChecker = new GoodFootstepPositionChecker(parameters, snapper, edgeData);
@@ -72,7 +72,7 @@ public class FootstepNodeChecker
    {
       footstepIndex++;
 
-      FootstepNodeSnapData snapData = snapper.snapFootstepNode(candidateNode, parameters.getWiggleWhilePlanning());
+      FootstepNodeSnapData snapData = snapper.snapFootstepNode(candidateNode, stanceNode, parameters.getWiggleWhilePlanning());
       candidateNodeSnapData.set(snapData);
 
       if (planarRegionsList == null || planarRegionsList.isEmpty())
@@ -155,7 +155,7 @@ public class FootstepNodeChecker
 
    private boolean boundingBoxCollisionDetected(FootstepNode candidateNode, FootstepNode stanceNode)
    {
-      FootstepNodeSnapData stanceNodeSnapData = snapper.snapFootstepNode(stanceNode, parameters.getWiggleWhilePlanning());
+      FootstepNodeSnapData stanceNodeSnapData = snapper.snapFootstepNode(stanceNode, null, parameters.getWiggleWhilePlanning());
       if (stanceNodeSnapData == null)
       {
          return false;

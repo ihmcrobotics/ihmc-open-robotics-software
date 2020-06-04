@@ -169,8 +169,8 @@ public class SimulateCutforceController implements RobotController
 
    private Vector3D quadraticCutForceModel(ExternalForcePoint forcePoint)
    {
-	   tangentVector.set(forcePoint.getVelocityVector());
-	   tangentionalVelocity.set(forcePoint.getVelocityVector());
+	   tangentVector.set(forcePoint.getVelocityCopy());
+	   tangentionalVelocity.set(forcePoint.getVelocityCopy());
 
 	   if(this.sdfRobot.getTime() >=13 && this.sdfRobot.getTime() <= 17)
 	   {
@@ -180,7 +180,7 @@ public class SimulateCutforceController implements RobotController
 	   {
 		   quadraticForceCoeff.set(1000.0);
 	   }
-	     if(tangentVector.length() != 0.0 && forcePoint.getPositionPoint().getZ() > 0.75 && forcePoint.getPositionPoint().getX() > 0.5)
+	     if(tangentVector.length() != 0.0 && forcePoint.getPositionCopy().getZ() > 0.75 && forcePoint.getPositionCopy().getX() > 0.5)
 	     {
 	    	tangentionalVelocity.setX(0.0);
 	    	tangentVector.setX(0.0);
@@ -188,7 +188,7 @@ public class SimulateCutforceController implements RobotController
 	        climbingForceVector.cross(tangentVector, xAxisVector);
 
 	        tangentVector.scale(-1.0);
-	        tangentVector.scale(quadraticForceCoeff.getDoubleValue() * Math.pow(forcePoint.getVelocityVector().length(), 2));
+	        tangentVector.scale(quadraticForceCoeff.getDoubleValue() * Math.pow(forcePoint.getVelocityCopy().length(), 2));
 	        climbingForceVector.scale(tangentionalVelocity.length() * 100.0);
 
 	        efpHandControlFrameVelocity.set(tangentionalVelocity.length());
@@ -208,8 +208,8 @@ public class SimulateCutforceController implements RobotController
 
    private Vector3D exponentialCutForceModel(ExternalForcePoint forcePoint)
    {
-	   tangentVector.set(forcePoint.getVelocityVector());
-	   tangentionalVelocity.set(forcePoint.getVelocityVector());
+	   tangentVector.set(forcePoint.getVelocityCopy());
+	   tangentionalVelocity.set(forcePoint.getVelocityCopy());
 
 	     if(tangentVector.length() != 0.0)
 	     {

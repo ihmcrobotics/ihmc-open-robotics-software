@@ -110,7 +110,7 @@ public class ValkyrieInitialSetup implements DRCRobotInitialSetup<HumanoidFloati
       {
          for (GroundContactPoint gc : contactPoints)
          {
-            height = Math.min(height, gc.getPositionPoint().getZ());
+            height = Math.min(height, gc.getPositionCopy().getZ());
          }
       }
 

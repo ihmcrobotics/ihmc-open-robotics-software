@@ -10,7 +10,7 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.ROS2Input;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.producers.VideoDataServerImageCallback;
 import us.ihmc.euclid.Axis3D;
@@ -64,7 +64,9 @@ public class SCSDoorAndCameraSimulator
 
    public SCSDoorAndCameraSimulator(Ros2Node ros2Node, CommonAvatarEnvironmentInterface environment, DRCRobotModel robotModel, boolean startMinimized)
    {
-      robotConfigurationData = new ROS2Input<>(ros2Node, RobotConfigurationData.class, robotModel.getSimpleRobotName(), ROS2Tools.HUMANOID_CONTROLLER);
+      robotConfigurationData = new ROS2Input<>(ros2Node,
+                                               RobotConfigurationData.class,
+                                               ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName()).withOutput());
 
       remoteSyncedHumanoidFrames = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
 
@@ -120,9 +122,9 @@ public class SCSDoorAndCameraSimulator
       // required for timestamp
       ROS2Input<RobotConfigurationData> robotConfigurationData = new ROS2Input<>(ros2Node,
                                                                                  RobotConfigurationData.class,
-                                                                                 robotModel.getSimpleRobotName(),
-                                                                                 ROS2Tools.HUMANOID_CONTROLLER);
-      IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class);
+                                                                                 ROS2Tools.HUMANOID_CONTROLLER.withRobot(robotModel.getSimpleRobotName())
+                                                                                                              .withOutput());
+      IHMCROS2Publisher<VideoPacket> scsCameraPublisher = new IHMCROS2Publisher<>(ros2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT);
       CameraConfiguration cameraConfiguration = new CameraConfiguration(videoCameraMountName);
       cameraConfiguration.setCameraMount(videoCameraMountName);
       cameraConfiguration.setCameraFieldOfView(80.0);
@@ -231,7 +233,7 @@ public class SCSDoorAndCameraSimulator
 //      ImageIO.read(
 //            UtilImageIO.loadImage()loadImage(new File(f, "leftEyeImage.png").getAbsolutePath());
 
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, ROS2Tools.REA.getNodeName());
+      Ros2Node ros2Node = ROS2Tools.createRos2Node(DomainFactory.PubSubImplementation.INTRAPROCESS, ROS2Tools.REA_NODE_NAME);
 //      new SCSLidarAndCameraSimulator(ros2Node, DefaultCommonAvatarEnvironment.setUpShortCinderBlockField("CinderBlockField", 0.0, 1.0), createRobotModel());
 //      new SCSLidarAndCameraSimulator(ros2Node, createCommonAvatarEnvironment(), createRobotModel());
 //      new SCSDoorAndCameraSimulator(ros2Node, new FiducialEnvironmentForDoorBehavior(), createRobotModel());

@@ -1,8 +1,8 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
-import us.ihmc.footstepPlanning.FootstepPlan;
-import us.ihmc.footstepPlanning.FootstepPlanningResult;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
+import us.ihmc.tools.property.BooleanStoredPropertyKey;
+import us.ihmc.tools.property.DoubleStoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -484,14 +484,14 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * generator is capable of swinging over.
     * </p>
     */
-   default double getCliffHeightToAvoid()
+   default double getCliffBaseHeightToAvoid()
    {
-      return get(cliffHeightToAvoid);
+      return get(cliffBaseHeightToAvoid);
    }
 
    /**
     * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
-    * nearby that is {@link #getCliffHeightToAvoid} higher than the candidate footstep, it will move away from it
+    * nearby that is {@link #getCliffBaseHeightToAvoid} higher than the candidate footstep, it will move away from it
     * until it is minimumDistanceFromCliffBottoms away from it.
     *
     * <p>
@@ -503,6 +503,38 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default double getMinimumDistanceFromCliffBottoms()
    {
       return get(minimumDistanceFromCliffBottoms);
+   }
+
+   /**
+    * The planner can be setup to avoid footsteps near the top of "cliffs". When the footstep has a planar region
+    * nearby that is cliffTopHeightToAvoid higher than the candidate footstep, it will move away from it
+    * until it is minimumDistanceFromCliffTops away from it.
+    *
+    * <p>
+    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+    * generator is capable of swinging over.
+    * </p>
+    */
+   default double getCliffTopHeightToAvoid()
+   {
+      return get(cliffTopHeightToAvoid);
+   }
+
+   /**
+    * The planner can be setup to avoid footsteps near the bottom of "cliffs". When the footstep has a planar region
+    * nearby that is {@link #getCliffTopHeightToAvoid} higher than the candidate footstep, it will move away from it
+    * until it is minimumDistanceFromCliffBottoms away from it.
+    *
+    * <p>
+    * If these values are set to zero, cliff avoidance will be turned off. This creates a risk that the robot will
+    * hit the cliff with its swing foot. Therefore, these parameters should be set according to what the swing trajectory
+    * generator is capable of swinging over.
+    * </p>
+    */
+   default double getMinimumDistanceFromCliffTops()
+   {
+      return get(minimumDistanceFromCliffTops);
    }
 
    /**
@@ -564,6 +596,15 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default double getBodyBoxBaseZ()
    {
       return get(bodyBoxBaseZ);
+   }
+
+   /**
+    * Maximum height above a stance step that a candidate step is snapped to. Regions above this height are ignored.
+    * Intended to avoid ceilings or obstacles that are above the top of the robot
+    */
+   default double getMaximumSnapHeight()
+   {
+      return get(maximumSnapHeight);
    }
 
    /**
@@ -745,5 +786,46 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default boolean getEnabledExpansionMask()
    {
       return get(enableExpansionMask);
+   }
+
+   /**
+    * If true will try to wiggle steps away from shin collisions. Collisions are checked against all regions.
+    * Enable concave hull wiggler must be true in order for the shin collision checker to run.
+    */
+   default boolean getEnableShinCollisionCheck()
+   {
+      return get(enableShinCollisionCheck);
+   }
+
+   /**
+    * Radius of the shin collidable cylinder
+    */
+   default double getShinRadius()
+   {
+      return get(shinRadius);
+   }
+
+   /**
+    * Length of the shin collidable cylinder
+    */
+   default double getShinLength()
+   {
+      return get(shinLength);
+   }
+
+   /**
+    * Pitch of the shin collidable cylinder
+    */
+   default double getShinPitch()
+   {
+      return get(shinPitch);
+   }
+
+   /**
+    * Height offset of shin collidable cylinder
+    */
+   default double getShinHeightOffset()
+   {
+      return get(shinHeightOffet);
    }
 }

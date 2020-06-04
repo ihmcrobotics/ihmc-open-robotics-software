@@ -26,7 +26,7 @@ public class VisiblePlanarRegionService
    public VisiblePlanarRegionService(Ros2NodeInterface ros2Node, Supplier<PlanarRegionsList>... planarRegionSuppliers)
    {
       this.planarRegionSuppliers = planarRegionSuppliers;
-      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, null, ROS2Tools.REA);
+      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.withOutput()); // TODO add name "visible"
       thread = new PausablePeriodicThread(getClass().getSimpleName(), 0.5, this::process);
    }
 

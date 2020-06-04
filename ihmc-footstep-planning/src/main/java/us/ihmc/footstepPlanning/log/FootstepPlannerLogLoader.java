@@ -137,6 +137,7 @@ public class FootstepPlannerLogLoader
             iterationData.setIdealStep(readNode(dataFileReader.readLine()));
             int edges = getIntCSV(true, dataFileReader.readLine())[0];
             iterationData.getStanceNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
+            iterationData.getStanceNodeSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
             iterationData.getStanceNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
             log.getIterationData().add(iterationData);
 
@@ -149,6 +150,7 @@ public class FootstepPlannerLogLoader
                edgeData.setStanceNode(iterationData.getStanceNode());
                edgeData.setCandidateNode(readNode(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
+               edgeData.getCandidateNodeSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
                edgeData.getCandidateNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
 
                double[] doubleCSV = getDoubleCSV(true, dataFileReader.readLine());

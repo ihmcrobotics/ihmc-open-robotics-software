@@ -9,33 +9,23 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
-import us.ihmc.commons.PrintTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
-import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.FlatGroundEnvironment;
-import us.ihmc.simulationToolkit.controllers.PushRobotController;
-import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
 import us.ihmc.tools.MemoryTools;
 import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static us.ihmc.robotics.Assert.assertEquals;
@@ -67,8 +57,8 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       drcSimulationTestHelper.createSimulation(className);
 
       AtomicInteger stepCounter = new AtomicInteger();
-      ROS2Tools.createCallbackSubscription(drcSimulationTestHelper.getRos2Node(), FootstepStatusMessage.class,
-                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()), (p) -> {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(drcSimulationTestHelper.getRos2Node(), FootstepStatusMessage.class,
+                                                    ROS2Tools.getControllerOutputTopic(getSimpleRobotName()), (p) -> {
                if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
                {
                   stepCounter.incrementAndGet();
@@ -144,8 +134,8 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       drcSimulationTestHelper.createSimulation(className);
 
       AtomicInteger stepCounter = new AtomicInteger();
-      ROS2Tools.createCallbackSubscription(drcSimulationTestHelper.getRos2Node(), FootstepStatusMessage.class,
-                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()), (p) -> {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(drcSimulationTestHelper.getRos2Node(), FootstepStatusMessage.class,
+                                                    ROS2Tools.getControllerOutputTopic(getSimpleRobotName()), (p) -> {
                if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
                {
                   stepCounter.incrementAndGet();
@@ -227,8 +217,8 @@ public abstract class AvatarFootstepQueueingTest implements MultiRobotTestInterf
       drcSimulationTestHelper.createSimulation(className);
 
       AtomicInteger stepCounter = new AtomicInteger();
-      ROS2Tools.createCallbackSubscription(drcSimulationTestHelper.getRos2Node(), FootstepStatusMessage.class,
-                                           ControllerAPIDefinition.getPublisherTopicNameGenerator(getSimpleRobotName()), (p) -> {
+      ROS2Tools.createCallbackSubscriptionTypeNamed(drcSimulationTestHelper.getRos2Node(), FootstepStatusMessage.class,
+                                                    ROS2Tools.getControllerOutputTopic(getSimpleRobotName()), (p) -> {
                if (FootstepStatus.fromByte(p.takeNextData().getFootstepStatus()) == FootstepStatus.STARTED)
                {
                   stepCounter.incrementAndGet();

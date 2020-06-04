@@ -37,8 +37,6 @@ import controller_msgs.msg.dds.FootLoadBearingMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPathPlanPacket;
-import controller_msgs.msg.dds.FootstepPlanRequestPacket;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.GoHomeMessage;
@@ -573,21 +571,6 @@ public class HumanoidMessageTools
       message.getExplorationRangeUpperLimits().add(explorationRangeUpperLimits);
       message.getExplorationRangeLowerLimits().add(explorationRangeLowerLimits);
 
-      return message;
-   }
-
-   public static FootstepPathPlanPacket createFootstepPathPlanPacket(boolean goalsValid, FootstepDataMessage start, List<FootstepDataMessage> originalGoals,
-                                                                     List<FootstepDataMessage> ADStarPathPlan, List<Boolean> footstepUnknown,
-                                                                     double subOptimality, double cost)
-   {
-      FootstepPathPlanPacket message = new FootstepPathPlanPacket();
-      message.setGoalsValid(goalsValid);
-      message.getStart().set(start);
-      MessageTools.copyData(originalGoals, message.getOriginalGoals());
-      MessageTools.copyData(ADStarPathPlan, message.getPathPlan());
-      footstepUnknown.stream().forEach(message.getFootstepUnknown()::add);
-      message.setSubOptimality(subOptimality);
-      message.setPathCost(cost);
       return message;
    }
 
@@ -1198,29 +1181,6 @@ public class HumanoidMessageTools
       message.setCuttingRadius(cuttingRadius);
       message.getCenterPosition().set(centerPosition);
       message.getCenterOrientation().set(new Quaternion(rotationMatrix));
-      return message;
-   }
-
-   public static FootstepPlanRequestPacket createFootstepPlanRequestPacket(FootstepPlanRequestType requestType, FootstepDataMessage startFootstep,
-                                                                           double thetaStart, List<FootstepDataMessage> goals)
-   {
-      FootstepPlanRequestPacket message = new FootstepPlanRequestPacket();
-      message.setFootstepPlanRequestType(requestType.toByte());
-      message.getStartFootstep().set(startFootstep);
-      message.setThetaStart(thetaStart);
-      MessageTools.copyData(goals, message.getGoals());
-      return message;
-   }
-
-   public static FootstepPlanRequestPacket createFootstepPlanRequestPacket(FootstepPlanRequestType requestType, FootstepDataMessage startFootstep,
-                                                                           double thetaStart, List<FootstepDataMessage> goals, double maxSuboptimality)
-   {
-      FootstepPlanRequestPacket message = new FootstepPlanRequestPacket();
-      message.setFootstepPlanRequestType(requestType.toByte());
-      message.getStartFootstep().set(startFootstep);
-      message.setThetaStart(thetaStart);
-      MessageTools.copyData(goals, message.getGoals());
-      message.setMaxSubOptimality(maxSuboptimality);
       return message;
    }
 
