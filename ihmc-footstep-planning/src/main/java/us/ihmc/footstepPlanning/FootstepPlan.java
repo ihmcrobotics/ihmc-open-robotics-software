@@ -9,10 +9,8 @@ import java.util.Collections;
 public class FootstepPlan
 {
    private final ArrayList<PlannedFootstep> footsteps = new ArrayList<>();
-
-   public FootstepPlan()
-   {
-   }
+   private double finalTransferSplitFraction = -1.0;
+   private double finalTransferWeightDistribution = -1.0;
 
    public int getNumberOfSteps()
    {
@@ -36,6 +34,26 @@ public class FootstepPlan
       return simpleFootstep;
    }
 
+   public double getFinalTransferSplitFraction()
+   {
+      return finalTransferSplitFraction;
+   }
+
+   public double getFinalTransferWeightDistribution()
+   {
+      return finalTransferWeightDistribution;
+   }
+
+   public void setFinalTransferSplitFraction(double finalTransferSplitFraction)
+   {
+      this.finalTransferSplitFraction = finalTransferSplitFraction;
+   }
+
+   public void setFinalTransferWeightDistribution(double finalTransferWeightDistribution)
+   {
+      this.finalTransferWeightDistribution = finalTransferWeightDistribution;
+   }
+
    public void reverse()
    {
       Collections.reverse(footsteps);
@@ -44,6 +62,8 @@ public class FootstepPlan
    public void clear()
    {
       footsteps.clear();
+      finalTransferSplitFraction = -1.0;
+      finalTransferWeightDistribution = -1.0;
    }
 
    public void remove(int footstepIndex)
