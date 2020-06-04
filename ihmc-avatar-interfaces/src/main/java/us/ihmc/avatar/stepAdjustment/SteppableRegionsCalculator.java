@@ -1,4 +1,4 @@
-package us;
+package us.ihmc.avatar.stepAdjustment;
 
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
@@ -21,7 +21,10 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.ClusterTools;
 import us.ihmc.robotics.RegionInWorldInterface;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionTools;
-import us.ihmc.robotics.geometry.concavePolygon2D.*;
+import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
+import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DBasics;
+import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
+import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.PolygonClippingAndMerging;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;

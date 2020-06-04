@@ -1,4 +1,4 @@
-package us;
+package us.ihmc.avatar.stepAdjustment;
 
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -20,7 +20,6 @@ import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.List;
-import java.util.Random;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
