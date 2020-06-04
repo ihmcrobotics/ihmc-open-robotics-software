@@ -103,7 +103,7 @@ public class BodyPathPlannerTools
 
          if (distanceToEndOfSegment < moveAmountToGo)
          {
-            previousComparisonPoint.set(bodyPathPlan.get(i + 1).getPosition()));
+            previousComparisonPoint.set(bodyPathPlan.get(i + 1).getPosition());
             moveAmountToGo -= distanceToEndOfSegment;
          }
          else
