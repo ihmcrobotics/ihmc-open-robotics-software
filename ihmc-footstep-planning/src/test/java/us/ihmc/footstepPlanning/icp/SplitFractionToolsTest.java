@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.postProcessing;
+package us.ihmc.footstepPlanning.icp;
 
 import org.junit.jupiter.api.Test;
 
