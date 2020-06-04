@@ -12,6 +12,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Vector2DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.robotics.EuclidCoreMissingTools;
 
 import java.util.Collection;
@@ -105,6 +106,31 @@ public class GeometryPolygonTools
 
       return false;
   }
+
+   public static boolean isClockwiseOrdered3D(List<? extends Point3DReadOnly> concaveHullVertices, int numberOfVertices)
+   {
+      checkNumberOfVertices3D(concaveHullVertices, numberOfVertices);
+
+      double sumOfAngles = 0.0;
+
+      for (int vertexIndex = 0; vertexIndex < numberOfVertices; vertexIndex++)
+      {
+         int previousVertexIndex = EuclidGeometryPolygonTools.previous(vertexIndex, numberOfVertices);
+         int nextVertexIndex = EuclidGeometryPolygonTools.next(vertexIndex, numberOfVertices);
+
+         Point3DReadOnly previousVertex = concaveHullVertices.get(previousVertexIndex);
+         Point3DReadOnly vertex = concaveHullVertices.get(vertexIndex);
+         Point3DReadOnly nextVertex = concaveHullVertices.get(nextVertexIndex);
+
+         double firstVectorX = vertex.getX() - previousVertex.getX();
+         double firstVectorY = vertex.getY() - previousVertex.getY();
+         double secondVectorX = nextVertex.getX() - vertex.getX();
+         double secondVectorY = nextVertex.getY() - vertex.getY();
+         sumOfAngles += angle(firstVectorX, firstVectorY, secondVectorX, secondVectorY);
+      }
+
+      return sumOfAngles <= 0.0;
+   }
 
    public static boolean isClockwiseOrdered(List<? extends Point2DReadOnly> concaveHullVertices, int numberOfVertices)
    {
@@ -416,5 +442,12 @@ public class GeometryPolygonTools
    {
       if (numberOfVertices < 0 || numberOfVertices > convexPolygon2D.size())
          throw new IllegalArgumentException("Illegal numberOfVertices: " + numberOfVertices + ", expected a value in ] 0, " + convexPolygon2D.size() + "].");
+   }
+
+   private static void checkNumberOfVertices3D(List<? extends Point3DReadOnly> convexPolygon, int numberOfVertices)
+   {
+      if (numberOfVertices < 0 || numberOfVertices > convexPolygon.size())
+         throw new IllegalArgumentException("Illegal numberOfVertices: " + numberOfVertices + ", expected a value in ] 0, " + convexPolygon.size() + "].");
+
    }
 }

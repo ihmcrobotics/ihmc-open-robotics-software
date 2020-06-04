@@ -245,10 +245,11 @@ public class ClusterTools
          boolean shouldExtrudeCorner;
 
          //TODO: +++JerryPratt: Think about half_pi limits here. Do they make the most sense? Just a little over and you still might want to round the corner...
+         double cornerAngle = edgePrev.direction(false).angle(edgeNext.direction(false));
          if (extrudeToTheLeft)
-            shouldExtrudeCorner = edgePrev.direction(false).angle(edgeNext.direction(false)) <= -HALF_PI;
+            shouldExtrudeCorner = cornerAngle <= -HALF_PI;
          else
-            shouldExtrudeCorner = edgePrev.direction(false).angle(edgeNext.direction(false)) >= HALF_PI;
+            shouldExtrudeCorner = cornerAngle >= HALF_PI;
 
          if (shouldExtrudeCorner)
          {

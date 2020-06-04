@@ -26,10 +26,7 @@ import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.PolygonClip
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class SteppableRegionsCalculator
@@ -288,6 +285,7 @@ public class SteppableRegionsCalculator
       return stepConstraintRegions;
    }
 
+   // FIXME by not merging the obstacles, the crop sequence does matter. That is, a crop may make a hole not a hole
    private List<StepConstraintRegion> createSteppableRegions(RigidBodyTransformReadOnly transformToWorld,
                                                              ConcavePolygon2DBasics uncroppedPolygon,
                                                              List<ConcavePolygon2DBasics> obstacleExtrusions)
@@ -344,12 +342,12 @@ public class SteppableRegionsCalculator
       return clippedPolygons;
    }
 
-   private boolean isObstacleAHole(ConcavePolygon2DBasics constraintArea, ConcavePolygon2DReadOnly obstacleConcaveHull)
+   private static boolean isObstacleAHole(ConcavePolygon2DBasics constraintArea, ConcavePolygon2DReadOnly obstacleConcaveHull)
    {
       return GeometryPolygonTools.isPolygonInsideOtherPolygon(obstacleConcaveHull, constraintArea);
    }
 
-   private boolean isRegionMasked(ConcavePolygon2DBasics region, ConcavePolygon2DReadOnly candidateMask)
+   private static boolean isRegionMasked(ConcavePolygon2DBasics region, ConcavePolygon2DReadOnly candidateMask)
    {
       return GeometryPolygonTools.isPolygonInsideOtherPolygon(region, candidateMask);
    }
@@ -381,6 +379,10 @@ public class SteppableRegionsCalculator
       // Transform the obstacle to world and also Project the obstacle to z = 0:
       List<Point3DReadOnly> obstacleClustersInWorld = new ArrayList<>();
       ClusterTools.calculatePointsInWorldAtRegionHeight(concaveHull, transformFromObstacleToWorld, homeRegion, null, obstacleClustersInWorld);
+
+      if (!GeometryPolygonTools.isClockwiseOrdered3D(obstacleClustersInWorld, obstacleClustersInWorld.size()))
+         Collections.reverse(obstacleClustersInWorld);
+
 
       Vector3DReadOnly obstacleNormal = obstacleRegion.getNormal();
       boolean isObstacleWall = Math.abs(obstacleNormal.getZ()) < zThresholdBeforeOrthogonal;
