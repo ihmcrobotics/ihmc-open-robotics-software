@@ -5,6 +5,7 @@ public class ConstraintOptimizerParameters
    private double maxX = 0.5;
    private double maxY = 0.5;
    private double deltaInside = 0.0;
+   private boolean constrainMaxAdjustment = true;
 
    public void setMaxX(double maxX)
    {
@@ -21,10 +22,16 @@ public class ConstraintOptimizerParameters
       this.deltaInside = distanceInside;
    }
 
+   public void setConstrainMaxAdjustment(boolean constraintMaxAdjustment)
+   {
+      this.constrainMaxAdjustment = constraintMaxAdjustment;
+   }
+
    public double getDesiredDistanceInside()
    {
       return deltaInside;
    }
+
    public double getMaxX()
    {
       return maxX;
@@ -33,5 +40,10 @@ public class ConstraintOptimizerParameters
    public double getMaxY()
    {
       return maxY;
+   }
+
+   public boolean getConstrainMaxAdjustment()
+   {
+      return constrainMaxAdjustment;
    }
 }
