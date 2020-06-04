@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
@@ -14,8 +15,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.awt.*;
 import java.util.ArrayList;
 
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.*;
 
 public class ConvexStepConstraintOptimizerTest
 {
@@ -52,16 +52,45 @@ public class ConvexStepConstraintOptimizerTest
       initialFootTransform.getTranslation().set(-0.05, 0.05, 0.0);
       initialFoot.applyTransform(initialFootTransform, false);
 
+
+      ConstraintOptimizerParameters parameters = new ConstraintOptimizerParameters();
       ConvexStepConstraintOptimizer stepConstraintOptimizer = new ConvexStepConstraintOptimizer();
-      RigidBodyTransformReadOnly wiggleTransfrom = stepConstraintOptimizer.wigglePolygonIntoConvexHullOfRegion(initialFoot, region, new WiggleParameters(), true);
-      assertFalse(wiggleTransfrom == null);
+      RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findConstraintTransform(initialFoot, region.getConvexHull(), parameters, true);
+
+      assertFalse(wiggleTransform == null);
 
       ConvexPolygon2D foot = new ConvexPolygon2D(initialFoot);
-      foot.applyTransform(wiggleTransfrom, false);
+
+      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
+      foot.applyTransform(wiggleTransform, false);
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
+
+      // Now, let's translation it a lot, and make sure the constraints on max translation prevent it from moving too much
+      initialFootTransform.setToZero();
+      initialFootTransform.getTranslation().set(1.0, 1.0, 0.0);
+      initialFoot.applyTransform(initialFootTransform, false);
+
+      parameters.setMaxX(0.05);
+      parameters.setMaxY(0.05);
+
+      foot.set(initialFoot);
+      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
+      wiggleTransform = stepConstraintOptimizer.findConstraintTransform(initialFoot, region.getConvexHull(), parameters, true);
+
+      assertEquals(-0.05, wiggleTransform.getTranslationX(), 1e-6);
+      assertEquals(-0.05, wiggleTransform.getTranslationY(), 1e-6);
 
 
-      ConvexPolygon2D hullOfRegion = new ConvexPolygon2D(plane1, plane2);
-      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, hullOfRegion));
+      foot.applyTransform(wiggleTransform, false);
+      assertFalse(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
+
+      wiggleTransform = stepConstraintOptimizer.findConstraintTransform(initialFoot, region.getConvexHull(), parameters, false);
+      foot.set(initialFoot);
+      foot.applyTransform(wiggleTransform, false);
+      assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
+
+
+
    }
 
    public static ConvexPolygon2D createDefaultFootPolygon()

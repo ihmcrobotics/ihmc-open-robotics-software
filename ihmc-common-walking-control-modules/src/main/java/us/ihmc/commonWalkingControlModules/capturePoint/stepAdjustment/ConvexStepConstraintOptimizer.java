@@ -5,31 +5,29 @@ import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
-import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.Vector2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.RegionInWorldInterface;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class ConvexStepConstraintOptimizer
 {
-   private static final boolean DEBUG = true;
+   private static final boolean DEBUG = false;
    private static final boolean coldStart = true;
 
-   /** Weight associated with moving into the polygon. */
+   /**
+    * Weight associated with moving into the polygon.
+    */
    private static final double polygonWeight = 1.0e6;
-   /** Regularization weight preferring a zero solution. */
+   /**
+    * Regularization weight preferring a zero solution.
+    */
    private static final double regularization = 1.0e-10;
-   /** Weight associated with moving the polygon. */
+   /**
+    * Weight associated with moving the polygon.
+    */
    private static final double moveWeight = 1.0;
 
    private static int[] emptyArray = new int[0];
@@ -59,32 +57,24 @@ public class ConvexStepConstraintOptimizer
    private final DenseMatrix64F identity = new DenseMatrix64F(0, 0);
    private final RigidBodyTransform transformToReturn = new RigidBodyTransform();
 
-   public RigidBodyTransformReadOnly wigglePolygonIntoConvexHullOfRegion(ConvexPolygon2DReadOnly polygonToWiggleInRegionFrame,
-                                                                 PlanarRegion regionToWiggleInto,
-                                                                 WiggleParameters parameters,
-                                                                 boolean boundTranslation)
+   public RigidBodyTransformReadOnly findConstraintTransform(ConvexPolygon2DReadOnly polygonToWiggle,
+                                                             ConvexPolygon2DReadOnly planeToWiggleInto,
+                                                             ConstraintOptimizerParameters parameters,
+                                                             boolean boundTranslation)
    {
-      return findWiggleTransform(polygonToWiggleInRegionFrame, regionToWiggleInto.getConvexHull(), parameters, boundTranslation);
+      return findConstraintTransform(polygonToWiggle, planeToWiggleInto, parameters, boundTranslation, emptyArray);
    }
 
-   public RigidBodyTransformReadOnly findWiggleTransform(ConvexPolygon2DReadOnly polygonToWiggle,
-                                                 ConvexPolygon2DReadOnly planeToWiggleInto,
-                                                 WiggleParameters parameters,
-                                                 boolean boundTranslation)
-   {
-      return findWiggleTransform(polygonToWiggle, planeToWiggleInto, parameters, boundTranslation, emptyArray);
-   }
-
-   public RigidBodyTransformReadOnly findWiggleTransform(ConvexPolygon2DReadOnly polygonToWiggle,
-                                                         ConvexPolygon2DReadOnly planeToWiggleInto,
-                                                         WiggleParameters parameters,
-                                                         boolean boundTranslation,
-                                                         int[] startingVerticesToIgnore)
+   public RigidBodyTransformReadOnly findConstraintTransform(ConvexPolygon2DReadOnly polygonToWiggle,
+                                                             ConvexPolygon2DReadOnly planeToWiggleInto,
+                                                             ConstraintOptimizerParameters parameters,
+                                                             boolean boundTranslation,
+                                                             int[] startingVerticesToIgnore)
    {
       int numberOfPoints = polygonToWiggle.getNumberOfVertices();
 
       // This creates inequality constraints for points to lie inside the desired polygon.
-      PolygonWiggler.convertToInequalityConstraints(planeToWiggleInto, A, b, parameters.deltaInside, startingVerticesToIgnore);
+      PolygonWiggler.convertToInequalityConstraints(planeToWiggleInto, A, b, parameters.getDesiredDistanceInside(), startingVerticesToIgnore);
 
       int constraintsPerPoint = A.getNumRows();
 
@@ -98,8 +88,7 @@ public class ConvexStepConstraintOptimizer
       bineq.reshape(constraints + boundConstraints, 1);
       // add limits on allowed translation // FIXME get rid of this?
       if (boundTranslation)
-         PolygonWiggler.addTranslationConstraint(Aineq, bineq, constraints, parameters);
-
+         PolygonWiggler.addTranslationConstraint(Aineq, bineq, constraints, parameters.getMaxX(), -parameters.getMaxX(), parameters.getMaxY(), -parameters.getMaxY());
 
       // The inequality constraints of form
       // Ax <= b
