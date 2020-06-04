@@ -115,6 +115,7 @@ public class EnvironmentConstraintHandler
       yoConvexHullConstraint.clear();
       yoShrunkConvexHullConstraint.clear();
       isEnvironmentConstraintValid.set(false);
+      stepConstraintOptimizer.reset();
    }
 
    public void setReachabilityRegion(FrameConvexPolygon2DReadOnly reachabilityRegion)

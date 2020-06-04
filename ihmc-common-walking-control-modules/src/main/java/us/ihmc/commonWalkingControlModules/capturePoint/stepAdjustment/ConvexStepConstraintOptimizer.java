@@ -3,19 +3,17 @@ package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 import org.ejml.data.DenseMatrix64F;
 import org.ejml.ops.CommonOps;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
-import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
 
 public class ConvexStepConstraintOptimizer
 {
    private static final boolean DEBUG = false;
-   private static final boolean coldStart = true;
+   private static final boolean warmStart = true;
 
    /**
     * Weight associated with moving into the polygon.
@@ -56,6 +54,11 @@ public class ConvexStepConstraintOptimizer
 
    private final DenseMatrix64F identity = new DenseMatrix64F(0, 0);
    private final RigidBodyTransform transformToReturn = new RigidBodyTransform();
+
+   public void reset()
+   {
+      solver.resetActiveConstraints();
+   }
 
    public RigidBodyTransformReadOnly findConstraintTransform(ConvexPolygon2DReadOnly polygonToWiggle,
                                                              ConvexPolygon2DReadOnly planeToWiggleInto,
@@ -133,9 +136,10 @@ public class ConvexStepConstraintOptimizer
       solution.reshape(totalVariables, 1);
       try
       {
+         solver.setMaxNumberOfIterations(parameters.getMaxIterations());
          solver.setQuadraticCostFunction(G, g, 0.0);
          solver.setLinearInequalityConstraints(Aineq, bineq);
-         solver.setUseWarmStart(!coldStart);
+         solver.setUseWarmStart(warmStart);
          int iterations = solver.solve(solution);
 
          if (DEBUG)
@@ -152,7 +156,7 @@ public class ConvexStepConstraintOptimizer
 
       if (MatrixTools.containsNaN(solution))
       {
-         LogTools.info("Could not wiggle!");
+         LogTools.info("Could not find transform!");
          return null;
       }
 
