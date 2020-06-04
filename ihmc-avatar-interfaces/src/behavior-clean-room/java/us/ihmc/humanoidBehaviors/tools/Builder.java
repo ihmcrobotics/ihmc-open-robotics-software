@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.lookAndStep;
+package us.ihmc.humanoidBehaviors.tools;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 
