@@ -44,6 +44,7 @@ public class ConvexStepConstraintOptimizer
 
    private final DenseMatrix64F Aineq = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F bineq = new DenseMatrix64F(0, 0);
+   private final DenseMatrix64F zeros = new DenseMatrix64F(0, 0);
 
    private final DenseMatrix64F p = new DenseMatrix64F(2, 1);
 
@@ -91,6 +92,7 @@ public class ConvexStepConstraintOptimizer
       if (parameters.getConstrainMaxAdjustment())
          PolygonWiggler.addTranslationConstraint(Aineq, bineq, constraints, parameters.getMaxX(), -parameters.getMaxX(), parameters.getMaxY(), -parameters.getMaxY());
 
+
       // The inequality constraints of form
       // Ax <= b
       // are converted to new constraints with a new optimization vector s:
@@ -126,6 +128,29 @@ public class ConvexStepConstraintOptimizer
       CommonOps.multTransA(-polygonWeight, J, j, g);
       CommonOps.scale(polygonWeight, G);
 
+      // Check to see if the optimization actually needs to run. Most of the time, probably not, but if so, there's no need to run the optimizer
+      zeros.reshape(totalVariables, 1);
+      solution.reshape(constraints, 1);
+      zeros.zero();
+      CommonOps.scale(-1.0, j, solution);
+      CommonOps.multAdd(J, zeros, solution);
+      boolean areConstraintsAlreadyValid = true;
+      for (int i = 0; i < solution.numRows; i++)
+      {
+         if (solution.get(i, 0) > 1e-5)
+         {
+            areConstraintsAlreadyValid = false;
+            break;
+         }
+      }
+
+      if (areConstraintsAlreadyValid)
+      {
+         transformToReturn.setToZero();
+         return transformToReturn;
+      }
+
+
       // Add regularization
       MatrixTools.addDiagonal(G, regularization);
 
@@ -133,7 +158,6 @@ public class ConvexStepConstraintOptimizer
       for (int i = 0; i < variables; i++)
          G.add(i, i, moveWeight);
 
-      solution.reshape(totalVariables, 1);
       try
       {
          solver.setMaxNumberOfIterations(parameters.getMaxIterations());
