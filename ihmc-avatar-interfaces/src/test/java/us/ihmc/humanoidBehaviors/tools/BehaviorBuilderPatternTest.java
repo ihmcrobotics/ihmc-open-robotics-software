@@ -1,9 +1,8 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.log.LogTools;
-
-import java.util.Objects;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -52,9 +51,88 @@ public class BehaviorBuilderPatternTest
    }
 
    @Test
+   public void testExtendingClass()
+   {
+      ExtendingClass extendingClass = new ExtendingClass();
+
+      assertThrows(RuntimeException.class, () ->
+      {
+         try
+         {
+            extendingClass.run();
+         }
+         catch (Throwable t)
+         {
+            LogTools.info("Exception thrown: {}", t.getMessage());
+            assertTrue(t.getMessage().startsWith("Field not set"));
+            throw t;
+         }
+      });
+
+      extendingClass.setFieldOne(new Object());
+      extendingClass.setFieldTwo(new Object());
+
+      assertThrows(RuntimeException.class, () ->
+      {
+         try
+         {
+            extendingClass.run();
+         }
+         catch (Throwable t)
+         {
+            LogTools.info("Exception thrown: {}", t.getMessage());
+            assertTrue(t.getMessage().startsWith("Field not set"));
+            throw t;
+         }
+      });
+
+      extendingClass.setParentField(new Object());
+      extendingClass.run();
+
+      ExtendingClass extendingClass2 = new ExtendingClass();
+
+      extendingClass2.setParentField(new Object());
+
+      assertThrows(RuntimeException.class, () ->
+      {
+         try
+         {
+            extendingClass2.run();
+         }
+         catch (Throwable t)
+         {
+            LogTools.info("Exception thrown: {}", t.getMessage());
+            assertTrue(t.getMessage().startsWith("Field not set"));
+            throw t;
+         }
+      });
+
+      extendingClass2.setFieldOne(new Object());
+      extendingClass2.setFieldTwo(new Object());
+      extendingClass2.run();
+   }
+
+   @Test
    public void testBuildWithThread()
    {
+      SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
+      AllRequiredClass allRequired = new AllRequiredClass();
+
+      LogTools.info("Exceptions are supposed to print out here.");
+      executor.execute(() -> allRequired.run());
+      executor.execute(() -> allRequired.run());
+      executor.execute(() -> allRequired.run());
+   }
+
+   class ExtendingClass extends AllRequiredClass
+   {
+      private final Field<Object> parentField = required();
+
+      public void setParentField(Object parentField)
+      {
+         this.parentField.set(parentField);
+      }
    }
 
    class AllRequiredClass implements BehaviorBuilderPattern
