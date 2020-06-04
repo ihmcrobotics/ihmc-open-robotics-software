@@ -23,15 +23,16 @@ public interface BehaviorBuilderPattern
    abstract class FieldBasics
    {
       private final boolean required;
+      private final boolean changing;
       private boolean set = false;
       private boolean valid = false;
-      private boolean changing = false;
 
       private final StackTraceElement[] cause;
 
       private FieldBasics(boolean required, boolean changing)
       {
          this.required = required;
+         this.changing = changing;
 
          StackTraceElement[] stackTrace = new Throwable().getStackTrace();
          if (stackTrace.length > 5)
@@ -51,7 +52,7 @@ public interface BehaviorBuilderPattern
          this.set = true;
       }
 
-      private void invalidate()
+      private void invalidateChanging()
       {
          if (changing)
          {
@@ -285,7 +286,7 @@ public interface BehaviorBuilderPattern
       }
    }
 
-   default void invalidate()
+   default void invalidateChanging()
    {
       for (java.lang.reflect.Field field : FieldUtils.getAllFieldsList(getClass()))
       {
@@ -296,7 +297,7 @@ public interface BehaviorBuilderPattern
                field.setAccessible(true);
 
                FieldBasics member = (FieldBasics) field.get(this);
-               member.invalidate();
+               member.invalidateChanging();
             }
             catch (IllegalArgumentException | IllegalAccessException e)
             {
