@@ -7,11 +7,8 @@ import java.util.function.Function;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingModule;
-import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingModuleLauncher;
 import us.ihmc.communication.*;
 import us.ihmc.communication.packets.PacketDestination;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -29,7 +26,6 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Input;
@@ -63,7 +59,6 @@ public class RemoteHumanoidRobotInterface
 
    private final RemoteSyncedHumanoidRobotState remoteSyncedHumanoidRobotState;
 
-   private final FootstepPlanPostProcessingModule footstepPlanPostProcessingModule;
    private final ROS2Topic topicName;
 
    public RemoteHumanoidRobotInterface(Ros2NodeInterface ros2Node, DRCRobotModel robotModel)
@@ -93,8 +88,6 @@ public class RemoteHumanoidRobotInterface
       initialState.setEndHighLevelControllerName(HighLevelControllerName.WALKING.toByte());
       controllerStateInput = new ROS2Input<>(ros2Node, HighLevelStateChangeStatusMessage.class, topicName.withOutput(), initialState, this::acceptStatusChange);
       capturabilityBasedStatusInput = new ROS2Input<>(ros2Node, CapturabilityBasedStatus.class, topicName.withOutput());
-
-      footstepPlanPostProcessingModule = FootstepPlanPostProcessingModuleLauncher.createModule(robotModel);
 
       remoteSyncedHumanoidRobotState = new RemoteSyncedHumanoidRobotState(robotModel, ros2Node);
    }
@@ -128,30 +121,6 @@ public class RemoteHumanoidRobotInterface
                                                                             consumer);
       //      ros2Callbacks.add(ros2Callback); // TODO: Use ManagedROS2Node
       return ros2Callback;
-   }
-
-   public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan,
-                                                              HumanoidReferenceFrames humanoidReferenceFrames,
-                                                              PlanarRegionsList planarRegionsList)
-   {
-      FramePose3D leftFootPose = new FramePose3D();
-      FramePose3D rightFootPose = new FramePose3D();
-      leftFootPose.setFromReferenceFrame(humanoidReferenceFrames.getSoleFrame(RobotSide.LEFT));
-      rightFootPose.setFromReferenceFrame(humanoidReferenceFrames.getSoleFrame(RobotSide.RIGHT));
-      CapturabilityBasedStatus latestCapturabilityBasedStatus = capturabilityBasedStatusInput.getLatest();
-
-      FootstepPostProcessingPacket footstepPostProcessingPacket = new FootstepPostProcessingPacket();
-      footstepPostProcessingPacket.getFootstepDataList().set(footstepPlan);
-      footstepPostProcessingPacket.getLeftFootPositionInWorld().set(leftFootPose.getPosition());
-      footstepPostProcessingPacket.getLeftFootOrientationInWorld().set(leftFootPose.getOrientation());
-      footstepPostProcessingPacket.getRightFootPositionInWorld().set(rightFootPose.getPosition());
-      footstepPostProcessingPacket.getRightFootOrientationInWorld().set(rightFootPose.getOrientation());
-      footstepPostProcessingPacket.getLeftFootContactPoints2d().set(latestCapturabilityBasedStatus.getLeftFootSupportPolygon2d());
-      footstepPostProcessingPacket.getRightFootContactPoints2d().set(latestCapturabilityBasedStatus.getRightFootSupportPolygon2d());
-      footstepPostProcessingPacket.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
-      footstepPlanPostProcessingModule.handleRequestPacket(footstepPostProcessingPacket);
-
-      return requestWalk(footstepPlan);
    }
 
    public TypedNotification<WalkingStatusMessage> requestWalk(FootstepDataListMessage footstepPlan)

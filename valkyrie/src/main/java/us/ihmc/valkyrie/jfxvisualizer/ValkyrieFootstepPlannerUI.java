@@ -18,7 +18,6 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.valkyrie.ValkyrieNetworkProcessor;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.parameters.ValkyrieFootstepPostProcessorParameters;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 /**
@@ -51,7 +50,6 @@ public class ValkyrieFootstepPlannerUI extends Application
                                               messager,
                                               model.getFootstepPlannerParameters(),
                                               model.getVisibilityGraphsParameters(),
-                                              new ValkyrieFootstepPostProcessorParameters(),
                                               model,
                                               previewModel,
                                               model.getContactPointParameters(),

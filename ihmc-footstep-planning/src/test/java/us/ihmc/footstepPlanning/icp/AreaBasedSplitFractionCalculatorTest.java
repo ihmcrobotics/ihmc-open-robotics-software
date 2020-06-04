@@ -1,16 +1,12 @@
 package us.ihmc.footstepPlanning.icp;
 
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPostProcessingPacket;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.PlannedFootstep;
-import us.ihmc.footstepPlanning.postProcessing.AreaSplitFractionPostProcessingElement;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;

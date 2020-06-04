@@ -16,9 +16,10 @@ import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapDat
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
@@ -81,9 +82,10 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<UIStepAdjustmentFrame> FootstepAdjustmentFrame = topic("FootstepAdjustmentFrame"); // ManualFootstepAdjustmentListener >>> table
 
    // Parameters
-   public static final Topic<FootstepPostProcessingParametersReadOnly> PostProcessingParametersTopic = topic("FootstepPostProcessingParameters");
    public static final Topic<FootstepPlannerParametersReadOnly> PlannerParameters = topic("PlannerParameters");
    public static final Topic<VisibilityGraphsParametersReadOnly> VisibilityGraphsParameters = topic("VisibilityGraphsParameters");
+   public static final Topic<SwingPlannerParametersReadOnly> SwingPlannerParameters = topic("SwingPlannerParameters");
+   public static final Topic<SplitFractionCalculatorParametersReadOnly> SplitFractionParameters = topic("SplitFractionParameters");
    public static final Topic<BipedalSupportPlanarRegionParametersMessage> BipedalSupportRegionsParameters = topic("BipedalSupportRegionsParameters");
 
    // Graphics control

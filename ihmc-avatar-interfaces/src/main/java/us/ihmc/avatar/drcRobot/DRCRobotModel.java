@@ -15,7 +15,6 @@ import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerPar
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -114,11 +113,6 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
    }
 
    public default FootstepPlannerParametersBasics getFootstepPlannerParameters()
-   {
-      return null;
-   }
-
-   public default FootstepPostProcessingParametersBasics getFootstepPostProcessingParameters()
    {
       return null;
    }
