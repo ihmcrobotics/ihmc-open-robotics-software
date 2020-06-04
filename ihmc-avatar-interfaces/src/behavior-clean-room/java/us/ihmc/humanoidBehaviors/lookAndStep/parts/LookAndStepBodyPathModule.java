@@ -1,11 +1,14 @@
-package us.ihmc.humanoidBehaviors.lookAndStep;
+package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.SimpleTimer;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.humanoidBehaviors.tools.Builder;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOnly;
+import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
+import us.ihmc.humanoidBehaviors.lookAndStep.TypedInput;
+import us.ihmc.humanoidBehaviors.tools.BehaviorBuilderPattern;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.log.LogTools;
@@ -16,7 +19,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public class LookAndStepBodyPathModule implements Builder
+public class LookAndStepBodyPathModule implements BehaviorBuilderPattern
 {
    // TODO: Could optional be used here for some things to make things more flexible?
    private Field<Supplier<HumanoidRobotState>> robotStateSupplier = required();

@@ -1,15 +1,18 @@
-package us.ihmc.humanoidBehaviors.lookAndStep;
+package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.SimpleTimer;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.humanoidBehaviors.tools.Builder;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOnly;
+import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
+import us.ihmc.humanoidBehaviors.lookAndStep.TypedInput;
+import us.ihmc.humanoidBehaviors.tools.BehaviorBuilderPattern;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.interfaces.RobotWalkRequest;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -20,7 +23,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class LookAndStepFootstepPlanningModule implements Builder
+public class LookAndStepFootstepPlanningModule implements BehaviorBuilderPattern
 {
    private Field<Supplier<Boolean>> isBeingReviewedSupplier = required();
    private Field<LookAndStepBehaviorParametersReadOnly> lookAndStepBehaviorParameters = required();
@@ -34,8 +37,8 @@ public class LookAndStepFootstepPlanningModule implements Builder
    private Field<FootstepPlanningModule> footstepPlanningModule = required();
    private Field<Consumer<RobotSide>> lastStanceSideSetter = required();
    private Field<Supplier<Boolean>> operatorReviewEnabledSupplier = required();
-   private Field<Consumer<FootstepPlan>> reviewPlanOutput = required();
-   private Field<Consumer<FootstepPlan>> autonomousOutput = required();
+   private Field<Consumer<RobotWalkRequest>> reviewPlanOutput = required();
+   private Field<Consumer<RobotWalkRequest>> autonomousOutput = required();
 
    private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
    private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
@@ -65,7 +68,7 @@ public class LookAndStepFootstepPlanningModule implements Builder
       bodyPathPlanInput.set(bodyPathPlan);
    }
 
-   private void evaluateAndRun()
+   public void evaluateAndRun()
    {
       validate();
 
@@ -146,12 +149,12 @@ public class LookAndStepFootstepPlanningModule implements Builder
       this.operatorReviewEnabledSupplier.set(operatorReviewEnabledSupplier);
    }
 
-   public void setReviewPlanOutput(Consumer<FootstepPlan> reviewPlanOutput)
+   public void setReviewPlanOutput(Consumer<RobotWalkRequest> reviewPlanOutput)
    {
       this.reviewPlanOutput.set(reviewPlanOutput);
    }
 
-   public void setAutonomousOutput(Consumer<FootstepPlan> autonomousOutput)
+   public void setAutonomousOutput(Consumer<RobotWalkRequest> autonomousOutput)
    {
       this.autonomousOutput.set(autonomousOutput);
    }

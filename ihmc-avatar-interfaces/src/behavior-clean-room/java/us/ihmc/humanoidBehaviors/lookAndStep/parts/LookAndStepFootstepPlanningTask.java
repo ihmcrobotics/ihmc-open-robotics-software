@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.lookAndStep;
+package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.util.SimpleTimer;
@@ -15,9 +15,11 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
-import us.ihmc.humanoidBehaviors.tools.Builder;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOnly;
+import us.ihmc.humanoidBehaviors.tools.BehaviorBuilderPattern;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
+import us.ihmc.humanoidBehaviors.tools.interfaces.RobotWalkRequest;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
@@ -34,7 +36,7 @@ import java.util.function.Supplier;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
-public class LookAndStepFootstepPlanningTask implements Builder
+public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
 {
    private Field<LookAndStepBehaviorParametersReadOnly> lookAndStepBehaviorParameters = required(); // TODO: Maybe we only need to invalidate some fields
    private Field<FootstepPlannerParametersReadOnly> footstepPlannerParameters = required();
@@ -47,8 +49,8 @@ public class LookAndStepFootstepPlanningTask implements Builder
    private Field<FootstepPlanningModule> footstepPlanningModule = required();
    private Field<Consumer<RobotSide>> lastStanceSideSetter = required();
    private Field<Supplier<Boolean>> operatorReviewEnabledSupplier = required();
-   private Field<Consumer<FootstepPlan>> reviewPlanOutput = required();
-   private Field<Consumer<FootstepPlan>> autonomousOutput = required();
+   private Field<Consumer<RobotWalkRequest>> reviewPlanOutput = required();
+   private Field<Consumer<RobotWalkRequest>> autonomousOutput = required();
 
    private Field<PlanarRegionsList> planarRegions = required();
    private Field<SimpleTimer.Status> planarRegionsExpirationStatus = required();
@@ -223,29 +225,18 @@ public class LookAndStepFootstepPlanningTask implements Builder
       footstepPlannerLogger.logSession();
       FootstepPlannerLogger.deleteOldLogs(30);
 
-      uiPublisher.get().publishToUI(FootstepPlanForUI, reduceFootstepPlanForUIMessager2(footstepPlannerOutput.getFootstepPlan(), "Planned"));
+      uiPublisher.get().publishToUI(FootstepPlanForUI, FootstepForUI.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "Planned"));
+
+      RobotWalkRequest robotWalkRequest = new RobotWalkRequest(footstepPlannerOutput.getFootstepPlan(), planarRegions.get());
 
       if (operatorReviewEnabledSupplier.get().get())
       {
-         reviewPlanOutput.get().accept(footstepPlannerOutput.getFootstepPlan());
+         reviewPlanOutput.get().accept(robotWalkRequest);
       }
       else
       {
-         autonomousOutput.get().accept(footstepPlannerOutput.getFootstepPlan());
+         autonomousOutput.get().accept(robotWalkRequest);
       }
-   }
-
-   private static ArrayList<FootstepForUI> reduceFootstepPlanForUIMessager2(FootstepPlan footstepPlan, String description)
-   {
-      ArrayList<FootstepForUI> footstepLocations = new ArrayList<>();
-      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
-      {
-         FramePose3D soleFramePoseToPack = new FramePose3D();
-         footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
-         soleFramePoseToPack.changeFrame(ReferenceFrame.getWorldFrame());
-         footstepLocations.add(new FootstepForUI(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack), description));
-      }
-      return footstepLocations;
    }
 
    public void run()
@@ -257,7 +248,7 @@ public class LookAndStepFootstepPlanningTask implements Builder
          performTask();
       }
 
-      invalidate();
+      invalidateChanging();
    }
 
    public void setPlanarRegions(PlanarRegionsList planarRegions)
@@ -340,12 +331,12 @@ public class LookAndStepFootstepPlanningTask implements Builder
       this.operatorReviewEnabledSupplier.set(operatorReviewEnabledSupplier);
    }
 
-   public void setReviewPlanOutput(Consumer<FootstepPlan> reviewPlanOutput)
+   public void setReviewPlanOutput(Consumer<RobotWalkRequest> reviewPlanOutput)
    {
       this.reviewPlanOutput.set(reviewPlanOutput);
    }
 
-   public void setAutonomousOutput(Consumer<FootstepPlan> autonomousOutput)
+   public void setAutonomousOutput(Consumer<RobotWalkRequest> autonomousOutput)
    {
       this.autonomousOutput.set(autonomousOutput);
    }
