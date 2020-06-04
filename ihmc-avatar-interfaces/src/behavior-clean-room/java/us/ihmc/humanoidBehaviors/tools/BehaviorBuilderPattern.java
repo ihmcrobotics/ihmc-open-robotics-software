@@ -65,7 +65,6 @@ public interface BehaviorBuilderPattern
       {
          if (!set)
          {
-
             if (required)
             {
                RuntimeException requiredException = new RuntimeException("Field not set: " + name);

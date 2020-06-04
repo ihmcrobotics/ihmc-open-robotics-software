@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOnly;
 import us.ihmc.humanoidBehaviors.tools.BehaviorBuilderPattern;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
@@ -29,19 +30,21 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.MapRe
 
 public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
 {
-   private final Field<UIPublisher> uiPublisher = required();
-   private final Field<PlanarRegionsList> mapRegions = required();
-   private final Field<Pose3D> goal = required();
-   private final Field<HumanoidRobotState> humanoidRobotState = required();
-   private final Field<VisibilityGraphsParametersReadOnly> visibilityGraphParameters = required();
-   private final Field<Supplier<Boolean>> operatorReviewEnabled = required();
-   private final Field<Consumer<ArrayList<Pose3D>>> successfulPlanConsumer = required();
-   private final Field<Runnable> resetPlanningFailedTimer = required();
-   private final Field<Consumer<List<? extends Pose3DReadOnly>>> review = required();
-   private final Field<SimpleTimer.Status> mapRegionsExpirationStatus = required();
-   private final Field<SimpleTimer.Status> planningFailedTimerStatus = required();
-   private final Field<Supplier<Boolean>> isBeingReviewed = required();
-   private final Field<Supplier<Boolean>> needNewPlan = required();
+   protected final Field<UIPublisher> uiPublisher = required();
+   protected final Field<VisibilityGraphsParametersReadOnly> visibilityGraphParameters = required();
+   protected final Field<LookAndStepBehaviorParametersReadOnly> lookAndStepBehaviorParameters = required();
+   protected final Field<Supplier<Boolean>> operatorReviewEnabled = required();
+   protected final Field<Consumer<ArrayList<Pose3D>>> successfulPlanConsumer = required();
+   protected final Field<Runnable> resetPlanningFailedTimer = required();
+   protected final Field<Consumer<List<? extends Pose3DReadOnly>>> initiateReviewOutput = required();
+   protected final Field<Supplier<Boolean>> isBeingReviewed = required();
+   protected final Field<Supplier<Boolean>> needNewPlan = required();
+
+   private final Field<PlanarRegionsList> mapRegions = requiredChanging();
+   private final Field<Pose3D> goal = requiredChanging();
+   private final Field<HumanoidRobotState> humanoidRobotState = requiredChanging();
+   private final Field<SimpleTimer.Status> mapRegionsExpirationStatus = requiredChanging();
+   private final Field<SimpleTimer.Status> planningFailedTimerStatus = requiredChanging();
 
    private boolean evaluateEntry()
    {
@@ -149,7 +152,7 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
       {
          if (operatorReviewEnabled.get().get())
          {
-            review.get().accept(bodyPathPlanForReview);
+            initiateReviewOutput.get().accept(bodyPathPlanForReview);
          }
          else
          {
@@ -162,24 +165,34 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
       }
    }
 
-   public void setUiPublisher(UIPublisher uiPublisher)
-   {
-      this.uiPublisher.set(uiPublisher);
-   }
-
-   public void setMapRegions(PlanarRegionsList mapRegions)
+   protected void setMapRegions(PlanarRegionsList mapRegions)
    {
       this.mapRegions.set(mapRegions);
    }
 
-   public void setGoal(Pose3D goal)
+   protected void setGoal(Pose3D goal)
    {
       this.goal.set(goal);
    }
 
-   public void setHumanoidRobotState(HumanoidRobotState humanoidRobotState)
+   protected void setHumanoidRobotState(HumanoidRobotState humanoidRobotState)
    {
       this.humanoidRobotState.set(humanoidRobotState);
+   }
+
+   protected void setMapRegionsExpirationStatus(SimpleTimer.Status mapRegionsExpirationStatus)
+   {
+      this.mapRegionsExpirationStatus.set(mapRegionsExpirationStatus);
+   }
+
+   protected void setPlanningFailedTimerStatus(SimpleTimer.Status planningFailedTimerStatus)
+   {
+      this.planningFailedTimerStatus.set(planningFailedTimerStatus);
+   }
+
+   public void setUIPublisher(UIPublisher uiPublisher)
+   {
+      this.uiPublisher.set(uiPublisher);
    }
 
    public void setVisibilityGraphParameters(VisibilityGraphsParametersReadOnly visibilityGraphParameters)
@@ -187,12 +200,17 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
       this.visibilityGraphParameters.set(visibilityGraphParameters);
    }
 
+   public void setLookAndStepBehaviorParameters(LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters)
+   {
+      this.lookAndStepBehaviorParameters.set(lookAndStepBehaviorParameters);
+   }
+
    public void setOperatorReviewEnabled(Supplier<Boolean> operatorReviewEnabled)
    {
       this.operatorReviewEnabled.set(operatorReviewEnabled);
    }
 
-   public void setSuccessfulPlanConsumer(Consumer<ArrayList<Pose3D>> successfulPlanConsumer)
+   public void setAutonomousOutput(Consumer<ArrayList<Pose3D>> successfulPlanConsumer)
    {
       this.successfulPlanConsumer.set(successfulPlanConsumer);
    }
@@ -204,20 +222,10 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
 
    public void setReviewInitiator(Consumer<List<? extends Pose3DReadOnly>> reviewInitiation)
    {
-      this.review.set(reviewInitiation);
+      this.initiateReviewOutput.set(reviewInitiation);
    }
 
-   public void setMapRegionsExpirationStatus(SimpleTimer.Status mapRegionsExpirationStatus)
-   {
-      this.mapRegionsExpirationStatus.set(mapRegionsExpirationStatus);
-   }
-
-   public void setPlanningFailedTimerStatus(SimpleTimer.Status planningFailedTimerStatus)
-   {
-      this.planningFailedTimerStatus.set(planningFailedTimerStatus);
-   }
-
-   public void setIsBeingReviewed(Supplier<Boolean> isBeingReviewed)
+   public void setIsBeingReviewedSupplier(Supplier<Boolean> isBeingReviewed)
    {
       this.isBeingReviewed.set(isBeingReviewed);
    }

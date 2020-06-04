@@ -3,7 +3,6 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.footstepPlanning.*;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
@@ -33,7 +32,9 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final BehaviorHelper helper;
    private final RemoteHumanoidRobotInterface robot;
 
-   private FootstepPlan robotWalkingModuleFootstepPlan;
+   private final LookAndStepBodyPathModule bodyPathModule;
+   private final LookAndStepFootstepPlanningModule footstepPlanningModule;
+   private final LookAndStepRobotMotionModule robotMotionModule;
 
    /**
     * We'll make the following assumptions/constraints about the data being passed around between task/modules:
@@ -66,12 +67,14 @@ public class LookAndStepBehavior implements BehaviorInterface
       TypedNotification<Boolean> approvalNotification = helper.createUITypedNotification(Approval);
 
       AtomicBoolean newBodyPathGoalNeeded = new AtomicBoolean(true);
+      AtomicReference<RobotSide> lastStanceSide = new AtomicReference<>();
+      SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses = new SideDependentList<>();
 
       // TODO: Want to be able to wire up behavior here and see all present modules
 
-      LookAndStepBodyPathModule bodyPathModule = new LookAndStepBodyPathModule();
-      LookAndStepFootstepPlanningModule footstepPlanningModule = new LookAndStepFootstepPlanningModule();
-      LookAndStepRobotMotionModule robotMotionModule = new LookAndStepRobotMotionModule();
+      bodyPathModule = new LookAndStepBodyPathModule();
+      footstepPlanningModule = new LookAndStepFootstepPlanningModule();
+      robotMotionModule = new LookAndStepRobotMotionModule();
 
       LookAndStepReviewPart<List<? extends Pose3DReadOnly>> bodyPathReview = new LookAndStepReviewPart<>("body path",
                                                                                                          approvalNotification,
@@ -84,12 +87,12 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.createUICallback(GoalInput, bodyPathModule::acceptGoal);
       bodyPathModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
       bodyPathModule.setIsBeingReviewedSupplier(bodyPathReview::isBeingReviewed);
-      bodyPathModule.setReviewEnabledSupplier(operatorReviewEnabledInput::get);
+      bodyPathModule.setIsBeingReviewedSupplier(operatorReviewEnabledInput::get);
       bodyPathModule.setLookAndStepBehaviorParameters(lookAndStepParameters);
       bodyPathModule.setVisibilityGraphParameters(visibilityGraphParameters);
-      bodyPathModule.setInitiateReviewOutput(bodyPathReview::review);
+      bodyPathModule.setReviewInitiator(bodyPathReview::review);
       bodyPathModule.setAutonomousOutput(footstepPlanningModule::acceptBodyPathPlan);
-      bodyPathModule.setNeedNewPlanSupplier(newBodyPathGoalNeeded::get); // TODO: hook up to subgoal mover
+      bodyPathModule.setNeedNewPlan(newBodyPathGoalNeeded::get); // TODO: hook up to subgoal mover
       bodyPathModule.setUIPublisher(helper::publishToUI);
 
       helper.createROS2Callback(ROS2Tools.REALSENSE_SLAM_REGIONS, footstepPlanningModule::acceptPlanarRegions);
@@ -98,15 +101,14 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlanningModule.setLookAndStepBehaviorParameters(lookAndStepParameters);
       footstepPlanningModule.setFootstepPlannerParameters(footstepPlannerParameters);
       footstepPlanningModule.setNewBodyPathGoalNeededNotifier(() -> newBodyPathGoalNeeded.set(true));
-      AtomicReference<RobotSide> lastStanceSide = new AtomicReference<>();
       footstepPlanningModule.setLastStanceSideSupplier(lastStanceSide::get);
       footstepPlanningModule.setLastStanceSideSetter(lastStanceSide::set);
-      SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses = new SideDependentList<>();
       footstepPlanningModule.setLastSteppedSolePoseSupplier(lastSteppedSolePoses::get);
       footstepPlanningModule.setLastSteppedSolePoseConsumer(lastSteppedSolePoses::put);
       footstepPlanningModule.setOperatorReviewEnabledSupplier(operatorReviewEnabledInput::get);
       footstepPlanningModule.setReviewPlanOutput(footstepPlanReview::review);
       footstepPlanningModule.setAutonomousOutput(robotMotionModule::acceptRobotWalkRequest);
+      footstepPlanningModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
 
       robotMotionModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
       robotMotionModule.setLastSteppedSolePoseConsumer(lastSteppedSolePoses::put);
