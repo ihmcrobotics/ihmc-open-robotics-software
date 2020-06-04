@@ -2,8 +2,8 @@ package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
 
 import controller_msgs.msg.dds.*;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -11,9 +11,9 @@ import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProperties;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
@@ -22,8 +22,8 @@ import us.ihmc.messager.Messager;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.Ros2NodeInterface;
-import us.ihmc.commons.thread.TypedNotification;
 
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -107,11 +107,11 @@ public class RemoteFootstepPlannerInterface
          {
             boolean containsStepDown = false;
             int index = 0;
-            double lastStepZ = result.getFootstepPlan().getFootstep(index).getSoleFramePose().getZ();
+            double lastStepZ = result.getFootstepPlan().getFootstep(index).getFootstepPose().getZ();
             do
             {
                ++index;
-               double thisStepZ = result.getFootstepPlan().getFootstep(index).getSoleFramePose().getZ();
+               double thisStepZ = result.getFootstepPlan().getFootstep(index).getFootstepPose().getZ();
                double difference = thisStepZ - lastStepZ;
                if (difference <= -STEP_DOWN_DISTANCE_QUALIFIER)
                {

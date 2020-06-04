@@ -29,7 +29,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
-import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -411,7 +411,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
 
    /** {@inheritDoc} */
    @Override
-   public void addFootstepToPlan(SimpleAdjustableFootstep footstep, double swingDuration, double transferDuration)
+   public void addFootstepToPlan(SimpleFootstep footstep, double swingDuration, double transferDuration)
    {
       FramePose3DReadOnly footstepPose = footstep.getSoleFramePose();
       footstepPose.checkReferenceFrameMatch(worldFrame);

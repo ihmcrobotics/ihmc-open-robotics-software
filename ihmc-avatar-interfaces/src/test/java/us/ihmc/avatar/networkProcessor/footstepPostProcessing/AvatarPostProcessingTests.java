@@ -457,8 +457,7 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
 
       FootstepDataListMessage footstepDataListFromPlan = FootstepDataMessageConverter.createFootstepDataListFromPlan(plannerOutput.getFootstepPlan(),
                                                                                                                      -1.0,
-                                                                                                                     -1.0,
-                                                                                                                     ExecutionMode.OVERRIDE);
+                                                                                                                     -1.0);
       postProcessingRequest.getFootstepDataList().set(footstepDataListFromPlan);
       postProcessingRequest.getPlanarRegionsList().set(requestPacket.getPlanarRegionsListMessage());
       postProcessingRequest.getLeftFootPositionInWorld().set(leftFootPose.getPosition());

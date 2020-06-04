@@ -1,6 +1,7 @@
 package us.ihmc.humanoidRobotics.footstep;
 
 import java.util.List;
+import java.util.function.IntToDoubleFunction;
 
 import org.apache.commons.lang3.mutable.MutableDouble;
 import us.ihmc.commons.MathTools;
@@ -10,12 +11,12 @@ import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.*;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -231,19 +232,29 @@ public class Footstep implements Settable<Footstep>
       return customPositionWaypoints;
    }
 
-   public void setCustomPositionWaypoints(RecyclingArrayList<FramePoint3D> customPositionWaypoints)
+   public void setCustomPositionWaypoints(List<? extends Tuple3DReadOnly> customPositionWaypoints)
    {
       this.customPositionWaypoints.clear();
       for (int i = 0; i < customPositionWaypoints.size(); i++)
+      {
          this.customPositionWaypoints.add().set(customPositionWaypoints.get(i));
+      }
    }
 
-   public List<FrameSE3TrajectoryPoint> getSwingTrajectory()
+   public void setCustomWaypointProportions(IntToDoubleFunction customWaypointProportions)
+   {
+      for (int i = 0; i < 2; i++)
+      {
+         this.customWaypointProportions.get(i).setValue(customWaypointProportions.applyAsDouble(i));
+      }
+   }
+
+   public RecyclingArrayList<FrameSE3TrajectoryPoint> getSwingTrajectory()
    {
       return swingTrajectory;
    }
 
-   public void setSwingTrajectory(RecyclingArrayList<FrameSE3TrajectoryPoint> swingTrajectory)
+   public void setSwingTrajectory(List<FrameSE3TrajectoryPoint> swingTrajectory)
    {
       this.swingTrajectory.clear();
       for (int i = 0; i < swingTrajectory.size(); i++)

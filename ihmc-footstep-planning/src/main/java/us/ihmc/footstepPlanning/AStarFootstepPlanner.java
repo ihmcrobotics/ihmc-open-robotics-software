@@ -1,12 +1,5 @@
 package us.ihmc.footstepPlanning;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -14,10 +7,12 @@ import us.ihmc.euclid.geometry.Pose2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
+import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 import us.ihmc.footstepPlanning.graphSearch.FootstepCostCalculator;
 import us.ihmc.footstepPlanning.graphSearch.FootstepPlannerHeuristicCalculator;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnappingTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
@@ -27,14 +22,19 @@ import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameters
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
-import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
-import us.ihmc.footstepPlanning.graphSearch.AStarFootstepPlannerIterationConductor;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 public class AStarFootstepPlanner
 {
@@ -223,20 +223,20 @@ public class AStarFootstepPlanner
       List<FootstepNode> path = footstepPlanner.getGraph().getPathFromStart(completionChecker.getEndNode());
       for (int i = 1; i < path.size(); i++)
       {
-         SimpleFootstep footstep = new SimpleFootstep();
+         Footstep footstep = new Footstep();
 
          footstep.setRobotSide(path.get(i).getRobotSide());
 
          FootstepNodeSnapData snapData = snapper.snapFootstepNode(path.get(i), path.get(i - 1), true);
-         footstep.getSoleFramePose().set(snapData.getSnappedNodeTransform(path.get(i)));
+         footstep.setPose(snapData.getSnappedNodeTransform(path.get(i)));
 
          if (request.getAssumeFlatGround() || request.getPlanarRegionsList() == null || request.getPlanarRegionsList().isEmpty())
          {
             double flatGroundHeight = 0.5 * (request.getStartFootPoses().get(RobotSide.LEFT).getZ() + request.getStartFootPoses().get(RobotSide.RIGHT).getZ());
-            footstep.getSoleFramePose().setZ(flatGroundHeight);
+            footstep.getFootstepPose().setZ(flatGroundHeight);
          }
 
-         footstep.setFoothold(snapData.getCroppedFoothold());
+         footstep.setPredictedContactPoints(snapData.getCroppedFoothold().getVertexBufferView());
          outputToPack.getFootstepPlan().addFootstep(footstep);
       }
 

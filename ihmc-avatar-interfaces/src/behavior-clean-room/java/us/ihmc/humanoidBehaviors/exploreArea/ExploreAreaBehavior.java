@@ -1,36 +1,20 @@
 package us.ihmc.humanoidBehaviors.exploreArea;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.apache.commons.lang3.tuple.MutablePair;
-import org.apache.commons.lang3.tuple.Pair;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
+import org.apache.commons.lang3.tuple.MutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.Conversions;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.LineSegment2D;
 import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.FrameQuaternion;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -74,7 +58,13 @@ import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.extra.EnumBasedStateMachineFactory;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.commons.thread.TypedNotification;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ExploreAreaBehavior implements BehaviorInterface
 {
@@ -1079,7 +1069,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++) // this code makes the message smaller to send over the network, TODO investigate
       {
          FramePose3D soleFramePoseToPack = new FramePose3D();
-         footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
+         footstepPlan.getFootstep(i).getPose(soleFramePoseToPack);
          footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
       }
       helper.publishToUI(PatrolBehaviorAPI.CurrentFootstepPlan, footstepLocations);
