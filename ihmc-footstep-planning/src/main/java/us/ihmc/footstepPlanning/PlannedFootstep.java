@@ -17,7 +17,7 @@ import java.util.List;
 /**
  * Object holding all information planned for a given step by {@link FootstepPlanningModule}
  */
-public class PlannedFootstep
+public class PlannedFootstep implements PlannedFootstepReadOnly
 {
    private final RobotSide robotSide;
    private final FramePose3D footstepPose = new FramePose3D();
@@ -88,6 +88,7 @@ public class PlannedFootstep
 
    }
 
+   @Override
    public RobotSide getRobotSide()
    {
       return robotSide;
@@ -98,16 +99,19 @@ public class PlannedFootstep
       return footstepPose;
    }
 
+   @Override
    public void getFootstepPose(FramePose3D footstepPoseToPack)
    {
       footstepPoseToPack.set(footstepPose);
    }
 
+   @Override
    public ConvexPolygon2D getFoothold()
    {
       return foothold;
    }
 
+   @Override
    public boolean hasFoothold()
    {
       return !foothold.isEmpty();
