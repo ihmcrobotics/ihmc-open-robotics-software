@@ -1,4 +1,4 @@
-package us;
+package us.ihmc.avatar.stepAdjustment;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;

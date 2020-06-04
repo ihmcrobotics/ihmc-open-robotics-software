@@ -1,4 +1,4 @@
-package us;
+package us.ihmc.avatar.stepAdjustment;
 
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
