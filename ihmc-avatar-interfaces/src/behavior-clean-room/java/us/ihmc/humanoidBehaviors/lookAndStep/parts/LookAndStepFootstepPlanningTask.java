@@ -9,7 +9,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
@@ -38,25 +37,25 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
 {
-   private Field<LookAndStepBehaviorParametersReadOnly> lookAndStepBehaviorParameters = required(); // TODO: Maybe we only need to invalidate some fields
-   private Field<FootstepPlannerParametersReadOnly> footstepPlannerParameters = required();
-   private Field<Supplier<Boolean>> isBeingReviewedSupplier = required();
-   private Field<UIPublisher> uiPublisher = required();
-   private Field<Runnable> newBodyPathGoalNeededNotifier = required();
-   private Field<Function<RobotSide, FramePose3DReadOnly>> lastSteppedSolePoseSupplier = required();
-   private Field<BiConsumer<RobotSide, FramePose3DReadOnly>> lastSteppedSolePoseConsumer = required();
-   private Field<RobotSide> lastStanceSide = required();
-   private Field<FootstepPlanningModule> footstepPlanningModule = required();
-   private Field<Consumer<RobotSide>> lastStanceSideSetter = required();
-   private Field<Supplier<Boolean>> operatorReviewEnabledSupplier = required();
-   private Field<Consumer<RobotWalkRequest>> reviewPlanOutput = required();
-   private Field<Consumer<RobotWalkRequest>> autonomousOutput = required();
+   protected final Field<LookAndStepBehaviorParametersReadOnly> lookAndStepBehaviorParameters = required(); // TODO: Maybe we only need to invalidate some fields
+   protected final Field<FootstepPlannerParametersReadOnly> footstepPlannerParameters = required();
+   protected final Field<Supplier<Boolean>> isBeingReviewedSupplier = required();
+   protected final Field<UIPublisher> uiPublisher = required();
+   protected final Field<Runnable> newBodyPathGoalNeededNotifier = required();
+   protected final Field<Function<RobotSide, FramePose3DReadOnly>> lastSteppedSolePoseSupplier = required();
+   protected final Field<BiConsumer<RobotSide, FramePose3DReadOnly>> lastSteppedSolePoseConsumer = required();
+   protected final Field<FootstepPlanningModule> footstepPlanningModule = required();
+   protected final Field<Consumer<RobotSide>> lastStanceSideSetter = required();
+   protected final Field<Supplier<Boolean>> operatorReviewEnabledSupplier = required();
+   protected final Field<Consumer<RobotWalkRequest>> reviewPlanOutput = required();
+   protected final Field<Consumer<RobotWalkRequest>> autonomousOutput = required();
 
-   private Field<PlanarRegionsList> planarRegions = required();
-   private Field<SimpleTimer.Status> planarRegionsExpirationStatus = required();
-   private Field<SimpleTimer.Status> moduleFailedTimerStatus = required();
-   private Field<List<? extends Pose3DReadOnly>> bodyPathPlan = required();
-   private Field<HumanoidRobotState> robotState = required();
+   private final Field<PlanarRegionsList> planarRegions = requiredChanging();
+   private final Field<SimpleTimer.Status> planarRegionsExpirationStatus = requiredChanging();
+   private final Field<SimpleTimer.Status> moduleFailedTimerStatus = requiredChanging();
+   private final Field<List<? extends Pose3DReadOnly>> bodyPathPlan = requiredChanging();
+   private final Field<HumanoidRobotState> robotState = requiredChanging();
+   private final Field<RobotSide> lastStanceSide = requiredChanging();
 
    private boolean evaluateEntry()
    {
@@ -251,24 +250,29 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       invalidateChanging();
    }
 
-   public void setPlanarRegions(PlanarRegionsList planarRegions)
+   protected void setPlanarRegions(PlanarRegionsList planarRegions)
    {
       this.planarRegions.set(planarRegions);
    }
 
-   public void setPlanarRegionsExpirationStatus(SimpleTimer.Status planarRegionsExpirationStatus)
+   protected void setPlanarRegionsExpirationStatus(SimpleTimer.Status planarRegionsExpirationStatus)
    {
       this.planarRegionsExpirationStatus.set(planarRegionsExpirationStatus);
    }
 
-   public void setModuleFailedTimerStatus(SimpleTimer.Status moduleFailedTimerStatus)
+   protected void setModuleFailedTimerStatus(SimpleTimer.Status moduleFailedTimerStatus)
    {
       this.moduleFailedTimerStatus.set(moduleFailedTimerStatus);
    }
 
-   public void setBodyPathPlan(List<? extends Pose3DReadOnly> bodyPathPlan)
+   protected void setBodyPathPlan(List<? extends Pose3DReadOnly> bodyPathPlan)
    {
       this.bodyPathPlan.set(bodyPathPlan);
+   }
+
+   protected void setRobotState(HumanoidRobotState robotState)
+   {
+      this.robotState.set(robotState);
    }
 
    public void setIsBeingReviewedSupplier(Supplier<Boolean> isBeingReviewedSupplier)
@@ -279,11 +283,6 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    public void setUiPublisher(UIPublisher uiPublisher)
    {
       this.uiPublisher.set(uiPublisher);
-   }
-
-   public void setRobotState(HumanoidRobotState robotState)
-   {
-      this.robotState.set(robotState);
    }
 
    public void setLookAndStepBehaviorParameters(LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters)
@@ -311,7 +310,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       this.lastSteppedSolePoseConsumer.set(lastSteppedSolePoseConsumer);
    }
 
-   public void setLastStanceSide(RobotSide lastStanceSide)
+   protected void setLastStanceSide(RobotSide lastStanceSide)
    {
       this.lastStanceSide.set(lastStanceSide);
    }
