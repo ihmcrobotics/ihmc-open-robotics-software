@@ -1,7 +1,7 @@
 package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.communication.util.SimpleTimer;
+import us.ihmc.communication.util.TimerSnapshot;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -43,8 +43,8 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    private final Field<PlanarRegionsList> mapRegions = requiredChanging();
    private final Field<Pose3D> goal = requiredChanging();
    private final Field<HumanoidRobotState> humanoidRobotState = requiredChanging();
-   private final Field<SimpleTimer.Status> mapRegionsExpirationStatus = requiredChanging();
-   private final Field<SimpleTimer.Status> planningFailedTimerStatus = requiredChanging();
+   private final Field<TimerSnapshot> mapRegionsReceptionTimerSnapshot = requiredChanging();
+   private final Field<TimerSnapshot> planningFailureTimerSnapshot = requiredChanging();
 
    private boolean evaluateEntry()
    {
@@ -61,7 +61,7 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
       {
          LogTools.warn("Body path: Regions not OK: {}, timePassed: {}, isEmpty: {}",
                        mapRegions,
-                       mapRegionsExpirationStatus.get().getTimePassedSinceReset(),
+                       mapRegionsReceptionTimerSnapshot.get().getTimePassedSinceReset(),
                        mapRegions == null ? null : mapRegions.get().isEmpty());
          proceed = false;
       }
@@ -70,9 +70,9 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
          LogTools.warn("Body path: New plan not needed");
          proceed = false;
       }
-      else if (failedRecently()) // TODO: This could be "run recently" instead of failed recently
+      else if (planningFailureTimerSnapshot.get().isRunning()) // TODO: This could be "run recently" instead of failed recently
       {
-         LogTools.warn("Body path: failedRecently = true");
+         LogTools.warn("Body path: Planner failed recently");
          proceed = false;
       }
       else if (isBeingReviewed.get().get())
@@ -91,12 +91,9 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
 
    private boolean regionsOK()
    {
-      return mapRegions.get() != null && !mapRegionsExpirationStatus.get().isPastOrNaN() && !mapRegions.get().isEmpty();
-   }
-
-   private boolean failedRecently()
-   {
-      return !planningFailedTimerStatus.get().isPastOrNaN();
+      return mapRegions.get() != null
+             && !mapRegions.get().isEmpty()
+             && mapRegionsReceptionTimerSnapshot.get().isRunning();
    }
 
    // TODO: Extract as interface?
@@ -180,14 +177,14 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
       this.humanoidRobotState.set(humanoidRobotState);
    }
 
-   protected void setMapRegionsExpirationStatus(SimpleTimer.Status mapRegionsExpirationStatus)
+   protected void setMapRegionsReceptionTimerSnapshot(TimerSnapshot mapRegionsReceptionTimerSnapshot)
    {
-      this.mapRegionsExpirationStatus.set(mapRegionsExpirationStatus);
+      this.mapRegionsReceptionTimerSnapshot.set(mapRegionsReceptionTimerSnapshot);
    }
 
-   protected void setPlanningFailedTimerStatus(SimpleTimer.Status planningFailedTimerStatus)
+   protected void setPlanningFailureTimerSnapshot(TimerSnapshot planningFailureTimerSnapshot)
    {
-      this.planningFailedTimerStatus.set(planningFailedTimerStatus);
+      this.planningFailureTimerSnapshot.set(planningFailureTimerSnapshot);
    }
 
    public void setUIPublisher(UIPublisher uiPublisher)

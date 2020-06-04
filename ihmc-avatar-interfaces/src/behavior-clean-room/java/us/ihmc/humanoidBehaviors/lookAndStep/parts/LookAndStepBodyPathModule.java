@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
-import us.ihmc.communication.util.SimpleTimer;
+import us.ihmc.communication.util.Timer;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.humanoidBehaviors.lookAndStep.TypedInput;
@@ -19,8 +19,8 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
 
    private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
    private final TypedInput<Pose3D> goalInput = new TypedInput<>();
-   private SimpleTimer mapRegionsExpirationTimer = new SimpleTimer();
-   private SimpleTimer planningFailedTimer = new SimpleTimer();
+   private Timer mapRegionsExpirationTimer = new Timer();
+   private Timer planningFailedTimer = new Timer();
 
    // hook up inputs and notifications separately.
    // always run again if with latest data
@@ -55,8 +55,8 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
       setMapRegions(mapRegionsInput.get());
       setHumanoidRobotState(robotStateSupplier.get().get());
       setVisibilityGraphParameters(visibilityGraphParameters.get());
-      setMapRegionsExpirationStatus(mapRegionsExpirationTimer.getStatus(lookAndStepBehaviorParameters.get().getPlanarRegionsExpiration()));
-      setPlanningFailedTimerStatus(planningFailedTimer.getStatus(lookAndStepBehaviorParameters.get().getWaitTimeAfterPlanFailed()));
+      setMapRegionsReceptionTimerSnapshot(mapRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.get().getPlanarRegionsExpiration()));
+      setPlanningFailureTimerSnapshot(planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.get().getWaitTimeAfterPlanFailed()));
 
       run();
    }
