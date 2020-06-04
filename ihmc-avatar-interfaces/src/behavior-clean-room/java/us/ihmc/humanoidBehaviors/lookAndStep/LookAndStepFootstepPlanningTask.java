@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.util.SimpleTimer;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -14,6 +15,7 @@ import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.humanoidBehaviors.tools.Builder;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
@@ -34,24 +36,25 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
 public class LookAndStepFootstepPlanningTask implements Builder
 {
-   private Field<PlanarRegionsList> planarRegions = required();
-   private Field<SimpleTimer.Status> planarRegionsExpirationStatus = required();
-   private Field<SimpleTimer.Status> moduleFailedTimerStatus = required();
-   private Field<List<Pose3D>> bodyPathPlan = required();
+   private Field<LookAndStepBehaviorParametersReadOnly> lookAndStepBehaviorParameters = required(); // TODO: Maybe we only need to invalidate some fields
+   private Field<FootstepPlannerParametersReadOnly> footstepPlannerParameters = required();
    private Field<Supplier<Boolean>> isBeingReviewedSupplier = required();
    private Field<UIPublisher> uiPublisher = required();
-   private Field<HumanoidRobotState> robotState = required();
-   private Field<LookAndStepBehaviorParametersReadOnly> lookAndStepBehaviorParameters = required();
-   private Field<FootstepPlannerParametersReadOnly> footstepPlannerParameters = required();
    private Field<Runnable> newBodyPathGoalNeededNotifier = required();
    private Field<Function<RobotSide, FramePose3DReadOnly>> lastSteppedSolePoseSupplier = required();
    private Field<BiConsumer<RobotSide, FramePose3DReadOnly>> lastSteppedSolePoseConsumer = required();
    private Field<RobotSide> lastStanceSide = required();
-   private Field<Consumer<RobotSide>> lastStanceSideSetter = required();
    private Field<FootstepPlanningModule> footstepPlanningModule = required();
+   private Field<Consumer<RobotSide>> lastStanceSideSetter = required();
    private Field<Supplier<Boolean>> operatorReviewEnabledSupplier = required();
    private Field<Consumer<FootstepPlan>> reviewPlanOutput = required();
    private Field<Consumer<FootstepPlan>> autonomousOutput = required();
+
+   private Field<PlanarRegionsList> planarRegions = required();
+   private Field<SimpleTimer.Status> planarRegionsExpirationStatus = required();
+   private Field<SimpleTimer.Status> moduleFailedTimerStatus = required();
+   private Field<List<? extends Pose3DReadOnly>> bodyPathPlan = required();
+   private Field<HumanoidRobotState> robotState = required();
 
    private boolean evaluateEntry()
    {
@@ -272,7 +275,7 @@ public class LookAndStepFootstepPlanningTask implements Builder
       this.moduleFailedTimerStatus.set(moduleFailedTimerStatus);
    }
 
-   public void setBodyPathPlan(List<Pose3D> bodyPathPlan)
+   public void setBodyPathPlan(List<? extends Pose3DReadOnly> bodyPathPlan)
    {
       this.bodyPathPlan.set(bodyPathPlan);
    }
