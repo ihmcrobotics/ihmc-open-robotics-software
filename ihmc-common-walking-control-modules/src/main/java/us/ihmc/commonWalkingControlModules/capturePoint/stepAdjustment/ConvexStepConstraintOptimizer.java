@@ -59,16 +59,14 @@ public class ConvexStepConstraintOptimizer
 
    public RigidBodyTransformReadOnly findConstraintTransform(ConvexPolygon2DReadOnly polygonToWiggle,
                                                              ConvexPolygon2DReadOnly planeToWiggleInto,
-                                                             ConstraintOptimizerParameters parameters,
-                                                             boolean boundTranslation)
+                                                             ConstraintOptimizerParameters parameters)
    {
-      return findConstraintTransform(polygonToWiggle, planeToWiggleInto, parameters, boundTranslation, emptyArray);
+      return findConstraintTransform(polygonToWiggle, planeToWiggleInto, parameters, emptyArray);
    }
 
    public RigidBodyTransformReadOnly findConstraintTransform(ConvexPolygon2DReadOnly polygonToWiggle,
                                                              ConvexPolygon2DReadOnly planeToWiggleInto,
                                                              ConstraintOptimizerParameters parameters,
-                                                             boolean boundTranslation,
                                                              int[] startingVerticesToIgnore)
    {
       int numberOfPoints = polygonToWiggle.getNumberOfVertices();
@@ -82,12 +80,12 @@ public class ConvexStepConstraintOptimizer
       int slackVariables = constraintsPerPoint * numberOfPoints;
       int totalVariables = variables + slackVariables;
       int constraints = constraintsPerPoint * numberOfPoints;
-      int boundConstraints = boundTranslation ? 4 : 0;
+      int boundConstraints = parameters.getConstrainMaxAdjustment() ? 4 : 0;
 
       Aineq.reshape(constraints + boundConstraints, totalVariables);
       bineq.reshape(constraints + boundConstraints, 1);
       // add limits on allowed translation // FIXME get rid of this?
-      if (boundTranslation)
+      if (parameters.getConstrainMaxAdjustment())
          PolygonWiggler.addTranslationConstraint(Aineq, bineq, constraints, parameters.getMaxX(), -parameters.getMaxX(), parameters.getMaxY(), -parameters.getMaxY());
 
       // The inequality constraints of form
