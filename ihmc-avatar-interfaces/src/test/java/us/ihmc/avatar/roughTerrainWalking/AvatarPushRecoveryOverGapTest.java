@@ -122,6 +122,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    @Test
    public void testNoPush() throws SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
 
       double simulationTime = (swingTime + transferTime) * 4 + 1.0;
@@ -159,6 +160,7 @@ public abstract class AvatarPushRecoveryOverGapTest implements MultiRobotTestInt
    @Test
    public void testSidePush() throws SimulationExceededMaximumTimeException
    {
+      simulationTestingParameters.setKeepSCSUp(true);
       setupTest();
 
       double totalMass  = getRobotModel().createFullRobotModel().getTotalMass();

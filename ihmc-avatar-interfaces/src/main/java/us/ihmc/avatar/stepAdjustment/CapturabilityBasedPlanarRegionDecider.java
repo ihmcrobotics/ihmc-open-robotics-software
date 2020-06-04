@@ -26,7 +26,7 @@ public class CapturabilityBasedPlanarRegionDecider
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final double minimumIntersectionForSearch = 0.005;
+   private static final double minimumIntersectionForSearch = 0.05;
 
    private final List<StepConstraintRegion> stepConstraintRegions = new ArrayList<>();
 
