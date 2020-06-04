@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.lookAndStep;
+package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;

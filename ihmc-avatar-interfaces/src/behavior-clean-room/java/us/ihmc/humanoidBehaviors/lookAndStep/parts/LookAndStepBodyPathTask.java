@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.lookAndStep;
+package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.util.SimpleTimer;
@@ -7,7 +7,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
-import us.ihmc.humanoidBehaviors.tools.Builder;
+import us.ihmc.humanoidBehaviors.tools.BehaviorBuilderPattern;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.log.LogTools;
@@ -27,7 +27,7 @@ import java.util.function.Supplier;
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.BodyPathPlanForUI;
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.MapRegionsForUI;
 
-public class LookAndStepBodyPathTask implements Builder
+public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
 {
    private final Field<UIPublisher> uiPublisher = required();
    private final Field<PlanarRegionsList> mapRegions = required();
@@ -106,7 +106,7 @@ public class LookAndStepBodyPathTask implements Builder
          performTask();
       }
 
-      invalidate();
+      invalidateChanging();
    }
 
    private void performTask()
