@@ -4,6 +4,8 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.SimpleTimer;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.humanoidBehaviors.tools.Builder;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.log.LogTools;
@@ -22,8 +24,8 @@ public class LookAndStepBodyPathModule implements Builder
    private Field<Supplier<Boolean>> reviewEnabledSupplier = required();
    private Field<LookAndStepBehaviorParametersReadOnly> lookAndStepBehaviorParameters = required();
    private Field<VisibilityGraphsParametersReadOnly> visibilityGraphParameters = required();
-   private Field<Consumer<List<Pose3D>>> initiateReviewOutput = required();
-   private Field<Consumer<List<Pose3D>>> autonomousOutput = required();
+   private Field<Consumer<List<? extends Pose3DReadOnly>>> initiateReviewOutput = required();
+   private Field<Consumer<List<? extends Pose3DReadOnly>>> autonomousOutput = required();
    private Field<Supplier<Boolean>> needNewPlanSupplier = required();
    private Field<UIPublisher> uiPublisher = required();
 
@@ -105,12 +107,12 @@ public class LookAndStepBodyPathModule implements Builder
       this.visibilityGraphParameters.set(visibilityGraphParameters);
    }
 
-   public void setInitiateReviewOutput(Consumer<List<Pose3D>> initiateReviewOutput)
+   public void setInitiateReviewOutput(Consumer<List<? extends Pose3DReadOnly>> initiateReviewOutput)
    {
       this.initiateReviewOutput.set(initiateReviewOutput);
    }
 
-   public void setAutonomousOutput(Consumer<List<Pose3D>> autonomousOutput)
+   public void setAutonomousOutput(Consumer<List<? extends Pose3DReadOnly>> autonomousOutput)
    {
       this.autonomousOutput.set(autonomousOutput);
    }

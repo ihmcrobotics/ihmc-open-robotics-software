@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
+import us.ihmc.humanoidBehaviors.tools.Builder;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.log.LogTools;
@@ -19,6 +20,7 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -35,7 +37,7 @@ public class LookAndStepBodyPathTask implements Builder
    private final Field<Supplier<Boolean>> operatorReviewEnabled = required();
    private final Field<Consumer<ArrayList<Pose3D>>> successfulPlanConsumer = required();
    private final Field<Runnable> resetPlanningFailedTimer = required();
-   private final Field<Consumer<ArrayList<Pose3D>>> review = required();
+   private final Field<Consumer<List<? extends Pose3DReadOnly>>> review = required();
    private final Field<SimpleTimer.Status> mapRegionsExpirationStatus = required();
    private final Field<SimpleTimer.Status> planningFailedTimerStatus = required();
    private final Field<Supplier<Boolean>> isBeingReviewed = required();
@@ -200,7 +202,7 @@ public class LookAndStepBodyPathTask implements Builder
       this.resetPlanningFailedTimer.set(resetPlanningFailedTimer);
    }
 
-   public void setReviewInitiator(Consumer<ArrayList<Pose3D>> reviewInitiation)
+   public void setReviewInitiator(Consumer<List<? extends Pose3DReadOnly>> reviewInitiation)
    {
       this.review.set(reviewInitiation);
    }
