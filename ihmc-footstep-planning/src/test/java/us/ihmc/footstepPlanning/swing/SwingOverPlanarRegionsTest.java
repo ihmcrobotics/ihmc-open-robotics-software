@@ -1,8 +1,7 @@
-package us.ihmc.footstepPlanning.postProcessing;
+package us.ihmc.footstepPlanning.swing;
 
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPostProcessingPacket;
-import io.netty.util.internal.RecyclableArrayList;
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGains;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationParameters;
@@ -12,28 +11,30 @@ import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTr
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsVisualizer;
 import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
 import us.ihmc.commons.ContinuousIntegrationTools;
-import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.*;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameOrientation3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
+import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.FootstepPlannerRequest;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.PlannedFootstep;
+import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicShape;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.log.LogTools;
+import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.robotics.Assert;
 import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
 import us.ihmc.robotics.controllers.pidGains.implementations.PIDSE3Configuration;
@@ -43,6 +44,7 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchFactory;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsListDefinedEnvironment;
@@ -53,15 +55,20 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 
-import java.awt.Color;
+import java.awt.*;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 
 public class SwingOverPlanarRegionsTest
 {
-   private final static boolean visualize = false && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   private static boolean visualize = true;
+
+   @BeforeEach
+   public void setup()
+   {
+      visualize = visualize && !ContinuousIntegrationTools.isRunningOnContinuousIntegrationServer();
+   }
 
    @Test
    public void testAngleStepDown()
@@ -83,8 +90,8 @@ public class SwingOverPlanarRegionsTest
       endFoot.getPosition().set(0.6, -width / 2.0, 0.31);
       endFoot.getOrientation().setYawPitchRoll(0.0, Math.toRadians(20.0), 0.0);
 
-      FootstepPostProcessingPacket result = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-//      checkForCollisions(result, true);
+      Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
+//      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
    }
 
    @Test
@@ -111,8 +118,8 @@ public class SwingOverPlanarRegionsTest
       endFoot.getPosition().set(0.6, -width / 2.0, 0.31);
       endFoot.getOrientation().setYawPitchRoll(0.0, Math.toRadians(20.0), 0.0);
 
-      FootstepPostProcessingPacket result = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-//      checkForCollisions(result, true);
+      Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
+//      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
    }
 
    @Test
@@ -133,8 +140,8 @@ public class SwingOverPlanarRegionsTest
       FramePose3D endFoot = new FramePose3D();
       endFoot.getPosition().set(0.2, -width / 2.0, 0.1);
 
-      FootstepPostProcessingPacket result = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-      checkForCollisions(result, true);
+      Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
    }
 
    @Test
@@ -151,7 +158,7 @@ public class SwingOverPlanarRegionsTest
       FramePose3D endFoot = new FramePose3D();
       endFoot.getPosition().set(0.6, 0.0, 0.0);
 
-      FootstepPostProcessingPacket result = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
+      Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
    }
 
    @Test
@@ -176,7 +183,7 @@ public class SwingOverPlanarRegionsTest
       FramePose3D endFoot = new FramePose3D();
       endFoot.getPosition().set(1.0, 0.0, 0.0);
 
-      FootstepPostProcessingPacket result = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
+      Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
    }
 
    @Test
@@ -198,8 +205,8 @@ public class SwingOverPlanarRegionsTest
       FramePose3D endFoot = new FramePose3D();
       endFoot.getPosition().set(1.0, 0.0, 0.0);
 
-      FootstepPostProcessingPacket processedPacket = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
-      checkForCollisions(processedPacket, false);
+      Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, generator.getPlanarRegionsList());
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), false);
    }
 
    @Test
@@ -217,8 +224,8 @@ public class SwingOverPlanarRegionsTest
       endFoot.getPosition().set(1.4, 0.1, 0.0);
       endFoot.getOrientation().set(0.0, 0.0, 0.174, 0.985);
 
-      FootstepPostProcessingPacket processedPacket = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
-      checkForCollisions(processedPacket, false);
+      Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), false);
    }
 
    @Test
@@ -236,8 +243,8 @@ public class SwingOverPlanarRegionsTest
       endFoot.getPosition().set(1.95, -0.1, 0.0);
       endFoot.getOrientation().set(0.0, 0.0, 0.087, 0.996);
 
-      FootstepPostProcessingPacket processedPacket = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
-      checkForCollisions(processedPacket, false);
+      Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), false);
    }
 
    @Test
@@ -255,8 +262,8 @@ public class SwingOverPlanarRegionsTest
       endFoot.getPosition().set(1.4, 0.1, 0.0);
       endFoot.getOrientation().set(0.0, 0.0, 0.174, 0.985);
 
-      FootstepPostProcessingPacket processedPacket = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
-      checkForCollisions(processedPacket, true);
+      Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
    }
 
    @Test
@@ -274,14 +281,24 @@ public class SwingOverPlanarRegionsTest
       endFoot.getPosition().set(1.95, -0.1, 0.0);
       endFoot.getOrientation().set(0.0, 0.0, 0.087, 0.996);
 
-      FootstepPostProcessingPacket processedPacket = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
-      checkForCollisions(processedPacket, true);
+      Pair<FootstepPlannerRequest, FootstepPlan> footstepPlan = runTest(startFoot, endFoot, environment.getPlanarRegionsList());
+      checkForCollisions(footstepPlan.getKey(), footstepPlan.getRight(), true);
    }
 
-   private FootstepPostProcessingPacket runTest(FramePose3DReadOnly startFoot, FramePose3DReadOnly endFoot, PlanarRegionsList planarRegionsList)
+   private Pair<FootstepPlannerRequest, FootstepPlan> runTest(FramePose3DReadOnly startFoot, FramePose3DReadOnly endFoot, PlanarRegionsList planarRegionsList)
    {
       WalkingControllerParameters walkingControllerParameters = getWalkingControllerParameters();
       ConvexPolygon2D foot = getFootPolygon();
+
+      SwingPlannerParametersBasics swingPlannerParameters = getParameters();
+      SideDependentList<ConvexPolygon2D> footPolygons = new SideDependentList<>(side -> getFootPolygon());
+      FootstepPlanningModule planningModule = new FootstepPlanningModule(getClass().getSimpleName(),
+                                                                         new DefaultVisibilityGraphParameters(),
+                                                                         new DefaultFootstepPlannerParameters(),
+                                                                         swingPlannerParameters,
+                                                                         new DefaultSplitFractionCalculatorParameters(),
+                                                                         walkingControllerParameters,
+                                                                         footPolygons);
 
       Graphics3DObject startGraphics = new Graphics3DObject();
       Graphics3DObject endGraphics = new Graphics3DObject();
@@ -289,7 +306,7 @@ public class SwingOverPlanarRegionsTest
       endGraphics.addExtrudedPolygon(foot, 0.02, YoAppearance.Color(Color.RED));
 
       YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
-      YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
+      YoGraphicsListRegistry yoGraphicsListRegistry = planningModule.getSwingOverPlanarRegionsTrajectoryExpander().getGraphicsListRegistry();
 
       RobotSide swingSide = RobotSide.RIGHT;
 
@@ -306,32 +323,23 @@ public class SwingOverPlanarRegionsTest
       yoGraphicsListRegistry.registerYoGraphic("outputWaypoints", new YoGraphicPosition("firstWaypoint", firstWaypoint, 0.02, YoAppearance.White()));
       yoGraphicsListRegistry.registerYoGraphic("outputWaypoints", new YoGraphicPosition("secondWaypoint", secondWaypoint, 0.02, YoAppearance.White()));
 
-      FootstepPostProcessingParametersBasics parameters = getParameters();
+      FootstepPlannerRequest request = new FootstepPlannerRequest();
+      FootstepPlan footstepPlan = new FootstepPlan();
 
-      SwingOverRegionsPostProcessingElement swingOverElement = new SwingOverRegionsPostProcessingElement(parameters,
-                                                                                                         walkingControllerParameters,
-                                                                                                         registry,
-                                                                                                         yoGraphicsListRegistry);
-
-      FootstepPostProcessingPacket postProcessingPacket = new FootstepPostProcessingPacket();
-      postProcessingPacket.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList));
-      FootstepDataMessage firstStep = postProcessingPacket.getFootstepDataList().getFootstepDataList().add();
-
-      firstStep.getLocation().set(endFoot.getPosition());
-      firstStep.getOrientation().set(endFoot.getOrientation());
-      firstStep.setRobotSide(swingSide.toByte());
+      PlannedFootstep firstStep = new PlannedFootstep(swingSide);
+      firstStep.getFootstepPose().set(endFoot);
+      footstepPlan.addFootstep(firstStep);
 
       FramePose3D stanceFoot = new FramePose3D(startFoot);
       stanceFoot.getPosition().addY(0.3);
 
-      postProcessingPacket.getLeftFootPositionInWorld().set(stanceFoot.getPosition());
-      postProcessingPacket.getLeftFootOrientationInWorld().set(stanceFoot.getOrientation());
-      postProcessingPacket.getRightFootPositionInWorld().set(startFoot.getPosition());
-      postProcessingPacket.getRightFootOrientationInWorld().set(startFoot.getOrientation());
+      request.getStartFootPoses().get(RobotSide.LEFT).set(stanceFoot);
+      request.getStartFootPoses().get(RobotSide.RIGHT).set(startFoot);
+      request.setPlanarRegionsList(planarRegionsList);
 
       PlanarRegionsListDefinedEnvironment environment = new PlanarRegionsListDefinedEnvironment("environment", planarRegionsList, 1e-2, false);
 
-      SwingOverPlanarRegionsTrajectoryExpander expander = swingOverElement.swingOverPlanarRegionsTrajectoryExpander;
+      SwingOverPlanarRegionsTrajectoryExpander expander = planningModule.getSwingOverPlanarRegionsTrajectoryExpander();
 
       SimulationConstructionSet scs = null;
       if (visualize)
@@ -348,26 +356,22 @@ public class SwingOverPlanarRegionsTest
          scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
       }
 
-      FootstepPostProcessingPacket processedPacket = swingOverElement.postProcessFootstepPlan(postProcessingPacket);
+      planningModule.computeSwingWaypoints(request, footstepPlan);
 
       boolean wasAdjusted = expander.wereWaypointsAdjusted();
       if (wasAdjusted)
-         assertTrue(processedPacket.getFootstepDataList().getFootstepDataList().get(0).getCustomPositionWaypoints().size() > 0);
+         assertTrue(footstepPlan.getFootstep(0).getCustomWaypointPositions().size() > 0);
 
       if (wasAdjusted)
       {
-         firstWaypoint.set(processedPacket.getFootstepDataList().getFootstepDataList().get(0).getCustomPositionWaypoints().get(0));
-         secondWaypoint.set(processedPacket.getFootstepDataList().getFootstepDataList().get(0).getCustomPositionWaypoints().get(1));
+         firstWaypoint.set(footstepPlan.getFootstep(0).getCustomWaypointPositions().get(0));
+         secondWaypoint.set(footstepPlan.getFootstep(0).getCustomWaypointPositions().get(1));
 
          List<FramePoint3D> expandedWaypoints = expander.getExpandedWaypoints();
          for (int i = 0; i < expandedWaypoints.size(); i++)
          {
             EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expandedWaypoints.get(i),
-                                                                 processedPacket.getFootstepDataList()
-                                                                                .getFootstepDataList()
-                                                                                .get(0)
-                                                                                .getCustomPositionWaypoints()
-                                                                                .get(i),
+                                                                 footstepPlan.getFootstep(0).getCustomWaypointPositions().get(i),
                                                                  1e-8);
          }
       }
@@ -383,10 +387,11 @@ public class SwingOverPlanarRegionsTest
          scs.cropBuffer();
          ThreadTools.sleepForever();
       }
-      return processedPacket;
+
+      return Pair.of(request, footstepPlan);
    }
 
-   private void checkForCollisions(FootstepPostProcessingPacket packet, boolean ignoreGroundSegments)
+   private void checkForCollisions(FootstepPlannerRequest request, FootstepPlan footstepPlan, boolean ignoreGroundSegments)
    {
       SteppingParameters steppingParameters = getWalkingControllerParameters().getSteppingParameters();
       TwoWaypointSwingGenerator twoWaypointSwingGenerator = new TwoWaypointSwingGenerator("",
@@ -396,7 +401,7 @@ public class SwingOverPlanarRegionsTest
                                                                                           new YoVariableRegistry(getClass().getSimpleName()),
                                                                                           null);
 
-      RobotSide swingSide = RobotSide.fromByte(packet.getFootstepDataList().getFootstepDataList().get(0).getRobotSide());
+      RobotSide swingSide = footstepPlan.getFootstep(0).getRobotSide();
 
       FramePoint3D stanceFootPosition = new FramePoint3D();
       FramePoint3D swingStartPosition = new FramePoint3D();
@@ -407,32 +412,22 @@ public class SwingOverPlanarRegionsTest
       FrameVector3D touchdownVelocity = new FrameVector3D();
       touchdownVelocity.setZ(getWalkingControllerParameters().getSwingTrajectoryParameters().getDesiredTouchdownVelocity());
 
-      if (swingSide == RobotSide.LEFT)
-      {
-         stanceFootPosition.set(packet.getRightFootPositionInWorld());
-         swingStartPosition.set(packet.getLeftFootPositionInWorld());
-         swingStartOrientation.set(packet.getLeftFootOrientationInWorld());
-      }
-      else
-      {
-         swingStartPosition.set(packet.getRightFootPositionInWorld());
-         swingStartOrientation.set(packet.getRightFootOrientationInWorld());
-         stanceFootPosition.set(packet.getLeftFootPositionInWorld());
-      }
-      swingEndPosition.set(packet.getFootstepDataList().getFootstepDataList().get(0).getLocation());
-      swingEndOrientation.set(packet.getFootstepDataList().getFootstepDataList().get(0).getOrientation());
+      stanceFootPosition.set(request.getStartFootPoses().get(swingSide.getOppositeSide()).getPosition());
+      swingStartPosition.set(request.getStartFootPoses().get(swingSide).getPosition());
+      swingStartOrientation.set(request.getStartFootPoses().get(swingSide).getOrientation());
+      swingEndPosition.set(footstepPlan.getFootstep(0).getFootstepPose().getPosition());
+      swingEndOrientation.set(footstepPlan.getFootstep(0).getFootstepPose().getOrientation());
 
-      RecyclingArrayList<FramePoint3D> waypoints = new RecyclingArrayList<>(FramePoint3D::new);
-      List<Point3D> customWaypoints = packet.getFootstepDataList().getFootstepDataList().get(0).getCustomPositionWaypoints();
-      for (int i = 0; i < customWaypoints.size(); i++)
-      {
-         waypoints.add().set(customWaypoints.get(i));
-      }
+      List<Point3D> waypoints = footstepPlan.getFootstep(0).getCustomWaypointPositions();
+      RecyclingArrayList<FramePoint3D> waypointListCopy = new RecyclingArrayList<>(FramePoint3D.class);
+      waypointListCopy.add().set(waypoints.get(0));
+      waypointListCopy.add().set(waypoints.get(1));
+
       twoWaypointSwingGenerator.setStanceFootPosition(stanceFootPosition);
       twoWaypointSwingGenerator.setInitialConditions(swingStartPosition, initialVelocity);
       twoWaypointSwingGenerator.setFinalConditions(swingEndPosition, touchdownVelocity);
       twoWaypointSwingGenerator.setStepTime(1.0);
-      twoWaypointSwingGenerator.setTrajectoryType(TrajectoryType.CUSTOM, waypoints);
+      twoWaypointSwingGenerator.setTrajectoryType(TrajectoryType.CUSTOM, waypointListCopy);
       twoWaypointSwingGenerator.initialize();
 
       PoseReferenceFrame endFootPoseFrame = new PoseReferenceFrame("endFootPoseFrame", ReferenceFrame.getWorldFrame());
@@ -449,8 +444,6 @@ public class SwingOverPlanarRegionsTest
 
       while (twoWaypointSwingGenerator.doOptimizationUpdate())
          twoWaypointSwingGenerator.compute(0.0);
-
-      PlanarRegionsList planarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(packet.getPlanarRegionsList());
 
       double minDistance =
             Math.max(steppingParameters.getFootBackwardOffset(), steppingParameters.getFootForwardOffset()) + getParameters().getMinimumSwingFootClearance();
@@ -479,7 +472,7 @@ public class SwingOverPlanarRegionsTest
             double closestDistance = Double.MAX_VALUE;
             Point3DReadOnly closestCollision = null;
 
-            for (PlanarRegion planarRegion : planarRegionsList.getPlanarRegionsAsList())
+            for (PlanarRegion planarRegion : request.getPlanarRegionsList().getPlanarRegionsAsList())
             {
                Point3DReadOnly collision = PlanarRegionTools.closestPointOnPlane(desiredPosition, planarRegion);
                FramePoint3D collisionRelativeToEndFoot = new FramePoint3D(ReferenceFrame.getWorldFrame(), collision);
@@ -505,11 +498,10 @@ public class SwingOverPlanarRegionsTest
       }
    }
 
-   public FootstepPostProcessingParametersBasics getParameters()
+   public SwingPlannerParametersBasics getParameters()
    {
-      DefaultFootstepPostProcessingParameters parameters = new DefaultFootstepPostProcessingParameters();
+      SwingPlannerParametersBasics parameters = new DefaultSwingPlannerParameters();
       parameters.setDoInitialFastApproximation(true);
-
       return parameters;
    }
 
