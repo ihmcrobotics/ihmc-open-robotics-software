@@ -1,7 +1,6 @@
 package us.ihmc.footstepPlanning.swing;
 
 import controller_msgs.msg.dds.SwingPlannerParametersPacket;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingKeys;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 public interface SwingPlannerParametersBasics extends SwingPlannerParametersReadOnly, StoredPropertySetBasics
@@ -78,7 +77,7 @@ public interface SwingPlannerParametersBasics extends SwingPlannerParametersRead
 
    default void setMinimumSwingFootClearance(double minimumSwingFootClearance)
    {
-      set(FootstepPostProcessingKeys.minimumSwingFootClearance, minimumSwingFootClearance);
+      set(SwingPlannerParameterKeys.minimumSwingFootClearance, minimumSwingFootClearance);
    }
 
    default void setFastApproximationLessClearance(double fastApproximationLessClearance)
