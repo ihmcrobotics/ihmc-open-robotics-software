@@ -59,6 +59,8 @@ public class LinuxGUIRecorder
 
       filename = System.getProperty("user.home") + "/.ihmc/logs/" + timestamp + "_" + guiName + "Log.mp4";
 
+      LogTools.info("Starting recording to {}", filename);
+
       try
       {
          if (builder != null)
@@ -77,6 +79,8 @@ public class LinuxGUIRecorder
 
    public synchronized void stop()
    {
+      LogTools.info("Stopping recording to {}", filename);
+
       scheduler.stop();
 
       try

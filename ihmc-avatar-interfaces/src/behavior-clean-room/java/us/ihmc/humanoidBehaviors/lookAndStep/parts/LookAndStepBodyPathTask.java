@@ -86,12 +86,12 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
 
    private boolean hasGoal()
    {
-      return goal != null && !goal.get().containsNaN();
+      return goal.get() != null && !goal.get().containsNaN();
    }
 
    private boolean regionsOK()
    {
-      return mapRegions != null && !mapRegionsExpirationStatus.get().isPastOrNaN() && !mapRegions.get().isEmpty();
+      return mapRegions.get() != null && !mapRegionsExpirationStatus.get().isPastOrNaN() && !mapRegions.get().isEmpty();
    }
 
    private boolean failedRecently()
@@ -102,7 +102,7 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    // TODO: Extract as interface?
    public void run()
    {
-      validate();
+      validateAll();
 
       if (evaluateEntry())
       {

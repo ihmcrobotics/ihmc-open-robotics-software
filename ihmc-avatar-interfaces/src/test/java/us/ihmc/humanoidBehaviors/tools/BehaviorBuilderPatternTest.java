@@ -113,6 +113,46 @@ public class BehaviorBuilderPatternTest
    }
 
    @Test
+   public void testTiered()
+   {
+      TieredParent teired = new TieredParent();
+
+      assertThrows(RuntimeException.class, () ->
+      {
+         try
+         {
+            teired.run();
+         }
+         catch (Throwable t)
+         {
+            LogTools.info("Exception thrown: {}", t.getMessage());
+            assertTrue(t.getMessage().startsWith("Field not set"));
+            throw t;
+         }
+      });
+
+      teired.setFieldOne(new Object());
+      teired.setParentField(new Object());
+
+      teired.runParent();
+      teired.runParent();
+
+      assertThrows(RuntimeException.class, () ->
+      {
+         try
+         {
+            teired.run();
+         }
+         catch (Throwable t)
+         {
+            LogTools.info("Exception thrown: {}", t.getMessage());
+            assertTrue(t.getMessage().startsWith("Field not set"));
+            throw t;
+         }
+      });
+   }
+
+   @Test
    public void testBuildWithThread()
    {
       SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
@@ -142,7 +182,7 @@ public class BehaviorBuilderPatternTest
 
       public void run()
       {
-         validate();
+         validateAll();
       }
 
       public void setFieldOne(Object object)
@@ -161,5 +201,50 @@ public class BehaviorBuilderPatternTest
       BooleanField optionalBooleanField = optionalBoolean(false);
       BooleanField requiredBooleanField = requiredBoolean();
 //      BooleanField optionalBooleanField = optionalInt(requiredBooleanFieldq)
+   }
+
+   class TieredParent extends TieredChild
+   {
+      private final Field<Object> parentField = required();
+
+      public void runParent()
+      {
+         validateNonChanging();
+
+         setFieldTwo(parentField.get());
+
+         run();
+      }
+
+      public void setParentField(Object parentField)
+      {
+         this.parentField.set(parentField);
+      }
+   }
+
+   class TieredChild implements BehaviorBuilderPattern
+   {
+      private final Field<Object> fieldOne = required();
+      private final Field<Object> fieldTwo = requiredChanging();
+
+      protected void run()
+      {
+         validateAll();
+
+         fieldOne.get();
+         fieldTwo.get();
+
+         invalidateChanging();
+      }
+
+      public void setFieldOne(Object object)
+      {
+         this.fieldOne.set(object);
+      }
+
+      protected void setFieldTwo(Object object)
+      {
+         this.fieldTwo.set(object);
+      }
    }
 }

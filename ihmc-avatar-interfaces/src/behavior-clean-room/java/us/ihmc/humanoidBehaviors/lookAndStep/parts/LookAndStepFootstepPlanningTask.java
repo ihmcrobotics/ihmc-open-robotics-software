@@ -61,7 +61,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    {
       boolean proceed = true;
 
-      if (regionsOK())
+      if (!regionsOK())
       {
          LogTools.warn("Find next footstep planning goal: Regions not OK: {}, timePassed: {}, isEmpty: {}",
                        planarRegions.get(),
@@ -240,7 +240,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
 
    public void run()
    {
-      validate();
+      validateAll();
 
       if (evaluateEntry())
       {

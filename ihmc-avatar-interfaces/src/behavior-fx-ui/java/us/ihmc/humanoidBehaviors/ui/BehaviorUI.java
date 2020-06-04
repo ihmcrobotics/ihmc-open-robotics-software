@@ -12,6 +12,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.SystemUtils;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
@@ -136,20 +137,10 @@ public class BehaviorUI
          primaryStage.toFront();
 
          // TODO: Make a property to toggle video recording
-         ThreadTools.scheduleSingleExecution("DelayRecordingStart", () -> {
-            LogTools.info("Starting recording...");
-            guiRecorder.start();
-         }, 2.0);
-
-         ThreadTools.scheduleSingleExecution("SafetyStop", () -> {
-            LogTools.info("Stopping recording to save disk space.");
-            guiRecorder.stop();
-         }, 300.0);
-
-         primaryStage.setOnCloseRequest(event -> {
-            LogTools.info("Handling on close request");
-            guiRecorder.stop();
-         });
+         ThreadTools.scheduleSingleExecution("DelayRecordingStart", guiRecorder::start, 2.0);
+         ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 300.0);
+         primaryStage.setOnCloseRequest(event -> guiRecorder.stop());
+         Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop));
       });
    }
 
