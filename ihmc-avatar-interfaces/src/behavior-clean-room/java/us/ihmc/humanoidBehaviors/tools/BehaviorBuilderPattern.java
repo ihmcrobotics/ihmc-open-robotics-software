@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
+import us.ihmc.log.LogTools;
 
 /**
  * Interface to streamline creating builders with checks for each field.
@@ -27,7 +28,7 @@ public interface BehaviorBuilderPattern
       private boolean set = false;
       private boolean valid = false;
 
-      private final StackTraceElement[] cause;
+      private final String clickableCodeLocation;
 
       private FieldBasics(boolean required, boolean changing)
       {
@@ -35,16 +36,8 @@ public interface BehaviorBuilderPattern
          this.changing = changing;
 
          StackTraceElement[] stackTrace = new Throwable().getStackTrace();
-         if (stackTrace.length > 5)
-         {
-            this.cause = new StackTraceElement[stackTrace.length - 5];
-            System.arraycopy(stackTrace, 5, cause, 0, cause.length);
-         }
-         else
-         {
-            // Weird state, but don't fail
-            this.cause = stackTrace;
-         }
+         StackTraceElement firstStackTraceElement = stackTrace[5];
+         clickableCodeLocation = "(" + firstStackTraceElement.getFileName() + ":" + firstStackTraceElement.getLineNumber() + ")";
       }
 
       protected void markSet()
@@ -67,13 +60,11 @@ public interface BehaviorBuilderPattern
          {
             if (required)
             {
-               RuntimeException requiredException = new RuntimeException("Field not set: " + name);
-               requiredException.setStackTrace(cause);
-               throw requiredException;
+               throw new RuntimeException("Field not set: " + name + " " + clickableCodeLocation);
             }
             else
             {
-               System.out.println("[INFO] (" + cause[0].getFileName() + ":" + cause[0].getLineNumber() + ") Field not set: " + name);
+               LogTools.info("Optional field not set: {} {}", name, clickableCodeLocation);
             }
          }
 
