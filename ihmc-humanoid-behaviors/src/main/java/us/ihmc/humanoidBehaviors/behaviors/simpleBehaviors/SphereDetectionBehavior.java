@@ -65,8 +65,8 @@ public class SphereDetectionBehavior extends AbstractBehavior
    public SphereDetectionBehavior(String robotName, Ros2Node ros2Node, HumanoidReferenceFrames referenceFrames)
    {
       super(robotName, ros2Node);
-      createSubscriber(PointCloudWorldPacket.class, ROS2Tools.getDefaultTopicNameGenerator(), pointCloudQueue::put);
-      detectedObjectPublisher = createBehaviorOutputPublisher(DetectedObjectPacket.class);
+      createSubscriber(PointCloudWorldPacket.class, ROS2Tools.IHMC_ROOT, pointCloudQueue::put);
+      detectedObjectPublisher = createBehaviorPublisher(DetectedObjectPacket.class);
 
       this.humanoidReferenceFrames = referenceFrames;
    }

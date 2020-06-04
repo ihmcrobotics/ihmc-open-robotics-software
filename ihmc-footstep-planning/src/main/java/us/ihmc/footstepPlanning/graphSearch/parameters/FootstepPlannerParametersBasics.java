@@ -3,8 +3,7 @@ package us.ihmc.footstepPlanning.graphSearch.parameters;
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
-import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.deltaYawFromReferenceTolerance;
-import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.distanceFromPathTolerance;
+import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.*;
 
 public interface FootstepPlannerParametersBasics extends FootstepPlannerParametersReadOnly, StoredPropertySetBasics
 {
@@ -28,9 +27,19 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.minimumDistanceFromCliffBottoms, distance);
    }
 
-   default void setCliffHeightToAvoid(double height)
+   default void setCliffBaseHeightToAvoid(double height)
    {
-      set(FootstepPlannerParameterKeys.cliffHeightToAvoid, height);
+      set(FootstepPlannerParameterKeys.cliffBaseHeightToAvoid, height);
+   }
+
+   default void setMinimumDistanceFromCliffTops(double distance)
+   {
+      set(FootstepPlannerParameterKeys.minimumDistanceFromCliffTops, distance);
+   }
+
+   default void setCliffTopHeightToAvoid(double height)
+   {
+      set(FootstepPlannerParameterKeys.cliffTopHeightToAvoid, height);
    }
 
    default void setMaximumStepReach(double reach)
@@ -218,6 +227,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.bodyBoxBaseZ, bodyBoxBaseZ);
    }
 
+   default void setMaximumSnapHeight(double maximumSnapHeight)
+   {
+      set(FootstepPlannerParameterKeys.maximumSnapHeight, maximumSnapHeight);
+   }
+
    default void setAStarHeuristicsWeight(double aStarHeuristicsWeight)
    {
       set(FootstepPlannerParameterKeys.aStarHeuristicsWeight, aStarHeuristicsWeight);
@@ -303,6 +317,31 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.enableExpansionMask, enableExpansionMask);
    }
 
+   default void setEnableShinCollisionCheck(boolean enableShinCollisionCheck)
+   {
+      set(FootstepPlannerParameterKeys.enableShinCollisionCheck, enableShinCollisionCheck);
+   }
+
+   default void setShinRadius(double shinRadius)
+   {
+      set(FootstepPlannerParameterKeys.shinRadius, shinRadius);
+   }
+
+   default void setShinLength(double shinLength)
+   {
+      set(FootstepPlannerParameterKeys.shinLength, shinLength);
+   }
+
+   default void setShinPitch(double shinPitch)
+   {
+      set(FootstepPlannerParameterKeys.shinPitch, shinPitch);
+   }
+
+   default void setShinHeightOffset(double shinHeightOffet)
+   {
+      set(FootstepPlannerParameterKeys.shinHeightOffet, shinHeightOffet);
+   }
+
    default void set(FootstepPlannerParametersPacket parametersPacket)
    {
       double noValue = FootstepPlannerParametersPacket.DEFAULT_NO_VALUE;
@@ -365,10 +404,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximumZPenetrationOnValleyRegions(parametersPacket.getMaximumZPenetrationOnValleyRegions());
       if (parametersPacket.getMaximumStepWidth() != noValue)
          setMaximumStepWidth(parametersPacket.getMaximumStepWidth());
-      if (parametersPacket.getCliffHeightToAvoid() != noValue)
-         setCliffHeightToAvoid(parametersPacket.getCliffHeightToAvoid());
+      if (parametersPacket.getCliffBaseHeightToAvoid() != noValue)
+         this.setCliffBaseHeightToAvoid(parametersPacket.getCliffBaseHeightToAvoid());
       if (parametersPacket.getMinimumDistanceFromCliffBottoms() != noValue)
          setMinimumDistanceFromCliffBottoms(parametersPacket.getMinimumDistanceFromCliffBottoms());
+      if (parametersPacket.getCliffTopHeightToAvoid() != noValue)
+         this.setCliffTopHeightToAvoid(parametersPacket.getCliffTopHeightToAvoid());
+      if (parametersPacket.getMinimumDistanceFromCliffTops() != noValue)
+         setMinimumDistanceFromCliffTops(parametersPacket.getMinimumDistanceFromCliffTops());
       if (parametersPacket.getBodyBoxHeight() != noValue)
          setBodyBoxHeight(parametersPacket.getBodyBoxHeight());
       if (parametersPacket.getBodyBoxDepth() != noValue)
@@ -381,6 +424,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setBodyBoxBaseY(parametersPacket.getBodyBoxBaseY());
       if (parametersPacket.getBodyBoxBaseZ() != noValue)
          setBodyBoxBaseZ(parametersPacket.getBodyBoxBaseZ());
+      if (parametersPacket.getMaximumSnapHeight() != noValue)
+         setMaximumSnapHeight(parametersPacket.getMaximumSnapHeight());
       if (parametersPacket.getMinXClearanceFromStance() != noValue)
          setMinXClearanceFromStance(parametersPacket.getMinXClearanceFromStance());
       if (parametersPacket.getMinYClearanceFromStance() != noValue)
@@ -418,5 +463,14 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setDistanceFromPathTolerance(parametersPacket.getDistanceFromPathTolerance());
       if (parametersPacket.getDeltaYawFromReferenceTolerance() != noValue)
          setDeltaYawFromReferenceTolerance(parametersPacket.getDeltaYawFromReferenceTolerance());
+      setEnableShinCollisionCheck(parametersPacket.getEnableShinCollisionCheck());
+      if (parametersPacket.getShinLength() != noValue)
+         setShinLength(parametersPacket.getShinLength());
+      if (parametersPacket.getShinRadius() != noValue)
+         setShinRadius(parametersPacket.getShinRadius());
+      if (parametersPacket.getShinHeightOffet() != noValue)
+         setShinHeightOffset(parametersPacket.getShinHeightOffet());
+      if (parametersPacket.getShinPitch() != noValue)
+         setShinPitch(parametersPacket.getShinPitch());
    }
 }

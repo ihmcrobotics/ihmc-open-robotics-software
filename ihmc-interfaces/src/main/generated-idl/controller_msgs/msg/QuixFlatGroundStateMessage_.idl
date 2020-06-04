@@ -1,0 +1,56 @@
+#ifndef __controller_msgs__msg__QuixFlatGroundStateMessage__idl__
+#define __controller_msgs__msg__QuixFlatGroundStateMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet STANDING =
+      0;
+
+      const octet TO_WALKING_LEFT_SUPPORT =
+      1;
+
+      const octet TO_WALKING_RIGHT_SUPPORT =
+      2;
+
+      const octet TOE_OFF_TO_LEFT_SUPPORT =
+      3;
+
+      const octet TOE_OFF_TO_RIGHT_SUPPORT =
+      4;
+
+      const octet WALKING_LEFT_SUPPORT =
+      5;
+
+      const octet WALKING_RIGHT_SUPPORT =
+      6;
+
+      const octet TRANSFER_TO_STANDING =
+      7;
+
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message is used to notify the crutch display of the current flat-ground walking state.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::QuixFlatGroundStateMessage_")
+      struct QuixFlatGroundStateMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Specifies which state the controller should transition into.
+         */
+        @defaultValue(value=255)
+        octet flat_ground_state_name;
+      };
+    };
+  };
+};
+
+#endif

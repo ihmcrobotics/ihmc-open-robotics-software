@@ -1,0 +1,44 @@
+#ifndef __controller_msgs__msg__QuixSlopeStateMessage__idl__
+#define __controller_msgs__msg__QuixSlopeStateMessage__idl__
+
+module controller_msgs
+{
+  module msg
+  {
+    module dds
+    {
+      const octet STANDING =
+      0;
+
+      const octet TO_WALKING_LEFT_SUPPORT =
+      1;
+
+      const octet TO_WALKING_RIGHT_SUPPORT =
+      2;
+
+      const octet WALKING_LEFT_SUPPORT =
+      3;
+
+      const octet WALKING_RIGHT_SUPPORT =
+      4;
+
+
+      /**
+       * This message is part of the IHMC whole-body controller API.
+       * This message is used to notify the crutch display of the current slope state.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::QuixSlopeStateMessage_")
+      struct QuixSlopeStateMessage
+      {
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        @defaultValue(value=255)
+        octet slope_state_name;
+      };
+    };
+  };
+};
+
+#endif

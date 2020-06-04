@@ -3,6 +3,7 @@ package us.ihmc.wholeBodyController.diagnostics;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Random;
 
 import us.ihmc.commonWalkingControlModules.corruptors.FullRobotModelCorruptor;
@@ -30,7 +31,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
 
    private final FullRobotModel fullRobotModel;
 
-   private final ArrayList<YoVariable<?>> corruptorVariables;
+   private final List<YoVariable<?>> corruptorVariables;
    private final ArrayList<YoDouble> torqueOffsetVariables;
    private final ArrayList<YoDouble> torqueScoreVariables;
 
@@ -323,7 +324,7 @@ public class HumanoidDiagnosticsWhenHangingAnalyzer
    }
 
 
-   private void getCurrentCorruptorValues(ArrayList<YoVariable<?>> corruptorVariables, double[] corruptorVariableValues)
+   private void getCurrentCorruptorValues(List<YoVariable<?>> corruptorVariables, double[] corruptorVariableValues)
    { 
       for (int i = 0; i < corruptorVariables.size(); i++)
       {

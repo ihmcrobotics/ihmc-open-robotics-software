@@ -33,7 +33,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
    {
       super(robotName, ThreadName, ros2Node);//, yoGraphicsListRegistry);
 
-      createSubscriber(DoorLocationPacket.class, IHMCHumanoidBehaviorManager.getSubscriberTopicNameGenerator(robotName), doorLocationQueue::set);
+      createSubscriber(DoorLocationPacket.class, IHMCHumanoidBehaviorManager.getInputTopic(robotName), doorLocationQueue::set);
 
       initialize();
    }
@@ -85,7 +85,6 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
          latestDoorLocationPacketRecieved = doorLocationQueue.getAndSet(null);
          if (latestDoorLocationPacketRecieved != null)
          {
-            System.out.println("recieved pose");
             newPose = new FramePose3D(ReferenceFrame.getWorldFrame(), latestDoorLocationPacketRecieved.getDoorTransformToWorld());
             // getReportedGoalPoseWorldFrame(newPose);
 

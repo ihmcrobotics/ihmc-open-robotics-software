@@ -830,6 +830,7 @@ public class BalanceManager
       capturePoint2d.checkReferenceFrameMatch(worldFrame);
       desiredCapturePoint2d.checkReferenceFrameMatch(worldFrame);
 
+      capturabilityBasedStatus.setOmega(controllerToolbox.getOmega0());
       capturabilityBasedStatus.getCapturePoint2d().set(capturePoint2d);
       capturabilityBasedStatus.getDesiredCapturePoint2d().set(desiredCapturePoint2d);
       capturabilityBasedStatus.getCenterOfMass3d().set(centerOfMassPosition);

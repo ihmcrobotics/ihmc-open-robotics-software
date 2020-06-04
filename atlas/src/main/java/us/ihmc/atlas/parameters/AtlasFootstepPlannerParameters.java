@@ -17,7 +17,7 @@ public class AtlasFootstepPlannerParameters extends StoredPropertySet implements
 
       setCheckForBodyBoxCollisions(false);
       setCheckForPathCollisions(true);
-      setCliffHeightToAvoid(0.05);
+      this.setCliffBaseHeightToAvoid(0.05);
       setMinimumDistanceFromCliffBottoms(0.1);
       setMaximumStepReach(0.5);
       setMinimumStepLength(-0.6);

@@ -12,7 +12,6 @@ import controller_msgs.msg.dds.WalkingControllerFailureStatusMessage;
 import controller_msgs.msg.dds.WalkingStatusMessage;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.FootstepListVisualizer;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.desiredFootStep.TransferToAndNextFootstepsData;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayDeque;
 import us.ihmc.commons.lists.RecyclingArrayList;
@@ -32,14 +31,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.AdjustFootstepCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.CenterOfMassTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.FootstepDataListCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.MomentumTrajectoryCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PauseWalkingCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.*;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.WalkingStatus;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -128,6 +120,7 @@ public class WalkingMessageHandler
    private final MomentumTrajectoryHandler momentumTrajectoryHandler;
    private final CenterOfMassTrajectoryHandler comTrajectoryHandler;
    private final PlanarRegionsListHandler planarRegionsListHandler;
+   private final StepConstraintRegionHandler stepConstraintRegionHandler;
 
    private final YoBoolean offsettingXYPlanWithFootstepError = new YoBoolean("offsettingXYPlanWithFootstepError", registry);
    private final YoBoolean offsettingHeightPlanWithFootstepError = new YoBoolean("offsettingHeightPlanWithFootstepError", registry);
@@ -188,6 +181,7 @@ public class WalkingMessageHandler
       momentumTrajectoryHandler = new MomentumTrajectoryHandler(yoTime, registry);
       comTrajectoryHandler = new CenterOfMassTrajectoryHandler(yoTime, registry);
       planarRegionsListHandler = new PlanarRegionsListHandler(statusOutputManager, registry);
+      stepConstraintRegionHandler = new StepConstraintRegionHandler(registry);
 
       parentRegistry.addChild(registry);
    }
@@ -335,9 +329,19 @@ public class WalkingMessageHandler
       planarRegionsListHandler.handlePlanarRegionsListCommand(planarRegionsListCommand);
    }
 
+   public void handleStepConstraintRegionCommand(StepConstraintRegionCommand stepConstraintRegionCommand)
+   {
+      stepConstraintRegionHandler.handleStepConstraintRegionCommand(stepConstraintRegionCommand);
+   }
+
    public PlanarRegionsListHandler getPlanarRegionsListHandler()
    {
       return planarRegionsListHandler;
+   }
+
+   public StepConstraintRegionHandler getStepConstraintRegionHandler()
+   {
+      return stepConstraintRegionHandler;
    }
 
    public void handleAdjustFootstepCommand(AdjustFootstepCommand command)
@@ -650,23 +654,25 @@ public class WalkingMessageHandler
    private final WalkingControllerFailureStatusMessage failureStatusMessage = new WalkingControllerFailureStatusMessage();
    private final FootstepStatusMessage footstepStatus = new FootstepStatusMessage();
 
-   public void reportFootstepStarted(RobotSide robotSide, FramePose3DReadOnly desiredFootPoseInWorld, FramePose3DReadOnly actualFootPoseInWorld)
+   public void reportFootstepStarted(RobotSide robotSide, FramePose3DReadOnly desiredFootPoseInWorld, FramePose3DReadOnly actualFootPoseInWorld,
+                                     double swingDuration)
    {
-      reportFootstepStatus(robotSide, FootstepStatus.STARTED, desiredFootPoseInWorld, actualFootPoseInWorld);
+      reportFootstepStatus(robotSide, FootstepStatus.STARTED, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration);
       executingFootstep.set(true);
 
       if (yoTime != null)
          timeElapsedWhenFootstepExecuted.set(yoTime.getDoubleValue() - footstepDataListReceivedTime.getDoubleValue());
    }
 
-   public void reportFootstepCompleted(RobotSide robotSide, FramePose3DReadOnly desiredFootPoseInWorld, FramePose3DReadOnly actualFootPoseInWorld)
+   public void reportFootstepCompleted(RobotSide robotSide, FramePose3DReadOnly desiredFootPoseInWorld, FramePose3DReadOnly actualFootPoseInWorld,
+                                       double swingDuration)
    {
-      reportFootstepStatus(robotSide, FootstepStatus.COMPLETED, desiredFootPoseInWorld, actualFootPoseInWorld);
+      reportFootstepStatus(robotSide, FootstepStatus.COMPLETED, desiredFootPoseInWorld, actualFootPoseInWorld, swingDuration);
       executingFootstep.set(false);
    }
 
    private void reportFootstepStatus(RobotSide robotSide, FootstepStatus status, FramePose3DReadOnly desiredFootPoseInWorld,
-                                     FramePose3DReadOnly actualFootPoseInWorld)
+                                     FramePose3DReadOnly actualFootPoseInWorld, double swingDuration)
    {
       desiredFootPoseInWorld.checkReferenceFrameMatch(worldFrame);
       actualFootPoseInWorld.checkReferenceFrameMatch(worldFrame);
@@ -678,6 +684,7 @@ public class WalkingMessageHandler
       footstepStatus.getActualFootPositionInWorld().set(actualFootPoseInWorld.getPosition());
       footstepStatus.getDesiredFootOrientationInWorld().set(desiredFootPoseInWorld.getOrientation());
       footstepStatus.getDesiredFootPositionInWorld().set(desiredFootPoseInWorld.getPosition());
+      footstepStatus.setSwingDuration(swingDuration);
       statusOutputManager.reportStatusMessage(footstepStatus);
    }
 

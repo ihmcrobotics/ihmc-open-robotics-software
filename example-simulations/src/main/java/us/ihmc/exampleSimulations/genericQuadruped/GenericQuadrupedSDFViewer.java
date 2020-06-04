@@ -1,13 +1,18 @@
 package us.ihmc.exampleSimulations.genericQuadruped;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.exampleSimulations.genericQuadruped.model.GenericQuadrupedModelFactory;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
-import us.ihmc.simulationconstructionset.*;
-
-import java.util.ArrayList;
-import java.util.HashSet;
+import us.ihmc.simulationconstructionset.FloatingRootJointRobot;
+import us.ihmc.simulationconstructionset.Joint;
+import us.ihmc.simulationconstructionset.Link;
+import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 
 public class GenericQuadrupedSDFViewer
 {
@@ -44,7 +49,7 @@ public class GenericQuadrupedSDFViewer
       }
    }
 
-   private static HashSet<Link> getAllLinks(ArrayList<Joint> joints, HashSet<Link> links)
+   private static HashSet<Link> getAllLinks(List<Joint> joints, HashSet<Link> links)
    {
       for (Joint j : joints)
       {

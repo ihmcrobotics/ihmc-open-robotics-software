@@ -34,7 +34,7 @@ public class TunedFootstepPlannerParameters
    public void setFromFootstepPlannerParameters(FootstepPlannerParametersReadOnly footstepPlannerParameters)
    {
       cliffClearance      = footstepPlannerParameters.getMinimumDistanceFromCliffBottoms();
-      cliffHeight         = footstepPlannerParameters.getCliffHeightToAvoid()             ;
+      cliffHeight         = footstepPlannerParameters.getCliffBaseHeightToAvoid()             ;
       maxStepLength       = footstepPlannerParameters.getMaximumStepReach()               ;
       maxStepWidth        = footstepPlannerParameters.getMaximumStepWidth()               ;
       maxStepYaw          = footstepPlannerParameters.getMaximumStepYaw()                 ;
@@ -58,7 +58,7 @@ public class TunedFootstepPlannerParameters
    public void packFootstepPlannerParameters(FootstepPlannerParametersBasics footstepPlannerParameters)
    {
       footstepPlannerParameters.setMinimumDistanceFromCliffBottoms(       cliffClearance      );
-      footstepPlannerParameters.setCliffHeightToAvoid(                    cliffHeight         );
+      footstepPlannerParameters.setCliffBaseHeightToAvoid(cliffHeight         );
       footstepPlannerParameters.setMaximumStepReach(                      maxStepLength       );
       footstepPlannerParameters.setMaximumStepWidth(                      maxStepWidth        );
       footstepPlannerParameters.setMaximumStepYaw(                        maxStepYaw          );

@@ -54,7 +54,7 @@ public class GraspAndTurnValveBehavior extends AbstractBehavior
       this.atlasPrimitiveActions = atlasPrimitiveActions;
 
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
-      uiPositionCheckerPacketpublisher = createBehaviorOutputPublisher(UIPositionCheckerPacket.class);
+      uiPositionCheckerPacketpublisher = createBehaviorPublisher(UIPositionCheckerPacket.class);
    }
 
    @Override

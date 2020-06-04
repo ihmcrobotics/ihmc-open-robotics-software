@@ -115,8 +115,8 @@ public class FootstepPlannerParametersTest
       assertEquals(maxZpenetration, parameters.getMaximumZPenetrationOnValleyRegions(), epsilon);
 
       double cliffHeightToAvoid = RandomNumbers.nextDouble(random, 10.00);
-      parameters.setCliffHeightToAvoid(cliffHeightToAvoid);
-      assertEquals(cliffHeightToAvoid, parameters.getCliffHeightToAvoid());
+      parameters.setCliffBaseHeightToAvoid(cliffHeightToAvoid);
+      assertEquals(cliffHeightToAvoid, parameters.getCliffBaseHeightToAvoid());
 
       double minimumDistanceFromCliff = RandomNumbers.nextDouble(random, 10.0);
       parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliff);
@@ -153,6 +153,10 @@ public class FootstepPlannerParametersTest
       double bodyBoxBaseZ = RandomNumbers.nextDouble(random, 10.0);
       parameters.setBodyBoxBaseZ(bodyBoxBaseZ);
       assertEquals(bodyBoxBaseZ, parameters.getBodyBoxBaseZ(), epsilon);
+
+      double maximumSnapHeight = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setMaximumSnapHeight(maximumSnapHeight);
+      assertEquals(maximumSnapHeight, parameters.getMaximumSnapHeight(), epsilon);
 
       double finalTurnProximity = RandomNumbers.nextDouble(random, 10.0);
       parameters.setFinalTurnProximity(finalTurnProximity);
@@ -213,5 +217,25 @@ public class FootstepPlannerParametersTest
       double deltaYawFromReferenceTolerance = RandomNumbers.nextDouble(random, 10.0);
       parameters.setDeltaYawFromReferenceTolerance(deltaYawFromReferenceTolerance);
       assertEquals(deltaYawFromReferenceTolerance, parameters.getDeltaYawFromReferenceTolerance(), epsilon);
+
+      boolean enableShinCollision = random.nextBoolean();
+      parameters.setEnableShinCollisionCheck(enableShinCollision);
+      assertEquals(enableShinCollision, parameters.getEnableShinCollisionCheck());
+
+      double shinRadius = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setShinRadius(shinRadius);
+      assertEquals(shinRadius, parameters.getShinRadius());
+
+      double shinLength = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setShinLength(shinLength);
+      assertEquals(shinLength, parameters.getShinLength());
+
+      double shinHeightOffset = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setShinHeightOffset(shinHeightOffset);
+      assertEquals(shinHeightOffset, parameters.getShinHeightOffset());
+
+      double shinPitch = RandomNumbers.nextDouble(random, Math.PI);
+      parameters.setShinPitch(shinPitch);
+      assertEquals(shinPitch, parameters.getShinPitch());
    }
 }

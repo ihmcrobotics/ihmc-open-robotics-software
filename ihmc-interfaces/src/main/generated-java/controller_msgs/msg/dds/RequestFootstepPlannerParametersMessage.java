@@ -7,10 +7,8 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC footstep planning module.
-   
- */
+       * This message is part of the IHMC footstep planning module.
+       */
 public class RequestFootstepPlannerParametersMessage extends Packet<RequestFootstepPlannerParametersMessage> implements Settable<RequestFootstepPlannerParametersMessage>, EpsilonComparable<RequestFootstepPlannerParametersMessage>
 {
 

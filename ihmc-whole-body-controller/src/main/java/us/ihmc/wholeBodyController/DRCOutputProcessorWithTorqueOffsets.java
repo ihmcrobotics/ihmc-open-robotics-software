@@ -4,6 +4,7 @@ import java.util.HashMap;
 
 import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobotContextJointData;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.robotics.sensors.ForceSensorDataHolderReadOnly;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
@@ -23,7 +24,7 @@ public class DRCOutputProcessorWithTorqueOffsets implements DRCOutputProcessor, 
    private final YoBoolean resetTorqueOffsets = new YoBoolean("resetTorqueOffsets", registry);
 
    private PairList<JointDesiredOutputBasics, YoDouble> torqueOffsetList;
-   private HashMap<OneDoFJointBasics, YoDouble> torqueOffsetMap;
+   private HashMap<OneDoFJointReadOnly, YoDouble> torqueOffsetMap;
 
    private final double updateDT;
 

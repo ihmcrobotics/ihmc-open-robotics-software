@@ -10,7 +10,6 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.joystickBasedJavaFXController.JoystickBasedSteppingMainUI;
 import us.ihmc.commonWalkingControlModules.configurations.SteppingParameters;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.ControllerAPIDefinition;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
@@ -36,8 +35,7 @@ public class AtlasJoystickBasedSteppingApplication extends Application
       PrintTools.info("-------------------------------------------------------------------");
       AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, robotTarget, false);
       String robotName = robotModel.getSimpleRobotName();
-      bdiBehaviorcommandPublisher = ROS2Tools.createPublisher(ros2Node, BDIBehaviorCommandPacket.class,
-                                                              ControllerAPIDefinition.getSubscriberTopicNameGenerator(robotName));
+      bdiBehaviorcommandPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, BDIBehaviorCommandPacket.class, ROS2Tools.getControllerInputTopic(robotName));
       AtlasKickAndPunchMessenger atlasKickAndPunchMessenger = new AtlasKickAndPunchMessenger(ros2Node, robotName);
 
       WalkingControllerParameters walkingControllerParameters = robotModel.getWalkingControllerParameters();
