@@ -260,28 +260,24 @@ public class SLAMTools
          double distanceToSurfel = EuclidGeometryTools.distanceFromPoint3DToPlane3D(surfel.getPoint(), node.getHitLocationCopy(), node.getNormalCopy());
          double distanceToMap = EuclidGeometryTools.distanceFromPoint3DToPlane3D(node.getHitLocationCopy(), surfel.getPoint(), surfel.getNormal());
          //double distance = Math.min(distanceToSurfel, distanceToMap);
-         double distance = Math.min(distanceToSurfel, distanceToSurfel);
+         //double distance = Math.min(distanceToSurfel, distanceToSurfel);
+         double distance = Math.min(distanceToMap, distanceToMap);
          nearestHitDistanceSquared.setValue(Math.min(nearestHitDistanceSquared.doubleValue(), distance));
       });
 
       return nearestHitDistanceSquared.getValue();
    }
 
-   public static double computeDistanceToNormalOctreeAndPackCorrespondingPoint(NormalOcTree octree, Point3DReadOnly point, Point3D correspondingPointToPack)
+   public static void computeCorrespondingPointToPoint(NormalOcTree octree, Point3DReadOnly point, Point3D correspondingPointToPack)
    {
       OcTreeKey occupiedKey = octree.coordinateToKey(point);
       OcTreeKey nearestKey = new OcTreeKey();
       OcTreeNearestNeighborTools.findNearestNeighbor(octree.getRoot(), octree.keyToCoordinate(occupiedKey), nearestKey);
 
-      MutableDouble nearestHitDistanceSquared = new MutableDouble(Double.POSITIVE_INFINITY);
-
       OcTreeNearestNeighborTools.findRadiusNeighbors(octree.getRoot(), octree.keyToCoordinate(nearestKey), octree.getResolution(), node ->
       {
-         nearestHitDistanceSquared.setValue(Math.min(nearestHitDistanceSquared.doubleValue(), node.getHitLocationCopy().distanceSquared(point)));
          correspondingPointToPack.set(node.getHitLocationCopy());
       });
-
-      return Math.sqrt(nearestHitDistanceSquared.getValue());
    }
 
    /**
