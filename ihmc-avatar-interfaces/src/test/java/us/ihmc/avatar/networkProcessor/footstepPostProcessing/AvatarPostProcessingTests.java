@@ -155,6 +155,8 @@ public abstract class AvatarPostProcessingTests implements MultiRobotTestInterfa
       goalPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       FootstepPlanningRequestPacket request = getRequest(drcSimulationTestHelper.getControllerFullRobotModel(), blockEnvironment.getPlanarRegionsList(), goalPose, footstepPlannerParameters);
+
+      request.setRequestedSwingPlanner(SwingPlannerType.POSITION.toByte());
       request.setPerformPositionBasedSplitFractionCalculation(true);
 
       runTest(request);

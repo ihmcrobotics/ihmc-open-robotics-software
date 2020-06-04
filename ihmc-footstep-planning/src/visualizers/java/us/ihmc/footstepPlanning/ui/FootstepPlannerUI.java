@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
@@ -19,8 +18,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
 import us.ihmc.footstepPlanning.ui.components.*;
 import us.ihmc.footstepPlanning.ui.controllers.*;
 import us.ihmc.footstepPlanning.ui.viewers.*;
@@ -88,8 +85,6 @@ public class FootstepPlannerUI
    @FXML
    private VisibilityGraphsParametersUIController visibilityGraphsParametersUIController;
    @FXML
-   private FootstepPostProcessingParametersUIController footstepPostProcessingParametersUIController;
-   @FXML
    private FootstepPlannerLogVisualizerController footstepPlannerLogVisualizerController;
    @FXML
    private MainTabController mainTabController;
@@ -109,7 +104,6 @@ public class FootstepPlannerUI
            messager,
            new DefaultFootstepPlannerParameters(),
            new DefaultVisibilityGraphParameters(),
-           new DefaultFootstepPostProcessingParameters(),
            null,
            null,
            showTestDashboard,
@@ -120,7 +114,6 @@ public class FootstepPlannerUI
                             JavaFXMessager messager,
                             FootstepPlannerParametersBasics plannerParameters,
                             VisibilityGraphsParametersBasics visibilityGraphsParameters,
-                            FootstepPostProcessingParametersBasics footstepPostProcessingParameters,
                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             WalkingControllerParameters walkingControllerParameters,
                             boolean showTestDashboard,
@@ -130,7 +123,6 @@ public class FootstepPlannerUI
            messager,
            plannerParameters,
            visibilityGraphsParameters,
-           footstepPostProcessingParameters,
            fullHumanoidRobotModelFactory,
            null,
            walkingControllerParameters,
@@ -144,7 +136,6 @@ public class FootstepPlannerUI
                             JavaFXMessager messager,
                             FootstepPlannerParametersBasics plannerParameters,
                             VisibilityGraphsParametersBasics visibilityGraphsParameters,
-                            FootstepPostProcessingParametersBasics footstepPostProcessingParameters,
                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             FullHumanoidRobotModelFactory previewModelFactory,
                             WalkingControllerParameters walkingControllerParameters,
@@ -169,7 +160,6 @@ public class FootstepPlannerUI
 
       footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
-      footstepPostProcessingParametersUIController.setPostProcessingParameters(footstepPostProcessingParameters);
 
       mainTabController.attachMessager(messager);
       footstepPlannerStatusBarController.attachMessager(messager);
@@ -177,7 +167,6 @@ public class FootstepPlannerUI
       footstepPlannerMenuUIController.attachMessager(messager);
       footstepPlannerParametersUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
-      footstepPostProcessingParametersUIController.attachMessager(messager);
       footstepPlannerLogVisualizerController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
       uiRobotController.attachMessager(messager);
@@ -189,7 +178,6 @@ public class FootstepPlannerUI
       footstepPlannerTestDashboardController.bindControls();
       footstepPlannerParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
-      footstepPostProcessingParametersUIController.bindControls();
       footstepPlannerLogVisualizerController.bindControls();
       visibilityGraphsUIController.bindControls();
 
@@ -388,7 +376,6 @@ public class FootstepPlannerUI
       footstepPlannerLogVisualizerController.onPrimaryStageLoaded();
       footstepPlannerParametersUIController.onPrimaryStageLoaded();
       visibilityGraphsParametersUIController.onPrimaryStageLoaded();
-      footstepPostProcessingParametersUIController.onPrimaryStageLoaded();
    }
 
    public void stop()
@@ -429,7 +416,6 @@ public class FootstepPlannerUI
                                                     JavaFXMessager messager,
                                                     FootstepPlannerParametersBasics plannerParameters,
                                                     VisibilityGraphsParametersBasics visibilityGraphsParameters,
-                                                    FootstepPostProcessingParametersBasics postProcessingParameters,
                                                     FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                                                     FullHumanoidRobotModelFactory previewModelFactory,
                                                     RobotContactPointParameters<RobotSide> contactPointParameters,
@@ -447,7 +433,6 @@ public class FootstepPlannerUI
                                    messager,
                                    plannerParameters,
                                    visibilityGraphsParameters,
-                                   postProcessingParameters,
                                    fullHumanoidRobotModelFactory,
                                    previewModelFactory,
                                    walkingControllerParameters,
