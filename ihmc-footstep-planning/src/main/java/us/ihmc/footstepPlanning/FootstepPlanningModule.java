@@ -420,6 +420,16 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return visibilityGraphParameters;
    }
 
+   public SwingPlannerParametersBasics getSwingPlannerParameters()
+   {
+      return swingPlannerParameters;
+   }
+
+   public SplitFractionCalculatorParametersBasics getSplitFractionParameters()
+   {
+      return splitFractionParameters;
+   }
+
    public FootstepNodeSnapAndWiggler getSnapper()
    {
       return aStarFootstepPlanner.getSnapper();

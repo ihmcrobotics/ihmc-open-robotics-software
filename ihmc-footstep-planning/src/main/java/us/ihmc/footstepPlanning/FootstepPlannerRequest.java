@@ -3,9 +3,11 @@ package us.ihmc.footstepPlanning;
 import controller_msgs.msg.dds.FootstepPlanningRequestPacket;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.orientation.interfaces.Orientation3DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -32,6 +34,11 @@ public class FootstepPlannerRequest
     * The starting left and right footstep poses
     */
    private final SideDependentList<Pose3D> startFootPoses = new SideDependentList<>(side -> new Pose3D());
+
+   /**
+    * Initial starting footholds. Used by split fraction calculator to improve robustness for poor footholds
+    */
+   private final SideDependentList<ConvexPolygon2D> startFootholds = new SideDependentList<>(side -> new ConvexPolygon2D());
 
    /**
     * The goal left and right footstep poses.
@@ -195,6 +202,11 @@ public class FootstepPlannerRequest
       this.startFootPoses.get(side).set(stanceFootPosition, stanceFootOrientation);
    }
 
+   public void setStartFoothold(RobotSide side, ConvexPolygon2D foothold)
+   {
+      this.startFootholds.get(side).set(foothold);
+   }
+
    public void setGoalFootPoses(Pose3DReadOnly leftFootPose, Pose3DReadOnly rightFootPose)
    {
       this.goalFootPoses.get(RobotSide.LEFT).set(leftFootPose);
@@ -320,6 +332,11 @@ public class FootstepPlannerRequest
       return startFootPoses;
    }
 
+   public SideDependentList<ConvexPolygon2D> getStartFootholds()
+   {
+      return startFootholds;
+   }
+
    public SideDependentList<Pose3D> getGoalFootPoses()
    {
       return goalFootPoses;
@@ -443,6 +460,20 @@ public class FootstepPlannerRequest
       setPerformAreaBasedSplitFractionCalculation(requestPacket.getPerformAreaBasedSplitFractionCalculation());
       setPerformPositionBasedSplitFractionCalculation(requestPacket.getPerformPositionBasedSplitFractionCalculation());
 
+      startFootholds.get(RobotSide.LEFT).clear();
+      for (Point3D vertex : requestPacket.getInitialLeftContactPoints2d())
+      {
+         startFootholds.get(RobotSide.LEFT).addVertex(vertex);
+      }
+      startFootholds.get(RobotSide.LEFT).update();
+
+      startFootholds.get(RobotSide.RIGHT).clear();
+      for (Point3D vertex : requestPacket.getInitialRightContactPoints2d())
+      {
+         startFootholds.get(RobotSide.RIGHT).addVertex(vertex);
+      }
+      startFootholds.get(RobotSide.RIGHT).update();
+
       SwingPlannerType swingPlannerType = SwingPlannerType.fromByte(requestPacket.getRequestedSwingPlanner());
       if (swingPlannerType != null)
          setSwingPlannerType(swingPlannerType);
@@ -491,6 +522,18 @@ public class FootstepPlannerRequest
          requestPacket.getBodyPathWaypoints().add().set(bodyPathWaypoints.get(i));
       }
 
+      requestPacket.getInitialLeftContactPoints2d().clear();
+      for (int i = 0; i < startFootholds.get(RobotSide.LEFT).getNumberOfVertices(); i++)
+      {
+         requestPacket.getInitialLeftContactPoints2d().add().set(requestPacket.getInitialLeftContactPoints2d().get(i));
+      }
+
+      requestPacket.getInitialRightContactPoints2d().clear();
+      for (int i = 0; i < startFootholds.get(RobotSide.RIGHT).getNumberOfVertices(); i++)
+      {
+         requestPacket.getInitialRightContactPoints2d().add().set(requestPacket.getInitialRightContactPoints2d().get(i));
+      }
+
       if(getPlanarRegionsList() != null)
       {
          PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(getPlanarRegionsList());
@@ -526,6 +569,11 @@ public class FootstepPlannerRequest
       this.swingPlannerType = other.swingPlannerType;
       this.performAreaBasedSplitFractionCalculation = other.performAreaBasedSplitFractionCalculation;
       this.performPositionBasedSplitFractionCalculation = other.performPositionBasedSplitFractionCalculation;
+
+      for (RobotSide robotSide : RobotSide.values)
+      {
+         this.startFootholds.get(robotSide).set(other.startFootholds.get(robotSide));
+      }
 
       if(other.planarRegionsList != null)
       {
