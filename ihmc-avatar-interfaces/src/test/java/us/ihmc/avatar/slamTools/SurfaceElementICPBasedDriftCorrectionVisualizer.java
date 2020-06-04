@@ -255,6 +255,6 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       double surfaceElementResolution = 0.04;
       double windowMargin = 0.05;
       int minimumNumberOfHits = 10;
-      frame2.registerSurfaceElements(octreeMap, windowMargin, surfaceElementResolution, minimumNumberOfHits);
+      frame2.registerSurfaceElements(octreeMap, windowMargin, surfaceElementResolution, minimumNumberOfHits, true);
    }
 }

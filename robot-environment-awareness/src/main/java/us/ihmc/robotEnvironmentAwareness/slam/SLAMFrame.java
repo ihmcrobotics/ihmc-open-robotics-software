@@ -17,6 +17,7 @@ import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 
@@ -28,11 +29,6 @@ public class SLAMFrame
     * original sensor pose from message.
     */
    private final RigidBodyTransformReadOnly originalSensorPoseToWorld;
-
-   /**
-    * fixedDiff(parent.originalSensorPoseToWorld vs this.originalSensorPoseToWorld).
-    */
-   private final RigidBodyTransformReadOnly transformFromPreviousFrame;
 
    /**
     * parent.optimizedSensorPoseToWorld * transformFromPreviousFrame.
@@ -52,7 +48,7 @@ public class SLAMFrame
    private final Point3DReadOnly[] originalPointCloudToWorld; // For comparison after mapping.
    private final Point3DReadOnly[] pointCloudToSensorFrame;
    private final Point3D[] optimizedPointCloudToWorld;
-   
+
    private double confidenceFactor;
 
    public SLAMFrame(StereoVisionPointCloudMessage message)
@@ -61,7 +57,6 @@ public class SLAMFrame
 
       originalSensorPoseToWorld = MessageTools.unpackSensorPose(message);
 
-      transformFromPreviousFrame = new RigidBodyTransform(originalSensorPoseToWorld);
       sensorPoseToWorld = new RigidBodyTransform(originalSensorPoseToWorld);
       optimizedSensorPoseToWorld.set(originalSensorPoseToWorld);
 
@@ -73,29 +68,6 @@ public class SLAMFrame
 
       updateOptimizedPointCloudAndSensorPose();
    }
-   
-//   public SLAMFrame(SLAMFrame frame, StereoVisionPointCloudMessage message)
-//   {
-//      previousFrame = frame;
-//
-//      originalSensorPoseToWorld = MessageTools.unpackSensorPose(message);
-//
-//      RigidBodyTransform transformDiff = new RigidBodyTransform(originalSensorPoseToWorld);
-//      transformDiff.preMultiplyInvertOther(frame.originalSensorPoseToWorld);
-//      transformFromPreviousFrame = new RigidBodyTransform(transformDiff);
-//
-//      RigidBodyTransform transformToWorld = new RigidBodyTransform(frame.optimizedSensorPoseToWorld);
-//      transformToWorld.multiply(transformFromPreviousFrame);
-//      sensorPoseToWorld = new RigidBodyTransform(transformToWorld);
-//
-//      originalPointCloudToWorld = PointCloudCompression.decompressPointCloudToArray(message);
-//      pointCloudToSensorFrame = SLAMTools.createConvertedPointsToSensorPose(originalSensorPoseToWorld, originalPointCloudToWorld);
-//      optimizedPointCloudToWorld = new Point3D[pointCloudToSensorFrame.length];
-//      for (int i = 0; i < optimizedPointCloudToWorld.length; i++)
-//         optimizedPointCloudToWorld[i] = new Point3D(pointCloudToSensorFrame[i]);
-//
-//      updateOptimizedPointCloudAndSensorPose();
-//   }
 
    public SLAMFrame(SLAMFrame frame, StereoVisionPointCloudMessage message)
    {
@@ -103,7 +75,6 @@ public class SLAMFrame
 
       originalSensorPoseToWorld = MessageTools.unpackSensorPose(message);
 
-      transformFromPreviousFrame = new RigidBodyTransform();
       sensorPoseToWorld = new RigidBodyTransform(originalSensorPoseToWorld);
 
       originalPointCloudToWorld = PointCloudCompression.decompressPointCloudToArray(message);
@@ -132,7 +103,7 @@ public class SLAMFrame
          optimizedPointCloudToWorld[i].set(pointCloudToSensorFrame[i]);
          optimizedSensorPoseToWorld.transform(optimizedPointCloudToWorld[i]);
       }
-      
+
       for (int i = 0; i < surfaceElements.size(); i++)
       {
          Plane3D surfel = surfaceElements.get(i);
@@ -141,15 +112,16 @@ public class SLAMFrame
          getSensorPose().transform(surfel.getNormal());
       }
    }
-   
+
    private final List<Plane3D> surfaceElements = new ArrayList<>();
    private final List<Plane3DReadOnly> surfaceElementsToSensor = new ArrayList<>();
-   
-   public void registerSurfaceElements(NormalOcTree map, double windowMargin, double surfaceElementResolution, int minimumNumberOfHits)
+   private NormalOcTree frameMap;
+
+   public void registerSurfaceElements(NormalOcTree map, double windowMargin, double surfaceElementResolution, int minimumNumberOfHits, boolean updateNormal)
    {
       surfaceElements.clear();
       surfaceElementsToSensor.clear();
-      NormalOcTree frameMap = new NormalOcTree(surfaceElementResolution);
+      frameMap = new NormalOcTree(surfaceElementResolution);
 
       ScanCollection scanCollection = new ScanCollection();
       int numberOfPoints = getOriginalPointCloud().length;
@@ -162,16 +134,16 @@ public class SLAMFrame
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
       normalEstimationParameters.setNumberOfIterations(10);
-      normalEstimationParameters.setMaxDistanceFromPlane(surfaceElementResolution);
       frameMap.setNormalEstimationParameters(normalEstimationParameters);
-      frameMap.updateNormals();
+      if(updateNormal)
+         frameMap.updateNormals();
 
       OcTreeIterable<NormalOcTreeNode> iterable = OcTreeIteratorFactory.createIterable(frameMap.getRoot());
       for (NormalOcTreeNode node : iterable)
       {
          if (node.getNumberOfHits() >= minimumNumberOfHits)
          {
-            if (node.getNormalAverageDeviation() < 0.00005)
+            //if (node.getNormalAverageDeviation() < 0.00005)
             {
                Plane3D surfaceElement = new Plane3D();
                node.getNormal(surfaceElement.getNormal());
@@ -183,7 +155,11 @@ public class SLAMFrame
          }
       }
    }
-   
+
+   public NormalOcTree getFrameMap()
+   {
+      return frameMap;
+   }
 
    public List<Plane3D> getSurfaceElements()
    {
@@ -194,7 +170,7 @@ public class SLAMFrame
    {
       return surfaceElementsToSensor;
    }
-   
+
    public void setConfidenceFactor(double value)
    {
       confidenceFactor = value;
@@ -242,7 +218,7 @@ public class SLAMFrame
    {
       return previousFrame;
    }
-   
+
    public double getConfidenceFactor()
    {
       return confidenceFactor;

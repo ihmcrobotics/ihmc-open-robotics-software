@@ -20,7 +20,6 @@ import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
-import us.ihmc.robotEnvironmentAwareness.slam.RandomICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMBasics;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.SurfaceElementICPSLAM;
@@ -52,6 +51,8 @@ public class SurfaceElementICPSLAMTest
        * 14, 15: small.
        */
       String stereoPath = "C:\\PointCloudData\\Data\\20200601_LidarWalking_UpStairs2\\PointCloud\\";
+      //String stereoPath = "C:\\PointCloudData\\Data\\20200603_LidarWalking_StairUp3\\PointCloud\\";   // 8-9 very big in X. 4-5 small in Y. 7-8 big in X and small overlap in the last vertical
+      
       File pointCloudFile = new File(stereoPath);
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
@@ -88,14 +89,16 @@ public class SurfaceElementICPSLAMTest
       map.updateNormals();
 
       SLAMFrame frame2 = new SLAMFrame(slam.getLatestFrame(), messages.get(4));
-      double surfaceElementResolution = 0.03;
-      frame2.registerSurfaceElements(map, 0.05, surfaceElementResolution, 5);
+      double surfaceElementResolution = 0.04;
+      double windowMargin = 0.05;
+      int minimumNumberOfHits = 10;
+      boolean updateNormal = false;
+      frame2.registerSurfaceElements(map, windowMargin, surfaceElementResolution, minimumNumberOfHits, updateNormal);
 
       SLAMViewer slamViewer = new SLAMViewer();
       slamViewer.addOctree(map, Color.CORAL, octreeResolution, true);
-      //slamViewer.addOctree(map, Color.CORAL, octreeResolution);
-
-      slamViewer.addOctree(frame2.getSurfaceElements(), Color.GREEN, surfaceElementResolution);
+      slamViewer.addOctree(map, Color.CORAL, octreeResolution);
+      slamViewer.addOctree(frame2.getFrameMap(), Color.GREEN, surfaceElementResolution, !updateNormal);
 
       slamViewer.start("testSurfaceElements");
       ThreadTools.sleepForever();
@@ -105,28 +108,29 @@ public class SurfaceElementICPSLAMTest
    public void testDriftCorrection()
    {
       String stereoPath = "C:\\PointCloudData\\Data\\20200601_LidarWalking_UpStairs2\\PointCloud\\";
+      //String stereoPath = "C:\\PointCloudData\\Data\\20200603_LidarWalking_StairUp3\\PointCloud\\";
       File pointCloudFile = new File(stereoPath);
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
       double octreeResolution = 0.02;
       SurfaceElementICPSLAM slam = new SurfaceElementICPSLAM(octreeResolution);
-      slam.addKeyFrame(messages.get(5));
+      slam.addKeyFrame(messages.get(4));
 
       NormalOcTree map = slam.getOctree();
       map.updateNormals();
-      System.out.println(map.getNumberOfNodes() + " " + map.getNumberOfLeafNodes());
 
-      SLAMFrame frame2 = new SLAMFrame(slam.getLatestFrame(), messages.get(6));
+      SLAMFrame frame2 = new SLAMFrame(slam.getLatestFrame(), messages.get(5));
       double surfaceElementResolution = 0.04;
       double windowMargin = 0.05;
       int minimumNumberOfHits = 10;
-      frame2.registerSurfaceElements(map, windowMargin, surfaceElementResolution, minimumNumberOfHits);
+      boolean updateNormal = false;
+      frame2.registerSurfaceElements(map, windowMargin, surfaceElementResolution, minimumNumberOfHits, updateNormal);
 
       SLAMViewer originalViewer = new SLAMViewer();
       originalViewer.addOctree(map, Color.CORAL, octreeResolution, true);
 
       originalViewer.addPointCloud(frame2.getPointCloud(), Color.BLUE);
-      originalViewer.addOctree(frame2.getSurfaceElements(), Color.GREEN, surfaceElementResolution);
+      originalViewer.addOctree(frame2.getFrameMap(), Color.GREEN, surfaceElementResolution, !updateNormal);
       originalViewer.start("originalViewer");
 
       int numberOfSurfel = frame2.getSurfaceElementsToSensor().size();
@@ -162,7 +166,7 @@ public class SurfaceElementICPSLAMTest
 
          private double computeClosestDistance(Plane3D surfel)
          {
-            return SLAMTools.computeSurfaceElementDistanceToNormalOctree(map, surfel);
+            return SLAMTools.computePerpendicularDistanceToNormalOctree(map, surfel.getPoint());
          }
       };
       DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
@@ -178,7 +182,7 @@ public class SurfaceElementICPSLAMTest
       optimizer.setCorrespondenceThreshold(0.05);
 
       // do ICP.
-      for (int i = 0; i < 100; i++)
+      for (int i = 0; i < 10; i++)
       {
          optimizer.iterate();
       }
@@ -210,8 +214,7 @@ public class SurfaceElementICPSLAMTest
 
       SLAMViewer slamViewer = new SLAMViewer();
       slamViewer.addOctree(map, Color.CORAL, octreeResolution, true);
-      //      slamViewer.addPointCloud(frame2.getPointCloud(), Color.GREEN);
-      //      slamViewer.addOctree(frame2.getSurfaceElements(), Color.GREEN, surfaceElementResolution);
+      slamViewer.addPointCloud(frame2.getPointCloud(), Color.GREEN);
       slamViewer.start("testDriftCorrection");
 
       ThreadTools.sleepForever();
@@ -231,8 +234,9 @@ public class SurfaceElementICPSLAMTest
    @Test
    public void testEndToEndTest()
    {
-      //String stereoPath = "C:\\PointCloudData\\Data\\20200601_LidarWalking_DownStairs\\PointCloud\\";
       String stereoPath = "C:\\PointCloudData\\Data\\20200601_LidarWalking_UpStairs2\\PointCloud\\";
+      //String stereoPath = "C:\\PointCloudData\\Data\\20200601_LidarWalking_DownStairs\\PointCloud\\";
+      //String stereoPath = "C:\\PointCloudData\\Data\\20200603_LidarWalking_StairUp3\\PointCloud\\";
       File pointCloudFile = new File(stereoPath);
 
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
@@ -244,43 +248,12 @@ public class SurfaceElementICPSLAMTest
       slam.addKeyFrame(messages.get(0));
       slam.updatePlanarRegionsMap();
 
-      //      // when add 1, 2, drift is not corrected. surfel size 0.03, min hit 5, then it would be good.
-      //            slam.addFrame(messages.get(1));
-      //            slam.updatePlanarRegionsMap();
-      //            originalViewer.addStereoMessage(messages.get(1), Color.GREEN);
-      //            
-      //            slam.addFrame(messages.get(2));
-      //            slam.updatePlanarRegionsMap();
-      //            originalViewer.addStereoMessage(messages.get(2), Color.GREEN);
-      //
-      //      slam.addFrame(messages.get(3));
-      //      slam.updatePlanarRegionsMap();
-      //      originalViewer.addStereoMessage(messages.get(3), Color.GREEN);
-      //
-      //      slam.addFrame(messages.get(4));
-      //      slam.updatePlanarRegionsMap();
-      //      originalViewer.addStereoMessage(messages.get(4), Color.GREEN);
-      //      
-      //      slam.addFrame(messages.get(5));
-      //      slam.updatePlanarRegionsMap();
-      //      originalViewer.addStereoMessage(messages.get(5), Color.GREEN);
-      //      
-      //      // offset on z dir.
-      //      slam.addFrame(messages.get(6));
-      //      slam.updatePlanarRegionsMap();
-      //      originalViewer.addStereoMessage(messages.get(6), Color.GREEN);
-      //      
-      //      // this is bad.
-      //      slam.addFrame(messages.get(7));
-      //      slam.updatePlanarRegionsMap();
-      //      originalViewer.addStereoMessage(messages.get(7), Color.GREEN);
-
       for (int i = 1; i < messages.size() - 1; i++)
       {
-         System.out.println();
-         System.out.println(" ## add frame " + i);
          slam.addFrame(messages.get(i));
          slam.updatePlanarRegionsMap();
+         System.out.println();
+         System.out.println(" ## add frame " + i + " " + slam.getComputationTimeForLatestFrame());
 
          originalViewer.addStereoMessage(messages.get(i), Color.GREEN);
       }
@@ -289,8 +262,9 @@ public class SurfaceElementICPSLAMTest
 
       SLAMViewer octreeViewer = new SLAMViewer();
 
-      //String path = "C:\\PointCloudData\\Data\\20200601_LidarWalking_DownStairs\\20200601_154952_PlanarRegion\\";
       String path = "C:\\PointCloudData\\Data\\20200601_LidarWalking_UpStairs2\\20200601_160327_PlanarRegion\\";
+      //String path = "C:\\PointCloudData\\Data\\20200601_LidarWalking_DownStairs\\20200601_154952_PlanarRegion\\";
+      //String path = "C:\\PointCloudData\\Data\\20200603_LidarWalking_StairUp3\\20200603_205049_PlanarRegion\\";
       File file = new File(path);
       octreeViewer.addPlanarRegions(PlanarRegionFileTools.importPlanarRegionData(file));
       octreeViewer.addOctree(slam.getOctree(), Color.CORAL, slam.getOctreeResolution(), true);
@@ -300,45 +274,6 @@ public class SurfaceElementICPSLAMTest
       octreeViewer.start("octreeViewer");
       slamViewer.start("slamViewer");
       originalViewer.start("originalViewer");
-
-      ThreadTools.sleepForever();
-   }
-
-   @Test
-   public void testOldSLAMEndToEndTest()
-   {
-      String stereoPath = "C:\\PointCloudData\\Data\\20200601_LidarWalking_UpStairs2\\PointCloud\\";
-      File pointCloudFile = new File(stereoPath);
-
-      List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
-      double octreeResolution = 0.02;
-      RandomICPSLAM slam = new RandomICPSLAM(octreeResolution);
-      SLAMViewer originalViewer = new SLAMViewer();
-      SLAMViewer slamViewer = new SLAMViewer();
-
-      slam.addKeyFrame(messages.get(0));
-      for (int i = 1; i < messages.size(); i++)
-      {
-         System.out.println();
-         System.out.println(" ## add frame " + i);
-         slam.addFrame(messages.get(i));
-         slam.updatePlanarRegionsMap();
-
-         originalViewer.addStereoMessage(messages.get(i), Color.GREEN);
-      }
-      slamViewer.addOctree(slam.getOctree(), Color.CORAL, slam.getOctreeResolution(), true);
-      slamViewer.addPlanarRegions(slam.getPlanarRegionsMap());
-
-      slamViewer.start("slamViewer");
-      originalViewer.start("originalViewer");
-
-      SLAMViewer octreeViewer = new SLAMViewer();
-
-      String path = "C:\\PointCloudData\\Data\\20200601_LidarWalking_UpStairs2\\20200601_160327_PlanarRegion\\";
-      File file = new File(path);
-      octreeViewer.addPlanarRegions(PlanarRegionFileTools.importPlanarRegionData(file));
-      octreeViewer.addOctree(slam.getOctree(), Color.CORAL, slam.getOctreeResolution(), true);
-      octreeViewer.start("octreeViewer");
 
       ThreadTools.sleepForever();
    }
