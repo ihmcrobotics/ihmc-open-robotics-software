@@ -1,21 +1,15 @@
 package us.ihmc.footstepPlanning.icp;
 
-import us.ihmc.commonWalkingControlModules.configurations.ICPPlannerParameters;
 import us.ihmc.commons.InterpolationTools;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
+import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SegmentDependentList;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.footstepPlanning.PlannedFootstep;
-
-import java.util.ArrayList;
 
 /**
  * The purpose of this class is to modify elements of the dynamic trajectory planner based on the comparative quality between footholds.
@@ -71,8 +65,15 @@ public class AreaBasedSplitFractionCalculator
             RobotSide stanceSide = footstepPlan.getFootstep(0).getRobotSide().getOppositeSide();
             previousFrame.setPoseAndUpdate(request.getStartFootPoses().get(stanceSide));
 
-            // TODO add initial foothold to request message
-            previousPolygon.set(footPolygons.get(stanceSide));
+            ConvexPolygon2D initialStanceFoothold = request.getStartFootholds().get(stanceSide);
+            if (initialStanceFoothold.isEmpty())
+            {
+               previousPolygon.set(footPolygons.get(stanceSide));
+            }
+            else
+            {
+               previousPolygon.set(initialStanceFoothold);
+            }
          }
          else
          {
