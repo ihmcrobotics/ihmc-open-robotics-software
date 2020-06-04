@@ -30,4 +30,9 @@ class LinkedPointListHolder
          }
       }
    }
+
+   public int getNumberOfPoints()
+   {
+      return listAPool.size() + listBPool.size();
+   }
 }

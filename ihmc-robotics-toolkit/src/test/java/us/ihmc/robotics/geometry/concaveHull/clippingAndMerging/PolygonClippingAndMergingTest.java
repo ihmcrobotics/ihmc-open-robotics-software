@@ -575,6 +575,33 @@ public class PolygonClippingAndMergingTest
    }
 
    @Test
+   public void testTroubleFromTesting()
+   {
+      ConcavePolygon2D clippingPolygon = new ConcavePolygon2D();
+      clippingPolygon.addVertex(-0.6599999999999993, 0.1506735276829657);
+      clippingPolygon.addVertex(-0.6453553390593267, 0.18727606806140973);
+      clippingPolygon.addVertex(-0.6099999999999994, 0.20243733670346997);
+      clippingPolygon.addVertex(-0.20999999999999908, 0.20243733670346997);
+      clippingPolygon.addVertex(-0.17464466094067177, 0.18727606806140973);
+      clippingPolygon.addVertex(-0.15999999999999925, 0.1506735276829657);
+      clippingPolygon.addVertex(-0.15999999999999925, -0.2493264723170343);
+      clippingPolygon.addVertex(-0.17464466094067177, -0.28592901269547816);
+      clippingPolygon.addVertex(-0.20999999999999908, -0.3010902813375385);
+      clippingPolygon.addVertex(-0.6099999999999994, -0.3010902813375385);
+      clippingPolygon.addVertex(-0.6599999999999993, -0.2493264723170343);
+      clippingPolygon.update();
+
+      ConcavePolygon2D polygonToClip = new ConcavePolygon2D();
+      polygonToClip.addVertex(-0.2, 0.2);
+      polygonToClip.addVertex(0.2, 0.2);
+      polygonToClip.addVertex(0.2, -0.2);
+      polygonToClip.addVertex(-0.2, -0.2);
+      polygonToClip.update();
+
+      PolygonClippingAndMerging.removeAreaInsideClip(clippingPolygon, polygonToClip);
+   }
+
+   @Test
    public void testAwfulMerge()
    {
       ConcavePolygon2D polygon1 = new ConcavePolygon2D();

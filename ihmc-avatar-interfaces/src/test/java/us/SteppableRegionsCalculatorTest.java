@@ -1145,10 +1145,15 @@ public class SteppableRegionsCalculatorTest
       calculator.setOrthogonalAngle(orthogonalAngle);
       calculator.setPlanarRegions(environment.getPlanarRegionsList().getPlanarRegionsAsList());
 
+      List<StepConstraintRegion> stepConstraintRegions = calculator.computeSteppableRegions();
+
+      Random random = new Random(1738L);
+      SteppableRegionsCalculatorTestHelper.assertSteppableRegionsAreValid(random, stepConstraintRegions, environment.getPlanarRegionsList());
+
       if (visualize)
       {
          ui.submitPlanarRegionsListToVisualizer(environment.getPlanarRegionsList());
-         ui.submitStepConstraintRegionsToVisualizer(calculator.computeSteppableRegions());
+         ui.submitStepConstraintRegionsToVisualizer(stepConstraintRegions);
          ui.submitObstacleExtrusions(calculator.getObstacleExtrusions());
          ui.submitTooSmallRegions(calculator.getTooSmallRegions());
          ui.submitTooSteepRegions(calculator.getTooSteepRegions());

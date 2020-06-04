@@ -155,7 +155,12 @@ public class PolygonClippingAndMerging
       while (startPoint != null)
       {
          ConcavePolygon2D polygon = new ConcavePolygon2D();
-         walkAlongEdgeOfPolygon(startPoint, listHolder, polygon, PolygonClippingAndMerging::shouldSwitchWhenMerging);
+         boolean failed = !walkAlongEdgeOfPolygon(startPoint, listHolder, polygon, PolygonClippingAndMerging::shouldSwitchWhenMerging);
+         if (failed)
+         {
+            mergedPolygon.set(polygonA);
+            return;
+         }
 
          // We want the biggest of the polygons; that is, we want the outer most perimeter polygon.
          if (Double.isNaN(mergedPolygon.getArea()))
@@ -231,8 +236,14 @@ public class PolygonClippingAndMerging
       while (startPoint != null)
       {
          ConcavePolygon2D clippedPolygon = new ConcavePolygon2D();
-         walkAlongEdgeOfPolygon(startPoint, listHolder, clippedPolygon, PolygonClippingAndMerging::shouldSwitchWhenClipping);
+         boolean failed = !walkAlongEdgeOfPolygon(startPoint, listHolder, clippedPolygon, PolygonClippingAndMerging::shouldSwitchWhenClipping);
          clippedPolygonsToReturn.add(clippedPolygon);
+
+         if (failed)
+         {
+            clippedPolygon.set(polygonToClip);
+            return clippedPolygonsToReturn;
+         }
 
          startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedToClipPoints);
       }
@@ -240,20 +251,21 @@ public class PolygonClippingAndMerging
       return clippedPolygonsToReturn;
    }
 
-   static void walkAlongEdgeOfPolygon(LinkedPoint startVertex, LinkedPointListHolder listHolder, ConcavePolygon2DBasics polygonToPack, SwitchingFunction switchFunction)
+   static boolean walkAlongEdgeOfPolygon(LinkedPoint startVertex, LinkedPointListHolder listHolder, ConcavePolygon2DBasics polygonToPack, SwitchingFunction switchFunction)
    {
       LinkedPoint linkedPoint = startVertex;
       LinkedPoint previousPoint = linkedPoint;
 
+      int maxPoints = listHolder.getNumberOfPoints();
       polygonToPack.addVertex(linkedPoint.getPoint());
       boolean isOnOtherList = false;
       int counter = 0;
-      while (counter++ < 500)
+      while (counter < maxPoints)
       {
          linkedPoint = linkedPoint.getSuccessor();
          listHolder.removePoint(previousPoint);
 
-         if (linkedPoint.getPoint().epsilonEquals(startVertex.getPoint(), 5e-3 + 1e-6))
+         if (linkedPoint.getPoint().epsilonEquals(startVertex.getPoint(), 1e-5))
             break;
 
          polygonToPack.addVertex(linkedPoint.getPoint());
@@ -274,12 +286,17 @@ public class PolygonClippingAndMerging
          {
             previousPoint = linkedPoint;
          }
+         counter++;
       }
 
-      if (counter >= 500)
-         throw new RuntimeException("Bad.");
+      if (counter >= maxPoints)
+      {
+         return false;
+      }
+//         throw new RuntimeException("Bad.");
 
       polygonToPack.update();
+      return true;
    }
 
 
