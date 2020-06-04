@@ -63,9 +63,6 @@ public class SteppableRegionsCalculator
    private final FramePoint2D stanceFootPosition = new FramePoint2D();
    private final Random random = new Random(1738L);
 
-   /**
-    * See notes in {@link VisibilityGraphsparametersReadOnly}
-    */
    private final ObstacleRegionFilter obstacleRegionFilter = new ObstacleRegionFilter()
    {
       @Override
@@ -97,9 +94,9 @@ public class SteppableRegionsCalculator
          }
          else if (obstacleHeight < canEasilyStepOverHeight.getDoubleValue())
          {
-//            return 0.01;
-                        double alpha = obstacleHeight / canEasilyStepOverHeight.getDoubleValue();
-                        return InterpolationTools.linearInterpolate(0.0, minimumDistanceFromCliffBottoms.getDoubleValue(), alpha);
+            //            return 0.01;
+            double alpha = obstacleHeight / canEasilyStepOverHeight.getDoubleValue();
+            return InterpolationTools.linearInterpolate(0.0, minimumDistanceFromCliffBottoms.getDoubleValue(), alpha);
          }
          else
          {
@@ -290,27 +287,37 @@ public class SteppableRegionsCalculator
                                                              ConcavePolygon2DBasics uncroppedPolygon,
                                                              List<ConcavePolygon2DBasics> obstacleExtrusions)
    {
-      List<ConcavePolygon2DBasics> listOfHoles = obstacleExtrusions.stream()
-                                                                   .filter(region -> isObstacleAHole(uncroppedPolygon, region))
-                                                                   .collect(Collectors.toList());
-      obstacleExtrusions.removeAll(listOfHoles);
+      List<ConcavePolygon2DBasics> extrusionsCopy = new ArrayList<>(obstacleExtrusions);
 
       List<ConcavePolygon2DBasics> croppedPolygons = new ArrayList<>();
       croppedPolygons.add(uncroppedPolygon);
 
-      // apply the polygons that we know will cause a clip
-      for (ConcavePolygon2DBasics obstacleExtrusion : obstacleExtrusions)
+      // apply all the extrusions that clip, removing them as they are applied.
+      // This has to been done via a brute force search, as applying one clip can cause a hole to create a clip on the next pass.
+      int i = 0;
+      while (i < extrusionsCopy.size())
       {
-         croppedPolygons = clipPolygons(obstacleExtrusion, croppedPolygons);
+         if (applyExtrusionClip(extrusionsCopy.get(i), croppedPolygons))
+         {
+            extrusionsCopy.remove(i);
+            i = 0;
+         }
+         else
+         {
+            i++;
+         }
       }
 
-      // TODO clean this thing up
-      // now assign the holes to the right region
+      List<ConcavePolygon2DBasics> listOfHoles = extrusionsCopy.stream()
+                                                               .filter(region -> GeometryPolygonTools.isPolygonInsideOtherPolygon(region, uncroppedPolygon))
+                                                               .collect(Collectors.toList());
+
+      // now assign the holes to their containing region region
       List<StepConstraintRegion> constraintRegions = new ArrayList<>();
       for (ConcavePolygon2DBasics croppedPolygon : croppedPolygons)
       {
          List<ConcavePolygon2DBasics> holesInRegion = new ArrayList<>();
-         int i = 0;
+         i = 0;
          while (i < listOfHoles.size())
          {
             ConcavePolygon2DBasics holeCandidate = listOfHoles.get(i);
@@ -331,15 +338,27 @@ public class SteppableRegionsCalculator
       return constraintRegions;
    }
 
-   private List<ConcavePolygon2DBasics> clipPolygons(ConcavePolygon2DReadOnly clippingPolygon, List<ConcavePolygon2DBasics> polygonsToClip)
+   /** Returns whether or not it should be removed from this list **/
+   private boolean applyExtrusionClip(ConcavePolygon2DReadOnly clippingPolygon, List<ConcavePolygon2DBasics> polygonsToModify)
    {
+      boolean doesNotIntersect = polygonsToModify.stream().noneMatch(region -> GeometryPolygonTools.doPolygonsIntersect(clippingPolygon, region));
+      if (doesNotIntersect)
+      {
+         if (polygonsToModify.stream().noneMatch(region -> GeometryPolygonTools.isPolygonInsideOtherPolygon(clippingPolygon, region)))
+            return true;
+
+         return false;
+      }
+
       List<ConcavePolygon2DBasics> clippedPolygons = new ArrayList<>();
-      for (ConcavePolygon2DBasics polygonToClip : polygonsToClip)
+      for (ConcavePolygon2DBasics polygonToClip : polygonsToModify)
       {
          clippedPolygons.addAll(PolygonClippingAndMerging.removeAreaInsideClip(clippingPolygon, polygonToClip));
       }
+      polygonsToModify.clear();
+      polygonsToModify.addAll(clippedPolygons);
 
-      return clippedPolygons;
+      return true;
    }
 
    private static boolean isObstacleAHole(ConcavePolygon2DBasics constraintArea, ConcavePolygon2DReadOnly obstacleConcaveHull)
