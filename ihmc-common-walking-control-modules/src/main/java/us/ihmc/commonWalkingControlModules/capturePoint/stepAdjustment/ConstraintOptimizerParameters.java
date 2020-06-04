@@ -7,6 +7,8 @@ public class ConstraintOptimizerParameters
    private double deltaInside = 0.0;
    private boolean constrainMaxAdjustment = true;
 
+   private int maxIterations = 3;
+
    public void setMaxX(double maxX)
    {
       this.maxX = maxX;
@@ -27,6 +29,11 @@ public class ConstraintOptimizerParameters
       this.constrainMaxAdjustment = constraintMaxAdjustment;
    }
 
+   public void setMaxIterations(int maxIterations)
+   {
+      this.maxIterations = maxIterations;
+   }
+
    public double getDesiredDistanceInside()
    {
       return deltaInside;
@@ -45,5 +52,10 @@ public class ConstraintOptimizerParameters
    public boolean getConstrainMaxAdjustment()
    {
       return constrainMaxAdjustment;
+   }
+
+   public int getMaxIterations()
+   {
+      return maxIterations;
    }
 }
