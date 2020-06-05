@@ -49,8 +49,7 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
       boolean footstepPlanOK = footstepPlan.get() != null && footstepPlan.get().getNumberOfSteps() > 0; // TODO: Shouldn't we prevent ever getting here?
       if (!footstepPlanOK)
       {
-         LogTools.warn("Robot walking: Footstep plan not OK {}, numberOfSteps = {}. Planning again...",
-                       footstepPlan.get(),
+         LogTools.warn("Robot walking supressed: Footstep plan not OK: numberOfSteps = {}. Planning again...",
                        footstepPlan.get() == null ? null : footstepPlan.get().getNumberOfSteps());
          replanFootstepsOutput.get().run();
          proceed = false;

@@ -42,6 +42,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    protected final Field<Supplier<Boolean>> isBeingReviewedSupplier = required();
    protected final Field<UIPublisher> uiPublisher = required();
    protected final Field<Runnable> newBodyPathGoalNeededNotifier = required();
+   protected final Field<Supplier<Boolean>> newBodyPathGoalNeededSupplier = required();
    protected final Field<Function<RobotSide, FramePose3DReadOnly>> lastSteppedSolePoseSupplier = required();
    protected final Field<BiConsumer<RobotSide, FramePose3DReadOnly>> lastSteppedSolePoseConsumer = required();
    protected final Field<FootstepPlanningModule> footstepPlanningModule = required();
@@ -64,7 +65,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
 
       if (!regionsOK())
       {
-         LogTools.warn("Find next footstep planning goal: Regions not OK: {}, timePassed: {}, isEmpty: {}",
+         LogTools.warn("Footstep planning suppressed: Regions not OK: {}, timePassed: {}, isEmpty: {}",
                        planarRegions.get(),
                        planarRegionReceptionTimerSnapshot.get().getTimePassedSinceReset(),
                        planarRegions.get() == null ? null : planarRegions.get().isEmpty());
@@ -73,17 +74,22 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       }
       else if (planningFailureTimerSnapshot.get().isRunning())
       {
-         LogTools.warn("Find next footstep planning goal: Planning failed recently");
+         LogTools.warn("Footstep planning suppressed: Planning failed recently");
          proceed = false;
       }
       else if (!bodyPathPlanOK())
       {
-         LogTools.warn("Find next footstep planning goal: Body path not OK {}, isEmpty: {}", bodyPathPlan.get(), bodyPathPlan.get() == null ? null : true);
+         LogTools.warn("Footstep planning suppressed: Body path size: {}", bodyPathPlan.get() == null ? null : bodyPathPlan.get().size());
          proceed = false;
       }
       else if (isBeingReviewedSupplier.get().get())
       {
-         LogTools.warn("Find next footstep planning goal: footstepPlanBeingReviewed = true");
+         LogTools.warn("Footstep planning suppressed: Plan being reviewed");
+         proceed = false;
+      }
+      else if (newBodyPathGoalNeededSupplier.get().get())
+      {
+         LogTools.warn("Footstep planning suppressed: New body path goal needed");
          proceed = false;
       }
 
@@ -299,6 +305,11 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    public void setNewBodyPathGoalNeededNotifier(Runnable newBodyPathGoalNeededNotifier)
    {
       this.newBodyPathGoalNeededNotifier.set(newBodyPathGoalNeededNotifier);
+   }
+
+   public void setNewBodyPathGoalNeededSupplier(Supplier<Boolean> newBodyPathGoalNeededSupplier)
+   {
+      this.newBodyPathGoalNeededSupplier.set(newBodyPathGoalNeededSupplier);
    }
 
    public void setLastSteppedSolePoseSupplier(Function<RobotSide, FramePose3DReadOnly> lastSteppedSolePoseSupplier)

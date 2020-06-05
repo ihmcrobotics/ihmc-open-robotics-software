@@ -39,6 +39,7 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    protected final Field<Consumer<List<? extends Pose3DReadOnly>>> initiateReviewOutput = required();
    protected final Field<Supplier<Boolean>> isBeingReviewed = required();
    protected final Field<Supplier<Boolean>> needNewPlan = required();
+   protected final Field<Runnable> clearNewBodyPathNeededCallback = required();
 
    private final Field<PlanarRegionsList> mapRegions = requiredChanging();
    private final Field<Pose3D> goal = requiredChanging();
@@ -50,34 +51,33 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    {
       boolean proceed = true;
 
-      if (!hasGoal())
+      if (!needNewPlan.get().get())
       {
-         LogTools.warn("Body path: does not have goal");
-         LogTools.debug("Sending planar regions to UI: {}: {}", LocalDateTime.now(), mapRegions.hashCode());
+         LogTools.warn("Body path planning supressed: New plan not needed");
+         proceed = false;
+      }
+      else if (!hasGoal())
+      {
+         LogTools.warn("Body path planning supressed: No goal specified");
          uiPublisher.get().publishToUI(MapRegionsForUI, mapRegions.get());
          proceed = false;
       }
       else if (!regionsOK())
       {
-         LogTools.warn("Body path: Regions not OK: {}, timePassed: {}, isEmpty: {}",
+         LogTools.warn("Body path planning supressed: Regions not OK: {}, timePassed: {}, isEmpty: {}",
                        mapRegions,
                        mapRegionsReceptionTimerSnapshot.get().getTimePassedSinceReset(),
                        mapRegions == null ? null : mapRegions.get().isEmpty());
          proceed = false;
       }
-      else if (!needNewPlan.get().get())
-      {
-         LogTools.warn("Body path: New plan not needed");
-         proceed = false;
-      }
       else if (planningFailureTimerSnapshot.get().isRunning()) // TODO: This could be "run recently" instead of failed recently
       {
-         LogTools.warn("Body path: Planner failed recently");
+         LogTools.warn("Body path planning supressed: Failed recently");
          proceed = false;
       }
       else if (isBeingReviewed.get().get())
       {
-         LogTools.debug("Body path: bodyPathBeingReviewed = true");
+         LogTools.warn("Body path planning supressed: Is being reviewed");
          proceed = false;
       }
 
@@ -116,6 +116,8 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
 
       LogTools.info("Planning body path...");
 
+      clearNewBodyPathNeededCallback.get().run();
+
       // calculate and send body path plan
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters.get());
       VisibilityGraphPathPlanner bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters.get(),
@@ -133,8 +135,8 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
       bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
       Stopwatch stopwatch = new Stopwatch().start();
       final ArrayList<Pose3D> bodyPathPlanForReview = new ArrayList<>(); // TODO Review making this final
-      bodyPathPlanner.planWaypoints();
-      LogTools.info("Body path planning took {}", stopwatch.totalElapsed()); // 0.1 s
+      bodyPathPlanner.planWaypoints(); // takes about 0.1s
+      LogTools.info("Body path planning took {}, contains {} waypoint", stopwatch.totalElapsed(), bodyPathPlanForReview.size());
       //      bodyPathPlan = bodyPathPlanner.getWaypoints();
       if (bodyPathPlanner.getWaypoints() != null)
       {
@@ -230,5 +232,10 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    public void setNeedNewPlan(Supplier<Boolean> needNewPlan)
    {
       this.needNewPlan.set(needNewPlan);
+   }
+
+   public void setClearNewBodyPathGoalNeededCallback(Runnable clearNewBodyPathNeededCallback)
+   {
+      this.clearNewBodyPathNeededCallback.set(clearNewBodyPathNeededCallback);
    }
 }

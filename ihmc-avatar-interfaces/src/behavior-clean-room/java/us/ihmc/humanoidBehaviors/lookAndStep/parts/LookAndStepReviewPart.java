@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
+import us.ihmc.commons.FormattingTools;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.log.LogTools;
@@ -26,16 +27,16 @@ public class LookAndStepReviewPart<T>
       ThreadTools.startAsDaemon(() ->
       {
          beingReviewed = true;
-         LogTools.info("Waiting for {} operator review...", description);
+         LogTools.error("Waiting for {} operator review... {}, {}", description, approvalNotification, callback);
          boolean approved = approvalNotification.blockingPoll();
-         LogTools.info("Operator reviewed {}: {}", description, approved);
+         LogTools.error("Operator reviewed {}: {}", description, approved);
          beingReviewed = false;
 
          if (approved)
          {
             callback.accept(data);
          }
-      }, description + "Review");
+      }, FormattingTools.titleToPascalCase(description) + "Review");
    }
 
    public boolean isBeingReviewed()
