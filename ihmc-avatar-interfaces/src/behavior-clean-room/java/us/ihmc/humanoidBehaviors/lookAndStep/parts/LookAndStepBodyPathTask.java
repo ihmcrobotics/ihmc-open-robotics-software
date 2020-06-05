@@ -51,12 +51,12 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    {
       boolean proceed = true;
 
-      if (!needNewPlan.get().get())
-      {
-         LogTools.warn("Body path planning supressed: New plan not needed");
-         proceed = false;
-      }
-      else if (!hasGoal())
+//      if (!needNewPlan.get().get())
+//      {
+//         LogTools.warn("Body path planning supressed: New plan not needed");
+//         proceed = false;
+//      }
+      if (!hasGoal())
       {
          LogTools.warn("Body path planning supressed: No goal specified");
          uiPublisher.get().publishToUI(MapRegionsForUI, mapRegions.get());

@@ -28,7 +28,17 @@ public class LookAndStepReviewPart<T>
       {
          beingReviewed = true;
          LogTools.error("Waiting for {} operator review... {}, {}", description, approvalNotification, callback);
-         boolean approved = approvalNotification.blockingPoll();
+         boolean approved = false;
+         try
+         {
+            approved = approvalNotification.blockingPoll();
+         }
+         catch (NullPointerException e)
+         {
+            LogTools.error("CAUGHT IT {}, {}", approvalNotification, e.getMessage());
+            e.printStackTrace();
+            throw e;
+         }
          LogTools.error("Operator reviewed {}: {}", description, approved);
          beingReviewed = false;
 
