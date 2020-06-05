@@ -66,12 +66,12 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    {
       boolean proceed = true;
 
-      if (!behaviorState.get().equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING))
-      {
-         LogTools.warn("Footstep planning supressed: Not in footstep planning state");
-         proceed = false;
-      }
-      else if (!regionsOK())
+//      if (!behaviorState.get().equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING))
+//      {
+//         LogTools.warn("Footstep planning supressed: Not in footstep planning state");
+//         proceed = false;
+//      }
+      if (!regionsOK())
       {
          LogTools.warn("Footstep planning suppressed: Regions not OK: {}, timePassed: {}, isEmpty: {}",
                        planarRegions.get(),
