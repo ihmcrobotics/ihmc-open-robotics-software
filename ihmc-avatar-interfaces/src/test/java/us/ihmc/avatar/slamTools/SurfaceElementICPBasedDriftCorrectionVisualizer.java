@@ -63,7 +63,6 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
    private final YoDouble optimizerQuality;
    private final YoInteger numberOfCorrespondingPoints;
-   private final YoInteger numberOfPerfectPoints;
 
    private final AppearanceDefinition octreeMapColor = YoAppearance.Coral();
    private final AppearanceDefinition frame1Appearance = YoAppearance.Blue();
@@ -73,7 +72,6 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    {
       optimizerQuality = new YoDouble("optimizerQuality", registry);
       numberOfCorrespondingPoints = new YoInteger("numberOfCorrespondingPoints", registry);
-      numberOfPerfectPoints = new YoInteger("numberOfPerfectPoints", registry);
 
       // Define frames .
       setupTest();
@@ -146,7 +144,6 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
          // do ICP.
          optimizer.iterate();
-         numberOfPerfectPoints.set(optimizer.numberOfPerfectPoints);
 
          // get parameter.
          icpTransformer.set(convertTransform(optimizer.getOptimalParameter().getData()));
