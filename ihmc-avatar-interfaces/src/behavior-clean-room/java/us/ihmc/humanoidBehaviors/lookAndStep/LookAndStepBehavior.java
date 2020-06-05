@@ -35,6 +35,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final LookAndStepBodyPathModule bodyPathModule;
    private final LookAndStepFootstepPlanningModule footstepPlanningModule;
    private final LookAndStepRobotMotionModule robotMotionModule;
+   private final AtomicReference<State> behaviorState;
 
    public enum State
    {
@@ -76,7 +77,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       AtomicReference<RobotSide> lastStanceSide = new AtomicReference<>();
       SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses = new SideDependentList<>();
 
-      AtomicReference<State> behaviorState = new AtomicReference<>(State.BODY_PATH_PLANNING);
+      behaviorState = new AtomicReference<>(State.BODY_PATH_PLANNING);
 
       // TODO: Want to be able to wire up behavior here and see all present modules
 
@@ -86,12 +87,12 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       LookAndStepReviewPart<List<? extends Pose3DReadOnly>> bodyPathReview = new LookAndStepReviewPart<>("body path", approvalNotification, bodyPathPlan ->
       {
-         behaviorState.set(State.FOOTSTEP_PLANNING);
+         updateState(State.FOOTSTEP_PLANNING);
          footstepPlanningModule.acceptBodyPathPlan(bodyPathPlan);
       });
       LookAndStepReviewPart<RobotWalkRequest> footstepPlanReview = new LookAndStepReviewPart<>("footstep plan", approvalNotification, robotWalkRequest ->
       {
-         behaviorState.set(LookAndStepBehavior.State.SWINGING);
+         updateState(LookAndStepBehavior.State.SWINGING);
          robotMotionModule.acceptRobotWalkRequest(robotWalkRequest);
       });
 
@@ -106,7 +107,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       bodyPathModule.setClearNewBodyPathGoalNeededCallback(() -> newBodyPathGoalNeeded.set(false));
       bodyPathModule.setUIPublisher(helper::publishToUI);
       bodyPathModule.setBehaviorStateSupplier(behaviorState::get);
-      bodyPathModule.setBehaviorStateUpdater(behaviorState::set);
+      bodyPathModule.setBehaviorStateUpdater(this::updateState);
 
       footstepPlanningModule.setIsBeingReviewedSupplier(footstepPlanReview::isBeingReviewed);
       footstepPlanningModule.setUiPublisher(helper::publishToUI);
@@ -124,7 +125,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlanningModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
       footstepPlanningModule.setFootstepPlanningModule(helper.getOrCreateFootstepPlanner());
       footstepPlanningModule.setBehaviorStateSupplier(behaviorState::get);
-      footstepPlanningModule.setBehaviorStateUpdater(behaviorState::set);
+      footstepPlanningModule.setBehaviorStateUpdater(this::updateState);
 
       robotMotionModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
       robotMotionModule.setLastSteppedSolePoseConsumer(lastSteppedSolePoses::put);
@@ -134,7 +135,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       robotMotionModule.setRobotWalkRequester(robot::requestWalk);
       robotMotionModule.setUiPublisher(helper::publishToUI);
       robotMotionModule.setBehaviorStateSupplier(behaviorState::get);
-      robotMotionModule.setBehaviorStateUpdater(behaviorState::set);
+      robotMotionModule.setBehaviorStateUpdater(this::updateState);
 
       // TODO: For now, these cause trouble if they are setup earlier. Need to disable them on creation
       helper.createROS2Callback(ROS2Tools.MAP_REGIONS, bodyPathModule::acceptMapRegions);
@@ -142,6 +143,12 @@ public class LookAndStepBehavior implements BehaviorInterface
       helper.createROS2Callback(ROS2Tools.REALSENSE_SLAM_REGIONS, footstepPlanningModule::acceptPlanarRegions);
 
       helper.setCommunicationCallbacksEnabled(false);
+   }
+
+   private void updateState(State state)
+   {
+      behaviorState.set(state);
+      helper.publishToUI(CurrentState, state.name());
    }
 
    @Override
