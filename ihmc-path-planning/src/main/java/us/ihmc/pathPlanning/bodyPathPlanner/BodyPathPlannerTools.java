@@ -79,6 +79,17 @@ public class BodyPathPlannerTools
       return closestSegmentIndex;
    }
 
+   public static int movePointAlongBodyPath(List<? extends Pose3DReadOnly> bodyPathPlan,
+                                            Point3DReadOnly startPoint,
+                                            Point3DBasics movedPointToPack,
+                                            double distance)
+   {
+      Point3D closestPointOnPlan = new Point3D();
+      int segmentToStartOn = findClosestPointAlongPath(bodyPathPlan, startPoint, closestPointOnPlan);
+
+      return movePointAlongBodyPath(bodyPathPlan, closestPointOnPlan, movedPointToPack, segmentToStartOn, distance);
+   }
+
    /**
     * Move point along body path plan by a distance.
     *
@@ -94,7 +105,8 @@ public class BodyPathPlannerTools
       Point3D previousComparisonPoint = new Point3D(pointOnBodyPath);
       Point3D endOfSegment = new Point3D();
       int segmentIndexOfGoal = segmentToStartOn;
-      for (int i = segmentToStartOn; i < bodyPathPlan.size() - 1 && moveAmountToGo > 0; i++)
+      movedPointToPack.set(pointOnBodyPath);
+      for (int i = segmentToStartOn; i < bodyPathPlan.size() - 1 && moveAmountToGo > 0.0; i++)
       {
          endOfSegment.set((bodyPathPlan.get(i + 1).getPosition()));
 
@@ -109,7 +121,8 @@ public class BodyPathPlannerTools
          else
          {
             movedPointToPack.interpolate(previousComparisonPoint, endOfSegment, moveAmountToGo / distanceToEndOfSegment);
-            moveAmountToGo = 0;
+            segmentIndexOfGoal = i;
+            break;
          }
 
          movedPointToPack.set(previousComparisonPoint);
