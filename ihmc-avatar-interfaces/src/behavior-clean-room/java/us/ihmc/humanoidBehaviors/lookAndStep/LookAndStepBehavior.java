@@ -36,6 +36,11 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final LookAndStepFootstepPlanningModule footstepPlanningModule;
    private final LookAndStepRobotMotionModule robotMotionModule;
 
+   public enum State
+   {
+      BODY_PATH_PLANNING, FOOTSTEP_PLANNING, SWINGING
+   }
+
    /**
     * We'll make the following assumptions/constraints about the data being passed around between task/modules:
     * - Data output from module will be read only and the underlying data must not be modified after sending
@@ -71,6 +76,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       AtomicReference<RobotSide> lastStanceSide = new AtomicReference<>();
       SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses = new SideDependentList<>();
 
+      AtomicReference<State> behaviorState = new AtomicReference<>(State.BODY_PATH_PLANNING);
+
       // TODO: Want to be able to wire up behavior here and see all present modules
 
       bodyPathModule = new LookAndStepBodyPathModule();
@@ -94,6 +101,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       bodyPathModule.setNeedNewPlan(newBodyPathGoalNeeded::get); // TODO: hook up to subgoal mover
       bodyPathModule.setClearNewBodyPathGoalNeededCallback(() -> newBodyPathGoalNeeded.set(false));
       bodyPathModule.setUIPublisher(helper::publishToUI);
+      bodyPathModule.setBehaviorStateSupplier(behaviorState::get);
+      bodyPathModule.setBehaviorStateUpdater(behaviorState::set);
 
       footstepPlanningModule.setIsBeingReviewedSupplier(footstepPlanReview::isBeingReviewed);
       footstepPlanningModule.setUiPublisher(helper::publishToUI);
@@ -110,6 +119,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlanningModule.setAutonomousOutput(robotMotionModule::acceptRobotWalkRequest);
       footstepPlanningModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
       footstepPlanningModule.setFootstepPlanningModule(helper.getOrCreateFootstepPlanner());
+      footstepPlanningModule.setBehaviorStateSupplier(behaviorState::get);
+      footstepPlanningModule.setBehaviorStateUpdater(behaviorState::set);
 
       robotMotionModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
       robotMotionModule.setLastSteppedSolePoseConsumer(lastSteppedSolePoses::put);
@@ -118,6 +129,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       robotMotionModule.setReplanFootstepsOutput(footstepPlanningModule::evaluateAndRun);
       robotMotionModule.setRobotWalkRequester(robot::requestWalk);
       robotMotionModule.setUiPublisher(helper::publishToUI);
+      robotMotionModule.setBehaviorStateSupplier(behaviorState::get);
+      robotMotionModule.setBehaviorStateUpdater(behaviorState::set);
 
       // TODO: For now, these cause trouble if they are setup earlier. Need to disable them on creation
       helper.createROS2Callback(ROS2Tools.MAP_REGIONS, bodyPathModule::acceptMapRegions);
