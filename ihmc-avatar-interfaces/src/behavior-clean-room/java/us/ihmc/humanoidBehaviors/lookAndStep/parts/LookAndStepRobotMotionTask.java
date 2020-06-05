@@ -60,6 +60,7 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
       {
          LogTools.warn("Robot walking supressed: Footstep plan not OK: numberOfSteps = {}. Planning again...",
                        footstepPlan.get() == null ? null : footstepPlan.get().getNumberOfSteps());
+         behaviorStateUpdater.get().accept(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
          replanFootstepsOutput.get().run();
          proceed = false;
       }
