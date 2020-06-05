@@ -23,6 +23,7 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet implements 
    public static final BooleanStoredPropertyKey returnBestEffortPlanOverride = keys.addBooleanKey("Return best effort plan override");
    public static final DoubleStoredPropertyKey maxPlanStrayDistance = keys.addDoubleKey("Max plan stray distance");
    public static final DoubleStoredPropertyKey goalSatisfactionRadius = keys.addDoubleKey("Goal satisfaction radius");
+   public static final DoubleStoredPropertyKey goalSatisfactionOrientationDelta = keys.addDoubleKey("Goal satisfaction orientation delta");
    public static final DoubleStoredPropertyKey percentSwingToWait = keys.addDoubleKey("Percent swing to wait");
 
    public LookAndStepBehaviorParameters()

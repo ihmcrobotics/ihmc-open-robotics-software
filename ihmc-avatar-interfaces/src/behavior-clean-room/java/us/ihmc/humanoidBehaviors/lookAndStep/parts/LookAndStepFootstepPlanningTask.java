@@ -23,6 +23,7 @@ import us.ihmc.humanoidBehaviors.tools.interfaces.RobotWalkRequest;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
+import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -148,7 +149,10 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
                                                                            closestSegmentIndex,
                                                                            lookAndStepBehaviorParameters.get().getPlanHorizon());
 
-      if (closestPointAlongPath.distanceXY(goalPoint) < lookAndStepBehaviorParameters.get().getGoalSatisfactionRadius())
+      Pose3DReadOnly terminalGoal = bodyPathPlan.get().get(bodyPathPlan.get().size() - 1);
+      boolean reachedGoal = closestPointAlongPath.distanceXY(goalPoint) < lookAndStepBehaviorParameters.get().getGoalSatisfactionRadius();
+      reachedGoal &= Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(pelvisPose.getYaw(), terminalGoal.getYaw())) < lookAndStepBehaviorParameters.get().getGoalSatisfactionOrientationDelta();
+      if (reachedGoal)
       {
          LogTools.warn("Footstep planning: Robot reached goal. Not planning");
          behaviorStateUpdater.get().accept(LookAndStepBehavior.State.BODY_PATH_PLANNING);
