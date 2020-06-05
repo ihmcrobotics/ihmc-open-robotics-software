@@ -76,7 +76,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       AtomicBoolean newBodyPathGoalNeeded = new AtomicBoolean(true);
       AtomicReference<RobotSide> lastStanceSide = new AtomicReference<>();
       SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses = new SideDependentList<>();
-
+      AtomicReference<Boolean> abortGoalWalking = helper.createUIInput(AbortGoalWalking, false);
       behaviorState = new AtomicReference<>(State.BODY_PATH_PLANNING);
 
       // TODO: Want to be able to wire up behavior here and see all present modules
@@ -109,6 +109,8 @@ public class LookAndStepBehavior implements BehaviorInterface
       bodyPathModule.setBehaviorStateSupplier(behaviorState::get);
       bodyPathModule.setBehaviorStateUpdater(this::updateState);
 
+      footstepPlanningModule.setAbortGoalWalkingSupplier(abortGoalWalking::get);
+      footstepPlanningModule.setAbortGoalWalkingUpdater(value -> helper.publishToUI(AbortGoalWalking, value));
       footstepPlanningModule.setIsBeingReviewedSupplier(footstepPlanReview::isBeingReviewed);
       footstepPlanningModule.setUiPublisher(helper::publishToUI);
       footstepPlanningModule.setLookAndStepBehaviorParameters(lookAndStepParameters);

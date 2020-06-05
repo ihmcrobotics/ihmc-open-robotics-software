@@ -21,6 +21,11 @@
                         <Insets bottom="10.0" left="5.0" right="5.0" top="5.0" />
                      </VBox.margin>
                   </Button>
+                  <Button fx:id="cancelGoalButton" mnemonicParsing="false" onAction="#cancelGoalButton" text="Abort Goal">
+                     <VBox.margin>
+                        <Insets bottom="10.0" left="5.0" right="5.0" top="5.0" />
+                     </VBox.margin>
+                  </Button>
                   <Separator prefWidth="200.0">
                      <VBox.margin>
                         <Insets bottom="5.0" top="5.0" />

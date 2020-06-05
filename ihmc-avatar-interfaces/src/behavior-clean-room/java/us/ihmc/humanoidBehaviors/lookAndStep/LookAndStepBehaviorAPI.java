@@ -19,6 +19,7 @@ public class LookAndStepBehaviorAPI
    public static final MessagerAPIFactory.Topic<Object> RePlan = topic("RePlan"); // TODO remove?
    public static final MessagerAPIFactory.Topic<Boolean> Approval = topic("Approval");
    public static final MessagerAPIFactory.Topic<Boolean> OperatorReviewEnabled = topic("OperatorReview");
+   public static final MessagerAPIFactory.Topic<Boolean> AbortGoalWalking = topic("AbortGoalWalking");
    public static final MessagerAPIFactory.Topic<ArrayList<FootstepForUI>> StartAndGoalFootPosesForUI = topic("StartAndGoalFootPosesForUI");
    public static final MessagerAPIFactory.Topic<ArrayList<FootstepForUI>> FootstepPlanForUI = topic("FootstepPlanForUI");
    public static final MessagerAPIFactory.Topic<Pose3D> ClosestPointForUI = topic("ClosestPointForUI");
