@@ -86,20 +86,21 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       bodyPathModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
       bodyPathModule.setIsBeingReviewedSupplier(bodyPathReview::isBeingReviewed);
-      bodyPathModule.setIsBeingReviewedSupplier(operatorReviewEnabledInput::get);
+      bodyPathModule.setOperatorReviewEnabled(operatorReviewEnabledInput::get);
       bodyPathModule.setLookAndStepBehaviorParameters(lookAndStepParameters);
       bodyPathModule.setVisibilityGraphParameters(visibilityGraphParameters);
       bodyPathModule.setReviewInitiator(bodyPathReview::review);
       bodyPathModule.setAutonomousOutput(footstepPlanningModule::acceptBodyPathPlan);
       bodyPathModule.setNeedNewPlan(newBodyPathGoalNeeded::get); // TODO: hook up to subgoal mover
+      bodyPathModule.setClearNewBodyPathGoalNeededCallback(() -> newBodyPathGoalNeeded.set(false));
       bodyPathModule.setUIPublisher(helper::publishToUI);
-      bodyPathModule.setOperatorReviewEnabled(operatorReviewEnabledInput::get);
 
       footstepPlanningModule.setIsBeingReviewedSupplier(footstepPlanReview::isBeingReviewed);
       footstepPlanningModule.setUiPublisher(helper::publishToUI);
       footstepPlanningModule.setLookAndStepBehaviorParameters(lookAndStepParameters);
       footstepPlanningModule.setFootstepPlannerParameters(footstepPlannerParameters);
       footstepPlanningModule.setNewBodyPathGoalNeededNotifier(() -> newBodyPathGoalNeeded.set(true));
+      footstepPlanningModule.setNewBodyPathGoalNeededSupplier(newBodyPathGoalNeeded::get);
       footstepPlanningModule.setLastStanceSideSupplier(lastStanceSide::get);
       footstepPlanningModule.setLastStanceSideSetter(lastStanceSide::set);
       footstepPlanningModule.setLastSteppedSolePoseSupplier(lastSteppedSolePoses::get);
