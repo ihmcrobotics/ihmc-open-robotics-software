@@ -21,6 +21,7 @@ import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
+import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
@@ -313,6 +314,13 @@ public class RemoteUIMessageConverter
       if (broadcastFootstepPlan)
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);         
+      }
+
+      Object<FootstepDataMessage> footstepDataList = packet.getFootstepDataList().getFootstepDataList();
+      System.out.println(getClass().getSimpleName() + " received steps");
+      for (int i = 0; i < footstepDataList.size(); i++)
+      {
+         System.out.println("\t " + i + " \t" + footstepDataList.get(i).getSwingDuration());
       }
       
       messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanId, plannerRequestId);

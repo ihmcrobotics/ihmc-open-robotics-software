@@ -72,6 +72,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Boolean> OverrideStepTimings = topic("overrideStepTimings");
    public static final Topic<Double> ManualSwingTime = topic("manualSwingTime");
    public static final Topic<Double> ManualTransferTime = topic("manualTransferTime");
+   public static final Topic<Pair<Integer, Double>> OverrideSpecificSwingTime = topic("OverrideSpecificSwingTime");
 
    public static final Topic<Boolean> OverrideSwingHeight = topic("overrideSwingHeight");
    public static final Topic<Double> ManualSwingHeight = topic("manualSwingHeight");
