@@ -53,16 +53,16 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    {
       boolean proceed = true;
 
-      if (!needNewPlan.get().get())
-      {
-         LogTools.warn("Body path planning supressed: New plan not needed");
-         proceed = false;
-      }
-//      if (!behaviorState.get().equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
+//      if (!needNewPlan.get().get())
 //      {
-//         LogTools.warn("Body path planning supressed: Not in body path planning state");
+//         LogTools.warn("Body path planning supressed: New plan not needed");
 //         proceed = false;
 //      }
+      if (!behaviorState.get().equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
+      {
+         LogTools.warn("Body path planning supressed: Not in body path planning state");
+         proceed = false;
+      }
       else if (!hasGoal())
       {
          LogTools.warn("Body path planning supressed: No goal specified");
@@ -162,6 +162,7 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
          }
          else
          {
+            behaviorStateUpdater.get().accept(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
             successfulPlanConsumer.get().accept(bodyPathPlanForReview);
          }
       }
