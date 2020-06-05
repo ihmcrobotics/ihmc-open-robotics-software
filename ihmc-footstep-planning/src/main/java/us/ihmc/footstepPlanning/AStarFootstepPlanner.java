@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning;
 
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -32,6 +33,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -57,7 +59,7 @@ public class AStarFootstepPlanner
    private final FramePose3D goalMidFootPose = new FramePose3D();
    private final AtomicBoolean haltRequested = new AtomicBoolean();
 
-   private Consumer<FootstepPlannerOutput> statusCallback = result -> {};
+   private Consumer<Pair<FootstepPlannerRequest, FootstepPlannerOutput>> postProcessorCallback = null;
    private Consumer<AStarIterationData<FootstepNode>> iterationCallback = iterationData -> {};
 
    private final Stopwatch stopwatch = new Stopwatch();
@@ -92,6 +94,7 @@ public class AStarFootstepPlanner
 
    public void handleRequest(FootstepPlannerRequest request, FootstepPlannerOutput outputToPack)
    {
+      Objects.requireNonNull(postProcessorCallback);
       iterations = 0;
       stopwatch.start();
 
@@ -239,7 +242,7 @@ public class AStarFootstepPlanner
       }
 
       outputToPack.setPlanarRegionsList(request.getPlanarRegionsList());
-      statusCallback.accept(outputToPack);
+      postProcessorCallback.accept(Pair.of(request, outputToPack));
    }
 
    private void markSolutionEdges()
@@ -308,9 +311,9 @@ public class AStarFootstepPlanner
       return false;
    }
 
-   public void setStatusCallback(Consumer<FootstepPlannerOutput> statusCallback)
+   public void setPostProcessorCallback(Consumer<Pair<FootstepPlannerRequest, FootstepPlannerOutput>> postProcessorCallback)
    {
-      this.statusCallback = statusCallback;
+      this.postProcessorCallback = postProcessorCallback;
    }
 
    public void addIterationCallback(Consumer<AStarIterationData<FootstepNode>> callback)
