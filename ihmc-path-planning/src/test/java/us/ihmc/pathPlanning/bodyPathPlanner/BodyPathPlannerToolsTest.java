@@ -1,6 +1,8 @@
 package us.ihmc.pathPlanning.bodyPathPlanner;
 
 import org.junit.jupiter.api.Test;
+import us.ihmc.euclid.geometry.LineSegment2D;
+import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
@@ -15,6 +17,30 @@ import static us.ihmc.robotics.Assert.assertEquals;
 
 public class BodyPathPlannerToolsTest
 {
+   @Test
+   public void testFindClosestPointAlongPath()
+   {
+      Point3DReadOnly point0 = new Point3D(-0.007, 0.0, 0.0);
+      Point3DReadOnly point1 = new Point3D(0.662, 0.217, 0.0);
+      Pose3D pose0 = new Pose3D(point0, new Quaternion());
+      Pose3D pose1 = new Pose3D(point1, new Quaternion());
+
+      List<Pose3DReadOnly> path = new ArrayList<>();
+      path.add(pose0);
+      path.add(pose1);
+
+      Point3D point = new Point3D(0.619, 0.207, 0.0);
+
+      Point3D projectedPoint = new Point3D();
+      BodyPathPlannerTools.findClosestPointAlongPath(path, point, projectedPoint);
+
+      Point3D expectedProjectedPoint = new Point3D();
+      LineSegment3D segment = new LineSegment3D(point0, point1);
+      segment.orthogonalProjection(point, expectedProjectedPoint);
+
+      EuclidCoreTestTools.assertPoint3DGeometricallyEquals(expectedProjectedPoint, projectedPoint, 1e-8);
+   }
+
    @Test
    public void testMoveAlongPoint()
    {
