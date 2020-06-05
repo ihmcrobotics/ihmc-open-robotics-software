@@ -131,6 +131,7 @@ public class BehaviorUI
          Scene mainScene = new Scene(mainPane, 1750, 1000);
 
          JavaFXLinuxGUIRecorder guiRecorder = new JavaFXLinuxGUIRecorder(primaryStage, 24, 0.8f, getClass().getSimpleName());
+         guiRecorder.deleteOldLogs(10);
 
          primaryStage.setScene(mainScene);
          primaryStage.show();
