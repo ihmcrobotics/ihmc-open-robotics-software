@@ -8,6 +8,9 @@ import us.ihmc.codecs.generated.YUVPicture.YUVSubsamplingType;
 import us.ihmc.codecs.screenCapture.ScreenCapture;
 import us.ihmc.codecs.screenCapture.ScreenCaptureFactory;
 import us.ihmc.codecs.yuv.JPEGEncoder;
+import us.ihmc.commons.nio.BasicPathVisitor;
+import us.ihmc.commons.nio.FileTools;
+import us.ihmc.commons.nio.PathTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.tools.thread.PausablePeriodicThread;
 
@@ -17,15 +20,22 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.file.FileVisitResult;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Comparator;
+import java.util.SortedSet;
+import java.util.TreeSet;
 import java.util.function.Supplier;
 
 // records rectangle of Linux X server and saves to file
 public class LinuxGUIRecorder
 {
    public static final int MAXIMUM_IMAGE_DATA_SIZE = 1024 * 1024;
+   public static final String LOG_MP4_POSTFIX = "Log.mp4";
    private final Supplier<Rectangle> windowBoundsProvider;
    private final int fps;
    private final int quality;
@@ -51,13 +61,32 @@ public class LinuxGUIRecorder
       scheduler = new PausablePeriodicThread("LinuxGUIRecorder", 1.0 / fps, captureRunner);
    }
 
+   public void deleteOldLogs(int numberOflogsToKeep)
+   {
+      String defaultLogsDirectory = System.getProperty("user.home") + File.separator + ".ihmc" + File.separator + "logs" + File.separator;
+      SortedSet<Path> sortedSet = new TreeSet<>(Comparator.comparing(path1 -> path1.getFileName().toString()));
+      PathTools.walkFlat(Paths.get(defaultLogsDirectory), (path, type) -> {
+         if (type == BasicPathVisitor.PathType.DIRECTORY && path.getFileName().toString().endsWith(guiName + LOG_MP4_POSTFIX))
+            sortedSet.add(path);
+         return FileVisitResult.CONTINUE;
+      });
+
+      while (sortedSet.size() > numberOflogsToKeep)
+      {
+         Path earliestLogDirectory = sortedSet.first();
+         LogTools.warn("Deleting old log {}", earliestLogDirectory);
+         FileTools.deleteQuietly(earliestLogDirectory);
+         sortedSet.remove(earliestLogDirectory);
+      }
+   }
+
    public synchronized void start()
    {
       DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
       Calendar calendar = Calendar.getInstance();
       String timestamp = dateFormat.format(calendar.getTime());
 
-      filename = System.getProperty("user.home") + "/.ihmc/logs/" + timestamp + "_" + guiName + "Log.mp4";
+      filename = System.getProperty("user.home") + "/.ihmc/logs/" + timestamp + "_" + guiName + LOG_MP4_POSTFIX;
 
       LogTools.info("Starting recording to {}", filename);
 
