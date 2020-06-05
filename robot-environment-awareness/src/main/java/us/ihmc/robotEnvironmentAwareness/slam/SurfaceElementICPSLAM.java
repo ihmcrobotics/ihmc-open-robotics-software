@@ -2,9 +2,6 @@ package us.ihmc.robotEnvironmentAwareness.slam;
 
 import org.ejml.data.DenseMatrix64F;
 
-import com.google.common.util.concurrent.AtomicDouble;
-
-import us.ihmc.commons.Conversions;
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
@@ -15,8 +12,6 @@ import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 public class SurfaceElementICPSLAM extends SLAMBasics
 {
    public static final boolean DEBUG = false;
-   
-   
 
    public SurfaceElementICPSLAM(double octreeResolution)
    {
@@ -87,7 +82,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       // get parameter.
       RigidBodyTransform icpTransformer = new RigidBodyTransform();
       icpTransformer.set(convertTransform(optimizer.getOptimalParameter().getData()));
-      
+
       return icpTransformer;
    }
 
