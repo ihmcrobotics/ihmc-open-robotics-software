@@ -50,12 +50,12 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
    {
       boolean proceed = true;
 
-      if (!behaviorState.get().equals(LookAndStepBehavior.State.SWINGING))
-      {
-         LogTools.warn("Footstep planning supressed: Not in footstep planning state");
-         proceed = false;
-      }
-      else if (!isFootstepPlanOK())
+//      if (!behaviorState.get().equals(LookAndStepBehavior.State.SWINGING))
+//      {
+//         LogTools.warn("Footstep planning supressed: Not in footstep planning state");
+//         proceed = false;
+//      }
+      if (!isFootstepPlanOK())
       {
          LogTools.warn("Robot walking supressed: Footstep plan not OK: numberOfSteps = {}. Planning again...",
                        footstepPlan.get() == null ? null : footstepPlan.get().getNumberOfSteps());

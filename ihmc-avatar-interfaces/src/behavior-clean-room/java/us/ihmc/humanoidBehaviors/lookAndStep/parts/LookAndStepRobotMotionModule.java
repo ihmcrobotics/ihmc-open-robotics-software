@@ -27,7 +27,7 @@ public class LookAndStepRobotMotionModule extends LookAndStepRobotMotionTask
    {
       // with the gets, maybe we don't need to have validate methods
 
-      behaviorStateUpdater.get().accept(LookAndStepBehavior.State.SWINGING);
+//      behaviorStateUpdater.get().accept(LookAndStepBehavior.State.SWINGING);
       robotWalkRequestInput.set(robotWalkRequest); // TODO: There could be data threading error here, might need to queue this data for use in the thread
    }
 
