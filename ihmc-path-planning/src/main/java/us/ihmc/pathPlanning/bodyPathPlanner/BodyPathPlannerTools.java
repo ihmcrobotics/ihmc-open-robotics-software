@@ -59,12 +59,7 @@ public class BodyPathPlannerTools
          lineSegment.set(bodyPathPlan.get(i).getPosition(), bodyPathPlan.get(i + 1).getPosition());
 
          Point3D closestPointOnBodyPathSegment = new Point3D();
-         EuclidGeometryTools.closestPoint3DsBetweenTwoLineSegment3Ds(lineSegment.getFirstEndpoint(),
-                                                                     lineSegment.getSecondEndpoint(),
-                                                                     nearbyPoint,
-                                                                     nearbyPoint,
-                                                                     closestPointOnBodyPathSegment,
-                                                                     new Point3D()); // TODO find a better way to do this
+         lineSegment.orthogonalProjection(nearbyPoint, closestPointOnBodyPathSegment);
 
          double distance = closestPointOnBodyPathSegment.distance(nearbyPoint);
          if (distance < closestDistance)
