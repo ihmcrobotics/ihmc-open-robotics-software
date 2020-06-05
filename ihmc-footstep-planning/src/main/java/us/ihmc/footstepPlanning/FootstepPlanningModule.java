@@ -242,7 +242,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       isPlanning.set(false);
    }
 
-
    private void reportBodyPathPlan(BodyPathPlanningResult bodyPathPlanningResult)
    {
       BodyPathPlan bodyPathPlan = bodyPathPlanHolder.getPlan();

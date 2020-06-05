@@ -26,6 +26,7 @@ public class FootstepPlanPostProcessHandler
 
    private final SwingPlannerParametersBasics swingPlannerParameters;
    private final SplitFractionCalculatorParametersBasics splitFractionParameters;
+   private final WalkingControllerParameters walkingControllerParameters;
 
    private final AdaptiveSwingTrajectoryCalculator adaptiveSwingTrajectoryCalculator;
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
@@ -43,6 +44,7 @@ public class FootstepPlanPostProcessHandler
    {
       this.swingPlannerParameters = swingPlannerParameters;
       this.splitFractionParameters = splitFractionParameters;
+      this.walkingControllerParameters = walkingControllerParameters;
 
       if (walkingControllerParameters == null)
       {
@@ -146,11 +148,16 @@ public class FootstepPlanPostProcessHandler
             Point3D waypointTwo = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
             footstep.setCustomWaypointPositions(waypointOne, waypointTwo);
 
-            System.out.println("step " + i + " was adjusted.");
-            System.out.println("\t waypoint 0: " + waypointOne);
-            System.out.println("\t waypoint 1: " + waypointTwo);
+            double trajectoryRatio = swingOverPlanarRegionsTrajectoryExpander.getExpandedTrajectoryLength()
+                                     / swingOverPlanarRegionsTrajectoryExpander.getInitialTrajectoryLength();
+            footstep.setSwingDuration(walkingControllerParameters.getDefaultSwingTime() * trajectoryRatio);
 
-            // TODO scale swing time
+            System.out.println("step " + i);
+            System.out.println("\t ratio " + trajectoryRatio);
+            System.out.println("\t init  " + swingOverPlanarRegionsTrajectoryExpander.getInitialTrajectoryLength());
+            System.out.println("\t exp   " + swingOverPlanarRegionsTrajectoryExpander.getExpandedTrajectoryLength());
+
+            // TODO decide about scaling transfer time as well. maybe not by a reduced ratio?
          }
       }
    }
