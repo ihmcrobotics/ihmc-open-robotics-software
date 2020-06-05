@@ -41,6 +41,8 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    protected final Field<LookAndStepBehaviorParametersReadOnly> lookAndStepBehaviorParameters = required(); // TODO: Maybe we only need to invalidate some fields
    protected final Field<FootstepPlannerParametersReadOnly> footstepPlannerParameters = required();
    protected final Field<Supplier<Boolean>> isBeingReviewedSupplier = required();
+   protected final Field<Supplier<Boolean>> abortGoalWalkingSupplier = required();
+   protected final Field<Consumer<Boolean>> abortGoalWalkingUpdater = required();
    protected final Field<UIPublisher> uiPublisher = required();
    protected final Field<Runnable> newBodyPathGoalNeededNotifier = required();
    protected final Field<Supplier<Boolean>> newBodyPathGoalNeededSupplier = required();
@@ -151,6 +153,14 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
          LogTools.warn("Footstep planning: Robot reached goal. Not planning");
          behaviorStateUpdater.get().accept(LookAndStepBehavior.State.BODY_PATH_PLANNING);
          newBodyPathGoalNeededNotifier.get().run();
+         return;
+      }
+      if (abortGoalWalkingSupplier.get().get())
+      {
+         LogTools.warn("Footstep planning: Goal was cancelled. Not planning");
+         behaviorStateUpdater.get().accept(LookAndStepBehavior.State.BODY_PATH_PLANNING);
+         newBodyPathGoalNeededNotifier.get().run();
+         abortGoalWalkingUpdater.get().accept(false);
          return;
       }
 
@@ -298,6 +308,16 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    public void setIsBeingReviewedSupplier(Supplier<Boolean> isBeingReviewedSupplier)
    {
       this.isBeingReviewedSupplier.set(isBeingReviewedSupplier);
+   }
+
+   public void setAbortGoalWalkingSupplier(Supplier<Boolean> abortGoalWalkingSupplier)
+   {
+      this.abortGoalWalkingSupplier.set(abortGoalWalkingSupplier);
+   }
+
+   public void setAbortGoalWalkingUpdater(Consumer<Boolean> abortGoalWalkingUpdater)
+   {
+      this.abortGoalWalkingUpdater.set(abortGoalWalkingUpdater);
    }
 
    public void setUiPublisher(UIPublisher uiPublisher)

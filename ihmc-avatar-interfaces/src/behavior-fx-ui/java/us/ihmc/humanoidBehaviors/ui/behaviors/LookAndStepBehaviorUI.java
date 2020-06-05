@@ -63,6 +63,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private FXUIActionMap placeGoalActionMap;
 
    @FXML private Button placeGoalButton;
+   @FXML private Button cancelGoalButton;
    @FXML private CheckBox operatorReviewCheckBox;
    @FXML private TextField behaviorState;
    @FXML private TableView lookAndStepParameterTable;
@@ -244,5 +245,10 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @FXML public void operatorReviewCheckBox()
    {
       behaviorMessager.submitMessage(OperatorReviewEnabled, operatorReviewCheckBox.isSelected());
+   }
+
+   @FXML public void cancelGoalButton()
+   {
+      behaviorMessager.submitMessage(AbortGoalWalking, true);
    }
 }
