@@ -99,7 +99,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlanningModule.setUiPublisher(helper::publishToUI);
       footstepPlanningModule.setLookAndStepBehaviorParameters(lookAndStepParameters);
       footstepPlanningModule.setFootstepPlannerParameters(footstepPlannerParameters);
-      footstepPlanningModule.setNewBodyPathGoalNeededNotifier(() -> newBodyPathGoalNeeded.set(true));
+      footstepPlanningModule.setNewBodyPathGoalNeededNotifier(() -> bodyPathModule.acceptGoal(null));
       footstepPlanningModule.setNewBodyPathGoalNeededSupplier(newBodyPathGoalNeeded::get);
       footstepPlanningModule.setLastStanceSideSupplier(lastStanceSide::get);
       footstepPlanningModule.setLastStanceSideSetter(lastStanceSide::set);
