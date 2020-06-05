@@ -84,12 +84,16 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlanningModule = new LookAndStepFootstepPlanningModule();
       robotMotionModule = new LookAndStepRobotMotionModule();
 
-      LookAndStepReviewPart<List<? extends Pose3DReadOnly>> bodyPathReview = new LookAndStepReviewPart<>("body path",
-                                                                                                         approvalNotification,
-                                                                                                         footstepPlanningModule::acceptBodyPathPlan);
-      LookAndStepReviewPart<RobotWalkRequest> footstepPlanReview = new LookAndStepReviewPart<>("footstep plan",
-                                                                                               approvalNotification,
-                                                                                               robotMotionModule::acceptRobotWalkRequest);
+      LookAndStepReviewPart<List<? extends Pose3DReadOnly>> bodyPathReview = new LookAndStepReviewPart<>("body path", approvalNotification, bodyPathPlan ->
+      {
+         behaviorState.set(State.FOOTSTEP_PLANNING);
+         footstepPlanningModule.acceptBodyPathPlan(bodyPathPlan);
+      });
+      LookAndStepReviewPart<RobotWalkRequest> footstepPlanReview = new LookAndStepReviewPart<>("footstep plan", approvalNotification, robotWalkRequest ->
+      {
+         behaviorState.set(LookAndStepBehavior.State.SWINGING);
+         robotMotionModule.acceptRobotWalkRequest(robotWalkRequest);
+      });
 
       bodyPathModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
       bodyPathModule.setIsBeingReviewedSupplier(bodyPathReview::isBeingReviewed);

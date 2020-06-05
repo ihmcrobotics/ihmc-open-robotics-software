@@ -43,7 +43,6 @@ public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanni
 
    public void acceptBodyPathPlan(List<? extends Pose3DReadOnly> bodyPathPlan)
    {
-      behaviorStateUpdater.get().accept(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
       bodyPathPlanInput.set(bodyPathPlan);
    }
 
