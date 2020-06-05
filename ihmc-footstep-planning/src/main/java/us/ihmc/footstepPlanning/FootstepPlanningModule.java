@@ -58,8 +58,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private Ros2Node ros2Node;
    private final VisibilityGraphsParametersBasics visibilityGraphParameters;
    private final FootstepPlannerParametersBasics footstepPlannerParameters;
-   private final SwingPlannerParametersBasics swingPlannerParameters;
-   private final SplitFractionCalculatorParametersBasics splitFractionParameters;
 
    private final VisibilityGraphPathPlanner bodyPathPlanner;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
@@ -67,11 +65,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    private final PlanThenSnapPlanner planThenSnapPlanner;
    private final AStarFootstepPlanner aStarFootstepPlanner;
 
-   private final AdaptiveSwingTrajectoryCalculator adaptiveSwingTrajectoryCalculator;
-   private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
-
-   private final AreaBasedSplitFractionCalculator areaBasedSplitFractionCalculator;
-   private final PositionBasedSplitFractionCalculator positionBasedSplitFractionCalculator;
+   private final FootstepPlanPostProcessHandler postProcessHandler;
 
    private final AtomicBoolean isPlanning = new AtomicBoolean();
    private final FootstepPlannerRequest request = new FootstepPlannerRequest();
@@ -106,8 +100,6 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       this.name = name;
       this.visibilityGraphParameters = visibilityGraphParameters;
       this.footstepPlannerParameters = footstepPlannerParameters;
-      this.swingPlannerParameters = swingPlannerParameters;
-      this.splitFractionParameters = splitFractionParameters;
 
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
       this.bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters,
@@ -116,22 +108,8 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters, footPolygons, bodyPathPlanHolder);
-
-      if (walkingControllerParameters == null)
-      {
-         this.adaptiveSwingTrajectoryCalculator = null;
-         this.swingOverPlanarRegionsTrajectoryExpander = null;
-      }
-      else
-      {
-         this.adaptiveSwingTrajectoryCalculator = new AdaptiveSwingTrajectoryCalculator(swingPlannerParameters, walkingControllerParameters);
-         this.swingOverPlanarRegionsTrajectoryExpander = new SwingOverPlanarRegionsTrajectoryExpander(walkingControllerParameters,
-                                                                                                      registry,
-                                                                                                      new YoGraphicsListRegistry());
-      }
-
-      this.areaBasedSplitFractionCalculator = new AreaBasedSplitFractionCalculator(splitFractionParameters, footPolygons);
-      this.positionBasedSplitFractionCalculator = new PositionBasedSplitFractionCalculator(splitFractionParameters);
+      this.postProcessHandler = new FootstepPlanPostProcessHandler(swingPlannerParameters, splitFractionParameters, walkingControllerParameters, footPolygons);
+      aStarFootstepPlanner.setPostProcessorCallback(output -> postProcessHandler.handleRequest(output.getKey(), output.getValue()));
 
       addStatusCallback(output -> output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lapElapsed()));
       addStatusCallback(output -> output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed()));
@@ -231,7 +209,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       if (request.getPerformAStarSearch())
       {
-         aStarFootstepPlanner.setStatusCallback(statusCallback);
+         postProcessHandler.setStatusCallback(statusCallback);
          aStarFootstepPlanner.handleRequest(request, output);
       }
       else
@@ -256,92 +234,14 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          }
 
          output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lap());
+
+         postProcessHandler.handleRequest(request, output);
          statusCallback.accept(output);
-      }
-
-      if (request.getSwingPlannerType() == SwingPlannerType.PROPORTION && adaptiveSwingTrajectoryCalculator != null && !flatGroundMode)
-      {
-         adaptiveSwingTrajectoryCalculator.setPlanarRegionsList(request.getPlanarRegionsList());
-         RobotSide initialStanceSide = request.getRequestedInitialStanceSide();
-         Pose3D initialStancePose = request.getStartFootPoses().get(initialStanceSide);
-         adaptiveSwingTrajectoryCalculator.setSwingParameters(initialStancePose, output.getFootstepPlan());
-      }
-      else if (request.getSwingPlannerType() == SwingPlannerType.POSITION && swingOverPlanarRegionsTrajectoryExpander != null && !flatGroundMode)
-      {
-         computeSwingWaypoints(request, output.getFootstepPlan());
-      }
-
-      if (request.performPositionBasedSplitFractionCalculation())
-      {
-         positionBasedSplitFractionCalculator.computeSplitFractions(request, output.getFootstepPlan());
-      }
-      if (request.performAreaBasedSplitFractionCalculation())
-      {
-         areaBasedSplitFractionCalculator.computeSplitFractions(request, output.getFootstepPlan());
       }
 
       isPlanning.set(false);
    }
 
-   // TODO make this a method of the swing trajectory solver after moving it to this package
-   public void computeSwingWaypoints(FootstepPlannerRequest request, FootstepPlan footstepPlan)
-   {
-      swingOverPlanarRegionsTrajectoryExpander.setDoInitialFastApproximation(swingPlannerParameters.getDoInitialFastApproximation());
-      swingOverPlanarRegionsTrajectoryExpander.setFastApproximationLessClearance(swingPlannerParameters.getFastApproximationLessClearance());
-      swingOverPlanarRegionsTrajectoryExpander.setNumberOfCheckpoints(swingPlannerParameters.getNumberOfChecksPerSwing());
-      swingOverPlanarRegionsTrajectoryExpander.setMaximumNumberOfTries(swingPlannerParameters.getMaximumNumberOfAdjustmentAttempts());
-      swingOverPlanarRegionsTrajectoryExpander.setMinimumSwingFootClearance(swingPlannerParameters.getMinimumSwingFootClearance());
-      swingOverPlanarRegionsTrajectoryExpander.setMinimumAdjustmentIncrementDistance(swingPlannerParameters.getMinimumAdjustmentIncrementDistance());
-      swingOverPlanarRegionsTrajectoryExpander.setMaximumAdjustmentIncrementDistance(swingPlannerParameters.getMaximumAdjustmentIncrementDistance());
-      swingOverPlanarRegionsTrajectoryExpander.setAdjustmentIncrementDistanceGain(swingPlannerParameters.getAdjustmentIncrementDistanceGain());
-      swingOverPlanarRegionsTrajectoryExpander.setMaximumAdjustmentDistance(swingPlannerParameters.getMaximumWaypointAdjustmentDistance());
-      swingOverPlanarRegionsTrajectoryExpander.setMinimumHeightAboveFloorForCollision(swingPlannerParameters.getMinimumHeightAboveFloorForCollision());
-
-      for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
-      {
-         PlannedFootstep footstep = footstepPlan.getFootstep(i);
-         FramePose3D swingEndPose = new FramePose3D(footstep.getFootstepPose());
-         FramePose3D swingStartPose = new FramePose3D();
-         FramePose3D stanceFootPose = new FramePose3D();
-
-         RobotSide swingSide = footstep.getRobotSide();
-         RobotSide stanceSide = swingSide.getOppositeSide();
-
-         if(i == 0)
-         {
-            swingStartPose.set(request.getStartFootPoses().get(swingSide));
-            stanceFootPose.set(request.getStartFootPoses().get(stanceSide));
-         }
-         else if (i == 1)
-         {
-            swingStartPose.set(request.getStartFootPoses().get(swingSide));
-            stanceFootPose.set(footstepPlan.getFootstep(i - 1).getFootstepPose());
-         }
-         else
-         {
-            swingStartPose.set(footstepPlan.getFootstep(i - 2).getFootstepPose());
-            stanceFootPose.set(footstepPlan.getFootstep(i - 1).getFootstepPose());
-         }
-
-         double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose,
-                                                                                                                   swingStartPose,
-                                                                                                                   swingEndPose,
-                                                                                                                   request.getPlanarRegionsList());
-         if (swingOverPlanarRegionsTrajectoryExpander.wereWaypointsAdjusted())
-         {
-            footstep.setTrajectoryType(TrajectoryType.CUSTOM);
-            Point3D waypointOne = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(0));
-            Point3D waypointTwo = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
-            footstep.setCustomWaypointPositions(waypointOne, waypointTwo);
-
-            System.out.println("step " + i + " was adjusted.");
-            System.out.println("\t waypoint 0: " + waypointOne);
-            System.out.println("\t waypoint 1: " + waypointTwo);
-
-            // TODO scale swing time
-         }
-      }
-   }
 
    private void reportBodyPathPlan(BodyPathPlanningResult bodyPathPlanningResult)
    {
@@ -433,12 +333,12 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public SwingPlannerParametersBasics getSwingPlannerParameters()
    {
-      return swingPlannerParameters;
+      return postProcessHandler.getSwingPlannerParameters();
    }
 
    public SplitFractionCalculatorParametersBasics getSplitFractionParameters()
    {
-      return splitFractionParameters;
+      return postProcessHandler.getSplitFractionParameters();
    }
 
    public FootstepNodeSnapAndWiggler getSnapper()
@@ -478,22 +378,27 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public AdaptiveSwingTrajectoryCalculator getAdaptiveSwingTrajectoryCalculator()
    {
-      return adaptiveSwingTrajectoryCalculator;
+      return postProcessHandler.getAdaptiveSwingTrajectoryCalculator();
    }
 
    public SwingOverPlanarRegionsTrajectoryExpander getSwingOverPlanarRegionsTrajectoryExpander()
    {
-      return swingOverPlanarRegionsTrajectoryExpander;
+      return postProcessHandler.getSwingOverPlanarRegionsTrajectoryExpander();
    }
 
    public AreaBasedSplitFractionCalculator getAreaBasedSplitFractionCalculator()
    {
-      return areaBasedSplitFractionCalculator;
+      return postProcessHandler.getAreaBasedSplitFractionCalculator();
    }
 
    public PositionBasedSplitFractionCalculator getPositionBasedSplitFractionCalculator()
    {
-      return positionBasedSplitFractionCalculator;
+      return postProcessHandler.getPositionBasedSplitFractionCalculator();
+   }
+
+   public FootstepPlanPostProcessHandler getPostProcessHandler()
+   {
+      return postProcessHandler;
    }
 
    @Override

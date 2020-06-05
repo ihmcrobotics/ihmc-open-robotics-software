@@ -356,7 +356,7 @@ public class SwingOverPlanarRegionsTest
          scs.addStaticLinkGraphics(environment.getTerrainObject3D().getLinkGraphics());
       }
 
-      planningModule.computeSwingWaypoints(request, footstepPlan);
+      planningModule.getPostProcessHandler().computeSwingWaypoints(request, footstepPlan);
 
       boolean wasAdjusted = expander.wereWaypointsAdjusted();
       if (wasAdjusted)
