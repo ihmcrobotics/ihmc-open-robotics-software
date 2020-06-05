@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.Timer;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.humanoidBehaviors.lookAndStep.TypedInput;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
@@ -17,6 +18,7 @@ public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanni
 {
    private Field<Supplier<HumanoidRobotState>> robotStateSupplier = required();
    private Field<Supplier<RobotSide>> lastStanceSideSupplier = required();
+   private Field<Supplier<LookAndStepBehavior.State>> behaviorStateSupplier = required();
 
    private final TypedInput<PlanarRegionsList> planarRegionsInput = new TypedInput<>();
    private final TypedInput<List<? extends Pose3DReadOnly>> bodyPathPlanInput = new TypedInput<>();
@@ -41,6 +43,7 @@ public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanni
 
    public void acceptBodyPathPlan(List<? extends Pose3DReadOnly> bodyPathPlan)
    {
+      behaviorStateUpdater.get().accept(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
       bodyPathPlanInput.set(bodyPathPlan);
    }
 
@@ -54,6 +57,7 @@ public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanni
       setLastStanceSide(lastStanceSideSupplier.get().get());
       setPlanarRegionReceptionTimerSnapshot(planarRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.get().getPlanarRegionsExpiration()));
       setPlanningFailureTimerSnapshot(planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.get().getWaitTimeAfterPlanFailed()));
+      setBehaviorState(behaviorStateSupplier.get().get());
 
       run();
    }
@@ -66,5 +70,10 @@ public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanni
    public void setRobotStateSupplier(Supplier<HumanoidRobotState> robotStateSupplier)
    {
       this.robotStateSupplier.set(robotStateSupplier);
+   }
+
+   public void setBehaviorStateSupplier(Supplier<LookAndStepBehavior.State> behaviorStateSupplier)
+   {
+      this.behaviorStateSupplier.set(behaviorStateSupplier);
    }
 }

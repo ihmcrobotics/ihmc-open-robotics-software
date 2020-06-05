@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.Timer;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.humanoidBehaviors.lookAndStep.TypedInput;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
@@ -16,6 +17,7 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
 {
    // TODO: Could optional be used here for some things to make things more flexible?
    private Field<Supplier<HumanoidRobotState>> robotStateSupplier = required();
+   private Field<Supplier<LookAndStepBehavior.State>> behaviorStateSupplier = required();
 
    private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
    private final TypedInput<Pose3D> goalInput = new TypedInput<>();
@@ -51,6 +53,7 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
    {
       validateNonChanging();
 
+      setBehaviorState(behaviorStateSupplier.get().get());
       setGoal(goalInput.get());
       setMapRegions(mapRegionsInput.get());
       setHumanoidRobotState(robotStateSupplier.get().get());
@@ -64,5 +67,10 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
    public void setRobotStateSupplier(Supplier<HumanoidRobotState> robotStateSupplier)
    {
       this.robotStateSupplier.set(robotStateSupplier);
+   }
+
+   public void setBehaviorStateSupplier(Supplier<LookAndStepBehavior.State> behaviorStateSupplier)
+   {
+      this.behaviorStateSupplier.set(behaviorStateSupplier);
    }
 }

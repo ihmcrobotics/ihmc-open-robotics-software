@@ -7,6 +7,7 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOnly;
 import us.ihmc.humanoidBehaviors.tools.BehaviorBuilderPattern;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
@@ -19,7 +20,6 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -40,12 +40,14 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    protected final Field<Supplier<Boolean>> isBeingReviewed = required();
    protected final Field<Supplier<Boolean>> needNewPlan = required();
    protected final Field<Runnable> clearNewBodyPathNeededCallback = required();
+   protected final Field<Consumer<LookAndStepBehavior.State>> behaviorStateUpdater = required();
 
    private final Field<PlanarRegionsList> mapRegions = requiredChanging();
    private final Field<Pose3D> goal = requiredChanging();
    private final Field<HumanoidRobotState> humanoidRobotState = requiredChanging();
    private final Field<TimerSnapshot> mapRegionsReceptionTimerSnapshot = requiredChanging();
    private final Field<TimerSnapshot> planningFailureTimerSnapshot = requiredChanging();
+   private final Field<LookAndStepBehavior.State> behaviorState = requiredChanging();
 
    private boolean evaluateEntry()
    {
@@ -56,7 +58,12 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
 //         LogTools.warn("Body path planning supressed: New plan not needed");
 //         proceed = false;
 //      }
-      if (!hasGoal())
+      if (!behaviorState.get().equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
+      {
+         LogTools.warn("Body path planning supressed: Not in body path planning state");
+         proceed = false;
+      }
+      else if (!hasGoal())
       {
          LogTools.warn("Body path planning supressed: No goal specified");
          uiPublisher.get().publishToUI(MapRegionsForUI, mapRegions.get());
@@ -237,5 +244,15 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    public void setClearNewBodyPathGoalNeededCallback(Runnable clearNewBodyPathNeededCallback)
    {
       this.clearNewBodyPathNeededCallback.set(clearNewBodyPathNeededCallback);
+   }
+
+   protected void setBehaviorState(LookAndStepBehavior.State behaviorState)
+   {
+      this.behaviorState.set(behaviorState);
+   }
+
+   public void setBehaviorStateUpdater(Consumer<LookAndStepBehavior.State> behaviorStateUpdater)
+   {
+      this.behaviorStateUpdater.set(behaviorStateUpdater);
    }
 }

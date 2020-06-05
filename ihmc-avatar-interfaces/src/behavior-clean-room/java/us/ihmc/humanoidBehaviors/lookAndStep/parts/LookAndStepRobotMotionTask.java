@@ -10,6 +10,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOnly;
 import us.ihmc.humanoidBehaviors.tools.BehaviorBuilderPattern;
@@ -24,6 +25,7 @@ import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.FootstepPlanForUI;
@@ -37,17 +39,23 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
    private final Field<UIPublisher> uiPublisher = required();
    private final Field<RobotWalkRequester> robotWalkRequester = required();
    private final Field<Runnable> replanFootstepsOutput = required();
+   protected final Field<Consumer<LookAndStepBehavior.State>> behaviorStateUpdater = required();
 
    private final Field<FootstepPlan> footstepPlan = requiredChanging();
    private final Field<HumanoidRobotState> robotState = requiredChanging();
    private final Field<PlanarRegionsList> planarRegions = requiredChanging();
+   private final Field<LookAndStepBehavior.State> behaviorState = requiredChanging();
 
    private boolean evaluateEntry()
    {
       boolean proceed = true;
 
-      boolean footstepPlanOK = footstepPlan.get() != null && footstepPlan.get().getNumberOfSteps() > 0; // TODO: Shouldn't we prevent ever getting here?
-      if (!footstepPlanOK)
+      if (!behaviorState.get().equals(LookAndStepBehavior.State.SWINGING))
+      {
+         LogTools.warn("Footstep planning supressed: Not in footstep planning state");
+         proceed = false;
+      }
+      else if (!isFootstepPlanOK())
       {
          LogTools.warn("Robot walking supressed: Footstep plan not OK: numberOfSteps = {}. Planning again...",
                        footstepPlan.get() == null ? null : footstepPlan.get().getNumberOfSteps());
@@ -56,6 +64,11 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
       }
 
       return proceed;
+   }
+
+   private boolean isFootstepPlanOK()
+   {
+      return footstepPlan.get() != null && footstepPlan.get().getNumberOfSteps() > 0; // TODO: Shouldn't we prevent ever getting here?
    }
 
    private void performTask()
@@ -88,8 +101,8 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
                               FootstepForUI.reduceFootstepPlanForUIMessager(FootstepDataMessageConverter.convertToFootstepPlan(footstepDataListMessage),
                                                                             "Stepping"));
 
-      ThreadTools.startAsDaemon(() -> sleepForPartOfSwingThread(swingTime), "SleepForSwing");
       ThreadTools.startAsDaemon(() -> robotWalkingThread(walkingStatusNotification), "RobotWalking");
+      sleepForPartOfSwingThread(swingTime);
    }
 
    private void sleepForPartOfSwingThread(double swingTime)
@@ -101,6 +114,7 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
       LogTools.info("{} % of swing complete!", percentSwingToWait);
 
       LogTools.warn("Step {}% complete: Robot not reached goal: Find next footstep planning goal...", percentSwingToWait);
+      behaviorStateUpdater.get().accept(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
       replanFootstepsOutput.get();
    }
 
@@ -166,5 +180,15 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
    public void setReplanFootstepsOutput(Runnable replanFootstepsOutput)
    {
       this.replanFootstepsOutput.set(replanFootstepsOutput);
+   }
+
+   public void setBehaviorStateUpdater(Consumer<LookAndStepBehavior.State> behaviorStateUpdater)
+   {
+      this.behaviorStateUpdater.set(behaviorStateUpdater);
+   }
+
+   protected void setBehaviorState(LookAndStepBehavior.State behaviorState)
+   {
+      this.behaviorState.set(behaviorState);
    }
 }
