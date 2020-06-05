@@ -38,7 +38,6 @@ public class RandomICPSLAM extends SLAMBasics
    private static final TDoubleArrayList LOWER_LIMIT = new TDoubleArrayList();
    private static final TDoubleArrayList UPPER_LIMIT = new TDoubleArrayList();
 
-   private final AtomicDouble latestComputationTime = new AtomicDouble();
    private Point3D[] sourcePointsToWorld;
 
    public static boolean ENABLE_YAW_CORRECTION = false;
@@ -129,7 +128,6 @@ public class RandomICPSLAM extends SLAMBasics
             optimizer.redefineModule(costFunction);
             optimizer.setStepSize(-1.0);
             int run = optimizer.run();
-            latestComputationTime.set((double) Math.round(optimizer.getComputationTime() * 100) / 100);
             if (DEBUG)
                System.out.println("optimization result # [" + run + "], #" + optimizer.getComputationTime() + " sec # " + "Init Q: " + initialQuery
                      + ", Opt Q: " + optimizer.getOptimalQuery());
@@ -150,11 +148,6 @@ public class RandomICPSLAM extends SLAMBasics
             return transformer;
          }
       }
-   }
-
-   public double getComputationTimeForLatestFrame()
-   {
-      return latestComputationTime.get();
    }
 
    public Point3DReadOnly[] getSourcePointsToWorldLatestFrame()

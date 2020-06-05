@@ -143,7 +143,7 @@ public class SLAMFrame
       {
          if (node.getNumberOfHits() >= minimumNumberOfHits)
          {
-            //if (node.getNormalAverageDeviation() < 0.00005)
+            if (!updateNormal || node.getNormalAverageDeviation() < 0.00005)
             {
                Plane3D surfaceElement = new Plane3D();
                node.getNormal(surfaceElement.getNormal());

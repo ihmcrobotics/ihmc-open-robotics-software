@@ -43,8 +43,9 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    private final int recordFrequency = 1;
    private final int bufferSize = (int) (trajectoryTime / dt / recordFrequency + 3);
 
-   private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200601_LidarWalking_UpStairs2\\PointCloud\\";
-   private static final int INDEX_FRAME_ONE = 0;
+   //private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200601_LidarWalking_UpStairs2\\PointCloud\\";
+   private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200603_LidarWalking_StairUp3\\PointCloud\\";
+   private static final int INDEX_FRAME_ONE = 4;
    private static final int INDEX_FRAME_TWO = 5;
    private static final int NUMBER_OF_POINTS_TO_VISUALIZE = 2000;
 
@@ -62,6 +63,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
    private final YoDouble optimizerQuality;
    private final YoInteger numberOfCorrespondingPoints;
+   private final YoInteger numberOfPerfectPoints;
 
    private final AppearanceDefinition octreeMapColor = YoAppearance.Coral();
    private final AppearanceDefinition frame1Appearance = YoAppearance.Blue();
@@ -71,6 +73,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    {
       optimizerQuality = new YoDouble("optimizerQuality", registry);
       numberOfCorrespondingPoints = new YoInteger("numberOfCorrespondingPoints", registry);
+      numberOfPerfectPoints = new YoInteger("numberOfPerfectPoints", registry);
 
       // Define frames .
       setupTest();
@@ -143,6 +146,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
          // do ICP.
          optimizer.iterate();
+         numberOfPerfectPoints.set(optimizer.numberOfPerfectPoints);
 
          // get parameter.
          icpTransformer.set(convertTransform(optimizer.getOptimalParameter().getData()));
@@ -217,25 +221,26 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
                errorSpace.set(i, distance);
             }
             return errorSpace;
-
          }
 
          private double computeClosestDistance(Plane3D surfel)
          {
-            return SLAMTools.computeSurfaceElementDistanceToNormalOctree(map, surfel);
+//            return SLAMTools.computeDistanceToNormalOctree(map, surfel.getPoint());
+            //return SLAMTools.computeSurfaceElementDistanceToNormalOctree(map, surfel);
+            return SLAMTools.computeSurfaceElementDistanceToNormalOctreeThreshold(map, surfel);
          }
       };
       DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
-      purterbationVector.set(0, 0.0001);
-      purterbationVector.set(1, 0.0001);
-      purterbationVector.set(2, 0.0001);
+      purterbationVector.set(0, 0.0005);
+      purterbationVector.set(1, 0.0005);
+      purterbationVector.set(2, 0.0005);
       purterbationVector.set(3, 0.0001);
       purterbationVector.set(4, 0.0001);
       purterbationVector.set(5, 0.0001);
       optimizer.setPerturbationVector(purterbationVector);
       optimizer.setOutputCalculator(functionOutputCalculator);
       optimizer.initialize();
-      optimizer.setCorrespondenceThreshold(OCTREE_RESOLUTION);
+      optimizer.setCorrespondenceThreshold(0.05);
 
       return optimizer;
    }
@@ -253,8 +258,8 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       frame1 = new SLAMFrame(messages.get(INDEX_FRAME_ONE));
       frame2 = new SLAMFrame(frame1, messages.get(INDEX_FRAME_TWO));
       double surfaceElementResolution = 0.04;
-      double windowMargin = 0.05;
-      int minimumNumberOfHits = 10;
+      double windowMargin = 0.02;
+      int minimumNumberOfHits = 1;
       frame2.registerSurfaceElements(octreeMap, windowMargin, surfaceElementResolution, minimumNumberOfHits, true);
    }
 }
