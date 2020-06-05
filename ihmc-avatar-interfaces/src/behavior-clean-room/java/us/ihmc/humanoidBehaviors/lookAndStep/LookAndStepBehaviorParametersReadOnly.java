@@ -14,6 +14,11 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(LookAndStepBehaviorParameters.goalSatisfactionRadius);
    }
 
+   default double getGoalSatisfactionOrientationDelta()
+   {
+      return get(LookAndStepBehaviorParameters.goalSatisfactionOrientationDelta);
+   }
+
    default double getPlanarRegionsExpiration()
    {
       return get(LookAndStepBehaviorParameters.planarRegionsExpiration);
