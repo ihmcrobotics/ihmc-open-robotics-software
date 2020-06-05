@@ -36,7 +36,7 @@ public class SLAMFrameYoGraphicsManager
    private final YoFramePoint3D[] yoFrameSurfelPoints;
    private final YoGraphicPosition[] yoGraphicSurfelPoints;
 
-   private static final double NORMAL_VIZ_LENGTH = 0.05;
+   private static final double NORMAL_VIZ_LENGTH = 0.0;
 
    private final YoFrameVector3D[] yoFrameSurfelNormals;
    private final YoGraphicVector[] yoGraphicSurfelNormals;
@@ -97,7 +97,7 @@ public class SLAMFrameYoGraphicsManager
 
          yoFrameSurfelNormals[i] = new YoFrameVector3D(prefix + "_SurfelNormal_" + i, worldFrame, registry);
          yoGraphicSurfelNormals[i] = new YoGraphicVector(prefix + "_SurfelNormalViz_"
-               + i, yoFrameSurfelPoints[i], yoFrameSurfelNormals[i], NORMAL_VIZ_LENGTH, appearance);
+               + i, yoFrameSurfelPoints[i], yoFrameSurfelNormals[i], NORMAL_VIZ_LENGTH, appearance, false);
 
          yoGraphicListRegistry.add(yoGraphicSurfelPoints[i]);
          yoGraphicListRegistry.add(yoGraphicSurfelNormals[i]);

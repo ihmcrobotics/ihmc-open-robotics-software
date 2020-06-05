@@ -32,7 +32,7 @@ public class LevenbergMarquardtParameterOptimizer
    private final DenseMatrix64F optimizeDirection;
 
    // higher : make quick approach when the model and the data are in long distance.
-   // lowe   : slower approach but better accuracy in near distance.
+   // lower   : slower approach but better accuracy in near distance.
    private boolean[] correspondence;
    private double correspondenceThreshold = 1.0;
    private int numberOfCoorespondingPoints = 0;
@@ -215,9 +215,9 @@ public class LevenbergMarquardtParameterOptimizer
       // compute direction.
       jacobianTranspose.set(jacobian);
       CommonOps.transpose(jacobianTranspose);
-      
+
       CommonOps.mult(jacobianTranspose, jacobian, squaredJacobian);
-      
+
       updateDamping();
 
       CommonOps.add(squaredJacobian, dampingCoefficient, squaredJacobian);
@@ -248,7 +248,13 @@ public class LevenbergMarquardtParameterOptimizer
 
       double iterateTime = Conversions.nanosecondsToSeconds(System.nanoTime() - startTime);
       if (DEBUG)
-         System.out.println("elapsed iteration time is " + iterateTime);
+      {
+         System.out.println("elapsed iteration time is " + iterateTime + " " + numberOfCoorespondingPoints);
+         //         System.out.println("optimizeDirection");
+         //         System.out.println(optimizeDirection);
+         //         System.out.println("currentInput");
+         //         System.out.println(currentInput);
+      }
       return quality;
    }
 
@@ -322,7 +328,7 @@ public class LevenbergMarquardtParameterOptimizer
       computationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - startTime);
       return optimized;
    }
-   
+
    public int getNumberOfCoorespondingPoints()
    {
       return numberOfCoorespondingPoints;

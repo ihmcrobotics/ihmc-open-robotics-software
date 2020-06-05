@@ -28,7 +28,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
    {
       double surfaceElementResolution = 0.04;
       double windowMargin = 0.05;
-      int minimumNumberOfHits = 10;
+      int minimumNumberOfHits = 1;
       frame.registerSurfaceElements(octree, windowMargin, surfaceElementResolution, minimumNumberOfHits, false);
 
       int numberOfSurfel = frame.getSurfaceElementsToSensor().size();
@@ -63,15 +63,13 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
          private double computeClosestDistance(Plane3D surfel)
          {
-            return SLAMTools.computePerpendicularDistanceToNormalOctree(octree, surfel.getPoint());
-            //return SLAMTools.computeDistanceToNormalOctree(octree, surfel.getPoint());
-            //return SLAMTools.computeSurfaceElementDistanceToNormalOctree(octree, surfel);
+            return SLAMTools.computeSurfaceElementDistanceToNormalOctreeThreshold(octree, surfel);
          }
       };
       DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
-      purterbationVector.set(0, 0.0001);
-      purterbationVector.set(1, 0.0001);
-      purterbationVector.set(2, 0.0001);
+      purterbationVector.set(0, 0.0005);
+      purterbationVector.set(1, 0.0005);
+      purterbationVector.set(2, 0.0005);
       purterbationVector.set(3, 0.0001);
       purterbationVector.set(4, 0.0001);
       purterbationVector.set(5, 0.0001);
@@ -81,7 +79,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       optimizer.setCorrespondenceThreshold(0.05);
 
       // do ICP.
-      for (int i = 0; i < 10; i++)
+      for (int i = 0; i < 30; i++)
       {
          optimizer.iterate();
       }
