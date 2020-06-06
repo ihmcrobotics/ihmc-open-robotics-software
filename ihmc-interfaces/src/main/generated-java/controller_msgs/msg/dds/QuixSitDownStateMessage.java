@@ -7,12 +7,9 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC whole-body controller API.
-   
- * This message is used to notify the crutch display of the current sit-down state.
-   
- */
+       * This message is part of the IHMC whole-body controller API.
+       * This message is used to notify the crutch display of the current sit-down state.
+       */
 public class QuixSitDownStateMessage extends Packet<QuixSitDownStateMessage> implements Settable<QuixSitDownStateMessage>, EpsilonComparable<QuixSitDownStateMessage>
 {
 
@@ -25,10 +22,8 @@ public class QuixSitDownStateMessage extends Packet<QuixSitDownStateMessage> imp
    public static final byte DONE = (byte) 3;
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    public byte sit_down_state_name_ = (byte) 255;
@@ -58,19 +53,15 @@ public class QuixSitDownStateMessage extends Packet<QuixSitDownStateMessage> imp
 
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;

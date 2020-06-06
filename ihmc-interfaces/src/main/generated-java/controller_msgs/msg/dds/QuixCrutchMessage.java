@@ -7,12 +7,9 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the Quix controller API.
-   
- * This message is used to allow the crutch to communicate a desired change in behavior.
-   
- */
+       * This message is part of the Quix controller API.
+       * This message is used to allow the crutch to communicate a desired change in behavior.
+       */
 public class QuixCrutchMessage extends Packet<QuixCrutchMessage> implements Settable<QuixCrutchMessage>, EpsilonComparable<QuixCrutchMessage>
 {
 

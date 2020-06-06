@@ -7,10 +7,8 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * Atlas specific message.
-   
- */
+       * Atlas specific message.
+       */
 public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControlModeMessage> implements Settable<AtlasLowLevelControlModeMessage>, EpsilonComparable<AtlasLowLevelControlModeMessage>
 {
 
@@ -19,10 +17,8 @@ public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControl
    public static final byte ATLAS_LOW_LEVEL_CONTROL_MODE_FREEZE = (byte) 1;
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    public byte requested_atlas_low_level_control_mode_ = (byte) 255;
@@ -52,19 +48,15 @@ public class AtlasLowLevelControlModeMessage extends Packet<AtlasLowLevelControl
 
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;

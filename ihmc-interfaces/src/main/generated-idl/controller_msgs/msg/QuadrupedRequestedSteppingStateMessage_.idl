@@ -1,11 +1,5 @@
-
-
-
 #ifndef __controller_msgs__msg__QuadrupedRequestedSteppingStateMessage__idl__
 #define __controller_msgs__msg__QuadrupedRequestedSteppingStateMessage__idl__
-
-
-
 
 module controller_msgs
 {
@@ -13,70 +7,33 @@ module controller_msgs
   {
     module dds
     {
-
-   
-   const octet REQUEST_STAND =
-
+      const octet REQUEST_STAND =
       0;
 
-
-
-   
-   const octet REQUEST_STEP =
-
+      const octet REQUEST_STEP =
       1;
 
-
-
-   
-   const octet REQUEST_SOLE_WAYPOINT =
-
+      const octet REQUEST_SOLE_WAYPOINT =
       2;
 
 
-
-   
-   /**
-   
-    * This message is part of the IHMC quadruped controller API.
-   
-    * This message is used to switch the control scheme between different stepping modes.
-   
-    */
-   
-   @TypeCode(type="controller_msgs::msg::dds_::QuadrupedRequestedSteppingStateMessage_")
+      /**
+       * This message is part of the IHMC quadruped controller API.
+       * This message is used to switch the control scheme between different stepping modes.
+       */
+      @TypeCode(type="controller_msgs::msg::dds_::QuadrupedRequestedSteppingStateMessage_")
       struct QuadrupedRequestedSteppingStateMessage
       {
-
-
-    
-    /**
-    
-     * Unique ID used to identify this message, should preferably be consecutively increasing.
-    
-     */
-    
-
-
-    unsigned long sequence_id;
-
-
-    
-    /**
-    
-     * Specifies the which state the controller should transition into.
-    
-     */
-    
-
-    @defaultValue(value=255)
-
+        /**
+         * Unique ID used to identify this message, should preferably be consecutively increasing.
+         */
+        unsigned long sequence_id;
+        /**
+         * Specifies the which state the controller should transition into.
+         */
+        @defaultValue(value=255)
         octet quadruped_stepping_requested_event;
-
-
-
       };
-
     };
   };
 };

@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.outputData;
 
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 
 public interface JointDesiredOutputListBasics extends JointDesiredOutputListReadOnly
 {
@@ -19,7 +19,7 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
 
       for (int otherIndex = 0; otherIndex < other.getNumberOfJointsWithDesiredOutput(); otherIndex++)
       {
-         OneDoFJointBasics otherJoint = other.getOneDoFJoint(otherIndex);
+         OneDoFJointReadOnly otherJoint = other.getOneDoFJoint(otherIndex);
          JointDesiredOutputBasics jointDesiredOutput = getJointDesiredOutputFromHash(otherJoint.hashCode());
 
          if (jointDesiredOutput == null)
@@ -36,7 +36,7 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
    {
       for (int otherIndex = 0; otherIndex < other.getNumberOfJointsWithDesiredOutput(); otherIndex++)
       {
-         OneDoFJointBasics otherJoint = other.getOneDoFJoint(otherIndex);
+         OneDoFJointReadOnly otherJoint = other.getOneDoFJoint(otherIndex);
          JointDesiredOutputBasics jointDesiredOutput = getJointDesiredOutputFromHash(otherJoint.hashCode());
 
          if (jointDesiredOutput == null)
@@ -46,7 +46,7 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
       }
    }
 
-   default void setJointControlMode(OneDoFJointBasics joint, JointDesiredControlMode controlMode)
+   default void setJointControlMode(OneDoFJointReadOnly joint, JointDesiredControlMode controlMode)
    {
       JointDesiredOutputBasics jointDesiredOutput = getJointDesiredOutputFromHash(joint.hashCode());
       if (jointDesiredOutput == null)
@@ -55,11 +55,11 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
       jointDesiredOutput.setControlMode(controlMode);
    }
 
-   default void setJointsControlMode(OneDoFJointBasics[] joints, JointDesiredControlMode controlMode)
+   default void setJointsControlMode(OneDoFJointReadOnly[] joints, JointDesiredControlMode controlMode)
    {
       for (int i = 0; i < joints.length; i++)
       {
-         OneDoFJointBasics joint = joints[i];
+         OneDoFJointReadOnly joint = joints[i];
          setJointControlMode(joint, controlMode);
       }
    }
@@ -79,7 +79,7 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
       jointDesiredOutput.setControlMode(controlMode);
    }
 
-   default void setDesiredJointTorque(OneDoFJointBasics joint, double desiredTorque)
+   default void setDesiredJointTorque(OneDoFJointReadOnly joint, double desiredTorque)
    {
       JointDesiredOutputBasics jointDesiredOutput = getJointDesiredOutputFromHash(joint.hashCode());
       if (jointDesiredOutput == null)
@@ -97,7 +97,7 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
       jointDesiredOutput.setDesiredTorque(desiredTorque);
    }
 
-   default void setDesiredJointPosition(OneDoFJointBasics joint, double desiredPosition)
+   default void setDesiredJointPosition(OneDoFJointReadOnly joint, double desiredPosition)
    {
       JointDesiredOutputBasics jointDesiredOutput = getJointDesiredOutputFromHash(joint.hashCode());
       if (jointDesiredOutput == null)
@@ -115,7 +115,7 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
       jointDesiredOutput.setDesiredPosition(desiredPosition);
    }
 
-   default void setDesiredJointVelocity(OneDoFJointBasics joint, double desiredVelocity)
+   default void setDesiredJointVelocity(OneDoFJointReadOnly joint, double desiredVelocity)
    {
       JointDesiredOutputBasics jointDesiredOutput = getJointDesiredOutputFromHash(joint.hashCode());
       if (jointDesiredOutput == null)
@@ -133,7 +133,7 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
       jointDesiredOutput.setDesiredVelocity(desiredVelocity);
    }
 
-   default void setDesiredJointAcceleration(OneDoFJointBasics joint, double desiredAcceleration)
+   default void setDesiredJointAcceleration(OneDoFJointReadOnly joint, double desiredAcceleration)
    {
       JointDesiredOutputBasics jointDesiredOutput = getJointDesiredOutputFromHash(joint.hashCode());
       if (jointDesiredOutput == null)
@@ -151,7 +151,7 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
       jointDesiredOutput.setDesiredAcceleration(desiredAcceleration);
    }
 
-   default void setupForForceControl(OneDoFJointBasics joint, double desiredTorque)
+   default void setupForForceControl(OneDoFJointReadOnly joint, double desiredTorque)
    {
       JointDesiredOutputBasics lowLevelJointData = getJointDesiredOutputFromHash(joint.hashCode());
       if (lowLevelJointData == null)
@@ -171,7 +171,7 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
       lowLevelJointData.setDesiredTorque(desiredTorque);
    }
 
-   default void setupForPositionControl(OneDoFJointBasics joint, double desiredPosition, double desiredVelocity)
+   default void setupForPositionControl(OneDoFJointReadOnly joint, double desiredPosition, double desiredVelocity)
    {
       JointDesiredOutputBasics lowLevelJointData = getJointDesiredOutputFromHash(joint.hashCode());
       if (lowLevelJointData == null)
@@ -193,7 +193,7 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
       lowLevelJointData.setDesiredVelocity(desiredVelocity);
    }
 
-   default void setResetJointIntegrators(OneDoFJointBasics joint, boolean reset)
+   default void setResetJointIntegrators(OneDoFJointReadOnly joint, boolean reset)
    {
       JointDesiredOutputBasics lowLevelJointData = getJointDesiredOutputFromHash(joint.hashCode());
       if (lowLevelJointData == null)
@@ -217,7 +217,7 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
    JointDesiredOutputBasics getJointDesiredOutput(int index);
 
    @Override
-   default JointDesiredOutputBasics getJointDesiredOutput(OneDoFJointBasics joint)
+   default JointDesiredOutputBasics getJointDesiredOutput(OneDoFJointReadOnly joint)
    {
       return getJointDesiredOutputFromHash(joint.hashCode());
    }
@@ -225,7 +225,7 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
    @Override
    JointDesiredOutputBasics getJointDesiredOutputFromHash(int jointHashCode);
 
-   static void throwJointNotRegisteredException(OneDoFJointBasics joint)
+   static void throwJointNotRegisteredException(OneDoFJointReadOnly joint)
    {
       throw new RuntimeException("The joint: " + joint.getName() + " has not been registered.");
    }
@@ -235,7 +235,7 @@ public interface JointDesiredOutputListBasics extends JointDesiredOutputListRead
       throw new RuntimeException("The joint index : " + index + " has not been registered.");
    }
 
-   static void throwJointAlreadyRegisteredException(OneDoFJointBasics joint)
+   static void throwJointAlreadyRegisteredException(OneDoFJointReadOnly joint)
    {
       throw new RuntimeException("The joint: " + joint.getName() + " has already been registered.");
    }
