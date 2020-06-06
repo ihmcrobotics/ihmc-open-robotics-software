@@ -24,6 +24,10 @@
                         <parameter name="AngularMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                         <parameter name="AngularMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
                         <parameter name="AngularMomentumRateWeightZ" type="DoubleParameter" min="0.0" max="1.0" value="0.0"/>
+                        <registry name="ICPController">
+                            <parameter name="captureKi" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                            <parameter name="captureIntegralLeakRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.97"/>
+                        </registry>
                     </registry>
                 </registry>
                 <registry name="HighLevelHumanoidControllerFactory">
