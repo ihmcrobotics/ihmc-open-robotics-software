@@ -1,12 +1,12 @@
 package us.ihmc.humanoidBehaviors.tools.footstepPlanner;
 
+import java.util.ArrayList;
+
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.robotics.robotSide.RobotSide;
-
-import java.util.ArrayList;
 
 public class FootstepForUI
 {
@@ -42,7 +42,7 @@ public class FootstepForUI
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
       {
          FramePose3D soleFramePoseToPack = new FramePose3D();
-         footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
+         footstepPlan.getFootstep(i).getPose(soleFramePoseToPack);
          soleFramePoseToPack.changeFrame(ReferenceFrame.getWorldFrame());
          footstepLocations.add(new FootstepForUI(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack), description));
       }
