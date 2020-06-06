@@ -247,7 +247,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
 
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule.get());
       footstepPlannerLogger.logSession();
-      FootstepPlannerLogger.deleteOldLogs(30);
+      FootstepPlannerLogger.deleteOldLogs(30); // TODO: Do this somewhere else
 
 
       if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() < 1) // failed
