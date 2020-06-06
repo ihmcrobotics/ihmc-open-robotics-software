@@ -141,7 +141,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       robotMotionModule.setBehaviorStateUpdater(this::updateState);
 
       // TODO: For now, these cause trouble if they are setup earlier. Need to disable them on creation
-      helper.createROS2Callback(ROS2Tools.MAP_REGIONS, bodyPathModule::acceptMapRegions);
+      helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathModule::acceptMapRegions);
       helper.createUICallback(GoalInput, bodyPathModule::acceptGoal);
       helper.createROS2Callback(ROS2Tools.REALSENSE_SLAM_REGIONS, footstepPlanningModule::acceptPlanarRegions);
 
