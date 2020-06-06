@@ -1,9 +1,6 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
-import us.ihmc.tools.property.BooleanStoredPropertyKey;
-import us.ihmc.tools.property.DoubleStoredPropertyKey;
-import us.ihmc.tools.property.StoredPropertyKeyList;
-import us.ihmc.tools.property.StoredPropertySet;
+import us.ihmc.tools.property.*;
 
 public class LookAndStepBehaviorParameters extends StoredPropertySet implements LookAndStepBehaviorParametersReadOnly
 {
@@ -22,6 +19,7 @@ public class LookAndStepBehaviorParameters extends StoredPropertySet implements 
    public static final DoubleStoredPropertyKey waitTimeAfterPlanFailed = keys.addDoubleKey("Wait time after plan failed");
    public static final BooleanStoredPropertyKey returnBestEffortPlanOverride = keys.addBooleanKey("Return best effort plan override");
    public static final DoubleStoredPropertyKey maxPlanStrayDistance = keys.addDoubleKey("Max plan stray distance");
+   public static final IntegerStoredPropertyKey minimumNumberOfPlannedSteps = keys.addIntegerKey("Minimum number of planned steps");
    public static final DoubleStoredPropertyKey goalSatisfactionRadius = keys.addDoubleKey("Goal satisfaction radius");
    public static final DoubleStoredPropertyKey goalSatisfactionOrientationDelta = keys.addDoubleKey("Goal satisfaction orientation delta");
    public static final DoubleStoredPropertyKey percentSwingToWait = keys.addDoubleKey("Percent swing to wait");

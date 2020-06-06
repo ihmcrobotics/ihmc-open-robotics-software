@@ -237,7 +237,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
 
       footstepPlanningModule.get().getFootstepPlannerParameters().set(footstepPlannerParameters.get());
 //      footstepPlanningModule.get().addStatusCallback(this::footstepPlanningStatusUpdate);
-      footstepPlanningModule.get().addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= 1);
+      footstepPlanningModule.get().addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= lookAndStepBehaviorParameters.get().getMinimumNumberOfPlannedSteps());
 
       LogTools.info("Footstep planner started...");
       Stopwatch stopwatch = new Stopwatch().start();
