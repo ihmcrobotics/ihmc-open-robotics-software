@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.ui.viewers;
+package us.ihmc.javaFXVisualizers;
 
 import javafx.scene.Group;
 import javafx.scene.paint.Material;
