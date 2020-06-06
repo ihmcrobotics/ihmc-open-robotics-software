@@ -46,7 +46,7 @@ public class FootstepMeshManager
    /**
     * Call from any thread
     */
-   void computeMesh()
+   public void computeMesh()
    {
       if (footstepDataMessage.get() == null)
       {
@@ -84,7 +84,7 @@ public class FootstepMeshManager
       meshBuilder.addPolygon(transformToWorld, foothold, footColor);
 
       Pair<Mesh, Material> meshMaterialPair = Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial());
-      meshHolder.meshReference.set(meshMaterialPair);
+      meshHolder.setMeshReference(meshMaterialPair);
    }
    
    public void setIgnorePartialFootHolds(boolean doIgnore)
@@ -137,7 +137,7 @@ public class FootstepMeshManager
    /**
     * Call from AnimationTimer.handle
     */
-   void updateMesh()
+   public void updateMesh()
    {
       meshHolder.update();
    }
@@ -145,7 +145,7 @@ public class FootstepMeshManager
    /**
     * Call from AnimationTimer.handle
     */
-   void clear()
+   public void clear()
    {
       footstepDataMessage.set(null);
       meshHolder.remove();

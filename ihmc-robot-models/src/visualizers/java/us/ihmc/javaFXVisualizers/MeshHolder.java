@@ -14,20 +14,30 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class MeshHolder
 {
-   final Group root;
-   final AtomicReference<Pair<Mesh, Material>> meshReference = new AtomicReference<>(null);
-   final MeshView meshView = new MeshView();
-   boolean addedFlag = false;
+   private final Group root;
+   private final AtomicReference<Pair<Mesh, Material>> meshReference = new AtomicReference<>(null);
+   private final MeshView meshView = new MeshView();
+   private boolean addedFlag = false;
 
-   MeshHolder(Group root)
+   public MeshHolder(Group root)
    {
       this.root = root;
+   }
+   
+   public void setMeshReference(Pair<Mesh, Material> reference)
+   {
+      meshReference.set(reference);
+   }
+   
+   public MeshView getMeshView()
+   {
+      return meshView;
    }
 
    /**
     * Should be called from AnimationTimer.handle
     */
-   void update()
+   public void update()
    {
       Pair<Mesh, Material> mesh = meshReference.getAndSet(null);
       if (mesh != null)
@@ -46,7 +56,7 @@ public class MeshHolder
    /**
     * Should be called from AnimationTimer.handle
     */
-   void remove()
+   public void remove()
    {
       if (addedFlag)
       {
