@@ -1,4 +1,4 @@
-package us.ihmc.footstepPlanning.ui.viewers;
+package us.ihmc.javaFXVisualizers;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
