@@ -84,7 +84,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
          footstepMeshes.add(new FootstepMeshManager(root, meshBuilder, i));
       }
 
-      messager.registerTopicListener(ShowFootstepPlan, show -> footstepMeshes.forEach(mesh -> mesh.getMeshHolder().meshView.setVisible(show)));
+      messager.registerTopicListener(ShowFootstepPlan, show -> footstepMeshes.forEach(mesh -> mesh.getMeshHolder().getMeshView().setVisible(show)));
    }
 
    private void computeAllMeshes(FootstepDataListMessage footstepPlanResponse)

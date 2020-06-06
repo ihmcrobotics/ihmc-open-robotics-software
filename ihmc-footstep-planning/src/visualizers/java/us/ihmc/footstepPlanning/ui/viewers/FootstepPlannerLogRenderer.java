@@ -74,11 +74,11 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
       idealStep = messager.createInput(FootstepPlannerMessagerAPI.LoggedIdealStep);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLogGraphics, root::setVisible);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedStanceStep, loggedStanceStepGraphic.meshView::setVisible);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedUnsnappedCandidateStep, loggedUnsnappedCandidateStepGraphic.meshView::setVisible);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedSnappedCandidateStep, loggedSnappedCandidateStepGraphic.meshView::setVisible);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedWiggledCandidateStep, loggedWiggledCandidateStepGraphic.meshView::setVisible);
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedIdealStep, loggedIealStepGraphic.meshView::setVisible);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedStanceStep, loggedStanceStepGraphic.getMeshView()::setVisible);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedUnsnappedCandidateStep, loggedUnsnappedCandidateStepGraphic.getMeshView()::setVisible);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedSnappedCandidateStep, loggedSnappedCandidateStepGraphic.getMeshView()::setVisible);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedWiggledCandidateStep, loggedWiggledCandidateStepGraphic.getMeshView()::setVisible);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.ShowLoggedIdealStep, loggedIealStepGraphic.getMeshView()::setVisible);
 
       root.setVisible(false);
    }
@@ -116,7 +116,7 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
                         stanceStepColor);
          }
 
-         this.loggedStanceStepGraphic.meshReference.set(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
+         this.loggedStanceStepGraphic.setMeshReference(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
          loggedStanceStepGraphic.update();
       }
 
@@ -145,7 +145,7 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
          // Render unsnapped footstep
          meshBuilder.clear();
          addFootstep(projectedFootPose.getTranslation(), projectedFootPose.getRotation(), defaultFootPoints, defaultFootPolygon, unsnappedFootholdColor);
-         loggedUnsnappedCandidateStepGraphic.meshReference.set(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
+         loggedUnsnappedCandidateStepGraphic.setMeshReference(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
          loggedUnsnappedCandidateStepGraphic.update();
 
          // Render snapped footstep if wiggle transform is present
@@ -154,7 +154,7 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
             meshBuilder.clear();
             FootstepNodeTools.getSnappedNodeTransform(candidateNode, snapTransform, projectedFootPose);
             addFootstep(projectedFootPose.getTranslation(), projectedFootPose.getRotation(), defaultFootPoints, defaultFootPolygon, snappedFootholdColor);
-            loggedSnappedCandidateStepGraphic.meshReference.set(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
+            loggedSnappedCandidateStepGraphic.setMeshReference(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
             loggedSnappedCandidateStepGraphic.update();
          }
 
@@ -177,7 +177,7 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
             addFootstep(projectedFootPose.getTranslation(), projectedFootPose.getRotation(), footPolygon, croppedFoothold, candidateStepColor);
          }
 
-         this.loggedWiggledCandidateStepGraphic.meshReference.set(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
+         this.loggedWiggledCandidateStepGraphic.setMeshReference(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
          loggedWiggledCandidateStepGraphic.update();
       }
 
@@ -187,7 +187,7 @@ public class FootstepPlannerLogRenderer extends AnimationTimer
       {
          meshBuilder.clear();
          addFootstep(idealStep.getTranslation(), idealStep.getRotation(), defaultFootPoints, defaultFootPolygon, idealStepColor);
-         this.loggedIealStepGraphic.meshReference.set(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
+         this.loggedIealStepGraphic.setMeshReference(Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial()));
          loggedIealStepGraphic.update();
       }
    }
