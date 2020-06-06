@@ -156,7 +156,7 @@ public class FootstepPlannerOutput
    public void setPacket(FootstepPlanningToolboxOutputStatus outputStatus)
    {
       outputStatus.setPlanId(getRequestId());
-      outputStatus.getFootstepDataList().set(FootstepDataMessageConverter.createFootstepDataListFromPlan(getFootstepPlan(), -1.0, -1.0, ExecutionMode.OVERRIDE));
+      outputStatus.getFootstepDataList().set(FootstepDataMessageConverter.createFootstepDataListFromPlan(getFootstepPlan(), -1.0, -1.0));
       outputStatus.getBodyPath().clear();
       outputStatus.getGoalPose().set(getGoalPose());
       getPlannerTimings().setPacket(outputStatus.getPlannerTimings());

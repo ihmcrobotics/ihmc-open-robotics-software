@@ -94,7 +94,7 @@ public class RobotAndMapViewer
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
       {
          FramePose3D soleFramePoseToPack = new FramePose3D();
-         footstepPlan.getFootstep(i).getSoleFramePose(soleFramePoseToPack);
+         footstepPlan.getFootstep(i).getPose(soleFramePoseToPack);
          footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
       }
       footstepPlanGraphic.generateMeshesAsynchronously(footstepLocations);

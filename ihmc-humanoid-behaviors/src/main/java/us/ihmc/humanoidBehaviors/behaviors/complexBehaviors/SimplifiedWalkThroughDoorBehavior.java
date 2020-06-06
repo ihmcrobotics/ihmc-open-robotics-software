@@ -43,6 +43,8 @@ import us.ihmc.wholeBodyController.WholeBodyControllerParameters;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+@Deprecated
+//DO NOT USE THIS BEHAVIOR, this was for testing br stuff only and should be replaced by a mroe complete WalkThroughDoorBehavior.
 public class SimplifiedWalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoorBehaviorState>
 {
    private final boolean DEBUG = true;

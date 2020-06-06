@@ -1,30 +1,18 @@
 package us.ihmc.footstepPlanning;
 
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.robotics.robotSide.RobotSide;
+
 import java.util.ArrayList;
 import java.util.Collections;
 
-import us.ihmc.euclid.geometry.Pose2D;
-import us.ihmc.euclid.geometry.Pose3D;
-import us.ihmc.euclid.geometry.interfaces.Pose2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
-import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.robotics.robotSide.RobotSide;
-
 public class FootstepPlan
 {
-   private final ArrayList<SimpleFootstep> footsteps = new ArrayList<>();
-   private FramePose3DReadOnly lowLevelPlanGoal = null;
+   private final ArrayList<Footstep> footsteps = new ArrayList<>();
 
    public FootstepPlan()
    {
-   }
-
-   public void setLowLevelPlanGoal(FramePose3DReadOnly lowLevelPlanGoal)
-   {
-      this.lowLevelPlanGoal = lowLevelPlanGoal;
    }
 
    public int getNumberOfSteps()
@@ -32,24 +20,19 @@ public class FootstepPlan
       return footsteps.size();
    }
 
-   public SimpleFootstep getFootstep(int footstepIndex)
+   public Footstep getFootstep(int footstepIndex)
    {
       return footsteps.get(footstepIndex);
    }
 
-   public void addFootstep(SimpleFootstep footstep)
+   public void addFootstep(Footstep footstep)
    {
       footsteps.add(footstep);
    }
 
-   public void addFootstepPlan(FootstepPlan other)
+   public Footstep addFootstep(RobotSide robotSide, FramePose3D soleFramePose)
    {
-      footsteps.addAll(other.footsteps);
-   }
-
-   public SimpleFootstep addFootstep(RobotSide robotSide, FramePose3D soleFramePose)
-   {
-      SimpleFootstep simpleFootstep = new SimpleFootstep(robotSide, soleFramePose);
+      Footstep simpleFootstep = new Footstep(robotSide, soleFramePose);
       footsteps.add(simpleFootstep);
       return simpleFootstep;
    }
@@ -61,24 +44,11 @@ public class FootstepPlan
 
    public void clear()
    {
-      lowLevelPlanGoal = null;
       footsteps.clear();
    }
 
    public void remove(int footstepIndex)
    {
       footsteps.remove(footstepIndex);
-   }
-
-   public boolean hasLowLevelPlanGoal()
-   {
-      return lowLevelPlanGoal != null;
-   }
-
-   public FramePose3DReadOnly getLowLevelPlanGoal()
-   {
-      if (hasLowLevelPlanGoal())
-         lowLevelPlanGoal.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-      return lowLevelPlanGoal;
    }
 }

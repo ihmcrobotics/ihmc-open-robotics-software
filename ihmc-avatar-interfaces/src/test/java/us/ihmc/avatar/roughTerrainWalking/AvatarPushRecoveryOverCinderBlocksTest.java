@@ -12,6 +12,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.MultiRobotTestInterface;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.initialSetup.OffsetAndYawRobotInitialSetup;
+import us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule.StepConstraintToolboxModule;
 import us.ihmc.avatar.testTools.DRCSimulationTestHelper;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule;
@@ -23,6 +24,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -39,6 +41,7 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
 {
    private static final SimulationTestingParameters simulationTestingParameters = SimulationTestingParameters.createFromEnvironmentVariables();
    private DRCSimulationTestHelper drcSimulationTestHelper;
+   private StepConstraintToolboxModule stepConstraintModule;
 
    private static final double cinderBlockTiltDegrees = 15;
    private static final double cinderBlockTiltRadians = Math.toRadians(cinderBlockTiltDegrees);
@@ -129,6 +132,11 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
 
       PlanarRegionsList planarRegionsList = environment.getPlanarRegionsList();
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList);
+
+      stepConstraintModule = new StepConstraintToolboxModule(robotModel, true, PubSubImplementation.INTRAPROCESS, 9.81);
+      stepConstraintModule.setSwitchPlanarRegionConstraintsAutomatically(true);
+      stepConstraintModule.wakeUp();
+      stepConstraintModule.updatePlanarRegion(planarRegionsListMessage);
 
       drcSimulationTestHelper.publishToController(planarRegionsListMessage);
 
@@ -848,6 +856,11 @@ public abstract class AvatarPushRecoveryOverCinderBlocksTest implements MultiRob
          drcSimulationTestHelper = null;
       }
 
+      if (stepConstraintModule != null)
+      {
+         stepConstraintModule.closeAndDispose();
+         stepConstraintModule = null;
+      }
       if (pushRobotController != null)
       {
          pushRobotController = null;

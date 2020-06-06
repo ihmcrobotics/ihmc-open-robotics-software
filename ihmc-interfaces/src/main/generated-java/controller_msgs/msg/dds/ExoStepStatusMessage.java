@@ -7,12 +7,9 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the IHMC whole-body controller API.
-   
- * This message gives the status of the current footstep from the controller as well as the position and orientation of the footstep in world coordinates.
-   
- */
+       * This message is part of the IHMC whole-body controller API.
+       * This message gives the status of the current footstep from the controller as well as the position and orientation of the footstep in world coordinates.
+       */
 public class ExoStepStatusMessage extends Packet<ExoStepStatusMessage> implements Settable<ExoStepStatusMessage>, EpsilonComparable<ExoStepStatusMessage>
 {
 
@@ -25,38 +22,28 @@ public class ExoStepStatusMessage extends Packet<ExoStepStatusMessage> implement
    public static final byte ROBOT_SIDE_RIGHT = (byte) 1;
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    /**
-       
-    * The current footstep status enum value.
-       
-    */
+            * The current footstep status enum value.
+            */
    public byte footstep_status_ = (byte) 255;
 
    /**
-       
-    * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
-       
-    */
+            * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
+            */
    public int footstep_index_;
 
    /**
-       
-    * The robot side (left or right) that this footstep status correlates to.
-       
-    */
+            * The robot side (left or right) that this footstep status correlates to.
+            */
    public byte robot_side_ = (byte) 255;
 
    /**
-       
-    * Specifies the desired position of the foot sent to the controller as opposed to where the foot actually landed.
-       
-    */
+            * Specifies the desired position of the foot sent to the controller as opposed to where the foot actually landed.
+            */
    public double desired_step_length_;
 
    public double desired_step_height_;
@@ -108,19 +95,15 @@ public class ExoStepStatusMessage extends Packet<ExoStepStatusMessage> implement
 
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;
@@ -128,19 +111,15 @@ public class ExoStepStatusMessage extends Packet<ExoStepStatusMessage> implement
 
 
    /**
-       
-    * The current footstep status enum value.
-       
-    */
+            * The current footstep status enum value.
+            */
    public void setFootstepStatus(byte footstep_status)
    {
       footstep_status_ = footstep_status;
    }
    /**
-       
-    * The current footstep status enum value.
-       
-    */
+            * The current footstep status enum value.
+            */
    public byte getFootstepStatus()
    {
       return footstep_status_;
@@ -148,19 +127,15 @@ public class ExoStepStatusMessage extends Packet<ExoStepStatusMessage> implement
 
 
    /**
-       
-    * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
-       
-    */
+            * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
+            */
    public void setFootstepIndex(int footstep_index)
    {
       footstep_index_ = footstep_index;
    }
    /**
-       
-    * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
-       
-    */
+            * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
+            */
    public int getFootstepIndex()
    {
       return footstep_index_;
@@ -168,19 +143,15 @@ public class ExoStepStatusMessage extends Packet<ExoStepStatusMessage> implement
 
 
    /**
-       
-    * The robot side (left or right) that this footstep status correlates to.
-       
-    */
+            * The robot side (left or right) that this footstep status correlates to.
+            */
    public void setRobotSide(byte robot_side)
    {
       robot_side_ = robot_side;
    }
    /**
-       
-    * The robot side (left or right) that this footstep status correlates to.
-       
-    */
+            * The robot side (left or right) that this footstep status correlates to.
+            */
    public byte getRobotSide()
    {
       return robot_side_;
@@ -188,19 +159,15 @@ public class ExoStepStatusMessage extends Packet<ExoStepStatusMessage> implement
 
 
    /**
-       
-    * Specifies the desired position of the foot sent to the controller as opposed to where the foot actually landed.
-       
-    */
+            * Specifies the desired position of the foot sent to the controller as opposed to where the foot actually landed.
+            */
    public void setDesiredStepLength(double desired_step_length)
    {
       desired_step_length_ = desired_step_length;
    }
    /**
-       
-    * Specifies the desired position of the foot sent to the controller as opposed to where the foot actually landed.
-       
-    */
+            * Specifies the desired position of the foot sent to the controller as opposed to where the foot actually landed.
+            */
    public double getDesiredStepLength()
    {
       return desired_step_length_;

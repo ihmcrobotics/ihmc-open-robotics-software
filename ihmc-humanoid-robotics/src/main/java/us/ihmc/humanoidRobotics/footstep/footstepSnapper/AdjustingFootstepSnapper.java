@@ -111,7 +111,7 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 
 
    @Override
-   public Footstep.FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap)
+   public FootstepType snapFootstep(Footstep footstep, HeightMapWithPoints heightMap)
    {
       // can only snap footsteps in world frame
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
@@ -125,12 +125,11 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
       originalFootstep.getOrientation().set(orientation);
 
       //get the footstep
-      Footstep.FootstepType type = snapFootstep(originalFootstep, heightMap);
-      if (type == Footstep.FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints2d().size() > 0){
+      FootstepType type = snapFootstep(originalFootstep, heightMap);
+      if (type == FootstepType.FULL_FOOTSTEP && originalFootstep.getPredictedContactPoints2d().size() > 0){
          throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
       }
       footstep.setPredictedContactPoints(HumanoidMessageTools.unpackPredictedContactPoints(originalFootstep));
-      footstep.setFootstepType(type);
       FramePose3D solePoseInWorld = new FramePose3D(ReferenceFrame.getWorldFrame(), originalFootstep.getLocation(), originalFootstep.getOrientation());
       footstep.setPose(solePoseInWorld);
 
@@ -141,13 +140,13 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
    }
 
    @Override
-   public Footstep.FootstepType snapFootstep(FootstepDataMessage footstep, HeightMapWithPoints heightMap)
+   public FootstepType snapFootstep(FootstepDataMessage footstep, HeightMapWithPoints heightMap)
    {
-      Footstep.FootstepType footstepFound = convexHullFootstepSnapper.snapFootstep(footstep, heightMap);
+      FootstepType footstepFound = convexHullFootstepSnapper.snapFootstep(footstep, heightMap);
 
-      if (footstepFound != Footstep.FootstepType.BAD_FOOTSTEP)
+      if (footstepFound != FootstepType.BAD_FOOTSTEP)
       {
-         if (footstepFound == Footstep.FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoints2d().size() > 0){
+         if (footstepFound == FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoints2d().size() > 0){
             throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
          }
          return footstepFound;
@@ -205,9 +204,9 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
             newDesiredSolePosition.setIncludingFrame(desiredSolePosition.getReferenceFrame(), point2d.getX(), point2d.getY(), originalYaw + angleOffsets[i]);
             footstepFound = convexHullFootstepSnapper.snapFootstep(footstep, heightMap);
 
-            if (footstepFound!= Footstep.FootstepType.BAD_FOOTSTEP)
+            if (footstepFound!= FootstepType.BAD_FOOTSTEP)
             {
-               if (footstepFound == Footstep.FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoints2d() != null){
+               if (footstepFound == FootstepType.FULL_FOOTSTEP && footstep.getPredictedContactPoints2d() != null){
                   throw new RuntimeException(this.getClass().getSimpleName() + "Full Footstep should have null contact points");
                }
                return footstepFound;
@@ -218,6 +217,6 @@ public class AdjustingFootstepSnapper implements QuadTreeFootstepSnapper
 
       footstep.getLocation().set(originalFootstepFound.getLocation());
       footstep.getOrientation().set(originalFootstepFound.getOrientation());
-      return Footstep.FootstepType.BAD_FOOTSTEP;
+      return FootstepType.BAD_FOOTSTEP;
    }
 }

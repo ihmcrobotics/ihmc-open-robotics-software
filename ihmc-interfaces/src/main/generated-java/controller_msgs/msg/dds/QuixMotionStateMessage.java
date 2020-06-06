@@ -7,12 +7,9 @@ import java.util.function.Supplier;
 import us.ihmc.pubsub.TopicDataType;
 
 /**
-   
- * This message is part of the Quix controller API.
-   
- * This message is used to notify the crutch display of the current motion state and allow the crutch to communicate a desired change in state.
-   
- */
+       * This message is part of the Quix controller API.
+       * This message is used to notify the crutch display of the current motion state and allow the crutch to communicate a desired change in state.
+       */
 public class QuixMotionStateMessage extends Packet<QuixMotionStateMessage> implements Settable<QuixMotionStateMessage>, EpsilonComparable<QuixMotionStateMessage>
 {
 
@@ -33,10 +30,8 @@ public class QuixMotionStateMessage extends Packet<QuixMotionStateMessage> imple
    public static final byte OLD_FLAT_GROUND_WALKING = (byte) 7;
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long sequence_id_;
 
    public byte motion_state_name_ = (byte) 255;
@@ -66,19 +61,15 @@ public class QuixMotionStateMessage extends Packet<QuixMotionStateMessage> imple
 
 
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public void setSequenceId(long sequence_id)
    {
       sequence_id_ = sequence_id;
    }
    /**
-       
-    * Unique ID used to identify this message, should preferably be consecutively increasing.
-       
-    */
+            * Unique ID used to identify this message, should preferably be consecutively increasing.
+            */
    public long getSequenceId()
    {
       return sequence_id_;

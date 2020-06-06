@@ -1085,7 +1085,7 @@ public class PlanarRegionTools
     * Will return the intersection point between a line and a single planar region. If the line does
     * not intersect the region this method will return null.
     */
-   public static Point3D intersectRegionWithLine(PlanarRegion region, Line3D projectionLineInWorld)
+   public static Point3D intersectRegionWithLine(PlanarRegion region, Line3DReadOnly projectionLineInWorld)
    {
       RigidBodyTransformReadOnly regionToWorld = region.getTransformToWorld();
       RigidBodyTransformReadOnly regionToLocal = region.getTransformToLocal();
@@ -1205,6 +1205,11 @@ public class PlanarRegionTools
     */
    public static Point3D projectPointToPlanesVertically(Point3DReadOnly pointInWorld, List<PlanarRegion> regions)
    {
+      return projectPointToPlanesVertically(pointInWorld, regions, null);
+   }
+
+   public static Point3D projectPointToPlanesVertically(Point3DReadOnly pointInWorld, List<PlanarRegion> regions, PlanarRegion highestRegionToPack)
+   {
       Point3D highestIntersection = null;
 
       Line3D verticalLine = new Line3D();
@@ -1223,6 +1228,8 @@ public class PlanarRegionTools
          {
             highestIntersection = new Point3D(pointInWorld);
             highestIntersection.setZ(Double.NEGATIVE_INFINITY);
+            if (highestRegionToPack != null)
+               highestRegionToPack.set(region);
          }
 
          double height = intersection.getZ();
@@ -1230,6 +1237,8 @@ public class PlanarRegionTools
          if (highestIntersection.getZ() < height)
          {
             highestIntersection.setZ(height);
+            if (highestRegionToPack != null)
+               highestRegionToPack.set(region);
          }
       }
 

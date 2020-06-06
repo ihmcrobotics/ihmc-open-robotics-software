@@ -5,8 +5,8 @@ import controller_msgs.msg.dds.WalkingStatusMessage;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.Notification;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
-import us.ihmc.ros2.ROS2Input;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -19,16 +19,18 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.footstepPlanning.*;
+import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
+import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidBehaviors.tools.behaviorTree.*;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
+import us.ihmc.humanoidBehaviors.tools.behaviorTree.AlwaysSucessfulAction;
+import us.ihmc.humanoidBehaviors.tools.behaviorTree.NonReactiveLoopSequenceNode;
+import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
@@ -45,9 +47,9 @@ import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.PathOrientationCalcu
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Input;
 import us.ihmc.tools.UnitConversions;
 import us.ihmc.tools.thread.PausablePeriodicThread;
-import us.ihmc.commons.thread.TypedNotification;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -284,9 +286,9 @@ public class NavigationBehavior implements BehaviorInterface
 
       for (int i = 0; i < latestFootstepPlan.getNumberOfSteps(); i++)
       {
-         SimpleFootstep footstep = latestFootstepPlan.getFootstep(i);
+         Footstep footstep = latestFootstepPlan.getFootstep(i);
 
-         if (footstep.getSoleFramePose().getPosition().distance(robotPose.getPosition()) > 2.0)
+         if (footstep.getFootstepPose().getPosition().distance(robotPose.getPosition()) > 2.0)
          {
             break; // don't go farther than 0.3 meters
          }
@@ -298,8 +300,7 @@ public class NavigationBehavior implements BehaviorInterface
       TypedNotification<WalkingStatusMessage> walkingStatusNotification = robot.requestWalk(FootstepDataMessageConverter.createFootstepDataListFromPlan(
             shortenedFootstepPlan,
             1.0,
-            0.5,
-            ExecutionMode.OVERRIDE));
+            0.5));
 
       // wait for robot to finish walking
       Stopwatch stopwatch = new Stopwatch().start();

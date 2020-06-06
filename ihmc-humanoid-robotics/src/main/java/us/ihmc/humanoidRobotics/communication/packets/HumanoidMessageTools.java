@@ -37,8 +37,6 @@ import controller_msgs.msg.dds.FootLoadBearingMessage;
 import controller_msgs.msg.dds.FootTrajectoryMessage;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepPathPlanPacket;
-import controller_msgs.msg.dds.FootstepPlanRequestPacket;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.FrameInformation;
 import controller_msgs.msg.dds.GoHomeMessage;
@@ -154,11 +152,13 @@ import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
+import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModelUtils;
 import us.ihmc.robotics.kinematics.TimeStampedTransform3D;
+import us.ihmc.robotics.math.trajectories.trajectorypoints.FrameSE3TrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.OneDoFTrajectoryPoint;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.interfaces.OneDoFTrajectoryPointBasics;
 import us.ihmc.robotics.math.trajectories.trajectorypoints.lists.OneDoFTrajectoryPointList;
@@ -573,21 +573,6 @@ public class HumanoidMessageTools
       message.getExplorationRangeUpperLimits().add(explorationRangeUpperLimits);
       message.getExplorationRangeLowerLimits().add(explorationRangeLowerLimits);
 
-      return message;
-   }
-
-   public static FootstepPathPlanPacket createFootstepPathPlanPacket(boolean goalsValid, FootstepDataMessage start, List<FootstepDataMessage> originalGoals,
-                                                                     List<FootstepDataMessage> ADStarPathPlan, List<Boolean> footstepUnknown,
-                                                                     double subOptimality, double cost)
-   {
-      FootstepPathPlanPacket message = new FootstepPathPlanPacket();
-      message.setGoalsValid(goalsValid);
-      message.getStart().set(start);
-      MessageTools.copyData(originalGoals, message.getOriginalGoals());
-      MessageTools.copyData(ADStarPathPlan, message.getPathPlan());
-      footstepUnknown.stream().forEach(message.getFootstepUnknown()::add);
-      message.setSubOptimality(subOptimality);
-      message.setPathCost(cost);
       return message;
    }
 
@@ -1198,29 +1183,6 @@ public class HumanoidMessageTools
       message.setCuttingRadius(cuttingRadius);
       message.getCenterPosition().set(centerPosition);
       message.getCenterOrientation().set(new Quaternion(rotationMatrix));
-      return message;
-   }
-
-   public static FootstepPlanRequestPacket createFootstepPlanRequestPacket(FootstepPlanRequestType requestType, FootstepDataMessage startFootstep,
-                                                                           double thetaStart, List<FootstepDataMessage> goals)
-   {
-      FootstepPlanRequestPacket message = new FootstepPlanRequestPacket();
-      message.setFootstepPlanRequestType(requestType.toByte());
-      message.getStartFootstep().set(startFootstep);
-      message.setThetaStart(thetaStart);
-      MessageTools.copyData(goals, message.getGoals());
-      return message;
-   }
-
-   public static FootstepPlanRequestPacket createFootstepPlanRequestPacket(FootstepPlanRequestType requestType, FootstepDataMessage startFootstep,
-                                                                           double thetaStart, List<FootstepDataMessage> goals, double maxSuboptimality)
-   {
-      FootstepPlanRequestPacket message = new FootstepPlanRequestPacket();
-      message.setFootstepPlanRequestType(requestType.toByte());
-      message.getStartFootstep().set(startFootstep);
-      message.setThetaStart(thetaStart);
-      MessageTools.copyData(goals, message.getGoals());
-      message.setMaxSubOptimality(maxSuboptimality);
       return message;
    }
 
@@ -2011,19 +1973,57 @@ public class HumanoidMessageTools
       footstep.getFootstepPose().checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
       message.getLocation().set(location);
       message.getOrientation().set(orientation);
+
       packPredictedContactPoints(footstep.getPredictedContactPoints(), message);
       message.setTrajectoryType(footstep.getTrajectoryType().toByte());
       message.setSwingHeight(footstep.getSwingHeight());
       message.setSwingTrajectoryBlendDuration(footstep.getSwingTrajectoryBlendDuration());
 
-      if (footstep.getCustomPositionWaypoints().size() != 0)
+      if (!footstep.getCustomPositionWaypoints().isEmpty())
       {
-         for (int i = 0; i < footstep.getCustomPositionWaypoints().size(); i++)
+         if (footstep.getCustomPositionWaypoints().size() != 2)
          {
-            FramePoint3D framePoint = footstep.getCustomPositionWaypoints().get(i);
-            framePoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
-            message.getCustomPositionWaypoints().add().set(framePoint);
+            LogTools.warn("Received footstep object without the correct number of waypoint positions. Should be 0 or 2, received: "
+                          + footstep.getCustomPositionWaypoints().size());
          }
+         else
+         {
+            for (int i = 0; i < 2; i++)
+            {
+               FramePoint3D framePoint = footstep.getCustomPositionWaypoints().get(i);
+               framePoint.checkReferenceFrameMatch(ReferenceFrame.getWorldFrame());
+               message.getCustomPositionWaypoints().add().set(framePoint);
+            }
+         }
+      }
+
+      if (!footstep.getCustomWaypointProportions().isEmpty())
+      {
+         if (footstep.getCustomWaypointProportions().size() != 2)
+         {
+            LogTools.warn("Received footstep object without the correct number of waypoint proportions. Should be 0 or 2, received: "
+                          + footstep.getCustomWaypointProportions().size());
+         }
+         else
+         {
+            message.getCustomWaypointProportions().clear();
+            for (int i = 0; i < 2; i++)
+            {
+               message.getCustomWaypointProportions().add(footstep.getCustomWaypointProportions().get(i).getValue());
+            }
+         }
+      }
+
+      for (int i = 0; i < footstep.getSwingTrajectory().size(); i++)
+      {
+         FrameSE3TrajectoryPoint swingTrajectoryPoint = footstep.getSwingTrajectory().get(i);
+         SE3TrajectoryPointMessage swingTrajectoryPointToSet = message.getSwingTrajectory().add();
+
+         swingTrajectoryPointToSet.getPosition().set(swingTrajectoryPoint.getPosition());
+         swingTrajectoryPointToSet.getOrientation().set(swingTrajectoryPoint.getOrientation());
+         swingTrajectoryPointToSet.getLinearVelocity().set(swingTrajectoryPoint.getLinearVelocity());
+         swingTrajectoryPointToSet.getAngularVelocity().set(swingTrajectoryPoint.getAngularVelocity());
+         swingTrajectoryPointToSet.setTime(swingTrajectoryPoint.getTime());
       }
 
       return message;
