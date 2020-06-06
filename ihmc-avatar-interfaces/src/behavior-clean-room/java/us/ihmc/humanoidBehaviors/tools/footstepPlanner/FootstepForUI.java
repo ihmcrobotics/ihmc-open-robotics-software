@@ -14,6 +14,13 @@ public class FootstepForUI
    private final Pose3D solePoseInWorld;
    private final String description;
 
+   public FootstepForUI()
+   {
+      side = null;
+      solePoseInWorld = null;
+      description = null;
+   }
+   
    public FootstepForUI(RobotSide side, Pose3D solePoseInWorld, String description)
    {
       this.side = side;
