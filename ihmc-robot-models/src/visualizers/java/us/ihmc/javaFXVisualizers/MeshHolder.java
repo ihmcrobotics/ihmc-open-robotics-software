@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Lightweight class for passing mesh data between threads
  * Set meshReference on any thread and call update() and remove() from an AnimationTimer handle method
  */
-class MeshHolder
+public class MeshHolder
 {
    final Group root;
    final AtomicReference<Pair<Mesh, Material>> meshReference = new AtomicReference<>(null);
