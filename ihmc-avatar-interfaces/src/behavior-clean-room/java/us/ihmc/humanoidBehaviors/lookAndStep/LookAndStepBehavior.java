@@ -58,6 +58,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       VisibilityGraphsParametersBasics visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
       visibilityGraphParameters.setIncludePreferredExtrusions(false);
+      visibilityGraphParameters.setTooHighToStepDistance(0.2);
 
       LookAndStepBehaviorParameters lookAndStepParameters = new LookAndStepBehaviorParameters();
       helper.createUICallback(LookAndStepParameters, lookAndStepParameters::setAllFromStrings);

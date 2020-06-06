@@ -9,6 +9,11 @@ public interface LookAndStepBehaviorParametersReadOnly extends StoredPropertySet
       return get(LookAndStepBehaviorParameters.maxPlanStrayDistance);
    }
 
+   default double getMinimumNumberOfPlannedSteps()
+   {
+      return get(LookAndStepBehaviorParameters.minimumNumberOfPlannedSteps);
+   }
+
    default double getGoalSatisfactionRadius()
    {
       return get(LookAndStepBehaviorParameters.goalSatisfactionRadius);
