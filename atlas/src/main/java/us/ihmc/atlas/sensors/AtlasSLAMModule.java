@@ -1,11 +1,17 @@
 package us.ihmc.atlas.sensors;
 
+import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.atomic.AtomicReference;
+
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.FootstepStatusMessage;
 import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.StampedPosePacket;
+import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -17,6 +23,7 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -24,6 +31,145 @@ public class AtlasSLAMModule extends SLAMModule
 {
    private static final double PELVIS_VELOCITY_STATIONARY_THRESHOLD = 0.001;
    private static final double TOLERANCE_PELVIS_VELOCITY = 0.01;
+
+   private final LinkedList<Boolean> stationaryFlagQueue = new LinkedList<Boolean>();
+   private final LinkedList<Boolean> reasonableVelocityFlagQueue = new LinkedList<Boolean>();
+
+   private final AtomicReference<Boolean> robotStatus;
+   private final AtomicReference<Boolean> velocityStatus;
+
+   /**
+    * to update corrected sensor frame for robot state estimation.
+    */
+   protected final AtomicLong latestRobotTimeStamp = new AtomicLong();
+   protected IHMCROS2Publisher<StampedPosePacket> estimatedPelvisPublisher = null;
+   protected RigidBodyTransform sensorPoseToPelvisTransformer = null;
+
+   public AtlasSLAMModule(Messager messager, DRCRobotModel drcRobotModel)
+   {
+      super(messager);
+
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    RobotConfigurationData.class,
+                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()),
+                                                    this::handleRobotConfigurationData);
+
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    FootstepStatusMessage.class,
+                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()),
+                                                    this::handleFootstepStatusMessage);
+
+      estimatedPelvisPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                    StampedPosePacket.class,
+                                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()));
+      sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToDepthCamera);
+      sensorPoseToPelvisTransformer.invert();
+
+      robotStatus = reaMessager.createInput(SLAMModuleAPI.SensorStatus, false);
+      velocityStatus = reaMessager.createInput(SLAMModuleAPI.VelocityLimitStatus, true);
+   }
+
+   @Override
+   public void updateSLAM()
+   {
+      if (isSLAMThreadInterrupted())
+         return;
+
+      if (pointCloudQueue.size() == 0)
+         return;
+
+      updateSLAMParameters();
+
+      StereoVisionPointCloudMessage pointCloudToCompute = pointCloudQueue.getFirst();
+      boolean stationaryFlag = stationaryFlagQueue.getFirst();
+      boolean reasonableVelocityFlag = reasonableVelocityFlagQueue.getFirst();
+
+      boolean success;
+      if (slam.isEmpty())
+      {
+         slam.addKeyFrame(pointCloudToCompute);
+         success = true;
+      }
+      else
+      {
+         if (reasonableVelocityFlag)
+         {
+            if (stationaryFlag)
+            {
+               slam.addKeyFrame(pointCloudToCompute);
+               success = true;
+            }
+            else
+            {
+               success = slam.addFrame(pointCloudToCompute);
+            }
+         }
+         else
+         {
+            success = false;
+         }
+      }
+
+      pointCloudQueue.removeFirst();
+      stationaryFlagQueue.removeFirst();
+      reasonableVelocityFlagQueue.removeFirst();
+
+      if (success)
+      {
+         SLAMFrame latestFrame = slam.getLatestFrame();
+         publishResults();
+
+         if (estimatedPelvisPublisher != null)
+         {
+            StampedPosePacket posePacket = new StampedPosePacket();
+            posePacket.setTimestamp(latestRobotTimeStamp.get());
+            int maximumBufferOfQueue = 10;
+            if (pointCloudQueue.size() >= maximumBufferOfQueue)
+            {
+               posePacket.setConfidenceFactor(0.0);
+            }
+            else
+            {
+               if (latestFrame.getConfidenceFactor() < 0)
+                  posePacket.setConfidenceFactor(0.0);
+               posePacket.setConfidenceFactor(latestFrame.getConfidenceFactor());
+            }
+            RigidBodyTransform estimatedPelvisPose = new RigidBodyTransform(sensorPoseToPelvisTransformer);
+            estimatedPelvisPose.preMultiply(latestFrame.getSensorPose());
+            posePacket.getPose().set(estimatedPelvisPose);
+            reaMessager.submitMessage(SLAMModuleAPI.CustomizedFrameState, posePacket);
+            estimatedPelvisPublisher.publish(posePacket);
+         }
+      }
+   }
+
+   @Override
+   public void updateMain()
+   {
+      if (isMainThreadInterrupted())
+         return;
+
+      if (enable.get())
+      {
+         StereoVisionPointCloudMessage pointCloud = newPointCloud.getAndSet(null);
+         if (pointCloud == null)
+            return;
+
+         pointCloudQueue.add(pointCloud);
+         stationaryFlagQueue.add(robotStatus.get());
+         reasonableVelocityFlagQueue.add(velocityStatus.get());
+      }
+   }
+
+   @Override
+   public void clearSLAM()
+   {
+      pointCloudQueue.clear();
+      stationaryFlagQueue.clear();
+      reasonableVelocityFlagQueue.clear();
+      slam.clear();
+      newPointCloud.set(null);
+   }
 
    private void handleRobotConfigurationData(Subscriber<RobotConfigurationData> subscriber)
    {
@@ -66,27 +212,6 @@ public class AtlasSLAMModule extends SLAMModule
          footstepDataMessageToSubmit.getOrientation().set(footOrientation);
          reaMessager.submitMessage(SLAMModuleAPI.FootstepDataState, footstepDataMessageToSubmit);
       }
-   }
-
-   public AtlasSLAMModule(Messager messager, DRCRobotModel drcRobotModel)
-   {
-      super(messager);
-
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class,
-                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()),
-                                                    this::handleRobotConfigurationData);
-
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    FootstepStatusMessage.class,
-                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()),
-                                                    this::handleFootstepStatusMessage);
-
-      estimatedPelvisPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                    StampedPosePacket.class,
-                                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()));
-      sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToDepthCamera);
-      sensorPoseToPelvisTransformer.invert();
    }
 
    public static AtlasSLAMModule createIntraprocessModule(DRCRobotModel drcRobotModel) throws Exception

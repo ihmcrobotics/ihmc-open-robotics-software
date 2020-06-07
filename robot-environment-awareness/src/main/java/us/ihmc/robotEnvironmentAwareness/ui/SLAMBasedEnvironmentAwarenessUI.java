@@ -27,8 +27,6 @@ import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 
 public class SLAMBasedEnvironmentAwarenessUI
 {
-   private static final String UI_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAUIConfiguration.txt";
-
    private final BorderPane mainPane;
 
    private final SLAMMeshViewer ihmcSLAMViewer;
@@ -83,7 +81,7 @@ public class SLAMBasedEnvironmentAwarenessUI
 
       view3dFactory.addNodeToView(ihmcSLAMViewer.getRoot());
       view3dFactory.addNodeToView(depthFrameViewer.getRoot());
-      view3dFactory.addNodeToView(pelvisFrameViewer.getRoot());
+      //view3dFactory.addNodeToView(pelvisFrameViewer.getRoot());
 
       uiConnectionHandler = new UIConnectionHandler(primaryStage, uiMessager, SLAMModuleAPI.RequestEntireModuleState);
       uiConnectionHandler.start();
@@ -105,19 +103,6 @@ public class SLAMBasedEnvironmentAwarenessUI
 
    private void initializeControllers(REAUIMessager uiMessager)
    {
-      File configurationFile = new File(UI_CONFIGURATION_FILE_NAME);
-      try
-      {
-         configurationFile.getParentFile().mkdirs();
-         configurationFile.createNewFile();
-      }
-      catch (IOException e)
-      {
-         System.out.println(configurationFile.getAbsolutePath());
-         e.printStackTrace();
-      }
-
-      slamAnchorPaneController.setConfigurationFile(configurationFile);
       slamAnchorPaneController.attachREAMessager(uiMessager);
       slamAnchorPaneController.bindControls();
       //      dataExporterAnchorPaneController.setConfigurationFile(configurationFile);
