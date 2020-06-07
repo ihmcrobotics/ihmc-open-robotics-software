@@ -16,7 +16,7 @@ import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.Intersectio
 import java.util.Collection;
 import java.util.HashSet;
 
-public class ClippingTools
+public class ConcavePolygon2DClippingTools
 {
    public static LinkedPointList createLinkedPointList(ConcavePolygon2DReadOnly polygon)
    {
@@ -202,22 +202,18 @@ public class ClippingTools
    {
       intersectionToPack.setToNaN();
 
-      IntersectionInfo info = new IntersectionInfo(IntersectionInfo.IntersectionType.NONE, null, null, null);
+      IntersectionInfo info = new IntersectionInfo(IntersectionInfo.IntersectionType.NONE, null);
 
       double epsilonForOnLine = 1e-4;
       double epsilonSquared = epsilonForOnLine * epsilonForOnLine;
       for (int i = 0; i < polygonToIntersect.getNumberOfVertices(); i++)
       {
-
-
-         int next = EuclidGeometryPolygonTools.next(i, polygonToIntersect.getNumberOfVertices());
-
          Point2DReadOnly polygonVertex = polygonToIntersect.getVertex(i);
          Point2DReadOnly polygonNextVertex = polygonToIntersect.getNextVertex(i);
 
          if (EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(edgeEnd, polygonVertex, polygonNextVertex) < epsilonSquared)
          {
-            info = new IntersectionInfo(IntersectionInfo.IntersectionType.END, edgeEnd, polygonVertex, polygonNextVertex);
+            info = new IntersectionInfo(IntersectionInfo.IntersectionType.END, edgeEnd);
          }
          else
          {
@@ -231,12 +227,14 @@ public class ClippingTools
                candidateIntersection = polygonVertex;
             }
             else if (EuclidGeometryTools.distanceSquaredFromPoint2DToLineSegment2D(polygonNextVertex, edgeStart, edgeEnd) < epsilonSquared)
+            {
                candidateIntersection = polygonNextVertex;
+            }
 
             if (candidateIntersection != null && candidateIntersection.distanceSquared(edgeStart) > epsilonSquaredForSamePoint
                 && candidateIntersection.distanceSquared(edgeEnd) > epsilonSquaredForSamePoint)
             {
-               return new IntersectionInfo(IntersectionType.NEW, candidateIntersection, polygonVertex, polygonNextVertex);
+               return new IntersectionInfo(IntersectionType.NEW, candidateIntersection);
             }
          }
       }

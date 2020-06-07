@@ -1,6 +1,5 @@
 package us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging;
 
-import sun.rmi.runtime.Log;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.*;
 
@@ -128,13 +127,13 @@ public class PolygonClippingAndMerging
          return;
       }
 
-      LinkedPointList polygonAList = ClippingTools.createLinkedPointList(polygonA);
-      LinkedPointList polygonBList = ClippingTools.createLinkedPointList(polygonB);
+      LinkedPointList polygonAList = ConcavePolygon2DClippingTools.createLinkedPointList(polygonA);
+      LinkedPointList polygonBList = ConcavePolygon2DClippingTools.createLinkedPointList(polygonB);
 
-      ClippingTools.insertIntersectionsIntoList(polygonAList, polygonB);
-      ClippingTools.insertIntersectionsIntoList(polygonBList, polygonA);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(polygonAList, polygonB);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(polygonBList, polygonA);
 
-      ClippingTools.linkSharedVertices(polygonAList, polygonBList, 5e-3);
+      ConcavePolygon2DClippingTools.linkSharedVertices(polygonAList, polygonBList, 5e-3);
 
       Collection<LinkedPoint> unassignedAPoints = polygonAList.getPointsCopy();
       Collection<LinkedPoint> unassignedBPoints = polygonBList.getPointsCopy();
@@ -204,13 +203,13 @@ public class PolygonClippingAndMerging
          return clippedPolygonsToReturn;
       }
 
-      LinkedPointList clippingPolygonList = ClippingTools.createLinkedPointList(clippingPolygon);
-      LinkedPointList polygonToClipList = ClippingTools.createLinkedPointList(polygonToClip);
+      LinkedPointList clippingPolygonList = ConcavePolygon2DClippingTools.createLinkedPointList(clippingPolygon);
+      LinkedPointList polygonToClipList = ConcavePolygon2DClippingTools.createLinkedPointList(polygonToClip);
 
-      ClippingTools.insertIntersectionsIntoList(polygonToClipList, clippingPolygon);
-      ClippingTools.insertIntersectionsIntoList(clippingPolygonList, polygonToClip);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(polygonToClipList, clippingPolygon);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(clippingPolygonList, polygonToClip);
 
-      ClippingTools.linkSharedVertices(polygonToClipList, clippingPolygonList, 5e-3);
+      ConcavePolygon2DClippingTools.linkSharedVertices(polygonToClipList, clippingPolygonList, 5e-3);
 
       // gotta make the clipping list is counter clockwise
       clippingPolygonList.reverseOrder();
