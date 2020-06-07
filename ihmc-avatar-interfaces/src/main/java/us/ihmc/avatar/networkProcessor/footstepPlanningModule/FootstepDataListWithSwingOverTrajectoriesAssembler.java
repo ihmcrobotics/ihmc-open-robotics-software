@@ -1,8 +1,5 @@
 package us.ihmc.avatar.networkProcessor.footstepPlanningModule;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -20,13 +17,14 @@ import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
-import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
-import us.ihmc.humanoidRobotics.footstep.Footstep.FootstepType;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class FootstepDataListWithSwingOverTrajectoriesAssembler
 {
@@ -75,11 +73,11 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
             stanceFootPose.setToZero(humanoidReferenceFrames.getSoleFrame(footstepPlan.getFootstep(0).getRobotSide().getOppositeSide()));
          }
 
-         SimpleFootstep simpleFootstep = footstepPlan.getFootstep(i);
+         Footstep footstep = footstepPlan.getFootstep(i);
 
-         simpleFootstep.getSoleFramePose(swingEndPose);
+         footstep.getPose(swingEndPose);
 
-         FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(simpleFootstep.getRobotSide(), new Point3D(swingEndPose.getPosition()), new Quaternion(swingEndPose.getOrientation()));
+         FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(footstep.getRobotSide(), new Point3D(swingEndPose.getPosition()), new Quaternion(swingEndPose.getOrientation()));
 
          double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose, swingStartPose, swingEndPose, planarRegionsList);
          footstepDataMessage.setTrajectoryType(TrajectoryType.CUSTOM.toByte());
@@ -88,9 +86,11 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
          MessageTools.copyData(waypoints, footstepDataMessage.getCustomPositionWaypoints());
 
-         if (simpleFootstep.hasFoothold())
+         if (footstep.hasPredictedContactPoints())
          {
-            simpleFootstep.getFoothold(partialFootholdPolygon);
+            partialFootholdPolygon.clear();
+            footstep.getPredictedContactPoints().forEach(partialFootholdPolygon::addVertex);
+            partialFootholdPolygon.update();
 
             if (partialFootholdPolygon.getNumberOfVertices() != 4)
             {
@@ -152,7 +152,7 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
          MessageTools.copyData(waypoints, footstepDataMessage.getCustomPositionWaypoints());
 
-         if (footstep.getFootstepType() == FootstepType.PARTIAL_FOOTSTEP)
+         if (footstep.hasPredictedContactPoints())
          {
             partialFootholdPolygon.clear();
             partialFootholdPolygon.addVertices(Vertex2DSupplier.asVertex2DSupplier(footstep.getPredictedContactPoints()));

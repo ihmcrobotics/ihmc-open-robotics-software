@@ -158,7 +158,7 @@ public class FootstepPathCalculatorModule
          messager.submitMessage(FootstepPlanningResultTopic, output.getFootstepPlanningResult());
 
          messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse,
-                                FootstepDataMessageConverter.createFootstepDataListFromPlan(output.getFootstepPlan(), -1.0, -1.0, ExecutionMode.OVERRIDE));
+                                FootstepDataMessageConverter.createFootstepDataListFromPlan(output.getFootstepPlan(), -1.0, -1.0));
          messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanId, output.getRequestId());
          messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathData, output.getBodyPath());
 

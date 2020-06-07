@@ -44,7 +44,7 @@ import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.footstep.SimpleAdjustableFootstep;
+import us.ihmc.humanoidRobotics.footstep.SimpleFootstep;
 import us.ihmc.humanoidRobotics.model.CenterOfPressureDataHolder;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -1636,7 +1636,7 @@ public class CrossRobotCommandRandomTools
       next.setDesiredICPAtEndOfState(nextFramePoint2D(random, possibleFrames));
       next.setDesiredCenterOfMassHeightAcceleration(random.nextDouble());
       next.setFinalTransferDuration(random.nextDouble());
-      next.setFootsteps(nextRecyclingArrayList(SimpleAdjustableFootstep.class, random.nextInt(10), random, true, rootBody, possibleFrames));
+      next.setFootsteps(nextRecyclingArrayList(SimpleFootstep.class, random.nextInt(10), random, true, rootBody, possibleFrames));
       next.setSwingDurations(nextTDoubleArrayList(random, random.nextInt(10)));
       next.setTransferDurations(nextTDoubleArrayList(random, random.nextInt(10)));
       next.setInitializeForSingleSupport(random.nextBoolean());
@@ -1653,9 +1653,9 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static SimpleAdjustableFootstep nextSimpleAdjustableFootstep(Random random, ReferenceFrame... possibleFrames)
+   public static SimpleFootstep nextSimpleAdjustableFootstep(Random random, ReferenceFrame... possibleFrames)
    {
-      SimpleAdjustableFootstep next = new SimpleAdjustableFootstep();
+      SimpleFootstep next = new SimpleFootstep();
       next.setSoleFramePose(nextFramePose3D(random, possibleFrames));
       next.setRobotSide(nextElementIn(random, RobotSide.values));
       next.setFoothold(nextConvexPolygon2D(random));
