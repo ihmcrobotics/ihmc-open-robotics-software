@@ -59,7 +59,7 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
       if (numberOfFramesTopic == null)
          numberOfFramesToShow = new AtomicReference<Integer>(DEFAULT_NUMBER_OF_FRAMES);
       else
-         numberOfFramesToShow = uiMessager.createInput(numberOfFramesTopic, 10); //REAModuleAPI.UINavigationFrames
+         numberOfFramesToShow = uiMessager.createInput(numberOfFramesTopic, 10);
       uiMessager.registerTopicListener(clearTopic, (c) -> clear());
 
       meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(2048));
@@ -196,5 +196,4 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
          return new Point3D(affine.getTx(), affine.getTy(), affine.getTz());
       }
    }
-
 }
