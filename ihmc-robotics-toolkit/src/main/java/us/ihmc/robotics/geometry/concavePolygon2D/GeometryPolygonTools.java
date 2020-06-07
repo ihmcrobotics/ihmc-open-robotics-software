@@ -107,7 +107,7 @@ public class GeometryPolygonTools
       return false;
   }
 
-   public static boolean isClockwiseOrdered3D(List<? extends Point3DReadOnly> concaveHullVertices, int numberOfVertices)
+   public static boolean isClockwiseOrdered3DZUp(List<? extends Point3DReadOnly> concaveHullVertices, int numberOfVertices)
    {
       checkNumberOfVertices3D(concaveHullVertices, numberOfVertices);
 

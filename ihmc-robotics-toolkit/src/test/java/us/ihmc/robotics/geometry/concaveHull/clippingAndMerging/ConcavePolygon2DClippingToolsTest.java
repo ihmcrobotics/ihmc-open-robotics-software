@@ -4,13 +4,13 @@ import org.junit.jupiter.api.Test;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
-import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.ClippingTools;
+import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.ConcavePolygon2DClippingTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.LinkedPoint;
 import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.LinkedPointList;
 
 import static us.ihmc.robotics.Assert.*;
 
-public class ClippingToolsTest
+public class ConcavePolygon2DClippingToolsTest
 {
    @Test
    public void testCreateLinkedPointList()
@@ -23,7 +23,7 @@ public class ClippingToolsTest
       polygon.addVertex(-1.0, -1.0);
       polygon.update();
 
-      LinkedPointList pointList = ClippingTools.createLinkedPointList(polygon);
+      LinkedPointList pointList = ConcavePolygon2DClippingTools.createLinkedPointList(polygon);
       LinkedPoint point = pointList.getFirstPoint();
 
       // check the chain
@@ -44,7 +44,7 @@ public class ClippingToolsTest
       polygon.addVertex(-1.0, 0.0);
       polygon.update();
 
-      pointList = ClippingTools.createLinkedPointList(polygon);
+      pointList = ConcavePolygon2DClippingTools.createLinkedPointList(polygon);
       point = pointList.getFirstPoint();
 
       // check the chain
@@ -79,8 +79,8 @@ public class ClippingToolsTest
       polygonB.addVertex(0.5, -0.5);
       polygonB.update();
 
-      LinkedPointList pointListA = ClippingTools.createLinkedPointList(polygonA);
-      LinkedPointList pointListB = ClippingTools.createLinkedPointList(polygonB);
+      LinkedPointList pointListA = ConcavePolygon2DClippingTools.createLinkedPointList(polygonA);
+      LinkedPointList pointListB = ConcavePolygon2DClippingTools.createLinkedPointList(polygonB);
 
       ConcavePolygon2D polygonAWithIntersectionsExpected = new ConcavePolygon2D();
       polygonAWithIntersectionsExpected.addVertex(-1.0, 1.0);
@@ -100,7 +100,7 @@ public class ClippingToolsTest
       polygonBWithIntersectionsExpected.addVertex(0.5, -0.5);
       polygonBWithIntersectionsExpected.update();
 
-      ClippingTools.insertIntersectionsIntoList(pointListA, polygonB);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(pointListA, polygonB);
 
       LinkedPoint pointOnA = pointListA.getFirstPoint();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals("Failed at vertex 0" ,
@@ -128,7 +128,7 @@ public class ClippingToolsTest
       assertEquals(4, polygonAWithIntersectionsExpected.getNumberOfVertices());
       assertTrue(pointOnA == pointListA.getFirstPoint());
 
-      ClippingTools.insertIntersectionsIntoList(pointListB, polygonA);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(pointListB, polygonA);
 
       LinkedPoint pointOnB = pointListB.getFirstPoint();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals("Failed at vertex 0" ,
@@ -173,8 +173,8 @@ public class ClippingToolsTest
       clippingPolygon.addVertex(0, 1.0);
       clippingPolygon.update();
 
-      LinkedPointList pointList = ClippingTools.createLinkedPointList(polygonToClip);
-      ClippingTools.insertIntersectionsIntoList(pointList, clippingPolygon);
+      LinkedPointList pointList = ConcavePolygon2DClippingTools.createLinkedPointList(polygonToClip);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(pointList, clippingPolygon);
 
       LinkedPoint vertex = pointList.getFirstPoint();
       do
@@ -201,11 +201,11 @@ public class ClippingToolsTest
       clippingPolygon.addVertex(0.5, 0.5);
       clippingPolygon.update();
 
-      LinkedPointList listA = ClippingTools.createLinkedPointList(polygonToClip);
-      LinkedPointList listB = ClippingTools.createLinkedPointList(clippingPolygon);
+      LinkedPointList listA = ConcavePolygon2DClippingTools.createLinkedPointList(polygonToClip);
+      LinkedPointList listB = ConcavePolygon2DClippingTools.createLinkedPointList(clippingPolygon);
 
-      ClippingTools.insertIntersectionsIntoList(listA, clippingPolygon);
-      ClippingTools.insertIntersectionsIntoList(listB, polygonToClip);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(listA, clippingPolygon);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(listB, polygonToClip);
 
       LinkedPoint pointA = listA.getFirstPoint();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, 1.0), pointA.getPoint(), 1e-7);
@@ -247,8 +247,8 @@ public class ClippingToolsTest
       polygon2.addVertex(0.5, -0.5);
       polygon2.update();
 
-      LinkedPointList list = ClippingTools.createLinkedPointList(polygon1);
-      ClippingTools.insertIntersectionsIntoList(list, polygon2);
+      LinkedPointList list = ConcavePolygon2DClippingTools.createLinkedPointList(polygon1);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(list, polygon2);
 
       LinkedPoint point = list.getFirstPoint();
       point = point.getSuccessor();
@@ -281,8 +281,8 @@ public class ClippingToolsTest
       polygon2.addVertex(0.0, 0.5);
       polygon2.update();
 
-      LinkedPointList list = ClippingTools.createLinkedPointList(polygon1);
-      ClippingTools.insertIntersectionsIntoList(list, polygon2);
+      LinkedPointList list = ConcavePolygon2DClippingTools.createLinkedPointList(polygon1);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(list, polygon2);
 
       LinkedPoint point = list.getFirstPoint();
       point = point.getSuccessor();
@@ -297,8 +297,8 @@ public class ClippingToolsTest
       assertTrue(point.isPointBeforeInsideOther());
       assertFalse(point.isPointAfterInsideOther());
 
-      list = ClippingTools.createLinkedPointList(polygon2);
-      ClippingTools.insertIntersectionsIntoList(list, polygon1);
+      list = ConcavePolygon2DClippingTools.createLinkedPointList(polygon2);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(list, polygon1);
       point = list.getFirstPoint();
       point = point.getSuccessor();
       point = point.getSuccessor();
@@ -331,8 +331,8 @@ public class ClippingToolsTest
       polygon2.addVertex(0.0, 1.0);
       polygon2.update();
 
-      LinkedPointList list = ClippingTools.createLinkedPointList(polygon1);
-      ClippingTools.insertIntersectionsIntoList(list, polygon2);
+      LinkedPointList list = ConcavePolygon2DClippingTools.createLinkedPointList(polygon1);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(list, polygon2);
 
       LinkedPoint point = list.getFirstPoint();
       point = point.getSuccessor();
@@ -341,8 +341,8 @@ public class ClippingToolsTest
       assertFalse(point.isPointAfterInsideOther());
       assertFalse(point.isPointBeforeInsideOther());
 
-      list = ClippingTools.createLinkedPointList(polygon2);
-      ClippingTools.insertIntersectionsIntoList(list, polygon1);
+      list = ConcavePolygon2DClippingTools.createLinkedPointList(polygon2);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(list, polygon1);
       point = list.getFirstPoint();
       point = point.getSuccessor();
       point = point.getSuccessor();
@@ -373,8 +373,8 @@ public class ClippingToolsTest
       hat.addVertex(-1.0, 0.9);
       hat.update();
 
-      LinkedPointList list = ClippingTools.createLinkedPointList(uPolygon);
-      ClippingTools.insertIntersectionsIntoList(list, hat);
+      LinkedPointList list = ConcavePolygon2DClippingTools.createLinkedPointList(uPolygon);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(list, hat);
 
       LinkedPoint point = list.getFirstPoint();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, 1.0), point.getPoint(), 1e-7);
@@ -407,8 +407,8 @@ public class ClippingToolsTest
       assertFalse(point.isPointBeforeInsideOther());
 
       // TODO do the other side
-      list = ClippingTools.createLinkedPointList(hat);
-      ClippingTools.insertIntersectionsIntoList(list, uPolygon);
+      list = ConcavePolygon2DClippingTools.createLinkedPointList(hat);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(list, uPolygon);
 
       point = list.getFirstPoint();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, 1.0), point.getPoint(), 1e-7);
@@ -484,8 +484,8 @@ public class ClippingToolsTest
       mergedPolygonExpected.addVertex(-1.0, -1.0);
       mergedPolygonExpected.update();
 
-      LinkedPointList list = ClippingTools.createLinkedPointList(polygonA);
-      ClippingTools.insertIntersectionsIntoList(list, polygonB);
+      LinkedPointList list = ConcavePolygon2DClippingTools.createLinkedPointList(polygonA);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(list, polygonB);
 
       LinkedPoint point = list.getFirstPoint();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(point.getPoint(), new Point2D(-1.0, 1.0), 1e-7);
@@ -519,8 +519,8 @@ public class ClippingToolsTest
       polygon2.addVertex(-0.1, -1.0);
       polygon2.update();
 
-      LinkedPointList list = ClippingTools.createLinkedPointList(polygon1);
-      ClippingTools.insertIntersectionsIntoList(list, polygon2);
+      LinkedPointList list = ConcavePolygon2DClippingTools.createLinkedPointList(polygon1);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(list, polygon2);
 
       LinkedPoint point = list.getFirstPoint();
       point = point.getSuccessor();
@@ -569,8 +569,8 @@ public class ClippingToolsTest
       polygon2.addVertex(0.5, 0.5);
       polygon2.update();
 
-      LinkedPointList list = ClippingTools.createLinkedPointList(polygon1);
-      ClippingTools.insertIntersectionsIntoList(list, polygon2);
+      LinkedPointList list = ConcavePolygon2DClippingTools.createLinkedPointList(polygon1);
+      ConcavePolygon2DClippingTools.insertIntersectionsIntoList(list, polygon2);
 
       LinkedPoint point = list.getFirstPoint();
       EuclidCoreTestTools.assertPoint2DGeometricallyEquals(new Point2D(-1.0, 1.0), point.getPoint(), 1e-7);

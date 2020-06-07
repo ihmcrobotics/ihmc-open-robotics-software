@@ -7,21 +7,14 @@ class IntersectionInfo
 {
    private final IntersectionType type;
    private final Point2DReadOnly intersection;
-   private final Point2DReadOnly startVertexOfIntersectingEdge;
-   private final Point2DReadOnly endVertexOfIntersectingEdge;
 
-   public IntersectionInfo(IntersectionType type,
-                           Point2DReadOnly intersection,
-                           Point2DReadOnly startVertexOfIntersectingEdge,
-                           Point2DReadOnly endVertexOfIntersectingEdge)
+   public IntersectionInfo(IntersectionType type, Point2DReadOnly intersection)
    {
       this.type = type;
       if (intersection != null)
          this.intersection = new Point2D(intersection);
       else
          this.intersection = null;
-      this.startVertexOfIntersectingEdge = startVertexOfIntersectingEdge;
-      this.endVertexOfIntersectingEdge = endVertexOfIntersectingEdge;
    }
 
    public IntersectionType getIntersectionType()
@@ -34,16 +27,12 @@ class IntersectionInfo
       return intersection;
    }
 
-   public Point2DReadOnly getStartVertexOfIntersectingEdge()
-   {
-      return startVertexOfIntersectingEdge;
-   }
-
-   public Point2DReadOnly getEndVertexOfIntersectingEdge()
-   {
-      return endVertexOfIntersectingEdge;
-   }
-
+   /**
+    * Defines the type of intersection that this represents. If it's at the end of an edge, this means that it occurs at a pre-existing vertex.
+    * END: Intersection occurs at a pre-existing vertex, meaning it's at one end of a line-segment.
+    * NEW: Intersection occurs somewhere along the line-segment.
+    * NONE: There is no intersection.
+    */
    enum IntersectionType
    {END, NEW, NONE}
 }

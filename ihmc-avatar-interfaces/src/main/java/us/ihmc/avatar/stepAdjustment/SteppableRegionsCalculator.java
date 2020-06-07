@@ -341,7 +341,9 @@ public class SteppableRegionsCalculator
       return constraintRegions;
    }
 
-   /** Returns whether or not it should be removed from this list **/
+   /**
+    * Returns whether or not it should be removed from this list
+    **/
    private boolean applyExtrusionClip(ConcavePolygon2DReadOnly clippingPolygon, List<ConcavePolygon2DBasics> polygonsToModify)
    {
       boolean doesNotIntersect = polygonsToModify.stream().noneMatch(region -> GeometryPolygonTools.doPolygonsIntersect(clippingPolygon, region));
@@ -402,9 +404,8 @@ public class SteppableRegionsCalculator
       List<Point3DReadOnly> obstacleClustersInWorld = new ArrayList<>();
       ClusterTools.calculatePointsInWorldAtRegionHeight(concaveHull, transformFromObstacleToWorld, homeRegion, null, obstacleClustersInWorld);
 
-      if (!GeometryPolygonTools.isClockwiseOrdered3D(obstacleClustersInWorld, obstacleClustersInWorld.size()))
+      if (!GeometryPolygonTools.isClockwiseOrdered3DZUp(obstacleClustersInWorld, obstacleClustersInWorld.size()))
          Collections.reverse(obstacleClustersInWorld);
-
 
       Vector3DReadOnly obstacleNormal = obstacleRegion.getNormal();
       boolean isObstacleWall = Math.abs(obstacleNormal.getZ()) < zThresholdBeforeOrthogonal;
