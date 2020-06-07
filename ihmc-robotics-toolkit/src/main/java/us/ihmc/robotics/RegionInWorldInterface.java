@@ -1,11 +1,12 @@
 package us.ihmc.robotics;
 
 import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Plane3DReadOnly;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 
-public interface RegionInWorldInterface<T extends RegionInWorldInterface>
+public interface RegionInWorldInterface<T extends RegionInWorldInterface> extends Plane3DReadOnly
 {
    int getRegionId();
 
@@ -22,12 +23,18 @@ public interface RegionInWorldInterface<T extends RegionInWorldInterface>
    /**
     * Returns the origin of the region in the world.
     */
-   void getOrigin(Point3DBasics originToPack);
+   default void getOrigin(Point3DBasics originToPack)
+   {
+      originToPack.set(getPoint());
+   }
 
    /**
     * Returns the normal of the region relative to the world.
     */
-   void getNormal(Vector3DBasics normalToPack);
+   default void getNormal(Vector3DBasics normalToPack)
+   {
+      normalToPack.set(getNormal());
+   }
 
    /**
     * Checks to see if a point defined in the region frame is within the region bounds.

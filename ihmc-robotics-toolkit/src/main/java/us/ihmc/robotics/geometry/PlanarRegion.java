@@ -19,10 +19,7 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.*;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.RegionInWorldInterface;
@@ -60,15 +57,77 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
+   private final Point3DReadOnly origin = new Point3DReadOnly()
+   {
+      @Override
+      public double getX()
+      {
+         return fromLocalToWorldTransform.getM03();
+      }
+
+      @Override
+      public double getY()
+      {
+         return fromLocalToWorldTransform.getM13();
+      }
+
+      @Override
+      public double getZ()
+      {
+         return fromLocalToWorldTransform.getM23();
+      }
+   };
+   private final UnitVector3DReadOnly normal = new UnitVector3DReadOnly()
+   {
+      @Override
+      public double getX()
+      {
+         return getRawX();
+      }
+
+      @Override
+      public double getY()
+      {
+         return getRawY();
+      }
+
+      @Override
+      public double getZ()
+      {
+         return getRawZ();
+      }
+
+      @Override
+      public double getRawX()
+      {
+         return fromLocalToWorldTransform.getM02();
+      }
+
+      @Override
+      public double getRawY()
+      {
+         return fromLocalToWorldTransform.getM12();
+      }
+
+      @Override
+      public double getRawZ()
+      {
+         return fromLocalToWorldTransform.getM22();
+      }
+
+      @Override
+      public boolean isDirty()
+      {
+         return false;
+      }
+   };
+
    /**
     * Create a new, empty planar region.
     */
    public PlanarRegion()
    {
-      convexPolygons = new ArrayList<>();
-      concaveHullsVertices = new ArrayList<>();
-      updateBoundingBox();
-      updateConvexHull();
+      this(new RigidBodyTransform(), new ArrayList<>());
    }
 
    /**
@@ -80,14 +139,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     */
    public PlanarRegion(RigidBodyTransform transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons)
    {
-      fromLocalToWorldTransform.set(transformToWorld);
-      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
-      convexPolygons = planarRegionConvexPolygons;
-      updateBoundingBox();
-      updateConvexHull();
-
-      concaveHullsVertices = new ArrayList<>();
-      updateConcaveHull();
+      this(transformToWorld, new ArrayList<>(), planarRegionConvexPolygons);
    }
    
    /**
@@ -866,35 +918,18 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
          return pollConvexPolygon(getNumberOfConvexPolygons() - 1);
    }
 
-   /**
-    * Retrieves and returns a copy of the normal in world frame of this planar region.
-    */
-   public Vector3D getNormal()
+   /** {@inheritDoc} */
+   @Override
+   public Point3DReadOnly getPoint()
    {
-      Vector3D normal = new Vector3D();
-      getNormal(normal);
+      return origin;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public UnitVector3DReadOnly getNormal()
+   {
       return normal;
-   }
-
-   /**
-    * Retrieves the normal of this planar region in the world frame and stores it in the given {@link Vector3D}.
-    *
-    * @param normalToPack used to store the normal of this planar region.
-    */
-   public void getNormal(Vector3DBasics normalToPack)
-   {
-      normalToPack.setX(fromLocalToWorldTransform.getM02());
-      normalToPack.setY(fromLocalToWorldTransform.getM12());
-      normalToPack.setZ(fromLocalToWorldTransform.getM22());
-   }
-
-   /**
-    * Retrieves the origin of this planar region in the world frame and stores it in the given {@link Point3D}.
-    * @param originToPack
-    */
-   public void getOrigin(Point3DBasics originToPack)
-   {
-      originToPack.set(fromLocalToWorldTransform.getM03(), fromLocalToWorldTransform.getM13(), fromLocalToWorldTransform.getM23());
    }
 
    /**
