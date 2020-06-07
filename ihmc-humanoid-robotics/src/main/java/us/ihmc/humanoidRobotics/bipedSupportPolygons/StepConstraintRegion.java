@@ -11,10 +11,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.*;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.RegionInWorldInterface;
 import us.ihmc.robotics.geometry.PlanarRegion;
@@ -40,6 +37,71 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
    private final Point3D tempPointForConvexPolygonProjection = new Point3D();
 
    private int regionId = -1;
+
+   private final Point3DReadOnly origin = new Point3DReadOnly()
+   {
+      @Override
+      public double getX()
+      {
+         return fromLocalToWorldTransform.getM03();
+      }
+
+      @Override
+      public double getY()
+      {
+         return fromLocalToWorldTransform.getM13();
+      }
+
+      @Override
+      public double getZ()
+      {
+         return fromLocalToWorldTransform.getM23();
+      }
+   };
+   private final UnitVector3DReadOnly normal = new UnitVector3DReadOnly()
+   {
+      @Override
+      public double getX()
+      {
+         return getRawX();
+      }
+
+      @Override
+      public double getY()
+      {
+         return getRawY();
+      }
+
+      @Override
+      public double getZ()
+      {
+         return getRawZ();
+      }
+
+      @Override
+      public double getRawX()
+      {
+         return fromLocalToWorldTransform.getM02();
+      }
+
+      @Override
+      public double getRawY()
+      {
+         return fromLocalToWorldTransform.getM12();
+      }
+
+      @Override
+      public double getRawZ()
+      {
+         return fromLocalToWorldTransform.getM22();
+      }
+
+      @Override
+      public boolean isDirty()
+      {
+         return false;
+      }
+   };
 
    public StepConstraintRegion()
    {
@@ -211,16 +273,18 @@ public class StepConstraintRegion implements RegionInWorldInterface<StepConstrai
       return fromWorldToLocalTransform;
    }
 
-   public void getNormal(Vector3DBasics normalToPack)
+   /** {@inheritDoc} */
+   @Override
+   public Point3DReadOnly getPoint()
    {
-      normalToPack.setX(fromLocalToWorldTransform.getM02());
-      normalToPack.setY(fromLocalToWorldTransform.getM12());
-      normalToPack.setZ(fromLocalToWorldTransform.getM22());
+      return origin;
    }
 
-   public void getOrigin(Point3DBasics originToPack)
+   /** {@inheritDoc} */
+   @Override
+   public UnitVector3DReadOnly getNormal()
    {
-      originToPack.set(fromLocalToWorldTransform.getM03(), fromLocalToWorldTransform.getM13(), fromLocalToWorldTransform.getM23());
+      return normal;
    }
 
    public ConcavePolygon2DReadOnly getConcaveHull()
