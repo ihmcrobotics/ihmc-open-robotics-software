@@ -11,8 +11,6 @@ import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
 
 public class AtlasSLAMBasedREAStandaloneLauncher extends Application
 {
-   private static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAModuleConfiguration.txt";
-
    private SLAMBasedEnvironmentAwarenessUI ui;
    private AtlasSLAMModule module;
 
@@ -20,9 +18,9 @@ public class AtlasSLAMBasedREAStandaloneLauncher extends Application
    public void start(Stage primaryStage) throws Exception
    {
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT, false);
-      
+
       ui = SLAMBasedEnvironmentAwarenessUI.creatIntraprocessUI(primaryStage);
-      module = AtlasSLAMModule.createIntraprocessModule(drcRobotModel, MODULE_CONFIGURATION_FILE_NAME);
+      module = AtlasSLAMModule.createIntraprocessModule(drcRobotModel);
 
       ui.show();
       module.start();

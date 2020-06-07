@@ -1,6 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.concurrent.ScheduledExecutorService;
@@ -22,7 +21,6 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
@@ -59,7 +57,7 @@ public class SLAMModule
 
    private final RandomICPSLAM slam = new RandomICPSLAM(DEFAULT_OCTREE_RESOLUTION);
 
-   private ScheduledExecutorService executorService = ExecutorServiceTools.newSingleThreadScheduledExecutor(getClass(), ExceptionHandling.CATCH_AND_REPORT);
+   private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private static final int THREAD_PERIOD_MILLISECONDS = 1;
    private ScheduledFuture<?> scheduledMain;
    private ScheduledFuture<?> scheduledSLAM;
@@ -72,14 +70,19 @@ public class SLAMModule
 
    private final AtomicReference<Boolean> robotStatus;
    private final AtomicReference<Boolean> velocityStatus;
+
+   /**
+    * to update corrected sensor frame for robot state estimation.
+    */
    protected final AtomicLong latestRobotTimeStamp = new AtomicLong();
    protected IHMCROS2Publisher<StampedPosePacket> estimatedPelvisPublisher = null;
    protected RigidBodyTransform sensorPoseToPelvisTransformer = null;
 
-   public SLAMModule(Messager messager, File configurationFile)
+   public SLAMModule(Messager messager)
    {
       this.reaMessager = messager;
 
+      // TODO: Check name space and fix. Suspected atlas sensor suite and publisher.
       ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud", this::handlePointCloud);
       ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud_D435", this::handlePointCloud);
 
@@ -306,7 +309,7 @@ public class SLAMModule
       reaMessager.submitMessage(SLAMModuleAPI.DepthPointCloudState, new StereoVisionPointCloudMessage(message));
    }
 
-   public static SLAMModule createIntraprocessModule(String configurationFilePath) throws Exception
+   public static SLAMModule createIntraprocessModule() throws Exception
    {
       KryoMessager messager = KryoMessager.createIntraprocess(SLAMModuleAPI.API,
                                                               NetworkPorts.SLAM_MODULE_UI_PORT,
@@ -314,18 +317,6 @@ public class SLAMModule
       messager.setAllowSelfSubmit(true);
       messager.startMessager();
 
-      File configurationFile = new File(configurationFilePath);
-      try
-      {
-         configurationFile.getParentFile().mkdirs();
-         configurationFile.createNewFile();
-      }
-      catch (IOException e)
-      {
-         System.out.println(configurationFile.getAbsolutePath());
-         e.printStackTrace();
-      }
-
-      return new SLAMModule(messager, configurationFile);
+      return new SLAMModule(messager);
    }
 }
