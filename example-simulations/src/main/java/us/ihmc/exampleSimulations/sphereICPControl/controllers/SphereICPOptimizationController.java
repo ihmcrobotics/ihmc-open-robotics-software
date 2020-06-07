@@ -290,7 +290,7 @@ public class SphereICPOptimizationController implements GenericSphereController
 
    private final FootstepTiming timing = new FootstepTiming();
    private final FootstepShiftFractions shiftFractions = new FootstepShiftFractions();
-   private final SimpleAdjustableFootstep footstep = new SimpleAdjustableFootstep();
+   private final SimpleFootstep footstep = new SimpleFootstep();
 
    private class SingleSupportState implements State
    {
