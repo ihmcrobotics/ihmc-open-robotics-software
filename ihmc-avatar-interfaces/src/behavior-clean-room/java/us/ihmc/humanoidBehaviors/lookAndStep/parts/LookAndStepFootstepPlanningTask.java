@@ -57,19 +57,36 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    protected final Field<Runnable> planningFailedNotifier = required();
    protected final Field<Consumer<LookAndStepBehavior.State>> behaviorStateUpdater = required();
 
-   private final Field<PlanarRegionsList> planarRegions = requiredChanging();
-   private final Field<TimerSnapshot> planarRegionReceptionTimerSnapshot = requiredChanging();
-   private final Field<TimerSnapshot> planningFailureTimerSnapshot = requiredChanging();
-   private final Field<List<? extends Pose3DReadOnly>> bodyPathPlan = requiredChanging();
-   private final Field<HumanoidRobotState> robotState = requiredChanging();
-   private final Field<RobotSide> lastStanceSide = requiredChanging();
-   private final Field<LookAndStepBehavior.State> behaviorState = requiredChanging();
+   private PlanarRegionsList planarRegions;
+   private TimerSnapshot planarRegionReceptionTimerSnapshot;
+   private TimerSnapshot planningFailureTimerSnapshot;
+   private List<? extends Pose3DReadOnly> bodyPathPlan;
+   private HumanoidRobotState robotState;
+   private RobotSide lastStanceSide;
+   private LookAndStepBehavior.State behaviorState;
+
+   protected void update(PlanarRegionsList planarRegions,
+                         TimerSnapshot planarRegionReceptionTimerSnapshot,
+                         TimerSnapshot planningFailureTimerSnapshot,
+                         List<? extends Pose3DReadOnly> bodyPathPlan,
+                         HumanoidRobotState robotState,
+                         RobotSide lastStanceSide,
+                         LookAndStepBehavior.State behaviorState)
+   {
+      this.planarRegions = planarRegions;
+      this.planarRegionReceptionTimerSnapshot = planarRegionReceptionTimerSnapshot;
+      this.planningFailureTimerSnapshot = planningFailureTimerSnapshot;
+      this.bodyPathPlan = bodyPathPlan;
+      this.robotState = robotState;
+      this.lastStanceSide = lastStanceSide;
+      this.behaviorState = behaviorState;
+   }
 
    private boolean evaluateEntry()
    {
       boolean proceed = true;
 
-      if (!behaviorState.get().equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING))
+      if (!behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING))
       {
          LogTools.warn("Footstep planning supressed: Not in footstep planning state");
          proceed = false;
@@ -77,20 +94,20 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       else if (!regionsOK())
       {
          LogTools.warn("Footstep planning suppressed: Regions not OK: {}, timePassed: {}, isEmpty: {}",
-                       planarRegions.get(),
-                       planarRegionReceptionTimerSnapshot.get().getTimePassedSinceReset(),
-                       planarRegions.get() == null ? null : planarRegions.get().isEmpty());
+                       planarRegions,
+                       planarRegionReceptionTimerSnapshot.getTimePassedSinceReset(),
+                       planarRegions == null ? null : planarRegions.isEmpty());
 
          proceed = false;
       }
-      else if (planningFailureTimerSnapshot.get().isRunning())
+      else if (planningFailureTimerSnapshot.isRunning())
       {
          LogTools.warn("Footstep planning suppressed: Planning failed recently");
          proceed = false;
       }
       else if (!bodyPathPlanOK())
       {
-         LogTools.warn("Footstep planning suppressed: Body path size: {}", bodyPathPlan.get() == null ? null : bodyPathPlan.get().size());
+         LogTools.warn("Footstep planning suppressed: Body path size: {}", bodyPathPlan == null ? null : bodyPathPlan.size());
          proceed = false;
       }
       else if (isBeingReviewedSupplier.get().get())
@@ -109,26 +126,26 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
 
    private boolean regionsOK()
    {
-      return planarRegions.get() != null && !planarRegions.get().isEmpty() && planarRegionReceptionTimerSnapshot.get().isRunning();
+      return planarRegions != null && !planarRegions.isEmpty() && planarRegionReceptionTimerSnapshot.isRunning();
    }
 
    private boolean bodyPathPlanOK()
    {
-      return bodyPathPlan.get() != null && !bodyPathPlan.get().isEmpty(); // are these null checks necessary?
+      return bodyPathPlan != null && !bodyPathPlan.isEmpty(); // are these null checks necessary?
    }
 
    private void performTask()
    {
       LogTools.info("Finding next sub goal for footstep planning...");
-      uiPublisher.get().publishToUI(MapRegionsForUI, planarRegions.get());
+      uiPublisher.get().publishToUI(MapRegionsForUI, planarRegions);
 
       FramePose3D initialPoseBetweenFeet = new FramePose3D();
-      initialPoseBetweenFeet.setToZero(robotState.get().getMidFeetZUpFrame());
+      initialPoseBetweenFeet.setToZero(robotState.getMidFeetZUpFrame());
       initialPoseBetweenFeet.changeFrame(ReferenceFrame.getWorldFrame());
       double midFeetZ = initialPoseBetweenFeet.getZ();
 
       FramePose3D pelvisPose = new FramePose3D();
-      pelvisPose.setToZero(robotState.get().getPelvisFrame());
+      pelvisPose.setToZero(robotState.getPelvisFrame());
       pelvisPose.changeFrame(ReferenceFrame.getWorldFrame());
 
       FramePose3D goalPoseBetweenFeet = new FramePose3D();
@@ -137,19 +154,19 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
 
       // find closest point along body path plan
       Point3D closestPointAlongPath = new Point3D();
-      int closestSegmentIndex = BodyPathPlannerTools.findClosestPointAlongPath(bodyPathPlan.get(), goalPoseBetweenFeet.getPosition(), closestPointAlongPath);
+      int closestSegmentIndex = BodyPathPlannerTools.findClosestPointAlongPath(bodyPathPlan, goalPoseBetweenFeet.getPosition(), closestPointAlongPath);
 
       uiPublisher.get().publishToUI(ClosestPointForUI, new Pose3D(closestPointAlongPath, new Quaternion()));
 
       // move point along body path plan by plan horizon
       Point3D goalPoint = new Point3D();
-      int segmentIndexOfGoal = BodyPathPlannerTools.movePointAlongBodyPath(bodyPathPlan.get(),
+      int segmentIndexOfGoal = BodyPathPlannerTools.movePointAlongBodyPath(bodyPathPlan,
                                                                            closestPointAlongPath,
                                                                            goalPoint,
                                                                            closestSegmentIndex,
                                                                            lookAndStepBehaviorParameters.get().getPlanHorizon());
 
-      Pose3DReadOnly terminalGoal = bodyPathPlan.get().get(bodyPathPlan.get().size() - 1);
+      Pose3DReadOnly terminalGoal = bodyPathPlan.get(bodyPathPlan.size() - 1);
       boolean reachedGoal = closestPointAlongPath.distanceXY(goalPoint) < lookAndStepBehaviorParameters.get().getGoalSatisfactionRadius();
       reachedGoal &= Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(pelvisPose.getYaw(), terminalGoal.getYaw())) < lookAndStepBehaviorParameters.get().getGoalSatisfactionOrientationDelta();
       if (reachedGoal)
@@ -183,7 +200,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       //      LogTools.info("Setting yaw: {}", yaw);
       //      goalPoseBetweenFeet.getOrientation().setYawPitchRoll(yaw, 0.0, 0.0);
 
-      goalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get().get(segmentIndexOfGoal + 1).getOrientation());
+      goalPoseBetweenFeet.getOrientation().set(bodyPathPlan.get(segmentIndexOfGoal + 1).getOrientation());
 
       // update last stepped poses to plan from; initialize to current poses
 
@@ -194,7 +211,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
          FramePose3DReadOnly lastSteppedSolePose = lastSteppedSolePoseSupplier.get().apply(side);
          if (lastSteppedSolePose == null)
          {
-            FramePose3D soleFrameZUpPose = new FramePose3D(robotState.get().getSoleZUpFrame(side));
+            FramePose3D soleFrameZUpPose = new FramePose3D(robotState.getSoleZUpFrame(side));
             soleFrameZUpPose.changeFrame(ReferenceFrame.getWorldFrame());
             lastSteppedSolePose = soleFrameZUpPose;
             lastSteppedSolePoseConsumer.get().accept(side, lastSteppedSolePose);
@@ -206,9 +223,9 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       uiPublisher.get().publishToUI(StartAndGoalFootPosesForUI, startFootPosesForUI);
 
       RobotSide stanceSide;
-      if (lastStanceSide.get() != null)
+      if (lastStanceSide != null)
       {
-         stanceSide = lastStanceSide.get().getOppositeSide();
+         stanceSide = lastStanceSide.getOppositeSide();
       }
       else // if first step, step with furthest foot from the goal
       {
@@ -232,7 +249,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       footstepPlannerRequest.setRequestedInitialStanceSide(stanceSide);
       footstepPlannerRequest.setStartFootPoses(startFootPoses.get(RobotSide.LEFT), startFootPoses.get(RobotSide.RIGHT));
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.get().getIdealFootstepWidth(), goalPoseBetweenFeet);
-      footstepPlannerRequest.setPlanarRegionsList(planarRegions.get());
+      footstepPlannerRequest.setPlanarRegionsList(planarRegions);
       footstepPlannerRequest.setTimeout(lookAndStepBehaviorParameters.get().getFootstepPlannerTimeout());
 
       footstepPlanningModule.get().getFootstepPlannerParameters().set(footstepPlannerParameters.get());
@@ -259,7 +276,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
          uiPublisher.get().publishToUI(FootstepPlanForUI, FootstepForUI.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "Planned"));
       }
 
-      RobotWalkRequest robotWalkRequest = new RobotWalkRequest(footstepPlannerOutput.getFootstepPlan(), planarRegions.get());
+      RobotWalkRequest robotWalkRequest = new RobotWalkRequest(footstepPlannerOutput.getFootstepPlan(), planarRegions);
 
       if (operatorReviewEnabledSupplier.get().get())
       {
@@ -282,31 +299,6 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       }
 
       invalidateChanging();
-   }
-
-   protected void setPlanarRegions(PlanarRegionsList planarRegions)
-   {
-      this.planarRegions.set(planarRegions);
-   }
-
-   protected void setPlanarRegionReceptionTimerSnapshot(TimerSnapshot planarRegionReceptionTimerSnapshot)
-   {
-      this.planarRegionReceptionTimerSnapshot.set(planarRegionReceptionTimerSnapshot);
-   }
-
-   protected void setPlanningFailureTimerSnapshot(TimerSnapshot planningFailureTimerSnapshot)
-   {
-      this.planningFailureTimerSnapshot.set(planningFailureTimerSnapshot);
-   }
-
-   protected void setBodyPathPlan(List<? extends Pose3DReadOnly> bodyPathPlan)
-   {
-      this.bodyPathPlan.set(bodyPathPlan);
-   }
-
-   protected void setRobotState(HumanoidRobotState robotState)
-   {
-      this.robotState.set(robotState);
    }
 
    public void setIsBeingReviewedSupplier(Supplier<Boolean> isBeingReviewedSupplier)
@@ -359,11 +351,6 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       this.lastSteppedSolePoseConsumer.set(lastSteppedSolePoseConsumer);
    }
 
-   protected void setLastStanceSide(RobotSide lastStanceSide)
-   {
-      this.lastStanceSide.set(lastStanceSide);
-   }
-
    public void setLastStanceSideSetter(Consumer<RobotSide> lastStanceSideSetter)
    {
       this.lastStanceSideSetter.set(lastStanceSideSetter);
@@ -397,10 +384,5 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    public void setBehaviorStateUpdater(Consumer<LookAndStepBehavior.State> behaviorStateUpdater)
    {
       this.behaviorStateUpdater.set(behaviorStateUpdater);
-   }
-
-   protected void setBehaviorState(LookAndStepBehavior.State behaviorState)
-   {
-      this.behaviorState.set(behaviorState);
    }
 }

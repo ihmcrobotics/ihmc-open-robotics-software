@@ -14,6 +14,10 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import java.util.List;
 import java.util.function.Supplier;
 
+/**
+ * Needs to be set up as a machine that:
+ * - Calls task update as a predefined llambda
+ */
 public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanningTask
 {
    private Field<Supplier<HumanoidRobotState>> robotStateSupplier = required();
@@ -50,13 +54,13 @@ public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanni
    {
       validateNonChanging();
 
-      setPlanarRegions(planarRegionsInput.get());
-      setBodyPathPlan(bodyPathPlanInput.get());
-      setRobotState(robotStateSupplier.get().get());
-      setLastStanceSide(lastStanceSideSupplier.get().get());
-      setPlanarRegionReceptionTimerSnapshot(planarRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.get().getPlanarRegionsExpiration()));
-      setPlanningFailureTimerSnapshot(planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.get().getWaitTimeAfterPlanFailed()));
-      setBehaviorState(behaviorStateSupplier.get().get());
+      update(planarRegionsInput.get(),
+             planarRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.get().getPlanarRegionsExpiration()),
+             planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.get().getWaitTimeAfterPlanFailed()),
+             bodyPathPlanInput.get(),
+             robotStateSupplier.get().get(),
+             lastStanceSideSupplier.get().get(),
+             behaviorStateSupplier.get().get());
 
       run();
    }
