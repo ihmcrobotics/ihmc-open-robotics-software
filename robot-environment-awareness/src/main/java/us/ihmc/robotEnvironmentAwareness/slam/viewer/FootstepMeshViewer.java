@@ -6,6 +6,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
+import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -17,7 +18,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class FootstepMeshViewer implements Runnable
+public class FootstepMeshViewer extends AnimationTimer
 {
    private final static int MAXIMUM_NUMBER_OF_FOOTSTEPS_TO_VIZ = 200;
 
@@ -51,6 +52,13 @@ public class FootstepMeshViewer implements Runnable
       }
 
       uiMessager.registerTopicListener(showviz, show -> footstepMesheManagers.forEach(mesh -> mesh.getMeshHolder().getMeshView().setVisible(show)));
+      uiMessager.registerModuleMessagerStateListener(isMessagerOpen ->
+      {
+         if (isMessagerOpen)
+            start();
+         else
+            stop();
+      });
    }
 
    public void render()
@@ -78,18 +86,6 @@ public class FootstepMeshViewer implements Runnable
       footstepMesheManagers.get(index).setFootstepDataMessage(footstepDataMessage);
    }
 
-   @Override
-   public void run()
-   {
-      if (!enable.get())
-         return;
-
-      if (newFootstepDataMessage.get() == null)
-         return;
-
-      addFootstepDataMessage(newFootstepDataMessage.getAndSet(null));
-   }
-
    public void clear()
    {
       for (int i = 0; i < footstepMesheManagers.size(); i++)
@@ -102,5 +98,17 @@ public class FootstepMeshViewer implements Runnable
    public Node getRoot()
    {
       return root;
+   }
+
+   @Override
+   public void handle(long arg0)
+   {
+      if (!enable.get())
+         return;
+
+      if (newFootstepDataMessage.get() == null)
+         return;
+
+      addFootstepDataMessage(newFootstepDataMessage.getAndSet(null));
    }
 }
