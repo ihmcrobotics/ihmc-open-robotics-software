@@ -89,7 +89,7 @@ public class FootstepMeshManager
    
    public void setIgnorePartialFootHolds(boolean doIgnore)
    {
-      
+      ignorePartialFootholds.set(doIgnore);
    }
    
    public void setSelected(boolean selected)
