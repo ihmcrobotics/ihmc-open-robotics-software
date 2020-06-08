@@ -38,7 +38,7 @@ public class SLAMMeshViewer
    private final MeshView planarRegionMeshView = new MeshView();
    private final MeshView importedPlanarRegionMeshView = new MeshView();
 
-   private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(4, getClass(), ExceptionHandling.CANCEL_AND_REPORT);
+   private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(5, getClass(), ExceptionHandling.CANCEL_AND_REPORT);
    private final AnimationTimer renderMeshAnimation;
 
    private final PlanarRegionsMeshBuilder planarRegionsMeshBuilder;
