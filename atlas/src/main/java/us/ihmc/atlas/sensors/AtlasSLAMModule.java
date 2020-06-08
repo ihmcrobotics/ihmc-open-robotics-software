@@ -45,18 +45,13 @@ public class AtlasSLAMModule extends SLAMModule
    {
       super(messager);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    RobotConfigurationData.class,
-                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()),
-                                                    this::handleRobotConfigurationData);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, RobotConfigurationData.class,
+                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()), this::handleRobotConfigurationData);
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
-                                                    FootstepStatusMessage.class,
-                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()),
-                                                    this::handleFootstepStatusMessage);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepStatusMessage.class,
+                                                    ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()), this::handleFootstepStatusMessage);
 
-      estimatedPelvisPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                    StampedPosePacket.class,
+      estimatedPelvisPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, StampedPosePacket.class,
                                                                     ROS2Tools.getControllerOutputTopic(drcRobotModel.getSimpleRobotName()));
       sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToDepthCamera);
       sensorPoseToPelvisTransformer.invert();
@@ -172,47 +167,52 @@ public class AtlasSLAMModule extends SLAMModule
       RobotConfigurationData robotConfigurationData = subscriber.takeNextData();
       latestRobotTimeStamp.set(robotConfigurationData.getMonotonicTime());
 
-      if (robotConfigurationData.getPelvisLinearVelocity().lengthSquared() < PELVIS_VELOCITY_STATIONARY_THRESHOLD)
+      if (reaMessager.isMessagerOpen())
       {
-         reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, true);
-      }
-      else
-      {
-         reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, false);
-      }
+         if (robotConfigurationData.getPelvisLinearVelocity().lengthSquared() < PELVIS_VELOCITY_STATIONARY_THRESHOLD)
+         {
+            reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, true);
+         }
+         else
+         {
+            reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, false);
+         }
 
-      if (robotConfigurationData.getPelvisLinearVelocity().lengthSquared() < TOLERANCE_PELVIS_VELOCITY)
-      {
-         reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, true);
-      }
-      else
-      {
-         reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, false);
+         if (robotConfigurationData.getPelvisLinearVelocity().lengthSquared() < TOLERANCE_PELVIS_VELOCITY)
+         {
+            reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, true);
+         }
+         else
+         {
+            reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, false);
+         }
       }
    }
 
    private void handleFootstepStatusMessage(Subscriber<FootstepStatusMessage> subscriber)
    {
       FootstepStatusMessage footstepStatusMessage = subscriber.takeNextData();
-      if (footstepStatusMessage.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
+      if (reaMessager.isMessagerOpen())
       {
-         reaMessager.submitMessage(SLAMModuleAPI.ShowFootstepDataViz, true);
-         RobotSide robotSide = RobotSide.fromByte(footstepStatusMessage.getRobotSide());
-         Point3DReadOnly footLocation = footstepStatusMessage.getActualFootPositionInWorld();
-         QuaternionReadOnly footOrientation = footstepStatusMessage.getActualFootOrientationInWorld();
+         if (footstepStatusMessage.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
+         {
+            reaMessager.submitMessage(SLAMModuleAPI.ShowFootstepDataViz, true);
+            RobotSide robotSide = RobotSide.fromByte(footstepStatusMessage.getRobotSide());
+            Point3DReadOnly footLocation = footstepStatusMessage.getActualFootPositionInWorld();
+            QuaternionReadOnly footOrientation = footstepStatusMessage.getActualFootOrientationInWorld();
 
-         FootstepDataMessage footstepDataMessageToSubmit = new FootstepDataMessage();
-         footstepDataMessageToSubmit.setRobotSide(robotSide.toByte());
-         footstepDataMessageToSubmit.getLocation().set(footLocation);
-         footstepDataMessageToSubmit.getOrientation().set(footOrientation);
-         reaMessager.submitMessage(SLAMModuleAPI.FootstepDataState, footstepDataMessageToSubmit);
+            FootstepDataMessage footstepDataMessageToSubmit = new FootstepDataMessage();
+            footstepDataMessageToSubmit.setRobotSide(robotSide.toByte());
+            footstepDataMessageToSubmit.getLocation().set(footLocation);
+            footstepDataMessageToSubmit.getOrientation().set(footOrientation);
+            reaMessager.submitMessage(SLAMModuleAPI.FootstepDataState, footstepDataMessageToSubmit);
+         }
       }
    }
 
    public static AtlasSLAMModule createIntraprocessModule(DRCRobotModel drcRobotModel) throws Exception
    {
-      KryoMessager messager = KryoMessager.createIntraprocess(SLAMModuleAPI.API,
-                                                              NetworkPorts.SLAM_MODULE_UI_PORT,
+      KryoMessager messager = KryoMessager.createIntraprocess(SLAMModuleAPI.API, NetworkPorts.SLAM_MODULE_UI_PORT,
                                                               REACommunicationProperties.getPrivateNetClassList());
       messager.setAllowSelfSubmit(true);
       messager.startMessager();
