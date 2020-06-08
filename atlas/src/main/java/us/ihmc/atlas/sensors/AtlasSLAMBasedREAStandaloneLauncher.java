@@ -25,7 +25,6 @@ public class AtlasSLAMBasedREAStandaloneLauncher extends Application
    {
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT, false);
 
-      //TODO: run atlas and check the footstep coming well.
       RobotContactPointParameters<RobotSide> contactPointParameters = drcRobotModel.getContactPointParameters();
       SideDependentList<List<Point2D>> defaultContactPoints = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
