@@ -4,11 +4,7 @@ import java.util.LinkedList;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.FootstepDataMessage;
-import controller_msgs.msg.dds.FootstepStatusMessage;
-import controller_msgs.msg.dds.RobotConfigurationData;
-import controller_msgs.msg.dds.StampedPosePacket;
-import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
+import controller_msgs.msg.dds.*;
 import us.ihmc.atlas.parameters.AtlasSensorInformation;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -200,8 +196,7 @@ public class AtlasSLAMModule extends SLAMModule
       FootstepStatusMessage footstepStatusMessage = subscriber.takeNextData();
       if (footstepStatusMessage.getFootstepStatus() == FootstepStatus.COMPLETED.toByte())
       {
-         // TODO: add button handler.
-         //reaMessager.submitMessage(SLAMModuleAPI.ShowFootstepDataViz, true);
+         reaMessager.submitMessage(SLAMModuleAPI.ShowFootstepDataViz, true);
          RobotSide robotSide = RobotSide.fromByte(footstepStatusMessage.getRobotSide());
          Point3DReadOnly footLocation = footstepStatusMessage.getActualFootPositionInWorld();
          QuaternionReadOnly footOrientation = footstepStatusMessage.getActualFootOrientationInWorld();

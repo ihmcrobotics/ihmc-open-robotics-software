@@ -105,6 +105,8 @@ public class FootstepMeshViewer extends AnimationTimer
    {
       if (!enable.get())
          return;
+      
+      render();
 
       if (newFootstepDataMessage.get() == null)
          return;
