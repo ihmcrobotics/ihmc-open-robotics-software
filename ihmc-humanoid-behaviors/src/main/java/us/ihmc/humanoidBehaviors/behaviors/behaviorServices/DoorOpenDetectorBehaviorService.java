@@ -33,7 +33,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
    {
       super(robotName, ThreadName, ros2Node);//, yoGraphicsListRegistry);
 
-      createSubscriber(DoorLocationPacket.class, IHMCHumanoidBehaviorManager.getInputTopic(robotName), doorLocationQueue::set);
+      createSubscriber(DoorLocationPacket.class, IHMCHumanoidBehaviorManager.getInputTopic(robotName), doorLocationQueue::set); 
 
       initialize();
    }
@@ -79,12 +79,14 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
    public void doThreadAction()
    {
 
+	   
       //super.doThreadAction();
-      if (true)
+      if (run)
       {
          latestDoorLocationPacketRecieved = doorLocationQueue.getAndSet(null);
          if (latestDoorLocationPacketRecieved != null)
          {
+
             newPose = new FramePose3D(ReferenceFrame.getWorldFrame(), latestDoorLocationPacketRecieved.getDoorTransformToWorld());
             // getReportedGoalPoseWorldFrame(newPose);
 
@@ -124,6 +126,10 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
                   {
                      averageCurrentDoorLocation = averageFramePoses(doorPoses);
                   }
+                 // System.out.println("***************************");
+                //  System.out.println(averageOrigin);
+                //  System.out.println(averageCurrentDoorLocation);
+                //  System.out.println(averageOrigin.getPositionDistance(averageCurrentDoorLocation));
                      if (averageCurrentDoorLocation != null && averageOrigin.getPositionDistance(averageCurrentDoorLocation) > openDistance)
                      {
                         doorOpen = true;
