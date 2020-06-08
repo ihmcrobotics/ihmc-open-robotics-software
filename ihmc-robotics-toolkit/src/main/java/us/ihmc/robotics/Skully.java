@@ -1,6 +1,6 @@
 package us.ihmc.robotics;
 
-import us.ihmc.commons.PrintTools;
+import us.ihmc.log.LogTools;
 
 /**
  * This is Skully the friendly debugging skull.
@@ -100,6 +100,6 @@ public class Skully
 
    private static void print(String output)
    {
-      PrintTools.warn("Skully says he discovered something mysterious:\n   " + output.replace("\n", "\n   "));
+      LogTools.warn("Skully says he discovered something mysterious:\n   " + output.replace("\n", "\n   "));
    }
 }
