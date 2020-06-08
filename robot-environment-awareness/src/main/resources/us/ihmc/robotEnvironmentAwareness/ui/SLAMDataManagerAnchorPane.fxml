@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
 <?import javafx.scene.control.Button?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ToggleButton?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
@@ -16,7 +16,7 @@
          <children>
             <GridPane prefHeight="67.0" prefWidth="534.0">
                <columnConstraints>
-                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="10.0" prefWidth="200.0" />
+                  <ColumnConstraints hgrow="SOMETIMES" maxWidth="250.0" minWidth="10.0" prefWidth="250.0" />
                   <ColumnConstraints hgrow="SOMETIMES" maxWidth="550.0" minWidth="10.0" prefWidth="550.0" />
                   <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="0.0" prefWidth="50.0" />
                </columnConstraints>
@@ -35,7 +35,7 @@
             </GridPane>
             <GridPane prefHeight="67.0" prefWidth="534.0">
               <columnConstraints>
-                <ColumnConstraints hgrow="SOMETIMES" maxWidth="200.0" minWidth="10.0" prefWidth="200.0" />
+                <ColumnConstraints hgrow="SOMETIMES" maxWidth="250.0" minWidth="10.0" prefWidth="250.0" />
                 <ColumnConstraints hgrow="SOMETIMES" maxWidth="550.0" minWidth="10.0" prefWidth="550.0" />
                   <ColumnConstraints hgrow="SOMETIMES" maxWidth="50.0" minWidth="0.0" prefWidth="50.0" />
               </columnConstraints>
@@ -45,11 +45,16 @@
               </rowConstraints>
                <children>
                   <Button alignment="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#importRawData" text="Import Raw Data" />
-                  <Button alignment="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#importPlanarRegions" text="Import Planar Regions" GridPane.rowIndex="1" />
                   <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#browseRawDataInputFolder" text="..." GridPane.columnIndex="2" />
                   <Button maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#browsePlanarRegionsInputFolder" text="..." GridPane.columnIndex="2" GridPane.rowIndex="1" />
                   <TextField fx:id="currentRawDataInputFolderTextField" editable="false" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" />
                   <TextField fx:id="currentPlanarRegionsInputFolderTextField" editable="false" maxWidth="1.7976931348623157E308" prefHeight="30.0" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                  <HBox alignment="CENTER" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" minWidth="-Infinity" GridPane.rowIndex="1">
+                     <children>
+                        <Button alignment="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#importPlanarRegions" prefHeight="25.0" prefWidth="150.0" text="Import Planar Regions" />
+                        <Button maxWidth="1.7976931348623157E308" minWidth="50.0" mnemonicParsing="false" onAction="#hideImportedPlanarRegions" prefWidth="50.0" text="hide" />
+                     </children>
+                  </HBox>
                </children>
             </GridPane>
          </children>

@@ -57,7 +57,7 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
    private final ScheduledExecutorService executor = ExecutorServiceTools.newSingleThreadScheduledExecutor(getClass(), ExceptionHandling.CANCEL_AND_REPORT);
    private final List<StereoVisionPointCloudMessage> stereoVisionPointCloudMessagesToPublish = new ArrayList<>();
    private int indexToPublish = 0;
-   
+
    public SLAMDataManagerAnchorPaneController()
    {
       executor.scheduleAtFixedRate(this::publish, 0, DEFAULT_PUBLISHING_PERIOD_MS, TimeUnit.MILLISECONDS);
@@ -104,6 +104,11 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
       String planarRegionsFilePath = currentPlanarRegionsInputFolderTextField.getText();
       File planarRegionsFile = new File(planarRegionsFilePath);
       PlanarRegionsList planarRegionDataToImport = PlanarRegionFileTools.importPlanarRegionData(planarRegionsFile);
+      if (planarRegionDataToImport == null)
+      {
+         LogTools.warn("Empty file path.");
+         return;
+      }
       PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionDataToImport);
       uiMessager.submitMessageInternal(SLAMModuleAPI.ImportedPlanarRegionsState, planarRegionsListMessage);
       uiMessager.submitMessageInternal(SLAMModuleAPI.ShowImportedPlanarRegions, true);
@@ -143,11 +148,17 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
       Platform.runLater(() -> currentPlanarRegionsInputFolderTextField.setText(newPath));
    }
 
+   @FXML
+   private void hideImportedPlanarRegions()
+   {
+      uiMessager.submitMessageInternal(SLAMModuleAPI.ImportedPlanarRegionsVizClear, true);
+   }
+
    private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, "stereoVisionPublisherNode");
    private final IHMCROS2Publisher<StereoVisionPointCloudMessage> stereoVisionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                                                                              StereoVisionPointCloudMessage.class,
                                                                                                                              ROS2Tools.IHMC_ROOT);
-   
+
    private void publish()
    {
       if (stereoVisionPointCloudMessagesToPublish.size() == indexToPublish)
