@@ -21,9 +21,10 @@ public class SLAMBasedREAStandaloneLauncher extends Application
    public void start(Stage primaryStage) throws Exception
    {
       slamUI = SLAMBasedEnvironmentAwarenessUI.creatIntraprocessUI(primaryStage);
-      planarSegmentationUI = PlanarSegmentationUI.creatIntraprocessUI(primaryStage);
-
       slamModule = SLAMModule.createIntraprocessModule();
+
+      Stage secondStage = new Stage();
+      planarSegmentationUI = PlanarSegmentationUI.creatIntraprocessUI(secondStage);
       segmentationModule = PlanarSegmentationModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME);
 
       slamModule.attachOcTreeConsumer(segmentationModule);
@@ -38,8 +39,9 @@ public class SLAMBasedREAStandaloneLauncher extends Application
    public void stop() throws Exception
    {
       slamUI.stop();
-      planarSegmentationUI.stop();
       slamModule.stop();
+
+      planarSegmentationUI.stop();
       segmentationModule.stop();
 
       Platform.exit();
