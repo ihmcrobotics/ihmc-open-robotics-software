@@ -92,8 +92,10 @@ public class SLAMModuleAPI
    
    public static final Topic<String> UIRawDataExportDirectory = Root.child(UI).child(DataManager).child(DepthCloud).child(Export).topic(Path);
    public static final Topic<String> UISLAMDataExportDirectory = Root.child(UI).child(DataManager).child(Module).child(Export).topic(Path);
-   public static final Topic<String> UIRawDataImportDirectory = Root.child(UI).child(DataManager).child(DepthCloud).child(Import).topic(Path);
-   public static final Topic<String> UIPlanarRegionsImportDirectory = Root.child(UI).child(DataManager).child(PlanarRegions).topic(Path);
+   
+   public static final Topic<PlanarRegionsListMessage> ImportedPlanarRegionsState = Root.child(UI).child(DataManager).child(PlanarRegions).child(Import).topic(Data);
+   public static final Topic<Boolean> ShowImportedPlanarRegions = Root.child(UI).child(DataManager).child(PlanarRegions).child(Import).topic(Show);
+   public static final Topic<Boolean> ImportedPlanarRegionsVizClear = Root.child(UI).child(DataManager).child(PlanarRegions).child(Import).topic(Clear);
    
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }
