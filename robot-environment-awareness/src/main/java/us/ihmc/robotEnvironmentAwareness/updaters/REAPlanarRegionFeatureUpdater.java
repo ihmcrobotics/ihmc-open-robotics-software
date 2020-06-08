@@ -8,6 +8,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import gnu.trove.map.hash.TIntObjectHashMap;
 import us.ihmc.euclid.geometry.LineSegment3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
@@ -249,7 +250,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       filePropertyHelper.saveProperty(planarRegionsIntersectionParametersTopic.getName(), intersectionEstimationParameters.get().toString());
    }
 
-   public void update(NormalOcTree octree, Pose3DReadOnly sensorPose)
+   public void update(NormalOcTree octree, Tuple3DReadOnly sensorPosition)
    {
       if (!isOcTreeEnabled.get())
          return;
@@ -269,10 +270,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       segmentationCalculator.setBoundingBox(octree.getBoundingBox());
       segmentationCalculator.setParameters(planarRegionSegmentationParameters.get());
       segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters.get());
-      if (sensorPose != null)
-         segmentationCalculator.setSensorPosition(sensorPose.getPosition());
-      else
-         segmentationCalculator.setSensorPosition(null);
+      segmentationCalculator.setSensorPosition(sensorPosition);
 
       timeReporter.run(() -> segmentationCalculator.compute(octree.getRoot()), segmentationTimeReport);
 
