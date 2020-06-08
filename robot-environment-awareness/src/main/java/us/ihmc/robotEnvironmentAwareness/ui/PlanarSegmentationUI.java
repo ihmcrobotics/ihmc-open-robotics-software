@@ -26,6 +26,7 @@ public class PlanarSegmentationUI
    private final REAUIMessager uiMessager;
    private final SegmentationMeshViewer meshViewer;
 
+
    @FXML
    private OcTreeEssentialsAnchorPaneController ocTreeEssentialsAnchorPaneController;
    @FXML
@@ -65,7 +66,7 @@ public class PlanarSegmentationUI
 
       view3dFactory.addNodeToView(meshViewer.getRoot());
 
-      uiConnectionHandler = new UIConnectionHandler(primaryStage, uiMessager);
+      uiConnectionHandler = new UIConnectionHandler(primaryStage, uiMessager, SegmentationModuleAPI.RequestEntireModuleState);
       uiConnectionHandler.start();
 
       uiMessager.notifyModuleMessagerStateListeners();
@@ -103,6 +104,8 @@ public class PlanarSegmentationUI
          e.printStackTrace();
       }
 
+
+      // FIXME the ocTree essentials controller
 
       regionSegmentationAnchorPaneController.setPlanarRegionsSegmentationEnableTopic(SegmentationModuleAPI.PlanarRegionsSegmentationEnable);
       regionSegmentationAnchorPaneController.setPlanarRegionsSegmentationClearTopic(SegmentationModuleAPI.PlanarRegionsSegmentationClear);
