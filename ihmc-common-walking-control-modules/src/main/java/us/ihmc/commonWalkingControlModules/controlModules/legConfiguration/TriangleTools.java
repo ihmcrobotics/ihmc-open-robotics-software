@@ -75,4 +75,40 @@ public class TriangleTools
       interiorAngleAcceleration -= Math.pow(interiorAngleVelocity, 2.0) / Math.tan(interiorAngle);
       return interiorAngleAcceleration;
    }
+
+   public static double computeSSASide(double sideALength, double sideBLength, double angleB, boolean isAngleAObtuse)
+   {
+      double lawSinesB;
+      double angleA;
+      double angleC;
+      if(angleB >= Math.PI){
+         if(sideALength > sideBLength){
+            return 0.0;
+         }
+      }
+      else{
+         if(sideALength > sideBLength){
+            double height = sideALength * Math.sin(angleB);
+            if(sideBLength < height){
+               return 0.0;
+            }
+            else if(sideBLength > height){
+               lawSinesB = Math.sin(angleB) / sideBLength;
+               if(isAngleAObtuse){
+                  angleA = Math.PI - Math.asin(lawSinesB * sideALength);
+               }
+               else
+               {
+                  angleA = Math.asin(lawSinesB * sideALength);
+               }
+               angleC = Math.PI - angleA - angleB;
+               return Math.sin(angleC) / lawSinesB;
+            }
+         }
+      }
+      lawSinesB = Math.sin(angleB) / sideBLength;
+      angleA = Math.asin(lawSinesB * sideALength);
+      angleC = Math.PI - angleA - angleB;
+      return Math.sin(angleC) / lawSinesB;
+   }
 }
