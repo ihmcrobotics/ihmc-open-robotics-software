@@ -6,7 +6,7 @@ import controller_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
 import us.ihmc.log.LogTools;
@@ -17,7 +17,6 @@ import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
-import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
@@ -34,9 +33,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
 
-public class PlanarSegmentationREAModule implements OcTreeConsumer
+public class PlanarSegmentationModule implements OcTreeConsumer
 {
-   private static final String reportOcTreeStateTimeReport = "Reporting OcTree state took: ";
    private static final String planarRegionsTimeReport = "OcTreePlanarRegion update took: ";
    private static final String reportPlanarRegionsStateTimeReport = "Reporting Planar Regions state took: ";
 
@@ -54,13 +52,13 @@ public class PlanarSegmentationREAModule implements OcTreeConsumer
 
    private final AtomicReference<Boolean> clearOcTree;
    private final AtomicReference<NormalOcTree> ocTree;
-   private final AtomicReference<Pose3DReadOnly> sensorPose;
+   private final AtomicReference<Tuple3DReadOnly> sensorPosition;
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
    private final Messager reaMessager;
 
-   private PlanarSegmentationREAModule(Messager reaMessager, File configurationFile) throws IOException
+   private PlanarSegmentationModule(Messager reaMessager, File configurationFile) throws IOException
    {
       this.reaMessager = reaMessager;
 
@@ -95,17 +93,17 @@ public class PlanarSegmentationREAModule implements OcTreeConsumer
 
       clearOcTree = reaMessager.createInput(SegmentationModuleAPI.OcTreeClear, false);
       ocTree = reaMessager.createInput(SegmentationModuleAPI.OcTree, null);
-      sensorPose = reaMessager.createInput(SegmentationModuleAPI.SensorPose, null);
+      sensorPosition = reaMessager.createInput(SegmentationModuleAPI.SensorPosition, null);
 
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
       reaMessager.submitMessage(SegmentationModuleAPI.RequestEntireModuleState, true);
    }
 
-   public void reportOcTree(NormalOcTree ocTree, Pose3DReadOnly sensorPose)
+   public void reportOcTree(NormalOcTree ocTree, Tuple3DReadOnly sensorPosition)
    {
       reaMessager.submitMessage(SegmentationModuleAPI.OcTree, ocTree);
       reaMessager.submitMessage(SegmentationModuleAPI.OcTreeState, OcTreeMessageConverter.convertToMessage(ocTree));
-      reaMessager.submitMessage(SegmentationModuleAPI.SensorPose, sensorPose);
+      reaMessager.submitMessage(SegmentationModuleAPI.SensorPosition, sensorPosition);
    }
 
    private void dispatchCustomPlanarRegion(Subscriber<PlanarRegionsListMessage> subscriber)
@@ -142,7 +140,7 @@ public class PlanarSegmentationREAModule implements OcTreeConsumer
       try
       {
          NormalOcTree mainOctree = ocTree.getAndSet(null);
-         Pose3DReadOnly sensorPose = this.sensorPose.getAndSet(null);
+         Tuple3DReadOnly sensorPose = this.sensorPosition.getAndSet(null);
          if (clearOcTree.getAndSet(false))
          {
             planarRegionFeatureUpdater.clearOcTree();
@@ -215,16 +213,16 @@ public class PlanarSegmentationREAModule implements OcTreeConsumer
       }
    }
 
-   public static PlanarSegmentationREAModule createRemoteModule(String configurationFilePath) throws Exception
+   public static PlanarSegmentationModule createRemoteModule(String configurationFilePath) throws Exception
    {
       KryoMessager server = KryoMessager.createTCPServer(SegmentationModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,
                                                          REACommunicationProperties.getPrivateNetClassList());
       server.setAllowSelfSubmit(true);
       server.startMessager();
-      return new PlanarSegmentationREAModule(server, new File(configurationFilePath));
+      return new PlanarSegmentationModule(server, new File(configurationFilePath));
    }
 
-   public static PlanarSegmentationREAModule createIntraprocessModule(String configurationFilePath) throws Exception
+   public static PlanarSegmentationModule createIntraprocessModule(String configurationFilePath) throws Exception
    {
       KryoMessager messager = KryoMessager.createIntraprocess(SegmentationModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,
                                                               REACommunicationProperties.getPrivateNetClassList());
@@ -243,6 +241,6 @@ public class PlanarSegmentationREAModule implements OcTreeConsumer
          e.printStackTrace();
       }
 
-      return new PlanarSegmentationREAModule(messager, configurationFile);
+      return new PlanarSegmentationModule(messager, configurationFile);
    }
 }
