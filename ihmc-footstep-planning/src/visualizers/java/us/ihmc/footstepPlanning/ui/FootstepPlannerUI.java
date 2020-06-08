@@ -14,7 +14,6 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
@@ -51,7 +50,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.ToDoubleFunction;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
@@ -141,7 +139,6 @@ public class FootstepPlannerUI
            null,
            walkingControllerParameters,
            null,
-           new Vector3D(),
            showTestDashboard,
            defaultContactPoints);
    }
@@ -155,8 +152,7 @@ public class FootstepPlannerUI
                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             FullHumanoidRobotModelFactory previewModelFactory,
                             WalkingControllerParameters walkingControllerParameters,
-                            ToDoubleFunction<String> defaultJointSetpoints,
-                            Tuple3DReadOnly rootJointToMidFootOffset,
+                            UIAuxiliaryRobotData auxiliaryRobotData,
                             boolean showTestDashboard,
                             SideDependentList<List<Point2D>> defaultContactPoints) throws Exception
    {
@@ -231,6 +227,7 @@ public class FootstepPlannerUI
       this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(defaultContactPoints, messager);
       new UIFootstepPlanManager(messager);
       this.manualFootstepAdjustmentListener = new ManualFootstepAdjustmentListener(messager, view3dFactory.getSubScene());
+      this.uiRobotController.setAuxiliaryRobotData(auxiliaryRobotData);
 
       startGoalPositionViewer.setShowStartGoalTopics(ShowStart, ShowGoal, ShowGoal);
 
@@ -301,9 +298,9 @@ public class FootstepPlannerUI
       new FootPoseFromMidFootUpdater(messager).start();
       new FootstepCompletionListener(messager).start();
 
-      if (defaultJointSetpoints != null)
+      if (auxiliaryRobotData != null)
       {
-         setupDataSetLoadBingings(defaultJointSetpoints, rootJointToMidFootOffset);
+         setupDataSetLoadBingings(auxiliaryRobotData);
       }
 
       mainPane.setCenter(subScene);
@@ -317,7 +314,7 @@ public class FootstepPlannerUI
       primaryStage.setOnCloseRequest(event -> stop());
    }
 
-   private void setupDataSetLoadBingings(ToDoubleFunction<String> defaultJointSetpoints, Tuple3DReadOnly rootJointToMidFootOffset)
+   private void setupDataSetLoadBingings(UIAuxiliaryRobotData auxiliaryRobotData)
    {
       Consumer<DataSetName> dataSetLoader = dataSetName ->
       {
@@ -329,8 +326,8 @@ public class FootstepPlannerUI
          {
             robotRootJoint.getTranslation().set(dataSet.getPlannerInput().getStartPosition());
             robotRootJoint.getRotation().setYawPitchRoll(dataSet.getPlannerInput().getStartYaw(), 0.0, 0.0);
-            robotRootJoint.getTranslation().sub(rootJointToMidFootOffset);
-            robotVisualizer.submitNewConfiguration(robotRootJoint, defaultJointSetpoints);
+            robotRootJoint.getTranslation().sub(auxiliaryRobotData.getRootJointToMidFootOffset());
+            robotVisualizer.submitNewConfiguration(robotRootJoint, auxiliaryRobotData.getDefaultJointAngleMap());
 
             messager.submitMessage(GoalMidFootPosition, dataSet.getPlannerInput().getGoalPosition());
             messager.submitMessage(GoalMidFootOrientation, new Quaternion(dataSet.getPlannerInput().getGoalYaw(), 0.0, 0.0));
@@ -446,8 +443,7 @@ public class FootstepPlannerUI
                                                     FullHumanoidRobotModelFactory previewModelFactory,
                                                     RobotContactPointParameters<RobotSide> contactPointParameters,
                                                     WalkingControllerParameters walkingControllerParameters,
-                                                    ToDoubleFunction<String> defaultJointSetpoints,
-                                                    Tuple3DReadOnly rootJointToMidFootOffset) throws Exception
+                                                    UIAuxiliaryRobotData auxiliaryRobotData) throws Exception
    {
       SideDependentList<List<Point2D>> defaultContactPoints = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
@@ -464,8 +460,7 @@ public class FootstepPlannerUI
                                    fullHumanoidRobotModelFactory,
                                    previewModelFactory,
                                    walkingControllerParameters,
-                                   defaultJointSetpoints,
-                                   rootJointToMidFootOffset,
+                                   auxiliaryRobotData,
                                    false,
                                    defaultContactPoints);
    }

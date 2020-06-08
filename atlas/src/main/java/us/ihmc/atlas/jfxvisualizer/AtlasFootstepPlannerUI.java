@@ -7,12 +7,12 @@ import javafx.stage.Stage;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.atlas.parameters.AtlasUIAuxiliaryData;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
@@ -24,9 +24,6 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.ros2.RealtimeRos2Node;
 
-import java.util.HashMap;
-import java.util.function.ToDoubleFunction;
-
 /**
  * This class provides a visualizer for the footstep planner module.
  * It allows user to create plans, log and load plans from disk, tune parameters,
@@ -34,7 +31,6 @@ import java.util.function.ToDoubleFunction;
  */
 public class AtlasFootstepPlannerUI extends Application
 {
-   private static final Vector3D rootJointToMidFootOffset = new Vector3D(0.0518637, 0.0, -0.8959426);
    private static final boolean launchPlannerToolbox = true;
    private static final double GOAL_DISTANCE_PROXIMITY = 0.1;
 
@@ -70,8 +66,7 @@ public class AtlasFootstepPlannerUI extends Application
                                               previewModel,
                                               drcRobotModel.getContactPointParameters(),
                                               drcRobotModel.getWalkingControllerParameters(),
-                                              createDefaultJointAngleMap(),
-                                              rootJointToMidFootOffset);
+                                              new AtlasUIAuxiliaryData());
       ui.setRobotLowLevelMessenger(robotLowLevelMessenger);
       ui.setREAStateRequestPublisher(reaStateRequestPublisher);
       ui.show();
@@ -88,44 +83,6 @@ public class AtlasFootstepPlannerUI extends Application
          // Automatically send graph data over messager
          plannerModule.addStatusCallback(status -> handleMessagerCallbacks(plannerModule, status));
       }
-   }
-
-   private static ToDoubleFunction<String> createDefaultJointAngleMap()
-   {
-      HashMap<String, Double> defaultJointAngleMap = new HashMap<>();
-
-      defaultJointAngleMap.put("back_bky", -0.05);
-      defaultJointAngleMap.put("l_leg_aky", 0.5 * -0.75);
-      defaultJointAngleMap.put("r_leg_aky", 0.5 * -0.75);
-      defaultJointAngleMap.put("l_leg_kny", 0.5 * 1.65);
-      defaultJointAngleMap.put("r_leg_kny", 0.5 * 1.65);
-      defaultJointAngleMap.put("back_bkz", 0.0);
-      defaultJointAngleMap.put("back_bkx", 0.0);
-
-      defaultJointAngleMap.put("l_leg_hpz", 0.0);
-      defaultJointAngleMap.put("l_leg_hpx", 0.09);
-      defaultJointAngleMap.put("l_leg_hpy", 0.5 * -0.933);
-      defaultJointAngleMap.put("l_leg_akx", -0.09);
-      defaultJointAngleMap.put("r_leg_hpz", 0.0);
-      defaultJointAngleMap.put("r_leg_hpx", -0.09);
-      defaultJointAngleMap.put("r_leg_hpy", 0.5 * -0.933);
-      defaultJointAngleMap.put("r_leg_akx", 0.09);
-      defaultJointAngleMap.put("l_arm_shz", 0.0);
-      defaultJointAngleMap.put("l_arm_shx", -1.3);
-      defaultJointAngleMap.put("l_arm_ely", 2.0);
-      defaultJointAngleMap.put("l_arm_elx", 0.5);
-      defaultJointAngleMap.put("l_arm_wry", 0.01);
-      defaultJointAngleMap.put("l_arm_wrx", 0.0);
-      defaultJointAngleMap.put("l_arm_wry2", 0.0);
-      defaultJointAngleMap.put("r_arm_shz", 0.0);
-      defaultJointAngleMap.put("r_arm_shx", 1.3);
-      defaultJointAngleMap.put("r_arm_ely", 2.0);
-      defaultJointAngleMap.put("r_arm_elx", -0.5);
-      defaultJointAngleMap.put("r_arm_wry", 0.01);
-      defaultJointAngleMap.put("r_arm_wrx", 0.0);
-      defaultJointAngleMap.put("r_arm_wry2", 0.0);
-
-      return jointName -> defaultJointAngleMap.getOrDefault(jointName, 0.0);
    }
 
    private void handleMessagerCallbacks(FootstepPlanningModule planningModule, FootstepPlannerOutput status)
