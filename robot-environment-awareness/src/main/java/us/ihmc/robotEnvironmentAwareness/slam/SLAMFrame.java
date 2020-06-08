@@ -45,11 +45,11 @@ public class SLAMFrame
     */
    private final RigidBodyTransform optimizedSensorPoseToWorld = new RigidBodyTransform();
 
-   private final Point3DReadOnly[] originalPointCloudToWorld; // For comparison after mapping.
-   private final Point3DReadOnly[] pointCloudToSensorFrame;
-   private final Point3D[] optimizedPointCloudToWorld;
-
-   private double confidenceFactor;
+   protected final Point3DReadOnly[] originalPointCloudToWorld; // For comparison after mapping.
+   protected final Point3DReadOnly[] pointCloudToSensorFrame;
+   protected final Point3D[] optimizedPointCloudToWorld;
+   
+   private double confidenceFactor = 1.0;
 
    public SLAMFrame(StereoVisionPointCloudMessage message)
    {

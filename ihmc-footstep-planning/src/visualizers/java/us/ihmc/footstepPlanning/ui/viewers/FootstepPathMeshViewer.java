@@ -1,39 +1,40 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
-import controller_msgs.msg.dds.FootstepDataListMessage;
-import controller_msgs.msg.dds.FootstepDataMessage;
-import javafx.animation.AnimationTimer;
-import javafx.scene.Group;
-import javafx.scene.Node;
-import javafx.scene.paint.Color;
-import javafx.scene.paint.Material;
-import javafx.scene.shape.Mesh;
-import org.apache.commons.lang3.tuple.Pair;
-import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Point2D;
-import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
-import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
-import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
-import us.ihmc.messager.Messager;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePath;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponse;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepToUpdateViz;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GlobalReset;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.IgnorePartialFootholds;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.SelectedFootstep;
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowFootstepPlan;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+import org.apache.commons.lang3.tuple.Pair;
+
+import controller_msgs.msg.dds.FootstepDataListMessage;
+import controller_msgs.msg.dds.FootstepDataMessage;
+import javafx.animation.AnimationTimer;
+import javafx.scene.Group;
+import javafx.scene.Node;
+import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
+import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
+import us.ihmc.javaFXVisualizers.FootstepMeshManager;
+import us.ihmc.messager.Messager;
+import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 /**
- * This class uses the shorthand:
- * compute a mesh = using a FootstepDataMessage generate a Mesh and Material pair
- * update a mesh = from a Mesh and Material pair update a MeshView
+ * This class uses the shorthand: compute a mesh = using a FootstepDataMessage generate a Mesh and
+ * Material pair update a mesh = from a Mesh and Material pair update a MeshView
  */
 public class FootstepPathMeshViewer extends AnimationTimer
 {
@@ -54,11 +55,11 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
    private final List<FootstepMeshManager> footstepMeshes = new ArrayList<>();
    private final AtomicReference<Pair<Integer, FootstepDataMessage>> updateStep = new AtomicReference<>();
-   
+
    public FootstepPathMeshViewer(Messager messager)
    {
       // call these on separate thread since they update all meshes
-      messager.registerTopicListener(FootstepPlanResponse, footstepPlan -> 
+      messager.registerTopicListener(FootstepPlanResponse, footstepPlan ->
       {
          footstepPlanResponse.set(footstepPlan);
          updateAllMeshes.set(true);
@@ -80,10 +81,10 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
       for (int i = 0; i < 200; i++)
       {
-         footstepMeshes.add(new FootstepMeshManager(i));
+         footstepMeshes.add(new FootstepMeshManager(root, meshBuilder, i));
       }
 
-      messager.registerTopicListener(ShowFootstepPlan, show -> footstepMeshes.forEach(mesh -> mesh.meshHolder.meshView.setVisible(show)));
+      messager.registerTopicListener(ShowFootstepPlan, show -> footstepMeshes.forEach(mesh -> mesh.getMeshHolder().getMeshView().setVisible(show)));
    }
 
    private void computeAllMeshes(FootstepDataListMessage footstepPlanResponse)
@@ -94,13 +95,13 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
          while (footstepPlanResponse.getFootstepDataList().size() > footstepMeshes.size())
          {
-            footstepMeshes.add(new FootstepMeshManager(footstepMeshes.size()));
+            footstepMeshes.add(new FootstepMeshManager(root, meshBuilder, footstepMeshes.size()));
          }
 
          for (int i = 0; i < footstepPlanResponse.getFootstepDataList().size(); i++)
          {
             FootstepDataMessage footstepDataMessage = footstepPlanResponse.getFootstepDataList().get(i);
-            footstepMeshes.get(i).footstepDataMessage.set(footstepDataMessage);
+            footstepMeshes.get(i).setFootstepDataMessage(footstepDataMessage);
          }
       }
 
@@ -112,96 +113,6 @@ public class FootstepPathMeshViewer extends AnimationTimer
       updateAllMeshes.set(true);
    }
 
-   private Color getFootstepColor(FootstepDataMessage footstepDataMessage, int index)
-   {
-      if (index == selectedStep.get().getKey())
-      {
-         return Color.YELLOW.darker();
-      }
-      else
-      {
-         return footstepDataMessage.getRobotSide() == 0 ? Color.RED : Color.GREEN;
-      }
-   }
-
-   private class FootstepMeshManager
-   {
-      private static final double ADDITIONAL_HEIGHT = 0.01;
-
-      private final int index;
-      private final MeshHolder meshHolder = new MeshHolder(root);
-      private final AtomicReference<FootstepDataMessage> footstepDataMessage = new AtomicReference<>();
-
-      private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
-      private final ConvexPolygon2D foothold = new ConvexPolygon2D();
-
-      public FootstepMeshManager(int index)
-      {
-         this.index = index;
-      }
-
-      /**
-       * Call from any thread
-       */
-      void computeMesh()
-      {
-         if (footstepDataMessage.get() == null)
-         {
-            return;
-         }
-
-         meshBuilder.clear();
-         foothold.clear();
-
-         FootstepDataMessage footstepDataMessage = this.footstepDataMessage.get();
-
-         Color footColor = getFootstepColor(footstepDataMessage, index);
-         RobotSide robotSide = RobotSide.fromByte(footstepDataMessage.getRobotSide());
-
-         transformToWorld.set(footstepDataMessage.getOrientation(), footstepDataMessage.getLocation());
-         transformToWorld.appendTranslation(0.0, 0.0, ADDITIONAL_HEIGHT);
-
-         if (ignorePartialFootholds.get() || footstepDataMessage.getPredictedContactPoints2d().isEmpty())
-         {
-            foothold.set(defaultContactPoints.get(robotSide));
-         }
-         else
-         {
-            footstepDataMessage.getPredictedContactPoints2d().forEach(p -> foothold.addVertex(p.getX(), p.getY()));
-            foothold.update();
-         }
-
-         Point2D[] vertices = new Point2D[foothold.getNumberOfVertices()];
-         for (int j = 0; j < vertices.length; j++)
-         {
-            vertices[j] = new Point2D(foothold.getVertex(j));
-         }
-
-         meshBuilder.addMultiLine(transformToWorld, vertices, 0.01, footColor, true);
-         meshBuilder.addPolygon(transformToWorld, foothold, footColor);
-
-         Pair<Mesh, Material> meshMaterialPair = Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial());
-         meshHolder.meshReference.set(meshMaterialPair);
-      }
-
-      /**
-       * Call from AnimationTimer.handle
-       */
-      void updateMesh()
-      {
-         meshHolder.update();
-      }
-
-      /**
-       * Call from AnimationTimer.handle
-       */
-      void clear()
-      {
-         footstepDataMessage.set(null);
-         meshHolder.remove();
-      }
-   }
-
    @Override
    public void handle(long now)
    {
@@ -209,11 +120,11 @@ public class FootstepPathMeshViewer extends AnimationTimer
       {
          computeAllMeshes(footstepPlanResponse.getAndSet(null));
       }
-      
+
       Pair<Integer, FootstepDataMessage> updateStep = this.updateStep.getAndSet(null);
       if (updateStep != null)
       {
-         footstepMeshes.get(updateStep.getKey()).footstepDataMessage.set(updateStep.getValue());
+         footstepMeshes.get(updateStep.getKey()).setFootstepDataMessage(updateStep.getValue());
          footstepMeshes.get(updateStep.getKey()).computeMesh();
          footstepMeshes.get(updateStep.getKey()).updateMesh();
       }
@@ -262,7 +173,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
    public void setDefaultContactPoints(SideDependentList<List<Point2D>> defaultContactPoints)
    {
-      for(RobotSide robotSide : RobotSide.values)
+      for (RobotSide robotSide : RobotSide.values)
       {
          ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
          for (int i = 0; i < defaultContactPoints.get(robotSide).size(); i++)

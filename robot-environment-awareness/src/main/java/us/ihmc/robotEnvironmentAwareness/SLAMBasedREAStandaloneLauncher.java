@@ -8,8 +8,6 @@ import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
 
 public class SLAMBasedREAStandaloneLauncher extends Application
 {
-   private static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAModuleConfiguration.txt";
-
    private SLAMBasedEnvironmentAwarenessUI ui;
    private SLAMModule module;
 
@@ -17,7 +15,7 @@ public class SLAMBasedREAStandaloneLauncher extends Application
    public void start(Stage primaryStage) throws Exception
    {
       ui = SLAMBasedEnvironmentAwarenessUI.creatIntraprocessUI(primaryStage);
-      module = SLAMModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME);
+      module = SLAMModule.createIntraprocessModule();
 
       ui.show();
       module.start();
