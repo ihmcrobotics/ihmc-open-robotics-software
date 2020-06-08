@@ -24,8 +24,6 @@ public class SegmentationModuleAPI
    private static final Category Root = apiFactory.createRootCategory("PlanarSegmentationRoot");
    private static final CategoryTheme PlanarSegmentation = apiFactory.createCategoryTheme("PlanarSegmentation");
 
-   public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
-
    public static final Topic<Integer> UIOcTreeDepth = topic("UIOctTreeDepth");
    public static final Topic<ColoringType> UIOcTreeColoringMode = topic("UIOctTreeDepth");
    public static final Topic<OcTreeMeshBuilder.DisplayType> UIOcTreeDisplayType = topic("UIOcTreeDisplayType");
@@ -66,6 +64,8 @@ public class SegmentationModuleAPI
    public static final Topic<Boolean> RequestPlanarRegionsIntersections = topic("RequestPlanarRegionsIntersections");
 
    public static final Topic<Boolean> SaveUpdaterConfiguration = topic("SaveUpdaterConfiguration");
+
+   public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 
    private static <T> Topic<T> topic(String name)
    {
