@@ -20,7 +20,7 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class FootstepMeshManager
 {
-   private static final double ADDITIONAL_HEIGHT = 0.01;
+   private static final double POLYGON_THICKNESS = 0.01;
 
    private final JavaFXMultiColorMeshBuilder meshBuilder;
    
@@ -62,7 +62,6 @@ public class FootstepMeshManager
       RobotSide robotSide = RobotSide.fromByte(footstepDataMessage.getRobotSide());
 
       transformToWorld.set(footstepDataMessage.getOrientation(), footstepDataMessage.getLocation());
-      transformToWorld.appendTranslation(0.0, 0.0, ADDITIONAL_HEIGHT);
 
       if (ignorePartialFootholds.get() || footstepDataMessage.getPredictedContactPoints2d().isEmpty())
       {
@@ -80,7 +79,9 @@ public class FootstepMeshManager
          vertices[j] = new Point2D(foothold.getVertex(j));
       }
 
-      meshBuilder.addMultiLine(transformToWorld, vertices, 0.01, footColor, true);
+      // Shift halfway so that bottom of perimeter line is flush with ground
+      transformToWorld.appendTranslation(0.0, 0.0, 0.5 * POLYGON_THICKNESS);
+      meshBuilder.addMultiLine(transformToWorld, vertices, POLYGON_THICKNESS, footColor, true);
       meshBuilder.addPolygon(transformToWorld, foothold, footColor);
 
       Pair<Mesh, Material> meshMaterialPair = Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial());
