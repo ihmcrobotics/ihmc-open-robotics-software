@@ -1,23 +1,19 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -48,15 +44,13 @@ public class SLAMModule
    private static final Color SOURCE_POINT_CLOUD_COLOR = Color.BLACK;
    private static final Color LATEST_POINT_CLOUD_COLOR = Color.LIME;
 
-   private final AtomicReference<Boolean> enable;
+   protected final AtomicReference<Boolean> enable;
 
    private final Topic<PlanarRegionsListMessage> planarRegionsStateTopicToSubmit;
-   private final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
-   private final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<StereoVisionPointCloudMessage>();
-   private final LinkedList<Boolean> stationaryFlagQueue = new LinkedList<Boolean>();
-   private final LinkedList<Boolean> reasonableVelocityFlagQueue = new LinkedList<Boolean>();
+   protected final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
+   protected final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<StereoVisionPointCloudMessage>();
 
-   private final SLAMBasics slam = new SurfaceElementICPSLAM(DEFAULT_OCTREE_RESOLUTION);
+   protected final SLAMBasics slam = new SurfaceElementICPSLAM(DEFAULT_OCTREE_RESOLUTION);
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private static final int THREAD_PERIOD_MILLISECONDS = 1;
@@ -69,13 +63,7 @@ public class SLAMModule
 
    protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
-   private final AtomicReference<Boolean> robotStatus;
-   private final AtomicReference<Boolean> velocityStatus;
-   protected final AtomicLong latestRobotTimeStamp = new AtomicLong();
-   protected IHMCROS2Publisher<StampedPosePacket> estimatedPelvisPublisher = null;
-   protected RigidBodyTransform sensorPoseToPelvisTransformer = null;
-
-   public SLAMModule(Messager messager, File configurationFile)
+   public SLAMModule(Messager messager)
    {
       this.reaMessager = messager;
 
@@ -92,9 +80,6 @@ public class SLAMModule
       reaMessager.registerTopicListener(SLAMModuleAPI.SLAMClear, (content) -> clearSLAM());
 
       planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP);
-
-      robotStatus = reaMessager.createInput(SLAMModuleAPI.SensorStatus, false);
-      velocityStatus = reaMessager.createInput(SLAMModuleAPI.VelocityLimitStatus, true);
    }
 
    public void start() throws IOException
@@ -133,12 +118,12 @@ public class SLAMModule
       }
    }
 
-   private boolean isMainThreadInterrupted()
+   protected boolean isMainThreadInterrupted()
    {
       return Thread.interrupted() || scheduledMain == null || scheduledMain.isCancelled();
    }
 
-   private boolean isSLAMThreadInterrupted()
+   protected boolean isSLAMThreadInterrupted()
    {
       return Thread.interrupted() || scheduledSLAM == null || scheduledSLAM.isCancelled();
    }
@@ -152,12 +137,8 @@ public class SLAMModule
          return;
 
       updateSLAMParameters();
-
       StereoVisionPointCloudMessage pointCloudToCompute = pointCloudQueue.getFirst();
-      boolean stationaryFlag = stationaryFlagQueue.getFirst();
-      boolean reasonableVelocityFlag = reasonableVelocityFlagQueue.getFirst();
 
-      String stringToReport = "";
       boolean success;
       if (slam.isEmpty())
       {
@@ -166,79 +147,48 @@ public class SLAMModule
       }
       else
       {
-         if (reasonableVelocityFlag)
-         {
-            if (stationaryFlag)
-            {
-               slam.addKeyFrame(pointCloudToCompute);
-               success = true;
-            }
-            else
-            {
-               success = slam.addFrame(pointCloudToCompute);
-            }
-         }
-         else
-         {
-            success = false;
-         }
+         success = slam.addFrame(pointCloudToCompute);
       }
 
       pointCloudQueue.removeFirst();
-      stationaryFlagQueue.removeFirst();
-      reasonableVelocityFlagQueue.removeFirst();
-      reaMessager.submitMessage(SLAMModuleAPI.QueuedBuffers, pointCloudQueue.size() + " [" + slam.getMapSize() + "]");
-      stringToReport = stringToReport + success + " " + slam.getMapSize() + " " + slam.getComputationTimeForLatestFrame() + " (sec) ";
-      reaMessager.submitMessage(SLAMModuleAPI.SLAMStatus, stringToReport);
 
       if (success)
       {
-         NormalOcTree octreeMap = slam.getOctree();
-         NormalOcTreeMessage octreeMessage = OcTreeMessageConverter.convertToMessage(octreeMap);
-         reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, octreeMessage);
-
-         slam.updatePlanarRegionsMap();
-         PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
-         PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap);
-         reaMessager.submitMessage(planarRegionsStateTopicToSubmit, planarRegionsListMessage);
-         planarRegionPublisher.publish(planarRegionsListMessage);
-
-         SLAMFrame latestFrame = slam.getLatestFrame();
-         Point3DReadOnly[] originalPointCloud = latestFrame.getOriginalPointCloud();
-         Point3DReadOnly[] correctedPointCloud = latestFrame.getPointCloud();
-         //Point3DReadOnly[] sourcePointsToWorld = slam.getSourcePointsToWorldLatestFrame();
-         Point3DReadOnly[] sourcePointsToWorld = null;
-         if (originalPointCloud == null || sourcePointsToWorld == null || correctedPointCloud == null)
-            return;
-         StereoVisionPointCloudMessage latestStereoMessage = createLatestFrameStereoVisionPointCloudMessage(originalPointCloud,
-                                                                                                            sourcePointsToWorld,
-                                                                                                            correctedPointCloud);
-         RigidBodyTransformReadOnly sensorPose = latestFrame.getSensorPose();
-         latestStereoMessage.getSensorPosition().set(sensorPose.getTranslation());
-         latestStereoMessage.getSensorOrientation().set(sensorPose.getRotation());
-         reaMessager.submitMessage(SLAMModuleAPI.IhmcSLAMFrameState, latestStereoMessage);
-         reaMessager.submitMessage(SLAMModuleAPI.LatestFrameConfidenceFactor, latestFrame.getConfidenceFactor());
-
-         if (estimatedPelvisPublisher != null)
-         {
-            StampedPosePacket posePacket = new StampedPosePacket();
-            posePacket.setTimestamp(latestRobotTimeStamp.get());
-            int maximumBufferOfQueue = 10;
-            if (pointCloudQueue.size() >= maximumBufferOfQueue)
-            {
-               posePacket.setConfidenceFactor(0.0);
-            }
-            else
-            {
-               posePacket.setConfidenceFactor(latestFrame.getConfidenceFactor());
-            }
-            RigidBodyTransform estimatedPelvisPose = new RigidBodyTransform(sensorPoseToPelvisTransformer);
-            estimatedPelvisPose.preMultiply(sensorPose);
-            posePacket.getPose().set(estimatedPelvisPose);
-            reaMessager.submitMessage(SLAMModuleAPI.CustomizedFrameState, posePacket);
-            estimatedPelvisPublisher.publish(posePacket);
-         }
+         publishResults();
       }
+   }
+
+   protected void publishResults()
+   {
+      String stringToReport = "";
+      reaMessager.submitMessage(SLAMModuleAPI.QueuedBuffers, pointCloudQueue.size() + " [" + slam.getMapSize() + "]");
+      stringToReport = stringToReport + " " + slam.getMapSize() + " " + slam.getComputationTimeForLatestFrame() + " (sec) ";
+      reaMessager.submitMessage(SLAMModuleAPI.SLAMStatus, stringToReport);
+
+      NormalOcTree octreeMap = slam.getOctree();
+      NormalOcTreeMessage octreeMessage = OcTreeMessageConverter.convertToMessage(octreeMap);
+      reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, octreeMessage);
+
+      SLAMFrame latestFrame = slam.getLatestFrame();
+      Point3DReadOnly[] originalPointCloud = latestFrame.getOriginalPointCloud();
+      Point3DReadOnly[] correctedPointCloud = latestFrame.getPointCloud();
+      Point3DReadOnly[] sourcePointsToWorld = new Point3D[0];
+      if (originalPointCloud == null || sourcePointsToWorld == null || correctedPointCloud == null)
+         return;
+      StereoVisionPointCloudMessage latestStereoMessage = createLatestFrameStereoVisionPointCloudMessage(originalPointCloud,
+                                                                                                         sourcePointsToWorld,
+                                                                                                         correctedPointCloud);
+      RigidBodyTransformReadOnly sensorPose = latestFrame.getSensorPose();
+      latestStereoMessage.getSensorPosition().set(sensorPose.getTranslation());
+      latestStereoMessage.getSensorOrientation().set(sensorPose.getRotation());
+      reaMessager.submitMessage(SLAMModuleAPI.IhmcSLAMFrameState, latestStereoMessage);
+      reaMessager.submitMessage(SLAMModuleAPI.LatestFrameConfidenceFactor, latestFrame.getConfidenceFactor());
+      
+      slam.updatePlanarRegionsMap();
+      PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
+      PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap);
+      reaMessager.submitMessage(planarRegionsStateTopicToSubmit, planarRegionsListMessage);
+      planarRegionPublisher.publish(planarRegionsListMessage);
    }
 
    private StereoVisionPointCloudMessage createLatestFrameStereoVisionPointCloudMessage(Point3DReadOnly[] originalPointCloud,
@@ -279,24 +229,19 @@ public class SLAMModule
             return;
 
          pointCloudQueue.add(pointCloud);
-         stationaryFlagQueue.add(robotStatus.get());
-         reasonableVelocityFlagQueue.add(velocityStatus.get());
       }
    }
 
-   private void updateSLAMParameters()
+   protected void updateSLAMParameters()
    {
-      RandomICPSLAMParameters parameters = ihmcSLAMParameters.get();
-      //slam.updateParameters(parameters);
+
    }
 
    public void clearSLAM()
    {
-      pointCloudQueue.clear();
-      stationaryFlagQueue.clear();
-      reasonableVelocityFlagQueue.clear();
-      slam.clear();
       newPointCloud.set(null);
+      pointCloudQueue.clear();
+      slam.clear();
    }
 
    private void handlePointCloud(Subscriber<StereoVisionPointCloudMessage> subscriber)
@@ -306,7 +251,7 @@ public class SLAMModule
       reaMessager.submitMessage(SLAMModuleAPI.DepthPointCloudState, new StereoVisionPointCloudMessage(message));
    }
 
-   public static SLAMModule createIntraprocessModule(String configurationFilePath) throws Exception
+   public static SLAMModule createIntraprocessModule() throws Exception
    {
       KryoMessager messager = KryoMessager.createIntraprocess(SLAMModuleAPI.API,
                                                               NetworkPorts.SLAM_MODULE_UI_PORT,
@@ -314,18 +259,6 @@ public class SLAMModule
       messager.setAllowSelfSubmit(true);
       messager.startMessager();
 
-      File configurationFile = new File(configurationFilePath);
-      try
-      {
-         configurationFile.getParentFile().mkdirs();
-         configurationFile.createNewFile();
-      }
-      catch (IOException e)
-      {
-         System.out.println(configurationFile.getAbsolutePath());
-         e.printStackTrace();
-      }
-
-      return new SLAMModule(messager, configurationFile);
+      return new SLAMModule(messager);
    }
 }
