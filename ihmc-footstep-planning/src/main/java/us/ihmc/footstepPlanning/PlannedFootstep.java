@@ -236,7 +236,10 @@ public class PlannedFootstep implements PlannedFootstepReadOnly
       footstepDataMessage.getLocation().set(footstepPose.getPosition());
       footstepDataMessage.getOrientation().set(footstepPose.getOrientation());
 
-      foothold.getVertexBufferView().forEach(vertex -> footstepDataMessage.getPredictedContactPoints2d().add().set(vertex, 0.0));
+      for (int i = 0; i < foothold.getNumberOfVertices(); i++)
+      {
+         footstepDataMessage.getPredictedContactPoints2d().add().set(foothold.getVertex(i), 0.0);
+      }
 
       if (trajectoryType != null)
       {
