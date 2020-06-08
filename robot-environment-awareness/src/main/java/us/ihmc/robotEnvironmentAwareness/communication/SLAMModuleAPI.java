@@ -32,6 +32,9 @@ public class SLAMModuleAPI
    private static final CategoryTheme Buffer = apiFactory.createCategoryTheme("Buffer");
    private static final CategoryTheme Custom = apiFactory.createCategoryTheme("Custom");
    private static final CategoryTheme Footstep = apiFactory.createCategoryTheme("Footstep");
+   private static final CategoryTheme DataManager = apiFactory.createCategoryTheme("DataManager");
+   private static final CategoryTheme Export = apiFactory.createCategoryTheme("Export");
+   private static final CategoryTheme Import = apiFactory.createCategoryTheme("Import");
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
@@ -45,6 +48,8 @@ public class SLAMModuleAPI
    private static final TypedTopicTheme<Integer> Size = apiFactory.createTypedTopicTheme("Size");
    private static final TypedTopicTheme<String> Status = apiFactory.createTypedTopicTheme("Status");
    private static final TypedTopicTheme<Double> Value = apiFactory.createTypedTopicTheme("Value");
+   
+   private static final TypedTopicTheme<String> Path = apiFactory.createTypedTopicTheme("Path");
 
    public static final Topic<Boolean> RequestEntireModuleState = Root.child(Module).topic(Request);
    public static final Topic<Boolean> RequestPlanarRegions = Root.child(Module).child(PlanarRegions).topic(Request);
@@ -83,5 +88,12 @@ public class SLAMModuleAPI
    public static final Topic<StampedPosePacket> CustomizedFrameState = Root.child(UI).child(Custom).topic(Data);
    public static final Topic<Double> LatestFrameConfidenceFactor = Root.child(UI).child(SensorFrame).topic(Value);
 
+   public static final Topic<Boolean> UIRawDataExportRequest = Root.child(UI).child(DataManager).child(DepthCloud).child(Export).topic(Request);
+   
+   public static final Topic<String> UIRawDataExportDirectory = Root.child(UI).child(DataManager).child(DepthCloud).child(Export).topic(Path);
+   public static final Topic<String> UISLAMDataExportDirectory = Root.child(UI).child(DataManager).child(Module).child(Export).topic(Path);
+   public static final Topic<String> UIRawDataImportDirectory = Root.child(UI).child(DataManager).child(DepthCloud).child(Import).topic(Path);
+   public static final Topic<String> UIPlanarRegionsImportDirectory = Root.child(UI).child(DataManager).child(PlanarRegions).topic(Path);
+   
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }
