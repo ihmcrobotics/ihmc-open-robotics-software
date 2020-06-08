@@ -16,7 +16,6 @@ import java.util.concurrent.atomic.AtomicReference;
 public class SegmentationModuleStateReporter
 {
    private final Messager reaMessager;
-   private final AtomicReference<Boolean> isOcTreeRequested;
    private final AtomicReference<Boolean> arePlanarRegionsRequested;
    private final AtomicReference<Boolean> isPlanarRegionSegmentationRequested;
    private final AtomicReference<Boolean> arePlanarRegionsIntersectionsRequested;
@@ -24,21 +23,9 @@ public class SegmentationModuleStateReporter
    public SegmentationModuleStateReporter(Messager reaMessager)
    {
       this.reaMessager = reaMessager;
-      isOcTreeRequested = reaMessager.createInput(SegmentationModuleAPI.RequestOcTree, false);
       arePlanarRegionsRequested = reaMessager.createInput(SegmentationModuleAPI.RequestPlanarRegions, false);
       isPlanarRegionSegmentationRequested = reaMessager.createInput(SegmentationModuleAPI.RequestPlanarRegionSegmentation, false);
       arePlanarRegionsIntersectionsRequested = reaMessager.createInput(SegmentationModuleAPI.RequestPlanarRegionsIntersections, false);
-   }
-
-   public void reportOcTreeState(NormalOcTree ocTree)
-   {
-      if (isOcTreeRequested.getAndSet(false))
-         reaMessager.submitMessage(SegmentationModuleAPI.OcTreeState, OcTreeMessageConverter.convertToMessage(ocTree));
-   }
-
-   public void reportSensorPose(Pose3DReadOnly sensorPose)
-   {
-      reaMessager.submitMessage(SegmentationModuleAPI.SensorPose, new Pose3D(sensorPose));
    }
 
    public void reportPlanarRegionsState(RegionFeaturesProvider regionFeaturesProvider)
