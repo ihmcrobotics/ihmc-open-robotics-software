@@ -82,7 +82,7 @@ public class LinuxGUIRecorder
 
    public synchronized void start()
    {
-      DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+      DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
       Calendar calendar = Calendar.getInstance();
       String timestamp = dateFormat.format(calendar.getTime());
 

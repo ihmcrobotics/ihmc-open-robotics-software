@@ -1,5 +1,9 @@
 Configuration:
   status: warn
+  properties:
+    property:
+      name: dateForLogFileName
+      value: "${date:yyyyMMdd_HHmmssSSS}" # This variable makes sure both logs go to the same file.
   appenders:
     Console:
       -
@@ -11,6 +15,17 @@ Configuration:
         name: ExternalAppender
         PatternLayout:
           Pattern: "%highlight{%date{yyMMdd H:mm:ss:SSS} [%level] (%logger{36}): %msg%n}"
+    File:
+      -
+        name: IHMCFileAppender
+        fileName: "${sys:user.home}/.ihmc/logs/${sys:dateForLogFileName}_LogTools.txt"
+        PatternLayout:
+          Pattern: "%date{yyMMdd H:mm:ss:SSS} [%level] %msg%n"
+      -
+        name: ExternalFileAppender
+        fileName: "${sys:user.home}/.ihmc/logs/${sys:dateForLogFileName}_LogTools.txt"
+        PatternLayout:
+          Pattern: "%date{yyMMdd H:mm:ss:SSS} [%level] (%logger{36}): %msg%n"
 
   Loggers:
     logger:
@@ -21,7 +36,12 @@ Configuration:
         AppenderRef:
           -
             ref: IHMCAppender
+          -
+            ref: IHMCFileAppender
     Root:
       level: error
       AppenderRef:
-        ref: ExternalAppender
+        -
+          ref: ExternalAppender
+        -
+          ref: ExternalFileAppender
