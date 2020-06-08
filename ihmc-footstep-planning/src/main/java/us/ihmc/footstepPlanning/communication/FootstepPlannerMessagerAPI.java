@@ -35,6 +35,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParamete
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.List;
 import java.util.Map;
@@ -55,6 +56,7 @@ public class FootstepPlannerMessagerAPI
    public static final Topic<Point3D> StartMidFootPosition = topic("StartMidFootPosition");
    public static final Topic<Quaternion> StartMidFootOrientation = topic("StartMidFootOrientation");
    public static final Topic<FootstepStatusMessage> FootstepStatusMessage = topic("FootstepStatusMessage");
+   public static final Topic<Pair<RobotSide, double[]>> RequestedArmJointAngles = topic("RequestedArmJointAngles");
 
    // REA data
    public static final Topic<PlanarRegionsList> PlanarRegionData = topic("PlanarRegionData");

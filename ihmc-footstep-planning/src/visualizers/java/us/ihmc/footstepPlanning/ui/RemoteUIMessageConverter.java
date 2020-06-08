@@ -21,6 +21,7 @@ import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
+import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.idl.IDLSequence.Object;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -101,6 +102,7 @@ public class RemoteUIMessageConverter
    private IHMCRealtimeROS2Publisher<GoHomeMessage> goHomePublisher;
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> walkingPreviewToolboxStatePublisher;
    private IHMCRealtimeROS2Publisher<WalkingControllerPreviewInputMessage> walkingPreviewRequestPublisher;
+   private IHMCRealtimeROS2Publisher<ArmTrajectoryMessage> armTrajectoryMessagePublisher;
 
    public static RemoteUIMessageConverter createRemoteConverter(Messager messager, String robotName)
    {
@@ -228,6 +230,7 @@ public class RemoteUIMessageConverter
                                                                                    .withInput();
       walkingPreviewToolboxStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ToolboxStateMessage.class, controllerPreviewInputTopic);
       walkingPreviewRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WalkingControllerPreviewInputMessage.class, controllerPreviewInputTopic);
+      armTrajectoryMessagePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, ArmTrajectoryMessage.class, ROS2Tools.getControllerInputTopic(robotName));
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, request -> requestNewPlan());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.HaltPlanning, request -> requestHaltPlanning());
@@ -247,6 +250,17 @@ public class RemoteUIMessageConverter
                                       ROS2Tools.BIPED_SUPPORT_REGION_PUBLISHER.withRobot(robotName)
                                                 .withInput());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.BipedalSupportRegionsParameters, supportRegionsParametersPublisher::publish);
+
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestedArmJointAngles, request ->
+      {
+         RobotSide robotSide = request.getKey();
+         double[] jointAngles = request.getValue();
+         double trajectoryTime = 4.0;
+
+         ArmTrajectoryMessage armTrajectoryMessage = HumanoidMessageTools.createArmTrajectoryMessage(robotSide, trajectoryTime, jointAngles);
+         armTrajectoryMessagePublisher.publish(armTrajectoryMessage);
+
+      });
    }
 
    private void processFootstepPlanningRequestPacket(FootstepPlanningRequestPacket packet)
