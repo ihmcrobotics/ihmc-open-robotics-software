@@ -465,45 +465,45 @@ public class TriangleToolsTest
       isAngleAObtuse = false;
       assertTrue("Case 3 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength,sideBLength,angleB,isAngleAObtuse)) < 0.0001);
 
-      // Case 5: Known angle < Pi/2 and adjacent side > opposite side and opposite side > height and angleA is acute
+      // Case 4: Known angle < Pi/2 and adjacent side > opposite side and opposite side > height and angleA is acute
       sideALength = 1.5;
       sideBLength = 1.0;
       angleB = 0.6;
       result = 1.769654;
       isAngleAObtuse = false;
-      assertTrue("Case 5 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength,sideBLength,angleB,isAngleAObtuse)) < 0.0001);
+      assertTrue("Case 4 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength,sideBLength,angleB,isAngleAObtuse)) < 0.0001);
 
-      // Case 6: Known angle < Pi/2 and adjacent side > opposite side and opposite side > height and angleA is obtuse
+      // Case 5: Known angle < Pi/2 and adjacent side > opposite side and opposite side > height and angleA is obtuse
       sideALength = 1.5;
       sideBLength = 1.0;
       angleB = 0.6;
       result = 0.706353;
       isAngleAObtuse = true;
-      assertTrue("Case 6 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength,sideBLength,angleB,isAngleAObtuse)) < 0.0001);
+      assertTrue("Case 5 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength,sideBLength,angleB,isAngleAObtuse)) < 0.0001);
 
-      // Case 7: Known angle > Pi/2 and adjacent side < opposite side
+      // Case 6: Known angle > Pi/2 and adjacent side < opposite side
       sideALength = 0.5;
       sideBLength = 1.0;
       angleB = 1.75;
       result = 0.781476;
       isAngleAObtuse = false;
-      assertTrue("Case 7 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength,sideBLength,angleB,isAngleAObtuse)) < 0.0001);
+      assertTrue("Case 6 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength,sideBLength,angleB,isAngleAObtuse)) < 0.0001);
 
-      // Case 8: Known angle > Pi/2 and adjacent side = opposite side
+      // Case 7: Known angle > Pi/2 and adjacent side = opposite side
       sideALength = 1.0;
       sideBLength = 1.0;
       angleB = 1.75;
       result = 0.0;
       isAngleAObtuse = false;
-      assertTrue("Case 8 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength,sideBLength,angleB,isAngleAObtuse)) < 0.0001);
+      assertTrue("Case 7 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength,sideBLength,angleB,isAngleAObtuse)) < 0.0001);
 
-      // Case 9: Known angle > Pi/2 and adjacent side > opposite side
+      // Case 8: Known angle > Pi/2 and adjacent side > opposite side
       sideALength = 1.5;
       sideBLength = 1.0;
       angleB = 1.75;
       result = 0.0;
       isAngleAObtuse = false;
-      assertTrue("Case 9 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength,sideBLength,angleB,isAngleAObtuse)) < 0.0001);
+      assertTrue("Case 8 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength,sideBLength,angleB,isAngleAObtuse)) < 0.0001);
 
 
    }
