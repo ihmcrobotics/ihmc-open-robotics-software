@@ -97,7 +97,10 @@ public class SLAMBasedEnvironmentAwarenessUI
 
       new PlanarRegionSegmentationDataExporter(uiMessager); // No need to anything with it beside instantiating it.
       new PlanarRegionDataExporter(uiMessager); // No need to anything with it beside instantiating it.
-      stereoVisionPointCloudDataExporter = new StereoVisionPointCloudDataExporter(uiMessager);
+      stereoVisionPointCloudDataExporter = new StereoVisionPointCloudDataExporter(uiMessager,
+                                                                                  SLAMModuleAPI.DepthPointCloudState,
+                                                                                  SLAMModuleAPI.UIRawDataExportDirectory,
+                                                                                  SLAMModuleAPI.UIRawDataExportRequest);
 
       initializeControllers(uiMessager);
 
@@ -123,7 +126,7 @@ public class SLAMBasedEnvironmentAwarenessUI
    {
       slamAnchorPaneController.attachREAMessager(uiMessager);
       slamAnchorPaneController.bindControls();
-      
+
       slamDataManagerAnchorPaneController.attachREAMessager(uiMessager);
       slamDataManagerAnchorPaneController.bindControls();
    }
