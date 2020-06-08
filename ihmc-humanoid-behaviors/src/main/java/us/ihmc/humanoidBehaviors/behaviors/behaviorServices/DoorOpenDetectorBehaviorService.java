@@ -24,7 +24,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
 
    private DoorLocationPacket latestDoorLocationPacketRecieved;
    private boolean doorOpen = false;
-   private float openDistance = 0.0308f;
+   private float openDistance = 0.17f;
    private boolean run = false;
 
    protected final AtomicReference<DoorLocationPacket> doorLocationQueue = new AtomicReference<DoorLocationPacket>();
@@ -127,10 +127,16 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
                      averageCurrentDoorLocation = averageFramePoses(doorPoses);
                   }
                  // System.out.println("***************************");
-                //  System.out.println(averageOrigin);
-                //  System.out.println(averageCurrentDoorLocation);
+               //   System.out.println(averageOrigin.getYaw());
+               //   System.out.println(averageCurrentDoorLocation.getYaw());
+               //   System.out.println("##"+Math.abs(Math.abs(averageOrigin.getYaw()) -Math.abs(averageCurrentDoorLocation.getYaw())));
+               //   System.out.println("&"+averageOrigin.getPitch());
+                //  System.out.println("&"+averageCurrentDoorLocation.getPitch());
+                //  System.out.println("#"+averageOrigin.getRoll());
+                //  System.out.println("#"+averageCurrentDoorLocation.getRoll());
                 //  System.out.println(averageOrigin.getPositionDistance(averageCurrentDoorLocation));
-                     if (averageCurrentDoorLocation != null && averageOrigin.getPositionDistance(averageCurrentDoorLocation) > openDistance)
+                  
+                     if (averageCurrentDoorLocation != null && Math.abs(Math.abs(averageOrigin.getYaw()) -Math.abs(averageCurrentDoorLocation.getYaw())) > openDistance)
                      {
                         doorOpen = true;
                      }
@@ -158,10 +164,13 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
             aveagedPose.setX(aveagedPose.getX() + pose.getX());
             aveagedPose.setY(aveagedPose.getY() + pose.getY());
             aveagedPose.setZ(aveagedPose.getZ() + pose.getZ());
+            aveagedPose.setOrientationYawPitchRoll(aveagedPose.getYaw()+pose.getYaw(), aveagedPose.getPitch()+pose.getPitch(), aveagedPose.getRoll()+pose.getRoll());
+
          }
          aveagedPose.setX(aveagedPose.getX() / numberOfPoses);
          aveagedPose.setY(aveagedPose.getY() / numberOfPoses);
          aveagedPose.setZ(aveagedPose.getZ() / numberOfPoses);
+         aveagedPose.setOrientationYawPitchRoll(aveagedPose.getYaw() / numberOfPoses, aveagedPose.getPitch() / numberOfPoses, aveagedPose.getRoll() / numberOfPoses);
          return aveagedPose;
       }
       else
