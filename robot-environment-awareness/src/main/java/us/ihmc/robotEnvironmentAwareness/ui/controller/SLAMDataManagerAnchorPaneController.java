@@ -1,15 +1,23 @@
 package us.ihmc.robotEnvironmentAwareness.ui.controller;
 
 import java.io.File;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.concurrent.Executor;
 
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.scene.control.ToggleButton;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Window;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
+import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.robotics.PlanarRegionFileTools;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class SLAMDataManagerAnchorPaneController extends REABasicUIController
 {
@@ -24,12 +32,12 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
    private TextField currentRawDataInputFolderTextField;
    @FXML
    private TextField currentPlanarRegionsInputFolderTextField;
-   
+
    private final DirectoryChooser exportRawDataDirectoryChooser = new DirectoryChooser();
    private final DirectoryChooser exportSLAMDataDirectoryChooser = new DirectoryChooser();
    private final DirectoryChooser importRawDataDirectoryChooser = new DirectoryChooser();
    private final DirectoryChooser importPlanarRegionsDirectoryChooser = new DirectoryChooser();
-   
+
    private final File defaultExportRawDataFile = new File("Data/SLAM/RawData/");
    private final File defaultExportSLAMDataFile = new File("Data/SLAM/SLAMData/");
    private final File defaultImportRawDataFile = new File("Data/SLAM/RawData/");
@@ -57,6 +65,8 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.UIRawDataExportRequest, exportRawData.selectedProperty());
    }
 
+   private final Executor importExecutor = ExecutorServiceTools.newSingleThreadScheduledExecutor(getClass(), ExceptionHandling.CANCEL_AND_REPORT);
+
    @FXML
    private void exportSLAMData()
    {
@@ -72,7 +82,12 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
    @FXML
    private void importPlanarRegions()
    {
-      //TODO: implement
+      String planarRegionsFilePath = currentPlanarRegionsInputFolderTextField.getText();
+      File planarRegionsFile = new File(planarRegionsFilePath);
+      PlanarRegionsList planarRegionDataToImport = PlanarRegionFileTools.importPlanarRegionData(planarRegionsFile);
+      PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionDataToImport);
+      uiMessager.submitMessageInternal(SLAMModuleAPI.ImportedPlanarRegionsState, planarRegionsListMessage);
+      uiMessager.submitMessageInternal(SLAMModuleAPI.ShowImportedPlanarRegions, true);
    }
 
    @FXML
@@ -80,7 +95,7 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
    {
       exportRawDataDirectoryChooser.setInitialDirectory(defaultExportRawDataFile);
       String newPath = exportRawDataDirectoryChooser.showDialog(ownerWindow).getAbsolutePath();
-      uiMessager.submitMessageInternal(SLAMModuleAPI.UIPlanarRegionsImportDirectory, newPath);
+      uiMessager.submitMessageInternal(SLAMModuleAPI.UIRawDataExportDirectory, newPath);
       Platform.runLater(() -> currentRawDataOutputFolderTextField.setText(newPath));
    }
 
@@ -89,7 +104,7 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
    {
       exportSLAMDataDirectoryChooser.setInitialDirectory(defaultExportSLAMDataFile);
       String newPath = exportSLAMDataDirectoryChooser.showDialog(ownerWindow).getAbsolutePath();
-      uiMessager.submitMessageInternal(SLAMModuleAPI.UIPlanarRegionsImportDirectory, newPath);
+      uiMessager.submitMessageInternal(SLAMModuleAPI.UISLAMDataExportDirectory, newPath);
       Platform.runLater(() -> currentSLAMDataOutputFolderTextField.setText(newPath));
    }
 
@@ -98,7 +113,6 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
    {
       importRawDataDirectoryChooser.setInitialDirectory(defaultImportRawDataFile);
       String newPath = importRawDataDirectoryChooser.showDialog(ownerWindow).getAbsolutePath();
-      uiMessager.submitMessageInternal(SLAMModuleAPI.UIPlanarRegionsImportDirectory, newPath);
       Platform.runLater(() -> currentRawDataInputFolderTextField.setText(newPath));
    }
 
@@ -107,7 +121,6 @@ public class SLAMDataManagerAnchorPaneController extends REABasicUIController
    {
       importPlanarRegionsDirectoryChooser.setInitialDirectory(defaultImportPlanarRegionsFile);
       String newPath = importPlanarRegionsDirectoryChooser.showDialog(ownerWindow).getAbsolutePath();
-      uiMessager.submitMessageInternal(SLAMModuleAPI.UIPlanarRegionsImportDirectory, newPath);
       Platform.runLater(() -> currentPlanarRegionsInputFolderTextField.setText(newPath));
    }
 }
