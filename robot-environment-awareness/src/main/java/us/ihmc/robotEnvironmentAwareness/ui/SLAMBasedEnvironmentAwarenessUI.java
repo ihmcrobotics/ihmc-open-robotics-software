@@ -20,8 +20,8 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.FootstepMeshViewer;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.SLAMMeshViewer;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.DataExporterAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMDataManagerAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
@@ -41,7 +41,7 @@ public class SLAMBasedEnvironmentAwarenessUI
    @FXML
    private SLAMAnchorPaneController slamAnchorPaneController;
    @FXML
-   private DataExporterAnchorPaneController dataExporterAnchorPaneController;
+   private SLAMDataManagerAnchorPaneController slamDataManagerAnchorPaneController;
 
    private final Stage primaryStage;
 
@@ -123,10 +123,9 @@ public class SLAMBasedEnvironmentAwarenessUI
    {
       slamAnchorPaneController.attachREAMessager(uiMessager);
       slamAnchorPaneController.bindControls();
-      //      dataExporterAnchorPaneController.setConfigurationFile(configurationFile);
-      //      dataExporterAnchorPaneController.attachREAMessager(uiMessager);
-      //      dataExporterAnchorPaneController.setMainWindow(primaryStage);
-      //      dataExporterAnchorPaneController.bindControls();
+      
+      slamDataManagerAnchorPaneController.attachREAMessager(uiMessager);
+      slamDataManagerAnchorPaneController.bindControls();
    }
 
    public void show() throws IOException
