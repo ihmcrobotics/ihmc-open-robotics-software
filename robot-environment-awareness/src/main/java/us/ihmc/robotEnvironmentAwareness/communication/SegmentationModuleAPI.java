@@ -1,6 +1,8 @@
 package us.ihmc.robotEnvironmentAwareness.communication;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.MessagerAPIFactory;
 import us.ihmc.messager.MessagerAPIFactory.Category;
 import us.ihmc.messager.MessagerAPIFactory.CategoryTheme;
@@ -31,6 +33,8 @@ public class SegmentationModuleAPI
    public static final Topic<Boolean> OcTreeEnable = topic("OcTreeEnable");
    public static final Topic<Boolean> OcTreeClear = topic("OcTreeClear");
    public static final Topic<NormalOcTreeMessage> OcTreeState = topic("OcTreeState");
+   public static final Topic<NormalOcTree> OcTree = topic("OcTree");
+   public static final Topic<Pose3DReadOnly> SensorPose = topic("SensorPose");
    public static final Topic<PlanarRegionSegmentationMessage[]> PlanarRegionsSegmentationState = topic("PlanarRegionsSegmentationState");
 
    public static final Topic<SurfaceNormalFilterParameters> SurfaceNormalFilterParameters = topic("SurfaceNormalFilterParameters");

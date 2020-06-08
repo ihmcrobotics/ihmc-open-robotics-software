@@ -16,6 +16,7 @@ import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
@@ -33,7 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
 
-public class PlanarSegmentationREAModule
+public class PlanarSegmentationREAModule implements OcTreeConsumer
 {
    private static final String reportOcTreeStateTimeReport = "Reporting OcTree state took: ";
    private static final String planarRegionsTimeReport = "OcTreePlanarRegion update took: ";
@@ -52,6 +53,8 @@ public class PlanarSegmentationREAModule
    private final SegmentationModuleStateReporter moduleStateReporter;
 
    private final AtomicReference<Boolean> clearOcTree;
+   private final AtomicReference<NormalOcTree> ocTree;
+   private final AtomicReference<Pose3DReadOnly> sensorPose;
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
@@ -83,7 +86,6 @@ public class PlanarSegmentationREAModule
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicName,
                                                     this::dispatchCustomPlanarRegion);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopic, this::handleREAStateRequestMessage);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, NormalOcTreeMessage.class, inputTopic, this::dispatchNormalOcTreeMessage);
 
       FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
       loadConfigurationFile(filePropertyHelper);
@@ -92,9 +94,18 @@ public class PlanarSegmentationREAModule
                                         (content) -> planarRegionFeatureUpdater.saveConfiguration(filePropertyHelper));
 
       clearOcTree = reaMessager.createInput(SegmentationModuleAPI.OcTreeClear, false);
+      ocTree = reaMessager.createInput(SegmentationModuleAPI.OcTree, null);
+      sensorPose = reaMessager.createInput(SegmentationModuleAPI.SensorPose, null);
 
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
       reaMessager.submitMessage(SegmentationModuleAPI.RequestEntireModuleState, true);
+   }
+
+   public void reportOcTree(NormalOcTree ocTree, Pose3DReadOnly sensorPose)
+   {
+      reaMessager.submitMessage(SegmentationModuleAPI.OcTree, ocTree);
+      reaMessager.submitMessage(SegmentationModuleAPI.OcTreeState, OcTreeMessageConverter.convertToMessage(ocTree));
+      reaMessager.submitMessage(SegmentationModuleAPI.SensorPose, sensorPose);
    }
 
    private void dispatchCustomPlanarRegion(Subscriber<PlanarRegionsListMessage> subscriber)
@@ -102,12 +113,6 @@ public class PlanarSegmentationREAModule
       PlanarRegionsListMessage message = subscriber.takeNextData();
       PlanarRegionsList customPlanarRegions = PlanarRegionMessageConverter.convertToPlanarRegionsList(message);
       customPlanarRegions.getPlanarRegionsAsList().forEach(planarRegionFeatureUpdater::registerCustomPlanarRegion);
-   }
-
-   private void dispatchNormalOcTreeMessage(Subscriber<NormalOcTreeMessage> subscriber)
-   {
-      NormalOcTreeMessage newMessage = subscriber.takeNextData();
-      reaMessager.submitMessage(SegmentationModuleAPI.OcTreeState, newMessage);
    }
 
    private void handleREAStateRequestMessage(Subscriber<REAStateRequestMessage> subscriber)
@@ -121,7 +126,6 @@ public class PlanarSegmentationREAModule
       if (newMessage.getRequestClear())
          clearOcTree.set(true);
    }
-
 
    private void loadConfigurationFile(FilePropertyHelper filePropertyHelper)
    {
@@ -137,17 +141,14 @@ public class PlanarSegmentationREAModule
 
       try
       {
-         NormalOcTree mainOctree = mainUpdater.getMainOctree();
-         Pose3DReadOnly sensorPose = mainUpdater.getSensorPose();
+         NormalOcTree mainOctree = ocTree.getAndSet(null);
+         Pose3DReadOnly sensorPose = this.sensorPose.getAndSet(null);
          if (clearOcTree.getAndSet(false))
          {
             planarRegionFeatureUpdater.clearOcTree();
          }
-         else
+         else if (mainOctree != null)
          {
-            timeReporter.run(() -> moduleStateReporter.reportOcTreeState(mainOctree), reportOcTreeStateTimeReport);
-            moduleStateReporter.reportSensorPose(sensorPose);
-
             if (isThreadInterrupted())
                return;
 

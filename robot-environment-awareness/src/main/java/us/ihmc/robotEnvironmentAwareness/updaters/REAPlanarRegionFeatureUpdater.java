@@ -269,7 +269,10 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       segmentationCalculator.setBoundingBox(octree.getBoundingBox());
       segmentationCalculator.setParameters(planarRegionSegmentationParameters.get());
       segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters.get());
-      segmentationCalculator.setSensorPosition(sensorPose.getPosition());
+      if (sensorPose != null)
+         segmentationCalculator.setSensorPosition(sensorPose.getPosition());
+      else
+         segmentationCalculator.setSensorPosition(null);
 
       timeReporter.run(() -> segmentationCalculator.compute(octree.getRoot()), segmentationTimeReport);
 

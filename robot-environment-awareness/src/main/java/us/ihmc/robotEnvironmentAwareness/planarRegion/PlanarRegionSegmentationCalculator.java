@@ -258,7 +258,7 @@ public class PlanarRegionSegmentationCalculator
 
       NeighborActionRule<NormalOcTreeNode> extendSearchRule = neighborNode -> recordCandidatesForRegion(neighborNode, ocTreeNodePlanarRegion, newSetToExplore,
                                                                                                         boundingBox, parameters);
-      if (surfaceNormalFilterParameters.isUseSurfaceNormalFilter())
+      if (surfaceNormalFilterParameters.isUseSurfaceNormalFilter() && !estimatedSensorPosition.containsNaN())
       {
          double surfaceNormalLowerBound = surfaceNormalFilterParameters.getSurfaceNormalLowerBound();
          double surfaceNormalUpperBound = surfaceNormalFilterParameters.getSurfaceNormalUpperBound();
@@ -384,6 +384,9 @@ public class PlanarRegionSegmentationCalculator
 
    public void setSensorPosition(Tuple3DReadOnly estimatedPosition)
    {
-      estimatedSensorPosition.set(estimatedPosition);
+      if (estimatedPosition == null)
+         estimatedSensorPosition.setToNaN();
+      else
+         estimatedSensorPosition.set(estimatedPosition);
    }
 }
