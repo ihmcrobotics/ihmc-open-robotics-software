@@ -1,27 +1,11 @@
 package us.ihmc.footstepPlanning.ui.viewers;
 
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ComputePath;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepPlanResponse;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.FootstepToUpdateViz;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.GlobalReset;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.IgnorePartialFootholds;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.SelectedFootstep;
-import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.ShowFootstepPlan;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -32,6 +16,15 @@ import us.ihmc.messager.Messager;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
+import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
+
 /**
  * This class uses the shorthand: compute a mesh = using a FootstepDataMessage generate a Mesh and
  * Material pair update a mesh = from a Mesh and Material pair update a MeshView
@@ -40,7 +33,7 @@ public class FootstepPathMeshViewer extends AnimationTimer
 {
    private final Group root = new Group();
    private final ExecutorService executorService = Executors.newSingleThreadExecutor(ThreadTools.createNamedThreadFactory(getClass().getSimpleName()));
-   private SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
+   private final SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
 
    private final AtomicBoolean reset = new AtomicBoolean(false);
    private final AtomicBoolean ignorePartialFootholds = new AtomicBoolean();
@@ -81,7 +74,13 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
       for (int i = 0; i < 200; i++)
       {
-         footstepMeshes.add(new FootstepMeshManager(root, meshBuilder, i));
+         int index = i;
+         FootstepMeshManager meshManager = new FootstepMeshManager(root,
+                                                                   meshBuilder,
+                                                                   defaultContactPoints::get,
+                                                                   () -> selectedStep.get().getKey() == index,
+                                                                   ignorePartialFootholds::get);
+         footstepMeshes.add(meshManager);
       }
 
       messager.registerTopicListener(ShowFootstepPlan, show -> footstepMeshes.forEach(mesh -> mesh.getMeshHolder().getMeshView().setVisible(show)));
@@ -95,7 +94,13 @@ public class FootstepPathMeshViewer extends AnimationTimer
 
          while (footstepPlanResponse.getFootstepDataList().size() > footstepMeshes.size())
          {
-            footstepMeshes.add(new FootstepMeshManager(root, meshBuilder, footstepMeshes.size()));
+            int index = footstepMeshes.size();
+            FootstepMeshManager meshManager = new FootstepMeshManager(root,
+                                                                      meshBuilder,
+                                                                      defaultContactPoints::get,
+                                                                      () -> selectedStep.get().getKey() == index,
+                                                                      ignorePartialFootholds::get);
+            footstepMeshes.add(meshManager);
          }
 
          for (int i = 0; i < footstepPlanResponse.getFootstepDataList().size(); i++)
