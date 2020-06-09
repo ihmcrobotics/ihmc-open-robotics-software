@@ -37,6 +37,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final double[] swingWaypointProportions;
+   private final YoGraphicsListRegistry graphicsListRegistry;
 
    private final TwoWaypointSwingGenerator twoWaypointSwingGenerator;
    private final ConvexPolygon2D footPolygonShape;
@@ -107,6 +108,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                                                    YoGraphicsListRegistry graphicsListRegistry)
    {
       String namePrefix = "trajectoryExpander";
+      this.graphicsListRegistry = graphicsListRegistry;
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix,
                                                                 steppingParameters.getMinSwingHeightFromStanceFoot(),
@@ -714,6 +716,11 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    public SwingOverPlanarRegionsStatus getStatus()
    {
       return status.getEnumValue();
+   }
+
+   public YoGraphicsListRegistry getGraphicsListRegistry()
+   {
+      return graphicsListRegistry;
    }
 
    // VISULIZER METHODS

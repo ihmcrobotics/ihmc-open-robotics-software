@@ -9,7 +9,7 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.footstepPlanAndProcessModule.FootstepPlanAndProcessModule;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -42,8 +42,7 @@ public class AtlasFootstepPlannerUI extends Application
    private RemoteUIMessageConverter messageConverter;
 
    private FootstepPlannerUI ui;
-
-   private FootstepPlanAndProcessModule planningAndProcessingModule;
+   private FootstepPlanningModule plannerModule;
 
    @Override
    public void start(Stage primaryStage) throws Exception
@@ -63,9 +62,10 @@ public class AtlasFootstepPlannerUI extends Application
 
       ui = FootstepPlannerUI.createMessagerUI(primaryStage,
                                               messager,
-                                              drcRobotModel.getFootstepPlannerParameters(),
                                               drcRobotModel.getVisibilityGraphsParameters(),
-                                              drcRobotModel.getFootstepPostProcessingParameters(),
+                                              drcRobotModel.getFootstepPlannerParameters(),
+                                              drcRobotModel.getSwingPlannerParameters(),
+                                              drcRobotModel.getSplitFractionCalculatorParameters(),
                                               drcRobotModel,
                                               previewModel,
                                               drcRobotModel.getContactPointParameters(),
@@ -78,16 +78,15 @@ public class AtlasFootstepPlannerUI extends Application
 
       if (launchPlannerToolbox)
       {
-         planningAndProcessingModule = new FootstepPlanAndProcessModule(drcRobotModel, DomainFactory.PubSubImplementation.FAST_RTPS);
-         FootstepPlanningModule planningModule = planningAndProcessingModule.getPlanningModule();
+         plannerModule = FootstepPlanningModuleLauncher.createModule(drcRobotModel, DomainFactory.PubSubImplementation.FAST_RTPS);
 
          // Create logger and connect to messager
-         FootstepPlannerLogger logger = new FootstepPlannerLogger(planningModule);
+         FootstepPlannerLogger logger = new FootstepPlannerLogger(plannerModule);
          Runnable loggerRunnable = () -> logger.logSessionAndReportToMessager(messager);
          messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestGenerateLog, b -> new Thread(loggerRunnable).start());
 
          // Automatically send graph data over messager
-         planningModule.addStatusCallback(status -> handleMessagerCallbacks(planningModule, status));
+         plannerModule.addStatusCallback(status -> handleMessagerCallbacks(plannerModule, status));
       }
    }
 
@@ -151,8 +150,8 @@ public class AtlasFootstepPlannerUI extends Application
       messageConverter.destroy();
       ui.stop();
 
-      if (planningAndProcessingModule != null)
-         planningAndProcessingModule.closeAndDispose();
+      if (plannerModule != null)
+         plannerModule.closeAndDispose();
 
       Platform.exit();
    }

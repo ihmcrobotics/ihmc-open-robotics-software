@@ -1,11 +1,14 @@
 package us.ihmc.footstepPlanning;
 
+import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
+import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.footstepPlanning.graphSearch.AStarIterationData;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
@@ -13,10 +16,19 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.FootstepNodeChecker;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.icp.AreaBasedSplitFractionCalculator;
+import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.footstepPlanning.icp.PositionBasedSplitFractionCalculator;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
 import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.log.FootstepPlannerIterationData;
 import us.ihmc.footstepPlanning.simplePlanners.PlanThenSnapPlanner;
+import us.ihmc.footstepPlanning.swing.AdaptiveSwingTrajectoryCalculator;
+import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.WaypointDefinedBodyPathPlanHolder;
 import us.ihmc.pathPlanning.graph.structure.GraphEdge;
@@ -28,6 +40,7 @@ import us.ihmc.pathPlanning.visibilityGraphs.tools.BodyPathPlan;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.trajectories.TrajectoryType;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.CloseableAndDisposable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -41,14 +54,18 @@ import java.util.function.Consumer;
 public class FootstepPlanningModule implements CloseableAndDisposable
 {
    private final String name;
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private Ros2Node ros2Node;
-   private final FootstepPlannerParametersBasics footstepPlannerParameters;
    private final VisibilityGraphsParametersBasics visibilityGraphParameters;
+   private final FootstepPlannerParametersBasics footstepPlannerParameters;
+
+   private final VisibilityGraphPathPlanner bodyPathPlanner;
+   private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
 
    private final PlanThenSnapPlanner planThenSnapPlanner;
    private final AStarFootstepPlanner aStarFootstepPlanner;
-   private final VisibilityGraphPathPlanner bodyPathPlanner;
-   private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder = new WaypointDefinedBodyPathPlanHolder();
+
+   private final FootstepPlanPostProcessHandler postProcessHandler;
 
    private final AtomicBoolean isPlanning = new AtomicBoolean();
    private final FootstepPlannerRequest request = new FootstepPlannerRequest();
@@ -63,25 +80,36 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
    public FootstepPlanningModule(String name)
    {
-      this(name, new DefaultFootstepPlannerParameters(), new DefaultVisibilityGraphParameters(), PlannerTools.createDefaultFootPolygons());
+      this(name,
+           new DefaultVisibilityGraphParameters(),
+           new DefaultFootstepPlannerParameters(),
+           new DefaultSwingPlannerParameters(),
+           new DefaultSplitFractionCalculatorParameters(),
+           null,
+           PlannerTools.createDefaultFootPolygons());
    }
 
    public FootstepPlanningModule(String name,
-                                 FootstepPlannerParametersBasics footstepPlannerParameters,
                                  VisibilityGraphsParametersBasics visibilityGraphParameters,
+                                 FootstepPlannerParametersBasics footstepPlannerParameters,
+                                 SwingPlannerParametersBasics swingPlannerParameters,
+                                 SplitFractionCalculatorParametersBasics splitFractionParameters,
+                                 WalkingControllerParameters walkingControllerParameters,
                                  SideDependentList<ConvexPolygon2D> footPolygons)
    {
       this.name = name;
-      this.footstepPlannerParameters = footstepPlannerParameters;
       this.visibilityGraphParameters = visibilityGraphParameters;
+      this.footstepPlannerParameters = footstepPlannerParameters;
 
       BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
       this.bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters,
                                                             pathPostProcessor,
-                                                            new YoVariableRegistry(getClass().getSimpleName()));
+                                                            registry);
 
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters, footPolygons, bodyPathPlanHolder);
+      this.postProcessHandler = new FootstepPlanPostProcessHandler(swingPlannerParameters, splitFractionParameters, walkingControllerParameters, footPolygons);
+      aStarFootstepPlanner.setPostProcessorCallback(output -> postProcessHandler.handleRequest(output.getKey(), output.getValue()));
 
       addStatusCallback(output -> output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lapElapsed()));
       addStatusCallback(output -> output.getPlannerTimings().setTotalElapsedSeconds(stopwatch.totalElapsed()));
@@ -181,7 +209,7 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       if (request.getPerformAStarSearch())
       {
-         aStarFootstepPlanner.setStatusCallback(statusCallback);
+         postProcessHandler.setStatusCallback(statusCallback);
          aStarFootstepPlanner.handleRequest(request, output);
       }
       else
@@ -206,11 +234,14 @@ public class FootstepPlanningModule implements CloseableAndDisposable
          }
 
          output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lap());
+
+         postProcessHandler.handleRequest(request, output);
          statusCallback.accept(output);
       }
 
       isPlanning.set(false);
    }
+
 
    private void reportBodyPathPlan(BodyPathPlanningResult bodyPathPlanningResult)
    {
@@ -300,6 +331,16 @@ public class FootstepPlanningModule implements CloseableAndDisposable
       return visibilityGraphParameters;
    }
 
+   public SwingPlannerParametersBasics getSwingPlannerParameters()
+   {
+      return postProcessHandler.getSwingPlannerParameters();
+   }
+
+   public SplitFractionCalculatorParametersBasics getSplitFractionParameters()
+   {
+      return postProcessHandler.getSplitFractionParameters();
+   }
+
    public FootstepNodeSnapAndWiggler getSnapper()
    {
       return aStarFootstepPlanner.getSnapper();
@@ -333,6 +374,31 @@ public class FootstepPlanningModule implements CloseableAndDisposable
    public List<FootstepPlannerIterationData> getIterationData()
    {
       return aStarFootstepPlanner.getIterationData();
+   }
+
+   public AdaptiveSwingTrajectoryCalculator getAdaptiveSwingTrajectoryCalculator()
+   {
+      return postProcessHandler.getAdaptiveSwingTrajectoryCalculator();
+   }
+
+   public SwingOverPlanarRegionsTrajectoryExpander getSwingOverPlanarRegionsTrajectoryExpander()
+   {
+      return postProcessHandler.getSwingOverPlanarRegionsTrajectoryExpander();
+   }
+
+   public AreaBasedSplitFractionCalculator getAreaBasedSplitFractionCalculator()
+   {
+      return postProcessHandler.getAreaBasedSplitFractionCalculator();
+   }
+
+   public PositionBasedSplitFractionCalculator getPositionBasedSplitFractionCalculator()
+   {
+      return postProcessHandler.getPositionBasedSplitFractionCalculator();
+   }
+
+   public FootstepPlanPostProcessHandler getPostProcessHandler()
+   {
+      return postProcessHandler;
    }
 
    @Override

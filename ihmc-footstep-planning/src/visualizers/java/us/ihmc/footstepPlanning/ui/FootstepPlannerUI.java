@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
@@ -19,8 +18,10 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
+import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
+import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.ui.components.*;
 import us.ihmc.footstepPlanning.ui.controllers.*;
 import us.ihmc.footstepPlanning.ui.viewers.*;
@@ -84,11 +85,13 @@ public class FootstepPlannerUI
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
    @FXML
-   private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
-   @FXML
    private VisibilityGraphsParametersUIController visibilityGraphsParametersUIController;
    @FXML
-   private FootstepPostProcessingParametersUIController footstepPostProcessingParametersUIController;
+   private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
+   @FXML
+   private SwingPlannerParametersUIController swingPlannerParametersUIController;
+   @FXML
+   private SplitFractionParametersUIController splitFractionParametersUIController;
    @FXML
    private FootstepPlannerLogVisualizerController footstepPlannerLogVisualizerController;
    @FXML
@@ -107,9 +110,10 @@ public class FootstepPlannerUI
    {
       this(primaryStage,
            messager,
-           new DefaultFootstepPlannerParameters(),
            new DefaultVisibilityGraphParameters(),
-           new DefaultFootstepPostProcessingParameters(),
+           new DefaultFootstepPlannerParameters(),
+           new DefaultSwingPlannerParameters(),
+           new DefaultSplitFractionCalculatorParameters(),
            null,
            null,
            showTestDashboard,
@@ -118,9 +122,10 @@ public class FootstepPlannerUI
 
    public FootstepPlannerUI(Stage primaryStage,
                             JavaFXMessager messager,
-                            FootstepPlannerParametersBasics plannerParameters,
                             VisibilityGraphsParametersBasics visibilityGraphsParameters,
-                            FootstepPostProcessingParametersBasics footstepPostProcessingParameters,
+                            FootstepPlannerParametersBasics plannerParameters,
+                            SwingPlannerParametersBasics swingPlannerParameters,
+                            SplitFractionCalculatorParametersBasics splitFractionCalculatorParameters,
                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             WalkingControllerParameters walkingControllerParameters,
                             boolean showTestDashboard,
@@ -128,9 +133,10 @@ public class FootstepPlannerUI
    {
       this(primaryStage,
            messager,
-           plannerParameters,
            visibilityGraphsParameters,
-           footstepPostProcessingParameters,
+           plannerParameters,
+           swingPlannerParameters,
+           splitFractionCalculatorParameters,
            fullHumanoidRobotModelFactory,
            null,
            walkingControllerParameters,
@@ -142,9 +148,10 @@ public class FootstepPlannerUI
 
    public FootstepPlannerUI(Stage primaryStage,
                             JavaFXMessager messager,
-                            FootstepPlannerParametersBasics plannerParameters,
                             VisibilityGraphsParametersBasics visibilityGraphsParameters,
-                            FootstepPostProcessingParametersBasics footstepPostProcessingParameters,
+                            FootstepPlannerParametersBasics plannerParameters,
+                            SwingPlannerParametersBasics swingPlannerParameters,
+                            SplitFractionCalculatorParametersBasics splitFractionCalculatorParameters,
                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             FullHumanoidRobotModelFactory previewModelFactory,
                             WalkingControllerParameters walkingControllerParameters,
@@ -167,17 +174,19 @@ public class FootstepPlannerUI
          mainPane.getChildren().remove(mainPane.getLeft());
       }
 
-      footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
-      footstepPostProcessingParametersUIController.setPostProcessingParameters(footstepPostProcessingParameters);
+      footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
+      swingPlannerParametersUIController.setParameters(swingPlannerParameters);
+      splitFractionParametersUIController.setParameters(splitFractionCalculatorParameters);
 
       mainTabController.attachMessager(messager);
       footstepPlannerStatusBarController.attachMessager(messager);
       footstepPlannerTestDashboardController.attachMessager(messager);
       footstepPlannerMenuUIController.attachMessager(messager);
-      footstepPlannerParametersUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
-      footstepPostProcessingParametersUIController.attachMessager(messager);
+      footstepPlannerParametersUIController.attachMessager(messager);
+      swingPlannerParametersUIController.attachMessager(messager);
+      splitFractionParametersUIController.attachMessager(messager);
       footstepPlannerLogVisualizerController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
       uiRobotController.attachMessager(messager);
@@ -189,8 +198,9 @@ public class FootstepPlannerUI
       footstepPlannerTestDashboardController.bindControls();
       footstepPlannerParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
-      footstepPostProcessingParametersUIController.bindControls();
       footstepPlannerLogVisualizerController.bindControls();
+      swingPlannerParametersUIController.bindControls();
+      splitFractionParametersUIController.bindControls();
       visibilityGraphsUIController.bindControls();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
@@ -388,7 +398,8 @@ public class FootstepPlannerUI
       footstepPlannerLogVisualizerController.onPrimaryStageLoaded();
       footstepPlannerParametersUIController.onPrimaryStageLoaded();
       visibilityGraphsParametersUIController.onPrimaryStageLoaded();
-      footstepPostProcessingParametersUIController.onPrimaryStageLoaded();
+      swingPlannerParametersUIController.onPrimaryStageLoaded();
+      splitFractionParametersUIController.onPrimaryStageLoaded();
    }
 
    public void stop()
@@ -427,9 +438,10 @@ public class FootstepPlannerUI
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage,
                                                     JavaFXMessager messager,
-                                                    FootstepPlannerParametersBasics plannerParameters,
                                                     VisibilityGraphsParametersBasics visibilityGraphsParameters,
-                                                    FootstepPostProcessingParametersBasics postProcessingParameters,
+                                                    FootstepPlannerParametersBasics plannerParameters,
+                                                    SwingPlannerParametersBasics swingPlannerParameters,
+                                                    SplitFractionCalculatorParametersBasics splitFractionCalculatorParameters,
                                                     FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                                                     FullHumanoidRobotModelFactory previewModelFactory,
                                                     RobotContactPointParameters<RobotSide> contactPointParameters,
@@ -445,9 +457,10 @@ public class FootstepPlannerUI
 
       return new FootstepPlannerUI(primaryStage,
                                    messager,
-                                   plannerParameters,
                                    visibilityGraphsParameters,
-                                   postProcessingParameters,
+                                   plannerParameters,
+                                   swingPlannerParameters,
+                                   splitFractionCalculatorParameters,
                                    fullHumanoidRobotModelFactory,
                                    previewModelFactory,
                                    walkingControllerParameters,

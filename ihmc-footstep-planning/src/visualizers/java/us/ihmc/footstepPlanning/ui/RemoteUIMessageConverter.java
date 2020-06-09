@@ -1,13 +1,9 @@
 package us.ihmc.footstepPlanning.ui;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
-
 import controller_msgs.msg.dds.*;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -21,7 +17,9 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProper
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.PlannerOccupancyMap;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersReadOnly;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersReadOnly;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
@@ -30,7 +28,11 @@ import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * This class is required when using a local version of the Footstep Planner UI and the footstep planning algorithms
@@ -53,9 +55,10 @@ public class RemoteUIMessageConverter
 
    private final String robotName;
 
-   private final AtomicReference<FootstepPlannerParametersReadOnly> plannerParametersReference;
-   private final AtomicReference<FootstepPostProcessingParametersReadOnly> postProcessingParametersReference;
    private final AtomicReference<VisibilityGraphsParametersReadOnly> visibilityGraphParametersReference;
+   private final AtomicReference<FootstepPlannerParametersReadOnly> plannerParametersReference;
+   private final AtomicReference<SwingPlannerParametersReadOnly> swingPlannerParametersReference;
+   private final AtomicReference<SplitFractionCalculatorParametersReadOnly> splitFractionCalculatorParametersReference;
    private final AtomicReference<Pose3DReadOnly> leftFootPose;
    private final AtomicReference<Pose3DReadOnly> rightFootPose;
    private final AtomicReference<Pose3DReadOnly> goalLeftFootPose;
@@ -65,6 +68,9 @@ public class RemoteUIMessageConverter
    private final AtomicReference<PlanarRegionsList> plannerPlanarRegionReference;
    private final AtomicReference<Boolean> planBodyPath;
    private final AtomicReference<Boolean> performAStarSearch;
+   private final AtomicReference<SwingPlannerType> requestedSwingPlanner;
+   private final AtomicReference<Boolean> performPositionBasedSplitFractionCalculation;
+   private final AtomicReference<Boolean> performAreaBasedSplitFractionCalculation;
    private final AtomicReference<Double> plannerTimeoutReference;
    private final AtomicReference<Integer> maxIterations;
    private final AtomicReference<RobotSide> plannerInitialSupportSideReference;
@@ -75,7 +81,6 @@ public class RemoteUIMessageConverter
    private final AtomicReference<Integer> currentPlanRequestId;
    private final AtomicReference<Boolean> assumeFlatGround;
    private final AtomicReference<Boolean> ignorePartialFootholds;
-   private final AtomicReference<Boolean> autoPostProcess;
    private final AtomicReference<Double> goalDistanceProximity;
    private final AtomicReference<Double> goalYawProximity;
 
@@ -85,11 +90,12 @@ public class RemoteUIMessageConverter
    private final AtomicReference<PlanarRegionsList> planarRegionListReference;
 
    private IHMCRealtimeROS2Publisher<FootstepPlannerActionMessage> plannerActionPublisher;
-   private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
-   private IHMCRealtimeROS2Publisher<FootstepPostProcessingParametersPacket> postProcessingParametersPublisher;
    private IHMCRealtimeROS2Publisher<VisibilityGraphsParametersPacket> visibilityGraphsParametersPublisher;
+   private IHMCRealtimeROS2Publisher<FootstepPlannerParametersPacket> plannerParametersPublisher;
+   private IHMCRealtimeROS2Publisher<SwingPlannerParametersPacket> swingPlannerParametersPublisher;
+   private IHMCRealtimeROS2Publisher<SplitFractionCalculatorParametersPacket> splitFractionParametersPublisher;
+
    private IHMCRealtimeROS2Publisher<FootstepPlanningRequestPacket> footstepPlanningRequestPublisher;
-   private IHMCRealtimeROS2Publisher<FootstepPostProcessingPacket> footstepPostProcessingRequestPublisher;
    private IHMCRealtimeROS2Publisher<FootstepDataListMessage> footstepDataListPublisher;
    private IHMCRealtimeROS2Publisher<GoHomeMessage> goHomePublisher;
    private IHMCRealtimeROS2Publisher<ToolboxStateMessage> walkingPreviewToolboxStatePublisher;
@@ -118,8 +124,10 @@ public class RemoteUIMessageConverter
       this.ros2Node = ros2Node;
 
       plannerParametersReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerParameters, null);
-      postProcessingParametersReference = messager.createInput(FootstepPlannerMessagerAPI.PostProcessingParametersTopic, null);
       visibilityGraphParametersReference = messager.createInput(FootstepPlannerMessagerAPI.VisibilityGraphsParameters, null);
+      swingPlannerParametersReference = messager.createInput(FootstepPlannerMessagerAPI.SwingPlannerParameters, null);
+      splitFractionCalculatorParametersReference = messager.createInput(FootstepPlannerMessagerAPI.SplitFractionParameters, null);
+
       leftFootPose = messager.createInput(FootstepPlannerMessagerAPI.LeftFootPose);
       rightFootPose = messager.createInput(FootstepPlannerMessagerAPI.RightFootPose);
       goalLeftFootPose = messager.createInput(FootstepPlannerMessagerAPI.LeftFootGoalPose);
@@ -129,6 +137,9 @@ public class RemoteUIMessageConverter
       plannerPlanarRegionReference = messager.createInput(FootstepPlannerMessagerAPI.PlanarRegionData);
       planBodyPath = messager.createInput(FootstepPlannerMessagerAPI.PlanBodyPath, false);
       performAStarSearch = messager.createInput(FootstepPlannerMessagerAPI.PerformAStarSearch, true);
+      requestedSwingPlanner = messager.createInput(FootstepPlannerMessagerAPI.RequestedSwingPlannerType, SwingPlannerType.NONE);
+      performPositionBasedSplitFractionCalculation = messager.createInput(FootstepPlannerMessagerAPI.PerformPositionBasedSplitFractionCalculation, true);
+      performAreaBasedSplitFractionCalculation = messager.createInput(FootstepPlannerMessagerAPI.PerformAreaBasedSplitFractionCalculation, false);
       plannerTimeoutReference = messager.createInput(FootstepPlannerMessagerAPI.PlannerTimeout, 5.0);
       maxIterations = messager.createInput(FootstepPlannerMessagerAPI.MaxIterations, -1);
       plannerInitialSupportSideReference = messager.createInput(FootstepPlannerMessagerAPI.InitialSupportSide, RobotSide.LEFT);
@@ -139,7 +150,6 @@ public class RemoteUIMessageConverter
       currentPlanRequestId = messager.createInput(FootstepPlannerMessagerAPI.PlannerRequestId, 0);
       assumeFlatGround = messager.createInput(FootstepPlannerMessagerAPI.AssumeFlatGround, false);
       ignorePartialFootholds = messager.createInput(FootstepPlannerMessagerAPI.IgnorePartialFootholds, false);
-      autoPostProcess = messager.createInput(FootstepPlannerMessagerAPI.AutoPostProcess, false);
       goalDistanceProximity = messager.createInput(FootstepPlannerMessagerAPI.GoalDistanceProximity, 0.0);
       goalYawProximity = messager.createInput(FootstepPlannerMessagerAPI.GoalYawProximity, 0.0);
 
@@ -175,11 +185,6 @@ public class RemoteUIMessageConverter
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPlannerOccupancyMapMessage.class,
                                                     FootstepPlannerCommunicationProperties.outputTopic(robotName),
                                            s -> messager.submitMessage(FootstepPlannerMessagerAPI.OccupancyMap, new PlannerOccupancyMap(s.takeNextData())));
-      // we want to list to the footstep plan post processing result from the toolbox
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, FootstepPostProcessingPacket.class,
-                                                    ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(robotName)
-                                                              .withOutput(),
-                                           s -> processFootstepPostProcessingResult(s.takeNextData()));
       // we want to also listen to incoming REA planar region data.
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, REACommunicationProperties.outputTopic,
                                            s -> processIncomingPlanarRegionMessage(s.takeNextData()));
@@ -206,15 +211,15 @@ public class RemoteUIMessageConverter
       plannerActionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
                                                                   FootstepPlannerActionMessage.class,
                                                                   FootstepPlannerCommunicationProperties.inputTopic(robotName));
-      postProcessingParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
-                                                                             FootstepPostProcessingParametersPacket.class,
-                                                                             ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(robotName)
-                                                                                       .withInput());
+      swingPlannerParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                           SwingPlannerParametersPacket.class,
+                                                                           ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput());
+      splitFractionParametersPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node,
+                                                                            SplitFractionCalculatorParametersPacket.class,
+                                                                            ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName).withInput());
+
       footstepPlanningRequestPublisher = ROS2Tools
             .createPublisherTypeNamed(ros2Node, FootstepPlanningRequestPacket.class, FootstepPlannerCommunicationProperties.inputTopic(robotName));
-      footstepPostProcessingRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepPostProcessingPacket.class,
-                                                                                  ROS2Tools.FOOTSTEP_POSTPROCESSING_TOOLBOX.withRobot(robotName)
-                                                                                            .withInput());
       footstepDataListPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, FootstepDataListMessage.class, ROS2Tools.getControllerInputTopic(robotName));
       goHomePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, GoHomeMessage.class, ROS2Tools.getControllerInputTopic(robotName));
 
@@ -224,7 +229,6 @@ public class RemoteUIMessageConverter
       walkingPreviewRequestPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, WalkingControllerPreviewInputMessage.class, controllerPreviewInputTopic);
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ComputePath, request -> requestNewPlan());
-      messager.registerTopicListener(FootstepPlannerMessagerAPI.PostProcessPlan, request -> requestPostProcessing());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.HaltPlanning, request -> requestHaltPlanning());
       messager.registerTopicListener(FootstepPlannerMessagerAPI.GoHomeTopic, goHomePublisher::publish);
       messager.registerTopicListener(FootstepPlannerMessagerAPI.RequestWalkingPreview, request ->
@@ -261,6 +265,9 @@ public class RemoteUIMessageConverter
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PerformAStarSearch, packet.getPerformAStarSearch());
       messager.submitMessage(FootstepPlannerMessagerAPI.PlanBodyPath, packet.getPlanBodyPath());
+      messager.submitMessage(FootstepPlannerMessagerAPI.RequestedSwingPlannerType, SwingPlannerType.fromByte(packet.getRequestedSwingPlanner()));
+      messager.submitMessage(FootstepPlannerMessagerAPI.PerformPositionBasedSplitFractionCalculation, packet.getPerformPositionBasedSplitFractionCalculation());
+      messager.submitMessage(FootstepPlannerMessagerAPI.PerformAreaBasedSplitFractionCalculation, packet.getPerformAreaBasedSplitFractionCalculation());
 
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimeout, timeout);
       messager.submitMessage(FootstepPlannerMessagerAPI.MaxIterations, packet.getMaxIterations());
@@ -336,22 +343,7 @@ public class RemoteUIMessageConverter
       messager.submitMessage(FootstepPlannerMessagerAPI.PlannerTimings, packet.getPlannerTimings());
 
       if (verbose)
-         LogTools.info("Received a footstep planning result from the toolbox.");
-
-      if (autoPostProcess.get())
-         requestPostProcessing();
-   }
-
-   private void processFootstepPostProcessingResult(FootstepPostProcessingPacket packet)
-   {
-      FootstepDataListMessage footstepDataListMessage = packet.getFootstepDataList();
-
-      ThreadTools.sleep(100);
-
-      messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);
-
-      if (verbose)
-         LogTools.info("Received a footstep post processing result from the toolbox.");
+         LogTools.info("Received a footstep planning result from planner module.");
    }
 
    private void processIncomingPlanarRegionMessage(PlanarRegionsListMessage packet)
@@ -388,6 +380,14 @@ public class RemoteUIMessageConverter
       if (verbose)
          LogTools.info("Told the toolbox to wake up.");
 
+      VisibilityGraphsParametersReadOnly visibilityGraphsParameters = visibilityGraphParametersReference.get();
+      if(visibilityGraphsParameters != null)
+      {
+         VisibilityGraphsParametersPacket visibilityGraphsParametersPacket = new VisibilityGraphsParametersPacket();
+         FootstepPlannerMessageTools.copyParametersToPacket(visibilityGraphsParametersPacket, visibilityGraphsParameters);
+         visibilityGraphsParametersPublisher.publish(visibilityGraphsParametersPacket);
+      }
+
       FootstepPlannerParametersReadOnly footstepPlannerParameters = plannerParametersReference.get();
       if(footstepPlannerParameters != null)
       {
@@ -396,16 +396,16 @@ public class RemoteUIMessageConverter
          plannerParametersPublisher.publish(plannerParametersPacket);
       }
 
-      FootstepPostProcessingParametersReadOnly postProcessingParameters = postProcessingParametersReference.get();
-      if (postProcessingParameters != null)
-         postProcessingParametersPublisher.publish(postProcessingParameters.getAsPacket());
-
-      VisibilityGraphsParametersReadOnly visibilityGraphsParameters = visibilityGraphParametersReference.get();
-      if(visibilityGraphsParameters != null)
+      SwingPlannerParametersReadOnly swingPlannerParameters = swingPlannerParametersReference.get();
+      if (swingPlannerParameters != null)
       {
-         VisibilityGraphsParametersPacket visibilityGraphsParametersPacket = new VisibilityGraphsParametersPacket();
-         FootstepPlannerMessageTools.copyParametersToPacket(visibilityGraphsParametersPacket, visibilityGraphsParameters);
-         visibilityGraphsParametersPublisher.publish(visibilityGraphsParametersPacket);
+         swingPlannerParametersPublisher.publish(swingPlannerParameters.getAsPacket());
+      }
+
+      SplitFractionCalculatorParametersReadOnly splitFractionParameters = splitFractionCalculatorParametersReference.get();
+      if (splitFractionParameters != null)
+      {
+         splitFractionParametersPublisher.publish(splitFractionParameters.getAsPacket());
       }
 
       if (verbose)
@@ -430,18 +430,6 @@ public class RemoteUIMessageConverter
       }
 
       return true;
-   }
-
-   private void requestPostProcessing()
-   {
-      if (!checkPostProcessingRequireds())
-         return;
-
-      FootstepPostProcessingParametersReadOnly postProcessingParameters = postProcessingParametersReference.get();
-      if (postProcessingParameters != null)
-         postProcessingParametersPublisher.publish(postProcessingParameters.getAsPacket());
-
-      submitFootstepPostProcessingRequestPacket();
    }
 
    private boolean checkPostProcessingRequireds()
@@ -491,6 +479,9 @@ public class RemoteUIMessageConverter
 
       packet.setPlanBodyPath(planBodyPath.get());
       packet.setPerformAStarSearch(performAStarSearch.get());
+      packet.setRequestedSwingPlanner(requestedSwingPlanner.get().toByte());
+      packet.setPerformPositionBasedSplitFractionCalculation(performPositionBasedSplitFractionCalculation.get());
+      packet.setPerformAreaBasedSplitFractionCalculation(performAreaBasedSplitFractionCalculation.get());
 
       if (plannerRequestIdReference.get() != null)
          packet.setPlannerRequestId(plannerRequestIdReference.get());
@@ -508,22 +499,5 @@ public class RemoteUIMessageConverter
       packet.setMaxIterations(maxIterations.get());
 
       footstepPlanningRequestPublisher.publish(packet);
-   }
-
-   private void submitFootstepPostProcessingRequestPacket()
-   {
-      FootstepPostProcessingPacket packet = new FootstepPostProcessingPacket();
-
-      packet.getLeftFootPositionInWorld().set(leftFootPose.get().getPosition());
-      packet.getLeftFootOrientationInWorld().set(leftFootPose.get().getOrientation());
-      postProcessingLeftFootSupportPolygonReference.get().getVertexBufferView().forEach(point -> packet.getLeftFootContactPoints2d().add().set(point));
-      packet.getRightFootPositionInWorld().set(rightFootPose.get().getPosition());
-      packet.getRightFootOrientationInWorld().set(rightFootPose.get().getOrientation());
-      postProcessingRightFootSupportPolygonReference.get().getVertexBufferView().forEach(point -> packet.getRightFootContactPoints2d().add().set(point));
-
-      packet.getFootstepDataList().set(footstepPlanResponseReference.get());
-      packet.getPlanarRegionsList().set(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionListReference.get()));
-
-      footstepPostProcessingRequestPublisher.publish(packet);
    }
 }
