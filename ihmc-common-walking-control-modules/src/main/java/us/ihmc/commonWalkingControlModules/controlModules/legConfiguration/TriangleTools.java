@@ -93,13 +93,12 @@ public class TriangleTools
     * @param isAngleAObtuse Whether the angle opposite of side a is obtuse or not, only used if there are two possible triangles
     * @return the value of the unknown side length.
     */
-   public static double computeSideLengethFromSideSideAngle(double sideALength, double sideBLength, double angleB, boolean isAngleAObtuse)
+   public static double computeSideLengthFromSideSideAngle(double sideALength, double sideBLength, double angleB, boolean isAngleAObtuse)
    {
       double lawSinesB;
       double angleA;
       double angleC;
-      if (angleB >= Math.PI/2)
-      {
+      if (angleB >= Math.PI/2){
          if (sideALength >= sideBLength)
          {
             return Double.NaN;
