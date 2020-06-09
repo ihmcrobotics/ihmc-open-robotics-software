@@ -121,6 +121,11 @@ public class SLAMModule
       this.ocTreeConsumers.add(ocTreeConsumer);
    }
 
+   public void removeOcTreeConsumer(OcTreeConsumer ocTreeConsumer)
+   {
+      this.ocTreeConsumers.remove(ocTreeConsumer);
+   }
+
    public void start()
    {
       if (scheduledMain == null)
