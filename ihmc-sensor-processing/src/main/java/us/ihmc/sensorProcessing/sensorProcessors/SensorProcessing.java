@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.matrix.interfaces.RotationMatrixReadOnly;
@@ -2236,7 +2236,7 @@ public class SensorProcessing implements SensorOutputMapReadOnly
       inputLinearAccelerations.get(imuDefinition).set(value);
    }
 
-   public void setForceSensorValue(ForceSensorDefinition forceSensorDefinition, DenseMatrix64F value)
+   public void setForceSensorValue(ForceSensorDefinition forceSensorDefinition, DMatrixRMaj value)
    {
       if (value.getNumRows() != Wrench.SIZE || value.getNumCols() != 1)
          throw new RuntimeException("Unexpected size");

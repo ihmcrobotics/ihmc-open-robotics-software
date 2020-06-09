@@ -2,10 +2,10 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import static us.ihmc.robotics.Assert.fail;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
@@ -22,7 +22,7 @@ public class SingularValueExplorationAndExamplesTest
 	@Test
    public void testSimpleCase()
    {
-      DenseMatrix64F matrixJ = new DenseMatrix64F(new double[][]{{1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}});
+      DMatrixRMaj matrixJ = new DMatrixRMaj(new double[][]{{1.0, 0.0, 0.0}, {1.0, 0.0, 0.0}});
 
       int numRows = matrixJ.getNumRows();
       int numColumns = matrixJ.getNumCols();
@@ -30,13 +30,13 @@ public class SingularValueExplorationAndExamplesTest
       boolean needV = true;
       boolean compact = false;
       
-      SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(numRows, numColumns, needU, needV, compact);
+      SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(numRows, numColumns, needU, needV, compact);
       svd.decompose(matrixJ);
       
       double[] singularValues = svd.getSingularValues();
-      DenseMatrix64F matrixU = new DenseMatrix64F(numRows, numRows);
-      DenseMatrix64F matrixW = new DenseMatrix64F(numRows, numColumns);
-      DenseMatrix64F matrixVTranspose = new DenseMatrix64F(numColumns, numColumns);
+      DMatrixRMaj matrixU = new DMatrixRMaj(numRows, numRows);
+      DMatrixRMaj matrixW = new DMatrixRMaj(numRows, numColumns);
+      DMatrixRMaj matrixVTranspose = new DMatrixRMaj(numColumns, numColumns);
       
       boolean transposeU = false;
       boolean transposeV = true;
@@ -49,7 +49,7 @@ public class SingularValueExplorationAndExamplesTest
       System.out.println("matrixW = " + matrixW);
       System.out.println("matrixV = " + matrixVTranspose);
       
-      DenseMatrix64F matrixJReconstructed = reconstructMatrix(matrixU, matrixW, matrixVTranspose);
+      DMatrixRMaj matrixJReconstructed = reconstructMatrix(matrixU, matrixW, matrixVTranspose);
       System.out.println("matrixJReconstructed = " + matrixJReconstructed);
 
       MatrixTestTools.assertMatrixEquals(matrixJ, matrixJReconstructed, 1e-7);
@@ -70,7 +70,7 @@ public class SingularValueExplorationAndExamplesTest
             {0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.001,  0.000,  0.000,  0.000,  0.000,  0.000, -0.433,  0.000,  0.000,  0.000,  0.000,  0.817,  0.000,  0.000,  0.000, -0.381,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000,  0.000}
       };
       
-      DenseMatrix64F matrixJ = new DenseMatrix64F(entries);
+      DMatrixRMaj matrixJ = new DMatrixRMaj(entries);
       
       int numRows = matrixJ.getNumRows();
       int numColumns = matrixJ.getNumCols();
@@ -78,13 +78,13 @@ public class SingularValueExplorationAndExamplesTest
       boolean needV = true;
       boolean compact = false;
       
-      SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(numRows, numColumns, needU, needV, compact);
+      SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(numRows, numColumns, needU, needV, compact);
       svd.decompose(matrixJ);
       
       double[] singularValues = svd.getSingularValues();
-      DenseMatrix64F matrixU = new DenseMatrix64F(numRows, numRows);
-      DenseMatrix64F matrixW = new DenseMatrix64F(numRows, numColumns);
-      DenseMatrix64F matrixVTranspose = new DenseMatrix64F(numColumns, numColumns);
+      DMatrixRMaj matrixU = new DMatrixRMaj(numRows, numRows);
+      DMatrixRMaj matrixW = new DMatrixRMaj(numRows, numColumns);
+      DMatrixRMaj matrixVTranspose = new DMatrixRMaj(numColumns, numColumns);
       
       boolean transposeU = false;
       boolean transposeV = true;
@@ -97,34 +97,34 @@ public class SingularValueExplorationAndExamplesTest
       System.out.println("matrixW = " + matrixW);
       System.out.println("matrixVTranspose = " + matrixVTranspose);
       
-      DenseMatrix64F matrixJReconstructed = reconstructMatrix(matrixU, matrixW, matrixVTranspose);
+      DMatrixRMaj matrixJReconstructed = reconstructMatrix(matrixU, matrixW, matrixVTranspose);
       System.out.println("matrixJReconstructed = " + matrixJReconstructed);
 
       MatrixTestTools.assertMatrixEquals(matrixJ, matrixJReconstructed, 1e-7);
       
       // Extract Nullspace:
 
-      DenseMatrix64F matrixNTranspose = new DenseMatrix64F(1, matrixVTranspose.getNumCols());
-      CommonOps.extract(matrixVTranspose, matrixVTranspose.getNumRows()-1, matrixVTranspose.getNumRows(), 0, matrixVTranspose.getNumCols(), matrixNTranspose, 0, 0);
+      DMatrixRMaj matrixNTranspose = new DMatrixRMaj(1, matrixVTranspose.getNumCols());
+      CommonOps_DDRM.extract(matrixVTranspose, matrixVTranspose.getNumRows()-1, matrixVTranspose.getNumRows(), 0, matrixVTranspose.getNumCols(), matrixNTranspose, 0, 0);
       
       System.out.println("matrixNTranspose = " + matrixNTranspose);
 
-      DenseMatrix64F identity = CommonOps.identity(matrixNTranspose.getNumCols());
-      DenseMatrix64F matrixNNTranspose = new DenseMatrix64F(matrixNTranspose.getNumCols(), matrixNTranspose.getNumCols());
-      CommonOps.multInner(matrixNTranspose, matrixNNTranspose);
+      DMatrixRMaj identity = CommonOps_DDRM.identity(matrixNTranspose.getNumCols());
+      DMatrixRMaj matrixNNTranspose = new DMatrixRMaj(matrixNTranspose.getNumCols(), matrixNTranspose.getNumCols());
+      CommonOps_DDRM.multInner(matrixNTranspose, matrixNNTranspose);
       
       System.out.println("matrixNNTranspose = " + matrixNNTranspose);
 
-      DenseMatrix64F iMinusNNTranspose = new DenseMatrix64F(matrixNNTranspose.getNumRows(), matrixNNTranspose.getNumCols());
-      CommonOps.subtract(identity, matrixNNTranspose, iMinusNNTranspose);
+      DMatrixRMaj iMinusNNTranspose = new DMatrixRMaj(matrixNNTranspose.getNumRows(), matrixNNTranspose.getNumCols());
+      CommonOps_DDRM.subtract(identity, matrixNNTranspose, iMinusNNTranspose);
       
       System.out.println("iMinusNNTranspose = " + iMinusNNTranspose);
 
-      DenseMatrix64F matrixJPrime = new DenseMatrix64F(matrixJ.getNumRows(), matrixJ.getNumCols());
+      DMatrixRMaj matrixJPrime = new DMatrixRMaj(matrixJ.getNumRows(), matrixJ.getNumCols());
 
       try
       {
-         CommonOps.mult(iMinusNNTranspose, matrixJ, matrixJPrime);
+         CommonOps_DDRM.mult(iMinusNNTranspose, matrixJ, matrixJPrime);
          System.out.println("matrixJPrime = " + matrixJPrime);
          fail("Dimensions don't even match!");
       }
@@ -135,13 +135,13 @@ public class SingularValueExplorationAndExamplesTest
 
    }
 
-   private DenseMatrix64F reconstructMatrix(DenseMatrix64F matrixU, DenseMatrix64F matrixW, DenseMatrix64F matrixV)
+   private DMatrixRMaj reconstructMatrix(DMatrixRMaj matrixU, DMatrixRMaj matrixW, DMatrixRMaj matrixV)
    {
-      DenseMatrix64F temp = new DenseMatrix64F(matrixW.getNumRows(), matrixW.getNumCols());
-      DenseMatrix64F ret = new DenseMatrix64F(matrixW.getNumRows(), matrixW.getNumCols());
+      DMatrixRMaj temp = new DMatrixRMaj(matrixW.getNumRows(), matrixW.getNumCols());
+      DMatrixRMaj ret = new DMatrixRMaj(matrixW.getNumRows(), matrixW.getNumCols());
       
-      CommonOps.mult(matrixU, matrixW, temp);
-      CommonOps.mult(temp, matrixV, ret);
+      CommonOps_DDRM.mult(matrixU, matrixW, temp);
+      CommonOps_DDRM.mult(temp, matrixV, ret);
       
       return ret;
    }
@@ -154,7 +154,7 @@ public class SingularValueExplorationAndExamplesTest
          double[][] entries = new double[][]{
                {1.000, 0.001}};
          
-         DenseMatrix64F matrixJ = new DenseMatrix64F(entries);
+         DMatrixRMaj matrixJ = new DMatrixRMaj(entries);
          
          int numRows = matrixJ.getNumRows();
          int numColumns = matrixJ.getNumCols();
@@ -162,13 +162,13 @@ public class SingularValueExplorationAndExamplesTest
          boolean needV = true;
          boolean compact = false;
          
-         SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(numRows, numColumns, needU, needV, compact);
+         SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(numRows, numColumns, needU, needV, compact);
          svd.decompose(matrixJ);
          
          double[] singularValues = svd.getSingularValues();
-         DenseMatrix64F matrixU = new DenseMatrix64F(numRows, numRows);
-         DenseMatrix64F matrixW = new DenseMatrix64F(numRows, numColumns);
-         DenseMatrix64F matrixVTranspose = new DenseMatrix64F(numColumns, numColumns);
+         DMatrixRMaj matrixU = new DMatrixRMaj(numRows, numRows);
+         DMatrixRMaj matrixW = new DMatrixRMaj(numRows, numColumns);
+         DMatrixRMaj matrixVTranspose = new DMatrixRMaj(numColumns, numColumns);
          
          boolean transposeU = false;
          boolean transposeV = true;
@@ -181,36 +181,36 @@ public class SingularValueExplorationAndExamplesTest
          System.out.println("matrixW = " + matrixW);
          System.out.println("matrixV = " + matrixVTranspose);
          
-         DenseMatrix64F matrixJReconstructed = reconstructMatrix(matrixU, matrixW, matrixVTranspose);
+         DMatrixRMaj matrixJReconstructed = reconstructMatrix(matrixU, matrixW, matrixVTranspose);
          System.out.println("matrixJReconstructed = " + matrixJReconstructed);
 
          MatrixTestTools.assertMatrixEquals(matrixJ, matrixJReconstructed, 1e-7);
          
-         DenseMatrix64F matrixJTranspose = new DenseMatrix64F(matrixJ);
-         CommonOps.transpose(matrixJTranspose);
+         DMatrixRMaj matrixJTranspose = new DMatrixRMaj(matrixJ);
+         CommonOps_DDRM.transpose(matrixJTranspose);
          
-         DenseMatrix64F matrixJJTranspose = new DenseMatrix64F(matrixJ.getNumRows(), matrixJ.getNumRows());
-         CommonOps.mult(matrixJ, matrixJTranspose, matrixJJTranspose);
+         DMatrixRMaj matrixJJTranspose = new DMatrixRMaj(matrixJ.getNumRows(), matrixJ.getNumRows());
+         CommonOps_DDRM.mult(matrixJ, matrixJTranspose, matrixJJTranspose);
          
-         DenseMatrix64F matrixJJTransposeInverse = new DenseMatrix64F(matrixJJTranspose);
-         CommonOps.invert(matrixJJTransposeInverse);
+         DMatrixRMaj matrixJJTransposeInverse = new DMatrixRMaj(matrixJJTranspose);
+         CommonOps_DDRM.invert(matrixJJTransposeInverse);
          
 
-         DenseMatrix64F jPlus = new DenseMatrix64F(matrixJ.getNumCols(), matrixJ.getNumRows());
-         CommonOps.mult(matrixJTranspose, matrixJJTransposeInverse, jPlus);
+         DMatrixRMaj jPlus = new DMatrixRMaj(matrixJ.getNumCols(), matrixJ.getNumRows());
+         CommonOps_DDRM.mult(matrixJTranspose, matrixJJTransposeInverse, jPlus);
 
          System.out.println("jPlus = " + jPlus);
 
          
-         DenseMatrix64F jPlusJ = new DenseMatrix64F(jPlus.getNumRows(), matrixJ.getNumCols());
-         CommonOps.mult(jPlus, matrixJ, jPlusJ);
+         DMatrixRMaj jPlusJ = new DMatrixRMaj(jPlus.getNumRows(), matrixJ.getNumCols());
+         CommonOps_DDRM.mult(jPlus, matrixJ, jPlusJ);
          
          System.out.println("jPlusJ = " + jPlusJ);
          
-         DenseMatrix64F identity = CommonOps.identity(jPlusJ.getNumRows());
-         DenseMatrix64F matrixQ = new DenseMatrix64F(identity.getNumRows(), identity.getNumCols());
+         DMatrixRMaj identity = CommonOps_DDRM.identity(jPlusJ.getNumRows());
+         DMatrixRMaj matrixQ = new DMatrixRMaj(identity.getNumRows(), identity.getNumCols());
          
-         CommonOps.subtract(identity, jPlusJ, matrixQ);
+         CommonOps_DDRM.subtract(identity, jPlusJ, matrixQ);
          System.out.println("matrixQ = " + matrixQ);
 
 

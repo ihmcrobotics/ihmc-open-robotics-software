@@ -1,6 +1,9 @@
 package us.ihmc.robotics.dataStructures;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertFalse;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,11 +14,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotics.geometry.InclusionFunction;
 import us.ihmc.robotics.geometry.InsufficientDataException;
@@ -72,7 +73,7 @@ public abstract class AbstractHeightMapTest
    {
       double gridResolution = 1;
       HeightMapWithPoints map = getHeightMap(-2,-2,2,2,gridResolution);
-      DenseMatrix64F matrix = new DenseMatrix64F(7, 7);
+      DMatrixRMaj matrix = new DMatrixRMaj(7, 7);
       matrix.setData(new double[] { 
             0, 0, 0, 0, 3, 0, 0, 
             0, 0, 8, 8, 0, 0, 0, 
@@ -283,7 +284,7 @@ public abstract class AbstractHeightMapTest
    {
       double b = 10000;    // borderOfExpectedFootPlacement
        double gridResolution = 0.01;
-      DenseMatrix64F matrix = new DenseMatrix64F(11, 11);
+      DMatrixRMaj matrix = new DMatrixRMaj(11, 11);
       matrix.setData(new double[]
       {
          b, b, b, b, b, b, b, b, b, b, b, 

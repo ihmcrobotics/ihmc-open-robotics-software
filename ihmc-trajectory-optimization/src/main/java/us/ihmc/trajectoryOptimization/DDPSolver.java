@@ -1,9 +1,9 @@
 package us.ihmc.trajectoryOptimization;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.lists.RecyclingArrayList;
 
 public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements DDPSolverInterface<E>
 {
@@ -39,7 +39,7 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
    }
 
    @Override
-   public void initializeSequencesFromDesireds(DenseMatrix64F initialState, DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence)
+   public void initializeSequencesFromDesireds(DMatrixRMaj initialState, DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence)
    {
       super.initializeSequencesFromDesireds(initialState, desiredSequence, constantsSequence);
 
@@ -69,17 +69,17 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
 
       for (int t = endIndex; t >= startIndex; t--)
       {
-         DenseMatrix64F valueStateHessian = valueStateHessianSequence.get(t);
-         DenseMatrix64F valueStateGradient = valueStateGradientSequence.get(t);
+         DMatrixRMaj valueStateHessian = valueStateHessianSequence.get(t);
+         DMatrixRMaj valueStateGradient = valueStateGradientSequence.get(t);
 
-         DenseMatrix64F dynamicsStateGradient = dynamicsStateGradientSequence.get(t);
-         DenseMatrix64F dynamicsControlGradient = dynamicsControlGradientSequence.get(t);
+         DMatrixRMaj dynamicsStateGradient = dynamicsStateGradientSequence.get(t);
+         DMatrixRMaj dynamicsControlGradient = dynamicsControlGradientSequence.get(t);
 
-         DenseMatrix64F costStateGradient = costStateGradientSequence.get(t);
-         DenseMatrix64F costControlGradient = costControlGradientSequence.get(t);
-         DenseMatrix64F costStateHessian = costStateHessianSequence.get(t);
-         DenseMatrix64F costControlHessian = costControlHessianSequence.get(t);
-         DenseMatrix64F costStateControlHessian = costStateControlHessianSequence.get(t);
+         DMatrixRMaj costStateGradient = costStateGradientSequence.get(t);
+         DMatrixRMaj costControlGradient = costControlGradientSequence.get(t);
+         DMatrixRMaj costStateHessian = costStateHessianSequence.get(t);
+         DMatrixRMaj costControlHessian = costControlHessianSequence.get(t);
+         DMatrixRMaj costStateControlHessian = costStateControlHessianSequence.get(t);
 
          updateHamiltonianApproximations(dynamicsState, t, costStateGradient, costControlGradient, costStateHessian, costControlHessian, costStateControlHessian,
                                          dynamicsStateGradient, dynamicsControlGradient, valueStateGradient, valueStateHessian, hamiltonianStateGradient,
@@ -103,7 +103,7 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
    }
 
    @Override
-   public double forwardPass(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DenseMatrix64F initialState,
+   public double forwardPass(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DMatrixRMaj initialState,
                              DiscreteOptimizationData updatedSequence)
    {
       lineSearchGain = lineSearchStartGain;
@@ -135,7 +135,7 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
       return updatedCost;
    }
 
-   private double solveForwardDDPPassInternal(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DenseMatrix64F initialState,
+   private double solveForwardDDPPassInternal(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DMatrixRMaj initialState,
                                               DiscreteOptimizationData updatedSequence)
    {
       updatedSequence.setState(startIndex, initialState);
@@ -144,10 +144,10 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
 
       for (int t = startIndex; t < endIndex; t++)
       {
-         DenseMatrix64F state = optimalSequence.getState(t);
-         DenseMatrix64F updatedState = updatedSequence.getState(t);
-         DenseMatrix64F updatedControl = updatedSequence.getControl(t);
-         DenseMatrix64F constants = constantsSequence.get(t);
+         DMatrixRMaj state = optimalSequence.getState(t);
+         DMatrixRMaj updatedState = updatedSequence.getState(t);
+         DMatrixRMaj updatedControl = updatedSequence.getControl(t);
+         DMatrixRMaj constants = constantsSequence.get(t);
 
          if (isStateDiverging(updatedState, state))
             return Double.POSITIVE_INFINITY;
@@ -164,7 +164,7 @@ public class DDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements D
       return cost;
    }
 
-   private boolean isStateDiverging(DenseMatrix64F newState, DenseMatrix64F originalState)
+   private boolean isStateDiverging(DMatrixRMaj newState, DMatrixRMaj originalState)
    {
       for (int i = 0; i < newState.getNumElements(); i++)
       {

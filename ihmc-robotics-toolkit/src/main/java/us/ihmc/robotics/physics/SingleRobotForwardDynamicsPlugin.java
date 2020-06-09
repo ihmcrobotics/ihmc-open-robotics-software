@@ -1,7 +1,7 @@
 package us.ihmc.robotics.physics;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator;
@@ -16,7 +16,7 @@ public class SingleRobotForwardDynamicsPlugin
 
    private MultiBodySystemStateWriter controllerOutputWriter;
 
-   private final DenseMatrix64F jointVelocityMatrix;
+   private final DMatrixRMaj jointVelocityMatrix;
 
    public SingleRobotForwardDynamicsPlugin(MultiBodySystemBasics input)
    {
@@ -28,7 +28,7 @@ public class SingleRobotForwardDynamicsPlugin
       this.input = input;
       this.controllerOutputWriter = controllerOutputWriter;
       forwardDynamicsCalculator = new ForwardDynamicsCalculator(input);
-      jointVelocityMatrix = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider()), 1);
+      jointVelocityMatrix = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(input.getJointsToConsider()), 1);
    }
 
    public void doScience(double time, double dt, Vector3DReadOnly gravity)
@@ -42,10 +42,10 @@ public class SingleRobotForwardDynamicsPlugin
       MultiBodySystemTools.extractJointsState(input.getJointsToConsider(), JointStateType.VELOCITY, jointVelocityMatrix);
    }
 
-   public void addJointVelocities(DenseMatrix64F jointVelocityToAdd)
+   public void addJointVelocities(DMatrixRMaj jointVelocityToAdd)
    {
       if (jointVelocityToAdd != null)
-         CommonOps.addEquals(jointVelocityMatrix, jointVelocityToAdd);
+         CommonOps_DDRM.addEquals(jointVelocityMatrix, jointVelocityToAdd);
    }
 
    public void writeJointVelocities()

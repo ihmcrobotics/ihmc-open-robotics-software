@@ -7,10 +7,10 @@ import java.util.Random;
 
 import javax.swing.JFrame;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.EjmlUnitTests;
-import org.ejml.ops.RandomMatrices;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.EjmlUnitTests;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.AxisLocation;
@@ -52,40 +52,40 @@ public class StateSpaceSystemDiscretizerTest
       double xInitial = 1.0;
       double xDotInitial = 0.1;
 
-      DenseMatrix64F continuousA = new DenseMatrix64F(new double[][] { { 0.0, 1.0 }, { -springK, -damperB } });
-      DenseMatrix64F continuousB = new DenseMatrix64F(new double[][] { { 0.0 }, { 1.0 } });
+      DMatrixRMaj continuousA = new DMatrixRMaj(new double[][] { { 0.0, 1.0 }, { -springK, -damperB } });
+      DMatrixRMaj continuousB = new DMatrixRMaj(new double[][] { { 0.0 }, { 1.0 } });
 
-      DenseMatrix64F continuousQ = new DenseMatrix64F(new double[][] { { xProcessCovariance, 0.0 }, { 0.0, xDotProcessCovariance } });
-      DenseMatrix64F continuousR = new DenseMatrix64F(new double[][] { { xSensorCovariance } });
+      DMatrixRMaj continuousQ = new DMatrixRMaj(new double[][] { { xProcessCovariance, 0.0 }, { 0.0, xDotProcessCovariance } });
+      DMatrixRMaj continuousR = new DMatrixRMaj(new double[][] { { xSensorCovariance } });
 
       printSystemMatrices("Continuous: ", continuousA, continuousB, continuousQ, continuousR, 1.0);
 
       // Trivial discreization: discreteA = I + A*deltaT, discreteB = B*deltaT, 
       // discreteQ = Q * deltaQ, discreteR = R
-      DenseMatrix64F simpleDiscreteA = new DenseMatrix64F(continuousA);
-      DenseMatrix64F simpleDiscreteB = new DenseMatrix64F(continuousB);
-      DenseMatrix64F simpleDiscreteQ = new DenseMatrix64F(continuousQ);
-      DenseMatrix64F simpleDiscreteR = new DenseMatrix64F(continuousR);
+      DMatrixRMaj simpleDiscreteA = new DMatrixRMaj(continuousA);
+      DMatrixRMaj simpleDiscreteB = new DMatrixRMaj(continuousB);
+      DMatrixRMaj simpleDiscreteQ = new DMatrixRMaj(continuousQ);
+      DMatrixRMaj simpleDiscreteR = new DMatrixRMaj(continuousR);
 
       // simpleA = I + A
-      CommonOps.scale(discretizationTimeStep, simpleDiscreteA);
-      CommonOps.add(simpleDiscreteA, CommonOps.identity(numberOfStates), simpleDiscreteA);
+      CommonOps_DDRM.scale(discretizationTimeStep, simpleDiscreteA);
+      CommonOps_DDRM.add(simpleDiscreteA, CommonOps_DDRM.identity(numberOfStates), simpleDiscreteA);
 
       // simpleB = B  * deltaT
-      CommonOps.scale(discretizationTimeStep, simpleDiscreteB);
+      CommonOps_DDRM.scale(discretizationTimeStep, simpleDiscreteB);
 
       // simpleQ = Q times deltaT
-      CommonOps.scale(discretizationTimeStep, simpleDiscreteQ);
+      CommonOps_DDRM.scale(discretizationTimeStep, simpleDiscreteQ);
 
       // simpleR = R
       printSystemMatrices("Simple Discrete: ", simpleDiscreteA, simpleDiscreteB, simpleDiscreteQ, simpleDiscreteR, discretizationTimeStep);
 
       // Discretization using StateSpaceSystemDiscretizer:
-      DenseMatrix64F discreteA = new DenseMatrix64F(continuousA);
-      DenseMatrix64F discreteB = new DenseMatrix64F(continuousB);
+      DMatrixRMaj discreteA = new DMatrixRMaj(continuousA);
+      DMatrixRMaj discreteB = new DMatrixRMaj(continuousB);
 
-      DenseMatrix64F discreteQ = new DenseMatrix64F(continuousQ);
-      DenseMatrix64F discreteR = new DenseMatrix64F(continuousR);
+      DMatrixRMaj discreteQ = new DMatrixRMaj(continuousQ);
+      DMatrixRMaj discreteR = new DMatrixRMaj(continuousR);
 
       stateSpaceSystemDiscretizer.discretize(discreteA, discreteB, discreteQ, discretizationTimeStep);
 
@@ -109,9 +109,9 @@ public class StateSpaceSystemDiscretizerTest
       double uAmplitude = 2.5;
       double uFreq = 2.0;
 
-      DenseMatrix64F stateDiscreteSimple = new DenseMatrix64F(new double[][] { { xInitial }, { xDotInitial } });
-      DenseMatrix64F stateDiscrete = new DenseMatrix64F(new double[][] { { xInitial }, { xDotInitial } });
-      DenseMatrix64F input = new DenseMatrix64F(1, 1);
+      DMatrixRMaj stateDiscreteSimple = new DMatrixRMaj(new double[][] { { xInitial }, { xDotInitial } });
+      DMatrixRMaj stateDiscrete = new DMatrixRMaj(new double[][] { { xInitial }, { xDotInitial } });
+      DMatrixRMaj input = new DMatrixRMaj(1, 1);
 
       for (int pointNumber = 0; pointNumber < numberOfPoints; pointNumber++)
       {
@@ -201,13 +201,13 @@ public class StateSpaceSystemDiscretizerTest
       StateSpaceSystemDiscretizer[] discretizers = new StateSpaceSystemDiscretizer[] { singleMatrixExponentialDiscretizer, splitUpMatrixExponentialDiscretizer };
 
       Random random = new Random(125L);
-      DenseMatrix64F A = RandomMatrices.createRandom(numberOfStates, numberOfStates, random);
-      DenseMatrix64F B = RandomMatrices.createRandom(numberOfStates, numberOfInputs, random);
-      DenseMatrix64F Q = RandomMatrices.createSymmPosDef(numberOfStates, random);
+      DMatrixRMaj A = RandomMatrices_DDRM.rectangle(numberOfStates, numberOfStates, random);
+      DMatrixRMaj B = RandomMatrices_DDRM.rectangle(numberOfStates, numberOfInputs, random);
+      DMatrixRMaj Q = RandomMatrices_DDRM.symmetricPosDef(numberOfStates, random);
 
-      DenseMatrix64F[] As = new DenseMatrix64F[] { new DenseMatrix64F(A), new DenseMatrix64F(A) };
-      DenseMatrix64F[] Bs = new DenseMatrix64F[] { new DenseMatrix64F(B), new DenseMatrix64F(B) };
-      DenseMatrix64F[] Qs = new DenseMatrix64F[] { new DenseMatrix64F(Q), new DenseMatrix64F(Q) };
+      DMatrixRMaj[] As = new DMatrixRMaj[] { new DMatrixRMaj(A), new DMatrixRMaj(A) };
+      DMatrixRMaj[] Bs = new DMatrixRMaj[] { new DMatrixRMaj(B), new DMatrixRMaj(B) };
+      DMatrixRMaj[] Qs = new DMatrixRMaj[] { new DMatrixRMaj(Q), new DMatrixRMaj(Q) };
 
       double dt = 1.0;
 
@@ -222,10 +222,10 @@ public class StateSpaceSystemDiscretizerTest
       EjmlUnitTests.assertEquals(Qs[0], Qs[1], tol);
    }
 
-   private void printSystemMatrices(String name, DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R, double deltaT)
+   private void printSystemMatrices(String name, DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj Q, DMatrixRMaj R, double deltaT)
    {
-      DenseMatrix64F QDividedByDeltaT = new DenseMatrix64F(Q);
-      CommonOps.scale(1.0 / (deltaT), QDividedByDeltaT);
+      DMatrixRMaj QDividedByDeltaT = new DMatrixRMaj(Q);
+      CommonOps_DDRM.scale(1.0 / (deltaT), QDividedByDeltaT);
 
       printIfDebug(name);
       printIfDebug("A = " + A);
@@ -291,19 +291,19 @@ public class StateSpaceSystemDiscretizerTest
       return dataset;
    }
 
-   private DenseMatrix64F computeNextState(DenseMatrix64F state, DenseMatrix64F input, DenseMatrix64F A, DenseMatrix64F B)
+   private DMatrixRMaj computeNextState(DMatrixRMaj state, DMatrixRMaj input, DMatrixRMaj A, DMatrixRMaj B)
    {
       int numberOfStates = state.getNumRows();
 
-      DenseMatrix64F nextState = new DenseMatrix64F(numberOfStates, 1);
+      DMatrixRMaj nextState = new DMatrixRMaj(numberOfStates, 1);
 
-      DenseMatrix64F Ax = new DenseMatrix64F(numberOfStates, 1);
-      DenseMatrix64F Bu = new DenseMatrix64F(numberOfStates, 1);
+      DMatrixRMaj Ax = new DMatrixRMaj(numberOfStates, 1);
+      DMatrixRMaj Bu = new DMatrixRMaj(numberOfStates, 1);
 
-      CommonOps.mult(A, state, Ax);
-      CommonOps.mult(B, input, Bu);
+      CommonOps_DDRM.mult(A, state, Ax);
+      CommonOps_DDRM.mult(B, input, Bu);
 
-      CommonOps.add(Ax, Bu, nextState);
+      CommonOps_DDRM.add(Ax, Bu, nextState);
 
       return nextState;
    }

@@ -11,7 +11,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPJumpingDDPCalculator;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState;
@@ -216,8 +216,8 @@ public class SLIPJumpingDDPCalculatorVisualizer
 
             updateUpcomingFootstepsViz(number, leftFoot.get(number), rightFoot.get(number));
 
-            DenseMatrix64F currentCoMState;
-            currentCoMState = new DenseMatrix64F(SLIPState.stateVectorSize, 1);
+            DMatrixRMaj currentCoMState;
+            currentCoMState = new DMatrixRMaj(SLIPState.stateVectorSize, 1);
             currentCoMState.set(SLIPState.y, 0, -0.5 * number);
             currentCoMState.set(SLIPState.z, 0, 1.0);
 
@@ -271,8 +271,8 @@ public class SLIPJumpingDDPCalculatorVisualizer
 
          for (int i = 0; i < trajectory.size(); i++)
          {
-            DenseMatrix64F control = trajectory.getControl(i);
-            DenseMatrix64F state = trajectory.getState(i);
+            DMatrixRMaj control = trajectory.getControl(i);
+            DMatrixRMaj state = trajectory.getState(i);
 
             tempPoint.set(control.get(SLIPState.xF), control.get(SLIPState.yF), 0.0);
             copTracks.get(number).setBallLoop(tempPoint);

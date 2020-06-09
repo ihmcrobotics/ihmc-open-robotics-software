@@ -5,10 +5,10 @@ import static us.ihmc.robotics.Assert.assertTrue;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
-import org.ejml.ops.NormOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
+import org.ejml.dense.row.NormOps_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerToolbox;
@@ -119,15 +119,15 @@ public class OrientationFeedbackControllerTest
       }
    }
 
-   private static void assertEquals(DenseMatrix64F expected, DenseMatrix64F actual, double epsilon)
+   private static void assertEquals(DMatrixRMaj expected, DMatrixRMaj actual, double epsilon)
    {
-      assertTrue(assertErrorMessage(expected, actual), MatrixFeatures.isEquals(expected, actual, epsilon));
+      assertTrue(assertErrorMessage(expected, actual), MatrixFeatures_DDRM.isEquals(expected, actual, epsilon));
    }
 
-   private static String assertErrorMessage(DenseMatrix64F expected, DenseMatrix64F actual)
+   private static String assertErrorMessage(DMatrixRMaj expected, DMatrixRMaj actual)
    {
-      DenseMatrix64F diff = new DenseMatrix64F(expected.getNumRows(), expected.getNumCols());
-      CommonOps.subtract(expected, actual, diff);
-      return "Expected:\n" + expected + "\nActual:\n" + actual + ", difference: " + NormOps.normP2(diff);
+      DMatrixRMaj diff = new DMatrixRMaj(expected.getNumRows(), expected.getNumCols());
+      CommonOps_DDRM.subtract(expected, actual, diff);
+      return "Expected:\n" + expected + "\nActual:\n" + actual + ", difference: " + NormOps_DDRM.normP2(diff);
    }
 }

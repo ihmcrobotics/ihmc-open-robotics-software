@@ -21,9 +21,9 @@ package us.ihmc.sensorProcessing.pointClouds.shape;
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 
 import georegression.struct.point.Point3D_F64;
 import georegression.struct.point.Vector3D_F64;
@@ -35,10 +35,10 @@ import georegression.struct.point.Vector3D_F64;
  */
 public class FitPlaneWeighted3D_F64 {
 
-   SingularValueDecomposition<DenseMatrix64F> svd = DecompositionFactory.svd(3,10,false, true, false);
+   SingularValueDecomposition_F64<DMatrixRMaj> svd = DecompositionFactory_DDRM.svd(3,10,false, true, false);
 
-   DenseMatrix64F A = new DenseMatrix64F(3,3);
-   DenseMatrix64F V = new DenseMatrix64F(3,3);
+   DMatrixRMaj A = new DMatrixRMaj(3,3);
+   DMatrixRMaj V = new DMatrixRMaj(3,3);
 
    /**
     * SVD based method for fitting a plane to a set of points.  The plane's equation is returned

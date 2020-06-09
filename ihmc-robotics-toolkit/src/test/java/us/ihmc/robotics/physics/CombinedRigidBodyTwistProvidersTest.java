@@ -1,10 +1,13 @@
 package us.ihmc.robotics.physics;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.RandomMatrices;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -13,6 +16,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.mecano.algorithms.interfaces.RigidBodyTwistProvider;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
@@ -21,7 +25,11 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
-import us.ihmc.mecano.tools.*;
+import us.ihmc.mecano.tools.JointStateType;
+import us.ihmc.mecano.tools.MecanoTestTools;
+import us.ihmc.mecano.tools.MultiBodySystemFactories;
+import us.ihmc.mecano.tools.MultiBodySystemRandomTools;
+import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 public class CombinedRigidBodyTwistProvidersTest
 {
@@ -42,14 +50,14 @@ public class CombinedRigidBodyTwistProvidersTest
          int numberOfProviders = random.nextInt(10) + 1;
 
          int nDoFs = SubtreeStreams.fromChildren(rootBody).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
-         DenseMatrix64F totalJointVelocities = new DenseMatrix64F(nDoFs, 1);
+         DMatrixRMaj totalJointVelocities = new DMatrixRMaj(nDoFs, 1);
          CombinedRigidBodyTwistProviders combinedRigidBodyTwistProviders = new CombinedRigidBodyTwistProviders(ReferenceFrame.getWorldFrame());
 
          for (int j = 0; j < numberOfProviders; j++)
          {
             TestHelper helper = new TestHelper(rootBody, "test" + i);
             helper.update(random);
-            CommonOps.addEquals(totalJointVelocities, helper.jointVelocities);
+            CommonOps_DDRM.addEquals(totalJointVelocities, helper.jointVelocities);
             combinedRigidBodyTwistProviders.add(helper.toProvider());
          }
 
@@ -84,7 +92,7 @@ public class CombinedRigidBodyTwistProvidersTest
       private final List<JointBasics> originalJoints;
       private final RigidBodyBasics cloneRootBody;
       private final List<JointBasics> cloneJoints;
-      private final DenseMatrix64F jointVelocities;
+      private final DMatrixRMaj jointVelocities;
 
       private final Map<RigidBodyBasics, RigidBodyBasics> fromOriginalToCloneMap = new HashMap<>();
 
@@ -96,7 +104,7 @@ public class CombinedRigidBodyTwistProvidersTest
          cloneRootBody = MultiBodySystemFactories.cloneMultiBodySystem(rootBody, inertialFrame, name);
          cloneJoints = Arrays.asList(MultiBodySystemTools.collectSubtreeJoints(cloneRootBody));
          int nDoFs = SubtreeStreams.fromChildren(rootBody).mapToInt(JointReadOnly::getDegreesOfFreedom).sum();
-         jointVelocities = new DenseMatrix64F(nDoFs, 1);
+         jointVelocities = new DMatrixRMaj(nDoFs, 1);
 
          List<? extends RigidBodyBasics> originalRigidBodies = originalRootBody.subtreeList();
          List<? extends RigidBodyBasics> cloneRigidBodies = cloneRootBody.subtreeList();
@@ -110,7 +118,10 @@ public class CombinedRigidBodyTwistProvidersTest
       public void update(Random random)
       {
          MultiBodySystemTools.copyJointsState(originalJoints, cloneJoints, JointStateType.CONFIGURATION);
-         RandomMatrices.setRandom(jointVelocities, -2.0, 2.0, random);
+         for (int i = 0; i < jointVelocities.getNumElements(); i++)
+         {
+            jointVelocities.data[i] = EuclidCoreRandomTools.nextDouble(random, 2.0);
+         }
          MultiBodySystemTools.insertJointsState(cloneJoints, JointStateType.VELOCITY, jointVelocities);
          cloneRootBody.updateFramesRecursively();
       }

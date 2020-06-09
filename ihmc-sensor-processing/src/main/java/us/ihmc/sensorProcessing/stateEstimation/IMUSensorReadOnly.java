@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.stateEstimation;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -47,13 +47,13 @@ public interface IMUSensorReadOnly
       linearAccelerationToPack.set(getLinearAccelerationMeasurement());
    }
 
-   public abstract void getOrientationNoiseCovariance(DenseMatrix64F noiseCovarianceToPack);
+   public abstract void getOrientationNoiseCovariance(DMatrixRMaj noiseCovarianceToPack);
 
-   public abstract void getAngularVelocityNoiseCovariance(DenseMatrix64F noiseCovarianceToPack);
+   public abstract void getAngularVelocityNoiseCovariance(DMatrixRMaj noiseCovarianceToPack);
 
-   public abstract void getAngularVelocityBiasProcessNoiseCovariance(DenseMatrix64F biasProcessNoiseCovarianceToPack);
+   public abstract void getAngularVelocityBiasProcessNoiseCovariance(DMatrixRMaj biasProcessNoiseCovarianceToPack);
 
-   public abstract void getLinearAccelerationNoiseCovariance(DenseMatrix64F noiseCovarianceToPack);
+   public abstract void getLinearAccelerationNoiseCovariance(DMatrixRMaj noiseCovarianceToPack);
 
-   public abstract void getLinearAccelerationBiasProcessNoiseCovariance(DenseMatrix64F biasProcessNoiseCovarianceToPack);
+   public abstract void getLinearAccelerationBiasProcessNoiseCovariance(DMatrixRMaj biasProcessNoiseCovarianceToPack);
 }

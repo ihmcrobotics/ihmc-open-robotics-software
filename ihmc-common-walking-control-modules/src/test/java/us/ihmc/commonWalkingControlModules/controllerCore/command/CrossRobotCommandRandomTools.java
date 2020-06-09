@@ -3,14 +3,19 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.lang3.mutable.MutableInt;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.RandomMatrices;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.reflections.Reflections;
 
 import gnu.trove.list.array.TDoubleArrayList;
@@ -21,21 +26,66 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.*;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.*;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.CenterOfMassFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.FeedbackControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.JointspaceFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OneDoFJointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.OrientationFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.PointFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ExternalWrenchCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.PlaneContactStateCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsOptimizationSettingsCommand.JointVelocityLimitMode;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointLimitReductionCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand.PrivilegedConfigurationOption;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.LowLevelOneDoFJointDesiredDataHolder;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationData;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointLimitEnforcementCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.JointTorqueCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualEffortCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualForceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandBuffer;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlCommandList;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualModelControlOptimizationSettingsCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualTorqueCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl.VirtualWrenchCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.parameters.JointAccelerationIntegrationParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitEnforcement;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointLimitParameters;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.OneDoFJointPrivilegedConfigurationParameters;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.*;
+import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FramePose3D;
+import us.ihmc.euclid.referenceFrame.FrameQuaternion;
+import us.ihmc.euclid.referenceFrame.FrameVector2D;
+import us.ihmc.euclid.referenceFrame.FrameVector3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameRandomTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -55,7 +105,11 @@ import us.ihmc.mecano.spatial.Wrench;
 import us.ihmc.mecano.tools.MecanoRandomTools;
 import us.ihmc.robotics.controllers.pidGains.PID3DGains;
 import us.ihmc.robotics.controllers.pidGains.PIDSE3Gains;
-import us.ihmc.robotics.controllers.pidGains.implementations.*;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.DefaultPIDSE3Gains;
+import us.ihmc.robotics.controllers.pidGains.implementations.PDGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePID3DGains;
+import us.ihmc.robotics.controllers.pidGains.implementations.ZeroablePIDSE3Gains;
 import us.ihmc.robotics.kinematics.JointLimitData;
 import us.ihmc.robotics.lists.DenseMatrixArrayList;
 import us.ihmc.robotics.lists.FrameTupleArrayList;
@@ -70,7 +124,11 @@ import us.ihmc.robotics.weightMatrices.WeightMatrix3D;
 import us.ihmc.robotics.weightMatrices.WeightMatrix6D;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.model.RobotMotionStatusHolder;
-import us.ihmc.sensorProcessing.outputData.*;
+import us.ihmc.sensorProcessing.outputData.ImuData;
+import us.ihmc.sensorProcessing.outputData.JointDesiredControlMode;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutput;
+import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListBasics;
+import us.ihmc.sensorProcessing.outputData.LowLevelState;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolder;
 import us.ihmc.sensorProcessing.sensors.RawJointSensorDataHolderMap;
 import us.ihmc.sensorProcessing.simulatedSensors.SensorDataContext;
@@ -304,14 +362,14 @@ public class CrossRobotCommandRandomTools
                                                        nextElementIn(random, possibleFrames));
    }
 
-   public static DenseMatrix64F nextDenseMatrix64F(Random random)
+   public static DMatrixRMaj nextDenseMatrix64F(Random random)
    {
-      return RandomMatrices.createRandom(random.nextInt(10), random.nextInt(10), random);
+      return RandomMatrices_DDRM.rectangle(random.nextInt(10), random.nextInt(10), random);
    }
 
-   public static DenseMatrix64F nextDenseMatrix64F(Random random, int numRow, int numCol)
+   public static DMatrixRMaj nextDenseMatrix64F(Random random, int numRow, int numCol)
    {
-      return RandomMatrices.createRandom(numRow, numCol, random);
+      return RandomMatrices_DDRM.rectangle(numRow, numCol, random);
    }
 
    public static DenseMatrixArrayList nextDenseMatrixArrayList(Random random, int numRow, int numCol, int size)
@@ -629,7 +687,7 @@ public class CrossRobotCommandRandomTools
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          JointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
-         DenseMatrix64F desiredAcceleration = RandomMatrices.createRandom(joint.getDegreesOfFreedom(), 1, random);
+         DMatrixRMaj desiredAcceleration = RandomMatrices_DDRM.rectangle(joint.getDegreesOfFreedom(), 1, random);
          next.addJoint(joint, desiredAcceleration, random.nextDouble());
       }
 
@@ -639,7 +697,7 @@ public class CrossRobotCommandRandomTools
    public static MomentumRateCommand nextMomentumRateCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       MomentumRateCommand next = new MomentumRateCommand();
-      next.setMomentumRate(RandomMatrices.createRandom(6, 1, random));
+      next.setMomentumRate(RandomMatrices_DDRM.rectangle(6, 1, random));
       next.setWeights(nextWeightMatrix6D(random, possibleFrames));
       next.setSelectionMatrix(nextSelectionMatrix6D(random, possibleFrames));
       return next;
@@ -746,7 +804,7 @@ public class CrossRobotCommandRandomTools
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          JointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
-         next.addJoint(joint, RandomMatrices.createRandom(joint.getDegreesOfFreedom(), 1, random), random.nextDouble());
+         next.addJoint(joint, RandomMatrices_DDRM.rectangle(joint.getDegreesOfFreedom(), 1, random), random.nextDouble());
       }
 
       return next;
@@ -755,7 +813,7 @@ public class CrossRobotCommandRandomTools
    public static MomentumCommand nextMomentumCommand(Random random, RigidBodyBasics rootBody, ReferenceFrame... possibleFrames)
    {
       MomentumCommand next = new MomentumCommand();
-      next.setMomentum(RandomMatrices.createRandom(6, 1, random));
+      next.setMomentum(RandomMatrices_DDRM.rectangle(6, 1, random));
       next.getWeightMatrix().set(nextWeightMatrix6D(random, possibleFrames));
       next.getSelectionMatrix().set(nextSelectionMatrix6D(random, possibleFrames));
       return next;
@@ -914,7 +972,7 @@ public class CrossRobotCommandRandomTools
       for (int jointIndex = 0; jointIndex < numberOfJoints; jointIndex++)
       {
          JointBasics joint = allJoints.remove(random.nextInt(allJoints.size()));
-         next.addJoint(joint, RandomMatrices.createRandom(joint.getDegreesOfFreedom(), 1, random));
+         next.addJoint(joint, RandomMatrices_DDRM.rectangle(joint.getDegreesOfFreedom(), 1, random));
       }
 
       return next;
@@ -1703,7 +1761,7 @@ public class CrossRobotCommandRandomTools
    {
       for (int i = 0; i < listToRandomize.size(); i++)
       {
-         listToRandomize.get(i).set(RandomMatrices.createRandom(random.nextInt(15) + 1, random.nextInt(15) + 1, random));
+         listToRandomize.get(i).set(RandomMatrices_DDRM.rectangle(random.nextInt(15) + 1, random.nextInt(15) + 1, random));
       }
    }
 
@@ -1797,9 +1855,9 @@ public class CrossRobotCommandRandomTools
          randomizeAtomicReference((AtomicReference) fieldInstance,
                                   (listElementType) -> nextTypeInstance(listElementType, random, true, rootBody, possibleFrames));
       }
-      else if (fieldType == DenseMatrix64F.class)
+      else if (fieldType == DMatrixRMaj.class)
       {
-         field.set(fieldOwnerInstance, RandomMatrices.createRandom(10, 10, random));
+         field.set(fieldOwnerInstance, RandomMatrices_DDRM.rectangle(10, 10, random));
       }
       else if (fieldType == SideDependentList.class)
       {

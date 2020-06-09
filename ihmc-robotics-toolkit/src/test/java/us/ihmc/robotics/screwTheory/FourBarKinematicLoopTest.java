@@ -1,15 +1,15 @@
 package us.ihmc.robotics.screwTheory;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
+import static us.ihmc.robotics.Assert.assertTrue;
+import static us.ihmc.robotics.Assert.fail;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -768,7 +768,7 @@ public class FourBarKinematicLoopTest
    {
       int numTests = 50;
       Random random = new Random(538L);
-      DenseMatrix64F jacobian = new DenseMatrix64F(6, 1);
+      DMatrixRMaj jacobian = new DMatrixRMaj(6, 1);
       FrameVector3D tempLinearVelocity = new FrameVector3D();
       double expectedLinearX, expectedLinearY, expectedLinearZ, expectedAngularX, expectedAngularY, expectedAngularZ;
       ReferenceFrame outputJointFrame;

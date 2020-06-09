@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -109,9 +109,9 @@ public class ComTrajectoryPlannerTest extends CoMTrajectoryPlannerInterfaceTest
       FramePoint3D fifthCoefficient = new FramePoint3D();
       FramePoint3D sixthCoefficient = new FramePoint3D();
 
-      DenseMatrix64F xCoefficientVector = planner.xCoefficientVector;
-      DenseMatrix64F yCoefficientVector = planner.yCoefficientVector;
-      DenseMatrix64F zCoefficientVector = planner.zCoefficientVector;
+      DMatrixRMaj xCoefficientVector = planner.xCoefficientVector;
+      DMatrixRMaj yCoefficientVector = planner.yCoefficientVector;
+      DMatrixRMaj zCoefficientVector = planner.zCoefficientVector;
 
       int startIndex = 0;
       firstCoefficient.setX(xCoefficientVector.get(startIndex));

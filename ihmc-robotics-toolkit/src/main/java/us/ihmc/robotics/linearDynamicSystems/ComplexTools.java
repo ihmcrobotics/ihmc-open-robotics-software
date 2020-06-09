@@ -1,15 +1,15 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
-import org.ejml.data.CDenseMatrix64F;
-import org.ejml.data.Complex64F;
+import org.ejml.data.Complex_F64;
+import org.ejml.data.ZMatrixRMaj;
 
 import us.ihmc.robotics.dataStructures.ComplexNumber;
 
 public class ComplexTools
 {
-   public static CDenseMatrix64F ihmcComplexToEjmlComplex(ComplexMatrix ihmc)
+   public static ZMatrixRMaj ihmcComplexToEjmlComplex(ComplexMatrix ihmc)
    {
-      CDenseMatrix64F ret = new CDenseMatrix64F(ihmc.getRowDimension(), ihmc.getColumnDimension());
+      ZMatrixRMaj ret = new ZMatrixRMaj(ihmc.getRowDimension(), ihmc.getColumnDimension());
 
       for (int i = 0; i < ret.numRows; i++)
       {
@@ -23,11 +23,11 @@ public class ComplexTools
       return ret;
    }
 
-   public static ComplexMatrix ejmlToIhmComplex(CDenseMatrix64F ejml)
+   public static ComplexMatrix ejmlToIhmComplex(ZMatrixRMaj ejml)
    {
       ComplexMatrix ihmc = new ComplexMatrix(ejml.numRows, ejml.numCols);
 
-      Complex64F c = new Complex64F();
+      Complex_F64 c = new Complex_F64();
 
       for (int i = 0; i < ejml.numRows; i++)
       {
@@ -41,11 +41,11 @@ public class ComplexTools
       return ihmc;
    }
 
-   public static ComplexNumber[][] copyEjmlComplexIntoIhmcComplexNumber2dArray(CDenseMatrix64F ejml)
+   public static ComplexNumber[][] copyEjmlComplexIntoIhmcComplexNumber2dArray(ZMatrixRMaj ejml)
    {
       ComplexNumber[][] ihmcComplexNumber2dArray = new ComplexNumber[ejml.getNumRows()][ejml.getNumCols()];
 
-      Complex64F c = new Complex64F();
+      Complex_F64 c = new Complex_F64();
       for (int i = 0; i < ejml.getNumRows(); i++)
       {
          for (int j = 0; j < ejml.getNumCols(); j++)

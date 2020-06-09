@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -262,14 +262,14 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       Vector3D rotationVector = new Vector3D();
       desiredChestOrientation.getRotationVector(rotationVector);
-      DenseMatrix64F rotationVectorMatrix = new DenseMatrix64F(3, 1);
+      DMatrixRMaj rotationVectorMatrix = new DMatrixRMaj(3, 1);
       rotationVector.get(rotationVectorMatrix);
 
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 3);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(3, 3);
       selectionMatrix3D.getFullSelectionMatrixInFrame(pelvisZUpFrame, selectionMatrix);
 
-      DenseMatrix64F result = new DenseMatrix64F(3, 1);
-      CommonOps.mult(selectionMatrix, rotationVectorMatrix, result);
+      DMatrixRMaj result = new DMatrixRMaj(3, 1);
+      CommonOps_DDRM.mult(selectionMatrix, rotationVectorMatrix, result);
       rotationVector.set(result);
       desiredChestOrientation.setRotationVector(rotationVector);
 
@@ -453,14 +453,14 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       Vector3D rotationVector = new Vector3D();
       desiredChestOrientation.getRotationVector(rotationVector);
-      DenseMatrix64F rotationVectorMatrix = new DenseMatrix64F(3, 1);
+      DMatrixRMaj rotationVectorMatrix = new DMatrixRMaj(3, 1);
       rotationVector.get(rotationVectorMatrix);
 
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 3);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(3, 3);
       selectionMatrix3D.getFullSelectionMatrixInFrame(pelvisZUpFrame, selectionMatrix);
 
-      DenseMatrix64F result = new DenseMatrix64F(3, 1);
-      CommonOps.mult(selectionMatrix, rotationVectorMatrix, result);
+      DMatrixRMaj result = new DMatrixRMaj(3, 1);
+      CommonOps_DDRM.mult(selectionMatrix, rotationVectorMatrix, result);
       rotationVector.set(result);
       desiredChestOrientation.setRotationVector(rotationVector);
 
@@ -1694,7 +1694,7 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
    {
       RigidBodyTransform t1 = new RigidBodyTransform();
       Vector3D rotationVector = new Vector3D();
-      DenseMatrix64F rotationVectorMatrix = new DenseMatrix64F(3, 1);
+      DMatrixRMaj rotationVectorMatrix = new DMatrixRMaj(3, 1);
 
       t1.appendYawRotation(Math.PI / 8.0);
       t1.getRotation().getRotationVector(rotationVector);
@@ -1702,11 +1702,11 @@ public abstract class EndToEndChestTrajectoryMessageTest implements MultiRobotTe
 
       SelectionMatrix3D selectionMatrix3d = new SelectionMatrix3D();
       selectionMatrix3d.selectZAxis(false);
-      DenseMatrix64F selectionMatrix = new DenseMatrix64F(3, 3);
+      DMatrixRMaj selectionMatrix = new DMatrixRMaj(3, 3);
       selectionMatrix3d.getFullSelectionMatrixInFrame(null, selectionMatrix);
 
-      DenseMatrix64F result = new DenseMatrix64F(3, 1);
-      CommonOps.mult(selectionMatrix, rotationVectorMatrix, result);
+      DMatrixRMaj result = new DMatrixRMaj(3, 1);
+      CommonOps_DDRM.mult(selectionMatrix, rotationVectorMatrix, result);
 
       System.out.println(result);
       rotationVector.set(result);

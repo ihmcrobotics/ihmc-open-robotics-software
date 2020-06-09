@@ -6,7 +6,7 @@ import static us.ihmc.robotics.Assert.fail;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.matrixlib.MatrixTestTools;
@@ -26,17 +26,17 @@ public class YoMatrixTest
       assertEquals(maxNumberOfRows, yoMatrix.getNumberOfRows());
       assertEquals(maxNumberOfColumns, yoMatrix.getNumberOfColumns());
 
-      DenseMatrix64F denseMatrix = new DenseMatrix64F(maxNumberOfRows, maxNumberOfColumns);
+      DMatrixRMaj denseMatrix = new DMatrixRMaj(maxNumberOfRows, maxNumberOfColumns);
       yoMatrix.get(denseMatrix);
 
       MatrixTestTools.assertMatrixEqualsZero(denseMatrix, 1e-10);
 
       Random random = new Random(1984L);
 
-      DenseMatrix64F randomMatrix = RandomGeometry.nextDenseMatrix64F(random, maxNumberOfRows, maxNumberOfColumns);
+      DMatrixRMaj randomMatrix = RandomGeometry.nextDenseMatrix64F(random, maxNumberOfRows, maxNumberOfColumns);
       yoMatrix.set(randomMatrix);
 
-      DenseMatrix64F checkMatrix = new DenseMatrix64F(maxNumberOfRows, maxNumberOfColumns);
+      DMatrixRMaj checkMatrix = new DMatrixRMaj(maxNumberOfRows, maxNumberOfColumns);
       yoMatrix.get(checkMatrix);
 
       MatrixTestTools.assertMatrixEquals(randomMatrix, checkMatrix, 1e-10);
@@ -56,7 +56,7 @@ public class YoMatrixTest
 
       int smallerRows = maxNumberOfRows - 2;
       int smallerColumns = maxNumberOfColumns - 3;
-      DenseMatrix64F denseMatrix = new DenseMatrix64F(smallerRows, smallerColumns);
+      DMatrixRMaj denseMatrix = new DMatrixRMaj(smallerRows, smallerColumns);
 
       try
       {
@@ -77,15 +77,15 @@ public class YoMatrixTest
 
       Random random = new Random(1984L);
 
-      DenseMatrix64F randomMatrix = RandomGeometry.nextDenseMatrix64F(random, maxNumberOfRows, maxNumberOfColumns);
+      DMatrixRMaj randomMatrix = RandomGeometry.nextDenseMatrix64F(random, maxNumberOfRows, maxNumberOfColumns);
       yoMatrix.set(randomMatrix);
 
-      DenseMatrix64F checkMatrix = new DenseMatrix64F(maxNumberOfRows, maxNumberOfColumns);
+      DMatrixRMaj checkMatrix = new DMatrixRMaj(maxNumberOfRows, maxNumberOfColumns);
       yoMatrix.get(checkMatrix);
 
       MatrixTestTools.assertMatrixEquals(randomMatrix, checkMatrix, 1e-10);
 
-      DenseMatrix64F smallerMatrix = RandomGeometry.nextDenseMatrix64F(random, smallerRows, smallerColumns);
+      DMatrixRMaj smallerMatrix = RandomGeometry.nextDenseMatrix64F(random, smallerRows, smallerColumns);
       yoMatrix.set(smallerMatrix);
 
       assertEquals(smallerRows, smallerMatrix.getNumRows());
@@ -94,7 +94,7 @@ public class YoMatrixTest
       assertEquals(smallerRows, yoMatrix.getNumberOfRows());
       assertEquals(smallerColumns, yoMatrix.getNumberOfColumns());
 
-      DenseMatrix64F checkMatrix2 = new DenseMatrix64F(1, 1);
+      DMatrixRMaj checkMatrix2 = new DMatrixRMaj(1, 1);
       yoMatrix.getAndReshape(checkMatrix2);
 
       MatrixTestTools.assertMatrixEquals(smallerMatrix, checkMatrix2, 1e-10);
@@ -114,14 +114,14 @@ public class YoMatrixTest
       
       Random random = new Random(1984L);
 
-      DenseMatrix64F randomMatrix = RandomGeometry.nextDenseMatrix64F(random, maxNumberOfRows, maxNumberOfColumns);
+      DMatrixRMaj randomMatrix = RandomGeometry.nextDenseMatrix64F(random, maxNumberOfRows, maxNumberOfColumns);
       yoMatrix.set(randomMatrix);
       
       int numberOfRows = 2;
       int numberOfColumns = 6;
       yoMatrix.setToZero(numberOfRows, numberOfColumns);
       
-      DenseMatrix64F zeroMatrix = new DenseMatrix64F(numberOfRows, numberOfColumns);
+      DMatrixRMaj zeroMatrix = new DMatrixRMaj(numberOfRows, numberOfColumns);
       checkMatrixYoVariablesEqualsCheckMatrixAndOutsideValuesAreNaN(name, maxNumberOfRows, maxNumberOfColumns, zeroMatrix, registry);  
    }
    
@@ -134,7 +134,7 @@ public class YoMatrixTest
       YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
       YoMatrix yoMatrix = new YoMatrix(name, maxNumberOfRows, maxNumberOfColumns, registry);
 
-      DenseMatrix64F tooBigMatrix = new DenseMatrix64F(maxNumberOfRows + 1, maxNumberOfColumns);
+      DMatrixRMaj tooBigMatrix = new DMatrixRMaj(maxNumberOfRows + 1, maxNumberOfColumns);
 
       try
       {
@@ -145,7 +145,7 @@ public class YoMatrixTest
       {
       }
 
-      tooBigMatrix = new DenseMatrix64F(maxNumberOfRows, maxNumberOfColumns + 1);
+      tooBigMatrix = new DMatrixRMaj(maxNumberOfRows, maxNumberOfColumns + 1);
 
       try
       {
@@ -157,11 +157,11 @@ public class YoMatrixTest
       }
 
       // Test a 0 X Big Matrix
-      DenseMatrix64F okMatrix = new DenseMatrix64F(0, maxNumberOfColumns + 10);
+      DMatrixRMaj okMatrix = new DMatrixRMaj(0, maxNumberOfColumns + 10);
       yoMatrix.set(okMatrix);
       assertMatrixYoVariablesAreNaN(name, maxNumberOfRows, maxNumberOfColumns, registry);
       
-      DenseMatrix64F checkMatrix = new DenseMatrix64F(1, 1);
+      DMatrixRMaj checkMatrix = new DMatrixRMaj(1, 1);
       yoMatrix.getAndReshape(checkMatrix);
       
       assertEquals(0, checkMatrix.getNumRows());
@@ -169,11 +169,11 @@ public class YoMatrixTest
       
       // Test a Big X 0 Matrix
 
-      okMatrix = new DenseMatrix64F(maxNumberOfRows + 10, 0);
+      okMatrix = new DMatrixRMaj(maxNumberOfRows + 10, 0);
       yoMatrix.set(okMatrix);
       assertMatrixYoVariablesAreNaN(name, maxNumberOfRows, maxNumberOfColumns, registry);
       
-      checkMatrix = new DenseMatrix64F(1, 1);
+      checkMatrix = new DMatrixRMaj(1, 1);
       yoMatrix.getAndReshape(checkMatrix);
       
       assertEquals(maxNumberOfRows + 10, checkMatrix.getNumRows());
@@ -182,7 +182,7 @@ public class YoMatrixTest
    }
 
 
-   private void checkMatrixYoVariablesEqualsCheckMatrixAndOutsideValuesAreNaN(String name, int maxNumberOfRows, int maxNumberOfColumns, DenseMatrix64F checkMatrix, YoVariableRegistry registry)
+   private void checkMatrixYoVariablesEqualsCheckMatrixAndOutsideValuesAreNaN(String name, int maxNumberOfRows, int maxNumberOfColumns, DMatrixRMaj checkMatrix, YoVariableRegistry registry)
    {
       int smallerRows = checkMatrix.getNumRows();
       int smallerColumns = checkMatrix.getNumCols();

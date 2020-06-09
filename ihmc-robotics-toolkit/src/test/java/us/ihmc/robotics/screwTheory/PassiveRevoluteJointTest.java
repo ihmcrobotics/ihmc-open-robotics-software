@@ -1,18 +1,16 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.AfterEach;
-import us.ihmc.robotics.Assert;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.robotics.Assert;
 
 public class PassiveRevoluteJointTest
 {
@@ -21,7 +19,7 @@ public class PassiveRevoluteJointTest
    private FrameVector3D frameVec = new FrameVector3D();
    private RigidBodyBasics rigidBody = new RigidBody("rigidBody", referenceFrame);
    private PassiveRevoluteJoint joint = null; // new PassiveRevoluteJoint("testJoint",rigidBody, referenceFrame, frameVec);
-   private DenseMatrix64F matrix = new DenseMatrix64F();
+   private DMatrixRMaj matrix = new DMatrixRMaj();
    private int rowStart = 1;
    private Wrench jointWrench = new Wrench();
    private double q, qd, qdd, qddDesired, tau;

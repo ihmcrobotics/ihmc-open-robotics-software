@@ -2,10 +2,10 @@ package us.ihmc.trajectoryOptimization;
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.DecompositionFactory_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.MathTools;
@@ -29,36 +29,36 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    protected final DiscreteSequence feedBackGainSequence;
    protected final DiscreteSequence feedForwardSequence;
 
-   protected final RecyclingArrayList<DenseMatrix64F> costStateGradientSequence;
-   protected final RecyclingArrayList<DenseMatrix64F> costControlGradientSequence;
-   protected final RecyclingArrayList<DenseMatrix64F> costStateHessianSequence;
-   protected final RecyclingArrayList<DenseMatrix64F> costControlHessianSequence;
-   protected final RecyclingArrayList<DenseMatrix64F> costStateControlHessianSequence;
+   protected final RecyclingArrayList<DMatrixRMaj> costStateGradientSequence;
+   protected final RecyclingArrayList<DMatrixRMaj> costControlGradientSequence;
+   protected final RecyclingArrayList<DMatrixRMaj> costStateHessianSequence;
+   protected final RecyclingArrayList<DMatrixRMaj> costControlHessianSequence;
+   protected final RecyclingArrayList<DMatrixRMaj> costStateControlHessianSequence;
 
-   protected final DenseMatrix64F hamiltonianStateGradient;
-   protected final DenseMatrix64F hamiltonianControlGradient;
-   protected final DenseMatrix64F hamiltonianStateHessian;
-   protected final DenseMatrix64F hamiltonianControlHessian;
-   protected final DenseMatrix64F hamiltonianStateControlHessian;
-   protected final DenseMatrix64F hamiltonianControlStateHessian;
-   protected final DenseMatrix64F invQuu;
+   protected final DMatrixRMaj hamiltonianStateGradient;
+   protected final DMatrixRMaj hamiltonianControlGradient;
+   protected final DMatrixRMaj hamiltonianStateHessian;
+   protected final DMatrixRMaj hamiltonianControlHessian;
+   protected final DMatrixRMaj hamiltonianStateControlHessian;
+   protected final DMatrixRMaj hamiltonianControlStateHessian;
+   protected final DMatrixRMaj invQuu;
 
-   protected final RecyclingArrayList<DenseMatrix64F> dynamicsStateGradientSequence;
-   protected final RecyclingArrayList<DenseMatrix64F> dynamicsControlGradientSequence;
-   protected final DenseMatrix64F dynamicsStateHessian;
-   protected final DenseMatrix64F dynamicsControlHessian;
-   protected final DenseMatrix64F dynamicsControlStateHessian;
+   protected final RecyclingArrayList<DMatrixRMaj> dynamicsStateGradientSequence;
+   protected final RecyclingArrayList<DMatrixRMaj> dynamicsControlGradientSequence;
+   protected final DMatrixRMaj dynamicsStateHessian;
+   protected final DMatrixRMaj dynamicsControlHessian;
+   protected final DMatrixRMaj dynamicsControlStateHessian;
 
-   protected final RecyclingArrayList<DenseMatrix64F> valueStateGradientSequence;
-   protected final RecyclingArrayList<DenseMatrix64F> valueStateHessianSequence;
+   protected final RecyclingArrayList<DMatrixRMaj> valueStateGradientSequence;
+   protected final RecyclingArrayList<DMatrixRMaj> valueStateHessianSequence;
 
-   private final DenseMatrix64F Q_XX_col;
-   private final DenseMatrix64F Q_UX_col;
-   private final DenseMatrix64F Q_UU_col;
+   private final DMatrixRMaj Q_XX_col;
+   private final DMatrixRMaj Q_UX_col;
+   private final DMatrixRMaj Q_UU_col;
 
-   private final DenseMatrix64F tempMatrix = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj tempMatrix = new DMatrixRMaj(0, 0);
 
-   private final SingularValueDecomposition<DenseMatrix64F> decomposer = DecompositionFactory.svd(0, 0, true, true, true);
+   private final SingularValueDecomposition_F64<DMatrixRMaj> decomposer = DecompositionFactory_DDRM.svd(0, 0, true, true, true);
    protected final boolean debug;
 
    private static final double minimumModificationFactor = 2;
@@ -97,19 +97,19 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       costControlHessianSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(controlSize, controlSize));
       costStateControlHessianSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, controlSize));
 
-      hamiltonianStateGradient = new DenseMatrix64F(stateSize, 1);
-      hamiltonianControlGradient = new DenseMatrix64F(controlSize, 1);
-      hamiltonianStateHessian = new DenseMatrix64F(stateSize, stateSize);
-      hamiltonianControlHessian = new DenseMatrix64F(controlSize, controlSize);
-      hamiltonianStateControlHessian = new DenseMatrix64F(stateSize, controlSize);
-      hamiltonianControlStateHessian = new DenseMatrix64F(controlSize, stateSize);
-      invQuu = new DenseMatrix64F(controlSize, controlSize);
+      hamiltonianStateGradient = new DMatrixRMaj(stateSize, 1);
+      hamiltonianControlGradient = new DMatrixRMaj(controlSize, 1);
+      hamiltonianStateHessian = new DMatrixRMaj(stateSize, stateSize);
+      hamiltonianControlHessian = new DMatrixRMaj(controlSize, controlSize);
+      hamiltonianStateControlHessian = new DMatrixRMaj(stateSize, controlSize);
+      hamiltonianControlStateHessian = new DMatrixRMaj(controlSize, stateSize);
+      invQuu = new DMatrixRMaj(controlSize, controlSize);
 
       dynamicsStateGradientSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, stateSize));
       dynamicsControlGradientSequence = new RecyclingArrayList<>(1000, new VariableVectorBuilder(stateSize, controlSize));
-      dynamicsStateHessian = new DenseMatrix64F(stateSize, stateSize);
-      dynamicsControlHessian = new DenseMatrix64F(stateSize, controlSize);
-      dynamicsControlStateHessian = new DenseMatrix64F(stateSize, controlSize);
+      dynamicsStateHessian = new DMatrixRMaj(stateSize, stateSize);
+      dynamicsControlHessian = new DMatrixRMaj(stateSize, controlSize);
+      dynamicsControlStateHessian = new DMatrixRMaj(stateSize, controlSize);
 
       valueStateHessianSequence.clear();
       valueStateGradientSequence.clear();
@@ -117,9 +117,9 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       feedBackGainSequence.clear();
       feedForwardSequence.clear();
 
-      Q_XX_col = new DenseMatrix64F(stateSize, 1);
-      Q_UX_col = new DenseMatrix64F(controlSize, 1);
-      Q_UU_col = new DenseMatrix64F(controlSize, 1);
+      Q_XX_col = new DMatrixRMaj(stateSize, 1);
+      Q_UX_col = new DMatrixRMaj(controlSize, 1);
+      Q_UU_col = new DMatrixRMaj(controlSize, 1);
    }
 
    @Override
@@ -171,7 +171,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    }
 
    @Override
-   public void initializeSequencesFromDesireds(DenseMatrix64F initialState, DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence)
+   public void initializeSequencesFromDesireds(DMatrixRMaj initialState, DiscreteOptimizationData desiredSequence, DiscreteSequence constantsSequence)
    {
       this.feedBackGainSequence.clear();
       this.feedForwardSequence.clear();
@@ -218,11 +218,11 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    {
       for (int t = startIndex; t <= endIndex; t++)
       {
-         DenseMatrix64F currentState = optimalSequence.getState(t);
-         DenseMatrix64F currentControl = optimalSequence.getControl(t);
-         DenseMatrix64F desiredState = desiredSequence.getState(t);
-         DenseMatrix64F desiredControl = desiredSequence.getControl(t);
-         DenseMatrix64F constants = constantsSequence.get(t);
+         DMatrixRMaj currentState = optimalSequence.getState(t);
+         DMatrixRMaj currentControl = optimalSequence.getControl(t);
+         DMatrixRMaj desiredState = desiredSequence.getState(t);
+         DMatrixRMaj desiredControl = desiredSequence.getControl(t);
+         DMatrixRMaj constants = constantsSequence.get(t);
 
          dynamics.getDynamicsStateGradient(dynamicsState, currentState, currentControl, constants, dynamicsStateGradientSequence.get(t));
          dynamics.getDynamicsControlGradient(dynamicsState, currentState, currentControl, constants, dynamicsControlGradientSequence.get(t));
@@ -236,12 +236,12 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    }
 
 
-   private final DenseMatrix64F U = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F W = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F V = new DenseMatrix64F(0, 0);
-   boolean computeFeedbackGainAndFeedForwardTerms(DenseMatrix64F hamiltonianControlGradient, DenseMatrix64F hamiltonianControlHessian,
-                                                  DenseMatrix64F hamiltonianControlStateHessian, DenseMatrix64F feedbackGainToPack,
-                                                  DenseMatrix64F feedForwardControlToPack)
+   private final DMatrixRMaj U = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj W = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj V = new DMatrixRMaj(0, 0);
+   boolean computeFeedbackGainAndFeedForwardTerms(DMatrixRMaj hamiltonianControlGradient, DMatrixRMaj hamiltonianControlHessian,
+                                                  DMatrixRMaj hamiltonianControlStateHessian, DMatrixRMaj feedbackGainToPack,
+                                                  DMatrixRMaj feedForwardControlToPack)
    {
       // insure that the hessian is positive definite
       int controlSize = hamiltonianControlHessian.numCols;
@@ -266,33 +266,33 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       }
 
       DiagonalMatrixTools.invertDiagonalMatrix(W);
-      CommonOps.mult(V, W, tempMatrix);
+      CommonOps_DDRM.mult(V, W, tempMatrix);
       invQuu.reshape(controlSize, controlSize);
-      CommonOps.mult(tempMatrix, U, invQuu);
+      CommonOps_DDRM.mult(tempMatrix, U, invQuu);
 
       // K = -inv(Quu) Qux
-      CommonOps.mult(-1.0, invQuu, hamiltonianControlStateHessian, feedbackGainToPack);
+      CommonOps_DDRM.mult(-1.0, invQuu, hamiltonianControlStateHessian, feedbackGainToPack);
 
       // du = -inv(Quu) Qu
-      CommonOps.mult(-1.0, invQuu, hamiltonianControlGradient, feedForwardControlToPack);
+      CommonOps_DDRM.mult(-1.0, invQuu, hamiltonianControlGradient, feedForwardControlToPack);
 
       return true;
    }
 
-   void updateHamiltonianApproximations(E dynamicsState, int t, DenseMatrix64F costStateGradient, DenseMatrix64F costControlGradient, DenseMatrix64F costStateHessian,
-                                        DenseMatrix64F costControlHessian, DenseMatrix64F costStateControlHessian, DenseMatrix64F dynamicsStateGradient,
-                                        DenseMatrix64F dynamicsControlGradient, DenseMatrix64F valueStateGradient, DenseMatrix64F valueStateHessian,
-                                        DenseMatrix64F hamiltonianStateGradientToPack, DenseMatrix64F hamiltonianControlGradientToPack,
-                                        DenseMatrix64F hamiltonianStateHessianToPack, DenseMatrix64F hamiltonianControlHessianToPack,
-                                        DenseMatrix64F hamiltonianStateControlHessianToPack, DenseMatrix64F hamiltonianControlStateHessianToPack)
+   void updateHamiltonianApproximations(E dynamicsState, int t, DMatrixRMaj costStateGradient, DMatrixRMaj costControlGradient, DMatrixRMaj costStateHessian,
+                                        DMatrixRMaj costControlHessian, DMatrixRMaj costStateControlHessian, DMatrixRMaj dynamicsStateGradient,
+                                        DMatrixRMaj dynamicsControlGradient, DMatrixRMaj valueStateGradient, DMatrixRMaj valueStateHessian,
+                                        DMatrixRMaj hamiltonianStateGradientToPack, DMatrixRMaj hamiltonianControlGradientToPack,
+                                        DMatrixRMaj hamiltonianStateHessianToPack, DMatrixRMaj hamiltonianControlHessianToPack,
+                                        DMatrixRMaj hamiltonianStateControlHessianToPack, DMatrixRMaj hamiltonianControlStateHessianToPack)
    {
       // Qx = Lx + A' Vx
       hamiltonianStateGradientToPack.set(costStateGradient);
-      CommonOps.multAddTransA(dynamicsStateGradient, valueStateGradient, hamiltonianStateGradientToPack);
+      CommonOps_DDRM.multAddTransA(dynamicsStateGradient, valueStateGradient, hamiltonianStateGradientToPack);
 
       // Qu = Lu + B' Vx
       hamiltonianControlGradientToPack.set(costControlGradient);
-      CommonOps.multAddTransA(dynamicsControlGradient, valueStateGradient, hamiltonianControlGradientToPack);
+      CommonOps_DDRM.multAddTransA(dynamicsControlGradient, valueStateGradient, hamiltonianControlGradientToPack);
 
       // Qxx = Lxx + A' Vxx A
       hamiltonianStateHessianToPack.set(costStateHessian);
@@ -309,19 +309,19 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
 
       if (useDynamicsHessian)
       {
-         DenseMatrix64F currentState = optimalSequence.getState(t);
-         DenseMatrix64F currentControl = optimalSequence.getControl(t);
-         DenseMatrix64F constants = constantsSequence.get(t);
+         DMatrixRMaj currentState = optimalSequence.getState(t);
+         DMatrixRMaj currentControl = optimalSequence.getControl(t);
+         DMatrixRMaj constants = constantsSequence.get(t);
 
          for (int stateIndex = 0; stateIndex < dynamics.getStateVectorSize(); stateIndex++)
          {
             dynamics.getDynamicsStateHessian(dynamicsState, stateIndex, currentState, currentControl, constants, dynamicsStateHessian);
             dynamics.getDynamicsStateGradientOfControlGradient(dynamicsState, stateIndex, currentState, currentControl, constants, dynamicsControlStateHessian);
 
-            CommonOps.multTransA(dynamicsStateHessian, valueStateGradient, Q_XX_col);
+            CommonOps_DDRM.multTransA(dynamicsStateHessian, valueStateGradient, Q_XX_col);
             MatrixTools.addMatrixBlock(hamiltonianStateHessianToPack, 0, stateIndex, Q_XX_col, 0, 0, dynamics.getStateVectorSize(), 1, 1.0);
 
-            CommonOps.multTransA(dynamicsControlStateHessian, valueStateGradient, Q_UX_col);
+            CommonOps_DDRM.multTransA(dynamicsControlStateHessian, valueStateGradient, Q_UX_col);
             MatrixTools.addMatrixBlock(hamiltonianControlStateHessianToPack, 0, stateIndex, Q_UX_col, 0, 0, dynamics.getControlVectorSize(), 1, 1.0);
          }
 
@@ -329,7 +329,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
          {
             dynamics.getDynamicsControlHessian(dynamicsState, controlIndex, currentState, currentControl, constants, dynamicsControlHessian);
 
-            CommonOps.multTransA(dynamicsControlHessian, valueStateGradient, Q_UU_col);
+            CommonOps_DDRM.multTransA(dynamicsControlHessian, valueStateGradient, Q_UU_col);
             MatrixTools.addMatrixBlock(hamiltonianControlHessianToPack, 0, controlIndex, Q_UU_col, 0, 0, dynamics.getControlVectorSize(), 1, 1.0);
          }
 
@@ -337,57 +337,57 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
       }
 
       // Qux = Qxu'
-      CommonOps.transpose(hamiltonianStateControlHessianToPack, hamiltonianControlStateHessianToPack);
+      CommonOps_DDRM.transpose(hamiltonianStateControlHessianToPack, hamiltonianControlStateHessianToPack);
    }
 
 
-   private final DenseMatrix64F stateError = new DenseMatrix64F(0, 0);
-   void computeUpdatedControl(DenseMatrix64F currentState, DenseMatrix64F updatedState, DenseMatrix64F feedbackGainMatrix, DenseMatrix64F feedforwardControl,
-                              DenseMatrix64F currentControl, DenseMatrix64F updatedControlToPack)
+   private final DMatrixRMaj stateError = new DMatrixRMaj(0, 0);
+   void computeUpdatedControl(DMatrixRMaj currentState, DMatrixRMaj updatedState, DMatrixRMaj feedbackGainMatrix, DMatrixRMaj feedforwardControl,
+                              DMatrixRMaj currentControl, DMatrixRMaj updatedControlToPack)
    {
       stateError.reshape(currentState.getNumRows(), 1);
-      CommonOps.subtract(updatedState, currentState, stateError);
+      CommonOps_DDRM.subtract(updatedState, currentState, stateError);
 
       // u += K*(xhat - x)
-      CommonOps.mult(feedbackGainMatrix, stateError, updatedControlToPack);
+      CommonOps_DDRM.mult(feedbackGainMatrix, stateError, updatedControlToPack);
 
       // u = alpha * du + uref
-      CommonOps.addEquals(updatedControlToPack, lineSearchGain, feedforwardControl);
-      CommonOps.addEquals(updatedControlToPack, currentControl);
+      CommonOps_DDRM.addEquals(updatedControlToPack, lineSearchGain, feedforwardControl);
+      CommonOps_DDRM.addEquals(updatedControlToPack, currentControl);
    }
 
-   void computePreviousValueApproximation(DenseMatrix64F hamiltonianStateGradient, DenseMatrix64F hamiltonianControlGradient,
-                                          DenseMatrix64F hamiltonianStateHessian, DenseMatrix64F hamiltonianStateControlHessian,
-                                          DenseMatrix64F feedbackGainMatrix, DenseMatrix64F previousValueStateGradientToPack,
-                                          DenseMatrix64F previousValueStateHessianToPack)
+   void computePreviousValueApproximation(DMatrixRMaj hamiltonianStateGradient, DMatrixRMaj hamiltonianControlGradient,
+                                          DMatrixRMaj hamiltonianStateHessian, DMatrixRMaj hamiltonianStateControlHessian,
+                                          DMatrixRMaj feedbackGainMatrix, DMatrixRMaj previousValueStateGradientToPack,
+                                          DMatrixRMaj previousValueStateHessianToPack)
    {
       // Vx = Qx + K' Qu
       previousValueStateGradientToPack.set(hamiltonianStateGradient);
-      CommonOps.multAddTransA(feedbackGainMatrix, hamiltonianControlGradient, previousValueStateGradientToPack);
+      CommonOps_DDRM.multAddTransA(feedbackGainMatrix, hamiltonianControlGradient, previousValueStateGradientToPack);
 
       // Vxx = Qxx + Qxu K
       previousValueStateHessianToPack.set(hamiltonianStateHessian);
-      CommonOps.multAdd(hamiltonianStateControlHessian, feedbackGainMatrix, previousValueStateHessianToPack);
+      CommonOps_DDRM.multAdd(hamiltonianStateControlHessian, feedbackGainMatrix, previousValueStateHessianToPack);
    }
 
    /**
     * D = D + A^T *  B * C
     */
-   void addMultQuad(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F C, DenseMatrix64F DToPack)
+   void addMultQuad(DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj C, DMatrixRMaj DToPack)
    {
       tempMatrix.reshape(A.numCols, B.numCols);
-      CommonOps.multTransA(A, B, tempMatrix);
-      CommonOps.multAdd(tempMatrix, C, DToPack);
+      CommonOps_DDRM.multTransA(A, B, tempMatrix);
+      CommonOps_DDRM.multAdd(tempMatrix, C, DToPack);
    }
 
    /**
     * D = D + alpha * A^T *  B * C
     */
-   void addMultQuad(double alpha, DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F C, DenseMatrix64F DToPack)
+   void addMultQuad(double alpha, DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj C, DMatrixRMaj DToPack)
    {
       tempMatrix.reshape(A.numCols, B.numCols);
-      CommonOps.multTransA(alpha, A, B, tempMatrix);
-      CommonOps.multAdd(tempMatrix, C, DToPack);
+      CommonOps_DDRM.multTransA(alpha, A, B, tempMatrix);
+      CommonOps_DDRM.multAdd(tempMatrix, C, DToPack);
    }
 
    void applyLevenbergMarquardtHeuristicForHessianRegularization(boolean success)
@@ -549,7 +549,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
             {
                int startIndex = startIndices.get(segment);
                int endIndex = endIndices.get(segment);
-               DenseMatrix64F initialStateForSegment = updatedSequence.getState(startIndex);
+               DMatrixRMaj initialStateForSegment = updatedSequence.getState(startIndex);
                forwardPass(dynamicsStates.get(segment), startIndex, endIndex, costFunctions.get(segment), initialStateForSegment, updatedSequence);
             }
             optimalSequence.set(updatedSequence);
@@ -573,7 +573,7 @@ public abstract class AbstractDDPSolver<E extends Enum> implements DDPSolverInte
    }
 
    @Override
-   public abstract double forwardPass(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DenseMatrix64F initialState,
+   public abstract double forwardPass(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction, DMatrixRMaj initialState,
                                       DiscreteOptimizationData updatedSequence);
 
    @Override

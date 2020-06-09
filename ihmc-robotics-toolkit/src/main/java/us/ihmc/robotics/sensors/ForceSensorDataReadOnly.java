@@ -1,6 +1,6 @@
 package us.ihmc.robotics.sensors;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
@@ -15,7 +15,7 @@ public interface ForceSensorDataReadOnly
 
    public RigidBodyBasics getMeasurementLink();
 
-   public void getWrench(DenseMatrix64F wrenchToPack);
+   public void getWrench(DMatrixRMaj wrenchToPack);
 
    public void getWrench(Wrench wrenchToPack);
 
