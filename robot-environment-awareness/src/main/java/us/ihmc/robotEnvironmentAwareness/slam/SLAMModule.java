@@ -62,7 +62,7 @@ public class SLAMModule
    private ScheduledFuture<?> scheduledMain;
    private ScheduledFuture<?> scheduledSLAM;
 
-   protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
+   protected final Ros2Node ros2Node;
 
    private final List<OcTreeConsumer> ocTreeConsumers = new ArrayList<>();
 
@@ -73,6 +73,12 @@ public class SLAMModule
 
    public SLAMModule(Messager messager, File configurationFile)
    {
+      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), messager, configurationFile);
+   }
+
+   public SLAMModule(Ros2Node ros2Node, Messager messager, File configurationFile)
+   {
+      this.ros2Node = ros2Node;
       this.reaMessager = messager;
 
       // TODO: Check name space and fix. Suspected atlas sensor suite and publisher.
@@ -108,12 +114,14 @@ public class SLAMModule
       sendCurrentState();
    }
 
+
+
    public void attachOcTreeConsumer(OcTreeConsumer ocTreeConsumer)
    {
       this.ocTreeConsumers.add(ocTreeConsumer);
    }
 
-   public void start() throws IOException
+   public void start()
    {
       if (scheduledMain == null)
       {
@@ -126,9 +134,16 @@ public class SLAMModule
       }
    }
 
-   public void stop() throws Exception
+   public void stop()
    {
-      reaMessager.closeMessager();
+      try
+      {
+         reaMessager.closeMessager();
+      }
+      catch (Exception e)
+      {
+         e.printStackTrace();
+      }
 
       if (scheduledMain != null)
       {
@@ -345,12 +360,18 @@ public class SLAMModule
 
    public static SLAMModule createIntraprocessModule() throws Exception
    {
+      KryoMessager messager = createKryoMessager();
+
+      return new SLAMModule(messager);
+   }
+
+   protected static KryoMessager createKryoMessager() throws IOException
+   {
       KryoMessager messager = KryoMessager.createIntraprocess(SLAMModuleAPI.API,
                                                               NetworkPorts.SLAM_MODULE_UI_PORT,
                                                               REACommunicationProperties.getPrivateNetClassList());
       messager.setAllowSelfSubmit(true);
       messager.startMessager();
-
-      return new SLAMModule(messager);
+      return messager;
    }
 }
