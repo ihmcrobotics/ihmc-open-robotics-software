@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules.controlModules.legConfiguration;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tuple2D.Vector2D;
 
 import java.util.Random;
 
@@ -447,7 +450,7 @@ public class TriangleToolsTest
       angleB = 0.8;
       result = 2.014053;
       isAngleAObtuse = false;
-      assertTrue("Case 1 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse)) < 0.0001);
+      assertEquals("Case 1 failed.", result, TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
 
       // Case 2: Known angle < Pi/2 and adjacent side = opposite side
       sideALength = 1.0;
@@ -455,7 +458,7 @@ public class TriangleToolsTest
       angleB = 0.8;
       result = 1.393413;
       isAngleAObtuse = false;
-      assertTrue("Case 2 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse)) < 0.0001);
+      assertEquals("Case 2 failed.", result, TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
 
       // Case 3: Known angle < Pi/2 and adjacent side > opposite side and opposite side < height
       sideALength = 1.5;
@@ -463,7 +466,7 @@ public class TriangleToolsTest
       angleB = 0.8;
       result = 0.0;
       isAngleAObtuse = false;
-      assertTrue("Case 3 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse)) < 0.0001);
+      assertEquals("Case 3 failed.", result, TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
 
       // Case 4: Known angle < Pi/2 and adjacent side > opposite side and opposite side > height and angleA is acute
       sideALength = 1.5;
@@ -471,7 +474,7 @@ public class TriangleToolsTest
       angleB = 0.6;
       result = 1.769654;
       isAngleAObtuse = false;
-      assertTrue("Case 4 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse)) < 0.0001);
+      assertEquals("Case 4 failed.", result, TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
 
       // Case 5: Known angle < Pi/2 and adjacent side > opposite side and opposite side > height and angleA is obtuse
       sideALength = 1.5;
@@ -479,7 +482,7 @@ public class TriangleToolsTest
       angleB = 0.6;
       result = 0.706353;
       isAngleAObtuse = true;
-      assertTrue("Case 5 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse)) < 0.0001);
+      assertEquals("Case 5 failed.", result, TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
 
       // Case 6: Known angle > Pi/2 and adjacent side < opposite side
       sideALength = 0.5;
@@ -487,7 +490,7 @@ public class TriangleToolsTest
       angleB = 1.75;
       result = 0.781476;
       isAngleAObtuse = false;
-      assertTrue("Case 6 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse)) < 0.0001);
+      assertEquals("Case 6 failed.", result, TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
 
       // Case 7: Known angle > Pi/2 and adjacent side = opposite side
       sideALength = 1.0;
@@ -495,7 +498,7 @@ public class TriangleToolsTest
       angleB = 1.75;
       result = 0.0;
       isAngleAObtuse = false;
-      assertTrue("Case 7 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse)) < 0.0001);
+      assertEquals("Case 7 failed.", result, TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
 
       // Case 8: Known angle > Pi/2 and adjacent side > opposite side
       sideALength = 1.5;
@@ -503,6 +506,43 @@ public class TriangleToolsTest
       angleB = 1.75;
       result = 0.0;
       isAngleAObtuse = false;
-      assertTrue("Case 8 failed.", Math.abs(result - TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse)) < 0.0001);
+      assertEquals("Case 8 failed.", result, TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
+
+      // Random Testing
+      Random random = new Random(34534L);
+
+      for (int iter = 0; iter < 1000; iter++)
+      {
+         Point2D a = EuclidCoreRandomTools.nextPoint2D(random, 10.0);
+         Point2D b = EuclidCoreRandomTools.nextPoint2D(random, 10.0);
+         Point2D c = EuclidCoreRandomTools.nextPoint2D(random, 10.0);
+
+         Vector2D ab = new Vector2D();
+         ab.sub(b, a);
+         Vector2D ba = new Vector2D();
+         ba.sub(a, b);
+         Vector2D ac = new Vector2D();
+         ac.sub(c, a);
+         Vector2D ca = new Vector2D();
+         ca.sub(a, c);
+         Vector2D bc = new Vector2D();
+         bc.sub(c, b);
+         Vector2D cb = new Vector2D();
+         cb.sub(b, c);
+
+         // The three edge lengths
+         double abLength = ab.length();
+         double acLength = ac.length();
+         double bcLength = bc.length();
+
+         // The three angles
+         double abc = Math.abs(ba.angle(bc));
+         double bca = Math.abs(cb.angle(ca));
+         double cab = Math.abs(ac.angle(ab));
+
+         assertEquals(acLength, TriangleTools.computeSSASide(bcLength, abLength, bca, cab > Math.PI / 2), epsilon);
+         assertEquals(bcLength, TriangleTools.computeSSASide(abLength, acLength, abc, bca > Math.PI / 2), epsilon);
+         assertEquals(abLength, TriangleTools.computeSSASide(acLength, bcLength, cab, abc > Math.PI / 2), epsilon);
+      }
    }
 }
