@@ -53,21 +53,6 @@ public class OcTreeEssentialsAnchorPaneController extends REABasicUIController
       }
    };
 
-   private final PropertyToMessageTypeConverter<Double, Number> numberToDoubleConverter = new PropertyToMessageTypeConverter<Double, Number>()
-   {
-      @Override
-      public Double convert(Number propertyValue)
-      {
-         return propertyValue.doubleValue();
-      }
-
-      @Override
-      public Number interpret(Double newValue)
-      {
-         return new Double(newValue.doubleValue());
-      }
-   };
-
    public OcTreeEssentialsAnchorPaneController()
    {
    }

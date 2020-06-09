@@ -25,7 +25,7 @@ public class SegmentationModuleAPI
    private static final CategoryTheme PlanarSegmentation = apiFactory.createCategoryTheme("PlanarSegmentation");
 
    public static final Topic<Integer> UIOcTreeDepth = topic("UIOctTreeDepth");
-   public static final Topic<ColoringType> UIOcTreeColoringMode = topic("UIOctTreeDepth");
+   public static final Topic<ColoringType> UIOcTreeColoringMode = topic("UIOcTreeColoringMode");
    public static final Topic<OcTreeMeshBuilder.DisplayType> UIOcTreeDisplayType = topic("UIOcTreeDisplayType");
    public static final Topic<Boolean> UIPlanarRegionHideNodes = topic("UIPlanarRegionHideNodes");
 
