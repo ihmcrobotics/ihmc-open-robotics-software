@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import com.google.common.util.concurrent.AtomicDouble;
+import com.jme3.opencl.PlatformChooser;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -37,9 +38,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
 
 public class PlanarSegmentationModule implements OcTreeConsumer
 {
@@ -226,7 +224,6 @@ public class PlanarSegmentationModule implements OcTreeConsumer
             reaMessager.submitMessage(SegmentationModuleAPI.UISegmentationDuration, timeReporter.getStringToReport());
 
             timeReporter.run(() -> moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater), reportPlanarRegionsStateTimeReport);
-
 
             planarRegionPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionFeatureUpdater.getPlanarRegionsList()));
          }
