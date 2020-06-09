@@ -39,9 +39,6 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
-
 public class PlanarSegmentationModule implements OcTreeConsumer
 {
    private static final String planarRegionsTimeReport = "OcTreePlanarRegion update took: ";
