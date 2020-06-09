@@ -1,7 +1,7 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
-import org.ejml.data.CDenseMatrix64F;
-import org.ejml.ops.CCommonOps;
+import org.ejml.data.ZMatrixRMaj;
+import org.ejml.dense.row.CommonOps_ZDRM;
 
 import Jama.Matrix;
 import us.ihmc.robotics.dataStructures.ComplexNumber;
@@ -118,9 +118,9 @@ public class ComplexMatrix
          throw new RuntimeException("Can only call inverse on square, invertible matrices!");
       }
 
-      CDenseMatrix64F ejmlMatrix = ComplexTools.ihmcComplexToEjmlComplex(this);
+      ZMatrixRMaj ejmlMatrix = ComplexTools.ihmcComplexToEjmlComplex(this);
       
-      CCommonOps.invert(ejmlMatrix);
+      CommonOps_ZDRM.invert(ejmlMatrix);
       
       return ComplexTools.ejmlToIhmComplex(ejmlMatrix);
    }

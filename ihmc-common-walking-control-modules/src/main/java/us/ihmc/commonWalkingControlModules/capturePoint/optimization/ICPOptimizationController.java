@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
@@ -124,14 +124,14 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final DoubleProvider forwardFootstepWeight;
    private final DoubleProvider lateralFootstepWeight;
    private final YoMatrix yoFootstepWeights = new YoMatrix(yoNamePrefix + "FootstepWeights", 2, 2, registry);
-   private final DenseMatrix64F footstepWeights = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj footstepWeights = new DMatrixRMaj(2, 2);
 
    private final DoubleProvider copFeedbackForwardWeight;
    private final DoubleProvider copFeedbackLateralWeight;
    private final DoubleProvider cmpFeedbackWeight;
    private final YoMatrix yoScaledCoPFeedbackWeight = new YoMatrix(yoNamePrefix + "ScaledCoPFeedbackWeight", 2, 2, registry);
    private final YoDouble scaledCMPFeedbackWeight = new YoDouble(yoNamePrefix + "ScaledCMPFeedbackWeight", registry);
-   private final DenseMatrix64F scaledCoPFeedbackWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj scaledCoPFeedbackWeight = new DMatrixRMaj(2, 2);
 
    private final DoubleProvider maxAllowedDistanceCMPSupport;
    private final DoubleProvider safeCoPDistanceToEdge;
@@ -150,7 +150,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
    private final boolean hasICPControlPolygons;
 
    private final ICPControlGainsReadOnly feedbackGains;
-   private final DenseMatrix64F transformedGains = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj transformedGains = new DMatrixRMaj(2, 2);
    private final FrameVector2D transformedMagnitudeLimits = new FrameVector2D();
 
    private final YoInteger numberOfIterations = new YoInteger(yoNamePrefix + "NumberOfIterations", registry);
@@ -999,7 +999,7 @@ public class ICPOptimizationController implements ICPOptimizationControllerInter
          double parallel = feedbackGains.getKpParallelToMotion();
          double orthogonal = feedbackGains.getKpOrthogonalToMotion();
          double magnitude = helper.transformGainsFromDynamicsFrame(transformedGains, desiredICPVelocity, parallel, orthogonal);
-         CommonOps.scale(1.0 / magnitude, scaledCoPFeedbackWeight);
+         CommonOps_DDRM.scale(1.0 / magnitude, scaledCoPFeedbackWeight);
       }
 
       yoScaledCoPFeedbackWeight.set(scaledCoPFeedbackWeight);

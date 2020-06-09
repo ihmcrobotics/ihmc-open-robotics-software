@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
@@ -64,7 +64,7 @@ public class InverseDynamicsOptimizationControlModule
    private final int rhoSize;
 
    private final OneDoFJointBasics[] oneDoFJoints;
-   private final DenseMatrix64F qDDotMinMatrix, qDDotMaxMatrix;
+   private final DMatrixRMaj qDDotMinMatrix, qDDotMaxMatrix;
 
    private final JointIndexHandler jointIndexHandler;
    private final YoDouble absoluteMaximumJointAcceleration = new YoDouble("absoluteMaximumJointAcceleration", registry);
@@ -79,7 +79,7 @@ public class InverseDynamicsOptimizationControlModule
    private final YoBoolean useWarmStart = new YoBoolean("useWarmStartInSolver", registry);
    private final YoInteger maximumNumberOfIterations = new YoInteger("maximumNumberOfIterationsInSolver", registry);
 
-   private final DenseMatrix64F zeroObjective = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj zeroObjective = new DMatrixRMaj(0, 0);
 
    public InverseDynamicsOptimizationControlModule(WholeBodyControlCoreToolbox toolbox, YoVariableRegistry parentRegistry)
    {
@@ -121,8 +121,8 @@ public class InverseDynamicsOptimizationControlModule
       boundCalculator = toolbox.getQPBoundCalculator();
 
       absoluteMaximumJointAcceleration.set(optimizationSettings.getMaximumJointAcceleration());
-      qDDotMinMatrix = new DenseMatrix64F(numberOfDoFs, 1);
-      qDDotMaxMatrix = new DenseMatrix64F(numberOfDoFs, 1);
+      qDDotMinMatrix = new DMatrixRMaj(numberOfDoFs, 1);
+      qDDotMaxMatrix = new DMatrixRMaj(numberOfDoFs, 1);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -208,8 +208,8 @@ public class InverseDynamicsOptimizationControlModule
          hasNotConvergedCounts.increment();
       }
 
-      DenseMatrix64F qDDotSolution = qpSolver.getJointAccelerations();
-      DenseMatrix64F rhoSolution = qpSolver.getRhos();
+      DMatrixRMaj qDDotSolution = qpSolver.getJointAccelerations();
+      DMatrixRMaj rhoSolution = qpSolver.getRhos();
 
       Map<RigidBodyBasics, Wrench> groundReactionWrenches = wrenchMatrixCalculator.computeWrenchesFromRho(rhoSolution);
       externalWrenchHandler.computeExternalWrenches(groundReactionWrenches);
@@ -258,18 +258,18 @@ public class InverseDynamicsOptimizationControlModule
 
    private void setupRhoTasks()
    {
-      DenseMatrix64F rhoPrevious = wrenchMatrixCalculator.getRhoPreviousMatrix();
-      DenseMatrix64F rhoRateWeight = wrenchMatrixCalculator.getRhoRateWeightMatrix();
+      DMatrixRMaj rhoPrevious = wrenchMatrixCalculator.getRhoPreviousMatrix();
+      DMatrixRMaj rhoRateWeight = wrenchMatrixCalculator.getRhoRateWeightMatrix();
       qpSolver.addRhoTask(rhoPrevious, rhoRateWeight);
 
-      DenseMatrix64F copRegularizationWeight = wrenchMatrixCalculator.getCoPRegularizationWeight();
-      DenseMatrix64F copRegularizationJacobian = wrenchMatrixCalculator.getCoPRegularizationJacobian();
-      DenseMatrix64F coPRegularizationObjective = wrenchMatrixCalculator.getCoPRegularizationObjective();
+      DMatrixRMaj copRegularizationWeight = wrenchMatrixCalculator.getCoPRegularizationWeight();
+      DMatrixRMaj copRegularizationJacobian = wrenchMatrixCalculator.getCoPRegularizationJacobian();
+      DMatrixRMaj coPRegularizationObjective = wrenchMatrixCalculator.getCoPRegularizationObjective();
       qpSolver.addRhoTask(copRegularizationJacobian, coPRegularizationObjective, copRegularizationWeight);
 
-      DenseMatrix64F copRateRegularizationWeight = wrenchMatrixCalculator.getCoPRateRegularizationWeight();
-      DenseMatrix64F copRateRegularizationJacobian = wrenchMatrixCalculator.getCoPRateRegularizationJacobian();
-      DenseMatrix64F copRateRegularizationObjective = wrenchMatrixCalculator.getCoPRateRegularizationObjective();
+      DMatrixRMaj copRateRegularizationWeight = wrenchMatrixCalculator.getCoPRateRegularizationWeight();
+      DMatrixRMaj copRateRegularizationJacobian = wrenchMatrixCalculator.getCoPRateRegularizationJacobian();
+      DMatrixRMaj copRateRegularizationObjective = wrenchMatrixCalculator.getCoPRateRegularizationObjective();
       qpSolver.addRhoTask(copRateRegularizationJacobian, copRateRegularizationObjective, copRateRegularizationWeight);
 
       // The wrench matrix calculator holds on to the command until all inverse dynamics commands are received since the
@@ -288,11 +288,11 @@ public class InverseDynamicsOptimizationControlModule
 
    private void setupWrenchesEquilibriumConstraint()
    {
-      DenseMatrix64F centroidalMomentumMatrix = motionQPInputCalculator.getCentroidalMomentumMatrix();
-      DenseMatrix64F rhoJacobian = wrenchMatrixCalculator.getRhoJacobianMatrix();
-      DenseMatrix64F convectiveTerm = motionQPInputCalculator.getCentroidalMomentumConvectiveTerm();
-      DenseMatrix64F additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
-      DenseMatrix64F gravityWrench = externalWrenchHandler.getGravitationalWrench();
+      DMatrixRMaj centroidalMomentumMatrix = motionQPInputCalculator.getCentroidalMomentumMatrix();
+      DMatrixRMaj rhoJacobian = wrenchMatrixCalculator.getRhoJacobianMatrix();
+      DMatrixRMaj convectiveTerm = motionQPInputCalculator.getCentroidalMomentumConvectiveTerm();
+      DMatrixRMaj additionalExternalWrench = externalWrenchHandler.getSumOfExternalWrenches();
+      DMatrixRMaj gravityWrench = externalWrenchHandler.getGravitationalWrench();
       qpSolver.setupWrenchesEquilibriumConstraint(centroidalMomentumMatrix, rhoJacobian, convectiveTerm, additionalExternalWrench, gravityWrench);
    }
 

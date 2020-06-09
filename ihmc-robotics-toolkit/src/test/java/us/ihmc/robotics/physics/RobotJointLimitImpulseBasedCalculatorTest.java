@@ -7,8 +7,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -79,10 +79,10 @@ public class RobotJointLimitImpulseBasedCalculatorTest
 
          if (calculator.isConstraintActive())
          {
-            DenseMatrix64F jointVelocities = new DenseMatrix64F(joints.stream().mapToInt(JointReadOnly::getDegreesOfFreedom).sum(), 1);
+            DMatrixRMaj jointVelocities = new DMatrixRMaj(joints.stream().mapToInt(JointReadOnly::getDegreesOfFreedom).sum(), 1);
             MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocities);
-            CommonOps.addEquals(jointVelocities, dt, forwardDynamicsCalculator.getJointAccelerationMatrix());
-            CommonOps.addEquals(jointVelocities, calculator.getJointVelocityChange(0));
+            CommonOps_DDRM.addEquals(jointVelocities, dt, forwardDynamicsCalculator.getJointAccelerationMatrix());
+            CommonOps_DDRM.addEquals(jointVelocities, calculator.getJointVelocityChange(0));
             MultiBodySystemTools.insertJointsState(joints, JointStateType.VELOCITY, jointVelocities);
             assertEquals(0.0, joint.getQd(), 1.0e-12, message);
          }
@@ -142,10 +142,10 @@ public class RobotJointLimitImpulseBasedCalculatorTest
 
          if (calculator.isConstraintActive())
          {
-            DenseMatrix64F jointVelocities = new DenseMatrix64F(joints.stream().mapToInt(JointReadOnly::getDegreesOfFreedom).sum(), 1);
+            DMatrixRMaj jointVelocities = new DMatrixRMaj(joints.stream().mapToInt(JointReadOnly::getDegreesOfFreedom).sum(), 1);
             MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocities);
-            CommonOps.addEquals(jointVelocities, dt, forwardDynamicsCalculator.getJointAccelerationMatrix());
-            CommonOps.addEquals(jointVelocities, calculator.getJointVelocityChange(0));
+            CommonOps_DDRM.addEquals(jointVelocities, dt, forwardDynamicsCalculator.getJointAccelerationMatrix());
+            CommonOps_DDRM.addEquals(jointVelocities, calculator.getJointVelocityChange(0));
             MultiBodySystemTools.insertJointsState(joints, JointStateType.VELOCITY, jointVelocities);
 
             List<ActiveLimit> activeLimits = calculator.getActiveLimits();

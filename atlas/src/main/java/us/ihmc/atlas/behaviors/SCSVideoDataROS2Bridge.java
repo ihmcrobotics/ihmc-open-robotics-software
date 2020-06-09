@@ -1,6 +1,11 @@
 package us.ihmc.atlas.behaviors;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.util.function.Consumer;
+
+import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.yuv.JPEGEncoder;
@@ -10,11 +15,6 @@ import us.ihmc.communication.producers.VideoSource;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
-
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.util.function.Consumer;
 
 public class SCSVideoDataROS2Bridge implements VideoDataServer
 {
@@ -35,7 +35,7 @@ public class SCSVideoDataROS2Bridge implements VideoDataServer
                        long timeStamp,
                        Point3DReadOnly cameraPosition,
                        QuaternionReadOnly cameraOrientation,
-                       IntrinsicParameters intrinsicParameters)
+                       CameraPinholeBrown intrinsicParameters)
    {
 
       YUVPicture picture = converter.fromBufferedImage(bufferedImage, YUVPicture.YUVSubsamplingType.YUV420);

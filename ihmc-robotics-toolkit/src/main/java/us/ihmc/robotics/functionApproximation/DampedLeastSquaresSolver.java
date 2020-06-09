@@ -1,22 +1,22 @@
 package us.ihmc.robotics.functionApproximation;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.ConfigurableSolvePseudoInverseSVD;
 
-public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
+public class DampedLeastSquaresSolver implements LinearSolverDense<DMatrixRMaj>
 {
-   private final DenseMatrix64F A;
+   private final DMatrixRMaj A;
    private double alpha;
-   private final DenseMatrix64F tempMatrix1;
-   private final DenseMatrix64F tempMatrix2;
-   private final LinearSolver<DenseMatrix64F> linearSolver;
-   private final LinearSolver<DenseMatrix64F> linearSolverAlpha0;
+   private final DMatrixRMaj tempMatrix1;
+   private final DMatrixRMaj tempMatrix2;
+   private final LinearSolverDense<DMatrixRMaj> linearSolver;
+   private final LinearSolverDense<DMatrixRMaj> linearSolverAlpha0;
    private int matrixSize;
 
    public DampedLeastSquaresSolver(int matrixSize)
@@ -27,11 +27,11 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
    public DampedLeastSquaresSolver(int matrixSize, double alpha)
    {
       this.matrixSize = matrixSize;
-      this.A = new DenseMatrix64F(matrixSize, matrixSize);
-      this.tempMatrix1 = new DenseMatrix64F(matrixSize, matrixSize);
-      this.tempMatrix2 = new DenseMatrix64F(matrixSize, 1);
-//      this.linearSolver = LinearSolverFactory.linear(matrixSize);
-      this.linearSolver = LinearSolverFactory.symmPosDef(matrixSize);
+      this.A = new DMatrixRMaj(matrixSize, matrixSize);
+      this.tempMatrix1 = new DMatrixRMaj(matrixSize, matrixSize);
+      this.tempMatrix2 = new DMatrixRMaj(matrixSize, 1);
+//      this.linearSolver = LinearSolverFactory_DDRM.linear(matrixSize);
+      this.linearSolver = LinearSolverFactory_DDRM.symmPosDef(matrixSize);
       this.linearSolverAlpha0 = new ConfigurableSolvePseudoInverseSVD();
       this.alpha = alpha;       
    }
@@ -47,7 +47,7 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
 
    /** {@inheritDoc} */
    @Override
-   public boolean setA(DenseMatrix64F A)
+   public boolean setA(DMatrixRMaj A)
    {
       this.A.set(A);
       matrixSize = A.getNumRows();
@@ -59,7 +59,7 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
    @Override
    public double quality()
    {
-      return CommonOps.det(A);
+      return CommonOps_DDRM.det(A);
    }
 
    /** {@inheritDoc}
@@ -71,7 +71,7 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
     * </p>
     */
    @Override
-   public void solve(DenseMatrix64F b, DenseMatrix64F x)
+   public void solve(DMatrixRMaj b, DMatrixRMaj x)
    {
       if (alpha == 0.0)
       {
@@ -83,26 +83,26 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
          tempMatrix1.reshape(matrixSize, matrixSize);
          tempMatrix2.reshape(matrixSize, b.getNumCols());
 
-         CommonOps.multOuter(A, tempMatrix1);
+         CommonOps_DDRM.multOuter(A, tempMatrix1);
          MatrixTools.addDiagonal(tempMatrix1, alpha * alpha);
 
          linearSolver.setA(tempMatrix1);
          linearSolver.solve(b, tempMatrix2);
 
-         CommonOps.multTransA(A, tempMatrix2, x);
+         CommonOps_DDRM.multTransA(A, tempMatrix2, x);
       }
    }
 
    /** {@inheritDoc}
     * <p>
-    *    Finds the inverse of the A matrix set by {@link #setA(DenseMatrix64F)}, accounting for the damping term, alpha. Computes the damped psuedo-inverse by
+    *    Finds the inverse of the A matrix set by {@link #setA(DMatrixRMaj)}, accounting for the damping term, alpha. Computes the damped psuedo-inverse by
     * </p>
     * <p>
     *    A_inv = A^T (AA^T + alpha^2)^-1
     * </p>
     */
    @Override
-   public void invert(DenseMatrix64F A_inv)
+   public void invert(DMatrixRMaj A_inv)
    {
       if (alpha == 0.0)
       {
@@ -114,13 +114,13 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
          tempMatrix1.reshape(matrixSize, matrixSize);
          tempMatrix2.reshape(matrixSize, matrixSize);
 
-         CommonOps.multOuter(A, tempMatrix1);
+         CommonOps_DDRM.multOuter(A, tempMatrix1);
          MatrixTools.addDiagonal(tempMatrix1, alpha * alpha);
 
          linearSolver.setA(tempMatrix1);
          linearSolver.invert(tempMatrix2);
 
-         CommonOps.multTransA(A, tempMatrix2, A_inv);
+         CommonOps_DDRM.multTransA(A, tempMatrix2, A_inv);
       }
    }
 
@@ -141,7 +141,7 @@ public class DampedLeastSquaresSolver implements LinearSolver<DenseMatrix64F>
    /** {@inheritDoc} */
    @SuppressWarnings("unchecked")
    @Override
-   public SingularValueDecomposition<DenseMatrix64F> getDecomposition() {
+   public SingularValueDecomposition_F64<DMatrixRMaj> getDecomposition() {
        return null;
    }
 }

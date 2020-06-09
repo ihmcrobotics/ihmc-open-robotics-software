@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -13,13 +13,13 @@ public interface DynamicallyConsistentNullspaceCalculator
 {
    void reset();
 
-   void addConstraint(RigidBodyBasics body, DenseMatrix64F selectionMatrix);
+   void addConstraint(RigidBodyBasics body, DMatrixRMaj selectionMatrix);
 
    void addActuatedJoint(JointBasics joint);
 
    void compute();
 
-   DenseMatrix64F getDynamicallyConsistentNullspace();
+   DMatrixRMaj getDynamicallyConsistentNullspace();
 
-   DenseMatrix64F getSNsBar();
+   DMatrixRMaj getSNsBar();
 }

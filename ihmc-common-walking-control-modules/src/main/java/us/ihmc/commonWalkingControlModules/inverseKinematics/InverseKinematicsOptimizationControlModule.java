@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.inverseKinematics;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
@@ -41,7 +41,7 @@ public class InverseKinematicsOptimizationControlModule
 
    private final Map<OneDoFJointBasics, YoDouble> jointMaximumVelocities = new HashMap<>();
    private final Map<OneDoFJointBasics, YoDouble> jointMinimumVelocities = new HashMap<>();
-   private final DenseMatrix64F qDotMinMatrix, qDotMaxMatrix;
+   private final DMatrixRMaj qDotMinMatrix, qDotMaxMatrix;
    private final JointIndexHandler jointIndexHandler;
 
    private final YoBoolean hasNotConvergedInPast = new YoBoolean("hasNotConvergedInPast", registry);
@@ -62,8 +62,8 @@ public class InverseKinematicsOptimizationControlModule
       motionQPInputCalculator = toolbox.getMotionQPInputCalculator();
       boundCalculator = toolbox.getQPBoundCalculator();
 
-      qDotMinMatrix = new DenseMatrix64F(numberOfDoFs, 1);
-      qDotMaxMatrix = new DenseMatrix64F(numberOfDoFs, 1);
+      qDotMinMatrix = new DMatrixRMaj(numberOfDoFs, 1);
+      qDotMaxMatrix = new DMatrixRMaj(numberOfDoFs, 1);
 
       for (int i = 0; i < oneDoFJoints.length; i++)
       {
@@ -124,7 +124,7 @@ public class InverseKinematicsOptimizationControlModule
          noConvergenceException = e;
       }
 
-      DenseMatrix64F jointVelocities = qpSolver.getJointVelocities();
+      DMatrixRMaj jointVelocities = qpSolver.getJointVelocities();
       MomentumReadOnly centroidalMomentumSoltuion = motionQPInputCalculator.computeCentroidalMomentumFromSolution(jointVelocities);
       inverseKinematicsSolution.setJointVelocities(jointVelocities);
       inverseKinematicsSolution.setCentroidalMomentumSolution(centroidalMomentumSoltuion);

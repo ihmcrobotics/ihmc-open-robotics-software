@@ -10,8 +10,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import controller_msgs.msg.dds.BoundingBoxesPacket;
 import controller_msgs.msg.dds.HeatMapPacket;
@@ -205,7 +205,7 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
    {
       synchronized (expectedFiducialSizeChangedConch)
       {
-         DenseMatrix64F pixelToNorm = computePixelToNorm(bufferedImage);
+         DMatrixRMaj pixelToNorm = computePixelToNorm(bufferedImage);
 
          cameraRigidTransform.getRotation().set(cameraOrientationInWorldXForward);
          cameraRigidPosition.set(cameraPositionInWorld);
@@ -257,7 +257,7 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
             GeometryMath_F64.mult(pixelToNorm, bottomRight, bottomRight);
             double distance = knownWidth * 0.66f / Math.abs(bottomRight.getX() - topLeft.getX()); // TODO: detectNet output is about 1/3 smaller than the real object, this is a quick hack for now, should re-train the network
             fiducialToCamera.setTranslation(0, 0, distance);
-            fiducialToCamera.setRotation(new DenseMatrix64F(3, 3, true, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0));
+            fiducialToCamera.setRotation(new DMatrixRMaj(3, 3, true, 1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, -1.0));
 
             detectorPositionX.set(fiducialToCamera.getX());
             detectorPositionY.set(fiducialToCamera.getY());
@@ -301,7 +301,7 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
       }
    }
 
-   private DenseMatrix64F computePixelToNorm(BufferedImage image)
+   private DMatrixRMaj computePixelToNorm(BufferedImage image)
    {
       int height = image.getHeight();
       int width = image.getWidth();
@@ -309,7 +309,7 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
       double fx = (width / 2.0) / Math.tan(fieldOfViewXinRadians.getDoubleValue() / 2.0);
       double fy = (height / 2.0) / Math.tan(fieldOfViewYinRadians.getDoubleValue() / 2.0);
 
-      DenseMatrix64F K_inv = new DenseMatrix64F(3, 3);
+      DMatrixRMaj K_inv = new DMatrixRMaj(3, 3);
       K_inv.set(0,0,fx);
       K_inv.set(1,1,fy);
       K_inv.set(0,1,0);
@@ -317,7 +317,7 @@ public class ObjectDetectorFromCameraImages implements ObjectConsumer<ObjectDete
       K_inv.set(1,2,height / 2.0);
       K_inv.set(2,2,1);
 
-      CommonOps.invert(K_inv);
+      CommonOps_DDRM.invert(K_inv);
 
       return K_inv;
    }

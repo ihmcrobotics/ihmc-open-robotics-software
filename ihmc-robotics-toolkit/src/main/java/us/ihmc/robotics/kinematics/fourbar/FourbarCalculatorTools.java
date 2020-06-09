@@ -11,8 +11,8 @@ import static us.ihmc.commons.MathTools.square;
 
 import java.util.Random;
 
-import us.ihmc.commons.RandomNumbers;
 import us.ihmc.commons.MathTools;
+import us.ihmc.commons.RandomNumbers;
 
 public class FourbarCalculatorTools
 {

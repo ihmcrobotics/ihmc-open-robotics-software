@@ -3,7 +3,7 @@ package us.ihmc.exampleSimulations.simple3DWalker;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -683,7 +683,7 @@ public class SimpleWalkerRobot extends Robot
          for (RobotSide robotSide : RobotSide.values())
          {
             gcPointBasedWrenchCalculators.get(robotSide).calculate();
-            DenseMatrix64F wrenchMatrix = gcPointBasedWrenchCalculators.get(robotSide).getWrench();
+            DMatrixRMaj wrenchMatrix = gcPointBasedWrenchCalculators.get(robotSide).getWrench();
             Wrench wrench = new Wrench(worldFrame, worldFrame, wrenchMatrix);
             this.yoWrenchs.get(robotSide).set(wrench);
             this.yoWrenchs.get(robotSide).scale(0.01);

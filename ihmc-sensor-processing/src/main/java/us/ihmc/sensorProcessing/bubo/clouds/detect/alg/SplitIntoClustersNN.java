@@ -21,82 +21,95 @@ package us.ihmc.sensorProcessing.bubo.clouds.detect.alg;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ddogleg.struct.FastQueue;
+import org.ddogleg.struct.FastArray;
 
 /**
- * Uses nearest-neighbor connectivity graph to find clusters of connected points.  Connect points not
- * in the input list are ignored.  "matchMarker" is modified.
+ * Uses nearest-neighbor connectivity graph to find clusters of connected points. Connect points not
+ * in the input list are ignored. "matchMarker" is modified.
  *
  * @author Peter Abeles
  */
 @SuppressWarnings("ForLoopReplaceableByForEach")
-public class SplitIntoClustersNN {
+public class SplitIntoClustersNN
+{
 
-	List<List<PointVectorNN>> clusters = new ArrayList<List<PointVectorNN>>();
+   List<List<PointVectorNN>> clusters = new ArrayList<List<PointVectorNN>>();
 
-	FastQueue<PointVectorNN> open = new FastQueue<PointVectorNN>(PointVectorNN.class,false);
+   FastArray<PointVectorNN> open = new FastArray<PointVectorNN>(PointVectorNN.class);
 
-	/**
-	 * Splits the provided cloud into clusters using the NN graph
-	 * @param cloud List of points.
-	 */
-	public void process(List<PointVectorNN> cloud ) {
-		System.out.println("SplitIntoClustersNN cloud "+cloud.size());
-		clusters.clear();
+   /**
+    * Splits the provided cloud into clusters using the NN graph
+    * 
+    * @param cloud List of points.
+    */
+   public void process(List<PointVectorNN> cloud)
+   {
+      System.out.println("SplitIntoClustersNN cloud " + cloud.size());
+      clusters.clear();
 
-		// Make that neighbors which are not a member of cloud are not included in island
-		// creation.
-		for (int i = 0; i < cloud.size(); i++) {
-			PointVectorNN p = cloud.get(i);
-			for (int j = 0; j < p.neighbors.size(); j++) {
-				p.neighbors.get(j).matchMarker = -2;
-			}
-		}
+      // Make that neighbors which are not a member of cloud are not included in island
+      // creation.
+      for (int i = 0; i < cloud.size(); i++)
+      {
+         PointVectorNN p = cloud.get(i);
+         for (int j = 0; j < p.neighbors.size(); j++)
+         {
+            p.neighbors.get(j).matchMarker = -2;
+         }
+      }
 
-		for (int i = 0; i < cloud.size(); i++) {
-			cloud.get(i).matchMarker = -1;
-		}
+      for (int i = 0; i < cloud.size(); i++)
+      {
+         cloud.get(i).matchMarker = -1;
+      }
 
-		for (int i = 0; i < cloud.size(); i++) {
-			PointVectorNN p = cloud.get(i);
-			if( p.matchMarker == -1 ) {
-				markNeighbors(p);
-			}
-		}
-		System.out.println("  total clusters "+clusters.size());
-	}
+      for (int i = 0; i < cloud.size(); i++)
+      {
+         PointVectorNN p = cloud.get(i);
+         if (p.matchMarker == -1)
+         {
+            markNeighbors(p);
+         }
+      }
+      System.out.println("  total clusters " + clusters.size());
+   }
 
-	/**
-	 * Put all the neighbors into the same list
-	 */
-	private void markNeighbors(PointVectorNN p ) {
-		List<PointVectorNN> cluster = new ArrayList<PointVectorNN>();
-		clusters.add(cluster);
+   /**
+    * Put all the neighbors into the same list
+    */
+   private void markNeighbors(PointVectorNN p)
+   {
+      List<PointVectorNN> cluster = new ArrayList<PointVectorNN>();
+      clusters.add(cluster);
 
-		int mark = clusters.size();
+      int mark = clusters.size();
 
-		open.reset();
-		open.add(p);
-		p.matchMarker = mark;
+      open.reset();
+      open.add(p);
+      p.matchMarker = mark;
 
-		while( open.size() > 0 ) {
-			p = open.removeTail();
-			cluster.add(p);
+      while (open.size() > 0)
+      {
+         p = open.removeTail();
+         cluster.add(p);
 
-			for (int i = 0; i < p.neighbors.size(); i++) {
-				PointVectorNN n = p.neighbors.get(i);
+         for (int i = 0; i < p.neighbors.size(); i++)
+         {
+            PointVectorNN n = p.neighbors.get(i);
 
-				if( n.matchMarker == -1 ) {
-					n.matchMarker = mark;
-					open.add(n);
-				}
-				// neighbors are not always symmetric.  This it is possible to have an island in one direction
-				// this case will be ignored.
-			}
-		}
-	}
+            if (n.matchMarker == -1)
+            {
+               n.matchMarker = mark;
+               open.add(n);
+            }
+            // neighbors are not always symmetric.  This it is possible to have an island in one direction
+            // this case will be ignored.
+         }
+      }
+   }
 
-	public List<List<PointVectorNN>> getClusters() {
-		return clusters;
-	}
+   public List<List<PointVectorNN>> getClusters()
+   {
+      return clusters;
+   }
 }

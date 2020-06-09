@@ -1,16 +1,13 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -21,7 +18,6 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.testing.JUnitTools;
 
 public class TransformToolsTest
 {
@@ -99,7 +95,7 @@ public class TransformToolsTest
    @Test
    public void testGetTransformFromA1toA2Random()
    {
-      DenseMatrix64F matrix = new DenseMatrix64F(4, 4);
+      DMatrixRMaj matrix = new DMatrixRMaj(4, 4);
       Random random = new Random(111L);
 
       this.createRandomTransformationMatrix(matrix, random);
@@ -172,7 +168,7 @@ public class TransformToolsTest
       int numberOfTests = 1000;
       for (int i = 0; i < numberOfTests; i++)
       {
-         DenseMatrix64F matrix = new DenseMatrix64F(4, 4);
+         DMatrixRMaj matrix = new DMatrixRMaj(4, 4);
 
          this.createRandomTransformationMatrix(matrix, random);
 
@@ -192,7 +188,7 @@ public class TransformToolsTest
       }
    }
 
-   private void createRandomTransformationMatrix(DenseMatrix64F matrix, Random random)
+   private void createRandomTransformationMatrix(DMatrixRMaj matrix, Random random)
    {
       RotationMatrix rotX = new RotationMatrix();
       RotationMatrix rotY = new RotationMatrix();

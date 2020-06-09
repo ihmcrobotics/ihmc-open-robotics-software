@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 
 import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -650,7 +650,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @param weightMatrixToPack the dense-matrix in which the weight matrix of this command is stored
     *           in. Modified.
     */
-   public void getWeightMatrix(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)
+   public void getWeightMatrix(ReferenceFrame destinationFrame, DMatrixRMaj weightMatrixToPack)
    {
       weightMatrix.getFullWeightMatrixInFrame(destinationFrame, weightMatrixToPack);
    }
@@ -715,7 +715,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     *           spatial acceleration is stored. The given matrix is reshaped to ensure proper size.
     *           Modified.
     */
-   public void getDesiredSpatialAcceleration(DenseMatrix64F desiredSpatialAccelerationToPack)
+   public void getDesiredSpatialAcceleration(DMatrixRMaj desiredSpatialAccelerationToPack)
    {
       desiredSpatialAccelerationToPack.reshape(6, 1);
       desiredAngularAcceleration.get(0, desiredSpatialAccelerationToPack);
@@ -793,7 +793,7 @@ public class SpatialAccelerationCommand implements InverseDynamicsCommand<Spatia
     * @param selectionMatrixToPack the dense-matrix in which the selection matrix of this command is
     *           stored in. Modified.
     */
-   public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
    }
