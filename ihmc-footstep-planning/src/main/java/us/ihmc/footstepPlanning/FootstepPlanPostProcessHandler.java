@@ -2,10 +2,14 @@ package us.ihmc.footstepPlanning;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.trajectories.SwingOverPlanarRegionsTrajectoryExpander;
+import us.ihmc.commonWalkingControlModules.trajectories.TwoWaypointSwingGenerator;
+import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Pose3D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.icp.AreaBasedSplitFractionCalculator;
 import us.ihmc.footstepPlanning.icp.PositionBasedSplitFractionCalculator;
 import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
@@ -24,8 +28,10 @@ public class FootstepPlanPostProcessHandler
 {
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
+   private final FootstepPlannerParametersReadOnly footstepPlannerParameters;
    private final SwingPlannerParametersBasics swingPlannerParameters;
    private final SplitFractionCalculatorParametersBasics splitFractionParameters;
+   private final WalkingControllerParameters walkingControllerParameters;
 
    private final AdaptiveSwingTrajectoryCalculator adaptiveSwingTrajectoryCalculator;
    private final SwingOverPlanarRegionsTrajectoryExpander swingOverPlanarRegionsTrajectoryExpander;
@@ -33,16 +39,22 @@ public class FootstepPlanPostProcessHandler
    private final AreaBasedSplitFractionCalculator areaBasedSplitFractionCalculator;
    private final PositionBasedSplitFractionCalculator positionBasedSplitFractionCalculator;
 
-   private Consumer<FootstepPlannerOutput> statusCallback = result -> {};
+   private Consumer<FootstepPlannerOutput> statusCallback = result ->
+   {
+   };
+   private double nominalSwingTrajectoryLength;
 
-   public FootstepPlanPostProcessHandler(SwingPlannerParametersBasics swingPlannerParameters,
+   public FootstepPlanPostProcessHandler(FootstepPlannerParametersReadOnly footstepPlannerParameters,
+                                         SwingPlannerParametersBasics swingPlannerParameters,
                                          SplitFractionCalculatorParametersBasics splitFractionParameters,
                                          WalkingControllerParameters walkingControllerParameters,
                                          SideDependentList<ConvexPolygon2D> footPolygons)
 
    {
+      this.footstepPlannerParameters = footstepPlannerParameters;
       this.swingPlannerParameters = swingPlannerParameters;
       this.splitFractionParameters = splitFractionParameters;
+      this.walkingControllerParameters = walkingControllerParameters;
 
       if (walkingControllerParameters == null)
       {
@@ -94,7 +106,6 @@ public class FootstepPlanPostProcessHandler
       statusCallback.accept(output);
    }
 
-
    // TODO make this a method of the swing trajectory solver after moving it to this package
    public void computeSwingWaypoints(FootstepPlannerRequest request, FootstepPlan footstepPlan)
    {
@@ -108,6 +119,8 @@ public class FootstepPlanPostProcessHandler
       swingOverPlanarRegionsTrajectoryExpander.setAdjustmentIncrementDistanceGain(swingPlannerParameters.getAdjustmentIncrementDistanceGain());
       swingOverPlanarRegionsTrajectoryExpander.setMaximumAdjustmentDistance(swingPlannerParameters.getMaximumWaypointAdjustmentDistance());
       swingOverPlanarRegionsTrajectoryExpander.setMinimumHeightAboveFloorForCollision(swingPlannerParameters.getMinimumHeightAboveFloorForCollision());
+
+      computeNominalSwingTrajectoryLength();
 
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
       {
@@ -135,10 +148,10 @@ public class FootstepPlanPostProcessHandler
             stanceFootPose.set(footstepPlan.getFootstep(i - 1).getFootstepPose());
          }
 
-         double maxSpeedDimensionless = swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose,
-                                                                                                                   swingStartPose,
-                                                                                                                   swingEndPose,
-                                                                                                                   request.getPlanarRegionsList());
+         swingOverPlanarRegionsTrajectoryExpander.expandTrajectoryOverPlanarRegions(stanceFootPose,
+                                                                                    swingStartPose,
+                                                                                    swingEndPose,
+                                                                                    request.getPlanarRegionsList());
          if (swingOverPlanarRegionsTrajectoryExpander.wereWaypointsAdjusted())
          {
             footstep.setTrajectoryType(TrajectoryType.CUSTOM);
@@ -146,13 +159,28 @@ public class FootstepPlanPostProcessHandler
             Point3D waypointTwo = new Point3D(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
             footstep.setCustomWaypointPositions(waypointOne, waypointTwo);
 
-            System.out.println("step " + i + " was adjusted.");
-            System.out.println("\t waypoint 0: " + waypointOne);
-            System.out.println("\t waypoint 1: " + waypointTwo);
-
-            // TODO scale swing time
+            double swingScale = Math.max(1.0, swingOverPlanarRegionsTrajectoryExpander.getExpandedTrajectoryLength() / nominalSwingTrajectoryLength);
+            double swingTime = swingPlannerParameters.getAdditionalSwingTimeIfExpanded() + swingScale * walkingControllerParameters.getDefaultSwingTime();
+            footstep.setSwingDuration(swingTime);
+         }
+         else
+         {
+            double swingScale = Math.max(1.0, swingOverPlanarRegionsTrajectoryExpander.getInitialTrajectoryLength() / nominalSwingTrajectoryLength);
+            double swingTime = swingScale * walkingControllerParameters.getDefaultSwingTime();
+            footstep.setSwingDuration(swingTime);
          }
       }
+   }
+
+   private void computeNominalSwingTrajectoryLength()
+   {
+      double nominalSwingHeight = walkingControllerParameters.getSteppingParameters().getDefaultSwingHeightFromStanceFoot();
+      double nominalSwingProportion = TwoWaypointSwingGenerator.getDefaultWaypointProportions()[0];
+      double nominalSwingLength = 2.0 * footstepPlannerParameters.getIdealFootstepLength();
+
+      // trapezoidal approximation of swing trajectory
+      nominalSwingTrajectoryLength = 2.0 * EuclidGeometryTools.pythagorasGetHypotenuse(nominalSwingProportion * nominalSwingLength, nominalSwingHeight)
+                                     + (1.0 - 2.0 * nominalSwingProportion) * nominalSwingLength;
    }
 
    public void setStatusCallback(Consumer<FootstepPlannerOutput> statusCallback)

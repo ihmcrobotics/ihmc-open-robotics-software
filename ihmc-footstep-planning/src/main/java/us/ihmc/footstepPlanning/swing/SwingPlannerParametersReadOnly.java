@@ -182,6 +182,11 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
       return get(SwingPlannerParameterKeys.minimumHeightAboveFloorForCollision);
    }
 
+   default double getAdditionalSwingTimeIfExpanded()
+   {
+      return get(SwingPlannerParameterKeys.additionalSwingTimeIfExpanded);
+   }
+
    default SwingPlannerParametersPacket getAsPacket()
    {
       SwingPlannerParametersPacket packet = new SwingPlannerParametersPacket();
@@ -208,6 +213,7 @@ public interface SwingPlannerParametersReadOnly extends StoredPropertySetReadOnl
       packet.setMaximumAdjustmentIncrementDistance(getMaximumAdjustmentIncrementDistance());
       packet.setAdjustmentIncrementDistanceGain(getAdjustmentIncrementDistanceGain());
       packet.setMinimumHeightAboveFloorForCollision(getMinimumHeightAboveFloorForCollision());
+      packet.setAdditionalSwingTimeIfExpanded(getAdditionalSwingTimeIfExpanded());
 
       return packet;
    }

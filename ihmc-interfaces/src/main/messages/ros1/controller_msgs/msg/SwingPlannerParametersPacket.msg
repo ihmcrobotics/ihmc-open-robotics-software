@@ -93,4 +93,8 @@ float64 foot_stub_clearance
 # Field default value -1.0
 float64 waypoint_proportion_shift_for_stub_avoidance
 
+# If using the custom position swing planner, will add additional swing time if the trajectory is expanded
+# Field default value -1.0
+float64 additional_swing_time_if_expanded
+
 

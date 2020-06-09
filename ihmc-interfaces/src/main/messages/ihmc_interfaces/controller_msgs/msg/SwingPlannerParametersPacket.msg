@@ -78,3 +78,6 @@ float64 foot_stub_clearance -1.0
 
 # The waypoint proportion calculator shifts the specified proportions if a foot collision is detected. This specifies how much to shift if a collision is detected
 float64 waypoint_proportion_shift_for_stub_avoidance -1.0
+
+# If using the custom position swing planner, will add additional swing time if the trajectory is expanded
+float64 additional_swing_time_if_expanded -1.0
