@@ -34,4 +34,5 @@ public class SwingPlannerParameterKeys
    public static final DoubleStoredPropertyKey  maximumAdjustmentIncrementDistance      = keys.addDoubleKey("Maximum adjustment increment distance", 0.15);
    public static final DoubleStoredPropertyKey  adjustmentIncrementDistanceGain         = keys.addDoubleKey("Adjustment increment distance gain", 0.95);
    public static final DoubleStoredPropertyKey  minimumHeightAboveFloorForCollision     = keys.addDoubleKey("Minimum height above floor for collision", 0.03);
+   public static final DoubleStoredPropertyKey additionalSwingTimeIfExpanded             = keys.addDoubleKey("Additional swing time if expanded", 0.25);
 }

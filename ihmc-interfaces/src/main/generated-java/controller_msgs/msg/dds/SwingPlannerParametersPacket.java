@@ -137,8 +137,14 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
             */
    public double waypoint_proportion_shift_for_stub_avoidance_ = -1.0;
 
+   /**
+            * If using the custom position swing planner, will add additional swing time if the trajectory is expanded
+            */
+   public double additional_swing_time_if_expanded_ = -1.0;
+
    public SwingPlannerParametersPacket()
    {
+
 
 
 
@@ -241,6 +247,9 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
 
 
       waypoint_proportion_shift_for_stub_avoidance_ = other.waypoint_proportion_shift_for_stub_avoidance_;
+
+
+      additional_swing_time_if_expanded_ = other.additional_swing_time_if_expanded_;
 
    }
 
@@ -633,6 +642,22 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
    }
 
 
+   /**
+            * If using the custom position swing planner, will add additional swing time if the trajectory is expanded
+            */
+   public void setAdditionalSwingTimeIfExpanded(double additional_swing_time_if_expanded)
+   {
+      additional_swing_time_if_expanded_ = additional_swing_time_if_expanded;
+   }
+   /**
+            * If using the custom position swing planner, will add additional swing time if the trajectory is expanded
+            */
+   public double getAdditionalSwingTimeIfExpanded()
+   {
+      return additional_swing_time_if_expanded_;
+   }
+
+
    public static Supplier<SwingPlannerParametersPacketPubSubType> getPubSubType()
    {
       return SwingPlannerParametersPacketPubSubType::new;
@@ -720,6 +745,9 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.waypoint_proportion_shift_for_stub_avoidance_, other.waypoint_proportion_shift_for_stub_avoidance_, epsilon)) return false;
 
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.additional_swing_time_if_expanded_, other.additional_swing_time_if_expanded_, epsilon)) return false;
+
+
       return true;
    }
 
@@ -802,6 +830,9 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
       if(this.waypoint_proportion_shift_for_stub_avoidance_ != otherMyClass.waypoint_proportion_shift_for_stub_avoidance_) return false;
 
 
+      if(this.additional_swing_time_if_expanded_ != otherMyClass.additional_swing_time_if_expanded_) return false;
+
+
       return true;
    }
 
@@ -879,7 +910,10 @@ public class SwingPlannerParametersPacket extends Packet<SwingPlannerParametersP
       builder.append(this.foot_stub_clearance_);      builder.append(", ");
 
       builder.append("waypoint_proportion_shift_for_stub_avoidance=");
-      builder.append(this.waypoint_proportion_shift_for_stub_avoidance_);
+      builder.append(this.waypoint_proportion_shift_for_stub_avoidance_);      builder.append(", ");
+
+      builder.append("additional_swing_time_if_expanded=");
+      builder.append(this.additional_swing_time_if_expanded_);
       builder.append("}");
       return builder.toString();
    }

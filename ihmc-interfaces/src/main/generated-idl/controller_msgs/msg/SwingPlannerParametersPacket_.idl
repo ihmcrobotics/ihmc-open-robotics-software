@@ -130,6 +130,11 @@ module controller_msgs
          */
         @defaultValue(value=-1.0)
         double waypoint_proportion_shift_for_stub_avoidance;
+        /**
+         * If using the custom position swing planner, will add additional swing time if the trajectory is expanded
+         */
+        @defaultValue(value=-1.0)
+        double additional_swing_time_if_expanded;
       };
     };
   };
