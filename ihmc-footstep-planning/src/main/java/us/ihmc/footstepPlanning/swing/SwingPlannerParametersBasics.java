@@ -120,6 +120,11 @@ public interface SwingPlannerParametersBasics extends SwingPlannerParametersRead
       set(SwingPlannerParameterKeys.minimumHeightAboveFloorForCollision, minimumHeightAboveFloorForCollision);
    }
 
+   default void setAdditionalSwingTimeIfExpanded(double additionalSwingTimeIfExpanded)
+   {
+      set(SwingPlannerParameterKeys.additionalSwingTimeIfExpanded, additionalSwingTimeIfExpanded);
+   }
+
    default void set(SwingPlannerParametersPacket packet)
    {
       setDoInitialFastApproximation(packet.getDoInitialFastApproximation());
@@ -164,5 +169,7 @@ public interface SwingPlannerParametersBasics extends SwingPlannerParametersRead
          setAdjustmentIncrementDistanceGain(packet.getAdjustmentIncrementDistanceGain());
       if (packet.getMinimumHeightAboveFloorForCollision() != -1.0)
          setMinimumHeightAboveFloorForCollision(packet.getMinimumHeightAboveFloorForCollision());
+      if (packet.getAdditionalSwingTimeIfExpanded() != -1.0)
+         setAdditionalSwingTimeIfExpanded(packet.getAdditionalSwingTimeIfExpanded());
    }
 }

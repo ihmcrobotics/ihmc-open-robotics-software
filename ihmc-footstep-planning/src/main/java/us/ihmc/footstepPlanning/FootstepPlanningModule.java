@@ -108,7 +108,11 @@ public class FootstepPlanningModule implements CloseableAndDisposable
 
       this.planThenSnapPlanner = new PlanThenSnapPlanner(footstepPlannerParameters, footPolygons);
       this.aStarFootstepPlanner = new AStarFootstepPlanner(footstepPlannerParameters, footPolygons, bodyPathPlanHolder);
-      this.postProcessHandler = new FootstepPlanPostProcessHandler(swingPlannerParameters, splitFractionParameters, walkingControllerParameters, footPolygons);
+      this.postProcessHandler = new FootstepPlanPostProcessHandler(footstepPlannerParameters,
+                                                                   swingPlannerParameters,
+                                                                   splitFractionParameters,
+                                                                   walkingControllerParameters,
+                                                                   footPolygons);
       aStarFootstepPlanner.setPostProcessorCallback(output -> postProcessHandler.handleRequest(output.getKey(), output.getValue()));
 
       addStatusCallback(output -> output.getPlannerTimings().setTimePlanningStepsSeconds(stopwatch.lapElapsed()));
