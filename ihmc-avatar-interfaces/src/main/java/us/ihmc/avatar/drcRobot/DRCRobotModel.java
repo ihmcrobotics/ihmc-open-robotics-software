@@ -14,7 +14,8 @@ import us.ihmc.commonWalkingControlModules.barrierScheduler.context.HumanoidRobo
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
 import us.ihmc.commonWalkingControlModules.configurations.SliderBoardParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
@@ -116,12 +117,17 @@ public interface DRCRobotModel extends SimulatedFullHumanoidRobotModelFactory, W
       return null;
    }
 
-   public default FootstepPostProcessingParametersBasics getFootstepPostProcessingParameters()
+   default VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return null;
    }
 
-   default VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
+   default SwingPlannerParametersBasics getSwingPlannerParameters()
+   {
+      return null;
+   }
+
+   default SplitFractionCalculatorParametersBasics getSplitFractionCalculatorParameters()
    {
       return null;
    }

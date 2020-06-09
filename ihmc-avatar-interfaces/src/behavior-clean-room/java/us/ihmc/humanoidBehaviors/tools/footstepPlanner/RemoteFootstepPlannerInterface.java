@@ -14,6 +14,7 @@ import us.ihmc.footstepPlanning.communication.FootstepPlannerCommunicationProper
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.footstepPlanning.tools.FootstepPlannerMessageTools;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.humanoidBehaviors.patrol.PatrolBehaviorAPI;
@@ -138,7 +139,7 @@ public class RemoteFootstepPlannerInterface
     */
    public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start, FramePose3DReadOnly goal)
    {
-      return requestPlan(start, goal, null, new DefaultFootstepPlannerParameters());
+      return requestPlan(start, goal, null, new DefaultFootstepPlannerParameters(), SwingPlannerType.NONE);
    }
 
    public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start, FramePose3DReadOnly goal, PlanarRegionsList planarRegionsList)
@@ -146,13 +147,15 @@ public class RemoteFootstepPlannerInterface
       return requestPlan(start,
                          goal,
                          PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsList),
-                         new DefaultFootstepPlannerParameters());
+                         new DefaultFootstepPlannerParameters(),
+                         SwingPlannerType.NONE);
    }
 
    public TypedNotification<RemoteFootstepPlannerResult> requestPlan(FramePose3DReadOnly start,
                                                                      FramePose3DReadOnly goal,
                                                                      PlanarRegionsListMessage planarRegionsListMessage,
-                                                                     FootstepPlannerParametersBasics settableFootstepPlannerParameters)
+                                                                     FootstepPlannerParametersBasics settableFootstepPlannerParameters,
+                                                                     SwingPlannerType swingPlannerType)
    {
       toolboxStatePublisher.publish(MessageTools.createToolboxStateMessage(ToolboxState.WAKE_UP));  // This is necessary! - @dcalvert 190318
 
@@ -181,6 +184,7 @@ public class RemoteFootstepPlannerInterface
       packet.getStartRightFootPose().set(startSteps.get(RobotSide.RIGHT));
       packet.getGoalLeftFootPose().set(goalSteps.get(RobotSide.LEFT));
       packet.getGoalRightFootPose().set(goalSteps.get(RobotSide.RIGHT));
+      packet.setRequestedSwingPlanner(swingPlannerType.toByte());
 
       packet.setTimeout(timeout);
       int sentPlannerId = requestCounter.getAndIncrement();
