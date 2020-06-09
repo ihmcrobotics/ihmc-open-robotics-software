@@ -112,14 +112,9 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.minSurfaceIncline, surfaceInclineRadians);
    }
 
-   default void setMinXClearanceFromStance(double clearance)
+   default void setMinClearanceFromStance(double clearance)
    {
-      set(FootstepPlannerParameterKeys.minXClearanceFromStance, clearance);
-   }
-
-   default void setMinYClearanceFromStance(double clearance)
-   {
-      set(FootstepPlannerParameterKeys.minYClearanceFromStance, clearance);
+      set(FootstepPlannerParameterKeys.minClearanceFromStance, clearance);
    }
 
    default void setWiggleInsideDelta(double wiggleInsideDelta)
@@ -426,10 +421,8 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setBodyBoxBaseZ(parametersPacket.getBodyBoxBaseZ());
       if (parametersPacket.getMaximumSnapHeight() != noValue)
          setMaximumSnapHeight(parametersPacket.getMaximumSnapHeight());
-      if (parametersPacket.getMinXClearanceFromStance() != noValue)
-         setMinXClearanceFromStance(parametersPacket.getMinXClearanceFromStance());
-      if (parametersPacket.getMinYClearanceFromStance() != noValue)
-         setMinYClearanceFromStance(parametersPacket.getMinYClearanceFromStance());
+      if (parametersPacket.getMinClearanceFromStance() != noValue)
+         setMinClearanceFromStance(parametersPacket.getMinClearanceFromStance());
       if (parametersPacket.getFinalTurnProximity() != noValue)
          setFinalTurnProximity(parametersPacket.getFinalTurnProximity());
       setMaximumBranchFactor(parametersPacket.getMaximumBranchFactor());

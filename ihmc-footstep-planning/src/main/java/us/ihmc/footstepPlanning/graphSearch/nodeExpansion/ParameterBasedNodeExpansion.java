@@ -70,8 +70,9 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
             if (reachSquared > maxReachSquared)
                continue;
 
-            if (Math.abs(x) <= parameters.getMinXClearanceFromStance() && Math.abs(y) <= parameters.getMinYClearanceFromStance())
-               continue;
+            // TODO
+//            if (Math.abs(x) <= parameters.getMinXClearanceFromStance() && Math.abs(y) <= parameters.getMinYClearanceFromStance())
+//               continue;
 
             double reachFraction = EuclidCoreTools.fastSquareRoot(reachSquared) / parameters.getMaximumStepReach();
             double minYawAtFullExtension = (1.0 - parameters.getStepYawReductionFactorAtMaxReach()) * parameters.getMinimumStepYaw();
