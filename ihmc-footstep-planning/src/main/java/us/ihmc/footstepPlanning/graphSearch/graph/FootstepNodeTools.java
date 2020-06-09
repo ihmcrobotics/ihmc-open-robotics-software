@@ -8,13 +8,17 @@ import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
+import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
+import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
+import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class FootstepNodeTools
 {
@@ -108,5 +112,23 @@ public class FootstepNodeTools
       double y = EuclidCoreTools.interpolate(nodeA.getY(), nodeB.getY(), alpha);
       double yaw = AngleTools.interpolateAngle(nodeA.getYaw(), nodeB.getYaw(), alpha);
       return new LatticeNode(x, y, yaw);
+   }
+
+   public static double computeDistanceBetweenFootPolygons(FootstepNode nodeA,
+                                                           FootstepNode nodeB,
+                                                           SideDependentList<ConvexPolygon2D> footPolygonsInSoleFrame,
+                                                           ConvexPolygonTools convexPolygonTools)
+   {
+      ConvexPolygon2D footPolygonA = new ConvexPolygon2D();
+      ConvexPolygon2D footPolygonB = new ConvexPolygon2D();
+
+      getFootPolygon(nodeA, footPolygonsInSoleFrame.get(nodeA.getRobotSide()), footPolygonA);
+      getFootPolygon(nodeB, footPolygonsInSoleFrame.get(nodeB.getRobotSide()), footPolygonB);
+
+      Point2D pointA = new Point2D();
+      Point2D pointB = new Point2D();
+
+      convexPolygonTools.computeMinimumDistancePoints(footPolygonA, footPolygonB, 1e-3, pointA, pointB);
+      return pointA.distance(pointB);
    }
 }

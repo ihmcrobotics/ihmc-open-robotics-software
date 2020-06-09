@@ -118,31 +118,32 @@ public class FootstepPlannerParametersUIController
 
       void setStepShape()
       {
-         double minXClearance = planningParameters.getMinXClearanceFromStance();
-         double minYClearance = planningParameters.getMinYClearanceFromStance();
+         // TODO update for new clearance param
 
-         double footCenterX = leftFootOriginX + 0.5 * footWidth * metersToPixel;
-         double footCenterY = leftFootOriginY + 0.5 * footLength * metersToPixel;
-
-         double furthestIn = Math.max(minStepWidth, minYClearance) * metersToPixel;
-
-         double width = maxStepWidth - minStepWidth;
-         double height = maxStepLength - minStepLength;
-         double xCenterInPanel = footCenterX + metersToPixel * minStepWidth;
-         double yCenterInPanel = footCenterY - metersToPixel * maxStepLength;
-
-         stepShape.setLayoutX(xCenterInPanel);
-         stepShape.setWidth(metersToPixel * width);
-         stepShape.setLayoutY(yCenterInPanel);
-         stepShape.setHeight(metersToPixel * height);
-
-         swingFootShape.setLayoutX(footCenterX + furthestIn - 0.5 * footWidth * metersToPixel);
-         swingFootShape.setRotate(Math.toDegrees(worstYaw));
-
-         clearanceBox.setLayoutX(leftFootOriginX + (0.5 * footWidth - minYClearance) * metersToPixel);
-         clearanceBox.setLayoutY(leftFootOriginY + (0.5 * footLength - minXClearance) * metersToPixel);
-         clearanceBox.setWidth(metersToPixel * (minYClearance * 2.0));
-         clearanceBox.setHeight(metersToPixel * (minXClearance * 2.0));
+//         double minClearance = planningParameters.getMinClearanceFromStance();
+//
+//         double footCenterX = leftFootOriginX + 0.5 * footWidth * metersToPixel;
+//         double footCenterY = leftFootOriginY + 0.5 * footLength * metersToPixel;
+//
+//         double furthestIn = Math.max(minStepWidth, minYClearance) * metersToPixel;
+//
+//         double width = maxStepWidth - minStepWidth;
+//         double height = maxStepLength - minStepLength;
+//         double xCenterInPanel = footCenterX + metersToPixel * minStepWidth;
+//         double yCenterInPanel = footCenterY - metersToPixel * maxStepLength;
+//
+//         stepShape.setLayoutX(xCenterInPanel);
+//         stepShape.setWidth(metersToPixel * width);
+//         stepShape.setLayoutY(yCenterInPanel);
+//         stepShape.setHeight(metersToPixel * height);
+//
+//         swingFootShape.setLayoutX(footCenterX + furthestIn - 0.5 * footWidth * metersToPixel);
+//         swingFootShape.setRotate(Math.toDegrees(worstYaw));
+//
+//         clearanceBox.setLayoutX(leftFootOriginX + (0.5 * footWidth - minYClearance) * metersToPixel);
+//         clearanceBox.setLayoutY(leftFootOriginY + (0.5 * footLength - minXClearance) * metersToPixel);
+//         clearanceBox.setWidth(metersToPixel * (minYClearance * 2.0));
+//         clearanceBox.setHeight(metersToPixel * (minXClearance * 2.0));
       }
    }
 }

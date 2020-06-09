@@ -7,6 +7,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.*;
@@ -23,7 +24,7 @@ public class ParameterBasedNodeExpansionTest
    public void testExpansionAlongBoundsFromOriginDefaultParametersWithRight()
    {
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null);
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null, PlannerTools.createDefaultFootPolygons());
       expansion.initialize();
 
       double maxYaw = parameters.getMaximumStepYaw();
@@ -63,7 +64,7 @@ public class ParameterBasedNodeExpansionTest
    public void testExpansionAlongBoundsFromOriginDefaultParametersWithLeft()
    {
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null);
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null, PlannerTools.createDefaultFootPolygons());
       expansion.initialize();
 
       double maxYaw = parameters.getMaximumStepYaw();
@@ -103,7 +104,7 @@ public class ParameterBasedNodeExpansionTest
    public void testExpansionAlongBoundsFromOrigin()
    {
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
-      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null);
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, null, PlannerTools.createDefaultFootPolygons());
       expansion.initialize();
 
       double maxYaw = 1.2;
@@ -184,7 +185,7 @@ public class ParameterBasedNodeExpansionTest
       parameters.setMaximumBranchFactor(branchFactor);
 
       UnaryOperator<FootstepNode> idealStepSupplier = step -> new FootstepNode(step.getX(), step.getY(), step.getYaw(), step.getRobotSide().getOppositeSide());
-      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier);
+      ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier, PlannerTools.createDefaultFootPolygons());
 
       expansion.initialize();
 
@@ -228,7 +229,7 @@ public class ParameterBasedNodeExpansionTest
          {
             FootstepNode randomIdealStep = FootstepNode.generateRandomFootstepNode(random, 5.0, stanceNode.getRobotSide().getOppositeSide());
             UnaryOperator<FootstepNode> idealStepSupplier = step -> randomIdealStep;
-            ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier);
+            ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier, PlannerTools.createDefaultFootPolygons());
             expansion.initialize();
 
             List<FootstepNode> fullExpansion = new ArrayList<>();
@@ -265,7 +266,7 @@ public class ParameterBasedNodeExpansionTest
          {
             FootstepNode randomIdealStep = FootstepNode.generateRandomFootstepNode(random, 5.0, stanceNode.getRobotSide().getOppositeSide());
             UnaryOperator<FootstepNode> idealStepSupplier = step -> randomIdealStep;
-            ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier);
+            ParameterBasedNodeExpansion expansion = new ParameterBasedNodeExpansion(parameters, idealStepSupplier, PlannerTools.createDefaultFootPolygons());
             expansion.initialize();
 
             List<FootstepNode> fullExpansion = new ArrayList<>();
