@@ -26,7 +26,6 @@ public class PlanarSegmentationUI
    private final REAUIMessager uiMessager;
    private final SegmentationMeshViewer meshViewer;
 
-
    @FXML
    private OcTreeEssentialsAnchorPaneController ocTreeEssentialsAnchorPaneController;
    @FXML
@@ -104,8 +103,9 @@ public class PlanarSegmentationUI
          e.printStackTrace();
       }
 
-
-      // FIXME the ocTree essentials controller
+      ocTreeEssentialsAnchorPaneController.setConfigurationFile(configurationFile);
+      ocTreeEssentialsAnchorPaneController.attachREAMessager(uiMessager);
+      ocTreeEssentialsAnchorPaneController.bindControls();
 
       regionSegmentationAnchorPaneController.setPlanarRegionsSegmentationEnableTopic(SegmentationModuleAPI.PlanarRegionsSegmentationEnable);
       regionSegmentationAnchorPaneController.setPlanarRegionsSegmentationClearTopic(SegmentationModuleAPI.PlanarRegionsSegmentationClear);
