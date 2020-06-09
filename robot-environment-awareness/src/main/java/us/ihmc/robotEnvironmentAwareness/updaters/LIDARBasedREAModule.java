@@ -21,7 +21,6 @@ import controller_msgs.msg.dds.REAStateRequestMessage;
 import controller_msgs.msg.dds.RequestPlanarRegionsListMessage;
 import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import org.bytedeco.javacv.FrameFilter.Exception;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
@@ -374,19 +373,19 @@ public class LIDARBasedREAModule
       }
    }
 
-   public static LIDARBasedREAModule createRemoteModule(String configurationFilePath) throws IOException
+   public static LIDARBasedREAModule createRemoteModule(String configurationFilePath) throws Exception
    {
       KryoMessager server = createKryoMessager();
       return new LIDARBasedREAModule(server, new File(configurationFilePath));
    }
 
-   public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath) throws IOException
+   public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath) throws Exception
    {
       Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
       return createIntraprocessModule(configurationFilePath, ros2Node);
    }
 
-   public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath, Ros2Node ros2Node) throws IOException
+   public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath, Ros2Node ros2Node) throws Exception
    {
       KryoMessager messager = createKryoMessager();
 
@@ -405,7 +404,7 @@ public class LIDARBasedREAModule
       return new LIDARBasedREAModule(ros2Node, messager, configurationFile);
    }
 
-   private static KryoMessager createKryoMessager() throws IOException
+   private static KryoMessager createKryoMessager() throws Exception
    {
       KryoMessager messager = KryoMessager.createIntraprocess(REAModuleAPI.API,
                                                               NetworkPorts.REA_MODULE_UI_PORT,
