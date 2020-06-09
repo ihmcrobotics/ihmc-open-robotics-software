@@ -54,7 +54,7 @@ public class TestDoorOpenBehaviorService extends AbstractBehavior
 //
 //      addBehaviorService(fiducialDetectorBehaviorService);
         doorToBehaviorPublisher = createPublisher(DoorLocationPacket.class, behaviorInputTopic);
-        doorToUIPublisher = createBehaviorPublisher(DoorLocationPacket.class);
+        doorToUIPublisher = createBehaviorOutputPublisher(DoorLocationPacket.class);
         
    }
 
