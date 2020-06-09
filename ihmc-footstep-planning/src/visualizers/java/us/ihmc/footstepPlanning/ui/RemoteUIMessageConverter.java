@@ -329,13 +329,6 @@ public class RemoteUIMessageConverter
       {
          messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanResponse, footstepDataListMessage);         
       }
-
-      Object<FootstepDataMessage> footstepDataList = packet.getFootstepDataList().getFootstepDataList();
-      System.out.println(getClass().getSimpleName() + " received steps");
-      for (int i = 0; i < footstepDataList.size(); i++)
-      {
-         System.out.println("\t " + i + " \t" + footstepDataList.get(i).getSwingDuration());
-      }
       
       messager.submitMessage(FootstepPlannerMessagerAPI.ReceivedPlanId, plannerRequestId);
       messager.submitMessage(FootstepPlannerMessagerAPI.BodyPathPlanningResultTopic, bodyPathPlanningResult);
