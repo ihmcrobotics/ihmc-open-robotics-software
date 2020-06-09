@@ -4,10 +4,8 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.DoorLocationPacket;
-import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
-import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameOrientation3DBasics;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
@@ -27,7 +25,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
 
    private DoorLocationPacket latestDoorLocationPacketRecieved;
    private boolean doorOpen = false;
-   private float openDistance = 0.08f;
+   private float openDistance = 0.17f;
    private boolean run = false;
    
    private long timeOfLastUpdate =0;

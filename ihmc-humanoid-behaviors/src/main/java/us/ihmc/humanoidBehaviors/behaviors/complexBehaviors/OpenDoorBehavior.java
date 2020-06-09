@@ -45,7 +45,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
    private SleepBehavior sleepBehavior;
    private final IHMCROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
    protected final AtomicReference<DoorLocationPacket> doorLocationPacket = new AtomicReference<DoorLocationPacket>();
-   private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
+   //private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
 
    private final IHMCROS2Publisher<AutomaticManipulationAbortMessage> abortMessagePublisher;
 
@@ -54,7 +54,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
    {
       super(robotName, "OpenDoorBehavior", OpenDoorState.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
-      this.doorOpenDetectorBehaviorService = doorOpenDetectorBehaviorService;
+     // this.doorOpenDetectorBehaviorService = doorOpenDetectorBehaviorService;
       uiPositionCheckerPacketpublisher = createBehaviorOutputPublisher(UIPositionCheckerPacket.class);
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
       abortMessagePublisher = createPublisherForController(AutomaticManipulationAbortMessage.class);
@@ -153,20 +153,21 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
          {
             publishTextToSpeech("Starting Door Open Detector Service");
 
-            doorOpenDetectorBehaviorService.reset();
-            doorOpenDetectorBehaviorService.run(true);
+          //  doorOpenDetectorBehaviorService.reset();
+           // doorOpenDetectorBehaviorService.run(true);
          }
 
          @Override
          public boolean isDone()
          {
             //wait for the door to be located and a baseline set for open detection
-            if(doorOpenDetectorBehaviorService.doorDetected())
-            {
-               publishTextToSpeech("Door Open Detector Service has closed door position saved");
-
-            }
-            return doorOpenDetectorBehaviorService.doorDetected();
+//            if(doorOpenDetectorBehaviorService.doorDetected())
+//            {
+//               publishTextToSpeech("Door Open Detector Service has closed door position saved");
+//
+//            }
+//            return doorOpenDetectorBehaviorService.doorDetected();
+            return true;
          }
 
       };
@@ -253,22 +254,32 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
       factory.addStateAndDoneTransition(OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR, setDoorDetectorStart, OpenDoorState.TURN_DOOR_KNOB);
 
       factory.addStateAndDoneTransition(OpenDoorState.TURN_DOOR_KNOB, moveRightHandToDoorKnob, OpenDoorState.PUSH_ON_DOOR);
-      factory.addState(OpenDoorState.PUSH_ON_DOOR, pushDoorALittle);
-      factory.addState(OpenDoorState.PUSH_OPEN_DOOR, pushDoorOpen);
-      factory.addState(OpenDoorState.PULL_BACK_HANDS, pullHandsBack);
+      
+      
+      factory.addStateAndDoneTransition(OpenDoorState.PUSH_ON_DOOR, pushDoorALittle, OpenDoorState.PUSH_OPEN_DOOR);
+      factory.addStateAndDoneTransition(OpenDoorState.PUSH_OPEN_DOOR, pushDoorOpen, OpenDoorState.PULL_BACK_HANDS);
+      factory.addStateAndDoneTransition(OpenDoorState.PULL_BACK_HANDS, pullHandsBack, OpenDoorState.DONE);
       factory.addState(OpenDoorState.DONE, done);
-      factory.addState(OpenDoorState.FAILED, failed);
 
-      factory.addTransition(OpenDoorState.PUSH_ON_DOOR, OpenDoorState.FAILED, t -> pushDoorALittle.isDone() && !doorOpenDetectorBehaviorService.isDoorOpen());
-      factory.addTransition(OpenDoorState.PUSH_ON_DOOR, OpenDoorState.PUSH_OPEN_DOOR, t -> doorOpenDetectorBehaviorService.isDoorOpen());
 
       
-      //removing door open checks durring fast motions for now.
-     // factory.addTransition(OpenDoorState.PUSH_OPEN_DOOR, OpenDoorState.FAILED, t -> !doorOpenDetectorBehaviorService.isDoorOpen());
-      factory.addTransition(OpenDoorState.PUSH_OPEN_DOOR, OpenDoorState.PULL_BACK_HANDS, t -> pushDoorOpen.isDone());// && doorOpenDetectorBehaviorService.isDoorOpen());
-
-      factory.addTransition(OpenDoorState.PULL_BACK_HANDS, OpenDoorState.FAILED, t -> pullHandsBack.isDone() && !doorOpenDetectorBehaviorService.isDoorOpen());
-      factory.addTransition(OpenDoorState.PULL_BACK_HANDS, OpenDoorState.DONE, t -> pullHandsBack.isDone() && doorOpenDetectorBehaviorService.isDoorOpen());
+//      
+//      factory.addState(OpenDoorState.PUSH_ON_DOOR, pushDoorALittle);
+//      factory.addState(OpenDoorState.PUSH_OPEN_DOOR, pushDoorOpen);
+//      factory.addState(OpenDoorState.PULL_BACK_HANDS, pullHandsBack);
+//      factory.addState(OpenDoorState.DONE, done);
+//      factory.addState(OpenDoorState.FAILED, failed);
+//
+//      factory.addTransition(OpenDoorState.PUSH_ON_DOOR, OpenDoorState.FAILED, t -> pushDoorALittle.isDone() && !doorOpenDetectorBehaviorService.isDoorOpen());
+//      factory.addTransition(OpenDoorState.PUSH_ON_DOOR, OpenDoorState.PUSH_OPEN_DOOR, t -> doorOpenDetectorBehaviorService.isDoorOpen());
+//
+//      
+//      //removing door open checks durring fast motions for now.
+//     // factory.addTransition(OpenDoorState.PUSH_OPEN_DOOR, OpenDoorState.FAILED, t -> !doorOpenDetectorBehaviorService.isDoorOpen());
+//      factory.addTransition(OpenDoorState.PUSH_OPEN_DOOR, OpenDoorState.PULL_BACK_HANDS, t -> pushDoorOpen.isDone());// && doorOpenDetectorBehaviorService.isDoorOpen());
+//
+//      factory.addTransition(OpenDoorState.PULL_BACK_HANDS, OpenDoorState.FAILED, t -> pullHandsBack.isDone() && !doorOpenDetectorBehaviorService.isDoorOpen());
+//      factory.addTransition(OpenDoorState.PULL_BACK_HANDS, OpenDoorState.DONE, t -> pullHandsBack.isDone() && doorOpenDetectorBehaviorService.isDoorOpen());
 
       return OpenDoorState.START;
 
