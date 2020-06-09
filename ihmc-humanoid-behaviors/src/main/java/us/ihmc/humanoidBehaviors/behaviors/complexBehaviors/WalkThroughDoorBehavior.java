@@ -129,8 +129,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
       
       
-      doorToBehaviorPublisher = createPublisher(DoorLocationPacket.class, behaviorInputTopic);
-      doorToUIPublisher = createBehaviorPublisher(DoorLocationPacket.class);
+      doorToBehaviorPublisher = createBehaviorInputPublisher(DoorLocationPacket.class);
+      doorToUIPublisher = createBehaviorOutputPublisher(DoorLocationPacket.class);
       
 
       //setup publisher for sending door location to UI

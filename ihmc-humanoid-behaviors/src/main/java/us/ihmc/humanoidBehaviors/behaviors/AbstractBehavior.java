@@ -110,7 +110,7 @@ public abstract class AbstractBehavior implements RobotController
       behaviorOutputTopic = ROS2Tools.BEHAVIOR_MODULE.withRobot(robotName).withOutput();
 
       textToSpeechPublisher = createPublisher(TextToSpeechPacket.class, ROS2Tools.IHMC_ROOT);
-      uiPositionCheckerPacketpublisher = createBehaviorPublisher(UIPositionCheckerPacket.class);
+      uiPositionCheckerPacketpublisher = createBehaviorOutputPublisher(UIPositionCheckerPacket.class);
    }
 
    public MessagerAPI getBehaviorAPI()
@@ -123,9 +123,14 @@ public abstract class AbstractBehavior implements RobotController
       return createPublisher(messageType, controllerInputTopic);
    }
 
-   public <T> IHMCROS2Publisher<T> createBehaviorPublisher(Class<T> messageType)
+   public <T> IHMCROS2Publisher<T> createBehaviorOutputPublisher(Class<T> messageType)
    {
       return createPublisher(messageType, behaviorOutputTopic);
+   }
+
+   public <T> IHMCROS2Publisher<T> createBehaviorInputPublisher(Class<T> messageType)
+   {
+      return createPublisher(messageType, behaviorInputTopic);
    }
 
    @SuppressWarnings("unchecked")
