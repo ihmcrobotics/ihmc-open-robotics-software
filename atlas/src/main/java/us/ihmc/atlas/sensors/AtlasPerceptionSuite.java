@@ -28,6 +28,7 @@ public class AtlasPerceptionSuite
    {
       DRCRobotModel drcRobotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_DUAL_ROBOTIQ, RobotTarget.REAL_ROBOT, false);
 
+      // TODO Need to configure REA for both LIDAR and RealSense
       slamModule = AtlasSLAMModule.createIntraprocessModule(ros2Node, drcRobotModel, MODULE_CONFIGURATION_FILE_NAME);
       reaModule = LIDARBasedREAModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node);
       segmentationModule = PlanarSegmentationModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node);
