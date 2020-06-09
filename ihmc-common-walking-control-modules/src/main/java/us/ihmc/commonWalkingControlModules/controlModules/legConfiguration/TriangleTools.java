@@ -81,20 +81,27 @@ public class TriangleTools
       double lawSinesB;
       double angleA;
       double angleC;
-      if(angleB >= Math.PI){
-         if(sideALength > sideBLength){
+      if (angleB >= Math.PI)
+      {
+         if (sideALength > sideBLength)
+         {
             return 0.0;
          }
       }
-      else{
-         if(sideALength > sideBLength){
+      else
+      {
+         if (sideALength > sideBLength)
+         {
             double height = sideALength * Math.sin(angleB);
-            if(sideBLength < height){
+            if (sideBLength < height)
+            {
                return 0.0;
             }
-            else if(sideBLength > height){
+            else if (sideBLength > height)
+            {
                lawSinesB = Math.sin(angleB) / sideBLength;
-               if(isAngleAObtuse){
+               if (isAngleAObtuse)
+               {
                   angleA = Math.PI - Math.asin(lawSinesB * sideALength);
                }
                else
