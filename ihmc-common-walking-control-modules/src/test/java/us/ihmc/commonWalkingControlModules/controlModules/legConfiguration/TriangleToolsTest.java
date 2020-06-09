@@ -464,9 +464,8 @@ public class TriangleToolsTest
       sideALength = 1.5;
       sideBLength = 1.0;
       angleB = 0.8;
-      result = 0.0;
       isAngleAObtuse = false;
-      assertEquals("Case 3 failed.", result, TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
+      assertTrue("Case 3 failed.", new Double(TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse)).isNaN());
 
       // Case 4: Known angle < Pi/2 and adjacent side > opposite side and opposite side > height and angleA is acute
       sideALength = 1.5;
@@ -496,17 +495,15 @@ public class TriangleToolsTest
       sideALength = 1.0;
       sideBLength = 1.0;
       angleB = 1.75;
-      result = 0.0;
       isAngleAObtuse = false;
-      assertEquals("Case 7 failed.", result, TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
+      assertTrue("Case 7 failed.", new Double(TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse)).isNaN());
 
       // Case 8: Known angle > Pi/2 and adjacent side > opposite side
       sideALength = 1.5;
       sideBLength = 1.0;
       angleB = 1.75;
-      result = 0.0;
       isAngleAObtuse = false;
-      assertEquals("Case 8 failed.", result, TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
+      assertTrue("Case 8 failed.", new Double(TriangleTools.computeSSASide(sideALength, sideBLength, angleB, isAngleAObtuse)).isNaN());
 
       // Random Testing
       Random random = new Random(34534L);

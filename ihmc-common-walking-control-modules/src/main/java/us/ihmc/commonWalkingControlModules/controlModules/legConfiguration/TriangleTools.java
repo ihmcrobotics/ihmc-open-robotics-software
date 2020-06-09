@@ -98,11 +98,11 @@ public class TriangleTools
       double lawSinesB;
       double angleA;
       double angleC;
-      if (angleB >= Math.PI)
+      if (angleB >= Math.PI/2)
       {
-         if (sideALength > sideBLength)
+         if (sideALength >= sideBLength)
          {
-            return 0.0;
+            return Double.NaN;
          }
       }
       else
@@ -112,7 +112,7 @@ public class TriangleTools
             double height = sideALength * Math.sin(angleB);
             if (sideBLength < height)
             {
-               return 0.0;
+               return Double.NaN;
             }
             else if (sideBLength > height)
             {
