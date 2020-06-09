@@ -1,8 +1,10 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import com.google.common.util.concurrent.AtomicDouble;
+import com.jme3.opencl.PlatformChooser;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.NetworkPorts;
@@ -21,6 +23,7 @@ import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 
 import java.io.File;
@@ -29,9 +32,6 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
 
 public class PlanarSegmentationModule implements OcTreeConsumer
 {
@@ -44,11 +44,12 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
    protected static final boolean DEBUG = true;
 
-   private final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
+   private final Ros2Node ros2Node;
 
    private final REAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
 
    private final SegmentationModuleStateReporter moduleStateReporter;
+   private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
    private final AtomicReference<Boolean> clearOcTree;
    private final AtomicReference<NormalOcTree> ocTree;
@@ -60,6 +61,31 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
    private PlanarSegmentationModule(Messager reaMessager, File configurationFile) throws IOException
    {
+      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
+           REACommunicationProperties.inputTopic,
+           REACommunicationProperties.subscriberCustomRegionsTopicName,
+           ROS2Tools.REALSENSE_SLAM_MAP,
+           reaMessager,
+           configurationFile);
+   }
+
+   private PlanarSegmentationModule(ROS2Topic<?> inputTopic,
+                                    ROS2Topic<?> customRegionTopic,
+                                    ROS2Topic<?> outputTopic,
+                                    Messager reaMessager,
+                                    File configurationFile) throws IOException
+   {
+     this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), inputTopic, customRegionTopic, outputTopic, reaMessager, configurationFile);
+   }
+
+   private PlanarSegmentationModule(Ros2Node ros2Node,
+                                    ROS2Topic<?> inputTopic,
+                                    ROS2Topic<?> customRegionTopic,
+                                    ROS2Topic<?> outputTopic,
+                                    Messager reaMessager,
+                                    File configurationFile) throws IOException
+   {
+      this.ros2Node = ros2Node;
       this.reaMessager = reaMessager;
 
       moduleStateReporter = new SegmentationModuleStateReporter(reaMessager);
@@ -81,9 +107,14 @@ public class PlanarSegmentationModule implements OcTreeConsumer
       planarRegionFeatureUpdater.setSurfaceNormalFilterParametersTopic(SegmentationModuleAPI.SurfaceNormalFilterParameters);
       planarRegionFeatureUpdater.bindControls();
 
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, subscriberCustomRegionsTopicName,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node,
+                                                    PlanarRegionsListMessage.class,
+                                                    customRegionTopic,
                                                     this::dispatchCustomPlanarRegion);
+      // TODO what the heck is this used for?
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, REAStateRequestMessage.class, inputTopic, this::handleREAStateRequestMessage);
+
+      planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, outputTopic);
 
       FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
       loadConfigurationFile(filePropertyHelper);
@@ -152,6 +183,8 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
             timeReporter.run(() -> planarRegionFeatureUpdater.update(mainOctree, sensorPose), planarRegionsTimeReport);
             timeReporter.run(() -> moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater), reportPlanarRegionsStateTimeReport);
+
+            planarRegionPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionFeatureUpdater.getPlanarRegionsList()));
          }
 
          if (isThreadInterrupted())
@@ -215,16 +248,21 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
    public static PlanarSegmentationModule createRemoteModule(String configurationFilePath) throws Exception
    {
-      KryoMessager server = KryoMessager.createTCPServer(SegmentationModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,
+      KryoMessager server = KryoMessager.createTCPServer(SegmentationModuleAPI.API,
+                                                         NetworkPorts.REA_MODULE_UI_PORT,
                                                          REACommunicationProperties.getPrivateNetClassList());
       server.setAllowSelfSubmit(true);
       server.startMessager();
       return new PlanarSegmentationModule(server, new File(configurationFilePath));
    }
 
-   public static PlanarSegmentationModule createIntraprocessModule(String configurationFilePath) throws Exception
+   public static PlanarSegmentationModule createIntraprocessModule(ROS2Topic<?> inputTopic,
+                                                                   ROS2Topic<?> customRegionTopic,
+                                                                   ROS2Topic<?> outputTopic,
+                                                                   String configurationFilePath) throws Exception
    {
-      KryoMessager messager = KryoMessager.createIntraprocess(SegmentationModuleAPI.API, NetworkPorts.REA_MODULE_UI_PORT,
+      KryoMessager messager = KryoMessager.createIntraprocess(SegmentationModuleAPI.API,
+                                                              NetworkPorts.REA_MODULE_UI_PORT,
                                                               REACommunicationProperties.getPrivateNetClassList());
       messager.setAllowSelfSubmit(true);
       messager.startMessager();
@@ -241,6 +279,6 @@ public class PlanarSegmentationModule implements OcTreeConsumer
          e.printStackTrace();
       }
 
-      return new PlanarSegmentationModule(messager, configurationFile);
+      return new PlanarSegmentationModule(inputTopic, customRegionTopic, outputTopic, messager, configurationFile);
    }
 }

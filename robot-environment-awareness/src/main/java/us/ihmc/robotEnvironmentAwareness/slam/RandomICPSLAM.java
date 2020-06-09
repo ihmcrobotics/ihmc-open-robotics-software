@@ -30,8 +30,6 @@ public class RandomICPSLAM extends SLAMBasics
 
    private final AtomicReference<RandomICPSLAMParameters> parameters = new AtomicReference<>(new RandomICPSLAMParameters());
 
-   private final PlanarRegionSegmentationCalculator segmentationCalculator;
-
    private final GradientDescentModule optimizer;
    private static final double OPTIMIZER_POSITION_LIMIT = 0.1;
    private static final double OPTIMIZER_ANGLE_LIMIT = Math.toRadians(10.);
@@ -64,18 +62,6 @@ public class RandomICPSLAM extends SLAMBasics
    public RandomICPSLAM(double octreeResolution)
    {
       super(octreeResolution);
-
-      segmentationCalculator = new PlanarRegionSegmentationCalculator();
-
-      SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
-      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
-      surfaceNormalFilterParameters.setSurfaceNormalLowerBound(Math.toRadians(-40.0));
-      surfaceNormalFilterParameters.setSurfaceNormalUpperBound(Math.toRadians(40.0));
-
-      segmentationCalculator.setParameters(planarRegionSegmentationParameters);
-      segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
-
-      polygonizerParameters.setConcaveHullThreshold(0.15);
 
       optimizer = new GradientDescentModule(null, INITIAL_INPUT);
       int maxIterations = 300;
@@ -138,14 +124,9 @@ public class RandomICPSLAM extends SLAMBasics
       return success;
    }
 
-   public void updatePlanarRegionsMap()
+   public void computeOcTreeNormals()
    {
       octree.updateNormals();
-      segmentationCalculator.setSensorPosition(getLatestFrame().getSensorPose().getTranslation());
-      segmentationCalculator.compute(octree.getRoot());
-
-      List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
-      planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
    }
 
    @Override

@@ -19,18 +19,10 @@ public class SLAMBasics implements SLAMInterface
    protected final NormalOcTree octree;
    private final List<RigidBodyTransformReadOnly> sensorPoses = new ArrayList<>();
 
-   protected PlanarRegionsList planarRegionsMap;
-   protected final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
-   protected final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
-   protected final CustomRegionMergeParameters customRegionMergeParameters = new CustomRegionMergeParameters();
-   protected final PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
 
    public SLAMBasics(double octreeResolution)
    {
       octree = new NormalOcTree(octreeResolution);
-
-      planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.03);
-      planarRegionSegmentationParameters.setMinRegionSize(150);
    }
 
    @Override
@@ -84,11 +76,6 @@ public class SLAMBasics implements SLAMInterface
    public List<RigidBodyTransformReadOnly> getSensorPoses()
    {
       return sensorPoses;
-   }
-
-   public PlanarRegionsList getPlanarRegionsMap()
-   {
-      return planarRegionsMap;
    }
 
    public SLAMFrame getLatestFrame()
