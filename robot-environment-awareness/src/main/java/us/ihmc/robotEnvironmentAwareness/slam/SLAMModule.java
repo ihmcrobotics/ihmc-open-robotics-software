@@ -14,9 +14,7 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -36,7 +34,6 @@ import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
 import us.ihmc.robotEnvironmentAwareness.updaters.OcTreeConsumer;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 
 public class SLAMModule
@@ -51,9 +48,10 @@ public class SLAMModule
 
    protected final AtomicReference<Boolean> enable;
 
-   private final Topic<PlanarRegionsListMessage> planarRegionsStateTopicToSubmit;
-   protected final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
-   protected final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<StereoVisionPointCloudMessage>();
+   private final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
+   private final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<StereoVisionPointCloudMessage>();
+   private final LinkedList<Boolean> stationaryFlagQueue = new LinkedList<Boolean>();
+   private final LinkedList<Boolean> reasonableVelocityFlagQueue = new LinkedList<Boolean>();
 
    protected final RandomICPSLAM slam = new RandomICPSLAM(DEFAULT_OCTREE_RESOLUTION);
 
@@ -63,8 +61,6 @@ public class SLAMModule
    private ScheduledFuture<?> scheduledSLAM;
 
    private final AtomicReference<RandomICPSLAMParameters> ihmcSLAMParameters;
-
-   private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
    protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
@@ -81,13 +77,10 @@ public class SLAMModule
       reaMessager.submitMessage(SLAMModuleAPI.UISensorPoseHistoryFrames, 1000);
 
       enable = reaMessager.createInput(SLAMModuleAPI.SLAMEnable, true);
-      planarRegionsStateTopicToSubmit = SLAMModuleAPI.SLAMPlanarRegionsState;
 
       ihmcSLAMParameters = reaMessager.createInput(SLAMModuleAPI.SLAMParameters, new RandomICPSLAMParameters());
 
       reaMessager.registerTopicListener(SLAMModuleAPI.SLAMClear, (content) -> clearSLAM());
-
-      planarRegionPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.withOutput());
    }
 
    public void attachOcTreeConsumer(OcTreeConsumer ocTreeConsumer)
@@ -180,13 +173,9 @@ public class SLAMModule
 
       NormalOcTree octreeMap = slam.getOctree();
       NormalOcTreeMessage octreeMessage = OcTreeMessageConverter.convertToMessage(octreeMap);
-      reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, octreeMessage);
+      slam.computeOcTreeNormals();
 
-      slam.updatePlanarRegionsMap();
-      PlanarRegionsList planarRegionsMap = slam.getPlanarRegionsMap();
-      PlanarRegionsListMessage planarRegionsListMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionsMap);
-      reaMessager.submitMessage(planarRegionsStateTopicToSubmit, planarRegionsListMessage);
-      planarRegionPublisher.publish(planarRegionsListMessage);
+      reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, octreeMessage);
 
       SLAMFrame latestFrame = slam.getLatestFrame();
       Point3DReadOnly[] originalPointCloud = latestFrame.getOriginalPointCloud();

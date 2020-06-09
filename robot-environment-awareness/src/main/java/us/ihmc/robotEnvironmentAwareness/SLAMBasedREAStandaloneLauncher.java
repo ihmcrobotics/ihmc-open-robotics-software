@@ -3,6 +3,8 @@ package us.ihmc.robotEnvironmentAwareness;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import us.ihmc.communication.ROS2Tools;
+import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
 import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
@@ -25,7 +27,10 @@ public class SLAMBasedREAStandaloneLauncher extends Application
 
       Stage secondStage = new Stage();
       planarSegmentationUI = PlanarSegmentationUI.creatIntraprocessUI(secondStage);
-      segmentationModule = PlanarSegmentationModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME);
+      segmentationModule = PlanarSegmentationModule.createIntraprocessModule(REACommunicationProperties.inputTopic,
+                                                                             REACommunicationProperties.subscriberCustomRegionsTopicName,
+                                                                             ROS2Tools.REALSENSE_SLAM_MAP,
+                                                                             MODULE_CONFIGURATION_FILE_NAME);
 
       slamModule.attachOcTreeConsumer(segmentationModule);
 
