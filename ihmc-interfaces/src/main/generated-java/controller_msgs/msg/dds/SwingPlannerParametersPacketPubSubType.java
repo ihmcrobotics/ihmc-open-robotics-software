@@ -110,6 +110,9 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       return current_alignment - initial_alignment;
    }
 
@@ -144,6 +147,10 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
 
@@ -289,6 +296,9 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
 
       cdr.write_type_6(data.getWaypointProportionShiftForStubAvoidance());
 
+
+      cdr.write_type_6(data.getAdditionalSwingTimeIfExpanded());
+
    }
 
    public static void read(controller_msgs.msg.dds.SwingPlannerParametersPacket data, us.ihmc.idl.CDR cdr)
@@ -363,6 +373,9 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
       data.setWaypointProportionShiftForStubAvoidance(cdr.read_type_6());
       	
 
+      data.setAdditionalSwingTimeIfExpanded(cdr.read_type_6());
+      	
+
    }
 
    @Override
@@ -414,6 +427,8 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
       ser.write_type_6("foot_stub_clearance", data.getFootStubClearance());
 
       ser.write_type_6("waypoint_proportion_shift_for_stub_avoidance", data.getWaypointProportionShiftForStubAvoidance());
+
+      ser.write_type_6("additional_swing_time_if_expanded", data.getAdditionalSwingTimeIfExpanded());
    }
 
    @Override
@@ -465,6 +480,8 @@ public class SwingPlannerParametersPacketPubSubType implements us.ihmc.pubsub.To
       data.setFootStubClearance(ser.read_type_6("foot_stub_clearance"));
 
       data.setWaypointProportionShiftForStubAvoidance(ser.read_type_6("waypoint_proportion_shift_for_stub_avoidance"));
+
+      data.setAdditionalSwingTimeIfExpanded(ser.read_type_6("additional_swing_time_if_expanded"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.SwingPlannerParametersPacket src, controller_msgs.msg.dds.SwingPlannerParametersPacket dest)
