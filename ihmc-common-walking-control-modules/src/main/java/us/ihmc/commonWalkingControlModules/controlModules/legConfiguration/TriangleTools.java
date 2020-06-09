@@ -98,7 +98,8 @@ public class TriangleTools
       double lawSinesB;
       double angleA;
       double angleC;
-      if (angleB >= Math.PI/2){
+      if (angleB >= Math.PI / 2)
+      {
          if (sideALength >= sideBLength)
          {
             return Double.NaN;
