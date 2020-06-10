@@ -49,7 +49,7 @@ public class FootstepForUI
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
       {
          FramePose3D soleFramePoseToPack = new FramePose3D();
-         footstepPlan.getFootstep(i).getPose(soleFramePoseToPack);
+         footstepPlan.getFootstep(i).getFootstepPose(soleFramePoseToPack);
          soleFramePoseToPack.changeFrame(ReferenceFrame.getWorldFrame());
          footstepLocations.add(new FootstepForUI(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack), description));
       }

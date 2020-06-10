@@ -9,17 +9,18 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.FootstepPlannerOutput;
 import us.ihmc.footstepPlanning.FootstepPlannerRequest;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogger;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOnly;
 import us.ihmc.humanoidBehaviors.tools.BehaviorBuilderPattern;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
-import us.ihmc.humanoidBehaviors.tools.interfaces.RobotWalkRequest;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
@@ -52,8 +53,8 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    protected final Field<FootstepPlanningModule> footstepPlanningModule = required();
    protected final Field<Consumer<RobotSide>> lastStanceSideSetter = required();
    protected final Field<Supplier<Boolean>> operatorReviewEnabledSupplier = required();
-   protected final Field<Consumer<RobotWalkRequest>> reviewPlanOutput = required();
-   protected final Field<Consumer<RobotWalkRequest>> autonomousOutput = required();
+   protected final Field<Consumer<FootstepPlan>> reviewPlanOutput = required();
+   protected final Field<Consumer<FootstepPlan>> autonomousOutput = required();
    protected final Field<Runnable> planningFailedNotifier = required();
    protected final Field<Consumer<LookAndStepBehavior.State>> behaviorStateUpdater = required();
    protected final Field<Consumer<String>> statusLogger = required();
@@ -253,6 +254,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.get().getIdealFootstepWidth(), goalPoseBetweenFeet);
       footstepPlannerRequest.setPlanarRegionsList(planarRegions);
       footstepPlannerRequest.setTimeout(lookAndStepBehaviorParameters.get().getFootstepPlannerTimeout());
+      footstepPlannerRequest.setSwingPlannerType(SwingPlannerType.POSITION);
 
       footstepPlanningModule.get().getFootstepPlannerParameters().set(footstepPlannerParameters.get());
 //      footstepPlanningModule.get().addStatusCallback(this::footstepPlanningStatusUpdate);
@@ -268,7 +270,6 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       footstepPlannerLogger.logSession();
       FootstepPlannerLogger.deleteOldLogs(30); // TODO: Do this somewhere else
 
-
       if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() < 1) // failed
       {
          planningFailedNotifier.get().run();
@@ -278,16 +279,14 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
          uiPublisher.get().publishToUI(FootstepPlanForUI, FootstepForUI.reduceFootstepPlanForUIMessager(footstepPlannerOutput.getFootstepPlan(), "Planned"));
       }
 
-      RobotWalkRequest robotWalkRequest = new RobotWalkRequest(footstepPlannerOutput.getFootstepPlan(), planarRegions);
-
       if (operatorReviewEnabledSupplier.get().get())
       {
-         reviewPlanOutput.get().accept(robotWalkRequest);
+         reviewPlanOutput.get().accept(footstepPlannerOutput.getFootstepPlan());
       }
       else
       {
          behaviorStateUpdater.get().accept(LookAndStepBehavior.State.SWINGING);
-         autonomousOutput.get().accept(robotWalkRequest);
+         autonomousOutput.get().accept(footstepPlannerOutput.getFootstepPlan());
       }
    }
 
@@ -368,12 +367,12 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       this.operatorReviewEnabledSupplier.set(operatorReviewEnabledSupplier);
    }
 
-   public void setReviewPlanOutput(Consumer<RobotWalkRequest> reviewPlanOutput)
+   public void setReviewPlanOutput(Consumer<FootstepPlan> reviewPlanOutput)
    {
       this.reviewPlanOutput.set(reviewPlanOutput);
    }
 
-   public void setAutonomousOutput(Consumer<RobotWalkRequest> autonomousOutput)
+   public void setAutonomousOutput(Consumer<FootstepPlan> autonomousOutput)
    {
       this.autonomousOutput.set(autonomousOutput);
    }
