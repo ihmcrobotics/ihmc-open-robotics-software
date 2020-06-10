@@ -3,10 +3,7 @@ package us.ihmc.robotEnvironmentAwareness.ui;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.control.ToggleButton;
-import javafx.scene.input.KeyCode;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
 import us.ihmc.communication.util.NetworkPorts;
@@ -18,7 +15,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 
 import java.io.IOException;
 
-public class AtlasPerceptionSuiteUI
+public class PerceptionSuiteUI
 {
    private final Pane mainPane;
    private final Stage primaryStage;
@@ -38,9 +35,11 @@ public class AtlasPerceptionSuiteUI
    @FXML
    private ToggleButton runMapSegmentationUI;
 
-   private AtlasPerceptionSuiteUI(REAUIMessager messager, Stage primaryStage) throws Exception
+   private PerceptionSuiteUI(REAUIMessager messager, Stage primaryStage) throws Exception
    {
       this.messager = messager;
+      messager.startMessager();
+
       this.primaryStage = primaryStage;
       FXMLLoader loader = new FXMLLoader();
       loader.setController(this);
@@ -80,12 +79,12 @@ public class AtlasPerceptionSuiteUI
    }
 
 
-   public static AtlasPerceptionSuiteUI createIntraprocessUI(Stage primaryStage) throws java.lang.Exception
+   public static PerceptionSuiteUI createIntraprocessUI(Stage primaryStage) throws java.lang.Exception
    {
       Messager moduleMessager = KryoMessager.createIntraprocess(PerceptionSuiteAPI.API,
-                                                                NetworkPorts.SLAM_MODULE_UI_PORT,
+                                                                NetworkPorts.PERCEPTION_SUITE_UI_PORT,
                                                                 REACommunicationProperties.getPrivateNetClassList());
       REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
-      return new AtlasPerceptionSuiteUI(uiMessager, primaryStage);
+      return new PerceptionSuiteUI(uiMessager, primaryStage);
    }
 }
