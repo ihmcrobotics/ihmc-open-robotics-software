@@ -18,6 +18,7 @@ public class SimpleFootstep
    private final ConvexPolygon2D foothold = new ConvexPolygon2D();
    private boolean isAdjustable;
 
+
    public RobotSide getRobotSide()
    {
       return robotSide;
@@ -124,7 +125,7 @@ public class SimpleFootstep
             return false;
          if (!foothold.equals(other.foothold))
             return false;
-         if (!isAdjustable != other.isAdjustable)
+         if (isAdjustable != other.isAdjustable)
             return false;
          return true;
       }
