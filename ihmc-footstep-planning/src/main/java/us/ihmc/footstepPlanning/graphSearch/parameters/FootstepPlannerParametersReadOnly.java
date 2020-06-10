@@ -816,4 +816,12 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    {
       return get(shinHeightOffet);
    }
+
+   /**
+    * Distance epsilon below snapped footstep that will be added to foothold
+    */
+   default double getDistanceEpsilonToBridgeRegions()
+   {
+      return get(distanceEpsilonToBridgeRegions);
+   }
 }
