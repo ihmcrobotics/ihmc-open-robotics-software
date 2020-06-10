@@ -53,13 +53,12 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
    {
       validateNonChanging();
 
-      setBehaviorState(behaviorStateSupplier.get().get());
-      setGoal(goalInput.get());
-      setMapRegions(mapRegionsInput.get());
-      setHumanoidRobotState(robotStateSupplier.get().get());
-      setVisibilityGraphParameters(visibilityGraphParameters.get());
-      setMapRegionsReceptionTimerSnapshot(mapRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.get().getPlanarRegionsExpiration()));
-      setPlanningFailureTimerSnapshot(planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.get().getWaitTimeAfterPlanFailed()));
+      update(mapRegionsInput.get(),
+             goalInput.get(),
+             robotStateSupplier.get().get(),
+             mapRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.get().getPlanarRegionsExpiration()),
+             planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.get().getWaitTimeAfterPlanFailed()),
+             behaviorStateSupplier.get().get());
 
       run();
    }

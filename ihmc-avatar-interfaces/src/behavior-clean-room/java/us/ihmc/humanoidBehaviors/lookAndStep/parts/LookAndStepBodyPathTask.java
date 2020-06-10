@@ -42,12 +42,27 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    protected final Field<Runnable> clearNewBodyPathNeededCallback = required();
    protected final Field<Consumer<LookAndStepBehavior.State>> behaviorStateUpdater = required();
 
-   private final Field<PlanarRegionsList> mapRegions = requiredChanging();
-   private final Field<Pose3D> goal = requiredChanging();
-   private final Field<HumanoidRobotState> humanoidRobotState = requiredChanging();
-   private final Field<TimerSnapshot> mapRegionsReceptionTimerSnapshot = requiredChanging();
-   private final Field<TimerSnapshot> planningFailureTimerSnapshot = requiredChanging();
-   private final Field<LookAndStepBehavior.State> behaviorState = requiredChanging();
+   private PlanarRegionsList mapRegions;
+   private Pose3D goal;
+   private HumanoidRobotState humanoidRobotState;
+   private TimerSnapshot mapRegionsReceptionTimerSnapshot;
+   private TimerSnapshot planningFailureTimerSnapshot;
+   private LookAndStepBehavior.State behaviorState;
+
+   protected void update(PlanarRegionsList mapRegions,
+                         Pose3D goal,
+                         HumanoidRobotState humanoidRobotState,
+                         TimerSnapshot mapRegionsReceptionTimerSnapshot,
+                         TimerSnapshot planningFailureTimerSnapshot,
+                         LookAndStepBehavior.State behaviorState)
+   {
+      this.mapRegions = mapRegions;
+      this.goal = goal;
+      this.humanoidRobotState = humanoidRobotState;
+      this.mapRegionsReceptionTimerSnapshot = mapRegionsReceptionTimerSnapshot;
+      this.planningFailureTimerSnapshot = planningFailureTimerSnapshot;
+      this.behaviorState = behaviorState;
+   }
 
    private boolean evaluateEntry()
    {
@@ -58,7 +73,7 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
 //         LogTools.warn("Body path planning supressed: New plan not needed");
 //         proceed = false;
 //      }
-      if (!behaviorState.get().equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
+      if (!behaviorState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
       {
          LogTools.warn("Body path planning supressed: Not in body path planning state");
          proceed = false;
@@ -66,18 +81,18 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
       else if (!hasGoal())
       {
          LogTools.warn("Body path planning supressed: No goal specified");
-         uiPublisher.get().publishToUI(MapRegionsForUI, mapRegions.get());
+         uiPublisher.get().publishToUI(MapRegionsForUI, mapRegions);
          proceed = false;
       }
       else if (!regionsOK())
       {
          LogTools.warn("Body path planning supressed: Regions not OK: {}, timePassed: {}, isEmpty: {}",
                        mapRegions,
-                       mapRegionsReceptionTimerSnapshot.get().getTimePassedSinceReset(),
-                       mapRegions == null ? null : mapRegions.get().isEmpty());
+                       mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset(),
+                       mapRegions == null ? null : mapRegions.isEmpty());
          proceed = false;
       }
-      else if (planningFailureTimerSnapshot.get().isRunning()) // TODO: This could be "run recently" instead of failed recently
+      else if (planningFailureTimerSnapshot.isRunning()) // TODO: This could be "run recently" instead of failed recently
       {
          LogTools.warn("Body path planning supressed: Failed recently");
          proceed = false;
@@ -93,14 +108,14 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
 
    private boolean hasGoal()
    {
-      return goal.get() != null && !goal.get().containsNaN();
+      return goal != null && !goal.containsNaN();
    }
 
    private boolean regionsOK()
    {
-      return mapRegions.get() != null
-             && !mapRegions.get().isEmpty()
-             && mapRegionsReceptionTimerSnapshot.get().isRunning();
+      return mapRegions != null
+             && !mapRegions.isEmpty()
+             && mapRegionsReceptionTimerSnapshot.isRunning();
    }
 
    // TODO: Extract as interface?
@@ -119,7 +134,7 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    private void performTask()
    {
       // TODO: Add robot standing still for 20s for real robot?
-      uiPublisher.get().publishToUI(MapRegionsForUI, mapRegions.get());
+      uiPublisher.get().publishToUI(MapRegionsForUI, mapRegions);
 
       LogTools.info("Planning body path...");
 
@@ -131,12 +146,12 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
                                                                                   pathPostProcessor,
                                                                                   new YoVariableRegistry(LookAndStepBodyPathModule.class.getSimpleName()));
 
-      bodyPathPlanner.setGoal(goal.get());
-      bodyPathPlanner.setPlanarRegionsList(mapRegions.get());
+      bodyPathPlanner.setGoal(goal);
+      bodyPathPlanner.setPlanarRegionsList(mapRegions);
       FramePose3D leftFootPoseTemp = new FramePose3D();
-      leftFootPoseTemp.setToZero(humanoidRobotState.get().getSoleFrame(RobotSide.LEFT));
+      leftFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.LEFT));
       FramePose3D rightFootPoseTemp = new FramePose3D();
-      rightFootPoseTemp.setToZero(humanoidRobotState.get().getSoleFrame(RobotSide.RIGHT));
+      rightFootPoseTemp.setToZero(humanoidRobotState.getSoleFrame(RobotSide.RIGHT));
       leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
       rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
       bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
@@ -170,31 +185,6 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
       {
          resetPlanningFailedTimer.get().run();
       }
-   }
-
-   protected void setMapRegions(PlanarRegionsList mapRegions)
-   {
-      this.mapRegions.set(mapRegions);
-   }
-
-   protected void setGoal(Pose3D goal)
-   {
-      this.goal.set(goal);
-   }
-
-   protected void setHumanoidRobotState(HumanoidRobotState humanoidRobotState)
-   {
-      this.humanoidRobotState.set(humanoidRobotState);
-   }
-
-   protected void setMapRegionsReceptionTimerSnapshot(TimerSnapshot mapRegionsReceptionTimerSnapshot)
-   {
-      this.mapRegionsReceptionTimerSnapshot.set(mapRegionsReceptionTimerSnapshot);
-   }
-
-   protected void setPlanningFailureTimerSnapshot(TimerSnapshot planningFailureTimerSnapshot)
-   {
-      this.planningFailureTimerSnapshot.set(planningFailureTimerSnapshot);
    }
 
    public void setUIPublisher(UIPublisher uiPublisher)
@@ -245,11 +235,6 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    public void setClearNewBodyPathGoalNeededCallback(Runnable clearNewBodyPathNeededCallback)
    {
       this.clearNewBodyPathNeededCallback.set(clearNewBodyPathNeededCallback);
-   }
-
-   protected void setBehaviorState(LookAndStepBehavior.State behaviorState)
-   {
-      this.behaviorState.set(behaviorState);
    }
 
    public void setBehaviorStateUpdater(Consumer<LookAndStepBehavior.State> behaviorStateUpdater)
