@@ -14,6 +14,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
+import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
 import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
 import us.ihmc.ros2.Ros2Node;
 
@@ -24,8 +25,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PerceptionSuite
 {
-   private static final int THREAD_PERIOD_MILLISECONDS = 200;
-
    protected static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAModuleConfiguration.txt";
 
    private SLAMModule realSenseSLAMModule;
@@ -36,6 +35,8 @@ public class PerceptionSuite
    private LIDARBasedEnvironmentAwarenessUI lidarREAModuleUI;
    private Stage realsenseSLAMStage;
    private SLAMBasedEnvironmentAwarenessUI realSenseSLAMUI;
+   private Stage planarSegmentationStage;
+   private PlanarSegmentationUI planarSegmentationUI;
 
    protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
    // TODO module for combining rea and segmentation
@@ -54,6 +55,7 @@ public class PerceptionSuite
 
       messager.registerTopicListener(PerceptionSuiteAPI.RunLidarREAUI, run -> runnable(run, this::startLidarREAUI, this::stopLidarREAUI, "Lidar REA UI"));
       messager.registerTopicListener(PerceptionSuiteAPI.RunRealSenseSLAMUI, run -> runnable(run, this::startRealSenseSLAMUI, this::stopRealSenseSLAMUI, "RealSense SLAM UI"));
+      messager.registerTopicListener(PerceptionSuiteAPI.RunMapSegmentationUI, run -> runnable(run, this::startMapSegmentationUI, this::stopMapSegmentationUI, "Mag Segmentation UI"));
    }
 
    protected SLAMModule createSLAMModule() throws Exception
@@ -101,8 +103,10 @@ public class PerceptionSuite
    {
       stopRealSenseSLAM();
       stopLidarREA();
-      stopLidarREAUI();
       stopMapSegmentation();
+      stopRealSenseSLAMUI();
+      stopLidarREAUI();
+      stopMapSegmentationUI();
 
       try
       {
@@ -136,6 +140,8 @@ public class PerceptionSuite
          realSenseSLAMModule = null;
       }
 
+      stopMapSegmentation();
+      stopRealSenseSLAMUI();
       messager.submitMessage(PerceptionSuiteAPI.RunRealSenseSLAMUI, false);
       messager.submitMessage(PerceptionSuiteAPI.RunMapSegmentation, false);
    }
@@ -190,6 +196,56 @@ public class PerceptionSuite
       }
    }
 
+   private void startMapSegmentationUI()
+   {
+      if (segmentationModule == null)
+      {
+         LogTools.info("Map Segmentation Module must be running first.");
+         messager.submitMessage(PerceptionSuiteAPI.RunMapSegmentationUI, false);
+      }
+
+      if (planarSegmentationUI == null)
+      {
+         Platform.runLater(() ->
+                           {
+                              planarSegmentationStage = new Stage();
+                              try
+                              {
+                                 planarSegmentationUI = PlanarSegmentationUI.creatIntraprocessUI(planarSegmentationStage);
+                                 planarSegmentationUI.show();
+                              }
+                              catch (Exception e)
+                              {
+                                 LogTools.warn(e.getMessage());
+                              }
+                              planarSegmentationStage.setOnCloseRequest(event ->
+                                                                   {
+                                                                      messager.submitMessage(PerceptionSuiteAPI.RunMapSegmentationUI, false);
+                                                                      stopMapSegmentationUI();
+                                                                   });
+                           });
+      }
+      else
+      {
+         stopMapSegmentationUI();
+         throw new RuntimeException("Map Segmentation UI is already running.");
+      }
+   }
+
+   private void stopMapSegmentationUI()
+   {
+      if (planarSegmentationUI != null)
+      {
+         Platform.runLater(() ->
+                           {
+                              planarSegmentationStage.close();
+                              planarSegmentationUI.stop();
+                              planarSegmentationStage = null;
+                              planarSegmentationUI = null;
+                           });
+      }
+   }
+
    private void startLidarREA() throws Exception
    {
       if (lidarREAModule == null)
@@ -211,6 +267,8 @@ public class PerceptionSuite
          lidarREAModule = null;
       }
 
+      stopLidarREAUI();
+      messager.submitMessage(PerceptionSuiteAPI.RunLidarREA, false);
       messager.submitMessage(PerceptionSuiteAPI.RunLidarREAUI, false);
    }
 
@@ -288,6 +346,8 @@ public class PerceptionSuite
          segmentationModule = null;
       }
 
+      stopMapSegmentationUI();
+      messager.submitMessage(PerceptionSuiteAPI.RunMapSegmentation, false);
       messager.submitMessage(PerceptionSuiteAPI.RunMapSegmentationUI, false);
    }
 
