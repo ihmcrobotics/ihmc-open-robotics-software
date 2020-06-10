@@ -15,6 +15,7 @@ public class LookAndStepBehaviorAPI
    private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
 
    public static final MessagerAPIFactory.Topic<String> CurrentState = topic("CurrentState");
+   public static final MessagerAPIFactory.Topic<String> StatusLog = topic("StatusLog");
    public static final MessagerAPIFactory.Topic<Object> TakeStep = topic("TakeStep"); // TODO remove?
    public static final MessagerAPIFactory.Topic<Object> RePlan = topic("RePlan"); // TODO remove?
    public static final MessagerAPIFactory.Topic<Boolean> Approval = topic("Approval");

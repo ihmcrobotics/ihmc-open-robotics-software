@@ -56,6 +56,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    protected final Field<Consumer<RobotWalkRequest>> autonomousOutput = required();
    protected final Field<Runnable> planningFailedNotifier = required();
    protected final Field<Consumer<LookAndStepBehavior.State>> behaviorStateUpdater = required();
+   protected final Field<Consumer<String>> statusLogger = required();
 
    private PlanarRegionsList planarRegions;
    private TimerSnapshot planarRegionReceptionTimerSnapshot;
@@ -89,6 +90,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       if (!behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING))
       {
          LogTools.warn("Footstep planning supressed: Not in footstep planning state");
+         statusLogger.get().accept("Footstep planning evauation failed: Not in footstep planning state");
          proceed = false;
       }
       else if (!regionsOK())
@@ -384,5 +386,10 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    public void setBehaviorStateUpdater(Consumer<LookAndStepBehavior.State> behaviorStateUpdater)
    {
       this.behaviorStateUpdater.set(behaviorStateUpdater);
+   }
+
+   public void setStatusLogger(Consumer<String> statusLogger)
+   {
+      this.statusLogger.set(statusLogger);
    }
 }

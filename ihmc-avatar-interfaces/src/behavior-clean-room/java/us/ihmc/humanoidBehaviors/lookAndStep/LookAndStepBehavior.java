@@ -129,6 +129,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlanningModule.setFootstepPlanningModule(helper.getOrCreateFootstepPlanner());
       footstepPlanningModule.setBehaviorStateSupplier(behaviorState::get);
       footstepPlanningModule.setBehaviorStateUpdater(this::updateState);
+      footstepPlanningModule.setStatusLogger(msg -> helper.logInfoLamda(StatusLog, msg));
 
       robotMotionModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
       robotMotionModule.setLastSteppedSolePoseConsumer(lastSteppedSolePoses::put);

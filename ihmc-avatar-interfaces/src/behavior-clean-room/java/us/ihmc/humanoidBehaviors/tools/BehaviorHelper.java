@@ -15,6 +15,7 @@ import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
@@ -156,6 +157,21 @@ public class BehaviorHelper
    public <T> void publishToUI(Topic<T> topic, T message)
    {
       managedMessager.submitMessage(topic, message);
+   }
+
+   /**
+    * Publish a log message to the UI and have it logged on both sides. TODO: Rename?
+    */
+   public void logInfo(Topic<String> logTopic, String message)
+   {
+      LogTools.info(1, message);
+      publishToUI(logTopic, message);
+   }
+
+   public void logInfoLamda(Topic<String> logTopic, String message)
+   {
+      LogTools.info(2, message);
+      publishToUI(logTopic, message);
    }
 
    public ActivationReference<Boolean> createBooleanActivationReference(Topic<Boolean> topic)
