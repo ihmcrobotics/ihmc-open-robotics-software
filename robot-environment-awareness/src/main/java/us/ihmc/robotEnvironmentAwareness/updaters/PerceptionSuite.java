@@ -327,6 +327,7 @@ public class PerceptionSuite
       if (realSenseSLAMModule == null)
       {
          LogTools.warn("Cannot start the segmentation module without the SLAM module running.");
+         messager.submitMessage(PerceptionSuiteAPI.RunMapSegmentation, false);
          return;
       }
 

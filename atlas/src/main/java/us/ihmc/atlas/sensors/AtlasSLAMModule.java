@@ -93,6 +93,14 @@ public class AtlasSLAMModule extends SLAMModule
    }
 
    @Override
+   protected void sendCurrentState()
+   {
+      super.sendCurrentState();
+      reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, robotStatus.get());
+      reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, velocityStatus.get());
+   }
+
+   @Override
    protected boolean addFrame(StereoVisionPointCloudMessage pointCloudToCompute)
    {
       boolean stationaryFlag = stationaryFlagQueue.getFirst();

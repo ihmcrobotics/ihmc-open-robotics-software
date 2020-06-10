@@ -97,7 +97,7 @@ public class PlanarSegmentationUI
 
    private void refreshModuleState()
    {
-      uiMessager.submitStateRequestToModule(SegmentationModuleAPI.RequestEntireModuleState);
+      uiMessager.submitMessageInternal(SegmentationModuleAPI.RequestEntireModuleState, true);
    }
 
    private void initializeControllers(REAUIMessager uiMessager)
