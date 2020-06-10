@@ -1069,7 +1069,7 @@ public class ExploreAreaBehavior implements BehaviorInterface
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++) // this code makes the message smaller to send over the network, TODO investigate
       {
          FramePose3D soleFramePoseToPack = new FramePose3D();
-         footstepPlan.getFootstep(i).getPose(soleFramePoseToPack);
+         footstepPlan.getFootstep(i).getFootstepPose(soleFramePoseToPack);
          footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
       }
       helper.publishToUI(PatrolBehaviorAPI.CurrentFootstepPlan, footstepLocations);

@@ -4,7 +4,6 @@ import controller_msgs.msg.dds.REAStateRequestMessage;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
@@ -15,12 +14,13 @@ import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
-import us.ihmc.footstepPlanning.postProcessing.parameters.DefaultFootstepPostProcessingParameters;
-import us.ihmc.footstepPlanning.postProcessing.parameters.FootstepPostProcessingParametersBasics;
+import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
+import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.footstepPlanning.ui.components.*;
 import us.ihmc.footstepPlanning.ui.controllers.*;
 import us.ihmc.footstepPlanning.ui.viewers.*;
@@ -50,7 +50,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.ToDoubleFunction;
 
 import static us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI.*;
 
@@ -84,11 +83,13 @@ public class FootstepPlannerUI
    @FXML
    private FootstepPlannerMenuUIController footstepPlannerMenuUIController;
    @FXML
-   private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
-   @FXML
    private VisibilityGraphsParametersUIController visibilityGraphsParametersUIController;
    @FXML
-   private FootstepPostProcessingParametersUIController footstepPostProcessingParametersUIController;
+   private FootstepPlannerParametersUIController footstepPlannerParametersUIController;
+   @FXML
+   private SwingPlannerParametersUIController swingPlannerParametersUIController;
+   @FXML
+   private SplitFractionParametersUIController splitFractionParametersUIController;
    @FXML
    private FootstepPlannerLogVisualizerController footstepPlannerLogVisualizerController;
    @FXML
@@ -107,9 +108,10 @@ public class FootstepPlannerUI
    {
       this(primaryStage,
            messager,
-           new DefaultFootstepPlannerParameters(),
            new DefaultVisibilityGraphParameters(),
-           new DefaultFootstepPostProcessingParameters(),
+           new DefaultFootstepPlannerParameters(),
+           new DefaultSwingPlannerParameters(),
+           new DefaultSplitFractionCalculatorParameters(),
            null,
            null,
            showTestDashboard,
@@ -118,9 +120,10 @@ public class FootstepPlannerUI
 
    public FootstepPlannerUI(Stage primaryStage,
                             JavaFXMessager messager,
-                            FootstepPlannerParametersBasics plannerParameters,
                             VisibilityGraphsParametersBasics visibilityGraphsParameters,
-                            FootstepPostProcessingParametersBasics footstepPostProcessingParameters,
+                            FootstepPlannerParametersBasics plannerParameters,
+                            SwingPlannerParametersBasics swingPlannerParameters,
+                            SplitFractionCalculatorParametersBasics splitFractionCalculatorParameters,
                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             WalkingControllerParameters walkingControllerParameters,
                             boolean showTestDashboard,
@@ -128,28 +131,28 @@ public class FootstepPlannerUI
    {
       this(primaryStage,
            messager,
-           plannerParameters,
            visibilityGraphsParameters,
-           footstepPostProcessingParameters,
+           plannerParameters,
+           swingPlannerParameters,
+           splitFractionCalculatorParameters,
            fullHumanoidRobotModelFactory,
            null,
            walkingControllerParameters,
            null,
-           new Vector3D(),
            showTestDashboard,
            defaultContactPoints);
    }
 
    public FootstepPlannerUI(Stage primaryStage,
                             JavaFXMessager messager,
-                            FootstepPlannerParametersBasics plannerParameters,
                             VisibilityGraphsParametersBasics visibilityGraphsParameters,
-                            FootstepPostProcessingParametersBasics footstepPostProcessingParameters,
+                            FootstepPlannerParametersBasics plannerParameters,
+                            SwingPlannerParametersBasics swingPlannerParameters,
+                            SplitFractionCalculatorParametersBasics splitFractionCalculatorParameters,
                             FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                             FullHumanoidRobotModelFactory previewModelFactory,
                             WalkingControllerParameters walkingControllerParameters,
-                            ToDoubleFunction<String> defaultJointSetpoints,
-                            Tuple3DReadOnly rootJointToMidFootOffset,
+                            UIAuxiliaryRobotData auxiliaryRobotData,
                             boolean showTestDashboard,
                             SideDependentList<List<Point2D>> defaultContactPoints) throws Exception
    {
@@ -167,17 +170,19 @@ public class FootstepPlannerUI
          mainPane.getChildren().remove(mainPane.getLeft());
       }
 
-      footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
       visibilityGraphsParametersUIController.setVisbilityGraphsParameters(visibilityGraphsParameters);
-      footstepPostProcessingParametersUIController.setPostProcessingParameters(footstepPostProcessingParameters);
+      footstepPlannerParametersUIController.setPlannerParameters(plannerParameters);
+      swingPlannerParametersUIController.setParameters(swingPlannerParameters);
+      splitFractionParametersUIController.setParameters(splitFractionCalculatorParameters);
 
       mainTabController.attachMessager(messager);
       footstepPlannerStatusBarController.attachMessager(messager);
       footstepPlannerTestDashboardController.attachMessager(messager);
       footstepPlannerMenuUIController.attachMessager(messager);
-      footstepPlannerParametersUIController.attachMessager(messager);
       visibilityGraphsParametersUIController.attachMessager(messager);
-      footstepPostProcessingParametersUIController.attachMessager(messager);
+      footstepPlannerParametersUIController.attachMessager(messager);
+      swingPlannerParametersUIController.attachMessager(messager);
+      splitFractionParametersUIController.attachMessager(messager);
       footstepPlannerLogVisualizerController.attachMessager(messager);
       visibilityGraphsUIController.attachMessager(messager);
       uiRobotController.attachMessager(messager);
@@ -189,8 +194,9 @@ public class FootstepPlannerUI
       footstepPlannerTestDashboardController.bindControls();
       footstepPlannerParametersUIController.bindControls();
       visibilityGraphsParametersUIController.bindControls();
-      footstepPostProcessingParametersUIController.bindControls();
       footstepPlannerLogVisualizerController.bindControls();
+      swingPlannerParametersUIController.bindControls();
+      splitFractionParametersUIController.bindControls();
       visibilityGraphsUIController.bindControls();
 
       View3DFactory view3dFactory = View3DFactory.createSubscene();
@@ -221,6 +227,7 @@ public class FootstepPlannerUI
       this.footstepPlannerLogRenderer = new FootstepPlannerLogRenderer(defaultContactPoints, messager);
       new UIFootstepPlanManager(messager);
       this.manualFootstepAdjustmentListener = new ManualFootstepAdjustmentListener(messager, view3dFactory.getSubScene());
+      this.uiRobotController.setAuxiliaryRobotData(auxiliaryRobotData);
 
       startGoalPositionViewer.setShowStartGoalTopics(ShowStart, ShowGoal, ShowGoal);
 
@@ -291,9 +298,9 @@ public class FootstepPlannerUI
       new FootPoseFromMidFootUpdater(messager).start();
       new FootstepCompletionListener(messager).start();
 
-      if (defaultJointSetpoints != null)
+      if (auxiliaryRobotData != null)
       {
-         setupDataSetLoadBingings(defaultJointSetpoints, rootJointToMidFootOffset);
+         setupDataSetLoadBingings(auxiliaryRobotData);
       }
 
       mainPane.setCenter(subScene);
@@ -307,7 +314,7 @@ public class FootstepPlannerUI
       primaryStage.setOnCloseRequest(event -> stop());
    }
 
-   private void setupDataSetLoadBingings(ToDoubleFunction<String> defaultJointSetpoints, Tuple3DReadOnly rootJointToMidFootOffset)
+   private void setupDataSetLoadBingings(UIAuxiliaryRobotData auxiliaryRobotData)
    {
       Consumer<DataSetName> dataSetLoader = dataSetName ->
       {
@@ -319,8 +326,8 @@ public class FootstepPlannerUI
          {
             robotRootJoint.getTranslation().set(dataSet.getPlannerInput().getStartPosition());
             robotRootJoint.getRotation().setYawPitchRoll(dataSet.getPlannerInput().getStartYaw(), 0.0, 0.0);
-            robotRootJoint.getTranslation().sub(rootJointToMidFootOffset);
-            robotVisualizer.submitNewConfiguration(robotRootJoint, defaultJointSetpoints);
+            robotRootJoint.getTranslation().sub(auxiliaryRobotData.getRootJointToMidFootOffset());
+            robotVisualizer.submitNewConfiguration(robotRootJoint, auxiliaryRobotData.getDefaultJointAngleMap());
 
             messager.submitMessage(GoalMidFootPosition, dataSet.getPlannerInput().getGoalPosition());
             messager.submitMessage(GoalMidFootOrientation, new Quaternion(dataSet.getPlannerInput().getGoalYaw(), 0.0, 0.0));
@@ -388,7 +395,8 @@ public class FootstepPlannerUI
       footstepPlannerLogVisualizerController.onPrimaryStageLoaded();
       footstepPlannerParametersUIController.onPrimaryStageLoaded();
       visibilityGraphsParametersUIController.onPrimaryStageLoaded();
-      footstepPostProcessingParametersUIController.onPrimaryStageLoaded();
+      swingPlannerParametersUIController.onPrimaryStageLoaded();
+      splitFractionParametersUIController.onPrimaryStageLoaded();
    }
 
    public void stop()
@@ -427,15 +435,15 @@ public class FootstepPlannerUI
 
    public static FootstepPlannerUI createMessagerUI(Stage primaryStage,
                                                     JavaFXMessager messager,
-                                                    FootstepPlannerParametersBasics plannerParameters,
                                                     VisibilityGraphsParametersBasics visibilityGraphsParameters,
-                                                    FootstepPostProcessingParametersBasics postProcessingParameters,
+                                                    FootstepPlannerParametersBasics plannerParameters,
+                                                    SwingPlannerParametersBasics swingPlannerParameters,
+                                                    SplitFractionCalculatorParametersBasics splitFractionCalculatorParameters,
                                                     FullHumanoidRobotModelFactory fullHumanoidRobotModelFactory,
                                                     FullHumanoidRobotModelFactory previewModelFactory,
                                                     RobotContactPointParameters<RobotSide> contactPointParameters,
                                                     WalkingControllerParameters walkingControllerParameters,
-                                                    ToDoubleFunction<String> defaultJointSetpoints,
-                                                    Tuple3DReadOnly rootJointToMidFootOffset) throws Exception
+                                                    UIAuxiliaryRobotData auxiliaryRobotData) throws Exception
    {
       SideDependentList<List<Point2D>> defaultContactPoints = new SideDependentList<>();
       for (RobotSide side : RobotSide.values)
@@ -445,14 +453,14 @@ public class FootstepPlannerUI
 
       return new FootstepPlannerUI(primaryStage,
                                    messager,
-                                   plannerParameters,
                                    visibilityGraphsParameters,
-                                   postProcessingParameters,
+                                   plannerParameters,
+                                   swingPlannerParameters,
+                                   splitFractionCalculatorParameters,
                                    fullHumanoidRobotModelFactory,
                                    previewModelFactory,
                                    walkingControllerParameters,
-                                   defaultJointSetpoints,
-                                   rootJointToMidFootOffset,
+                                   auxiliaryRobotData,
                                    false,
                                    defaultContactPoints);
    }

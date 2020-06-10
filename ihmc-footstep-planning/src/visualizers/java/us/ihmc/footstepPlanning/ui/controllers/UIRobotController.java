@@ -8,15 +8,19 @@ import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Spinner;
 import javafx.scene.control.SpinnerValueFactory.DoubleSpinnerValueFactory;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.controllerAPI.RobotLowLevelMessenger;
 import us.ihmc.footstepPlanning.communication.FootstepPlannerMessagerAPI;
+import us.ihmc.footstepPlanning.ui.UIAuxiliaryRobotData;
 import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class UIRobotController
 {
    private JavaFXMessager messager;
    private RobotLowLevelMessenger robotLowLevelMessenger;
+   private UIAuxiliaryRobotData auxiliaryRobotData;
 
    @FXML
    private Button homeAll;
@@ -121,6 +125,24 @@ public class UIRobotController
       reaStateRequestPublisher.publish(clearMessage);
    }
 
+   @FXML
+   public void sendLeftArmIn()
+   {
+      if (auxiliaryRobotData != null)
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.RequestedArmJointAngles, Pair.of(RobotSide.LEFT, auxiliaryRobotData.getArmsInJointAngles().get(RobotSide.LEFT)));
+      }
+   }
+
+   @FXML
+   public void sendRightArmIn()
+   {
+      if (auxiliaryRobotData != null)
+      {
+         messager.submitMessage(FootstepPlannerMessagerAPI.RequestedArmJointAngles, Pair.of(RobotSide.RIGHT, auxiliaryRobotData.getArmsInJointAngles().get(RobotSide.RIGHT)));
+      }
+   }
+
    public void attachMessager(JavaFXMessager messager)
    {
       this.messager = messager;
@@ -136,5 +158,11 @@ public class UIRobotController
    public void setREAStateRequestPublisher(IHMCRealtimeROS2Publisher<REAStateRequestMessage> reaStateRequestPublisher)
    {
       this.reaStateRequestPublisher = reaStateRequestPublisher;
+   }
+
+
+   public void setAuxiliaryRobotData(UIAuxiliaryRobotData auxiliaryRobotData)
+   {
+      this.auxiliaryRobotData = auxiliaryRobotData;
    }
 }

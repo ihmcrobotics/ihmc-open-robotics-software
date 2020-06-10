@@ -34,8 +34,10 @@ import java.util.Optional;
 public class FootstepPlannerLogLoader
 {
    private final JSONSerializer<FootstepPlanningRequestPacket> requestPacketSerializer = new JSONSerializer<>(new FootstepPlanningRequestPacketPubSubType());
-   private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersSerializer  = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
    private final JSONSerializer<VisibilityGraphsParametersPacket> bodyPathParametersSerializer = new JSONSerializer<>(new VisibilityGraphsParametersPacketPubSubType());
+   private final JSONSerializer<FootstepPlannerParametersPacket> footstepParametersSerializer  = new JSONSerializer<>(new FootstepPlannerParametersPacketPubSubType());
+   private final JSONSerializer<SwingPlannerParametersPacket> swingParametersSerializer  = new JSONSerializer<>(new SwingPlannerParametersPacketPubSubType());
+   private final JSONSerializer<SplitFractionCalculatorParametersPacket> splitFractionParametersPacketSerializer  = new JSONSerializer<>(new SplitFractionCalculatorParametersPacketPubSubType());
    private final JSONSerializer<FootstepPlanningToolboxOutputStatus> statusPacketSerializer = new JSONSerializer<>(new FootstepPlanningToolboxOutputStatusPubSubType());
 
    private FootstepPlannerLog log = null;
@@ -78,6 +80,13 @@ public class FootstepPlannerLogLoader
          log.getRequestPacket().set(requestPacketSerializer.deserialize(jsonNode.toString()));
          requestPacketInputStream.close();
 
+         // load body path parameters packet
+         File bodyPathParametersFile = new File(logDirectory, FootstepPlannerLogger.bodyPathParametersFileName);
+         InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
+         jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
+         log.getBodyPathParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
+         bodyPathParametersPacketInputStream.close();
+
          // load footstep parameters packet
          File footstepParametersFile = new File(logDirectory, FootstepPlannerLogger.footstepParametersFileName);
          InputStream footstepParametersPacketInputStream = new FileInputStream(footstepParametersFile);
@@ -85,12 +94,19 @@ public class FootstepPlannerLogLoader
          log.getFootstepParametersPacket().set(footstepParametersSerializer.deserialize(jsonNode.toString()));
          footstepParametersPacketInputStream.close();
 
-         // load footstep parameters packet
-         File bodyPathParametersFile = new File(logDirectory, FootstepPlannerLogger.bodyPathParametersFileName);
-         InputStream bodyPathParametersPacketInputStream = new FileInputStream(bodyPathParametersFile);
-         jsonNode = objectMapper.readTree(bodyPathParametersPacketInputStream);
-         log.getBodyPathParametersPacket().set(bodyPathParametersSerializer.deserialize(jsonNode.toString()));
-         bodyPathParametersPacketInputStream.close();
+         // load swing parameters packet
+         File swingParametersFile = new File(logDirectory, FootstepPlannerLogger.swingParametersFileName);
+         InputStream swingParametersPacketInputStream = new FileInputStream(swingParametersFile);
+         jsonNode = objectMapper.readTree(swingParametersPacketInputStream);
+         log.getSwingPlannerParametersPacket().set(swingParametersSerializer.deserialize(jsonNode.toString()));
+         swingParametersPacketInputStream.close();
+
+         // load split fraction parameters packet
+         File splitFractionParametersFile = new File(logDirectory, FootstepPlannerLogger.splitFractionParametersFileName);
+         InputStream splitFractionParametersInputStream = new FileInputStream(splitFractionParametersFile);
+         jsonNode = objectMapper.readTree(splitFractionParametersInputStream);
+         log.getSplitFractionParametersPacket().set(splitFractionParametersPacketSerializer.deserialize(jsonNode.toString()));
+         splitFractionParametersInputStream.close();
 
          // load status packet
          File statusFile = new File(logDirectory, FootstepPlannerLogger.statusPacketFileName);

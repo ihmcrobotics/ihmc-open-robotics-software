@@ -9,7 +9,6 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.pathPlanning.DataSet;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.DataSetName;
@@ -193,7 +192,7 @@ public class FootstepPlanningModuleTest
       int planSize = plannerOutput.getFootstepPlan().getNumberOfSteps();
       for (int i = 0; i < 2; i++)
       {
-         Footstep footstep = plannerOutput.getFootstepPlan().getFootstep(planSize - 1 - i);
+         PlannedFootstep footstep = plannerOutput.getFootstepPlan().getFootstep(planSize - 1 - i);
          RobotSide robotSide = footstep.getRobotSide();
          boolean stepWasntAdjusted = footstep.getFootstepPose().epsilonEquals(request.getGoalFootPoses().get(robotSide), 1e-10);
          Assertions.assertTrue(stepWasntAdjusted);
