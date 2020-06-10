@@ -304,53 +304,70 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
          snapData.getCroppedFoothold().set(croppedFootPolygon);
       }
 
-      if (parameters.getDistanceEpsilonToBridgeRegions() > 0.0 && !croppedFootPolygon.isEmpty() && croppedFootPolygon.getArea() / footPolygonsInSoleFrame.get(footstepNode.getRobotSide()).getArea() < 0.99)
+      checkForNearbyContact(footstepNode, snapData, snappedPolygonInWorld, croppedFootPolygon);
+   }
+
+   private void checkForNearbyContact(FootstepNode footstepNode,
+                                      FootstepNodeSnapData snapData,
+                                      ConvexPolygon2D snappedPolygonInWorld,
+                                      ConvexPolygon2D croppedFootPolygon)
+   {
+      boolean checkForNearbyContact = parameters.getDistanceEpsilonToBridgeRegions() > 0.0;
+      if (!checkForNearbyContact)
       {
-         for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+         return;
+      }
+
+      boolean fullFoothold = croppedFootPolygon.isEmpty() || croppedFootPolygon.getArea() / footPolygonsInSoleFrame.get(footstepNode.getRobotSide()).getArea() > 0.99;
+      if (fullFoothold)
+      {
+         return;
+      }
+
+      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      {
+         PlanarRegion candidateRegion = planarRegionsList.getPlanarRegion(i);
+
+         if (candidateRegion.epsilonEquals(planarRegionToPack, 1e-3))
          {
-            PlanarRegion candidateRegion = planarRegionsList.getPlanarRegion(i);
+            continue;
+         }
 
-            if (candidateRegion.epsilonEquals(planarRegionToPack, 1e-3))
+         if (candidateRegion.isVertical())
+         {
+            continue;
+         }
+
+         if (candidateRegion.isPolygonIntersecting(snappedPolygonInWorld))
+         {
+            boolean appendToFoothold = true;
+            for (int j = 0; j < snappedPolygonInWorld.getNumberOfVertices(); j++)
             {
-               continue;
+               FootstepNodeSnappingTools.transformPolygonVertex(snappedPolygonInWorld.getVertex(j), polygonVertexToTransform, tempTransform);
+               double snappedVertexZ = polygonVertexToTransform.getZ();
+               double planeZ = candidateRegion.getPlaneZGivenXY(polygonVertexToTransform.getX(), polygonVertexToTransform.getY());
+
+               if (Math.abs(snappedVertexZ - planeZ) > parameters.getDistanceEpsilonToBridgeRegions())
+               {
+                  appendToFoothold = false;
+                  break;
+               }
             }
 
-            if (candidateRegion.isVertical())
+            if (appendToFoothold)
             {
-               continue;
-            }
+               polygonIntersections.clear();
+               candidateRegion.getPolygonIntersectionsWhenProjectedVertically(snappedPolygonInWorld, polygonIntersections);
 
-            if (candidateRegion.isPolygonIntersecting(snappedPolygonInWorld))
-            {
-               boolean appendToFoothold = true;
-               for (int j = 0; j < snappedPolygonInWorld.getNumberOfVertices(); j++)
+               for (int j = 0; j < polygonIntersections.size(); j++)
                {
-                  FootstepNodeSnappingTools.transformPolygonVertex(snappedPolygonInWorld.getVertex(j), polygonVertexToTransform, tempTransform);
-                  double snappedVertexZ = polygonVertexToTransform.getZ();
-                  double planeZ = candidateRegion.getPlaneZGivenXY(polygonVertexToTransform.getX(), polygonVertexToTransform.getY());
-
-                  if (Math.abs(snappedVertexZ - planeZ) > parameters.getDistanceEpsilonToBridgeRegions())
-                  {
-                     appendToFoothold = false;
-                     break;
-                  }
+                  ConvexPolygon2D polygonIntersection = polygonIntersections.get(j);
+                  FootstepNodeSnappingTools.changeFromPlanarRegionToSoleFrame(candidateRegion, footstepNode, tempTransform, polygonIntersection);
+                  croppedFootPolygon.addVertices(polygonIntersection);
                }
 
-               if (appendToFoothold)
-               {
-                  polygonIntersections.clear();
-                  candidateRegion.getPolygonIntersectionsWhenProjectedVertically(snappedPolygonInWorld, polygonIntersections);
-
-                  for (int j = 0; j < polygonIntersections.size(); j++)
-                  {
-                     ConvexPolygon2D polygonIntersection = polygonIntersections.get(j);
-                     FootstepNodeSnappingTools.changeFromPlanarRegionToSoleFrame(candidateRegion, footstepNode, tempTransform, polygonIntersection);
-                     croppedFootPolygon.addVertices(polygonIntersection);
-                  }
-
-                  croppedFootPolygon.update();
-                  snapData.getCroppedFoothold().set(croppedFootPolygon);
-               }
+               croppedFootPolygon.update();
+               snapData.getCroppedFoothold().set(croppedFootPolygon);
             }
          }
       }
