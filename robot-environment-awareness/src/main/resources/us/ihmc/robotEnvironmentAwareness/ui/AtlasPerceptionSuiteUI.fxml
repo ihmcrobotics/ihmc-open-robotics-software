@@ -7,6 +7,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 
+<?import javafx.scene.control.ToggleButton?>
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <GridPane alignment="CENTER" layoutX="3.0" layoutY="208.0" prefHeight="192.0" prefWidth="589.0">
@@ -25,15 +26,15 @@
             <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Button mnemonicParsing="false" prefHeight="42.0" prefWidth="150.0" text="Run Module" GridPane.columnIndex="2" GridPane.rowIndex="2" />
-            <Button mnemonicParsing="false" prefHeight="55.0" prefWidth="164.0" text="Run UI" GridPane.columnIndex="3" GridPane.rowIndex="2" />
-            <Button mnemonicParsing="false" prefHeight="71.0" prefWidth="195.0" text="Run Module" GridPane.rowIndex="2" />
-            <Button alignment="CENTER" mnemonicParsing="false" prefHeight="64.0" prefWidth="182.0" text="Run UI" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+            <ToggleButton fx:id="runLidarREAModule" mnemonicParsing="false" prefHeight="42.0" prefWidth="150.0" text="Run Module" GridPane.columnIndex="2" GridPane.rowIndex="2" />
+            <ToggleButton fx:id="runLidarREAUI" mnemonicParsing="false" prefHeight="55.0" prefWidth="164.0" text="Run UI" GridPane.columnIndex="3" GridPane.rowIndex="2" />
+            <ToggleButton fx:id="runSlamModule" mnemonicParsing="false" prefHeight="71.0" prefWidth="195.0" text="Run Module" GridPane.rowIndex="2" />
+            <ToggleButton fx:id="runSlamUI" alignment="CENTER" mnemonicParsing="false" prefHeight="64.0" prefWidth="182.0" text="Run UI" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="2" />
             <Label text="LIDAR REA" GridPane.columnSpan="2" GridPane.rowIndex="3" />
             <Label text="RealSense SLAM" GridPane.columnSpan="2" GridPane.rowIndex="1" />
             <Label text="Map Segmentation" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="1" />
-            <Button mnemonicParsing="false" prefHeight="70.0" prefWidth="198.0" text="Run Module" GridPane.rowIndex="4" />
-            <Button alignment="CENTER" mnemonicParsing="false" prefHeight="81.0" prefWidth="209.0" text="Run UI" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+            <ToggleButton fx:id="runMapSegmentationModule" mnemonicParsing="false" prefHeight="70.0" prefWidth="198.0" text="Run Module" GridPane.rowIndex="4" />
+            <ToggleButton fx:id="runMapSegmentationUI" alignment="CENTER" mnemonicParsing="false" prefHeight="81.0" prefWidth="209.0" text="Run UI" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="4" />
          </children>
       </GridPane>
    </children>

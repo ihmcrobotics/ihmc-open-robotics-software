@@ -1,14 +1,17 @@
 package us.ihmc.atlas.sensors;
 
+import javafx.stage.Stage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotEnvironmentAwareness.communication.PerceptionSuiteAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.*;
+import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 import us.ihmc.ros2.Ros2Node;
@@ -96,8 +99,8 @@ public class AtlasPerceptionSuite
    public void stop()
    {
       stopRealSenseSLAM();
-      lidarREAModule.stop();
-      segmentationModule.stop();
+      stopLidarREA();
+      stopMapSegmentation();
 
       ros2Node.destroy();
    }
@@ -178,5 +181,12 @@ public class AtlasPerceptionSuite
       messager.submitMessage(PerceptionSuiteAPI.RunMapSegmentationUI, false);
    }
 
+   public static AtlasPerceptionSuite createIntraprocess() throws Exception
+   {
+      Messager moduleMessager = KryoMessager.createIntraprocess(PerceptionSuiteAPI.API,
+                                                                NetworkPorts.SLAM_MODULE_UI_PORT,
+                                                                REACommunicationProperties.getPrivateNetClassList());
+      return new AtlasPerceptionSuite(moduleMessager);
+   }
 
 }
