@@ -63,6 +63,7 @@ public class SLAMModule
    private ScheduledFuture<?> scheduledMain;
    private ScheduledFuture<?> scheduledSLAM;
 
+   private final boolean manageRosNode;
    protected final Ros2Node ros2Node;
 
    private final List<OcTreeConsumer> ocTreeConsumers = new ArrayList<>();
@@ -74,13 +75,19 @@ public class SLAMModule
 
    public SLAMModule(Messager messager, File configurationFile)
    {
-      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), messager, configurationFile);
+      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), messager, configurationFile, true);
    }
 
    public SLAMModule(Ros2Node ros2Node, Messager messager, File configurationFile)
    {
+      this(ros2Node, messager, configurationFile, false);
+   }
+
+   public SLAMModule(Ros2Node ros2Node, Messager messager, File configurationFile, boolean manageRosNode)
+   {
       this.ros2Node = ros2Node;
       this.reaMessager = messager;
+      this.manageRosNode = manageRosNode;
 
       // TODO: Check name space and fix. Suspected atlas sensor suite and publisher.
       ROS2Tools.createCallbackSubscription(ros2Node, StereoVisionPointCloudMessage.class, "/ihmc/stereo_vision_point_cloud", this::handlePointCloud);
@@ -159,6 +166,9 @@ public class SLAMModule
          scheduledMain.cancel(true);
          scheduledMain = null;
       }
+
+      if (manageRosNode)
+         ros2Node.destroy();
 
       if (scheduledSLAM != null)
       {

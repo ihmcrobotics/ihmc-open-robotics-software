@@ -59,6 +59,7 @@ public class LIDARBasedREAModule
 
    protected static final boolean DEBUG = true;
 
+   private final boolean manageRosNode;
    private final Ros2Node ros2Node;
 
    private final AtomicReference<Double> octreeResolution;
@@ -83,13 +84,19 @@ public class LIDARBasedREAModule
 
    private LIDARBasedREAModule(Messager reaMessager, File configurationFile)
    {
-      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), reaMessager, configurationFile);
+      this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), reaMessager, configurationFile, true);
    }
 
    private LIDARBasedREAModule(Ros2Node ros2Node, Messager reaMessager, File configurationFile)
    {
+      this(ros2Node, reaMessager, configurationFile, false);
+   }
+
+   private LIDARBasedREAModule(Ros2Node ros2Node, Messager reaMessager, File configurationFile, boolean manageRosNode)
+   {
       this.reaMessager = reaMessager;
       this.ros2Node = ros2Node;
+      this.manageRosNode = manageRosNode;
 
       moduleStateReporter = new REAModuleStateReporter(reaMessager);
       lidarBufferUpdater = new REAOcTreeBuffer(DEFAULT_OCTREE_RESOLUTION,
@@ -358,7 +365,8 @@ public class LIDARBasedREAModule
       {
          e.printStackTrace();
       }
-      ros2Node.destroy();
+      if (manageRosNode)
+         ros2Node.destroy();
 
       if (scheduled != null)
       {
@@ -381,8 +389,21 @@ public class LIDARBasedREAModule
 
    public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath) throws Exception
    {
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
-      return createIntraprocessModule(configurationFilePath, ros2Node);
+      KryoMessager messager = createKryoMessager();
+
+      File configurationFile = new File(configurationFilePath);
+      try
+      {
+         configurationFile.getParentFile().mkdirs();
+         configurationFile.createNewFile();
+      }
+      catch (IOException e)
+      {
+         System.out.println(configurationFile.getAbsolutePath());
+         e.printStackTrace();
+      }
+
+      return new LIDARBasedREAModule(messager, configurationFile);
    }
 
    public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath, Ros2Node ros2Node) throws Exception
