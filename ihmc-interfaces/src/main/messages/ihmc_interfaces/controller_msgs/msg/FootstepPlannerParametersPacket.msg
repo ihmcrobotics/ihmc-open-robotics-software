@@ -396,3 +396,6 @@ float64 shin_pitch -11.1
 
 # Height offset of shin collidable cylinder
 float64 shin_height_offet -11.1
+
+# Distance epsilon below snapped footstep that will be added to foothold
+float64 distance_epsilon_to_bridge_regions -11.1
