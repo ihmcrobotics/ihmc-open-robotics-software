@@ -9,7 +9,6 @@ import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
@@ -224,14 +223,14 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
          FootstepNodeSnapData stanceNodeSnapData = snapDataHolder.get(stanceNode);
 
          // check for overlap
-         boolean overlapDetected = doStepsOverlap(footstepNode, snapData, stanceNode, stanceNodeSnapData);
+         boolean overlapDetected = stepsAreTooClose(footstepNode, snapData, stanceNode, stanceNodeSnapData);
          if (overlapDetected)
          {
             snapData.getWiggleTransformInWorld().setIdentity();
          }
 
          // check for overlap after this steps wiggle is removed. if still overlapping, remove wiggle on stance step
-         overlapDetected = doStepsOverlap(footstepNode, snapData, stanceNode, stanceNodeSnapData);
+         overlapDetected = stepsAreTooClose(footstepNode, snapData, stanceNode, stanceNodeSnapData);
          if (overlapDetected)
          {
             stanceNodeSnapData.getWiggleTransformInWorld().setIdentity();
@@ -253,7 +252,7 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
    private final ConvexPolygon2D polyon2 = new ConvexPolygon2D();
 
    /** Extracted to method for testing purposes */
-   protected boolean doStepsOverlap(FootstepNode node1, FootstepNodeSnapData snapData1, FootstepNode node2, FootstepNodeSnapData snapData2)
+   protected boolean stepsAreTooClose(FootstepNode node1, FootstepNodeSnapData snapData1, FootstepNode node2, FootstepNodeSnapData snapData2)
    {
       FootstepNodeTools.getFootPolygon(node1, footPolygonsInSoleFrame.get(node1.getRobotSide()), polyon1);
       FootstepNodeTools.getFootPolygon(node2, footPolygonsInSoleFrame.get(node2.getRobotSide()), polyon2);
@@ -264,18 +263,14 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       polyon1.applyTransform(transform1, false);
       polyon2.applyTransform(transform2, false);
 
-      for (int i = 0; i < polyon1.getNumberOfVertices(); i++)
+      boolean intersection = FootstepNodeTools.arePolygonsIntersecting(polyon1, polyon2);
+      if (intersection)
       {
-         if (polyon2.signedDistance(polyon1.getVertex(i)) <= 0.0)
-            return true;
-      }
-      for (int i = 0; i < polyon2.getNumberOfVertices(); i++)
-      {
-         if (polyon1.signedDistance(polyon2.getVertex(i)) <= 0.0)
-            return true;
+         return true;
       }
 
-      return false;
+      double distance = FootstepNodeTools.distanceBetweenPolygons(polyon1, polyon2);
+      return distance < parameters.getMinClearanceFromStance();
    }
 
    protected void computeCroppedFoothold(FootstepNode footstepNode, FootstepNodeSnapData snapData)
