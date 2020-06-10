@@ -45,8 +45,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  minimumDistanceFromCliffBottoms              = keys.addDoubleKey ("Min distance from cliff bottoms", 0.0);
    public static final DoubleStoredPropertyKey  cliffTopHeightToAvoid                        = keys.addDoubleKey ("Cliff top height to avoid", Double.MAX_VALUE);
    public static final DoubleStoredPropertyKey  minimumDistanceFromCliffTops                 = keys.addDoubleKey ("Min distance from cliff tops", 0.0);
-   public static final DoubleStoredPropertyKey  minXClearanceFromStance                      = keys.addDoubleKey ("Min X clearance from stance", 0.0);
-   public static final DoubleStoredPropertyKey  minYClearanceFromStance                      = keys.addDoubleKey ("Min Y clearance from stance", 0.0);
+   public static final DoubleStoredPropertyKey minClearanceFromStance                        = keys.addDoubleKey ("Min clearance from stance", 0.0);
    public static final DoubleStoredPropertyKey  bodyBoxWidth                                 = keys.addDoubleKey ("Body box width", 0.7);
    public static final DoubleStoredPropertyKey  bodyBoxHeight                                = keys.addDoubleKey ("Body box height", 1.5);
    public static final DoubleStoredPropertyKey  bodyBoxDepth                                 = keys.addDoubleKey ("Body box depth", 0.3);
