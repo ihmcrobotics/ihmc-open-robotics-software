@@ -66,7 +66,7 @@ mainDependencies {
 testDependencies {
    api("com.thoughtworks.xstream:xstream:1.4.7")
 
-   api("us.ihmc:ihmc-commons-testing:0.29.0")
+   api("us.ihmc:ihmc-commons-testing:0.30.0")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-common-walking-control-modules-test:source")
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
