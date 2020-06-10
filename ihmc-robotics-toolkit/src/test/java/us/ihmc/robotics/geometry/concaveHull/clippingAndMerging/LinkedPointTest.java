@@ -1,7 +1,7 @@
 package us.ihmc.robotics.geometry.concaveHull.clippingAndMerging;
 
 import org.junit.jupiter.api.Test;
-import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.LinkedPoint;
+import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.ConcavePolygon2DClippingTools.LinkedPoint;
 
 import static us.ihmc.robotics.Assert.assertTrue;
 

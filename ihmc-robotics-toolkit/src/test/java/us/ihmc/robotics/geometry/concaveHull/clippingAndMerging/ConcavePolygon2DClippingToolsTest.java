@@ -5,8 +5,8 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.ConcavePolygon2DClippingTools;
-import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.LinkedPoint;
-import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.LinkedPointList;
+import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.ConcavePolygon2DClippingTools.LinkedPoint;
+import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.ConcavePolygon2DClippingTools.LinkedPointList;
 
 import static us.ihmc.robotics.Assert.*;
 
