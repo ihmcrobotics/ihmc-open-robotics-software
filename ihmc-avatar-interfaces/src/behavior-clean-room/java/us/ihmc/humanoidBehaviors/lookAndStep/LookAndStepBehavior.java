@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.lookAndStep;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
@@ -12,7 +13,6 @@ import us.ihmc.humanoidBehaviors.lookAndStep.parts.LookAndStepReviewPart;
 import us.ihmc.humanoidBehaviors.lookAndStep.parts.LookAndStepRobotMotionModule;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
-import us.ihmc.humanoidBehaviors.tools.interfaces.RobotWalkRequest;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -91,10 +91,10 @@ public class LookAndStepBehavior implements BehaviorInterface
          updateState(State.FOOTSTEP_PLANNING);
          footstepPlanningModule.acceptBodyPathPlan(bodyPathPlan);
       });
-      LookAndStepReviewPart<RobotWalkRequest> footstepPlanReview = new LookAndStepReviewPart<>("footstep plan", approvalNotification, robotWalkRequest ->
+      LookAndStepReviewPart<FootstepPlan> footstepPlanReview = new LookAndStepReviewPart<>("footstep plan", approvalNotification, footstepPlan ->
       {
          updateState(LookAndStepBehavior.State.SWINGING);
-         robotMotionModule.acceptRobotWalkRequest(robotWalkRequest);
+         robotMotionModule.acceptFootstepPlan(footstepPlan);
       });
 
       bodyPathModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
@@ -124,7 +124,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlanningModule.setLastSteppedSolePoseConsumer(lastSteppedSolePoses::put);
       footstepPlanningModule.setOperatorReviewEnabledSupplier(operatorReviewEnabledInput::get);
       footstepPlanningModule.setReviewPlanOutput(footstepPlanReview::review);
-      footstepPlanningModule.setAutonomousOutput(robotMotionModule::acceptRobotWalkRequest);
+      footstepPlanningModule.setAutonomousOutput(robotMotionModule::acceptFootstepPlan);
       footstepPlanningModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
       footstepPlanningModule.setFootstepPlanningModule(helper.getOrCreateFootstepPlanner());
       footstepPlanningModule.setBehaviorStateSupplier(behaviorState::get);

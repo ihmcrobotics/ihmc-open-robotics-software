@@ -17,6 +17,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOnly;
@@ -25,9 +26,7 @@ import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
 import us.ihmc.humanoidBehaviors.tools.interfaces.RobotWalkRequester;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
@@ -42,7 +41,6 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
 
    private final Field<FootstepPlan> footstepPlan = requiredChanging();
    private final Field<HumanoidRobotState> robotState = requiredChanging();
-   private final Field<PlanarRegionsList> planarRegions = requiredChanging();
    private final Field<LookAndStepBehavior.State> behaviorState = requiredChanging();
 
    private boolean evaluateEntry()
@@ -76,7 +74,7 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
       FootstepPlan shortenedFootstepPlan = new FootstepPlan();
       if (footstepPlan.get().getNumberOfSteps() > 0)
       {
-         Footstep footstepToTake = footstepPlan.get().getFootstep(0);
+         PlannedFootstep footstepToTake = footstepPlan.get().getFootstep(0);
          shortenedFootstepPlan.addFootstep(footstepToTake);
          lastSteppedSolePoseConsumer.get().accept(footstepToTake.getRobotSide(), new FramePose3D(footstepToTake.getFootstepPose()));
       }
@@ -91,9 +89,7 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(shortenedFootstepPlan,
                                                                                                                     swingTime,
                                                                                                                     transferTime);
-      TypedNotification<WalkingStatusMessage> walkingStatusNotification = robotWalkRequester.get().requestWalk(footstepDataListMessage,
-                                                                                                               robotState.get(),
-                                                                                                               planarRegions.get());
+      TypedNotification<WalkingStatusMessage> walkingStatusNotification = robotWalkRequester.get().requestWalk(footstepDataListMessage);
 
       uiPublisher.get()
                  .publishToUI(FootstepPlanForUI,
@@ -169,11 +165,6 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
    protected void setRobotState(HumanoidRobotState robotState)
    {
       this.robotState.set(robotState);
-   }
-
-   protected void setPlanarRegions(PlanarRegionsList planarRegions)
-   {
-      this.planarRegions.set(planarRegions);
    }
 
    public void setReplanFootstepsOutput(Runnable replanFootstepsOutput)

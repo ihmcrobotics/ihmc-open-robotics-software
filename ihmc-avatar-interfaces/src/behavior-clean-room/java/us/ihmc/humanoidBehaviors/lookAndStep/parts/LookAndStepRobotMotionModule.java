@@ -1,10 +1,10 @@
 package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
+import us.ihmc.footstepPlanning.FootstepPlan;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.humanoidBehaviors.lookAndStep.TypedInput;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
-import us.ihmc.humanoidBehaviors.tools.interfaces.RobotWalkRequest;
 
 import java.util.function.Supplier;
 
@@ -13,20 +13,20 @@ public class LookAndStepRobotMotionModule extends LookAndStepRobotMotionTask
    private final Field<Supplier<HumanoidRobotState>> robotStateSupplier = required();
    private Field<Supplier<LookAndStepBehavior.State>> behaviorStateSupplier = required();
 
-   private final TypedInput<RobotWalkRequest> robotWalkRequestInput = new TypedInput<>();
+   private final TypedInput<FootstepPlan> footstepPlanInput = new TypedInput<>();
 
    public LookAndStepRobotMotionModule()
    {
       SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
-      robotWalkRequestInput.addCallback(data -> executor.execute(this::evaluateAndRun));
+      footstepPlanInput.addCallback(data -> executor.execute(this::evaluateAndRun));
    }
 
-   public void acceptRobotWalkRequest(RobotWalkRequest robotWalkRequest)
+   public void acceptFootstepPlan(FootstepPlan footstepPlan)
    {
       // with the gets, maybe we don't need to have validate methods
 
-      robotWalkRequestInput.set(robotWalkRequest); // TODO: There could be data threading error here, might need to queue this data for use in the thread
+      footstepPlanInput.set(footstepPlan); // TODO: There could be data threading error here, might need to queue this data for use in the thread
    }
 
    private void evaluateAndRun()
@@ -34,8 +34,7 @@ public class LookAndStepRobotMotionModule extends LookAndStepRobotMotionTask
       validateNonChanging();
 
       // set changing stuff
-      setFootstepPlan(robotWalkRequestInput.get().getFootstepPlan());
-      setPlanarRegions(robotWalkRequestInput.get().getPlanarRegions());
+      setFootstepPlan(footstepPlanInput.get());
       setRobotState(robotStateSupplier.get().get());
       setBehaviorState(behaviorStateSupplier.get().get());
 
