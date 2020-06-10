@@ -409,14 +409,7 @@ module controller_msgs
          * this parameter.
          */
         @defaultValue(value=-11.1)
-        double min_x_clearance_from_stance;
-        /**
-         * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
-         * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
-         * this parameter.
-         */
-        @defaultValue(value=-11.1)
-        double min_y_clearance_from_stance;
+        double min_clearance_from_stance;
         /**
          * Radius around the goal inside which the planner should start to turn to match the goal's orientation
          */

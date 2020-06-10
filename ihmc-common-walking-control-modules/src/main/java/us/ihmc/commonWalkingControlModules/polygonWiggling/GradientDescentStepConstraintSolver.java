@@ -2,11 +2,11 @@ package us.ihmc.commonWalkingControlModules.polygonWiggling;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.shape.primitives.Cylinder3D;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -15,12 +15,13 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactLineSegment2d;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.graphics.YoGraphicPlanarRegionsList;
 import us.ihmc.simulationconstructionset.util.TickAndUpdatable;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameLineSegment2D;
+import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
 import java.awt.*;
 
@@ -96,40 +97,10 @@ public class GradientDescentStepConstraintSolver
       graphicsListRegistry.registerYoGraphic(getClass().getSimpleName(), yoGraphicPlanarRegionsList);
    }
 
-   /**
-    * Wiggles into concave hull without leg collision check
-    */
-   public RigidBodyTransform wigglePolygon(ConvexPolygon2DReadOnly polygonToWiggle,
-                                           Vertex2DSupplier concavePolygonToWiggleInto,
-                                           WiggleParameters wiggleParameters)
+   public RigidBodyTransform wigglePolygon(GradientDescentStepConstraintInput input)
    {
-      return wigglePolygon(polygonToWiggle, concavePolygonToWiggleInto, wiggleParameters, null, null, null);
-   }
+      input.checkInputs();
 
-   /**
-    * Wiggles into concave hull with leg collision check
-    */
-   public RigidBodyTransform wigglePolygon(ConvexPolygon2DReadOnly polygonToWiggle,
-                                           WiggleParameters wiggleParameters,
-                                           RigidBodyTransformReadOnly footTransformInLocal,
-                                           PlanarRegion regionToStep,
-                                           PlanarRegionsList allRegions)
-   {
-      return wigglePolygon(polygonToWiggle,
-                           Vertex2DSupplier.asVertex2DSupplier(regionToStep.getConcaveHull()),
-                           wiggleParameters,
-                           footTransformInLocal,
-                           regionToStep.getTransformToWorld(),
-                           allRegions);
-   }
-
-   private RigidBodyTransform wigglePolygon(ConvexPolygon2DReadOnly polygonToWiggle,
-                                            Vertex2DSupplier concavePolygonToWiggleInto,
-                                            WiggleParameters wiggleParameters,
-                                            RigidBodyTransformReadOnly footTransformInRegionFrame,
-                                            RigidBodyTransformReadOnly localToWorld,
-                                            PlanarRegionsList planarRegionsList)
-   {
       int iterations = 0;
       accumulatedTransform.setToZero();
       rotationVectors.clear();
@@ -137,11 +108,12 @@ public class GradientDescentStepConstraintSolver
       footPlacementGradient.setToZero();
       legCollisionGradient.setToZero();
 
-      if (footTransformInRegionFrame != null)
+      if (input.containsInputForLegCollisionCheck())
       {
-         transformedSoleToRegionFrame.set(footTransformInRegionFrame);
+         transformedSoleToRegionFrame.set(input.getFootstepInRegionFrame());
       }
 
+      ConvexPolygon2D polygonToWiggle = input.getInitialStepPolygon();
       for (int i = 0; i < polygonToWiggle.getNumberOfVertices(); i++)
       {
          Point2DReadOnly vertex = polygonToWiggle.getVertex(i);
@@ -154,7 +126,7 @@ public class GradientDescentStepConstraintSolver
 
       if (tickAndUpdatable != null)
       {
-         initializeConstraintGraphics(polygonToWiggle, concavePolygonToWiggleInto, planarRegionsList);
+         initializeConstraintGraphics(polygonToWiggle, input.getPolygonToWiggleInto(), input.getPlanarRegionsList());
          tickAndUpdatable.tickAndUpdate();
       }
 
@@ -165,6 +137,7 @@ public class GradientDescentStepConstraintSolver
             break;
          }
 
+         WiggleParameters wiggleParameters = input.getWiggleParameters();
          boolean xTranslationAllowed = MathTools.intervalContains(accumulatedTransform.getX(), wiggleParameters.minX, wiggleParameters.maxX);
          boolean yTranslationAllowed = MathTools.intervalContains(accumulatedTransform.getY(), wiggleParameters.minY, wiggleParameters.maxY);
          boolean rotationAllowed = MathTools.intervalContains(accumulatedTransform.getZ(), wiggleParameters.minYaw, wiggleParameters.maxYaw);
@@ -176,11 +149,14 @@ public class GradientDescentStepConstraintSolver
 
          updateGraphics(polygonToWiggle);
 
-         footPlacementConstraintCalculator.calculateFootAreaGradient(transformedVertices, rotationVectors, concavePolygonToWiggleInto, wiggleParameters,
+         footPlacementConstraintCalculator.calculateFootAreaGradient(transformedVertices, rotationVectors, input.getPolygonToWiggleInto(), wiggleParameters,
                                                                      footPlacementGradient);
-         if (planarRegionsList != null)
+         if (input.containsInputForLegCollisionCheck())
          {
-            legCollisionConstraintCalculator.calculateLegCollisionGradient(transformedSoleToRegionFrame, localToWorld, planarRegionsList, legCollisionGradient);
+            legCollisionConstraintCalculator.calculateLegCollisionGradient(transformedSoleToRegionFrame,
+                                                                           input.getLocalToWorld(),
+                                                                           input.getPlanarRegionsList(),
+                                                                           legCollisionGradient);
          }
 
          if (legCollisionGradient.lengthSquared() > 1e-10)

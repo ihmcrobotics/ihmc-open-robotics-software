@@ -77,7 +77,7 @@ public class AStarFootstepPlanner
 
       this.checker = new FootstepNodeChecker(footstepPlannerParameters, footPolygons, snapper, edgeData);
       this.idealStepCalculator = new IdealStepCalculator(footstepPlannerParameters, checker::isNodeValid, bodyPathPlanHolder);
-      this.expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters, idealStepCalculator::computeIdealStep);
+      this.expansion = new ParameterBasedNodeExpansion(footstepPlannerParameters, idealStepCalculator::computeIdealStep, footPolygons);
 
       this.distanceAndYawHeuristics = new FootstepPlannerHeuristicCalculator(snapper, footstepPlannerParameters, bodyPathPlanHolder, edgeData);
       FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator::computeIdealStep, distanceAndYawHeuristics::compute, footPolygons, edgeData);

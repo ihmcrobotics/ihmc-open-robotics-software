@@ -1,8 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
-import us.ihmc.tools.property.BooleanStoredPropertyKey;
-import us.ihmc.tools.property.DoubleStoredPropertyKey;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -612,19 +610,9 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
     * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
     * this parameter.
     */
-   default double getMinXClearanceFromStance()
+   default double getMinClearanceFromStance()
    {
-      return get(minXClearanceFromStance);
-   }
-
-   /**
-    * Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
-    * Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
-    * this parameter.
-    */
-   default double getMinYClearanceFromStance()
-   {
-      return get(minYClearanceFromStance);
+      return get(minClearanceFromStance);
    }
 
    /**

@@ -122,13 +122,9 @@ public class FootstepPlannerParametersTest
       parameters.setMinimumDistanceFromCliffBottoms(minimumDistanceFromCliff);
       assertEquals(minimumDistanceFromCliff, parameters.getMinimumDistanceFromCliffBottoms(), epsilon);
 
-      double minXClearanceFromStance = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMinXClearanceFromStance(minXClearanceFromStance);
-      assertEquals(minXClearanceFromStance, parameters.getMinXClearanceFromStance(), epsilon);
-
-      double minYClearanceFromStance = RandomNumbers.nextDouble(random, 10.0);
-      parameters.setMinYClearanceFromStance(minYClearanceFromStance);
-      assertEquals(minYClearanceFromStance, parameters.getMinYClearanceFromStance(), epsilon);
+      double minClearanceFromStance = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setMinClearanceFromStance(minClearanceFromStance);
+      assertEquals(minClearanceFromStance, parameters.getMinClearanceFromStance(), epsilon);
 
       double bodyBoxWidth = RandomNumbers.nextDouble(random, 10.0);
       parameters.setBodyBoxWidth(bodyBoxWidth);
