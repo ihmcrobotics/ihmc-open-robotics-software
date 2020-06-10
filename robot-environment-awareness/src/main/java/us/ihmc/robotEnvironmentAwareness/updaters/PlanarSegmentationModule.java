@@ -13,6 +13,7 @@ import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
+import us.ihmc.messager.SharedMemoryMessager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
@@ -59,7 +60,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
    private ScheduledFuture<?> scheduled;
    private final Messager reaMessager;
 
-   private PlanarSegmentationModule(Messager reaMessager, File configurationFile) throws IOException
+   private PlanarSegmentationModule(Messager reaMessager, File configurationFile) throws Exception
    {
       this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
            REACommunicationProperties.inputTopic,
@@ -73,9 +74,14 @@ public class PlanarSegmentationModule implements OcTreeConsumer
                                     ROS2Topic<?> customRegionTopic,
                                     ROS2Topic<?> outputTopic,
                                     Messager reaMessager,
-                                    File configurationFile) throws IOException
+                                    File configurationFile) throws Exception
    {
-     this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), inputTopic, customRegionTopic, outputTopic, reaMessager, configurationFile);
+     this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME),
+          inputTopic,
+          customRegionTopic,
+          outputTopic,
+          reaMessager,
+          configurationFile);
    }
 
    private PlanarSegmentationModule(Ros2Node ros2Node,
@@ -83,10 +89,11 @@ public class PlanarSegmentationModule implements OcTreeConsumer
                                     ROS2Topic<?> customRegionTopic,
                                     ROS2Topic<?> outputTopic,
                                     Messager reaMessager,
-                                    File configurationFile) throws IOException
+                                    File configurationFile) throws Exception
    {
       this.ros2Node = ros2Node;
       this.reaMessager = reaMessager;
+      reaMessager.startMessager();
 
       moduleStateReporter = new SegmentationModuleStateReporter(reaMessager);
 
@@ -213,6 +220,8 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
    public void start()
    {
+      LogTools.info("Planar segmentation is starting.");
+
       if (scheduled == null)
       {
          scheduled = executorService.scheduleAtFixedRate(this::mainUpdate, 0, THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
@@ -221,7 +230,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
    public void stop()
    {
-      LogTools.info("REA Module is going down.");
+      LogTools.info("Planar segmentation is going down.");
 
       try
       {
@@ -248,12 +257,8 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
    public static PlanarSegmentationModule createRemoteModule(String configurationFilePath) throws Exception
    {
-      KryoMessager server = KryoMessager.createTCPServer(SegmentationModuleAPI.API,
-                                                         NetworkPorts.REA_MODULE_UI_PORT,
-                                                         REACommunicationProperties.getPrivateNetClassList());
-      server.setAllowSelfSubmit(true);
-      server.startMessager();
-      return new PlanarSegmentationModule(server, new File(configurationFilePath));
+      Messager messager = new SharedMemoryMessager(SegmentationModuleAPI.API);
+      return new PlanarSegmentationModule(messager, new File(configurationFilePath));
    }
 
    public static PlanarSegmentationModule createIntraprocessModule(ROS2Topic<?> inputTopic,
@@ -261,11 +266,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
                                                                    ROS2Topic<?> outputTopic,
                                                                    String configurationFilePath) throws Exception
    {
-      KryoMessager messager = KryoMessager.createIntraprocess(SegmentationModuleAPI.API,
-                                                              NetworkPorts.REA_MODULE_UI_PORT,
-                                                              REACommunicationProperties.getPrivateNetClassList());
-      messager.setAllowSelfSubmit(true);
-      messager.startMessager();
+      Messager messager = new SharedMemoryMessager(SegmentationModuleAPI.API);
 
       File configurationFile = new File(configurationFilePath);
       try
