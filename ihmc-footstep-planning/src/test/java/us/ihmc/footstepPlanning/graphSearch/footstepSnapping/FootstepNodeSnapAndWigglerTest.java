@@ -18,6 +18,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.Random;
+
 public class FootstepNodeSnapAndWigglerTest
 {
    @Test
