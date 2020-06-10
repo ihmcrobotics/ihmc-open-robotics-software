@@ -17,6 +17,7 @@ import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegion;
 
 /**
@@ -272,7 +273,7 @@ public class PlanarRegionTerrainObjectTest
          boolean regionFacesDown = planarRegion.getNormal().getZ() < 0.0;
          for (Point3D point : insidePoints)
          {
-            Vector3D expectedNormal = planarRegion.getNormal();
+            Vector3D expectedNormal = new Vector3D(planarRegion.getNormal());
 
             if(regionFacesDown)
             {
