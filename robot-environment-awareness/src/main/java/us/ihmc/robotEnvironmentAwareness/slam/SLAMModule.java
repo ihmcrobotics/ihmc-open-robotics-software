@@ -122,7 +122,11 @@ public class SLAMModule
       sendCurrentState();
    }
 
-
+   protected void sendCurrentState()
+   {
+      reaMessager.submitMessage(SLAMModuleAPI.SLAMParameters, ihmcSLAMParameters.get());
+      reaMessager.submitMessage(SLAMModuleAPI.SLAMEnable, enable.get());
+   }
 
    public void attachOcTreeConsumer(OcTreeConsumer ocTreeConsumer)
    {
