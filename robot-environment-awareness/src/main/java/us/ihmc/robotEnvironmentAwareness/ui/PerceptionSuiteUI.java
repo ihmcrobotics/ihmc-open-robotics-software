@@ -54,8 +54,7 @@ public class PerceptionSuiteUI
       messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunMapSegmentationUI, runMapSegmentationUI.selectedProperty());
 
       primaryStage.setTitle(getClass().getSimpleName());
-      primaryStage.setMaximized(true);
-      Scene mainScene = new Scene(mainPane, 600, 400);
+      Scene mainScene = new Scene(mainPane, 594, 200);
 
       primaryStage.setScene(mainScene);
       primaryStage.setOnCloseRequest(event -> stop());

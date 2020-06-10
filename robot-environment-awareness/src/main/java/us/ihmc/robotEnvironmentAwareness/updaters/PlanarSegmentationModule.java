@@ -85,7 +85,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
            REACommunicationProperties.subscriberCustomRegionsTopicName,
            ROS2Tools.REALSENSE_SLAM_MAP,
            reaMessager,
-           configurationFile);
+           configurationFile, false);
    }
 
    private PlanarSegmentationModule(ROS2Topic<?> inputTopic,
@@ -99,7 +99,8 @@ public class PlanarSegmentationModule implements OcTreeConsumer
           customRegionTopic,
           outputTopic,
           reaMessager,
-          configurationFile);
+          configurationFile,
+          true);
    }
 
    private PlanarSegmentationModule(Ros2Node ros2Node,

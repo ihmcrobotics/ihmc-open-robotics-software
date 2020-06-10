@@ -19,10 +19,12 @@ public class AltasPerceptionSuiteLauncher extends Application
 
       module.start();
       ui.show();
+
+      primaryStage.setOnCloseRequest(event -> stop());
    }
 
    @Override
-   public void stop() throws Exception
+   public void stop()
    {
       module.stop();
       ui.stop();
