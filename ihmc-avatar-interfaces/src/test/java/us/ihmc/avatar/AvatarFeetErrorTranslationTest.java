@@ -159,7 +159,6 @@ public abstract class AvatarFeetErrorTranslationTest implements MultiRobotTestIn
    public void showMemoryUsageBeforeTest()
    {
       MemoryTools.printCurrentMemoryUsageAndReturnUsedMemoryInMB(getClass().getSimpleName() + " before test.");
-      simulationTestingParameters.setKeepSCSUp(true);
    }
 
    @AfterEach
