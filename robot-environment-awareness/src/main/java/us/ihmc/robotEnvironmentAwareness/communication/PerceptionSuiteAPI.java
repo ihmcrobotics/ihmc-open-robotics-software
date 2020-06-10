@@ -20,6 +20,8 @@ public class PerceptionSuiteAPI
    public static final Topic<Boolean> RunLidarREA = topic("RunLidarREA");
    public static final Topic<Boolean> RunLidarREAUI = topic("RunLidarREAUI");
 
+   public static final MessagerAPIFactory.MessagerAPI API = apiFactory.getAPIAndCloseFactory();
+
    private static <T> Topic<T> topic(String name)
    {
       return Root.child(PerceptionSuite).topic(apiFactory.createTypedTopicTheme(name));
