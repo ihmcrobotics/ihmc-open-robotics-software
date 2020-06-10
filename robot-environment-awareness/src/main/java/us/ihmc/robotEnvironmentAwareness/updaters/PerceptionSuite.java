@@ -325,7 +325,10 @@ public class PerceptionSuite
    private void startMapSegmentation() throws Exception
    {
       if (realSenseSLAMModule == null)
+      {
          LogTools.warn("Cannot start the segmentation module without the SLAM module running.");
+         return;
+      }
 
       if (segmentationModule == null)
       {

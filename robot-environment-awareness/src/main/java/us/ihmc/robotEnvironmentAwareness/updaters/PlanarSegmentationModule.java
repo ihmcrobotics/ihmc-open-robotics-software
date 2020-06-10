@@ -51,6 +51,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
    protected static final boolean DEBUG = true;
 
+   private boolean manageRosNode;
    private final Ros2Node ros2Node;
 
    private final REAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
@@ -73,7 +74,8 @@ public class PlanarSegmentationModule implements OcTreeConsumer
            REACommunicationProperties.subscriberCustomRegionsTopicName,
            ROS2Tools.REALSENSE_SLAM_MAP,
            reaMessager,
-           configurationFile);
+           configurationFile,
+           true);
    }
 
    private PlanarSegmentationModule(Ros2Node ros2Node, Messager reaMessager, File configurationFile) throws Exception
@@ -107,8 +109,21 @@ public class PlanarSegmentationModule implements OcTreeConsumer
                                     Messager reaMessager,
                                     File configurationFile) throws Exception
    {
-      this.ros2Node = ros2Node;
+      this(ros2Node, inputTopic, customRegionTopic, outputTopic, reaMessager, configurationFile, false);
+   }
+
+   private PlanarSegmentationModule(Ros2Node ros2Node,
+                                    ROS2Topic<?> inputTopic,
+                                    ROS2Topic<?> customRegionTopic,
+                                    ROS2Topic<?> outputTopic,
+                                    Messager reaMessager,
+                                    File configurationFile,
+                                    boolean manageRosNode) throws Exception
+   {
+      this.manageRosNode = manageRosNode;
       this.reaMessager = reaMessager;
+      this.ros2Node = ros2Node;
+
       if (!reaMessager.isMessagerOpen())
          reaMessager.startMessager();
 
@@ -265,7 +280,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
    public void start()
    {
-      LogTools.info("Planar segmentation is starting.");
+      LogTools.info("Planar segmentation Module is starting.");
 
       if (scheduled == null)
       {
@@ -275,7 +290,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
    public void stop()
    {
-      LogTools.info("Planar segmentation is going down.");
+      LogTools.info("Planar segmentation Module is going down.");
 
       try
       {
@@ -285,7 +300,8 @@ public class PlanarSegmentationModule implements OcTreeConsumer
       {
          e.printStackTrace();
       }
-      ros2Node.destroy();
+      if (manageRosNode)
+         ros2Node.destroy();
 
       if (scheduled != null)
       {
@@ -334,8 +350,21 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
    public static PlanarSegmentationModule createIntraprocessModule(String configurationFilePath) throws Exception
    {
-      Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
-      return createIntraprocessModule(configurationFilePath, ros2Node);
+      Messager messager = new SharedMemoryMessager(SegmentationModuleAPI.API);
+
+      File configurationFile = new File(configurationFilePath);
+      try
+      {
+         configurationFile.getParentFile().mkdirs();
+         configurationFile.createNewFile();
+      }
+      catch (IOException e)
+      {
+         System.out.println(configurationFile.getAbsolutePath());
+         e.printStackTrace();
+      }
+
+      return new PlanarSegmentationModule(messager, configurationFile);
    }
 
    public static PlanarSegmentationModule createIntraprocessModule(String configurationFilePath, Ros2Node ros2Node) throws Exception
