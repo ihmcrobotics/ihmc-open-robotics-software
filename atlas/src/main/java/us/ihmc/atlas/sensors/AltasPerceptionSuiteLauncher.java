@@ -3,21 +3,19 @@ package us.ihmc.atlas.sensors;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
-import us.ihmc.robotEnvironmentAwareness.ui.AtlasPerceptionSuiteUI;
-import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
-import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
+import us.ihmc.robotEnvironmentAwareness.ui.PerceptionSuiteUI;
 
 public class AltasPerceptionSuiteLauncher extends Application
 {
    private AtlasPerceptionSuite module;
 
-   private AtlasPerceptionSuiteUI ui;
+   private PerceptionSuiteUI ui;
 
    @Override
    public void start(Stage primaryStage) throws Exception
    {
       module = AtlasPerceptionSuite.createIntraprocess();
-      ui = AtlasPerceptionSuiteUI.createIntraprocessUI(primaryStage);
+      ui = PerceptionSuiteUI.createIntraprocessUI(primaryStage);
 
       module.start();
       ui.show();

@@ -20,6 +20,7 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
@@ -128,6 +129,7 @@ public class SLAMModule
 
    public void start()
    {
+      LogTools.info("Starting SLAM Module");
       if (scheduledMain == null)
       {
          scheduledMain = executorService.scheduleAtFixedRate(this::updateMain, 0, THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
@@ -141,6 +143,8 @@ public class SLAMModule
 
    public void stop()
    {
+      LogTools.info("SLAM Module is going down");
+
       try
       {
          reaMessager.closeMessager();
@@ -361,6 +365,13 @@ public class SLAMModule
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       newPointCloud.set(message);
       reaMessager.submitMessage(SLAMModuleAPI.DepthPointCloudState, new StereoVisionPointCloudMessage(message));
+   }
+
+   public static SLAMModule createIntraprocessModule(Ros2Node ros2Node) throws Exception
+   {
+      KryoMessager messager = createKryoMessager();
+
+      return new SLAMModule(ros2Node, messager);
    }
 
    public static SLAMModule createIntraprocessModule() throws Exception
