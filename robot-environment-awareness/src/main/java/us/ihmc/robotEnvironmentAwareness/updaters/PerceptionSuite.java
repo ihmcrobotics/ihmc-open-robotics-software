@@ -14,6 +14,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
+import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
 import us.ihmc.ros2.Ros2Node;
 
 import java.util.concurrent.ScheduledExecutorService;
@@ -33,6 +34,8 @@ public class PerceptionSuite
 
    private Stage lidarREAStage;
    private LIDARBasedEnvironmentAwarenessUI lidarREAModuleUI;
+   private Stage realsenseSLAMStage;
+   private SLAMBasedEnvironmentAwarenessUI realSenseSLAMUI;
 
    protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
    // TODO module for combining rea and segmentation
@@ -50,6 +53,7 @@ public class PerceptionSuite
       messager.registerTopicListener(PerceptionSuiteAPI.RunLidarREA, run -> runnable(run, this::startLidarREA, this::stopLidarREA, "Lidar REA"));
 
       messager.registerTopicListener(PerceptionSuiteAPI.RunLidarREAUI, run -> runnable(run, this::startLidarREAUI, this::stopLidarREAUI, "Lidar REA UI"));
+      messager.registerTopicListener(PerceptionSuiteAPI.RunRealSenseSLAMUI, run -> runnable(run, this::startRealSenseSLAMUI, this::stopRealSenseSLAMUI, "RealSense SLAM UI"));
    }
 
    protected SLAMModule createSLAMModule() throws Exception
@@ -136,6 +140,56 @@ public class PerceptionSuite
       messager.submitMessage(PerceptionSuiteAPI.RunMapSegmentation, false);
    }
 
+   private void startRealSenseSLAMUI()
+   {
+      if (realSenseSLAMModule == null)
+      {
+         LogTools.info("RealSense SLAM Module must be running first.");
+         messager.submitMessage(PerceptionSuiteAPI.RunRealSenseSLAMUI, false);
+      }
+
+      if (realSenseSLAMUI == null)
+      {
+         Platform.runLater(() ->
+                           {
+                              realsenseSLAMStage = new Stage();
+                              try
+                              {
+                                 realSenseSLAMUI = SLAMBasedEnvironmentAwarenessUI.creatIntraprocessUI(realsenseSLAMStage);
+                                 realSenseSLAMUI.show();
+                              }
+                              catch (Exception e)
+                              {
+                                 LogTools.warn(e.getMessage());
+                              }
+                              realsenseSLAMStage.setOnCloseRequest(event ->
+                                                              {
+                                                                 messager.submitMessage(PerceptionSuiteAPI.RunRealSenseSLAMUI, false);
+                                                                 stopRealSenseSLAMUI();
+                                                              });
+                           });
+      }
+      else
+      {
+         stopRealSenseSLAMUI();
+         throw new RuntimeException("RealSense SLAM UI is already running.");
+      }
+   }
+
+   private void stopRealSenseSLAMUI()
+   {
+      if (realSenseSLAMUI != null)
+      {
+         Platform.runLater(() ->
+                           {
+                              realsenseSLAMStage.close();
+                              realSenseSLAMUI.stop();
+                              realsenseSLAMStage = null;
+                              realSenseSLAMUI = null;
+                           });
+      }
+   }
+
    private void startLidarREA() throws Exception
    {
       if (lidarREAModule == null)
@@ -160,7 +214,7 @@ public class PerceptionSuite
       messager.submitMessage(PerceptionSuiteAPI.RunLidarREAUI, false);
    }
 
-   private void startLidarREAUI() throws Exception
+   private void startLidarREAUI()
    {
       if (lidarREAModule == null)
       {
