@@ -39,15 +39,24 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
    private final Field<Runnable> replanFootstepsOutput = required();
    protected final Field<Consumer<LookAndStepBehavior.State>> behaviorStateUpdater = required();
 
-   private final Field<FootstepPlan> footstepPlan = requiredChanging();
-   private final Field<HumanoidRobotState> robotState = requiredChanging();
-   private final Field<LookAndStepBehavior.State> behaviorState = requiredChanging();
+   private FootstepPlan footstepPlan;
+   private HumanoidRobotState robotState;
+   private LookAndStepBehavior.State behaviorState;
+
+   protected void update(FootstepPlan footstepPlan,
+                         HumanoidRobotState robotState,
+                         LookAndStepBehavior.State behaviorState)
+   {
+      this.footstepPlan = footstepPlan;
+      this.robotState = robotState;
+      this.behaviorState = behaviorState;
+   }
 
    private boolean evaluateEntry()
    {
       boolean proceed = true;
 
-      if (!behaviorState.get().equals(LookAndStepBehavior.State.SWINGING))
+      if (!behaviorState.equals(LookAndStepBehavior.State.SWINGING))
       {
          LogTools.warn("Footstep planning supressed: Not in footstep planning state");
          proceed = false;
@@ -55,7 +64,7 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
       else if (!isFootstepPlanOK())
       {
          LogTools.warn("Robot walking supressed: Footstep plan not OK: numberOfSteps = {}. Planning again...",
-                       footstepPlan.get() == null ? null : footstepPlan.get().getNumberOfSteps());
+                       footstepPlan == null ? null : footstepPlan.getNumberOfSteps());
          behaviorStateUpdater.get().accept(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
          replanFootstepsOutput.get().run();
          proceed = false;
@@ -66,15 +75,15 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
 
    private boolean isFootstepPlanOK()
    {
-      return footstepPlan.get() != null && footstepPlan.get().getNumberOfSteps() > 0; // TODO: Shouldn't we prevent ever getting here?
+      return footstepPlan != null && footstepPlan.getNumberOfSteps() > 0; // TODO: Shouldn't we prevent ever getting here?
    }
 
    private void performTask()
    {
       FootstepPlan shortenedFootstepPlan = new FootstepPlan();
-      if (footstepPlan.get().getNumberOfSteps() > 0)
+      if (footstepPlan.getNumberOfSteps() > 0)
       {
-         PlannedFootstep footstepToTake = footstepPlan.get().getFootstep(0);
+         PlannedFootstep footstepToTake = footstepPlan.getFootstep(0);
          shortenedFootstepPlan.addFootstep(footstepToTake);
          lastSteppedSolePoseConsumer.get().accept(footstepToTake.getRobotSide(), new FramePose3D(footstepToTake.getFootstepPose()));
       }
@@ -157,16 +166,6 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
       this.robotWalkRequester.set(robotWalkRequester);
    }
 
-   protected void setFootstepPlan(FootstepPlan footstepPlan)
-   {
-      this.footstepPlan.set(footstepPlan);
-   }
-
-   protected void setRobotState(HumanoidRobotState robotState)
-   {
-      this.robotState.set(robotState);
-   }
-
    public void setReplanFootstepsOutput(Runnable replanFootstepsOutput)
    {
       this.replanFootstepsOutput.set(replanFootstepsOutput);
@@ -175,10 +174,5 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
    public void setBehaviorStateUpdater(Consumer<LookAndStepBehavior.State> behaviorStateUpdater)
    {
       this.behaviorStateUpdater.set(behaviorStateUpdater);
-   }
-
-   protected void setBehaviorState(LookAndStepBehavior.State behaviorState)
-   {
-      this.behaviorState.set(behaviorState);
    }
 }

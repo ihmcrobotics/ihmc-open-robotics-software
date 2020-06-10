@@ -33,10 +33,9 @@ public class LookAndStepRobotMotionModule extends LookAndStepRobotMotionTask
    {
       validateNonChanging();
 
-      // set changing stuff
-      setFootstepPlan(footstepPlanInput.get());
-      setRobotState(robotStateSupplier.get().get());
-      setBehaviorState(behaviorStateSupplier.get().get());
+      update(footstepPlanInput.get(),
+             robotStateSupplier.get().get(),
+             behaviorStateSupplier.get().get());
 
       run();
    }
