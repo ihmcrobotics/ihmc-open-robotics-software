@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
+import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintInput;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintSolver;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
@@ -34,6 +35,7 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
    private final Cylinder3D legCollisionShape = new Cylinder3D();
    private final RigidBodyTransform legCollisionShapeToSoleTransform = new RigidBodyTransform();
    private final RigidBodyTransformGenerator transformGenerator = new RigidBodyTransformGenerator();
+   private final GradientDescentStepConstraintInput gradientDescentStepConstraintInput = new GradientDescentStepConstraintInput();
 
    private final HashMap<FootstepNode, FootstepNodeSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
@@ -167,46 +169,47 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       FootstepNodeTools.getFootPolygon(footstepNode, footPolygonsInSoleFrame.get(footstepNode.getRobotSide()), footPolygon);
       tempTransform.set(snapData.getSnapTransform());
       tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
-      ConvexPolygon2D footPolygonInRegionFrame = FootstepNodeSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
+      ConvexPolygon2D footPolygonInSnapFrame = FootstepNodeSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
 
       RigidBodyTransform wiggleTransformInLocal;
       boolean concaveWigglerRequested = parameters.getEnableConcaveHullWiggler() && !planarRegionToPack.getConcaveHull().isEmpty();
-      if (concaveWigglerRequested && parameters.getEnableShinCollisionCheck())
+      if (concaveWigglerRequested)
       {
-         RigidBodyTransform snappedNodeTransform = snapData.getSnappedNodeTransform(footstepNode);
-         tempTransform.set(snappedNodeTransform);
-         tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
+         gradientDescentStepConstraintInput.clear();
+         gradientDescentStepConstraintInput.setInitialStepPolygon(footPolygonInSnapFrame);
+         gradientDescentStepConstraintInput.setWiggleParameters(wiggleParameters);
+         gradientDescentStepConstraintInput.setPlanarRegion(planarRegionToPack);
 
-         legCollisionShape.setSize(parameters.getShinLength(), parameters.getShinRadius());
-         transformGenerator.identity();
-         transformGenerator.translate(0.0, 0.0, parameters.getShinHeightOffset());
-         transformGenerator.rotate(parameters.getShinPitch(), Axis3D.Y);
-         transformGenerator.translate(0.0, 0.0, 0.5 * parameters.getShinLength());
-         transformGenerator.getRigidyBodyTransform(legCollisionShapeToSoleTransform);
-         gradientDescentStepConstraintSolver.setLegCollisionShape(legCollisionShape, 15.0, legCollisionShapeToSoleTransform);
+         if (parameters.getEnableShinCollisionCheck())
+         {
+            RigidBodyTransform snappedNodeTransform = snapData.getSnappedNodeTransform(footstepNode);
+            tempTransform.set(snappedNodeTransform);
+            tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
+            gradientDescentStepConstraintInput.setFootstepInRegionFrame(tempTransform);
 
-         wiggleTransformInLocal = gradientDescentStepConstraintSolver.wigglePolygon(footPolygonInRegionFrame,
-                                                                                    wiggleParameters,
-                                                                                    tempTransform,
-                                                                                    planarRegionToPack,
-                                                                                    planarRegionsList);
-      }
-      else if (concaveWigglerRequested)
-      {
-         wiggleTransformInLocal = gradientDescentStepConstraintSolver.wigglePolygon(footPolygonInRegionFrame,
-                                                                                    Vertex2DSupplier.asVertex2DSupplier(planarRegionToPack.getConcaveHull()),
-                                                                                    wiggleParameters);
+            legCollisionShape.setSize(parameters.getShinLength(), parameters.getShinRadius());
+            transformGenerator.identity();
+            transformGenerator.translate(0.0, 0.0, parameters.getShinHeightOffset());
+            transformGenerator.rotate(parameters.getShinPitch(), Axis3D.Y);
+            transformGenerator.translate(0.0, 0.0, 0.5 * parameters.getShinLength());
+            transformGenerator.getRigidyBodyTransform(legCollisionShapeToSoleTransform);
+            gradientDescentStepConstraintSolver.setLegCollisionShape(legCollisionShape, 15.0, legCollisionShapeToSoleTransform);
+
+            gradientDescentStepConstraintInput.setPlanarRegionsList(planarRegionsList);
+         }
+
+         wiggleTransformInLocal = gradientDescentStepConstraintSolver.wigglePolygon(gradientDescentStepConstraintInput);
       }
       else
       {
-         if (isConvexConstraintSatisfied(footPolygonInRegionFrame, planarRegionToPack, parameters.getWiggleInsideDelta()))
+         if (isConvexConstraintSatisfied(footPolygonInSnapFrame, planarRegionToPack, parameters.getWiggleInsideDelta()))
          {
             snapData.getWiggleTransformInWorld().setIdentity();
             return;
          }
          else
          {
-            if ((wiggleTransformInLocal = wiggleIntoConvexHull(footPolygonInRegionFrame)) == null)
+            if ((wiggleTransformInLocal = wiggleIntoConvexHull(footPolygonInSnapFrame)) == null)
             {
                snapData.getWiggleTransformInWorld().setIdentity();
                return;
