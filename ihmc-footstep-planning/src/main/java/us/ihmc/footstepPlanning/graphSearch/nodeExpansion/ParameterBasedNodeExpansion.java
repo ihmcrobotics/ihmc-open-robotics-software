@@ -27,7 +27,6 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
    private final IdealStepProximityComparator idealStepProximityComparator = new IdealStepProximityComparator();
    private final HashMap<FootstepNode, PartialExpansionManager> expansionManagers = new HashMap<>();
 
-   private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
    private final SideDependentList<ConvexPolygon2D> footPolygons;
 
    private final TDoubleArrayList xOffsets = new TDoubleArrayList();
@@ -90,8 +89,7 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
             {
                double distance = FootstepNodeTools.computeDistanceBetweenFootPolygons(new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT),
                                                                                       new FootstepNode(x, y, yaw, RobotSide.LEFT),
-                                                                                      footPolygons,
-                                                                                      convexPolygonTools);
+                                                                                      footPolygons);
 
                if (distance >= parameters.getMinClearanceFromStance())
                {

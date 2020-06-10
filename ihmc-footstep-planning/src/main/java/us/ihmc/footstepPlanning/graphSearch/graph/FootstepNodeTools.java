@@ -119,8 +119,7 @@ public class FootstepNodeTools
 
    public static double computeDistanceBetweenFootPolygons(FootstepNode nodeA,
                                                            FootstepNode nodeB,
-                                                           SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygonsInSoleFrame,
-                                                           ConvexPolygonTools convexPolygonTools)
+                                                           SideDependentList<? extends ConvexPolygon2DReadOnly> footPolygonsInSoleFrame)
    {
       ConvexPolygon2D footPolygonA = new ConvexPolygon2D();
       ConvexPolygon2D footPolygonB = new ConvexPolygon2D();
@@ -136,10 +135,7 @@ public class FootstepNodeTools
       return distanceBetweenPolygons(footPolygonA, footPolygonB);
    }
 
-   /**
-    * Assumes one polygon isn't completely contained inside the other
-    */
-   static boolean arePolygonsIntersecting(ConvexPolygon2D polygonA, ConvexPolygon2D polygonB)
+   public static boolean arePolygonsIntersecting(ConvexPolygon2D polygonA, ConvexPolygon2D polygonB)
    {
       for (int i = 0; i < polygonA.getNumberOfVertices(); i++)
       {
@@ -186,7 +182,7 @@ public class FootstepNodeTools
     * than {@link ConvexPolygonTools#computeMinimumDistancePoints}, but that method was seen to give bad results for polygons
     * intersecting by epsilon (didn't seem to be picked up by the method's initial intersecion check, and probably throws off the algorithm).
     */
-   static double distanceBetweenPolygons(ConvexPolygon2D polygonA, ConvexPolygon2D polygonB)
+   public static double distanceBetweenPolygons(ConvexPolygon2D polygonA, ConvexPolygon2D polygonB)
    {
       double minDistance = Double.POSITIVE_INFINITY;
       for (int i = 0; i < polygonA.getNumberOfVertices(); i++)
