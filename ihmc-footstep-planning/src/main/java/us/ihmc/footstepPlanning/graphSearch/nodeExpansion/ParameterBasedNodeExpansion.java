@@ -88,14 +88,17 @@ public class ParameterBasedNodeExpansion implements FootstepNodeExpansion
 
             for (double yaw = minYaw; yaw <= maxYaw; yaw += LatticeNode.gridSizeYaw)
             {
-               FootstepNodeTools.computeDistanceBetweenFootPolygons(new FootstepNode(0.0, 0.0, 0.0, RobotSide.LEFT),
-                                                                    new FootstepNode(x, y, yaw, RobotSide.RIGHT),
-                                                                    footPolygons,
-                                                                    convexPolygonTools);
+               double distance = FootstepNodeTools.computeDistanceBetweenFootPolygons(new FootstepNode(0.0, 0.0, 0.0, RobotSide.RIGHT),
+                                                                                      new FootstepNode(x, y, yaw, RobotSide.LEFT),
+                                                                                      footPolygons,
+                                                                                      convexPolygonTools);
 
-               xOffsets.add(x);
-               yOffsets.add(y);
-               yawOffsets.add(yaw);
+               if (distance >= parameters.getMinClearanceFromStance())
+               {
+                  xOffsets.add(x);
+                  yOffsets.add(y);
+                  yawOffsets.add(yaw);
+               }
             }
          }
       }
