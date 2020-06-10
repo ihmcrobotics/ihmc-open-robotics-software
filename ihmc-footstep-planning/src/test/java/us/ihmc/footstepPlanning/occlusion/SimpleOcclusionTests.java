@@ -26,7 +26,6 @@ import us.ihmc.graphicsDescription.appearance.YoAppearanceRGBColor;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.DefaultVisibilityGraphParameters;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.Assert;
@@ -302,9 +301,9 @@ public class SimpleOcclusionTests
             int stepsToShow = Math.min(plan.getNumberOfSteps(), 2 * stepsPerSideToVisualize);
             for (int stepIdx = 0; stepIdx < stepsToShow; stepIdx++)
             {
-               Footstep footstep = plan.getFootstep(stepIdx);
+               PlannedFootstep footstep = plan.getFootstep(stepIdx);
                FramePose3D footstepPose = new FramePose3D();
-               footstep.getPose(footstepPose);
+               footstep.getFootstepPose(footstepPose);
 
                List<YoFramePoseUsingYawPitchRoll> listOfPoses = solePosesForVisualization.get(footstep.getRobotSide());
                YoFramePoseUsingYawPitchRoll yoSolePose = listOfPoses.get(stepIdx / 2);
@@ -317,8 +316,8 @@ public class SimpleOcclusionTests
             stepPosesTaken.get(i).set(stancePose);
          }
 
-         Footstep firstStep = plan.getFootstep(0);
-         firstStep.getPose(stancePose);
+         PlannedFootstep firstStep = plan.getFootstep(0);
+         firstStep.getFootstepPose(stancePose);
          stanceSide = firstStep.getRobotSide();
 
          Point3D bodyPoint = computeBodyPoint(stancePose, stanceSide, parameters, 0.0);

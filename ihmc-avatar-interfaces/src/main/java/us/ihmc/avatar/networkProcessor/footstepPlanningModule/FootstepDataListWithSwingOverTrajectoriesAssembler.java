@@ -14,6 +14,7 @@ import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.footstepPlanning.FootstepPlan;
+import us.ihmc.footstepPlanning.PlannedFootstep;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
@@ -73,9 +74,9 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
             stanceFootPose.setToZero(humanoidReferenceFrames.getSoleFrame(footstepPlan.getFootstep(0).getRobotSide().getOppositeSide()));
          }
 
-         Footstep footstep = footstepPlan.getFootstep(i);
+         PlannedFootstep footstep = footstepPlan.getFootstep(i);
 
-         footstep.getPose(swingEndPose);
+         footstep.getFootstepPose(swingEndPose);
 
          FootstepDataMessage footstepDataMessage = HumanoidMessageTools.createFootstepDataMessage(footstep.getRobotSide(), new Point3D(swingEndPose.getPosition()), new Quaternion(swingEndPose.getOrientation()));
 
@@ -86,12 +87,9 @@ public class FootstepDataListWithSwingOverTrajectoriesAssembler
          waypoints[1].set(swingOverPlanarRegionsTrajectoryExpander.getExpandedWaypoints().get(1));
          MessageTools.copyData(waypoints, footstepDataMessage.getCustomPositionWaypoints());
 
-         if (footstep.hasPredictedContactPoints())
+         if (footstep.hasFoothold())
          {
-            partialFootholdPolygon.clear();
-            footstep.getPredictedContactPoints().forEach(partialFootholdPolygon::addVertex);
-            partialFootholdPolygon.update();
-
+            partialFootholdPolygon.set(footstep.getFoothold());
             if (partialFootholdPolygon.getNumberOfVertices() != 4)
             {
                ConvexPolygonTools.limitVerticesConservative(partialFootholdPolygon, 4);

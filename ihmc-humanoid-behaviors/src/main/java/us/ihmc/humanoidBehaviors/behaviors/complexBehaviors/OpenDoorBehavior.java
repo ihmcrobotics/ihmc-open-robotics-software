@@ -55,7 +55,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
       super(robotName, "OpenDoorBehavior", OpenDoorState.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       this.doorOpenDetectorBehaviorService = doorOpenDetectorBehaviorService;
-      uiPositionCheckerPacketpublisher = createBehaviorPublisher(UIPositionCheckerPacket.class);
+      uiPositionCheckerPacketpublisher = createBehaviorOutputPublisher(UIPositionCheckerPacket.class);
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
       abortMessagePublisher = createPublisherForController(AutomaticManipulationAbortMessage.class);
 

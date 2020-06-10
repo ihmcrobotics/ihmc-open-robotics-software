@@ -103,7 +103,7 @@
                             <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.12"/>
                         </registry>
                         <registry name="ICPController">
-                            <parameter name="captureKi" type="DoubleParameter" min="0.0" max="1.0" value="2.0"/>
+                            <parameter name="captureKi" type="DoubleParameter" min="0.0" max="1.0" value="1.5"/>
                             <parameter name="captureIntegralLeakRatio" type="DoubleParameter" min="0.0" max="1.0" value="0.98"/>
                             <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.135"/>
                         </registry>
