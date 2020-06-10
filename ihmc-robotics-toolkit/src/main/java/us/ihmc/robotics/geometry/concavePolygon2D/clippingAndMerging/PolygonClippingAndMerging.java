@@ -127,20 +127,20 @@ public class PolygonClippingAndMerging
          return;
       }
 
-      LinkedPointList polygonAList = ConcavePolygon2DClippingTools.createLinkedPointList(polygonA);
-      LinkedPointList polygonBList = ConcavePolygon2DClippingTools.createLinkedPointList(polygonB);
+      ConcavePolygon2DClippingTools.LinkedPointList polygonAList = ConcavePolygon2DClippingTools.createLinkedPointList(polygonA);
+      ConcavePolygon2DClippingTools.LinkedPointList polygonBList = ConcavePolygon2DClippingTools.createLinkedPointList(polygonB);
 
       ConcavePolygon2DClippingTools.insertIntersectionsIntoList(polygonAList, polygonB);
       ConcavePolygon2DClippingTools.insertIntersectionsIntoList(polygonBList, polygonA);
 
       ConcavePolygon2DClippingTools.linkSharedVertices(polygonAList, polygonBList, 5e-3);
 
-      Collection<LinkedPoint> unassignedAPoints = polygonAList.getPointsCopy();
-      Collection<LinkedPoint> unassignedBPoints = polygonBList.getPointsCopy();
+      Collection<ConcavePolygon2DClippingTools.LinkedPoint> unassignedAPoints = polygonAList.getPointsCopy();
+      Collection<ConcavePolygon2DClippingTools.LinkedPoint> unassignedBPoints = polygonBList.getPointsCopy();
 
-      LinkedPointListHolder listHolder = new LinkedPointListHolder(unassignedAPoints, unassignedBPoints);
+      ConcavePolygon2DClippingTools.LinkedPointListHolder listHolder = new ConcavePolygon2DClippingTools.LinkedPointListHolder(unassignedAPoints, unassignedBPoints);
 
-      LinkedPoint startPoint = findVertexOutsideOfPolygon(polygonB, unassignedAPoints);
+      ConcavePolygon2DClippingTools.LinkedPoint startPoint = findVertexOutsideOfPolygon(polygonB, unassignedAPoints);
       if (startPoint == null)
       {
          startPoint = findVertexOutsideOfPolygon(polygonA, unassignedBPoints);
@@ -203,8 +203,8 @@ public class PolygonClippingAndMerging
          return clippedPolygonsToReturn;
       }
 
-      LinkedPointList clippingPolygonList = ConcavePolygon2DClippingTools.createLinkedPointList(clippingPolygon);
-      LinkedPointList polygonToClipList = ConcavePolygon2DClippingTools.createLinkedPointList(polygonToClip);
+      ConcavePolygon2DClippingTools.LinkedPointList clippingPolygonList = ConcavePolygon2DClippingTools.createLinkedPointList(clippingPolygon);
+      ConcavePolygon2DClippingTools.LinkedPointList polygonToClipList = ConcavePolygon2DClippingTools.createLinkedPointList(polygonToClip);
 
       ConcavePolygon2DClippingTools.insertIntersectionsIntoList(polygonToClipList, clippingPolygon);
       ConcavePolygon2DClippingTools.insertIntersectionsIntoList(clippingPolygonList, polygonToClip);
@@ -214,15 +214,15 @@ public class PolygonClippingAndMerging
       // gotta make the clipping list is counter clockwise
       clippingPolygonList.reverseOrder();
 
-      Collection<LinkedPoint> unassignedToClipPoints = polygonToClipList.getPointsCopy();
-      Collection<LinkedPoint> unassignedClippingPoints = clippingPolygonList.getPointsCopy();
-      LinkedPointListHolder listHolder = new LinkedPointListHolder(unassignedClippingPoints, unassignedToClipPoints);
+      Collection<ConcavePolygon2DClippingTools.LinkedPoint> unassignedToClipPoints = polygonToClipList.getPointsCopy();
+      Collection<ConcavePolygon2DClippingTools.LinkedPoint> unassignedClippingPoints = clippingPolygonList.getPointsCopy();
+      ConcavePolygon2DClippingTools.LinkedPointListHolder listHolder = new ConcavePolygon2DClippingTools.LinkedPointListHolder(unassignedClippingPoints, unassignedToClipPoints);
 
-      LinkedPoint startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedToClipPoints);
+      ConcavePolygon2DClippingTools.LinkedPoint startPoint = findVertexOutsideOfPolygon(clippingPolygon, unassignedToClipPoints);
       // There aren't any that are outside from the start. Instead, find a shared vertex, and make sure it's an "outgoing edge"
       if (startPoint == null)
       {
-         for (LinkedPoint point : unassignedToClipPoints)
+         for (ConcavePolygon2DClippingTools.LinkedPoint point : unassignedToClipPoints)
          {
             if (!point.isPointAfterInsideOther() && point.isPointBeforeInsideOther())
             {
@@ -250,10 +250,10 @@ public class PolygonClippingAndMerging
       return clippedPolygonsToReturn;
    }
 
-   static boolean walkAlongEdgeOfPolygon(LinkedPoint startVertex, LinkedPointListHolder listHolder, ConcavePolygon2DBasics polygonToPack, SwitchingFunction switchFunction)
+   static boolean walkAlongEdgeOfPolygon(ConcavePolygon2DClippingTools.LinkedPoint startVertex, ConcavePolygon2DClippingTools.LinkedPointListHolder listHolder, ConcavePolygon2DBasics polygonToPack, SwitchingFunction switchFunction)
    {
-      LinkedPoint linkedPoint = startVertex;
-      LinkedPoint previousPoint = linkedPoint;
+      ConcavePolygon2DClippingTools.LinkedPoint linkedPoint = startVertex;
+      ConcavePolygon2DClippingTools.LinkedPoint previousPoint = linkedPoint;
 
       int maxPoints = listHolder.getNumberOfPoints();
       polygonToPack.addVertex(linkedPoint.getPoint());
@@ -299,7 +299,7 @@ public class PolygonClippingAndMerging
    }
 
 
-   private static boolean shouldSwitch(LinkedPoint linkedPoint)
+   private static boolean shouldSwitch(ConcavePolygon2DClippingTools.LinkedPoint linkedPoint)
    {
       return linkedPoint.isPointAfterInsideOther() != linkedPoint.isPointBeforeInsideOther();
    }
@@ -307,10 +307,10 @@ public class PolygonClippingAndMerging
    @FunctionalInterface
    private interface SwitchingFunction
    {
-      boolean apply(LinkedPoint point, boolean isOnOtherList);
+      boolean apply(ConcavePolygon2DClippingTools.LinkedPoint point, boolean isOnOtherList);
    }
 
-   private static boolean shouldSwitchWhenMerging(LinkedPoint linkedPoint, boolean isOnOtherList)
+   private static boolean shouldSwitchWhenMerging(ConcavePolygon2DClippingTools.LinkedPoint linkedPoint, boolean isOnOtherList)
    {
       boolean shouldSwitch = shouldSwitch(linkedPoint);
       boolean outgoingPoint = linkedPoint.isPointBeforeInsideOther() && !linkedPoint.isPointAfterInsideOther();
@@ -325,7 +325,7 @@ public class PolygonClippingAndMerging
       return shouldSwitch;
    }
 
-   private static boolean shouldSwitchWhenClipping(LinkedPoint linkedPoint, boolean isOnOtherList)
+   private static boolean shouldSwitchWhenClipping(ConcavePolygon2DClippingTools.LinkedPoint linkedPoint, boolean isOnOtherList)
    {
       boolean shouldSwitch = shouldSwitch(linkedPoint);
 
@@ -333,8 +333,8 @@ public class PolygonClippingAndMerging
 
       if (linkedPoint.isLinkedToOtherList())
       {
-         LinkedPoint clippingPoint = isOnOtherList ? linkedPoint : linkedPoint.getPointOnOtherList();
-         LinkedPoint clippedPoint = isOnOtherList ? linkedPoint.getPointOnOtherList() : linkedPoint;
+         ConcavePolygon2DClippingTools.LinkedPoint clippingPoint = isOnOtherList ? linkedPoint : linkedPoint.getPointOnOtherList();
+         ConcavePolygon2DClippingTools.LinkedPoint clippedPoint = isOnOtherList ? linkedPoint.getPointOnOtherList() : linkedPoint;
          if (clippingPoint.isPointBeforeInsideOther() && clippingPoint.isPointAfterInsideOther() && (!clippedPoint.isPointBeforeInsideOther()
                                                                                                      && !clippedPoint.isPointAfterInsideOther()))
          {
@@ -345,9 +345,9 @@ public class PolygonClippingAndMerging
       return shouldSwitch;
    }
 
-   private static LinkedPoint findVertexOutsideOfPolygon(ConcavePolygon2DReadOnly polygon, Collection<LinkedPoint> points)
+   private static ConcavePolygon2DClippingTools.LinkedPoint findVertexOutsideOfPolygon(ConcavePolygon2DReadOnly polygon, Collection<ConcavePolygon2DClippingTools.LinkedPoint> points)
    {
-      for (LinkedPoint point : points)
+      for (ConcavePolygon2DClippingTools.LinkedPoint point : points)
       {
          if (!polygon.isPointInsideEpsilon(point.getPoint(), 1e-5))
             return point;

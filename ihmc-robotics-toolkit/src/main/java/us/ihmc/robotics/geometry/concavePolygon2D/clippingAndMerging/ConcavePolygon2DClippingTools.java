@@ -1,7 +1,5 @@
 package us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging;
 
-import sun.awt.image.ImageWatched.Link;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryPolygonTools;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.Vector2D;
@@ -13,8 +11,10 @@ import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
 import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
 import us.ihmc.robotics.geometry.concavePolygon2D.clippingAndMerging.IntersectionInfo.IntersectionType;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 
 public class ConcavePolygon2DClippingTools
 {
@@ -252,5 +252,311 @@ public class ConcavePolygon2DClippingTools
       littleBefore.add(direction, intersection);
 
       return littleBefore;
+   }
+
+   public static class LinkedPointList
+   {
+      private LinkedPoint firstPoint;
+      private LinkedPoint lastPoint;
+      private boolean isForwardList = true;
+
+      private final Collection<LinkedPoint> points = new HashSet<>();
+
+      public void addPointToEnd(double x, double y)
+      {
+         addPointToEnd(new LinkedPoint(x, y));
+      }
+
+      public void addPointToEnd(Point2DReadOnly point)
+      {
+         addPointToEnd(new LinkedPoint(point));
+      }
+
+      public void addPointToEnd(LinkedPoint point)
+      {
+         if (points.size() == 0)
+         {
+            firstPoint = point;
+            lastPoint = point;
+            point.setPredecessor(point);
+            point.setSuccessor(point);
+            points.add(point);
+         }
+         else
+         {
+            insertPoint(point, lastPoint);
+         }
+      }
+
+      public void clear()
+      {
+         points.clear();
+         firstPoint = null;
+         lastPoint = null;
+      }
+
+      public LinkedPoint getLinkedPointAtLocation(Point2DReadOnly location)
+      {
+         return points.stream().filter(linkedPoint -> linkedPoint.getPoint().epsilonEquals(location, 1e-7)).findFirst().orElse(null);
+      }
+
+      public void insertPoint(LinkedPoint pointToInsert, LinkedPoint predecessor)
+      {
+         LinkedPoint oldSuccessor = predecessor.getSuccessor();
+         predecessor.setSuccessor(pointToInsert);
+         oldSuccessor.setPredecessor(pointToInsert);
+         pointToInsert.setSuccessor(oldSuccessor);
+         pointToInsert.setPredecessor(predecessor);
+         points.add(pointToInsert);
+
+         if (predecessor.equals(lastPoint))
+            lastPoint = pointToInsert;
+      }
+
+      public void removePoint(LinkedPoint pointToRemove)
+      {
+         LinkedPoint predecessor = pointToRemove.getPredecessor();
+         LinkedPoint successor = pointToRemove.getSuccessor();
+         predecessor.setSuccessor(successor);
+         successor.setPredecessor(predecessor);
+
+         if (pointToRemove == firstPoint)
+            firstPoint = successor;
+         if (pointToRemove == lastPoint)
+            lastPoint = predecessor;
+
+         points.remove(pointToRemove);
+      }
+
+      public LinkedPoint getFirstPoint()
+      {
+         return firstPoint;
+      }
+
+      public LinkedPoint getLastPoint()
+      {
+         return lastPoint;
+      }
+
+      public boolean isForwardList()
+      {
+         return isForwardList;
+      }
+
+      public void reverseOrder()
+      {
+         isForwardList = !isForwardList;
+         points.forEach(LinkedPoint::reverse);
+         LinkedPoint oldFirstPoint = firstPoint;
+         firstPoint = lastPoint;
+         lastPoint = oldFirstPoint;
+      }
+
+      public Collection<LinkedPoint> getPoints()
+      {
+         return points;
+      }
+
+      public Collection<LinkedPoint> getPointsCopy()
+      {
+         List<LinkedPoint> pointsCopy = new ArrayList<>();
+         for (LinkedPoint point : points)
+            pointsCopy.add(new LinkedPoint(point));
+         return pointsCopy;
+      }
+
+   }
+
+   public static class LinkedPoint
+   {
+      private LinkedPoint predecessor;
+      private LinkedPoint successor;
+
+      private boolean isPointAfterInsideOther = false;
+      private boolean isPointBeforeInsideOther = false;
+
+      private final Point2DBasics point = new Point2D();
+
+      private LinkedPoint pointOnOtherList = null;
+
+      public LinkedPoint()
+      {}
+
+      public LinkedPoint(Point2DReadOnly other)
+      {
+         this(other.getX(), other.getY());
+      }
+
+      public LinkedPoint(LinkedPoint other)
+      {
+         this(other.getPoint());
+
+         setIsPointAfterInsideOther(other.isPointAfterInsideOther);
+         setIsPointBeforeInsideOther(other.isPointBeforeInsideOther);
+         setPredecessor(other.predecessor);
+         setSuccessor(other.successor);
+      }
+
+      public LinkedPoint(double x, double y)
+      {
+         this(x, y, false, false);
+      }
+
+      public LinkedPoint(Point2DReadOnly other, boolean isPointAfterInsideOther, boolean isPointBeforeInsideOther)
+      {
+         this(other.getX(), other.getY(), isPointAfterInsideOther, isPointBeforeInsideOther);
+      }
+
+      public LinkedPoint(double x, double y, boolean isPointAfterInsideOther, boolean isPointBeforeInsideOther)
+      {
+         this.isPointAfterInsideOther = isPointAfterInsideOther;
+         this.isPointBeforeInsideOther = isPointBeforeInsideOther;
+         setPoint(x, y);
+      }
+
+      public void setIsPointAfterInsideOther(boolean isPointAfterInsideOther)
+      {
+         this.isPointAfterInsideOther = isPointAfterInsideOther;
+      }
+
+      public void setIsPointBeforeInsideOther(boolean isOutgoingIntersection)
+      {
+         this.isPointBeforeInsideOther = isOutgoingIntersection;
+      }
+
+      public boolean getIsIntersectionPoint()
+      {
+         return isPointAfterInsideOther || isPointBeforeInsideOther;
+      }
+
+      public boolean isPointAfterInsideOther()
+      {
+         return isPointAfterInsideOther;
+      }
+
+      public boolean isPointBeforeInsideOther()
+      {
+         return isPointBeforeInsideOther;
+      }
+
+      public void set(LinkedPoint other)
+      {
+         setPoint(other.point);
+         setPredecessor(other.predecessor);
+         setSuccessor(other.successor);
+      }
+
+      public void linkToOtherList(LinkedPoint pointOnOtherList)
+      {
+         this.pointOnOtherList = pointOnOtherList;
+      }
+
+      public boolean isLinkedToOtherList()
+      {
+         return pointOnOtherList != null;
+      }
+
+      public LinkedPoint getPointOnOtherList()
+      {
+         return pointOnOtherList;
+      }
+
+      public void reverse()
+      {
+         LinkedPoint oldSuccessor = successor;
+         successor = predecessor;
+         predecessor = oldSuccessor;
+
+         boolean oldIsIncoming = isPointAfterInsideOther;
+         isPointAfterInsideOther = isPointBeforeInsideOther;
+         isPointBeforeInsideOther = oldIsIncoming;
+      }
+
+      public void setPoint(Point2DReadOnly point)
+      {
+         setPoint(point.getX(), point.getY());
+      }
+
+      public void setPoint(double x, double y)
+      {
+         this.point.set(x, y);
+      }
+
+      public void setPredecessor(LinkedPoint point)
+      {
+         predecessor = point;
+      }
+
+      public void setSuccessor(LinkedPoint successor)
+      {
+         this.successor = successor;
+      }
+
+      public LinkedPoint getPredecessor()
+      {
+         return predecessor;
+      }
+
+      public LinkedPoint getSuccessor()
+      {
+         return successor;
+      }
+
+      public Point2DReadOnly getPoint()
+      {
+         return point;
+      }
+
+      public boolean equals(LinkedPoint other)
+      {
+         if (other == this)
+            return true;
+         else if (other == null)
+            return false;
+         else
+            return point.getX() == other.point.getX() && point.getY() == other.point.getY();
+      }
+
+      @Override
+      public String toString()
+      {
+         return point.toString();
+      }
+
+   }
+
+   static class LinkedPointListHolder
+   {
+      private final Collection<LinkedPoint> listAPool;
+      private final Collection<LinkedPoint> listBPool;
+
+      public LinkedPointListHolder(Collection<LinkedPoint> listAPool, Collection<LinkedPoint> listBPool)
+      {
+         this.listAPool = listAPool;
+         this.listBPool = listBPool;
+      }
+
+      public void removePoint(LinkedPoint pointToRemove)
+      {
+         removePointFromList(listAPool, pointToRemove);
+         removePointFromList(listBPool, pointToRemove);
+      }
+
+      private static void removePointFromList(Collection<LinkedPoint> listToEdit, LinkedPoint pointToRemove)
+      {
+         for (LinkedPoint other : listToEdit)
+         {
+            if (other.getPoint().epsilonEquals(pointToRemove.getPoint(), 1e-7))
+            {
+               listToEdit.remove(other);
+               break;
+            }
+         }
+      }
+
+      public int getNumberOfPoints()
+      {
+         return listAPool.size() + listBPool.size();
+      }
    }
 }
