@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
+package us.ihmc.avatar.stepAdjustment;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -9,17 +9,13 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.footstepPlanning.tools.PlannerTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
+import us.ihmc.robotics.geometry.concaveHull.GeometryPolygonTestTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
-import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoDouble;
 
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -43,10 +39,10 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       ground.addVertex(-10.0, -10.0);
       ground.addVertex(-10.0, 10.0);
       ground.update();
-      PlanarRegion groundPlane = new PlanarRegion(new RigidBodyTransform(), ground);
+      StepConstraintRegion groundPlane = new StepConstraintRegion(new RigidBodyTransform(), ground);
 
-      PlanarRegionsList planarRegionsList = new PlanarRegionsList();
-      planarRegionsList.addPlanarRegion(groundPlane);
+      List<StepConstraintRegion> constraintRegions = new ArrayList<>();
+      constraintRegions.add(groundPlane);
 
       PoseReferenceFrame centerOfMassFrame = new PoseReferenceFrame("centerOfMassFrame", ReferenceFrame.getWorldFrame());
       centerOfMassFrame.translateAndUpdate(0.0, 0.0, 1.0);
@@ -67,7 +63,7 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       captureRegion.update();
 
       constraintCalculator.setOmega0(3.0);
-      constraintCalculator.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+      constraintCalculator.setConstraintRegions(constraintRegions);
       constraintCalculator.setCaptureRegion(captureRegion);
 
       constraintCalculator.updatePlanarRegionConstraintForStep(stepPose);
@@ -95,7 +91,7 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       ground.addVertex(-10.0, -10.0);
       ground.addVertex(-10.0, 10.0);
       ground.update();
-      PlanarRegion groundPlane = new PlanarRegion(new RigidBodyTransform(), ground);
+      StepConstraintRegion groundPlane = new StepConstraintRegion(new RigidBodyTransform(), ground);
 
       ConvexPolygon2D smallRegion = new ConvexPolygon2D();
       smallRegion.addVertex(0.2, 0.2);
@@ -106,11 +102,11 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       RigidBodyTransform smallRegionTransform = new RigidBodyTransform();
       smallRegionTransform.getTranslation().set(stepPose.getPosition());
       smallRegionTransform.getTranslation().setZ(0.1);
-      PlanarRegion smallRegionPlane = new PlanarRegion(smallRegionTransform, smallRegion);
+      StepConstraintRegion smallRegionPlane = new StepConstraintRegion(smallRegionTransform, smallRegion);
 
-      PlanarRegionsList planarRegionsList = new PlanarRegionsList();
-      planarRegionsList.addPlanarRegion(groundPlane);
-      planarRegionsList.addPlanarRegion(smallRegionPlane);
+      List<StepConstraintRegion> constraintRegions = new ArrayList<>();
+      constraintRegions.add(groundPlane);
+      constraintRegions.add(smallRegionPlane);
 
       FrameConvexPolygon2D captureRegion = new FrameConvexPolygon2D();
       captureRegion.addVertex(stepLength + 0.05, 0.5 * stanceWidth + 0.05);
@@ -129,22 +125,24 @@ public class CapturabilityBasedPlanarRegionDeciderTest
       centerOfMassFrame.setPositionAndUpdate(new FramePoint3D(ReferenceFrame.getWorldFrame(), 0.1, -0.05, comHeight));
 
       constraintCalculator.setOmega0(omega);
-      constraintCalculator.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+      constraintCalculator.setConstraintRegions(constraintRegions);
       constraintCalculator.setCaptureRegion(captureRegion);
       constraintCalculator.updatePlanarRegionConstraintForStep(stepPose);
 
       assertTrue(smallRegionPlane.epsilonEquals(constraintCalculator.getConstraintRegion(), 1e-8));
 
       captureRegion.clear();
-      captureRegion.addVertex(stepLength + 0.05 + 0.05, -0.05 + 0.05);
-      captureRegion.addVertex(stepLength + 0.05 - 0.05, -0.05 + 0.05);
-      captureRegion.addVertex(stepLength + 0.05 - 0.05, -0.05 - 0.05);
-      captureRegion.addVertex(stepLength + 0.05 + 0.05, -0.05 - 0.05);
+      captureRegion.addVertex(stepLength + 0.05 + 0.05, 0.5 * stanceWidth + 0.05 - 0.2);
+      captureRegion.addVertex(stepLength + 0.05 - 0.05, 0.5 * stanceWidth + 0.05 - 0.2);
+      captureRegion.addVertex(stepLength + 0.05 - 0.05, 0.5 * stanceWidth - 0.05 - 0.2);
+      captureRegion.addVertex(stepLength + 0.05 + 0.05, 0.5 * stanceWidth - 0.05 - 0.2);
       captureRegion.update();
 
       constraintCalculator.setCaptureRegion(captureRegion);
 
       constraintCalculator.updatePlanarRegionConstraintForStep(stepPose);
+
+      GeometryPolygonTestTools.assertConcavePolygon2DEquals(groundPlane.getConcaveHull(), constraintCalculator.getConstraintRegion().getConcaveHull(), 1e-8);
       assertTrue(groundPlane.epsilonEquals(constraintCalculator.getConstraintRegion(), 1e-8));
    }
 }
