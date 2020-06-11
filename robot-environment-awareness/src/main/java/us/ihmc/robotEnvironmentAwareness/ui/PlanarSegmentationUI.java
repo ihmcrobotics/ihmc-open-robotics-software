@@ -167,19 +167,20 @@ public class PlanarSegmentationUI
 
    public static PlanarSegmentationUI creatIntraprocessUI(Stage primaryStage) throws Exception
    {
-      Messager moduleMessager = KryoMessager.createIntraprocess(SegmentationModuleAPI.API,
-                                                                NetworkPorts.REA_MODULE_UI_PORT,
+      KryoMessager moduleMessager = KryoMessager.createIntraprocess(SegmentationModuleAPI.API,
+                                                                NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
                                                                 REACommunicationProperties.getPrivateNetClassList());
+      moduleMessager.setAllowSelfSubmit(true);
       REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
       return new PlanarSegmentationUI(uiMessager, primaryStage);
    }
 
-   public static PlanarSegmentationUI creatRemoteUI(Stage primaryStage, String host) throws Exception
+   public static PlanarSegmentationUI creatRemoteUI(Stage primaryStage) throws Exception
    {
-      Messager moduleMessager = KryoMessager.createTCPClient(SegmentationModuleAPI.API,
-                                                             host,
-                                                             NetworkPorts.REA_MODULE_UI_PORT,
+      KryoMessager moduleMessager = KryoMessager.createTCPServer(SegmentationModuleAPI.API,
+                                                             NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
                                                              REACommunicationProperties.getPrivateNetClassList());
+      moduleMessager.setAllowSelfSubmit(true);
       REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
       return new PlanarSegmentationUI(uiMessager, primaryStage);
    }
