@@ -16,7 +16,7 @@ import java.util.function.Supplier;
 
 /**
  * Needs to be set up as a machine that:
- * - Calls task update as a predefined llambda
+ * - Calls task update as a predefined lambda
  */
 public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanningTask
 {
