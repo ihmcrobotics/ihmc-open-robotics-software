@@ -34,6 +34,8 @@ public class PlanarSegmentationUI
    private CustomRegionMergeAnchorPaneController customRegionMergeAnchorPaneController;
    @FXML
    private PolygonizerAnchorPaneController polygonizerAnchorPaneController;
+   @FXML
+   private SegmentationDataExporterAnchorPaneController dataExporterAnchorPaneController;
 
    private final Stage primaryStage;
 
@@ -110,6 +112,15 @@ public class PlanarSegmentationUI
          System.out.println(configurationFile.getAbsolutePath());
          e.printStackTrace();
       }
+
+      dataExporterAnchorPaneController.setUiPlanarRegionDataExporterDirectoryTopic(SegmentationModuleAPI.UIPlanarRegionDataExporterDirectory);
+      dataExporterAnchorPaneController.setUiSegmentationDataExporterDirectoryTopic(SegmentationModuleAPI.UISegmentationDataExporterDirectory);
+      dataExporterAnchorPaneController.setUiSegmentationDataExportRequestTopic(SegmentationModuleAPI.UISegmentationDataExportRequest);
+      dataExporterAnchorPaneController.setUiPlanarRegionDataExportRequestTopic(SegmentationModuleAPI.UIPlanarRegionDataExportRequest);
+      dataExporterAnchorPaneController.setConfigurationFile(configurationFile);
+      dataExporterAnchorPaneController.setMainWindow(primaryStage);
+      dataExporterAnchorPaneController.attachREAMessager(uiMessager);
+      dataExporterAnchorPaneController.bindControls();;
 
       ocTreeEssentialsAnchorPaneController.setConfigurationFile(configurationFile);
       ocTreeEssentialsAnchorPaneController.attachREAMessager(uiMessager);

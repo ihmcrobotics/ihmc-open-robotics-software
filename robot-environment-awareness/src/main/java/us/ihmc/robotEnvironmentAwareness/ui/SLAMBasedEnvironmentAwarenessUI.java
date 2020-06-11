@@ -78,6 +78,11 @@ public class SLAMBasedEnvironmentAwarenessUI
       view3dFactory.addNodeToView(ihmcSLAMViewer.getRoot());
       view3dFactory.addNodeToView(depthFrameViewer.getRoot());
 
+      stereoVisionPointCloudDataExporter = new StereoVisionPointCloudDataExporter(uiMessager,
+                                                                                  SLAMModuleAPI.DepthPointCloudState,
+                                                                                  SLAMModuleAPI.UIRawDataExportDirectory,
+                                                                                  SLAMModuleAPI.UIRawDataExportRequest);
+
       if (defaultContactPoints == null)
       {
          pelvisFrameViewer = null;
@@ -111,13 +116,6 @@ public class SLAMBasedEnvironmentAwarenessUI
          view3dFactory.addNodeToView(footstepViewer.getRoot());
       }
 
-      new PlanarRegionSegmentationDataExporter(uiMessager); // No need to anything with it beside instantiating it.
-      new PlanarRegionDataExporter(uiMessager); // No need to anything with it beside instantiating it.
-      stereoVisionPointCloudDataExporter = new StereoVisionPointCloudDataExporter(uiMessager,
-                                                                                  SLAMModuleAPI.DepthPointCloudState,
-                                                                                  SLAMModuleAPI.UIRawDataExportDirectory,
-                                                                                  SLAMModuleAPI.UIRawDataExportRequest);
-
       initializeControllers(uiMessager);
 
       uiConnectionHandler = new UIConnectionHandler(primaryStage, uiMessager, SLAMModuleAPI.RequestEntireModuleState);
@@ -143,7 +141,9 @@ public class SLAMBasedEnvironmentAwarenessUI
       slamAnchorPaneController.attachREAMessager(uiMessager);
       slamAnchorPaneController.bindControls();
 
+      // TODO set the configuration file
       slamDataManagerAnchorPaneController.attachREAMessager(uiMessager);
+      slamDataManagerAnchorPaneController.setMainWindow(primaryStage);
       slamDataManagerAnchorPaneController.bindControls();
    }
 
