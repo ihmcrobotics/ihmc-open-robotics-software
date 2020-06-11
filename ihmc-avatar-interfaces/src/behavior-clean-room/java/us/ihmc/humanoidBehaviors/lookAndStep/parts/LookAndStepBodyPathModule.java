@@ -11,13 +11,13 @@ import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
 {
-   // TODO: Could optional be used here for some things to make things more flexible?
-   private Field<Supplier<HumanoidRobotState>> robotStateSupplier = required();
-   private Field<Supplier<LookAndStepBehavior.State>> behaviorStateSupplier = required();
+   private Supplier<HumanoidRobotState> robotStateSupplier;
+   private Supplier<LookAndStepBehavior.State> behaviorStateSupplier;
 
    private final TypedInput<PlanarRegionsList> mapRegionsInput = new TypedInput<>();
    private final TypedInput<Pose3D> goalInput = new TypedInput<>();
@@ -52,24 +52,26 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
    private void evaluateAndRun()
    {
       validateNonChanging();
+      Objects.requireNonNull(robotStateSupplier);
+      Objects.requireNonNull(behaviorStateSupplier);
 
       update(mapRegionsInput.get(),
              goalInput.get(),
-             robotStateSupplier.get().get(),
+             robotStateSupplier.get(),
              mapRegionsExpirationTimer.createSnapshot(lookAndStepBehaviorParameters.get().getPlanarRegionsExpiration()),
              planningFailedTimer.createSnapshot(lookAndStepBehaviorParameters.get().getWaitTimeAfterPlanFailed()),
-             behaviorStateSupplier.get().get());
+             behaviorStateSupplier.get());
 
       run();
    }
 
    public void setRobotStateSupplier(Supplier<HumanoidRobotState> robotStateSupplier)
    {
-      this.robotStateSupplier.set(robotStateSupplier);
+      this.robotStateSupplier = robotStateSupplier;
    }
 
    public void setBehaviorStateSupplier(Supplier<LookAndStepBehavior.State> behaviorStateSupplier)
    {
-      this.behaviorStateSupplier.set(behaviorStateSupplier);
+      this.behaviorStateSupplier = behaviorStateSupplier;
    }
 }
