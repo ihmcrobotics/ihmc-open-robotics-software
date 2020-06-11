@@ -6,6 +6,8 @@ import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPr
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -81,6 +83,8 @@ public class LIDARBasedREAModule
    private final Messager reaMessager;
 
    private final AtomicReference<Boolean> preserveOcTreeHistory;
+
+   private final List<ClosingListener> closingListeners = new ArrayList<>();
 
    private LIDARBasedREAModule(Messager reaMessager, File configurationFile)
    {
@@ -182,6 +186,11 @@ public class LIDARBasedREAModule
       preserveOcTreeHistory = reaMessager.createInput(REAModuleAPI.StereoVisionBufferPreservingEnable, false);
       enableStereoBuffer = reaMessager.createInput(REAModuleAPI.StereoVisionBufferEnable, false);
       octreeResolution = reaMessager.createInput(REAModuleAPI.OcTreeResolution, mainUpdater.getMainOctree().getResolution());
+   }
+
+   public void attachClosingListener(ClosingListener closingListener)
+   {
+      this.closingListeners.add(closingListener);
    }
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
@@ -356,6 +365,8 @@ public class LIDARBasedREAModule
    public void stop()
    {
       LogTools.info("REA Module is going down.");
+
+      closingListeners.forEach(ClosingListener::closing);
 
       try
       {
