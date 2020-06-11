@@ -5,7 +5,6 @@ import java.util.Random;
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
 import org.ddogleg.optimization.functions.FunctionNtoM;
-import org.ddogleg.optimization.trustregion.ConfigTrustRegion;
 import org.ejml.data.DMatrixRMaj;
 
 import georegression.geometry.ConvertRotation3D_F64;
@@ -118,9 +117,7 @@ public class DdoglegInverseKinematicsCalculator implements InverseKinematicsCalc
 
       FunctionNtoM func = new FunctionErrors(desiredTransform, parameterChangePenalty);
 
-      ConfigTrustRegion config = new ConfigTrustRegion();
-      config.regionMaximum = 0.1;
-      UnconstrainedLeastSquares optimizer = FactoryOptimization.dogleg(config, false); 
+      UnconstrainedLeastSquares<DMatrixRMaj> optimizer = FactoryOptimization.dogleg(null, true); 
 
       optimizer.setFunction(func, null);
 
