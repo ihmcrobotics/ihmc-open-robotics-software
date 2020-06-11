@@ -4,19 +4,20 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 
 import controller_msgs.msg.dds.FootstepDataMessage;
 import javafx.animation.AnimationTimer;
 import javafx.scene.Group;
 import javafx.scene.Node;
-import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorPalette1D;
 import us.ihmc.javaFXVisualizers.FootstepMeshManager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
-import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepMeshViewer extends AnimationTimer
 {
@@ -33,7 +34,7 @@ public class FootstepMeshViewer extends AnimationTimer
 
    private final AtomicReference<Boolean> enable;
 
-   public FootstepMeshViewer(REAUIMessager uiMessager)
+   public FootstepMeshViewer(REAUIMessager uiMessager, Function<RobotSide, ConvexPolygon2D> contactPointsProvider)
    {
       newFootstepDataMessage = uiMessager.createInput(SLAMModuleAPI.FootstepDataState);
 
@@ -48,7 +49,12 @@ public class FootstepMeshViewer extends AnimationTimer
 
       for (int i = 0; i < MAXIMUM_NUMBER_OF_FOOTSTEPS_TO_VIZ; i++)
       {
-         footstepMesheManagers.add(new FootstepMeshManager(root, meshBuilder, i));
+         int index = i;
+         footstepMesheManagers.add(new FootstepMeshManager(root,
+                                                           meshBuilder,
+                                                           contactPointsProvider,
+                                                           () -> numberOfFootstepsToRender.get() == (index + 1),
+                                                           () -> false));
       }
 
       uiMessager.registerTopicListener(showviz, show -> footstepMesheManagers.forEach(mesh -> mesh.getMeshHolder().getMeshView().setVisible(show)));
@@ -68,15 +74,6 @@ public class FootstepMeshViewer extends AnimationTimer
       {
          footstepMesheManagers.get(i).computeMesh();
          footstepMesheManagers.get(i).updateMesh();
-      }
-   }
-
-   public void setDefaultContactPoints(SideDependentList<List<Point2D>> defaultContactPoints)
-   {
-      for (int i = 0; i < footstepMesheManagers.size(); i++)
-      {
-         footstepMesheManagers.get(i).setFoothold(defaultContactPoints);
-         footstepMesheManagers.get(i).setIgnorePartialFootHolds(true);
       }
    }
 
@@ -105,7 +102,7 @@ public class FootstepMeshViewer extends AnimationTimer
    {
       if (!enable.get())
          return;
-      
+
       render();
 
       if (newFootstepDataMessage.get() == null)

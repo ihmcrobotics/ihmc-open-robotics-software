@@ -2,6 +2,7 @@ package us.ihmc.robotEnvironmentAwareness.ui;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Function;
 
 import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -11,6 +12,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.messager.Messager;
@@ -26,6 +28,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class SLAMBasedEnvironmentAwarenessUI
@@ -88,8 +91,22 @@ public class SLAMBasedEnvironmentAwarenessUI
                                                                       SLAMModuleAPI.UISensorPoseHistoryFrames,
                                                                       SensorFrameViewer.createStampedPosePacketSensorFrameExtractor(),
                                                                       SLAMModuleAPI.SensorPoseHistoryClear);
-         footstepViewer = new FootstepMeshViewer(uiMessager);
-         footstepViewer.setDefaultContactPoints(defaultContactPoints);
+         Function<RobotSide, ConvexPolygon2D> contactPointsProvider = new Function<RobotSide, ConvexPolygon2D>()
+         {
+            @Override
+            public ConvexPolygon2D apply(RobotSide robotSide)
+            {
+               ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
+               for (int i = 0; i < defaultContactPoints.get(robotSide).size(); i++)
+               {
+                  defaultFoothold.addVertex(defaultContactPoints.get(robotSide).get(i));
+               }
+
+               defaultFoothold.update();
+               return defaultFoothold;
+            }
+         };
+         footstepViewer = new FootstepMeshViewer(uiMessager, contactPointsProvider);
 
          view3dFactory.addNodeToView(pelvisFrameViewer.getRoot());
          view3dFactory.addNodeToView(footstepViewer.getRoot());
