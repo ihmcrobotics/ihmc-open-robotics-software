@@ -8,7 +8,6 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
-import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.*;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.*;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
@@ -35,7 +34,7 @@ public class PlanarSegmentationUI
    @FXML
    private PolygonizerAnchorPaneController polygonizerAnchorPaneController;
    @FXML
-   private SegmentationDataExporterAnchorPaneController dataExporterAnchorPaneController;
+   private SegmentationDataExporterAnchorPaneController segmentationDataExporterAnchorPaneController;
 
    private final Stage primaryStage;
 
@@ -113,14 +112,14 @@ public class PlanarSegmentationUI
          e.printStackTrace();
       }
 
-      dataExporterAnchorPaneController.setUiPlanarRegionDataExporterDirectoryTopic(SegmentationModuleAPI.UIPlanarRegionDataExporterDirectory);
-      dataExporterAnchorPaneController.setUiSegmentationDataExporterDirectoryTopic(SegmentationModuleAPI.UISegmentationDataExporterDirectory);
-      dataExporterAnchorPaneController.setUiSegmentationDataExportRequestTopic(SegmentationModuleAPI.UISegmentationDataExportRequest);
-      dataExporterAnchorPaneController.setUiPlanarRegionDataExportRequestTopic(SegmentationModuleAPI.UIPlanarRegionDataExportRequest);
-      dataExporterAnchorPaneController.setConfigurationFile(configurationFile);
-      dataExporterAnchorPaneController.setMainWindow(primaryStage);
-      dataExporterAnchorPaneController.attachREAMessager(uiMessager);
-      dataExporterAnchorPaneController.bindControls();;
+      segmentationDataExporterAnchorPaneController.setUiPlanarRegionDataExporterDirectoryTopic(SegmentationModuleAPI.UIPlanarRegionDataExporterDirectory);
+      segmentationDataExporterAnchorPaneController.setUiSegmentationDataExporterDirectoryTopic(SegmentationModuleAPI.UISegmentationDataExporterDirectory);
+      segmentationDataExporterAnchorPaneController.setUiSegmentationDataExportRequestTopic(SegmentationModuleAPI.UISegmentationDataExportRequest);
+      segmentationDataExporterAnchorPaneController.setUiPlanarRegionDataExportRequestTopic(SegmentationModuleAPI.UIPlanarRegionDataExportRequest);
+      segmentationDataExporterAnchorPaneController.setConfigurationFile(configurationFile);
+      segmentationDataExporterAnchorPaneController.setMainWindow(primaryStage);
+      segmentationDataExporterAnchorPaneController.attachREAMessager(uiMessager);
+      segmentationDataExporterAnchorPaneController.bindControls();;
 
       ocTreeEssentialsAnchorPaneController.setConfigurationFile(configurationFile);
       ocTreeEssentialsAnchorPaneController.attachREAMessager(uiMessager);
