@@ -125,6 +125,7 @@ public class PerceptionSuite
       {
          realSenseSLAMModule = createSLAMModule();
          realSenseSLAMModule.start();
+         realSenseSLAMModule.attachClosingListener(this::stopRealSenseSLAM);
       }
       else
       {
@@ -252,6 +253,7 @@ public class PerceptionSuite
       if (lidarREAModule == null)
       {
          lidarREAModule = LIDARBasedREAModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node);
+         lidarREAModule.attachClosingListener(this::stopLidarREA);
          lidarREAModule.start();
       }
       else
@@ -336,6 +338,7 @@ public class PerceptionSuite
       if (segmentationModule == null)
       {
          segmentationModule = PlanarSegmentationModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node);
+         segmentationModule.attachClosingListener(this::stopMapSegmentation);
          segmentationModule.start();
 
          realSenseSLAMModule.attachOcTreeConsumer(segmentationModule);

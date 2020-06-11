@@ -35,6 +35,8 @@ import us.ihmc.ros2.Ros2Node;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -66,6 +68,8 @@ public class PlanarSegmentationModule implements OcTreeConsumer
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
    private final Messager reaMessager;
+
+   private final List<ClosingListener> closingListeners = new ArrayList<>();
 
    private PlanarSegmentationModule(Messager reaMessager, File configurationFile) throws Exception
    {
@@ -187,7 +191,6 @@ public class PlanarSegmentationModule implements OcTreeConsumer
       reaMessager.submitMessage(SegmentationModuleAPI.RequestEntireModuleState, true);
    }
 
-   @Override
    public void reportOcTree(NormalOcTree ocTree, Tuple3DReadOnly sensorPosition)
    {
       this.ocTree.set(ocTree);
@@ -292,6 +295,8 @@ public class PlanarSegmentationModule implements OcTreeConsumer
    public void stop()
    {
       LogTools.info("Planar segmentation Module is going down.");
+
+      closingListeners.forEach(ClosingListener::closing);
 
       try
       {
