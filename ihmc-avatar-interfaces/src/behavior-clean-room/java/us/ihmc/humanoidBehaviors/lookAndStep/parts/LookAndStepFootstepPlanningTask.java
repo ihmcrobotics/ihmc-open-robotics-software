@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.util.TimerSnapshot;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -266,9 +267,10 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
 
       LogTools.info("Footstep planner completed in {} s!", stopwatch.totalElapsed());
 
+      // print log duration?
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule.get());
       footstepPlannerLogger.logSession();
-      FootstepPlannerLogger.deleteOldLogs(30); // TODO: Do this somewhere else
+      ThreadTools.startAThread(() -> FootstepPlannerLogger.deleteOldLogs(30), "FootstepPlanLogDeletion");
 
       if (footstepPlannerOutput.getFootstepPlan().getNumberOfSteps() < 1) // failed
       {
