@@ -83,7 +83,7 @@ public class BehaviorHelper
       managedMessager = new ManagedMessager(messager);
       managedROS2Node = new ManagedROS2Node(ros2Node);
 
-      setCommunicationCallbacksEnabled(false); // should do this?
+      setCommunicationCallbacksEnabled(false);
    }
 
    // Construction-only methods:
