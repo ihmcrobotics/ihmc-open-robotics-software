@@ -63,6 +63,11 @@ public class SegmentationModuleAPI
    public static final Topic<Boolean> RequestPlanarRegionSegmentation = topic("RequestPlanarRegionSegmentation");
    public static final Topic<Boolean> RequestPlanarRegionsIntersections = topic("RequestPlanarRegionsIntersections");
 
+   public static final Topic<Boolean> UISegmentationDataExportRequest = topic("UISegmentationDataExportRequest");
+   public static final Topic<Boolean> UIPlanarRegionDataExportRequest = topic("UIPlanarRegionDataExportRequest");
+   public static final Topic<String> UISegmentationDataExporterDirectory = topic("UISegmentationDataExporterDirectory");
+   public static final Topic<String> UIPlanarRegionDataExporterDirectory = topic("UIPlanarRegionDataExporterDirectory");
+
    public static final Topic<Boolean> SaveUpdaterConfiguration = topic("SaveUpdaterConfiguration");
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
