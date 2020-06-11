@@ -202,6 +202,7 @@ public class PerceptionSuite
       {
          LogTools.info("Map Segmentation Module must be running first.");
          messager.submitMessage(PerceptionSuiteAPI.RunMapSegmentationUI, false);
+         return;
       }
 
       if (planarSegmentationUI == null)
@@ -278,6 +279,7 @@ public class PerceptionSuite
       {
          LogTools.info("Lidar REA must be running first.");
          messager.submitMessage(PerceptionSuiteAPI.RunLidarREAUI, false);
+         return;
       }
 
       if (lidarREAModuleUI == null)
