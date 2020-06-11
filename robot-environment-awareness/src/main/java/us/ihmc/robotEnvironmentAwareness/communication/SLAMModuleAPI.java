@@ -78,9 +78,7 @@ public class SLAMModuleAPI
 
    public static final Topic<PlanarRegionsListMessage> SLAMPlanarRegionsState = Root.child(Module).child(PlanarRegions).topic(Data);
    public static final Topic<RandomICPSLAMParameters> SLAMParameters = Root.child(Module).topic(Parameters);
-
-   public static final Topic<DisplayType> SLAMOcTreeDisplayType = Root.child(UI).child(OcTree).topic(Display);
-
+   
    public static final Topic<String> SLAMStatus = Root.child(Module).topic(Status);
    public static final Topic<String> QueuedBuffers = Root.child(Module).child(Buffer).topic(Status);
 
