@@ -8,6 +8,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.*;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.*;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
@@ -181,22 +182,24 @@ public class PlanarSegmentationUI
 
    public static PlanarSegmentationUI createIntraprocessUI(Stage primaryStage) throws Exception
    {
-      KryoMessager moduleMessager = KryoMessager.createIntraprocess(SegmentationModuleAPI.API,
-                                                                NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
-                                                                REACommunicationProperties.getPrivateNetClassList());
-      moduleMessager.setAllowSelfSubmit(true);
-      REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
+      Messager messager = createKryoMessager();
+      REAUIMessager uiMessager = new REAUIMessager(messager);
       return new PlanarSegmentationUI(uiMessager, primaryStage);
    }
 
    public static PlanarSegmentationUI createRemoteUI(Stage primaryStage) throws Exception
    {
-      KryoMessager moduleMessager = KryoMessager.createTCPServer(SegmentationModuleAPI.API,
-                                                             NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
-                                                             REACommunicationProperties.getPrivateNetClassList());
-      moduleMessager.setAllowSelfSubmit(true);
-      REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
+      Messager messager = createKryoMessager();
+      REAUIMessager uiMessager = new REAUIMessager(messager);
       return new PlanarSegmentationUI(uiMessager, primaryStage);
    }
 
+   private static Messager createKryoMessager()
+   {
+      KryoMessager messager = KryoMessager.createIntraprocess(SegmentationModuleAPI.API,
+                                                              NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
+                                                              REACommunicationProperties.getPrivateNetClassList());
+      messager.setAllowSelfSubmit(true);
+      return messager;
+   }
 }
