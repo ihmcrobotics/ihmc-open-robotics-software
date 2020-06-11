@@ -53,8 +53,16 @@ public class PlanarSegmentationUI
 
       meshViewer = new SegmentationMeshViewer(uiMessager);
 
-      new PlanarRegionSegmentationDataExporter(uiMessager); // No need to anything with it beside instantiating it.
-      new PlanarRegionDataExporter(uiMessager); // No need to anything with it beside instantiating it.
+      // No need to anything with it beside instantiating it.
+      new PlanarRegionSegmentationDataExporter(uiMessager,
+                                               SegmentationModuleAPI.PlanarRegionsSegmentationState,
+                                               SegmentationModuleAPI.UISegmentationDataExporterDirectory,
+                                               SegmentationModuleAPI.UISegmentationDataExportRequest);
+      // No need to anything with it beside instantiating it.
+      new PlanarRegionDataExporter(uiMessager,
+                                   SegmentationModuleAPI.PlanarRegionsState,
+                                   SegmentationModuleAPI.UIPlanarRegionDataExporterDirectory,
+                                   SegmentationModuleAPI.UIPlanarRegionDataExportRequest); // No need to anything with it beside instantiating it.
 
       initializeControllers(uiMessager);
 

@@ -75,7 +75,6 @@ public class SLAMBasedEnvironmentAwarenessUI
                                                                               SLAMModuleAPI.UISensorPoseHistoryFrames,
                                                                               SensorFrameViewer.createStereoVisionSensorFrameExtractor(),
                                                                               SLAMModuleAPI.SensorPoseHistoryClear);
-
       view3dFactory.addNodeToView(ihmcSLAMViewer.getRoot());
       view3dFactory.addNodeToView(depthFrameViewer.getRoot());
 
