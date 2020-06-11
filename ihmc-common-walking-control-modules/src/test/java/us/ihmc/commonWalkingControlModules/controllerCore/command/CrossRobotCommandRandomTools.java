@@ -362,12 +362,12 @@ public class CrossRobotCommandRandomTools
                                                        nextElementIn(random, possibleFrames));
    }
 
-   public static DMatrixRMaj nextDenseMatrix64F(Random random)
+   public static DMatrixRMaj nextDMatrixRMaj(Random random)
    {
       return RandomMatrices_DDRM.rectangle(random.nextInt(10), random.nextInt(10), random);
    }
 
-   public static DMatrixRMaj nextDenseMatrix64F(Random random, int numRow, int numCol)
+   public static DMatrixRMaj nextDMatrixRMaj(Random random, int numRow, int numCol)
    {
       return RandomMatrices_DDRM.rectangle(numRow, numCol, random);
    }
@@ -376,7 +376,7 @@ public class CrossRobotCommandRandomTools
    {
       DenseMatrixArrayList next = new DenseMatrixArrayList();
       while (next.size() < size)
-         next.add().set(nextDenseMatrix64F(random, numRow, numCol));
+         next.add().set(nextDMatrixRMaj(random, numRow, numCol));
       return next;
    }
 
@@ -1549,7 +1549,7 @@ public class CrossRobotCommandRandomTools
          numberOfForceSensors = Math.max(numberOfForceSensors, 1);
       for (int forceSensorIndex = 0; forceSensorIndex < numberOfForceSensors; forceSensorIndex++)
       {
-         next.registerForceSensor("ForceSensor" + forceSensorIndex).set(nextDenseMatrix64F(random, 6, 1));
+         next.registerForceSensor("ForceSensor" + forceSensorIndex).set(nextDMatrixRMaj(random, 6, 1));
       }
 
       return next;
@@ -1611,7 +1611,7 @@ public class CrossRobotCommandRandomTools
       List<RigidBodyBasics> allBodies = SubtreeStreams.from(rootBody).collect(Collectors.toList());
       RigidBodyBasics rigidBody = nextElementIn(random, allBodies);
       next.setDefinition(rigidBody.getName(), nextElementIn(random, possibleFrames), rigidBody);
-      next.setWrench(nextDenseMatrix64F(random, 6, 1));
+      next.setWrench(nextDMatrixRMaj(random, 6, 1));
       return next;
    }
 
