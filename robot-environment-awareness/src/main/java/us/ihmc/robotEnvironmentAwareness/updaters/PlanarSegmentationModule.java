@@ -351,7 +351,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
    public static PlanarSegmentationModule createIntraprocessModule(String configurationFilePath) throws Exception
    {
-      Messager messager = new SharedMemoryMessager(SegmentationModuleAPI.API);
+      Messager messager = createKryoMessager();
 
       File configurationFile = new File(configurationFilePath);
       try
@@ -370,10 +370,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
    public static PlanarSegmentationModule createIntraprocessModule(String configurationFilePath, Ros2Node ros2Node) throws Exception
    {
-      KryoMessager moduleMessager = KryoMessager.createIntraprocess(SegmentationModuleAPI.API,
-                                                                    NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
-                                                                    REACommunicationProperties.getPrivateNetClassList());
-      moduleMessager.setAllowSelfSubmit(true);
+      Messager messager = createKryoMessager();
 
       File configurationFile = new File(configurationFilePath);
       try
@@ -387,6 +384,15 @@ public class PlanarSegmentationModule implements OcTreeConsumer
          e.printStackTrace();
       }
 
-      return new PlanarSegmentationModule(ros2Node, moduleMessager, configurationFile);
+      return new PlanarSegmentationModule(ros2Node, messager, configurationFile);
+   }
+
+   private static Messager createKryoMessager()
+   {
+      KryoMessager messager = KryoMessager.createIntraprocess(SegmentationModuleAPI.API,
+                                                              NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
+                                                              REACommunicationProperties.getPrivateNetClassList());
+      messager.setAllowSelfSubmit(true);
+      return messager;
    }
 }
