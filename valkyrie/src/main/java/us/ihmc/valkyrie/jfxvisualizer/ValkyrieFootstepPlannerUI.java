@@ -18,8 +18,7 @@ import us.ihmc.javaFXToolkit.messager.SharedMemoryJavaFXMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.valkyrie.ValkyrieNetworkProcessor;
 import us.ihmc.valkyrie.ValkyrieRobotModel;
-import us.ihmc.valkyrie.parameters.ValkyrieAdaptiveSwingParameters;
-import us.ihmc.valkyrie.parameters.ValkyrieFootstepPostProcessorParameters;
+import us.ihmc.valkyrie.parameters.ValkyrieUIAuxiliaryData;
 import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
 
 /**
@@ -29,8 +28,6 @@ import us.ihmc.valkyrieRosControl.ValkyrieRosControlController;
  */
 public class ValkyrieFootstepPlannerUI extends Application
 {
-   private static final Vector3D rootJointToMidFootOffset = new Vector3D(0.0359987, 0.0, -0.9900972);
-
    private SharedMemoryJavaFXMessager messager;
    private RemoteUIMessageConverter messageConverter;
    private FootstepPlannerUI ui;
@@ -50,20 +47,20 @@ public class ValkyrieFootstepPlannerUI extends Application
 
       ui = FootstepPlannerUI.createMessagerUI(primaryStage,
                                               messager,
-                                              model.getFootstepPlannerParameters(),
                                               model.getVisibilityGraphsParameters(),
-                                              new ValkyrieFootstepPostProcessorParameters(),
+                                              model.getFootstepPlannerParameters(),
+                                              model.getSwingPlannerParameters(),
+                                              model.getSplitFractionCalculatorParameters(),
                                               model,
                                               previewModel,
                                               model.getContactPointParameters(),
                                               model.getWalkingControllerParameters(),
-                                              model.getHighLevelControllerParameters().getStandPrepParameters()::getSetpoint,
-                                              rootJointToMidFootOffset);
+                                              new ValkyrieUIAuxiliaryData());
       ui.show();
 
       if(!ValkyrieNetworkProcessor.isFootstepPlanningModuleStarted())
       {
-         FootstepPlanningModule plannerModule = FootstepPlanningModuleLauncher.createModule(model, DomainFactory.PubSubImplementation.FAST_RTPS, new ValkyrieAdaptiveSwingParameters());
+         FootstepPlanningModule plannerModule = FootstepPlanningModuleLauncher.createModule(model, DomainFactory.PubSubImplementation.FAST_RTPS);
 
          // Create logger and connect to messager
          FootstepPlannerLogger logger = new FootstepPlannerLogger(plannerModule);

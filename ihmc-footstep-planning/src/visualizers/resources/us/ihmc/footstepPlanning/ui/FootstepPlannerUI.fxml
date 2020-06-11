@@ -27,21 +27,27 @@
                     </content>
                 </Tab>
 
-                <Tab text="Footstep Parameters">
-                    <content>
-                        <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml"/>
-                    </content>
-                </Tab>
-
                 <Tab text="Visibility Graph Parameters">
                     <content>
                         <fx:include fx:id="visibilityGraphsParametersUI" source="VisibilityGraphsParametersUI.fxml" />
                     </content>
                 </Tab>
 
-                <Tab text="Footstep Post Processing">
+                <Tab text="Footstep Parameters">
                     <content>
-                        <fx:include fx:id="footstepPostProcessingParametersUI" source="FootstepPostProcessingParametersUI.fxml" />
+                        <fx:include fx:id="footstepPlannerParametersUI" source="FootstepPlannerParametersUI.fxml"/>
+                    </content>
+                </Tab>
+
+                <Tab text="Swing Parameters">
+                    <content>
+                        <fx:include fx:id="swingPlannerParametersUI" source="SwingPlannerParametersUI.fxml" />
+                    </content>
+                </Tab>
+
+                <Tab text="ICP Split Fraction Parameters">
+                    <content>
+                        <fx:include fx:id="splitFractionParametersUI" source="SplitFractionParametersUI.fxml" />
                     </content>
                 </Tab>
 

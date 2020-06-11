@@ -9,7 +9,6 @@ import controller_msgs.msg.dds.FootstepPlanningToolboxOutputStatus;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.ToolboxStateMessage;
 import us.ihmc.communication.IHMCROS2Publisher;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PacketDestination;
 import us.ihmc.communication.packets.ToolboxState;
@@ -79,7 +78,7 @@ public class PlanPathToLocationBehavior extends AbstractBehavior
       toolboxStatePublisher = createPublisher(ToolboxStateMessage.class, footstepPlannerInputTopic);
       footstepPlanningRequestPublisher = createPublisher(FootstepPlanningRequestPacket.class, footstepPlannerInputTopic);
       footstepPlannerParametersPublisher = createPublisher(FootstepPlannerParametersPacket.class, footstepPlannerInputTopic);
-      goalFootstepToUIVisualization = createBehaviorPublisher(FootstepDataListMessage.class);
+      goalFootstepToUIVisualization = createBehaviorOutputPublisher(FootstepDataListMessage.class);
 
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
    }

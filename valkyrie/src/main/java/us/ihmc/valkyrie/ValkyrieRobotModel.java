@@ -19,6 +19,10 @@ import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParam
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
+import us.ihmc.footstepPlanning.icp.DefaultSplitFractionCalculatorParameters;
+import us.ihmc.footstepPlanning.icp.SplitFractionCalculatorParametersBasics;
+import us.ihmc.footstepPlanning.swing.DefaultSwingPlannerParameters;
+import us.ihmc.footstepPlanning.swing.SwingPlannerParametersBasics;
 import us.ihmc.humanoidRobotics.footstep.footstepGenerator.QuadTreeFootstepPlanningParameters;
 import us.ihmc.ihmcPerception.depthData.CollisionBoxProvider;
 import us.ihmc.modelFileLoaders.SdfLoader.*;
@@ -515,6 +519,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
    public VisibilityGraphsParametersBasics getVisibilityGraphsParameters()
    {
       return new DefaultVisibilityGraphParameters();
+   }
+
+   @Override
+   public SwingPlannerParametersBasics getSwingPlannerParameters()
+   {
+      return new DefaultSwingPlannerParameters();
+   }
+
+   @Override
+   public SplitFractionCalculatorParametersBasics getSplitFractionCalculatorParameters()
+   {
+      return new DefaultSplitFractionCalculatorParameters();
    }
 
    @Override

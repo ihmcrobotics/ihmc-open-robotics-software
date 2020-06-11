@@ -1,40 +1,59 @@
 package us.ihmc.footstepPlanning;
 
 import us.ihmc.euclid.referenceFrame.FramePose3D;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class FootstepPlan
+public class FootstepPlan implements FootstepPlanReadOnly
 {
-   private final ArrayList<Footstep> footsteps = new ArrayList<>();
+   private final ArrayList<PlannedFootstep> footsteps = new ArrayList<>();
+   private double finalTransferSplitFraction = -1.0;
+   private double finalTransferWeightDistribution = -1.0;
 
-   public FootstepPlan()
-   {
-   }
-
+   @Override
    public int getNumberOfSteps()
    {
       return footsteps.size();
    }
 
-   public Footstep getFootstep(int footstepIndex)
+   @Override
+   public PlannedFootstep getFootstep(int footstepIndex)
    {
       return footsteps.get(footstepIndex);
    }
 
-   public void addFootstep(Footstep footstep)
+   public void addFootstep(PlannedFootstep footstep)
    {
       footsteps.add(footstep);
    }
 
-   public Footstep addFootstep(RobotSide robotSide, FramePose3D soleFramePose)
+   public PlannedFootstep addFootstep(RobotSide robotSide, FramePose3D soleFramePose)
    {
-      Footstep simpleFootstep = new Footstep(robotSide, soleFramePose);
+      PlannedFootstep simpleFootstep = new PlannedFootstep(robotSide, soleFramePose);
       footsteps.add(simpleFootstep);
       return simpleFootstep;
+   }
+
+   public double getFinalTransferSplitFraction()
+   {
+      return finalTransferSplitFraction;
+   }
+
+   public double getFinalTransferWeightDistribution()
+   {
+      return finalTransferWeightDistribution;
+   }
+
+   public void setFinalTransferSplitFraction(double finalTransferSplitFraction)
+   {
+      this.finalTransferSplitFraction = finalTransferSplitFraction;
+   }
+
+   public void setFinalTransferWeightDistribution(double finalTransferWeightDistribution)
+   {
+      this.finalTransferWeightDistribution = finalTransferWeightDistribution;
    }
 
    public void reverse()
@@ -45,6 +64,8 @@ public class FootstepPlan
    public void clear()
    {
       footsteps.clear();
+      finalTransferSplitFraction = -1.0;
+      finalTransferWeightDistribution = -1.0;
    }
 
    public void remove(int footstepIndex)

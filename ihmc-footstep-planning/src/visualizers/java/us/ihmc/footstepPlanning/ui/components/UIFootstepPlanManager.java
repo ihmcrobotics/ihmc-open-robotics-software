@@ -58,6 +58,7 @@ public class UIFootstepPlanManager
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ManualSwingHeight, value -> updateStepHeights());
 
       messager.registerTopicListener(FootstepPlannerMessagerAPI.ManuallyAdjustmentedStep, this::updateStepPlacements);
+      messager.registerTopicListener(FootstepPlannerMessagerAPI.OverrideSpecificSwingTime, this::updateSpecificStepSwingTime);
 
       // Send plan to robot when requested
       Runnable dispathPlanRunnable = () -> messager.submitMessage(FootstepPlannerMessagerAPI.FootstepPlanToRobot, adjustedPath.get());
@@ -119,6 +120,15 @@ public class UIFootstepPlanManager
       footstepDataMessage.getLocation().set(manuallyAdjustedStep.getValue().getPosition());
       footstepDataMessage.getOrientation().set(manuallyAdjustedStep.getValue().getOrientation());
       messager.submitMessage(FootstepPlannerMessagerAPI.FootstepToUpdateViz, Pair.of(stepIndex, footstepDataMessage));
+   }
+
+   private void updateSpecificStepSwingTime(Pair<Integer, Double> specificStepSwingTime)
+   {
+      int index = specificStepSwingTime.getKey();
+      if (index >= 0 && index < adjustedPath.get().getFootstepDataList().size())
+      {
+         adjustedPath.get().getFootstepDataList().get(index).setSwingDuration(specificStepSwingTime.getValue());
+      }
    }
 
    private void updatePaths(FootstepDataListMessage plannedPath)

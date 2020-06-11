@@ -14,6 +14,10 @@
                         <registry name="ICPOptimizationController">
                             <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
                         </registry>
+                        <registry name="ICPController">
+                            <parameter name="controllerThresholdForStuck" type="DoubleParameter" min="0.0" max="1.0" value="0.01"/>
+                            <parameter name="captureKi" type="DoubleParameter" min="0.0" max="1.0" value="1.0"/>
+                        </registry>
                         <parameter name="allowMomentumRecoveryWeight" type="BooleanParameter" value="true"/>
                         <parameter name="LinearMomentumRateWeightX" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
                         <parameter name="LinearMomentumRateWeightY" type="DoubleParameter" min="0.0" max="1.0" value="0.1"/>
@@ -235,7 +239,7 @@
                             <parameter name="maxICPErrorBeforeSingleSupportForwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.035"/>
                             <parameter name="maxICPErrorBeforeSingleSupportBackwardX" type="DoubleParameter" min="0.0" max="1.0" value="0.035"/>
                             <parameter name="maxICPErrorBeforeSingleSupportInnerY" type="DoubleParameter" min="0.0" max="1.0" value="0.015"/>
-                            <parameter name="maxICPErrorBeforeSingleSupportOuterY" type="DoubleParameter" min="0.0" max="1.0" value="0.012"/>
+                            <parameter name="maxICPErrorBeforeSingleSupportOuterY" type="DoubleParameter" min="0.0" max="1.0" value="0.013"/>
                         </registry>
                     </registry>
                 </registry>
