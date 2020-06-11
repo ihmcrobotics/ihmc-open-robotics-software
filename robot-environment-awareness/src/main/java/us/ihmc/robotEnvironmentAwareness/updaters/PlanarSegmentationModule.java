@@ -257,7 +257,10 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
    public static PlanarSegmentationModule createRemoteModule(String configurationFilePath) throws Exception
    {
-      Messager messager = new SharedMemoryMessager(SegmentationModuleAPI.API);
+      KryoMessager messager = KryoMessager.createTCPServer(SegmentationModuleAPI.API,
+                                                                    NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
+                                                                    REACommunicationProperties.getPrivateNetClassList());
+      messager.setAllowSelfSubmit(true);
       return new PlanarSegmentationModule(messager, new File(configurationFilePath));
    }
 
@@ -266,7 +269,10 @@ public class PlanarSegmentationModule implements OcTreeConsumer
                                                                    ROS2Topic<?> outputTopic,
                                                                    String configurationFilePath) throws Exception
    {
-      Messager messager = new SharedMemoryMessager(SegmentationModuleAPI.API);
+      KryoMessager moduleMessager = KryoMessager.createIntraprocess(SegmentationModuleAPI.API,
+                                                                    NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
+                                                                    REACommunicationProperties.getPrivateNetClassList());
+      moduleMessager.setAllowSelfSubmit(true);
 
       File configurationFile = new File(configurationFilePath);
       try
@@ -280,6 +286,6 @@ public class PlanarSegmentationModule implements OcTreeConsumer
          e.printStackTrace();
       }
 
-      return new PlanarSegmentationModule(inputTopic, customRegionTopic, outputTopic, messager, configurationFile);
+      return new PlanarSegmentationModule(inputTopic, customRegionTopic, outputTopic, moduleMessager, configurationFile);
    }
 }
