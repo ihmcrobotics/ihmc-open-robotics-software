@@ -1,46 +1,48 @@
 package us.ihmc.javaFXVisualizers;
 
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import controller_msgs.msg.dds.FootstepDataMessage;
 import javafx.scene.Group;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Material;
 import javafx.scene.shape.Mesh;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.robotics.robotSide.SideDependentList;
+
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
+import java.util.function.Function;
 
 public class FootstepMeshManager
 {
-   private static final double ADDITIONAL_HEIGHT = 0.01;
+   private static final double POLYGON_THICKNESS = 0.01;
 
    private final JavaFXMultiColorMeshBuilder meshBuilder;
-   
-   private final AtomicBoolean selected = new AtomicBoolean(false);
-   private final AtomicBoolean ignorePartialFootholds = new AtomicBoolean(false);
-   
-   private final SideDependentList<ConvexPolygon2D> defaultContactPoints = new SideDependentList<>();
-   
-   private final int index;
+
+   private final Function<RobotSide, ConvexPolygon2D> defaultContactPointSupplier;
+   private final BooleanSupplier isSelected;
+   private final BooleanSupplier ignorePartialFootholds;
+
    private final MeshHolder meshHolder;
    private final AtomicReference<FootstepDataMessage> footstepDataMessage = new AtomicReference<>();
 
    private final RigidBodyTransform transformToWorld = new RigidBodyTransform();
    private final ConvexPolygon2D foothold = new ConvexPolygon2D();
 
-   public FootstepMeshManager(Group root, JavaFXMultiColorMeshBuilder meshBuilder, int index)
+   public FootstepMeshManager(Group root,
+                              JavaFXMultiColorMeshBuilder meshBuilder,
+                              Function<RobotSide, ConvexPolygon2D> defaultContactPointSupplier,
+                              BooleanSupplier isSelected,
+                              BooleanSupplier ignorePartialFootholds)
    {
       meshHolder = new MeshHolder(root);
       this.meshBuilder = meshBuilder;
-      this.index = index;
+      this.defaultContactPointSupplier = defaultContactPointSupplier;
+      this.isSelected = isSelected;
+      this.ignorePartialFootholds = ignorePartialFootholds;
    }
 
    /**
@@ -58,15 +60,14 @@ public class FootstepMeshManager
 
       FootstepDataMessage footstepDataMessage = this.footstepDataMessage.get();
 
-      Color footColor = getFootstepColor(footstepDataMessage, index);
+      Color footColor = getFootstepColor(footstepDataMessage);
       RobotSide robotSide = RobotSide.fromByte(footstepDataMessage.getRobotSide());
 
       transformToWorld.set(footstepDataMessage.getOrientation(), footstepDataMessage.getLocation());
-      transformToWorld.appendTranslation(0.0, 0.0, ADDITIONAL_HEIGHT);
 
-      if (ignorePartialFootholds.get() || footstepDataMessage.getPredictedContactPoints2d().isEmpty())
+      if (ignorePartialFootholds.getAsBoolean() || footstepDataMessage.getPredictedContactPoints2d().isEmpty())
       {
-         foothold.set(defaultContactPoints.get(robotSide));
+         foothold.set(defaultContactPointSupplier.apply(robotSide));
       }
       else
       {
@@ -80,41 +81,18 @@ public class FootstepMeshManager
          vertices[j] = new Point2D(foothold.getVertex(j));
       }
 
-      meshBuilder.addMultiLine(transformToWorld, vertices, 0.01, footColor, true);
+      // Shift halfway so that bottom of perimeter line is flush with ground
+      transformToWorld.appendTranslation(0.0, 0.0, 0.5 * POLYGON_THICKNESS);
+      meshBuilder.addMultiLine(transformToWorld, vertices, POLYGON_THICKNESS, footColor, true);
       meshBuilder.addPolygon(transformToWorld, foothold, footColor);
 
       Pair<Mesh, Material> meshMaterialPair = Pair.of(meshBuilder.generateMesh(), meshBuilder.generateMaterial());
       meshHolder.setMeshReference(meshMaterialPair);
    }
-   
-   public void setIgnorePartialFootHolds(boolean doIgnore)
-   {
-      ignorePartialFootholds.set(doIgnore);
-   }
-   
-   public void setSelected(boolean selected)
-   {
-      this.selected.set(selected);
-   }
-   
-   public void setFoothold(SideDependentList<List<Point2D>> defaultContactPoints)
-   {
-      for(RobotSide robotSide : RobotSide.values)
-      {
-         ConvexPolygon2D defaultFoothold = new ConvexPolygon2D();
-         for (int i = 0; i < defaultContactPoints.get(robotSide).size(); i++)
-         {
-            defaultFoothold.addVertex(defaultContactPoints.get(robotSide).get(i));
-         }
 
-         defaultFoothold.update();
-         this.defaultContactPoints.put(robotSide, defaultFoothold);
-      }
-   }
-   
-   private Color getFootstepColor(FootstepDataMessage footstepDataMessage, int index)
+   private Color getFootstepColor(FootstepDataMessage footstepDataMessage)
    {
-      if (selected.get())
+      if (isSelected.getAsBoolean())
       {
          return Color.YELLOW.darker();
       }

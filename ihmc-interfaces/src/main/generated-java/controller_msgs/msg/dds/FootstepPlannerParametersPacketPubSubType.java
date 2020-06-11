@@ -212,9 +212,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
-
-
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
@@ -374,10 +371,6 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
-
-
-
-      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
 
@@ -675,10 +668,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       cdr.write_type_6(data.getMaximumSnapHeight());
 
 
-      cdr.write_type_6(data.getMinXClearanceFromStance());
-
-
-      cdr.write_type_6(data.getMinYClearanceFromStance());
+      cdr.write_type_6(data.getMinClearanceFromStance());
 
 
       cdr.write_type_6(data.getFinalTurnProximity());
@@ -886,10 +876,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setMaximumSnapHeight(cdr.read_type_6());
       	
 
-      data.setMinXClearanceFromStance(cdr.read_type_6());
-      	
-
-      data.setMinYClearanceFromStance(cdr.read_type_6());
+      data.setMinClearanceFromStance(cdr.read_type_6());
       	
 
       data.setFinalTurnProximity(cdr.read_type_6());
@@ -1055,9 +1042,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       ser.write_type_6("maximum_snap_height", data.getMaximumSnapHeight());
 
-      ser.write_type_6("min_x_clearance_from_stance", data.getMinXClearanceFromStance());
-
-      ser.write_type_6("min_y_clearance_from_stance", data.getMinYClearanceFromStance());
+      ser.write_type_6("min_clearance_from_stance", data.getMinClearanceFromStance());
 
       ser.write_type_6("final_turn_proximity", data.getFinalTurnProximity());
 
@@ -1198,9 +1183,7 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       data.setMaximumSnapHeight(ser.read_type_6("maximum_snap_height"));
 
-      data.setMinXClearanceFromStance(ser.read_type_6("min_x_clearance_from_stance"));
-
-      data.setMinYClearanceFromStance(ser.read_type_6("min_y_clearance_from_stance"));
+      data.setMinClearanceFromStance(ser.read_type_6("min_clearance_from_stance"));
 
       data.setFinalTurnProximity(ser.read_type_6("final_turn_proximity"));
 
