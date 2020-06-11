@@ -255,6 +255,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       footstepPlannerRequest.setGoalFootPoses(footstepPlannerParameters.get().getIdealFootstepWidth(), goalPoseBetweenFeet);
       footstepPlannerRequest.setPlanarRegionsList(planarRegions);
       footstepPlannerRequest.setTimeout(lookAndStepBehaviorParameters.get().getFootstepPlannerTimeout());
+      footstepPlannerRequest.setPerformPositionBasedSplitFractionCalculation(true);
       footstepPlannerRequest.setSwingPlannerType(SwingPlannerType.POSITION);
 
       footstepPlanningModule.get().getFootstepPlannerParameters().set(footstepPlannerParameters.get());
