@@ -53,7 +53,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
    private final AtomicReference<Boolean> clearOcTree;
-   private final AtomicReference<NormalOcTree> ocTree;
+   private final AtomicReference<NormalOcTree> ocTree = new AtomicReference<>(null);
    private final AtomicReference<Tuple3DReadOnly> sensorPosition;
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
@@ -93,7 +93,8 @@ public class PlanarSegmentationModule implements OcTreeConsumer
    {
       this.ros2Node = ros2Node;
       this.reaMessager = reaMessager;
-      reaMessager.startMessager();
+      if (!reaMessager.isMessagerOpen())
+         reaMessager.startMessager();
 
       moduleStateReporter = new SegmentationModuleStateReporter(reaMessager);
 
@@ -130,8 +131,9 @@ public class PlanarSegmentationModule implements OcTreeConsumer
                                         (content) -> planarRegionFeatureUpdater.saveConfiguration(filePropertyHelper));
 
       clearOcTree = reaMessager.createInput(SegmentationModuleAPI.OcTreeClear, false);
-      ocTree = reaMessager.createInput(SegmentationModuleAPI.OcTree, null);
       sensorPosition = reaMessager.createInput(SegmentationModuleAPI.SensorPosition, null);
+
+      reaMessager.submitMessage(SegmentationModuleAPI.OcTreeEnable, true);
 
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
       reaMessager.submitMessage(SegmentationModuleAPI.RequestEntireModuleState, true);
@@ -139,7 +141,7 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
    public void reportOcTree(NormalOcTree ocTree, Tuple3DReadOnly sensorPosition)
    {
-      reaMessager.submitMessage(SegmentationModuleAPI.OcTree, ocTree);
+      this.ocTree.set(ocTree);
       reaMessager.submitMessage(SegmentationModuleAPI.OcTreeState, OcTreeMessageConverter.convertToMessage(ocTree));
       reaMessager.submitMessage(SegmentationModuleAPI.SensorPosition, sensorPosition);
    }
@@ -177,8 +179,8 @@ public class PlanarSegmentationModule implements OcTreeConsumer
 
       try
       {
-         NormalOcTree mainOctree = ocTree.getAndSet(null);
-         Tuple3DReadOnly sensorPose = this.sensorPosition.getAndSet(null);
+         NormalOcTree mainOctree = ocTree.get();
+         Tuple3DReadOnly sensorPose = this.sensorPosition.get();
          if (clearOcTree.getAndSet(false))
          {
             planarRegionFeatureUpdater.clearOcTree();

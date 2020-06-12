@@ -32,7 +32,6 @@ public class SegmentationModuleAPI
    public static final Topic<Boolean> OcTreeEnable = topic("OcTreeEnable");
    public static final Topic<Boolean> OcTreeClear = topic("OcTreeClear");
    public static final Topic<NormalOcTreeMessage> OcTreeState = topic("OcTreeState");
-   public static final Topic<NormalOcTree> OcTree = topic("OcTree");
    public static final Topic<Tuple3DReadOnly> SensorPosition = topic("SensorPosition");
    public static final Topic<PlanarRegionSegmentationMessage[]> PlanarRegionsSegmentationState = topic("PlanarRegionsSegmentationState");
 

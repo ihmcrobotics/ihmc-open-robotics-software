@@ -50,7 +50,8 @@ public class PlanarSegmentationUI
 
       // Client
       this.uiMessager = uiMessager;
-      uiMessager.startMessager();
+      if (!uiMessager.isInternalMessagerOpen())
+         uiMessager.startMessager();
 
       meshViewer = new SegmentationMeshViewer(uiMessager);
 
