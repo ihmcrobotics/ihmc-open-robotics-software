@@ -9,19 +9,15 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
-import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.Messager;
-import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
@@ -48,8 +44,8 @@ public class SLAMModule
 
    protected final AtomicReference<Boolean> enable;
 
-   protected final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
-   protected final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<StereoVisionPointCloudMessage>();
+   private final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
+   protected final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<>();
 
    protected final RandomICPSLAM slam = new RandomICPSLAM(DEFAULT_OCTREE_RESOLUTION);
 
@@ -122,23 +118,31 @@ public class SLAMModule
       }
    }
 
-   protected boolean isMainThreadInterrupted()
+   private boolean isMainThreadInterrupted()
    {
       return Thread.interrupted() || scheduledMain == null || scheduledMain.isCancelled();
    }
 
-   protected boolean isSLAMThreadInterrupted()
+   private boolean isSLAMThreadInterrupted()
    {
       return Thread.interrupted() || scheduledSLAM == null || scheduledSLAM.isCancelled();
    }
 
    public void updateSLAM()
    {
+      if (updateSLAMInternal())
+      {
+         publishResults();
+      }
+   }
+
+   private boolean updateSLAMInternal()
+   {
       if (isSLAMThreadInterrupted())
-         return;
+         return false;
 
       if (pointCloudQueue.size() == 0)
-         return;
+         return false;
 
       updateSLAMParameters();
       StereoVisionPointCloudMessage pointCloudToCompute = pointCloudQueue.getFirst();
@@ -151,15 +155,27 @@ public class SLAMModule
       }
       else
       {
-         success = slam.addFrame(pointCloudToCompute);
+         success = addFrame(pointCloudToCompute);
       }
 
+      dequeue();
+
+      return success;
+   }
+
+   protected boolean addFrame(StereoVisionPointCloudMessage pointCloudToCompute)
+   {
+      return slam.addFrame(pointCloudToCompute);
+   }
+
+   protected void queue(StereoVisionPointCloudMessage pointCloud)
+   {
+      pointCloudQueue.add(pointCloud);
+   }
+
+   protected void dequeue()
+   {
       pointCloudQueue.removeFirst();
-
-      if (success)
-      {
-         publishResults();
-      }
    }
 
    protected void publishResults()
@@ -233,11 +249,11 @@ public class SLAMModule
          if (pointCloud == null)
             return;
 
-         pointCloudQueue.add(pointCloud);
+         queue(pointCloud);
       }
    }
 
-   protected void updateSLAMParameters()
+   private void updateSLAMParameters()
    {
       RandomICPSLAMParameters parameters = ihmcSLAMParameters.get();
       slam.updateParameters(parameters);
