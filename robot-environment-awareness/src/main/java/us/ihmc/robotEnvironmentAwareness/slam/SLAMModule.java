@@ -48,10 +48,8 @@ public class SLAMModule
 
    protected final AtomicReference<Boolean> enable;
 
-   private final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
-   private final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<StereoVisionPointCloudMessage>();
-   private final LinkedList<Boolean> stationaryFlagQueue = new LinkedList<Boolean>();
-   private final LinkedList<Boolean> reasonableVelocityFlagQueue = new LinkedList<Boolean>();
+   protected final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
+   protected final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<StereoVisionPointCloudMessage>();
 
    protected final RandomICPSLAM slam = new RandomICPSLAM(DEFAULT_OCTREE_RESOLUTION);
 
