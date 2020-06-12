@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
@@ -42,6 +43,14 @@ public class StereoVisionPointCloudDataExporter
 
       uiMessager.registerTopicListener(REAModuleAPI.UIStereoDataExportRequest, this::toggleRecording);
    }
+   
+   public StereoVisionPointCloudDataExporter(REAUIMessager uiMessager, Topic<StereoVisionPointCloudMessage> dataTopic, Topic<String> pathTopic, Topic<Boolean> recordingTopic)
+   {
+      stereovisionPointCloudMessage = uiMessager.createInput(dataTopic);
+      dataDirectoryPath = uiMessager.createInput(pathTopic, new File("Data/").getAbsolutePath());
+
+      uiMessager.registerTopicListener(recordingTopic, this::toggleRecording);
+   }
 
    private void toggleRecording(boolean enable)
    {
@@ -66,6 +75,8 @@ public class StereoVisionPointCloudDataExporter
    {
       StereoVisionPointCloudMessage message = stereovisionPointCloudMessage.get();
 
+      if(message == null)
+         return;
       Point3D[] pointCloud = PointCloudCompression.decompressPointCloudToArray(message);
 
       Path path = Paths.get(dataDirectoryPath.get());

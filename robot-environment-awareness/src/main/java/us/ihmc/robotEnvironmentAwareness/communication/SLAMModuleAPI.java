@@ -1,5 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.communication;
 
+import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.StampedPosePacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -30,11 +31,15 @@ public class SLAMModuleAPI
    private static final CategoryTheme Normal = apiFactory.createCategoryTheme("Normal");
    private static final CategoryTheme Buffer = apiFactory.createCategoryTheme("Buffer");
    private static final CategoryTheme Custom = apiFactory.createCategoryTheme("Custom");
+   private static final CategoryTheme Footstep = apiFactory.createCategoryTheme("Footstep");
+   private static final CategoryTheme DataManager = apiFactory.createCategoryTheme("DataManager");
+   private static final CategoryTheme Export = apiFactory.createCategoryTheme("Export");
+   private static final CategoryTheme Import = apiFactory.createCategoryTheme("Import");
 
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
    private static final TopicTheme Display = apiFactory.createTopicTheme("Display");
-   
+
    private static final TypedTopicTheme<Boolean> Enable = apiFactory.createTypedTopicTheme("Enable");
    private static final TypedTopicTheme<Boolean> Request = apiFactory.createTypedTopicTheme("Request");
    private static final TypedTopicTheme<Boolean> Clear = apiFactory.createTypedTopicTheme("Clear");
@@ -44,12 +49,14 @@ public class SLAMModuleAPI
    private static final TypedTopicTheme<String> Status = apiFactory.createTypedTopicTheme("Status");
    private static final TypedTopicTheme<Double> Value = apiFactory.createTypedTopicTheme("Value");
    
+   private static final TypedTopicTheme<String> Path = apiFactory.createTypedTopicTheme("Path");
+
    public static final Topic<Boolean> RequestEntireModuleState = Root.child(Module).topic(Request);
    public static final Topic<Boolean> RequestPlanarRegions = Root.child(Module).child(PlanarRegions).topic(Request);
-   
+
    public static final Topic<Boolean> SLAMEnable = Root.child(Module).topic(Enable);
    public static final Topic<Boolean> SLAMClear = Root.child(Module).topic(Clear);
-   
+
    public static final Topic<Boolean> ShowPlanarRegionsMap = Root.child(UI).child(PlanarRegions).topic(Show);
    public static final Topic<Boolean> ShowSLAMOctreeMap = Root.child(UI).child(OcTree).topic(Show);
    public static final Topic<Boolean> ShowSLAMOctreeNormalMap = Root.child(UI).child(OcTree).child(Normal).topic(Show);
@@ -57,18 +64,22 @@ public class SLAMModuleAPI
    public static final Topic<Boolean> ShowSLAMSensorTrajectory = Root.child(UI).child(SensorFrame).topic(Show);
    public static final Topic<Boolean> SLAMVizClear = Root.child(UI).topic(Clear);
    public static final Topic<Boolean> SensorPoseHistoryClear = Root.child(UI).child(SensorFrame).topic(Clear);
-   
+
+   public static final Topic<Boolean> ShowFootstepDataViz = Root.child(UI).child(Footstep).topic(Enable);
+   public static final Topic<Boolean> ClearFootstepDataViz = Root.child(UI).child(Footstep).topic(Clear);
+   public static final Topic<FootstepDataMessage> FootstepDataState = Root.child(UI).child(Footstep).topic(Data);
+
    public static final Topic<Boolean> SensorStatus = Root.child(Module).child(SensorFrame).topic(Moving);
    public static final Topic<Boolean> VelocityLimitStatus = Root.child(Module).child(VelocityLimit).topic(Moving);
-   
+
    public static final Topic<PlanarRegionsListMessage> SLAMPlanarRegionsState = Root.child(Module).child(PlanarRegions).topic(Data);
    public static final Topic<RandomICPSLAMParameters> SLAMParameters = Root.child(Module).topic(Parameters);
-   
+
    public static final Topic<DisplayType> SLAMOcTreeDisplayType = Root.child(UI).child(OcTree).topic(Display);
-   
+
    public static final Topic<String> SLAMStatus = Root.child(Module).topic(Status);
    public static final Topic<String> QueuedBuffers = Root.child(Module).child(Buffer).topic(Status);
-   
+
    public static final Topic<StereoVisionPointCloudMessage> StereoVisionPointCloudState = Root.child(UI).child(StereoVision).topic(Data);
    public static final Topic<StereoVisionPointCloudMessage> DepthPointCloudState = Root.child(UI).child(DepthCloud).topic(Data);
    public static final Topic<StereoVisionPointCloudMessage> IhmcSLAMFrameState = Root.child(UI).child(Buffer).topic(Data);
@@ -76,7 +87,15 @@ public class SLAMModuleAPI
    public static final Topic<Integer> UISensorPoseHistoryFrames = Root.child(UI).child(SensorFrame).topic(Size);
    public static final Topic<StampedPosePacket> CustomizedFrameState = Root.child(UI).child(Custom).topic(Data);
    public static final Topic<Double> LatestFrameConfidenceFactor = Root.child(UI).child(SensorFrame).topic(Value);
+
+   public static final Topic<Boolean> UIRawDataExportRequest = Root.child(UI).child(DataManager).child(DepthCloud).child(Export).topic(Request);
    
+   public static final Topic<String> UIRawDataExportDirectory = Root.child(UI).child(DataManager).child(DepthCloud).child(Export).topic(Path);
+   public static final Topic<String> UISLAMDataExportDirectory = Root.child(UI).child(DataManager).child(Module).child(Export).topic(Path);
+   
+   public static final Topic<PlanarRegionsListMessage> ImportedPlanarRegionsState = Root.child(UI).child(DataManager).child(PlanarRegions).child(Import).topic(Data);
+   public static final Topic<Boolean> ShowImportedPlanarRegions = Root.child(UI).child(DataManager).child(PlanarRegions).child(Import).topic(Show);
+   public static final Topic<Boolean> ImportedPlanarRegionsVizClear = Root.child(UI).child(DataManager).child(PlanarRegions).child(Import).topic(Clear);
    
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 }

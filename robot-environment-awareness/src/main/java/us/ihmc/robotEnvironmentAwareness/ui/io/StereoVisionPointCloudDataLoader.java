@@ -1,4 +1,4 @@
-package us.ihmc.robotEnvironmentAwareness.hardware;
+package us.ihmc.robotEnvironmentAwareness.ui.io;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -13,7 +13,6 @@ import java.util.Map;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
-import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
 
 public class StereoVisionPointCloudDataLoader
 {
