@@ -27,12 +27,10 @@ import us.ihmc.javaFXToolkit.shapes.JavaFXCoordinateSystem;
 import us.ihmc.javaFXToolkit.shapes.JavaFXMultiColorMeshBuilder;
 import us.ihmc.javaFXToolkit.shapes.TextureColorAdaptivePalette;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
-import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 
 public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
 {
-   private final boolean showInterval;
    private static final int TRAJECTORY_RADIAL_RESOLUTION = 16;
    private static final double TRAJECTORY_MESH_RADIUS = 0.01;
 
@@ -55,14 +53,13 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
    private Function<T, SensorFrame> function;
 
    public SensorFrameViewer(REAUIMessager uiMessager, Topic<T> messageState, Topic<Integer> numberOfFramesTopic, Function<T, SensorFrame> function,
-                            Topic<Boolean> clearTopic, boolean showInterval)
+                            Topic<Boolean> clearTopic)
    {
-      this.showInterval = showInterval;
       this.function = function;
       if (numberOfFramesTopic == null)
          numberOfFramesToShow = new AtomicReference<Integer>(DEFAULT_NUMBER_OF_FRAMES);
       else
-         numberOfFramesToShow = uiMessager.createInput(numberOfFramesTopic, 10); //REAModuleAPI.UINavigationFrames
+         numberOfFramesToShow = uiMessager.createInput(numberOfFramesTopic, 10);
       uiMessager.registerTopicListener(clearTopic, (c) -> clear());
 
       meshBuilder = new JavaFXMultiColorMeshBuilder(new TextureColorAdaptivePalette(2048));
@@ -76,17 +73,13 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
       root.setMouseTransparent(true);
 
       latestMessage = uiMessager.createInput(messageState);
-      uiMessager.registerModuleMessagerStateListener(isMessagerOpen -> {
+      uiMessager.registerModuleMessagerStateListener(isMessagerOpen ->
+      {
          if (isMessagerOpen)
             start();
          else
             stop();
       });
-   }
-
-   public SensorFrameViewer(REAUIMessager uiMessager, Topic<T> messageState, Topic<Integer> numberOfFramesTopic, Function<T, SensorFrame> function, Topic<Boolean> clearTopic)
-   {
-      this(uiMessager, messageState, numberOfFramesTopic, function, clearTopic, false);
    }
 
    @Override
@@ -116,8 +109,11 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
       for (int i = 0; i < numberOfSensorFrames; i++)
       {
          sensorOriginHistory.get(i).getOrigin(point);
-         int redScaler = (int) (0xFF * (1 - (sensorOriginHistory.get(i).confidence)));
-         int greenScaler = (int) (0xFF * (sensorOriginHistory.get(i).confidence));
+         double confidence = sensorOriginHistory.get(i).confidence;
+         if (confidence < 0)
+            confidence = 0.0;
+         int redScaler = (int) (0xFF * (1 - confidence));
+         int greenScaler = (int) (0xFF * confidence);
          Color confidenceColor = Color.rgb(redScaler, greenScaler, 0);
          meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(ORIGIN_POINT_SIZE), point, confidenceColor);
 
@@ -167,7 +163,8 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
 
    public static Function<StampedPosePacket, SensorFrame> createStampedPosePacketSensorFrameExtractor()
    {
-      return message -> {
+      return message ->
+      {
          Pose3D pose = message.getPose();
          return new SensorFrame(pose.getPosition(), pose.getOrientation(), message.getConfidenceFactor());
       };
@@ -199,5 +196,4 @@ public class SensorFrameViewer<T extends Packet<T>> extends AnimationTimer
          return new Point3D(affine.getTx(), affine.getTy(), affine.getTz());
       }
    }
-
 }
