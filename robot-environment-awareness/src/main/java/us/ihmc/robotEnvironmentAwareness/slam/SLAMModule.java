@@ -75,6 +75,11 @@ public class SLAMModule
       this(messager, null);
    }
 
+   public SLAMModule(Ros2Node ros2Node, Messager messager)
+   {
+      this(ros2Node, messager, null);
+   }
+
    public SLAMModule(Messager messager, File configurationFile)
    {
       this(ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME), messager, configurationFile, true);
@@ -122,12 +127,6 @@ public class SLAMModule
       }
 
       sendCurrentState();
-   }
-
-   protected void sendCurrentState()
-   {
-      reaMessager.submitMessage(SLAMModuleAPI.SLAMParameters, ihmcSLAMParameters.get());
-      reaMessager.submitMessage(SLAMModuleAPI.SLAMEnable, enable.get());
    }
 
    public void attachOcTreeConsumer(OcTreeConsumer ocTreeConsumer)

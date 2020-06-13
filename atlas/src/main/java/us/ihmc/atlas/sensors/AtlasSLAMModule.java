@@ -93,7 +93,7 @@ public class AtlasSLAMModule extends SLAMModule
    }
 
    @Override
-   protected void sendCurrentState()
+   public void sendCurrentState()
    {
       super.sendCurrentState();
       reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, robotStatus.get());
