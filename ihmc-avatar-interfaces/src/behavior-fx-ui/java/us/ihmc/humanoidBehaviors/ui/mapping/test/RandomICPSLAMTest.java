@@ -407,7 +407,7 @@ public class RandomICPSLAMTest
          System.out.println();
          System.out.println(" ## add frame " + i);
          slam.addFrame(messages.get(i));
-         slam.computeOcTreeNormals();
+         slam.updateOcTree();
 
          originalViewer.addStereoMessage(messages.get(i), Color.GREEN);
 

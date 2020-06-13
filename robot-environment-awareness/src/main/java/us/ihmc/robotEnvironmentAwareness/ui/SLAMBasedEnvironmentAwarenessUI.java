@@ -20,8 +20,10 @@ import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.FootstepMeshViewer;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.SLAMMeshViewer;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.NormalEstimationAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMDataManagerAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
@@ -45,6 +47,8 @@ public class SLAMBasedEnvironmentAwarenessUI
    private SLAMAnchorPaneController slamAnchorPaneController;
    @FXML
    private SLAMDataManagerAnchorPaneController slamDataManagerAnchorPaneController;
+   @FXML
+   private NormalEstimationAnchorPaneController normalEstimationAnchorPaneController;
 
    private final Stage primaryStage;
 
@@ -145,6 +149,14 @@ public class SLAMBasedEnvironmentAwarenessUI
       slamDataManagerAnchorPaneController.attachREAMessager(uiMessager);
       slamDataManagerAnchorPaneController.setMainWindow(primaryStage);
       slamDataManagerAnchorPaneController.bindControls();
+
+      normalEstimationAnchorPaneController.setNormalEstimationEnableTopic(SLAMModuleAPI.NormalEstimationEnable);
+      normalEstimationAnchorPaneController.setNormalEstimationClearTopic(SLAMModuleAPI.NormalEstimationClear);
+      normalEstimationAnchorPaneController.setSaveMainUpdaterConfigurationTopic(SLAMModuleAPI.SaveMainUpdaterConfiguration);
+      normalEstimationAnchorPaneController.setNormalEstimationParametersTopic(SLAMModuleAPI.NormalEstimationParameters);
+      normalEstimationAnchorPaneController.setConfigurationFile();
+      normalEstimationAnchorPaneController.attachREAMessager(uiMessager);
+      normalEstimationAnchorPaneController.bindControls();
    }
 
    public void show() throws IOException

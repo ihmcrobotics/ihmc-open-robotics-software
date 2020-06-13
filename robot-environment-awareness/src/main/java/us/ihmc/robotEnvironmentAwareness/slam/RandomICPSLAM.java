@@ -91,6 +91,10 @@ public class RandomICPSLAM extends SLAMBasics
 
       octree.insertScanCollection(scanCollection, false);
 
+   }
+
+   public void updateOcTree()
+   {
       octree.enableParallelComputationForNormals(true);
       octree.enableParallelInsertionOfMisses(true);
       octree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
@@ -98,7 +102,10 @@ public class RandomICPSLAM extends SLAMBasics
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
       normalEstimationParameters.setNumberOfIterations(7);
       octree.setNormalEstimationParameters(normalEstimationParameters);
+
+      octree.updateNormals();
    }
+
 
    @Override
    public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage)
@@ -122,11 +129,6 @@ public class RandomICPSLAM extends SLAMBasics
       }
 
       return success;
-   }
-
-   public void computeOcTreeNormals()
-   {
-      octree.updateNormals();
    }
 
    @Override
