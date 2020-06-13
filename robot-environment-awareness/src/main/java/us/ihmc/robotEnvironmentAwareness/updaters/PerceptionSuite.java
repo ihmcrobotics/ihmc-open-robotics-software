@@ -60,7 +60,7 @@ public class PerceptionSuite
 
    protected SLAMModule createSLAMModule() throws Exception
    {
-      return SLAMModule.createIntraprocessModule(ros2Node, MODULE_CONFIGURATION_FILE_NAME);
+      return SLAMModule.createIntraprocessModule(ros2Node);
    }
 
    private interface Command
