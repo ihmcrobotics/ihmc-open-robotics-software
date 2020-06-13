@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
@@ -29,6 +30,7 @@ public class RandomICPSLAM extends SLAMBasics
    public Point3D[] correctedSourcePointsToWorld;
 
    private final AtomicReference<RandomICPSLAMParameters> parameters = new AtomicReference<>(new RandomICPSLAMParameters());
+   private final AtomicBoolean enableNormalEstimation = new AtomicBoolean(true);
 
    private final GradientDescentModule optimizer;
    private static final double OPTIMIZER_POSITION_LIMIT = 0.1;
@@ -75,6 +77,14 @@ public class RandomICPSLAM extends SLAMBasics
       optimizer.setStepSize(optimizerStepSize);
       optimizer.setPerturbationSize(optimizerPerturbationSize);
       optimizer.setReducingStepSizeRatio(2);
+
+      octree.enableParallelComputationForNormals(true);
+      octree.enableParallelInsertionOfMisses(true);
+      octree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
+
+      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
+      normalEstimationParameters.setNumberOfIterations(7);
+      octree.setNormalEstimationParameters(normalEstimationParameters);
    }
 
    private void insertNewPointCloud(SLAMFrame frame)
@@ -90,22 +100,22 @@ public class RandomICPSLAM extends SLAMBasics
       scanCollection.addScan(SLAMTools.toScan(pointCloud, sensorPose.getTranslation(), parameters.getMinimumDepth(), parameters.getMaximumDepth()));
 
       octree.insertScanCollection(scanCollection, false);
+   }
 
+   public void clearNormals()
+   {
+      octree.clearNormals();
    }
 
    public void updateOcTree()
    {
-      octree.enableParallelComputationForNormals(true);
-      octree.enableParallelInsertionOfMisses(true);
-      octree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
-
-      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
-      normalEstimationParameters.setNumberOfIterations(7);
-      octree.setNormalEstimationParameters(normalEstimationParameters);
-
       octree.updateNormals();
    }
 
+   public void setNormalEstimationParameters(NormalEstimationParameters normalEstimationParameters)
+   {
+      octree.setNormalEstimationParameters(normalEstimationParameters);
+   }
 
    @Override
    public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage)
