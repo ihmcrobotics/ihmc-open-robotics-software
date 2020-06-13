@@ -158,6 +158,7 @@ public class SLAMModule
          success = addFrame(pointCloudToCompute);
       }
 
+      updateOcTree();
       dequeue();
 
       return success;
@@ -166,6 +167,11 @@ public class SLAMModule
    protected boolean addFrame(StereoVisionPointCloudMessage pointCloudToCompute)
    {
       return slam.addFrame(pointCloudToCompute);
+   }
+
+   protected void updateOcTree()
+   {
+      slam.updateOcTree();
    }
 
    protected void queue(StereoVisionPointCloudMessage pointCloud)
@@ -187,7 +193,6 @@ public class SLAMModule
 
       NormalOcTree octreeMap = slam.getOctree();
       NormalOcTreeMessage octreeMessage = OcTreeMessageConverter.convertToMessage(octreeMap);
-      slam.computeOcTreeNormals();
 
       reaMessager.submitMessage(SLAMModuleAPI.SLAMOctreeMapState, octreeMessage);
 
