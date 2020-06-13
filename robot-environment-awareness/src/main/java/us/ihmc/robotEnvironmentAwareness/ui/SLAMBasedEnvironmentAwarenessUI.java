@@ -1,5 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.ui;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
@@ -35,6 +36,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class SLAMBasedEnvironmentAwarenessUI
 {
+   private static final String UI_CONFIGURATION_FILE_NAME = "./Configurations/defaultSLAMUIConfiguration.txt";
+
    private final BorderPane mainPane;
 
    private final SLAMMeshViewer ihmcSLAMViewer;
@@ -142,19 +145,31 @@ public class SLAMBasedEnvironmentAwarenessUI
 
    private void initializeControllers(REAUIMessager uiMessager)
    {
+      File configurationFile = new File(UI_CONFIGURATION_FILE_NAME);
+      try
+      {
+         configurationFile.getParentFile().mkdirs();
+         configurationFile.createNewFile();
+      }
+      catch (IOException e)
+      {
+         System.out.println(configurationFile.getAbsolutePath());
+         e.printStackTrace();
+      }
+
       slamAnchorPaneController.attachREAMessager(uiMessager);
       slamAnchorPaneController.bindControls();
 
-      // TODO set the configuration file
       slamDataManagerAnchorPaneController.attachREAMessager(uiMessager);
       slamDataManagerAnchorPaneController.setMainWindow(primaryStage);
+      slamDataManagerAnchorPaneController.setConfigurationFile(configurationFile);
       slamDataManagerAnchorPaneController.bindControls();
 
       normalEstimationAnchorPaneController.setNormalEstimationEnableTopic(SLAMModuleAPI.NormalEstimationEnable);
       normalEstimationAnchorPaneController.setNormalEstimationClearTopic(SLAMModuleAPI.NormalEstimationClear);
-      normalEstimationAnchorPaneController.setSaveMainUpdaterConfigurationTopic(SLAMModuleAPI.SaveMainUpdaterConfiguration);
+      normalEstimationAnchorPaneController.setSaveMainUpdaterConfigurationTopic(SLAMModuleAPI.SaveConfiguration);
       normalEstimationAnchorPaneController.setNormalEstimationParametersTopic(SLAMModuleAPI.NormalEstimationParameters);
-      normalEstimationAnchorPaneController.setConfigurationFile();
+      normalEstimationAnchorPaneController.setConfigurationFile(configurationFile);
       normalEstimationAnchorPaneController.attachREAMessager(uiMessager);
       normalEstimationAnchorPaneController.bindControls();
    }

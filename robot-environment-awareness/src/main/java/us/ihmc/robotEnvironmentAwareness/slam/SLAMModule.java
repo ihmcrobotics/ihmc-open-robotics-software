@@ -1,5 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -16,16 +17,20 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.pubsub.subscriber.Subscriber;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
+import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.converters.BoundingBoxMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
+import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
@@ -47,6 +52,11 @@ public class SLAMModule
    private final AtomicReference<StereoVisionPointCloudMessage> newPointCloud = new AtomicReference<>(null);
    protected final LinkedList<StereoVisionPointCloudMessage> pointCloudQueue = new LinkedList<>();
 
+   private final AtomicReference<RandomICPSLAMParameters> slamParameters;
+   private final AtomicReference<NormalEstimationParameters> normalEstimationParameters;
+   private final AtomicReference<Boolean> enableNormalEstimation;
+   private final AtomicReference<Boolean> clearNormals;
+
    protected final RandomICPSLAM slam = new RandomICPSLAM(DEFAULT_OCTREE_RESOLUTION);
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(2, getClass(), ExceptionHandling.CATCH_AND_REPORT);
@@ -54,13 +64,16 @@ public class SLAMModule
    private ScheduledFuture<?> scheduledMain;
    private ScheduledFuture<?> scheduledSLAM;
 
-   private final AtomicReference<RandomICPSLAMParameters> ihmcSLAMParameters;
-
    protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
 
    private final List<OcTreeConsumer> ocTreeConsumers = new ArrayList<>();
 
    public SLAMModule(Messager messager)
+   {
+      this(messager, null);
+   }
+
+   public SLAMModule(Messager messager, File configurationFile)
    {
       this.reaMessager = messager;
 
@@ -72,9 +85,29 @@ public class SLAMModule
 
       enable = reaMessager.createInput(SLAMModuleAPI.SLAMEnable, true);
 
-      ihmcSLAMParameters = reaMessager.createInput(SLAMModuleAPI.SLAMParameters, new RandomICPSLAMParameters());
+      slamParameters = reaMessager.createInput(SLAMModuleAPI.SLAMParameters, new RandomICPSLAMParameters());
+
+      enableNormalEstimation = reaMessager.createInput(SLAMModuleAPI.NormalEstimationEnable, true);
+      clearNormals = reaMessager.createInput(SLAMModuleAPI.NormalEstimationClear, false);
+      normalEstimationParameters = reaMessager.createInput(SLAMModuleAPI.NormalEstimationParameters);
 
       reaMessager.registerTopicListener(SLAMModuleAPI.SLAMClear, (content) -> clearSLAM());
+
+      reaMessager.registerTopicListener(SLAMModuleAPI.RequestEntireModuleState, update -> sendCurrentState());
+
+      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
+      normalEstimationParameters.setNumberOfIterations(7);
+      reaMessager.submitMessage(SLAMModuleAPI.NormalEstimationParameters, normalEstimationParameters);
+
+      if (configurationFile != null)
+      {
+         FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
+         loadConfiguration(filePropertyHelper);
+
+         reaMessager.registerTopicListener(SLAMModuleAPI.SaveConfiguration, content -> saveConfiguration(filePropertyHelper));
+      }
+
+      sendCurrentState();
    }
 
    public void attachOcTreeConsumer(OcTreeConsumer ocTreeConsumer)
@@ -128,6 +161,15 @@ public class SLAMModule
       return Thread.interrupted() || scheduledSLAM == null || scheduledSLAM.isCancelled();
    }
 
+   public void sendCurrentState()
+   {
+      reaMessager.submitMessage(SLAMModuleAPI.SLAMEnable, enable.get());
+      reaMessager.submitMessage(SLAMModuleAPI.SLAMParameters, slamParameters.get());
+
+      reaMessager.submitMessage(SLAMModuleAPI.NormalEstimationEnable, enableNormalEstimation.get());
+      reaMessager.submitMessage(SLAMModuleAPI.NormalEstimationParameters, normalEstimationParameters.get());
+   }
+
    public void updateSLAM()
    {
       if (updateSLAMInternal())
@@ -158,7 +200,11 @@ public class SLAMModule
          success = addFrame(pointCloudToCompute);
       }
 
-      updateOcTree();
+      slam.setNormalEstimationParameters(normalEstimationParameters.get());
+      if (clearNormals.getAndSet(false))
+         slam.clearNormals();
+      if (enableNormalEstimation.get())
+         slam.updateOcTree();
       dequeue();
 
       return success;
@@ -167,11 +213,6 @@ public class SLAMModule
    protected boolean addFrame(StereoVisionPointCloudMessage pointCloudToCompute)
    {
       return slam.addFrame(pointCloudToCompute);
-   }
-
-   protected void updateOcTree()
-   {
-      slam.updateOcTree();
    }
 
    protected void queue(StereoVisionPointCloudMessage pointCloud)
@@ -260,7 +301,7 @@ public class SLAMModule
 
    private void updateSLAMParameters()
    {
-      RandomICPSLAMParameters parameters = ihmcSLAMParameters.get();
+      RandomICPSLAMParameters parameters = slamParameters.get();
       slam.updateParameters(parameters);
    }
 
@@ -269,6 +310,31 @@ public class SLAMModule
       newPointCloud.set(null);
       pointCloudQueue.clear();
       slam.clear();
+   }
+
+   public void loadConfiguration(FilePropertyHelper filePropertyHelper)
+   {
+      Boolean enableFile = filePropertyHelper.loadBooleanProperty(SLAMModuleAPI.SLAMEnable.getName());
+      if (enableFile != null)
+         enable.set(enableFile);
+      Boolean enableNormalEstimationFile = filePropertyHelper.loadBooleanProperty(SLAMModuleAPI.NormalEstimationEnable.getName());
+      if (enableNormalEstimationFile != null)
+         enableNormalEstimation.set(enableNormalEstimationFile);
+      String slamParametersFile = filePropertyHelper.loadProperty(SLAMModuleAPI.SLAMParameters.getName());
+      if (slamParametersFile != null)
+         slamParameters.set(RandomICPSLAMParameters.parse(slamParametersFile));
+      String normalEstimationParametersFile = filePropertyHelper.loadProperty(SLAMModuleAPI.NormalEstimationParameters.getName());
+      if (normalEstimationParametersFile != null)
+         normalEstimationParameters.set(NormalEstimationParameters.parse(normalEstimationParametersFile));
+   }
+
+   public void saveConfiguration(FilePropertyHelper filePropertyHelper)
+   {
+      filePropertyHelper.saveProperty(SLAMModuleAPI.SLAMEnable.getName(), enable.get());
+      filePropertyHelper.saveProperty(SLAMModuleAPI.NormalEstimationEnable.getName(), enableNormalEstimation.get());
+
+      filePropertyHelper.saveProperty(SLAMModuleAPI.SLAMParameters.getName(), slamParameters.get().toString());
+      filePropertyHelper.saveProperty(SLAMModuleAPI.NormalEstimationParameters.getName(), normalEstimationParameters.get().toString());
    }
 
    private void handlePointCloud(Subscriber<StereoVisionPointCloudMessage> subscriber)
