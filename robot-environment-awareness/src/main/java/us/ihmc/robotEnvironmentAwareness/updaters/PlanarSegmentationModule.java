@@ -23,6 +23,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageC
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
@@ -134,6 +135,13 @@ public class PlanarSegmentationModule implements OcTreeConsumer
       sensorPosition = reaMessager.createInput(SegmentationModuleAPI.SensorPosition, null);
 
       reaMessager.submitMessage(SegmentationModuleAPI.OcTreeEnable, true);
+      reaMessager.submitMessage(SegmentationModuleAPI.PlanarRegionsSegmentationEnable, true);
+      reaMessager.submitMessage(SegmentationModuleAPI.PlanarRegionsIntersectionEnable, true);
+      reaMessager.submitMessage(SegmentationModuleAPI.PlanarRegionsPolygonizerEnable, true);
+      reaMessager.submitMessage(SegmentationModuleAPI.CustomRegionsMergingEnable, true);
+
+      reaMessager.submitMessage(SegmentationModuleAPI.UIOcTreeDisplayType, OcTreeMeshBuilder.DisplayType.PLANE);
+      reaMessager.submitMessage(SegmentationModuleAPI.UIOcTreeColoringMode, OcTreeMeshBuilder.ColoringType.REGION);
 
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
       reaMessager.submitMessage(SegmentationModuleAPI.RequestEntireModuleState, true);
