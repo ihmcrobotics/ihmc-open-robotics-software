@@ -101,9 +101,11 @@ public class PerceptionSuite
    {
       stopRealSenseSLAM();
       stopLidarREA();
+      stopRealSenseREA();
       stopMapSegmentation();
       stopRealSenseSLAMUI();
       stopLidarREAUI();
+      stopRealSenseREAUI();
       stopMapSegmentationUI();
 
       try
@@ -277,7 +279,7 @@ public class PerceptionSuite
    {
       if (realsenseREAModule == null)
       {
-         realsenseREAModule = LIDARBasedREAModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node);
+         realsenseREAModule = LIDARBasedREAModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node, NetworkPorts.REA_MODULE2_UI_PORT);
          realsenseREAModule.attachClosingListener(this::stopRealSenseREA);
          realsenseREAModule.start();
          realsenseREAModule.setParametersForStereo();
@@ -368,7 +370,7 @@ public class PerceptionSuite
                               realsenseREAStage = new Stage();
                               try
                               {
-                                 realsenseREAModuleUI = LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(realsenseREAStage);
+                                 realsenseREAModuleUI = LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(realsenseREAStage, NetworkPorts.REA_MODULE2_UI_PORT);
                                  realsenseREAModuleUI.show();
                               }
                               catch (Exception e)
