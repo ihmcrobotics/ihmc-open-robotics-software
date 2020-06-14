@@ -20,6 +20,9 @@ public class PerceptionSuiteAPI
    public static final Topic<Boolean> RunLidarREA = topic("RunLidarREA");
    public static final Topic<Boolean> RunLidarREAUI = topic("RunLidarREAUI");
 
+   public static final Topic<Boolean> RunRealSenseREA = topic("RunDepthREA");
+   public static final Topic<Boolean> RunRealSenseREAUI = topic("RunDepthREAUI");
+
    public static final MessagerAPIFactory.MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 
    private static <T> Topic<T> topic(String name)

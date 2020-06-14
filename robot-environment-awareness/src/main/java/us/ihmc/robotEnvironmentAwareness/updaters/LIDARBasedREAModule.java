@@ -43,6 +43,7 @@ import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 
@@ -360,6 +361,24 @@ public class LIDARBasedREAModule
          executorService.scheduleAtFixedRate(stereoVisionBufferUpdater.createBufferThread(), 0, BUFFER_THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
          executorService.scheduleAtFixedRate(depthCloudBufferUpdater.createBufferThread(), 0, BUFFER_THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
       }
+   }
+
+   public void setParametersForDepth()
+   {
+      BoundingBoxParametersMessage boundindBoxMessage = new BoundingBoxParametersMessage();
+      boundindBoxMessage.setMaxX(1.0f);
+      boundindBoxMessage.setMinX(0.0f);
+      boundindBoxMessage.setMaxY(1.0f);
+      boundindBoxMessage.setMinY(-1.0f);
+      boundindBoxMessage.setMaxZ(1.0f);
+      boundindBoxMessage.setMinZ(-2.0f);
+
+      reaMessager.submitMessage(REAModuleAPI.LidarBufferEnable, false);
+      reaMessager.submitMessage(REAModuleAPI.StereoVisionBufferEnable, false);
+      reaMessager.submitMessage(REAModuleAPI.DepthCloudBufferEnable, true);
+      reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxEnable, false);
+      reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundindBoxMessage);
+      reaMessager.submitMessage(REAModuleAPI.UIOcTreeDisplayType, OcTreeMeshBuilder.DisplayType.HIDE);
    }
 
    public void stop()

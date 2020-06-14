@@ -7,21 +7,14 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotEnvironmentAwareness.LidarBasedREAStandaloneLauncher;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.PerceptionSuiteAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
-import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
 import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
 import us.ihmc.ros2.Ros2Node;
-
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class PerceptionSuite
 {
@@ -29,10 +22,13 @@ public class PerceptionSuite
 
    private SLAMModule realSenseSLAMModule;
    private LIDARBasedREAModule lidarREAModule;
+   private LIDARBasedREAModule realsenseREAModule;
    private PlanarSegmentationModule segmentationModule;
 
    private Stage lidarREAStage;
    private LIDARBasedEnvironmentAwarenessUI lidarREAModuleUI;
+   private Stage realsenseREAStage;
+   private LIDARBasedEnvironmentAwarenessUI realsenseREAModuleUI;
    private Stage realsenseSLAMStage;
    private SLAMBasedEnvironmentAwarenessUI realSenseSLAMUI;
    private Stage planarSegmentationStage;
@@ -52,8 +48,10 @@ public class PerceptionSuite
       messager.registerTopicListener(PerceptionSuiteAPI.RunMapSegmentation,
                                      run -> runnable(run, this::startMapSegmentation, this::stopMapSegmentation, "Map Segmentation"));
       messager.registerTopicListener(PerceptionSuiteAPI.RunLidarREA, run -> runnable(run, this::startLidarREA, this::stopLidarREA, "Lidar REA"));
+      messager.registerTopicListener(PerceptionSuiteAPI.RunRealSenseREA, run -> runnable(run, this::startRealSenseREA, this::stopRealSenseREA, "RealSense REA"));
 
       messager.registerTopicListener(PerceptionSuiteAPI.RunLidarREAUI, run -> runnable(run, this::startLidarREAUI, this::stopLidarREAUI, "Lidar REA UI"));
+      messager.registerTopicListener(PerceptionSuiteAPI.RunRealSenseREAUI, run -> runnable(run, this::startRealSenseREAUI, this::stopRealSenseREAUI, "RealSense REA UI"));
       messager.registerTopicListener(PerceptionSuiteAPI.RunRealSenseSLAMUI, run -> runnable(run, this::startRealSenseSLAMUI, this::stopRealSenseSLAMUI, "RealSense SLAM UI"));
       messager.registerTopicListener(PerceptionSuiteAPI.RunMapSegmentationUI, run -> runnable(run, this::startMapSegmentationUI, this::stopMapSegmentationUI, "Mag Segmentation UI"));
    }
@@ -213,7 +211,7 @@ public class PerceptionSuite
                               planarSegmentationStage = new Stage();
                               try
                               {
-                                 planarSegmentationUI = PlanarSegmentationUI.creatIntraprocessUI(planarSegmentationStage);
+                                 planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(planarSegmentationStage);
                                  planarSegmentationUI.show();
                               }
                               catch (Exception e)
@@ -275,6 +273,34 @@ public class PerceptionSuite
       messager.submitMessage(PerceptionSuiteAPI.RunLidarREAUI, false);
    }
 
+   private void startRealSenseREA() throws Exception
+   {
+      if (realsenseREAModule == null)
+      {
+         realsenseREAModule = LIDARBasedREAModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node);
+         realsenseREAModule.attachClosingListener(this::stopRealSenseREA);
+         realsenseREAModule.start();
+         realsenseREAModule.setParametersForDepth();
+      }
+      else
+      {
+         throw new RuntimeException("RealSense REA is already running.");
+      }
+   }
+
+   private void stopRealSenseREA()
+   {
+      if (realsenseREAModule != null)
+      {
+         realsenseREAModule.stop();
+         realsenseREAModule = null;
+      }
+
+      stopRealSenseREAUI();
+      messager.submitMessage(PerceptionSuiteAPI.RunRealSenseREA, false);
+      messager.submitMessage(PerceptionSuiteAPI.RunRealSenseREAUI, false);
+   }
+
    private void startLidarREAUI()
    {
       if (lidarREAModule == null)
@@ -322,6 +348,57 @@ public class PerceptionSuite
                               lidarREAModuleUI.stop();
                               lidarREAStage = null;
                               lidarREAModuleUI = null;
+                           });
+      }
+   }
+
+   private void startRealSenseREAUI()
+   {
+      if (realsenseREAModule == null)
+      {
+         LogTools.info("RealSense REA must be running first.");
+         messager.submitMessage(PerceptionSuiteAPI.RunRealSenseREAUI, false);
+         return;
+      }
+
+      if (realsenseREAModuleUI == null)
+      {
+         Platform.runLater(() ->
+                           {
+                              realsenseREAStage = new Stage();
+                              try
+                              {
+                                 realsenseREAModuleUI = LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(realsenseREAStage);
+                                 realsenseREAModuleUI.show();
+                              }
+                              catch (Exception e)
+                              {
+                                 LogTools.warn(e.getMessage());
+                              }
+                              realsenseREAStage.setOnCloseRequest(event ->
+                                                              {
+                                                                 messager.submitMessage(PerceptionSuiteAPI.RunRealSenseREAUI, false);
+                                                                 stopRealSenseREAUI();
+                                                              });
+                           });
+      }
+      else
+      {
+         stopRealSenseREAUI();
+         throw new RuntimeException("RealSense REA UI is already running.");
+      }
+   }
+
+   private void stopRealSenseREAUI()
+   {
+      if (realsenseREAModuleUI != null)
+      {
+         Platform.runLater(() ->
+                           {
+                              realsenseREAStage.close();
+                              realsenseREAModuleUI.stop();
+                              realsenseREAStage = null;
+                              realsenseREAModuleUI = null;
                            });
       }
    }
