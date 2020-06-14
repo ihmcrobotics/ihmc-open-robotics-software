@@ -83,6 +83,8 @@ public class LIDARBasedREAModule
 
    private final AtomicReference<Boolean> clearOcTree;
    private final AtomicReference<Boolean> enableStereoBuffer;
+   private final AtomicReference<Boolean> enableDepthCloudBuffer;
+   private final AtomicReference<Boolean> enableLidarBuffer;
 
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
@@ -195,6 +197,8 @@ public class LIDARBasedREAModule
 
       preserveOcTreeHistory = reaMessager.createInput(REAModuleAPI.StereoVisionBufferPreservingEnable, false);
       enableStereoBuffer = reaMessager.createInput(REAModuleAPI.StereoVisionBufferEnable, false);
+      enableLidarBuffer = reaMessager.createInput(REAModuleAPI.LidarBufferEnable, true);
+      enableDepthCloudBuffer = reaMessager.createInput(REAModuleAPI.DepthCloudBufferEnable, false);
       octreeResolution = reaMessager.createInput(REAModuleAPI.OcTreeResolution, mainUpdater.getMainOctree().getResolution());
    }
 
@@ -205,6 +209,9 @@ public class LIDARBasedREAModule
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
    {
+      if (!enableLidarBuffer.get())
+         return;
+
       LidarScanMessage message = subscriber.takeNextData();
       moduleStateReporter.registerLidarScanMessage(message);
       lidarBufferUpdater.handleLidarScanMessage(message);
@@ -213,6 +220,9 @@ public class LIDARBasedREAModule
 
    private void dispatchStereoVisionPointCloudMessage(Subscriber<StereoVisionPointCloudMessage> subscriber)
    {
+      if (!enableStereoBuffer.get())
+         return;
+
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerStereoVisionPointCloudMessage(message);
       stereoVisionBufferUpdater.handleStereoVisionPointCloudMessage(message);
@@ -221,6 +231,9 @@ public class LIDARBasedREAModule
 
    private void dispatchDepthPointCloudMessage(Subscriber<StereoVisionPointCloudMessage> subscriber)
    {
+      if (!enableDepthCloudBuffer.get())
+         return;
+
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerDepthCloudMessage(message);
       depthCloudBufferUpdater.handleStereoVisionPointCloudMessage(message);
