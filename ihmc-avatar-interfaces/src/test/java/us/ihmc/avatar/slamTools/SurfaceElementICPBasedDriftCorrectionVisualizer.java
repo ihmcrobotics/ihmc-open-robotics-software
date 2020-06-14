@@ -220,9 +220,10 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
          private double computeClosestDistance(Plane3D surfel)
          {
-            //            return SLAMTools.computeDistanceToNormalOctree(map, surfel.getPoint());
-            //return SLAMTools.computeSurfaceElementDistanceToNormalOctree(map, surfel);
-            return SLAMTools.computeSurfaceElementBoundedDistanceToNormalOctree(map, surfel);
+            return SLAMTools.computeSurfaceElementBoundedDistanceToNormalOctree(map,
+                                                                                surfel,
+                                                                                frame.getFrameMap().getResolution(),
+                                                                                frame.getFrameMap().getResolution());
          }
       };
       DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);

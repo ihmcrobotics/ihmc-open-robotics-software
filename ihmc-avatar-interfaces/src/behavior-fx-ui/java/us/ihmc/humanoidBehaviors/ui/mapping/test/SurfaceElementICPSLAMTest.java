@@ -239,7 +239,10 @@ public class SurfaceElementICPSLAMTest
 
          private double computeClosestDistance(Plane3D surfel)
          {
-            return SLAMTools.computeSurfaceElementBoundedDistanceToNormalOctree(map, surfel);
+            return SLAMTools.computeSurfaceElementBoundedDistanceToNormalOctree(map,
+                                                                                surfel,
+                                                                                frame2.getFrameMap().getResolution(),
+                                                                                frame2.getFrameMap().getResolution());
          }
       };
       DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
