@@ -67,6 +67,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    private final AppearanceDefinition octreeMapColor = YoAppearance.Coral();
    private final AppearanceDefinition frame1Appearance = YoAppearance.Blue();
    private final AppearanceDefinition frame2Appearance = YoAppearance.Green();
+   private final AppearanceDefinition frame2SurfelAppearance = YoAppearance.Red();
 
    public SurfaceElementICPBasedDriftCorrectionVisualizer()
    {
@@ -86,8 +87,10 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
                                                              frame2,
                                                              NUMBER_OF_POINTS_TO_VISUALIZE,
                                                              frame2Appearance,
+                                                             frame2SurfelAppearance,
                                                              registry,
-                                                             yoGraphicsListRegistry);
+                                                             yoGraphicsListRegistry,
+                                                             true);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setCreateGUI(true);
@@ -222,7 +225,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
          private double computeClosestDistance(Plane3D surfel)
          {
-//            return SLAMTools.computeDistanceToNormalOctree(map, surfel.getPoint());
+            //            return SLAMTools.computeDistanceToNormalOctree(map, surfel.getPoint());
             //return SLAMTools.computeSurfaceElementDistanceToNormalOctree(map, surfel);
             return SLAMTools.computeSurfaceElementDistanceToNormalOctreeThreshold(map, surfel);
          }
