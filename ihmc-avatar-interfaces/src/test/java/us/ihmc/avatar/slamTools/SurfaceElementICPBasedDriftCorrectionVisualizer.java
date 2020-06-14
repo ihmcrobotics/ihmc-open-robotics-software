@@ -43,10 +43,12 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    private final int recordFrequency = 1;
    private final int bufferSize = (int) (trajectoryTime / dt / recordFrequency + 3);
 
-   //private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200601_LidarWalking_UpStairs2\\PointCloud\\";
-   private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200603_LidarWalking_StairUp3\\PointCloud\\";
-   private static final int INDEX_FRAME_ONE = 4;
-   private static final int INDEX_FRAME_TWO = 5;
+   private static final DriftCase DRIFT_CASE = DriftCase.Upstairs3YDriftSmallOverlap;
+
+   private static final String DATA_PATH = "C:\\" + DRIFT_CASE.getFilePath();
+   private static final int INDEX_FRAME_ONE = DRIFT_CASE.getPreviousFrameIndex();
+   private static final int INDEX_FRAME_TWO = DRIFT_CASE.getNewFrameIndex();
+
    private static final int NUMBER_OF_POINTS_TO_VISUALIZE = 2000;
 
    private static final boolean VISUALIZE_OCTREE = true;
@@ -122,7 +124,6 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          EuclidGeometryTools.orientation3DFromZUpToVector3D(normal, rotation);
          octreeGraphics.rotate(rotation);
          octreeGraphics.addSphere(0.002, octreeMapColor);
-         //octreeGraphics.addCube(OCTREE_RESOLUTION, OCTREE_RESOLUTION, OCTREE_RESOLUTION * 0.1, octreeMapColor);
       }
       if (VISUALIZE_OCTREE)
          scs.addStaticLinkGraphics(octreeGraphics);
@@ -262,7 +263,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       frame1 = new SLAMFrame(messages.get(INDEX_FRAME_ONE));
       frame2 = new SLAMFrame(frame1, messages.get(INDEX_FRAME_TWO));
       double surfaceElementResolution = 0.04;
-      double windowMargin = 0.02;
+      double windowMargin = 0.0;
       int minimumNumberOfHits = 1;
       frame2.registerSurfaceElements(octreeMap, windowMargin, surfaceElementResolution, minimumNumberOfHits, true);
    }
