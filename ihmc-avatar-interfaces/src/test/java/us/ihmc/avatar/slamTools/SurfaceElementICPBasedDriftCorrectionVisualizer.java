@@ -141,7 +141,11 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          icpTransformer.transform(correctedData[i]);
       }
 
-      for (double t = 0.0; t <= trajectoryTime + dt; t += dt)
+      frame1GraphicsManager.updateGraphics();
+      frame2GraphicsManager.updateGraphics();
+      scs.tickAndUpdate();
+
+      for (double t = 1.0; t <= trajectoryTime + dt; t += dt)
       {
          robot.getYoTime().set(t);
 
