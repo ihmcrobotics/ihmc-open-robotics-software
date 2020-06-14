@@ -36,15 +36,17 @@ public class SLAMFrameYoGraphicsManager
    private final YoFramePoint3D[] yoFrameSurfelPoints;
    private final YoGraphicPosition[] yoGraphicSurfelPoints;
 
-   private static final double NORMAL_VIZ_LENGTH = 0.0;
+   private final boolean visualizeSurfel;
+   private static final double NORMAL_VIZ_LENGTH = 0.03;
 
    private final YoFrameVector3D[] yoFrameSurfelNormals;
    private final YoGraphicVector[] yoGraphicSurfelNormals;
 
-   public SLAMFrameYoGraphicsManager(String prefix, SLAMFrame frame, int size, AppearanceDefinition appearance, YoVariableRegistry registry,
-                                     YoGraphicsListRegistry graphicsRegistry)
+   public SLAMFrameYoGraphicsManager(String prefix, SLAMFrame frame, int size, AppearanceDefinition appearance, AppearanceDefinition surfelAppearance,
+                                     YoVariableRegistry registry, YoGraphicsListRegistry graphicsRegistry, boolean visualizeSurfel)
    {
       slamFrame = frame;
+      this.visualizeSurfel = visualizeSurfel;
 
       yoFrameSensorPose = new YoFramePose3D(prefix + "_SensorPoseFrame", worldFrame, registry);
       YoGraphicsList yoGraphicListRegistry = new YoGraphicsList(prefix + "_SLAM_Frame_Viz");
@@ -93,11 +95,11 @@ public class SLAMFrameYoGraphicsManager
       for (int i = 0; i < numberOfSurfel; i++)
       {
          yoFrameSurfelPoints[i] = new YoFramePoint3D(prefix + "_SurfelPoint_" + i, worldFrame, registry);
-         yoGraphicSurfelPoints[i] = new YoGraphicPosition(prefix + "_SurfelPointViz_" + i, yoFrameSurfelPoints[i], 0.003, appearance);
+         yoGraphicSurfelPoints[i] = new YoGraphicPosition(prefix + "_SurfelPointViz_" + i, yoFrameSurfelPoints[i], 0.003, surfelAppearance);
 
          yoFrameSurfelNormals[i] = new YoFrameVector3D(prefix + "_SurfelNormal_" + i, worldFrame, registry);
          yoGraphicSurfelNormals[i] = new YoGraphicVector(prefix + "_SurfelNormalViz_"
-               + i, yoFrameSurfelPoints[i], yoFrameSurfelNormals[i], NORMAL_VIZ_LENGTH, appearance, false);
+               + i, yoFrameSurfelPoints[i], yoFrameSurfelNormals[i], NORMAL_VIZ_LENGTH, surfelAppearance, false);
 
          yoGraphicListRegistry.add(yoGraphicSurfelPoints[i]);
          yoGraphicListRegistry.add(yoGraphicSurfelNormals[i]);
@@ -106,10 +108,10 @@ public class SLAMFrameYoGraphicsManager
       graphicsRegistry.registerYoGraphicsList(yoGraphicListRegistry);
    }
 
-   public SLAMFrameYoGraphicsManager(String prefix, SLAMFrame frame, AppearanceDefinition appearance, YoVariableRegistry registry,
+   public SLAMFrameYoGraphicsManager(String prefix, SLAMFrame frame, int size, AppearanceDefinition appearance, YoVariableRegistry registry,
                                      YoGraphicsListRegistry graphicsRegistry)
    {
-      this(prefix, frame, -1, appearance, registry, graphicsRegistry);
+      this(prefix, frame, size, appearance, appearance, registry, graphicsRegistry, false);
    }
 
    public void updateGraphics()
@@ -120,11 +122,15 @@ public class SLAMFrameYoGraphicsManager
       {
          yoFramePointCloud[i].set(pointCloud[indicesArray.get(i)]);
       }
-      List<Plane3D> surfaceElements = slamFrame.getSurfaceElements();
-      for (int i = 0; i < surfaceElements.size(); i++)
+
+      if (visualizeSurfel)
       {
-         yoFrameSurfelPoints[i].set(surfaceElements.get(i).getPoint());
-         yoFrameSurfelNormals[i].set(surfaceElements.get(i).getNormal());
+         List<Plane3D> surfaceElements = slamFrame.getSurfaceElements();
+         for (int i = 0; i < surfaceElements.size(); i++)
+         {
+            yoFrameSurfelPoints[i].set(surfaceElements.get(i).getPoint());
+            yoFrameSurfelNormals[i].set(surfaceElements.get(i).getNormal());
+         }
       }
    }
 
