@@ -12,7 +12,7 @@ import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 
 public class SLAMBasedREAStandaloneLauncher extends Application
 {
-   private static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAModuleConfiguration.txt";
+   private static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultSLAMModuleConfiguration.txt";
 
    private SLAMBasedEnvironmentAwarenessUI slamUI;
    private PlanarSegmentationUI planarSegmentationUI;
@@ -26,7 +26,7 @@ public class SLAMBasedREAStandaloneLauncher extends Application
       slamModule = SLAMModule.createIntraprocessModule();
 
       Stage secondStage = new Stage();
-      planarSegmentationUI = PlanarSegmentationUI.creatIntraprocessUI(secondStage);
+      planarSegmentationUI = PlanarSegmentationUI.createIntraprocessUI(secondStage);
       segmentationModule = PlanarSegmentationModule.createIntraprocessModule(REACommunicationProperties.inputTopic,
                                                                              REACommunicationProperties.subscriberCustomRegionsTopicName,
                                                                              ROS2Tools.REALSENSE_SLAM_MAP,

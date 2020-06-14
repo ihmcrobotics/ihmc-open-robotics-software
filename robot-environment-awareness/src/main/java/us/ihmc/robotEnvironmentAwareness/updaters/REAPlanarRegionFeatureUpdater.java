@@ -113,6 +113,31 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       surfaceNormalFilterParameters = reaMessager.createInput(surfaceNormalFilterParametersTopic, new SurfaceNormalFilterParameters());
    }
 
+   public void setPlanarRegionSegmentationParameters(PlanarRegionSegmentationParameters planarRegionSegmentationParameters)
+   {
+      this.planarRegionSegmentationParameters.set(planarRegionSegmentationParameters);
+   }
+
+   public void setCustomRegionMergingParameters(CustomRegionMergeParameters customRegionMergingParameters)
+   {
+      this.customRegionMergingParameters.set(customRegionMergingParameters);
+   }
+
+   public void setConcaveHullFactoryParameters(ConcaveHullFactoryParameters concaveHullFactoryParameters)
+   {
+      this.concaveHullFactoryParameters.set(concaveHullFactoryParameters);
+   }
+
+   public void setPolygonizerParameters(PolygonizerParameters polygonizerParameters)
+   {
+      this.polygonizerParameters.set(polygonizerParameters);
+   }
+
+   public void setSurfaceNormalFilterParameters(SurfaceNormalFilterParameters surfaceNormalFilterParameters)
+   {
+      this.surfaceNormalFilterParameters.set(surfaceNormalFilterParameters);
+   }
+
    public void setOcTreeEnableTopic(Topic<Boolean> ocTreeEnableTopic)
    {
       this.ocTreeEnableTopic = ocTreeEnableTopic;
@@ -153,7 +178,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
       this.planarRegionsIntersectionEnableTopic = planarRegionsIntersectionEnableTopic;
    }
 
-   public void setPlanarRegionSegmentationParameters(Topic<PlanarRegionSegmentationParameters> planarRegionsSegmentationParametersTopic)
+   public void setPlanarRegionSegmentationParametersTopic(Topic<PlanarRegionSegmentationParameters> planarRegionsSegmentationParametersTopic)
    {
       this.planarRegionsSegmentationParametersTopic = planarRegionsSegmentationParametersTopic;
    }
@@ -185,6 +210,7 @@ public class REAPlanarRegionFeatureUpdater implements RegionFeaturesProvider
 
    private void sendCurrentState()
    {
+      reaMessager.submitMessage(ocTreeEnableTopic, isOcTreeEnabled.get());
       reaMessager.submitMessage(planarRegionsSegmentationEnableTopic, enableSegmentation.get());
       reaMessager.submitMessage(customRegionsMergingEnableTopic, enableCustomRegions.get());
       reaMessager.submitMessage(planarRegionsPolygonizerEnableTopic, enablePolygonizer.get());

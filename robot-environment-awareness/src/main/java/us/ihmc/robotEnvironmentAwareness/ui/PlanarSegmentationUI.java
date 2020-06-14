@@ -155,7 +155,7 @@ public class PlanarSegmentationUI
       polygonizerAnchorPaneController.bindControls();
    }
 
-   public void show() throws IOException
+   public void show()
    {
       refreshModuleState();
       primaryStage.show();
@@ -176,7 +176,7 @@ public class PlanarSegmentationUI
       }
    }
 
-   public static PlanarSegmentationUI creatIntraprocessUI(Stage primaryStage) throws Exception
+   public static PlanarSegmentationUI createIntraprocessUI(Stage primaryStage) throws Exception
    {
       KryoMessager moduleMessager = KryoMessager.createIntraprocess(SegmentationModuleAPI.API,
                                                                 NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
@@ -186,7 +186,7 @@ public class PlanarSegmentationUI
       return new PlanarSegmentationUI(uiMessager, primaryStage);
    }
 
-   public static PlanarSegmentationUI creatRemoteUI(Stage primaryStage) throws Exception
+   public static PlanarSegmentationUI createRemoteUI(Stage primaryStage) throws Exception
    {
       KryoMessager moduleMessager = KryoMessager.createTCPServer(SegmentationModuleAPI.API,
                                                              NetworkPorts.PLANAR_SEGMENTATION_UI_PORT,
