@@ -30,7 +30,10 @@
              <ToggleButton fx:id="runMapSegmentationUI" mnemonicParsing="false" prefHeight="55.0" prefWidth="164.0" text="Run UI" GridPane.columnIndex="3" GridPane.rowIndex="2" />
              <ToggleButton fx:id="runLidarREAModule" mnemonicParsing="false" prefHeight="70.0" prefWidth="198.0" text="Run Module" GridPane.rowIndex="4" />
              <ToggleButton fx:id="runLidarREAUI" mnemonicParsing="false" prefHeight="81.0" prefWidth="209.0" text="Run UI" textAlignment="CENTER" GridPane.columnIndex="1" GridPane.rowIndex="4" />
+             <ToggleButton fx:id="runRealSenseREAModule" mnemonicParsing="false" prefHeight="70.0" prefWidth="198.0" text="Run Module"  GridPane.columnIndex="2" GridPane.rowIndex="4" />
+             <ToggleButton fx:id="runRealSenseREAUI" mnemonicParsing="false" prefHeight="81.0" prefWidth="209.0" text="Run UI" textAlignment="CENTER" GridPane.columnIndex="3" GridPane.rowIndex="4" />
              <Label text="LIDAR REA" GridPane.columnSpan="2" GridPane.rowIndex="3" />
+             <Label text="RealSense REA" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="3" />
              <Label text="RealSense SLAM" GridPane.columnSpan="2" GridPane.rowIndex="1" />
              <Label text="Map Segmentation" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="1" />
          </children>
