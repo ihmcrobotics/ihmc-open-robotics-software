@@ -8,18 +8,12 @@ import org.ejml.data.DenseMatrix64F;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
-import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.jOctoMap.iterators.OcTreeIterable;
-import us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory;
-import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
@@ -51,8 +45,6 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
    private static final int NUMBER_OF_POINTS_TO_VISUALIZE = 2000;
 
-   private static final boolean VISUALIZE_OCTREE = true;
-
    private final static double OCTREE_RESOLUTION = 0.02;
    private NormalOcTree octreeMap;
 
@@ -71,7 +63,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    private final AppearanceDefinition octreeMapColor = YoAppearance.Coral();
    private final AppearanceDefinition frame1Appearance = YoAppearance.Blue();
    private final AppearanceDefinition frame2Appearance = YoAppearance.Green();
-   private final AppearanceDefinition frame2SurfelAppearance = YoAppearance.Red();
+   private final AppearanceDefinition frameSurfelAppearance = YoAppearance.Red();
 
    public SurfaceElementICPBasedDriftCorrectionVisualizer()
    {
@@ -93,10 +85,11 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
                                                              frame2,
                                                              NUMBER_OF_POINTS_TO_VISUALIZE,
                                                              frame2Appearance,
-                                                             frame2SurfelAppearance,
+                                                             frameSurfelAppearance,
                                                              registry,
                                                              yoGraphicsListRegistry,
-                                                             true);
+                                                             false);
+      new OctreeYoGraphicsManager("Octree_", octreeMap, octreeMapColor, registry, yoGraphicsListRegistry, false);
 
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
       parameters.setCreateGUI(true);
@@ -111,26 +104,6 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       linkGraphics.addCoordinateSystem(0.3);
       scs.addStaticLinkGraphics(linkGraphics);
       scs.setGroundVisible(false);
-
-      octreeMapColor.setTransparency(0.8);
-      Graphics3DObject octreeGraphics = new Graphics3DObject();
-      OcTreeIterable<NormalOcTreeNode> iterable = OcTreeIteratorFactory.createIterable(octreeMap.getRoot());
-      for (NormalOcTreeNode node : iterable)
-      {
-         Vector3D normal = new Vector3D();
-         Point3D hitLocation = new Point3D();
-         node.getNormal(normal);
-         node.getHitLocation(hitLocation);
-
-         octreeGraphics.identity();
-         octreeGraphics.translate(hitLocation);
-         RotationMatrix rotation = new RotationMatrix();
-         EuclidGeometryTools.orientation3DFromZUpToVector3D(normal, rotation);
-         octreeGraphics.rotate(rotation);
-         octreeGraphics.addSphere(0.002, octreeMapColor);
-      }
-      if (VISUALIZE_OCTREE)
-         scs.addStaticLinkGraphics(octreeGraphics);
 
       // define optimizer.
       LevenbergMarquardtParameterOptimizer optimizer = createOptimizer(octreeMap, frame2);
