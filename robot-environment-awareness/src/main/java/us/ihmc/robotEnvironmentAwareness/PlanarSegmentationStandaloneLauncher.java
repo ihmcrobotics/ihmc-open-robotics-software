@@ -16,7 +16,7 @@ public class PlanarSegmentationStandaloneLauncher extends Application
    @Override
    public void start(Stage primaryStage) throws Exception
    {
-      ui = PlanarSegmentationUI.creatIntraprocessUI(primaryStage);
+      ui = PlanarSegmentationUI.createIntraprocessUI(primaryStage);
       module = PlanarSegmentationModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME);
 
       ui.show();
