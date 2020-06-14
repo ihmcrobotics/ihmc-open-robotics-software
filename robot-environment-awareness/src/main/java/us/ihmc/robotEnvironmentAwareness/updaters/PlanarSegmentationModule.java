@@ -21,6 +21,9 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
@@ -139,6 +142,21 @@ public class PlanarSegmentationModule implements OcTreeConsumer
       reaMessager.submitMessage(SegmentationModuleAPI.PlanarRegionsIntersectionEnable, true);
       reaMessager.submitMessage(SegmentationModuleAPI.PlanarRegionsPolygonizerEnable, true);
       reaMessager.submitMessage(SegmentationModuleAPI.CustomRegionsMergingEnable, true);
+
+      PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
+      planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.03);
+      planarRegionSegmentationParameters.setMinRegionSize(150);
+      reaMessager.submitMessage(SegmentationModuleAPI.PlanarRegionsSegmentationParameters, planarRegionSegmentationParameters);
+
+      SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
+      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
+      surfaceNormalFilterParameters.setSurfaceNormalLowerBound(Math.toRadians(-40.0));
+      surfaceNormalFilterParameters.setSurfaceNormalUpperBound(Math.toRadians(40.0));
+      reaMessager.submitMessage(SegmentationModuleAPI.SurfaceNormalFilterParameters, surfaceNormalFilterParameters);
+
+      PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
+      polygonizerParameters.setConcaveHullThreshold(0.15);
+      reaMessager.submitMessage(SegmentationModuleAPI.PlanarRegionsPolygonizerParameters, polygonizerParameters);
 
       reaMessager.submitMessage(SegmentationModuleAPI.UIOcTreeDisplayType, OcTreeMeshBuilder.DisplayType.PLANE);
       reaMessager.submitMessage(SegmentationModuleAPI.UIOcTreeColoringMode, OcTreeMeshBuilder.ColoringType.REGION);
