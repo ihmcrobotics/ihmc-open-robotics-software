@@ -45,12 +45,11 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
    private final int recordFrequency = 1;
    private final int bufferSize = (int) (trajectoryTime / dt / recordFrequency + 3);
 
-   //private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200305_Simple\\PointCloud\\"; // 30 vs 33 : small drift, 33 vs 34 : drift and left right big movement.
-   //private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200601_LidarWalking_DownStairs\\PointCloud\\";  // 12 vs 13 : drift
-   private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200601_LidarWalking_UpStairs2\\PointCloud\\"; // 3 vs 4 : drift in Y. (Great)
-   //private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200603_LidarWalking_StairUp3\\PointCloud\\"; // 4 vs 5 : point to point can not resolve the drift in Y for this frames.
-   private static final int INDEX_FRAME_ONE = 3;
-   private static final int INDEX_FRAME_TWO = 4;
+   private static final DriftCase DRIFT_CASE = DriftCase.UpStairs2YDrift;
+
+   private static final String DATA_PATH = "C:\\" + DRIFT_CASE.getFilePath();
+   private static final int INDEX_FRAME_ONE = DRIFT_CASE.getPreviousFrameIndex();
+   private static final int INDEX_FRAME_TWO = DRIFT_CASE.getNewFrameIndex();
    private static final int NUMBER_OF_POINTS_TO_VISUALIZE = 2000;
 
    private static final boolean VISUALIZE_OCTREE = false;
