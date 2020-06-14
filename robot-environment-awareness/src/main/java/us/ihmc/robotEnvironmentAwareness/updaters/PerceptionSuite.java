@@ -280,7 +280,7 @@ public class PerceptionSuite
          realsenseREAModule = LIDARBasedREAModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node);
          realsenseREAModule.attachClosingListener(this::stopRealSenseREA);
          realsenseREAModule.start();
-         realsenseREAModule.setParametersForDepth();
+         realsenseREAModule.setParametersForStereo();
       }
       else
       {

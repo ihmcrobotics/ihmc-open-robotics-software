@@ -34,6 +34,10 @@ public class PerceptionSuiteUI
    private ToggleButton runMapSegmentationModule;
    @FXML
    private ToggleButton runMapSegmentationUI;
+   @FXML
+   private ToggleButton runRealSenseREAModule;
+   @FXML
+   private ToggleButton runRealSenseREAUI;
 
    private PerceptionSuiteUI(REAUIMessager messager, Stage primaryStage) throws Exception
    {
@@ -52,6 +56,8 @@ public class PerceptionSuiteUI
       messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunLidarREAUI, runLidarREAUI.selectedProperty());
       messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunMapSegmentation, runMapSegmentationModule.selectedProperty());
       messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunMapSegmentationUI, runMapSegmentationUI.selectedProperty());
+      messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunRealSenseREA, runRealSenseREAModule.selectedProperty());
+      messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunRealSenseREAUI, runRealSenseREAUI.selectedProperty());
 
       primaryStage.setTitle(getClass().getSimpleName());
       Scene mainScene = new Scene(mainPane, 594, 200);
