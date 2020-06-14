@@ -43,7 +43,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    private final int recordFrequency = 1;
    private final int bufferSize = (int) (trajectoryTime / dt / recordFrequency + 3);
 
-   private static final DriftCase DRIFT_CASE = DriftCase.Upstairs3YDriftSmallOverlap;
+   private static final DriftCase DRIFT_CASE = DriftCase.MultiplePlanes;
 
    private static final String DATA_PATH = "C:\\" + DRIFT_CASE.getFilePath();
    private static final int INDEX_FRAME_ONE = DRIFT_CASE.getPreviousFrameIndex();
@@ -64,6 +64,8 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    private final SLAMFrameYoGraphicsManager frame2GraphicsManager;
 
    private final YoDouble optimizerQuality;
+   private final YoDouble optimizerTranslationalEffort;
+   private final YoDouble optimizerRotationalEffort;
    private final YoInteger numberOfCorrespondingPoints;
 
    private final AppearanceDefinition octreeMapColor = YoAppearance.Coral();
@@ -74,6 +76,8 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    public SurfaceElementICPBasedDriftCorrectionVisualizer()
    {
       optimizerQuality = new YoDouble("optimizerQuality", registry);
+      optimizerTranslationalEffort = new YoDouble("optimizerTranslationalEffort", registry);
+      optimizerRotationalEffort = new YoDouble("optimizerRotationalEffort", registry);
       numberOfCorrespondingPoints = new YoInteger("numberOfCorrespondingPoints", registry);
 
       // Define frames .
@@ -154,7 +158,8 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          optimizer.iterate();
 
          // get parameter.
-         icpTransformer.set(convertTransform(optimizer.getOptimalParameter().getData()));
+         DenseMatrix64F optimalParameter = optimizer.getOptimalParameter();
+         icpTransformer.set(convertTransform(optimalParameter.getData()));
          correctedSensorPoseToWorld.set(frame2.getInitialSensorPoseToWorld());
          correctedSensorPoseToWorld.multiply(icpTransformer);
          for (int i = 0; i < correctedData.length; i++)
@@ -171,6 +176,18 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
          // update yo variables.   
          optimizerQuality.set(optimizer.getQuality());
+         double translationalEffort = 0.0, rotationalEffort = 0.0;
+         for (int i = 0; i < 3; i++)
+         {
+            translationalEffort = translationalEffort + optimalParameter.get(i) * optimalParameter.get(i);
+         }
+         for (int i = 3; i < 6; i++)
+         {
+            rotationalEffort = rotationalEffort + optimalParameter.get(i) * optimalParameter.get(i);
+         }
+         optimizer.getOptimalParameter();
+         optimizerTranslationalEffort.set(translationalEffort);
+         optimizerRotationalEffort.set(rotationalEffort);
          numberOfCorrespondingPoints.set(optimizer.getNumberOfCoorespondingPoints());
 
          scs.tickAndUpdate();
@@ -232,7 +249,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          {
             //            return SLAMTools.computeDistanceToNormalOctree(map, surfel.getPoint());
             //return SLAMTools.computeSurfaceElementDistanceToNormalOctree(map, surfel);
-            return SLAMTools.computeSurfaceElementDistanceToNormalOctreeThreshold(map, surfel);
+            return SLAMTools.computeSurfaceElementBoundedDistanceToNormalOctree(map, surfel);
          }
       };
       DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
