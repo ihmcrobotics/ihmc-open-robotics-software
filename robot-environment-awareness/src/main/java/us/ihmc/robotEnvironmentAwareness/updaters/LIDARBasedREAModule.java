@@ -7,6 +7,7 @@ import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPr
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -27,6 +28,7 @@ import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.communication.util.NetworkPorts;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
@@ -70,6 +72,9 @@ public class LIDARBasedREAModule
    private final REAOcTreeBuffer lidarBufferUpdater;
    private final REAOcTreeBuffer stereoVisionBufferUpdater;
    private final REAOcTreeBuffer depthCloudBufferUpdater;
+   private final AtomicReference<Pose3D> latestLidarPoseReference = new AtomicReference<>(null);
+   private final AtomicReference<Pose3D> latestStereoVisionPoseReference = new AtomicReference<>(null);
+   private final AtomicReference<Pose3D> latestDepthPoseReference = new AtomicReference<>(null);
    private final REAOcTreeUpdater mainUpdater;
    private final REAPlanarRegionFeatureUpdater planarRegionFeatureUpdater;
 
@@ -135,7 +140,11 @@ public class LIDARBasedREAModule
                                                     REAModuleAPI.RequestStereoVisionBuffer,
                                                     REAModuleAPI.DepthCloudBufferState);
       REAOcTreeBuffer[] bufferUpdaters = new REAOcTreeBuffer[] {lidarBufferUpdater, stereoVisionBufferUpdater, depthCloudBufferUpdater};
-      mainUpdater = new REAOcTreeUpdater(DEFAULT_OCTREE_RESOLUTION, bufferUpdaters, reaMessager);
+      HashMap<REAOcTreeBuffer, AtomicReference<Pose3D>> latestSensorPosePositions = new HashMap<>();
+      latestSensorPosePositions.put(lidarBufferUpdater, latestLidarPoseReference);
+      latestSensorPosePositions.put(stereoVisionBufferUpdater, latestStereoVisionPoseReference);
+      latestSensorPosePositions.put(depthCloudBufferUpdater, latestDepthPoseReference);
+      mainUpdater = new REAOcTreeUpdater(DEFAULT_OCTREE_RESOLUTION, bufferUpdaters, latestSensorPosePositions, reaMessager);
       planarRegionFeatureUpdater = new REAPlanarRegionFeatureUpdater(reaMessager);
       planarRegionFeatureUpdater.bindControls();
 
@@ -199,7 +208,7 @@ public class LIDARBasedREAModule
       LidarScanMessage message = subscriber.takeNextData();
       moduleStateReporter.registerLidarScanMessage(message);
       lidarBufferUpdater.handleLidarScanMessage(message);
-      mainUpdater.handleLidarScanMessage(message);
+      latestLidarPoseReference.set(new Pose3D(message.getLidarPosition(), message.getLidarOrientation()));
    }
 
    private void dispatchStereoVisionPointCloudMessage(Subscriber<StereoVisionPointCloudMessage> subscriber)
@@ -207,6 +216,7 @@ public class LIDARBasedREAModule
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerStereoVisionPointCloudMessage(message);
       stereoVisionBufferUpdater.handleStereoVisionPointCloudMessage(message);
+      latestStereoVisionPoseReference.set(new Pose3D(message.getSensorPosition(), message.getSensorOrientation()));
    }
 
    private void dispatchDepthPointCloudMessage(Subscriber<StereoVisionPointCloudMessage> subscriber)
@@ -214,6 +224,7 @@ public class LIDARBasedREAModule
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerDepthCloudMessage(message);
       depthCloudBufferUpdater.handleStereoVisionPointCloudMessage(message);
+      latestDepthPoseReference.set(new Pose3D(message.getSensorPosition(), message.getSensorOrientation()));
    }
 
    private void dispatchStampedPosePacket(Subscriber<StampedPosePacket> subscriber)
@@ -361,6 +372,24 @@ public class LIDARBasedREAModule
          executorService.scheduleAtFixedRate(stereoVisionBufferUpdater.createBufferThread(), 0, BUFFER_THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
          executorService.scheduleAtFixedRate(depthCloudBufferUpdater.createBufferThread(), 0, BUFFER_THREAD_PERIOD_MILLISECONDS, TimeUnit.MILLISECONDS);
       }
+   }
+
+   public void setParametersForStereo()
+   {
+      BoundingBoxParametersMessage boundindBoxMessage = new BoundingBoxParametersMessage();
+      boundindBoxMessage.setMaxX(1.0f);
+      boundindBoxMessage.setMinX(0.0f);
+      boundindBoxMessage.setMaxY(1.0f);
+      boundindBoxMessage.setMinY(-1.0f);
+      boundindBoxMessage.setMaxZ(1.0f);
+      boundindBoxMessage.setMinZ(-2.0f);
+
+      reaMessager.submitMessage(REAModuleAPI.LidarBufferEnable, false);
+      reaMessager.submitMessage(REAModuleAPI.StereoVisionBufferEnable, true);
+      reaMessager.submitMessage(REAModuleAPI.DepthCloudBufferEnable, false);
+      reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxEnable, true);
+      reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundindBoxMessage);
+      reaMessager.submitMessage(REAModuleAPI.UIOcTreeDisplayType, OcTreeMeshBuilder.DisplayType.HIDE);
    }
 
    public void setParametersForDepth()
