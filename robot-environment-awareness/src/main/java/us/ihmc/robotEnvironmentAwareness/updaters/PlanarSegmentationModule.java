@@ -209,7 +209,10 @@ public class PlanarSegmentationModule implements OcTreeConsumer
                return;
 
             timeReporter.run(() -> planarRegionFeatureUpdater.update(mainOctree, sensorPose), planarRegionsTimeReport);
+            reaMessager.submitMessage(SegmentationModuleAPI.UISegmentationDuration, timeReporter.getStringToReport());
+
             timeReporter.run(() -> moduleStateReporter.reportPlanarRegionsState(planarRegionFeatureUpdater), reportPlanarRegionsStateTimeReport);
+
 
             planarRegionPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(planarRegionFeatureUpdater.getPlanarRegionsList()));
          }

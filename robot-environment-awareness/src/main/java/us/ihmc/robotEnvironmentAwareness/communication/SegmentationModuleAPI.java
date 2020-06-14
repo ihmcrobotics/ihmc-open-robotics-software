@@ -67,6 +67,8 @@ public class SegmentationModuleAPI
    public static final Topic<String> UISegmentationDataExporterDirectory = topic("UISegmentationDataExporterDirectory");
    public static final Topic<String> UIPlanarRegionDataExporterDirectory = topic("UIPlanarRegionDataExporterDirectory");
 
+   public static final Topic<String> UISegmentationDuration = topic("UISegmentationDuration");
+
    public static final Topic<Boolean> SaveUpdaterConfiguration = topic("SaveUpdaterConfiguration");
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
