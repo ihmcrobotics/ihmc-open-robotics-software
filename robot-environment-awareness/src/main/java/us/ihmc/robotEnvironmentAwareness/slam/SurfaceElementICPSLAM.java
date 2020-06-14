@@ -58,7 +58,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
 
          private double computeClosestDistance(Plane3D surfel)
          {
-            return SLAMTools.computeSurfaceElementDistanceToNormalOctreeThreshold(octree, surfel);
+            return SLAMTools.computeSurfaceElementBoundedDistanceToNormalOctree(octree, surfel);
          }
       };
       DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);

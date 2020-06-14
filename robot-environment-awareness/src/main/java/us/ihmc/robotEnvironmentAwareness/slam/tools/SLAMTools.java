@@ -282,7 +282,7 @@ public class SLAMTools
       return nearestHitDistanceSquared.getValue();
    }
    
-   public static double computeSurfaceElementDistanceToNormalOctreeThreshold(NormalOcTree octree, Plane3DBasics surfel)
+   public static double computeSurfaceElementBoundedDistanceToNormalOctree(NormalOcTree octree, Plane3DBasics surfel)
    {
       OcTreeKey occupiedKey = octree.coordinateToKey(surfel.getPoint());
       OcTreeKey nearestKey = new OcTreeKey();
