@@ -218,8 +218,13 @@ public class LIDARBasedEnvironmentAwarenessUI
 
    public static LIDARBasedEnvironmentAwarenessUI creatIntraprocessUI(Stage primaryStage) throws Exception
    {
+      return creatIntraprocessUI(primaryStage, NetworkPorts.REA_MODULE_UI_PORT);
+   }
+
+   public static LIDARBasedEnvironmentAwarenessUI creatIntraprocessUI(Stage primaryStage, NetworkPorts networkPort) throws Exception
+   {
       Messager moduleMessager = KryoMessager.createIntraprocess(REAModuleAPI.API,
-                                                                NetworkPorts.REA_MODULE_UI_PORT,
+                                                                networkPort,
                                                                 REACommunicationProperties.getPrivateNetClassList());
       REAUIMessager uiMessager = new REAUIMessager(moduleMessager);
       return new LIDARBasedEnvironmentAwarenessUI(uiMessager, primaryStage);

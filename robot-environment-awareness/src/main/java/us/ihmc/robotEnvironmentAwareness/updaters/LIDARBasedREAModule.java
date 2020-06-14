@@ -455,13 +455,13 @@ public class LIDARBasedREAModule
 
    public static LIDARBasedREAModule createRemoteModule(String configurationFilePath) throws Exception
    {
-      KryoMessager server = createKryoMessager();
+      KryoMessager server = createKryoMessager(NetworkPorts.REA_MODULE_UI_PORT);
       return new LIDARBasedREAModule(server, new File(configurationFilePath));
    }
 
    public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath) throws Exception
    {
-      KryoMessager messager = createKryoMessager();
+      KryoMessager messager = createKryoMessager(NetworkPorts.REA_MODULE_UI_PORT);
 
       File configurationFile = new File(configurationFilePath);
       try
@@ -480,7 +480,12 @@ public class LIDARBasedREAModule
 
    public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath, Ros2Node ros2Node) throws Exception
    {
-      KryoMessager messager = createKryoMessager();
+      return createIntraprocessModule(configurationFilePath, ros2Node, NetworkPorts.REA_MODULE_UI_PORT);
+   }
+
+   public static LIDARBasedREAModule createIntraprocessModule(String configurationFilePath, Ros2Node ros2Node, NetworkPorts networkPorts) throws Exception
+   {
+      KryoMessager messager = createKryoMessager(networkPorts);
 
       File configurationFile = new File(configurationFilePath);
       try
@@ -497,10 +502,10 @@ public class LIDARBasedREAModule
       return new LIDARBasedREAModule(ros2Node, messager, configurationFile);
    }
 
-   private static KryoMessager createKryoMessager() throws Exception
+   private static KryoMessager createKryoMessager(NetworkPorts networkPorts) throws Exception
    {
       KryoMessager messager = KryoMessager.createIntraprocess(REAModuleAPI.API,
-                                                              NetworkPorts.REA_MODULE_UI_PORT,
+                                                              networkPorts,
                                                               REACommunicationProperties.getPrivateNetClassList());
       messager.setAllowSelfSubmit(true);
       messager.startMessager();
