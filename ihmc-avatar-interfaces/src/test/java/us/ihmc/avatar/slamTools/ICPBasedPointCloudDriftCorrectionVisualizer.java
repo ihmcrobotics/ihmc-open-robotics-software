@@ -239,9 +239,8 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
 
          private double computeClosestDistance(Point3D point)
          {
-            double linearDistance = SLAMTools.computeDistanceToNormalOctree(map, point);
             double surfelDistance = SLAMTools.computePerpendicularDistanceToNormalOctree(map, point);
-            return Math.min(linearDistance, surfelDistance);
+            return surfelDistance;
          }
       };
       DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
