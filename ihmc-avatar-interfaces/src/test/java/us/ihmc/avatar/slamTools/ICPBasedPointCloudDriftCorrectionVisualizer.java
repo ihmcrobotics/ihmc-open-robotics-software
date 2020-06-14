@@ -2,17 +2,14 @@ package us.ihmc.avatar.slamTools;
 
 import java.io.File;
 import java.util.List;
-import java.util.Random;
 
 import org.ejml.data.DenseMatrix64F;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
-import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -50,13 +47,14 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
 
    //private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200305_Simple\\PointCloud\\"; // 30 vs 33 : small drift, 33 vs 34 : drift and left right big movement.
    //private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200601_LidarWalking_DownStairs\\PointCloud\\";  // 12 vs 13 : drift
-   private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200601_LidarWalking_UpStairs2\\PointCloud\\";
+   private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200601_LidarWalking_UpStairs2\\PointCloud\\"; // 3 vs 4 : drift in Y. (Great)
+   //private static final String DATA_PATH = "C:\\PointCloudData\\Data\\20200603_LidarWalking_StairUp3\\PointCloud\\"; // 4 vs 5 : point to point can not resolve the drift in Y for this frames.
    private static final int INDEX_FRAME_ONE = 3;
    private static final int INDEX_FRAME_TWO = 4;
    private static final int NUMBER_OF_POINTS_TO_VISUALIZE = 2000;
 
    private static final boolean VISUALIZE_OCTREE = false;
-   
+
    private final static double OCTREE_RESOLUTION = 0.02;
    private NormalOcTree octreeMap;
 
@@ -86,10 +84,21 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       // Define frames .
       setupTest();
       YoGraphicsListRegistry yoGraphicsListRegistry = new YoGraphicsListRegistry();
-      frame1GraphicsManager = new SLAMFrameYoGraphicsManager("Frame1_", frame1, NUMBER_OF_POINTS_TO_VISUALIZE, frame1Appearance, registry, yoGraphicsListRegistry);
-      frame2GraphicsManager = new SLAMFrameYoGraphicsManager("Frame2_", frame2, NUMBER_OF_POINTS_TO_VISUALIZE, frame2Appearance, registry, yoGraphicsListRegistry);
+      frame1GraphicsManager = new SLAMFrameYoGraphicsManager("Frame1_",
+                                                             frame1,
+                                                             NUMBER_OF_POINTS_TO_VISUALIZE,
+                                                             frame1Appearance,
+                                                             registry,
+                                                             yoGraphicsListRegistry);
+      frame2GraphicsManager = new SLAMFrameYoGraphicsManager("Frame2_",
+                                                             frame2,
+                                                             NUMBER_OF_POINTS_TO_VISUALIZE,
+                                                             frame2Appearance,
+                                                             registry,
+                                                             yoGraphicsListRegistry);
       sourcePointsFrameGraphicsManager = new SLAMFrameYoGraphicsManager("SourcePointFrame_",
-                                                                        frameForSourcePoints, NUMBER_OF_POINTS_TO_VISUALIZE, 
+                                                                        frameForSourcePoints,
+                                                                        NUMBER_OF_POINTS_TO_VISUALIZE,
                                                                         sourcePointsAppearance,
                                                                         registry,
                                                                         yoGraphicsListRegistry);
@@ -124,7 +133,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
          octreeGraphics.rotate(rotation);
          octreeGraphics.addCube(OCTREE_RESOLUTION, OCTREE_RESOLUTION, OCTREE_RESOLUTION * 0.1, octreeMapColor);
       }
-      if(VISUALIZE_OCTREE)
+      if (VISUALIZE_OCTREE)
          scs.addStaticLinkGraphics(octreeGraphics);
 
       // define optimizer.
@@ -143,7 +152,12 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
          icpTransformer.transform(correctedData[i]);
       }
 
-      for (double t = 0.0; t <= trajectoryTime + dt; t += dt)
+      frame1GraphicsManager.updateGraphics();
+      frame2GraphicsManager.updateGraphics();
+      sourcePointsFrameGraphicsManager.updateGraphics();
+      scs.tickAndUpdate();
+
+      for (double t = 1.0; t <= trajectoryTime + dt; t += dt)
       {
          robot.getYoTime().set(t);
 
@@ -159,7 +173,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
             correctedData[i].set(frameForSourcePoints.getOriginalPointCloudToSensorPose()[i]);
             icpTransformer.transform(correctedData[i]);
          }
-         
+
          frame2.updateOptimizedCorrection(icpTransformer);
          frameForSourcePoints.updateOptimizedCorrection(icpTransformer);
 
@@ -171,7 +185,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
          // update yo variables.   
          optimizerQuality.set(optimizer.getQuality());
          numberOfCorrespondingPoints.set(optimizer.getNumberOfCoorespondingPoints());
-         
+
          scs.tickAndUpdate();
       }
 
@@ -245,7 +259,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
 
       return optimizer;
    }
-   
+
    private void setupTest()
    {
       // load data.
