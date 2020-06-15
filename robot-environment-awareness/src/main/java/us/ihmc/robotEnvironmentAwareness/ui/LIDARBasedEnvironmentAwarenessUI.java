@@ -20,14 +20,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionUI;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.CustomRegionMergeAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.DataExporterAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.LIDARFilterAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.NormalEstimationAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.OcTreeBasicsAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.PointCloudAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.PolygonizerAnchorPaneController;
-import us.ihmc.robotEnvironmentAwareness.ui.controller.RegionSegmentationAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.*;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporter;
@@ -51,6 +44,8 @@ public class LIDARBasedEnvironmentAwarenessUI implements PerceptionUI
    private PointCloudAnchorPaneController pointCloudAnchorPaneController;
    @FXML
    private OcTreeBasicsAnchorPaneController ocTreeBasicsAnchorPaneController;
+   @FXML
+   private SurfaceNormalFilterAnchorPaneController surfaceNormalFilterAnchorPaneController;
    @FXML
    private LIDARFilterAnchorPaneController lidarFilterAnchorPaneController;
    @FXML
@@ -165,6 +160,10 @@ public class LIDARBasedEnvironmentAwarenessUI implements PerceptionUI
       ocTreeBasicsAnchorPaneController.setConfigurationFile(configurationFile);
       ocTreeBasicsAnchorPaneController.attachREAMessager(uiMessager);
       ocTreeBasicsAnchorPaneController.bindControls();
+
+      surfaceNormalFilterAnchorPaneController.setConfigurationFile(configurationFile);
+      surfaceNormalFilterAnchorPaneController.attachREAMessager(uiMessager);
+      surfaceNormalFilterAnchorPaneController.bindControls();
 
       lidarFilterAnchorPaneController.setConfigurationFile(configurationFile);
       lidarFilterAnchorPaneController.attachREAMessager(uiMessager);
