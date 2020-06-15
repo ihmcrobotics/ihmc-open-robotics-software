@@ -18,6 +18,7 @@ import javafx.scene.shape.Mesh;
 import javafx.scene.shape.MeshView;
 import javafx.util.Pair;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
@@ -70,7 +71,8 @@ public class SLAMMeshViewer
       latestBufferViewer = new StereoVisionPointCloudViewer(SLAMModuleAPI.IhmcSLAMFrameState,
                                                             uiMessager,
                                                             SLAMModuleAPI.ShowLatestFrame,
-                                                            SLAMModuleAPI.SLAMVizClear);
+                                                            SLAMModuleAPI.SLAMVizClear,
+                                                            REAModuleAPI.UIStereoVisionSize); // FIXME this is obviously the wrong topic
 
       occupancyMapViewer.getRoot().setMouseTransparent(true);
       latestBufferViewer.getRoot().setMouseTransparent(true);

@@ -6,9 +6,7 @@ import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPr
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
@@ -16,7 +14,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
 
-import com.sun.xml.internal.ws.policy.privateutil.PolicyUtils.IO;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.REASensorDataFilterParametersMessage;
@@ -50,7 +47,6 @@ import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
-import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 
@@ -95,7 +91,8 @@ public class LIDARBasedREAModule implements PerceptionModule
    private ScheduledFuture<?> scheduled;
    private final Messager reaMessager;
 
-   private final AtomicReference<Boolean> preserveOcTreeHistory;
+   private final AtomicReference<Boolean> preserveStereoOcTreeHistory;
+   private final AtomicReference<Boolean> preserveDepthOcTreeHistory;
    private final FilePropertyHelper filePropertyHelper;
 
    private LIDARBasedREAModule(Messager reaMessager, File configurationFile)
@@ -139,11 +136,11 @@ public class LIDARBasedREAModule implements PerceptionModule
                                                     reaMessager,
                                                     REAModuleAPI.DepthCloudBufferEnable,
                                                     false,
-                                                    REAModuleAPI.StereoVisionBufferOcTreeCapacity,
+                                                    REAModuleAPI.DepthCloudBufferOcTreeCapacity,
                                                     1000000,
-                                                    REAModuleAPI.StereoVisionBufferMessageCapacity,
+                                                    REAModuleAPI.DepthCloudBufferMessageCapacity,
                                                     1,
-                                                    REAModuleAPI.RequestStereoVisionBuffer,
+                                                    REAModuleAPI.RequestDepthCloudBuffer,
                                                     REAModuleAPI.DepthCloudBufferState);
       REAOcTreeBuffer[] bufferUpdaters = new REAOcTreeBuffer[] {lidarBufferUpdater, stereoVisionBufferUpdater, depthCloudBufferUpdater};
       HashMap<REAOcTreeBuffer, AtomicReference<Pose3D>> latestSensorPosePositions = new HashMap<>();
@@ -199,7 +196,8 @@ public class LIDARBasedREAModule implements PerceptionModule
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
       reaMessager.submitMessage(REAModuleAPI.RequestEntireModuleState, true);
 
-      preserveOcTreeHistory = reaMessager.createInput(REAModuleAPI.StereoVisionBufferPreservingEnable, false);
+      preserveStereoOcTreeHistory = reaMessager.createInput(REAModuleAPI.StereoVisionBufferPreservingEnable, false);
+      preserveDepthOcTreeHistory = reaMessager.createInput(REAModuleAPI.DepthCloudBufferPreservingEnable, false);
       enableStereoBuffer = reaMessager.createInput(REAModuleAPI.StereoVisionBufferEnable, false);
       enableLidarBuffer = reaMessager.createInput(REAModuleAPI.LidarBufferEnable, true);
       enableDepthCloudBuffer = reaMessager.createInput(REAModuleAPI.DepthCloudBufferEnable, false);
@@ -235,7 +233,7 @@ public class LIDARBasedREAModule implements PerceptionModule
 
       StereoVisionPointCloudMessage message = subscriber.takeNextData();
       moduleStateReporter.registerDepthCloudMessage(message);
-      depthCloudBufferUpdater.handleStereoVisionPointCloudMessage(message);
+      depthCloudBufferUpdater.handleDepthCloudPointCloudMessage(message);
       latestDepthPoseReference.set(new Pose3D(message.getSensorPosition(), message.getSensorOrientation()));
    }
 
@@ -332,7 +330,9 @@ public class LIDARBasedREAModule implements PerceptionModule
          }
          else
          {
-            if (enableStereoBuffer.get() && !preserveOcTreeHistory.get())
+            if (enableStereoBuffer.get() && !preserveStereoOcTreeHistory.get())
+               mainUpdater.clearOcTree();
+            else if (enableDepthCloudBuffer.get() && !preserveDepthOcTreeHistory.get())
                mainUpdater.clearOcTree();
 
             timeReporter.run(mainUpdater::update, ocTreeTimeReport);
@@ -399,7 +399,7 @@ public class LIDARBasedREAModule implements PerceptionModule
       reaMessager.submitMessage(REAModuleAPI.LidarBufferEnable, false);
       reaMessager.submitMessage(REAModuleAPI.StereoVisionBufferEnable, true);
       reaMessager.submitMessage(REAModuleAPI.DepthCloudBufferEnable, false);
-//      reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxEnable, true);
+      reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxEnable, false);
       reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundingBoxMessage);
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();

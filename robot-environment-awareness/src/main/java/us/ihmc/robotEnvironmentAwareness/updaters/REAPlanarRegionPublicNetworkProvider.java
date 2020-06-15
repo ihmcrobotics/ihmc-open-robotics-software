@@ -21,7 +21,7 @@ public class REAPlanarRegionPublicNetworkProvider
 
    private final RegionFeaturesProvider regionFeaturesProvider;
 
-   private final AtomicReference<Boolean> isRunning, hasCleared, isUsingLidar, isUsingStereoVision;
+   private final AtomicReference<Boolean> isRunning, hasCleared, isUsingLidar, isUsingStereoVision, isUsingDepthCloud;
    private final AtomicReference<Double> minRange;
    private final AtomicReference<Double> maxRange;
    private final AtomicReference<BoundingBoxParametersMessage> boundingBoxParameters;
@@ -41,6 +41,7 @@ public class REAPlanarRegionPublicNetworkProvider
          hasCleared = messager.createInput(REAModuleAPI.OcTreeClear, false);
          isUsingLidar = messager.createInput(REAModuleAPI.LidarBufferEnable);
          isUsingStereoVision = messager.createInput(REAModuleAPI.StereoVisionBufferEnable);
+         isUsingDepthCloud = messager.createInput(REAModuleAPI.DepthCloudBufferEnable);
          minRange = messager.createInput(REAModuleAPI.LidarMinRange);
          maxRange = messager.createInput(REAModuleAPI.LidarMaxRange);
          boundingBoxParameters = messager.createInput(REAModuleAPI.OcTreeBoundingBoxParameters);
@@ -52,6 +53,7 @@ public class REAPlanarRegionPublicNetworkProvider
          hasCleared = null;
          isUsingLidar = null;
          isUsingStereoVision = null;
+         isUsingDepthCloud = null;
          minRange = null;
          maxRange = null;
          boundingBoxParameters = null;
@@ -82,6 +84,7 @@ public class REAPlanarRegionPublicNetworkProvider
       currentState.setIsRunning(isRunning.get());
       currentState.setIsUsingLidar(isUsingLidar.get());
       currentState.setIsUsingStereoVision(isUsingStereoVision.get());
+      //currentState.setIsusingDepthCloud(isUsingDepthCloud.get()); // todo
       currentState.setHasCleared(hasCleared.getAndSet(false));
       REASensorDataFilterParametersMessage sensorFilterParameters = currentState.getCurrentSensorFilterParameters();
       sensorFilterParameters.setSensorMinRange(minRange.get());
