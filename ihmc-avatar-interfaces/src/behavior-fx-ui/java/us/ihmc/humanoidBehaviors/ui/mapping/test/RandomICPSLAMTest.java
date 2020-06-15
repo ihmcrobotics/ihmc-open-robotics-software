@@ -87,7 +87,7 @@ public class RandomICPSLAMTest
       {
          int maximumSearchingSize = 10;
          double distance = -1.0;
-         distance = SLAMTools.computeDistanceToNormalOctree(octree, sourcePoint);
+         distance = SLAMTools.computeDistancePointToNormalOctree(octree, sourcePoint);
 
          if (distance >= 0.0)
          {

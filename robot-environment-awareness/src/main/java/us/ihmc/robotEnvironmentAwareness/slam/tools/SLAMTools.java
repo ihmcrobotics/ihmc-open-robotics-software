@@ -214,7 +214,7 @@ public class SLAMTools
       return rawData;
    }
 
-   public static double computeDistanceToNormalOctree(NormalOcTree octree, Point3DReadOnly point)
+   public static double computeDistancePointToNormalOctree(NormalOcTree octree, Point3DReadOnly point)
    {
       OcTreeKey occupiedKey = octree.coordinateToKey(point);
       OcTreeKey nearestKey = new OcTreeKey();
@@ -231,7 +231,7 @@ public class SLAMTools
       return Math.sqrt(nearestHitDistanceSquared.getValue());
    }
 
-   public static double computePerpendicularDistanceToNormalOctree(NormalOcTree octree, Point3DReadOnly point)
+   public static double computePerpendicularDistancePointToNormalOctree(NormalOcTree octree, Point3DReadOnly point)
    {
       OcTreeKey occupiedKey = octree.coordinateToKey(point);
       OcTreeKey nearestKey = new OcTreeKey();
@@ -249,25 +249,24 @@ public class SLAMTools
       return nearestHitDistanceSquared.getValue();
    }
 
-   public static double computeSurfaceElementBoundedDistanceToNormalOctree(NormalOcTree octree, Plane3DBasics surfel, double linearDistanceThreshold,
-                                                                           double perpendicularDistanceThreshold)
+   public static double computeBoundedPerpendicularDistancePointToNormalOctree(NormalOcTree octree, Point3DReadOnly point, double bound)
    {
-      OcTreeKey occupiedKey = octree.coordinateToKey(surfel.getPoint());
+      OcTreeKey occupiedKey = octree.coordinateToKey(point);
       OcTreeKey nearestKey = new OcTreeKey();
       OcTreeNearestNeighborTools.findNearestNeighbor(octree.getRoot(), octree.keyToCoordinate(occupiedKey), nearestKey);
 
       MutableDouble nearestHitDistanceSquared = new MutableDouble(Double.POSITIVE_INFINITY);
 
       double resolution = octree.getResolution();
-      OcTreeNearestNeighborTools.findRadiusNeighbors(octree.getRoot(), octree.keyToCoordinate(nearestKey), resolution, node ->
+      OcTreeNearestNeighborTools.findRadiusNeighbors(octree.getRoot(), octree.keyToCoordinate(nearestKey), resolution * 2, node ->
       {
-         double linearDistance = surfel.getPoint().distance(node.getHitLocationCopy());
-         double distanceToSurfel = EuclidGeometryTools.distanceFromPoint3DToPlane3D(surfel.getPoint(), node.getHitLocationCopy(), node.getNormalCopy());
+         double linearDistance = point.distance(node.getHitLocationCopy());
 
          double distance = linearDistance;
 
-         if (linearDistance < linearDistanceThreshold && distanceToSurfel < perpendicularDistanceThreshold)
+         if (linearDistance < bound)
          {
+            double distanceToSurfel = EuclidGeometryTools.distanceFromPoint3DToPlane3D(point, node.getHitLocationCopy(), node.getNormalCopy());
             distance = distanceToSurfel;
          }
 
@@ -391,7 +390,7 @@ public class SLAMTools
          newSourcePointToWorld.set(sourcePoint);
          sensorPoseToWorld.transform(newSourcePointToWorld);
 
-         double distance = SLAMTools.computeDistanceToNormalOctree(octree, newSourcePointToWorld);
+         double distance = SLAMTools.computeDistancePointToNormalOctree(octree, newSourcePointToWorld);
 
          if (distance >= 0)
          {

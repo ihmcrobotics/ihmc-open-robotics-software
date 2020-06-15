@@ -37,7 +37,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    private final int recordFrequency = 1;
    private final int bufferSize = (int) (trajectoryTime / dt / recordFrequency + 3);
 
-   private static final DriftCase DRIFT_CASE = DriftCase.MultiplePlanes;
+   private static final DriftCase DRIFT_CASE = DriftCase.Upstairs3YDriftSmallOverlap;
 
    private static final String DATA_PATH = "C:\\" + DRIFT_CASE.getFilePath();
    private static final int INDEX_FRAME_ONE = DRIFT_CASE.getPreviousFrameIndex();
@@ -220,16 +220,13 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
          private double computeClosestDistance(Plane3D surfel)
          {
-            return SLAMTools.computeSurfaceElementBoundedDistanceToNormalOctree(map,
-                                                                                surfel,
-                                                                                frame.getFrameMap().getResolution(),
-                                                                                frame.getFrameMap().getResolution());
+            return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(map, surfel.getPoint(), map.getResolution());
          }
       };
       DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
-      purterbationVector.set(0, 0.0005);
-      purterbationVector.set(1, 0.0005);
-      purterbationVector.set(2, 0.0005);
+      purterbationVector.set(0, map.getResolution() * 0.01);
+      purterbationVector.set(1, map.getResolution() * 0.01);
+      purterbationVector.set(2, map.getResolution() * 0.01);
       purterbationVector.set(3, 0.0001);
       purterbationVector.set(4, 0.0001);
       purterbationVector.set(5, 0.0001);

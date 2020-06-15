@@ -234,7 +234,7 @@ public class LevenbergMarquardtICPVisualizer
 
          private double computeClosestDistance(Point3D point)
          {
-            double distance = SLAMTools.computeDistanceToNormalOctree(map, point);
+            double distance = SLAMTools.computeDistancePointToNormalOctree(map, point);
             return distance;
          }
       };
