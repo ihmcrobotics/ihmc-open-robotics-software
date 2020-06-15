@@ -100,7 +100,7 @@ public class StepConstraintMessagePubSubType implements us.ihmc.pubsub.TopicData
 
 
       current_alignment += 4 + us.ihmc.idl.CDR.alignment(current_alignment, 4);
-      current_alignment += (data.getConvexPolygonsSize().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
+      current_alignment += (data.getHolePolygonsSize().size() * 4) + us.ihmc.idl.CDR.alignment(current_alignment, 4);
 
 
 
@@ -124,12 +124,12 @@ public class StepConstraintMessagePubSubType implements us.ihmc.pubsub.TopicData
       cdr.write_type_2(data.getConcaveHullSize());
 
 
-      cdr.write_type_2(data.getNumberOfConvexPolygons());
+      cdr.write_type_2(data.getNumberOfHolesInRegion());
 
 
-      if(data.getConvexPolygonsSize().size() <= 20)
-      cdr.write_type_e(data.getConvexPolygonsSize());else
-          throw new RuntimeException("convex_polygons_size field exceeds the maximum length");
+      if(data.getHolePolygonsSize().size() <= 20)
+      cdr.write_type_e(data.getHolePolygonsSize());else
+          throw new RuntimeException("hole_polygons_size field exceeds the maximum length");
 
    }
 
@@ -147,10 +147,10 @@ public class StepConstraintMessagePubSubType implements us.ihmc.pubsub.TopicData
       data.setConcaveHullSize(cdr.read_type_2());
       	
 
-      data.setNumberOfConvexPolygons(cdr.read_type_2());
+      data.setNumberOfHolesInRegion(cdr.read_type_2());
       	
 
-      cdr.read_type_e(data.getConvexPolygonsSize());	
+      cdr.read_type_e(data.getHolePolygonsSize());	
 
    }
 
@@ -171,9 +171,9 @@ public class StepConstraintMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       ser.write_type_2("concave_hull_size", data.getConcaveHullSize());
 
-      ser.write_type_2("number_of_convex_polygons", data.getNumberOfConvexPolygons());
+      ser.write_type_2("number_of_holes_in_region", data.getNumberOfHolesInRegion());
 
-      ser.write_type_e("convex_polygons_size", data.getConvexPolygonsSize());
+      ser.write_type_e("hole_polygons_size", data.getHolePolygonsSize());
    }
 
    @Override
@@ -193,9 +193,9 @@ public class StepConstraintMessagePubSubType implements us.ihmc.pubsub.TopicData
 
       data.setConcaveHullSize(ser.read_type_2("concave_hull_size"));
 
-      data.setNumberOfConvexPolygons(ser.read_type_2("number_of_convex_polygons"));
+      data.setNumberOfHolesInRegion(ser.read_type_2("number_of_holes_in_region"));
 
-      ser.read_type_e("convex_polygons_size", data.getConvexPolygonsSize());
+      ser.read_type_e("hole_polygons_size", data.getHolePolygonsSize());
    }
 
    public static void staticCopy(controller_msgs.msg.dds.StepConstraintMessage src, controller_msgs.msg.dds.StepConstraintMessage dest)

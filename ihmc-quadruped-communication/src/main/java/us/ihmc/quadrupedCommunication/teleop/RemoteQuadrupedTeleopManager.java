@@ -83,7 +83,7 @@ public class RemoteQuadrupedTeleopManager
       ROS2Topic controllerInputTopic = ROS2Tools.getQuadrupedControllerInputTopic(robotName);
       ROS2Topic stepTeleopInputTopic = ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName)
                                                                         .withInput();
-      ROS2Topic footstepPlannerInputTopic = ROS2Tools.STEP_TELEOP_TOOLBOX.withRobot(robotName)
+      ROS2Topic footstepPlannerInputTopic = ROS2Tools.FOOTSTEP_PLANNER.withRobot(robotName)
                                                                              .withInput();
 
       controllerStatePublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, HighLevelStateMessage.class, controllerInputTopic);

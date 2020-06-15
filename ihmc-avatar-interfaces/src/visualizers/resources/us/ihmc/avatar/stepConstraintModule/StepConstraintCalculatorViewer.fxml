@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.CheckBox?>
+<?import javafx.scene.layout.*?>
+<AnchorPane prefHeight="563.0" prefWidth="1020.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
+   <children>
+      <BorderPane fx:id="mainPane" layoutY="-109.0" prefHeight="425.0" prefWidth="514.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+         <bottom>
+            <AnchorPane prefHeight="100.0" prefWidth="781.0" BorderPane.alignment="CENTER">
+               <children>
+                  <GridPane hgap="5.0" layoutX="14.0" layoutY="14.0">
+                     <children>
+                        <CheckBox fx:id="showPlanarRegions" text="Show Planar Regions" maxWidth="1.7976931348623157E308" GridPane.columnIndex="1" />
+                        <CheckBox fx:id="showConstraintRegions" text="Show Constraint Regions" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" />
+                        <CheckBox fx:id="showObstacleExtrusions" text="Show Obstacle Extrusions" maxWidth="1.7976931348623157E308" GridPane.columnIndex="3" />
+                        <CheckBox fx:id="showObstacleRawPoints" text="Show Extrusion Points" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" />
+                        <CheckBox fx:id="showTooSmallRegions" text="Show Too Small Regions" maxWidth="1.7976931348623157E308"  GridPane.rowIndex="1"
+                                  GridPane.columnIndex="1" />
+                        <CheckBox fx:id="showTooSteepRegions" text="Show Too Steep Regions" maxWidth="1.7976931348623157E308" GridPane.rowIndex="1" GridPane.columnIndex="2" />
+                        <CheckBox fx:id="showMaskedRegions" text="Show Masked Regions" maxWidth="1.7976931348623157E308" GridPane.rowIndex="1" GridPane.columnIndex="3" />
+                     </children>
+                  </GridPane>
+               </children>
+            </AnchorPane>
+         </bottom>
+      </BorderPane>
+   </children>
+</AnchorPane>

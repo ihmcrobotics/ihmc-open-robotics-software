@@ -1,76 +1,174 @@
 package us.ihmc.humanoidRobotics.bipedSupportPolygons;
 
+import us.ihmc.euclid.geometry.BoundingBox3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple3D.interfaces.*;
 import us.ihmc.log.LogTools;
+import us.ihmc.robotics.RegionInWorldInterface;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
+import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2DReadOnly;
+import us.ihmc.robotics.geometry.concavePolygon2D.GeometryPolygonTools;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class StepConstraintRegion
+public class StepConstraintRegion implements RegionInWorldInterface<StepConstraintRegion>
 {
-   private final List<Point2D> concaveHullsVertices;
-   private final List<ConvexPolygon2D> convexPolygons;
+   private final ConcavePolygon2D concaveHull;
    private final ConvexPolygon2D convexHull = new ConvexPolygon2D();
 
    private final RigidBodyTransform fromLocalToWorldTransform = new RigidBodyTransform();
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
 
+   private final List<ConcavePolygon2DReadOnly> holesInRegion = new ArrayList<>();
+
+   private final BoundingBox3D boundingBox3dInWorld = new BoundingBox3D(new Point3D(Double.NaN, Double.NaN, Double.NaN),
+                                                                        new Point3D(Double.NaN, Double.NaN, Double.NaN));
+   private final Point3D tempPointForConvexPolygonProjection = new Point3D();
+
+   private int regionId = -1;
+
+   private final Point3DReadOnly origin = new Point3DReadOnly()
+   {
+      @Override
+      public double getX()
+      {
+         return fromLocalToWorldTransform.getM03();
+      }
+
+      @Override
+      public double getY()
+      {
+         return fromLocalToWorldTransform.getM13();
+      }
+
+      @Override
+      public double getZ()
+      {
+         return fromLocalToWorldTransform.getM23();
+      }
+   };
+   private final UnitVector3DReadOnly normal = new UnitVector3DReadOnly()
+   {
+      @Override
+      public double getX()
+      {
+         return getRawX();
+      }
+
+      @Override
+      public double getY()
+      {
+         return getRawY();
+      }
+
+      @Override
+      public double getZ()
+      {
+         return getRawZ();
+      }
+
+      @Override
+      public double getRawX()
+      {
+         return fromLocalToWorldTransform.getM02();
+      }
+
+      @Override
+      public double getRawY()
+      {
+         return fromLocalToWorldTransform.getM12();
+      }
+
+      @Override
+      public double getRawZ()
+      {
+         return fromLocalToWorldTransform.getM22();
+      }
+
+      @Override
+      public boolean isDirty()
+      {
+         return false;
+      }
+   };
+
    public StepConstraintRegion()
    {
-      convexPolygons = new ArrayList<>();
-      concaveHullsVertices = new ArrayList<>();
+      concaveHull = new ConcavePolygon2D();
       updateConvexHull();
+      updateBoundingBox();
    }
 
-   public StepConstraintRegion(RigidBodyTransformReadOnly transformToWorld, List<Point2D> concaveHullVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
+   public void setRegionId(int regionId)
+   {
+      this.regionId = regionId;
+   }
+
+   public int getRegionId()
+   {
+      return regionId;
+   }
+
+   public StepConstraintRegion(RigidBodyTransformReadOnly transformToWorld, List<Point2D> concaveHullVertices)
+   {
+      this(transformToWorld, Vertex2DSupplier.asVertex2DSupplier(concaveHullVertices));
+   }
+
+   public StepConstraintRegion(RigidBodyTransformReadOnly transformToWorld, Vertex2DSupplier vertexSupplier)
+   {
+      this(transformToWorld, vertexSupplier, new ArrayList<>());
+   }
+
+   public StepConstraintRegion(RigidBodyTransformReadOnly transformToWorld,
+                               Vertex2DSupplier vertexSupplier,
+                               List<? extends ConcavePolygon2DReadOnly> holesInRegion)
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
 
-      this.concaveHullsVertices = concaveHullVertices;
+      concaveHull = new ConcavePolygon2D(vertexSupplier);
       checkConcaveHullRepeatVertices();
-
-      convexPolygons = planarRegionConvexPolygons;
       updateConvexHull();
+      updateBoundingBox();
+
+      this.holesInRegion.addAll(holesInRegion);
    }
 
-   public StepConstraintRegion(RigidBodyTransformReadOnly transformToWorld, ConvexPolygon2D convexPolygon)
+   public void set(StepConstraintRegion other)
    {
-      fromLocalToWorldTransform.set(transformToWorld);
-      fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
+      fromLocalToWorldTransform.set(other.fromLocalToWorldTransform);
+      fromWorldToLocalTransform.set(other.fromWorldToLocalTransform);
+      holesInRegion.clear();
+      for (int i = 0; i < other.getNumberOfHolesInRegion(); i++)
+         holesInRegion.add(new ConcavePolygon2D(other.holesInRegion.get(i)));
 
-      concaveHullsVertices = new ArrayList<>();
-      for (int i = 0; i < convexPolygon.getNumberOfVertices(); i++)
-      {
-         concaveHullsVertices.add(new Point2D(convexPolygon.getVertex(i)));
-      }
-      checkConcaveHullRepeatVertices();
-
-      convexPolygons = new ArrayList<>();
-      convexPolygons.add(convexPolygon);
-      updateConvexHull();
+      concaveHull.set(other.concaveHull);
+      convexHull.set(other.convexHull);
+      updateBoundingBox();
    }
 
    private void checkConcaveHullRepeatVertices()
    {
-      if (concaveHullsVertices.size() < 2)
+      if (concaveHull.getNumberOfVertices() < 2)
          return;
 
-      for (int i=0; i< concaveHullsVertices.size(); i++)
+      for (int i = 0; i < concaveHull.getNumberOfVertices(); i++)
       {
-         int nextIndex = (i + 1) % concaveHullsVertices.size();
+         int nextIndex = (i + 1) % concaveHull.getNumberOfVertices();
 
-         Point2D vertex = concaveHullsVertices.get(i);
-         Point2D nextVertex = concaveHullsVertices.get(nextIndex);
+         Point2DReadOnly vertex = concaveHull.getVertex(i);
+         Point2DReadOnly nextVertex = concaveHull.getVertex(nextIndex);
 
          if (vertex.distance(nextVertex) < 1e-7)
          {
@@ -81,31 +179,25 @@ public class StepConstraintRegion
 
    private void updateConvexHull()
    {
-      convexHull.clear();
-      for (int i = 0; i < this.getNumberOfConvexPolygons(); i++)
-      {
-         ConvexPolygon2DReadOnly convexPolygon = this.getConvexPolygonInRegionFrame(i);
-         for (int j = 0; j < convexPolygon.getNumberOfVertices(); j++)
-            convexHull.addVertex(convexPolygon.getVertex(j));
-      }
-      convexHull.update();
+      convexHull.set(concaveHull);
    }
 
-   public void set(RigidBodyTransform transformToWorld, List<Point2D> concaveHullVertices, List<ConvexPolygon2D> planarRegionConvexPolygons)
+   public void set(RigidBodyTransform transformToWorld, List<? extends Point2DReadOnly> concaveHullsVertices, List<ConcavePolygon2D> holesInRegion)
    {
       fromLocalToWorldTransform.set(transformToWorld);
       fromWorldToLocalTransform.setAndInvert(fromLocalToWorldTransform);
 
-      convexPolygons.clear();
-      for (int i = 0; i < planarRegionConvexPolygons.size(); i++)
-         convexPolygons.add(planarRegionConvexPolygons.get(i));
-
-      this.concaveHullsVertices.clear();
-      for (int i = 0; i < concaveHullVertices.size(); i++)
-         this.concaveHullsVertices.add(concaveHullVertices.get(i));
-      checkConcaveHullRepeatVertices();
+      this.concaveHull.clear();
+      for (int i = 0; i < concaveHullsVertices.size(); i++)
+         concaveHull.addVertex(concaveHullsVertices.get(i));
+      concaveHull.update();
 
       updateConvexHull();
+      updateBoundingBox();
+
+      this.holesInRegion.clear();
+      for (int i = 0; i < holesInRegion.size(); i++)
+         this.holesInRegion.add(holesInRegion.get(i));
    }
 
    /**
@@ -133,18 +225,17 @@ public class StepConstraintRegion
 
    public List<? extends Point2DReadOnly> getConcaveHullVertices()
    {
-      return concaveHullsVertices;
+      return concaveHull.getVertexBufferView();
    }
 
    public int getConcaveHullSize()
    {
-      return concaveHullsVertices.size();
+      return concaveHull.getNumberOfVertices();
    }
 
-   /** Returns the number of convex polygons representing this region. */
-   public int getNumberOfConvexPolygons()
+   public int getNumberOfHolesInRegion()
    {
-      return convexPolygons.size();
+      return holesInRegion.size();
    }
 
    public Tuple3DReadOnly getRegionOriginInWorld()
@@ -162,26 +253,67 @@ public class StepConstraintRegion
       return convexHull;
    }
 
+   public List<ConcavePolygon2DReadOnly> getHolesInConstraintRegion()
+   {
+      return holesInRegion;
+   }
+
+   public ConcavePolygon2DReadOnly getHoleInConstraintRegion(int idx)
+   {
+      return holesInRegion.get(idx);
+   }
+
    public RigidBodyTransformReadOnly getTransformToWorld()
    {
       return fromLocalToWorldTransform;
    }
 
-   public void getNormalInWorld(Vector3DBasics normalToPack)
+   public RigidBodyTransformReadOnly getTransformToLocal()
    {
-      normalToPack.setX(fromLocalToWorldTransform.getM02());
-      normalToPack.setY(fromLocalToWorldTransform.getM12());
-      normalToPack.setZ(fromLocalToWorldTransform.getM22());
+      return fromWorldToLocalTransform;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public Point3DReadOnly getPoint()
+   {
+      return origin;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public UnitVector3DReadOnly getNormal()
+   {
+      return normal;
+   }
+
+   public ConcavePolygon2DReadOnly getConcaveHull()
+   {
+      return concaveHull;
    }
 
    public Point2DReadOnly getConcaveHullVertexInRegionFrame(int i)
    {
-      return concaveHullsVertices.get(i);
+      return concaveHull.getVertex(i);
    }
 
-   public ConvexPolygon2DReadOnly getConvexPolygonInRegionFrame(int i)
+   public BoundingBox3DReadOnly getBoundingBox3dInWorld()
    {
-      return convexPolygons.get(i);
+      return this.boundingBox3dInWorld;
+   }
+
+   public boolean isPointInside(double xInLocal, double yInLocal)
+   {
+      if (!concaveHull.isPointInside(xInLocal, yInLocal))
+         return false;
+
+      for (int i = 0; i < getNumberOfHolesInRegion(); i++)
+      {
+         if (getHoleInConstraintRegion(i).isPointInside(xInLocal, yInLocal))
+            return false;
+      }
+
+      return true;
    }
 
    public boolean epsilonEquals(StepConstraintRegion other, double epsilon)
@@ -192,14 +324,50 @@ public class StepConstraintRegion
       if (!fromWorldToLocalTransform.epsilonEquals(other.fromWorldToLocalTransform, epsilon))
          return false;
 
-      if (getNumberOfConvexPolygons() != other.getNumberOfConvexPolygons())
+      if (!concaveHull.epsilonEquals(other.concaveHull, epsilon))
          return false;
 
-      for (int i = 0; i < getNumberOfConvexPolygons(); i++)
+      if (getNumberOfHolesInRegion() != other.getNumberOfHolesInRegion())
+         return false;
+
+      for (int i = 0; i < getNumberOfHolesInRegion(); i++)
       {
-         if (!convexPolygons.get(i).epsilonEquals(other.convexPolygons.get(i), epsilon))
+         if (!holesInRegion.get(i).epsilonEquals(other.holesInRegion.get(i), epsilon))
             return false;
       }
       return true;
+   }
+
+   public boolean isPolygonInWorldIntersecting(ConvexPolygon2DReadOnly polygonInWorld)
+   {
+      BoundingBox2DReadOnly polygonBoundingBox = polygonInWorld.getBoundingBox();
+      if (!boundingBox3dInWorld.intersectsInclusiveInXYPlane(polygonBoundingBox))
+         return false;
+
+      // Instead of projecting all the polygons of this region onto the world XY-plane,
+      // the given convex polygon is projected along the z-world axis to be snapped onto plane.
+      ConvexPolygon2D localPolygon = new ConvexPolygon2D(polygonInWorld);
+      localPolygon.applyTransform(fromWorldToLocalTransform, false);
+
+      return GeometryPolygonTools.doPolygonsIntersect(concaveHull, localPolygon);
+   }
+
+   private void updateBoundingBox()
+   {
+      boundingBox3dInWorld.set(Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN, Double.NaN);
+
+      for (int i = 0; i < concaveHull.getNumberOfVertices(); i++)
+      {
+         Point2DReadOnly vertex = concaveHull.getVertex(i);
+         tempPointForConvexPolygonProjection.set(vertex.getX(), vertex.getY(), 0.0);
+         fromLocalToWorldTransform.transform(tempPointForConvexPolygonProjection);
+         this.boundingBox3dInWorld.updateToIncludePoint(tempPointForConvexPolygonProjection);
+      }
+
+      Point3DReadOnly minPoint = boundingBox3dInWorld.getMinPoint();
+      Point3DReadOnly maxPoint = boundingBox3dInWorld.getMaxPoint();
+
+      this.boundingBox3dInWorld.setMin(minPoint.getX(), minPoint.getY(), minPoint.getZ());
+      this.boundingBox3dInWorld.setMax(maxPoint.getX(), maxPoint.getY(), maxPoint.getZ());
    }
 }
