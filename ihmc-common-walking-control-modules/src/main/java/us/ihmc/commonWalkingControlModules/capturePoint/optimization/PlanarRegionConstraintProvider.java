@@ -312,7 +312,7 @@ public class PlanarRegionConstraintProvider
          footstepPolygon.update();
       }
       scaler.scaleConvexPolygonToContainInteriorPolygon(activePlanarRegion.getConvexHull(), footstepPolygon, distanceFromEdgeForSwitching, tempShrunkProjectedPolygon);
-      icpControlPlane.projectConvexHullOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), projectedAndShrunkConvexHull);
+      icpControlPlane.projectVerticesOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), projectedAndShrunkConvexHull);
 
       yoShrunkActivePlanarRegion.set(projectedAndShrunkConvexHull);
 
@@ -355,7 +355,7 @@ public class PlanarRegionConstraintProvider
       captureRegion.changeFrameAndProjectToXYPlane(worldFrame);
 
       scaler.scaleConvexPolygon(activePlanarRegion.getConvexHull(), distanceFromEdgeForSwitching, tempShrunkProjectedPolygon);
-      icpControlPlane.projectConvexHullOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), tempProjectedPolygon);
+      icpControlPlane.projectVerticesOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), tempProjectedPolygon);
 
       double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, tempProjectedPolygon);
 
@@ -391,7 +391,7 @@ public class PlanarRegionConstraintProvider
          PlanarRegion planarRegion = planarRegionsList.get(regionIndex);
 
          scaler.scaleConvexPolygon(activePlanarRegion.getConvexHull(), distanceFromEdgeForSwitching, tempShrunkProjectedPolygon);
-         icpControlPlane.projectConvexHullOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), tempProjectedPolygon);
+         icpControlPlane.projectVerticesOntoControlPlane(tempShrunkProjectedPolygon, activePlanarRegion.getTransformToWorld(), tempProjectedPolygon);
 
          double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(captureRegion, tempProjectedPolygon);
 

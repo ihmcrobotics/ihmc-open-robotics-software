@@ -13,7 +13,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.WalkingControllerState.LinearMomentumRateControlModule.ICPOptimizationController.controllerTimeRemainingInState</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config2</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -25,7 +25,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.rightFootControlModule.rightFootSupportState.FootRotationCalculationModuleRight.CroppedFootholdCalculator.rightShouldShrinkFoothold</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config3</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -37,7 +37,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.leftFootSupportState.FootRotationCalculationModuleLeft.CroppedFootholdCalculator.leftFootCoPOccupancyCropper.leftNumberOfCellsOccupiedOnLeftSideOfLine,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.rightFootControlModule.rightFootSupportState.FootRotationCalculationModuleRight.rightCoPAndVelocityCoPAndVelocityRotationEdgeCalculator.rightCoPAndVelocityLineOfRotationAngularVelocityFiltered</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config4</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -49,7 +49,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.leftFootSupportState.FootRotationCalculationModuleLeft.CroppedFootholdCalculator.leftShrinkCounter</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config5</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -61,7 +61,7 @@
 		</GraphConfig>
 	</Graph>
 	<Graph>
-		<Variables>root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.leftFootSupportState.FootRotationCalculationModuleLeft.leftCoPAndVelocityCoPAndVelocityRotationEdgeCalculator.leftCoPAndVelocityIsEdgeStable,root.atlas.DRCSimulation.DRCControllerThread.DRCMomentumBasedController.HumanoidHighLevelControllerManager.HighLevelHumanoidControllerFactory.HighLevelControlManagerFactory.FeetManager.leftFootControlModule.leftFootSupportState.FootRotationCalculationModuleLeft.leftCoPAndVelocityCoPAndVelocityRotationEdgeCalculator.leftCoPAndVelocityIsEdgeStableCount</Variables>
+		<Variables></Variables>
 		<GraphConfiguration>
 			<Name>config6</Name>
 			<ScalingMethod>1</ScalingMethod>
@@ -91,7 +91,7 @@ null,
 
 <Current View>Normal View</Current View>
  <Canvas 1> 
- <Camera X>11.5</Camera X>
+ <Camera X>8.0</Camera X>
  <Camera Y>-8.0</Camera Y>
  <Camera Z>5.0</Camera Z>
  <Dolly data> 
@@ -117,7 +117,7 @@ null,
 </Track Booleans>
 </Track data>
 <Fix Position>
-<Fix X>5.0</Fix X>
+<Fix X>1.5</Fix X>
 <Fix Y>0.0</Fix Y>
 <Fix Z>0.8</Fix Z>
 </Fix Position>

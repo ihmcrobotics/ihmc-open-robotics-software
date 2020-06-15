@@ -35,6 +35,7 @@ mainDependencies {
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-models-visualizers:source")
    api("us.ihmc:ihmc-robot-data-logger:0.18.0")
+   api("us.ihmc:ihmc-messager-kryo:0.1.5")
 
    api("org.bytedeco:javacv-platform:1.5") {
       exclude(group = "org.bytedeco", module = "opencv")
@@ -59,7 +60,7 @@ applicationDependencies {
 
    api("us.ihmc:ihmc-ros-tools:source")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.17.0")
-   api("us.ihmc:simulation-construction-set:0.17.0")
+   api("us.ihmc:simulation-construction-set:0.18.0")
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 

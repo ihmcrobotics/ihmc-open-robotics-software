@@ -18,6 +18,22 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
+import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxOutputConfigurationCommand;
+import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
+import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
+import us.ihmc.ros2.RealtimeRos2Node;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class StepConstraintToolboxModule extends ToolboxModule
 {
    private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 5;
@@ -34,11 +50,14 @@ public class StepConstraintToolboxModule extends ToolboxModule
             DEFAULT_UPDATE_PERIOD_MILLISECONDS,
             pubSubImplementation);
 
-      setTimeWithoutInputsBeforeGoingToSleep(3.0);
-      controller = new StepConstraintToolboxController(statusOutputManager,
-                                                       constraintRegionPublisher, robotModel.getWalkingControllerParameters(), fullRobotModel, gravityZ, registry);
-
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
+      controller = new StepConstraintToolboxController(statusOutputManager,
+                                                       constraintRegionPublisher,
+                                                       robotModel.getWalkingControllerParameters(),
+                                                       fullRobotModel,
+                                                       gravityZ,
+                                                       registry);
+
       startYoVariableServer();
       if (yoVariableServer != null)
       {
@@ -60,26 +79,43 @@ public class StepConstraintToolboxModule extends ToolboxModule
          }
       });
 
+      RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
+
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      {
+         if (controller != null)
+         {
+            s.takeNextData(robotConfigurationData, null);
+            controller.updateRobotConfigurationData(robotConfigurationData);
+         }
+      });
+
+      CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
+
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
       {
          if (controller != null)
          {
-            controller.updateCapturabilityBasedStatus(s.takeNextData());
+            s.takeNextData(capturabilityBasedStatus, null);
+            controller.updateCapturabilityBasedStatus(capturabilityBasedStatus);
          }
       });
+
+      FootstepStatusMessage statusMessage = new FootstepStatusMessage();
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
       {
          if (controller != null)
          {
-            controller.updateFootstepStatus(s.takeNextData());
+            s.takeNextData(statusMessage, null);
+            controller.updateFootstepStatus(statusMessage);
          }
       });
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
-                                           PlanarRegionsListMessage.class,
-                                           REACommunicationProperties.outputTopic,
-                                           s -> updatePlanarRegion(s.takeNextData()));
+                                                    PlanarRegionsListMessage.class,
+                                                    REACommunicationProperties.outputTopic,
+                                                    s -> updatePlanarRegion(s.takeNextData()));
 
       constraintRegionPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, StepConstraintMessage.class, ControllerAPIDefinition.getInputTopic(robotName));
    }

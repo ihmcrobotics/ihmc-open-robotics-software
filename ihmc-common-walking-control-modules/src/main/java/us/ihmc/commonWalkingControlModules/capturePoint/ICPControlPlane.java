@@ -2,9 +2,9 @@ package us.ihmc.commonWalkingControlModules.capturePoint;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DBasics;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
+import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
@@ -18,7 +18,6 @@ import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
-import us.ihmc.robotics.geometry.ConvexPolygonScaler;
 import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -113,7 +112,7 @@ public class ICPControlPlane
                                                                 FramePoint3D projectionToPack,
                                                                 StepConstraintRegion stepConstraintRegion)
    {
-      stepConstraintRegion.getNormalInWorld(planeNormal);
+      stepConstraintRegion.getNormal(planeNormal);
       stepConstraintRegion.getRegionOriginInWorld(planeOrigin);
 
       projectPointFromControlPlaneOntoRegion(desiredReferenceFrame, pointToProject, projectionToPack, planeOrigin, planeNormal);
@@ -145,7 +144,7 @@ public class ICPControlPlane
 
    public void projectPlanarRegionConvexHullOntoControlPlane(PlanarRegion planarRegion, ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
    {
-      projectConvexHullOntoControlPlane(planarRegion.getConvexHull(), planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
+      projectVerticesOntoControlPlane(planarRegion.getConvexHull(), planarRegion.getTransformToWorld(), convexPolygonInControlPlaneToPack);
    }
 
    public void projectPlanarRegionConvexHullInWorldOntoControlPlane(ConvexPolygon2DReadOnly convexHullInWorld, PlanarRegion heightProvider,
@@ -167,8 +166,8 @@ public class ICPControlPlane
       convexPolygonInControlPlaneToPack.update();
    }
 
-   public void projectConvexHullOntoControlPlane(ConvexPolygon2DReadOnly convexHullInLocal, RigidBodyTransformReadOnly transformFromLocalToWorld,
-                                                 ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
+   public void projectVerticesOntoControlPlane(Vertex2DSupplier convexHullInLocal, RigidBodyTransformReadOnly transformFromLocalToWorld,
+                                               ConvexPolygon2DBasics convexPolygonInControlPlaneToPack)
    {
       vertexInWorldProvider.clear();
       for (int i = 0; i < convexHullInLocal.getNumberOfVertices(); i++)
