@@ -21,6 +21,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionUI;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.FootstepMeshViewer;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.SLAMMeshViewer;
@@ -34,7 +35,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
-public class SLAMBasedEnvironmentAwarenessUI
+public class SLAMBasedEnvironmentAwarenessUI implements PerceptionUI
 {
    private static final String UI_CONFIGURATION_FILE_NAME = "./Configurations/defaultSLAMUIConfiguration.txt";
 
@@ -174,7 +175,7 @@ public class SLAMBasedEnvironmentAwarenessUI
       normalEstimationAnchorPaneController.bindControls();
    }
 
-   public void show() throws IOException
+   public void show()
    {
       refreshModuleState();
       primaryStage.show();

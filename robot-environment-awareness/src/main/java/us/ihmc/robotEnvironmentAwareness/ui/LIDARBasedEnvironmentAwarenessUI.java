@@ -19,6 +19,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
+import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionUI;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.CustomRegionMergeAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.DataExporterAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.LIDARFilterAnchorPaneController;
@@ -33,7 +34,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataExporte
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.REAMeshViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.SensorFrameViewer;
 
-public class LIDARBasedEnvironmentAwarenessUI
+public class LIDARBasedEnvironmentAwarenessUI implements PerceptionUI
 {
    private static final String UI_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAUIConfiguration.txt";
 
@@ -191,7 +192,7 @@ public class LIDARBasedEnvironmentAwarenessUI
       dataExporterAnchorPaneController.bindControls();
    }
 
-   public void show() throws IOException
+   public void show()
    {
       refreshModuleState();
       primaryStage.show();

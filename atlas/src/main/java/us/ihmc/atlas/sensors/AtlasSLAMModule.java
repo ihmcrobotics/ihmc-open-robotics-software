@@ -2,6 +2,7 @@ package us.ihmc.atlas.sensors;
 
 import java.io.IOException;
 import java.util.LinkedList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -34,8 +35,8 @@ public class AtlasSLAMModule extends SLAMModule
    private final LinkedList<Boolean> stationaryFlagQueue = new LinkedList<Boolean>();
    private final LinkedList<Boolean> reasonableVelocityFlagQueue = new LinkedList<Boolean>();
 
-   private final AtomicReference<Boolean> robotStatus;
-   private final AtomicReference<Boolean> velocityStatus;
+   private final AtomicBoolean robotStatus = new AtomicBoolean(false);
+   private final AtomicBoolean velocityStatus = new AtomicBoolean(true);
 
    /**
     * to update corrected sensor frame for robot state estimation.
@@ -64,8 +65,8 @@ public class AtlasSLAMModule extends SLAMModule
       sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToDepthCamera);
       sensorPoseToPelvisTransformer.invert();
 
-      robotStatus = reaMessager.createInput(SLAMModuleAPI.SensorStatus, false);
-      velocityStatus = reaMessager.createInput(SLAMModuleAPI.VelocityLimitStatus, true);
+      reaMessager.registerTopicListener(SLAMModuleAPI.SensorStatus, robotStatus::set);
+      reaMessager.registerTopicListener(SLAMModuleAPI.VelocityLimitStatus, velocityStatus::set);
    }
 
    public AtlasSLAMModule(Messager messager, DRCRobotModel drcRobotModel)
@@ -88,16 +89,19 @@ public class AtlasSLAMModule extends SLAMModule
       sensorPoseToPelvisTransformer = new RigidBodyTransform(AtlasSensorInformation.transformPelvisToDepthCamera);
       sensorPoseToPelvisTransformer.invert();
 
-      robotStatus = reaMessager.createInput(SLAMModuleAPI.SensorStatus, false);
-      velocityStatus = reaMessager.createInput(SLAMModuleAPI.VelocityLimitStatus, true);
+      reaMessager.registerTopicListener(SLAMModuleAPI.SensorStatus, robotStatus::set);
+      reaMessager.registerTopicListener(SLAMModuleAPI.VelocityLimitStatus, velocityStatus::set);
    }
 
    @Override
    public void sendCurrentState()
    {
       super.sendCurrentState();
-      reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, robotStatus.get());
-      reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, velocityStatus.get());
+      
+      if (robotStatus != null)
+         reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, robotStatus.get());
+      if (velocityStatus != null)
+         reaMessager.submitMessage(SLAMModuleAPI.VelocityLimitStatus, velocityStatus.get());
    }
 
    @Override

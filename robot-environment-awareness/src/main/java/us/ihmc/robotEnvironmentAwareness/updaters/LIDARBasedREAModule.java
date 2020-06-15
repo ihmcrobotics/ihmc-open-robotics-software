@@ -41,6 +41,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationPropertie
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
+import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
 import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
@@ -49,7 +50,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 
-public class LIDARBasedREAModule
+public class LIDARBasedREAModule implements PerceptionModule
 {
    private static final String ocTreeTimeReport = "OcTree update took: ";
    private static final String reportOcTreeStateTimeReport = "Reporting OcTree state took: ";
@@ -91,8 +92,6 @@ public class LIDARBasedREAModule
    private final Messager reaMessager;
 
    private final AtomicReference<Boolean> preserveOcTreeHistory;
-
-   private final List<ClosingListener> closingListeners = new ArrayList<>();
 
    private LIDARBasedREAModule(Messager reaMessager, File configurationFile)
    {
@@ -200,11 +199,6 @@ public class LIDARBasedREAModule
       enableLidarBuffer = reaMessager.createInput(REAModuleAPI.LidarBufferEnable, true);
       enableDepthCloudBuffer = reaMessager.createInput(REAModuleAPI.DepthCloudBufferEnable, false);
       octreeResolution = reaMessager.createInput(REAModuleAPI.OcTreeResolution, mainUpdater.getMainOctree().getResolution());
-   }
-
-   public void attachClosingListener(ClosingListener closingListener)
-   {
-      this.closingListeners.add(closingListener);
    }
 
    private void dispatchLidarScanMessage(Subscriber<LidarScanMessage> subscriber)
@@ -426,8 +420,6 @@ public class LIDARBasedREAModule
    public void stop()
    {
       LogTools.info("REA Module is going down.");
-
-      closingListeners.forEach(ClosingListener::closing);
 
       try
       {

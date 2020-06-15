@@ -14,7 +14,6 @@ import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.paint.Color;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -31,14 +30,14 @@ import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageC
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
+import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.StereoVisionPointCloudViewer;
-import us.ihmc.robotEnvironmentAwareness.updaters.ClosingListener;
 import us.ihmc.robotEnvironmentAwareness.updaters.OcTreeConsumer;
 import us.ihmc.ros2.Ros2Node;
 
-public class SLAMModule
+public class SLAMModule implements PerceptionModule
 {
    protected final Messager reaMessager;
 
@@ -68,7 +67,6 @@ public class SLAMModule
    protected final Ros2Node ros2Node;
 
    private final List<OcTreeConsumer> ocTreeConsumers = new ArrayList<>();
-   private final List<ClosingListener> closingListeners = new ArrayList<>();
 
    public SLAMModule(Messager messager)
    {
@@ -134,11 +132,6 @@ public class SLAMModule
       this.ocTreeConsumers.add(ocTreeConsumer);
    }
 
-   public void attachClosingListener(ClosingListener closingListener)
-   {
-      this.closingListeners.add(closingListener);
-   }
-
    public void removeOcTreeConsumer(OcTreeConsumer ocTreeConsumer)
    {
       this.ocTreeConsumers.remove(ocTreeConsumer);
@@ -161,9 +154,6 @@ public class SLAMModule
    public void stop()
    {
       LogTools.info("SLAM Module is going down");
-
-      for (ClosingListener closingListener : closingListeners)
-         closingListener.closing();
 
       try
       {
