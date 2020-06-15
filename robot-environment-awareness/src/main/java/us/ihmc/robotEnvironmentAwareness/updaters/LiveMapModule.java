@@ -1,17 +1,21 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import javafx.stage.Stage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.pubsub.subscriber.Subscriber;
-import us.ihmc.robotEnvironmentAwareness.communication.LiveMapAPI;
+import us.ihmc.robotEnvironmentAwareness.communication.*;
+import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
+import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 
@@ -22,8 +26,9 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.stereoOutputTopic;
 
-public class LiveMapModule
+public class LiveMapModule implements PerceptionModule
 {
    private static final int THREAD_PERIOD_MILLISECONDS = 200;
 
@@ -33,11 +38,14 @@ public class LiveMapModule
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
 
-   private final AtomicReference<PlanarRegionsList> mostRecentLocalizedMap;
-   private final AtomicReference<PlanarRegionsList> mostRecentRegionsAtFeet;
+   private final AtomicReference<PlanarRegionsListMessage> mostRecentLocalizedMap;
+   private final AtomicReference<PlanarRegionsListMessage> mostRecentRegionsAtFeet;
 
    private final AtomicBoolean hasNewLocalizedMap = new AtomicBoolean(false);
    private final AtomicBoolean hasNewRegionsAtFeet = new AtomicBoolean(false);
+
+   private final AtomicReference<Boolean> viewingEnabled;
+   private final AtomicReference<PlanarRegionsListMessage> combinedLiveMap;
 
    private final AtomicReference<PlanarRegionSLAMParameters> slamParameters;
 
@@ -50,31 +58,45 @@ public class LiveMapModule
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP,
                                                     this::dispatchLocalizedMap);
-      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, outputTopic,
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, stereoOutputTopic,
                                                     this::dispatchRegionsAtFeet);
 
-      mostRecentLocalizedMap = messager.createInput(LiveMapAPI.LocalizedMap, null);
-      mostRecentRegionsAtFeet = messager.createInput(LiveMapAPI.RegionsAtFeet, null);
+      mostRecentLocalizedMap = messager.createInput(LiveMapModuleAPI.LocalizedMap, null);
+      mostRecentRegionsAtFeet = messager.createInput(LiveMapModuleAPI.RegionsAtFeet, null);
 
-      slamParameters = messager.createInput(LiveMapAPI.PlanarRegionSLAMParameters, new PlanarRegionSLAMParameters());
+      slamParameters = messager.createInput(LiveMapModuleAPI.PlanarRegionsSLAMParameters, new PlanarRegionSLAMParameters());
 
-      messager.registerTopicListener(LiveMapAPI.LocalizedMap, (message) -> hasNewLocalizedMap.set(true));
-      messager.registerTopicListener(LiveMapAPI.RegionsAtFeet, (message) -> hasNewRegionsAtFeet.set(true));
+      messager.registerTopicListener(LiveMapModuleAPI.LocalizedMap, (message) -> hasNewLocalizedMap.set(true));
+      messager.registerTopicListener(LiveMapModuleAPI.RegionsAtFeet, (message) -> hasNewRegionsAtFeet.set(true));
+
+      viewingEnabled = messager.createInput(LiveMapModuleAPI.ViewingEnable, true);
+      combinedLiveMap = messager.createInput(LiveMapModuleAPI.CombinedLiveMap);
+
+      messager.registerTopicListener(LiveMapModuleAPI.RequestEntireModuleState, request -> sendCurrentState());
+
+      sendCurrentState();
 
       // FIXME fix the output topic name.
       combinedMapPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, outputTopic);
    }
 
+   private void sendCurrentState()
+   {
+       messager.submitMessage(LiveMapModuleAPI.ViewingEnable, viewingEnabled.get());
+       messager.submitMessage(LiveMapModuleAPI.CombinedLiveMap, combinedLiveMap.get());
+   }
+
+
    private void dispatchLocalizedMap(Subscriber<PlanarRegionsListMessage> subscriber)
    {
       PlanarRegionsListMessage message = subscriber.takeNextData();
-      messager.submitMessage(LiveMapAPI.LocalizedMap, PlanarRegionMessageConverter.convertToPlanarRegionsList(message));
+      messager.submitMessage(LiveMapModuleAPI.LocalizedMap, message);
    }
 
    private void dispatchRegionsAtFeet(Subscriber<PlanarRegionsListMessage> subscriber)
    {
       PlanarRegionsListMessage message = subscriber.takeNextData();
-      messager.submitMessage(LiveMapAPI.RegionsAtFeet, PlanarRegionMessageConverter.convertToPlanarRegionsList(message));
+      messager.submitMessage(LiveMapModuleAPI.RegionsAtFeet, message);
    }
 
    private boolean isThreadInterrupted()
@@ -126,16 +148,33 @@ public class LiveMapModule
 
       if (shouldUpdateMap)
       {
-         PlanarRegionsList localizedMap = mostRecentLocalizedMap.get();
-         PlanarRegionsList regionsAtFeet = mostRecentRegionsAtFeet.get();
+         PlanarRegionsList localizedMap = PlanarRegionMessageConverter.convertToPlanarRegionsList(mostRecentLocalizedMap.get());
+         PlanarRegionsList regionsAtFeet = PlanarRegionMessageConverter.convertToPlanarRegionsList(mostRecentRegionsAtFeet.get());
 
          PlanarRegionsList combinedMap = PlanarRegionSLAM.generateMergedMapByMergingAllPlanarRegionsMatches(localizedMap,
                                                                                                             regionsAtFeet,
                                                                                                             slamParameters.get(),
                                                                                                             null);
 
-         messager.submitMessage(LiveMapAPI.CombinedLiveMap, combinedMap);
-         combinedMapPublisher.publish(PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(combinedMap));
+         PlanarRegionsListMessage mapMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(combinedMap);
+         messager.submitMessage(LiveMapModuleAPI.CombinedLiveMap, mapMessage);
+         combinedMapPublisher.publish(mapMessage);
       }
+   }
+
+   public static LiveMapModule createIntraprocess( Ros2Node ros2Node) throws Exception
+   {
+      Messager messager = createKryoMessager();
+      return new LiveMapModule(ros2Node, messager);
+   }
+
+   private static Messager createKryoMessager() throws Exception
+   {
+      KryoMessager messager = KryoMessager.createIntraprocess(LiveMapModuleAPI.API,
+                                                              NetworkPorts.LIVEMAP_UI_PORT,
+                                                              REACommunicationProperties.getPrivateNetClassList());
+      messager.setAllowSelfSubmit(true);
+      messager.startMessager();
+      return messager;
    }
 }

@@ -23,6 +23,9 @@ public class PerceptionSuiteAPI
    public static final Topic<Boolean> RunRealSenseREA = topic("RunDepthREA");
    public static final Topic<Boolean> RunRealSenseREAUI = topic("RunDepthREAUI");
 
+   public static final Topic<Boolean> RunLiveMap = topic("RunLiveMap");
+   public static final Topic<Boolean> RunLiveMapUI = topic("RunLiveMapUI");
+
    public static final Topic<String> ErrorMessage = topic("ErrorMessage");
    public static final Topic<Boolean> ClearErrorMessage = topic("ClearErrorMessage");
 

@@ -10,9 +10,11 @@ import us.ihmc.robotEnvironmentAwareness.communication.PerceptionSuiteAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotEnvironmentAwareness.ui.LIDARBasedEnvironmentAwarenessUI;
+import us.ihmc.robotEnvironmentAwareness.ui.LiveMapUI;
 import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
 import us.ihmc.robotEnvironmentAwareness.ui.SLAMBasedEnvironmentAwarenessUI;
 import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
+import us.ihmc.robotEnvironmentAwareness.updaters.LiveMapModule;
 import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
 import us.ihmc.ros2.Ros2Node;
 
@@ -26,6 +28,7 @@ public class PerceptionSuite
    private PerceptionSuiteComponent<LIDARBasedREAModule, LIDARBasedEnvironmentAwarenessUI> realsenseREAModule;
    private PerceptionSuiteComponent<LIDARBasedREAModule, LIDARBasedEnvironmentAwarenessUI> lidarREAModule;
    private PerceptionSuiteComponent<PlanarSegmentationModule, PlanarSegmentationUI> segmentationModule;
+   private PerceptionSuiteComponent<LiveMapModule, LiveMapUI> liveMapModule;
 
    protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
    // TODO module for combining rea and segmentation
@@ -61,6 +64,12 @@ public class PerceptionSuite
                                                           messager,
                                                           PerceptionSuiteAPI.RunMapSegmentation,
                                                           PerceptionSuiteAPI.RunMapSegmentationUI);
+      liveMapModule = new PerceptionSuiteComponent<LiveMapModule, LiveMapUI>("LiveMap",
+                                                                             () -> LiveMapModule.createIntraprocess(ros2Node),
+                                                                             LiveMapUI::createIntraprocessUI,
+                                                                             messager,
+                                                                             PerceptionSuiteAPI.RunLiveMap,
+                                                                             PerceptionSuiteAPI.RunLiveMapUI);
 
       slamModule.attachDependentModule(segmentationModule);
    }
