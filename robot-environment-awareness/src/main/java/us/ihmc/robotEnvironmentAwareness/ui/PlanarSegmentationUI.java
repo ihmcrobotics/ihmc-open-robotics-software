@@ -10,6 +10,7 @@ import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.*;
+import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionUI;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.*;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionSegmentationDataExporter;
@@ -18,7 +19,7 @@ import us.ihmc.robotEnvironmentAwareness.ui.viewer.SegmentationMeshViewer;
 import java.io.File;
 import java.io.IOException;
 
-public class PlanarSegmentationUI
+public class PlanarSegmentationUI implements PerceptionUI
 {
    private static final String UI_CONFIGURATION_FILE_NAME = "./Configurations/defaultPlanarSegmentationUIConfiguration.txt";
 

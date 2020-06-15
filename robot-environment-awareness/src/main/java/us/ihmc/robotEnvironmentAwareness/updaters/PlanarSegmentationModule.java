@@ -23,6 +23,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.SegmentationModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
+import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
@@ -42,7 +43,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class PlanarSegmentationModule implements OcTreeConsumer
+public class PlanarSegmentationModule implements OcTreeConsumer, PerceptionModule
 {
    private static final String planarRegionsTimeReport = "OcTreePlanarRegion update took: ";
    private static final String reportPlanarRegionsStateTimeReport = "Reporting Planar Regions state took: ";
@@ -68,8 +69,6 @@ public class PlanarSegmentationModule implements OcTreeConsumer
    private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(3, getClass(), ExceptionHandling.CATCH_AND_REPORT);
    private ScheduledFuture<?> scheduled;
    private final Messager reaMessager;
-
-   private final List<ClosingListener> closingListeners = new ArrayList<>();
 
    private PlanarSegmentationModule(Messager reaMessager, File configurationFile) throws Exception
    {
@@ -295,8 +294,6 @@ public class PlanarSegmentationModule implements OcTreeConsumer
    public void stop()
    {
       LogTools.info("Planar segmentation Module is going down.");
-
-      closingListeners.forEach(ClosingListener::closing);
 
       try
       {

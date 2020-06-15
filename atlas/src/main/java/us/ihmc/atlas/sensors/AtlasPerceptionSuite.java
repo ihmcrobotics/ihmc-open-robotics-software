@@ -4,19 +4,13 @@ import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
 import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.PerceptionSuiteAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
-import us.ihmc.robotEnvironmentAwareness.updaters.LIDARBasedREAModule;
-import us.ihmc.robotEnvironmentAwareness.updaters.PerceptionSuite;
-import us.ihmc.robotEnvironmentAwareness.updaters.PlanarSegmentationModule;
-import us.ihmc.ros2.Ros2Node;
+import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionSuite;
 
 public class AtlasPerceptionSuite extends PerceptionSuite
 {
