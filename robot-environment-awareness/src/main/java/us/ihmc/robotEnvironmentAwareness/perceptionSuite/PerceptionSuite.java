@@ -43,9 +43,7 @@ public class PerceptionSuite
                                                   PerceptionSuiteAPI.RunRealSenseSLAM,
                                                   PerceptionSuiteAPI.RunRealSenseSLAMUI);
       realsenseREAModule = new PerceptionSuiteComponent<>("RealSense REA",
-                                                          () -> LIDARBasedREAModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME,
-                                                                                                             ros2Node,
-                                                                                                             NetworkPorts.REA_MODULE2_UI_PORT),
+                                                          this::createRealSenseREAModule,
                                                           stage -> LIDARBasedEnvironmentAwarenessUI.creatIntraprocessUI(stage,
                                                                                                                         NetworkPorts.REA_MODULE2_UI_PORT),
                                                           messager,
@@ -88,6 +86,13 @@ public class PerceptionSuite
          slamModule.getModule().attachOcTreeConsumer(segmentationModule);
 
       return segmentationModule;
+   }
+
+   private LIDARBasedREAModule createRealSenseREAModule() throws Exception
+   {
+      LIDARBasedREAModule module = LIDARBasedREAModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node, NetworkPorts.REA_MODULE2_UI_PORT);
+      module.setParametersForStereo();
+      return module;
    }
 
    public void start() throws Exception
