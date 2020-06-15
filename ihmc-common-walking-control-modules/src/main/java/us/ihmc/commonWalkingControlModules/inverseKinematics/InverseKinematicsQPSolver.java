@@ -265,9 +265,12 @@ public class InverseKinematicsQPSolver
       qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
 
-      for (int i = 0; i < inactiveIndices.size(); i++)
+      if (inactiveIndices != null)
       {
-         qpSolver.setVariableInactive(inactiveIndices.get(i));
+         for (int i = 0; i < inactiveIndices.size(); i++)
+         {
+            qpSolver.setVariableInactive(inactiveIndices.get(i));
+         }
       }
 
       numberOfIterations.set(qpSolver.solve(solverOutput));
