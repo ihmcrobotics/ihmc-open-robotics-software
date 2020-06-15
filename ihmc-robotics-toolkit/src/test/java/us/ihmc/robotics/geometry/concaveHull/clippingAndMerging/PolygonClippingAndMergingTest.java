@@ -978,6 +978,7 @@ public class PolygonClippingAndMergingTest
       GeometryPolygonTestTools.assertConcavePolygon2DEquals(clippedPolygonExpected, clippedPolygons.get(0), 1e-7);
    }
 
+   @Disabled
    @Test
    public void testMergingComplexShapeAcrossTopEdge()
    {
