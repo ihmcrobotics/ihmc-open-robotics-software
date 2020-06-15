@@ -14,7 +14,7 @@ public class LevenbergMarquardtParameterOptimizer
 
    private static final boolean ENABLE_EARLY_TERMINAL = false;
    private FunctionOutputCalculator outputCalculator = null;
-   private boolean useDampingCoefficient = false;  // TODO: add setter.
+   private boolean useDampingCoefficient = false; // TODO: add setter.
    private final DenseMatrix64F dampingCoefficient;
    private static final double DEFAULT_RESIDUAL_SCALER = 0.1;
    private double residualScaler = DEFAULT_RESIDUAL_SCALER;
@@ -125,6 +125,16 @@ public class LevenbergMarquardtParameterOptimizer
       return norm;
    }
 
+   private double computePureQuality(DenseMatrix64F space)
+   {
+      double norm = 0.0;
+      for (int i = 0; i < space.getNumRows(); i++)
+      {
+         norm = norm + space.get(i, 0) * space.get(i, 0);
+      }
+      return norm;
+   }
+
    private void updateDamping()
    {
       if (quality < initialQuality)
@@ -165,6 +175,7 @@ public class LevenbergMarquardtParameterOptimizer
 
    public double iterate()
    {
+      iteration++;
       long startTime = System.nanoTime();
 
       DenseMatrix64F newInput = new DenseMatrix64F(parameterDimension, 1);
@@ -219,7 +230,7 @@ public class LevenbergMarquardtParameterOptimizer
 
       CommonOps.mult(jacobianTranspose, jacobian, squaredJacobian);
 
-      if(useDampingCoefficient)
+      if (useDampingCoefficient)
       {
          updateDamping();
          CommonOps.add(squaredJacobian, dampingCoefficient, squaredJacobian);
@@ -253,83 +264,8 @@ public class LevenbergMarquardtParameterOptimizer
       if (DEBUG)
       {
          System.out.println("elapsed iteration time is " + iterateTime + " " + numberOfCoorespondingPoints);
-         //         System.out.println("optimizeDirection");
-         //         System.out.println(optimizeDirection);
-         //         System.out.println("currentInput");
-         //         System.out.println(currentInput);
       }
       return quality;
-   }
-
-   public boolean solve(int terminalIteration, double terminalConvergencePercentage)
-   {
-      long startTime = System.nanoTime();
-      initialize();
-
-      DenseMatrix64F newInput = new DenseMatrix64F(parameterDimension, 1);
-
-      double previousQuality = 0.0;
-
-      // compute correspondence space.
-      currentOutput.set(outputCalculator.computeOutput(currentInput));
-      for (int i = 0; i < outputDimension; i++)
-      {
-         if (currentOutput.get(i, 0) < correspondenceThreshold)
-         {
-            correspondence[i] = true;
-         }
-         else
-         {
-            correspondence[i] = false;
-         }
-      }
-      quality = computeQuality(currentOutput, correspondence);
-      initialQuality = quality;
-      if (DEBUG)
-      {
-         System.out.println("Initial Quality = " + quality);
-      }
-
-      // start.      
-      for (int iter = 0; iter < terminalIteration; iter++)
-      {
-         iteration = iter;
-         previousQuality = quality;
-
-         iterate();
-
-         quality = iterate();
-         double qualityDiff = previousQuality - quality;
-         double regressionPercentage = qualityDiff / previousQuality * 100;
-         if (DEBUG)
-         {
-            System.out.print("# iter [" + iter + "] quality = " + quality);
-            System.out.print(", regression = " + regressionPercentage + " [%]");
-            System.out.println(", residualScaler = " + residualScaler);
-         }
-
-         if (ENABLE_EARLY_TERMINAL)
-         {
-            if (iter > 5 && qualityDiff < 0)
-            {
-               optimized = false;
-
-               // revert updating parameter.
-               quality = previousQuality;
-               CommonOps.add(currentInput, optimizeDirection, currentInput);
-               break;
-            }
-            if (Math.abs(regressionPercentage) < terminalConvergencePercentage && regressionPercentage > 0)
-            {
-               // terminal.
-               optimized = true;
-               break;
-            }
-         }
-      }
-
-      computationTime = Conversions.nanosecondsToSeconds(System.nanoTime() - startTime);
-      return optimized;
    }
 
    public int getNumberOfCoorespondingPoints()
@@ -352,6 +288,11 @@ public class LevenbergMarquardtParameterOptimizer
       return quality;
    }
    
+   public double getPureQuality()
+   {
+      return computePureQuality(currentOutput);
+   }
+
    public double getDampingCoefficient()
    {
       return residualScaler;

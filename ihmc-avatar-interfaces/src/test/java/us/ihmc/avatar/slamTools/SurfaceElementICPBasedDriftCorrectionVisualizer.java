@@ -11,6 +11,7 @@ import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
@@ -26,6 +27,7 @@ import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.SimulationConstructionSetParameters;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoInteger;
 
@@ -38,8 +40,10 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    private final int recordFrequency = 1;
    private final int bufferSize = (int) (trajectoryTime / dt / recordFrequency + 3);
 
-//   private static final DriftCase DRIFT_CASE = DriftCase.Upstairs3YDriftSmallOverlap;
-   private static final DriftCase DRIFT_CASE = DriftCase.Upstairs3RollDrift;
+   private static final DriftCase DRIFT_CASE = DriftCase.UpStairs3YDriftSmallOverlap;
+//         private static final DriftCase DRIFT_CASE = DriftCase.UpStairs3RollDrift;
+//         private static final DriftCase DRIFT_CASE = DriftCase.UpStairs3HugeDrift;
+//      private static final DriftCase DRIFT_CASE = DriftCase.UpStairs2YawDrift;
 
    private static final String DATA_PATH = "C:\\" + DRIFT_CASE.getFilePath();
    private static final int INDEX_FRAME_ONE = DRIFT_CASE.getPreviousFrameIndex();
@@ -58,12 +62,23 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    private final SLAMFrameYoGraphicsManager frame2GraphicsManager;
 
    private final YoDouble optimizerQuality;
+   private final YoDouble optimizerPureQuality;
    private final YoDouble optimizerTranslationalEffort;
    private final YoDouble optimizerRotationalEffort;
    private final YoDouble optimizerTranslationalEffortDiff;
    private final YoDouble optimizerRotationalEffortDiff;
    private final YoDouble optimizerDampingCoefficient;
    private final YoInteger numberOfCorrespondingPoints;
+   private final YoInteger numberOfSourcePoints;
+
+   private static final int NUMBER_OF_STEADY = 3;
+   private boolean isSteady = false;
+   private int steadyIterations = 0;
+   private final YoBoolean terminalCondition;
+
+   private final YoBoolean qualityCondition;
+   private final YoBoolean translationalCondition;
+   private final YoBoolean rotationalCondition;
 
    private final AppearanceDefinition octreeMapColor = YoAppearance.Coral();
    private final AppearanceDefinition frame1Appearance = YoAppearance.Blue();
@@ -73,12 +88,19 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    public SurfaceElementICPBasedDriftCorrectionVisualizer()
    {
       optimizerQuality = new YoDouble("optimizerQuality", registry);
+      optimizerPureQuality = new YoDouble("optimizerPureQuality", registry);
       optimizerTranslationalEffort = new YoDouble("optimizerTranslationalEffort", registry);
       optimizerRotationalEffort = new YoDouble("optimizerRotationalEffort", registry);
       optimizerTranslationalEffortDiff = new YoDouble("optimizerTranslationalEffortDiff", registry);
       optimizerRotationalEffortDiff = new YoDouble("optimizerRotationalEffortDiff", registry);
       optimizerDampingCoefficient = new YoDouble("optimizerDampingCoefficient", registry);
       numberOfCorrespondingPoints = new YoInteger("numberOfCorrespondingPoints", registry);
+      numberOfSourcePoints = new YoInteger("numberOfSourcePoints", registry);
+
+      terminalCondition = new YoBoolean("terminalCondition", registry);
+      qualityCondition = new YoBoolean("qualityCondition", registry);
+      translationalCondition = new YoBoolean("translationalCondition", registry);
+      rotationalCondition = new YoBoolean("rotationalCondition", registry);
 
       // Define frames .
       setupTest();
@@ -131,6 +153,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       frame2GraphicsManager.updateGraphics();
       scs.tickAndUpdate();
 
+      RigidBodyTransform previousIcpTransformer = new RigidBodyTransform(icpTransformer);
       for (double t = 1.0; t <= trajectoryTime + dt; t += dt)
       {
          robot.getYoTime().set(t);
@@ -150,22 +173,75 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          }
 
          frame2.updateOptimizedCorrection(icpTransformer);
+         double quality = optimizer.getQuality();
+         double pureQuality = optimizer.getPureQuality();
+         double translationalEffort = icpTransformer.getTranslation().lengthSquared();
+         double rotationalEffort = icpTransformer.getRotation().distance(new RotationMatrix());
+         //double translationalEffortDiff = new Point3D(previousIcpTransformer.getTranslation()).distance(new Point3D(icpTransformer.getTranslation()));
+         double translationalEffortDiff = Math.abs(translationalEffort - optimizerTranslationalEffort.getDoubleValue());
+         double rotationalEffortDiff = new Quaternion(previousIcpTransformer.getRotation()).distance(new Quaternion(icpTransformer.getRotation()));
 
          // update viz.
          frame1GraphicsManager.updateGraphics();
          frame2GraphicsManager.updateGraphics();
 
+         // update terminal conditions
+         boolean isSteadyQuality = false;
+         boolean isSteadyTranslational = false;
+         boolean isSteadyRotational = false;
+         
+         if (Math.abs(quality - optimizerQuality.getDoubleValue()) < 0.001)
+         {
+            isSteadyQuality = true;
+         }
+         if (translationalEffortDiff < 0.001)
+         {
+            isSteadyTranslational = true;
+         }
+         if (rotationalEffortDiff < 0.005)
+         {
+            isSteadyRotational = true;
+         }
+         qualityCondition.set(isSteadyQuality);
+         translationalCondition.set(isSteadyTranslational);
+         rotationalCondition.set(isSteadyRotational);
+
+         if (isSteadyQuality && isSteadyTranslational && isSteadyRotational)
+         {
+            isSteady = true;
+         }
+         else
+         {
+            isSteady = false;
+         }
+
          // update yo variables.   
-         optimizerQuality.set(optimizer.getQuality());
-         optimizer.getOptimalParameter();
-         double translationalEffort = icpTransformer.getTranslation().lengthSquared();
-         double rotationalEffort = icpTransformer.getRotation().distance(new RotationMatrix());
-         optimizerTranslationalEffortDiff.set(Math.abs(translationalEffort - optimizerTranslationalEffort.getDoubleValue()));
-         optimizerRotationalEffortDiff.set(Math.abs(rotationalEffort - optimizerRotationalEffort.getDoubleValue()));
+         optimizerQuality.set(quality);
+         optimizerPureQuality.set(pureQuality);
+         optimizerTranslationalEffortDiff.set(translationalEffortDiff);
+         optimizerRotationalEffortDiff.set(rotationalEffortDiff);
          optimizerTranslationalEffort.set(translationalEffort);
          optimizerRotationalEffort.set(rotationalEffort);
          optimizerDampingCoefficient.set(optimizer.getDampingCoefficient());
          numberOfCorrespondingPoints.set(optimizer.getNumberOfCoorespondingPoints());
+
+         previousIcpTransformer.set(icpTransformer);
+         if (isSteady)
+         {
+            steadyIterations++;
+         }
+         else
+         {
+            steadyIterations = 0;
+         }
+         if (steadyIterations >= NUMBER_OF_STEADY)
+         {
+            terminalCondition.set(true);
+         }
+         else
+         {
+            terminalCondition.set(false);
+         }
 
          scs.tickAndUpdate();
       }
@@ -231,13 +307,13 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       purterbationVector.set(0, map.getResolution() * 0.002);
       purterbationVector.set(1, map.getResolution() * 0.002);
       purterbationVector.set(2, map.getResolution() * 0.002);
-      purterbationVector.set(3, 0.00005);
-      purterbationVector.set(4, 0.00005);
-      purterbationVector.set(5, 0.00005);
+      purterbationVector.set(3, 0.00001);
+      purterbationVector.set(4, 0.00001);
+      purterbationVector.set(5, 0.00001);
       optimizer.setPerturbationVector(purterbationVector);
       optimizer.setOutputCalculator(functionOutputCalculator);
       optimizer.initialize();
-      optimizer.setCorrespondenceThreshold(map.getResolution() * 1.2);
+      optimizer.setCorrespondenceThreshold(map.getResolution() * 1.5);
 
       return optimizer;
    }
@@ -258,5 +334,6 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       double windowMargin = 0.0;
       int minimumNumberOfHits = 1;
       frame2.registerSurfaceElements(octreeMap, windowMargin, surfaceElementResolution, minimumNumberOfHits, true);
+      numberOfSourcePoints.set(frame2.getSurfaceElements().size());
    }
 }
