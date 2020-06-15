@@ -14,6 +14,7 @@ public class LevenbergMarquardtParameterOptimizer
 
    private static final boolean ENABLE_EARLY_TERMINAL = false;
    private FunctionOutputCalculator outputCalculator = null;
+   private boolean useDampingCoefficient = false;  // TODO: add setter.
    private final DenseMatrix64F dampingCoefficient;
    private static final double DEFAULT_RESIDUAL_SCALER = 0.1;
    private double residualScaler = DEFAULT_RESIDUAL_SCALER;
@@ -218,9 +219,11 @@ public class LevenbergMarquardtParameterOptimizer
 
       CommonOps.mult(jacobianTranspose, jacobian, squaredJacobian);
 
-      updateDamping();
-
-      CommonOps.add(squaredJacobian, dampingCoefficient, squaredJacobian);
+      if(useDampingCoefficient)
+      {
+         updateDamping();
+         CommonOps.add(squaredJacobian, dampingCoefficient, squaredJacobian);
+      }
       CommonOps.invert(squaredJacobian);
 
       CommonOps.mult(squaredJacobian, jacobianTranspose, invMultJacobianTranspose);
@@ -347,6 +350,11 @@ public class LevenbergMarquardtParameterOptimizer
    public double getQuality()
    {
       return quality;
+   }
+   
+   public double getDampingCoefficient()
+   {
+      return residualScaler;
    }
 
    public int getIteration()

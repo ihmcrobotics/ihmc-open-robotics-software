@@ -58,6 +58,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    private final YoDouble optimizerQuality;
    private final YoDouble optimizerTranslationalEffort;
    private final YoDouble optimizerRotationalEffort;
+   private final YoDouble optimizerDampingCoefficient;
    private final YoInteger numberOfCorrespondingPoints;
 
    private final AppearanceDefinition octreeMapColor = YoAppearance.Coral();
@@ -70,6 +71,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       optimizerQuality = new YoDouble("optimizerQuality", registry);
       optimizerTranslationalEffort = new YoDouble("optimizerTranslationalEffort", registry);
       optimizerRotationalEffort = new YoDouble("optimizerRotationalEffort", registry);
+      optimizerDampingCoefficient = new YoDouble("optimizerDampingCoefficient", registry);
       numberOfCorrespondingPoints = new YoInteger("numberOfCorrespondingPoints", registry);
 
       // Define frames .
@@ -161,6 +163,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          optimizer.getOptimalParameter();
          optimizerTranslationalEffort.set(translationalEffort);
          optimizerRotationalEffort.set(rotationalEffort);
+         optimizerDampingCoefficient.set(optimizer.getDampingCoefficient());
          numberOfCorrespondingPoints.set(optimizer.getNumberOfCoorespondingPoints());
 
          scs.tickAndUpdate();
