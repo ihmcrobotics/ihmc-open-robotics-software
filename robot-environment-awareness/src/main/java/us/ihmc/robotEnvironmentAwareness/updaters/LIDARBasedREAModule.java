@@ -1,9 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.subscriberCustomRegionsTopicName;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.inputTopic;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
@@ -49,6 +45,8 @@ import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
+
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
 
 public class LIDARBasedREAModule implements PerceptionModule
 {
@@ -190,7 +188,13 @@ public class LIDARBasedREAModule implements PerceptionModule
       reaMessager.registerTopicListener(REAModuleAPI.SaveRegionUpdaterConfiguration,
                                         (content) -> planarRegionFeatureUpdater.saveConfiguration(filePropertyHelper));
 
-      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager, planarRegionFeatureUpdater, ros2Node, outputTopic, inputTopic);
+      planarRegionNetworkProvider = new REAPlanarRegionPublicNetworkProvider(reaMessager,
+                                                                             planarRegionFeatureUpdater,
+                                                                             ros2Node,
+                                                                             outputTopic,
+                                                                             lidarOutputTopic,
+                                                                             stereoOutputTopic,
+                                                                             depthOutputTopic);
       clearOcTree = reaMessager.createInput(REAModuleAPI.OcTreeClear, false);
 
       // At the very end, we force the modules to submit their state so duplicate inputs have consistent values.
