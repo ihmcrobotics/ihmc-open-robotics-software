@@ -36,11 +36,13 @@ public class SLAMMeshViewer
 
    private final List<ScheduledFuture<?>> meshBuilderScheduledFutures = new ArrayList<>();
    private final MeshView planarRegionMeshView = new MeshView();
+   private final MeshView importedPlanarRegionMeshView = new MeshView();
 
-   private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(4, getClass(), ExceptionHandling.CANCEL_AND_REPORT);
+   private ScheduledExecutorService executorService = ExecutorServiceTools.newScheduledThreadPool(5, getClass(), ExceptionHandling.CANCEL_AND_REPORT);
    private final AnimationTimer renderMeshAnimation;
 
    private final PlanarRegionsMeshBuilder planarRegionsMeshBuilder;
+   private final PlanarRegionsMeshBuilder importedPlanarRegionsMeshBuilder;
    private final OccupancyMapMeshBuilder occupancyMapViewer;
    private final StereoVisionPointCloudViewer latestBufferViewer;
 
@@ -56,6 +58,13 @@ public class SLAMMeshViewer
                                                               SLAMModuleAPI.SLAMClear,
                                                               SLAMModuleAPI.RequestPlanarRegions);
 
+      importedPlanarRegionsMeshBuilder = new PlanarRegionsMeshBuilder(uiMessager,
+                                                                      SLAMModuleAPI.ImportedPlanarRegionsState,
+                                                                      SLAMModuleAPI.ShowImportedPlanarRegions,
+                                                                      SLAMModuleAPI.SLAMVizClear,
+                                                                      SLAMModuleAPI.ImportedPlanarRegionsVizClear,
+                                                                      SLAMModuleAPI.RequestPlanarRegions);
+
       occupancyMapViewer = new OccupancyMapMeshBuilder(uiMessager);
 
       latestBufferViewer = new StereoVisionPointCloudViewer(SLAMModuleAPI.IhmcSLAMFrameState,
@@ -65,9 +74,10 @@ public class SLAMMeshViewer
 
       occupancyMapViewer.getRoot().setMouseTransparent(true);
       latestBufferViewer.getRoot().setMouseTransparent(true);
-      root.getChildren().addAll(planarRegionMeshView, occupancyMapViewer.getRoot(), latestBufferViewer.getRoot());
+      root.getChildren().addAll(planarRegionMeshView, importedPlanarRegionMeshView, occupancyMapViewer.getRoot(), latestBufferViewer.getRoot());
 
       addViewer(uiMessager, planarRegionMeshView, SLAMModuleAPI.ShowPlanarRegionsMap);
+      addViewer(uiMessager, importedPlanarRegionMeshView, SLAMModuleAPI.ShowImportedPlanarRegions);
       addViewer(uiMessager, occupancyMapViewer.getRoot(), SLAMModuleAPI.ShowSLAMOctreeMap);
       addViewer(uiMessager, latestBufferViewer.getRoot(), SLAMModuleAPI.ShowLatestFrame);
 
@@ -81,6 +91,8 @@ public class SLAMMeshViewer
 
             if (planarRegionsMeshBuilder.hasNewMeshAndMaterial())
                updateMeshView(planarRegionMeshView, planarRegionsMeshBuilder.pollMeshAndMaterial());
+            if (importedPlanarRegionsMeshBuilder.hasNewMeshAndMaterial())
+               updateMeshView(importedPlanarRegionMeshView, importedPlanarRegionsMeshBuilder.pollMeshAndMaterial());
          }
       };
 
@@ -139,6 +151,7 @@ public class SLAMMeshViewer
          return;
       renderMeshAnimation.start();
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(planarRegionsMeshBuilder, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
+      meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(importedPlanarRegionsMeshBuilder, 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(occupancyMapViewer, 0, SLOW_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(latestBufferViewer, 0, MEDIUM_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));
       meshBuilderScheduledFutures.add(executorService.scheduleAtFixedRate(createViewersController(), 0, HIGH_PACE_UPDATE_PERIOD, TimeUnit.MILLISECONDS));

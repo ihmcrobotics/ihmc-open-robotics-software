@@ -56,6 +56,7 @@ public class EnvironmentConstraintHandler
    private StepConstraintRegion stepConstraintRegion = null;
 
    private final FramePoint3D projectedReachablePoint = new FramePoint3D();
+
    private final ConvexPolygon2D footstepPolygon = new ConvexPolygon2D();
    private final RigidBodyTransform footOrientationTransform = new RigidBodyTransform();
    private final FramePoint2D stepXY = new FramePoint2D();
