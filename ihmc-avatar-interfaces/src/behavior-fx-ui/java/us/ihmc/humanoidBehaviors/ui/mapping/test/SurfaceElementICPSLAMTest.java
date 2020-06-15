@@ -142,7 +142,7 @@ public class SurfaceElementICPSLAMTest
       LogTools.info("numberOfSurfel " + numberOfSurfel);
       for (int i = 0; i < numberOfSurfel; i++)
       {
-         double distance = SLAMTools.computeDistanceToNormalOctree(map, frame2.getSurfaceElements().get(i).getPoint());
+         double distance = SLAMTools.computeDistancePointToNormalOctree(map, frame2.getSurfaceElements().get(i).getPoint());
          System.out.println(distance);
          for (int j = 0; j < bigSurfelDistances.size(); j++)
          {
@@ -239,10 +239,7 @@ public class SurfaceElementICPSLAMTest
 
          private double computeClosestDistance(Plane3D surfel)
          {
-            return SLAMTools.computeSurfaceElementBoundedDistanceToNormalOctree(map,
-                                                                                surfel,
-                                                                                frame2.getFrameMap().getResolution(),
-                                                                                frame2.getFrameMap().getResolution());
+            return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(map, surfel.getPoint(), map.getResolution());
          }
       };
       DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);

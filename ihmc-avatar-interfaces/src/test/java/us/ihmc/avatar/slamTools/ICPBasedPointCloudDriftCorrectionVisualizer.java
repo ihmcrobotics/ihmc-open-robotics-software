@@ -239,7 +239,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
 
          private double computeClosestDistance(Point3D point)
          {
-            double surfelDistance = SLAMTools.computePerpendicularDistanceToNormalOctree(map, point);
+            double surfelDistance = SLAMTools.computePerpendicularDistancePointToNormalOctree(map, point);
             return surfelDistance;
          }
       };
