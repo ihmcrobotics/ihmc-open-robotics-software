@@ -37,10 +37,10 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
 
-@Disabled // FIXME This test didn't work when merging the PR. The estimator seems to being poorly setup or updated.
+//@Disabled // FIXME This test didn't work when merging the PR. The estimator seems to being poorly setup or updated.
 public class EKFHeadPoseEstimatorTest
 {
-   private final static boolean VISUALIZE = false;
+   private final static boolean VISUALIZE = true;
    private static final String PARAMETER_FILE = "headPoseEstimatorTest.xml";
    private static final Random RANDOM = new Random(58369L);
 
@@ -212,6 +212,7 @@ public class EKFHeadPoseEstimatorTest
          angularVelocity.setToZero();
          linearVelocity.setToZero();
       }
+      System.out.println(pose);
       trajectoryGenerator.appendPoseWaypoint(time, pose, linearVelocity, angularVelocity);
    }
 }

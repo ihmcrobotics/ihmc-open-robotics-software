@@ -24,7 +24,7 @@ import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 
 public class LevenbergMarquardtICPTest
 {
-   private boolean visualize = false;
+   private boolean visualize = true;
    private XYPlaneDrawer drawer;
    private JFrame frame;
 
@@ -257,9 +257,18 @@ public class LevenbergMarquardtICPTest
       purterbationVector.set(2, 0.00001);
       optimizer.setPerturbationVector(purterbationVector);
       optimizer.setOutputCalculator(functionOutputCalculator);
-      boolean isSolved = optimizer.solve(30, 0.1);
+      boolean isSolved = false;
+      for (int i = 0; i < 30; i++)
+      {
+         optimizer.iterate();
+         if(optimizer.getQuality() < 0.4)
+         {
+            isSolved = true;
+            break;
+         }
+      }
       LogTools.info("Computation is done " + optimizer.getComputationTime() + " sec.");
-      System.out.println("is solved? " + isSolved + " " + optimizer.getQuality());
+      System.out.println("is solved? " + isSolved + " " + optimizer.getIteration() + " " + optimizer.getQuality());
       optimizer.getOptimalParameter().print();
 
       DenseMatrix64F optimalParameter = optimizer.getOptimalParameter();
@@ -274,7 +283,7 @@ public class LevenbergMarquardtICPTest
 
       transformPoint(driftedPoint, driftX, driftY, driftTheta);
       transformPoint(correctedPoint, optimalParameter.get(0, 0), optimalParameter.get(1, 0), optimalParameter.get(2, 0));
-      assertTrue(correctedPoint.distance(driftedPoint) < 0.05, "a point on the drifted doughnut corrected with icp.");
+      assertTrue(correctedPoint.distance(driftedPoint) < 0.06, "a point on the drifted doughnut corrected with icp. " + correctedPoint.distance(driftedPoint));
 
       drawer.addPointCloud(transformedData, Color.green, true);
 
