@@ -55,7 +55,7 @@ mainDependencies {
 
    api("us.ihmc:euclid:0.14.2")
    api("us.ihmc:ihmc-yovariables:0.7.0")
-   api("us.ihmc:simulation-construction-set:0.17.0")
+   api("us.ihmc:simulation-construction-set:0.18.0")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.17.0")
    api("us.ihmc:ihmc-graphics-description:0.17.0")
    api("us.ihmc:ihmc-humanoid-robotics:source")
@@ -70,8 +70,8 @@ mainDependencies {
 
 testDependencies {
    api("us.ihmc:ihmc-commons-testing:0.30.0")
-   api("us.ihmc:simulation-construction-set:0.17.0")
-   api("us.ihmc:simulation-construction-set-test:0.17.0")
+   api("us.ihmc:simulation-construction-set:0.18.0")
+   api("us.ihmc:simulation-construction-set-test:0.18.0")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:simulation-construction-set-tools-test:source")

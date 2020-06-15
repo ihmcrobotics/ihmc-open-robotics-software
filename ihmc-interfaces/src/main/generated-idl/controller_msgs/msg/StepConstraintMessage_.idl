@@ -19,8 +19,8 @@ module controller_msgs
         geometry_msgs::msg::dds::Vector3 region_normal;
         sequence<geometry_msgs::msg::dds::Point, 1000> vertex_buffer;
         long concave_hull_size;
-        long number_of_convex_polygons;
-        sequence<long, 20> convex_polygons_size;
+        long number_of_holes_in_region;
+        sequence<long, 20> hole_polygons_size;
       };
     };
   };

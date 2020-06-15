@@ -104,9 +104,6 @@ public class PlanarRegionsGraphic extends Group
 
       if (drawNormal)
       {
-         Vector3D normal = planarRegion.getNormal();
-         normal.normalize();
-
          Point3DReadOnly centroid = PlanarRegionTools.getCentroid3DInWorld(planarRegion);
 
          double length = 0.07;
