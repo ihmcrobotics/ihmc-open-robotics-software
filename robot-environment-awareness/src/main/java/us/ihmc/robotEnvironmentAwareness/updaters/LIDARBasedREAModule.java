@@ -30,6 +30,7 @@ import us.ihmc.communication.packets.PlanarRegionsRequestType;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
+import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.tools.JOctoMapTools;
 import us.ihmc.log.LogTools;
@@ -42,6 +43,9 @@ import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.io.FilePropertyHelper;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
 import us.ihmc.robotEnvironmentAwareness.ros.REAModuleROS2Subscription;
 import us.ihmc.robotEnvironmentAwareness.ros.REASourceType;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
@@ -92,6 +96,7 @@ public class LIDARBasedREAModule implements PerceptionModule
    private final Messager reaMessager;
 
    private final AtomicReference<Boolean> preserveOcTreeHistory;
+   private final FilePropertyHelper filePropertyHelper;
 
    private LIDARBasedREAModule(Messager reaMessager, File configurationFile)
    {
@@ -178,7 +183,7 @@ public class LIDARBasedREAModule implements PerceptionModule
                                                     inputTopic,
                                                     this::handleREASensorDataFilterParametersMessage);
 
-      FilePropertyHelper filePropertyHelper = new FilePropertyHelper(configurationFile);
+      filePropertyHelper = new FilePropertyHelper(configurationFile);
       loadConfigurationFile(filePropertyHelper);
 
       reaMessager.registerTopicListener(REAModuleAPI.SaveBufferConfiguration, (content) -> lidarBufferUpdater.saveConfiguration(filePropertyHelper));
@@ -383,38 +388,60 @@ public class LIDARBasedREAModule implements PerceptionModule
 
    public void setParametersForStereo()
    {
-      BoundingBoxParametersMessage boundindBoxMessage = new BoundingBoxParametersMessage();
-      boundindBoxMessage.setMaxX(1.0f);
-      boundindBoxMessage.setMinX(0.0f);
-      boundindBoxMessage.setMaxY(1.0f);
-      boundindBoxMessage.setMinY(-1.0f);
-      boundindBoxMessage.setMaxZ(1.0f);
-      boundindBoxMessage.setMinZ(-2.0f);
+      BoundingBoxParametersMessage boundingBoxMessage = new BoundingBoxParametersMessage();
+      boundingBoxMessage.setMaxX(1.0f);
+      boundingBoxMessage.setMinX(0.0f);
+      boundingBoxMessage.setMaxY(1.0f);
+      boundingBoxMessage.setMinY(-1.0f);
+      boundingBoxMessage.setMaxZ(1.0f);
+      boundingBoxMessage.setMinZ(-2.0f);
 
       reaMessager.submitMessage(REAModuleAPI.LidarBufferEnable, false);
       reaMessager.submitMessage(REAModuleAPI.StereoVisionBufferEnable, true);
       reaMessager.submitMessage(REAModuleAPI.DepthCloudBufferEnable, false);
       reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxEnable, true);
-      reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundindBoxMessage);
-      reaMessager.submitMessage(REAModuleAPI.UIOcTreeDisplayType, OcTreeMeshBuilder.DisplayType.HIDE);
+      reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundingBoxMessage);
+
+      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
+      normalEstimationParameters.setNumberOfIterations(7);
+      reaMessager.submitMessage(REAModuleAPI.NormalEstimationParameters, normalEstimationParameters);
+
+      PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
+      planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.03);
+      planarRegionSegmentationParameters.setMinRegionSize(150);
+      reaMessager.submitMessage(REAModuleAPI.PlanarRegionsSegmentationParameters, planarRegionSegmentationParameters);
+
+      SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
+      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
+      surfaceNormalFilterParameters.setSurfaceNormalLowerBound(Math.toRadians(-40.0));
+      surfaceNormalFilterParameters.setSurfaceNormalUpperBound(Math.toRadians(40.0));
+      reaMessager.submitMessage(REAModuleAPI.SurfaceNormalFilterParameters, surfaceNormalFilterParameters);
+
+      PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
+      polygonizerParameters.setConcaveHullThreshold(0.15);
+      reaMessager.submitMessage(REAModuleAPI.PlanarRegionsPolygonizerParameters, polygonizerParameters);
    }
 
    public void setParametersForDepth()
    {
-      BoundingBoxParametersMessage boundindBoxMessage = new BoundingBoxParametersMessage();
-      boundindBoxMessage.setMaxX(1.0f);
-      boundindBoxMessage.setMinX(0.0f);
-      boundindBoxMessage.setMaxY(1.0f);
-      boundindBoxMessage.setMinY(-1.0f);
-      boundindBoxMessage.setMaxZ(1.0f);
-      boundindBoxMessage.setMinZ(-2.0f);
+      BoundingBoxParametersMessage boundingBoxMessage = new BoundingBoxParametersMessage();
+      boundingBoxMessage.setMaxX(1.0f);
+      boundingBoxMessage.setMinX(0.0f);
+      boundingBoxMessage.setMaxY(1.0f);
+      boundingBoxMessage.setMinY(-1.0f);
+      boundingBoxMessage.setMaxZ(1.0f);
+      boundingBoxMessage.setMinZ(-2.0f);
 
       reaMessager.submitMessage(REAModuleAPI.LidarBufferEnable, false);
       reaMessager.submitMessage(REAModuleAPI.StereoVisionBufferEnable, false);
       reaMessager.submitMessage(REAModuleAPI.DepthCloudBufferEnable, true);
       reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxEnable, false);
-      reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundindBoxMessage);
-      reaMessager.submitMessage(REAModuleAPI.UIOcTreeDisplayType, OcTreeMeshBuilder.DisplayType.HIDE);
+      reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundingBoxMessage);
+   }
+
+   public void loadConfigurationsFromFile()
+   {
+      loadConfigurationFile(filePropertyHelper);
    }
 
    public void stop()
