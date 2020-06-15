@@ -34,5 +34,5 @@ visualizersDependencies {
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:simulation-construction-set-tools:source")
    api("us.ihmc:ihmc-javafx-toolkit:0.17.0")
-   api("us.ihmc:simulation-construction-set:0.17.0")
+   api("us.ihmc:simulation-construction-set:0.18.0")
 }
