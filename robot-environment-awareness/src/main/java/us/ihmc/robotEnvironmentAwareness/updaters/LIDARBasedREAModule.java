@@ -399,7 +399,7 @@ public class LIDARBasedREAModule implements PerceptionModule
       reaMessager.submitMessage(REAModuleAPI.LidarBufferEnable, false);
       reaMessager.submitMessage(REAModuleAPI.StereoVisionBufferEnable, true);
       reaMessager.submitMessage(REAModuleAPI.DepthCloudBufferEnable, false);
-      reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxEnable, true);
+//      reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxEnable, true);
       reaMessager.submitMessage(REAModuleAPI.OcTreeBoundingBoxParameters, boundingBoxMessage);
 
       NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();

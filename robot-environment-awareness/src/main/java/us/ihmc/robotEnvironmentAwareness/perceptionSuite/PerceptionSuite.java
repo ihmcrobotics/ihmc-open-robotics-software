@@ -116,7 +116,9 @@ public class PerceptionSuite
       }
       catch (Exception e)
       {
-         LogTools.warn(e.getMessage());
+         String error = e.getMessage();
+         LogTools.error(error);
+         messager.submitMessage(PerceptionSuiteAPI.ErrorMessage, error);
       }
       ros2Node.destroy();
    }

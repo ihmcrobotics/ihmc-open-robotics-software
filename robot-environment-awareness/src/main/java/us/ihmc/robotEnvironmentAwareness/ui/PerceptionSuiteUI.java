@@ -3,6 +3,7 @@ package us.ihmc.robotEnvironmentAwareness.ui;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.Pane;
@@ -61,13 +62,19 @@ public class PerceptionSuiteUI
       messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunMapSegmentationUI, runMapSegmentationUI.selectedProperty());
       messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunRealSenseREA, runRealSenseREAModule.selectedProperty());
       messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunRealSenseREAUI, runRealSenseREAUI.selectedProperty());
-      messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunRealSenseREAUI, runRealSenseREAUI.selectedProperty());
+
+      messager.registerTopicListener(PerceptionSuiteAPI.ErrorMessage, errorField::setText);
 
       primaryStage.setTitle(getClass().getSimpleName());
       Scene mainScene = new Scene(mainPane, 594, 200);
 
       primaryStage.setScene(mainScene);
       primaryStage.setOnCloseRequest(event -> stop());
+   }
+
+   public void clearError()
+   {
+      errorField.clear();
    }
 
    public void show() throws IOException
