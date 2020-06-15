@@ -41,6 +41,10 @@ public class PerceptionSuiteUI
    @FXML
    private ToggleButton runRealSenseREAUI;
    @FXML
+   private ToggleButton runLiveMapModule;
+   @FXML
+   private ToggleButton runLiveMapUI;
+   @FXML
    private TextArea errorField;
 
    private PerceptionSuiteUI(REAUIMessager messager, Stage primaryStage) throws Exception
@@ -62,6 +66,8 @@ public class PerceptionSuiteUI
       messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunMapSegmentationUI, runMapSegmentationUI.selectedProperty());
       messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunRealSenseREA, runRealSenseREAModule.selectedProperty());
       messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunRealSenseREAUI, runRealSenseREAUI.selectedProperty());
+      messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunLiveMap, runLiveMapModule.selectedProperty());
+      messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunLiveMapUI, runLiveMapUI.selectedProperty());
 
       messager.registerTopicListener(PerceptionSuiteAPI.ErrorMessage, errorField::setText);
 
