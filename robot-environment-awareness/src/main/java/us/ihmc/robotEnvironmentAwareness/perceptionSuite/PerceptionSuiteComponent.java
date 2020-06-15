@@ -77,6 +77,7 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
       {
          LogTools.info(name + " Module must be running first.");
          messager.submitMessage(runUITopic, false);
+         return;
       }
 
       if (ui == null)

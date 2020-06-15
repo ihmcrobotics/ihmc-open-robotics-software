@@ -23,6 +23,9 @@ public class PerceptionSuiteAPI
    public static final Topic<Boolean> RunRealSenseREA = topic("RunDepthREA");
    public static final Topic<Boolean> RunRealSenseREAUI = topic("RunDepthREAUI");
 
+   public static final Topic<String> ErrorMessage = topic("ErrorMessage");
+   public static final Topic<Boolean> ClearErrorMessage = topic("ClearErrorMessage");
+
    public static final MessagerAPIFactory.MessagerAPI API = apiFactory.getAPIAndCloseFactory();
 
    private static <T> Topic<T> topic(String name)

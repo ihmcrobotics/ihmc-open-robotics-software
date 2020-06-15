@@ -3,6 +3,7 @@ package us.ihmc.robotEnvironmentAwareness.ui;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.Pane;
 import javafx.stage.Stage;
@@ -38,6 +39,8 @@ public class PerceptionSuiteUI
    private ToggleButton runRealSenseREAModule;
    @FXML
    private ToggleButton runRealSenseREAUI;
+   @FXML
+   private TextArea errorField;
 
    private PerceptionSuiteUI(REAUIMessager messager, Stage primaryStage) throws Exception
    {
@@ -57,6 +60,7 @@ public class PerceptionSuiteUI
       messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunMapSegmentation, runMapSegmentationModule.selectedProperty());
       messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunMapSegmentationUI, runMapSegmentationUI.selectedProperty());
       messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunRealSenseREA, runRealSenseREAModule.selectedProperty());
+      messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunRealSenseREAUI, runRealSenseREAUI.selectedProperty());
       messager.bindBidirectionalGlobal(PerceptionSuiteAPI.RunRealSenseREAUI, runRealSenseREAUI.selectedProperty());
 
       primaryStage.setTitle(getClass().getSimpleName());

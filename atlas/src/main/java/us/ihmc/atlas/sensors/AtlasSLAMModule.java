@@ -97,7 +97,7 @@ public class AtlasSLAMModule extends SLAMModule
    public void sendCurrentState()
    {
       super.sendCurrentState();
-      
+
       if (robotStatus != null)
          reaMessager.submitMessage(SLAMModuleAPI.SensorStatus, robotStatus.get());
       if (velocityStatus != null)
