@@ -111,6 +111,19 @@ public class FourBar
 
       AC.setup(A, C, BD);
       BD.setup(B, D, AC);
+
+      A.checkProperlySetup();
+      B.checkProperlySetup();
+      C.checkProperlySetup();
+      D.checkProperlySetup();
+
+      AB.checkProperlySetup();
+      BC.checkProperlySetup();
+      CD.checkProperlySetup();
+      DA.checkProperlySetup();
+
+      AC.checkProperlySetup();
+      BD.checkProperlySetup();
    }
 
    /**

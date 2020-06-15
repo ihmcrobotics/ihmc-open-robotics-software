@@ -1,5 +1,7 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
+import java.util.Objects;
+
 /**
  * Represents one of the four sides of a four bar linkage.
  * <p>
@@ -13,7 +15,7 @@ public class FourBarEdge
    private double length;
 
    private FourBarVertex start, end;
-   private FourBarEdge nextEdge, previous;
+   private FourBarEdge next, previous;
 
    /**
     * Creates a new edge given a human readable name.
@@ -38,7 +40,30 @@ public class FourBarEdge
       this.start = start;
       this.end = end;
       this.previous = previous;
-      this.nextEdge = next;
+      this.next = next;
+   }
+
+   /**
+    * Checks that the references to the other four bar elements have been set and that the configuration is consistent.
+    * 
+    * @throws NullPointerException if any of the references has not been set.
+    * @throws IllegalStateException if a problem in the configuration is detected.
+    */
+   void checkProperlySetup()
+   {
+      Objects.requireNonNull(start);
+      Objects.requireNonNull(end);
+      Objects.requireNonNull(next);
+      Objects.requireNonNull(previous);
+
+      if (start.getNextEdge() != this)
+         throw new IllegalStateException("Improper configuration of the four bar.");
+      if (end.getPreviousEdge() != this)
+         throw new IllegalStateException("Improper configuration of the four bar.");
+      if (next.getPrevious() != this)
+         throw new IllegalStateException("Improper configuration of the four bar.");
+      if (previous.getNext() != this)
+         throw new IllegalStateException("Improper configuration of the four bar.");
    }
 
    /**
@@ -96,7 +121,7 @@ public class FourBarEdge
     */
    public boolean isCrossing()
    {
-      return nextEdge.isFlipped() || previous.isFlipped();
+      return next.isFlipped() || previous.isFlipped();
    }
 
    /**
@@ -126,7 +151,7 @@ public class FourBarEdge
     */
    public FourBarEdge getNext()
    {
-      return nextEdge;
+      return next;
    }
 
    /**

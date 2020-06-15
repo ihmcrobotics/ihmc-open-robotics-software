@@ -1,5 +1,7 @@
 package us.ihmc.robotics.kinematics.fourbar;
 
+import java.util.Objects;
+
 /**
  * Represents one of the two diagonals of a four bar linkage.
  * <p>
@@ -37,6 +39,26 @@ public class FourBarDiagonal
       this.start = start;
       this.end = end;
       this.other = other;
+   }
+
+   /**
+    * Checks that the references to the other four bar elements have been set and that the configuration is consistent.
+    * 
+    * @throws NullPointerException if any of the references has not been set.
+    * @throws IllegalStateException if a problem in the configuration is detected.
+    */
+   void checkProperlySetup()
+   {
+      Objects.requireNonNull(start);
+      Objects.requireNonNull(end);
+      Objects.requireNonNull(other);
+
+      if (start.getDiagonal() != this)
+         throw new IllegalStateException("Improper configuration of the four bar.");
+      if (end.getDiagonal() != this)
+         throw new IllegalStateException("Improper configuration of the four bar.");
+      if (other.getOther() != this)
+         throw new IllegalStateException("Improper configuration of the four bar.");
    }
 
    /**
