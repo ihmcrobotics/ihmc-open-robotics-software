@@ -223,7 +223,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
          private double computeClosestDistance(Plane3D surfel)
          {
-            return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(map, surfel.getPoint(), map.getResolution());
+            return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(map, surfel.getPoint(), map.getResolution() * 1.1);
          }
       };
       DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
