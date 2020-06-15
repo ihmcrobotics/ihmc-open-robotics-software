@@ -8,6 +8,7 @@ import org.ejml.data.DenseMatrix64F;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.Plane3D;
+import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.graphicsDescription.Graphics3DObject;
@@ -37,7 +38,8 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    private final int recordFrequency = 1;
    private final int bufferSize = (int) (trajectoryTime / dt / recordFrequency + 3);
 
-   private static final DriftCase DRIFT_CASE = DriftCase.Upstairs3YDriftSmallOverlap;
+//   private static final DriftCase DRIFT_CASE = DriftCase.Upstairs3YDriftSmallOverlap;
+   private static final DriftCase DRIFT_CASE = DriftCase.Upstairs3RollDrift;
 
    private static final String DATA_PATH = "C:\\" + DRIFT_CASE.getFilePath();
    private static final int INDEX_FRAME_ONE = DRIFT_CASE.getPreviousFrameIndex();
@@ -58,6 +60,8 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    private final YoDouble optimizerQuality;
    private final YoDouble optimizerTranslationalEffort;
    private final YoDouble optimizerRotationalEffort;
+   private final YoDouble optimizerTranslationalEffortDiff;
+   private final YoDouble optimizerRotationalEffortDiff;
    private final YoDouble optimizerDampingCoefficient;
    private final YoInteger numberOfCorrespondingPoints;
 
@@ -71,6 +75,8 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       optimizerQuality = new YoDouble("optimizerQuality", registry);
       optimizerTranslationalEffort = new YoDouble("optimizerTranslationalEffort", registry);
       optimizerRotationalEffort = new YoDouble("optimizerRotationalEffort", registry);
+      optimizerTranslationalEffortDiff = new YoDouble("optimizerTranslationalEffortDiff", registry);
+      optimizerRotationalEffortDiff = new YoDouble("optimizerRotationalEffortDiff", registry);
       optimizerDampingCoefficient = new YoDouble("optimizerDampingCoefficient", registry);
       numberOfCorrespondingPoints = new YoInteger("numberOfCorrespondingPoints", registry);
 
@@ -151,16 +157,11 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
 
          // update yo variables.   
          optimizerQuality.set(optimizer.getQuality());
-         double translationalEffort = 0.0, rotationalEffort = 0.0;
-         for (int i = 0; i < 3; i++)
-         {
-            translationalEffort = translationalEffort + optimalParameter.get(i) * optimalParameter.get(i);
-         }
-         for (int i = 3; i < 6; i++)
-         {
-            rotationalEffort = rotationalEffort + optimalParameter.get(i) * optimalParameter.get(i);
-         }
          optimizer.getOptimalParameter();
+         double translationalEffort = icpTransformer.getTranslation().lengthSquared();
+         double rotationalEffort = icpTransformer.getRotation().distance(new RotationMatrix());
+         optimizerTranslationalEffortDiff.set(Math.abs(translationalEffort - optimizerTranslationalEffort.getDoubleValue()));
+         optimizerRotationalEffortDiff.set(Math.abs(rotationalEffort - optimizerRotationalEffort.getDoubleValue()));
          optimizerTranslationalEffort.set(translationalEffort);
          optimizerRotationalEffort.set(rotationalEffort);
          optimizerDampingCoefficient.set(optimizer.getDampingCoefficient());
@@ -227,16 +228,16 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          }
       };
       DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
-      purterbationVector.set(0, map.getResolution() * 0.01);
-      purterbationVector.set(1, map.getResolution() * 0.01);
-      purterbationVector.set(2, map.getResolution() * 0.01);
-      purterbationVector.set(3, 0.0001);
-      purterbationVector.set(4, 0.0001);
-      purterbationVector.set(5, 0.0001);
+      purterbationVector.set(0, map.getResolution() * 0.002);
+      purterbationVector.set(1, map.getResolution() * 0.002);
+      purterbationVector.set(2, map.getResolution() * 0.002);
+      purterbationVector.set(3, 0.00005);
+      purterbationVector.set(4, 0.00005);
+      purterbationVector.set(5, 0.00005);
       optimizer.setPerturbationVector(purterbationVector);
       optimizer.setOutputCalculator(functionOutputCalculator);
       optimizer.initialize();
-      optimizer.setCorrespondenceThreshold(0.05);
+      optimizer.setCorrespondenceThreshold(map.getResolution() * 1.2);
 
       return optimizer;
    }
