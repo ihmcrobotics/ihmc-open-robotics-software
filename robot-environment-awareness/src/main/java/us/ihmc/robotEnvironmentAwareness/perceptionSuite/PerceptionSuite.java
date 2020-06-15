@@ -1,7 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.perceptionSuite;
 
-import javafx.application.Platform;
-import javafx.stage.Stage;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.log.LogTools;
@@ -20,7 +18,9 @@ import us.ihmc.ros2.Ros2Node;
 
 public class PerceptionSuite
 {
-   protected static final String MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAModuleConfiguration.txt";
+   private static final String SEGMENTATION_MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultSegmentationModuleConfiguration.txt";
+   private static final String LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultREAModuleConfiguration.txt";
+   private static final String REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME = "./Configurations/defaultRealSenseREAModuleConfiguration.txt";
 
    private PerceptionSuiteComponent<SLAMModule, SLAMBasedEnvironmentAwarenessUI> slamModule;
    private PerceptionSuiteComponent<LIDARBasedREAModule, LIDARBasedEnvironmentAwarenessUI> realsenseREAModule;
@@ -50,7 +50,7 @@ public class PerceptionSuite
                                                           PerceptionSuiteAPI.RunRealSenseREA,
                                                           PerceptionSuiteAPI.RunRealSenseREAUI);
       lidarREAModule = new PerceptionSuiteComponent<>("Lidar REA",
-                                                      () -> LIDARBasedREAModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node),
+                                                      () -> LIDARBasedREAModule.createIntraprocessModule(LIDAR_REA_MODULE_CONFIGURATION_FILE_NAME, ros2Node),
                                                       LIDARBasedEnvironmentAwarenessUI::creatIntraprocessUI,
                                                       messager,
                                                       PerceptionSuiteAPI.RunLidarREA,
@@ -81,7 +81,7 @@ public class PerceptionSuite
 
    private PlanarSegmentationModule createSegmentationModule() throws Exception
    {
-      PlanarSegmentationModule segmentationModule = PlanarSegmentationModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node);
+      PlanarSegmentationModule segmentationModule = PlanarSegmentationModule.createIntraprocessModule(SEGMENTATION_MODULE_CONFIGURATION_FILE_NAME, ros2Node);
       if (slamModule.getModule() != null)
          slamModule.getModule().attachOcTreeConsumer(segmentationModule);
 
@@ -90,8 +90,11 @@ public class PerceptionSuite
 
    private LIDARBasedREAModule createRealSenseREAModule() throws Exception
    {
-      LIDARBasedREAModule module = LIDARBasedREAModule.createIntraprocessModule(MODULE_CONFIGURATION_FILE_NAME, ros2Node, NetworkPorts.REA_MODULE2_UI_PORT);
+      LIDARBasedREAModule module = LIDARBasedREAModule.createIntraprocessModule(REALSENSE_REA_MODULE_CONFIGURATION_FILE_NAME,
+                                                                                ros2Node,
+                                                                                NetworkPorts.REA_MODULE2_UI_PORT);
       module.setParametersForStereo();
+      module.loadConfigurationsFromFile();
       return module;
    }
 
