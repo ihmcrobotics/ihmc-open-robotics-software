@@ -162,6 +162,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       convexPolygons = planarRegionConvexPolygons;
       updateBoundingBox();
       updateConvexHull();
+      updateConcaveHull();
    }
 
    /**
