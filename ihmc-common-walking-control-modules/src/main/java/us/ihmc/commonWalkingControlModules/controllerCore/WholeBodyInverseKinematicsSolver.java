@@ -160,8 +160,8 @@ public class WholeBodyInverseKinematicsSolver
          for (int j = 0; j < loopJoints.size(); j++)
          {
             OneDoFJointReadOnly loopJoint = loopJoints.get(j);
-            double tau = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointPosition((OneDoFJointBasics) loopJoint);
-            kinematicLoopJointConfiguration.set(j, tau);
+            double position = lowLevelOneDoFJointDesiredDataHolder.getDesiredJointPosition((OneDoFJointBasics) loopJoint);
+            kinematicLoopJointConfiguration.set(j, position);
          }
 
          kinematicLoopFunction.adjustConfiguration(kinematicLoopJointConfiguration);
