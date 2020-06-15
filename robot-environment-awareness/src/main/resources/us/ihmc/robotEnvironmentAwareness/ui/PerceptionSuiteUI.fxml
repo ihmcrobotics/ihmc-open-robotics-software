@@ -8,6 +8,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.RowConstraints?>
 
+<?import javafx.scene.control.Button?>
 <Pane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="209.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1">
    <children>
       <GridPane alignment="CENTER" layoutX="-2.0" prefHeight="192.0" prefWidth="594.0">
@@ -39,7 +40,7 @@
              <Label text="RealSense SLAM" GridPane.columnSpan="2" GridPane.rowIndex="2" />
              <Label text="Map Segmentation" GridPane.columnIndex="2" GridPane.columnSpan="2" GridPane.rowIndex="2" />
              <Label layoutX="10.0" layoutY="10.0" text="Error Message" textAlignment="CENTER" />
-             <ToggleButton fx:id="runMapSegmentationUI1" mnemonicParsing="false" prefHeight="55.0" prefWidth="164.0" text="Clear" GridPane.columnIndex="3" />
+             <Button  mnemonicParsing="false" prefHeight="55.0" prefWidth="164.0" text="Clear" GridPane.columnIndex="3" onAction="#clearError" />
             <TextArea fx:id="errorField" prefHeight="71.0" prefWidth="268.0" GridPane.columnIndex="1" GridPane.columnSpan="2" />
          </children>
       </GridPane>

@@ -5,6 +5,7 @@ import javafx.stage.Stage;
 import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
+import us.ihmc.robotEnvironmentAwareness.communication.PerceptionSuiteAPI;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -75,7 +76,9 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
    {
       if (module == null)
       {
-         LogTools.info(name + " Module must be running first.");
+         String error = name + " Module must be running first.";
+         LogTools.error(error);
+         messager.submitMessage(PerceptionSuiteAPI.ErrorMessage, error);
          messager.submitMessage(runUITopic, false);
          return;
       }
@@ -93,6 +96,7 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
                               catch (Exception e)
                               {
                                  LogTools.warn(e.getMessage());
+                                 messager.submitMessage(PerceptionSuiteAPI.ErrorMessage, e.getMessage());
                               }
                               uiStage.setOnCloseRequest(event ->
                                                         {
@@ -104,7 +108,9 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
       else
       {
          stopUI();
-         throw new RuntimeException(name + " UI is already running.");
+         String error = name + " UI is already running.";
+         LogTools.error(error);
+         messager.submitMessage(PerceptionSuiteAPI.ErrorMessage, error);
       }
    }
 
@@ -162,7 +168,9 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
          }
          catch (Exception e)
          {
-            LogTools.warn("Failed to start " + name + ": " + e.getMessage());
+            String error = "Failed to start " + name + ": " + e.getMessage();
+            LogTools.error(error);
+            messager.submitMessage(PerceptionSuiteAPI.ErrorMessage, error);
          }
       }
       else
@@ -173,7 +181,9 @@ public class PerceptionSuiteComponent<M extends PerceptionModule, U extends Perc
          }
          catch (Exception e)
          {
-            LogTools.warn("Failed to stop " + name + ": " + e.getMessage());
+            String error = "Failed to stop " + name + ": " + e.getMessage();
+            LogTools.error(error);
+            messager.submitMessage(PerceptionSuiteAPI.ErrorMessage, error);
          }
       }
    }
