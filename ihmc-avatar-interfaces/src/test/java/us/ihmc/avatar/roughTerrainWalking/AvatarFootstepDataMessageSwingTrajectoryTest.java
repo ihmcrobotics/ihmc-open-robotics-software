@@ -46,6 +46,7 @@ import us.ihmc.simulationToolkit.controllers.PushRobotController;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
 import us.ihmc.simulationconstructionset.util.simulationRunner.BlockingSimulationRunner.SimulationExceededMaximumTimeException;
 import us.ihmc.simulationconstructionset.util.simulationTesting.SimulationTestingParameters;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoEnum;
 import us.ihmc.yoVariables.variable.YoVariable;
 
@@ -104,6 +105,10 @@ public abstract class AvatarFootstepDataMessageSwingTrajectoryTest implements Mu
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(swingTime, transferTime);
       message.setExecutionTiming(ExecutionTiming.CONTROL_ABSOLUTE_TIMINGS.toByte());
       message.setAreFootstepsAdjustable(pushAndAdjust);
+
+      ((YoBoolean) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("controllerSwingSpeedUpEnabled")).set(false);
+      ((YoBoolean) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("leftFootSwingIsSpeedUpEnabled")).set(false);
+      ((YoBoolean) drcSimulationTestHelper.getSimulationConstructionSet().getVariable("rightFootSwingIsSpeedUpEnabled")).set(false);
 
       FootstepDataMessage footstep = message.getFootstepDataList().add();
       footstep.setRobotSide(robotSide.toByte());
