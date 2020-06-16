@@ -105,7 +105,7 @@ public class StepConstraintCalculator
    {
       FrameConvexPolygon2DBasics supportPolygon = supportPolygons.get(supportSide);
       supportPolygon.clear();
-      supportPolygon.addVertices(Vertex3DSupplier.asVertex3DSupplier(footVertices));
+      footVertices.forEach(supportPolygon::addVertex);
       supportPolygon.update();
    }
 
