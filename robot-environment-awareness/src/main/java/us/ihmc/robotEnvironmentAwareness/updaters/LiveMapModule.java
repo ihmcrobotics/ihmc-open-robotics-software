@@ -45,6 +45,7 @@ public class LiveMapModule implements PerceptionModule
    private final AtomicBoolean hasNewLocalizedMap = new AtomicBoolean(false);
    private final AtomicBoolean hasNewRegionsAtFeet = new AtomicBoolean(false);
    private final AtomicBoolean hasNewLidarMap = new AtomicBoolean(false);
+   private final AtomicBoolean hasNewParameters = new AtomicBoolean(false);
 
    private final AtomicReference<Boolean> viewingEnabled;
    private final AtomicReference<PlanarRegionsListMessage> combinedLiveMap;
@@ -77,7 +78,11 @@ public class LiveMapModule implements PerceptionModule
       slamParameters = new PlanarRegionSLAMParameters("ihmc-open-robotics-software",
                                                                              "robot-environment-awareness/src/main/resources/liveMap");
       slamParameters.load();
-      messager.registerTopicListener(LiveMapModuleAPI.PlanarRegionsSLAMParameters, parameters -> parameters.get(slamParameters));
+      messager.registerTopicListener(LiveMapModuleAPI.PlanarRegionsSLAMParameters, parameters ->
+      {
+         parameters.get(slamParameters);
+         hasNewParameters.set(true);
+      });
 
       messager.registerTopicListener(LiveMapModuleAPI.LocalizedMap, (message) -> hasNewLocalizedMap.set(true));
       messager.registerTopicListener(LiveMapModuleAPI.RegionsAtFeet, (message) -> hasNewRegionsAtFeet.set(true));
@@ -192,21 +197,31 @@ public class LiveMapModule implements PerceptionModule
          mostRecentRegionsAtFeet.set(null);
       }
 
-      boolean shouldUpdateMap = hasNewLocalizedMap.getAndSet(false) || hasNewRegionsAtFeet.getAndSet(false) || hasNewLidarMap.getAndSet(false);
+      if (!enableMapFusion.get())
+         return;
+
+      boolean shouldUpdateMap = hasNewLocalizedMap.get() || hasNewRegionsAtFeet.get() || hasNewLidarMap.get() || hasNewParameters.get();
 
       if (shouldUpdateMap && mostRecentLocalizedMap.get() != null)
       {
          PlanarRegionsList localizedMap = PlanarRegionMessageConverter.convertToPlanarRegionsList(mostRecentLocalizedMap.get());
+         hasNewLocalizedMap.set(false);
 
-         if (enableRealSense.get() && enableMapFusion.get() && mostRecentRegionsAtFeet.get() != null)
+         if (enableRealSense.get() && mostRecentRegionsAtFeet.get() != null)
          {
             PlanarRegionsList regionsToFuse = PlanarRegionMessageConverter.convertToPlanarRegionsList(mostRecentRegionsAtFeet.get());
             localizedMap = PlanarRegionSLAM.generateMergedMapByMergingAllPlanarRegionsMatches(localizedMap, regionsToFuse, slamParameters, null);
+
+            hasNewParameters.set(false);
+            hasNewRegionsAtFeet.set(false);
          }
-         if (enableLidar.get() && enableMapFusion.get() && mostRecentLidarMap.get() != null)
+         if (enableLidar.get() && mostRecentLidarMap.get() != null)
          {
             PlanarRegionsList regionsToFuse = PlanarRegionMessageConverter.convertToPlanarRegionsList(mostRecentLidarMap.get());
             localizedMap = PlanarRegionSLAM.generateMergedMapByMergingAllPlanarRegionsMatches(localizedMap, regionsToFuse, slamParameters, null);
+
+            hasNewParameters.set(false);
+            hasNewLidarMap.set(false);
          }
 
          PlanarRegionsListMessage mapMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(localizedMap);
