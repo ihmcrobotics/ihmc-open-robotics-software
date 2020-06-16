@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.exception.DefaultExceptionHandler;
 import us.ihmc.commons.exception.ExceptionTools;
@@ -95,6 +96,7 @@ public class BehaviorModule
       private static final MessagerAPIFactory.CategoryTheme BehaviorModuleTheme = apiFactory.createCategoryTheme("BehaviorModule");
 
       public static final MessagerAPIFactory.Topic<String> BehaviorSelection = topic("BehaviorSelection");
+      public static final MessagerAPIFactory.Topic<Pair<Integer, String>> StatusLog = topic("StatusLog");
 
       private static final <T> MessagerAPIFactory.Topic<T> topic(String name)
       {
