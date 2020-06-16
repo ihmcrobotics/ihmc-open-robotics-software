@@ -2,6 +2,7 @@ package us.ihmc.humanoidBehaviors.tools.interfaces;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.message.ParameterizedMessage;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.log.LogTools;
 import us.ihmc.log.LogToolsWriteOnly;
@@ -67,20 +68,65 @@ public class StatusLogger implements LogToolsWriteOnly
    public void trace(Object message, Object p0, Object p1) { logIfEnabled(Level.TRACE, message, p0, p1); }
    public void trace(Object message, Object p0, Object p1, Object p2) { logIfEnabled(Level.TRACE, message, p0, p1, p2); }
 
-   private void logIfEnabled(Level level, Object message) { if (LogTools.isEnabled(level, 2)) logInternal(level, message); }
-   private void logIfEnabled(Level level, int additionalStackTraceHeight, Object message) { logIfEnabled(Level.INFO); }
-   private void logIfEnabled(Level level, Supplier<?> msgSupplier) { logIfEnabled(Level.INFO); }
-   private void logIfEnabled(Level level, Object message, Supplier<?> msgSupplier) { logIfEnabled(Level.INFO); }
-   private void logIfEnabled(Level level, Object message, Object p0) { logIfEnabled(Level.INFO); }
-   private void logIfEnabled(Level level, Object message, Object p0, Object p1) { logIfEnabled(Level.INFO); }
-   private void logIfEnabled(Level level, Object message, Object p0, Object p1, Object p2) { logIfEnabled(Level.INFO); }
-
-   private void logInternal(Level level, int additionalStackHeight, String message)
+   private void logIfEnabled(Level level, Object message)
    {
-      if (LogTools.isEnabled(level, 2 + additionalStackHeight)) // TODO: test this
+      if (LogTools.isEnabled(level, 2))
       {
-         levelLogger.accept(2 + additionalStackHeight, message);
-         uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), message));
+         LogTools.log(level, 2, message);
+         uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), message.toString()));
+      }
+   }
+   private void logIfEnabled(Level level, int additionalStackTraceHeight, Object message)
+   {
+      if (LogTools.isEnabled(level, 2))
+      {
+         LogTools.log(level, 2 + additionalStackTraceHeight, message);
+         uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), message.toString()));
+      }
+   }
+   private void logIfEnabled(Level level, Supplier<?> msgSupplier)
+   {
+      if (LogTools.isEnabled(level, 2))
+      {
+         String suppliedMessage = msgSupplier.get().toString();
+         LogTools.log(level, 2, suppliedMessage);
+         uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), suppliedMessage));
+      }
+   }
+   private void logIfEnabled(Level level, Object message, Supplier<?> msgSupplier)
+   {
+      if (LogTools.isEnabled(level, 2))
+      {
+         String parameterProcessed = new ParameterizedMessage(message.toString(), msgSupplier.get()).getFormattedMessage();
+         LogTools.log(level, 2, parameterProcessed);
+         uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), parameterProcessed));
+      }
+   }
+   private void logIfEnabled(Level level, Object message, Object p0)
+   {
+      if (LogTools.isEnabled(level, 2))
+      {
+         String parameterProcessed = new ParameterizedMessage(message.toString(), p0).getFormattedMessage();
+         LogTools.log(level, 2, parameterProcessed);
+         uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), parameterProcessed));
+      }
+   }
+   private void logIfEnabled(Level level, Object message, Object p0, Object p1)
+   {
+      if (LogTools.isEnabled(level, 2))
+      {
+         String parameterProcessed = new ParameterizedMessage(message.toString(), p0, p1).getFormattedMessage();
+         LogTools.log(level, 2, parameterProcessed);
+         uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), parameterProcessed));
+      }
+   }
+   private void logIfEnabled(Level level, Object message, Object p0, Object p1, Object p2)
+   {
+      if (LogTools.isEnabled(level, 2))
+      {
+         String parameterProcessed = new ParameterizedMessage(message.toString(), p0, p1, p2).getFormattedMessage();
+         LogTools.log(level, 2, parameterProcessed);
+         uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), parameterProcessed));
       }
    }
 }
