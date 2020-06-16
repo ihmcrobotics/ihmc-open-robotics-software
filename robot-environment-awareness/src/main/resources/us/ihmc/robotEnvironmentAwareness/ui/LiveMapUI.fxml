@@ -9,6 +9,18 @@
 	<center>
 		<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="568.0" prefWidth="945.0" BorderPane.alignment="CENTER" />
 	</center>
-   <bottom>
-   </bottom>
+	<bottom>
+		<TabPane prefHeight="204.0" prefWidth="893.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
+			<tabs>
+				<Tab text="Config">
+					<content>
+						<AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+							<children>
+								<fx:include fx:id="liveMapAnchorPane" source="LiveMapAnchorPane.fxml" />
+							</children>
+						</AnchorPane>
+					</content>
+				</Tab>
+		</TabPane>
+	</bottom>
 </BorderPane>
