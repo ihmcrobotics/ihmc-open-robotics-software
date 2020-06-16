@@ -13,6 +13,7 @@ import us.ihmc.robotEnvironmentAwareness.communication.*;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParametersPacket;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
 import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
@@ -56,7 +57,7 @@ public class LiveMapModule implements PerceptionModule
    private final AtomicReference<Boolean> clearRealSense;
    private final AtomicReference<Boolean> clearLocalizedMap;
 
-   private final AtomicReference<PlanarRegionSLAMParameters> slamParameters;
+   private final PlanarRegionSLAMParameters slamParameters;
 
    private final IHMCROS2Publisher<PlanarRegionsListMessage> combinedMapPublisher;
 
@@ -73,10 +74,10 @@ public class LiveMapModule implements PerceptionModule
       mostRecentRegionsAtFeet = messager.createInput(LiveMapModuleAPI.RegionsAtFeet, null);
       mostRecentLidarMap = messager.createInput(LiveMapModuleAPI.LidarMap, null);
 
-      PlanarRegionSLAMParameters parameters = new PlanarRegionSLAMParameters("ihmc-open-robotics-software",
+      slamParameters = new PlanarRegionSLAMParameters("ihmc-open-robotics-software",
                                                                              "robot-environment-awareness/src/main/resources/liveMap");
-      parameters.load();
-      slamParameters = messager.createInput(LiveMapModuleAPI.PlanarRegionsSLAMParameters, parameters);
+      slamParameters.load();
+      messager.registerTopicListener(LiveMapModuleAPI.PlanarRegionsSLAMParameters, parameters -> parameters.get(slamParameters));
 
       messager.registerTopicListener(LiveMapModuleAPI.LocalizedMap, (message) -> hasNewLocalizedMap.set(true));
       messager.registerTopicListener(LiveMapModuleAPI.RegionsAtFeet, (message) -> hasNewRegionsAtFeet.set(true));
@@ -109,6 +110,7 @@ public class LiveMapModule implements PerceptionModule
 
       messager.submitMessage(LiveMapModuleAPI.ViewingEnable, viewingEnabled.get());
       messager.submitMessage(LiveMapModuleAPI.CombinedLiveMap, combinedLiveMap.get());
+      messager.submitMessage(LiveMapModuleAPI.PlanarRegionsSLAMParameters, new PlanarRegionSLAMParametersPacket(slamParameters));
    }
 
    private void dispatchLocalizedMap(Subscriber<PlanarRegionsListMessage> subscriber)
@@ -199,12 +201,12 @@ public class LiveMapModule implements PerceptionModule
          if (enableRealSense.get() && enableMapFusion.get() && mostRecentRegionsAtFeet.get() != null)
          {
             PlanarRegionsList regionsToFuse = PlanarRegionMessageConverter.convertToPlanarRegionsList(mostRecentRegionsAtFeet.get());
-            localizedMap = PlanarRegionSLAM.generateMergedMapByMergingAllPlanarRegionsMatches(localizedMap, regionsToFuse, slamParameters.get(), null);
+            localizedMap = PlanarRegionSLAM.generateMergedMapByMergingAllPlanarRegionsMatches(localizedMap, regionsToFuse, slamParameters, null);
          }
          if (enableLidar.get() && enableMapFusion.get() && mostRecentLidarMap.get() != null)
          {
             PlanarRegionsList regionsToFuse = PlanarRegionMessageConverter.convertToPlanarRegionsList(mostRecentLidarMap.get());
-            localizedMap = PlanarRegionSLAM.generateMergedMapByMergingAllPlanarRegionsMatches(localizedMap, regionsToFuse, slamParameters.get(), null);
+            localizedMap = PlanarRegionSLAM.generateMergedMapByMergingAllPlanarRegionsMatches(localizedMap, regionsToFuse, slamParameters, null);
          }
 
          PlanarRegionsListMessage mapMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(localizedMap);
