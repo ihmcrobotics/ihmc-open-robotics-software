@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.ui.graphics.live;
 
+import java.time.LocalDateTime;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -9,6 +10,7 @@ import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.javaFXVisualizers.PrivateAnimationTimer;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Topic;
@@ -23,21 +25,16 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
    private boolean acceptNewRegions = true;
    private volatile PlanarRegionsList latestPlanarRegionsList = new PlanarRegionsList(); // prevent NPEs
 
-   public LivePlanarRegionsGraphic(Ros2Node ros2Node)
-   {
-      this(ros2Node, true);
-   }
-
    public LivePlanarRegionsGraphic(Ros2Node ros2Node, boolean initializeToFlatGround)
    {
-      this(ros2Node, ROS2Tools.REA.withInput(), initializeToFlatGround);
+      this(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, initializeToFlatGround);
    }
 
-   public LivePlanarRegionsGraphic(Ros2Node ros2Node, ROS2Topic regionsSourceTopicName, boolean initializeToFlatGround)
+   public LivePlanarRegionsGraphic(Ros2Node ros2Node, ROS2Topic<PlanarRegionsListMessage> topic, boolean initializeToFlatGround)
    {
       super(initializeToFlatGround);
 
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, regionsSourceTopicName, this::acceptPlanarRegions);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, topic, this::acceptPlanarRegions);
       animationTimer.start();
    }
 
@@ -67,6 +64,7 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
             executorService.submit(() ->
             {
                this.latestPlanarRegionsList = incomingData;
+               LogTools.debug("Received regions from behavior: {}: {}", LocalDateTime.now(), incomingData.hashCode());
                generateMeshes(incomingData);
             });
          }
@@ -77,6 +75,7 @@ public class LivePlanarRegionsGraphic extends PlanarRegionsGraphic
    {
       PlanarRegionsList latestPlanarRegionsList = PlanarRegionMessageConverter.convertToPlanarRegionsList(incomingData);
       this.latestPlanarRegionsList = latestPlanarRegionsList;
+      LogTools.debug("Generating mesh for sequenceId: {}", incomingData.getSequenceId());
       generateMeshes(latestPlanarRegionsList); // important not to execute this in either ROS2 or JavaFX threads
    }
 

@@ -42,7 +42,7 @@ public class BodyPathPlanGraphic extends Group
    /**
     * To process in parallel.
     */
-   public void generateMeshesAsynchronously(List<Point3DReadOnly> bodyPath)
+   public void generateMeshesAsynchronously(List<? extends Point3DReadOnly> bodyPath)
    {
       executorService.submit(() -> {
          LogTools.debug("Received body path plan containing {} points", bodyPath.size());
@@ -50,7 +50,7 @@ public class BodyPathPlanGraphic extends Group
       });
    }
 
-   public void generateMeshes(List<Point3DReadOnly> bodyPath)
+   public void generateMeshes(List<? extends Point3DReadOnly> bodyPath)
    {
       meshBuilder.clear();
 
