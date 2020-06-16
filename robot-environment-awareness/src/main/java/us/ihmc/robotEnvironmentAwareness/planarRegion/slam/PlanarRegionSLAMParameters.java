@@ -41,6 +41,13 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
       load();
    }
 
+   public PlanarRegionSLAMParameters(String name, String directory)
+   {
+      super(keys, PlanarRegionSLAMParameters.class, name, directory);
+
+      load();
+   }
+
    public double getBoundingBoxHeight()
    {
       return get(boundingBoxHeight);
