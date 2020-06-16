@@ -75,9 +75,8 @@ public class LiveMapModule implements PerceptionModule
       mostRecentRegionsAtFeet = messager.createInput(LiveMapModuleAPI.RegionsAtFeet, null);
       mostRecentLidarMap = messager.createInput(LiveMapModuleAPI.LidarMap, null);
 
-      slamParameters = new PlanarRegionSLAMParameters("ihmc-open-robotics-software",
-                                                                             "robot-environment-awareness/src/main/resources/liveMap");
-      slamParameters.load();
+      // FIXME this isn't loading properly
+      slamParameters = new PlanarRegionSLAMParameters("ihmc-open-robotics-software", "robot-environment-awareness/src/main/resources/liveMap");
       messager.registerTopicListener(LiveMapModuleAPI.PlanarRegionsSLAMParameters, parameters ->
       {
          parameters.get(slamParameters);

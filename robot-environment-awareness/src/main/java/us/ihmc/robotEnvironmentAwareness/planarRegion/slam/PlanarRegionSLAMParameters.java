@@ -7,17 +7,17 @@ import us.ihmc.tools.property.StoredPropertySet;
 
 /**
  * Parameters for the planar region SLAM algorithm.
- *
+ * <p>
  * On construction, these properties are loaded from the INI file:
  * ihmc-avatar-interfaces/src/behavior-clean-room/resources/us/ihmc/humanoidBehaviors/tools/perception/planarRegionSLAMParameters.ini
- *
+ * <p>
  * To save/load properties, call the save() and load() methods.
- *
+ * <p>
  * After adding new properties, call the main() method to add them to the INI file with null values. Then,
  * set the initial value in the file.
- *
+ * <p>
  * The named getters and setters are more of a "sugar" feature for this class and may go out of date as parameters are added.
- *
+ * <p>
  * The set(Key, value) and get(Key) methods are always available.
  */
 public class PlanarRegionSLAMParameters extends StoredPropertySet
@@ -30,15 +30,10 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
    public static final DoubleStoredPropertyKey dampedLeastSquaresLambda = keys.addDoubleKey("Damped least squares lambda");
    public static final DoubleStoredPropertyKey minimumRegionOverlapDistance = keys.addDoubleKey("Minimum Region Overlap Distance");
    public static final DoubleStoredPropertyKey maximumPointProjectionDistance = keys.addDoubleKey("Maximum Point Projection Distance");
-   
+
    public PlanarRegionSLAMParameters()
    {
-      super(keys,
-            PlanarRegionSLAMParameters.class,
-            "ihmc-open-robotics-software",
-            "robot-environment-awareness/src/main/resources");
-
-      load();
+      this("ihmc-open-robotics-software", "robot-environment-awareness/src/main/resources");
    }
 
    public PlanarRegionSLAMParameters(String name, String directory)
@@ -97,7 +92,7 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
    {
       set(PlanarRegionSLAMParameters.minimumRegionOverlapDistance, minimumRegionOverlapDistance);
    }
-   
+
    public double getMaximumPointProjectionDistance()
    {
       return get(maximumPointProjectionDistance);
@@ -107,7 +102,6 @@ public class PlanarRegionSLAMParameters extends StoredPropertySet
    {
       set(PlanarRegionSLAMParameters.maximumPointProjectionDistance, maximumPointProjectionDistance);
    }
-   
 
    /**
     * Run to update file with new parameters.

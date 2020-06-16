@@ -31,7 +31,6 @@ public class PerceptionSuite
    private PerceptionSuiteComponent<LiveMapModule, LiveMapUI> liveMapModule;
 
    protected final Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, ROS2Tools.REA_NODE_NAME);
-   // TODO module for combining rea and segmentation
 
    private final Messager messager;
 
@@ -64,12 +63,12 @@ public class PerceptionSuite
                                                           messager,
                                                           PerceptionSuiteAPI.RunMapSegmentation,
                                                           PerceptionSuiteAPI.RunMapSegmentationUI);
-      liveMapModule = new PerceptionSuiteComponent<LiveMapModule, LiveMapUI>("LiveMap",
-                                                                             () -> LiveMapModule.createIntraprocess(ros2Node),
-                                                                             LiveMapUI::createIntraprocessUI,
-                                                                             messager,
-                                                                             PerceptionSuiteAPI.RunLiveMap,
-                                                                             PerceptionSuiteAPI.RunLiveMapUI);
+      liveMapModule = new PerceptionSuiteComponent<>("LiveMap",
+                                                     () -> LiveMapModule.createIntraprocess(ros2Node),
+                                                     LiveMapUI::createIntraprocessUI,
+                                                     messager,
+                                                     PerceptionSuiteAPI.RunLiveMap,
+                                                     PerceptionSuiteAPI.RunLiveMapUI);
 
       slamModule.attachDependentModule(segmentationModule);
    }
@@ -118,6 +117,7 @@ public class PerceptionSuite
       lidarREAModule.stop();
       realsenseREAModule.stop();
       segmentationModule.stop();
+      liveMapModule.stop();
 
       try
       {
