@@ -12,6 +12,7 @@ import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.*;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionUI;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.LiveMapAnchorPaneController;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.PlanarRegionSLAMParametersUIController;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.LiveMapMeshViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.SegmentationMeshViewer;
 
@@ -20,7 +21,7 @@ import java.io.IOException;
 
 public class LiveMapUI implements PerceptionUI
 {
-   private static final String UI_CONFIGURATION_FILE_NAME = "./Configurations/defaultPlanarSegmentationUIConfiguration.txt";
+   private static final String UI_CONFIGURATION_FILE_NAME = "./Configurations/defaultLiveMapUIConfiguration.txt";
 
    private final BorderPane mainPane;
    private final REAUIMessager uiMessager;
@@ -32,6 +33,8 @@ public class LiveMapUI implements PerceptionUI
 
    @FXML
    private LiveMapAnchorPaneController liveMapAnchorPaneController;
+   @FXML
+   private PlanarRegionSLAMParametersUIController slamParametersUIController;
 
    private LiveMapUI(REAUIMessager uiMessager, Stage primaryStage) throws Exception
    {
@@ -98,12 +101,17 @@ public class LiveMapUI implements PerceptionUI
       liveMapAnchorPaneController.setConfigurationFile(configurationFile);
       liveMapAnchorPaneController.attachREAMessager(uiMessager);
       liveMapAnchorPaneController.bindControls();
+
+      slamParametersUIController.setConfigurationFile(configurationFile);
+      slamParametersUIController.attachREAMessager(uiMessager);
+      slamParametersUIController.bindControls();
    }
 
    public void show()
    {
       refreshModuleState();
       primaryStage.show();
+      slamParametersUIController.onPrimaryStageLoaded();
    }
 
    public void stop()
