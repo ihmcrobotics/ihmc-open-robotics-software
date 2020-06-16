@@ -11,8 +11,8 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOnly;
 import us.ihmc.humanoidBehaviors.tools.BehaviorBuilderPattern;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
-import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.BodyPathPostProcessor;
 import us.ihmc.pathPlanning.visibilityGraphs.postProcessing.ObstacleAvoidanceProcessor;
@@ -28,8 +28,10 @@ import java.util.function.Supplier;
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.BodyPathPlanForUI;
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.MapRegionsForUI;
 
-public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
+class LookAndStepBodyPathTask implements BehaviorBuilderPattern
 {
+   protected final StatusLogger statusLogger;
+
    protected final Field<UIPublisher> uiPublisher = required();
    protected final Field<VisibilityGraphsParametersReadOnly> visibilityGraphParameters = required();
    protected final Field<LookAndStepBehaviorParametersReadOnly> lookAndStepBehaviorParameters = required();
@@ -48,6 +50,11 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    private TimerSnapshot mapRegionsReceptionTimerSnapshot;
    private TimerSnapshot planningFailureTimerSnapshot;
    private LookAndStepBehavior.State behaviorState;
+
+   LookAndStepBodyPathTask(StatusLogger statusLogger)
+   {
+      this.statusLogger = statusLogger;
+   }
 
    protected void update(PlanarRegionsList mapRegions,
                          Pose3D goal,
@@ -75,18 +82,18 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
 //      }
       if (!behaviorState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
       {
-         LogTools.warn("Body path planning supressed: Not in body path planning state");
+         statusLogger.warn("Body path planning supressed: Not in body path planning state");
          proceed = false;
       }
       else if (!hasGoal())
       {
-         LogTools.warn("Body path planning supressed: No goal specified");
+         statusLogger.warn("Body path planning supressed: No goal specified");
          uiPublisher.get().publishToUI(MapRegionsForUI, mapRegions);
          proceed = false;
       }
       else if (!regionsOK())
       {
-         LogTools.warn("Body path planning supressed: Regions not OK: {}, timePassed: {}, isEmpty: {}",
+         statusLogger.warn("Body path planning supressed: Regions not OK: {}, timePassed: {}, isEmpty: {}",
                        mapRegions,
                        mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset(),
                        mapRegions == null ? null : mapRegions.isEmpty());
@@ -94,12 +101,12 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
       }
       else if (planningFailureTimerSnapshot.isRunning()) // TODO: This could be "run recently" instead of failed recently
       {
-         LogTools.warn("Body path planning supressed: Failed recently");
+         statusLogger.warn("Body path planning supressed: Failed recently");
          proceed = false;
       }
       else if (isBeingReviewed.get().get())
       {
-         LogTools.warn("Body path planning supressed: Is being reviewed");
+         statusLogger.warn("Body path planning supressed: Is being reviewed");
          proceed = false;
       }
 
@@ -136,7 +143,7 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
       // TODO: Add robot standing still for 20s for real robot?
       uiPublisher.get().publishToUI(MapRegionsForUI, mapRegions);
 
-      LogTools.info("Planning body path...");
+      statusLogger.info("Planning body path...");
 
       clearNewBodyPathNeededCallback.get().run();
 
@@ -158,7 +165,7 @@ public class LookAndStepBodyPathTask implements BehaviorBuilderPattern
       Stopwatch stopwatch = new Stopwatch().start();
       final ArrayList<Pose3D> bodyPathPlanForReview = new ArrayList<>(); // TODO Review making this final
       bodyPathPlanner.planWaypoints(); // takes about 0.1s
-      LogTools.info("Body path planning took {}, contains {} waypoint", stopwatch.totalElapsed(), bodyPathPlanForReview.size());
+      statusLogger.info("Body path planning took {}, contains {} waypoint", stopwatch.totalElapsed(), bodyPathPlanForReview.size());
       //      bodyPathPlan = bodyPathPlanner.getWaypoints();
       if (bodyPathPlanner.getWaypoints() != null)
       {

@@ -8,6 +8,7 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.humanoidBehaviors.lookAndStep.TypedInput;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
@@ -26,8 +27,10 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
 
    // hook up inputs and notifications separately.
    // always run again if with latest data
-   public LookAndStepBodyPathModule()
+   public LookAndStepBodyPathModule(StatusLogger statusLogger)
    {
+      super(statusLogger);
+
       // don't run two body path plans at the same time
       SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 

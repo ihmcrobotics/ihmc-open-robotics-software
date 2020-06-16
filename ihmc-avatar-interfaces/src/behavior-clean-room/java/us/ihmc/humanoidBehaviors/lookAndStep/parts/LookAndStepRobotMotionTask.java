@@ -25,12 +25,14 @@ import us.ihmc.humanoidBehaviors.tools.BehaviorBuilderPattern;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
 import us.ihmc.humanoidBehaviors.tools.interfaces.RobotWalkRequester;
+import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
-import us.ihmc.log.LogTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
-public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
+class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
 {
+   protected final StatusLogger statusLogger;
+
    private final Field<LookAndStepBehaviorParametersReadOnly> lookAndStepBehaviorParameters = required();
    private final Field<BiConsumer<RobotSide, FramePose3DReadOnly>> lastSteppedSolePoseConsumer = required();
    private final Field<Function<RobotSide, FramePose3DReadOnly>> lastSteppedSolePoseSupplier = required();
@@ -42,6 +44,11 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
    private FootstepPlan footstepPlan;
    private HumanoidRobotState robotState;
    private LookAndStepBehavior.State behaviorState;
+
+   LookAndStepRobotMotionTask(StatusLogger statusLogger)
+   {
+      this.statusLogger = statusLogger;
+   }
 
    protected void update(FootstepPlan footstepPlan,
                          HumanoidRobotState robotState,
@@ -58,12 +65,12 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
 
       if (!behaviorState.equals(LookAndStepBehavior.State.SWINGING))
       {
-         LogTools.warn("Footstep planning supressed: Not in footstep planning state");
+         statusLogger.warn("Footstep planning supressed: Not in footstep planning state");
          proceed = false;
       }
       else if (!isFootstepPlanOK())
       {
-         LogTools.warn("Robot walking supressed: Footstep plan not OK: numberOfSteps = {}. Planning again...",
+         statusLogger.warn("Robot walking supressed: Footstep plan not OK: numberOfSteps = {}. Planning again...",
                        footstepPlan == null ? null : footstepPlan.getNumberOfSteps());
          behaviorStateUpdater.get().accept(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
          replanFootstepsOutput.get().run();
@@ -92,7 +99,7 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
       startFootPosesForUI.add(new FootstepForUI(RobotSide.RIGHT, new Pose3D(lastSteppedSolePoseSupplier.get().apply(RobotSide.RIGHT)), "Right Start"));
       uiPublisher.get().publishToUI(StartAndGoalFootPosesForUI, startFootPosesForUI); // TODO: Should specify topic here?
 
-      LogTools.info("Requesting walk");
+      statusLogger.info("Requesting walk");
       double swingTime = lookAndStepBehaviorParameters.get().getSwingTime();
       double transferTime = lookAndStepBehaviorParameters.get().getTransferTime();
       FootstepDataListMessage footstepDataListMessage = FootstepDataMessageConverter.createFootstepDataListFromPlan(shortenedFootstepPlan,
@@ -113,20 +120,20 @@ public class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
    {
       double percentSwingToWait = lookAndStepBehaviorParameters.get().get(LookAndStepBehaviorParameters.percentSwingToWait);
       double waitTime = swingTime * percentSwingToWait;
-      LogTools.info("Waiting {} for {} % of swing...", waitTime, percentSwingToWait);
+      statusLogger.info("Waiting {} for {} % of swing...", waitTime, percentSwingToWait);
       ThreadTools.sleepSeconds(waitTime);
-      LogTools.info("{} % of swing complete!", percentSwingToWait);
+      statusLogger.info("{} % of swing complete!", percentSwingToWait);
 
-      LogTools.warn("Step {}% complete: Robot not reached goal: Find next footstep planning goal...", percentSwingToWait);
+      statusLogger.warn("Step {}% complete: Robot not reached goal: Find next footstep planning goal...", percentSwingToWait);
       behaviorStateUpdater.get().accept(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
       replanFootstepsOutput.get();
    }
 
    private void robotWalkingThread(TypedNotification<WalkingStatusMessage> walkingStatusNotification)
    {
-      LogTools.info("Waiting for robot walking...");
+      statusLogger.info("Waiting for robot walking...");
       walkingStatusNotification.blockingPoll();
-      LogTools.info("Robot walk complete.");
+      statusLogger.info("Robot walk complete.");
    }
 
    public void run()
