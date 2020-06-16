@@ -13,7 +13,7 @@ import us.ihmc.tools.thread.PausablePeriodicThread;
 import java.util.function.Supplier;
 
 /**
- * Assembles and publishes currently visible planar regions on the REA output topic.
+ * Combines and publishes planar regions from suppliers.
  */
 public class VisiblePlanarRegionService
 {
@@ -25,8 +25,13 @@ public class VisiblePlanarRegionService
 
    public VisiblePlanarRegionService(Ros2NodeInterface ros2Node, Supplier<PlanarRegionsList>... planarRegionSuppliers)
    {
+      this(ros2Node, ROS2Tools.LIDAR_REA_REGIONS.getName(), planarRegionSuppliers);
+   }
+
+   public VisiblePlanarRegionService(Ros2NodeInterface ros2Node, String topicName, Supplier<PlanarRegionsList>... planarRegionSuppliers)
+   {
       this.planarRegionSuppliers = planarRegionSuppliers;
-      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.withOutput()); // TODO add name "visible"
+      planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, topicName); // TODO add name "visible"
       thread = new PausablePeriodicThread(getClass().getSimpleName(), 0.5, this::process);
    }
 

@@ -9,8 +9,8 @@ import java.util.List;
 
 public class ManagedROS2Node implements Ros2NodeInterface
 {
-   private final List<ManagedROS2Listener> ros2MessageListeners = new ArrayList<>();
-   private final List<ManagedROS2Publisher> ros2Publishers = new ArrayList<>();
+   private final List<ManagedROS2Listener<?>> ros2MessageListeners = new ArrayList<>();
+   private final List<ManagedROS2Publisher<?>> ros2Publishers = new ArrayList<>();
    private final Ros2Node ros2Node;
 
    public ManagedROS2Node(Ros2Node ros2Node)
@@ -23,11 +23,11 @@ public class ManagedROS2Node implements Ros2NodeInterface
     */
    public void setEnabled(boolean enabled)
    {
-      for (ManagedROS2Listener ros2Listener : ros2MessageListeners)
+      for (ManagedROS2Listener<?> ros2Listener : ros2MessageListeners)
       {
          ros2Listener.setEnabled(enabled);
       }
-      for (ManagedROS2Publisher ros2Publisher : ros2Publishers)
+      for (ManagedROS2Publisher<?> ros2Publisher : ros2Publishers)
       {
          ros2Publisher.setEnabled(enabled);
       }
@@ -75,14 +75,14 @@ public class ManagedROS2Node implements Ros2NodeInterface
                                                      String topicName,
                                                      Ros2QosProfile qosProfile) throws IOException
    {
-      ManagedROS2Listener managedListener = new ManagedROS2Listener(newMessageListener, subscriptionMatchedListener);
+      ManagedROS2Listener<T> managedListener = new ManagedROS2Listener<T>(newMessageListener, subscriptionMatchedListener);
       ros2MessageListeners.add(managedListener);
       return ros2Node.createSubscription(topicDataType, managedListener, managedListener, topicName, qosProfile);
    }
 
-   private <T> ManagedROS2Listener createManagedListener(NewMessageListener<T> newMessageListener)
+   private <T> ManagedROS2Listener<T> createManagedListener(NewMessageListener<T> newMessageListener)
    {
-      ManagedROS2Listener managedListener = new ManagedROS2Listener(newMessageListener);
+      ManagedROS2Listener<T> managedListener = new ManagedROS2Listener<T>(newMessageListener);
       ros2MessageListeners.add(managedListener);
       return managedListener;
    }
