@@ -72,6 +72,11 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private final FrameVector3D velocityRelative = new FrameVector3D();
    private final FrameVector3D velocityRelativePrevious = new FrameVector3D();
    private final FrameVector3D velocityRelativeChange = new FrameVector3D();
+   /**
+    * Velocity used to compute the impulse. It is composed of {@link #velocityRelative} and
+    * modifications to inject restitution and error reduction in the solution.
+    */
+   private final FrameVector3D velocitySolverInput = new FrameVector3D();
 
    private final DMatrixRMaj inverseApparentInertiaA = new DMatrixRMaj(3, 3);
    private final DMatrixRMaj inverseApparentInertiaB = new DMatrixRMaj(3, 3);
@@ -204,6 +209,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          velocityNoImpulseB.changeFrame(contactFrame);
       }
 
+      velocitySolverInput.setToZero(contactFrame);
+
       isFirstUpdate = true;
    }
 
@@ -297,25 +304,23 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          velocityRelative.set(velocityA);
       }
 
-      if (isFirstUpdate)
-      {
-         velocityRelativePrevious.set(velocityRelative);
-         velocityRelativeChange.set(velocityRelative);
-      }
-      else
-      {
-         velocityRelativeChange.sub(velocityRelative, velocityRelativePrevious);
-         velocityRelativePrevious.set(velocityRelative);
-      }
-
       /*
        * Modifying the contact velocity that the solver is trying to cancel. For instance, the coefficient
        * of restitution is 1.0, the velocity is doubled, which results in an impulse which magnitude is
        * doubled, such that, the post-impact velocity is opposite of the pre-impact velocity along the
        * collision axis.
        */
-      if (contactParameters.getCoefficientOfRestitution() != 0.0 && velocityRelative.getZ() <= -contactParameters.getRestitutionThreshold())
-         velocityRelative.scale(1.0 + contactParameters.getCoefficientOfRestitution());
+      if (contactParameters.getCoefficientOfRestitution() != 0.0)
+      {
+         if (velocityRelative.getZ() <= -contactParameters.getRestitutionThreshold())
+            velocitySolverInput.setAndScale(1.0 + contactParameters.getCoefficientOfRestitution(), velocityRelative);
+         else
+            velocitySolverInput.set(velocityRelative);
+      }
+      else
+      {
+         velocitySolverInput.set(velocityRelative);
+      }
 
       /*
        * Computing the correction term based on the penetration of the two collidables. This assumes that
@@ -334,7 +339,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          if (normalError > 0.0)
          {
             normalError *= contactParameters.getErrorReductionParameter() / dt;
-            velocityRelative.subZ(normalError);
+            velocitySolverInput.subZ(normalError);
          }
       }
       if (contactParameters.getSlipErrorReductionParameter() != 0.0)
@@ -343,10 +348,10 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          collisionErrorReductionTerm.scale(-contactParameters.getSlipErrorReductionParameter() / dt);
          collisionErrorReductionTerm.changeFrame(contactFrame);
          // Ensure slip error is only tangential to the contact.
-         velocityRelative.sub(collisionErrorReductionTerm.getX(), collisionErrorReductionTerm.getY(), 0.0);
+         velocitySolverInput.sub(collisionErrorReductionTerm.getX(), collisionErrorReductionTerm.getY(), 0.0);
       }
 
-      isContactClosing = velocityRelative.getZ() < 0.0;
+      isContactClosing = velocitySolverInput.getZ() < 0.0;
       impulseA.setToZero(bodyFrameA, contactFrame);
 
       if (isContactClosing)
@@ -355,11 +360,11 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
          if (EuclidCoreTools.isZero(mu, 1.0e-12))
          { // Trivial case, i.e. there is no friction => the impulse is along the collision axis.
-            impulseA.getLinearPart().setZ(-velocityRelative.getZ() / M_inv.get(2, 2));
+            impulseA.getLinearPart().setZ(-velocitySolverInput.getZ() / M_inv.get(2, 2));
          }
          else
          {
-            velocityRelative.get(c);
+            velocitySolverInput.get(c);
             LinearSolverDense<DMatrixRMaj> solver;
             if (CommonOps_DDRM.det(M_inv) > 1.0e-6)
                solver = linearSolver;
@@ -430,6 +435,18 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       }
 
       impulsePreviousA.set(impulseA.getLinearPart());
+
+      if (isFirstUpdate)
+      {
+         velocityRelativePrevious.set(velocityRelative);
+         velocityRelativeChange.set(velocityRelative);
+      }
+      else
+      {
+         velocityRelativeChange.sub(velocityRelative, velocityRelativePrevious);
+         velocityRelativePrevious.set(velocityRelative);
+      }
+
       isFirstUpdate = false;
    }
 
@@ -708,5 +725,13 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
                                                                  M_inv,
                                                                  lambda_v_0,
                                                                  c));
+   }
+
+   @Override
+   public String toString()
+   {
+      return "Collidables [A: " + PhysicsEngineTools.collidableSimpleName(collisionResult.getCollidableA()) + ", B: "
+            + PhysicsEngineTools.collidableSimpleName(collisionResult.getCollidableB()) + "], velocity relative: " + velocityRelative + ", impulse A: "
+            + impulseA.getLinearPart();
    }
 }
