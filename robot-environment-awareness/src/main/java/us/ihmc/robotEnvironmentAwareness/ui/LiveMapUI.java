@@ -1,5 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.ui;
 
+import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.scene.input.KeyCode;
@@ -10,6 +11,7 @@ import us.ihmc.javaFXToolkit.scenes.View3DFactory;
 import us.ihmc.messager.Messager;
 import us.ihmc.robotEnvironmentAwareness.communication.*;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionUI;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.LiveMapAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.LiveMapMeshViewer;
 import us.ihmc.robotEnvironmentAwareness.ui.viewer.SegmentationMeshViewer;
 
@@ -28,6 +30,9 @@ public class LiveMapUI implements PerceptionUI
 
    private final UIConnectionHandler uiConnectionHandler;
 
+   @FXML
+   private LiveMapAnchorPaneController liveMapAnchorPaneController;
+
    private LiveMapUI(REAUIMessager uiMessager, Stage primaryStage) throws Exception
    {
       this.primaryStage = primaryStage;
@@ -42,7 +47,6 @@ public class LiveMapUI implements PerceptionUI
          uiMessager.startMessager();
 
       meshViewer = new LiveMapMeshViewer(uiMessager);
-
 
       initializeControllers(uiMessager);
 
@@ -90,6 +94,10 @@ public class LiveMapUI implements PerceptionUI
          System.out.println(configurationFile.getAbsolutePath());
          e.printStackTrace();
       }
+
+      liveMapAnchorPaneController.setConfigurationFile(configurationFile);
+      liveMapAnchorPaneController.attachREAMessager(uiMessager);
+      liveMapAnchorPaneController.bindControls();
    }
 
    public void show()

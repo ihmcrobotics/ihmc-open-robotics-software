@@ -27,6 +27,12 @@ public class LiveMapModuleAPI
 
    public static final Topic<Boolean> RequestEntireModuleState = topic("RequestEntireModuleState");
 
+   public static final Topic<Boolean> EnableLidar = topic("EnableLidar");
+   public static final Topic<Boolean> EnableRealSense = topic("EnableRealSense");
+
+   public static final Topic<Boolean> ClearLidar = topic("ClearLidar");
+   public static final Topic<Boolean> ClearRealSense = topic("ClearRealSense");
+
    public static final Topic<Boolean> SaveUpdaterConfiguration = topic("SaveUpdaterConfiguration");
 
    public static final MessagerAPI API = apiFactory.getAPIAndCloseFactory();
