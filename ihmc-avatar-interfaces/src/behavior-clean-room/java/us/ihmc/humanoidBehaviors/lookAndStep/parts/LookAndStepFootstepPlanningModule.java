@@ -8,6 +8,7 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.SingleThreadSizeOneQueueExecutor;
 import us.ihmc.humanoidBehaviors.lookAndStep.TypedInput;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
+import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 
@@ -29,8 +30,10 @@ public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanni
    private Timer planarRegionsExpirationTimer = new Timer();
    private Timer planningFailedTimer = new Timer();
 
-   public LookAndStepFootstepPlanningModule()
+   public LookAndStepFootstepPlanningModule(StatusLogger statusLogger)
    {
+      super(statusLogger);
+
       SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
       planarRegionsInput.addCallback(data -> executor.execute(this::evaluateAndRun));

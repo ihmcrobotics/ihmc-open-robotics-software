@@ -82,16 +82,22 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       // TODO: Want to be able to wire up behavior here and see all present modules
 
-      bodyPathModule = new LookAndStepBodyPathModule();
-      footstepPlanningModule = new LookAndStepFootstepPlanningModule();
-      robotMotionModule = new LookAndStepRobotMotionModule();
+      bodyPathModule = new LookAndStepBodyPathModule(helper.getOrCreateStatusLogger());
+      footstepPlanningModule = new LookAndStepFootstepPlanningModule(helper.getOrCreateStatusLogger());
+      robotMotionModule = new LookAndStepRobotMotionModule(helper.getOrCreateStatusLogger());
 
-      LookAndStepReviewPart<List<? extends Pose3DReadOnly>> bodyPathReview = new LookAndStepReviewPart<>("body path", approvalNotification, bodyPathPlan ->
+      LookAndStepReviewPart<List<? extends Pose3DReadOnly>> bodyPathReview = new LookAndStepReviewPart<>(helper.getOrCreateStatusLogger(),
+                                                                                                         "body path",
+                                                                                                         approvalNotification,
+                                                                                                         bodyPathPlan ->
       {
          updateState(State.FOOTSTEP_PLANNING);
          footstepPlanningModule.acceptBodyPathPlan(bodyPathPlan);
       });
-      LookAndStepReviewPart<FootstepPlan> footstepPlanReview = new LookAndStepReviewPart<>("footstep plan", approvalNotification, footstepPlan ->
+      LookAndStepReviewPart<FootstepPlan> footstepPlanReview = new LookAndStepReviewPart<>(helper.getOrCreateStatusLogger(),
+                                                                                           "footstep plan",
+                                                                                           approvalNotification,
+                                                                                           footstepPlan ->
       {
          updateState(LookAndStepBehavior.State.SWINGING);
          robotMotionModule.acceptFootstepPlan(footstepPlan);
@@ -129,7 +135,6 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlanningModule.setFootstepPlanningModule(helper.getOrCreateFootstepPlanner());
       footstepPlanningModule.setBehaviorStateSupplier(behaviorState::get);
       footstepPlanningModule.setBehaviorStateUpdater(this::updateState);
-      footstepPlanningModule.setStatusLogger(helper::logInfoLamda);
 
       robotMotionModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
       robotMotionModule.setLastSteppedSolePoseConsumer(lastSteppedSolePoses::put);

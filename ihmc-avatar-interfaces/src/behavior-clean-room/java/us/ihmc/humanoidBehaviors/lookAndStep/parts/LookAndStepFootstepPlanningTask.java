@@ -22,8 +22,8 @@ import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOn
 import us.ihmc.humanoidBehaviors.tools.BehaviorBuilderPattern;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
+import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
-import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.bodyPathPlanner.BodyPathPlannerTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -39,8 +39,10 @@ import java.util.function.Supplier;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.*;
 
-public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
+class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
 {
+   protected final StatusLogger statusLogger;
+
    protected final Field<LookAndStepBehaviorParametersReadOnly> lookAndStepBehaviorParameters = required(); // TODO: Maybe we only need to invalidate some fields
    protected final Field<FootstepPlannerParametersReadOnly> footstepPlannerParameters = required();
    protected final Field<Supplier<Boolean>> isBeingReviewedSupplier = required();
@@ -58,7 +60,6 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    protected final Field<Consumer<FootstepPlan>> autonomousOutput = required();
    protected final Field<Runnable> planningFailedNotifier = required();
    protected final Field<Consumer<LookAndStepBehavior.State>> behaviorStateUpdater = required();
-   protected final Field<Consumer<String>> statusLogger = required();
 
    private PlanarRegionsList planarRegions;
    private TimerSnapshot planarRegionReceptionTimerSnapshot;
@@ -67,6 +68,11 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    private HumanoidRobotState robotState;
    private RobotSide lastStanceSide;
    private LookAndStepBehavior.State behaviorState;
+
+   LookAndStepFootstepPlanningTask(StatusLogger statusLogger)
+   {
+      this.statusLogger = statusLogger;
+   }
 
    protected void update(PlanarRegionsList planarRegions,
                          TimerSnapshot planarRegionReceptionTimerSnapshot,
@@ -91,13 +97,13 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
 
       if (!behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING))
       {
-         LogTools.warn("Footstep planning supressed: Not in footstep planning state");
-         statusLogger.get().accept("Footstep planning evauation failed: Not in footstep planning state");
+         statusLogger.warn("Footstep planning supressed: Not in footstep planning state");
+         statusLogger.warn("Footstep planning evauation failed: Not in footstep planning state");
          proceed = false;
       }
       else if (!regionsOK())
       {
-         LogTools.warn("Footstep planning suppressed: Regions not OK: {}, timePassed: {}, isEmpty: {}",
+         statusLogger.warn("Footstep planning suppressed: Regions not OK: {}, timePassed: {}, isEmpty: {}",
                        planarRegions,
                        planarRegionReceptionTimerSnapshot.getTimePassedSinceReset(),
                        planarRegions == null ? null : planarRegions.isEmpty());
@@ -106,22 +112,22 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       }
       else if (planningFailureTimerSnapshot.isRunning())
       {
-         LogTools.warn("Footstep planning suppressed: Planning failed recently");
+         statusLogger.warn("Footstep planning suppressed: Planning failed recently");
          proceed = false;
       }
       else if (!bodyPathPlanOK())
       {
-         LogTools.warn("Footstep planning suppressed: Body path size: {}", bodyPathPlan == null ? null : bodyPathPlan.size());
+         statusLogger.warn("Footstep planning suppressed: Body path size: {}", bodyPathPlan == null ? null : bodyPathPlan.size());
          proceed = false;
       }
       else if (isBeingReviewedSupplier.get().get())
       {
-         LogTools.warn("Footstep planning suppressed: Plan being reviewed");
+         statusLogger.warn("Footstep planning suppressed: Plan being reviewed");
          proceed = false;
       }
       else if (newBodyPathGoalNeededSupplier.get().get())
       {
-         LogTools.warn("Footstep planning suppressed: New body path goal needed");
+         statusLogger.warn("Footstep planning suppressed: New body path goal needed");
          proceed = false;
       }
 
@@ -140,7 +146,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
 
    private void performTask()
    {
-      LogTools.info("Finding next sub goal for footstep planning...");
+      statusLogger.info("Finding next sub goal for footstep planning...");
       uiPublisher.get().publishToUI(MapRegionsForUI, planarRegions);
 
       FramePose3D initialPoseBetweenFeet = new FramePose3D();
@@ -175,14 +181,14 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       reachedGoal &= Math.abs(AngleTools.computeAngleDifferenceMinusPiToPi(pelvisPose.getYaw(), terminalGoal.getYaw())) < lookAndStepBehaviorParameters.get().getGoalSatisfactionOrientationDelta();
       if (reachedGoal)
       {
-         LogTools.warn("Footstep planning: Robot reached goal. Not planning");
+         statusLogger.warn("Footstep planning: Robot reached goal. Not planning");
          behaviorStateUpdater.get().accept(LookAndStepBehavior.State.BODY_PATH_PLANNING);
          newBodyPathGoalNeededNotifier.get().run();
          return;
       }
       if (abortGoalWalkingSupplier.get().get())
       {
-         LogTools.warn("Footstep planning: Goal was cancelled. Not planning");
+         statusLogger.warn("Footstep planning: Goal was cancelled. Not planning");
          behaviorStateUpdater.get().accept(LookAndStepBehavior.State.BODY_PATH_PLANNING);
          newBodyPathGoalNeededNotifier.get().run();
          abortGoalWalkingUpdater.get().accept(false);
@@ -197,7 +203,7 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       //      headingVector.set(goalPoint.getX(), goalPoint.getY());
       //      headingVector.sub(goalPoseBetweenFeet.getPosition().getX(), goalPoseBetweenFeet.getPosition().getY());
 
-      LogTools.info("Setting goalPoint: {}", goalPoint);
+      statusLogger.info("Setting goalPoint: {}", goalPoint);
       goalPoseBetweenFeet.getPosition().set(goalPoint);
 
       //      double yaw = Math.atan2(headingVector.getX(), headingVector.getY());
@@ -262,11 +268,11 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
 //      footstepPlanningModule.get().addStatusCallback(this::footstepPlanningStatusUpdate);
       footstepPlanningModule.get().addCustomTerminationCondition((plannerTime, iterations, bestPathFinalStep, bestPathSize) -> bestPathSize >= lookAndStepBehaviorParameters.get().getMinimumNumberOfPlannedSteps());
 
-      LogTools.info("Footstep planner started...");
+      statusLogger.info("Footstep planner started...");
       Stopwatch stopwatch = new Stopwatch().start();
       FootstepPlannerOutput footstepPlannerOutput = footstepPlanningModule.get().handleRequest(footstepPlannerRequest);
 
-      LogTools.info("Footstep planner completed in {} s!", stopwatch.totalElapsed());
+      statusLogger.info("Footstep planner completed in {} s!", stopwatch.totalElapsed());
 
       // print log duration?
       FootstepPlannerLogger footstepPlannerLogger = new FootstepPlannerLogger(footstepPlanningModule.get());
@@ -388,10 +394,5 @@ public class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    public void setBehaviorStateUpdater(Consumer<LookAndStepBehavior.State> behaviorStateUpdater)
    {
       this.behaviorStateUpdater.set(behaviorStateUpdater);
-   }
-
-   public void setStatusLogger(Consumer<String> statusLogger)
-   {
-      this.statusLogger.set(statusLogger);
    }
 }

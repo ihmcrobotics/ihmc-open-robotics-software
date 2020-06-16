@@ -1,8 +1,6 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.Level;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.Notification;
@@ -15,10 +13,9 @@ import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
-import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
+import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
@@ -36,7 +33,6 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -80,6 +76,7 @@ public class BehaviorHelper
    private RemoteEnvironmentMapInterface environmentMap;
    private FootstepPlanningModule footstepPlanner;
    private VisibilityGraphPathPlanner bodyPathPlanner;
+   private StatusLogger statusLogger;
 
    public BehaviorHelper(DRCRobotModel robotModel, Messager messager, Ros2Node ros2Node)
    {
@@ -148,11 +145,15 @@ public class BehaviorHelper
    public FootstepPlanningModule getOrCreateFootstepPlanner()
    {
       if (footstepPlanner == null)
-      {
          footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
-      }
-
       return footstepPlanner;
+   }
+
+   public StatusLogger getOrCreateStatusLogger()
+   {
+      if (statusLogger == null)
+         statusLogger = new StatusLogger(this::publishToUI);
+      return statusLogger;
    }
 
    // UI Communication Methods:
@@ -161,35 +162,6 @@ public class BehaviorHelper
    public <T> void publishToUI(Topic<T> topic, T message)
    {
       managedMessager.submitMessage(topic, message);
-   }
-
-   /**
-    * Publish a log message to the UI and have it logged on both sides. TODO: Rename?
-    */
-   public void logInfo(String message)
-   {
-      log(Level.INFO, message, 1, LogTools::info);
-   }
-
-   public void logInfoLamda(String message)
-   {
-      log(Level.INFO, message, 2, LogTools::info);
-   }
-
-   public void logError(String message)
-   {
-      log(Level.ERROR, message, 1, LogTools::error);
-   }
-
-   public void logErrorLamda(String message)
-   {
-      log(Level.ERROR, message, 2, LogTools::error);
-   }
-
-   private void log(Level level, String message, int additionalStackHeight, BiConsumer<Integer, String> levelLogger)
-   {
-      levelLogger.accept(additionalStackHeight + 1, message);
-      publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), message));
    }
 
    public ActivationReference<Boolean> createBooleanActivationReference(Topic<Boolean> topic)
