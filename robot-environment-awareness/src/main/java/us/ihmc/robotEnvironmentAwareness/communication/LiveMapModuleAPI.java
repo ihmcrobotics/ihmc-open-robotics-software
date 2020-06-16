@@ -8,6 +8,7 @@ import us.ihmc.messager.MessagerAPIFactory.MessagerAPI;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.PlanarRegionSegmentationMessage;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParametersPacket;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class LiveMapModuleAPI
@@ -24,7 +25,7 @@ public class LiveMapModuleAPI
    public static final Topic<PlanarRegionsListMessage> RegionsAtFeet = topic("RegionsAtFeet");
    public static final Topic<PlanarRegionsListMessage> CombinedLiveMap = topic("PlanarRegionsState");
 
-   public static final Topic<PlanarRegionSLAMParameters> PlanarRegionsSLAMParameters = topic("PlanarRegionsSLAMParameters");
+   public static final Topic<PlanarRegionSLAMParametersPacket> PlanarRegionsSLAMParameters = topic("PlanarRegionsSLAMParameters");
 
    public static final Topic<Boolean> RequestEntireModuleState = topic("RequestEntireModuleState");
 

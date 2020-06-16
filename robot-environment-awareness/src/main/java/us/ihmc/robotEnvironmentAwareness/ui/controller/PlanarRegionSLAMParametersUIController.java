@@ -7,6 +7,7 @@ import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper;
 import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper.ParametersTableRow;
 import us.ihmc.robotEnvironmentAwareness.communication.LiveMapModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
+import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParametersPacket;
 
 public class PlanarRegionSLAMParametersUIController extends REABasicUIController
 {
@@ -21,12 +22,12 @@ public class PlanarRegionSLAMParametersUIController extends REABasicUIController
    public void bindControls()
    {
       tableViewWrapper = new StoredPropertyTableViewWrapper(380.0, 260.0, 4, parameterTable, javaFXStoredPropertyMap);
-      tableViewWrapper.setTableUpdatedCallback(() -> uiMessager.submitMessageToModule(LiveMapModuleAPI.PlanarRegionsSLAMParameters, slamParameters));
+      tableViewWrapper.setTableUpdatedCallback(() -> uiMessager.submitMessageToModule(LiveMapModuleAPI.PlanarRegionsSLAMParameters, new PlanarRegionSLAMParametersPacket(slamParameters)));
 
       // set messager updates to update all stored properties and select JavaFX properties
       uiMessager.registerTopicListener(LiveMapModuleAPI.PlanarRegionsSLAMParameters, parameters ->
       {
-         slamParameters.setAll(parameters.getAll());
+         parameters.get(slamParameters);
          javaFXStoredPropertyMap.copyStoredToJavaFX();
       });
    }
