@@ -1,5 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.ui;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.function.Function;
@@ -20,8 +21,10 @@ import us.ihmc.robotEnvironmentAwareness.communication.KryoMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
+import us.ihmc.robotEnvironmentAwareness.slam.SLAMModule;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.FootstepMeshViewer;
 import us.ihmc.robotEnvironmentAwareness.slam.viewer.SLAMMeshViewer;
+import us.ihmc.robotEnvironmentAwareness.ui.controller.NormalEstimationAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.controller.SLAMDataManagerAnchorPaneController;
 import us.ihmc.robotEnvironmentAwareness.ui.io.PlanarRegionDataExporter;
@@ -33,6 +36,8 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 public class SLAMBasedEnvironmentAwarenessUI
 {
+   private static final String UI_CONFIGURATION_FILE_NAME = "./Configurations/defaultSLAMUIConfiguration.txt";
+
    private final BorderPane mainPane;
 
    private final SLAMMeshViewer ihmcSLAMViewer;
@@ -45,6 +50,8 @@ public class SLAMBasedEnvironmentAwarenessUI
    private SLAMAnchorPaneController slamAnchorPaneController;
    @FXML
    private SLAMDataManagerAnchorPaneController slamDataManagerAnchorPaneController;
+   @FXML
+   private NormalEstimationAnchorPaneController normalEstimationAnchorPaneController;
 
    private final Stage primaryStage;
 
@@ -75,9 +82,13 @@ public class SLAMBasedEnvironmentAwarenessUI
                                                                               SLAMModuleAPI.UISensorPoseHistoryFrames,
                                                                               SensorFrameViewer.createStereoVisionSensorFrameExtractor(),
                                                                               SLAMModuleAPI.SensorPoseHistoryClear);
-
       view3dFactory.addNodeToView(ihmcSLAMViewer.getRoot());
       view3dFactory.addNodeToView(depthFrameViewer.getRoot());
+
+      stereoVisionPointCloudDataExporter = new StereoVisionPointCloudDataExporter(uiMessager,
+                                                                                  SLAMModuleAPI.DepthPointCloudState,
+                                                                                  SLAMModuleAPI.UIRawDataExportDirectory,
+                                                                                  SLAMModuleAPI.UIRawDataExportRequest);
 
       if (defaultContactPoints == null)
       {
@@ -112,13 +123,6 @@ public class SLAMBasedEnvironmentAwarenessUI
          view3dFactory.addNodeToView(footstepViewer.getRoot());
       }
 
-      new PlanarRegionSegmentationDataExporter(uiMessager); // No need to anything with it beside instantiating it.
-      new PlanarRegionDataExporter(uiMessager); // No need to anything with it beside instantiating it.
-      stereoVisionPointCloudDataExporter = new StereoVisionPointCloudDataExporter(uiMessager,
-                                                                                  SLAMModuleAPI.DepthPointCloudState,
-                                                                                  SLAMModuleAPI.UIRawDataExportDirectory,
-                                                                                  SLAMModuleAPI.UIRawDataExportRequest);
-
       initializeControllers(uiMessager);
 
       uiConnectionHandler = new UIConnectionHandler(primaryStage, uiMessager, SLAMModuleAPI.RequestEntireModuleState);
@@ -141,11 +145,33 @@ public class SLAMBasedEnvironmentAwarenessUI
 
    private void initializeControllers(REAUIMessager uiMessager)
    {
+      File configurationFile = new File(UI_CONFIGURATION_FILE_NAME);
+      try
+      {
+         configurationFile.getParentFile().mkdirs();
+         configurationFile.createNewFile();
+      }
+      catch (IOException e)
+      {
+         System.out.println(configurationFile.getAbsolutePath());
+         e.printStackTrace();
+      }
+
       slamAnchorPaneController.attachREAMessager(uiMessager);
       slamAnchorPaneController.bindControls();
 
       slamDataManagerAnchorPaneController.attachREAMessager(uiMessager);
+      slamDataManagerAnchorPaneController.setMainWindow(primaryStage);
+      slamDataManagerAnchorPaneController.setConfigurationFile(configurationFile);
       slamDataManagerAnchorPaneController.bindControls();
+
+      normalEstimationAnchorPaneController.setNormalEstimationEnableTopic(SLAMModuleAPI.NormalEstimationEnable);
+      normalEstimationAnchorPaneController.setNormalEstimationClearTopic(SLAMModuleAPI.NormalEstimationClear);
+      normalEstimationAnchorPaneController.setSaveMainUpdaterConfigurationTopic(SLAMModuleAPI.SaveConfiguration);
+      normalEstimationAnchorPaneController.setNormalEstimationParametersTopic(SLAMModuleAPI.NormalEstimationParameters);
+      normalEstimationAnchorPaneController.setConfigurationFile(configurationFile);
+      normalEstimationAnchorPaneController.attachREAMessager(uiMessager);
+      normalEstimationAnchorPaneController.bindControls();
    }
 
    public void show() throws IOException
