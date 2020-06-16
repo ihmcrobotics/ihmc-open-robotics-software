@@ -193,6 +193,11 @@ public class Collidable
       return rootBody;
    }
 
+   public boolean isEnvironment()
+   {
+      return rigidBody == null;
+   }
+
    @Override
    public int hashCode()
    {
