@@ -2,7 +2,6 @@ package us.ihmc.robotEnvironmentAwareness.ui.controller;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.TableView;
-import us.ihmc.javaFXToolkit.messager.JavaFXMessager;
 import us.ihmc.javafx.parameter.JavaFXStoredPropertyMap;
 import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper;
 import us.ihmc.javafx.parameter.StoredPropertyTableViewWrapper.ParametersTableRow;
@@ -12,7 +11,8 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParam
 public class PlanarRegionSLAMParametersUIController extends REABasicUIController
 {
    private StoredPropertyTableViewWrapper tableViewWrapper;
-   private final PlanarRegionSLAMParameters slamParameters = new PlanarRegionSLAMParameters();
+   private final PlanarRegionSLAMParameters slamParameters = new PlanarRegionSLAMParameters("ihmc-open-robotics-software",
+                                                                                            "robot-environment-awareness/src/main/resources/liveMap");
    private final JavaFXStoredPropertyMap javaFXStoredPropertyMap = new JavaFXStoredPropertyMap(slamParameters);
 
    @FXML
@@ -34,6 +34,12 @@ public class PlanarRegionSLAMParametersUIController extends REABasicUIController
    public void onPrimaryStageLoaded()
    {
       tableViewWrapper.removeHeader();
+   }
+
+   @FXML
+   public void load()
+   {
+      slamParameters.load();
    }
 
    @FXML
