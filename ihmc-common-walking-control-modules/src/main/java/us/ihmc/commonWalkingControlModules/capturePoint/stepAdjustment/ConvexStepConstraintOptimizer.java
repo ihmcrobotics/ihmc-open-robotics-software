@@ -58,7 +58,7 @@ public class ConvexStepConstraintOptimizer
 
    public void reset()
    {
-      solver.resetActiveConstraints();
+      solver.resetActiveSet();
    }
 
    public RigidBodyTransformReadOnly findConstraintTransform(ConvexPolygon2DReadOnly polygonToWiggle,
