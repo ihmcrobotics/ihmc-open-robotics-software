@@ -25,8 +25,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.outputTopic;
-import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.stereoOutputTopic;
+import static us.ihmc.robotEnvironmentAwareness.communication.REACommunicationProperties.*;
 
 public class LiveMapModule implements PerceptionModule
 {
@@ -40,18 +39,22 @@ public class LiveMapModule implements PerceptionModule
 
    private final AtomicReference<PlanarRegionsListMessage> mostRecentLocalizedMap;
    private final AtomicReference<PlanarRegionsListMessage> mostRecentRegionsAtFeet;
+   private final AtomicReference<PlanarRegionsListMessage> mostRecentLidarMap;
 
    private final AtomicBoolean hasNewLocalizedMap = new AtomicBoolean(false);
    private final AtomicBoolean hasNewRegionsAtFeet = new AtomicBoolean(false);
+   private final AtomicBoolean hasNewLidarMap = new AtomicBoolean(false);
 
    private final AtomicReference<Boolean> viewingEnabled;
    private final AtomicReference<PlanarRegionsListMessage> combinedLiveMap;
 
+   private final AtomicReference<Boolean> enableMapFusion;
    private final AtomicReference<Boolean> enableLidar;
    private final AtomicReference<Boolean> enableRealSense;
 
    private final AtomicReference<Boolean> clearLidar;
    private final AtomicReference<Boolean> clearRealSense;
+   private final AtomicReference<Boolean> clearLocalizedMap;
 
    private final AtomicReference<PlanarRegionSLAMParameters> slamParameters;
 
@@ -63,24 +66,29 @@ public class LiveMapModule implements PerceptionModule
       this.messager = messager;
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP, this::dispatchLocalizedMap);
+      ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, lidarOutputTopic, this::dispatchLidarMap);
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, PlanarRegionsListMessage.class, stereoOutputTopic, this::dispatchRegionsAtFeet);
 
       mostRecentLocalizedMap = messager.createInput(LiveMapModuleAPI.LocalizedMap, null);
       mostRecentRegionsAtFeet = messager.createInput(LiveMapModuleAPI.RegionsAtFeet, null);
+      mostRecentLidarMap = messager.createInput(LiveMapModuleAPI.LidarMap, null);
 
       slamParameters = messager.createInput(LiveMapModuleAPI.PlanarRegionsSLAMParameters, new PlanarRegionSLAMParameters());
 
       messager.registerTopicListener(LiveMapModuleAPI.LocalizedMap, (message) -> hasNewLocalizedMap.set(true));
       messager.registerTopicListener(LiveMapModuleAPI.RegionsAtFeet, (message) -> hasNewRegionsAtFeet.set(true));
+      messager.registerTopicListener(LiveMapModuleAPI.LidarMap, (message) -> hasNewLidarMap.set(true));
 
       viewingEnabled = messager.createInput(LiveMapModuleAPI.ViewingEnable, true);
       combinedLiveMap = messager.createInput(LiveMapModuleAPI.CombinedLiveMap);
 
+      enableMapFusion = messager.createInput(LiveMapModuleAPI.EnableMapFusion, true);
       enableRealSense = messager.createInput(LiveMapModuleAPI.EnableRealSense, true);
       enableLidar = messager.createInput(LiveMapModuleAPI.EnableLidar, false);
 
       clearRealSense = messager.createInput(LiveMapModuleAPI.ClearRealSense, false);
       clearLidar = messager.createInput(LiveMapModuleAPI.ClearLidar, false);
+      clearLocalizedMap = messager.createInput(LiveMapModuleAPI.ClearLocalizedMap, false);
 
       messager.registerTopicListener(LiveMapModuleAPI.RequestEntireModuleState, request -> sendCurrentState());
 
@@ -92,6 +100,7 @@ public class LiveMapModule implements PerceptionModule
 
    private void sendCurrentState()
    {
+      messager.submitMessage(LiveMapModuleAPI.EnableMapFusion, enableMapFusion.get());
       messager.submitMessage(LiveMapModuleAPI.EnableLidar, enableLidar.get());
       messager.submitMessage(LiveMapModuleAPI.EnableRealSense, enableRealSense.get());
 
@@ -103,6 +112,12 @@ public class LiveMapModule implements PerceptionModule
    {
       PlanarRegionsListMessage message = subscriber.takeNextData();
       messager.submitMessage(LiveMapModuleAPI.LocalizedMap, message);
+   }
+
+   private void dispatchLidarMap(Subscriber<PlanarRegionsListMessage> subscriber)
+   {
+      PlanarRegionsListMessage message = subscriber.takeNextData();
+      messager.submitMessage(LiveMapModuleAPI.LidarMap, message);
    }
 
    private void dispatchRegionsAtFeet(Subscriber<PlanarRegionsListMessage> subscriber)
@@ -156,9 +171,15 @@ public class LiveMapModule implements PerceptionModule
       if (isThreadInterrupted())
          return;
 
+      if (clearLocalizedMap.getAndSet(false))
+      {
+         hasNewLocalizedMap.set(false);
+         mostRecentLocalizedMap.set(null);
+      }
       if (clearLidar.getAndSet(false))
       {
-         // TODO
+         hasNewLidarMap.set(false);
+         mostRecentLidarMap.set(null);
       }
       if (clearRealSense.getAndSet(false))
       {
@@ -166,14 +187,22 @@ public class LiveMapModule implements PerceptionModule
          mostRecentRegionsAtFeet.set(null);
       }
 
-      boolean shouldUpdateMap = hasNewLocalizedMap.getAndSet(false) || hasNewRegionsAtFeet.getAndSet(false); // TODO || hasNewLidarMap.getAndSet(false);
+      boolean shouldUpdateMap = hasNewLocalizedMap.getAndSet(false) || hasNewRegionsAtFeet.getAndSet(false) || hasNewLidarMap.getAndSet(false);
 
-      if (shouldUpdateMap)
+      if (shouldUpdateMap && mostRecentLocalizedMap.get() != null)
       {
          PlanarRegionsList localizedMap = PlanarRegionMessageConverter.convertToPlanarRegionsList(mostRecentLocalizedMap.get());
 
-         PlanarRegionsList regionsAtFeet = PlanarRegionMessageConverter.convertToPlanarRegionsList(mostRecentRegionsAtFeet.get());
-         localizedMap = PlanarRegionSLAM.generateMergedMapByMergingAllPlanarRegionsMatches(localizedMap, regionsAtFeet, slamParameters.get(), null);
+         if (enableRealSense.get() && enableMapFusion.get() && mostRecentRegionsAtFeet.get() != null)
+         {
+            PlanarRegionsList regionsToFuse = PlanarRegionMessageConverter.convertToPlanarRegionsList(mostRecentRegionsAtFeet.get());
+            localizedMap = PlanarRegionSLAM.generateMergedMapByMergingAllPlanarRegionsMatches(localizedMap, regionsToFuse, slamParameters.get(), null);
+         }
+         if (enableLidar.get() && enableMapFusion.get() && mostRecentLidarMap.get() != null)
+         {
+            PlanarRegionsList regionsToFuse = PlanarRegionMessageConverter.convertToPlanarRegionsList(mostRecentLidarMap.get());
+            localizedMap = PlanarRegionSLAM.generateMergedMapByMergingAllPlanarRegionsMatches(localizedMap, regionsToFuse, slamParameters.get(), null);
+         }
 
          PlanarRegionsListMessage mapMessage = PlanarRegionMessageConverter.convertToPlanarRegionsListMessage(localizedMap);
          messager.submitMessage(LiveMapModuleAPI.CombinedLiveMap, mapMessage);

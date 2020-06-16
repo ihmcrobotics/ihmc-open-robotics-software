@@ -20,6 +20,7 @@ public class LiveMapModuleAPI
    public static final Topic<Boolean> Clear = topic("Clear");
 
    public static final Topic<PlanarRegionsListMessage> LocalizedMap = topic("LocalizedMap");
+   public static final Topic<PlanarRegionsListMessage> LidarMap = topic("LidarMap");
    public static final Topic<PlanarRegionsListMessage> RegionsAtFeet = topic("RegionsAtFeet");
    public static final Topic<PlanarRegionsListMessage> CombinedLiveMap = topic("PlanarRegionsState");
 
@@ -27,11 +28,13 @@ public class LiveMapModuleAPI
 
    public static final Topic<Boolean> RequestEntireModuleState = topic("RequestEntireModuleState");
 
+   public static final Topic<Boolean> EnableMapFusion = topic("EnableMapFusion");
    public static final Topic<Boolean> EnableLidar = topic("EnableLidar");
    public static final Topic<Boolean> EnableRealSense = topic("EnableRealSense");
 
    public static final Topic<Boolean> ClearLidar = topic("ClearLidar");
    public static final Topic<Boolean> ClearRealSense = topic("ClearRealSense");
+   public static final Topic<Boolean> ClearLocalizedMap = topic("ClearLocalizedMap");
 
    public static final Topic<Boolean> SaveUpdaterConfiguration = topic("SaveUpdaterConfiguration");
 
