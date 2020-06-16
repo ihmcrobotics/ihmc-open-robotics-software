@@ -16,6 +16,7 @@ import controller_msgs.msg.dds.KinematicsToolboxRigidBodyMessage;
 import controller_msgs.msg.dds.LidarScanMessage;
 import controller_msgs.msg.dds.LidarScanParametersMessage;
 import controller_msgs.msg.dds.ObjectDetectorResultPacket;
+import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SelectionMatrix3DMessage;
 import controller_msgs.msg.dds.SimulatedLidarScanPacket;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -1098,5 +1099,22 @@ public class MessageTools
    public static RigidBodyTransform unpackSensorPose(StereoVisionPointCloudMessage stereoVisionPointCloudMessage)
    {
       return new RigidBodyTransform(stereoVisionPointCloudMessage.getSensorOrientation(), stereoVisionPointCloudMessage.getSensorPosition());
+   }
+   
+   /*
+    * Set the sequence ID for a RobotConfigurationData object and propagate it to all sensor values.
+    */
+   public static void setRobotConfigurationDataSequenceId(RobotConfigurationData robotConfigurationData, long sequenceId)
+   {
+      robotConfigurationData.setSequenceId(sequenceId);
+      // update the sequence ID for the sensor data as well
+      for (int i = 0; i < robotConfigurationData.getImuSensorData().size(); i++)
+      {
+         robotConfigurationData.getImuSensorData().get(i).setSequenceId(sequenceId);
+      }
+      for (int i = 0; i < robotConfigurationData.getForceSensorData().size(); i++)
+      {
+         robotConfigurationData.getForceSensorData().get(i).setSequenceId(sequenceId);
+      }
    }
 }
