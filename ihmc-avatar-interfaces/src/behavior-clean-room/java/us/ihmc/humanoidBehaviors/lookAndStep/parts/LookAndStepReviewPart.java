@@ -29,7 +29,7 @@ public class LookAndStepReviewPart<T>
       ThreadTools.startAsDaemon(() ->
       {
          beingReviewed = true;
-         statusLogger.error("Waiting for {} operator review... {}, {}", description, approvalNotification, callback);
+         statusLogger.info("Waiting for {} operator review... {}, {}", description);
          boolean approved = false;
          try
          {
@@ -37,11 +37,11 @@ public class LookAndStepReviewPart<T>
          }
          catch (NullPointerException e)
          {
-            statusLogger.error("CAUGHT IT {}, {}", approvalNotification, e.getMessage());
+            statusLogger.error("Exception: {}, {}", approvalNotification, e.getMessage());
             e.printStackTrace();
             throw e;
          }
-         statusLogger.error("Operator reviewed {}: {}", description, approved);
+         statusLogger.info("Operator reviewed {}: {}", description, approved);
          beingReviewed = false;
 
          if (approved)

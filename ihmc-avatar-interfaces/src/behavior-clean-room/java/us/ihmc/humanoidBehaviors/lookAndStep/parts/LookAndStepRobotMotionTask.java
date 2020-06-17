@@ -65,12 +65,12 @@ class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
 
       if (!behaviorState.equals(LookAndStepBehavior.State.SWINGING))
       {
-         statusLogger.warn("Footstep planning supressed: Not in footstep planning state");
+         statusLogger.debug("Footstep planning supressed: Not in footstep planning state");
          proceed = false;
       }
       else if (!isFootstepPlanOK())
       {
-         statusLogger.warn("Robot walking supressed: Footstep plan not OK: numberOfSteps = {}. Planning again...",
+         statusLogger.debug("Robot walking supressed: Footstep plan not OK: numberOfSteps = {}. Planning again...",
                        footstepPlan == null ? null : footstepPlan.getNumberOfSteps());
          behaviorStateUpdater.get().accept(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
          replanFootstepsOutput.get().run();
@@ -123,8 +123,6 @@ class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
       statusLogger.info("Waiting {} for {} % of swing...", waitTime, percentSwingToWait);
       ThreadTools.sleepSeconds(waitTime);
       statusLogger.info("{} % of swing complete!", percentSwingToWait);
-
-      statusLogger.warn("Step {}% complete: Robot not reached goal: Find next footstep planning goal...", percentSwingToWait);
       behaviorStateUpdater.get().accept(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
       replanFootstepsOutput.get();
    }
