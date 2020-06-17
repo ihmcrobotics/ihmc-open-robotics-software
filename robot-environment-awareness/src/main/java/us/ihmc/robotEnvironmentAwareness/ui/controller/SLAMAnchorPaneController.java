@@ -1,11 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.ui.controller;
 
 import javafx.fxml.FXML;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.Label;
-import javafx.scene.control.Slider;
-import javafx.scene.control.TextField;
-import javafx.scene.control.ToggleButton;
+import javafx.scene.control.*;
 import us.ihmc.robotEnvironmentAwareness.communication.SLAMModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.ui.properties.RandomICPSLAMParametersProperty;
 
@@ -31,9 +27,6 @@ public class SLAMAnchorPaneController extends REABasicUIController
 
    @FXML
    private ToggleButton sensorFrameEnable;
-
-   @FXML
-   private ToggleButton planarRegionsEnable;
 
    @FXML
    private Slider sourcePointsSlider;
@@ -84,7 +77,6 @@ public class SLAMAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowSLAMOctreeMap, octreeMapEnable.selectedProperty());
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowSLAMOctreeNormalMap, showNormal.selectedProperty());
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowSLAMSensorTrajectory, sensorFrameEnable.selectedProperty());
-      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowPlanarRegionsMap, planarRegionsEnable.selectedProperty());
 
       ihmcSLAMParametersProperty.bindBidirectionalNumberOfSourcePoints(sourcePointsSlider.valueProperty());
       ihmcSLAMParametersProperty.bindBidirectionalMaximumICPSearchingSize(searchingSizeSlider.valueProperty());
@@ -114,5 +106,11 @@ public class SLAMAnchorPaneController extends REABasicUIController
       uiMessager.broadcastMessage(SLAMModuleAPI.SLAMClear, true);
       uiMessager.broadcastMessage(SLAMModuleAPI.SLAMVizClear, true);
       uiMessager.broadcastMessage(SLAMModuleAPI.SensorPoseHistoryClear, true);
+   }
+   
+   @FXML
+   public void clearFootsteps()
+   {
+      uiMessager.broadcastMessage(SLAMModuleAPI.ClearFootstepDataViz, true);
    }
 }

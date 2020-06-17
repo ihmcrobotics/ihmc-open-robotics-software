@@ -3,7 +3,7 @@ plugins {
    id("us.ihmc.ihmc-ci") version "5.3"
    id("us.ihmc.ihmc-cd") version "1.14"
    id("us.ihmc.scs") version "0.4"
-   id("us.ihmc.log-tools") version "0.4.2"
+   id("us.ihmc.log-tools-plugin") version "0.5.0"
 }
 
 ihmc {
@@ -36,9 +36,9 @@ mainDependencies {
       setChanging(true)
    }
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.17.0-ejml-0.39-beta-2")
-   api("us.ihmc:simulation-construction-set:0.17.0-ejml-0.39-beta-2")
+   api("us.ihmc:simulation-construction-set:0.18.0-ejml-0.39-beta-1")
    api("us.ihmc:ihmc-graphics-description:0.17.0-ejml-0.39-beta-1")
-   api("us.ihmc:ihmc-robot-description:0.17.0-ejml-0.39-beta-2")
+   api("us.ihmc:ihmc-robot-description:0.18.0-ejml-0.39-beta-1")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-system-identification:source")

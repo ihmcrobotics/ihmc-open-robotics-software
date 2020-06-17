@@ -11,6 +11,7 @@ import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.tools.ConcaveHullMergerListener;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 
 /**
@@ -20,7 +21,7 @@ public class PlanarRegionsMappingModule
 {
    private final IHMCROS2Publisher<PlanarRegionsListMessage> planarRegionPublisher;
 
-   private PlanarRegionsList slamMap = new PlanarRegionsList();
+   private volatile PlanarRegionsList slamMap = new PlanarRegionsList();
    private PlanarRegionSLAMParameters planarRegionSLAMParameters = new PlanarRegionSLAMParameters();
 
    private Notification slamUpdated = new Notification();
@@ -34,8 +35,9 @@ public class PlanarRegionsMappingModule
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, ROS2Tools.MAPPING_MODULE_NODE_NAME);
 
       planarRegionPublisher = new IHMCROS2Publisher<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REALSENSE_SLAM_MAP.withOutput());
-
-      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.withOutput(), this::process);
+      ROS2Topic realsenseTopic = ROS2Tools.REA.withOutput().withSuffix("realsense");
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, realsenseTopic, this::process);
+      new ROS2Callback<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.LIDAR_REA_REGIONS, this::process);
    }
 
    private void process(PlanarRegionsListMessage visibleRegionsMessage)
@@ -76,6 +78,11 @@ public class PlanarRegionsMappingModule
       {
          slamUpdated.set();
       }
+   }
+
+   public PlanarRegionsList getLatestMap()
+   {
+      return slamMap;
    }
 
    public Notification getSlamUpdated()
