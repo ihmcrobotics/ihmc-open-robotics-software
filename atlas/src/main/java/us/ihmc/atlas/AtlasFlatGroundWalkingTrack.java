@@ -18,14 +18,21 @@ import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 
 public class AtlasFlatGroundWalkingTrack
 {
+   // Give a default model to use is one isn't input
    private static final DRCRobotModel defaultModelForGraphicSelector = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false);
-
-   private static final boolean USE_BUMPY_GROUND = true;
+   
+   //Setting Parameters
+   private static final boolean USE_BUMPY_GROUND = false;
    private static final boolean USE_FEET_PERTURBER = false;
-
+   private static final boolean Ground_Profile_Visible = true;
+   private static final boolean Draw_Plane_At_Zero_Height = false;
+   
+   
    public static void main(String[] args) throws JSAPException
    {
-
+      
+      // This main could be called with arguments, namely the default model to use, but if it is called 
+      // empty then the default model will be filled in
       DRCRobotModel model = null;
       model = AtlasRobotModelFactory.selectSimulationModelFromFlag(args);
 
@@ -34,9 +41,11 @@ public class AtlasFlatGroundWalkingTrack
 
       if (model == null)
          throw new RuntimeException("No robot model selected");
-
-      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(true, false);
-
+      
+      // Setup GUI with a bunch of settings on how it should look
+      DRCGuiInitialSetup guiInitialSetup = new DRCGuiInitialSetup(Ground_Profile_Visible, Draw_Plane_At_Zero_Height);
+      
+      //Define Ground Profile
       final double groundHeight = 0.0;
       GroundProfile3D groundProfile;
       if (USE_BUMPY_GROUND)
@@ -47,17 +56,20 @@ public class AtlasFlatGroundWalkingTrack
       {
          groundProfile = new FlatGroundProfile(groundHeight);
       }
-
+      
+      //Create SCS setup object with proper settings
       DRCSCSInitialSetup scsInitialSetup = new DRCSCSInitialSetup(groundProfile, model.getSimulateDT());
       scsInitialSetup.setDrawGroundProfile(true);
       scsInitialSetup.setInitializeEstimatorToActual(true);
-
+      
+      // create robot initial state
       double initialYaw = 0.3;
       DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup = model.getDefaultRobotInitialSetup(groundHeight, initialYaw);
 
       boolean useVelocityAndHeadingScript = true;
       boolean cheatWithGroundHeightAtForFootstep = false;
-
+      
+      // Begin the DRC Flat Ground Walking Track Simulation (it is general so we pass in the robot model and all the initial settings we defined
       DRCFlatGroundWalkingTrack drcFlatGroundWalkingTrack = new DRCFlatGroundWalkingTrack(robotInitialSetup, guiInitialSetup, scsInitialSetup,
             useVelocityAndHeadingScript, cheatWithGroundHeightAtForFootstep, model);
 

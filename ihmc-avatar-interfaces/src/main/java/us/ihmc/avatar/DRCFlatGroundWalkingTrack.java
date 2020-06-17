@@ -39,14 +39,18 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 public class DRCFlatGroundWalkingTrack
 {
    // looking for CREATE_YOVARIABLE_WALKING_PROVIDERS ?  use the second constructor and pass in WalkingProvider = YOVARIABLE_PROVIDER
-
+   
+   // General Simulation framework?
    private final AvatarSimulation avatarSimulation;
-
+   
+   // ROS node used for real time control enforcement
    private final RealtimeRos2Node realtimeRos2Node = ROS2Tools.createRealtimeRos2Node(PubSubImplementation.INTRAPROCESS, "flat_ground_walking_track_simulation");
 
+   //Create a YoVariable server - ask Chao about these details
    private static boolean createYoVariableServer = System.getProperty("create.yovariable.server") != null
          && Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
 
+   // Helper Constructors
    public DRCFlatGroundWalkingTrack(DRCRobotInitialSetup<HumanoidFloatingRootJointRobot> robotInitialSetup, DRCGuiInitialSetup guiInitialSetup, DRCSCSInitialSetup scsInitialSetup,
                                     boolean useVelocityAndHeadingScript, boolean cheatWithGroundHeightAtForFootstep, DRCRobotModel model)
    {
@@ -91,6 +95,7 @@ public class DRCFlatGroundWalkingTrack
          recordFrequency = 1;
       scsInitialSetup.setRecordFrequency(recordFrequency);
 
+      // set a bunch of parameters and names of objects/devices
       HighLevelControllerParameters highLevelControllerParameters = model.getHighLevelControllerParameters();
       WalkingControllerParameters walkingControllerParameters = model.getWalkingControllerParameters();
       ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters = model.getCapturePointPlannerParameters();
@@ -104,29 +109,35 @@ public class DRCFlatGroundWalkingTrack
       ArrayList<String> additionalContactNames = contactPointParameters.getAdditionalContactNames();
       ArrayList<RigidBodyTransform> additionalContactTransforms = contactPointParameters.getAdditionalContactTransforms();
 
+      
+      // contactable bodies Factory sets up physics engine objects?
       ContactableBodiesFactory<RobotSide> contactableBodiesFactory = new ContactableBodiesFactory<>();
       contactableBodiesFactory.setFootContactPoints(contactPointParameters.getFootContactPoints());
       contactableBodiesFactory.setToeContactParameters(contactPointParameters.getControllerToeContactPoints(), contactPointParameters.getControllerToeContactLines());
       for (int i = 0; i < contactPointParameters.getAdditionalContactNames().size(); i++)
          contactableBodiesFactory.addAdditionalContactPoint(additionalContactRigidBodyNames.get(i), additionalContactNames.get(i), additionalContactTransforms.get(i));
 
+      //Controller Factory is where all the states are set up? - this is where we put in a new state
       HighLevelHumanoidControllerFactory controllerFactory = new HighLevelHumanoidControllerFactory(contactableBodiesFactory, feetForceSensorNames, feetContactSensorNames,
                                                                                                     wristForceSensorNames, highLevelControllerParameters,
                                                                                                     walkingControllerParameters, capturePointPlannerParameters);
+      //For DRC this method sets up alternating btwn the Walking state and DO_Nothing_Behavior
       setupHighLevelStates(controllerFactory, feetForceSensorNames, highLevelControllerParameters.getFallbackControllerState());
       controllerFactory.setHeadingAndVelocityEvaluationScriptParameters(walkingScriptParameters);
       controllerFactory.createControllerNetworkSubscriber(model.getSimpleRobotName(), realtimeRos2Node);
       if (customControllerStateFactory != null)
          controllerFactory.addCustomControlState(customControllerStateFactory);
 
+      //??
       HeightMap heightMapForFootstepZ = null;
       if (cheatWithGroundHeightAtForFootstep)
       {
          heightMapForFootstepZ = scsInitialSetup.getHeightMap();
       }
-
+      
       controllerFactory.createComponentBasedFootstepDataMessageGenerator(useVelocityAndHeadingScript, heightMapForFootstepZ);
 
+      //Send simulation settings to the simulation factory
       AvatarSimulationFactory avatarSimulationFactory = new AvatarSimulationFactory();
       avatarSimulationFactory.setRobotModel(model);
       avatarSimulationFactory.setShapeCollisionSettings(model.getShapeCollisionSettings());
@@ -140,6 +151,7 @@ public class DRCFlatGroundWalkingTrack
       if (externalPelvisCorrectorSubscriber != null)
          avatarSimulationFactory.setExternalPelvisCorrectorSubscriber(externalPelvisCorrectorSubscriber);
 
+      //Produce a simulation from a factory
       avatarSimulation = avatarSimulationFactory.createAvatarSimulation();
       initialize();
 
@@ -150,6 +162,7 @@ public class DRCFlatGroundWalkingTrack
          avatarSimulation.getSimulationConstructionSet().addButton(resetButton);
       }
 
+      //Start Simulation
       avatarSimulation.start();
    }
 
