@@ -5,6 +5,9 @@ import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotModels.FullRobotModel;
 
+/**
+ * TODO: Need ReadOnly version!
+ */
 public class HumanoidRobotState extends HumanoidReferenceFrames
 {
    private final FullHumanoidRobotModel fullRobotModel;

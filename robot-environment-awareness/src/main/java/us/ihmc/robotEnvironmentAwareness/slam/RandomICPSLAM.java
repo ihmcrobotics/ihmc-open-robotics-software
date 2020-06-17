@@ -1,6 +1,7 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.google.common.util.concurrent.AtomicDouble;
@@ -29,8 +30,7 @@ public class RandomICPSLAM extends SLAMBasics
    public Point3D[] correctedSourcePointsToWorld;
 
    private final AtomicReference<RandomICPSLAMParameters> parameters = new AtomicReference<>(new RandomICPSLAMParameters());
-
-   private final PlanarRegionSegmentationCalculator segmentationCalculator;
+   private final AtomicBoolean enableNormalEstimation = new AtomicBoolean(true);
 
    private final GradientDescentModule optimizer;
    private static final double OPTIMIZER_POSITION_LIMIT = 0.1;
@@ -65,18 +65,6 @@ public class RandomICPSLAM extends SLAMBasics
    {
       super(octreeResolution);
 
-      segmentationCalculator = new PlanarRegionSegmentationCalculator();
-
-      SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
-      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
-      surfaceNormalFilterParameters.setSurfaceNormalLowerBound(Math.toRadians(-40.0));
-      surfaceNormalFilterParameters.setSurfaceNormalUpperBound(Math.toRadians(40.0));
-
-      segmentationCalculator.setParameters(planarRegionSegmentationParameters);
-      segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
-
-      polygonizerParameters.setConcaveHullThreshold(0.15);
-
       optimizer = new GradientDescentModule(null, INITIAL_INPUT);
       int maxIterations = 300;
       double convergenceThreshold = 1 * 10E-5;
@@ -89,6 +77,14 @@ public class RandomICPSLAM extends SLAMBasics
       optimizer.setStepSize(optimizerStepSize);
       optimizer.setPerturbationSize(optimizerPerturbationSize);
       optimizer.setReducingStepSizeRatio(2);
+
+      octree.enableParallelComputationForNormals(true);
+      octree.enableParallelInsertionOfMisses(true);
+      octree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
+
+      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
+      normalEstimationParameters.setNumberOfIterations(7);
+      octree.setNormalEstimationParameters(normalEstimationParameters);
    }
 
    private void insertNewPointCloud(SLAMFrame frame)
@@ -104,13 +100,20 @@ public class RandomICPSLAM extends SLAMBasics
       scanCollection.addScan(SLAMTools.toScan(pointCloud, sensorPose.getTranslation(), parameters.getMinimumDepth(), parameters.getMaximumDepth()));
 
       octree.insertScanCollection(scanCollection, false);
+   }
 
-      octree.enableParallelComputationForNormals(true);
-      octree.enableParallelInsertionOfMisses(true);
-      octree.setCustomRayMissProbabilityUpdater(new AdaptiveRayMissProbabilityUpdater());
+   public void clearNormals()
+   {
+      octree.clearNormals();
+   }
 
-      NormalEstimationParameters normalEstimationParameters = new NormalEstimationParameters();
-      normalEstimationParameters.setNumberOfIterations(7);
+   public void updateOcTree()
+   {
+      octree.updateNormals();
+   }
+
+   public void setNormalEstimationParameters(NormalEstimationParameters normalEstimationParameters)
+   {
       octree.setNormalEstimationParameters(normalEstimationParameters);
    }
 
@@ -136,16 +139,6 @@ public class RandomICPSLAM extends SLAMBasics
       }
 
       return success;
-   }
-
-   public void updatePlanarRegionsMap()
-   {
-      octree.updateNormals();
-      segmentationCalculator.setSensorPosition(getLatestFrame().getSensorPose().getTranslation());
-      segmentationCalculator.compute(octree.getRoot());
-
-      List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
-      planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
    }
 
    @Override

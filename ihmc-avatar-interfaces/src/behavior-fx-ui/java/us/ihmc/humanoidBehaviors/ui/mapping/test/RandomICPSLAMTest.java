@@ -18,7 +18,6 @@ import us.ihmc.humanoidBehaviors.ui.mapping.visualizer.SLAMViewer;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.OcTreeMessageConverter;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.NormalOcTreeMessage;
-import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotEnvironmentAwareness.slam.RandomICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.slam.RandomICPSLAMParameters;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
@@ -26,6 +25,7 @@ import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SimulatedStereoVisionPointCloudMessageLibrary;
 import us.ihmc.robotEnvironmentAwareness.ui.UIOcTree;
 import us.ihmc.robotEnvironmentAwareness.ui.UIOcTreeNode;
+import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.PlanarRegionFileTools;
 
 public class RandomICPSLAMTest
@@ -407,7 +407,7 @@ public class RandomICPSLAMTest
          System.out.println();
          System.out.println(" ## add frame " + i);
          slam.addFrame(messages.get(i));
-         slam.updatePlanarRegionsMap();
+         slam.updateOcTree();
 
          originalViewer.addStereoMessage(messages.get(i), Color.GREEN);
 

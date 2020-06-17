@@ -5,12 +5,18 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.Random;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
+import us.ihmc.euclid.geometry.ConvexPolygon2D;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryRandomTools;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTestTools;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.yawPitchRoll.YawPitchRoll;
 import us.ihmc.robotics.geometry.AngleTools;
+import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.robotSide.RobotSide;
 
 public class FootstepNodeToolsTest
@@ -85,5 +91,73 @@ public class FootstepNodeToolsTest
 
          assertTrue(expectedSnappedNodeTransform.epsilonEquals(snappedNodeTransform, epsilon));
       }
+   }
+
+   @Test
+   public void testIntersectionChecks1()
+   {
+      ConvexPolygon2D unitSquare = new ConvexPolygon2D();
+      unitSquare.addVertex(-0.5, -0.5);
+      unitSquare.addVertex(-0.5, 0.5);
+      unitSquare.addVertex(0.5, 0.5);
+      unitSquare.addVertex(0.5, -0.5);
+      unitSquare.update();
+
+      ConvexPolygon2D testPolygon = new ConvexPolygon2D(unitSquare);
+      testPolygon.translate(-0.5, -0.5);
+      Assertions.assertTrue(FootstepNodeTools.arePolygonsIntersecting(unitSquare, testPolygon));
+      testPolygon.translate(0.0, 1.0);
+      Assertions.assertTrue(FootstepNodeTools.arePolygonsIntersecting(unitSquare, testPolygon));
+      testPolygon.translate(1.0, 0.0);
+      Assertions.assertTrue(FootstepNodeTools.arePolygonsIntersecting(unitSquare, testPolygon));
+      testPolygon.translate(0.0, -1.0);
+      Assertions.assertTrue(FootstepNodeTools.arePolygonsIntersecting(unitSquare, testPolygon));
+   }
+
+   @Test
+   public void testIntersectionChecks2()
+   {
+      int numTests = 10000;
+      ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
+
+      for (int i = 0; i < numTests; i++)
+      {
+         ConvexPolygon2D polygon1 = EuclidGeometryRandomTools.nextConvexPolygon2D(random, 2.0, 4);
+         ConvexPolygon2D polygon2 = EuclidGeometryRandomTools.nextConvexPolygon2D(random, 2.0, 4);
+
+         double intersectionArea = convexPolygonTools.computeIntersectionAreaOfPolygons(polygon1, polygon2);
+         boolean intersectionDetected = FootstepNodeTools.arePolygonsIntersecting(polygon1, polygon2);
+
+         Assertions.assertEquals(intersectionDetected, intersectionArea > 1e-8);
+      }
+   }
+
+   @Test
+   public void testDistanceChecks1()
+   {
+      ConvexPolygon2D unitSquare = new ConvexPolygon2D();
+      unitSquare.addVertex(-0.5, -0.5);
+      unitSquare.addVertex(-0.5, 0.5);
+      unitSquare.addVertex(0.5, 0.5);
+      unitSquare.addVertex(0.5, -0.5);
+      unitSquare.update();
+
+      double distanceToCheck = 0.15;
+
+      ConvexPolygon2D testPolygon = new ConvexPolygon2D(unitSquare);
+      testPolygon.translate(-1.0 - distanceToCheck, 0.0);
+      Assertions.assertTrue(Math.abs(FootstepNodeTools.distanceBetweenPolygons(unitSquare, testPolygon) - distanceToCheck) < epsilon);
+
+      testPolygon = new ConvexPolygon2D(unitSquare);
+      testPolygon.translate(1.0 + distanceToCheck, 0.0);
+      Assertions.assertTrue(Math.abs(FootstepNodeTools.distanceBetweenPolygons(unitSquare, testPolygon) - distanceToCheck) < epsilon);
+
+      testPolygon = new ConvexPolygon2D(unitSquare);
+      testPolygon.translate(0.0, 1.0 + distanceToCheck);
+      Assertions.assertTrue(Math.abs(FootstepNodeTools.distanceBetweenPolygons(unitSquare, testPolygon) - distanceToCheck) < epsilon);
+
+      testPolygon = new ConvexPolygon2D(unitSquare);
+      testPolygon.translate(0.0, -1.0 - distanceToCheck);
+      Assertions.assertTrue(Math.abs(FootstepNodeTools.distanceBetweenPolygons(unitSquare, testPolygon) - distanceToCheck) < epsilon);
    }
 }

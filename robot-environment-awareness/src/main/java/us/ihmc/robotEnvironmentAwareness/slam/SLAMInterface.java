@@ -17,8 +17,6 @@ public interface SLAMInterface
 
    abstract List<RigidBodyTransformReadOnly> getSensorPoses();
 
-   abstract PlanarRegionsList getPlanarRegionsMap();
-
    /**
     * if this frame is detected as a key frame, return new RigidBodyTransform(); if this frame needs
     * drift correction, return optimized transform; if this frame should not be mergeable, return null;

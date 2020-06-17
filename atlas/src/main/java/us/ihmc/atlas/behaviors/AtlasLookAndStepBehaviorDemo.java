@@ -1,5 +1,6 @@
 package us.ihmc.atlas.behaviors;
 
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -8,10 +9,10 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.graphicsDescription.appearance.YoAppearanceTexture;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
-import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
+import us.ihmc.humanoidBehaviors.tools.PlanarRegionSLAMMapper;
+import us.ihmc.humanoidBehaviors.tools.perception.CompositePlanarRegionService;
 import us.ihmc.humanoidBehaviors.tools.perception.MultisenseHeadStereoSimulator;
 import us.ihmc.humanoidBehaviors.tools.perception.RealsensePelvisSimulator;
-import us.ihmc.humanoidBehaviors.tools.perception.VisiblePlanarRegionService;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
@@ -27,6 +28,7 @@ import us.ihmc.simulationConstructionSetTools.util.environments.PlanarRegionsLis
 import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
+import java.util.ArrayList;
 import java.util.function.Supplier;
 
 public class AtlasLookAndStepBehaviorDemo
@@ -62,10 +64,21 @@ public class AtlasLookAndStepBehaviorDemo
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, ROS2Tools.REA_NODE_NAME);
       MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(environment.get(), createRobotModel(), ros2Node);
       RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(environment.get(), createRobotModel(), ros2Node);
-      VisiblePlanarRegionService visiblePlanarRegionService = new VisiblePlanarRegionService(ros2Node, realsense);
-      visiblePlanarRegionService.start();
 
-      new PlanarRegionsMappingModule(pubSubMode); // Start the SLAM mapper which look and step uses
+      PlanarRegionSLAMMapper realsenseSLAM = new PlanarRegionSLAMMapper();
+
+      // might be a weird delay with threads at 0.5 hz depending on each other
+
+      ArrayList<String> topicNames = new ArrayList<>();
+      topicNames.add(ROS2Tools.REALSENSE_SLAM_REGIONS.getName());
+      topicNames.add(ROS2Tools.LIDAR_REA_REGIONS.getName());
+      double period = 1.0;
+      CompositePlanarRegionService allRegionsPublisher = new CompositePlanarRegionService(ros2Node,
+                                                                                          topicNames,
+                                                                                          period,
+                                                                                          () -> realsenseSLAM.update(realsense.get()),
+                                                                                          multisense);
+      allRegionsPublisher.start();
    }
 
    private void dynamicsSimulation()

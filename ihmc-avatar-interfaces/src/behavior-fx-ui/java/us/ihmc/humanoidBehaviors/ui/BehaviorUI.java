@@ -3,18 +3,22 @@ package us.ihmc.humanoidBehaviors.ui;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
-import javafx.scene.Scene;
-import javafx.scene.SubScene;
+import javafx.scene.*;
 import javafx.scene.control.ChoiceBox;
+import javafx.scene.control.SplitPane;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.apache.commons.lang3.SystemUtils;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
 import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
+import us.ihmc.javafx.JavaFXLinuxGUIRecorder;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.javafx.graphics.LabelGraphic;
@@ -85,12 +89,15 @@ public class BehaviorUI
             tabPane.getTabs().add(tab);
          }
 
-         View3DFactory view3dFactory = View3DFactory.createSubscene();
-         view3dFactory.addCameraController(0.05, 2000.0,true);
-         view3dFactory.addWorldCoordinateSystem(0.3);
-         view3dFactory.addDefaultLighting();
-         SubScene subScene = view3dFactory.getSubScene();
-         Pane subSceneWrappedInsidePane = view3dFactory.getSubSceneWrappedInsidePane();
+         View3DFactory view3DFactory = View3DFactory.createSubscene();
+         view3DFactory.addCameraController(0.05, 2000.0, true);
+         view3DFactory.addWorldCoordinateSystem(0.3);
+         view3DFactory.addDefaultLighting();
+         SubScene subScene3D = view3DFactory.getSubScene();
+         Pane view3DSubSceneWrappedInsidePane = view3DFactory.getSubSceneWrappedInsidePane();
+
+//         AnchorPane sideVisualizationArea = new AnchorPane();
+         VBox sideVisualizationArea = new VBox();
 
          behaviorSelector.getItems().add("None");
          behaviorSelector.setValue("None");
@@ -102,25 +109,39 @@ public class BehaviorUI
 
          for (BehaviorUIInterface behaviorUIInterface : behaviorUIInterfaces.values())
          {
-            behaviorUIInterface.init(subScene, behaviorMessager, robotModel);
-            view3dFactory.addNodeToView(behaviorUIInterface);
+            behaviorUIInterface.init(subScene3D, sideVisualizationArea, ros2Node, behaviorMessager, robotModel);
+            view3DFactory.addNodeToView(behaviorUIInterface);
          }
 
          behaviorSelector.valueProperty().addListener(this::onBehaviorSelection);
 
-         directRobotUIController.init(subScene, ros2Node, robotModel);
-         view3dFactory.addNodeToView(directRobotUIController);
-         view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
+         directRobotUIController.init(subScene3D, ros2Node, robotModel);
+         view3DFactory.addNodeToView(directRobotUIController);
+         view3DFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
-         mainPane.setCenter(subSceneWrappedInsidePane);
+         SplitPane mainSplitPane = (SplitPane) mainPane.getCenter();
+         sideVisualizationArea.setPrefWidth(200.0);
+//         view3DSubSceneWrappedInsidePane.setPrefWidth(500.0);
+         mainSplitPane.getItems().add(view3DSubSceneWrappedInsidePane);
+//         mainSplitPane.getItems().add(sideVisualizationArea);
+
          Stage primaryStage = new Stage();
          primaryStage.setTitle(getClass().getSimpleName());
          primaryStage.setMaximized(false);
          Scene mainScene = new Scene(mainPane, 1750, 1000);
 
+         JavaFXLinuxGUIRecorder guiRecorder = new JavaFXLinuxGUIRecorder(primaryStage, 24, 0.8f, getClass().getSimpleName());
+         guiRecorder.deleteOldLogs(10);
+
          primaryStage.setScene(mainScene);
          primaryStage.show();
          primaryStage.toFront();
+
+         // TODO: Make a property to toggle video recording
+         ThreadTools.scheduleSingleExecution("DelayRecordingStart", guiRecorder::start, 2.0);
+         ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 300.0);
+         primaryStage.setOnCloseRequest(event -> guiRecorder.stop());
+         Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop));
       });
    }
 
