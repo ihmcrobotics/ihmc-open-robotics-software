@@ -38,7 +38,6 @@ public class ConsoleScrollPane extends ScrollPane
       setVvalue(1.0);
 
       setOnScroll(event -> {
-         LogTools.info("Scrolled");
          customScrollSeen = true;
       });
    }
@@ -88,19 +87,12 @@ public class ConsoleScrollPane extends ScrollPane
             break;
       }
 
-      LogTools.info("logScrollPane.getVvalue(): {}", getVvalue());
-      double vvalue = getVvalue();
-      if (vvalue != 0.0 && vvalue != 1.0)
-      {
-
-      }
-      boolean autoScroll = vvalue >= 0.97;
+      boolean autoScroll = getVvalue() >= 0.97;
 
       textFlow.getChildren().add(text);
 
       if (autoScroll || !customScrollSeen)
       {
-         LogTools.info("Queuing auto scroll...");
          JavaFXMissingTools.runNFramesLater(1,() -> setVvalue(1.0));
       }
    }
