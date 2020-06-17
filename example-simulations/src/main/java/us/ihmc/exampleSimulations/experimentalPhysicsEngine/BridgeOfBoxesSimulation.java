@@ -33,10 +33,18 @@ public class BridgeOfBoxesSimulation
    private static final SideDependentList<String> SUPPORT_NAMES = new SideDependentList<>("LeftSupport", "RightSupport");
    private static final boolean SUPPORT_STATIC = false;
 
-   private final ContactParameters contactParameters = new ContactParameters(5.0e-5, 0.7, 0.0, 0.0, 0.1, 0.0, 0.99);
+   private final ContactParameters contactParameters = new ContactParameters();
 
    public BridgeOfBoxesSimulation()
    {
+      contactParameters.setMinimumPenetration(5.0e-5);
+      contactParameters.setCoefficientOfFriction(0.7);
+      contactParameters.setCoefficientOfRestitution(0.0);
+      contactParameters.setRestitutionThreshold(0.0);
+      contactParameters.setErrorReductionParameter(0.1);
+      contactParameters.setSlipErrorReductionParameter(0.0);
+      contactParameters.setConstraintForceMixing(1.0);
+
       ExperimentalSimulation experimentalSimulation = new ExperimentalSimulation(1 << 15);
 
       Vector3D bridgeSize = new Vector3D(3.0, 0.3, 0.2);
@@ -164,6 +172,7 @@ public class BridgeOfBoxesSimulation
       scs.getRootRegistry().addChild(registry);
       scs.getRootRegistry().addChild(experimentalSimulation.getPhysicsEngineRegistry());
       scs.addYoGraphicsListRegistry(experimentalSimulation.getPhysicsEngineGraphicsRegistry());
+      scs.setFastSimulate(true);
       scs.setDT(simDT, 1);
       scs.startOnAThread();
       scs.simulate(2.0);
