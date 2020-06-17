@@ -24,7 +24,7 @@ import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 public class SpinningCoinExperimentalSimulation
 {
    private static final String SPINNING_COIN = "SpinningCoin";
-   private final ContactParameters contactParameters = new ContactParameters(5.0e-5, 0.7, 0.0, 0.0, 1.0e-3, 0.0, 0.5);
+   private final ContactParameters contactParameters = new ContactParameters();
    private final double coinWidth = 0.00175; //quarter //0.1    
    private final double coinRadius = 0.01213; //0.5; //         
    private final double coinMass = 0.00567; //1.0; //
@@ -32,6 +32,14 @@ public class SpinningCoinExperimentalSimulation
 
    public SpinningCoinExperimentalSimulation()
    {
+      contactParameters.setMinimumPenetration(5.0e-5);
+      contactParameters.setCoefficientOfFriction(0.7);
+      contactParameters.setCoefficientOfRestitution(0.0);
+      contactParameters.setRestitutionThreshold(0.0);
+      contactParameters.setErrorReductionParameter(1.0e-3);
+      contactParameters.setSlipErrorReductionParameter(0.0);
+      contactParameters.setConstraintForceMixing(0.5);
+      
       RobotDescription robotDescription = new RobotDescription(SPINNING_COIN);
 
       FloatingJointDescription floatingJointDescription = new FloatingJointDescription("root");
@@ -82,6 +90,7 @@ public class SpinningCoinExperimentalSimulation
                                                                     parameters);
       scs.addYoGraphicsListRegistry(experimentalSimulation.getPhysicsEngineGraphicsRegistry());
       scs.getRootRegistry().addChild(experimentalSimulation.getPhysicsEngineRegistry());
+      ExampleExperimentalSimulationTools.configureSCSToTrackRobotRootJoint(scs, robotDescription);
       scs.setDT(simDT, 1);
       scs.startOnAThread();
       scs.simulate(10.0);
