@@ -73,7 +73,7 @@ public class IntraprocessYoVariableLogger
                                        double dt,
                                        Path incomingLogsFolder)
    {
-      DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmss");
+      DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd_HHmmssSSS");
       Calendar calendar = Calendar.getInstance();
       timestamp = dateFormat.format(calendar.getTime());
       logFolder = incomingLogsFolder.resolve(timestamp + INTRAPROCESS_LOG_POSTFIX);

@@ -31,9 +31,9 @@ public class SimulatedDepthCamera
    enum FilterType { SPHERICAL, PLANE_CUTTING }
    private static final FilterType FILTER_TYPE = FilterType.SPHERICAL;
 
-   private double range;
    private final ReferenceFrame cameraFrame;
 
+   private final double range;
    private final double verticalFOV;
    private final double horizontalFOV;
 
@@ -48,9 +48,9 @@ public class SimulatedDepthCamera
 
    private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
    private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
-   private HashMap<PlanarRegion, List<Point3D>> pointsInRegions = new HashMap<>();
-   private FramePose3D tempCameraPose = new FramePose3D();
-   private Point2D tempCircleOrigin = new Point2D();
+   private final HashMap<PlanarRegion, List<Point3D>> pointsInRegions = new HashMap<>();
+   private final FramePose3D tempCameraPose = new FramePose3D();
+   private final Point2D tempCircleOrigin = new Point2D();
 
    public SimulatedDepthCamera(ReferenceFrame cameraFrame)
    {
@@ -80,7 +80,7 @@ public class SimulatedDepthCamera
       return FILTER_TYPE == FilterType.SPHERICAL ? filterUsingSpherical(map) : filterUsingPlaneCutting(map);
    }
 
-   public PlanarRegionsList filterUsingSpherical(PlanarRegionsList map)
+   public synchronized PlanarRegionsList filterUsingSpherical(PlanarRegionsList map)
    {
       pointsInRegions.clear();
 
@@ -166,7 +166,7 @@ public class SimulatedDepthCamera
       return PlanarRegionPolygonizer.createPlanarRegionsList(segmentationRawData, concaveHullFactoryParameters, polygonizerParameters);
    }
 
-   public PlanarRegionsList filterUsingPlaneCutting(PlanarRegionsList map)
+   public synchronized PlanarRegionsList filterUsingPlaneCutting(PlanarRegionsList map)
    {
       // TODO consider prefilter with view distance
       // List<PlanarRegion> filteredRegions = PlanarRegionTools

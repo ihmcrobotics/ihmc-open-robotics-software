@@ -1653,7 +1653,7 @@ public class CrossRobotCommandRandomTools
       return next;
    }
 
-   public static SimpleFootstep nextSimpleAdjustableFootstep(Random random, ReferenceFrame... possibleFrames)
+   public static SimpleFootstep nextSimpleFootstep(Random random, ReferenceFrame... possibleFrames)
    {
       SimpleFootstep next = new SimpleFootstep();
       next.setSoleFramePose(nextFramePose3D(random, possibleFrames));

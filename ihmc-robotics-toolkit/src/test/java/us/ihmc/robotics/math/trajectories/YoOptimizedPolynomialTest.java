@@ -11,7 +11,7 @@ import static us.ihmc.robotics.Assert.fail;
 
 public class YoOptimizedPolynomialTest
 {
-   private static double EPSILON = 1e-4;
+   private static double EPSILON = 1e-3;
 
    String namePrefix = "YoPolynomialTest";
 

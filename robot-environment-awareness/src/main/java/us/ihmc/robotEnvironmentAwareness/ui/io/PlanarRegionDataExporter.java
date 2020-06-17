@@ -9,6 +9,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import javafx.stage.Window;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.REAUIMessager;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
@@ -26,9 +27,17 @@ public class PlanarRegionDataExporter
 
    public PlanarRegionDataExporter(REAUIMessager uiMessager)
    {
-      planarRegionsState = uiMessager.createInput(REAModuleAPI.PlanarRegionsState);
-      dataDirectoryPath = uiMessager.createInput(REAModuleAPI.UIPlanarRegionDataExporterDirectory, new File("Data/PlanarRegion/").getAbsolutePath());
-      uiMessager.registerTopicListener(REAModuleAPI.UIPlanarRegionDataExportRequest, this::exportPlanarRegionData);
+      this(uiMessager, REAModuleAPI.PlanarRegionsState, REAModuleAPI.UIPlanarRegionDataExporterDirectory, REAModuleAPI.UIPlanarRegionDataExportRequest);
+   }
+
+   public PlanarRegionDataExporter(REAUIMessager uiMessager,
+                                   Topic<PlanarRegionsListMessage> planarRegionsStateTopic,
+                                   Topic<String> uiPlanarRegionDataExporterDirectoryTopic,
+                                   Topic<Boolean> uiPlanarRegionDataExportRequestTopic)
+   {
+      planarRegionsState = uiMessager.createInput(planarRegionsStateTopic);
+      dataDirectoryPath = uiMessager.createInput(uiPlanarRegionDataExporterDirectoryTopic, new File("Data/PlanarRegion/").getAbsolutePath());
+      uiMessager.registerTopicListener(uiPlanarRegionDataExportRequestTopic, this::exportPlanarRegionData);
    }
 
    public PlanarRegionDataExporter(File dataDirectoryPath)

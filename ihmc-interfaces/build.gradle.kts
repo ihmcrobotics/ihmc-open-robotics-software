@@ -16,7 +16,7 @@ plugins {
    id("us.ihmc.ihmc-build") version "0.20.1"
    id("us.ihmc.ihmc-ci") version "5.3"
    id("us.ihmc.ihmc-cd") version "1.14"
-   id("us.ihmc.log-tools") version "0.4.2"
+   id("us.ihmc.log-tools-plugin") version "0.5.0"
 }
 
 ihmc {
@@ -35,7 +35,7 @@ mainDependencies {
    api("us.ihmc:euclid-geometry:0.14.2")
    api("us.ihmc:ihmc-pub-sub:0.12.0")
    api("us.ihmc:ros2-common-interfaces:0.18.3")
-   api("us.ihmc:ihmc-commons:0.29.0")
+   api("us.ihmc:ihmc-commons:0.30.0")
 }
 
 testDependencies {
@@ -44,7 +44,7 @@ testDependencies {
 
 generatorDependencies {
    api("us.ihmc:euclid:0.14.2")
-   api("us.ihmc:ihmc-commons:0.29.0")
+   api("us.ihmc:ihmc-commons:0.30.0")
    api("us.ihmc:ros2-msg-to-pubsub-generator:0.18.3")
 }
 

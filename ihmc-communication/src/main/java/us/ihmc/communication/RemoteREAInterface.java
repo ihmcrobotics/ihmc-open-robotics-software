@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.REAStateRequestMessage;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.Ros2NodeInterface;
@@ -20,7 +21,7 @@ public class RemoteREAInterface
    public RemoteREAInterface(Ros2NodeInterface ros2Node)
    {
       reaStateRequestPublisher = new IHMCROS2Publisher<>(ros2Node, REAStateRequestMessage.class, ROS2Tools.REA.withInput());
-      planarRegionsListInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.REA.withOutput());
+      planarRegionsListInput = new ROS2Input<>(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.LIDAR_REA_REGIONS);
 
       planarRegionsListInput.addCallback(planarRegionsListMessage -> stopwatch.start());
    }
@@ -28,7 +29,9 @@ public class RemoteREAInterface
    public void addPlanarRegionsListCallback(Consumer<PlanarRegionsList> planarRegionsListConsumer)
    {
       planarRegionsListInput.addCallback(planarRegionsListMessage ->
-                                          planarRegionsListConsumer.accept(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage)));
+      {
+         planarRegionsListConsumer.accept(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+      });
    }
 
    public PlanarRegionsList getLatestPlanarRegionsList()
@@ -57,6 +60,7 @@ public class RemoteREAInterface
       return stopwatch.lapElapsed();
    }
 
+   // TODO Remove this from this class? It might not belong here
    public boolean getPlanarRegionsListExpired(double expirationDuration)
    {
       return Double.isNaN(timeSinceLastUpdate()) || timeSinceLastUpdate() > expirationDuration;

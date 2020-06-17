@@ -1,4 +1,4 @@
-package us.ihmc.avatar.networkProcessor.stepConstraintToolboxModule;
+package us.ihmc.avatar.stepAdjustment;
 
 import us.ihmc.commonWalkingControlModules.captureRegion.OneStepCaptureRegionCalculator;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
@@ -6,13 +6,13 @@ import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
+import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
-import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
@@ -26,6 +26,7 @@ import static us.ihmc.humanoidRobotics.footstep.FootstepUtils.worldFrame;
 
 public class StepConstraintCalculator
 {
+   private final SteppableRegionsCalculator steppableRegionsCalculator;
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
    private final DoubleProvider timeProvider;
@@ -38,7 +39,7 @@ public class StepConstraintCalculator
    private final FramePoint2D capturePoint = new FramePoint2D();
 
    private final SideDependentList<FrameConvexPolygon2D> supportPolygons = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
-
+   private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
    private final AtomicReference<PlanarRegionsList> planarRegionsList = new AtomicReference<>();
 
    private SimpleStep currentStep;
@@ -76,6 +77,8 @@ public class StepConstraintCalculator
                                    double gravityZ)
    {
       this.timeProvider = timeProvider;
+      this.soleZUpFrames = soleZUpFrames;
+      this.steppableRegionsCalculator = new SteppableRegionsCalculator(kinematicStepRange, registry);
       this.captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange, soleZUpFrames, registry, null);
       this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, gravityZ, registry, null);
       this.reachabilityConstraintCalculator = new ReachabilityConstraintCalculator(soleZUpFrames,
@@ -102,7 +105,7 @@ public class StepConstraintCalculator
    {
       FrameConvexPolygon2DBasics supportPolygon = supportPolygons.get(supportSide);
       supportPolygon.clear();
-      supportPolygon.addVertices(Vertex3DSupplier.asVertex3DSupplier(footVertices));
+      footVertices.forEach(supportPolygon::addVertex);
       supportPolygon.update();
    }
 
@@ -149,9 +152,14 @@ public class StepConstraintCalculator
       {
          updateCaptureRegion(currentStep);
 
-         PlanarRegionsList planarRegionsList = this.planarRegionsList.getAndSet(null);
-         if (planarRegionsList != null)
-            planarRegionDecider.setPlanarRegions(planarRegionsList.getPlanarRegionsAsList());
+         steppableRegionsCalculator.setPlanarRegions(planarRegionsList.get().getPlanarRegionsAsList());
+         FramePoint3D supportFoot = new FramePoint3D(soleZUpFrames.get(currentStep.getSwingSide().getOppositeSide()));
+         supportFoot.changeFrame(worldFrame);
+         steppableRegionsCalculator.setStanceFootPosition(supportFoot);
+
+         List<StepConstraintRegion> steppableRegions = steppableRegionsCalculator.computeSteppableRegions();
+
+         planarRegionDecider.setConstraintRegions(steppableRegions);
          planarRegionDecider.setOmega0(omega);
          planarRegionDecider.setCaptureRegion(captureRegionCalculator.getCaptureRegion());
          planarRegionDecider.updatePlanarRegionConstraintForStep(currentStep.getStepPose());
@@ -173,29 +181,29 @@ public class StepConstraintCalculator
 
    public void updateReachabilityRegionInControlPlane(RobotSide supportSide)
    {
-      PlanarRegion planarRegionForConstraint = planarRegionDecider.getConstraintRegion();
+      StepConstraintRegion stepConstraintRegion = planarRegionDecider.getConstraintRegion();
 
-      if (planarRegionForConstraint == null)
+      if (stepConstraintRegion == null)
          return;
 
       FrameConvexPolygon2DReadOnly reachabilityRegion = reachabilityConstraintCalculator.getReachabilityPolygon(supportSide);
       reachabilityRegionInConstraintPlane.clear();
       reachabilityRegionInConstraintPlane.setIncludingFrame(reachabilityRegion);
       reachabilityRegionInConstraintPlane.changeFrame(worldFrame);
-      reachabilityRegionInConstraintPlane.applyTransform(planarRegionForConstraint.getTransformToLocal(), false);
+      reachabilityRegionInConstraintPlane.applyTransform(stepConstraintRegion.getTransformToLocal(), false);
    }
 
    private final ConvexPolygonTools convexPolygonTools = new ConvexPolygonTools();
 
    private StepConstraintRegion computeConstraintRegion()
    {
-      PlanarRegion planarRegionForConstraint = planarRegionDecider.getConstraintRegion();
+      StepConstraintRegion planarRegionForConstraint = planarRegionDecider.getConstraintRegion();
 
       if (planarRegionForConstraint == null)
          return null;
 
       ConvexPolygon2D constraintConvexHull = new ConvexPolygon2D();
-      convexPolygonTools.computeIntersectionOfPolygons(planarRegionForConstraint.getConvexHull(), reachabilityRegionInConstraintPlane, constraintConvexHull);
+      convexPolygonTools.computeIntersectionOfPolygons(planarRegionForConstraint.getConvexHullInConstraintRegion(), reachabilityRegionInConstraintPlane, constraintConvexHull);
 
       return new StepConstraintRegion(planarRegionForConstraint.getTransformToWorld(), constraintConvexHull);
    }
