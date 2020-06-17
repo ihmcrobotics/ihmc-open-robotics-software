@@ -1,28 +1,46 @@
 package us.ihmc.humanoidBehaviors.ui.graphics;
 
 import javafx.application.Platform;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.*;
 import org.apache.commons.lang3.tuple.Pair;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.javafx.JavaFXMissingTools;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 
 import java.util.List;
 
-public class ConsoleTextFlow extends TextFlow
+public class ConsoleScrollPane extends ScrollPane
 {
    /** Feel free to add font names here. */
    private static final String[] FONT_PREFERENCE = {"Courier New", "Liberation Mono"};
 
    private final Messager behaviorMessager;
+   private final TextFlow textFlow;
    private final String fontName;
 
-   public ConsoleTextFlow(Messager behaviorMessager)
+   private boolean customScrollSeen = false;
+
+   public ConsoleScrollPane(Messager behaviorMessager)
    {
       this.behaviorMessager = behaviorMessager;
       this.fontName = selectFontName();
 
-      setTextAlignment(TextAlignment.LEFT);
+      setVmin(0.0);
+      setVmax(1.0);
+
+      textFlow = new TextFlow();
+      textFlow.setTextAlignment(TextAlignment.LEFT);
+
+      setContent(textFlow);
+      setVvalue(1.0);
+
+      setOnScroll(event -> {
+         LogTools.info("Scrolled");
+         customScrollSeen = true;
+      });
    }
 
    private String selectFontName()
@@ -48,7 +66,7 @@ public class ConsoleTextFlow extends TextFlow
    private void receivedMessageForTopic(Pair<Integer, String> logEntry)
    {
       Text text = new Text(logEntry.getRight() + "\n");
-      text.setFont(new Font("Courier New", -1));
+      text.setFont(new Font(fontName, -1));
       text.setFontSmoothingType(FontSmoothingType.LCD);
       switch (logEntry.getLeft())
       {
@@ -69,6 +87,21 @@ public class ConsoleTextFlow extends TextFlow
             text.setFill(Color.GREEN);
             break;
       }
-      getChildren().add(text);
+
+      LogTools.info("logScrollPane.getVvalue(): {}", getVvalue());
+      double vvalue = getVvalue();
+      if (vvalue != 0.0 && vvalue != 1.0)
+      {
+
+      }
+      boolean autoScroll = vvalue >= 0.97;
+
+      textFlow.getChildren().add(text);
+
+      if (autoScroll || !customScrollSeen)
+      {
+         LogTools.info("Queuing auto scroll...");
+         JavaFXMissingTools.runNFramesLater(1,() -> setVvalue(1.0));
+      }
    }
 }
