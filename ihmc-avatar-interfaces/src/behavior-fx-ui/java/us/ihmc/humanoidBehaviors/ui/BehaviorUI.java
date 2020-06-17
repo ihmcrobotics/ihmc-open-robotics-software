@@ -8,14 +8,13 @@ import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.*;
 import javafx.stage.Stage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
 import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
+import us.ihmc.humanoidBehaviors.ui.graphics.ConsoleTextFlow;
 import us.ihmc.javafx.JavaFXLinuxGUIRecorder;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
@@ -100,20 +99,8 @@ public class BehaviorUI
          VBox sideVisualizationArea = new VBox();
 
          ScrollPane logScrollPane = new ScrollPane();
-//         logScrollPane.setLayoutY(500.0);
-//         logScrollPane.setPrefWidth(200.0);
-//         logScrollPane.setPrefHeight(500.0);
-         TextFlow textFlow = new TextFlow();
-         textFlow.setTextAlignment(TextAlignment.LEFT);
-//         textFlow.setPrefWidth(100.0);
-//         TextArea textArea = new TextArea();
-//         textArea.setPrefWidth(Region.USE_COMPUTED_SIZE);
-//         textArea.setPrefHeight(Region.USE_COMPUTED_SIZE);
-         logScrollPane.setContent(textFlow);
-//         logScrollPane.setFitToHeight(true);
-//         logScrollPane.setFitToWidth(true);
-//         logScrollPane.setLayoutY(300.0);
-//         logScrollPane.setPrefWidth(300.0);
+         ConsoleTextFlow consoleTextFlow = new ConsoleTextFlow(behaviorMessager);
+         logScrollPane.setContent(consoleTextFlow);
 
          behaviorSelector.getItems().add("None");
          behaviorSelector.setValue("None");
@@ -163,54 +150,7 @@ public class BehaviorUI
          }
 
          // do this last for now in case events starts firing early
-         String fontName = null;
-         for (String installedFontName : Font.getFontNames())
-         {
-            if (installedFontName.equals("Courier New"))
-            {
-               fontName = "Courier New";
-               break;
-            }
-            else if (installedFontName.equals("Liberation Mono"))
-            {
-               fontName = "Liberation Mono";
-               break;
-            }
-         }
-         if (fontName == null)
-         {
-            throw new RuntimeException("No monospaced font found. Please add your font to the code.");
-         }
-         final String selectedFontName = fontName;
-         behaviorMessager.registerTopicListener(BehaviorModule.API.StatusLog, logEntry ->
-         {
-            Platform.runLater(() ->
-            {
-               Text text = new Text(logEntry.getRight() + "\n");
-               text.setFont(new Font("Courier New", -1));
-               text.setFontSmoothingType(FontSmoothingType.LCD);
-               switch (logEntry.getLeft())
-               {
-                  case 100:
-                  case 200:
-                     text.setFill(Color.RED.brighter());
-                     break;
-                  case 300:
-                     text.setFill(Color.YELLOW.darker());
-                     break;
-                  case 400:
-                     text.setFill(Color.BLACK);
-                     break;
-                  case 500:
-                     text.setFill(Color.CYAN);
-                     break;
-                  case 600:
-                     text.setFill(Color.GREEN);
-                     break;
-               }
-               textFlow.getChildren().add(text);
-            });
-         });
+         consoleTextFlow.setupAtEnd();
       });
    }
 
