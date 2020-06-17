@@ -42,7 +42,7 @@ public class NewtonsCradleExperimentalSimulation
       RobotDescription robotDescription = new RobotDescription(NEWTONS_CRADLE);
       double ballRadiusOfGyration = ballRadius * 0.6;
       double pinJointHeight = 1.1 * stringLength;
-      double pinJointSeparation = 2.00 * ballRadius;
+      double pinJointSeparation = 2.0001 * ballRadius; // FIXME Note the 1.0e-4 epsilon here, this is to prevent things from blowing up. Need to figure out how to fix this.
 
       for (int i = 0; i < numberOfBalls; i++)
       {
