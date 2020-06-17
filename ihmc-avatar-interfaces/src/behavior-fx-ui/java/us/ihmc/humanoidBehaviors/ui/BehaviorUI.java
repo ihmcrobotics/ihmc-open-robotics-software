@@ -1,6 +1,5 @@
 package us.ihmc.humanoidBehaviors.ui;
 
-import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -8,13 +7,10 @@ import javafx.scene.*;
 import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
-import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextFlow;
+import javafx.scene.text.*;
 import javafx.stage.Stage;
-import org.apache.commons.lang3.SystemUtils;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
@@ -40,6 +36,8 @@ import java.util.Map;
  */
 public class BehaviorUI
 {
+   private static boolean RECORD_VIDEO = Boolean.parseBoolean(System.getProperty("record.video"));
+
    private BorderPane mainPane;
    private final Messager behaviorMessager;
    private final Map<String, BehaviorUIInterface> behaviorUIInterfaces = new HashMap<>();
@@ -102,16 +100,20 @@ public class BehaviorUI
          VBox sideVisualizationArea = new VBox();
 
          ScrollPane logScrollPane = new ScrollPane();
-         logScrollPane.setLayoutY(200.0);
 //         logScrollPane.setLayoutY(500.0);
 //         logScrollPane.setPrefWidth(200.0);
 //         logScrollPane.setPrefHeight(500.0);
          TextFlow textFlow = new TextFlow();
+         textFlow.setTextAlignment(TextAlignment.LEFT);
 //         textFlow.setPrefWidth(100.0);
 //         TextArea textArea = new TextArea();
 //         textArea.setPrefWidth(Region.USE_COMPUTED_SIZE);
 //         textArea.setPrefHeight(Region.USE_COMPUTED_SIZE);
          logScrollPane.setContent(textFlow);
+//         logScrollPane.setFitToHeight(true);
+//         logScrollPane.setFitToWidth(true);
+//         logScrollPane.setLayoutY(300.0);
+//         logScrollPane.setPrefWidth(300.0);
 
          behaviorSelector.getItems().add("None");
          behaviorSelector.setValue("None");
@@ -134,36 +136,59 @@ public class BehaviorUI
          view3DFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
          SplitPane mainSplitPane = (SplitPane) mainPane.getCenter();
-         sideVisualizationArea.setPrefWidth(200.0);
+//         sideVisualizationArea.setPrefWidth(200.0);
 //         view3DSubSceneWrappedInsidePane.setPrefWidth(500.0);
          mainSplitPane.getItems().add(view3DSubSceneWrappedInsidePane);
          mainSplitPane.getItems().add(logScrollPane);
 //         mainSplitPane.getItems().add(sideVisualizationArea);
+         mainSplitPane.setDividerPositions(2.0 / 3.0);
 
          Stage primaryStage = new Stage();
          primaryStage.setTitle(getClass().getSimpleName());
          primaryStage.setMaximized(false);
          Scene mainScene = new Scene(mainPane, 1750, 1000);
 
-         JavaFXLinuxGUIRecorder guiRecorder = new JavaFXLinuxGUIRecorder(primaryStage, 24, 0.8f, getClass().getSimpleName());
-         guiRecorder.deleteOldLogs(10);
-
          primaryStage.setScene(mainScene);
          primaryStage.show();
          primaryStage.toFront();
 
-         // TODO: Make a property to toggle video recording
-         ThreadTools.scheduleSingleExecution("DelayRecordingStart", guiRecorder::start, 2.0);
-         ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 300.0);
-         primaryStage.setOnCloseRequest(event -> guiRecorder.stop());
-         Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop));
+         if (RECORD_VIDEO)
+         {
+            JavaFXLinuxGUIRecorder guiRecorder = new JavaFXLinuxGUIRecorder(primaryStage, 24, 0.8f, getClass().getSimpleName());
+            guiRecorder.deleteOldLogs(10);
+            ThreadTools.scheduleSingleExecution("DelayRecordingStart", guiRecorder::start, 2.0);
+            ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 300.0);
+            primaryStage.setOnCloseRequest(event -> guiRecorder.stop());
+            Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop));
+         }
 
          // do this last for now in case events starts firing early
+         String fontName = null;
+         for (String installedFontName : Font.getFontNames())
+         {
+            if (installedFontName.equals("Courier New"))
+            {
+               fontName = "Courier New";
+               break;
+            }
+            else if (installedFontName.equals("Liberation Mono"))
+            {
+               fontName = "Liberation Mono";
+               break;
+            }
+         }
+         if (fontName == null)
+         {
+            throw new RuntimeException("No monospaced font found. Please add your font to the code.");
+         }
+         final String selectedFontName = fontName;
          behaviorMessager.registerTopicListener(BehaviorModule.API.StatusLog, logEntry ->
          {
             Platform.runLater(() ->
             {
                Text text = new Text(logEntry.getRight() + "\n");
+               text.setFont(new Font("Courier New", -1));
+               text.setFontSmoothingType(FontSmoothingType.LCD);
                switch (logEntry.getLeft())
                {
                   case 100:
@@ -171,7 +196,7 @@ public class BehaviorUI
                      text.setFill(Color.RED.brighter());
                      break;
                   case 300:
-                     text.setFill(Color.YELLOW);
+                     text.setFill(Color.YELLOW.darker());
                      break;
                   case 400:
                      text.setFill(Color.BLACK);
