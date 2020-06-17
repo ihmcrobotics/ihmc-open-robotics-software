@@ -52,7 +52,7 @@ import java.util.List;
 
 public class AStarPawStepPlanner implements BodyPathAndPawPlanner
 {
-   private static final boolean debug = false;
+   private static final boolean debug = true;
 
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private static final RobotQuadrant defaultFirstQuadrant = RobotQuadrant.FRONT_LEFT;
@@ -500,8 +500,11 @@ public class AStarPawStepPlanner implements BodyPathAndPawPlanner
             PawNode previousNode = path.get(i - 1);
             Point3D previousPosition = new Point3D(previousNode.getX(robotQuadrant), previousNode.getY(robotQuadrant), 0.0);
             PawNodeSnapData previousSnapData = snapper.getSnapData(previousNode.getXIndex(robotQuadrant), previousNode.getYIndex(robotQuadrant));
-            RigidBodyTransform previousSnapTransform = previousSnapData.getSnapTransform();
-            previousPosition.applyTransform(previousSnapTransform);
+            if (previousSnapData != null)
+            {
+               RigidBodyTransform previousSnapTransform = previousSnapData.getSnapTransform();
+               previousPosition.applyTransform(previousSnapTransform);
+            }
             if (Math.abs(position.getZ() - previousPosition.getZ()) > parameters.getMaximumStepChangeZ())
             {
                LogTools.error("height change error.");

@@ -140,6 +140,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
    public PlanarRegion(RigidBodyTransform transformToWorld, List<ConvexPolygon2D> planarRegionConvexPolygons)
    {
       this(transformToWorld, new ArrayList<>(), planarRegionConvexPolygons);
+      updateConcaveHull();
    }
    
    /**

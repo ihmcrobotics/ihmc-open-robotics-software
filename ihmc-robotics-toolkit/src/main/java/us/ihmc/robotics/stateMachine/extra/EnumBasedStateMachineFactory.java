@@ -3,8 +3,10 @@ package us.ihmc.robotics.stateMachine.extra;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleConsumer;
 import java.util.function.DoublePredicate;
+import java.util.function.Supplier;
 
 import us.ihmc.log.LogTools;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -46,6 +48,16 @@ public class EnumBasedStateMachineFactory<K extends Enum<K>>
    public void addTransition(K from, K to, StateTransitionCondition condition)
    {
       getFactory().addTransition(from,  to, condition);
+   }
+
+   public void addTransition(K from, K to, BooleanSupplier condition)
+   {
+      getFactory().addTransition(from,  to, timeInCurrentState -> condition.getAsBoolean());
+   }
+
+   public void addTransition(K from, List<K> toOptions, Supplier<K> stateTransitionTo)
+   {
+      addTransition(from, toOptions, timeInCurrentState -> stateTransitionTo.get());
    }
 
    /**
@@ -94,6 +106,11 @@ public class EnumBasedStateMachineFactory<K extends Enum<K>>
    public void setOnEntry(K key, Runnable onEntry)
    {
       getState(key).setOnEntry(onEntry);
+   }
+
+   public void setDoAction(K key, Runnable doAction)
+   {
+      setDoAction(key, timeInCurrentState -> doAction.run());
    }
 
    public void setDoAction(K key, DoubleConsumer doAction)

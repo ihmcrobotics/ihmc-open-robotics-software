@@ -42,7 +42,7 @@ public class SLAMFrame
    protected final Point3DReadOnly[] pointCloudToSensorFrame;
    protected final Point3D[] optimizedPointCloudToWorld;
    
-   private double confidenceFactor;
+   private double confidenceFactor = 1.0;
 
    public SLAMFrame(StereoVisionPointCloudMessage message)
    {

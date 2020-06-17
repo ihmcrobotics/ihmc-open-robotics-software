@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.RobotConfigurationData;
 import controller_msgs.msg.dds.SpatialVectorMessage;
 import us.ihmc.communication.IHMCRealtimeROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.robotics.robotController.RawOutputWriter;
 import us.ihmc.robotics.sensors.ForceSensorDataReadOnly;
 import us.ihmc.ros2.ROS2Topic;
@@ -33,6 +34,9 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
 
    private final long publishPeriod;
    private long lastPublishTime = -1;
+
+   // Counter to keep track of configuration data sequence number
+   private long sequenceId = 0;
 
    /**
     * Intended to be instantiated only using {@link RobotConfigurationDataPublisherFactory}.
@@ -143,6 +147,12 @@ public class RobotConfigurationDataPublisher implements RawOutputWriter
       robotConfigurationData.setLastReceivedPacketTypeId(-1);
       robotConfigurationData.setLastReceivedPacketUniqueId(-1);
       robotConfigurationData.setLastReceivedPacketRobotTimestamp(-1);
+
+      // update sequence id for each new message
+      this.sequenceId++;
+
+      // Set the sequence id for the robot configuration data and propagate it to the sensor data
+      MessageTools.setRobotConfigurationDataSequenceId(robotConfigurationData, this.sequenceId);
 
       robotConfigurationDataPublisher.publish(robotConfigurationData);
    }

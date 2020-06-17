@@ -34,21 +34,21 @@ public class PlanarRegionsMeshBuilder implements Runnable
    
    private final REAUIMessager uiMessager;
 
-   public PlanarRegionsMeshBuilder(REAUIMessager uiMessager, Topic<PlanarRegionsListMessage> planarregionsstate)
+   public PlanarRegionsMeshBuilder(REAUIMessager uiMessager, Topic<PlanarRegionsListMessage> planarRegionsState)
    {
-      this(uiMessager, planarregionsstate, REAModuleAPI.OcTreeEnable, REAModuleAPI.PlanarRegionsPolygonizerClear, REAModuleAPI.OcTreeClear, REAModuleAPI.RequestPlanarRegions);
+      this(uiMessager, planarRegionsState, REAModuleAPI.OcTreeEnable, REAModuleAPI.PlanarRegionsPolygonizerClear, REAModuleAPI.OcTreeClear, REAModuleAPI.RequestPlanarRegions);
    }
 
-   public PlanarRegionsMeshBuilder(REAUIMessager uiMessager, Topic<PlanarRegionsListMessage> planarregionsstate, Topic<Boolean> enableTopic,
+   public PlanarRegionsMeshBuilder(REAUIMessager uiMessager, Topic<PlanarRegionsListMessage> planarRegionsState, Topic<Boolean> enableTopic,
                                    Topic<Boolean> clearTopic, Topic<Boolean> octreeClearTopic, Topic<Boolean> requestPlanarRegionsTopic)
    {
-      this.uiMessager = uiMessager;
       enable = uiMessager.createInput(enableTopic, false);
+      this.uiMessager = uiMessager;
       clear = uiMessager.createInput(clearTopic, false);
       clearOcTree = uiMessager.createInput(octreeClearTopic, false);
       this.requestPlanarRegionsTopic = requestPlanarRegionsTopic;
 
-      planarRegionsListMessage = uiMessager.createInput(planarregionsstate);
+      planarRegionsListMessage = uiMessager.createInput(planarRegionsState);
 
       TextureColorPalette2D colorPalette = new TextureColorPalette2D();
       colorPalette.setHueBrightnessBased(0.9);

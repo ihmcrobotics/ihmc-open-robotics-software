@@ -15,11 +15,23 @@ public interface ForceSensorDataReadOnly
 
    public RigidBodyBasics getMeasurementLink();
 
+   /*
+    * Get force sensor wrench data and write to Matrix argument.
+    */
    public void getWrench(DMatrixRMaj wrenchToPack);
 
+   /*
+    * Get force sensor wrench data and write to Wrench argument.
+    */
    public void getWrench(Wrench wrenchToPack);
 
+   /*
+    * Get force sensor wrench data and write to float array argument.
+    */
    public void getWrench(float[] wrenchToPack);
    
+   /*
+    * Get force sensor wrench data and write to vector arguments for moment and force.
+    */
    public void getWrench(Vector3DBasics momentToPack, Vector3DBasics forceToPack);
 }
