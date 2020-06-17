@@ -5,6 +5,7 @@ import us.ihmc.euclid.referenceFrame.FrameUnitVector3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.collision.EuclidFrameShape3DCollisionResult;
+import us.ihmc.robotics.EuclidCoreMissingTools;
 
 public class CollisionSlipEstimator implements CollisionSlipHolder
 {
@@ -66,10 +67,7 @@ public class CollisionSlipEstimator implements CollisionSlipHolder
       pointOnB.changeFrame(rootFrame);
 
       separationFromBToA.sub(pointOnA, pointOnB);
-      // Subtracting off the normal component of the collision data.
-      double normalComponent = separationFromBToA.dot(collisionAxis);
-      separationFromBToA.scaleAdd(-normalComponent, collisionAxis, separationFromBToA);
-
+      EuclidCoreMissingTools.extractTangentialPart(separationFromBToA, collisionAxis, separationFromBToA);
       estimatedSlipFromBToA.add(separationFromBToA);
    }
 
