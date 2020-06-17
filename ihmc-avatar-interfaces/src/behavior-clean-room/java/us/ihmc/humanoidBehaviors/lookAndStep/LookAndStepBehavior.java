@@ -13,6 +13,7 @@ import us.ihmc.humanoidBehaviors.lookAndStep.parts.LookAndStepReviewPart;
 import us.ihmc.humanoidBehaviors.lookAndStep.parts.LookAndStepRobotMotionModule;
 import us.ihmc.humanoidBehaviors.tools.BehaviorHelper;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
+import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
@@ -36,6 +37,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private final LookAndStepFootstepPlanningModule footstepPlanningModule;
    private final LookAndStepRobotMotionModule robotMotionModule;
    private final AtomicReference<State> behaviorState;
+   private final StatusLogger statusLogger;
 
    public enum State
    {
@@ -55,6 +57,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       this.helper = helper;
 
       robot = helper.getOrCreateRobotInterface();
+      statusLogger = helper.getOrCreateStatusLogger();
 
       VisibilityGraphsParametersBasics visibilityGraphParameters = helper.getRobotModel().getVisibilityGraphsParameters();
       visibilityGraphParameters.setIncludePreferredExtrusions(false);
@@ -154,6 +157,7 @@ public class LookAndStepBehavior implements BehaviorInterface
    private void updateState(State state)
    {
       behaviorState.set(state);
+      statusLogger.info("Entering state: {}", state.name());
       helper.publishToUI(CurrentState, state.name());
    }
 

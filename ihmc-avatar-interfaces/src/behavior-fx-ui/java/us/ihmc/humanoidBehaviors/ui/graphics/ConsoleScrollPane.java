@@ -33,6 +33,7 @@ public class ConsoleScrollPane extends ScrollPane
 
       textFlow = new TextFlow();
       textFlow.setTextAlignment(TextAlignment.LEFT);
+      textFlow.setMaxWidth(550);
 
       setContent(textFlow);
       setVvalue(1.0);
@@ -67,6 +68,8 @@ public class ConsoleScrollPane extends ScrollPane
       Text text = new Text(logEntry.getRight() + "\n");
       text.setFont(new Font(fontName, -1));
       text.setFontSmoothingType(FontSmoothingType.LCD);
+//      text.setTextAlignment(TextAlignment.LEFT);
+//      text.setWrappingWidth(10);
       switch (logEntry.getLeft())
       {
          case 100:

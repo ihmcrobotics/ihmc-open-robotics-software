@@ -97,13 +97,13 @@ class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
 
       if (!behaviorState.equals(LookAndStepBehavior.State.FOOTSTEP_PLANNING))
       {
-         statusLogger.warn("Footstep planning supressed: Not in footstep planning state");
-         statusLogger.warn("Footstep planning evauation failed: Not in footstep planning state");
+         statusLogger.debug("Footstep planning supressed: Not in footstep planning state");
+         statusLogger.debug("Footstep planning evauation failed: Not in footstep planning state");
          proceed = false;
       }
       else if (!regionsOK())
       {
-         statusLogger.warn("Footstep planning suppressed: Regions not OK: {}, timePassed: {}, isEmpty: {}",
+         statusLogger.debug("Footstep planning suppressed: Regions not OK: {}, timePassed: {}, isEmpty: {}",
                        planarRegions,
                        planarRegionReceptionTimerSnapshot.getTimePassedSinceReset(),
                        planarRegions == null ? null : planarRegions.isEmpty());
@@ -112,22 +112,22 @@ class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       }
       else if (planningFailureTimerSnapshot.isRunning())
       {
-         statusLogger.warn("Footstep planning suppressed: Planning failed recently");
+         statusLogger.debug("Footstep planning suppressed: Planning failed recently");
          proceed = false;
       }
       else if (!bodyPathPlanOK())
       {
-         statusLogger.warn("Footstep planning suppressed: Body path size: {}", bodyPathPlan == null ? null : bodyPathPlan.size());
+         statusLogger.debug("Footstep planning suppressed: Body path size: {}", bodyPathPlan == null ? null : bodyPathPlan.size());
          proceed = false;
       }
       else if (isBeingReviewedSupplier.get().get())
       {
-         statusLogger.warn("Footstep planning suppressed: Plan being reviewed");
+         statusLogger.debug("Footstep planning suppressed: Plan being reviewed");
          proceed = false;
       }
       else if (newBodyPathGoalNeededSupplier.get().get())
       {
-         statusLogger.warn("Footstep planning suppressed: New body path goal needed");
+         statusLogger.debug("Footstep planning suppressed: New body path goal needed");
          proceed = false;
       }
 
@@ -203,7 +203,7 @@ class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
       //      headingVector.set(goalPoint.getX(), goalPoint.getY());
       //      headingVector.sub(goalPoseBetweenFeet.getPosition().getX(), goalPoseBetweenFeet.getPosition().getY());
 
-      statusLogger.info("Setting goalPoint: {}", goalPoint);
+      statusLogger.info("Found next sub goal: {}", goalPoint);
       goalPoseBetweenFeet.getPosition().set(goalPoint);
 
       //      double yaw = Math.atan2(headingVector.getX(), headingVector.getY());
