@@ -153,7 +153,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
          {
             publishTextToSpeech("Starting Door Open Detector Service");
 
-            doorOpenDetectorBehaviorService.reset();
+           doorOpenDetectorBehaviorService.reset();
             doorOpenDetectorBehaviorService.run(true);
          }
 
@@ -167,6 +167,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
 
             }
             return doorOpenDetectorBehaviorService.doorDetected();
+           
          }
 
       };
@@ -253,6 +254,16 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
       factory.addStateAndDoneTransition(OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR, setDoorDetectorStart, OpenDoorState.TURN_DOOR_KNOB);
 
       factory.addStateAndDoneTransition(OpenDoorState.TURN_DOOR_KNOB, moveRightHandToDoorKnob, OpenDoorState.PUSH_ON_DOOR);
+      
+      
+      factory.addStateAndDoneTransition(OpenDoorState.PUSH_ON_DOOR, pushDoorALittle, OpenDoorState.PUSH_OPEN_DOOR);
+      factory.addStateAndDoneTransition(OpenDoorState.PUSH_OPEN_DOOR, pushDoorOpen, OpenDoorState.PULL_BACK_HANDS);
+      factory.addStateAndDoneTransition(OpenDoorState.PULL_BACK_HANDS, pullHandsBack, OpenDoorState.DONE);
+      factory.addState(OpenDoorState.DONE, done);
+
+
+      
+//      
       factory.addState(OpenDoorState.PUSH_ON_DOOR, pushDoorALittle);
       factory.addState(OpenDoorState.PUSH_OPEN_DOOR, pushDoorOpen);
       factory.addState(OpenDoorState.PULL_BACK_HANDS, pullHandsBack);
