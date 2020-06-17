@@ -11,6 +11,7 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.control.Tooltip;
 import us.ihmc.javaFXToolkit.StringConverterTools;
 import us.ihmc.javaFXToolkit.messager.MessageBidirectionalBinding.PropertyToMessageTypeConverter;
+import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.robotEnvironmentAwareness.communication.REAModuleAPI;
 import us.ihmc.robotEnvironmentAwareness.communication.packets.BoundingBoxParametersMessage;
 import us.ihmc.robotEnvironmentAwareness.ui.graphicsBuilders.OcTreeMeshBuilder.ColoringType;
@@ -114,12 +115,19 @@ public class OcTreeBasicsAnchorPaneController extends REABasicUIController
       resolutionSlider.setTooltip(tooltip);
    }
 
+   private Topic<Boolean> ocTreeEnableTopic = REAModuleAPI.OcTreeEnable;
+
+   public void setOcTreeEnableTopic(Topic<Boolean> ocTreeEnableTopic)
+   {
+      this.ocTreeEnableTopic = ocTreeEnableTopic;
+   }
+
    @Override
    public void bindControls()
    {
       setupControls();
 
-      uiMessager.bindBidirectionalGlobal(REAModuleAPI.OcTreeEnable, enableButton.selectedProperty());
+      uiMessager.bindBidirectionalGlobal(ocTreeEnableTopic, enableButton.selectedProperty());
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.OcTreeResolution, resolutionSlider.valueProperty(), numberToDoubleConverter);
 
       uiMessager.bindBidirectionalGlobal(REAModuleAPI.LidarBufferEnable, enableLidarBufferButton.selectedProperty());

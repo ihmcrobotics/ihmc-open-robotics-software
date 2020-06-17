@@ -38,18 +38,18 @@ public class StereoVisionPointCloudDataExporter
 
    public StereoVisionPointCloudDataExporter(REAUIMessager uiMessager)
    {
-      stereovisionPointCloudMessage = uiMessager.createInput(REAModuleAPI.DepthPointCloudState);
-      dataDirectoryPath = uiMessager.createInput(REAModuleAPI.UIStereoDataExporterDirectory, new File("Data/").getAbsolutePath());
-
-      uiMessager.registerTopicListener(REAModuleAPI.UIStereoDataExportRequest, this::toggleRecording);
+      this(uiMessager, REAModuleAPI.DepthPointCloudState, REAModuleAPI.UIStereoDataExporterDirectory, REAModuleAPI.UIStereoDataExportRequest);
    }
-   
-   public StereoVisionPointCloudDataExporter(REAUIMessager uiMessager, Topic<StereoVisionPointCloudMessage> dataTopic, Topic<String> pathTopic, Topic<Boolean> recordingTopic)
-   {
-      stereovisionPointCloudMessage = uiMessager.createInput(dataTopic);
-      dataDirectoryPath = uiMessager.createInput(pathTopic, new File("Data/").getAbsolutePath());
 
-      uiMessager.registerTopicListener(recordingTopic, this::toggleRecording);
+   public StereoVisionPointCloudDataExporter(REAUIMessager uiMessager,
+                                             Topic<StereoVisionPointCloudMessage> depthPointCloudStateTopic,
+                                             Topic<String> uiStereoDataExporterDirectoryTopic,
+                                             Topic<Boolean> uiStereoDataExportRequestTopic)
+   {
+      stereovisionPointCloudMessage = uiMessager.createInput(depthPointCloudStateTopic);
+      dataDirectoryPath = uiMessager.createInput(uiStereoDataExporterDirectoryTopic, new File("Data/").getAbsolutePath());
+
+      uiMessager.registerTopicListener(uiStereoDataExportRequestTopic, this::toggleRecording);
    }
 
    private void toggleRecording(boolean enable)

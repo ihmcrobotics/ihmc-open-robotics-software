@@ -29,9 +29,6 @@ public class SLAMAnchorPaneController extends REABasicUIController
    private ToggleButton sensorFrameEnable;
 
    @FXML
-   private ToggleButton planarRegionsEnable;
-
-   @FXML
    private Slider sourcePointsSlider;
 
    @FXML
@@ -80,7 +77,6 @@ public class SLAMAnchorPaneController extends REABasicUIController
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowSLAMOctreeMap, octreeMapEnable.selectedProperty());
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowSLAMOctreeNormalMap, showNormal.selectedProperty());
       uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowSLAMSensorTrajectory, sensorFrameEnable.selectedProperty());
-      uiMessager.bindBidirectionalGlobal(SLAMModuleAPI.ShowPlanarRegionsMap, planarRegionsEnable.selectedProperty());
 
       ihmcSLAMParametersProperty.bindBidirectionalNumberOfSourcePoints(sourcePointsSlider.valueProperty());
       ihmcSLAMParametersProperty.bindBidirectionalMaximumICPSearchingSize(searchingSizeSlider.valueProperty());
