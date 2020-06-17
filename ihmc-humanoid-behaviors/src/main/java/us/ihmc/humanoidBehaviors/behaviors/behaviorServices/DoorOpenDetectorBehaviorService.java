@@ -95,7 +95,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
             // getReportedGoalPoseWorldFrame(newPose);
 
             //first find the average location of the door to begin with(the doors closed point)
-            if (averageOrigin == null)
+            if (averageOrigin == null) 
             {
 
                originPoses.add(newPose);
