@@ -197,7 +197,7 @@ public class FiducialDetectorFromCameraImages
    {
       detector.setIntrinsic(intrinsicParameters);
       //increase brightness for sim
-      RescaleOp rescaleOp = new RescaleOp(1.9f, 35, null);
+      RescaleOp rescaleOp = new RescaleOp(2.5f, 35, null);
       rescaleOp.filter(bufferedImage, bufferedImage);  // Source and destination are the same.
       if (DEBUG)
       {

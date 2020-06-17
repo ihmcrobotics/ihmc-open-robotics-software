@@ -96,6 +96,7 @@ public class TestDoorOpenBehaviorService extends AbstractBehavior
 	         Quaternion orientation = new Quaternion();
 	         pose.get(location, orientation);
 	         publishUIPositionCheckerPacket(location, orientation);
+	       //  System.out.println("sending door pose "+pose.getYaw()+", "+pose.getPitch()+", "+pose.getRoll());
 
 	         doorToBehaviorPublisher.publish(HumanoidMessageTools.createDoorLocationPacket(pose));
 	         doorToUIPublisher.publish(HumanoidMessageTools.createDoorLocationPacket(pose));
