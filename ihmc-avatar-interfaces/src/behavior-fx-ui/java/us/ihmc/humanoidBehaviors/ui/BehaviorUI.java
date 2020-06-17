@@ -1,16 +1,18 @@
 package us.ihmc.humanoidBehaviors.ui;
 
+import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.scene.*;
-import javafx.scene.control.ChoiceBox;
-import javafx.scene.control.SplitPane;
-import javafx.scene.control.Tab;
-import javafx.scene.control.TabPane;
+import javafx.scene.control.*;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
+import javafx.scene.text.TextFlow;
 import javafx.stage.Stage;
 import org.apache.commons.lang3.SystemUtils;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
@@ -99,6 +101,18 @@ public class BehaviorUI
 //         AnchorPane sideVisualizationArea = new AnchorPane();
          VBox sideVisualizationArea = new VBox();
 
+         ScrollPane logScrollPane = new ScrollPane();
+         logScrollPane.setLayoutY(200.0);
+//         logScrollPane.setLayoutY(500.0);
+//         logScrollPane.setPrefWidth(200.0);
+//         logScrollPane.setPrefHeight(500.0);
+         TextFlow textFlow = new TextFlow();
+//         textFlow.setPrefWidth(100.0);
+//         TextArea textArea = new TextArea();
+//         textArea.setPrefWidth(Region.USE_COMPUTED_SIZE);
+//         textArea.setPrefHeight(Region.USE_COMPUTED_SIZE);
+         logScrollPane.setContent(textFlow);
+
          behaviorSelector.getItems().add("None");
          behaviorSelector.setValue("None");
 
@@ -123,6 +137,7 @@ public class BehaviorUI
          sideVisualizationArea.setPrefWidth(200.0);
 //         view3DSubSceneWrappedInsidePane.setPrefWidth(500.0);
          mainSplitPane.getItems().add(view3DSubSceneWrappedInsidePane);
+         mainSplitPane.getItems().add(logScrollPane);
 //         mainSplitPane.getItems().add(sideVisualizationArea);
 
          Stage primaryStage = new Stage();
@@ -142,6 +157,35 @@ public class BehaviorUI
          ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 300.0);
          primaryStage.setOnCloseRequest(event -> guiRecorder.stop());
          Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop));
+
+         // do this last for now in case events starts firing early
+         behaviorMessager.registerTopicListener(BehaviorModule.API.StatusLog, logEntry ->
+         {
+            Platform.runLater(() ->
+            {
+               Text text = new Text(logEntry.getRight() + "\n");
+               switch (logEntry.getLeft())
+               {
+                  case 100:
+                  case 200:
+                     text.setFill(Color.RED.brighter());
+                     break;
+                  case 300:
+                     text.setFill(Color.YELLOW);
+                     break;
+                  case 400:
+                     text.setFill(Color.BLACK);
+                     break;
+                  case 500:
+                     text.setFill(Color.CYAN);
+                     break;
+                  case 600:
+                     text.setFill(Color.GREEN);
+                     break;
+               }
+               textFlow.getChildren().add(text);
+            });
+         });
       });
    }
 
