@@ -7,10 +7,14 @@ import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.log.LogTools;
 import us.ihmc.log.LogToolsWriteOnly;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.function.Supplier;
 
 public class StatusLogger implements LogToolsWriteOnly
 {
+   private final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("ss:SSS");
+
    private final UIPublisher uiPublisher;
 
    public StatusLogger(UIPublisher uiPublisher)
@@ -73,7 +77,7 @@ public class StatusLogger implements LogToolsWriteOnly
       if (LogTools.isEnabled(level, 2))
       {
          LogTools.log(level, 2, message);
-         uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), message.toString()));
+         publishToUI(level, message.toString());
       }
    }
    private void logIfEnabled(Level level, int additionalStackTraceHeight, Object message)
@@ -81,7 +85,7 @@ public class StatusLogger implements LogToolsWriteOnly
       if (LogTools.isEnabled(level, 2))
       {
          LogTools.log(level, 2 + additionalStackTraceHeight, message);
-         uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), message.toString()));
+         publishToUI(level, message.toString());
       }
    }
    private void logIfEnabled(Level level, Supplier<?> msgSupplier)
@@ -90,7 +94,7 @@ public class StatusLogger implements LogToolsWriteOnly
       {
          String suppliedMessage = msgSupplier.get().toString();
          LogTools.log(level, 2, suppliedMessage);
-         uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), suppliedMessage));
+         publishToUI(level, suppliedMessage);
       }
    }
    private void logIfEnabled(Level level, Object message, Supplier<?> msgSupplier)
@@ -99,7 +103,7 @@ public class StatusLogger implements LogToolsWriteOnly
       {
          String parameterProcessed = new ParameterizedMessage(message.toString(), msgSupplier.get()).getFormattedMessage();
          LogTools.log(level, 2, parameterProcessed);
-         uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), parameterProcessed));
+         publishToUI(level, parameterProcessed);
       }
    }
    private void logIfEnabled(Level level, Object message, Object p0)
@@ -108,7 +112,7 @@ public class StatusLogger implements LogToolsWriteOnly
       {
          String parameterProcessed = new ParameterizedMessage(message.toString(), p0).getFormattedMessage();
          LogTools.log(level, 2, parameterProcessed);
-         uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), parameterProcessed));
+         publishToUI(level, parameterProcessed);
       }
    }
    private void logIfEnabled(Level level, Object message, Object p0, Object p1)
@@ -117,7 +121,7 @@ public class StatusLogger implements LogToolsWriteOnly
       {
          String parameterProcessed = new ParameterizedMessage(message.toString(), p0, p1).getFormattedMessage();
          LogTools.log(level, 2, parameterProcessed);
-         uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), parameterProcessed));
+         publishToUI(level, parameterProcessed);
       }
    }
    private void logIfEnabled(Level level, Object message, Object p0, Object p1, Object p2)
@@ -126,7 +130,12 @@ public class StatusLogger implements LogToolsWriteOnly
       {
          String parameterProcessed = new ParameterizedMessage(message.toString(), p0, p1, p2).getFormattedMessage();
          LogTools.log(level, 2, parameterProcessed);
-         uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), parameterProcessed));
+         publishToUI(level, parameterProcessed);
       }
+   }
+
+   private void publishToUI(Level level, String  message)
+   {
+      uiPublisher.publishToUI(BehaviorModule.API.StatusLog, Pair.of(level.intLevel(), LocalDateTime.now().format(dateFormat) + " " + message));
    }
 }
