@@ -14,7 +14,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.humanoidBehaviors.*;
 import us.ihmc.humanoidBehaviors.ui.behaviors.DirectRobotUIController;
-import us.ihmc.humanoidBehaviors.ui.graphics.ConsoleTextFlow;
+import us.ihmc.humanoidBehaviors.ui.graphics.ConsoleScrollPane;
 import us.ihmc.javafx.JavaFXLinuxGUIRecorder;
 import us.ihmc.javafx.JavaFXMissingTools;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
@@ -98,9 +98,7 @@ public class BehaviorUI
 //         AnchorPane sideVisualizationArea = new AnchorPane();
          VBox sideVisualizationArea = new VBox();
 
-         ScrollPane logScrollPane = new ScrollPane();
-         ConsoleTextFlow consoleTextFlow = new ConsoleTextFlow(behaviorMessager);
-         logScrollPane.setContent(consoleTextFlow);
+         ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager);
 
          behaviorSelector.getItems().add("None");
          behaviorSelector.setValue("None");
@@ -126,7 +124,7 @@ public class BehaviorUI
 //         sideVisualizationArea.setPrefWidth(200.0);
 //         view3DSubSceneWrappedInsidePane.setPrefWidth(500.0);
          mainSplitPane.getItems().add(view3DSubSceneWrappedInsidePane);
-         mainSplitPane.getItems().add(logScrollPane);
+         mainSplitPane.getItems().add(consoleScrollPane);
 //         mainSplitPane.getItems().add(sideVisualizationArea);
          mainSplitPane.setDividerPositions(2.0 / 3.0);
 
@@ -150,7 +148,7 @@ public class BehaviorUI
          }
 
          // do this last for now in case events starts firing early
-         consoleTextFlow.setupAtEnd();
+         consoleScrollPane.setupAtEnd();
       });
    }
 
