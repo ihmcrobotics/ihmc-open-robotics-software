@@ -9,7 +9,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParametersReadOnly;
-import us.ihmc.humanoidBehaviors.tools.BehaviorBuilderPattern;
 import us.ihmc.humanoidBehaviors.tools.HumanoidRobotState;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.interfaces.UIPublisher;
@@ -22,13 +21,14 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.BodyPathPlanForUI;
 import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.MapRegionsForUI;
 
-class LookAndStepBodyPathTask implements BehaviorBuilderPattern
+class LookAndStepBodyPathTask
 {
    protected final StatusLogger statusLogger;
    protected final UIPublisher uiPublisher;
@@ -39,12 +39,11 @@ class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    protected final Runnable clearNewBodyPathNeededCallback;
    protected final Consumer<LookAndStepBehavior.State> behaviorStateUpdater;
 
-   // TODO Create more minimal field set enforcer
-   protected final Field<Consumer<ArrayList<Pose3D>>> autonomousOutput = required();
-   protected final Field<Consumer<List<? extends Pose3DReadOnly>>> initiateReviewOutput = required();
-   protected final Field<Supplier<Boolean>> isBeingReviewed = required();
+   protected Consumer<ArrayList<Pose3D>> autonomousOutput;
+   protected Consumer<List<? extends Pose3DReadOnly>> initiateReviewOutput;
+   protected Supplier<Boolean> isBeingReviewed;
 
-   protected final Field<Runnable> resetPlanningFailedTimer = required();
+   protected Runnable resetPlanningFailedTimer;
 
    private PlanarRegionsList mapRegions;
    private Pose3D goal;
@@ -120,7 +119,7 @@ class LookAndStepBodyPathTask implements BehaviorBuilderPattern
          statusLogger.debug("Body path planning supressed: Failed recently");
          proceed = false;
       }
-      else if (isBeingReviewed.get().get())
+      else if (isBeingReviewed.get())
       {
          statusLogger.debug("Body path planning supressed: Is being reviewed");
          proceed = false;
@@ -142,14 +141,15 @@ class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    // TODO: Extract as interface?
    public void run()
    {
-      validateAll();
+      Objects.requireNonNull(resetPlanningFailedTimer);
+      Objects.requireNonNull(isBeingReviewed);
+      Objects.requireNonNull(autonomousOutput);
+      Objects.requireNonNull(initiateReviewOutput);
 
       if (evaluateEntry())
       {
          performTask();
       }
-
-      invalidateChanging();
    }
 
    private void performTask()
@@ -191,37 +191,37 @@ class LookAndStepBodyPathTask implements BehaviorBuilderPattern
       {
          if (operatorReviewEnabled.get())
          {
-            initiateReviewOutput.get().accept(bodyPathPlanForReview);
+            initiateReviewOutput.accept(bodyPathPlanForReview);
          }
          else
          {
             behaviorStateUpdater.accept(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
-            autonomousOutput.get().accept(bodyPathPlanForReview);
+            autonomousOutput.accept(bodyPathPlanForReview);
          }
       }
       else
       {
-         resetPlanningFailedTimer.get().run();
+         resetPlanningFailedTimer.run();
       }
    }
 
    protected void setResetPlanningFailedTimer(Runnable resetPlanningFailedTimer)
    {
-      this.resetPlanningFailedTimer.set(resetPlanningFailedTimer);
+      this.resetPlanningFailedTimer = resetPlanningFailedTimer;
    }
 
    public void setIsBeingReviewedSupplier(Supplier<Boolean> isBeingReviewed)
    {
-      this.isBeingReviewed.set(isBeingReviewed);
+      this.isBeingReviewed = isBeingReviewed;
    }
 
    public void setAutonomousOutput(Consumer<ArrayList<Pose3D>> autonomousOutput)
    {
-      this.autonomousOutput.set(autonomousOutput);
+      this.autonomousOutput = autonomousOutput;
    }
 
    public void setReviewInitiator(Consumer<List<? extends Pose3DReadOnly>> reviewInitiation)
    {
-      this.initiateReviewOutput.set(reviewInitiation);
+      this.initiateReviewOutput = reviewInitiation;
    }
 }
