@@ -31,18 +31,20 @@ import static us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI.MapRe
 class LookAndStepBodyPathTask implements BehaviorBuilderPattern
 {
    protected final StatusLogger statusLogger;
+   protected final UIPublisher uiPublisher;
+   protected final VisibilityGraphsParametersReadOnly visibilityGraphParameters;
+   protected final LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters;
+   protected final Supplier<Boolean> operatorReviewEnabled;
+   protected final Supplier<Boolean> needNewPlan;
+   protected final Runnable clearNewBodyPathNeededCallback;
+   protected final Consumer<LookAndStepBehavior.State> behaviorStateUpdater;
 
-   protected final Field<UIPublisher> uiPublisher = required();
-   protected final Field<VisibilityGraphsParametersReadOnly> visibilityGraphParameters = required();
-   protected final Field<LookAndStepBehaviorParametersReadOnly> lookAndStepBehaviorParameters = required();
-   protected final Field<Supplier<Boolean>> operatorReviewEnabled = required();
-   protected final Field<Consumer<ArrayList<Pose3D>>> successfulPlanConsumer = required();
-   protected final Field<Runnable> resetPlanningFailedTimer = required();
+   // TODO Create more minimal field set enforcer
+   protected final Field<Consumer<ArrayList<Pose3D>>> autonomousOutput = required();
    protected final Field<Consumer<List<? extends Pose3DReadOnly>>> initiateReviewOutput = required();
    protected final Field<Supplier<Boolean>> isBeingReviewed = required();
-   protected final Field<Supplier<Boolean>> needNewPlan = required();
-   protected final Field<Runnable> clearNewBodyPathNeededCallback = required();
-   protected final Field<Consumer<LookAndStepBehavior.State>> behaviorStateUpdater = required();
+
+   protected final Field<Runnable> resetPlanningFailedTimer = required();
 
    private PlanarRegionsList mapRegions;
    private Pose3D goal;
@@ -51,9 +53,23 @@ class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    private TimerSnapshot planningFailureTimerSnapshot;
    private LookAndStepBehavior.State behaviorState;
 
-   LookAndStepBodyPathTask(StatusLogger statusLogger)
+   LookAndStepBodyPathTask(StatusLogger statusLogger,
+                           UIPublisher uiPublisher,
+                           VisibilityGraphsParametersReadOnly visibilityGraphParameters,
+                           LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters,
+                           Supplier<Boolean> operatorReviewEnabled,
+                           Supplier<Boolean> needNewPlan,
+                           Runnable clearNewBodyPathNeededCallback,
+                           Consumer<LookAndStepBehavior.State> behaviorStateUpdater)
    {
       this.statusLogger = statusLogger;
+      this.uiPublisher = uiPublisher;
+      this.visibilityGraphParameters = visibilityGraphParameters;
+      this.lookAndStepBehaviorParameters = lookAndStepBehaviorParameters;
+      this.operatorReviewEnabled = operatorReviewEnabled;
+      this.needNewPlan = needNewPlan;
+      this.clearNewBodyPathNeededCallback = clearNewBodyPathNeededCallback;
+      this.behaviorStateUpdater = behaviorStateUpdater;
    }
 
    protected void update(PlanarRegionsList mapRegions,
@@ -75,11 +91,11 @@ class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    {
       boolean proceed = true;
 
-//      if (!needNewPlan.get().get())
-//      {
-//         LogTools.warn("Body path planning supressed: New plan not needed");
-//         proceed = false;
-//      }
+      //      if (!needNewPlan.get().get())
+      //      {
+      //         LogTools.warn("Body path planning supressed: New plan not needed");
+      //         proceed = false;
+      //      }
       if (!behaviorState.equals(LookAndStepBehavior.State.BODY_PATH_PLANNING))
       {
          statusLogger.debug("Body path planning supressed: Not in body path planning state");
@@ -88,15 +104,15 @@ class LookAndStepBodyPathTask implements BehaviorBuilderPattern
       else if (!hasGoal())
       {
          statusLogger.debug("Body path planning supressed: No goal specified");
-         uiPublisher.get().publishToUI(MapRegionsForUI, mapRegions);
+         uiPublisher.publishToUI(MapRegionsForUI, mapRegions);
          proceed = false;
       }
       else if (!regionsOK())
       {
          statusLogger.debug("Body path planning supressed: Regions not OK: {}, timePassed: {}, isEmpty: {}",
-                       mapRegions,
-                       mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset(),
-                       mapRegions == null ? null : mapRegions.isEmpty());
+                            mapRegions,
+                            mapRegionsReceptionTimerSnapshot.getTimePassedSinceReset(),
+                            mapRegions == null ? null : mapRegions.isEmpty());
          proceed = false;
       }
       else if (planningFailureTimerSnapshot.isRunning()) // TODO: This could be "run recently" instead of failed recently
@@ -120,9 +136,7 @@ class LookAndStepBodyPathTask implements BehaviorBuilderPattern
 
    private boolean regionsOK()
    {
-      return mapRegions != null
-             && !mapRegions.isEmpty()
-             && mapRegionsReceptionTimerSnapshot.isRunning();
+      return mapRegions != null && !mapRegions.isEmpty() && mapRegionsReceptionTimerSnapshot.isRunning();
    }
 
    // TODO: Extract as interface?
@@ -141,15 +155,14 @@ class LookAndStepBodyPathTask implements BehaviorBuilderPattern
    private void performTask()
    {
       // TODO: Add robot standing still for 20s for real robot?
-      uiPublisher.get().publishToUI(MapRegionsForUI, mapRegions);
+      uiPublisher.publishToUI(MapRegionsForUI, mapRegions);
 
-      clearNewBodyPathNeededCallback.get().run();
+      clearNewBodyPathNeededCallback.run();
 
       // calculate and send body path plan
-      BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters.get());
-      VisibilityGraphPathPlanner bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters.get(),
-                                                                                  pathPostProcessor,
-                                                                                  new YoVariableRegistry(LookAndStepBodyPathModule.class.getSimpleName()));
+      BodyPathPostProcessor pathPostProcessor = new ObstacleAvoidanceProcessor(visibilityGraphParameters);
+      YoVariableRegistry parentRegistry = new YoVariableRegistry(LookAndStepBodyPathModule.class.getSimpleName());
+      VisibilityGraphPathPlanner bodyPathPlanner = new VisibilityGraphPathPlanner(visibilityGraphParameters, pathPostProcessor, parentRegistry);
 
       bodyPathPlanner.setGoal(goal);
       bodyPathPlanner.setPlanarRegionsList(mapRegions);
@@ -171,19 +184,19 @@ class LookAndStepBodyPathTask implements BehaviorBuilderPattern
          {
             bodyPathPlanForReview.add(new Pose3D(poseWaypoint));
          }
-         uiPublisher.get().publishToUI(BodyPathPlanForUI, bodyPathPlanForReview);
+         uiPublisher.publishToUI(BodyPathPlanForUI, bodyPathPlanForReview);
       }
 
       if (bodyPathPlanForReview.size() >= 2)
       {
-         if (operatorReviewEnabled.get().get())
+         if (operatorReviewEnabled.get())
          {
             initiateReviewOutput.get().accept(bodyPathPlanForReview);
          }
          else
          {
-            behaviorStateUpdater.get().accept(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
-            successfulPlanConsumer.get().accept(bodyPathPlanForReview);
+            behaviorStateUpdater.accept(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
+            autonomousOutput.get().accept(bodyPathPlanForReview);
          }
       }
       else
@@ -192,39 +205,9 @@ class LookAndStepBodyPathTask implements BehaviorBuilderPattern
       }
    }
 
-   public void setUIPublisher(UIPublisher uiPublisher)
-   {
-      this.uiPublisher.set(uiPublisher);
-   }
-
-   public void setVisibilityGraphParameters(VisibilityGraphsParametersReadOnly visibilityGraphParameters)
-   {
-      this.visibilityGraphParameters.set(visibilityGraphParameters);
-   }
-
-   public void setLookAndStepBehaviorParameters(LookAndStepBehaviorParametersReadOnly lookAndStepBehaviorParameters)
-   {
-      this.lookAndStepBehaviorParameters.set(lookAndStepBehaviorParameters);
-   }
-
-   public void setOperatorReviewEnabled(Supplier<Boolean> operatorReviewEnabled)
-   {
-      this.operatorReviewEnabled.set(operatorReviewEnabled);
-   }
-
-   public void setAutonomousOutput(Consumer<ArrayList<Pose3D>> successfulPlanConsumer)
-   {
-      this.successfulPlanConsumer.set(successfulPlanConsumer);
-   }
-
-   public void setResetPlanningFailedTimer(Runnable resetPlanningFailedTimer)
+   protected void setResetPlanningFailedTimer(Runnable resetPlanningFailedTimer)
    {
       this.resetPlanningFailedTimer.set(resetPlanningFailedTimer);
-   }
-
-   public void setReviewInitiator(Consumer<List<? extends Pose3DReadOnly>> reviewInitiation)
-   {
-      this.initiateReviewOutput.set(reviewInitiation);
    }
 
    public void setIsBeingReviewedSupplier(Supplier<Boolean> isBeingReviewed)
@@ -232,18 +215,13 @@ class LookAndStepBodyPathTask implements BehaviorBuilderPattern
       this.isBeingReviewed.set(isBeingReviewed);
    }
 
-   public void setNeedNewPlan(Supplier<Boolean> needNewPlan)
+   public void setAutonomousOutput(Consumer<ArrayList<Pose3D>> autonomousOutput)
    {
-      this.needNewPlan.set(needNewPlan);
+      this.autonomousOutput.set(autonomousOutput);
    }
 
-   public void setClearNewBodyPathGoalNeededCallback(Runnable clearNewBodyPathNeededCallback)
+   public void setReviewInitiator(Consumer<List<? extends Pose3DReadOnly>> reviewInitiation)
    {
-      this.clearNewBodyPathNeededCallback.set(clearNewBodyPathNeededCallback);
-   }
-
-   public void setBehaviorStateUpdater(Consumer<LookAndStepBehavior.State> behaviorStateUpdater)
-   {
-      this.behaviorStateUpdater.set(behaviorStateUpdater);
+      this.initiateReviewOutput.set(reviewInitiation);
    }
 }
