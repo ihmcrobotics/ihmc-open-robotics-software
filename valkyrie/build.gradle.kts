@@ -30,7 +30,7 @@ mainDependencies {
    api("us.ihmc:euclid-frame-shape:0.15.0")
    api("us.ihmc:mecano:0.4.1-ejml-0.39-beta-1")
    api("us.ihmc:mecano-yovariables:0.4.1-ejml-0.39-beta-1")
-   api("us.ihmc:ihmc-yovariables:0.7.0-ejml-0.39-beta-1")
+   api("us.ihmc:ihmc-yovariables:0.8.0")
    api("us.ihmc:ihmc-realtime:1.3.0")
    api("us.ihmc:IHMCRosControl:0.5.0") {
       setChanging(true)
