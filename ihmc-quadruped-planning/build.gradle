@@ -17,8 +17,8 @@ mainDependencies {
     api("org.ejml:ejml-core:0.39")
     api("org.ejml:ejml-ddense:0.39")
 
-    api("us.ihmc:euclid-frame:0.14.2-ejml-0.39-beta-1")
-    api("us.ihmc:euclid-shape:0.14.2-ejml-0.39-beta-1")
+    api("us.ihmc:euclid-frame:0.15.0")
+    api("us.ihmc:euclid-shape:0.15.0")
     api("us.ihmc:ihmc-yovariables:0.7.0-ejml-0.39-beta-1")
     api("us.ihmc:ihmc-robot-description:0.18.0-ejml-0.39-beta-1")
     api("us.ihmc:ihmc-robotics-toolkit:source")

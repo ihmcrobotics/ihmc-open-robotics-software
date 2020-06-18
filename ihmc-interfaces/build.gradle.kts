@@ -31,8 +31,8 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.14.2-ejml-0.39-beta-1")
-   api("us.ihmc:euclid-geometry:0.14.2-ejml-0.39-beta-1")
+   api("us.ihmc:euclid:0.15.0")
+   api("us.ihmc:euclid-geometry:0.15.0")
    api("us.ihmc:ihmc-pub-sub:0.12.0-ejml-0.39-beta-1")
    api("us.ihmc:ros2-common-interfaces:0.18.3-ejml-0.39-beta-1")
    api("us.ihmc:ihmc-commons:0.30.0")
@@ -43,7 +43,7 @@ testDependencies {
 }
 
 generatorDependencies {
-   api("us.ihmc:euclid:0.14.2-ejml-0.39-beta-1")
+   api("us.ihmc:euclid:0.15.0")
    api("us.ihmc:ihmc-commons:0.30.0")
    api("us.ihmc:ros2-msg-to-pubsub-generator:0.18.3-ejml-0.39-beta-1")
 }
