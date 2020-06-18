@@ -21,7 +21,7 @@ mainDependencies {
    api("org.georegression:georegression:0.22")
    api("org.boofcv:boofcv-geo:0.36")
 
-   api("us.ihmc:ihmc-graphics-description:0.17.0-ejml-0.39-beta-1")
+   api("us.ihmc:ihmc-graphics-description:0.18.0")
    api("us.ihmc:simulation-construction-set:0.18.0-ejml-0.39-beta-1")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
