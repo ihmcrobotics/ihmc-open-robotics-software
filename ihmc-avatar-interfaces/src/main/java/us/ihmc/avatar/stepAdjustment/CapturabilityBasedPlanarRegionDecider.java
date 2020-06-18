@@ -28,7 +28,7 @@ public class CapturabilityBasedPlanarRegionDecider
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
 
-   private static final double defaultMinimumIntersectionForSearch = 0.05;
+   private static final double defaultMinimumIntersectionForSearch = 0.015;
    private static final double defaultAreaImprovementToSwitch = 0.02;
    private static final double defaultInflationToCurrentArea = 0.1;
 
@@ -174,6 +174,9 @@ public class CapturabilityBasedPlanarRegionDecider
 
    private boolean checkIfCurrentPlanarRegionIsValid(FrameConvexPolygon2DReadOnly captureRegion, ConvexPolygon2DReadOnly reachabilityRegion)
    {
+      if (planarRegionToConstrainTo == null)
+         return false;
+
       computeProjectedConvexHull(planarRegionToConstrainTo);
       if (reachabilityRegion != null)
          convexPolygonTools.computeIntersectionOfPolygons(convexHullConstraintInControlPlane, reachabilityRegion, possibleArea);

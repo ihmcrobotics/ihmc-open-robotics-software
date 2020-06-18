@@ -47,7 +47,10 @@ public class StepConstraintCalculator
    private final ReachabilityConstraintCalculator reachabilityConstraintCalculator;
 
    private final FrameConvexPolygon2D reachabilityRegionInConstraintPlane = new FrameConvexPolygon2D();
-   private final YoFrameConvexPolygon2D yoReachabilityRegionInConstraintPlane = new YoFrameConvexPolygon2D("reachabilityPolygon", worldFrame, 10, registry);
+   private final YoFrameConvexPolygon2D yoReachabilityRegion = new YoFrameConvexPolygon2D("reachabilityPolygon", worldFrame, 10, registry);
+
+   private static final double defaultMinimumTimeRemainingForSwitch = 0.05;
+   private final YoDouble minimumTimeRemainingForSwitch = new YoDouble("minimumTimeRemainingForSwitch", registry);
 
    private final YoDouble timeRemainingInState = new YoDouble("timeRemainingInState", registry);
    private final YoFrameConvexPolygon2D supportPolygon = new YoFrameConvexPolygon2D("supportPolygon", worldFrame, 6, registry);
@@ -106,9 +109,11 @@ public class StepConstraintCalculator
                                                                                    maxStepWidth,
                                                                                    registry);
 
+      minimumTimeRemainingForSwitch.set(defaultMinimumTimeRemainingForSwitch);
+
       YoGraphicPosition capturePointViz = new YoGraphicPosition("CapturePoint", capturePoint, 0.02, YoAppearance.Yellow(), GraphicType.BALL_WITH_CROSS);
       YoArtifactPolygon supportPolygonArtifact = new YoArtifactPolygon("SupportPolygon", supportPolygon, Color.GREEN, false);
-      YoArtifactPolygon reachabilityArtifact = new YoArtifactPolygon("ReachabilityPolygon", yoReachabilityRegionInConstraintPlane, Color.BLUE, false);
+      YoArtifactPolygon reachabilityArtifact = new YoArtifactPolygon("ReachabilityPolygon", yoReachabilityRegion, Color.BLUE, false);
 
       graphicsListRegistry.registerYoGraphic("Constraint Calculator", capturePointViz);
       graphicsListRegistry.registerArtifact("Constraint Calculator", capturePointViz.createArtifact());
@@ -199,12 +204,17 @@ public class StepConstraintCalculator
 
          List<StepConstraintRegion> steppableRegions = steppableRegionsCalculator.computeSteppableRegions();
 
+         updateReachabilityRegion(currentStep.getSwingSide().getOppositeSide());
+
+         if (timeRemainingInState.getDoubleValue() < minimumTimeRemainingForSwitch.getDoubleValue())
+            return;
+
          planarRegionDecider.setConstraintRegions(steppableRegions);
          planarRegionDecider.setOmega0(omega);
          planarRegionDecider.setCaptureRegion(captureRegionCalculator.getCaptureRegion());
-         planarRegionDecider.updatePlanarRegionConstraintForStep(currentStep.getStepPose(), reachabilityRegionInConstraintPlane);
+         planarRegionDecider.updatePlanarRegionConstraintForStep(currentStep.getStepPose(), yoReachabilityRegion);
 
-         updateReachabilityRegionInControlPlane(currentStep.getSwingSide().getOppositeSide());
+         updateReachabilityRegionInControlPlane();
 
          stepConstraintRegion = computeConstraintRegion();
       }
@@ -221,18 +231,23 @@ public class StepConstraintCalculator
       captureRegionCalculator.calculateCaptureRegion(swingSide, timeRemaining, capturePoint, omega, supportPolygons.get(swingSide.getOppositeSide()));
    }
 
-   public void updateReachabilityRegionInControlPlane(RobotSide supportSide)
+   public void updateReachabilityRegion(RobotSide supportSide)
+   {
+      FrameConvexPolygon2DReadOnly reachabilityRegion = reachabilityConstraintCalculator.getReachabilityPolygon(supportSide);
+      reachabilityRegionInConstraintPlane.clear();
+      reachabilityRegionInConstraintPlane.setIncludingFrame(reachabilityRegion);
+      reachabilityRegionInConstraintPlane.changeFrame(worldFrame);
+      yoReachabilityRegion.set(reachabilityRegionInConstraintPlane);
+   }
+
+   public void updateReachabilityRegionInControlPlane()
    {
       StepConstraintRegion stepConstraintRegion = planarRegionDecider.getConstraintRegion();
 
       if (stepConstraintRegion == null)
          return;
 
-      FrameConvexPolygon2DReadOnly reachabilityRegion = reachabilityConstraintCalculator.getReachabilityPolygon(supportSide);
-      reachabilityRegionInConstraintPlane.clear();
-      reachabilityRegionInConstraintPlane.setIncludingFrame(reachabilityRegion);
-      reachabilityRegionInConstraintPlane.changeFrame(worldFrame);
-      yoReachabilityRegionInConstraintPlane.set(reachabilityRegionInConstraintPlane);
+      reachabilityRegionInConstraintPlane.set(yoReachabilityRegion);
       reachabilityRegionInConstraintPlane.applyTransform(stepConstraintRegion.getTransformToLocal(), false);
    }
 
