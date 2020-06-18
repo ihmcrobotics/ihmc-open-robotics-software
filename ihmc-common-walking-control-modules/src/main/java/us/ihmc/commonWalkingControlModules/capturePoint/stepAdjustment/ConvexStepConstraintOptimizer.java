@@ -10,6 +10,18 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.log.LogTools;
 import us.ihmc.matrixlib.MatrixTools;
 
+/**
+ * The objective of this class is to provide an optimization scheme to constrain a convex polygon within another convex polygon using only linear translations.
+ * This is then applied to constrain a step within a step constraint region in the environment.
+ *
+ * It does so use a garbage free implementation and a quadratic program to satisfy the inequality constraints as best as possible. If there is no possible
+ * solution to satisfy one polygon completely within another, it returns a "best-effort" solution that maximizes the amount of area inside the constraining
+ * polygon.
+ *
+ * It is able to achieve this objective efficiently by not requiring a solution be found in a single control tick. The maximum number of iterations in the
+ * quadratic program is set fairly low, so as to reduce total time. Then, the solver is "warm started" from the previous active set, allowing the optimization
+ * to iteratively find a solution over multiple control ticks.
+ */
 public class ConvexStepConstraintOptimizer
 {
    private static final boolean DEBUG = false;
