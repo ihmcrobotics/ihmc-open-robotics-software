@@ -509,6 +509,7 @@ public class LinearMomentumRateControlModule
          }
          if (initializeForSingleSupport)
          {
+            stepAdjustmentController.reset();
             icpController.initializeForSingleSupport(supportSide);
 
             double transferDuration = transferDurations.size() > 1 ? transferDurations.get(1) : transferDurations.get(0);
