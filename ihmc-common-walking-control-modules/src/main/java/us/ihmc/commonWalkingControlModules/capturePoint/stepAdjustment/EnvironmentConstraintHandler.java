@@ -164,12 +164,10 @@ public class EnvironmentConstraintHandler
       parameters.setDesiredDistanceInside(desiredDistanceInsideConstraint.getValue());
 
       RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findConstraintTransform(footstepPolygon, yoConvexHullConstraint, parameters);
-      if (wiggleTransform == null)
-         return false;
-
       originalPose.set(footstepPoseToPack);
 
-      footstepPoseToPack.applyTransform(wiggleTransform);
+      if (wiggleTransform != null)
+         footstepPoseToPack.applyTransform(wiggleTransform);
 
       footstepPoseToPack.getPosition().setZ(stepConstraintRegion.getPlaneZGivenXY(footstepPoseToPack.getX(), footstepPoseToPack.getY()));
       footstepPoseToPack.getOrientation().set(stepConstraintRegion.getTransformToWorld().getRotation());
