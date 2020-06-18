@@ -75,7 +75,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       footstepPlannerParameters.setEnableConcaveHullWiggler(lookAndStepParameters.getEnableConcaveHullWigglerOverride());
 
       AtomicReference<Boolean> operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
-      TypedNotification<Boolean> approvalNotification = helper.createUITypedNotification(Approval);
+      TypedNotification<Boolean> approvalNotification = helper.createUITypedNotification(ReviewApproval);
 
       AtomicBoolean newBodyPathGoalNeeded = new AtomicBoolean(true);
       AtomicReference<RobotSide> lastStanceSide = new AtomicReference<>();
@@ -154,7 +154,7 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       // TODO: Put these in better spots
       helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathModule::acceptMapRegions);
-      helper.createUICallback(GoalInput, bodyPathModule::acceptGoal);
+      helper.createROS2Callback(GOAL_INPUT, bodyPathModule::acceptGoal);
       helper.createROS2Callback(ROS2Tools.REALSENSE_SLAM_REGIONS, footstepPlanningModule::acceptPlanarRegions);
    }
 

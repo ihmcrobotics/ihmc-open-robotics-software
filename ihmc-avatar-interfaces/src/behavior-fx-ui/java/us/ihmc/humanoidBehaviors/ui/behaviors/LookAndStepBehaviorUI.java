@@ -16,6 +16,7 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
@@ -151,6 +152,8 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       snappedPositionEditor = new SnappedPositionEditor(sceneNode);
       orientationYawEditor = new OrientationYawEditor(sceneNode);
 
+      IHMCROS2Publisher<Pose3D> goalInputPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, GOAL_INPUT);
+
       placeGoalActionMap = new FXUIActionMap(startAction ->
       {
          placeGoalButton.setDisable(true);
@@ -165,7 +168,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       });
       placeGoalActionMap.mapAction(FXUITrigger.ORIENTATION_LEFT_CLICK, trigger ->
       {
-         behaviorMessager.submitMessage(GoalInput, new Pose3D(goalGraphic.getPose()));
+         goalInputPublisher.publish(new Pose3D(goalGraphic.getPose()));
 
          placeGoalButton.setDisable(false);
       });
@@ -223,13 +226,13 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    @FXML public void approve()
    {
 //      behaviorMessager.submitMessage(TakeStep, new Object());
-      behaviorMessager.submitMessage(Approval, true);
+      behaviorMessager.submitMessage(ReviewApproval, true);
    }
 
    @FXML public void reject()
    {
 //      behaviorMessager.submitMessage(RePlan, new Object());
-      behaviorMessager.submitMessage(Approval, false);
+      behaviorMessager.submitMessage(ReviewApproval, false);
    }
 
    @FXML public void saveLookAndStepParameters()

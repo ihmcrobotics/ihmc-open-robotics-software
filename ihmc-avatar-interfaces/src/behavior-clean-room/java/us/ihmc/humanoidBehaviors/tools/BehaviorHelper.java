@@ -4,6 +4,7 @@ import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.IHMCROS2Callback;
 import us.ihmc.communication.ROS2PlanarRegionsInput;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.RemoteREAInterface;
@@ -22,7 +23,6 @@ import us.ihmc.messager.TopicListener;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
-import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
@@ -106,7 +106,7 @@ public class BehaviorHelper
 
    public <T> void createROS2Callback(ROS2Topic<T> topic, Consumer<T> callback)
    {
-      new ROS2Callback<>(managedROS2Node, topic.getType(), topic, callback);
+      new IHMCROS2Callback<>(managedROS2Node, topic.getType(), topic, callback);
    }
 
    public void createROS2PlanarRegionsListCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)
