@@ -43,6 +43,7 @@ import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 
+@Deprecated //should be using the new FiducialDetectorToolbox and listening for FiducialDetectedpackets
 public class FiducialDetectorFromCameraImages
 {
    private boolean visualize = true;
@@ -295,21 +296,6 @@ public class FiducialDetectorFromCameraImages
 
       targetIDHasBeenLocatedFiltered.update();
    }
-
-  // private final IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
-
-   /*
-    * private IntrinsicParameters setIntrinsicParameters(BufferedImage image) {
-    * int height = image.getHeight(); int width = image.getWidth(); double fx =
-    * (width / 2.0) / Math.tan(fieldOfViewXinRadians.getDoubleValue() / 2.0);
-    * double fy = (height / 2.0) /
-    * Math.tan(fieldOfViewYinRadians.getDoubleValue() / 2.0);
-    * intrinsicParameters.width = width; intrinsicParameters.height = height;
-    * intrinsicParameters.cx = width / 2.0; intrinsicParameters.cy = height /
-    * 2.0; intrinsicParameters.fx = fx; intrinsicParameters.fy = fy;
-    * detector.setIntrinsic(intrinsicParameters);
-    * this.targetIDHasBeenLocated.set(false); return intrinsicParameters; }
-    */
 
    public void setExpectedFiducialSize(double expectedFiducialSize)
    {
