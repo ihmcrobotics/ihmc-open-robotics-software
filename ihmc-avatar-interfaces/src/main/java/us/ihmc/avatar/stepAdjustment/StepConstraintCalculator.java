@@ -162,7 +162,7 @@ public class StepConstraintCalculator
          planarRegionDecider.setConstraintRegions(steppableRegions);
          planarRegionDecider.setOmega0(omega);
          planarRegionDecider.setCaptureRegion(captureRegionCalculator.getCaptureRegion());
-         planarRegionDecider.updatePlanarRegionConstraintForStep(currentStep.getStepPose());
+         planarRegionDecider.updatePlanarRegionConstraintForStep(currentStep.getStepPose(), reachabilityRegionInConstraintPlane);
 
          updateReachabilityRegionInControlPlane(currentStep.getSwingSide().getOppositeSide());
 
