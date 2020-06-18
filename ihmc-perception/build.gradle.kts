@@ -53,7 +53,7 @@ mainDependencies {
    api("us.ihmc.ihmcPerception:cuda:7.5")
    api("org.ddogleg:ddogleg:0.18")
 
-   api("us.ihmc:euclid:0.14.2-ejml-0.39-beta-1")
+   api("us.ihmc:euclid:0.15.0")
    api("us.ihmc:ihmc-yovariables:0.7.0-ejml-0.39-beta-1")
    api("us.ihmc:simulation-construction-set:0.18.0-ejml-0.39-beta-1")
    api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.17.0-ejml-0.39-beta-2")
