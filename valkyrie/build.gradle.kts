@@ -35,7 +35,7 @@ mainDependencies {
    api("us.ihmc:IHMCRosControl:0.5.0") {
       setChanging(true)
    }
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.17.0-ejml-0.39-beta-2")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.18.0")
    api("us.ihmc:simulation-construction-set:0.18.0-ejml-0.39-beta-1")
    api("us.ihmc:ihmc-graphics-description:0.18.0")
    api("us.ihmc:ihmc-robot-description:0.18.0-ejml-0.39-beta-1")
