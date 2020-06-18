@@ -85,7 +85,19 @@ public class LookAndStepBehavior implements BehaviorInterface
 
       // TODO: Want to be able to wire up behavior here and see all present modules
 
-      bodyPathModule = new LookAndStepBodyPathModule(helper.getOrCreateStatusLogger());
+      // TODO: Add more meaning to the construction by establishing data patterns
+
+      // could add meaning by local variables before passing
+      bodyPathModule = new LookAndStepBodyPathModule(helper.getOrCreateStatusLogger(),
+                                                     helper::publishToUI,
+                                                     visibilityGraphParameters,
+                                                     lookAndStepParameters,
+                                                     operatorReviewEnabledInput::get,
+                                                     newBodyPathGoalNeeded::get, // TODO: hook up to subgoal mover
+                                                     () -> newBodyPathGoalNeeded.set(false),
+                                                     robot::pollHumanoidRobotState,
+                                                     behaviorState::get,
+                                                     this::updateState);
       footstepPlanningModule = new LookAndStepFootstepPlanningModule(helper.getOrCreateStatusLogger());
       robotMotionModule = new LookAndStepRobotMotionModule(helper.getOrCreateStatusLogger());
 
@@ -106,18 +118,9 @@ public class LookAndStepBehavior implements BehaviorInterface
          robotMotionModule.acceptFootstepPlan(footstepPlan);
       });
 
-      bodyPathModule.setRobotStateSupplier(robot::pollHumanoidRobotState);
       bodyPathModule.setIsBeingReviewedSupplier(bodyPathReview::isBeingReviewed);
-      bodyPathModule.setOperatorReviewEnabled(operatorReviewEnabledInput::get);
-      bodyPathModule.setLookAndStepBehaviorParameters(lookAndStepParameters);
-      bodyPathModule.setVisibilityGraphParameters(visibilityGraphParameters);
       bodyPathModule.setReviewInitiator(bodyPathReview::review);
       bodyPathModule.setAutonomousOutput(footstepPlanningModule::acceptBodyPathPlan);
-      bodyPathModule.setNeedNewPlan(newBodyPathGoalNeeded::get); // TODO: hook up to subgoal mover
-      bodyPathModule.setClearNewBodyPathGoalNeededCallback(() -> newBodyPathGoalNeeded.set(false));
-      bodyPathModule.setUIPublisher(helper::publishToUI);
-      bodyPathModule.setBehaviorStateSupplier(behaviorState::get);
-      bodyPathModule.setBehaviorStateUpdater(this::updateState);
 
       footstepPlanningModule.setAbortGoalWalkingSupplier(abortGoalWalking::get);
       footstepPlanningModule.setAbortGoalWalkingUpdater(value -> helper.publishToUI(AbortGoalWalking, value));
@@ -149,6 +152,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       robotMotionModule.setBehaviorStateSupplier(behaviorState::get);
       robotMotionModule.setBehaviorStateUpdater(this::updateState);
 
+      // TODO: Put these in better spots
       helper.createROS2Callback(ROS2Tools.LIDAR_REA_REGIONS, bodyPathModule::acceptMapRegions);
       helper.createUICallback(GoalInput, bodyPathModule::acceptGoal);
       helper.createROS2Callback(ROS2Tools.REALSENSE_SLAM_REGIONS, footstepPlanningModule::acceptPlanarRegions);
