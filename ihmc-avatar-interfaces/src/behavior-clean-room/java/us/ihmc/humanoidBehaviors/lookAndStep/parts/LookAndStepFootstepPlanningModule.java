@@ -21,6 +21,8 @@ import java.util.function.Supplier;
  */
 public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanningTask
 {
+   private final SingleThreadSizeOneQueueExecutor executor;
+
    private Field<Supplier<HumanoidRobotState>> robotStateSupplier = required();
    private Field<Supplier<RobotSide>> lastStanceSideSupplier = required();
    private Field<Supplier<LookAndStepBehavior.State>> behaviorStateSupplier = required();
@@ -34,10 +36,10 @@ public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanni
    {
       super(statusLogger);
 
-      SingleThreadSizeOneQueueExecutor executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
+      executor = new SingleThreadSizeOneQueueExecutor(getClass().getSimpleName());
 
-      planarRegionsInput.addCallback(data -> executor.execute(this::evaluateAndRun));
-      bodyPathPlanInput.addCallback(data -> executor.execute(this::evaluateAndRun));
+      planarRegionsInput.addCallback(data -> runOrQueue());
+      bodyPathPlanInput.addCallback(data -> runOrQueue());
 
       setPlanningFailedNotifier(planningFailedTimer::reset);
    }
@@ -53,7 +55,12 @@ public class LookAndStepFootstepPlanningModule extends LookAndStepFootstepPlanni
       bodyPathPlanInput.set(bodyPathPlan);
    }
 
-   public void evaluateAndRun()
+   public synchronized void runOrQueue()
+   {
+      executor.execute(this::evaluateAndRun);
+   }
+
+   private void evaluateAndRun()
    {
       validateNonChanging();
 
