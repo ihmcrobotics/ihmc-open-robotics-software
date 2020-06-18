@@ -13,6 +13,7 @@ import java.util.List;
 public class LookAndStepBehaviorAPI
 {
    public static final ROS2Topic<Pose3D> GOAL_INPUT = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Pose3D.class);
+   // TODO add ReachedGoal output
 
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
