@@ -1,6 +1,5 @@
 package us.ihmc.atlas.behaviors;
 
-import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -102,6 +101,8 @@ public class AtlasLookAndStepBehaviorDemo
       kinematicsSimulationParameters.setPubSubImplementation(pubSubMode);
       kinematicsSimulationParameters.setLogToFile(LOG_TO_FILE);
       kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YOVARIABLE_SERVER);
+      kinematicsSimulationParameters.setInitialRobotX(-1.0);
+      kinematicsSimulationParameters.setInitialRobotY(1.0);
       AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
    }
 
