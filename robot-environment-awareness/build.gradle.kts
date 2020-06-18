@@ -28,7 +28,7 @@ mainDependencies {
    api("org.apache.commons:commons-lang3:3.8.1")
    
    api("us.ihmc:euclid-shape:0.15.0")
-   api("us.ihmc:joctomap:1.9.0-ejml-0.39-beta-1")
+   api("us.ihmc:joctomap:1.10.0")
    api("us.ihmc:ihmc-yovariables:0.8.0")
    api("us.ihmc:ihmc-javafx-toolkit:0.17.0-ejml-0.39-beta-1")
    api("us.ihmc:ihmc-communication:source")
