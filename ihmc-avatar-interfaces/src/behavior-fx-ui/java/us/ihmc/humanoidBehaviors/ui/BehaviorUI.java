@@ -40,10 +40,13 @@ public class BehaviorUI
    private BorderPane mainPane;
    private final Messager behaviorMessager;
    private final Map<String, BehaviorUIInterface> behaviorUIInterfaces = new HashMap<>();
+   private JavaFXLinuxGUIRecorder guiRecorder;
 
    public static volatile Object ACTIVE_EDITOR; // a tool to assist editors in making sure there isn't more than one active
 
    @FXML private ChoiceBox<String> behaviorSelector;
+   @FXML private Button startRecording;
+   @FXML private Button stopRecording;
    @FXML private DirectRobotUIController directRobotUIController;
 
    public static BehaviorUI createInterprocess(BehaviorUIRegistry behaviorUIRegistry, DRCRobotModel robotModel, String behaviorModuleAddress)
@@ -100,6 +103,8 @@ public class BehaviorUI
 
          ConsoleScrollPane consoleScrollPane = new ConsoleScrollPane(behaviorMessager);
 
+         stopRecording.setDisable(true);
+
          behaviorSelector.getItems().add("None");
          behaviorSelector.setValue("None");
 
@@ -137,19 +142,35 @@ public class BehaviorUI
          primaryStage.show();
          primaryStage.toFront();
 
+         guiRecorder = new JavaFXLinuxGUIRecorder(primaryStage, 24, 0.8f, getClass().getSimpleName());
+         primaryStage.setOnCloseRequest(event -> guiRecorder.stop());
+         Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop));
+
          if (RECORD_VIDEO)
          {
-            JavaFXLinuxGUIRecorder guiRecorder = new JavaFXLinuxGUIRecorder(primaryStage, 24, 0.8f, getClass().getSimpleName());
-            guiRecorder.deleteOldLogs(10);
-            ThreadTools.scheduleSingleExecution("DelayRecordingStart", guiRecorder::start, 2.0);
-            ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 300.0);
-            primaryStage.setOnCloseRequest(event -> guiRecorder.stop());
-            Runtime.getRuntime().addShutdownHook(new Thread(guiRecorder::stop));
+            ThreadTools.scheduleSingleExecution("DelayRecordingStart", this::startRecording, 2.0);
+            ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 1200.0);
          }
 
          // do this last for now in case events starts firing early
          consoleScrollPane.setupAtEnd();
       });
+   }
+
+   @FXML public void startRecording()
+   {
+      startRecording.setDisable(true);
+      stopRecording.setDisable(false);
+      guiRecorder.deleteOldLogs(10);
+      ThreadTools.startAThread(() -> guiRecorder.start(), "RecordingStart");
+      ThreadTools.scheduleSingleExecution("SafetyStop", guiRecorder::stop, 3600.0);
+   }
+
+   @FXML public void stopRecording()
+   {
+      startRecording.setDisable(false);
+      stopRecording.setDisable(true);
+      ThreadTools.startAThread(() -> guiRecorder.stop(), "RecordingStop");
    }
 
    private void onBehaviorSelection(ObservableValue<? extends String> observable, String oldValue, String newValue)
