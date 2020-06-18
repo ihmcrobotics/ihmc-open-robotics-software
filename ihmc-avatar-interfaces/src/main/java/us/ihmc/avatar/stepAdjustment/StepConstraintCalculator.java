@@ -11,6 +11,12 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.graphicsDescription.appearance.YoAppearance;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPolygon;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicPosition.GraphicType;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.YoArtifactPolygon;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.robotics.geometry.ConvexPolygonTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
@@ -18,7 +24,12 @@ import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoDouble;
+import us.ihmc.yoVariables.variable.YoFrameConvexPolygon2D;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFramePose3D;
 
+import java.awt.*;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -29,14 +40,19 @@ public class StepConstraintCalculator
    private final SteppableRegionsCalculator steppableRegionsCalculator;
    private final OneStepCaptureRegionCalculator captureRegionCalculator;
    private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
+   private final YoGraphicsListRegistry graphicsListRegistry = new YoGraphicsListRegistry();
    private final DoubleProvider timeProvider;
 
    private final CapturabilityBasedPlanarRegionDecider planarRegionDecider;
    private final ReachabilityConstraintCalculator reachabilityConstraintCalculator;
 
    private final FrameConvexPolygon2D reachabilityRegionInConstraintPlane = new FrameConvexPolygon2D();
+   private final YoFrameConvexPolygon2D yoReachabilityRegionInConstraintPlane = new YoFrameConvexPolygon2D("reachabilityPolygon", worldFrame, 10, registry);
 
-   private final FramePoint2D capturePoint = new FramePoint2D();
+   private final YoDouble timeRemainingInState = new YoDouble("timeRemainingInState", registry);
+   private final YoFrameConvexPolygon2D supportPolygon = new YoFrameConvexPolygon2D("supportPolygon", worldFrame, 6, registry);
+   private final YoFramePose3D supportPose = new YoFramePose3D("supportPose", worldFrame, registry);
+   private final YoFramePoint2D capturePoint = new YoFramePoint2D("capturePoint", worldFrame, registry);
 
    private final SideDependentList<FrameConvexPolygon2D> supportPolygons = new SideDependentList<>(new FrameConvexPolygon2D(), new FrameConvexPolygon2D());
    private final SideDependentList<? extends ReferenceFrame> soleZUpFrames;
@@ -79,8 +95,8 @@ public class StepConstraintCalculator
       this.timeProvider = timeProvider;
       this.soleZUpFrames = soleZUpFrames;
       this.steppableRegionsCalculator = new SteppableRegionsCalculator(kinematicStepRange, registry);
-      this.captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange, soleZUpFrames, registry, null);
-      this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, gravityZ, registry, null);
+      this.captureRegionCalculator = new OneStepCaptureRegionCalculator(footWidth, kinematicStepRange, soleZUpFrames, registry, graphicsListRegistry);
+      this.planarRegionDecider = new CapturabilityBasedPlanarRegionDecider(centerOfMassFrame, gravityZ, registry, graphicsListRegistry);
       this.reachabilityConstraintCalculator = new ReachabilityConstraintCalculator(soleZUpFrames,
                                                                                    footLength,
                                                                                    footWidth,
@@ -89,6 +105,25 @@ public class StepConstraintCalculator
                                                                                    minStepWidth,
                                                                                    maxStepWidth,
                                                                                    registry);
+
+      YoGraphicPosition capturePointViz = new YoGraphicPosition("CapturePoint", capturePoint, 0.02, YoAppearance.Yellow(), GraphicType.BALL_WITH_CROSS);
+      YoArtifactPolygon supportPolygonArtifact = new YoArtifactPolygon("SupportPolygon", supportPolygon, Color.GREEN, false);
+      YoArtifactPolygon reachabilityArtifact = new YoArtifactPolygon("ReachabilityPolygon", yoReachabilityRegionInConstraintPlane, Color.BLUE, false);
+
+      graphicsListRegistry.registerYoGraphic("Constraint Calculator", capturePointViz);
+      graphicsListRegistry.registerArtifact("Constraint Calculator", capturePointViz.createArtifact());
+      graphicsListRegistry.registerArtifact("Constraint Calculator", supportPolygonArtifact);
+      graphicsListRegistry.registerArtifact("Constraint Calculator", reachabilityArtifact);
+   }
+
+   public YoVariableRegistry getYoVariableRegistry()
+   {
+      return registry;
+   }
+
+   public YoGraphicsListRegistry getYoGraphicsListRegistry()
+   {
+      return graphicsListRegistry;
    }
 
    public void setLeftFootSupportPolygon(List<? extends Point3DReadOnly> footVertices)
@@ -116,7 +151,7 @@ public class StepConstraintCalculator
 
    public void setCapturePoint(Point3DReadOnly capturePointInWorld)
    {
-      capturePoint.setIncludingFrame(ReferenceFrame.getWorldFrame(), capturePointInWorld);
+      capturePoint.set(capturePointInWorld);
    }
 
    public void setCurrentStep(SimpleStep simpleStep)
@@ -138,6 +173,9 @@ public class StepConstraintCalculator
    {
       currentStep = null;
       planarRegionDecider.reset();
+      supportPolygon.clearAndUpdate();
+      capturePoint.setToNaN();
+      supportPose.setToNaN();
    }
 
    public void update()
@@ -155,6 +193,8 @@ public class StepConstraintCalculator
          steppableRegionsCalculator.setPlanarRegions(planarRegionsList.get().getPlanarRegionsAsList());
          FramePoint3D supportFoot = new FramePoint3D(soleZUpFrames.get(currentStep.getSwingSide().getOppositeSide()));
          supportFoot.changeFrame(worldFrame);
+         supportPose.setToZero();
+         supportPose.getPosition().set(supportFoot);
          steppableRegionsCalculator.setStanceFootPosition(supportFoot);
 
          List<StepConstraintRegion> steppableRegions = steppableRegionsCalculator.computeSteppableRegions();
@@ -174,8 +214,10 @@ public class StepConstraintCalculator
    {
       double timeInState = timeProvider.getValue() - simpleStep.getStartTime();
       double timeRemaining = simpleStep.getSwingDuration() - timeInState;
+      timeRemainingInState.set(timeRemaining);
       RobotSide swingSide = simpleStep.getSwingSide();
 
+      supportPolygon.set(supportPolygons.get(swingSide.getOppositeSide()));
       captureRegionCalculator.calculateCaptureRegion(swingSide, timeRemaining, capturePoint, omega, supportPolygons.get(swingSide.getOppositeSide()));
    }
 
@@ -190,6 +232,7 @@ public class StepConstraintCalculator
       reachabilityRegionInConstraintPlane.clear();
       reachabilityRegionInConstraintPlane.setIncludingFrame(reachabilityRegion);
       reachabilityRegionInConstraintPlane.changeFrame(worldFrame);
+      yoReachabilityRegionInConstraintPlane.set(reachabilityRegionInConstraintPlane);
       reachabilityRegionInConstraintPlane.applyTransform(stepConstraintRegion.getTransformToLocal(), false);
    }
 
@@ -216,5 +259,20 @@ public class StepConstraintCalculator
    public StepConstraintRegion getConstraintRegion()
    {
       return stepConstraintRegion;
+   }
+
+   public StepConstraintRegion pollStepConstraintRegion()
+   {
+      if (planarRegionDecider.constraintRegionChanged())
+      {
+         StepConstraintRegion regionToReturn = stepConstraintRegion;
+         planarRegionDecider.setConstraintRegionChanged(false);
+         stepConstraintRegion = null;
+         return regionToReturn;
+      }
+      else
+      {
+         return null;
+      }
    }
 }

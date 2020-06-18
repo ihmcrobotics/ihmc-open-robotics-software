@@ -56,7 +56,8 @@ public class StepConstraintToolboxModule extends ToolboxModule
                                                        robotModel.getWalkingControllerParameters(),
                                                        fullRobotModel,
                                                        gravityZ,
-                                                       registry);
+                                                       registry,
+                                                       yoGraphicsListRegistry);
 
       startYoVariableServer();
       if (yoVariableServer != null)
