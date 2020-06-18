@@ -15,7 +15,6 @@ import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.parameters.VisibilityGraphsParametersReadOnly;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
-import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -77,10 +76,6 @@ public class LookAndStepBodyPathModule extends LookAndStepBodyPathTask
 
    private void evaluateAndRun()
    {
-      validateNonChanging();
-      Objects.requireNonNull(robotStateSupplier);
-      Objects.requireNonNull(behaviorStateSupplier);
-
       update(mapRegionsInput.get(),
              goalInput.get(),
              robotStateSupplier.get(),
