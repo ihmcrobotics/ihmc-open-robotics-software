@@ -146,7 +146,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       robotMotionModule.setLastSteppedSolePoseConsumer(lastSteppedSolePoses::put);
       robotMotionModule.setLastSteppedSolePoseSupplier(lastSteppedSolePoses::get);
       robotMotionModule.setLookAndStepBehaviorParameters(lookAndStepParameters);
-      robotMotionModule.setReplanFootstepsOutput(footstepPlanningModule::evaluateAndRun);
+      robotMotionModule.setReplanFootstepsOutput(footstepPlanningModule::runOrQueue);
       robotMotionModule.setRobotWalkRequester(robot::requestWalk);
       robotMotionModule.setUiPublisher(helper::publishToUI);
       robotMotionModule.setBehaviorStateSupplier(behaviorState::get);
