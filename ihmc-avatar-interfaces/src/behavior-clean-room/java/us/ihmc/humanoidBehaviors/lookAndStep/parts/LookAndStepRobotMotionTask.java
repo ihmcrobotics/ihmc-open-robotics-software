@@ -120,11 +120,11 @@ class LookAndStepRobotMotionTask implements BehaviorBuilderPattern
    {
       double percentSwingToWait = lookAndStepBehaviorParameters.get().get(LookAndStepBehaviorParameters.percentSwingToWait);
       double waitTime = swingTime * percentSwingToWait;
-      statusLogger.info("Waiting {} for {} % of swing...", waitTime, percentSwingToWait);
+      statusLogger.info("Waiting {} s for {} % of swing...", waitTime, percentSwingToWait);
       ThreadTools.sleepSeconds(waitTime);
       statusLogger.info("{} % of swing complete!", percentSwingToWait);
       behaviorStateUpdater.get().accept(LookAndStepBehavior.State.FOOTSTEP_PLANNING);
-      replanFootstepsOutput.get();
+      replanFootstepsOutput.get().run();
    }
 
    private void robotWalkingThread(TypedNotification<WalkingStatusMessage> walkingStatusNotification)

@@ -16,10 +16,10 @@ import us.ihmc.humanoidBehaviors.ui.BehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
 import us.ihmc.humanoidBehaviors.ui.simulation.BehaviorPlanarRegionEnvironments;
+import us.ihmc.humanoidBehaviors.ui.simulation.EnvironmentInitialSetup;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
@@ -28,7 +28,7 @@ import us.ihmc.wholeBodyController.AdditionalSimulationContactPoints;
 import us.ihmc.wholeBodyController.FootContactPoints;
 
 import java.util.ArrayList;
-import java.util.function.Supplier;
+import java.util.Random;
 
 public class AtlasLookAndStepBehaviorDemo
 {
@@ -39,8 +39,21 @@ public class AtlasLookAndStepBehaviorDemo
    private static boolean CREATE_YOVARIABLE_SERVER = Boolean.parseBoolean(System.getProperty("create.yovariable.server"));
 
    private final PubSubImplementation pubSubMode = PubSubImplementation.INTRAPROCESS;
-   private final Supplier<PlanarRegionsList> environment = BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop;
    private final Runnable simulation = this::kinematicSimulation;
+
+   private final ArrayList<EnvironmentInitialSetup> environmentInitialSetups = new ArrayList<>();
+   {
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop,
+                                                               0.0, 0.0, 0.0, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop,
+                                                               0.0, Math.PI, 6.0, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop,
+                                                               BehaviorPlanarRegionEnvironments.topPlatformHeight, Math.PI, 3.0, 0.0));
+      environmentInitialSetups.add(new EnvironmentInitialSetup(BehaviorPlanarRegionEnvironments::createRoughUpAndDownStairsWithFlatTop,
+                                                               BehaviorPlanarRegionEnvironments.topPlatformHeight, 0.0, 3.0, 0.0));
+   }
+   private final Random random = new Random();
+   private final EnvironmentInitialSetup environmentInitialSetup = environmentInitialSetups.get(random.nextInt(environmentInitialSetups.size()));
 
    public AtlasLookAndStepBehaviorDemo()
    {
@@ -61,8 +74,12 @@ public class AtlasLookAndStepBehaviorDemo
    {
       LogTools.info("Creating simulated multisense stereo regions module");
       Ros2Node ros2Node = ROS2Tools.createRos2Node(pubSubMode, ROS2Tools.REA_NODE_NAME);
-      MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(environment.get(), createRobotModel(), ros2Node);
-      RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(environment.get(), createRobotModel(), ros2Node);
+      MultisenseHeadStereoSimulator multisense = new MultisenseHeadStereoSimulator(environmentInitialSetup.getPlanarRegionsSupplier().get(),
+                                                                                   createRobotModel(),
+                                                                                   ros2Node);
+      RealsensePelvisSimulator realsense = new RealsensePelvisSimulator(environmentInitialSetup.getPlanarRegionsSupplier().get(),
+                                                                        createRobotModel(),
+                                                                        ros2Node);
 
       PlanarRegionSLAMMapper realsenseSLAM = new PlanarRegionSLAMMapper();
 
@@ -91,7 +108,11 @@ public class AtlasLookAndStepBehaviorDemo
    {
       String environmentName = PlanarRegionsListDefinedEnvironment.class.getSimpleName();
       YoAppearanceTexture cinderBlockTexture = new YoAppearanceTexture("sampleMeshes/cinderblock.png");
-      return new PlanarRegionsListDefinedEnvironment(environmentName, environment.get(), cinderBlockTexture, 0.02, false);
+      return new PlanarRegionsListDefinedEnvironment(environmentName,
+                                                     environmentInitialSetup.getPlanarRegionsSupplier().get(),
+                                                     cinderBlockTexture,
+                                                     0.02,
+                                                     false);
    }
 
    private void kinematicSimulation()
@@ -101,8 +122,10 @@ public class AtlasLookAndStepBehaviorDemo
       kinematicsSimulationParameters.setPubSubImplementation(pubSubMode);
       kinematicsSimulationParameters.setLogToFile(LOG_TO_FILE);
       kinematicsSimulationParameters.setCreateYoVariableServer(CREATE_YOVARIABLE_SERVER);
-      kinematicsSimulationParameters.setInitialRobotX(-1.0);
-      kinematicsSimulationParameters.setInitialRobotY(1.0);
+      kinematicsSimulationParameters.setInitialGroundHeight(environmentInitialSetup.getGroundZ());
+      kinematicsSimulationParameters.setInitialRobotYaw(environmentInitialSetup.getInitialYaw());
+      kinematicsSimulationParameters.setInitialRobotX(environmentInitialSetup.getInitialX());
+      kinematicsSimulationParameters.setInitialRobotY(environmentInitialSetup.getInitialY());
       AtlasKinematicSimulation.create(createRobotModel(), kinematicsSimulationParameters);
    }
 
