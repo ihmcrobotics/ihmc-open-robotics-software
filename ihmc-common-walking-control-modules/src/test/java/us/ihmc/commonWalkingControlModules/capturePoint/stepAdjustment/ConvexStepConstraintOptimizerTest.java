@@ -15,10 +15,6 @@ import static us.ihmc.robotics.Assert.*;
 public class ConvexStepConstraintOptimizerTest
 {
    @Test
-   public void test()
-   {}
-
-   @Test
    public void testProjectionIntoPlanarRegionHull()
    {
       ArrayList<ConvexPolygon2D> planes = new ArrayList<>();
@@ -67,6 +63,8 @@ public class ConvexStepConstraintOptimizerTest
 
       parameters.setMaxX(0.05);
       parameters.setMaxY(0.05);
+
+      parameters.setMaxIterations(100);
 
       foot.set(initialFoot);
       assertFalse(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));

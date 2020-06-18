@@ -187,7 +187,10 @@ public class CapturabilityBasedPlanarRegionDecider
 
    private StepConstraintRegion findBestPlanarRegionToStepTo(FrameConvexPolygon2DReadOnly captureRegion, ConvexPolygon2DReadOnly reachabilityRegion)
    {
-      double maxArea = (1.0 + inflationToCurrentArea.getDoubleValue()) * intersectionAreaWithCurrentRegion.getDoubleValue() + areaImprovementToSwitch.getDoubleValue();
+      double maxArea = intersectionAreaWithCurrentRegion.getDoubleValue();
+      if (maxArea > 0.0)
+         maxArea = (1.0 + inflationToCurrentArea.getDoubleValue()) * maxArea + areaImprovementToSwitch.getDoubleValue();
+
       StepConstraintRegion activePlanarRegion = planarRegionToConstrainTo;
 
       for (int regionIndex = 0; regionIndex < stepConstraintRegions.size(); regionIndex++)
