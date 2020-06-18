@@ -154,6 +154,7 @@ class LookAndStepBodyPathTask
 
    private void performTask()
    {
+      statusLogger.info("Body path planning...");
       // TODO: Add robot standing still for 20s for real robot?
       uiPublisher.publishToUI(MapRegionsForUI, mapRegions);
 
@@ -173,10 +174,9 @@ class LookAndStepBodyPathTask
       leftFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
       rightFootPoseTemp.changeFrame(ReferenceFrame.getWorldFrame());
       bodyPathPlanner.setStanceFootPoses(leftFootPoseTemp, rightFootPoseTemp);
-      Stopwatch stopwatch = new Stopwatch().start();
       final ArrayList<Pose3D> bodyPathPlanForReview = new ArrayList<>(); // TODO Review making this final
       bodyPathPlanner.planWaypoints(); // takes about 0.1s
-      statusLogger.info("Body path planning took {}; contains {} waypoint(s)", stopwatch.totalElapsed(), bodyPathPlanForReview.size());
+      statusLogger.info("Body path plan completed with {} waypoint(s)", bodyPathPlanner.getWaypoints().size());
       //      bodyPathPlan = bodyPathPlanner.getWaypoints();
       if (bodyPathPlanner.getWaypoints() != null)
       {

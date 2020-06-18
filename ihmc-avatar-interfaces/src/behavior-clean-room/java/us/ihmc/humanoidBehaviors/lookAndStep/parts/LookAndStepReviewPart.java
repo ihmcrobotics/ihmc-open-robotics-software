@@ -29,7 +29,7 @@ public class LookAndStepReviewPart<T>
       ThreadTools.startAsDaemon(() ->
       {
          beingReviewed = true;
-         statusLogger.info("Waiting for {} operator review... {}, {}", description);
+         statusLogger.info("Waiting for {} operator review...", description);
          boolean approved = false;
          try
          {
