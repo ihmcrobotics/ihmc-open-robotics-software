@@ -21,7 +21,7 @@ import us.ihmc.valkyrie.testsupport.ModifiableValkyrieRobotConfig;
 
 class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 	enum TestType {
-		STAIRS, STEP, SQUARE_UP_STEP, STEP_DOWN, SLOPE, SPEED, PUSHRECOVERY, DUMMY;
+		STAIRS, STEP, SQUARE_UP_STEP, STEP_DOWN, SLOPE, SPEED, NORMAL_WALK, PUSHRECOVERY, DUMMY;
 	}
 
 	public String testCase;             // for push recovery, specifies which case to run

@@ -187,12 +187,11 @@ public class TorqueSpeedTestRunner {
 		FootstepDataListMessage recordedFootsteps = config.getFootsteps();
 		ValkyrieRobotModel robot;
 		
-		if (config.testType == TestType.SPEED || config.testType == TestType.PUSHRECOVERY) {
+		if (config.testType == TestType.SPEED || config.testType == TestType.NORMAL_WALK  || config.testType == TestType.PUSHRECOVERY) {
 			robot = new ModifiableValkyrieRobotModel(RobotTarget.SCS, config);		
 		} else {
 			robot = new ModifiableValkyrieRobotModel(RobotTarget.REAL_ROBOT, config);		
 		}
-
 		
 //		ValkyrieTorqueSpeedWalkingControllerParameters walkingParameters = new ValkyrieTorqueSpeedWalkingControllerParameters(
 //				robot.getJointMap(),
@@ -247,6 +246,9 @@ public class TorqueSpeedTestRunner {
 			case SPEED:
 				result = tester.testSpeedWalk(robot, walkingParameters, outputPrefixDirectory, config.keepUp);		
 				break;
+			case NORMAL_WALK:
+				result = tester.testNormalWalk(robot, walkingParameters, outputPrefixDirectory, config.keepUp);		
+				break;
 			case PUSHRECOVERY:
 				result = runPushRecoveryTest(robot, config, outputPrefixDirectory);
 				break;
@@ -264,14 +266,11 @@ public class TorqueSpeedTestRunner {
 		// Copy the test parameters into the results directory
 		try {
 			if (outputResultsDirectory != null) {
-				// For SPEED type, the controller parameters are critical and need to be copied too
-				if (config.testType == TestType.SPEED) {
 					URL controllerParamsUrl = runner.getClass()
 							.getResource("/us/ihmc/valkyrie/parameters/controller_simulation.xml");
 					String controllerParamsFilename = outputResultsDirectory.toString() + "/controller_simulation.xml";
 					File controllerParamsDest = new File(controllerParamsFilename);
 					FileUtils.copyURLToFile(controllerParamsUrl, controllerParamsDest);
-				}
 				Files.copy(paramInput, Paths.get(outputResultsDirectory.toString(), paramInput.toPath().getFileName().toString()).toFile());
 			}
 		} catch (IOException e) {
