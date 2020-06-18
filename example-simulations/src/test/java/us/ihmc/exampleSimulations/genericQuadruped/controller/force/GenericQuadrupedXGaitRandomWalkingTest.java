@@ -28,7 +28,9 @@ public class GenericQuadrupedXGaitRandomWalkingTest extends QuadrupedXGaitRandom
       super.testExtremeRandomWalking();
    }
 
+   // Flaky
    @Override
+   @Disabled
    @Test
    public void testWalkingRandomly() throws SimulationExceededMaximumTimeException, ControllerFailureException, IOException
    {
