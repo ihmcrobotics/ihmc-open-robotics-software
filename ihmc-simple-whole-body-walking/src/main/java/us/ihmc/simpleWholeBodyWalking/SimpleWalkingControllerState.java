@@ -51,10 +51,6 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
 
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
 
-   private boolean setupInverseDynamicsSolver = true;
-   private boolean setupInverseKinematicsSolver = false;
-   private boolean setupVirtualModelControlSolver = false;
-
    private final boolean deactivateAccelerationIntegrationInWBC;
 
    private boolean requestIntegratorReset = false;
@@ -87,14 +83,7 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
                                                                             controllerToolbox.getYoGraphicsListRegistry(), registry);
       toolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
       toolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
-      if (setupInverseDynamicsSolver)
          toolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
-      if (setupInverseKinematicsSolver)
-         toolbox.setupForInverseKinematicsSolver();
-      if (setupVirtualModelControlSolver)
-      {
-         toolbox.setupForVirtualModelControlSolver(fullRobotModel.getPelvis(), controllerToolbox.getContactablePlaneBodies());
-      }
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controlledJoints);
       controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);
@@ -117,48 +106,6 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
       linearMomentumRateControlModule.setPlanarRegionStepConstraintHandler(controllerToolbox.getWalkingMessageHandler().getStepConstraintRegionHandler());
 
       registry.addChild(walkingController.getYoVariableRegistry());
-   }
-
-   /**
-    * Specifies whether the inverse dynamics module of the {@link WholeBodyControllerCore} should be
-    * created or not.
-    * <p>
-    * This module is created by default as the {@link WalkingHighLevelHumanoidController} needs it.
-    * </p>
-    *
-    * @param setup whether to setup the inverse dynamics mode or not.
-    */
-   public void setupControllerCoreInverseDynamicsMode(boolean setup)
-   {
-      setupInverseDynamicsSolver = setup;
-   }
-
-   /**
-    * Specifies whether the inverse kinematics module of the {@link WholeBodyControllerCore} should
-    * be created or not.
-    * <p>
-    * This module is not created by default to prevent creating unused {@link YoVariable}s.
-    * </p>
-    *
-    * @param setup whether to setup the inverse kinematics mode or not.
-    */
-   public void setupControllerCoreInverseKinematicsMode(boolean setup)
-   {
-      setupInverseKinematicsSolver = setup;
-   }
-
-   /**
-    * Specifies whether the virtual model control module of the {@link WholeBodyControllerCore}
-    * should be created or not.
-    * <p>
-    * This module is not created by default to prevent creating unused {@link YoVariable}s.
-    * </p>
-    *
-    * @param setup whether to setup the virtual model control mode or not.
-    */
-   public void setupControllerCoreVirtualModelControlMode(boolean setup)
-   {
-      setupVirtualModelControlSolver = setup;
    }
 
    public void initialize()
@@ -245,14 +192,5 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
    public boolean isJointLoadBearing(String jointName)
    {
       return walkingController.isJointLoadBearing(jointName);
-   }
-
-   /**
-    * Returns the currently active walking state. This is used for unit testing.
-    * @return WalkingStateEnum
-    */
-   public SimpleWalkingStateEnum getWalkingStateEnum()
-   {
-      return walkingController.getWalkingStateEnum();
    }
 }

@@ -42,7 +42,7 @@ public class SimpleCommandConsumer
    private final StatusMessageOutputManager statusMessageOutputManager;
 
    private final PelvisOrientationManager pelvisOrientationManager;
-   private final BalanceManager balanceManager;
+   private final SimpleBalanceManager balanceManager;
    private final SimpleCenterOfMassHeightManager comHeightManager;
 
    private final RigidBodyControlManager chestManager;
