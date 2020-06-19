@@ -8,30 +8,52 @@ public class ConstraintOptimizerParameters
    private boolean constrainMaxAdjustment = true;
 
    private int maxIterations = 3;
+   private int maxIterationsWhenSettingUp = 1;
+
+   private boolean parametersChanged = false;
+
+   public boolean pollParametersChanged()
+   {
+      if (parametersChanged)
+      {
+         parametersChanged = false;
+         return true;
+      }
+      return false;
+   }
 
    public void setMaxX(double maxX)
    {
+      parametersChanged = true;
       this.maxX = maxX;
    }
 
    public void setMaxY(double maxY)
    {
+      parametersChanged = true;
       this.maxY = maxY;
    }
 
    public void setDesiredDistanceInside(double distanceInside)
    {
+      parametersChanged = true;
       this.deltaInside = distanceInside;
    }
 
    public void setConstrainMaxAdjustment(boolean constraintMaxAdjustment)
    {
+      parametersChanged = true;
       this.constrainMaxAdjustment = constraintMaxAdjustment;
    }
 
    public void setMaxIterations(int maxIterations)
    {
       this.maxIterations = maxIterations;
+   }
+
+   public void setMaxIterationsWhenSettingUp(int maxIterations)
+   {
+      this.maxIterationsWhenSettingUp = maxIterations;
    }
 
    public double getDesiredDistanceInside()
@@ -58,4 +80,10 @@ public class ConstraintOptimizerParameters
    {
       return maxIterations;
    }
+
+   public int getMaxIterationsWhenSettingUp()
+   {
+      return maxIterationsWhenSettingUp;
+   }
+
 }

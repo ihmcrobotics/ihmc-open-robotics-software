@@ -65,6 +65,7 @@ public class ConvexStepConstraintOptimizerTest
       parameters.setMaxY(0.05);
 
       parameters.setMaxIterations(100);
+      parameters.setMaxIterationsWhenSettingUp(100);
 
       foot.set(initialFoot);
       assertFalse(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
@@ -84,7 +85,6 @@ public class ConvexStepConstraintOptimizerTest
       assertTrue(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));
 
 
-      stepConstraintOptimizer.reset();
       double distanceInside = 0.05;
       parameters.setDesiredDistanceInside(distanceInside);
       assertFalse(isPolygonDistanceInside(foot, distanceInside, 1e-5, region.getConvexHull()));
