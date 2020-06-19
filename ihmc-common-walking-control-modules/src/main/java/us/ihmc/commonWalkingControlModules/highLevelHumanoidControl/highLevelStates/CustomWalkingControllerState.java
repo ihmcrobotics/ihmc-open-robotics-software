@@ -45,7 +45,7 @@ public class CustomWalkingControllerState extends HighLevelControllerState
 
    private final WholeBodyControllerCore controllerCore;
    private final LinearMomentumRateControlModule linearMomentumRateControlModule;
-   private final WalkingHighLevelHumanoidController walkingController;
+   private final CustomWalkingHighLevelHumanoidController walkingController;
 
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
 
@@ -70,7 +70,7 @@ public class CustomWalkingControllerState extends HighLevelControllerState
       this.controllerToolbox = controllerToolbox;
 
       // create walking controller
-      walkingController = new WalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
+      walkingController = new CustomWalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
                                                                  controllerToolbox);
 
       // create controller core
