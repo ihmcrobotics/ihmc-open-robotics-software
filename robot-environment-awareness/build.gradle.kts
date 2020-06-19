@@ -34,7 +34,7 @@ mainDependencies {
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-models-visualizers:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.18.0-ejml-0.39-beta-1")
+   api("us.ihmc:ihmc-robot-data-logger:0.19.0")
    api("us.ihmc:ihmc-messager-kryo:0.1.5")
 
    api("org.bytedeco:javacv-platform:1.5") {
