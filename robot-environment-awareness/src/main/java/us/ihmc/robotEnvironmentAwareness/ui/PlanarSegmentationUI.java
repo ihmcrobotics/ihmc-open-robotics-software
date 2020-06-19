@@ -188,12 +188,6 @@ public class PlanarSegmentationUI implements PerceptionUI
       return new PlanarSegmentationUI(uiMessager, primaryStage);
    }
 
-   public static PlanarSegmentationUI createRemoteUI(Stage primaryStage) throws Exception
-   {
-      Messager messager = createKryoMessager();
-      REAUIMessager uiMessager = new REAUIMessager(messager);
-      return new PlanarSegmentationUI(uiMessager, primaryStage);
-   }
 
    private static Messager createKryoMessager()
    {
