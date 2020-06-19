@@ -1,22 +1,27 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories;
+package us.ihmc.simpleWholeBodyWalking;
 
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.HighLevelControllerFactoryHelper;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.CustomWalkingControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControllerStateFactory;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingControllerState;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 
-public class CustomWalkingControllerStateFactory implements HighLevelControllerStateFactory
+public class SimpleWalkingControllerStateFactory implements HighLevelControllerStateFactory
 {
-   private CustomWalkingControllerState walkingControllerState;
+   private SimpleWalkingControllerState walkingControllerState;
+   private final SimpleControlManagerFactory managerFactory;
+
+   public SimpleWalkingControllerStateFactory(SimpleControlManagerFactory managerFactory)
+   {
+      this.managerFactory = managerFactory;
+   }
 
    @Override
    public HighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
       if (walkingControllerState == null)
       {
-         walkingControllerState = new CustomWalkingControllerState(controllerFactoryHelper.getCommandInputManager(), controllerFactoryHelper.getStatusMessageOutputManager(),
-                                                                   controllerFactoryHelper.getManagerFactory(), controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
+         walkingControllerState = new SimpleWalkingControllerState(controllerFactoryHelper.getCommandInputManager(), controllerFactoryHelper.getStatusMessageOutputManager(),
+                                                                   managerFactory, controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
                                                                    controllerFactoryHelper.getHighLevelControllerParameters(),
                                                                    controllerFactoryHelper.getWalkingControllerParameters());
       }

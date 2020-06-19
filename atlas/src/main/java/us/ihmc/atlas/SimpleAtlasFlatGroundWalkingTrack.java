@@ -6,12 +6,12 @@ import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.avatar.initialSetup.DRCGuiInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCRobotInitialSetup;
 import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.CustomWalkingControllerStateFactory;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
+import us.ihmc.simpleWholeBodyWalking.SimpleWalkingControllerStateFactory;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationconstructionset.util.ground.FlatGroundProfile;
 
-public class CustomAtlasFlatGroundWalkingTrack
+public class SimpleAtlasFlatGroundWalkingTrack
 {
    public static void main(String[] args)
    {
@@ -41,7 +41,7 @@ public class CustomAtlasFlatGroundWalkingTrack
                                     useVelocityAndHeadingScript,
                                     cheatWithGroundHeightAtForFootstep,
                                     model,
-                                    new CustomWalkingControllerStateFactory());
+                                    new SimpleWalkingControllerStateFactory());
    }
 
 }
