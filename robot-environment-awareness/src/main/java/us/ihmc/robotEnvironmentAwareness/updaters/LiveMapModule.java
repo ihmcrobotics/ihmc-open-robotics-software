@@ -1,7 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.updaters;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
-import javafx.stage.Stage;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
@@ -13,10 +12,8 @@ import us.ihmc.robotEnvironmentAwareness.communication.*;
 import us.ihmc.robotEnvironmentAwareness.perceptionSuite.PerceptionModule;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAMParametersPacket;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools;
 import us.ihmc.robotEnvironmentAwareness.tools.ExecutorServiceTools.ExceptionHandling;
-import us.ihmc.robotEnvironmentAwareness.ui.PlanarSegmentationUI;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.ros2.Ros2Node;
 
@@ -79,7 +76,7 @@ public class LiveMapModule implements PerceptionModule
       slamParameters = new PlanarRegionSLAMParameters("ihmc-open-robotics-software", "robot-environment-awareness/src/main/resources/liveMap");
       messager.registerTopicListener(LiveMapModuleAPI.PlanarRegionsSLAMParameters, parameters ->
       {
-         parameters.get(slamParameters);
+         slamParameters.setAllFromStrings(parameters);
          hasNewParameters.set(true);
       });
 
@@ -113,7 +110,7 @@ public class LiveMapModule implements PerceptionModule
 
       messager.submitMessage(LiveMapModuleAPI.ViewingEnable, viewingEnabled.get());
       messager.submitMessage(LiveMapModuleAPI.CombinedLiveMap, combinedLiveMap.get());
-      messager.submitMessage(LiveMapModuleAPI.PlanarRegionsSLAMParameters, new PlanarRegionSLAMParametersPacket(slamParameters));
+      messager.submitMessage(LiveMapModuleAPI.PlanarRegionsSLAMParameters, slamParameters.getAllAsStrings());
    }
 
    private void dispatchLocalizedMap(Subscriber<PlanarRegionsListMessage> subscriber)
