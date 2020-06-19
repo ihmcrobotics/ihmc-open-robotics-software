@@ -8,18 +8,13 @@ import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelContr
 public class SimpleWalkingControllerStateFactory implements HighLevelControllerStateFactory
 {
    private SimpleWalkingControllerState walkingControllerState;
-   private final SimpleControlManagerFactory managerFactory;
-
-   public SimpleWalkingControllerStateFactory(SimpleControlManagerFactory managerFactory)
-   {
-      this.managerFactory = managerFactory;
-   }
 
    @Override
    public HighLevelControllerState getOrCreateControllerState(HighLevelControllerFactoryHelper controllerFactoryHelper)
    {
       if (walkingControllerState == null)
       {
+         SimpleControlManagerFactory managerFactory = new SimpleControlManagerFactory(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getYoVariableRegistry());
          walkingControllerState = new SimpleWalkingControllerState(controllerFactoryHelper.getCommandInputManager(), controllerFactoryHelper.getStatusMessageOutputManager(),
                                                                    managerFactory, controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
                                                                    controllerFactoryHelper.getHighLevelControllerParameters(),
