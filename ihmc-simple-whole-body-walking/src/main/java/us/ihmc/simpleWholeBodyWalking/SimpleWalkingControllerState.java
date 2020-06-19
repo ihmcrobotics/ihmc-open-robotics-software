@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates;
+package us.ihmc.simpleWholeBodyWalking;
 
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModule;
 import us.ihmc.commonWalkingControlModules.configurations.HighLevelControllerParameters;
@@ -11,6 +11,8 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackContro
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointAccelerationIntegrationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel.RootJointDesiredConfigurationDataReadOnly;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.HighLevelControllerState;
+import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.WalkingHighLevelHumanoidController;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -20,7 +22,6 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.ContactableFoot;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
-import us.ihmc.log.LogTools;
 import us.ihmc.mecano.multiBodySystem.OneDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -33,19 +34,20 @@ import us.ihmc.sensorProcessing.frames.CommonHumanoidReferenceFrames;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputList;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputListReadOnly;
+import us.ihmc.simpleWholeBodyWalking.states.SimpleWalkingStateEnum;
 import us.ihmc.yoVariables.parameters.BooleanParameter;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-public class CustomWalkingControllerState extends HighLevelControllerState
+public class SimpleWalkingControllerState extends HighLevelControllerState
 {
    private final static HighLevelControllerName controllerState = HighLevelControllerName.WALKING;
    private final static FrameVector2D emptyVector = new FrameVector2D();
 
    private final WholeBodyControllerCore controllerCore;
    private final LinearMomentumRateControlModule linearMomentumRateControlModule;
-   private final CustomWalkingHighLevelHumanoidController walkingController;
+   private final SimpleWalkingHighLevelHumanoidController walkingController;
 
    private final ExecutionTimer controllerCoreTimer = new ExecutionTimer("controllerCoreTimer", 1.0, registry);
 
@@ -62,15 +64,15 @@ public class CustomWalkingControllerState extends HighLevelControllerState
 
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
 
-   public CustomWalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
-                                       HighLevelControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
+   public SimpleWalkingControllerState(CommandInputManager commandInputManager, StatusMessageOutputManager statusOutputManager,
+                                       SimpleControlManagerFactory managerFactory, HighLevelHumanoidControllerToolbox controllerToolbox,
                                        HighLevelControllerParameters highLevelControllerParameters, WalkingControllerParameters walkingControllerParameters)
    {
       super(controllerState, highLevelControllerParameters, MultiBodySystemTools.filterJoints(controllerToolbox.getControlledJoints(), OneDoFJoint.class));
       this.controllerToolbox = controllerToolbox;
 
       // create walking controller
-      walkingController = new CustomWalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
+      walkingController = new SimpleWalkingHighLevelHumanoidController(commandInputManager, statusOutputManager, managerFactory, walkingControllerParameters,
                                                                  controllerToolbox);
 
       // create controller core
@@ -249,7 +251,7 @@ public class CustomWalkingControllerState extends HighLevelControllerState
     * Returns the currently active walking state. This is used for unit testing.
     * @return WalkingStateEnum
     */
-   public WalkingStateEnum getWalkingStateEnum()
+   public SimpleWalkingStateEnum getWalkingStateEnum()
    {
       return walkingController.getWalkingStateEnum();
    }

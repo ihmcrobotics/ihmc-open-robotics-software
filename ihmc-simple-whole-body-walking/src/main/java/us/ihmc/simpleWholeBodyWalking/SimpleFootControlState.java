@@ -1,4 +1,4 @@
-package us.ihmc.commonWalkingControlModules.controlModules.foot;
+package us.ihmc.simpleWholeBodyWalking;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController.SpatialFeedbackControlCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.InverseDynamicsCommand;
