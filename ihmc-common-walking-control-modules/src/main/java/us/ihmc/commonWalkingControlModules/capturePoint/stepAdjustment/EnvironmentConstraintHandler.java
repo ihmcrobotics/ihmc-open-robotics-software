@@ -92,6 +92,7 @@ public class EnvironmentConstraintHandler
    public void setStepConstraintRegion(StepConstraintRegion stepConstraintRegion)
    {
       this.stepConstraintRegion = stepConstraintRegion;
+      stepConstraintOptimizer.reset();
    }
 
    public boolean hasStepConstraintRegion()
