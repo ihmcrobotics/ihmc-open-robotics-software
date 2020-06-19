@@ -63,7 +63,7 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
 
    private final PelvisOrientationManager pelvisOrientationManager;
    private final SimpleFeetManager feetManager;
-   private final BalanceManager balanceManager;
+   private final SimpleBalanceManager balanceManager;
    private final SimpleCenterOfMassHeightManager comHeightManager;
 
    private final ArrayList<RigidBodyControlManager> bodyManagers = new ArrayList<>();
@@ -87,8 +87,6 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
 
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   private final YoBoolean enablePushRecoveryOnFailure = new YoBoolean("enablePushRecoveryOnFailure", registry);
-
    private final YoBoolean allowUpperBodyMotionDuringLocomotion = new YoBoolean("allowUpperBodyMotionDuringLocomotion", registry);
 
    private final CommandInputManager commandInputManager;
@@ -105,8 +103,6 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
    private ControllerCoreOutputReadOnly controllerCoreOutput;
 
    private final ParameterizedControllerCoreOptimizationSettings controllerCoreOptimizationSettings;
-
-   private final YoBoolean enableHeightFeedbackControl = new YoBoolean("enableHeightFeedbackControl", registry);
 
    private boolean firstTick = true;
 
@@ -167,7 +163,7 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
          {
             continue;
          }
-         Arrays.asList(manager.getControlledJoints()).stream().forEach(joint -> bodyManagerByJointName.put(joint.getName(), manager));
+         Arrays.asList(manager.getControlledJoints()).forEach(joint -> bodyManagerByJointName.put(joint.getName(), manager));
       }
 
       for (RobotSide robotSide : RobotSide.values)
@@ -175,7 +171,7 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
          RigidBodyBasics foot = fullRobotModel.getFoot(robotSide);
          OneDoFJointBasics[] legJoints = MultiBodySystemTools.filterJoints(MultiBodySystemTools.createJointPath(pelvis, foot), OneDoFJointBasics.class);
          Set<String> jointNames = new HashSet<>();
-         Arrays.asList(legJoints).stream().forEach(legJoint -> jointNames.add(legJoint.getName()));
+         Arrays.asList(legJoints).forEach(legJoint -> jointNames.add(legJoint.getName()));
          legJointNames.put(robotSide, jointNames);
       }
 
@@ -188,7 +184,6 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
       this.statusOutputManager = statusOutputManager;
 
       allowUpperBodyMotionDuringLocomotion.set(walkingControllerParameters.allowUpperBodyMotionDuringLocomotion());
-      enableHeightFeedbackControl.set(walkingControllerParameters.enableHeightFeedbackControl());
 
       failureDetectionControlModule = new WalkingFailureDetectionControlModule(controllerToolbox.getContactableFeet(), registry);
 
@@ -355,7 +350,7 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
 
       // Update the previous state info for each state using state changed listeners.
       factory.getRegisteredStates().forEach(state -> factory.addStateChangedListener((from, to) -> state.setPreviousWalkingStateEnum(from)));
-      factory.addStateChangedListener((from, to) -> controllerToolbox.reportControllerStateChangeToListeners(from, to));
+      factory.addStateChangedListener(controllerToolbox::reportControllerStateChangeToListeners);
 
       return factory.build(SimpleWalkingStateEnum.TO_STANDING);
    }
@@ -541,23 +536,8 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
          walkingMessageHandler.clearFootsteps();
          walkingMessageHandler.clearFootTrajectory();
          commandInputManager.clearAllCommands();
-
-         if (enablePushRecoveryOnFailure.getBooleanValue() && !balanceManager.isPushRecoveryEnabled())
-         {
-            balanceManager.enablePushRecovery();
-         }
-         else if (!balanceManager.isPushRecoveryEnabled() || balanceManager.isRecoveryImpossible())
-         {
-            walkingMessageHandler.reportControllerFailure(failureDetectionControlModule.getFallingDirection3D());
-            controllerToolbox.reportControllerFailureToListeners(failureDetectionControlModule.getFallingDirection2D());
-         }
       }
 
-      if (enablePushRecoveryOnFailure.getBooleanValue())
-      {
-         if (balanceManager.isPushRecoveryEnabled() && balanceManager.isRobotBackToSafeState())
-            balanceManager.disablePushRecovery();
-      }
    }
 
    public void updateManagers(SimpleWalkingState currentState)
@@ -569,7 +549,6 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
 
       boolean isInDoubleSupport = currentState.isDoubleSupportState();
       double omega0 = controllerToolbox.getOmega0();
-      boolean isRecoveringFromPush = balanceManager.isRecovering();
 
       feetManager.compute();
 
@@ -593,13 +572,12 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
                                                                                                desiredCoMVelocityAsFrameVector,
                                                                                                isInDoubleSupport,
                                                                                                omega0,
-                                                                                               isRecoveringFromPush));
+                                                                                               false));
 
       // the comHeightManager can control the pelvis with a feedback controller and doesn't always need the z component of the momentum command. It would be better to remove the coupling between these two modules
-      boolean controlHeightWithMomentum = comHeightManager.getControlHeightWithMomentum() && enableHeightFeedbackControl.getValue();
       boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
       RobotSide side = currentState.isDoubleSupportState() ? currentState.getTransferToSide() : currentState.getSupportSide();
-      balanceManager.compute(side, controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon, controlHeightWithMomentum);
+      balanceManager.compute(side, controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon, false);
    }
 
    private void reportStatusMessages()

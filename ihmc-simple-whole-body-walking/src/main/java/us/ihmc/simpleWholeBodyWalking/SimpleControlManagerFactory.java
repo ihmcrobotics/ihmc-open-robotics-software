@@ -50,7 +50,7 @@ public class SimpleControlManagerFactory
    private final YoVariableRegistry footGainRegistry = new YoVariableRegistry(footGainRegistryName);
    private final YoVariableRegistry comHeightGainRegistry = new YoVariableRegistry(comHeightGainRegistryName);
 
-   private BalanceManager balanceManager;
+   private SimpleBalanceManager balanceManager;
    private SimpleCenterOfMassHeightManager centerOfMassHeightManager;
    private SimpleFeetManager feetManager;
    private PelvisOrientationManager pelvisOrientationManager;
@@ -78,7 +78,6 @@ public class SimpleControlManagerFactory
 
    private PIDGainsReadOnly walkingControllerComHeightGains;
    private DoubleProvider walkingControllerMaxComHeightVelocity;
-   private PIDGainsReadOnly userModeComHeightGains;
 
    public SimpleControlManagerFactory(YoVariableRegistry parentRegistry)
    {
@@ -118,7 +117,6 @@ public class SimpleControlManagerFactory
 
       walkingControllerComHeightGains = new ParameterizedPIDGains("WalkingControllerComHeight", walkingControllerParameters.getCoMHeightControlGains(), comHeightGainRegistry);
       walkingControllerMaxComHeightVelocity = new DoubleParameter("MaximumVelocityWalkingControllerComHeight", comHeightGainRegistry, walkingControllerParameters.getMaximumVelocityCoMHeight());
-      userModeComHeightGains = new ParameterizedPIDGains("UserModeComHeight", walkingControllerParameters.getCoMHeightControlGains(), comHeightGainRegistry);
    }
 
    public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
@@ -126,7 +124,7 @@ public class SimpleControlManagerFactory
       this.capturePointPlannerParameters = capturePointPlannerParameters;
    }
 
-   public BalanceManager getOrCreateBalanceManager()
+   public SimpleBalanceManager getOrCreateBalanceManager()
    {
       if (balanceManager != null)
          return balanceManager;
@@ -140,7 +138,7 @@ public class SimpleControlManagerFactory
       if (!hasMomentumOptimizationSettings(BalanceManager.class))
          return null;
 
-      balanceManager = new BalanceManager(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, angularMomentumModifierParameters,
+      balanceManager = new SimpleBalanceManager(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, angularMomentumModifierParameters,
                                           registry);
       return balanceManager;
    }
@@ -155,9 +153,8 @@ public class SimpleControlManagerFactory
       if (!hasWalkingControllerParameters(CenterOfMassHeightManager.class))
          return null;
 
-      String pelvisName = controllerToolbox.getFullRobotModel().getPelvis().getName();
       centerOfMassHeightManager = new SimpleCenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, registry);
-      centerOfMassHeightManager.setComHeightGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity, userModeComHeightGains);
+      centerOfMassHeightManager.setComHeightGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
       return centerOfMassHeightManager;
    }
 

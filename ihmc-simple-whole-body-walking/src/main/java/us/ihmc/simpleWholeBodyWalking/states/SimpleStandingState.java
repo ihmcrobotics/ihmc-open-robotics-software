@@ -1,14 +1,8 @@
 package us.ihmc.simpleWholeBodyWalking.states;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
-import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
-import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.communication.controllerAPI.CommandInputManager;
@@ -17,6 +11,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.sensorProcessing.model.RobotMotionStatus;
+import us.ihmc.simpleWholeBodyWalking.SimpleBalanceManager;
 import us.ihmc.simpleWholeBodyWalking.SimpleCenterOfMassHeightManager;
 import us.ihmc.simpleWholeBodyWalking.SimpleControlManagerFactory;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -29,7 +24,7 @@ public class SimpleStandingState extends SimpleWalkingState
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final SimpleCenterOfMassHeightManager comHeightManager;
-   private final BalanceManager balanceManager;
+   private final SimpleBalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
@@ -81,7 +76,6 @@ public class SimpleStandingState extends SimpleWalkingState
       // need to always update biped support polygons after a change to the contact states
       controllerToolbox.updateBipedSupportPolygons();
 
-      balanceManager.resetPushRecovery();
       balanceManager.enablePelvisXYControl();
       balanceManager.setICPPlanTransferFromSide(null);
       balanceManager.initializeICPPlanForStanding();

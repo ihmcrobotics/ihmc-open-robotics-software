@@ -38,7 +38,6 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
  */
 public class SimpleSupportState extends SimpleFootControlState
 {
-   private static final double defaultFootLoadThreshold = 0.2;
    private static final int dofs = Twist.SIZE;
 
    private final YoVariableRegistry registry;

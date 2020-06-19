@@ -1,32 +1,22 @@
 package us.ihmc.simpleWholeBodyWalking.states;
 
-import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
-import us.ihmc.commonWalkingControlModules.capturePoint.CenterOfMassHeightManager;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.foot.FeetManager;
-import us.ihmc.commonWalkingControlModules.controlModules.legConfiguration.LegConfigurationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.desiredFootStep.NewTransferToAndNextFootstepsData;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.factories.HighLevelControlManagerFactory;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.TouchdownErrorCompensator;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
+import us.ihmc.simpleWholeBodyWalking.SimpleBalanceManager;
 import us.ihmc.simpleWholeBodyWalking.SimpleCenterOfMassHeightManager;
 import us.ihmc.simpleWholeBodyWalking.SimpleControlManagerFactory;
 import us.ihmc.simpleWholeBodyWalking.SimpleFeetManager;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 public class SimpleTransferToStandingState extends SimpleWalkingState
 {
-   private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-
    private final YoDouble maxICPErrorToSwitchToStanding = new YoDouble("maxICPErrorToSwitchToStanding", registry);
 
    private final WalkingMessageHandler walkingMessageHandler;
@@ -34,7 +24,7 @@ public class SimpleTransferToStandingState extends SimpleWalkingState
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
    private final SimpleCenterOfMassHeightManager comHeightManager;
-   private final BalanceManager balanceManager;
+   private final SimpleBalanceManager balanceManager;
    private final PelvisOrientationManager pelvisOrientationManager;
    private final SimpleFeetManager feetManager;
 
@@ -79,7 +69,6 @@ public class SimpleTransferToStandingState extends SimpleWalkingState
    public void onEntry()
    {
       balanceManager.clearICPPlan();
-      balanceManager.resetPushRecovery();
 
       SimpleWalkingStateEnum previousStateEnum = getPreviousWalkingStateEnum();
 
@@ -109,10 +98,6 @@ public class SimpleTransferToStandingState extends SimpleWalkingState
       double finalTransferTime = walkingMessageHandler.getFinalTransferTime();
       double finalTransferSplitFraction = walkingMessageHandler.getFinalTransferSplitFraction();
       double finalTransferWeightDistribution = walkingMessageHandler.getFinalTransferWeightDistribution();
-      Footstep footstepLeft = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.LEFT);
-      Footstep footstepRight = walkingMessageHandler.getFootstepAtCurrentLocation(RobotSide.LEFT);
-      midFootPosition.interpolate(footstepLeft.getFootstepPose().getPosition(), footstepRight.getFootstepPose().getPosition(), 0.5);
-      comHeightManager.transfer(midFootPosition, finalTransferTime);
 
       // Just standing in double support, do nothing
       pelvisOrientationManager.centerInMidFeetZUpFrame(finalTransferTime);
@@ -120,10 +105,5 @@ public class SimpleTransferToStandingState extends SimpleWalkingState
       balanceManager.setFinalTransferWeightDistribution(finalTransferWeightDistribution);
       balanceManager.setICPPlanTransferFromSide(previousSupportSide);
       balanceManager.initializeICPPlanForTransferToStanding(finalTransferTime);
-   }
-
-   @Override
-   public void onExit()
-   {
    }
 }

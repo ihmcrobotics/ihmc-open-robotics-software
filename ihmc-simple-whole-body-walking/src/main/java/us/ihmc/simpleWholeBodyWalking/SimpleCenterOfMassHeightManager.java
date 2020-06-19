@@ -58,11 +58,6 @@ public class SimpleCenterOfMassHeightManager
       centerOfMassHeightControlState.doAction(time.getValue());
    }
 
-   public void initializeDesiredHeightToCurrent()
-   {
-      centerOfMassHeightControlState.initializeDesiredHeightToCurrent();
-   }
-
    /**
     * checks that the command is valid and switches to user mode
     * The controller will try to achieve the pelvis height regardless of the robot configuration
@@ -132,32 +127,10 @@ public class SimpleCenterOfMassHeightManager
       return centerOfMassHeightControlState.getFeedbackControlCommand();
    }
 
-   public boolean getControlHeightWithMomentum()
-   {
-
-      return false;
-   }
-
    public void setComHeightGains(PIDGainsReadOnly walkingControllerComHeightGains,
-                                 DoubleProvider walkingControllerMaxComHeightVelocity,
-                                 PIDGainsReadOnly userModeComHeightGains)
+                                 DoubleProvider walkingControllerMaxComHeightVelocity)
    {
       centerOfMassHeightControlState.setGains(walkingControllerComHeightGains, walkingControllerMaxComHeightVelocity);
-   }
-
-   public void step(Point3DReadOnly stanceFootPosition, Point3DReadOnly touchdownPosition, double swingTime, RobotSide swingSide, double toeOffHeight)
-   {
-
-   }
-
-   public void transfer(Point3DReadOnly transferPosition, double transferTime)
-   {
-      transfer(transferPosition, transferTime, null, 0.0);
-   }
-
-   public void transfer(Point3DReadOnly transferPosition, double transferTime, RobotSide swingSide, double toeOffHeight)
-   {
-
    }
 
    public TaskspaceTrajectoryStatusMessage pollStatusToReport()
