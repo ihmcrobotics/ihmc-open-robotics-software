@@ -41,7 +41,7 @@ public class SimpleCommandConsumer
    private final CommandConsumerWithDelayBuffers commandConsumerWithDelayBuffers;
    private final StatusMessageOutputManager statusMessageOutputManager;
 
-   private final PelvisOrientationManager pelvisOrientationManager;
+   private final SimplePelvisOrientationManager pelvisOrientationManager;
    private final SimpleBalanceManager balanceManager;
    private final SimpleCenterOfMassHeightManager comHeightManager;
 
@@ -363,7 +363,6 @@ public class SimpleCommandConsumer
 
       comHeightManager.handleStopAllTrajectoryCommand(command);
       balanceManager.handleStopAllTrajectoryCommand(command);
-      pelvisOrientationManager.handleStopAllTrajectoryCommand(command);
    }
 
    public void consumeFootCommands()

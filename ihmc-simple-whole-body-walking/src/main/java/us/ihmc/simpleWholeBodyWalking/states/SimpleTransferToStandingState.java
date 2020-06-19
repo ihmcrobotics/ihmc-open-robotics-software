@@ -8,10 +8,7 @@ import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHuma
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simpleWholeBodyWalking.SimpleBalanceManager;
-import us.ihmc.simpleWholeBodyWalking.SimpleCenterOfMassHeightManager;
-import us.ihmc.simpleWholeBodyWalking.SimpleControlManagerFactory;
-import us.ihmc.simpleWholeBodyWalking.SimpleFeetManager;
+import us.ihmc.simpleWholeBodyWalking.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -25,10 +22,8 @@ public class SimpleTransferToStandingState extends SimpleWalkingState
 
    private final SimpleCenterOfMassHeightManager comHeightManager;
    private final SimpleBalanceManager balanceManager;
-   private final PelvisOrientationManager pelvisOrientationManager;
+   private final SimplePelvisOrientationManager pelvisOrientationManager;
    private final SimpleFeetManager feetManager;
-
-   private final Point3D midFootPosition = new Point3D();
 
    public SimpleTransferToStandingState(WalkingMessageHandler walkingMessageHandler,
                                         HighLevelHumanoidControllerToolbox controllerToolbox,

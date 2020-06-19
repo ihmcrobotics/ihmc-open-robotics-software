@@ -12,10 +12,7 @@ import us.ihmc.euclid.referenceFrame.interfaces.FrameConvexPolygon2DReadOnly;
 import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.humanoidRobotics.footstep.FootstepTiming;
 import us.ihmc.robotics.robotSide.RobotSide;
-import us.ihmc.simpleWholeBodyWalking.SimpleBalanceManager;
-import us.ihmc.simpleWholeBodyWalking.SimpleCenterOfMassHeightManager;
-import us.ihmc.simpleWholeBodyWalking.SimpleControlManagerFactory;
-import us.ihmc.simpleWholeBodyWalking.SimpleFeetManager;
+import us.ihmc.simpleWholeBodyWalking.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public abstract class SimpleTransferState extends SimpleWalkingState
@@ -28,7 +25,7 @@ public abstract class SimpleTransferState extends SimpleWalkingState
 
    protected final SimpleCenterOfMassHeightManager comHeightManager;
    protected final SimpleBalanceManager balanceManager;
-   protected final PelvisOrientationManager pelvisOrientationManager;
+   protected final SimplePelvisOrientationManager pelvisOrientationManager;
    protected final SimpleFeetManager feetManager;
 
    private final FramePoint2D capturePoint2d = new FramePoint2D();
@@ -139,11 +136,5 @@ public abstract class SimpleTransferState extends SimpleWalkingState
    public boolean isInitialTransfer()
    {
       return getPreviousWalkingStateEnum() == SimpleWalkingStateEnum.STANDING;
-   }
-
-   @Override
-   public void onExit()
-   {
-      feetManager.reset();
    }
 }

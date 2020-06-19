@@ -53,14 +53,13 @@ public class SimpleControlManagerFactory
    private SimpleBalanceManager balanceManager;
    private SimpleCenterOfMassHeightManager centerOfMassHeightManager;
    private SimpleFeetManager feetManager;
-   private PelvisOrientationManager pelvisOrientationManager;
+   private SimplePelvisOrientationManager pelvisOrientationManager;
 
    private final Map<String, RigidBodyControlManager> rigidBodyManagerMapByBodyName = new HashMap<>();
 
    private HighLevelHumanoidControllerToolbox controllerToolbox;
    private WalkingControllerParameters walkingControllerParameters;
    private ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters;
-   private ICPAngularMomentumModifierParameters angularMomentumModifierParameters;
    private MomentumOptimizationSettings momentumOptimizationSettings;
 
    private final Map<String, PIDGainsReadOnly> jointGainMap = new HashMap<>();
@@ -98,7 +97,6 @@ public class SimpleControlManagerFactory
    {
       this.walkingControllerParameters = walkingControllerParameters;
       momentumOptimizationSettings = walkingControllerParameters.getMomentumOptimizationSettings();
-      angularMomentumModifierParameters = walkingControllerParameters.getICPAngularMomentumModifierParameters();
 
       // Transform weights and gains to their parameterized versions.
       ParameterTools.extractJointGainMap(walkingControllerParameters.getJointSpaceControlGains(), jointGainMap, jointGainRegistry);
@@ -138,8 +136,7 @@ public class SimpleControlManagerFactory
       if (!hasMomentumOptimizationSettings(BalanceManager.class))
          return null;
 
-      balanceManager = new SimpleBalanceManager(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, angularMomentumModifierParameters,
-                                          registry);
+      balanceManager = new SimpleBalanceManager(controllerToolbox, walkingControllerParameters, capturePointPlannerParameters, registry);
       return balanceManager;
    }
 
@@ -235,7 +232,7 @@ public class SimpleControlManagerFactory
       return feetManager;
    }
 
-   public PelvisOrientationManager getOrCreatePelvisOrientationManager()
+   public SimplePelvisOrientationManager getOrCreatePelvisOrientationManager()
    {
       if (pelvisOrientationManager != null)
          return pelvisOrientationManager;
@@ -250,11 +247,8 @@ public class SimpleControlManagerFactory
       String pelvisName = controllerToolbox.getFullRobotModel().getPelvis().getName();
       PID3DGainsReadOnly pelvisGains = taskspaceOrientationGainMap.get(pelvisName);
       Vector3DReadOnly pelvisAngularWeight = taskspaceAngularWeightMap.get(pelvisName);
-      PelvisOffsetWhileWalkingParameters pelvisOffsetWhileWalkingParameters = walkingControllerParameters.getPelvisOffsetWhileWalkingParameters();
-      LeapOfFaithParameters leapOfFaithParameters = walkingControllerParameters.getLeapOfFaithParameters();
 
-      pelvisOrientationManager = new PelvisOrientationManager(pelvisGains, pelvisOffsetWhileWalkingParameters, leapOfFaithParameters, controllerToolbox,
-                                                              registry);
+      pelvisOrientationManager = new SimplePelvisOrientationManager(pelvisGains, controllerToolbox, registry);
       pelvisOrientationManager.setWeights(pelvisAngularWeight);
       pelvisOrientationManager.setPrepareForLocomotion(walkingControllerParameters.doPreparePelvisForLocomotion());
       return pelvisOrientationManager;
