@@ -57,7 +57,6 @@ public class ConvexStepConstraintOptimizer
 
    private final DenseMatrix64F Aineq = new DenseMatrix64F(0, 0);
    private final DenseMatrix64F bineq = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F zeros = new DenseMatrix64F(0, 0);
 
    private final DenseMatrix64F p = new DenseMatrix64F(2, 1);
 
@@ -92,9 +91,15 @@ public class ConvexStepConstraintOptimizer
    {
       int numberOfPoints = polygonToWiggle.getNumberOfVertices();
 
+      boolean parametersChanged = parameters.pollParametersChanged();
+      int maxIterations = parameters.getMaxIterations();
+
       // This creates inequality constraints for points to lie inside the desired polygon.
-      if (!invariantConstraintRegionValuesComputed)
+      if (!invariantConstraintRegionValuesComputed || parametersChanged)
+      {
          computeInvariantConstraintValues(planeToWiggleInto, parameters, startingVerticesToIgnore, numberOfPoints);
+         maxIterations = parameters.getMaxIterationsWhenSettingUp();
+      }
 
       int constraintsPerPoint = A.getNumRows();
 
@@ -102,7 +107,6 @@ public class ConvexStepConstraintOptimizer
       int slackVariables = constraintsPerPoint * numberOfPoints;
       int totalVariables = variables + slackVariables;
       int constraints = constraintsPerPoint * numberOfPoints;
-      int boundConstraints = parameters.getConstrainMaxAdjustment() ? 4 : 0;
 
       // The inequality constraints of form
       // Ax <= b
@@ -110,7 +114,6 @@ public class ConvexStepConstraintOptimizer
       // Ax - s - b == 0.0
       // s <= 0
       // The equality constraint will be converted to an objective causing the wiggler to do the best it can instead of failing when the wiggle is not possible.
-
       j.set(bFull);
 
       for (int i = 0; i < numberOfPoints; i++)
@@ -122,11 +125,8 @@ public class ConvexStepConstraintOptimizer
       }
 
       // Check to see if the optimization actually needs to run. Most of the time, probably not, but if so, there's no need to run the optimizer
-      zeros.reshape(totalVariables, 1);
       solution.reshape(constraints, 1);
-      zeros.zero();
       CommonOps.scale(-1.0, j, solution);
-      CommonOps.multAdd(J, zeros, solution); // FIXME there's no way this does anything
       boolean areConstraintsAlreadyValid = true;
       for (int i = 0; i < solution.numRows; i++)
       {
@@ -144,18 +144,16 @@ public class ConvexStepConstraintOptimizer
       }
 
 
-      // TODO move these invariant setters into the static method later
-      Aineq.reshape(constraints + boundConstraints, totalVariables);
-      bineq.reshape(constraints + boundConstraints, 1);
-      // add limits on allowed translation
-      if (parameters.getConstrainMaxAdjustment())
-         PolygonWiggler.addTranslationConstraint(Aineq, bineq, constraints, parameters.getMaxX(), -parameters.getMaxX(), parameters.getMaxY(), -parameters.getMaxY());
-
-      MatrixMissingTools.setDiagonalValues(Aineq, 1.0, 0, variables);
-
-
       if (!invariantOptimizationValuesComputed)
-         computeInvariantOptimizationValues(planeToWiggleInto , parameters, startingVerticesToIgnore, numberOfPoints);
+      {
+         computeInvariantOptimizationValues(numberOfPoints);
+         computeInequalityConstraints(parameters, totalVariables, numberOfPoints);
+         maxIterations = parameters.getMaxIterationsWhenSettingUp();
+      }
+      else if (parametersChanged)
+      {
+         computeInequalityConstraints(parameters, totalVariables, numberOfPoints);
+      }
 
       // Convert the inequality constraint for being inside the polygon to an objective.
       g.reshape(totalVariables, 1);
@@ -163,7 +161,7 @@ public class ConvexStepConstraintOptimizer
 
       try
       {
-         solver.setMaxNumberOfIterations(parameters.getMaxIterations());
+         solver.setMaxNumberOfIterations(maxIterations);
          solver.setQuadraticCostFunction(G, g, 0.0);
          solver.setLinearInequalityConstraints(Aineq, bineq);
          solver.setUseWarmStart(warmStart);
@@ -205,8 +203,6 @@ public class ConvexStepConstraintOptimizer
       int slackVariables = constraintsPerPoint * numberOfPoints;
       int totalVariables = variables + slackVariables;
       int constraints = constraintsPerPoint * numberOfPoints;
-      int boundConstraints = parameters.getConstrainMaxAdjustment() ? 4 : 0;
-
 
       J.reshape(constraints, totalVariables);
       bFull.reshape(constraints, 1);
@@ -222,31 +218,13 @@ public class ConvexStepConstraintOptimizer
       invariantConstraintRegionValuesComputed = true;
    }
 
-   private void computeInvariantOptimizationValues(ConvexPolygon2DReadOnly planeToWiggleInto,
-                                                   ConstraintOptimizerParameters parameters,
-                                                   int[] startingVerticesToIgnore, int numberOfPoints)
+   private void computeInvariantOptimizationValues(int numberOfPoints)
    {
       int constraintsPerPoint = A.getNumRows();
 
       int variables = 2;
       int slackVariables = constraintsPerPoint * numberOfPoints;
       int totalVariables = variables + slackVariables;
-      int constraints = constraintsPerPoint * numberOfPoints;
-      int boundConstraints = parameters.getConstrainMaxAdjustment() ? 4 : 0;
-
-//      Aineq.reshape(constraints + boundConstraints, totalVariables);
-//      bineq.reshape(constraints + boundConstraints, 1);
-//       add limits on allowed translation
-//      if (parameters.getConstrainMaxAdjustment())
-//         PolygonWiggler.addTranslationConstraint(Aineq, bineq, constraints, parameters.getMaxX(), -parameters.getMaxX(), parameters.getMaxY(), -parameters.getMaxY());
-
-
-      Aineq.reshape(constraints + boundConstraints, totalVariables);
-      bineq.reshape(constraints + boundConstraints, 1);
-      // add limits on allowed translation
-      if (parameters.getConstrainMaxAdjustment())
-         PolygonWiggler.addTranslationConstraint(Aineq, bineq, constraints, parameters.getMaxX(), -parameters.getMaxX(), parameters.getMaxY(), -parameters.getMaxY());
-
 
       G.reshape(totalVariables, totalVariables);
       CommonOps.multInner(J, G);
@@ -260,5 +238,22 @@ public class ConvexStepConstraintOptimizer
          G.add(i, i, moveWeight);
 
       invariantOptimizationValuesComputed = true;
+   }
+
+   private void computeInequalityConstraints(ConstraintOptimizerParameters parameters, int totalVariables, int numberOfPoints)
+   {
+      int constraintsPerPoint = A.getNumRows();
+
+      int variables = 2;
+      int constraints = constraintsPerPoint * numberOfPoints;
+      int boundConstraints = parameters.getConstrainMaxAdjustment() ? 4 : 0;
+
+      Aineq.reshape(constraints + boundConstraints, totalVariables);
+      bineq.reshape(constraints + boundConstraints, 1);
+      // add limits on allowed translation
+      if (parameters.getConstrainMaxAdjustment())
+         PolygonWiggler.addTranslationConstraint(Aineq, bineq, constraints, parameters.getMaxX(), -parameters.getMaxX(), parameters.getMaxY(), -parameters.getMaxY());
+
+      MatrixMissingTools.setDiagonalValues(Aineq, 1.0, 0, variables);
    }
 }
