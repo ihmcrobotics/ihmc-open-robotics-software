@@ -102,8 +102,7 @@ public class LiveMapModule implements PerceptionModule
 
       sendCurrentState();
 
-      // FIXME fix the output topic name.
-      combinedMapPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, outputTopic);
+      combinedMapPublisher = ROS2Tools.createPublisherTypeNamed(ros2Node, PlanarRegionsListMessage.class, ROS2Tools.MAP_REGIONS);
    }
 
    private void sendCurrentState()
