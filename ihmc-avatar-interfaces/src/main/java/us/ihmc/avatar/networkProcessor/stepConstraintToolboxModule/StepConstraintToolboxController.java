@@ -90,20 +90,16 @@ public class StepConstraintToolboxController extends ToolboxController
       return true;
    }
 
-   private long initialTimestamp = -1L;
-
    @Override
    public void updateInternal()
    {
       try
       {
-         if (initialTimestamp == -1L)
-            initialTimestamp = System.nanoTime();
-         time.set(Conversions.nanosecondsToSeconds(System.nanoTime() - initialTimestamp));
-
          RobotConfigurationData configurationData = this.configurationData.getAndSet(null);
          if (configurationData != null)
          {
+            time.set(Conversions.nanosecondsToSeconds(configurationData.getMonotonicTime()));
+
             KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(configurationData, fullRobotModel.getRootJoint(), oneDoFJoints);
             referenceFrames.updateFrames();
          }
