@@ -64,6 +64,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  shinLength                                   = keys.addDoubleKey("Shin length", 0.45);
    public static final DoubleStoredPropertyKey  shinPitch                                    = keys.addDoubleKey("Shin pitch", 0.0);
    public static final DoubleStoredPropertyKey  shinHeightOffet                              = keys.addDoubleKey("Shin height offet", 0.05);
+   public static final DoubleStoredPropertyKey  distanceEpsilonToBridgeRegions               = keys.addDoubleKey("Distance epsilon to bridge regions", 0.0);
 
    // cost parameters
    public static final DoubleStoredPropertyKey  aStarHeuristicsWeight                        = keys.addDoubleKey ("AStar heuristics weight", 1.5);
