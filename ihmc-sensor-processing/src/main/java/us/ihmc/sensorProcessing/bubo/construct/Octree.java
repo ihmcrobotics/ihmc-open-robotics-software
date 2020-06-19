@@ -20,7 +20,7 @@ package us.ihmc.sensorProcessing.bubo.construct;
 
 import java.util.List;
 
-import org.ddogleg.struct.FastQueue;
+import org.ddogleg.struct.FastArray;
 
 import georegression.struct.GeoTuple;
 
@@ -72,7 +72,7 @@ public abstract class Octree< O extends Octree, P extends GeoTuple> {
 	 * Points contained inside this node.  Depending on how it was constructed, all the points might be
 	 * contained in the leafs or not.  New points are not declared by the FastQueue, just the storage array
 	 */
-	public FastQueue<Info<P>> points = new FastQueue<Info<P>>((Class)Info.class, false);
+	public FastArray<Info<P>> points = new FastArray<Info<P>>((Class)Info.class);
 
 	/**
 	 * Returns true if it is a leaf node or false if it is not

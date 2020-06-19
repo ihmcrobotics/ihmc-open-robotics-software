@@ -4,7 +4,7 @@ import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
@@ -34,19 +34,19 @@ public class SimpleLIPMDynamicsTest
 
       SimpleLIPMDynamics dynamics = new SimpleLIPMDynamics(deltaT, 1.0, gravityZ);
 
-      DenseMatrix64F currentState = new DenseMatrix64F(4, 1);
+      DMatrixRMaj currentState = new DMatrixRMaj(4, 1);
       currentState.set(0, x);
       currentState.set(1, y);
       currentState.set(2, xDot);
       currentState.set(3, yDot);
 
-      DenseMatrix64F currentControl = new DenseMatrix64F(2, 1);
+      DMatrixRMaj currentControl = new DMatrixRMaj(2, 1);
       currentControl.set(0, pX);
       currentControl.set(1, pY);
 
-      DenseMatrix64F constants = new DenseMatrix64F(0, 1);
+      DMatrixRMaj constants = new DMatrixRMaj(0, 1);
 
-      DenseMatrix64F nextState = new DenseMatrix64F(4, 1);
+      DMatrixRMaj nextState = new DMatrixRMaj(4, 1);
 
       dynamics.getNextState(DefaultDiscreteState.DEFAULT, currentState, currentControl, constants, nextState);
 
@@ -58,7 +58,7 @@ public class SimpleLIPMDynamicsTest
       double nextXDot = xDot + deltaT * (x - pX) * fz / (mass * z);
       double nextYDot = yDot + deltaT * (y - pY) * fz / (mass * z);
 
-      DenseMatrix64F expectedNextState = new DenseMatrix64F(4, 1);
+      DMatrixRMaj expectedNextState = new DMatrixRMaj(4, 1);
       expectedNextState.set(0, nextX);
       expectedNextState.set(1, nextY);
       expectedNextState.set(2, nextXDot);
@@ -85,19 +85,19 @@ public class SimpleLIPMDynamicsTest
          pX = RandomNumbers.nextDouble(random, 10.0);
          pY = RandomNumbers.nextDouble(random, 10.0);
 
-         currentState = new DenseMatrix64F(4, 1);
+         currentState = new DMatrixRMaj(4, 1);
          currentState.set(0, x);
          currentState.set(1, y);
          currentState.set(2, xDot);
          currentState.set(3, yDot);
 
-         currentControl = new DenseMatrix64F(2, 1);
+         currentControl = new DMatrixRMaj(2, 1);
          currentControl.set(0, pX);
          currentControl.set(1, pY);
 
-         constants = new DenseMatrix64F(0, 1);
+         constants = new DMatrixRMaj(0, 1);
 
-         nextState = new DenseMatrix64F(4, 1);
+         nextState = new DMatrixRMaj(4, 1);
 
          dynamics.getNextState(DefaultDiscreteState.DEFAULT, currentState, currentControl, constants, nextState);
 
@@ -109,7 +109,7 @@ public class SimpleLIPMDynamicsTest
          nextXDot = xDot + deltaT * (x - pX) * fz / (mass * z);
          nextYDot = yDot + deltaT * (y - pY) * fz / (mass * z);
 
-         expectedNextState = new DenseMatrix64F(4, 1);
+         expectedNextState = new DMatrixRMaj(4, 1);
          expectedNextState.set(0, nextX);
          expectedNextState.set(1, nextY);
          expectedNextState.set(2, nextXDot);
@@ -140,19 +140,19 @@ public class SimpleLIPMDynamicsTest
 
       SimpleLIPMDynamics dynamics = new SimpleLIPMDynamics(deltaT, z, gravityZ);
 
-      DenseMatrix64F currentState = new DenseMatrix64F(4, 1);
+      DMatrixRMaj currentState = new DMatrixRMaj(4, 1);
       currentState.set(0, x);
       currentState.set(1, y);
       currentState.set(2, xDot);
       currentState.set(3, yDot);
 
-      DenseMatrix64F currentControl = new DenseMatrix64F(2, 1);
+      DMatrixRMaj currentControl = new DMatrixRMaj(2, 1);
       currentControl.set(0, pX);
       currentControl.set(1, pY);
 
-      DenseMatrix64F constants = new DenseMatrix64F(0, 1);
+      DMatrixRMaj constants = new DMatrixRMaj(0, 1);
 
-      DenseMatrix64F dynamicsStateGradient = new DenseMatrix64F(4, 4);
+      DMatrixRMaj dynamicsStateGradient = new DMatrixRMaj(4, 4);
 
       dynamics.getDynamicsStateGradient(DefaultDiscreteState.DEFAULT, currentState, currentControl, constants, dynamicsStateGradient);
 
@@ -168,7 +168,7 @@ public class SimpleLIPMDynamicsTest
       double f31 = deltaT * fz / (mass * z);
       double f33 = 1;
 
-      DenseMatrix64F expectedDynamicsStateGradient = new DenseMatrix64F(4, 4);
+      DMatrixRMaj expectedDynamicsStateGradient = new DMatrixRMaj(4, 4);
       expectedDynamicsStateGradient.set(0, 0, f00);
       expectedDynamicsStateGradient.set(0, 2, f02);
       expectedDynamicsStateGradient.set(1, 1, f11);
@@ -199,19 +199,19 @@ public class SimpleLIPMDynamicsTest
          pX = RandomNumbers.nextDouble(random, 10.0);
          pY = RandomNumbers.nextDouble(random, 10.0);
 
-         currentState = new DenseMatrix64F(4, 1);
+         currentState = new DMatrixRMaj(4, 1);
          currentState.set(0, x);
          currentState.set(1, y);
          currentState.set(2, xDot);
          currentState.set(3, yDot);
 
-         currentControl = new DenseMatrix64F(2, 1);
+         currentControl = new DMatrixRMaj(2, 1);
          currentControl.set(0, pX);
          currentControl.set(1, pY);
 
-         constants = new DenseMatrix64F(0, 1);
+         constants = new DMatrixRMaj(0, 1);
 
-         dynamicsStateGradient = new DenseMatrix64F(4, 4);
+         dynamicsStateGradient = new DMatrixRMaj(4, 4);
 
          dynamics.getDynamicsStateGradient(DefaultDiscreteState.DEFAULT, currentState, currentControl, constants, dynamicsStateGradient);
 
@@ -227,7 +227,7 @@ public class SimpleLIPMDynamicsTest
          f31 = deltaT * fz / (mass * z);
          f33 = 1;
 
-         expectedDynamicsStateGradient = new DenseMatrix64F(4, 4);
+         expectedDynamicsStateGradient = new DMatrixRMaj(4, 4);
          expectedDynamicsStateGradient.set(0, 0, f00);
          expectedDynamicsStateGradient.set(0, 2, f02);
          expectedDynamicsStateGradient.set(1, 1, f11);
@@ -261,19 +261,19 @@ public class SimpleLIPMDynamicsTest
 
       SimpleLIPMDynamics dynamics = new SimpleLIPMDynamics(deltaT, z, gravityZ);
 
-      DenseMatrix64F currentState = new DenseMatrix64F(4, 1);
+      DMatrixRMaj currentState = new DMatrixRMaj(4, 1);
       currentState.set(0, x);
       currentState.set(1, y);
       currentState.set(2, xDot);
       currentState.set(3, yDot);
 
-      DenseMatrix64F currentControl = new DenseMatrix64F(2, 1);
+      DMatrixRMaj currentControl = new DMatrixRMaj(2, 1);
       currentControl.set(0, pX);
       currentControl.set(1, pY);
 
-      DenseMatrix64F constants = new DenseMatrix64F(0, 1);
+      DMatrixRMaj constants = new DMatrixRMaj(0, 1);
 
-      DenseMatrix64F dynamicsControlGradient = new DenseMatrix64F(4, 2);
+      DMatrixRMaj dynamicsControlGradient = new DMatrixRMaj(4, 2);
 
       dynamics.getDynamicsControlGradient(DefaultDiscreteState.DEFAULT, currentState, currentControl, constants, dynamicsControlGradient);
 
@@ -285,7 +285,7 @@ public class SimpleLIPMDynamicsTest
       double f20 = -deltaT * fz / (mass * z);
       double f31 = -deltaT * fz / (mass * z);
 
-      DenseMatrix64F expectedDynamicsControlGradient = new DenseMatrix64F(4, 2);
+      DMatrixRMaj expectedDynamicsControlGradient = new DMatrixRMaj(4, 2);
       expectedDynamicsControlGradient.set(0, 0, f00);
       expectedDynamicsControlGradient.set(1, 1, f11);
       expectedDynamicsControlGradient.set(2, 0, f20);
@@ -312,19 +312,19 @@ public class SimpleLIPMDynamicsTest
          pX = RandomNumbers.nextDouble(random, 10.0);
          pY = RandomNumbers.nextDouble(random, 10.0);
 
-         currentState = new DenseMatrix64F(4, 1);
+         currentState = new DMatrixRMaj(4, 1);
          currentState.set(0, x);
          currentState.set(1, y);
          currentState.set(2, xDot);
          currentState.set(3, yDot);
 
-         currentControl = new DenseMatrix64F(2, 1);
+         currentControl = new DMatrixRMaj(2, 1);
          currentControl.set(0, pX);
          currentControl.set(1, pY);
 
-         constants = new DenseMatrix64F(0, 1);
+         constants = new DMatrixRMaj(0, 1);
 
-         dynamicsControlGradient = new DenseMatrix64F(4, 2);
+         dynamicsControlGradient = new DMatrixRMaj(4, 2);
 
          dynamics.getDynamicsControlGradient(DefaultDiscreteState.DEFAULT, currentState, currentControl, constants, dynamicsControlGradient);
 
@@ -336,7 +336,7 @@ public class SimpleLIPMDynamicsTest
          f20 = -deltaT * fz / (mass * z);
          f31 = -deltaT * fz / (mass * z);
 
-         expectedDynamicsControlGradient = new DenseMatrix64F(4, 2);
+         expectedDynamicsControlGradient = new DMatrixRMaj(4, 2);
          expectedDynamicsControlGradient.set(0, 0, f00);
          expectedDynamicsControlGradient.set(1, 1, f11);
          expectedDynamicsControlGradient.set(2, 0, f20);
@@ -368,7 +368,7 @@ public class SimpleLIPMDynamicsTest
 
       LIPMDynamics dynamics = new LIPMDynamics(deltaT, mass, gravityZ);
 
-      DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
+      DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
       currentState.set(0, x);
       currentState.set(1, y);
       currentState.set(2, z);
@@ -376,7 +376,7 @@ public class SimpleLIPMDynamicsTest
       currentState.set(4, yDot);
       currentState.set(5, zDot);
 
-      DenseMatrix64F currentControl = new DenseMatrix64F(3, 1);
+      DMatrixRMaj currentControl = new DMatrixRMaj(3, 1);
       currentControl.set(0, pX);
       currentControl.set(1, pY);
       currentControl.set(2, fz);
@@ -394,8 +394,8 @@ public class SimpleLIPMDynamicsTest
       //double f41 = deltaT * fz / (mass * z);
       //double f42 = - deltaT * (y - pY) * mass * fz / Math.pow(mass * z, 2.0);
 
-      DenseMatrix64F dynamicsStateHessian = new DenseMatrix64F(6, 6);
-      DenseMatrix64F expectedDynamicsStateHessian = new DenseMatrix64F(6, 6);
+      DMatrixRMaj dynamicsStateHessian = new DMatrixRMaj(6, 6);
+      DMatrixRMaj expectedDynamicsStateHessian = new DMatrixRMaj(6, 6);
 
       dynamics.getDynamicsStateHessian(DefaultDiscreteState.DEFAULT, 0, currentState, currentControl, dynamicsStateHessian);
 
@@ -483,7 +483,7 @@ public class SimpleLIPMDynamicsTest
          pY = RandomNumbers.nextDouble(random, 10.0);
          fz = RandomNumbers.nextDouble(random, 0, 1000);
 
-         currentState = new DenseMatrix64F(6, 1);
+         currentState = new DMatrixRMaj(6, 1);
          currentState.set(0, x);
          currentState.set(1, y);
          currentState.set(2, z);
@@ -491,7 +491,7 @@ public class SimpleLIPMDynamicsTest
          currentState.set(4, yDot);
          currentState.set(5, zDot);
 
-         currentControl = new DenseMatrix64F(3, 1);
+         currentControl = new DMatrixRMaj(3, 1);
          currentControl.set(0, pX);
          currentControl.set(1, pY);
          currentControl.set(2, fz);
@@ -505,8 +505,8 @@ public class SimpleLIPMDynamicsTest
          //double f41 = deltaT * fz / (mass * z);
          //double f42 = - deltaT * (y - pY) * mass * fz / Math.pow(mass * z, 2.0);
 
-         dynamicsStateHessian = new DenseMatrix64F(6, 6);
-         expectedDynamicsStateHessian = new DenseMatrix64F(6, 6);
+         dynamicsStateHessian = new DMatrixRMaj(6, 6);
+         expectedDynamicsStateHessian = new DMatrixRMaj(6, 6);
 
          dynamics.getDynamicsStateHessian(DefaultDiscreteState.DEFAULT, 0, currentState, currentControl, dynamicsStateHessian);
 
@@ -588,7 +588,7 @@ public class SimpleLIPMDynamicsTest
 
       LIPMDynamics dynamics = new LIPMDynamics(deltaT, mass, gravityZ);
 
-      DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
+      DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
       currentState.set(0, x);
       currentState.set(1, y);
       currentState.set(2, z);
@@ -596,7 +596,7 @@ public class SimpleLIPMDynamicsTest
       currentState.set(4, yDot);
       currentState.set(5, zDot);
 
-      DenseMatrix64F currentControl = new DenseMatrix64F(3, 1);
+      DMatrixRMaj currentControl = new DMatrixRMaj(3, 1);
       currentControl.set(0, pX);
       currentControl.set(1, pY);
       currentControl.set(2, fz);
@@ -604,7 +604,7 @@ public class SimpleLIPMDynamicsTest
       assertEquals(6, dynamics.getStateVectorSize());
       assertEquals(3, dynamics.getControlVectorSize());
 
-      DenseMatrix64F dynamicsControlHessian = new DenseMatrix64F(6, 3);
+      DMatrixRMaj dynamicsControlHessian = new DMatrixRMaj(6, 3);
 
       dynamics.getDynamicsControlHessian(DefaultDiscreteState.DEFAULT, 0, currentState, currentControl, dynamicsControlHessian);
 
@@ -622,7 +622,7 @@ public class SimpleLIPMDynamicsTest
       double f02 = -0.5 * deltaT * deltaT / (mass * z);
       double f32 = -deltaT / (mass * z);
 
-      DenseMatrix64F expectedDynamicsControlHessian = new DenseMatrix64F(6, 3);
+      DMatrixRMaj expectedDynamicsControlHessian = new DMatrixRMaj(6, 3);
       expectedDynamicsControlHessian.set(0, 2, f02);
       expectedDynamicsControlHessian.set(3, 2, f32);
 
@@ -679,7 +679,7 @@ public class SimpleLIPMDynamicsTest
          pY = RandomNumbers.nextDouble(random, 10.0);
          fz = RandomNumbers.nextDouble(random, 0, 1000);
 
-         currentState = new DenseMatrix64F(6, 1);
+         currentState = new DMatrixRMaj(6, 1);
          currentState.set(0, x);
          currentState.set(1, y);
          currentState.set(2, z);
@@ -687,12 +687,12 @@ public class SimpleLIPMDynamicsTest
          currentState.set(4, yDot);
          currentState.set(5, zDot);
 
-         currentControl = new DenseMatrix64F(3, 1);
+         currentControl = new DMatrixRMaj(3, 1);
          currentControl.set(0, pX);
          currentControl.set(1, pY);
          currentControl.set(2, fz);
 
-         dynamicsControlHessian = new DenseMatrix64F(6, 3);
+         dynamicsControlHessian = new DMatrixRMaj(6, 3);
 
          dynamics.getDynamicsControlHessian(DefaultDiscreteState.DEFAULT, 0, currentState, currentControl, dynamicsControlHessian);
 
@@ -710,7 +710,7 @@ public class SimpleLIPMDynamicsTest
          f02 = -0.5 * deltaT * deltaT / (mass * z);
          f32 = -deltaT / (mass * z);
 
-         expectedDynamicsControlHessian = new DenseMatrix64F(6, 3);
+         expectedDynamicsControlHessian = new DMatrixRMaj(6, 3);
          expectedDynamicsControlHessian.set(0, 2, f02);
          expectedDynamicsControlHessian.set(3, 2, f32);
 
@@ -764,7 +764,7 @@ public class SimpleLIPMDynamicsTest
 
       LIPMDynamics dynamics = new LIPMDynamics(deltaT, mass, gravityZ);
 
-      DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
+      DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
       currentState.set(0, x);
       currentState.set(1, y);
       currentState.set(2, z);
@@ -772,7 +772,7 @@ public class SimpleLIPMDynamicsTest
       currentState.set(4, yDot);
       currentState.set(5, zDot);
 
-      DenseMatrix64F currentControl = new DenseMatrix64F(3, 1);
+      DMatrixRMaj currentControl = new DMatrixRMaj(3, 1);
       currentControl.set(0, pX);
       currentControl.set(1, pY);
       currentControl.set(2, fz);
@@ -780,7 +780,7 @@ public class SimpleLIPMDynamicsTest
       assertEquals(6, dynamics.getStateVectorSize());
       assertEquals(3, dynamics.getControlVectorSize());
 
-      DenseMatrix64F dynamicsControlHessian = new DenseMatrix64F(6, 3);
+      DMatrixRMaj dynamicsControlHessian = new DMatrixRMaj(6, 3);
 
       dynamics.getDynamicsStateGradientOfControlGradient(DefaultDiscreteState.DEFAULT, 0, currentState, currentControl, dynamicsControlHessian);
 
@@ -798,7 +798,7 @@ public class SimpleLIPMDynamicsTest
       double f02 = 0.5 * deltaT * deltaT / (mass * z);
       double f32 = deltaT / (mass * z);
 
-      DenseMatrix64F expectedDynamicsControlHessian = new DenseMatrix64F(6, 3);
+      DMatrixRMaj expectedDynamicsControlHessian = new DMatrixRMaj(6, 3);
       expectedDynamicsControlHessian.set(0, 2, f02);
       expectedDynamicsControlHessian.set(3, 2, f32);
 
@@ -883,7 +883,7 @@ public class SimpleLIPMDynamicsTest
          pY = RandomNumbers.nextDouble(random, 10.0);
          fz = RandomNumbers.nextDouble(random, 0, 1000);
 
-         currentState = new DenseMatrix64F(6, 1);
+         currentState = new DMatrixRMaj(6, 1);
          currentState.set(0, x);
          currentState.set(1, y);
          currentState.set(2, z);
@@ -891,12 +891,12 @@ public class SimpleLIPMDynamicsTest
          currentState.set(4, yDot);
          currentState.set(5, zDot);
 
-         currentControl = new DenseMatrix64F(3, 1);
+         currentControl = new DMatrixRMaj(3, 1);
          currentControl.set(0, pX);
          currentControl.set(1, pY);
          currentControl.set(2, fz);
 
-         dynamicsControlHessian = new DenseMatrix64F(6, 3);
+         dynamicsControlHessian = new DMatrixRMaj(6, 3);
 
          dynamics.getDynamicsStateGradientOfControlGradient(DefaultDiscreteState.DEFAULT, 0, currentState, currentControl, dynamicsControlHessian);
 
@@ -914,7 +914,7 @@ public class SimpleLIPMDynamicsTest
          f02 = 0.5 * deltaT * deltaT / (mass * z);
          f32 = deltaT / (mass * z);
 
-         expectedDynamicsControlHessian = new DenseMatrix64F(6, 3);
+         expectedDynamicsControlHessian = new DMatrixRMaj(6, 3);
          expectedDynamicsControlHessian.set(0, 2, f02);
          expectedDynamicsControlHessian.set(3, 2, f32);
 

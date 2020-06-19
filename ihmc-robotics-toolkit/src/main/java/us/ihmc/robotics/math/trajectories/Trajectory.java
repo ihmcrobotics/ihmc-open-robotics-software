@@ -1,9 +1,9 @@
 package us.ihmc.robotics.math.trajectories;
 
 import org.apache.commons.lang3.ArrayUtils;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
@@ -17,28 +17,28 @@ public class Trajectory
    private final int maximumNumberOfCoefficients;
    private final double[] coefficients;
    private final double[] coefficientsCopy;
-   private final DenseMatrix64F constraintMatrix;
-   private final DenseMatrix64F constraintVector;
-   private final DenseMatrix64F coefficientVector;
-   private final LinearSolver<DenseMatrix64F> solver;
+   private final DMatrixRMaj constraintMatrix;
+   private final DMatrixRMaj constraintVector;
+   private final DMatrixRMaj coefficientVector;
+   private final LinearSolverDense<DMatrixRMaj> solver;
 
    private double tInitial;
    private double tFinal;
    private int numberOfCoefficients;
    private double f, df, ddf;
    private final double[] xPowers;
-   private final DenseMatrix64F xPowersDerivativeVector;
+   private final DMatrixRMaj xPowersDerivativeVector;
 
    public Trajectory(int maxNumberOfCoefficients)
    {
       this.maximumNumberOfCoefficients = maxNumberOfCoefficients;
       this.coefficients = new double[maxNumberOfCoefficients];
       this.coefficientsCopy = new double[maxNumberOfCoefficients];
-      this.constraintMatrix = new DenseMatrix64F(maxNumberOfCoefficients, maxNumberOfCoefficients);
-      this.constraintVector = new DenseMatrix64F(maxNumberOfCoefficients, 1);
-      this.coefficientVector = new DenseMatrix64F(maxNumberOfCoefficients, 1);
-      this.xPowersDerivativeVector = new DenseMatrix64F(1, maxNumberOfCoefficients);
-      this.solver = LinearSolverFactory.general(maxNumberOfCoefficients, maxNumberOfCoefficients);
+      this.constraintMatrix = new DMatrixRMaj(maxNumberOfCoefficients, maxNumberOfCoefficients);
+      this.constraintVector = new DMatrixRMaj(maxNumberOfCoefficients, 1);
+      this.coefficientVector = new DMatrixRMaj(maxNumberOfCoefficients, 1);
+      this.xPowersDerivativeVector = new DMatrixRMaj(1, maxNumberOfCoefficients);
+      this.solver = LinearSolverFactory_DDRM.general(maxNumberOfCoefficients, maxNumberOfCoefficients);
       this.xPowers = new double[maxNumberOfCoefficients];
       reset();
    }
@@ -116,7 +116,7 @@ public class Trajectory
     * @param order highest order exponent, the value N in the above equation
     * @param x0 value at which the derivative is evaluated
     */
-   public DenseMatrix64F evaluateGeometricSequenceDerivative(int order, double x0)
+   public DMatrixRMaj evaluateGeometricSequenceDerivative(int order, double x0)
    {
       xPowersDerivativeVector.zero();
 
@@ -174,7 +174,7 @@ public class Trajectory
       return coefficientsCopy[i];
    }
 
-   public DenseMatrix64F getCoefficientsVector()
+   public DMatrixRMaj getCoefficientsVector()
    {
       return coefficientVector;
    }
@@ -663,7 +663,7 @@ public class Trajectory
       solver.solve(constraintVector, coefficientVector);
    }
 
-   public void setDirectly(DenseMatrix64F coefficients)
+   public void setDirectly(DMatrixRMaj coefficients)
    {
       reshape(coefficients.getNumRows());
       int index = 0;

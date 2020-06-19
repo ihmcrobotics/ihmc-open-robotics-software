@@ -2,8 +2,8 @@ package us.ihmc.robotics.geometry;
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DBasics;
@@ -15,9 +15,9 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
  */
 public class LeastSquaresZPlaneFitter implements PlaneFitter
 {
-   private final DenseMatrix64F covarianceMatrix = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F zVarianceVector = new DenseMatrix64F(3, 1);
-   private final DenseMatrix64F coefficients = new DenseMatrix64F(3, 1);
+   private final DMatrixRMaj covarianceMatrix = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj zVarianceVector = new DMatrixRMaj(3, 1);
+   private final DMatrixRMaj coefficients = new DMatrixRMaj(3, 1);
 
    public LeastSquaresZPlaneFitter()
    {
@@ -125,8 +125,8 @@ public class LeastSquaresZPlaneFitter implements PlaneFitter
       zVarianceVector.set(1, 0, -1.0 * yz);
       zVarianceVector.set(2, 0, -1.0 * z);
       
-      CommonOps.invert(covarianceMatrix);
-      CommonOps.mult(covarianceMatrix, zVarianceVector, coefficients);
+      CommonOps_DDRM.invert(covarianceMatrix);
+      CommonOps_DDRM.mult(covarianceMatrix, zVarianceVector, coefficients);
 
       double xSolution = x / n;
       double ySolution = y / n;

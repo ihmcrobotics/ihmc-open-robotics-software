@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import java.util.LinkedHashMap;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
@@ -48,38 +48,38 @@ public class DynamicsMatrixCalculatorHelper
       this.rhoSize = rhoSize;
    }
 
-   public void computeCoriolisMatrix(DenseMatrix64F coriolisMatrix)
+   public void computeCoriolisMatrix(DMatrixRMaj coriolisMatrix)
    {
       coriolisMatrix.set(coriolisMatrixCalculator.getJointTauMatrix());
    }
 
-   public void extractFloatingBaseCoriolisMatrix(DenseMatrix64F coriolisMatrixSrc, DenseMatrix64F coriolisMatrixDest)
+   public void extractFloatingBaseCoriolisMatrix(DMatrixRMaj coriolisMatrixSrc, DMatrixRMaj coriolisMatrixDest)
    {
-      CommonOps.extract(coriolisMatrixSrc, 0, floatingBaseDoFs, 0, 1, coriolisMatrixDest, 0, 0);
+      CommonOps_DDRM.extract(coriolisMatrixSrc, 0, floatingBaseDoFs, 0, 1, coriolisMatrixDest, 0, 0);
    }
 
-   public void extractBodyCoriolisMatrix(DenseMatrix64F coriolisMatrixSrc, DenseMatrix64F coriolisMatrixDest)
+   public void extractBodyCoriolisMatrix(DMatrixRMaj coriolisMatrixSrc, DMatrixRMaj coriolisMatrixDest)
    {
-      CommonOps.extract(coriolisMatrixSrc, floatingBaseDoFs, degreesOfFreedom, 0, 1, coriolisMatrixDest, 0, 0);
+      CommonOps_DDRM.extract(coriolisMatrixSrc, floatingBaseDoFs, degreesOfFreedom, 0, 1, coriolisMatrixDest, 0, 0);
    }
 
-   public void extractFloatingBaseContactForceJacobianMatrix(DenseMatrix64F jacobainMatrixSrc, DenseMatrix64F jacobianMatrixDest)
+   public void extractFloatingBaseContactForceJacobianMatrix(DMatrixRMaj jacobainMatrixSrc, DMatrixRMaj jacobianMatrixDest)
    {
-      CommonOps.extract(jacobainMatrixSrc, 0, rhoSize, 0, floatingBaseDoFs, jacobianMatrixDest, 0, 0);
+      CommonOps_DDRM.extract(jacobainMatrixSrc, 0, rhoSize, 0, floatingBaseDoFs, jacobianMatrixDest, 0, 0);
    }
 
-   public void extractBodyContactForceJacobianMatrix(DenseMatrix64F jacobainMatrixSrc, DenseMatrix64F jacobianMatrixDest)
+   public void extractBodyContactForceJacobianMatrix(DMatrixRMaj jacobainMatrixSrc, DMatrixRMaj jacobianMatrixDest)
    {
-      CommonOps.extract(jacobainMatrixSrc, 0, rhoSize, floatingBaseDoFs, degreesOfFreedom, jacobianMatrixDest, 0, 0);
+      CommonOps_DDRM.extract(jacobainMatrixSrc, 0, rhoSize, floatingBaseDoFs, degreesOfFreedom, jacobianMatrixDest, 0, 0);
    }
 
-   public void extractFloatingBaseMassMatrix(DenseMatrix64F massMatrixSrc, DenseMatrix64F massMatrixDest)
+   public void extractFloatingBaseMassMatrix(DMatrixRMaj massMatrixSrc, DMatrixRMaj massMatrixDest)
    {
-      CommonOps.extract(massMatrixSrc, 0, floatingBaseDoFs, 0, degreesOfFreedom, massMatrixDest, 0, 0);
+      CommonOps_DDRM.extract(massMatrixSrc, 0, floatingBaseDoFs, 0, degreesOfFreedom, massMatrixDest, 0, 0);
    }
 
-   public void extractBodyMassMatrix(DenseMatrix64F massMatrixSrc, DenseMatrix64F massMatrixDest)
+   public void extractBodyMassMatrix(DMatrixRMaj massMatrixSrc, DMatrixRMaj massMatrixDest)
    {
-      CommonOps.extract(massMatrixSrc, floatingBaseDoFs, degreesOfFreedom, 0, degreesOfFreedom, massMatrixDest, 0, 0);
+      CommonOps_DDRM.extract(massMatrixSrc, floatingBaseDoFs, degreesOfFreedom, 0, degreesOfFreedom, massMatrixDest, 0, 0);
    }
 }

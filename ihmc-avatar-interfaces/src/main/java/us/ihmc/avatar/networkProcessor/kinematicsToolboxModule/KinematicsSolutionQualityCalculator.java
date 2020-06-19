@@ -1,8 +1,8 @@
 package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.NormOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.NormOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly;
 import us.ihmc.commonWalkingControlModules.controllerCore.FeedbackControllerDataReadOnly.Space;
@@ -77,9 +77,9 @@ public class KinematicsSolutionQualityCalculator
 
    private final FrameVector3D rotationError = new FrameVector3D();
    private final FrameVector3D positionError = new FrameVector3D();
-   private final DenseMatrix64F selectionMatrix = new DenseMatrix64F(6, 6);
-   private final DenseMatrix64F weightMatrix = new DenseMatrix64F(6, 6);
-   private final DenseMatrix64F error = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj selectionMatrix = new DMatrixRMaj(6, 6);
+   private final DMatrixRMaj weightMatrix = new DMatrixRMaj(6, 6);
+   private final DMatrixRMaj error = new DMatrixRMaj(6, 1);
 
    /**
     * Calculates the quality based on the tracking of the given
@@ -134,8 +134,8 @@ public class KinematicsSolutionQualityCalculator
       return computeQualityFromError(error, weightMatrix, selectionMatrix);
    }
 
-   private final DenseMatrix64F errorWeighted = new DenseMatrix64F(6, 1);
-   private final DenseMatrix64F errorSubspace = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj errorWeighted = new DMatrixRMaj(6, 1);
+   private final DMatrixRMaj errorSubspace = new DMatrixRMaj(6, 1);
 
    /**
     * This is actually where the calculation of the command quality is happening.
@@ -146,18 +146,18 @@ public class KinematicsSolutionQualityCalculator
     * @param selectionMatrix the 6-by-6 selection matrix of the command. Not modified.
     * @return the command quality.
     */
-   private double computeQualityFromError(DenseMatrix64F error, DenseMatrix64F weightMatrix, DenseMatrix64F selectionMatrix)
+   private double computeQualityFromError(DMatrixRMaj error, DMatrixRMaj weightMatrix, DMatrixRMaj selectionMatrix)
    {
       // Applying the weight to the error
       errorWeighted.reshape(error.getNumRows(), 1);
-      CommonOps.mult(weightMatrix, error, errorWeighted);
+      CommonOps_DDRM.mult(weightMatrix, error, errorWeighted);
 
       // Selecting only the controlled axes
       errorSubspace.reshape(selectionMatrix.getNumRows(), 1);
-      CommonOps.mult(selectionMatrix, errorWeighted, errorSubspace);
+      CommonOps_DDRM.mult(selectionMatrix, errorWeighted, errorSubspace);
 
       // Returning the Euclidean norm of the error computed as the command quality
-      return NormOps.normP2(errorSubspace);
+      return NormOps_DDRM.normP2(errorSubspace);
    }
 
    private double calculateCommandQuality(OneDoFJointFeedbackControlCommand command, FeedbackControllerDataReadOnly feedbackControllerDataHolder)

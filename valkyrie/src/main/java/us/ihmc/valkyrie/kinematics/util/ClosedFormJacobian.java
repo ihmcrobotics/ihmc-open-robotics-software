@@ -1,8 +1,8 @@
 package us.ihmc.valkyrie.kinematics.util;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.data.RowD1Matrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.data.DMatrix1Row;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.simple.SimpleMatrix;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -19,11 +19,11 @@ public class ClosedFormJacobian
    
    private boolean useFuteks = true;
 
-   private final DenseMatrix64F transform_0_1 = SimpleMatrix.identity(4).getMatrix();
-   private final DenseMatrix64F transform_1_2 = SimpleMatrix.identity(4).getMatrix();
-   private final DenseMatrix64F transform_0_2 = SimpleMatrix.identity(4).getMatrix();
-   private final DenseMatrix64F transform_2_0 = SimpleMatrix.identity(4).getMatrix();
-   private final DenseMatrix64F transform_1_0 = SimpleMatrix.identity(4).getMatrix();
+   private final DMatrixRMaj transform_0_1 = SimpleMatrix.identity(4).getMatrix();
+   private final DMatrixRMaj transform_1_2 = SimpleMatrix.identity(4).getMatrix();
+   private final DMatrixRMaj transform_0_2 = SimpleMatrix.identity(4).getMatrix();
+   private final DMatrixRMaj transform_2_0 = SimpleMatrix.identity(4).getMatrix();
+   private final DMatrixRMaj transform_1_0 = SimpleMatrix.identity(4).getMatrix();
    
    private final Vector3D m11v = new Vector3D();
    private final Vector3D m12v = new Vector3D();
@@ -42,30 +42,30 @@ public class ClosedFormJacobian
    
    private PushRodTransmissionJoint pushRodTransmissionJoint;
    
-   private RowD1Matrix64F t5ZerothFrame = new DenseMatrix64F(4, 1);
-   private RowD1Matrix64F t6ZerothFrame = new DenseMatrix64F(4, 1);
-   private DenseMatrix64F b5ZerothFrame = new DenseMatrix64F(4, 1);
-   private DenseMatrix64F b6ZerothFrame = new DenseMatrix64F(4, 1);
+   private DMatrix1Row t5ZerothFrame = new DMatrixRMaj(4, 1);
+   private DMatrix1Row t6ZerothFrame = new DMatrixRMaj(4, 1);
+   private DMatrixRMaj b5ZerothFrame = new DMatrixRMaj(4, 1);
+   private DMatrixRMaj b6ZerothFrame = new DMatrixRMaj(4, 1);
    
-   private RowD1Matrix64F t5FirstFrame = new DenseMatrix64F(4, 1);
-   private RowD1Matrix64F t6FirstFrame = new DenseMatrix64F(4, 1);
-   private RowD1Matrix64F b5FirstFrame = new DenseMatrix64F(4, 1);
-   private RowD1Matrix64F b6FirstFrame = new DenseMatrix64F(4, 1);
+   private DMatrix1Row t5FirstFrame = new DMatrixRMaj(4, 1);
+   private DMatrix1Row t6FirstFrame = new DMatrixRMaj(4, 1);
+   private DMatrix1Row b5FirstFrame = new DMatrixRMaj(4, 1);
+   private DMatrix1Row b6FirstFrame = new DMatrixRMaj(4, 1);
    
-   private DenseMatrix64F t5SecondFrame = new DenseMatrix64F(4, 1);
-   private DenseMatrix64F t6SecondFrame = new DenseMatrix64F(4, 1);
-   private RowD1Matrix64F b5SecondFrame = new DenseMatrix64F(4, 1);
-   private RowD1Matrix64F b6SecondFrame = new DenseMatrix64F(4, 1);
+   private DMatrixRMaj t5SecondFrame = new DMatrixRMaj(4, 1);
+   private DMatrixRMaj t6SecondFrame = new DMatrixRMaj(4, 1);
+   private DMatrix1Row b5SecondFrame = new DMatrixRMaj(4, 1);
+   private DMatrix1Row b6SecondFrame = new DMatrixRMaj(4, 1);
    
-//   private RowD1Matrix64F renishawUnitForceVectorZerothFrame = new DenseMatrix64F(4, 1);
-//   private RowD1Matrix64F renishawUnitForceVectorFirstFrame = new DenseMatrix64F(4, 1);
-//   private final DenseMatrix64F renishawUnitForceVectorSecondFrame = new DenseMatrix64F(4, 1, false, 0.0, 0.0, -1.0, 1.0);
+//   private DMatrix1Row renishawUnitForceVectorZerothFrame = new DMatrixRMaj(4, 1);
+//   private DMatrix1Row renishawUnitForceVectorFirstFrame = new DMatrixRMaj(4, 1);
+//   private final DMatrixRMaj renishawUnitForceVectorSecondFrame = new DMatrixRMaj(4, 1, false, 0.0, 0.0, -1.0, 1.0);
    
-   private DenseMatrix64F transform01StaticPart  = new DenseMatrix64F(4, 4);
-   private DenseMatrix64F transform12StaticPart  = new DenseMatrix64F(4, 4);
+   private DMatrixRMaj transform01StaticPart  = new DMatrixRMaj(4, 4);
+   private DMatrixRMaj transform12StaticPart  = new DMatrixRMaj(4, 4);
    
-   private DenseMatrix64F pitchTransform = new DenseMatrix64F(4, 4);
-   private DenseMatrix64F rollTransform  = new DenseMatrix64F(4, 4);
+   private DMatrixRMaj pitchTransform = new DMatrixRMaj(4, 4);
+   private DMatrixRMaj rollTransform  = new DMatrixRMaj(4, 4);
      
    public ClosedFormJacobian(PushRodTransmissionJoint pushRodTransmissionJoint)
    {
@@ -93,14 +93,14 @@ public class ClosedFormJacobian
       length = 0.1049655;
       lengthSquared = length * length;
 
-      b5ZerothFrame = new DenseMatrix64F(4, 1, false, -0.0364, -0.0355, 0.0176, 1.0);
-      b6ZerothFrame = new DenseMatrix64F(4, 1, false, -0.0364,  0.0355, 0.0176, 1.0);
+      b5ZerothFrame = new DMatrixRMaj(4, 1, false, -0.0364, -0.0355, 0.0176, 1.0);
+      b6ZerothFrame = new DMatrixRMaj(4, 1, false, -0.0364,  0.0355, 0.0176, 1.0);
       
-      t5SecondFrame = new DenseMatrix64F(4, 1, false, -0.0215689, -0.04128855, 0, 1.0);
-      t6SecondFrame = new DenseMatrix64F(4, 1, false, -0.0215689,  0.04128855, 0, 1.0);  
+      t5SecondFrame = new DMatrixRMaj(4, 1, false, -0.0215689, -0.04128855, 0, 1.0);
+      t6SecondFrame = new DMatrixRMaj(4, 1, false, -0.0215689,  0.04128855, 0, 1.0);  
       
-      transform01StaticPart = new DenseMatrix64F(4,4,true, 1.0, 0.0 ,0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, h, 0.0, 0.0, 0.0, 1.0);
-      transform12StaticPart = new DenseMatrix64F(4,4,true, 1.0, 0.0 ,0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
+      transform01StaticPart = new DMatrixRMaj(4,4,true, 1.0, 0.0 ,0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, h, 0.0, 0.0, 0.0, 1.0);
+      transform12StaticPart = new DMatrixRMaj(4,4,true, 1.0, 0.0 ,0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0);
    }
 
 
@@ -110,17 +110,17 @@ public class ClosedFormJacobian
       length = 0.1310005;
       lengthSquared = length * length;
       
-      b5ZerothFrame = new DenseMatrix64F(4, 1, false, -0.0762,  0.0508, 0.0, 1.0);
-      b6ZerothFrame = new DenseMatrix64F(4, 1, false, -0.0762, -0.0508, 0.0, 1.0);
+      b5ZerothFrame = new DMatrixRMaj(4, 1, false, -0.0762,  0.0508, 0.0, 1.0);
+      b6ZerothFrame = new DMatrixRMaj(4, 1, false, -0.0762, -0.0508, 0.0, 1.0);
       
-      t5SecondFrame = new DenseMatrix64F(4, 1, false, 0.0,  0.06985123, 0.0, 1.0);
-      t6SecondFrame = new DenseMatrix64F(4, 1, false, 0.0, -0.06985123, 0.0, 1.0);
+      t5SecondFrame = new DMatrixRMaj(4, 1, false, 0.0,  0.06985123, 0.0, 1.0);
+      t6SecondFrame = new DMatrixRMaj(4, 1, false, 0.0, -0.06985123, 0.0, 1.0);
       
-      transform01StaticPart = new DenseMatrix64F(4,4,true, 1.0, 0.0 ,0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, h, 0.0, 0.0, 0.0, 1.0);
-      transform12StaticPart = new DenseMatrix64F(4,4,true, 0.913545457642601, 0.0, 0.406736643075800, -0.00598410000000000, 0.0, 1.0, 0.0, 0.0, -0.406736643075800, 0.0, 0.913545457642601, 0.0886199400000000, 0.0, 0.0, 0.0, 1.0);
+      transform01StaticPart = new DMatrixRMaj(4,4,true, 1.0, 0.0 ,0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, h, 0.0, 0.0, 0.0, 1.0);
+      transform12StaticPart = new DMatrixRMaj(4,4,true, 0.913545457642601, 0.0, 0.406736643075800, -0.00598410000000000, 0.0, 1.0, 0.0, 0.0, -0.406736643075800, 0.0, 0.913545457642601, 0.0886199400000000, 0.0, 0.0, 0.0, 1.0);
    }
    
-   private void rotX(DenseMatrix64F matrixToPack, double alpha){
+   private void rotX(DMatrixRMaj matrixToPack, double alpha){
       
       double cosAlpha = Math.cos(alpha);
       double sinAlpha = Math.sin(alpha);
@@ -146,7 +146,7 @@ public class ClosedFormJacobian
       matrixToPack.set(3, 3, 1.0);
    }
    
-   private void rotY(DenseMatrix64F matrixToPack, double beta){
+   private void rotY(DMatrixRMaj matrixToPack, double beta){
       
       double cosBeta = Math.cos(beta);
       double sinBeta = Math.sin(beta);
@@ -172,7 +172,7 @@ public class ClosedFormJacobian
       matrixToPack.set(3, 3, 1.0);
    }
    
-//   private void denavitHartenbergTransformationMatrix(DenseMatrix64F matrixToPack, double a, double alpha, double d, double theta)
+//   private void denavitHartenbergTransformationMatrix(DMatrixRMaj matrixToPack, double a, double alpha, double d, double theta)
 //   {
 //      double cosTheta = Math.cos(theta);
 //      double sinTheta = Math.sin(theta);
@@ -212,18 +212,18 @@ public class ClosedFormJacobian
       pitch = -pitch;
 //      roll = -roll;
       rotX(rollTransform, roll);
-      CommonOps.mult(rollTransform, transform01StaticPart, transform_0_1);
+      CommonOps_DDRM.mult(rollTransform, transform01StaticPart, transform_0_1);
       rotY(pitchTransform, pitch);
-      CommonOps.mult(pitchTransform, transform12StaticPart, transform_1_2);
+      CommonOps_DDRM.mult(pitchTransform, transform12StaticPart, transform_1_2);
       //End Ankle Specific
       
-      CommonOps.mult(transform_0_1, transform_1_2, transform_0_2);
-      CommonOps.invert(transform_0_2, transform_2_0);
-      CommonOps.invert(transform_0_1, transform_1_0);
+      CommonOps_DDRM.mult(transform_0_1, transform_1_2, transform_0_2);
+      CommonOps_DDRM.invert(transform_0_2, transform_2_0);
+      CommonOps_DDRM.invert(transform_0_1, transform_1_0);
       
       //Solve for pushrod heights (z in second frame)
-      CommonOps.mult(transform_2_0, b5ZerothFrame, b5SecondFrame);
-      CommonOps.mult(transform_2_0, b6ZerothFrame, b6SecondFrame);
+      CommonOps_DDRM.mult(transform_2_0, b5ZerothFrame, b5SecondFrame);
+      CommonOps_DDRM.mult(transform_2_0, b6ZerothFrame, b6SecondFrame);
       
       double pushrodHeightSolution5=Math.sqrt(lengthSquared - Math.pow(t5SecondFrame.get(0)-b5SecondFrame.get(0), 2) - Math.pow(t5SecondFrame.get(1)-b5SecondFrame.get(1), 2)) + b5SecondFrame.get(2);
       t5SecondFrame.set(2, 0, pushrodHeightSolution5);
@@ -231,18 +231,18 @@ public class ClosedFormJacobian
       t6SecondFrame.set(2, 0, pushrodHeightSolution6);
       
       //Convert tops positions to zeroth frame
-      CommonOps.mult(transform_0_2, t5SecondFrame, t5ZerothFrame);
-      CommonOps.mult(transform_0_2, t6SecondFrame, t6ZerothFrame);
+      CommonOps_DDRM.mult(transform_0_2, t5SecondFrame, t5ZerothFrame);
+      CommonOps_DDRM.mult(transform_0_2, t6SecondFrame, t6ZerothFrame);
       
       //Convert tops to first joint frame
-      CommonOps.mult(transform_1_2, t5SecondFrame, t5FirstFrame);
-      CommonOps.mult(transform_1_2, t6SecondFrame, t6FirstFrame);
+      CommonOps_DDRM.mult(transform_1_2, t5SecondFrame, t5FirstFrame);
+      CommonOps_DDRM.mult(transform_1_2, t6SecondFrame, t6FirstFrame);
       
       if(useFuteks){
            
          //Convert bottoms to first joint frame
-         CommonOps.mult(transform_1_0, b5ZerothFrame, b5FirstFrame);
-         CommonOps.mult(transform_1_0, b6ZerothFrame, b6FirstFrame);
+         CommonOps_DDRM.mult(transform_1_0, b5ZerothFrame, b5FirstFrame);
+         CommonOps_DDRM.mult(transform_1_0, b6ZerothFrame, b6FirstFrame);
          
          //Compute radius and Force vectors for use in r x F calculation in zeroth frame for futeks
          radius5LowerDOF.set(b5ZerothFrame.get(0), b5ZerothFrame.get(1), b5ZerothFrame.get(2));
@@ -303,16 +303,16 @@ public class ClosedFormJacobian
     	  if(useFuteks){
         // Create the transformation matrices
         rotY(pitchTransform, -pitch);
-        CommonOps.mult(pitchTransform, transform01StaticPart, transform_0_1);
+        CommonOps_DDRM.mult(pitchTransform, transform01StaticPart, transform_0_1);
         rotX(rollTransform, -roll);
-        CommonOps.mult(rollTransform, transform12StaticPart, transform_1_2);
-        CommonOps.mult(transform_0_1, transform_1_2, transform_0_2);
-        CommonOps.invert(transform_0_2, transform_2_0);
-        CommonOps.invert(transform_0_1, transform_1_0);
+        CommonOps_DDRM.mult(rollTransform, transform12StaticPart, transform_1_2);
+        CommonOps_DDRM.mult(transform_0_1, transform_1_2, transform_0_2);
+        CommonOps_DDRM.invert(transform_0_2, transform_2_0);
+        CommonOps_DDRM.invert(transform_0_1, transform_1_0);
         
         //Solve for pushrod heights (z in second frame)
-        CommonOps.mult(transform_2_0, b5ZerothFrame, b5SecondFrame);
-        CommonOps.mult(transform_2_0, b6ZerothFrame, b6SecondFrame);
+        CommonOps_DDRM.mult(transform_2_0, b5ZerothFrame, b5SecondFrame);
+        CommonOps_DDRM.mult(transform_2_0, b6ZerothFrame, b6SecondFrame);
         
         double pushrodHeightSolution5=Math.sqrt(lengthSquared - Math.pow(t5SecondFrame.get(0)-b5SecondFrame.get(0), 2) - Math.pow(t5SecondFrame.get(1)-b5SecondFrame.get(1), 2)) + b5SecondFrame.get(2);
         t5SecondFrame.set(2, 0, pushrodHeightSolution5);
@@ -320,16 +320,16 @@ public class ClosedFormJacobian
         t6SecondFrame.set(2, 0, pushrodHeightSolution6);
         
         //Convert tops positions to zeroth frame
-        CommonOps.mult(transform_0_2, t5SecondFrame, t5ZerothFrame);
-        CommonOps.mult(transform_0_2, t6SecondFrame, t6ZerothFrame);
+        CommonOps_DDRM.mult(transform_0_2, t5SecondFrame, t5ZerothFrame);
+        CommonOps_DDRM.mult(transform_0_2, t6SecondFrame, t6ZerothFrame);
         
         //Convert tops to first joint frame
-        CommonOps.mult(transform_1_2, t5SecondFrame, t5FirstFrame);
-        CommonOps.mult(transform_1_2, t6SecondFrame, t6FirstFrame);
+        CommonOps_DDRM.mult(transform_1_2, t5SecondFrame, t5FirstFrame);
+        CommonOps_DDRM.mult(transform_1_2, t6SecondFrame, t6FirstFrame);
         
            //Convert bottoms to first joint frame
-           CommonOps.mult(transform_1_0, b5ZerothFrame, b5FirstFrame);
-           CommonOps.mult(transform_1_0, b6ZerothFrame, b6FirstFrame);
+           CommonOps_DDRM.mult(transform_1_0, b5ZerothFrame, b5FirstFrame);
+           CommonOps_DDRM.mult(transform_1_0, b6ZerothFrame, b6FirstFrame);
            
            //Compute radius and Force vectors for use in r x F calculation in zeroth frame for futeks
            radius5LowerDOF.set(b5ZerothFrame.get(0), b5ZerothFrame.get(1), b5ZerothFrame.get(2));

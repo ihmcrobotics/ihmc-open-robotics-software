@@ -15,8 +15,8 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
@@ -157,24 +157,24 @@ public class MultiContactImpulseCalculatorTest
    static void updateVelocities(double dt, MultiContactImpulseCalculator multiContactImpulseCalculator,
                                 Map<RigidBodyBasics, ForwardDynamicsCalculator> calculatorMap)
    {
-      Map<RigidBodyBasics, DenseMatrix64F> jointVelocityMatrixMap = new HashMap<>();
+      Map<RigidBodyBasics, DMatrixRMaj> jointVelocityMatrixMap = new HashMap<>();
 
       for (SingleContactImpulseCalculator impulseCalculator : multiContactImpulseCalculator.getImpulseCalculators())
       {
          RigidBodyBasics bodyA = impulseCalculator.getContactingBodyA();
          RigidBodyBasics rootA = MultiBodySystemTools.getRootBody(bodyA);
 
-         DenseMatrix64F jointVelocityMatrix = jointVelocityMatrixMap.get(rootA);
+         DMatrixRMaj jointVelocityMatrix = jointVelocityMatrixMap.get(rootA);
          if (jointVelocityMatrix == null)
          {
             List<JointBasics> joints = Arrays.asList(MultiBodySystemTools.collectSubtreeJoints(rootA));
-            jointVelocityMatrix = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
+            jointVelocityMatrix = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
             MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocityMatrix);
-            CommonOps.addEquals(jointVelocityMatrix, dt, calculatorMap.get(rootA).getJointAccelerationMatrix());
+            CommonOps_DDRM.addEquals(jointVelocityMatrix, dt, calculatorMap.get(rootA).getJointAccelerationMatrix());
             jointVelocityMatrixMap.put(rootA, jointVelocityMatrix);
          }
          if (impulseCalculator.isConstraintActive())
-            CommonOps.addEquals(jointVelocityMatrix, impulseCalculator.getJointVelocityChangeA());
+            CommonOps_DDRM.addEquals(jointVelocityMatrix, impulseCalculator.getJointVelocityChangeA());
 
          RigidBodyBasics bodyB = impulseCalculator.getContactingBodyB();
 
@@ -186,17 +186,17 @@ public class MultiContactImpulseCalculatorTest
             if (jointVelocityMatrix == null)
             {
                List<JointBasics> joints = Arrays.asList(MultiBodySystemTools.collectSubtreeJoints(rootB));
-               jointVelocityMatrix = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
+               jointVelocityMatrix = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
                MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocityMatrix);
-               CommonOps.addEquals(jointVelocityMatrix, dt, calculatorMap.get(rootB).getJointAccelerationMatrix());
+               CommonOps_DDRM.addEquals(jointVelocityMatrix, dt, calculatorMap.get(rootB).getJointAccelerationMatrix());
                jointVelocityMatrixMap.put(rootB, jointVelocityMatrix);
             }
             if (impulseCalculator.isConstraintActive())
-               CommonOps.addEquals(jointVelocityMatrix, impulseCalculator.getJointVelocityChangeB());
+               CommonOps_DDRM.addEquals(jointVelocityMatrix, impulseCalculator.getJointVelocityChangeB());
          }
       }
 
-      for (Entry<RigidBodyBasics, DenseMatrix64F> entry : jointVelocityMatrixMap.entrySet())
+      for (Entry<RigidBodyBasics, DMatrixRMaj> entry : jointVelocityMatrixMap.entrySet())
       {
          RigidBodyBasics root = entry.getKey();
          List<JointBasics> joints = Arrays.asList(MultiBodySystemTools.collectSubtreeJoints(root));

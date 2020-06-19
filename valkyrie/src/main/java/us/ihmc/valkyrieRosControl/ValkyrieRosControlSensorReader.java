@@ -3,7 +3,7 @@ package us.ihmc.valkyrieRosControl;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -44,7 +44,7 @@ public class ValkyrieRosControlSensorReader implements SensorReader, JointTorque
    private final Vector3D angularVelocity = new Vector3D();
    private final Quaternion orientation = new Quaternion();
 
-   private final DenseMatrix64F torqueForce = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj torqueForce = new DMatrixRMaj(6, 1);
 
    private final ValkyrieRosControlLowLevelController lowlLevelController;
 

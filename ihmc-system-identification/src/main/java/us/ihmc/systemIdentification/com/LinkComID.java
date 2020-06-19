@@ -2,6 +2,7 @@ package us.ihmc.systemIdentification.com;
 
 import org.ddogleg.optimization.FactoryOptimization;
 import org.ddogleg.optimization.UnconstrainedLeastSquares;
+import org.ddogleg.optimization.lm.ConfigLevenbergMarquardt;
 
 public class LinkComID
 {
@@ -15,7 +16,7 @@ public class LinkComID
    public void optimize()
    {
       new FactoryOptimization();
-      UnconstrainedLeastSquares optimizer = FactoryOptimization.leastSquaresLM(1e-3, true);
+      UnconstrainedLeastSquares optimizer = FactoryOptimization.levenbergMarquardt(new ConfigLevenbergMarquardt(), true);
       optimizer.setFunction(residual, null);
 
       double[] prm = new double[residual.getNumOfInputsN()];

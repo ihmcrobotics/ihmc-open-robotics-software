@@ -5,8 +5,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.GeometricJacobianHolder;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -24,7 +24,6 @@ import us.ihmc.robotics.contactable.ContactableBody;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFramePoint3D;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
@@ -51,10 +50,10 @@ public class EstimatedFromTorquesWrenchVisualizer
 
    private final DampedLeastSquaresSolver pseudoInverseSolver = new DampedLeastSquaresSolver(0, 0.005);
 
-   private final DenseMatrix64F jacobianInverseMatrix = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F jointChainTorquesVector = new DenseMatrix64F(0, 1);
-   private final DenseMatrix64F jointTorquesVector = new DenseMatrix64F(0, 1);
-   private final DenseMatrix64F wrenchVector = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj jacobianInverseMatrix = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj jointChainTorquesVector = new DMatrixRMaj(0, 1);
+   private final DMatrixRMaj jointTorquesVector = new DMatrixRMaj(0, 1);
+   private final DMatrixRMaj wrenchVector = new DMatrixRMaj(6, 1);
 
    public static EstimatedFromTorquesWrenchVisualizer createWrenchVisualizerWithContactableBodies(String name, RigidBodyBasics rootBody,
                                                                                                   List<? extends ContactablePlaneBody> contactableBodies,
@@ -143,7 +142,7 @@ public class EstimatedFromTorquesWrenchVisualizer
          GeometricJacobian jacobian = jacobians.get(rigidBody);
          jacobian.compute();
 
-         DenseMatrix64F jacobianMatrix = jacobian.getJacobianMatrix();
+         DMatrixRMaj jacobianMatrix = jacobian.getJacobianMatrix();
          jointChainTorquesVector.reshape(jacobian.getNumberOfColumns(), 1);
          jacobianInverseMatrix.reshape(jacobian.getNumberOfColumns(), 6);
 
@@ -154,8 +153,8 @@ public class EstimatedFromTorquesWrenchVisualizer
          for (int jointIndex = 0; jointIndex < jointLists.get(rigidBody).length; jointIndex++)
             jointChainTorquesVector.set(jointIndex, 0, joints[jointIndex].getTau());
 
-         CommonOps.multTransA(jacobianInverseMatrix, jointChainTorquesVector, wrenchVector);
-         CommonOps.scale(-1.0, wrenchVector);
+         CommonOps_DDRM.multTransA(jacobianInverseMatrix, jointChainTorquesVector, wrenchVector);
+         CommonOps_DDRM.scale(-1.0, wrenchVector);
 
          YoFrameVector3D torque = torques.get(rigidBody);
          tempVector.setToZero(jacobian.getJacobianFrame());

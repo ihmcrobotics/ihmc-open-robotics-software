@@ -1,18 +1,16 @@
 package us.ihmc.robotics.screwTheory;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.matrix.Matrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -86,7 +84,7 @@ public class GeometricJacobianTest
          GeometricJacobian rootJacobian = new GeometricJacobian(rootBody, randomEndEffector, randomEndEffector.getBodyFixedFrame());
          rootJacobian.compute();
 
-         DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(rootJacobian.getNumberOfColumns(), 1);
+         DMatrixRMaj jointVelocitiesMatrix = new DMatrixRMaj(rootJacobian.getNumberOfColumns(), 1);
          MultiBodySystemTools.extractJointsState(rootJacobian.getJointsInOrder(), JointStateType.VELOCITY, jointVelocitiesMatrix);
 
          randomEndEffector.getBodyFixedFrame().getTwistRelativeToOther(rootBody.getBodyFixedFrame(), expectedTwist);
@@ -138,7 +136,7 @@ public class GeometricJacobianTest
          GeometricJacobian rootJacobian = new GeometricJacobian(rootBody, randomEndEffector, randomEndEffector.getBodyFixedFrame());
          rootJacobian.compute();
 
-         DenseMatrix64F jointVelocitiesMatrix = new DenseMatrix64F(rootJacobian.getNumberOfColumns(), 1);
+         DMatrixRMaj jointVelocitiesMatrix = new DMatrixRMaj(rootJacobian.getNumberOfColumns(), 1);
          MultiBodySystemTools.extractJointsState(rootJacobian.getJointsInOrder(), JointStateType.VELOCITY, jointVelocitiesMatrix);
 
          randomEndEffector.getBodyFixedFrame().getTwistRelativeToOther(rootBody.getBodyFixedFrame(), expectedTwist);
@@ -179,21 +177,21 @@ public class GeometricJacobianTest
       double q2d = random.nextDouble();
       double q3d = random.nextDouble();
 
-      DenseMatrix64F qd = new DenseMatrix64F(3, 1);
+      DMatrixRMaj qd = new DMatrixRMaj(3, 1);
       qd.set(0, 0, q1d);
       qd.set(1, 0, q2d);
       qd.set(2, 0, q3d);
 
-      DenseMatrix64F twistMatrixFromBodyManipulatorJacobian = new DenseMatrix64F(Twist.SIZE, 1);
-      CommonOps.mult(bodyManipulatorJacobian.getJacobianMatrix(), qd, twistMatrixFromBodyManipulatorJacobian);
+      DMatrixRMaj twistMatrixFromBodyManipulatorJacobian = new DMatrixRMaj(Twist.SIZE, 1);
+      CommonOps_DDRM.mult(bodyManipulatorJacobian.getJacobianMatrix(), qd, twistMatrixFromBodyManipulatorJacobian);
       Twist twistFromBodyManipulatorJacobian = new Twist(bodyManipulatorJacobian.getEndEffectorFrame(), bodyManipulatorJacobian.getBaseFrame(),
                                                   bodyManipulatorJacobian.getJacobianFrame(), twistMatrixFromBodyManipulatorJacobian);
       Vector3D omegaFromBodyManipulatorJacobian = new Vector3D(twistFromBodyManipulatorJacobian.getAngularPart());
       Vector3D vFromBodyManipulatorJacobian = new Vector3D(twistFromBodyManipulatorJacobian.getLinearPart());
 
 
-      DenseMatrix64F twistMatrixFromSpatialManipulatorJacobian = new DenseMatrix64F(Twist.SIZE, 1);
-      CommonOps.mult(spatialManipulatorJacobian.getJacobianMatrix(), qd, twistMatrixFromSpatialManipulatorJacobian);
+      DMatrixRMaj twistMatrixFromSpatialManipulatorJacobian = new DMatrixRMaj(Twist.SIZE, 1);
+      CommonOps_DDRM.mult(spatialManipulatorJacobian.getJacobianMatrix(), qd, twistMatrixFromSpatialManipulatorJacobian);
 
       Twist twistFromSpatialManipulatorJacobian = new Twist(spatialManipulatorJacobian.getEndEffectorFrame(), spatialManipulatorJacobian.getBaseFrame(),
                                                      spatialManipulatorJacobian.getJacobianFrame(), twistMatrixFromSpatialManipulatorJacobian);

@@ -2,7 +2,7 @@ package us.ihmc.robotics.sensors;
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.mecano.spatial.Wrench;
 
@@ -16,7 +16,7 @@ public interface ForceSensorDataHolderReadOnly
 
    public abstract void getForceSensorValue(ForceSensorDefinition key, Wrench wrenchToPack);
 
-   public abstract void getForceSensorValue(ForceSensorDefinition key, DenseMatrix64F wrenchToPack);
+   public abstract void getForceSensorValue(ForceSensorDefinition key, DMatrixRMaj wrenchToPack);
 
    public abstract ForceSensorDefinition findForceSensorDefinition(String name);
 }

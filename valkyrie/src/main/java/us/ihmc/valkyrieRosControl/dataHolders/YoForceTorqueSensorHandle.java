@@ -1,6 +1,6 @@
 package us.ihmc.valkyrieRosControl.dataHolders;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -49,7 +49,7 @@ public class YoForceTorqueSensorHandle
    }
 
    
-   public void packWrench(DenseMatrix64F torqueForce)
+   public void packWrench(DMatrixRMaj torqueForce)
    {
       torqueForce.set(0, tx.getDoubleValue());
       torqueForce.set(1, ty.getDoubleValue());

@@ -5,7 +5,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.codecs.generated.YUVPicture;
 import us.ihmc.codecs.generated.YUVPicture.YUVSubsamplingType;
 import us.ihmc.codecs.yuv.JPEGEncoder;
@@ -45,7 +45,7 @@ public class JPEGCompressedVideoDataServer implements CompressedVideoDataServer
 
    @Override
    public void onFrame(VideoSource videoSource, BufferedImage bufferedImage, long timeStamp, Point3DReadOnly cameraPosition,
-                       QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
+                       QuaternionReadOnly cameraOrientation, CameraPinholeBrown intrinsicParameters)
    {
       if (!handler.isConnected() || !videoEnabled || bufferedImage == null)
          return;

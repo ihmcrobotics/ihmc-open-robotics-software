@@ -11,8 +11,8 @@ import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.NPOIFSFileSystem;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape;
 import us.ihmc.avatar.reachabilityMap.voxelPrimitiveShapes.SphereVoxelShape.SphereVoxelType;
@@ -128,7 +128,7 @@ public class ReachabilityMapFileLoader
    {
       String gridFrameName = descriptionSheet.getRow(6).getCell(2).getStringCellValue();
       String parentFrameName = descriptionSheet.getRow(7).getCell(2).getStringCellValue();
-      DenseMatrix64F transformToParentFrameAsDenseMatrix = CommonOps.identity(4);
+      DMatrixRMaj transformToParentFrameAsDenseMatrix = CommonOps_DDRM.identity(4);
       int row = 0;
       for (int rowIndex = 8; rowIndex < 11; rowIndex++)
       {

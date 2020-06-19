@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Random;
 
 import org.ddogleg.fitting.modelset.ransac.RansacMulti;
+import org.ddogleg.struct.FastArray;
 import org.ddogleg.struct.FastQueue;
 
 import georegression.struct.point.Point3D_F64;
@@ -30,7 +31,7 @@ import georegression.struct.point.Vector3D_F64;
 import georegression.struct.shapes.Box3D_F64;
 import us.ihmc.sensorProcessing.bubo.clouds.detect.shape.CheckShapeAcceptAll;
 import us.ihmc.sensorProcessing.bubo.construct.ConstructOctreeNumPoints_F64;
-import us.ihmc.sensorProcessing.bubo.construct.Octree;
+import us.ihmc.sensorProcessing.bubo.construct.Octree.Info;
 import us.ihmc.sensorProcessing.bubo.construct.Octree_F64;
 
 /**
@@ -48,7 +49,7 @@ import us.ihmc.sensorProcessing.bubo.construct.Octree_F64;
  * belonging to a shape.  Instead the results from the nearest-neighbor search are used to find all points which
  * match the shape..  Other deviations are mentioned throughout the code in comments.
  * <p></p>
- * [1] Schnabel, Ruwen, Roland Wahl, and Reinhard Klein. "Efficient RANSAC for Point‐Cloud Shape Detection."
+ * [1] Schnabel, Ruwen, Roland Wahl, and Reinhard Klein. "Efficient RANSAC for Pointâ€�Cloud Shape Detection."
  * Computer Graphics Forum. Vol. 26. No. 2. Blackwell Publishing Ltd, 2007.
  *
  * @author Peter Abeles
@@ -65,10 +66,10 @@ public class PointCloudShapeDetectionSchnabel2007 {
 	private Box3D_F64 bounding = new Box3D_F64();
 
 	// list of leafs in the Octree.  Allows quick finding of the path to the base node
-	private FastQueue<Octree_F64> leafs = new FastQueue<Octree_F64>(Octree_F64.class, false);
+	private FastArray<Octree_F64> leafs = new FastArray<Octree_F64>(Octree_F64.class);
 
 	// found path from leaf to base
-	private FastQueue<Octree_F64> path = new FastQueue<Octree_F64>(Octree_F64.class, false);
+	private FastArray<Octree_F64> path = new FastArray<Octree_F64>(Octree_F64.class);
 
 	// searches the NN graph to find points which match the model.
 	// need to use the same instance for all searches since it modified the points by marking them.
@@ -81,12 +82,12 @@ public class PointCloudShapeDetectionSchnabel2007 {
 	private LocalFitShapeNN refineShape;
 
 	// list of found objects
-	private FastQueue<FoundShape> foundObjects = new FastQueue<FoundShape>(FoundShape.class, true);
+	private FastQueue<FoundShape> foundObjects = new FastQueue<FoundShape>(FoundShape::new);
 
 	// points with normal vectors
-	private FastQueue<PointVectorNN> pointsNormal = new FastQueue<PointVectorNN>(PointVectorNN.class, false);
+	private FastQueue<PointVectorNN> pointsNormal = new FastQueue<PointVectorNN>(PointVectorNN::new);
 	// points without normal vectors
-	private FastQueue<PointVectorNN> pointsNoNormal = new FastQueue<PointVectorNN>(PointVectorNN.class, false);
+	private FastQueue<PointVectorNN> pointsNoNormal = new FastQueue<PointVectorNN>(PointVectorNN::new);
 
 	// list of shapes which can be fit
 	private List<ShapeDescription> models;
@@ -164,9 +165,9 @@ public class PointCloudShapeDetectionSchnabel2007 {
 			PointVectorNN pv = points.data[i];
 			Vector3D_F64 v = pv.normal;
 			if (v.x == 0 && v.y == 0 && v.z == 0) {
-				pointsNoNormal.add(pv);
+				pointsNoNormal.grow().set(pv);
 			} else {
-				pointsNormal.add(pv);
+				pointsNormal.grow().set(pv);
 			}
 		}
 
@@ -329,7 +330,7 @@ public class PointCloudShapeDetectionSchnabel2007 {
 	 * @param unmatched Output. Where the unmatched points are stored.
 	 */
 	public void findUnmatchedPoints(List<PointVectorNN> unmatched) {
-		FastQueue<Octree.Info<Point3D_F64>> treePts = managerOctree.getTree().points;
+		FastArray<Info<Point3D_F64>> treePts = managerOctree.getTree().points;
 
 		for (int i = 0; i < treePts.size; i++) {
 			Octree_F64.Info info = treePts.data[i];
@@ -355,7 +356,7 @@ public class PointCloudShapeDetectionSchnabel2007 {
 		return bounding;
 	}
 
-	public FastQueue<Octree_F64> getLeafs() {
+	public FastArray<Octree_F64> getLeafs() {
 		return leafs;
 	}
 

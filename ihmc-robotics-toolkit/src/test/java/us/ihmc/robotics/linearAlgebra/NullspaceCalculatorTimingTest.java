@@ -1,21 +1,16 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.DecompositionFactory;
-import org.ejml.interfaces.decomposition.QRDecomposition;
-import org.ejml.interfaces.decomposition.QRPDecomposition;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.junit.jupiter.api.Test;
-import us.ihmc.commons.PrintTools;
-import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
-import us.ihmc.robotics.time.ExecutionTimer;
-import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.Random;
 
-import static us.ihmc.robotics.Assert.*;
+import org.ejml.data.DMatrixRMaj;
+import org.junit.jupiter.api.Test;
+
+import us.ihmc.commons.PrintTools;
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.robotics.time.ExecutionTimer;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class NullspaceCalculatorTimingTest
 {
@@ -37,12 +32,12 @@ public class NullspaceCalculatorTimingTest
 
       for (int i = 0; i < 10000; i++)
       {
-         DenseMatrix64F J = new DenseMatrix64F(10, 20, false, Jvalues);
-         DenseMatrix64F A = new DenseMatrix64F(5, 20, false, Avalues);
+         DMatrixRMaj J = new DMatrixRMaj(10, 20, false, Jvalues);
+         DMatrixRMaj A = new DMatrixRMaj(5, 20, false, Avalues);
 
-         DenseMatrix64F A_projected1 = new DenseMatrix64F(5, 20, false, Avalues);
-         DenseMatrix64F A_projected2 = new DenseMatrix64F(5, 20, false, Avalues);
-         DenseMatrix64F A_projected3 = new DenseMatrix64F(5, 20, false, Avalues);
+         DMatrixRMaj A_projected1 = new DMatrixRMaj(5, 20, false, Avalues);
+         DMatrixRMaj A_projected2 = new DMatrixRMaj(5, 20, false, Avalues);
+         DMatrixRMaj A_projected3 = new DMatrixRMaj(5, 20, false, Avalues);
 
          svdTimer.startMeasurement();
          svdCalculator.projectOntoNullspace(A, J, A_projected1);
