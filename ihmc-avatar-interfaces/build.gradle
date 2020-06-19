@@ -64,7 +64,7 @@ behaviorCleanRoomDependencies {
 behaviorFxUiDependencies {
    compile ihmc.sourceSetProject("main")
    compile ihmc.sourceSetProject("behavior-clean-room")
-   api("us.ihmc:ihmc-javafx-toolkit:0.17.0-ejml-0.39-beta-1")
+   api("us.ihmc:ihmc-javafx-toolkit:0.18.0")
    api("us.ihmc:ihmc-robot-models-visualizers:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
    api("us.ihmc:robot-environment-awareness-visualizers:source")
@@ -85,7 +85,7 @@ testDependencies {
 visualizersDependencies {
    compile ihmc.sourceSetProject("main")
 
-   api("us.ihmc:ihmc-javafx-toolkit:0.16.0-ejml-0.39-beta-1")
+   api("us.ihmc:ihmc-javafx-toolkit:0.18.0")
    api("us.ihmc:robot-environment-awareness-application:source")
    api("us.ihmc:ihmc-path-planning-visualizers:source")
 }
