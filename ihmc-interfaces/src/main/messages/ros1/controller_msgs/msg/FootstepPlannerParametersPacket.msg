@@ -455,4 +455,8 @@ float64 shin_pitch
 # Field default value -11.1
 float64 shin_height_offet
 
+# Distance epsilon below snapped footstep that will be added to foothold
+# Field default value -11.1
+float64 distance_epsilon_to_bridge_regions
+
 

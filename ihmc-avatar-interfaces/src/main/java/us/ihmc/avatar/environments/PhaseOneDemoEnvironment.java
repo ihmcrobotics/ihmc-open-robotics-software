@@ -3,7 +3,7 @@ package us.ihmc.avatar.environments;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.lang.NotImplementedException;
+import org.apache.commons.lang3.NotImplementedException;
 
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -91,7 +91,7 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
 
    private void createDebris()
    {
-      throw new NotImplementedException();
+      throw new NotImplementedException("Debris not implemented");
    }
 
    private void createDoor()
@@ -103,7 +103,7 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
 
    private void createBarrel()
    {
-      throw new NotImplementedException();
+      throw new NotImplementedException("Barrel not implemented");
    }
 
    private CombinedTerrainObject3D setUpGround(String name)

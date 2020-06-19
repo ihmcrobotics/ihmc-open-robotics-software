@@ -245,6 +245,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       return current_alignment - initial_alignment;
    }
 
@@ -530,6 +533,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
+
       return current_alignment - initial_alignment;
    }
 
@@ -738,6 +745,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
 
       cdr.write_type_6(data.getShinHeightOffet());
+
+
+      cdr.write_type_6(data.getDistanceEpsilonToBridgeRegions());
 
    }
 
@@ -948,6 +958,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setShinHeightOffet(cdr.read_type_6());
       	
 
+      data.setDistanceEpsilonToBridgeRegions(cdr.read_type_6());
+      	
+
    }
 
    @Override
@@ -1089,6 +1102,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       ser.write_type_6("shin_pitch", data.getShinPitch());
 
       ser.write_type_6("shin_height_offet", data.getShinHeightOffet());
+
+      ser.write_type_6("distance_epsilon_to_bridge_regions", data.getDistanceEpsilonToBridgeRegions());
    }
 
    @Override
@@ -1230,6 +1245,8 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setShinPitch(ser.read_type_6("shin_pitch"));
 
       data.setShinHeightOffet(ser.read_type_6("shin_height_offet"));
+
+      data.setDistanceEpsilonToBridgeRegions(ser.read_type_6("distance_epsilon_to_bridge_regions"));
    }
 
    public static void staticCopy(controller_msgs.msg.dds.FootstepPlannerParametersPacket src, controller_msgs.msg.dds.FootstepPlannerParametersPacket dest)

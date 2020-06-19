@@ -543,8 +543,14 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
             */
    public double shin_height_offet_ = -11.1;
 
+   /**
+            * Distance epsilon below snapped footstep that will be added to foothold
+            */
+   public double distance_epsilon_to_bridge_regions_ = -11.1;
+
    public FootstepPlannerParametersPacket()
    {
+
 
 
 
@@ -827,6 +833,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
 
 
       shin_height_offet_ = other.shin_height_offet_;
+
+
+      distance_epsilon_to_bridge_regions_ = other.distance_epsilon_to_bridge_regions_;
 
    }
 
@@ -2249,6 +2258,22 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
    }
 
 
+   /**
+            * Distance epsilon below snapped footstep that will be added to foothold
+            */
+   public void setDistanceEpsilonToBridgeRegions(double distance_epsilon_to_bridge_regions)
+   {
+      distance_epsilon_to_bridge_regions_ = distance_epsilon_to_bridge_regions;
+   }
+   /**
+            * Distance epsilon below snapped footstep that will be added to foothold
+            */
+   public double getDistanceEpsilonToBridgeRegions()
+   {
+      return distance_epsilon_to_bridge_regions_;
+   }
+
+
    public static Supplier<FootstepPlannerParametersPacketPubSubType> getPubSubType()
    {
       return FootstepPlannerParametersPacketPubSubType::new;
@@ -2471,6 +2496,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.shin_height_offet_, other.shin_height_offet_, epsilon)) return false;
 
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsPrimitive(this.distance_epsilon_to_bridge_regions_, other.distance_epsilon_to_bridge_regions_, epsilon)) return false;
+
+
       return true;
    }
 
@@ -2688,6 +2716,9 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       if(this.shin_height_offet_ != otherMyClass.shin_height_offet_) return false;
 
 
+      if(this.distance_epsilon_to_bridge_regions_ != otherMyClass.distance_epsilon_to_bridge_regions_) return false;
+
+
       return true;
    }
 
@@ -2900,7 +2931,10 @@ public class FootstepPlannerParametersPacket extends Packet<FootstepPlannerParam
       builder.append(this.shin_pitch_);      builder.append(", ");
 
       builder.append("shin_height_offet=");
-      builder.append(this.shin_height_offet_);
+      builder.append(this.shin_height_offet_);      builder.append(", ");
+
+      builder.append("distance_epsilon_to_bridge_regions=");
+      builder.append(this.distance_epsilon_to_bridge_regions_);
       builder.append("}");
       return builder.toString();
    }
