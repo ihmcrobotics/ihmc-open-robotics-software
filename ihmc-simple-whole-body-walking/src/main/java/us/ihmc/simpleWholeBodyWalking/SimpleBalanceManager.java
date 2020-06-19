@@ -126,7 +126,7 @@ public class SimpleBalanceManager
                                                                                                             new PlaneContactStateCommand());
 
    public SimpleBalanceManager(HighLevelHumanoidControllerToolbox controllerToolbox, WalkingControllerParameters walkingControllerParameters,
-                               ICPWithTimeFreezingPlannerParameters icpPlannerParameters, ICPAngularMomentumModifierParameters angularMomentumModifierParameters,
+                               ICPWithTimeFreezingPlannerParameters icpPlannerParameters,
                                YoVariableRegistry parentRegistry)
    {
       CommonHumanoidReferenceFrames referenceFrames = controllerToolbox.getReferenceFrames();

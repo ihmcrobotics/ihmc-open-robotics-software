@@ -16,10 +16,7 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.sensors.FootSwitchInterface;
-import us.ihmc.simpleWholeBodyWalking.SimpleBalanceManager;
-import us.ihmc.simpleWholeBodyWalking.SimpleCenterOfMassHeightManager;
-import us.ihmc.simpleWholeBodyWalking.SimpleControlManagerFactory;
-import us.ihmc.simpleWholeBodyWalking.SimpleFeetManager;
+import us.ihmc.simpleWholeBodyWalking.*;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -57,7 +54,7 @@ public class SimpleSingleSupportState extends SimpleWalkingState
    private final HighLevelHumanoidControllerToolbox controllerToolbox;
    private final WalkingFailureDetectionControlModule failureDetectionControlModule;
 
-   private final PelvisOrientationManager pelvisOrientationManager;
+   private final SimplePelvisOrientationManager pelvisOrientationManager;
    private final SimpleFeetManager feetManager;
 
    private final FramePoint3D desiredCoM = new FramePoint3D();

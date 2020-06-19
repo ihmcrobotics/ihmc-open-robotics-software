@@ -61,7 +61,7 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
 
    private final SimpleControlManagerFactory managerFactory;
 
-   private final PelvisOrientationManager pelvisOrientationManager;
+   private final SimplePelvisOrientationManager pelvisOrientationManager;
    private final SimpleFeetManager feetManager;
    private final SimpleBalanceManager balanceManager;
    private final SimpleCenterOfMassHeightManager comHeightManager;
@@ -602,11 +602,10 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
          }
       }
 
-      TaskspaceTrajectoryStatusMessage pelvisOrientationStatus = pelvisOrientationManager.pollStatusToReport();
       TaskspaceTrajectoryStatusMessage pelvisXYStatus = balanceManager.pollPelvisXYTranslationStatusToReport();
       TaskspaceTrajectoryStatusMessage pelvisHeightStatus = comHeightManager.pollStatusToReport();
 
-      TaskspaceTrajectoryStatusMessage mergedPelvisStatus = mergePelvisStatusMessages(pelvisOrientationStatus, pelvisXYStatus, pelvisHeightStatus);
+      TaskspaceTrajectoryStatusMessage mergedPelvisStatus = mergePelvisStatusMessages(pelvisXYStatus, pelvisHeightStatus);
 
       if (mergedPelvisStatus != null)
       {
@@ -614,18 +613,14 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
       }
    }
 
-   private TaskspaceTrajectoryStatusMessage mergePelvisStatusMessages(TaskspaceTrajectoryStatusMessage pelvisOrientationStatus,
-                                                                      TaskspaceTrajectoryStatusMessage pelvisXYStatus,
+   private TaskspaceTrajectoryStatusMessage mergePelvisStatusMessages(TaskspaceTrajectoryStatusMessage pelvisXYStatus,
                                                                       TaskspaceTrajectoryStatusMessage pelvisHeightStatus)
    {
-      int numberOfStatus = pelvisOrientationStatus != null ? 1 : 0;
-      numberOfStatus += pelvisXYStatus != null ? 1 : 0;
+      int numberOfStatus = pelvisXYStatus != null ? 1 : 0;
       numberOfStatus += pelvisHeightStatus != null ? 1 : 0;
 
       if (numberOfStatus <= 1)
       {
-         if (pelvisOrientationStatus != null)
-            return pelvisOrientationStatus;
          if (pelvisXYStatus != null)
             return pelvisXYStatus;
          if (pelvisHeightStatus != null)
@@ -642,15 +637,6 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
       desiredEndEffectorPosition.setToNaN();
       actualEndEffectorOrientation.setToNaN();
       actualEndEffectorPosition.setToNaN();
-
-      if (pelvisOrientationStatus != null)
-      {
-         pelvisStatusMessage.setSequenceId(pelvisOrientationStatus.getSequenceId());
-         pelvisStatusMessage.setTimestamp(pelvisOrientationStatus.getTimestamp());
-         pelvisStatusMessage.setTrajectoryExecutionStatus(pelvisOrientationStatus.getTrajectoryExecutionStatus());
-         desiredEndEffectorOrientation.set(pelvisOrientationStatus.getDesiredEndEffectorOrientation());
-         actualEndEffectorOrientation.set(pelvisOrientationStatus.getActualEndEffectorOrientation());
-      }
 
       if (pelvisXYStatus != null)
       {

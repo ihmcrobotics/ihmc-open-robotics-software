@@ -14,6 +14,7 @@ import us.ihmc.sensorProcessing.model.RobotMotionStatus;
 import us.ihmc.simpleWholeBodyWalking.SimpleBalanceManager;
 import us.ihmc.simpleWholeBodyWalking.SimpleCenterOfMassHeightManager;
 import us.ihmc.simpleWholeBodyWalking.SimpleControlManagerFactory;
+import us.ihmc.simpleWholeBodyWalking.SimplePelvisOrientationManager;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class SimpleStandingState extends SimpleWalkingState
@@ -25,7 +26,7 @@ public class SimpleStandingState extends SimpleWalkingState
 
    private final SimpleCenterOfMassHeightManager comHeightManager;
    private final SimpleBalanceManager balanceManager;
-   private final PelvisOrientationManager pelvisOrientationManager;
+   private final SimplePelvisOrientationManager pelvisOrientationManager;
    private final SideDependentList<RigidBodyControlManager> handManagers = new SideDependentList<>();
 
    public SimpleStandingState(CommandInputManager commandInputManager, WalkingMessageHandler walkingMessageHandler,
