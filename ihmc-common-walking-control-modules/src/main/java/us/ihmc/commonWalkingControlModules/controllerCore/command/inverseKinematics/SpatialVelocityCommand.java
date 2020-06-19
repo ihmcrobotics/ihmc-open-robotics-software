@@ -2,7 +2,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinema
 
 import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType;
@@ -707,7 +707,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * @param weightMatrixToPack the dense-matrix in which the weight matrix of this command is stored
     *           in. Modified.
     */
-   public void getWeightMatrix(ReferenceFrame destinationFrame, DenseMatrix64F weightMatrixToPack)
+   public void getWeightMatrix(ReferenceFrame destinationFrame, DMatrixRMaj weightMatrixToPack)
    {
       weightMatrix.getFullWeightMatrixInFrame(destinationFrame, weightMatrixToPack);
    }
@@ -771,7 +771,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * @param desiredSpatialVelocityToPack the 6-by-1 matrix in which the value of the desired spatial
     *           velocity is stored. The given matrix is reshaped to ensure proper size. Modified.
     */
-   public void getDesiredSpatialVelocity(DenseMatrix64F desiredSpatialVelocityToPack)
+   public void getDesiredSpatialVelocity(DMatrixRMaj desiredSpatialVelocityToPack)
    {
       desiredSpatialVelocityToPack.reshape(6, 1);
       desiredAngularVelocity.get(0, desiredSpatialVelocityToPack);
@@ -838,7 +838,7 @@ public class SpatialVelocityCommand implements InverseKinematicsCommand<SpatialV
     * @param selectionMatrixToPack the dense-matrix in which the selection matrix of this command is
     *           stored in. Modified.
     */
-   public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
    }

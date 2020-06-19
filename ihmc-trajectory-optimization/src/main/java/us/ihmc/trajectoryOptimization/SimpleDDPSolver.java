@@ -1,6 +1,6 @@
 package us.ihmc.trajectoryOptimization;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 public class SimpleDDPSolver<E extends Enum> extends AbstractDDPSolver<E> implements DDPSolverInterface<E>
 {
@@ -17,7 +17,7 @@ public class SimpleDDPSolver<E extends Enum> extends AbstractDDPSolver<E> implem
 
    @Override
    public double forwardPass(E dynamicsState, int startIndex, int endIndex, LQTrackingCostFunction<E> costFunction,
-                             DenseMatrix64F initialState, DiscreteOptimizationData updatedSequence)
+                             DMatrixRMaj initialState, DiscreteOptimizationData updatedSequence)
    {
       updatedSequence.setState(startIndex, initialState);
 
@@ -25,15 +25,15 @@ public class SimpleDDPSolver<E extends Enum> extends AbstractDDPSolver<E> implem
 
       for (int t = startIndex; t <= endIndex; t++)
       {
-         DenseMatrix64F desiredControl = desiredSequence.getControl(t);
-         DenseMatrix64F desiredState = desiredSequence.getState(t);
-         DenseMatrix64F updatedControl = updatedSequence.getControl(t);
-         DenseMatrix64F updatedState = updatedSequence.getState(t);
+         DMatrixRMaj desiredControl = desiredSequence.getControl(t);
+         DMatrixRMaj desiredState = desiredSequence.getState(t);
+         DMatrixRMaj updatedControl = updatedSequence.getControl(t);
+         DMatrixRMaj updatedState = updatedSequence.getState(t);
 
-         DenseMatrix64F currentState = optimalSequence.getState(t);
-         DenseMatrix64F currentControl = optimalSequence.getControl(t);
+         DMatrixRMaj currentState = optimalSequence.getState(t);
+         DMatrixRMaj currentControl = optimalSequence.getControl(t);
 
-         DenseMatrix64F constants = constantsSequence.get(t);
+         DMatrixRMaj constants = constantsSequence.get(t);
 
          computeUpdatedControl(currentState, updatedState, feedBackGainSequence.get(t), feedForwardSequence.get(t), currentControl, updatedControl);
 
@@ -68,17 +68,17 @@ public class SimpleDDPSolver<E extends Enum> extends AbstractDDPSolver<E> implem
 
       for (int t = endIndex; t >= startIndex; t--)
       {
-         DenseMatrix64F valueStateHessian = valueStateHessianSequence.get(t);
-         DenseMatrix64F valueStateGradient = valueStateGradientSequence.get(t);
+         DMatrixRMaj valueStateHessian = valueStateHessianSequence.get(t);
+         DMatrixRMaj valueStateGradient = valueStateGradientSequence.get(t);
 
-         DenseMatrix64F dynamicsStateGradient = dynamicsStateGradientSequence.get(t);
-         DenseMatrix64F dynamicsControlGradient = dynamicsControlGradientSequence.get(t);
+         DMatrixRMaj dynamicsStateGradient = dynamicsStateGradientSequence.get(t);
+         DMatrixRMaj dynamicsControlGradient = dynamicsControlGradientSequence.get(t);
 
-         DenseMatrix64F costStateGradient = costStateGradientSequence.get(t);
-         DenseMatrix64F costControlGradient = costControlGradientSequence.get(t);
-         DenseMatrix64F costStateHessian = costStateHessianSequence.get(t);
-         DenseMatrix64F costControlHessian = costControlHessianSequence.get(t);
-         DenseMatrix64F costStateControlHessian = costStateControlHessianSequence.get(t);
+         DMatrixRMaj costStateGradient = costStateGradientSequence.get(t);
+         DMatrixRMaj costControlGradient = costControlGradientSequence.get(t);
+         DMatrixRMaj costStateHessian = costStateHessianSequence.get(t);
+         DMatrixRMaj costControlHessian = costControlHessianSequence.get(t);
+         DMatrixRMaj costStateControlHessian = costStateControlHessianSequence.get(t);
 
          updateHamiltonianApproximations(dynamicsState, t, costStateGradient, costControlGradient, costStateHessian, costControlHessian, costStateControlHessian,
                                          dynamicsStateGradient, dynamicsControlGradient, valueStateGradient, valueStateHessian, hamiltonianStateGradient,

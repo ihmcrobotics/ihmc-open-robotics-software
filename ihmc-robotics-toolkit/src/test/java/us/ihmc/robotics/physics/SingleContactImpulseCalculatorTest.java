@@ -8,8 +8,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
@@ -192,8 +192,8 @@ public class SingleContactImpulseCalculatorTest
       FrameVector3D collisionAxisForA = collisionResult.getCollisionAxisForA();
       RigidBodyBasics bodyA = collisionResult.getCollidableA().getRigidBody();
       RigidBodyBasics bodyB = collisionResult.getCollidableB().getRigidBody();
-      DenseMatrix64F jointVelocityChangeA = impulseCalculator.getJointVelocityChangeA();
-      DenseMatrix64F jointVelocityChangeB = impulseCalculator.getJointVelocityChangeB();
+      DMatrixRMaj jointVelocityChangeA = impulseCalculator.getJointVelocityChangeA();
+      DMatrixRMaj jointVelocityChangeB = impulseCalculator.getJointVelocityChangeB();
 
       double normalVelocityMagnitudePreImpulse = contactLinearVelocityNoImpulse.dot(collisionAxisForA);
 
@@ -371,15 +371,15 @@ public class SingleContactImpulseCalculatorTest
    }
 
    static void updateJointVelocities(double dt, RigidBodyBasics rigidBody, ForwardDynamicsCalculator forwardDynamicsCalculator,
-                                     DenseMatrix64F jointVelocityChange)
+                                     DMatrixRMaj jointVelocityChange)
    {
       RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rigidBody);
       List<JointBasics> joints = Arrays.asList(MultiBodySystemTools.collectSubtreeJoints(rootBody));
 
-      DenseMatrix64F jointVelocityMatrix = new DenseMatrix64F(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
+      DMatrixRMaj jointVelocityMatrix = new DMatrixRMaj(MultiBodySystemTools.computeDegreesOfFreedom(joints), 1);
       MultiBodySystemTools.extractJointsState(joints, JointStateType.VELOCITY, jointVelocityMatrix);
-      CommonOps.addEquals(jointVelocityMatrix, jointVelocityChange);
-      CommonOps.addEquals(jointVelocityMatrix, dt, forwardDynamicsCalculator.getJointAccelerationMatrix());
+      CommonOps_DDRM.addEquals(jointVelocityMatrix, jointVelocityChange);
+      CommonOps_DDRM.addEquals(jointVelocityMatrix, dt, forwardDynamicsCalculator.getJointAccelerationMatrix());
       MultiBodySystemTools.insertJointsState(joints, JointStateType.VELOCITY, jointVelocityMatrix);
       rootBody.updateFramesRecursively();
    }

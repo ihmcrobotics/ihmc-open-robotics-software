@@ -4,8 +4,8 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import com.thoughtworks.xstream.XStream;
 
@@ -28,7 +28,7 @@ public class EvaluateAgainstManualAlignment {
       double errorsT[] = new double[N];
       double errorsR[] = new double[N];
 
-      DenseMatrix64F R = new DenseMatrix64F(3,3);
+      DMatrixRMaj R = new DMatrixRMaj(3,3);
       Rodrigues_F64 rod = new Rodrigues_F64();
       for (int i = 0; i < N; i++) {
          String nameEstimated = String.format(directory + "estimatedTestbedToWorld%02d.xml", i);
@@ -49,7 +49,7 @@ public class EvaluateAgainstManualAlignment {
 
 
 
-         CommonOps.multTransA(estimatedToModel.getR(), found.getR(), R);
+         CommonOps_DDRM.multTransA(estimatedToModel.getR(), found.getR(), R);
          ConvertRotation3D_F64.matrixToRodrigues(R, rod);
          errorsR[i] = rod.theta;
 

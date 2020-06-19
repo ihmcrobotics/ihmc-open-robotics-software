@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.matrixlib.MatrixTestTools;
 import us.ihmc.robotics.random.RandomGeometry;
@@ -30,14 +30,14 @@ public abstract class TrackingCostFunctionTest<E extends Enum<E>>
          E hybridState = getHybridState(hybridStateIndex);
 
          Random random = new Random(1738L);
-         DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
-         DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
-         DenseMatrix64F desiredState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
-         DenseMatrix64F desiredControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
-         DenseMatrix64F constant = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
+         DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
+         DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+         DMatrixRMaj desiredState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
+         DMatrixRMaj desiredControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+         DMatrixRMaj constant = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
 
-         DenseMatrix64F costGradient = new DenseMatrix64F(getStateVectorSize(), 1);
-         DenseMatrix64F expectedCostGradient = new DenseMatrix64F(getStateVectorSize(), 1);
+         DMatrixRMaj costGradient = new DMatrixRMaj(getStateVectorSize(), 1);
+         DMatrixRMaj expectedCostGradient = new DMatrixRMaj(getStateVectorSize(), 1);
 
          double cost = costFunction.getCost(hybridState, currentControl, currentState, desiredControl, desiredState, constant);
          int length = (int)(Math.log10(cost) + 1);
@@ -48,13 +48,13 @@ public abstract class TrackingCostFunctionTest<E extends Enum<E>>
 
          for (int modifiedStateIndex = 0; modifiedStateIndex < getStateVectorSize(); modifiedStateIndex++)
          {
-            DenseMatrix64F currentStateModified = new DenseMatrix64F(currentState);
+            DMatrixRMaj currentStateModified = new DMatrixRMaj(currentState);
             currentStateModified.add(modifiedStateIndex, 0, modifiedEpsilon);
             double modifiedCost = costFunction.getCost(hybridState, currentControl, currentStateModified, desiredControl, desiredState, constant);
             expectedCostGradient.set(modifiedStateIndex, 0, (modifiedCost - cost) / modifiedEpsilon);
          }
 
-         double value = Math.abs(CommonOps.elementSum(expectedCostGradient));
+         double value = Math.abs(CommonOps_DDRM.elementSum(expectedCostGradient));
          MatrixTestTools.assertMatrixEquals(expectedCostGradient, costGradient, 1e-3 * value);
       }
    }
@@ -69,14 +69,14 @@ public abstract class TrackingCostFunctionTest<E extends Enum<E>>
          E hybridState = getHybridState(hybridStateIndex);
 
          Random random = new Random(1738L);
-         DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
-         DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
-         DenseMatrix64F desiredState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
-         DenseMatrix64F desiredControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
-         DenseMatrix64F constant = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
+         DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
+         DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+         DMatrixRMaj desiredState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
+         DMatrixRMaj desiredControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+         DMatrixRMaj constant = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
 
-         DenseMatrix64F costGradient = new DenseMatrix64F(getControlVectorSize(), 1);
-         DenseMatrix64F expectedCostGradient = new DenseMatrix64F(getControlVectorSize(), 1);
+         DMatrixRMaj costGradient = new DMatrixRMaj(getControlVectorSize(), 1);
+         DMatrixRMaj expectedCostGradient = new DMatrixRMaj(getControlVectorSize(), 1);
 
          double cost = costFunction.getCost(hybridState, currentControl, currentState, desiredControl, desiredState, constant);
          int length = (int)(Math.log10(cost) + 1);
@@ -88,13 +88,13 @@ public abstract class TrackingCostFunctionTest<E extends Enum<E>>
 
          for (int controlModifiedIndex = 0; controlModifiedIndex < getControlVectorSize(); controlModifiedIndex++)
          {
-            DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
+            DMatrixRMaj currentControlModified = new DMatrixRMaj(currentControl);
             currentControlModified.add(controlModifiedIndex, 0, modifiedEpsilon);
             double modifiedCost = costFunction.getCost(hybridState, currentControlModified, currentState, desiredControl, desiredState, constant);
             expectedCostGradient.set(controlModifiedIndex, 0, (modifiedCost - cost) / (modifiedEpsilon));
          }
 
-         double value = Math.max(1.0e-10, 1e-3 * Math.abs(CommonOps.elementSum(expectedCostGradient)));
+         double value = Math.max(1.0e-10, 1e-3 * Math.abs(CommonOps_DDRM.elementSum(expectedCostGradient)));
          MatrixTestTools.assertMatrixEquals(expectedCostGradient, costGradient, value);
       }
    }
@@ -109,24 +109,24 @@ public abstract class TrackingCostFunctionTest<E extends Enum<E>>
          E hybridState = getHybridState(hybridStateIndex);
 
          Random random = new Random(1738L);
-         DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
-         DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
-         DenseMatrix64F desiredState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
-         DenseMatrix64F desiredControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
-         DenseMatrix64F constant = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
+         DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
+         DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+         DMatrixRMaj desiredState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
+         DMatrixRMaj desiredControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+         DMatrixRMaj constant = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
 
-         DenseMatrix64F costHessian = new DenseMatrix64F(getStateVectorSize(), getStateVectorSize());
-         DenseMatrix64F expectedCostHessian = new DenseMatrix64F(getStateVectorSize(), getStateVectorSize());
+         DMatrixRMaj costHessian = new DMatrixRMaj(getStateVectorSize(), getStateVectorSize());
+         DMatrixRMaj expectedCostHessian = new DMatrixRMaj(getStateVectorSize(), getStateVectorSize());
 
-         DenseMatrix64F currentGradient = new DenseMatrix64F(getStateVectorSize(), 1);
-         DenseMatrix64F modifiedGradient = new DenseMatrix64F(getStateVectorSize(), 1);
+         DMatrixRMaj currentGradient = new DMatrixRMaj(getStateVectorSize(), 1);
+         DMatrixRMaj modifiedGradient = new DMatrixRMaj(getStateVectorSize(), 1);
 
          costFunction.getCostStateHessian(hybridState, currentControl, currentState, constant, costHessian);
          costFunction.getCostStateGradient(hybridState, currentControl, currentState, desiredControl, desiredState, constant, currentGradient);
 
          for (int partialState = 0; partialState < getStateVectorSize(); partialState++)
          {
-            DenseMatrix64F currentStateModified = new DenseMatrix64F(currentState);
+            DMatrixRMaj currentStateModified = new DMatrixRMaj(currentState);
             currentStateModified.add(partialState, 0, epsilon);
             costFunction.getCostStateGradient(hybridState, currentControl, currentStateModified, desiredControl, desiredState, constant, modifiedGradient);
 
@@ -134,7 +134,7 @@ public abstract class TrackingCostFunctionTest<E extends Enum<E>>
                expectedCostHessian.set(state, partialState, (modifiedGradient.get(state) - currentGradient.get(state)) / epsilon);
          }
 
-         double trace = Math.abs(CommonOps.trace(expectedCostHessian));
+         double trace = Math.abs(CommonOps_DDRM.trace(expectedCostHessian));
          MatrixTestTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-5 * trace);
       }
    }
@@ -149,17 +149,17 @@ public abstract class TrackingCostFunctionTest<E extends Enum<E>>
          E hybridState = getHybridState(hybridStateIndex);
 
          Random random = new Random(1738L);
-         DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
-         DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
-         DenseMatrix64F desiredState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
-         DenseMatrix64F desiredControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
-         DenseMatrix64F constant = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
+         DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
+         DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+         DMatrixRMaj desiredState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
+         DMatrixRMaj desiredControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+         DMatrixRMaj constant = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
 
-         DenseMatrix64F costHessian = new DenseMatrix64F(getControlVectorSize(), getControlVectorSize());
-         DenseMatrix64F expectedCostHessian = new DenseMatrix64F(getControlVectorSize(), getControlVectorSize());
+         DMatrixRMaj costHessian = new DMatrixRMaj(getControlVectorSize(), getControlVectorSize());
+         DMatrixRMaj expectedCostHessian = new DMatrixRMaj(getControlVectorSize(), getControlVectorSize());
 
-         DenseMatrix64F currentGradient = new DenseMatrix64F(getControlVectorSize(), 1);
-         DenseMatrix64F modifiedGradient = new DenseMatrix64F(getControlVectorSize(), 1);
+         DMatrixRMaj currentGradient = new DMatrixRMaj(getControlVectorSize(), 1);
+         DMatrixRMaj modifiedGradient = new DMatrixRMaj(getControlVectorSize(), 1);
 
 
          costFunction.getCostControlHessian(hybridState, currentControl, currentState, constant, costHessian);
@@ -168,7 +168,7 @@ public abstract class TrackingCostFunctionTest<E extends Enum<E>>
 
          for (int partialControl = 0; partialControl < getControlVectorSize(); partialControl++)
          {
-            DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
+            DMatrixRMaj currentControlModified = new DMatrixRMaj(currentControl);
             currentControlModified.add(partialControl, 0, epsilon);
             costFunction.getCostControlGradient(hybridState, currentControlModified, currentState, desiredControl, desiredState, constant, modifiedGradient);
 
@@ -176,7 +176,7 @@ public abstract class TrackingCostFunctionTest<E extends Enum<E>>
                expectedCostHessian.set(control, partialControl, (modifiedGradient.get(control) - currentGradient.get(control)) / epsilon);
          }
 
-         double trace = Math.abs(CommonOps.trace(expectedCostHessian));
+         double trace = Math.abs(CommonOps_DDRM.trace(expectedCostHessian));
          MatrixTestTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-5 * trace);
       }
    }
@@ -191,24 +191,24 @@ public abstract class TrackingCostFunctionTest<E extends Enum<E>>
          E hybridState = getHybridState(hybridStateIndex);
 
          Random random = new Random(1738L);
-         DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
-         DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
-         DenseMatrix64F desiredState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
-         DenseMatrix64F desiredControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
-         DenseMatrix64F constant = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
+         DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
+         DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+         DMatrixRMaj desiredState = RandomGeometry.nextDenseMatrix64F(random, getStateVectorSize(), 1);
+         DMatrixRMaj desiredControl = RandomGeometry.nextDenseMatrix64F(random, getControlVectorSize(), 1);
+         DMatrixRMaj constant = RandomGeometry.nextDenseMatrix64F(random, getConstantVectorSize(), 1);
 
-         DenseMatrix64F costHessian = new DenseMatrix64F(getStateVectorSize(), getControlVectorSize());
-         DenseMatrix64F expectedCostHessian = new DenseMatrix64F(getStateVectorSize(), getControlVectorSize());
+         DMatrixRMaj costHessian = new DMatrixRMaj(getStateVectorSize(), getControlVectorSize());
+         DMatrixRMaj expectedCostHessian = new DMatrixRMaj(getStateVectorSize(), getControlVectorSize());
 
-         DenseMatrix64F currentGradient = new DenseMatrix64F(getStateVectorSize(), 1);
-         DenseMatrix64F modifiedGradient = new DenseMatrix64F(getStateVectorSize(), 1);
+         DMatrixRMaj currentGradient = new DMatrixRMaj(getStateVectorSize(), 1);
+         DMatrixRMaj modifiedGradient = new DMatrixRMaj(getStateVectorSize(), 1);
 
          costFunction.getCostControlGradientOfStateGradient(hybridState, currentControl, currentState, constant, costHessian);
          costFunction.getCostStateGradient(hybridState, currentControl, currentState, desiredControl, desiredState, constant, currentGradient);
 
          for (int partialControl = 0; partialControl < getControlVectorSize(); partialControl++)
          {
-            DenseMatrix64F currentControlModified = new DenseMatrix64F(currentControl);
+            DMatrixRMaj currentControlModified = new DMatrixRMaj(currentControl);
             currentControlModified.add(partialControl, 0, epsilon);
             costFunction.getCostStateGradient(hybridState, currentControlModified, currentState, desiredControl, desiredState, constant, modifiedGradient);
 
@@ -216,7 +216,7 @@ public abstract class TrackingCostFunctionTest<E extends Enum<E>>
                expectedCostHessian.set(state, partialControl, (modifiedGradient.get(state) - currentGradient.get(state)) / epsilon);
          }
 
-         double trace = Math.abs(CommonOps.trace(expectedCostHessian));
+         double trace = Math.abs(CommonOps_DDRM.trace(expectedCostHessian));
          MatrixTestTools.assertMatrixEquals(expectedCostHessian, costHessian, 1e-5 * trace);
       }
    }

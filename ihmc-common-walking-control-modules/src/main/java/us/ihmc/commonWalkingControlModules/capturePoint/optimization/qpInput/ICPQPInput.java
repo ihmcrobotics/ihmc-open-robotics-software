@@ -1,8 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
 
 /**
@@ -16,14 +16,14 @@ import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimiza
 public class ICPQPInput
 {
    /** Storage matrix for the quadratic cost of the objective. */
-   public DenseMatrix64F quadraticTerm;
+   public DMatrixRMaj quadraticTerm;
    /** Storage matrix for the linear cost of the objective. */
-   public DenseMatrix64F linearTerm;
+   public DMatrixRMaj linearTerm;
    /** Storage matrix for the scalar cost of the objective. */
-   public DenseMatrix64F residualCost;
+   public DMatrixRMaj residualCost;
 
-   private final DenseMatrix64F tempMatrix;
-   private final DenseMatrix64F tempScalar = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj tempMatrix;
+   private final DMatrixRMaj tempScalar = new DMatrixRMaj(1, 1);
 
    /**
     * Creates the ICP QP Input. Refer to the class documentation {@link ICPQPInput}.
@@ -31,11 +31,11 @@ public class ICPQPInput
     */
    public ICPQPInput(int size)
    {
-      quadraticTerm = new DenseMatrix64F(size, size);
-      linearTerm = new DenseMatrix64F(size, 1);
-      residualCost = new DenseMatrix64F(1, 1);
+      quadraticTerm = new DMatrixRMaj(size, size);
+      linearTerm = new DMatrixRMaj(size, 1);
+      residualCost = new DMatrixRMaj(1, 1);
 
-      tempMatrix = new DenseMatrix64F(size, 1);
+      tempMatrix = new DMatrixRMaj(size, 1);
    }
 
    /**
@@ -64,7 +64,7 @@ public class ICPQPInput
    /**
     * Computes the cost of the task given the task value {@param x}.
     */
-   public double computeCost(DenseMatrix64F x)
+   public double computeCost(DMatrixRMaj x)
    {
       if (x.getNumRows() != quadraticTerm.getNumRows())
          throw new RuntimeException("x.getNumRows() != quadraticTerms.getNumRows()");
@@ -73,10 +73,10 @@ public class ICPQPInput
       tempMatrix.zero();
       tempScalar.zero();
 
-      CommonOps.mult(quadraticTerm, x, tempMatrix);
-      CommonOps.multAddTransA(0.5, x, tempMatrix, tempScalar);
-      CommonOps.multAddTransA(-1.0, linearTerm, x, tempScalar);
-      CommonOps.addEquals(tempScalar, residualCost);
+      CommonOps_DDRM.mult(quadraticTerm, x, tempMatrix);
+      CommonOps_DDRM.multAddTransA(0.5, x, tempMatrix, tempScalar);
+      CommonOps_DDRM.multAddTransA(-1.0, linearTerm, x, tempScalar);
+      CommonOps_DDRM.addEquals(tempScalar, residualCost);
 
       return tempScalar.get(0);
    }
@@ -94,6 +94,6 @@ public class ICPQPInput
     */
    public boolean equals(ICPQPInput other, double tol)
    {
-      return MatrixFeatures.isEquals(quadraticTerm, other.quadraticTerm, tol) && MatrixFeatures.isEquals(linearTerm, other.linearTerm, tol) && MatrixFeatures.isEquals(residualCost, other.residualCost, tol);
+      return MatrixFeatures_DDRM.isEquals(quadraticTerm, other.quadraticTerm, tol) && MatrixFeatures_DDRM.isEquals(linearTerm, other.linearTerm, tol) && MatrixFeatures_DDRM.isEquals(residualCost, other.residualCost, tol);
    }
 }

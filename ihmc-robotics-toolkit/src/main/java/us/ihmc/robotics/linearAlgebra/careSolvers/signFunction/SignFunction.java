@@ -1,6 +1,6 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers.signFunction;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 /**
  * If an nxn matrix K, has a Jordan canconical form
@@ -18,7 +18,7 @@ import org.ejml.data.DenseMatrix64F;
  */
 public interface SignFunction
 {
-   boolean compute(DenseMatrix64F K);
+   boolean compute(DMatrixRMaj K);
 
-   DenseMatrix64F getW(DenseMatrix64F WToPack);
+   DMatrixRMaj getW(DMatrixRMaj WToPack);
 }

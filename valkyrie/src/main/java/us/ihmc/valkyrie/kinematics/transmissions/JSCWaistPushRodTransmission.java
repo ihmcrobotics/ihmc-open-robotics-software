@@ -1,7 +1,7 @@
 package us.ihmc.valkyrie.kinematics.transmissions;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.valkyrie.kinematics.LinearActuator;
 import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
@@ -9,18 +9,18 @@ import us.ihmc.valkyrie.kinematics.ValkyrieJointInterface;
 public class JSCWaistPushRodTransmission implements PushRodTransmissionInterface
 {
    /** Maps actuator force to joint torque */
-   private final DenseMatrix64F jacobianTranspose = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj jacobianTranspose = new DMatrixRMaj(2, 2);
    /** Maps joint velocity to actuator velocity */
-   private final DenseMatrix64F jacobian = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj jacobian = new DMatrixRMaj(2, 2);
 
    /** Joint position, jointPositions = [q1 q2] = [spine roll, spine pitch]' */
-//   private final DenseMatrix64F jointPositions = new DenseMatrix64F(2, 1);
-   private final DenseMatrix64F jointVelocites = new DenseMatrix64F(2, 1);
-   private final DenseMatrix64F jointTorques = new DenseMatrix64F(2, 1);
+//   private final DMatrixRMaj jointPositions = new DMatrixRMaj(2, 1);
+   private final DMatrixRMaj jointVelocites = new DMatrixRMaj(2, 1);
+   private final DMatrixRMaj jointTorques = new DMatrixRMaj(2, 1);
    /** Actuator position, pushrodPositions = [left actuator , right actuator]' */
-   private final DenseMatrix64F pushrodPositions = new DenseMatrix64F(2, 1);
-   private final DenseMatrix64F pushrodVelocities = new DenseMatrix64F(2, 1);
-   private final DenseMatrix64F pushrodForces = new DenseMatrix64F(2, 1);
+   private final DMatrixRMaj pushrodPositions = new DMatrixRMaj(2, 1);
+   private final DMatrixRMaj pushrodVelocities = new DMatrixRMaj(2, 1);
+   private final DMatrixRMaj pushrodForces = new DMatrixRMaj(2, 1);
 
    public JSCWaistPushRodTransmission(PushRodTransmissionJoint joint)
    {
@@ -35,8 +35,8 @@ public class JSCWaistPushRodTransmission implements PushRodTransmissionInterface
       pushrodForces.set(0, 0, act_data[0].getEffort());
       pushrodForces.set(1, 0, act_data[1].getEffort());
       
-//      CommonOps.multTransA(jacobian, pushrodForces, jointTorques);
-      CommonOps.mult(jacobianTranspose, pushrodForces, jointTorques);
+//      CommonOps_DDRM.multTransA(jacobian, pushrodForces, jointTorques);
+      CommonOps_DDRM.mult(jacobianTranspose, pushrodForces, jointTorques);
 
 
       jnt_data[1].setEffort(jointTorques.get(0, 0));
@@ -50,9 +50,9 @@ public class JSCWaistPushRodTransmission implements PushRodTransmissionInterface
       pushrodVelocities.set(0, 0, act_data[0].getVelocity());
       pushrodVelocities.set(1, 0, act_data[1].getVelocity());
       
-      DenseMatrix64F jacobianInverse = new DenseMatrix64F(2, 2);
-      CommonOps.invert(jacobian, jacobianInverse);
-      CommonOps.mult(jacobianInverse, pushrodVelocities, jointVelocites);
+      DMatrixRMaj jacobianInverse = new DMatrixRMaj(2, 2);
+      CommonOps_DDRM.invert(jacobian, jacobianInverse);
+      CommonOps_DDRM.mult(jacobianInverse, pushrodVelocities, jointVelocites);
 
       jnt_data[1].setVelocity(-jointVelocites.get(0, 0));
       jnt_data[0].setVelocity(-jointVelocites.get(1, 0));
@@ -71,10 +71,10 @@ public class JSCWaistPushRodTransmission implements PushRodTransmissionInterface
       jointTorques.set(0, 0, jnt_data[1].getDesiredEffort());
       jointTorques.set(1, 0, jnt_data[0].getDesiredEffort());
       
-      DenseMatrix64F jacobianTransposeInverse = new DenseMatrix64F(2, 2);
-      CommonOps.invert(jacobianTranspose, jacobianTransposeInverse);
+      DMatrixRMaj jacobianTransposeInverse = new DMatrixRMaj(2, 2);
+      CommonOps_DDRM.invert(jacobianTranspose, jacobianTransposeInverse);
       
-      CommonOps.mult(jacobianTransposeInverse, jointTorques, pushrodForces);
+      CommonOps_DDRM.mult(jacobianTransposeInverse, jointTorques, pushrodForces);
 
       act_data[0].setEffortCommand(pushrodForces.get(0, 0));
       act_data[1].setEffortCommand(pushrodForces.get(1, 0));

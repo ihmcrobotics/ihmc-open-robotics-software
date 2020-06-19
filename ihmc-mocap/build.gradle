@@ -13,10 +13,10 @@ ihmc {
 }
 
 mainDependencies {
-   api("us.ihmc:euclid:0.14.2")
-   api("us.ihmc:ihmc-yovariables:0.7.0")
+   api("us.ihmc:euclid:0.15.0")
+   api("us.ihmc:ihmc-yovariables:0.8.0")
    api("us.ihmc:ihmc-java-toolkit:source")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
-   api("us.ihmc:simulation-construction-set:0.18.0")
+   api("us.ihmc:simulation-construction-set:0.19.0")
 }

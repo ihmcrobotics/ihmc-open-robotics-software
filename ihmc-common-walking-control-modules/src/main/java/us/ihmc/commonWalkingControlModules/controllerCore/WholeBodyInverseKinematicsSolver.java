@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointLimitEnforcementMethodCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.InverseKinematicsCommand;
@@ -106,7 +106,7 @@ public class WholeBodyInverseKinematicsSolver
          inverseKinematicsSolution = inverseKinematicsOptimizationException.getSolution();
       }
 
-      DenseMatrix64F jointVelocities = inverseKinematicsSolution.getJointVelocities();
+      DMatrixRMaj jointVelocities = inverseKinematicsSolution.getJointVelocities();
 
       integrator.integrateJointVelocities(jointsToOptimizeFor, jointVelocities);
 
@@ -114,7 +114,7 @@ public class WholeBodyInverseKinematicsSolver
       yoAchievedMomentumLinear.setMatchingFrame(centroidalMomentumSolution.getLinearPart());
       yoAchievedMomentumAngular.setMatchingFrame(centroidalMomentumSolution.getAngularPart());
 
-      DenseMatrix64F jointConfigurations = integrator.getJointConfigurations();
+      DMatrixRMaj jointConfigurations = integrator.getJointConfigurations();
       jointVelocities = integrator.getJointVelocities();
 
       if (rootJoint != null)
@@ -188,7 +188,7 @@ public class WholeBodyInverseKinematicsSolver
 
    private void recordMomentumRate(MomentumCommand command)
    {
-      DenseMatrix64F momentumRate = command.getMomentum();
+      DMatrixRMaj momentumRate = command.getMomentum();
       yoDesiredMomentumAngular.set(0, momentumRate);
       yoDesiredMomentumLinear.set(3, momentumRate);
    }

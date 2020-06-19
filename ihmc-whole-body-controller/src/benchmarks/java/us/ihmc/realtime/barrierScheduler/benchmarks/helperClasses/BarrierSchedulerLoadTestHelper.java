@@ -2,8 +2,8 @@ package us.ihmc.realtime.barrierScheduler.benchmarks.helperClasses;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.time.ExecutionTimer;
@@ -34,7 +34,7 @@ public class BarrierSchedulerLoadTestHelper
       return numberOfOperations;
    }
 
-   public static void doMatrixMultiplyOperationsNativeCommonOps(DenseMatrix64F matrixA, DenseMatrix64F matrixB, DenseMatrix64F resultMatrix,
+   public static void doMatrixMultiplyOperationsNativeCommonOps(DMatrixRMaj matrixA, DMatrixRMaj matrixB, DMatrixRMaj resultMatrix,
                                                                 int numberOfOperations)
    {
       for (int i = 0; i < numberOfOperations; i++)
@@ -50,18 +50,18 @@ public class BarrierSchedulerLoadTestHelper
       }
    }
 
-   public static void doMatrixMultiplyOperationsEJMLCommonOps(DenseMatrix64F matrixA, DenseMatrix64F matrixB, DenseMatrix64F resultMatrix,
+   public static void doMatrixMultiplyOperationsEJMLCommonOps(DMatrixRMaj matrixA, DMatrixRMaj matrixB, DMatrixRMaj resultMatrix,
                                                               int numberOfOperations)
    {
       for (int i = 0; i < numberOfOperations; i++)
       {
          if (i % 2 == 0)
          {
-            CommonOps.mult(matrixA, matrixB, resultMatrix);
+            CommonOps_DDRM.mult(matrixA, matrixB, resultMatrix);
          }
          else
          {
-            CommonOps.mult(matrixB, matrixA, resultMatrix);
+            CommonOps_DDRM.mult(matrixB, matrixA, resultMatrix);
          }
       }
    }

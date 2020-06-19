@@ -3,8 +3,8 @@ package us.ihmc.robotics.screwTheory;
 import java.util.ArrayList;
 import java.util.Collections;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
@@ -52,7 +52,7 @@ public class FourBarKinematicLoop
    private final ConstantSideFourBarCalculatorWithDerivatives fourBarCalculator;
 
    private final FourBarKinematicLoopJacobianSolver fourBarJacobianSolver;
-   private final DenseMatrix64F columnJacobian = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj columnJacobian = new DMatrixRMaj(6, 1);
 
    private final double[] interiorAnglesAtZeroConfiguration = new double[4];
    private final int[] jointSigns = new int[4];
@@ -442,7 +442,7 @@ public class FourBarKinematicLoop
       passiveJointD.setQdd(jointSigns[3] * fourBarCalculator.getAngleDt2CDA());
 
       fourBarJacobianSolver.getUnitJacobian(columnJacobian);
-      CommonOps.scale(masterJointA.getQd(), columnJacobian);
+      CommonOps_DDRM.scale(masterJointA.getQd(), columnJacobian);
 
       if (DEBUG)
       {
@@ -510,7 +510,7 @@ public class FourBarKinematicLoop
       return fourBarOutputJoint;
    }
 
-   public void getJacobian(DenseMatrix64F jacobianToPack)
+   public void getJacobian(DMatrixRMaj jacobianToPack)
    {
       jacobianToPack.set(columnJacobian);
    }
@@ -520,7 +520,7 @@ public class FourBarKinematicLoop
       private final GeometricJacobian geometricJacobian;
       private final JointBasics[] jointsForJacobianCalculation;
       private final ReferenceFrame geometricJacobianFrame;
-      private final DenseMatrix64F geometricJacobianToColumnJacobian;
+      private final DMatrixRMaj geometricJacobianToColumnJacobian;
 
       public FourBarKinematicLoopJacobianSolver(PassiveRevoluteJoint outputJoint)
       {
@@ -556,7 +556,7 @@ public class FourBarKinematicLoop
          return joints;
       }
 
-      public void getUnitJacobian(DenseMatrix64F unitJacobianToPack)
+      public void getUnitJacobian(DMatrixRMaj unitJacobianToPack)
       {
          // Geometric Jacobian - open kinematic chain Jacobian
          geometricJacobian.compute();
@@ -565,7 +565,7 @@ public class FourBarKinematicLoop
          computeVectorTransformGeometricToColumnJacobian();
 
          // Column Jacobian - fourbars are a 1DOF system so the Jacobian is a column vector
-         CommonOps.mult(geometricJacobian.getJacobianMatrix(), geometricJacobianToColumnJacobian, unitJacobianToPack);
+         CommonOps_DDRM.mult(geometricJacobian.getJacobianMatrix(), geometricJacobianToColumnJacobian, unitJacobianToPack);
       }
 
       private void computeVectorTransformGeometricToColumnJacobian()
@@ -592,7 +592,7 @@ public class FourBarKinematicLoop
          }
       }
 
-      private DenseMatrix64F createGeometricJacobianToColumnJacobianMatrix(JointBasics[] jointsForJacobianCalculation)
+      private DMatrixRMaj createGeometricJacobianToColumnJacobianMatrix(JointBasics[] jointsForJacobianCalculation)
       {
          int numberOfJointsForJacobianCalculation = jointsForJacobianCalculation.length;
 
@@ -602,7 +602,7 @@ public class FourBarKinematicLoop
                   "Illegal number of joints for jacobian calculation. Expected 1, 2, or 3 and got " + numberOfJointsForJacobianCalculation);
          }
 
-         return new DenseMatrix64F(3, jointsForJacobianCalculation.length);
+         return new DMatrixRMaj(3, jointsForJacobianCalculation.length);
       }
    }
 }

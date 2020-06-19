@@ -3,7 +3,7 @@ package us.ihmc.atlas.commonWalkingControlModules;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.jcodec.common.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -344,7 +344,7 @@ public class WalkingControllerTest
       }
 
       RootJointDesiredConfigurationDataReadOnly rootJointOutput = controllerCore.getOutputForRootJoint();
-      DenseMatrix64F desiredAcceleration = rootJointOutput.getDesiredAcceleration();
+      DMatrixRMaj desiredAcceleration = rootJointOutput.getDesiredAcceleration();
       desiredAngularAcceleration.set(desiredAcceleration.get(0), desiredAcceleration.get(1), desiredAcceleration.get(2));
       desiredLinearAcceleration.set(desiredAcceleration.get(3), desiredAcceleration.get(4), desiredAcceleration.get(5));
 
