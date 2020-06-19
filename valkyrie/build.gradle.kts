@@ -46,7 +46,7 @@ mainDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-avatar-interfaces:source")
    api("us.ihmc:ihmc-ros-tools:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.18.0-ejml-0.39-beta-1")
+   api("us.ihmc:ihmc-robot-data-logger:0.19.0")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-perception:source")
