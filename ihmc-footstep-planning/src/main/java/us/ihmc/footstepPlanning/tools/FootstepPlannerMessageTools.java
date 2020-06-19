@@ -101,6 +101,7 @@ public class FootstepPlannerMessageTools
       packet.setShinLength(parameters.getShinLength());
       packet.setShinPitch(parameters.getShinPitch());
       packet.setShinHeightOffet(parameters.getShinHeightOffset());
+      packet.setDistanceEpsilonToBridgeRegions(parameters.getDistanceEpsilonToBridgeRegions());
 
       packet.setAStarHeuristicsWeight(parameters.getAStarHeuristicsWeight().getValue());
       packet.setYawWeight(parameters.getYawWeight());
