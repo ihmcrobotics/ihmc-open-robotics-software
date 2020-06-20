@@ -5,7 +5,7 @@ import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import gnu.trove.list.array.TDoubleArrayList;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
@@ -44,7 +44,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
    private final List<JointBasics> joints = new ArrayList<>(initialCapacity);
    /**
     * The list of the desired accelerations for each joint. The list follows the same ordering as the
-    * {@link #joints} list. Each {@link DenseMatrix64F} in this list, is a N-by-1 vector where N is
+    * {@link #joints} list. Each {@link DMatrixRMaj} in this list, is a N-by-1 vector where N is
     * equal to the number of degrees of freedom of the joint it is associated with.
     */
    private final DenseMatrixArrayList desiredAccelerations = new DenseMatrixArrayList(initialCapacity);
@@ -120,7 +120,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
    {
       joints.add(joint);
       weights.add(weight);
-      DenseMatrix64F jointDesiredAcceleration = desiredAccelerations.add();
+      DMatrixRMaj jointDesiredAcceleration = desiredAccelerations.add();
       jointDesiredAcceleration.reshape(1, 1);
       jointDesiredAcceleration.set(0, 0, desiredAcceleration);
    }
@@ -139,7 +139,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
     *           modified.
     * @throws RuntimeException if the {@code desiredAcceleration} is not a N-by-1 vector.
     */
-   public void addJoint(JointBasics joint, DenseMatrix64F desiredAcceleration)
+   public void addJoint(JointBasics joint, DMatrixRMaj desiredAcceleration)
    {
       addJoint(joint, desiredAcceleration, HARD_CONSTRAINT);
    }
@@ -157,7 +157,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
     * @param weight positive value that denotes the priority of the joint task.
     * @throws RuntimeException if the {@code desiredAcceleration} is not a N-by-1 vector.
     */
-   public void addJoint(JointBasics joint, DenseMatrix64F desiredAcceleration, double weight)
+   public void addJoint(JointBasics joint, DMatrixRMaj desiredAcceleration, double weight)
    {
       checkConsistency(joint, desiredAcceleration);
       joints.add(joint);
@@ -193,7 +193,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
     *           modified.
     * @throws RuntimeException if the {@code desiredAcceleration} is not a N-by-1 vector.
     */
-   public void setDesiredAcceleration(int jointIndex, DenseMatrix64F desiredAcceleration)
+   public void setDesiredAcceleration(int jointIndex, DMatrixRMaj desiredAcceleration)
    {
       checkConsistency(joints.get(jointIndex), desiredAcceleration);
       desiredAccelerations.get(jointIndex).set(desiredAcceleration);
@@ -235,7 +235,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
          weights.set(jointIdx, weight);
    }
 
-   private void checkConsistency(JointBasics joint, DenseMatrix64F desiredAcceleration)
+   private void checkConsistency(JointBasics joint, DMatrixRMaj desiredAcceleration)
    {
       MathTools.checkEquals(joint.getDegreesOfFreedom(), desiredAcceleration.getNumRows());
    }
@@ -320,7 +320,7 @@ public class JointspaceAccelerationCommand implements InverseDynamicsCommand<Joi
     * @param jointIndex the index of the joint &in; [0, {@code getNumberOfJoints()}[.
     * @return the N-by-1 desired acceleration where N is the joint number of degrees of freedom.
     */
-   public DenseMatrix64F getDesiredAcceleration(int jointIndex)
+   public DMatrixRMaj getDesiredAcceleration(int jointIndex)
    {
       return desiredAccelerations.get(jointIndex);
    }

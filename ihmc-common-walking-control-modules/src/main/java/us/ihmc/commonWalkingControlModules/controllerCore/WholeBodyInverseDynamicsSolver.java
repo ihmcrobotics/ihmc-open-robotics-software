@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
@@ -202,8 +202,8 @@ public class WholeBodyInverseDynamicsSolver
       }
       MomentumModuleSolution momentumModuleSolution = optimizationControlModule.getMomentumModuleSolution();
 
-      DenseMatrix64F jointAccelerations = momentumModuleSolution.getJointAccelerations();
-      DenseMatrix64F rhoSolution = momentumModuleSolution.getRhoSolution();
+      DMatrixRMaj jointAccelerations = momentumModuleSolution.getJointAccelerations();
+      DMatrixRMaj rhoSolution = momentumModuleSolution.getRhoSolution();
       Map<RigidBodyBasics, Wrench> externalWrenchSolution = momentumModuleSolution.getExternalWrenchSolution();
       List<RigidBodyBasics> rigidBodiesWithExternalWrench = momentumModuleSolution.getRigidBodiesWithExternalWrench();
       SpatialForceReadOnly centroidalMomentumRateSolution = momentumModuleSolution.getCentroidalMomentumRateSolution();
@@ -221,7 +221,7 @@ public class WholeBodyInverseDynamicsSolver
          inverseDynamicsCalculator.compute(jointAccelerations);
 
          dynamicsMatrixCalculator.compute();
-         DenseMatrix64F tauSolution = dynamicsMatrixCalculator.computeJointTorques(jointAccelerations, rhoSolution);
+         DMatrixRMaj tauSolution = dynamicsMatrixCalculator.computeJointTorques(jointAccelerations, rhoSolution);
 
          for (int jointIndex = 0; jointIndex < controlledOneDoFJoints.length; jointIndex++)
          {
@@ -362,7 +362,7 @@ public class WholeBodyInverseDynamicsSolver
    // FIXME this assumes there is only one momentum rate command
    private void recordMomentumRate(MomentumRateCommand command)
    {
-      DenseMatrix64F momentumRate = command.getMomentumRate();
+      DMatrixRMaj momentumRate = command.getMomentumRate();
       yoDesiredMomentumRateAngular.set(0, momentumRate);
       yoDesiredMomentumRateLinear.set(3, momentumRate);
    }

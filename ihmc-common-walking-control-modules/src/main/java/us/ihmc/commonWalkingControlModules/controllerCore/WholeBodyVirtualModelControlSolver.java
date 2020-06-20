@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
@@ -190,7 +190,7 @@ public class WholeBodyVirtualModelControlSolver
       }
 
       virtualModelController.populateTorqueSolution(virtualModelControlSolution);
-      DenseMatrix64F jointTorquesSolution = virtualModelControlSolution.getJointTorques();
+      DMatrixRMaj jointTorquesSolution = virtualModelControlSolution.getJointTorques();
 
       for (int i = 0; i < rigidBodiesWithExternalWrench.size(); i++)
       {
@@ -293,7 +293,7 @@ public class WholeBodyVirtualModelControlSolver
 
    private void recordMomentumRate(MomentumRateCommand command)
    {
-      DenseMatrix64F momentumRate = command.getMomentumRate();
+      DMatrixRMaj momentumRate = command.getMomentumRate();
       yoDesiredMomentumRateAngular.addX(momentumRate.get(0, 0));
       yoDesiredMomentumRateAngular.addY(momentumRate.get(1, 0));
       yoDesiredMomentumRateAngular.addZ(momentumRate.get(2, 0));

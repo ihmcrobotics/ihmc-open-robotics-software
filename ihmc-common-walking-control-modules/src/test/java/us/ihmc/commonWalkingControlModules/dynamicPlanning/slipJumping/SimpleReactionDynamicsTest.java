@@ -4,8 +4,8 @@ import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SL
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
@@ -38,9 +38,9 @@ public class SimpleReactionDynamicsTest
       FrameVector3D desiredAngularAcceleration = new FrameVector3D(ReferenceFrame.getWorldFrame(), 5.5, 6.5, 7.5);
 
       Random random = new Random(1738L);
-      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
-      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
-      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
+      DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DMatrixRMaj constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
       constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
       currentControl.set(x, 0, desiredLinearAcceleration.getX() * mass);
@@ -50,8 +50,8 @@ public class SimpleReactionDynamicsTest
       currentControl.set(thetaY, 0, desiredAngularAcceleration.getY() * inertia.getY());
       currentControl.set(thetaZ, 0, desiredAngularAcceleration.getZ() * inertia.getZ());
 
-      DenseMatrix64F nextState = new DenseMatrix64F(currentState);
-      DenseMatrix64F nextStateExpected = new DenseMatrix64F(currentState);
+      DMatrixRMaj nextState = new DMatrixRMaj(currentState);
+      DMatrixRMaj nextStateExpected = new DMatrixRMaj(currentState);
 
       dynamics.getNextState(STANCE, currentState, currentControl, constants, nextState);
 
@@ -98,7 +98,7 @@ public class SimpleReactionDynamicsTest
       double deltaT = 0.01;
 
       ContinuousSimpleReactionDynamics continuousDynamics = new ContinuousSimpleReactionDynamics(mass, gravity);
-      DenseMatrix64F continuousDynamicsStateGradient = new DenseMatrix64F(stateVectorSize / 2, stateVectorSize);
+      DMatrixRMaj continuousDynamicsStateGradient = new DMatrixRMaj(stateVectorSize / 2, stateVectorSize);
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
       SimpleReactionDynamics dynamics = new SimpleReactionDynamics(deltaT, mass, gravity);
@@ -110,19 +110,19 @@ public class SimpleReactionDynamicsTest
       inertia.scale(mass / 12.0);
 
       Random random = new Random(1738L);
-      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
-      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
-      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
+      DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DMatrixRMaj constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
       constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
-      DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize, stateVectorSize);
-      DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize, stateVectorSize);
+      DMatrixRMaj gradient = new DMatrixRMaj(stateVectorSize, stateVectorSize);
+      DMatrixRMaj gradientExpected = new DMatrixRMaj(stateVectorSize, stateVectorSize);
 
       continuousDynamics.getDynamicsStateGradient(STANCE, currentState, currentControl, constants, continuousDynamicsStateGradient);
       dynamics.getDynamicsStateGradient(STANCE, currentState, currentControl, constants, gradient);
 
       gradientExpected.zero();
-      CommonOps.setIdentity(gradientExpected);
+      CommonOps_DDRM.setIdentity(gradientExpected);
       gradientExpected.set(x, xDot, deltaT);
       gradientExpected.set(y, yDot, deltaT);
       gradientExpected.set(z, zDot, deltaT);
@@ -139,7 +139,7 @@ public class SimpleReactionDynamicsTest
       dynamics.getDynamicsStateGradient(FLIGHT, currentState, currentControl, constants, gradient);
 
       gradientExpected.zero();
-      CommonOps.setIdentity(gradientExpected);
+      CommonOps_DDRM.setIdentity(gradientExpected);
 
       gradientExpected.set(x, xDot, deltaT);
       gradientExpected.set(y, yDot, deltaT);
@@ -162,7 +162,7 @@ public class SimpleReactionDynamicsTest
       double deltaT = 0.01;
 
       ContinuousSimpleReactionDynamics continuousDynamics = new ContinuousSimpleReactionDynamics(mass, gravity);
-      DenseMatrix64F continuousDynamicsControlGradient = new DenseMatrix64F(stateVectorSize / 2, controlVectorSize);
+      DMatrixRMaj continuousDynamicsControlGradient = new DMatrixRMaj(stateVectorSize / 2, controlVectorSize);
 
       Vector3D boxSize = new Vector3D(0.3, 0.3, 0.5);
       SimpleReactionDynamics dynamics = new SimpleReactionDynamics(deltaT, mass, gravity);
@@ -174,13 +174,13 @@ public class SimpleReactionDynamicsTest
       inertia.scale(mass / 12.0);
 
       Random random = new Random(1738L);
-      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
-      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
-      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
+      DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DMatrixRMaj constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
       constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
-      DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize, controlVectorSize);
-      DenseMatrix64F gradientExpected = new DenseMatrix64F(stateVectorSize, controlVectorSize);
+      DMatrixRMaj gradient = new DMatrixRMaj(stateVectorSize, controlVectorSize);
+      DMatrixRMaj gradientExpected = new DMatrixRMaj(stateVectorSize, controlVectorSize);
 
       continuousDynamics.getDynamicsControlGradient(STANCE, currentState, currentControl, constants, continuousDynamicsControlGradient);
       dynamics.getDynamicsControlGradient(STANCE, currentState, currentControl, constants, gradient);

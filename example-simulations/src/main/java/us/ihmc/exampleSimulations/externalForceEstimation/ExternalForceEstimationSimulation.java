@@ -1,6 +1,6 @@
 package us.ihmc.exampleSimulations.externalForceEstimation;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.avatar.networkProcessor.externalForceEstimationToolboxModule.ExternalWrenchEstimator;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.DynamicsMatrixCalculator;
@@ -36,14 +36,14 @@ import java.util.function.Consumer;
    private ExternalForcePoint externalForcePoint = new ExternalForcePoint("efp", registry);
    private final Vector3D externalForcePointOffset = new Vector3D();
 
-   private BiConsumer<DenseMatrix64F, DenseMatrix64F> dynamicMatrixSetter;
+   private BiConsumer<DMatrixRMaj, DMatrixRMaj> dynamicMatrixSetter;
 
    public ExternalForceEstimationSimulation()
    {
 //      robot = setupFixedBaseArmRobot();
       robot = setupMovingBaseRobotArm();
 
-      Consumer<DenseMatrix64F> tauSetter = tau -> MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
+      Consumer<DMatrixRMaj> tauSetter = tau -> MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();

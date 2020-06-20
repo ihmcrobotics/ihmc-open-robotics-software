@@ -9,12 +9,13 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import boofcv.abst.fiducial.FiducialDetector;
+import boofcv.alg.distort.pinhole.LensDistortionPinhole;
 import boofcv.factory.fiducial.ConfigFiducialBinary;
 import boofcv.factory.fiducial.FactoryFiducial;
 import boofcv.factory.filter.binary.ConfigThreshold;
 import boofcv.factory.filter.binary.ThresholdType;
 import boofcv.io.image.ConvertBufferedImage;
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinhole;
 import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.ImageType;
 import controller_msgs.msg.dds.VideoPacket;
@@ -43,7 +44,6 @@ import us.ihmc.yoVariables.variable.YoFramePose3D;
 import us.ihmc.yoVariables.variable.YoLong;
 import us.ihmc.yoVariables.variable.YoVariable;
 
-@Deprecated //should be using the new FiducialDetectorToolbox and listening for FiducialDetectedpackets
 public class FiducialDetectorFromCameraImages
 {
    private boolean visualize = true;
@@ -97,7 +97,7 @@ public class FiducialDetectorFromCameraImages
       this.expectedFiducialSize.set(1.0);
       this.prefix = prefix;
       detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()),
-                                              ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
+                                              ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10), GrayF32.class);
 
       expectedFiducialSize.addVariableChangedListener(new VariableChangedListener()
       {
@@ -107,7 +107,7 @@ public class FiducialDetectorFromCameraImages
             synchronized (expectedFiducialSizeChangedConch)
             {
                detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize.getDoubleValue()),
-                                                       ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10), GrayF32.class);
+                                                       ConfigThreshold.local(ThresholdType.LOCAL_GAUSSIAN, 10), GrayF32.class);
             }
          }
       });
@@ -194,9 +194,9 @@ public class FiducialDetectorFromCameraImages
    }
 
    public void detect(BufferedImage bufferedImage, Point3DReadOnly cameraPositionInWorld, QuaternionReadOnly cameraOrientationInWorldXForward,
-                      IntrinsicParameters intrinsicParameters)
+                      CameraPinhole intrinsicParameters)
    {
-      detector.setIntrinsic(intrinsicParameters);
+      detector.setLensDistortion(new LensDistortionPinhole(intrinsicParameters), intrinsicParameters.getWidth(), intrinsicParameters.getHeight());
       //increase brightness for sim
       RescaleOp rescaleOp = new RescaleOp(2.5f, 35, null);
       rescaleOp.filter(bufferedImage, bufferedImage);  // Source and destination are the same.
@@ -296,6 +296,21 @@ public class FiducialDetectorFromCameraImages
 
       targetIDHasBeenLocatedFiltered.update();
    }
+
+  // private final CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
+
+   /*
+    * private CameraPinholeBrown setIntrinsicParameters(BufferedImage image) {
+    * int height = image.getHeight(); int width = image.getWidth(); double fx =
+    * (width / 2.0) / Math.tan(fieldOfViewXinRadians.getDoubleValue() / 2.0);
+    * double fy = (height / 2.0) /
+    * Math.tan(fieldOfViewYinRadians.getDoubleValue() / 2.0);
+    * intrinsicParameters.width = width; intrinsicParameters.height = height;
+    * intrinsicParameters.cx = width / 2.0; intrinsicParameters.cy = height /
+    * 2.0; intrinsicParameters.fx = fx; intrinsicParameters.fy = fy;
+    * detector.setIntrinsic(intrinsicParameters);
+    * this.targetIDHasBeenLocated.set(false); return intrinsicParameters; }
+    */
 
    public void setExpectedFiducialSize(double expectedFiducialSize)
    {

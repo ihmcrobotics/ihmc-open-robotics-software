@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -420,7 +420,7 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     * @param desiredWrenchToPack the 6-by-1 matrix in which the value of the desired wrench is stored.
     *           The given matrix is reshaped to ensure proper size. Modified.
     */
-   public void getDesiredWrench(DenseMatrix64F desiredWrenchToPack)
+   public void getDesiredWrench(DMatrixRMaj desiredWrenchToPack)
    {
       desiredWrenchToPack.reshape(6, 1);
       desiredAngularTorque.get(0, desiredWrenchToPack);
@@ -429,7 +429,7 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredEffort(DenseMatrix64F desiredWrenchToPack)
+   public void getDesiredEffort(DMatrixRMaj desiredWrenchToPack)
    {
       getDesiredWrench(desiredWrenchToPack);
    }
@@ -491,7 +491,7 @@ public class VirtualWrenchCommand implements VirtualEffortCommand<VirtualWrenchC
     *           stored in. Modified.
     */
    @Override
-   public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
    }

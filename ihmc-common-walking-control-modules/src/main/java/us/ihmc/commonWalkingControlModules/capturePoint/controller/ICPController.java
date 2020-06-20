@@ -1,9 +1,8 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlGainsReadOnly;
 import us.ihmc.commonWalkingControlModules.capturePoint.ICPControlPolygons;
@@ -34,7 +33,11 @@ import us.ihmc.yoVariables.providers.BooleanProvider;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 import us.ihmc.yoVariables.providers.IntegerProvider;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
-import us.ihmc.yoVariables.variable.*;
+import us.ihmc.yoVariables.variable.YoBoolean;
+import us.ihmc.yoVariables.variable.YoEnum;
+import us.ihmc.yoVariables.variable.YoFramePoint2D;
+import us.ihmc.yoVariables.variable.YoFrameVector2D;
+import us.ihmc.yoVariables.variable.YoInteger;
 
 public class ICPController
 {
@@ -63,16 +66,16 @@ public class ICPController
 
    final YoFrameVector2D feedbackCoPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCoPDeltaSolution", worldFrame, registry);
    final YoFrameVector2D feedbackCMPDelta = new YoFrameVector2D(yoNamePrefix + "FeedbackCMPDeltaSolution", worldFrame, registry);
-   private final DenseMatrix64F feedbackCMPDeltaMatrix = new DenseMatrix64F(2, 1);
+   private final DMatrixRMaj feedbackCMPDeltaMatrix = new DMatrixRMaj(2, 1);
 
    private final YoFrameVector2D residualDynamicsError = new YoFrameVector2D(yoNamePrefix + "ResidualDynamicsError", worldFrame, registry);
    private final YoFrameVector2D residualDynamicsErrorConservative = new YoFrameVector2D(yoNamePrefix + "ResidualDynamicsErrorConservative", worldFrame, registry);
-   private final DenseMatrix64F residualDynamicsErrorConservativeMatrix = new DenseMatrix64F(2, 1);
+   private final DMatrixRMaj residualDynamicsErrorConservativeMatrix = new DMatrixRMaj(2, 1);
 
    private final DoubleProvider copFeedbackForwardWeight;
    private final DoubleProvider copFeedbackLateralWeight;
    private final DoubleProvider cmpFeedbackWeight;
-   private final DenseMatrix64F scaledCoPFeedbackWeight = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj scaledCoPFeedbackWeight = new DMatrixRMaj(2, 2);
 
    private final DoubleProvider maxAllowedDistanceCMPSupport;
    private final DoubleProvider safeCoPDistanceToEdge;
@@ -84,8 +87,8 @@ public class ICPController
    private final AngularMomentumIntegrator integrator;
 
    private final ICPControlGainsReadOnly feedbackGains;
-   private final DenseMatrix64F transformedGains = new DenseMatrix64F(2, 2);
-   private final DenseMatrix64F inverseTransformedGains = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj transformedGains = new DMatrixRMaj(2, 2);
+   private final DMatrixRMaj inverseTransformedGains = new DMatrixRMaj(2, 2);
    private final FrameVector2D transformedMagnitudeLimits = new FrameVector2D();
 
    private final YoInteger numberOfIterations = new YoInteger(yoNamePrefix + "NumberOfIterations", registry);
@@ -335,9 +338,9 @@ public class ICPController
          solver.setCMPFeedbackConditions(cmpFeedbackWeight.getValue(), useAngularMomentum.getValue());
    }
 
-   private static void fastStaticInverse(DenseMatrix64F matrixToInvert, DenseMatrix64F invertedMatrixToPack)
+   private static void fastStaticInverse(DMatrixRMaj matrixToInvert, DMatrixRMaj invertedMatrixToPack)
    {
-      double determinate = CommonOps.det(matrixToInvert);
+      double determinate = CommonOps_DDRM.det(matrixToInvert);
       invertedMatrixToPack.set(0, 0,  matrixToInvert.get(1, 1) / determinate);
       invertedMatrixToPack.set(1, 1, matrixToInvert.get(0, 0) / determinate);
       invertedMatrixToPack.set(0, 1, -matrixToInvert.get(0, 1) / determinate);
@@ -374,7 +377,7 @@ public class ICPController
          solver.getResidualDynamicsError(residualDynamicsError);
 
          feedbackCoPDelta.get(feedbackCMPDeltaMatrix);
-         CommonOps.mult(-1.0, inverseTransformedGains, feedbackCMPDeltaMatrix, residualDynamicsErrorConservativeMatrix);
+         CommonOps_DDRM.mult(-1.0, inverseTransformedGains, feedbackCMPDeltaMatrix, residualDynamicsErrorConservativeMatrix);
          residualDynamicsErrorConservative.set(residualDynamicsErrorConservativeMatrix);
          residualDynamicsErrorConservative.add(icpError);
       }
@@ -397,7 +400,7 @@ public class ICPController
          double parallel = feedbackGains.getKpParallelToMotion();
          double orthogonal = feedbackGains.getKpOrthogonalToMotion();
          double magnitude = helper.transformGainsFromDynamicsFrame(transformedGains, desiredICPVelocity, parallel, orthogonal);
-         CommonOps.scale(1.0 / magnitude, scaledCoPFeedbackWeight);
+         CommonOps_DDRM.scale(1.0 / magnitude, scaledCoPFeedbackWeight);
       }
    }
 

@@ -30,10 +30,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
-import org.ejml.ops.RandomMatrices;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
@@ -56,9 +56,9 @@ public class ContactImpulseToolsTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         DenseMatrix64F v1 = RandomMatrices.createRandom(3, 1, -10.0, 10.0, random);
-         DenseMatrix64F v2 = RandomMatrices.createRandom(3, 1, -10.0, 10.0, random);
-         DenseMatrix64F actualCross = cross(v1, v2);
+         DMatrixRMaj v1 = RandomMatrices_DDRM.rectangle(3, 1, -10.0, 10.0, random);
+         DMatrixRMaj v2 = RandomMatrices_DDRM.rectangle(3, 1, -10.0, 10.0, random);
+         DMatrixRMaj actualCross = cross(v1, v2);
 
          Vector3D euclidV1 = new Vector3D();
          Vector3D euclidV2 = new Vector3D();
@@ -66,10 +66,10 @@ public class ContactImpulseToolsTest
          euclidV1.set(v1);
          euclidV2.set(v2);
          euclidCross.cross(euclidV1, euclidV2);
-         DenseMatrix64F expectedCross = new DenseMatrix64F(3, 1);
+         DMatrixRMaj expectedCross = new DMatrixRMaj(3, 1);
          euclidCross.get(expectedCross);
 
-         assertTrue(MatrixFeatures.isEquals(expectedCross, actualCross, EPSILON));
+         assertTrue(MatrixFeatures_DDRM.isEquals(expectedCross, actualCross, EPSILON));
       }
    }
 
@@ -81,12 +81,12 @@ public class ContactImpulseToolsTest
       for (int i = 0; i < ITERATIONS; i++)
       {
          int xSize = random.nextInt(50) + 1;
-         DenseMatrix64F x = RandomMatrices.createRandom(xSize, 1, -10.0, 10.0, random);
-         DenseMatrix64F H = RandomMatrices.createRandom(xSize, xSize, -10.0, 10.0, random);
+         DMatrixRMaj x = RandomMatrices_DDRM.rectangle(xSize, 1, -10.0, 10.0, random);
+         DMatrixRMaj H = RandomMatrices_DDRM.rectangle(xSize, xSize, -10.0, 10.0, random);
 
-         DenseMatrix64F intermediate = new DenseMatrix64F(xSize, 1);
-         CommonOps.mult(H, x, intermediate);
-         double expectedResult = CommonOps.dot(x, intermediate);
+         DMatrixRMaj intermediate = new DMatrixRMaj(xSize, 1);
+         CommonOps_DDRM.mult(H, x, intermediate);
+         double expectedResult = CommonOps_DDRM.dot(x, intermediate);
          double actualResult = multQuad(x, H);
          assertEquals(expectedResult, actualResult, EPSILON);
       }
@@ -104,18 +104,18 @@ public class ContactImpulseToolsTest
          double theta = EuclidCoreRandomTools.nextDouble(random, Math.PI);
          double cosTheta = Math.cos(theta);
          double sinTheta = Math.sin(theta);
-         DenseMatrix64F M_inv = nextSquareFullRank(random);
-         DenseMatrix64F c = RandomMatrices.createRandom(3, 1, random);
+         DMatrixRMaj M_inv = nextSquareFullRank(random);
+         DMatrixRMaj c = RandomMatrices_DDRM.rectangle(3, 1, random);
 
          double lambda_x = r * cosTheta;
          double lambda_y = r * sinTheta;
          double lambda_z = computeLambdaZ(r, cosTheta, sinTheta, M_inv, c);
-         DenseMatrix64F lambda = new DenseMatrix64F(3, 1);
+         DMatrixRMaj lambda = new DMatrixRMaj(3, 1);
          lambda.set(0, 0, lambda_x);
          lambda.set(1, 0, lambda_y);
          lambda.set(2, 0, lambda_z);
-         DenseMatrix64F v = new DenseMatrix64F(c);
-         CommonOps.multAdd(M_inv, lambda, v);
+         DMatrixRMaj v = new DMatrixRMaj(c);
+         CommonOps_DDRM.multAdd(M_inv, lambda, v);
 
          assertEquals(0.0, v.get(2, 0), EPSILON, "Iteration: " + i);
       }
@@ -132,8 +132,8 @@ public class ContactImpulseToolsTest
          double theta = EuclidCoreRandomTools.nextDouble(random, Math.PI);
          double cosTheta = Math.cos(theta);
          double sinTheta = Math.sin(theta);
-         DenseMatrix64F M_inv = nextSquareFullRank(random);
-         DenseMatrix64F c = RandomMatrices.createRandom(3, 1, random);
+         DMatrixRMaj M_inv = nextSquareFullRank(random);
+         DMatrixRMaj c = RandomMatrices_DDRM.rectangle(3, 1, random);
          double r = computeR(mu, cosTheta, sinTheta, M_inv, c);
          double lambda_x = Math.abs(r * cosTheta);
          double lambda_y = Math.abs(r * sinTheta);
@@ -150,12 +150,12 @@ public class ContactImpulseToolsTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         DenseMatrix64F M = nextPositiveDefiniteSymmetricMatrix(random, 1.0e-3, 10.0);
-         DenseMatrix64F M_inv = invert(M);
-         DenseMatrix64F c = RandomMatrices.createRandom(3, 1, -10.0, 10.0, random);
-         DenseMatrix64F lambda = RandomMatrices.createRandom(3, 1, -10.0, 10.0, random);
+         DMatrixRMaj M = nextPositiveDefiniteSymmetricMatrix(random, 1.0e-3, 10.0);
+         DMatrixRMaj M_inv = invert(M);
+         DMatrixRMaj c = RandomMatrices_DDRM.rectangle(3, 1, -10.0, 10.0, random);
+         DMatrixRMaj lambda = RandomMatrices_DDRM.rectangle(3, 1, -10.0, 10.0, random);
 
-         DenseMatrix64F v = computePostImpulseVelocity(c, M_inv, lambda);
+         DMatrixRMaj v = computePostImpulseVelocity(c, M_inv, lambda);
 
          double E1 = computeE1(v, M);
          double E3 = computeE3(M, M_inv, c, lambda);
@@ -171,11 +171,11 @@ public class ContactImpulseToolsTest
 
       for (int i = 0; i < ITERATIONS; i++)
       { // Using the stick solution and adjusting mu such that [lambda_x, lambda_y]^2 = mu^2 * lambda_z^2. The projected gradient should be 0.0 as it is the optimal solution.
-         DenseMatrix64F M = nextSquareFullRank(random);
-         DenseMatrix64F M_inv = new DenseMatrix64F(3, 3);
-         CommonOps.invert(M, M_inv);
-         DenseMatrix64F c = RandomMatrices.createRandom(3, 1, random);
-         DenseMatrix64F lambda = negateMult(M, c);
+         DMatrixRMaj M = nextSquareFullRank(random);
+         DMatrixRMaj M_inv = new DMatrixRMaj(3, 3);
+         CommonOps_DDRM.invert(M, M_inv);
+         DMatrixRMaj c = RandomMatrices_DDRM.rectangle(3, 1, random);
+         DMatrixRMaj lambda = negateMult(M, c);
          double mu = Math.sqrt(lambda.get(0) * lambda.get(0) + lambda.get(1) * lambda.get(1)) / Math.abs(lambda.get(2));
 
          double projectedGradient = computeProjectedGradient(mu, M_inv, c, lambda);
@@ -187,21 +187,21 @@ public class ContactImpulseToolsTest
       for (int i = 0; i < ITERATIONS; i++)
       { // Compare the sign the projected gradient against numerical differentiation of E over theta
          double theta = EuclidCoreRandomTools.nextDouble(random, Math.PI);
-         DenseMatrix64F M = nextPositiveDefiniteSymmetricMatrix(random, 1.0e-3, 10.0);
-         DenseMatrix64F M_inv = invert(M);
+         DMatrixRMaj M = nextPositiveDefiniteSymmetricMatrix(random, 1.0e-3, 10.0);
+         DMatrixRMaj M_inv = invert(M);
 
          double mu = EuclidCoreRandomTools.nextDouble(random, 1.0e-2, 1.0);
-         DenseMatrix64F c = nextSlippingClosingVelocity(random, M_inv, mu);
+         DMatrixRMaj c = nextSlippingClosingVelocity(random, M_inv, mu);
          double dtheta = 1.0e-6;
          double numericalDerivative = computeEThetaNumericalDerivative(theta, dtheta, mu, M_inv, c);
-         DenseMatrix64F lambda_v_0 = negateMult(M, c);
+         DMatrixRMaj lambda_v_0 = negateMult(M, c);
          if (lambda_v_0.get(2) < 0.0)
          {
             i--;
             continue;
          }
          assertFalse(isInsideFrictionCone(mu, lambda_v_0));
-         DenseMatrix64F lambda = computeLambda(theta, mu, M_inv, c);
+         DMatrixRMaj lambda = computeLambda(theta, mu, M_inv, c);
          if (lambda.get(2) < 0.0)
          { // TODO: Identify whether this kind scenario happens with real data.
             i--;
@@ -220,13 +220,13 @@ public class ContactImpulseToolsTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         DenseMatrix64F M = nextPositiveDefiniteSymmetricMatrix(random, 1.0e-3, 10.0);
-         DenseMatrix64F M_inv = invert(M);
+         DMatrixRMaj M = nextPositiveDefiniteSymmetricMatrix(random, 1.0e-3, 10.0);
+         DMatrixRMaj M_inv = invert(M);
 
          double mu = EuclidCoreRandomTools.nextDouble(random, 1.0e-2, 1.0);
-         DenseMatrix64F c = nextSlippingClosingVelocity(random, M_inv, mu);
+         DMatrixRMaj c = nextSlippingClosingVelocity(random, M_inv, mu);
          assertTrue(c.get(2) < 0.0);
-         DenseMatrix64F lambda_v_0 = negateMult(M, c);
+         DMatrixRMaj lambda_v_0 = negateMult(M, c);
          assertTrue(lambda_v_0.get(2) > 0.0);
          double theta = Math.atan2(lambda_v_0.get(1), lambda_v_0.get(0));
          assertTrue(lineOfSightTest(mu, computeLambda(theta, mu, M_inv, c), lambda_v_0), "Iteration " + i);
@@ -243,12 +243,12 @@ public class ContactImpulseToolsTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         DenseMatrix64F M = nextPositiveDefiniteSymmetricMatrix(random, 1.0e-3, 10.0);
-         DenseMatrix64F M_inv = invert(M);
+         DMatrixRMaj M = nextPositiveDefiniteSymmetricMatrix(random, 1.0e-3, 10.0);
+         DMatrixRMaj M_inv = invert(M);
          double mu = EuclidCoreRandomTools.nextDouble(random, 1.0e-2, 1.0);
-         DenseMatrix64F c = nextSlippingClosingVelocity(random, M_inv, mu);
+         DMatrixRMaj c = nextSlippingClosingVelocity(random, M_inv, mu);
 
-         DenseMatrix64F lambda_v_0 = negateMult(M, c);
+         DMatrixRMaj lambda_v_0 = negateMult(M, c);
          assertFalse(isInsideFrictionCone(mu, lambda_v_0), "Iteration " + i);
          assertTrue(c.get(2) < 0.0, "Iteration " + i);
       }
@@ -265,21 +265,21 @@ public class ContactImpulseToolsTest
 
       for (int i = 0; i < ITERATIONS; i++)
       {
-         DenseMatrix64F M = nextPositiveDefiniteSymmetricMatrix(random, 1.0e-3, 10.0);
-         DenseMatrix64F M_inv = invert(M);
+         DMatrixRMaj M = nextPositiveDefiniteSymmetricMatrix(random, 1.0e-3, 10.0);
+         DMatrixRMaj M_inv = invert(M);
 
          double mu = EuclidCoreRandomTools.nextDouble(random, 1.0e-2, 1.0);
-         DenseMatrix64F c = nextSlippingClosingVelocity(random, M_inv, mu);
-         DenseMatrix64F lambda_v_0 = negateMult(M, c);
+         DMatrixRMaj c = nextSlippingClosingVelocity(random, M_inv, mu);
+         DMatrixRMaj lambda_v_0 = negateMult(M, c);
          assertFalse(isInsideFrictionCone(mu, lambda_v_0));
          assertTrue(c.get(2) < 0.0);
 
          double dTheta = 1.0e-2;
          double thetaNaiveOpt = EuclidCoreTools.trimAngleMinusPiToPi(findOptimalTheta(M, M_inv, c, mu, gamma, dTheta, false));
-         DenseMatrix64F expectedLambda = computeLambda(thetaNaiveOpt, mu, M_inv, c);
+         DMatrixRMaj expectedLambda = computeLambda(thetaNaiveOpt, mu, M_inv, c);
          double expectedCost = computeE2(M_inv, c, expectedLambda);
 
-         DenseMatrix64F actualLambda;
+         DMatrixRMaj actualLambda;
          try
          {
             actualLambda = computeSlipLambda(beta1, beta2, beta3, gamma, mu, M_inv, lambda_v_0, c, false);
@@ -290,7 +290,7 @@ public class ContactImpulseToolsTest
             throw new AssertionFailedError("Iteration " + i, e);
          }
 
-         DenseMatrix64F vPlusActual = computePostImpulseVelocity(c, M_inv, actualLambda);
+         DMatrixRMaj vPlusActual = computePostImpulseVelocity(c, M_inv, actualLambda);
          assertEquals(0.0, vPlusActual.get(2), EPSILON);
          double actualCost = computeE2(M_inv, c, actualLambda);
 
@@ -303,18 +303,18 @@ public class ContactImpulseToolsTest
             expectedCost = computeE2(M_inv, c, expectedLambda);
          }
 
-         DenseMatrix64F vPlusExpected = computePostImpulseVelocity(c, M_inv, expectedLambda);
+         DMatrixRMaj vPlusExpected = computePostImpulseVelocity(c, M_inv, expectedLambda);
          assertTrue(actualLambda.get(0) * vPlusExpected.get(0) + actualLambda.get(1) * vPlusExpected.get(1) < 0.0);
 
          assertTrue(lineOfSightTest(mu, expectedLambda, lambda_v_0));
-         assertTrue(isInsideFrictionCone(mu, actualLambda, Math.max(1.0, CommonOps.elementMaxAbs(actualLambda)) * EPSILON));
-         assertTrue(isInsideFrictionCone(mu, expectedLambda, Math.max(1.0, CommonOps.elementMaxAbs(expectedLambda)) * EPSILON));
+         assertTrue(isInsideFrictionCone(mu, actualLambda, Math.max(1.0, CommonOps_DDRM.elementMaxAbs(actualLambda)) * EPSILON));
+         assertTrue(isInsideFrictionCone(mu, expectedLambda, Math.max(1.0, CommonOps_DDRM.elementMaxAbs(expectedLambda)) * EPSILON));
 
          assertEquals(expectedCost, actualCost, Math.max(Math.abs(expectedCost), 1.0) * EPSILON, "Iteration " + i);
 
-         boolean areEqual = MatrixFeatures.isEquals(expectedLambda,
+         boolean areEqual = MatrixFeatures_DDRM.isEquals(expectedLambda,
                                                     actualLambda,
-                                                    Math.max(1.0, CommonOps.elementMaxAbs(expectedLambda)) * COST_VS_NAIVE_EPSILON);
+                                                    Math.max(1.0, CommonOps_DDRM.elementMaxAbs(expectedLambda)) * COST_VS_NAIVE_EPSILON);
          if (!areEqual)
          {
             System.out.println("iteration: " + i);
@@ -322,7 +322,7 @@ public class ContactImpulseToolsTest
             System.out.println("Cost: " + expectedCost + ", " + actualCost);
 
             double maxError = 0.0;
-            DenseMatrix64F output = new DenseMatrix64F(3, 3);
+            DMatrixRMaj output = new DMatrixRMaj(3, 3);
 
             for (int row = 0; row < 3; row++)
             {
@@ -339,16 +339,16 @@ public class ContactImpulseToolsTest
             System.out.println("c: " + c);
 
             System.out.println("v+:");
-            DenseMatrix64F vPluses = new DenseMatrix64F(3, 2);
-            CommonOps.insert(vPlusExpected, vPluses, 0, 0);
-            CommonOps.insert(vPlusActual, vPluses, 0, 1);
+            DMatrixRMaj vPluses = new DMatrixRMaj(3, 2);
+            CommonOps_DDRM.insert(vPlusExpected, vPluses, 0, 0);
+            CommonOps_DDRM.insert(vPlusActual, vPluses, 0, 1);
             System.out.println(vPluses);
          }
          assertTrue(areEqual);
       }
    }
 
-   static double polarGradient(DenseMatrix64F M_inv, double theta, DenseMatrix64F c, double lambda_z, double mu)
+   static double polarGradient(DMatrixRMaj M_inv, double theta, DMatrixRMaj c, double lambda_z, double mu)
    { // Obtained from Tobias Preclick PhD thesis
       double cosTheta = Math.cos(theta);
       double sinTheta = Math.sin(theta);
@@ -366,12 +366,12 @@ public class ContactImpulseToolsTest
       return dE_dTheta;
    }
 
-   public static double findOptimalTheta(DenseMatrix64F M, DenseMatrix64F M_inv, DenseMatrix64F c, double mu, double tolerance, double dTheta, boolean verbose)
+   public static double findOptimalTheta(DMatrixRMaj M, DMatrixRMaj M_inv, DMatrixRMaj c, double mu, double tolerance, double dTheta, boolean verbose)
    {
       double thetaStart = 0.0;
       double thetaSubOpt = thetaStart;
       double costSubOpt = Double.POSITIVE_INFINITY;
-      DenseMatrix64F lambdaSubOpt;
+      DMatrixRMaj lambdaSubOpt;
 
       double thetaOpt = thetaSubOpt;
       double costOpt = Double.POSITIVE_INFINITY;
@@ -393,7 +393,7 @@ public class ContactImpulseToolsTest
       return thetaOpt;
    }
 
-   public static double findNextSubOptimalTheta(double thetaStart, DenseMatrix64F M_inv, DenseMatrix64F c, double mu, double tolerance, double dTheta,
+   public static double findNextSubOptimalTheta(double thetaStart, DMatrixRMaj M_inv, DMatrixRMaj c, double mu, double tolerance, double dTheta,
                                                 boolean verbose)
    {
       double currentTheta = thetaStart;
@@ -478,21 +478,21 @@ public class ContactImpulseToolsTest
          double gamma = dataset.gamma;
 
          double mu = dataset.mu;
-         DenseMatrix64F M_inv = dataset.M_inv;
-         assertTrue(MatrixFeatures.isSymmetric(M_inv, EPSILON));
-         assertTrue(MatrixFeatures.isPositiveSemidefinite(M_inv));
-         DenseMatrix64F M = invert(M_inv);
-         DenseMatrix64F c = dataset.c;
+         DMatrixRMaj M_inv = dataset.M_inv;
+         assertTrue(MatrixFeatures_DDRM.isSymmetric(M_inv, EPSILON));
+         assertTrue(MatrixFeatures_DDRM.isPositiveSemidefinite(M_inv));
+         DMatrixRMaj M = invert(M_inv);
+         DMatrixRMaj c = dataset.c;
          assertTrue(c.get(2) < 0.0);
-         DenseMatrix64F lambda_v_0 = negateMult(M, c);
+         DMatrixRMaj lambda_v_0 = negateMult(M, c);
          assertFalse(isInsideFrictionCone(mu, lambda_v_0));
 
          double dTheta = 1.0e-2;
          double thetaNaiveOpt = EuclidCoreTools.trimAngleMinusPiToPi(findOptimalTheta(M, M_inv, c, mu, gamma, dTheta, false));
-         DenseMatrix64F expectedLambda = computeLambda(thetaNaiveOpt, mu, M_inv, c);
+         DMatrixRMaj expectedLambda = computeLambda(thetaNaiveOpt, mu, M_inv, c);
          double expectedCost = computeE2(M_inv, c, expectedLambda);
 
-         DenseMatrix64F actualLambda;
+         DMatrixRMaj actualLambda;
          try
          {
             actualLambda = computeSlipLambda(beta1, beta2, beta3, gamma, mu, M_inv, lambda_v_0, c, i == 2);
@@ -505,10 +505,10 @@ public class ContactImpulseToolsTest
             throw new AssertionFailedError("Iteration " + i, e);
          }
 
-         DenseMatrix64F vPlusActual = computePostImpulseVelocity(c, M_inv, actualLambda);
+         DMatrixRMaj vPlusActual = computePostImpulseVelocity(c, M_inv, actualLambda);
          assertEquals(0.0, vPlusActual.get(2), EPSILON, "Iteration " + i);
          assertTrue(lineOfSightTest(mu, actualLambda, lambda_v_0), "Iteration " + i);
-         assertTrue(isInsideFrictionCone(mu, actualLambda, Math.max(1.0, CommonOps.elementMaxAbs(actualLambda)) * EPSILON), "Iteration " + i);
+         assertTrue(isInsideFrictionCone(mu, actualLambda, Math.max(1.0, CommonOps_DDRM.elementMaxAbs(actualLambda)) * EPSILON), "Iteration " + i);
          assertTrue(actualLambda.get(0) * vPlusActual.get(0) + actualLambda.get(1) * vPlusActual.get(1) < 0.0, "Iteration " + i);
 
          double actualCost = computeE2(M_inv, c, actualLambda);
@@ -522,16 +522,16 @@ public class ContactImpulseToolsTest
             expectedCost = computeE2(M_inv, c, expectedLambda);
          }
 
-         DenseMatrix64F vPlusExpected = computePostImpulseVelocity(c, M_inv, expectedLambda);
+         DMatrixRMaj vPlusExpected = computePostImpulseVelocity(c, M_inv, expectedLambda);
 
          assertTrue(lineOfSightTest(mu, expectedLambda, lambda_v_0), "Iteration " + i);
-         assertTrue(isInsideFrictionCone(mu, expectedLambda, Math.max(1.0, CommonOps.elementMaxAbs(expectedLambda)) * EPSILON), "Iteration " + i);
+         assertTrue(isInsideFrictionCone(mu, expectedLambda, Math.max(1.0, CommonOps_DDRM.elementMaxAbs(expectedLambda)) * EPSILON), "Iteration " + i);
 
          assertEquals(expectedCost, actualCost, Math.max(Math.abs(expectedCost), 1.0) * EPSILON, "Iteration " + i);
 
-         boolean areEqual = MatrixFeatures.isEquals(expectedLambda,
+         boolean areEqual = MatrixFeatures_DDRM.isEquals(expectedLambda,
                                                     actualLambda,
-                                                    Math.max(1.0, CommonOps.elementMaxAbs(expectedLambda)) * COST_VS_NAIVE_EPSILON);
+                                                    Math.max(1.0, CommonOps_DDRM.elementMaxAbs(expectedLambda)) * COST_VS_NAIVE_EPSILON);
          if (!areEqual)
          {
             System.out.println("iteration: " + i);
@@ -539,7 +539,7 @@ public class ContactImpulseToolsTest
             System.out.println("Cost: " + expectedCost + ", " + actualCost);
 
             double maxError = 0.0;
-            DenseMatrix64F output = new DenseMatrix64F(3, 3);
+            DMatrixRMaj output = new DMatrixRMaj(3, 3);
 
             for (int row = 0; row < 3; row++)
             {
@@ -556,9 +556,9 @@ public class ContactImpulseToolsTest
             System.out.println("c: " + c);
 
             System.out.println("v+:");
-            DenseMatrix64F vPluses = new DenseMatrix64F(3, 2);
-            CommonOps.insert(vPlusExpected, vPluses, 0, 0);
-            CommonOps.insert(vPlusActual, vPluses, 0, 1);
+            DMatrixRMaj vPluses = new DMatrixRMaj(3, 2);
+            CommonOps_DDRM.insert(vPlusExpected, vPluses, 0, 0);
+            CommonOps_DDRM.insert(vPlusActual, vPluses, 0, 1);
             System.out.println(vPluses);
          }
          assertTrue(areEqual);
@@ -572,10 +572,10 @@ public class ContactImpulseToolsTest
       private double beta3;
       private double gamma;
       private double mu;
-      private DenseMatrix64F M_inv;
-      private DenseMatrix64F c;
+      private DMatrixRMaj M_inv;
+      private DMatrixRMaj c;
 
-      public Dataset(double beta1, double beta2, double beta3, double gamma, double mu, DenseMatrix64F M_inv, DenseMatrix64F c)
+      public Dataset(double beta1, double beta2, double beta3, double gamma, double mu, DMatrixRMaj M_inv, DMatrixRMaj c)
       {
          this.beta1 = beta1;
          this.beta2 = beta2;
@@ -595,7 +595,7 @@ public class ContactImpulseToolsTest
                                1.05, //0.99,
                                1.0e-12, //1.0E-6,
                                0.7,
-                               new DenseMatrix64F(3,
+                               new DMatrixRMaj(3,
                                                   3,
                                                   true,
                                                   0.12177228584776682,
@@ -607,13 +607,13 @@ public class ContactImpulseToolsTest
                                                   -0.019894234454115235,
                                                   -0.020817228276444992,
                                                   0.06819326854414993),
-                               new DenseMatrix64F(3, 1, true, -0.9626403389842907, -0.36649553510266114, -1.2699859622739815)));
+                               new DMatrixRMaj(3, 1, true, -0.9626403389842907, -0.36649553510266114, -1.2699859622739815)));
       datasets.add(new Dataset(0.35,
                                0.95,
                                1.15,
                                1.0E-6,
                                0.7,
-                               new DenseMatrix64F(3,
+                               new DMatrixRMaj(3,
                                                   3,
                                                   true,
                                                   0.5377939246837216,
@@ -625,7 +625,7 @@ public class ContactImpulseToolsTest
                                                   0.14101806011205031,
                                                   0.37755617516622164,
                                                   0.6485524022866964),
-                               new DenseMatrix64F(3, 1, true, -0.4009147394246455, 0.48869427996462383, -1.5083682060883388)));
+                               new DMatrixRMaj(3, 1, true, -0.4009147394246455, 0.48869427996462383, -1.5083682060883388)));
       return datasets;
    }
 }

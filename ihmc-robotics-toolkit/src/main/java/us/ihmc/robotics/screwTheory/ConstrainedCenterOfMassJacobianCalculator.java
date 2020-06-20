@@ -1,7 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.mecano.algorithms.CenterOfMassJacobian;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -16,7 +16,7 @@ public class ConstrainedCenterOfMassJacobianCalculator
 {
    private final DynamicallyConsistentNullspaceCalculator dynamicallyConsistentNullspaceCalculator;
    private final CenterOfMassJacobian centerOfMassJacobian;
-   private final DenseMatrix64F constrainedCenterOfMassJacobian = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj constrainedCenterOfMassJacobian = new DMatrixRMaj(1, 1);
 
    public ConstrainedCenterOfMassJacobianCalculator(FloatingJointBasics rootJoint)
    {
@@ -28,11 +28,11 @@ public class ConstrainedCenterOfMassJacobianCalculator
    {
       dynamicallyConsistentNullspaceCalculator.compute();
       centerOfMassJacobian.reset();
-      DenseMatrix64F centerOfMassJacobianMatrix = centerOfMassJacobian.getJacobianMatrix();
-      DenseMatrix64F sNsBar = dynamicallyConsistentNullspaceCalculator.getSNsBar();
+      DMatrixRMaj centerOfMassJacobianMatrix = centerOfMassJacobian.getJacobianMatrix();
+      DMatrixRMaj sNsBar = dynamicallyConsistentNullspaceCalculator.getSNsBar();
 
       constrainedCenterOfMassJacobian.reshape(centerOfMassJacobianMatrix.getNumRows(), sNsBar.getNumCols());
-      CommonOps.mult(centerOfMassJacobianMatrix, sNsBar, constrainedCenterOfMassJacobian);
+      CommonOps_DDRM.mult(centerOfMassJacobianMatrix, sNsBar, constrainedCenterOfMassJacobian);
    }
 
    public void reset()
@@ -40,7 +40,7 @@ public class ConstrainedCenterOfMassJacobianCalculator
       dynamicallyConsistentNullspaceCalculator.reset();
    }
 
-   public void addConstraint(RigidBodyBasics body, DenseMatrix64F selectionMatrix)
+   public void addConstraint(RigidBodyBasics body, DMatrixRMaj selectionMatrix)
    {
       dynamicallyConsistentNullspaceCalculator.addConstraint(body, selectionMatrix);
    }
@@ -50,12 +50,12 @@ public class ConstrainedCenterOfMassJacobianCalculator
       dynamicallyConsistentNullspaceCalculator.addActuatedJoint(joint);
    }
 
-   public DenseMatrix64F getConstrainedCenterOfMassJacobian()
+   public DMatrixRMaj getConstrainedCenterOfMassJacobian()
    {
       return constrainedCenterOfMassJacobian;
    }
 
-   public DenseMatrix64F getCenterOfMassJacobian()
+   public DMatrixRMaj getCenterOfMassJacobian()
    {
       return centerOfMassJacobian.getJacobianMatrix();
    }

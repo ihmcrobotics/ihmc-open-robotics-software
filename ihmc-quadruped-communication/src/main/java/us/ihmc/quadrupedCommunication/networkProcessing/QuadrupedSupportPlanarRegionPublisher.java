@@ -8,7 +8,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import controller_msgs.msg.dds.QuadrupedSupportPlanarRegionParametersMessage;
@@ -297,7 +297,7 @@ public class QuadrupedSupportPlanarRegionPublisher
          desiredRootJoint.getJointPose().getPosition().set(translation.getX(), translation.getY(), translation.getZ());
          Quaternion orientation = robotConfigurationData.getRootOrientation();
          desiredRootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
-         desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
+         desiredRootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
 
          desiredRootJoint.getPredecessor().updateFramesRecursively();
       }

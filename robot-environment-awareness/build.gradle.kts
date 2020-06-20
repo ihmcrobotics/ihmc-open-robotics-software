@@ -27,14 +27,14 @@ mainDependencies {
    api("com.vividsolutions:jts:1.13") // TODO Update to https://github.com/locationtech/jts
    api("org.apache.commons:commons-lang3:3.8.1")
    
-   api("us.ihmc:euclid-shape:0.14.2")
-   api("us.ihmc:joctomap:1.9.0")
-   api("us.ihmc:ihmc-yovariables:0.7.0")
-   api("us.ihmc:ihmc-javafx-toolkit:0.17.0")
+   api("us.ihmc:euclid-shape:0.15.0")
+   api("us.ihmc:joctomap:1.10.0")
+   api("us.ihmc:ihmc-yovariables:0.8.0")
+   api("us.ihmc:ihmc-javafx-toolkit:0.18.0")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-robotics-toolkit:source")
    api("us.ihmc:ihmc-robot-models-visualizers:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.18.0")
+   api("us.ihmc:ihmc-robot-data-logger:0.19.0")
    api("us.ihmc:ihmc-messager-kryo:0.1.5")
 
    api("org.bytedeco:javacv-platform:1.5") {
@@ -59,8 +59,8 @@ applicationDependencies {
    api(ihmc.sourceSetProject("main"))
 
    api("us.ihmc:ihmc-ros-tools:source")
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.17.0")
-   api("us.ihmc:simulation-construction-set:0.18.0")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.18.0")
+   api("us.ihmc:simulation-construction-set:0.19.0")
    api("us.ihmc:simulation-construction-set-tools:source")
 }
 

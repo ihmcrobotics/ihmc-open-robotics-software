@@ -1,15 +1,10 @@
 package us.ihmc.robotics.math.trajectories;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertEquals;
 
-import java.util.Arrays;
-
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
-import us.ihmc.commons.PrintTools;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class YoPolynomialTest
@@ -216,8 +211,8 @@ public class YoPolynomialTest
       double[] coefficients = polynomial.getCoefficients();
       for(int i = 0; i < coefficients.length + 3; i++)
       {
-         DenseMatrix64F generalizedDYPoly = polynomial.getXPowersDerivativeVector(i, x);
-         DenseMatrix64F generalizedDYHand = new DenseMatrix64F(generalizedDYPoly.getNumRows(), generalizedDYPoly.getNumCols());
+         DMatrixRMaj generalizedDYPoly = polynomial.getXPowersDerivativeVector(i, x);
+         DMatrixRMaj generalizedDYHand = new DMatrixRMaj(generalizedDYPoly.getNumRows(), generalizedDYPoly.getNumCols());
          if(i < coefficients.length)
          {
             for(int j = i; j < coefficients.length; j++)
@@ -241,7 +236,7 @@ public class YoPolynomialTest
          double generalizedDYPolyScalar = polynomial.getDerivative(i, x);
          double generalizedDYHandScalar = 0.0;
          
-         DenseMatrix64F generalizedDYPolyVector = polynomial.getXPowersDerivativeVector(i, x);
+         DMatrixRMaj generalizedDYPolyVector = polynomial.getXPowersDerivativeVector(i, x);
          for(int j = 0; j < generalizedDYPolyVector.numRows; j++)
          {
             generalizedDYHandScalar += generalizedDYPolyVector.get(j,0) * coefficients[j];

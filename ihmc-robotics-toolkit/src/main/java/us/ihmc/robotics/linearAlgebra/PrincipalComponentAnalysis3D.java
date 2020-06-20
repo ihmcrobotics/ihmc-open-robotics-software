@@ -2,10 +2,10 @@ package us.ihmc.robotics.linearAlgebra;
 
 import java.util.List;
 
-import org.ejml.alg.dense.decomposition.svd.SvdImplicitQrDecompose_D64;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.interfaces.decomposition.SingularValueDecomposition;
-import org.ejml.ops.SingularOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.SingularOps_DDRM;
+import org.ejml.dense.row.decomposition.svd.SvdImplicitQrDecompose_DDRM;
+import org.ejml.interfaces.decomposition.SingularValueDecomposition_F64;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -36,8 +36,8 @@ public class PrincipalComponentAnalysis3D
 {
    private static final boolean DEBUG = false;
 
-   private final DenseMatrix64F W = new DenseMatrix64F(3, 3);
-   private final DenseMatrix64F V = new DenseMatrix64F(3, 3);
+   private final DMatrixRMaj W = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj V = new DMatrixRMaj(3, 3);
 
    /** Axis along which the data has the highest variance. It is a unit vector. */
    private final Vector3D principalAxis = new Vector3D();
@@ -55,13 +55,13 @@ public class PrincipalComponentAnalysis3D
    private final Vector3D variance = new Vector3D();
 
    private final IncrementalCovariance3D covarianceCalculator = new IncrementalCovariance3D();
-   private final DenseMatrix64F covariance = new DenseMatrix64F(3, 3);
+   private final DMatrixRMaj covariance = new DMatrixRMaj(3, 3);
 
-   private final SingularValueDecomposition<DenseMatrix64F> svd;
+   private final SingularValueDecomposition_F64<DMatrixRMaj> svd;
 
    public PrincipalComponentAnalysis3D()
    {
-      svd = new SvdImplicitQrDecompose_D64(true, false, true, false);
+      svd = new SvdImplicitQrDecompose_DDRM(true, false, true, false);
    }
 
    public void clear()
@@ -74,7 +74,7 @@ public class PrincipalComponentAnalysis3D
       covarianceCalculator.addAllDataPoints(tuples);
    }
 
-   public void addAllDataPoint(DenseMatrix64F dataPoints)
+   public void addAllDataPoint(DMatrixRMaj dataPoints)
    {
       covarianceCalculator.addAllDataPoint(dataPoints);
    }
@@ -113,7 +113,7 @@ public class PrincipalComponentAnalysis3D
     * @param pointCloud matrix holding the point cloud data. Its size has to be either n-by-3 or
     *           3-by-n, where n is the number of points.
     */
-   public void setPointCloud(DenseMatrix64F pointCloud)
+   public void setPointCloud(DMatrixRMaj pointCloud)
    {
       covarianceCalculator.clear();
       covarianceCalculator.addAllDataPoint(pointCloud);
@@ -143,7 +143,7 @@ public class PrincipalComponentAnalysis3D
 
       svd.getW(W);
       svd.getV(V, false);
-      SingularOps.descendingOrder(null, false, W, V, false);
+      SingularOps_DDRM.descendingOrder(null, false, W, V, false);
 
       if (DEBUG)
          System.out.println("V: \n" + V);

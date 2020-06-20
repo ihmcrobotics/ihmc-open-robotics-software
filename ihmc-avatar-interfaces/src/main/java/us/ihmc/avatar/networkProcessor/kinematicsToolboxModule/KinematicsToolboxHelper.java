@@ -2,7 +2,7 @@ package us.ihmc.avatar.networkProcessor.kinematicsToolboxModule;
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import controller_msgs.msg.dds.RobotConfigurationData;
 import gnu.trove.list.array.TFloatArrayList;
@@ -166,7 +166,7 @@ public class KinematicsToolboxHelper
          rootJoint.getJointPose().getPosition().set(translation.getX(), translation.getY(), translation.getZ());
          Quaternion orientation = robotConfigurationData.getRootOrientation();
          rootJoint.getJointPose().getOrientation().setQuaternion(orientation.getX(), orientation.getY(), orientation.getZ(), orientation.getS());
-         rootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
+         rootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
 
          rootJoint.getPredecessor().updateFramesRecursively();
       }
@@ -184,7 +184,7 @@ public class KinematicsToolboxHelper
       if (desiredRootJoint != null)
       {
          desiredRootJoint.getJointPose().set(pelvisPose);
-         desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
+         desiredRootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
 
          desiredRootJoint.getPredecessor().updateFramesRecursively();
       }
@@ -229,7 +229,7 @@ public class KinematicsToolboxHelper
       if (hasPrivilegedRooJointPosition)
       {
          desiredRootJoint.setJointPosition(commandWithPrivilegedConfiguration.getPrivilegedRootJointPosition());
-         desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
+         desiredRootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
       }
 
       boolean hasPrivilegedRooJointOrientation = commandWithPrivilegedConfiguration.hasPrivilegedRootJointOrientation();
@@ -237,7 +237,7 @@ public class KinematicsToolboxHelper
       if (hasPrivilegedRooJointOrientation)
       {
          desiredRootJoint.setJointOrientation(commandWithPrivilegedConfiguration.getPrivilegedRootJointOrientation());
-         desiredRootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
+         desiredRootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
       }
 
       desiredRootJoint.getPredecessor().updateFramesRecursively();

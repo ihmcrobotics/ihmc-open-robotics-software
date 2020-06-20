@@ -1,7 +1,7 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
 import org.apache.commons.math3.stat.regression.SimpleRegression;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
@@ -29,8 +29,8 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
 
    private final YoBoolean enabled;
 
-   private final DenseMatrix64F referenceSignalBuffer;
-   private final DenseMatrix64F delayedSignalBuffer;
+   private final DMatrixRMaj referenceSignalBuffer;
+   private final DMatrixRMaj delayedSignalBuffer;
    private final SimpleRegression correlationCalculator = new SimpleRegression();
    private final YoDouble correlationForDelay;
    private final YoDouble maxCorrelation;
@@ -41,8 +41,8 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
    private final YoInteger numberOfObservations;
 
    private final YoDouble correlationAlpha;
-   private final DenseMatrix64F correlationBuffer;
-   private final DenseMatrix64F filteredCorrelationBuffer;
+   private final DMatrixRMaj correlationBuffer;
+   private final DMatrixRMaj filteredCorrelationBuffer;
 
    private int bufferPosition = 0;
    private boolean hasBufferBeenFilled = false;
@@ -78,13 +78,13 @@ public class DelayEstimatorBetweenTwoSignals implements DiagnosticUpdatable
       numberOfObservations.set(DEFAULT_NUMBER_OF_OBSERVATIONS);
 
       int bufferSize = numberOfObservations.getIntegerValue() + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue();
-      referenceSignalBuffer = new DenseMatrix64F(bufferSize, 1);
-      delayedSignalBuffer = new DenseMatrix64F(bufferSize, 1);
+      referenceSignalBuffer = new DMatrixRMaj(bufferSize, 1);
+      delayedSignalBuffer = new DMatrixRMaj(bufferSize, 1);
 
       correlationAlpha = new YoDouble(namePrefix + "CorrelationApha", registry);
       correlationAlpha.set(AlphaFilteredYoVariable.computeAlphaGivenBreakFrequencyProperly(0.16, dt));
-      correlationBuffer = new DenseMatrix64F(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);
-      filteredCorrelationBuffer = new DenseMatrix64F(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);
+      correlationBuffer = new DMatrixRMaj(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);
+      filteredCorrelationBuffer = new DMatrixRMaj(1 + maxLeadInTicks.getIntegerValue() + maxLagInTicks.getIntegerValue(), 1);
    }
 
    @Override

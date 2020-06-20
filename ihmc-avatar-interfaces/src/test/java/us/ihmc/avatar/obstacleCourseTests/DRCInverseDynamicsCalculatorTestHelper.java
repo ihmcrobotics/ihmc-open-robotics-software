@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -495,7 +495,7 @@ public class DRCInverseDynamicsCalculatorTestHelper
             ReferenceFrame bodyFixedFrame = rigidBodyToApplyWrenchTo.getBodyFixedFrame();
 
             groundContactPointBasedWrenchCalculator.calculate();
-            DenseMatrix64F wrenchFromSimulation = groundContactPointBasedWrenchCalculator.getWrench();
+            DMatrixRMaj wrenchFromSimulation = groundContactPointBasedWrenchCalculator.getWrench();
             ReferenceFrame frameAtJoint = rigidBodyToApplyWrenchTo.getParentJoint().getFrameAfterJoint();
 
             Wrench wrench = new Wrench(frameAtJoint, frameAtJoint, wrenchFromSimulation);
