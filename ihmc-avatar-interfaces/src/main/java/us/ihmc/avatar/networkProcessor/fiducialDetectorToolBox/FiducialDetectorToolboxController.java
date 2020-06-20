@@ -1,8 +1,9 @@
-package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
+package us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox;
 
 import java.awt.FlowLayout;
 import java.awt.image.BufferedImage;
 import java.awt.image.RescaleOp;
+import java.util.concurrent.atomic.AtomicReference;
 
 import javax.swing.ImageIcon;
 import javax.swing.JFrame;
@@ -19,6 +20,8 @@ import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.ImageType;
 import controller_msgs.msg.dds.VideoPacket;
 import georegression.struct.se.Se3_F64;
+import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
+import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.producers.JPEGDecompressor;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
@@ -29,11 +32,20 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
+import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-public class FiducialDetectorToolBox
+public class FiducialDetectorToolboxController extends ToolboxController
 {
+
+   private final AtomicReference<VideoPacket> videoPacket = new AtomicReference<VideoPacket>();
+
+   //debugging only
    private boolean DEBUG = false;
+   private JFrame frame;
+   private ImageIcon image;
+   //*************
 
    private final Se3_F64 fiducialToCamera = new Se3_F64();
    private final RotationMatrix fiducialRotationMatrix = new RotationMatrix();
@@ -48,19 +60,24 @@ public class FiducialDetectorToolBox
    private FiducialDetector<GrayF32> detector;
    private Object expectedFiducialSizeChangedConch = new Object();
 
+   private final Object fiducialDetectorFromCameraImagesConch = new Object();
+
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
 
    private String prefix = "fiducial";
 
-   private double expectedFiducialSize;
+   //standard size printed on normal paper
+   private double expectedFiducialSize = 0.2032;
 
    private final FramePose3D cameraPose = new FramePose3D(ReferenceFrame.getWorldFrame());
    private final FramePose3D locatedFiducialPoseInWorldFrame = new FramePose3D(ReferenceFrame.getWorldFrame());
    private final FramePose3D reportedFiducialPoseInWorldFrame = new FramePose3D(ReferenceFrame.getWorldFrame());
    private RigidBodyTransform transformFromReportedToFiducialFrame = new RigidBodyTransform();
 
-   public FiducialDetectorToolBox()
+   public FiducialDetectorToolboxController(FullHumanoidRobotModel fullRobotModel, StatusMessageOutputManager statusOutputManager,
+                                            YoVariableRegistry parentRegistry)
    {
+      super(statusOutputManager, parentRegistry);
 
       detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize),
                                               ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10),
@@ -96,23 +113,31 @@ public class FiducialDetectorToolBox
       reportedFiducialReferenceFrame = new TransformReferenceFrame(prefix + "ReportedReferenceFrame",
                                                                    locatedFiducialReferenceFrame,
                                                                    transformFromReportedToFiducialFrame);
-
    }
 
-   public FiducialDetector<GrayF32> getFiducialDetector()
+   @Override
+   public boolean initialize()
    {
-      return detector;
+      return true;
    }
 
-   public void detectFromVideoPacket(VideoPacket videoPacket)
+   public void receivedPacket(VideoPacket packet)
    {
-      detect(videoPacket);
+      if (packet != null)
+         videoPacket.set(packet);
    }
 
-   private JFrame frame;
-   private ImageIcon image;
+   @Override
+   public void updateInternal()
+   {
+      VideoPacket latest = videoPacket.getAndSet(null);
+      if (latest != null)
+      {
+         detectFromVideoPacket(latest);
+      }
+   }
 
-   public void detect(VideoPacket videoPacket)
+   private void detectFromVideoPacket(VideoPacket videoPacket)
    {
       BufferedImage bufferedImage = jpegDecompressor.decompressJPEGDataToBufferedImage(videoPacket.getData().toArray());
       detect(bufferedImage,
@@ -122,8 +147,8 @@ public class FiducialDetectorToolBox
 
    }
 
-   public void detect(BufferedImage bufferedImage, Point3DReadOnly cameraPositionInWorld, QuaternionReadOnly cameraOrientationInWorldXForward,
-                      IntrinsicParameters intrinsicParameters)
+   private void detect(BufferedImage bufferedImage, Point3DReadOnly cameraPositionInWorld, QuaternionReadOnly cameraOrientationInWorldXForward,
+                       IntrinsicParameters intrinsicParameters)
    {
       detector.setIntrinsic(intrinsicParameters);
       //increase brightness for sim
@@ -144,71 +169,58 @@ public class FiducialDetectorToolBox
             frame.setVisible(true);
          }
       }
-      synchronized (expectedFiducialSizeChangedConch)
+
+      cameraRigidTransform.getRotation().set(cameraOrientationInWorldXForward);
+      cameraRigidPosition.set(cameraPositionInWorld);
+      cameraRigidTransform.getTranslation().set(cameraRigidPosition);
+
+      cameraReferenceFrame.update();
+      detectorReferenceFrame.update();
+
+      cameraPose.getOrientation().set(cameraOrientationInWorldXForward);
+      cameraPose.getPosition().set(cameraPositionInWorld);
+
+      GrayF32 grayImage = ConvertBufferedImage.convertFrom(bufferedImage, true, ImageType.single(GrayF32.class));
+
+      if (DEBUG)
+      {
+         image.setImage(ConvertBufferedImage.convertTo(grayImage, null));
+         frame.setVisible(true);
+      }
+
+      detector.detect(grayImage);
+
+      for (int i = 0; i < detector.totalFound(); i++)
       {
 
-         cameraRigidTransform.getRotation().set(cameraOrientationInWorldXForward);
-         cameraRigidPosition.set(cameraPositionInWorld);
-         cameraRigidTransform.getTranslation().set(cameraRigidPosition);
+         detector.getFiducialToCamera(i, fiducialToCamera);
 
-         cameraReferenceFrame.update();
-         detectorReferenceFrame.update();
+         fiducialRotationMatrix.set(fiducialToCamera.getR().data);
+         tempFiducialRotationQuat.set(fiducialRotationMatrix);
 
-         cameraPose.getOrientation().set(cameraOrientationInWorldXForward);
-         cameraPose.getPosition().set(cameraPositionInWorld);
+         tempFiducialDetectorFrame.setToZero(detectorReferenceFrame);
+         tempFiducialDetectorFrame.getOrientation().set(tempFiducialRotationQuat);
+         tempFiducialDetectorFrame.getPosition().set(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
+         tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
 
-         GrayF32 grayImage = ConvertBufferedImage.convertFrom(bufferedImage, true, ImageType.single(GrayF32.class));
+         locatedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
 
-         if (DEBUG)
-         {
-            image.setImage(ConvertBufferedImage.convertTo(grayImage, null));
-            frame.setVisible(true);
-         }
+         locatedFiducialReferenceFrame.update();
 
-         detector.detect(grayImage);
+         tempFiducialDetectorFrame.setToZero(reportedFiducialReferenceFrame);
+         tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
 
-         for (int i = 0; i < detector.totalFound(); i++)
-         {
+         reportedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
 
-            detector.getFiducialToCamera(i, fiducialToCamera);
-
-            fiducialRotationMatrix.set(fiducialToCamera.getR().data);
-            tempFiducialRotationQuat.set(fiducialRotationMatrix);
-
-            tempFiducialDetectorFrame.setToZero(detectorReferenceFrame);
-            tempFiducialDetectorFrame.getOrientation().set(tempFiducialRotationQuat);
-            tempFiducialDetectorFrame.getPosition().set(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
-            tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
-
-            locatedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
-
-            locatedFiducialReferenceFrame.update();
-
-            tempFiducialDetectorFrame.setToZero(reportedFiducialReferenceFrame);
-            tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
-
-            reportedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
-
-            //TODO send out a detected Fiducial packet containing ID, Pose, And Timestamp
-
-         }
+         //TODO send out a detected Fiducial packet containing ID, Pose, And Timestamp
 
       }
 
    }
 
-   public void setExpectedFiducialSize(double expectedFiducialSize)
+   @Override
+   public boolean isDone()
    {
-      this.expectedFiducialSize = expectedFiducialSize;
-      detector = FactoryFiducial.squareBinary(new ConfigFiducialBinary(expectedFiducialSize),
-                                              ConfigThreshold.local(ThresholdType.LOCAL_SQUARE, 10),
-                                              GrayF32.class);
-
+      return false;
    }
-
-   public void getReportedFiducialPoseWorldFrame(FramePose3D framePoseToPack)
-   {
-      framePoseToPack.setIncludingFrame(reportedFiducialPoseInWorldFrame);
-   }
-
 }
