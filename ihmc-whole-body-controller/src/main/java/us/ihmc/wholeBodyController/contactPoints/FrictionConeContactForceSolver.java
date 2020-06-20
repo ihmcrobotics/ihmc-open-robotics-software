@@ -2,8 +2,8 @@ package us.ihmc.wholeBodyController.contactPoints;
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.convexOptimization.quadraticProgram.QuadProgSolver;
 import us.ihmc.euclid.tuple2D.Point2D;
@@ -20,20 +20,20 @@ public class FrictionConeContactForceSolver
 
    private final QuadProgSolver solver = new QuadProgSolver();
 
-   private final DenseMatrix64F x = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F Q = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F f = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F Aeq = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F beq = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F Ain = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F bin = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj x = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj Q = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj f = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj Aeq = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj beq = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj Ain = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj bin = new DMatrixRMaj(1, 1);
 
-   private final DenseMatrix64F objective = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F J = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F W = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj objective = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj J = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj W = new DMatrixRMaj(1, 1);
 
-   private final DenseMatrix64F temp1 = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F temp2 = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj temp1 = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj temp2 = new DMatrixRMaj(1, 1);
 
    private final Vector3D offset = new Vector3D();
    private final Vector3D unitTorque = new Vector3D();
@@ -67,28 +67,28 @@ public class FrictionConeContactForceSolver
 
       // initialize x as vector with the grf magnitudes
       x.reshape(size, 1);
-      CommonOps.fill(x, 0.0);
+      CommonOps_DDRM.fill(x, 0.0);
 
       // set up inequality constraints such that Ain * x < bin makes sure all x are positive
       Ain.reshape(size, size);
-      CommonOps.setIdentity(Ain);
-      CommonOps.scale(-1.0, Ain);
+      CommonOps_DDRM.setIdentity(Ain);
+      CommonOps_DDRM.scale(-1.0, Ain);
       bin.reshape(size, 1);
-      CommonOps.fill(bin, 0.0);
+      CommonOps_DDRM.fill(bin, 0.0);
 
       // regulate the resulting forces: add small diagonal to the Q matrix
       Q.reshape(size, size);
-      CommonOps.setIdentity(Q);
-      CommonOps.scale(regWeight, Q);
+      CommonOps_DDRM.setIdentity(Q);
+      CommonOps_DDRM.scale(regWeight, Q);
 
       // set all W equal
       W.reshape(2, 2);
-      CommonOps.setIdentity(W);
+      CommonOps_DDRM.setIdentity(W);
 
       // build the task jacobian J and the objective o such that the goal is to minimize (Jx - objective)
       J.reshape(2, size);
       Aeq.reshape(5, size);
-      CommonOps.fill(Aeq, 0.0);
+      CommonOps_DDRM.fill(Aeq, 0.0);
       for (int contactIdx = 0; contactIdx < contactPoints.size(); contactIdx++)
       {
          // vector from sole to contact
@@ -142,19 +142,19 @@ public class FrictionConeContactForceSolver
       // 0.5 * (Jx - objective)' W (Jx - objective) = 0.5 * x'J'WJx - x'J'W objective
       // temp1 = J'W
       temp1.reshape(size, 2);
-      CommonOps.multTransA(J, W, temp1);
+      CommonOps_DDRM.multTransA(J, W, temp1);
       // temp2 = temp1 * J = J'WJ
       temp2.reshape(size, size);
-      CommonOps.mult(temp1, J, temp2);
+      CommonOps_DDRM.mult(temp1, J, temp2);
 
       // add J'WJ to Q
-      CommonOps.add(Q, temp2, Q);
+      CommonOps_DDRM.add(Q, temp2, Q);
 
       // set f to -J'W
       f.reshape(size, 1);
-      CommonOps.fill(f, 0.0);
-      CommonOps.mult(temp1, objective, f);
-      CommonOps.scale(-1.0, f);
+      CommonOps_DDRM.fill(f, 0.0);
+      CommonOps_DDRM.mult(temp1, objective, f);
+      CommonOps_DDRM.scale(-1.0, f);
 
       // fix equality constraints
       for (int i = 0; i < beq.getNumRows(); i++)

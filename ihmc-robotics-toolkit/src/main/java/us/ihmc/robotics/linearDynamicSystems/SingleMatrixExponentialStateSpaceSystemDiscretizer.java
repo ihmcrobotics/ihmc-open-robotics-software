@@ -1,7 +1,7 @@
 package us.ihmc.robotics.linearDynamicSystems;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
@@ -19,14 +19,14 @@ import us.ihmc.robotics.linearAlgebra.MatrixExponentialCalculator;
  */
 public class SingleMatrixExponentialStateSpaceSystemDiscretizer implements StateSpaceSystemDiscretizer
 {
-   private final DenseMatrix64F discretizationMatrix;
+   private final DMatrixRMaj discretizationMatrix;
    private final MatrixExponentialCalculator matrixExponentialCalculator;
 
-   private final DenseMatrix64F F3;
-   private final DenseMatrix64F G2;
-   private final DenseMatrix64F G3;
+   private final DMatrixRMaj F3;
+   private final DMatrixRMaj G2;
+   private final DMatrixRMaj G3;
    
-   private final DenseMatrix64F negativeATranspose;
+   private final DMatrixRMaj negativeATranspose;
 
    private final int nStates;
    private final int nInputs;
@@ -34,12 +34,12 @@ public class SingleMatrixExponentialStateSpaceSystemDiscretizer implements State
    public SingleMatrixExponentialStateSpaceSystemDiscretizer(int numberOfStates, int numberOfInputs)
    {
       int discretizationMatrixSize = 2 * numberOfStates + numberOfInputs;
-      this.discretizationMatrix = new DenseMatrix64F(discretizationMatrixSize, discretizationMatrixSize);
+      this.discretizationMatrix = new DMatrixRMaj(discretizationMatrixSize, discretizationMatrixSize);
       this.matrixExponentialCalculator = new MatrixExponentialCalculator(discretizationMatrixSize);
-      this.F3 = new DenseMatrix64F(numberOfStates, numberOfStates);
-      this.G2 = new DenseMatrix64F(numberOfStates, numberOfStates);
-      this.G3 = new DenseMatrix64F(numberOfStates, numberOfInputs);
-      this.negativeATranspose = new DenseMatrix64F(numberOfStates, numberOfStates);
+      this.F3 = new DMatrixRMaj(numberOfStates, numberOfStates);
+      this.G2 = new DMatrixRMaj(numberOfStates, numberOfStates);
+      this.G3 = new DMatrixRMaj(numberOfStates, numberOfInputs);
+      this.negativeATranspose = new DMatrixRMaj(numberOfStates, numberOfStates);
       this.nStates = numberOfStates;
       this.nInputs = numberOfInputs;
    }
@@ -51,47 +51,47 @@ public class SingleMatrixExponentialStateSpaceSystemDiscretizer implements State
     * @param Q process noise covariance matrix
     * @param dt time step
     */
-   public void discretize(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, double dt)
+   public void discretize(DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj Q, double dt)
    {
       MatrixTools.checkMatrixDimensions(A, nStates, nStates);
       MatrixTools.checkMatrixDimensions(B, nStates, nInputs);
       MatrixTools.checkMatrixDimensions(Q, nStates, nStates);
       
       // A
-      CommonOps.insert(A, discretizationMatrix, nStates, nStates);
+      CommonOps_DDRM.insert(A, discretizationMatrix, nStates, nStates);
 
       // -A^T
-      CommonOps.transpose(A, negativeATranspose);
-      CommonOps.changeSign(negativeATranspose);
-      CommonOps.insert(negativeATranspose, discretizationMatrix, 0, 0);
+      CommonOps_DDRM.transpose(A, negativeATranspose);
+      CommonOps_DDRM.changeSign(negativeATranspose);
+      CommonOps_DDRM.insert(negativeATranspose, discretizationMatrix, 0, 0);
 
       // Q
-      CommonOps.insert(Q, discretizationMatrix, 0, nStates);
+      CommonOps_DDRM.insert(Q, discretizationMatrix, 0, nStates);
 
       // B
-      CommonOps.insert(B, discretizationMatrix, nStates, 2 * nStates);
+      CommonOps_DDRM.insert(B, discretizationMatrix, nStates, 2 * nStates);
 
       // exp(M * dt)
-      CommonOps.scale(dt, discretizationMatrix);
+      CommonOps_DDRM.scale(dt, discretizationMatrix);
       matrixExponentialCalculator.compute(discretizationMatrix, discretizationMatrix);
 
       // blocks
-      CommonOps.extract(discretizationMatrix, nStates, 2 * nStates, nStates, 2 * nStates, F3, 0, 0);
-      CommonOps.extract(discretizationMatrix, 0, nStates, nStates, 2 * nStates, G2, 0, 0);
-      CommonOps.extract(discretizationMatrix, nStates, 2 * nStates, 2 * nStates, 2 * nStates + nInputs, G3, 0, 0);
+      CommonOps_DDRM.extract(discretizationMatrix, nStates, 2 * nStates, nStates, 2 * nStates, F3, 0, 0);
+      CommonOps_DDRM.extract(discretizationMatrix, 0, nStates, nStates, 2 * nStates, G2, 0, 0);
+      CommonOps_DDRM.extract(discretizationMatrix, nStates, 2 * nStates, 2 * nStates, 2 * nStates + nInputs, G3, 0, 0);
 
       // A
       A.set(F3);
 
       // B
-      CommonOps.mult(F3, G3, B);
+      CommonOps_DDRM.mult(F3, G3, B);
 
       // Q
-      CommonOps.multTransA(F3, G2, Q);
+      CommonOps_DDRM.multTransA(F3, G2, Q);
 
       // R stays R. Matlab kalmd says to scale it by 1/dt, but 
       // we think this is only true if you are averaging out the noise during the reading.
       // More realistically, you are not and just getting a noisy discrete reading.
-//      CommonOps.scale(1.0 / dt, R);
+//      CommonOps_DDRM.scale(1.0 / dt, R);
    }
 }

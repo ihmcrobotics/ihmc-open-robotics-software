@@ -10,8 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -1245,7 +1245,7 @@ public abstract class EndToEndHandTrajectoryMessageTest implements MultiRobotTes
                                                                                                             new YoVariableRegistry("Dummy"));
       taskspaceToJointspaceCalculator.setControlFrameFixedInEndEffector(handControlFrame);
       taskspaceToJointspaceCalculator.setupWithDefaultParameters();
-      DenseMatrix64F selectionMatrix = CommonOps.identity(6);
+      DMatrixRMaj selectionMatrix = CommonOps_DDRM.identity(6);
       for (int i = 0; i < 3; i++)
          MatrixTools.removeRow(selectionMatrix, 0);
       taskspaceToJointspaceCalculator.setSelectionMatrix(selectionMatrix);

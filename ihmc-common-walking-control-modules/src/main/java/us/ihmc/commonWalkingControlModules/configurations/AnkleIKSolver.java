@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.configurations;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
@@ -12,8 +12,8 @@ import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
  * This interface can be used if desired foot orientation and angular velocity should be tracked
  * using the ankle joints of a robot. The implementation of this can be robot specific and specific
  * to the desired foot behavior. It provides two main methods:</br>
- * {@link AnkleIKSolver#computeAngles(QuaternionReadOnly, DenseMatrix64F)}</br>
- * {@link AnkleIKSolver#computeVelocities(Vector3DReadOnly, DenseMatrix64F, DenseMatrix64F)}
+ * {@link AnkleIKSolver#computeAngles(QuaternionReadOnly, DMatrixRMaj)}</br>
+ * {@link AnkleIKSolver#computeVelocities(Vector3DReadOnly, DMatrixRMaj, DMatrixRMaj)}
  * </p>
  * <p>
  * The implementation {@link PitchRollAnkleWithSolePlaneConstraintSolver} provides an example and
@@ -30,7 +30,7 @@ public interface AnkleIKSolver
     * @param footOrientation the desired orientation of the foot w.r.t. the shin in shin frame.
     * @param result will be modified and contain the resulting joint angles starting from the shin.
     */
-   public abstract void computeAngles(QuaternionReadOnly footOrientation, DenseMatrix64F result);
+   public abstract void computeAngles(QuaternionReadOnly footOrientation, DMatrixRMaj result);
 
    /**
     * Computes the joint velocities that will cause the foot to achieve the desired {@link footVelocity}.
@@ -41,7 +41,7 @@ public interface AnkleIKSolver
     * @param jointAngles the joint angles of the ankle joint starting from the shin.
     * @param result will be modified and contain the resulting joint velocities starting from the shin.
     */
-   public abstract void computeVelocities(Vector3DReadOnly footVelocity, DenseMatrix64F jointAngles, DenseMatrix64F result);
+   public abstract void computeVelocities(Vector3DReadOnly footVelocity, DMatrixRMaj jointAngles, DMatrixRMaj result);
 
    /**
     * Returns the number of ankle joints. Should be equal to the number of joints between the shin and
@@ -62,7 +62,7 @@ public interface AnkleIKSolver
       private final RotationMatrix rotationMatrix = new RotationMatrix();
 
       @Override
-      public void computeAngles(QuaternionReadOnly footOrientation, DenseMatrix64F result)
+      public void computeAngles(QuaternionReadOnly footOrientation, DMatrixRMaj result)
       {
          rotationMatrix.set(footOrientation);
          double q0 = Math.atan2(rotationMatrix.getM02(), rotationMatrix.getM22());
@@ -74,7 +74,7 @@ public interface AnkleIKSolver
       }
 
       @Override
-      public void computeVelocities(Vector3DReadOnly footVelocity, DenseMatrix64F jointAngles, DenseMatrix64F result)
+      public void computeVelocities(Vector3DReadOnly footVelocity, DMatrixRMaj jointAngles, DMatrixRMaj result)
       {
          double qd0 = footVelocity.getY();
          double q0 = jointAngles.get(0);

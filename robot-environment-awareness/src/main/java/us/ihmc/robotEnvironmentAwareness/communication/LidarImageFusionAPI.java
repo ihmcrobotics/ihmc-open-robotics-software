@@ -3,7 +3,7 @@ package us.ihmc.robotEnvironmentAwareness.communication;
 import java.awt.image.BufferedImage;
 import java.util.List;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.Image32;
 import sensor_msgs.msg.dds.RegionOfInterest;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -57,7 +57,7 @@ public class LidarImageFusionAPI
    private static final TypedTopicTheme<Integer> Size = apiFactory.createTypedTopicTheme("Size");
    private static final TypedTopicTheme<Point3D> Position = apiFactory.createTypedTopicTheme("Position");
    private static final TypedTopicTheme<Quaternion> Orientation = apiFactory.createTypedTopicTheme("Orientation");
-   private static final TypedTopicTheme<IntrinsicParameters> IntrinsicParameters = apiFactory.createTypedTopicTheme("IntrinsicParameters");
+   private static final TypedTopicTheme<CameraPinholeBrown> CameraPinholeBrown = apiFactory.createTypedTopicTheme("CameraPinholeBrown");
 
    private static final TopicTheme Data = apiFactory.createTopicTheme("Data");
    private static final TopicTheme Parameters = apiFactory.createTopicTheme("Parameters");
@@ -73,7 +73,7 @@ public class LidarImageFusionAPI
    
    public static final Topic<Point3D> CameraPositionState = ModuleCategory.child(Camera).topic(Position);
    public static final Topic<Quaternion> CameraOrientationState = ModuleCategory.child(Camera).topic(Orientation);
-   public static final Topic<IntrinsicParameters> CameraIntrinsicParametersState = ModuleCategory.child(Camera).topic(IntrinsicParameters);
+   public static final Topic<CameraPinholeBrown> CameraIntrinsicParametersState = ModuleCategory.child(Camera).topic(CameraPinholeBrown);
 
    public static final Topic<Boolean> RequestSocketConnection = ObjectDetectionCategory.child(Socket).topic(Request);
    public static final Topic<Boolean> RequestObjectDetection = ObjectDetectionCategory.topic(Request);

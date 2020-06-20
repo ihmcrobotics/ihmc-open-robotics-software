@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.trajectoryOptimization.ContinuousHybridDynamics;
 
@@ -35,7 +35,7 @@ public class ContinuousSLIPDynamics implements ContinuousHybridDynamics<SLIPStat
    }
 
    @Override
-   public void getDynamics(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+   public void getDynamics(SLIPState hybridState, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants, DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize / 2)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -86,8 +86,8 @@ public class ContinuousSLIPDynamics implements ContinuousHybridDynamics<SLIPStat
    }
 
    @Override
-   public void getDynamicsStateGradient(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants,
-                                        DenseMatrix64F matrixToPack)
+   public void getDynamicsStateGradient(SLIPState hybridState, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants,
+                                        DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize / 2)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -149,8 +149,8 @@ public class ContinuousSLIPDynamics implements ContinuousHybridDynamics<SLIPStat
    }
 
    @Override
-   public void getDynamicsControlGradient(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants,
-                                          DenseMatrix64F matrixToPack)
+   public void getDynamicsControlGradient(SLIPState hybridState, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants,
+                                          DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize / 2)
          throw new RuntimeException("The state matrix size is wrong.");

@@ -1,23 +1,17 @@
 package us.ihmc.avatar.externalForceEstimationToolboxModule;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
 import us.ihmc.mecano.multiBodySystem.RigidBody;
-import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
-import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.PointJacobian;
-import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.simulationconstructionset.Link;
 import us.ihmc.simulationconstructionset.PinJoint;
 import us.ihmc.simulationconstructionset.Robot;
@@ -48,12 +42,12 @@ import us.ihmc.simulationconstructionset.Robot;
    /**
     * Manipulator equation matrices, see {@link #updateManipulatorMatrices()}
     */
-   private final DenseMatrix64F H = new DenseMatrix64F(2, 2);
-   private final DenseMatrix64F C = new DenseMatrix64F(2, 2);
-   private final DenseMatrix64F G = new DenseMatrix64F(2, 1);
-   private final DenseMatrix64F qd = new DenseMatrix64F(2, 1);
-   private final DenseMatrix64F Hdot = new DenseMatrix64F(2, 2);
-   private final DenseMatrix64F Hprev = new DenseMatrix64F(2, 2);
+   private final DMatrixRMaj H = new DMatrixRMaj(2, 2);
+   private final DMatrixRMaj C = new DMatrixRMaj(2, 2);
+   private final DMatrixRMaj G = new DMatrixRMaj(2, 1);
+   private final DMatrixRMaj qd = new DMatrixRMaj(2, 1);
+   private final DMatrixRMaj Hdot = new DMatrixRMaj(2, 2);
+   private final DMatrixRMaj Hprev = new DMatrixRMaj(2, 2);
 
    DoublePendulumRobot(String name, double dt)
    {
@@ -161,31 +155,31 @@ import us.ihmc.simulationconstructionset.Robot;
       qd.set(0, 0, qd1);
       qd.set(1, 0, qd2);
 
-      CommonOps.subtract(H, Hprev, Hdot);
-      CommonOps.scale(1.0 / dt, Hdot);
+      CommonOps_DDRM.subtract(H, Hprev, Hdot);
+      CommonOps_DDRM.scale(1.0 / dt, Hdot);
    }
 
-   public DenseMatrix64F getH()
+   public DMatrixRMaj getH()
    {
       return H;
    }
 
-   public DenseMatrix64F getC()
+   public DMatrixRMaj getC()
    {
       return C;
    }
 
-   public DenseMatrix64F getG()
+   public DMatrixRMaj getG()
    {
       return G;
    }
 
-   public DenseMatrix64F getQd()
+   public DMatrixRMaj getQd()
    {
       return qd;
    }
 
-   public DenseMatrix64F getHdot()
+   public DMatrixRMaj getHdot()
    {
       return Hdot;
    }

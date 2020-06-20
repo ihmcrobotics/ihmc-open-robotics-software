@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.Image32;
 import controller_msgs.msg.dds.IntrinsicParametersMessage;
 import controller_msgs.msg.dds.LidarScanMessage;
@@ -166,9 +166,9 @@ public class LidarImageFusionProcessorCommunicationModule
       return new LidarImageFusionProcessorCommunicationModule(ros2Node, kryoMessager, messager);
    }
 
-   private static IntrinsicParameters toIntrinsicParameters(IntrinsicParametersMessage message)
+   private static CameraPinholeBrown toIntrinsicParameters(IntrinsicParametersMessage message)
    {
-      IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
+      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
       intrinsicParameters.width = message.getWidth();
       intrinsicParameters.height = message.getHeight();
       intrinsicParameters.fx = message.getFx();

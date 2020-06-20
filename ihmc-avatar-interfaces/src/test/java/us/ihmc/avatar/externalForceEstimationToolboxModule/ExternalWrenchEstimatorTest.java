@@ -6,7 +6,7 @@ import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -58,7 +58,7 @@ public class ExternalWrenchEstimatorTest
    private double epsilon;
    private final int iterations = 5;
 
-   private BiConsumer<DenseMatrix64F, DenseMatrix64F> dynamicMatrixSetter;
+   private BiConsumer<DMatrixRMaj, DMatrixRMaj> dynamicMatrixSetter;
 
    @BeforeEach
    public void setup()
@@ -84,7 +84,7 @@ public class ExternalWrenchEstimatorTest
          c.set(gravityCoriolisExternalWrenchMatrixCalculator.getJointTauMatrix());
       };
 
-      Consumer<DenseMatrix64F> tauSetter = tau -> MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
+      Consumer<DMatrixRMaj> tauSetter = tau -> MultiBodySystemTools.extractJointsState(joints, JointStateType.EFFORT, tau);
       externalForcePoint.setOffsetJoint(externalForcePointOffset);
 
       RigidBodyBasics endEffector = joints[joints.length - 1].getSuccessor();

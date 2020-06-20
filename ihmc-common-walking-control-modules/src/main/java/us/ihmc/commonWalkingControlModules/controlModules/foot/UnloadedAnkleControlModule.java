@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.configurations.AnkleIKSolver;
 import us.ihmc.commonWalkingControlModules.controlModules.foot.FootControlModule.ConstraintType;
@@ -37,8 +37,8 @@ public class UnloadedAnkleControlModule
    private final YoBoolean enabled = new YoBoolean("UnloadedAnkleControlModuleEnabled", registry);
 
    private final AnkleIKSolver ankleIKSolver;
-   private final DenseMatrix64F jointAngles = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F jointVelocities = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj jointAngles = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj jointVelocities = new DMatrixRMaj(1, 1);
 
    private final FrameQuaternion desiredOrientation = new FrameQuaternion();
    private final FrameVector3D desiredAngularVelocity = new FrameVector3D();

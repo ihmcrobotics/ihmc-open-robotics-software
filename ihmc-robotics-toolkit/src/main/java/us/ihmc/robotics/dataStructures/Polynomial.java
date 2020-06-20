@@ -1,8 +1,7 @@
 package us.ihmc.robotics.dataStructures;
 
-import static org.ejml.ops.CommonOps.solve;
-
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commons.MathTools;
 
@@ -19,9 +18,9 @@ public class Polynomial
    private final double[] coefficients;
    private final double[] derivativeCoefficients;
    private final double[] doubleDerivativeCoefficients;
-   private DenseMatrix64F constraintMatrix;
-   private DenseMatrix64F constraintVector;
-   private DenseMatrix64F coefficientVector;
+   private DMatrixRMaj constraintMatrix;
+   private DMatrixRMaj constraintVector;
+   private DMatrixRMaj coefficientVector;
 
    public Polynomial(double constant)
    {
@@ -365,9 +364,9 @@ public class Polynomial
    public void setQuintic(double x0, double x1, double y0, double yd0, double ydd0, double y1, double yd1, double ydd1)
    {
       MathTools.checkEquals(coefficients.length, 6);
-      constraintMatrix = new DenseMatrix64F(new double[6][6]);
-      constraintVector = new DenseMatrix64F(new double[6][1]);
-      coefficientVector = new DenseMatrix64F(new double[6][1]);
+      constraintMatrix = new DMatrixRMaj(new double[6][6]);
+      constraintVector = new DMatrixRMaj(new double[6][1]);
+      coefficientVector = new DMatrixRMaj(new double[6][1]);
 
       setPointConstraint(0, x0, y0);
       setDerivativeConstraint(1, x0, yd0);
@@ -377,16 +376,16 @@ public class Polynomial
       setDerivativeConstraint(4, x1, yd1);
       setDoubleDerivativeConstraint(5, x1, ydd1);
 
-      solve(constraintMatrix, constraintVector, coefficientVector);
+      CommonOps_DDRM.solve(constraintMatrix, constraintVector, coefficientVector);
       setVariables();
    }
 
    public void setCubic(double x0, double x1, double y0, double yd0, double y1, double yd1)
    {
       MathTools.checkEquals(coefficients.length, 4);
-      constraintMatrix = new DenseMatrix64F(new double[4][4]);
-      constraintVector = new DenseMatrix64F(new double[4][1]);
-      coefficientVector = new DenseMatrix64F(new double[4][1]);
+      constraintMatrix = new DMatrixRMaj(new double[4][4]);
+      constraintVector = new DMatrixRMaj(new double[4][1]);
+      coefficientVector = new DMatrixRMaj(new double[4][1]);
 
       setPointConstraint(0, x0, y0);
       setDerivativeConstraint(1, x0, yd0);
@@ -394,7 +393,7 @@ public class Polynomial
       setPointConstraint(2, x1, y1);
       setDerivativeConstraint(3, x1, yd1);
 
-      solve(constraintMatrix, constraintVector, coefficientVector);
+      CommonOps_DDRM.solve(constraintMatrix, constraintVector, coefficientVector);
       setVariables();
    }
 

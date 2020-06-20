@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinema
 
 import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.MatrixFeatures;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -47,7 +47,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * expressed in world frame.
     * </p>
     */
-   private final DenseMatrix64F momentum = new DenseMatrix64F(Momentum.SIZE, 1);
+   private final DMatrixRMaj momentum = new DMatrixRMaj(Momentum.SIZE, 1);
    /**
     * Weights on a per component basis to use in the optimization function. A higher weight means
     * higher priority of this task.
@@ -115,7 +115,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * @param momentum the desired momentum at the center of mass expressed in world frame. Not
     *           modified.
     */
-   public void setMomentum(DenseMatrix64F momentum)
+   public void setMomentum(DMatrixRMaj momentum)
    {
       this.momentum.set(momentum);
    }
@@ -450,7 +450,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * @param weightMatrixToPack the weight matrix to use in the optimization. The given matrix is
     *           reshaped to ensure proper size. Modified.
     */
-   public void getWeightMatrix(DenseMatrix64F weightMatrixToPack)
+   public void getWeightMatrix(DMatrixRMaj weightMatrixToPack)
    {
       weightMatrixToPack.reshape(Momentum.SIZE, Momentum.SIZE);
       weightMatrix.getFullWeightMatrixInFrame(worldFrame, weightMatrixToPack);
@@ -474,7 +474,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * @param selectionMatrixToPack the dense-matrix in which the selection matrix of this command is
     *           stored in. Modified.
     */
-   public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
    }
@@ -504,7 +504,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
     * 
     * @return the desired momentum.
     */
-   public DenseMatrix64F getMomentum()
+   public DMatrixRMaj getMomentum()
    {
       return momentum;
    }
@@ -544,7 +544,7 @@ public class MomentumCommand implements InverseKinematicsCommand<MomentumCommand
       {
          MomentumCommand other = (MomentumCommand) object;
 
-         if (!MatrixFeatures.isEquals(momentum, other.momentum))
+         if (!MatrixFeatures_DDRM.isEquals(momentum, other.momentum))
             return false;
          if (!weightMatrix.equals(other.weightMatrix))
             return false;

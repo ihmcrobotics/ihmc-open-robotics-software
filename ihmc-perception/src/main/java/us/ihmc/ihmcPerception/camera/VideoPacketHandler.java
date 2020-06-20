@@ -1,6 +1,6 @@
 package us.ihmc.ihmcPerception.camera;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -34,7 +34,7 @@ public class VideoPacketHandler implements CompressedVideoHandler
 
    @Override
    public void onFrame(VideoSource videoSource, byte[] data, long timeStamp, Point3DReadOnly position, QuaternionReadOnly orientation,
-                       IntrinsicParameters intrinsicParameters)
+                       CameraPinholeBrown intrinsicParameters)
    {
       if (DEBUG)
       {
