@@ -75,6 +75,7 @@ public class BoxTeeteringEdgeToEdgeExperimentalSimulation
       scs.addStaticLinkGraphics(ExampleExperimentalSimulationTools.toGraphics3DObject(groundShape, worldFrame, YoAppearance.DarkKhaki()));
       scs.getRootRegistry().addChild(experimentalSimulation.getPhysicsEngineRegistry());
       scs.setDT(simDT, 1);
+      scs.setFastSimulate(true);
       scs.startOnAThread();
       scs.simulate(2.0);
    }

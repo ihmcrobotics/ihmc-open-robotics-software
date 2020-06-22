@@ -64,6 +64,7 @@ public class SphereAtRestExperimentalSimulation
       scs.getRootRegistry().addChild(experimentalSimulation.getPhysicsEngineRegistry());
       scs.addYoGraphicsListRegistry(experimentalSimulation.getPhysicsEngineGraphicsRegistry());
       scs.setDT(simDT, 1);
+      scs.setFastSimulate(true);
       scs.startOnAThread();
       scs.simulate(2.0);
    }
