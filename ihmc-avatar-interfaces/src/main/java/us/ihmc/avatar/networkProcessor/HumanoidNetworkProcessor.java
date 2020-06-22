@@ -3,6 +3,7 @@ package us.ihmc.avatar.networkProcessor;
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
+import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
@@ -89,6 +90,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          humanoidNetworkProcessor.setupSensorModule();
       if (parameters.isUseHeightQuadTreeToolboxModule())
          humanoidNetworkProcessor.setupHeightQuadTreeToolboxModule();
+      if (parameters.isUseFiducialDetectorToolboxModule())
+         humanoidNetworkProcessor.setupFiducialDetectorToolboxModule();
       if (parameters.isUseRobotEnvironmentAwerenessModule())
          humanoidNetworkProcessor.setupRobotEnvironmentAwerenessModule(parameters.getREAConfigurationFilePath());
       if (parameters.isUseBipedalSupportPlanarRegionPublisherModule())
@@ -420,7 +423,30 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          return null;
       }
    }
+   
+   
 
+   public FiducialDetectorToolboxModule setupFiducialDetectorToolboxModule()
+   {
+      checkIfModuleCanBeCreated(FiducialDetectorToolboxModule.class);
+
+      try
+      {
+         FiducialDetectorToolboxModule module = new FiducialDetectorToolboxModule(robotModel.getSimpleRobotName(),
+                                                                              robotModel.createFullRobotModel(),
+                                                                              robotModel.getLogModelProvider(),
+                                                                              pubSubImplementation);
+         modulesToClose.add(module);
+         return module;
+      }
+      catch (Throwable e)
+      {
+         reportFailure(e);
+         return null;
+      }
+   }
+   
+   
    public LIDARBasedREAModule setupRobotEnvironmentAwerenessModule(String reaConfigurationFilePath)
    {
       checkIfModuleCanBeCreated(LIDARBasedREAModule.class);

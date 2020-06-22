@@ -64,6 +64,8 @@ public abstract class DRCSimulationTools
          networkProcessorParameters.setUseRobotEnvironmentAwerenessModule(startREAModule);
          networkProcessorParameters.setUseBipedalSupportPlanarRegionPublisherModule(modulesToStart.contains(Modules.SENSOR_MODULE));
          networkProcessorParameters.setUseMocapModule(modulesToStart.contains(Modules.MOCAP_MODULE));
+         networkProcessorParameters.setUseFiducialDetectorToolboxModule(modulesToStart.contains(Modules.FIDUCIAL_DETECTOR));
+
       }
       else
       {
@@ -352,7 +354,8 @@ public abstract class DRCSimulationTools
       MOCAP_MODULE,
       KINEMATICS_TOOLBOX,
       FOOTSTEP_PLANNING_TOOLBOX,
-      WHOLE_BODY_TRAJECTORY_TOOLBOX;
+      WHOLE_BODY_TRAJECTORY_TOOLBOX,
+      FIDUCIAL_DETECTOR;
 
       public String getPropertyNameForEnable()
       {

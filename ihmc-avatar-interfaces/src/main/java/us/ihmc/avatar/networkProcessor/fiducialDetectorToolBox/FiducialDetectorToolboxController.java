@@ -19,11 +19,13 @@ import boofcv.io.image.ConvertBufferedImage;
 import boofcv.struct.calib.CameraPinhole;
 import boofcv.struct.image.GrayF32;
 import boofcv.struct.image.ImageType;
+import controller_msgs.msg.dds.DetectedFiducialPacket;
 import controller_msgs.msg.dds.VideoPacket;
 import georegression.struct.se.Se3_F64;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.producers.JPEGDecompressor;
+import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -213,6 +215,15 @@ public class FiducialDetectorToolboxController extends ToolboxController
          reportedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
 
          //TODO send out a detected Fiducial packet containing ID, Pose, And Timestamp
+
+         DetectedFiducialPacket packet = new DetectedFiducialPacket();
+         packet.fiducial_id_ = detector.getId(i);
+
+         Pose3D pose = new Pose3D(reportedFiducialPoseInWorldFrame.getPosition(), reportedFiducialPoseInWorldFrame.getOrientation());
+
+         packet.fiducial_transform_to_world_ = pose;
+
+         reportMessage(packet);
 
       }
 
