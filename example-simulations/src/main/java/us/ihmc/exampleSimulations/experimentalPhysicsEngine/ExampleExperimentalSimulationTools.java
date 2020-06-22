@@ -13,6 +13,7 @@ import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Sphere3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.Graphics3DObject;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.robotics.robotDescription.FloatingJointDescription;
@@ -119,18 +120,42 @@ public class ExampleExperimentalSimulationTools
       RobotDescription robotDescription = new RobotDescription(name);
 
       FloatingJointDescription rootJoint = new FloatingJointDescription(name, name);
-      LinkDescription link = new LinkDescription(name + "Link");
+      rootJoint.setLink(newBoxLink(name + "Link", sizeX, sizeY, sizeZ, mass, radiusOfGyrationPercent, appearance));
+      robotDescription.addRootJoint(rootJoint);
+
+      return robotDescription;
+   }
+
+   public static LinkDescription newBoxLink(String linkName, Tuple3DReadOnly size, double mass, double radiusOfGyrationPercent, AppearanceDefinition appearance)
+   {
+      return newBoxLink(linkName, size.getX(), size.getY(), size.getZ(), mass, radiusOfGyrationPercent, appearance);
+   }
+
+   public static LinkDescription newBoxLink(String linkName, double sizeX, double sizeY, double sizeZ, double mass, double radiusOfGyrationPercent,
+                                            AppearanceDefinition appearance)
+   {
+      LinkDescription link = new LinkDescription(linkName);
       link.setMassAndRadiiOfGyration(mass, radiusOfGyrationPercent * sizeX, radiusOfGyrationPercent * sizeY, radiusOfGyrationPercent * sizeZ);
 
       LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
       linkGraphics.translate(0.0, 0.0, -sizeZ / 2.0);
       linkGraphics.addCube(sizeX, sizeY, sizeZ, appearance);
       link.setLinkGraphics(linkGraphics);
+      return link;
+   }
 
-      rootJoint.setLink(link);
-      robotDescription.addRootJoint(rootJoint);
+   public static LinkGraphicsDescription translateLinkGraphicsDescription(LinkGraphicsDescription input, Vector3DReadOnly translation)
+   {
+      LinkGraphicsDescription output = new LinkGraphicsDescription();
+      output.combine(input, translation);
+      return output;
+   }
 
-      return robotDescription;
+   public static Graphics3DObject translateGraphics3DObject(Graphics3DObject input, Vector3DReadOnly translation)
+   {
+      Graphics3DObject output = new Graphics3DObject();
+      output.combine(input, translation);
+      return output;
    }
 
    static void configureSCSToTrackRobotRootJoint(SimulationConstructionSet scs, RobotDescription robotToTrack)
