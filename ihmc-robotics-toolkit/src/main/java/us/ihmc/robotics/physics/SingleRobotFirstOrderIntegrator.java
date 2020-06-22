@@ -138,7 +138,7 @@ public class SingleRobotFirstOrderIntegrator
       linearVelocity.add(linearVelocityChange);
       orientationChange.inverseTransform(linearVelocity);
 
-      orientationChange.inverseTransform(spatialAcceleration.getLinearPart());
+      orientationChange.inverseTransform(linearAcceleration);
       spatialAcceleration.setBasedOnOriginAcceleration(angularAcceleration, linearAcceleration, twist);
 
       orientation.append(orientationChange);
