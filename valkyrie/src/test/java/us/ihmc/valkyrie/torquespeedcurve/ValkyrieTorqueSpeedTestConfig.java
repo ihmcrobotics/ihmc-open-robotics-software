@@ -21,7 +21,7 @@ import us.ihmc.valkyrie.testsupport.ModifiableValkyrieRobotConfig;
 
 class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 	enum TestType {
-		STAIRS, STEP, SQUARE_UP_STEP, STEP_DOWN, SLOPE, SPEED, NORMAL_WALK, PUSHRECOVERY, DUMMY;
+		STAIRS, STEP, SQUARE_UP_STEP, STEP_DOWN, SLOPE, SPEED, NORMAL_WALK, TURN_IN_PLACE, PUSHRECOVERY, DUMMY;
 	}
 
 	public String testCase;             // for push recovery, specifies which case to run
@@ -33,6 +33,10 @@ class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 	public double stepStartingDistance; // for step/stair scenarios, distance to the first step (inches)
 	public double stepHeight;           // for step/stairs scenarios, height of each step (inches)
 	public int numberOfSteps;           // for step/stair scenarios, number of steps in the staircase
+	public double swingDuration;		// for turn/fast walking
+	public double transferDuration;		// for turn/fast walking
+	public double turnRadiansPerStep;	// for turn walking
+	
 	public HashMap<String, Double> torqueLimits; // Map of joint name to overridden torque limit. Only overridden
 	                                             // joints need to be specified.
 	public HashMap<String, Double> linkMassKg;  // Map of link name to overridden link mass in kg. Only overridden
@@ -104,6 +108,9 @@ class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 		stepStartingDistance = 1.0 * 100.0 / 2.54; // 1m in inches
 		stepHeight = 6.0;
 		numberOfSteps = 3;
+		swingDuration = 1.2;
+		transferDuration = 1.0;
+		turnRadiansPerStep = 0.785399;
 		torqueLimits = new HashMap<String, Double>();
 		linkMassKg = new HashMap<String, Double>();
 		velocityLimits = new HashMap<String, Double>();
@@ -143,8 +150,8 @@ class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 	}	
 	
 	public String toString() {
-		String value = String.format("Test Type: %s\nStep Starting Distance: %f\nStep Height: %f\nNumber of Steps: %d\nShow Gui: %b\nDisable Ankle Limits: %b\n",
-				testType, stepStartingDistance, stepHeight, numberOfSteps, showGui, disableAnkleLimits);
+		String value = String.format("Test Type: %s\nStep Starting Distance: %f\nStep Height: %f\nNumber of Steps: %d\nSwing Duration: %f\nTransfer Duration: %f\nTurn Radians per step: %f\nShow Gui: %b\nDisable Ankle Limits: %b\n",
+				testType, stepStartingDistance, stepHeight, numberOfSteps, swingDuration, transferDuration, turnRadiansPerStep, showGui, disableAnkleLimits);
 		value += String.format("Slope Degrees: %f\nStep Length (Inches): %f\nMass scale: %f\nSize scale: %f\n",
 				slopeDegrees, stepLengthInches, globalMassScale, globalSizeScale);
 		value += walkingValues.toString();

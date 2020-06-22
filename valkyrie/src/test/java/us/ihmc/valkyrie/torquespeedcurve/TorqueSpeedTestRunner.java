@@ -249,6 +249,10 @@ public class TorqueSpeedTestRunner {
 			case NORMAL_WALK:
 				result = tester.testNormalWalk(robot, walkingParameters, outputPrefixDirectory, config.keepUp);		
 				break;
+			case TURN_IN_PLACE:
+				result = tester.testTurn(robot, walkingParameters, outputPrefixDirectory, config.keepUp, 
+										config.numberOfSteps, config.swingDuration, config.transferDuration, config.turnRadiansPerStep);
+				break;
 			case PUSHRECOVERY:
 				result = runPushRecoveryTest(robot, config, outputPrefixDirectory);
 				break;
