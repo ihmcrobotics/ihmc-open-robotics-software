@@ -440,7 +440,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 	}
 
 	public TorqueSpeedTestResult testSpeedWalk(DRCRobotModel robotModel,
-			WalkingControllerParameters walkingControllerParameters, File dataOutputFolder, boolean keepUp)
+			WalkingControllerParameters walkingControllerParameters, File dataOutputFolder, boolean keepUp, double inputSwingDuration, double inputTransferDuration, double inputPercentOfMaxReach)
 			throws SimulationExceededMaximumTimeException {
 		showMemoryUsageBeforeTest();
 		BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -479,11 +479,10 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 
 			SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
 			final double swingHeight = steppingParameters.getDefaultSwingHeightFromStanceFoot() * 0.6;
-			final double swingDuration = 0.35; //0.25; 
-			final double transferDuration = 0.15; //0.075;
+			final double swingDuration = inputSwingDuration; //0.35; //0.25; 
+			final double transferDuration = inputTransferDuration; //0.15; //0.075;
 			// Lower maximum step length to 85% of maximum step reach for controller stability
-			final double stepLength = steppingParameters.getMaxStepLength()*0.85; //steppingParameters.getMaxStepLength()*0.7; 
-
+			final double stepLength = steppingParameters.getMaxStepLength()*inputPercentOfMaxReach; 
 		
 			if (success) {
 				scs.setInPoint();

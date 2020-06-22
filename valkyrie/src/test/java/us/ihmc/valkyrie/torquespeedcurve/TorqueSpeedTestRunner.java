@@ -244,7 +244,7 @@ public class TorqueSpeedTestRunner {
 						outputPrefixDirectory);
 				break;
 			case SPEED:
-				result = tester.testSpeedWalk(robot, walkingParameters, outputPrefixDirectory, config.keepUp);		
+				result = tester.testSpeedWalk(robot, walkingParameters, outputPrefixDirectory, config.keepUp, config.swingDuration, config.transferDuration, config.percentOfMaxReach);		
 				break;
 			case NORMAL_WALK:
 				result = tester.testNormalWalk(robot, walkingParameters, outputPrefixDirectory, config.keepUp);		

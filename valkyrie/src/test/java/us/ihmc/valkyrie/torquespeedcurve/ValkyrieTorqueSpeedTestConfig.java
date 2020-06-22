@@ -35,6 +35,7 @@ class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 	public int numberOfSteps;           // for step/stair scenarios, number of steps in the staircase
 	public double swingDuration;		// for turn/fast walking
 	public double transferDuration;		// for turn/fast walking
+	public double percentOfMaxReach;	// for fast walking
 	public double turnRadiansPerStep;	// for turn walking
 	
 	public HashMap<String, Double> torqueLimits; // Map of joint name to overridden torque limit. Only overridden
@@ -110,6 +111,7 @@ class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 		numberOfSteps = 3;
 		swingDuration = 1.2;
 		transferDuration = 1.0;
+		percentOfMaxReach = 1.0;
 		turnRadiansPerStep = 0.785399;
 		torqueLimits = new HashMap<String, Double>();
 		linkMassKg = new HashMap<String, Double>();
@@ -150,8 +152,8 @@ class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 	}	
 	
 	public String toString() {
-		String value = String.format("Test Type: %s\nStep Starting Distance: %f\nStep Height: %f\nNumber of Steps: %d\nSwing Duration: %f\nTransfer Duration: %f\nTurn Radians per step: %f\nShow Gui: %b\nDisable Ankle Limits: %b\n",
-				testType, stepStartingDistance, stepHeight, numberOfSteps, swingDuration, transferDuration, turnRadiansPerStep, showGui, disableAnkleLimits);
+		String value = String.format("Test Type: %s\nStep Starting Distance: %f\nStep Height: %f\nNumber of Steps: %d\nSwing Duration: %f\nTransfer Duration: %f\nPercent Max Reach: %f\nTurn Radians per step: %f\nShow Gui: %b\nDisable Ankle Limits: %b\n",
+				testType, stepStartingDistance, stepHeight, numberOfSteps, swingDuration, transferDuration, percentOfMaxReach, turnRadiansPerStep, showGui, disableAnkleLimits);
 		value += String.format("Slope Degrees: %f\nStep Length (Inches): %f\nMass scale: %f\nSize scale: %f\n",
 				slopeDegrees, stepLengthInches, globalMassScale, globalSizeScale);
 		value += walkingValues.toString();
