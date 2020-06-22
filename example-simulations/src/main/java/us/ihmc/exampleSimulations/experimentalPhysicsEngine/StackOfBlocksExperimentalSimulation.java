@@ -86,6 +86,7 @@ public class StackOfBlocksExperimentalSimulation
       experimentalSimulation.simulate();
       scs.getRootRegistry().addChild(experimentalSimulation.getPhysicsEngineRegistry());
       scs.setDT(simDT, 1);
+      scs.setFastSimulate(true);
       scs.startOnAThread();
       scs.simulate(5.0);
    }

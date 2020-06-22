@@ -92,6 +92,7 @@ public class SpinningCoinExperimentalSimulation
       scs.getRootRegistry().addChild(experimentalSimulation.getPhysicsEngineRegistry());
       ExampleExperimentalSimulationTools.configureSCSToTrackRobotRootJoint(scs, robotDescription);
       scs.setDT(simDT, 1);
+      scs.setFastSimulate(true);
       scs.startOnAThread();
       scs.simulate(10.0);
    }
