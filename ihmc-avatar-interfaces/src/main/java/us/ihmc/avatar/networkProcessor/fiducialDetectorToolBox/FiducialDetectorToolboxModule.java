@@ -41,7 +41,7 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
    {
 
       //TODO is this how i get video packets
-      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerInputTopic(robotName);
+      ROS2Topic controllerOutputTopic = ROS2Tools.getControllerOutputTopic(robotName);
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, VideoPacket.class, controllerOutputTopic, s ->
       {
          if (controller != null)
