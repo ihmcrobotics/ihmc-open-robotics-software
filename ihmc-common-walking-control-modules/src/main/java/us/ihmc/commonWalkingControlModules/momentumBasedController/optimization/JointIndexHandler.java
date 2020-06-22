@@ -10,6 +10,7 @@ import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -175,7 +176,7 @@ public class JointIndexHandler
       return true;
    }
 
-   public int getOneDoFJointIndex(OneDoFJointBasics joint)
+   public int getOneDoFJointIndex(OneDoFJointReadOnly joint)
    {
       int[] jointIndices = columnsForJoints.get(joint);
       if (jointIndices == null)
