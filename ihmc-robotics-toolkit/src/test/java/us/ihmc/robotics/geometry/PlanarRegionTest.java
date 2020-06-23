@@ -1,8 +1,6 @@
 package us.ihmc.robotics.geometry;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.assertFalse;
-import static us.ihmc.robotics.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -388,9 +386,9 @@ public class PlanarRegionTest
       RigidBodyTransform regionTransform = new RigidBodyTransform();
       PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
 
-      assertEquals("Wrong number of convex polygons in the region.", 3, planarRegion.getNumberOfConvexPolygons());
+      assertEquals(3, planarRegion.getNumberOfConvexPolygons(), "Wrong number of convex polygons in the region.");
       for (int i = 0; i < 3; i++)
-         assertTrue("Unexpected region polygon.", regionConvexPolygons.get(i).epsilonEquals(planarRegion.getConvexPolygon(i), 1.0e-10));
+         assertTrue(regionConvexPolygons.get(i).epsilonEquals(planarRegion.getConvexPolygon(i), 1.0e-10), "Unexpected region polygon.");
 
       Vector3D actualNormal = new Vector3D();
       planarRegion.getNormal(actualNormal);
@@ -400,7 +398,7 @@ public class PlanarRegionTest
       EuclidCoreTestTools.assertTuple3DEquals("Wrong region origin.", new Point3D(), actualOrigin, 1.0e-10);
       RigidBodyTransform actualTransform = new RigidBodyTransform();
       planarRegion.getTransformToWorld(actualTransform);
-      assertTrue("Wrong region transform to world.", regionTransform.epsilonEquals(actualTransform, 1.0e-10));
+      assertTrue(regionTransform.epsilonEquals(actualTransform, 1.0e-10), "Wrong region transform to world.");
 
       Point2D point2d = new Point2D();
 
@@ -486,13 +484,13 @@ public class PlanarRegionTest
       assertEquals(3, intersectionsInPlaneFrame.size());
 
       lineSegment = new LineSegment2D(0.0, 0.0, 0.5, 0.5);
-      assertFalse("Not intersecting if fully inside a single polygon", planarRegion.isLineSegmentIntersecting(lineSegment));
+      assertFalse(planarRegion.isLineSegmentIntersecting(lineSegment), "Not intersecting if fully inside a single polygon");
       intersectionsInPlaneFrame.clear();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
       assertEquals(0, intersectionsInPlaneFrame.size());
 
       lineSegment = new LineSegment2D(0.0, 0.0, 0.0, 1.5);
-      assertTrue("Intersecting if fully inside but cross two polygons", planarRegion.isLineSegmentIntersecting(lineSegment));
+      assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment), "Intersecting if fully inside but cross two polygons");
       intersectionsInPlaneFrame.clear();
       planarRegion.getLineSegmentIntersectionsWhenProjectedVertically(lineSegment, intersectionsInPlaneFrame);
       assertEquals(2, intersectionsInPlaneFrame.size());
@@ -506,7 +504,7 @@ public class PlanarRegionTest
       lineSegment = new LineSegment2D(2.5, 0.5, 3.0, 9.0);
       assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
       lineSegment = new LineSegment2D(2.5, 4.5, 3.0, 9.0);
-      assertFalse("Not intersecting if fully outside", planarRegion.isLineSegmentIntersecting(lineSegment));
+      assertFalse(planarRegion.isLineSegmentIntersecting(lineSegment), "Not intersecting if fully outside");
 
       lineSegment = new LineSegment2D(2.0, -2.0, 2.0, 2.0);
       assertTrue(planarRegion.isLineSegmentIntersecting(lineSegment));
@@ -630,9 +628,9 @@ public class PlanarRegionTest
          ReferenceFrame localFrame = ReferenceFrameTools.constructFrameWithUnchangingTransformToParent("local", worldFrame, regionTransform);
          PlanarRegion planarRegion = new PlanarRegion(regionTransform, regionConvexPolygons);
 
-         assertEquals("Wrong number of convex polygons in the region.", 3, planarRegion.getNumberOfConvexPolygons());
+         assertEquals(3, planarRegion.getNumberOfConvexPolygons(), "Wrong number of convex polygons in the region.");
          for (int i = 0; i < 3; i++)
-            assertTrue("Unexpected region polygon.", regionConvexPolygons.get(i).epsilonEquals(planarRegion.getConvexPolygon(i), 1.0e-10));
+            assertTrue(regionConvexPolygons.get(i).epsilonEquals(planarRegion.getConvexPolygon(i), 1.0e-10), "Unexpected region polygon.");
 
          Vector3D expectedNormal = new Vector3D(0.0, 0.0, 1.0);
          regionTransform.transform(expectedNormal);
@@ -646,7 +644,7 @@ public class PlanarRegionTest
          EuclidCoreTestTools.assertTuple3DEquals("Wrong region origin.", expectedOrigin, actualOrigin, 1.0e-10);
          RigidBodyTransform actualTransform = new RigidBodyTransform();
          planarRegion.getTransformToWorld(actualTransform);
-         assertTrue("Wrong region transform to world.", regionTransform.epsilonEquals(actualTransform, 1.0e-10));
+         assertTrue(regionTransform.epsilonEquals(actualTransform, 1.0e-10), "Wrong region transform to world.");
 
          FramePoint2D point2d = new FramePoint2D();
 
@@ -790,9 +788,9 @@ public class PlanarRegionTest
                Point2DReadOnly vertex = convexPolygon2dInWorld.getVertex(i);
                double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.getX(), vertex.getY());
 
-               assertTrue(
-                     "Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: "
-                           + boundingBox3dInWorld, boundingBox3dInWorld.isInsideEpsilon(vertex.getX(), vertex.getY(), planeZGivenXY, 1e-15));
+               assertTrue(boundingBox3dInWorld.isInsideEpsilon(vertex.getX(), vertex.getY(), planeZGivenXY, 1e-15),
+                       "Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: "
+                       + boundingBox3dInWorld);
             }
          }
       }
@@ -909,37 +907,43 @@ public class PlanarRegionTest
          supportDirection.set(Axis3D.X);
          expectedSupportVertex = convexHullVertices.stream().max(Comparator.comparingDouble(Point3D::getX)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
-         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+         assertTrue(expectedSupportVertex.equals(actualSupportVertex),
+                    "iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex);
 
          // Trivial case #2: supportingVector = -X
          supportDirection.setAndNegate(Axis3D.X);
          expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(Point3D::getX)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
-         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+         assertTrue(expectedSupportVertex.equals(actualSupportVertex),
+                    "iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex);
 
          // Trivial case #1: supportingVector = +Y
          supportDirection.set(Axis3D.Y);
          expectedSupportVertex = convexHullVertices.stream().max(Comparator.comparingDouble(Point3D::getY)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
-         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+         assertTrue(expectedSupportVertex.equals(actualSupportVertex),
+                    "iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex);
 
          // Trivial case #2: supportingVector = -Y
          supportDirection.setAndNegate(Axis3D.Y);
          expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(Point3D::getY)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
-         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+         assertTrue(expectedSupportVertex.equals(actualSupportVertex),
+                    "iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex);
 
          // Trivial case #1: supportingVector = +Z
          supportDirection.set(Axis3D.Z);
          expectedSupportVertex = convexHullVertices.stream().max(Comparator.comparingDouble(Point3D::getZ)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
-         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+         assertTrue(expectedSupportVertex.equals(actualSupportVertex),
+                    "iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex);
 
          // Trivial case #2: supportingVector = -Z
          supportDirection.setAndNegate(Axis3D.Z);
          expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(Point3D::getZ)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
-         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+         assertTrue(expectedSupportVertex.equals(actualSupportVertex),
+                    "iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex);
 
          // Random support direction
          supportDirection = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
@@ -956,7 +960,8 @@ public class PlanarRegionTest
 
          expectedSupportVertex = convexHullVertices.stream().min(Comparator.comparingDouble(line::distance)).get();
          actualSupportVertex = planarRegion.getSupportingVertex(supportDirection);
-         assertTrue("iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex, expectedSupportVertex.equals(actualSupportVertex));
+         assertTrue(expectedSupportVertex.equals(actualSupportVertex),
+                    "iteration #" + i + " expected:\n" + expectedSupportVertex + "was:\n" + actualSupportVertex);
       }
    }
 
@@ -1209,8 +1214,9 @@ public class PlanarRegionTest
             Point2DReadOnly vertex = convexPolygon2dInWorld.getVertex(i);
             double planeZGivenXY = planarRegion.getPlaneZGivenXY(vertex.getX(), vertex.getY());
 
-            assertTrue("Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: "
-                  + boundingBox3dInWorld, boundingBox3dInWorld.isInsideInclusive(vertex.getX(), vertex.getY(), planeZGivenXY));
+            assertTrue(boundingBox3dInWorld.isInsideInclusive(vertex.getX(), vertex.getY(), planeZGivenXY),
+                       "Polygon vertex is not inside computed bounding box.\nVertex: " + vertex + "\nPlane z at vertex: " + planeZGivenXY + "\nBounding Box: "
+                       + boundingBox3dInWorld);
          }
       }
    }
