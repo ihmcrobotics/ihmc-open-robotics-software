@@ -376,7 +376,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
             else
             { // Contact is slipping, that's the though case.
                ContactImpulseTools.computeSlipLambda(beta1, beta2, beta3, gamma, mu, M_inv, lambda_v_0, c, impulseA.getLinearPart(), false);
-               collisionResult.getAccumulatedSlipForA().scale(0.995);
+               if (collisionResult.getAccumulatedSlipForA() != null)
+                  collisionResult.getAccumulatedSlipForA().scale(0.995);
             }
          }
       }
