@@ -178,7 +178,7 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
       this.walkingControllerParameters = walkingControllerParameters;
 
       balanceManager = managerFactory.getOrCreateBalanceManager();
-      comHeightManager = new SimpleCenterOfMassHeightManager(controllerToolbox, walkingControllerParameters, registry);
+      comHeightManager = managerFactory.getOrCreateCenterOfMassHeightManager();
 
       this.commandInputManager = commandInputManager;
       this.statusOutputManager = statusOutputManager;

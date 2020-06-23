@@ -117,6 +117,7 @@ public class SimpleControlManagerFactory
       walkingControllerMaxComHeightVelocity = new DoubleParameter("MaximumVelocityWalkingControllerComHeight", comHeightGainRegistry, walkingControllerParameters.getMaximumVelocityCoMHeight());
    }
 
+   // TODO this needs to be called
    public void setCapturePointPlannerParameters(ICPWithTimeFreezingPlannerParameters capturePointPlannerParameters)
    {
       this.capturePointPlannerParameters = capturePointPlannerParameters;
