@@ -13,6 +13,7 @@ import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
+import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
 import us.ihmc.avatar.networkProcessor.reaStateUpdater.HumanoidAvatarREAStateUpdater;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
@@ -92,6 +93,8 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          humanoidNetworkProcessor.setupHeightQuadTreeToolboxModule();
       if (parameters.isUseFiducialDetectorToolboxModule())
          humanoidNetworkProcessor.setupFiducialDetectorToolboxModule();
+      if (parameters.isUseObjectDetectorToolboxModule())
+         humanoidNetworkProcessor.setupObjectDetectorToolboxModule();
       if (parameters.isUseRobotEnvironmentAwerenessModule())
          humanoidNetworkProcessor.setupRobotEnvironmentAwerenessModule(parameters.getREAConfigurationFilePath());
       if (parameters.isUseBipedalSupportPlanarRegionPublisherModule())
@@ -433,6 +436,26 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       try
       {
          FiducialDetectorToolboxModule module = new FiducialDetectorToolboxModule(robotModel.getSimpleRobotName(),
+                                                                              robotModel.createFullRobotModel(),
+                                                                              robotModel.getLogModelProvider(),
+                                                                              pubSubImplementation);
+         modulesToClose.add(module);
+         return module;
+      }
+      catch (Throwable e)
+      {
+         reportFailure(e);
+         return null;
+      }
+   }
+   
+   public ObjectDetectorToolboxModule setupObjectDetectorToolboxModule()
+   {
+      checkIfModuleCanBeCreated(ObjectDetectorToolboxModule.class);
+
+      try
+      {
+         ObjectDetectorToolboxModule module = new ObjectDetectorToolboxModule(robotModel.getSimpleRobotName(),
                                                                               robotModel.createFullRobotModel(),
                                                                               robotModel.getLogModelProvider(),
                                                                               pubSubImplementation);
