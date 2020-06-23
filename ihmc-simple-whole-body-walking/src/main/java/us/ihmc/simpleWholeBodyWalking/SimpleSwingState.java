@@ -169,11 +169,12 @@ public class SimpleSwingState extends SimpleFootControlState
    private final YoBoolean yoSetDesiredVelocityToZero;
    private final YoBoolean scaleSecondaryJointWeights;
    private final YoDouble secondaryJointWeightScale;
-   private final YoFrameVector3D currentAngularWeight;
-   private final YoFrameVector3D currentLinearWeight;
    private final ReferenceFrame ankleFrame;
    private final PoseReferenceFrame controlFrame;
    private final PIDSE3GainsReadOnly gains;
+
+   private Vector3DReadOnly nominalAngularWeight;
+   private Vector3DReadOnly nominalLinearWeight;
 
    public SimpleSwingState(ContactableFoot contactableFoot,
                            HighLevelHumanoidControllerToolbox controllerToolbox,
@@ -197,9 +198,6 @@ public class SimpleSwingState extends SimpleFootControlState
       scaleSecondaryJointWeights = new YoBoolean(namePrefix + "ScaleSecondaryJointWeights", registry);
       secondaryJointWeightScale = new YoDouble(namePrefix + "SecondaryJointWeightScale", registry);
       secondaryJointWeightScale.set(1.0);
-
-      currentAngularWeight = new YoFrameVector3D(namePrefix + "CurrentAngularWeight", worldFrame, registry);
-      currentLinearWeight = new YoFrameVector3D(namePrefix + "CurrentLinearWeight", worldFrame, registry);
 
       ankleFrame = contactableFoot.getFrameAfterParentJoint();
       controlFrame = new PoseReferenceFrame("controlFrame", contactableFoot.getRigidBody().getBodyFixedFrame());
@@ -443,7 +441,7 @@ public class SimpleSwingState extends SimpleFootControlState
       }
 
       spatialFeedbackControlCommand.setInverseDynamics(desiredOrientation, desiredPosition, desiredAngularVelocity, desiredLinearVelocity, desiredAngularAcceleration, desiredLinearAcceleration);
-      spatialFeedbackControlCommand.setWeightsForSolver(currentAngularWeight, currentLinearWeight);
+      spatialFeedbackControlCommand.setWeightsForSolver(nominalAngularWeight, nominalLinearWeight);
       spatialFeedbackControlCommand.setScaleSecondaryTaskJointWeight(scaleSecondaryJointWeights.getBooleanValue(), secondaryJointWeightScale.getDoubleValue());
       spatialFeedbackControlCommand.setGains(gains);
 
@@ -891,8 +889,8 @@ public class SimpleSwingState extends SimpleFootControlState
 
    public void setWeights(Vector3DReadOnly angularWeight, Vector3DReadOnly linearWeight)
    {
-      this.currentAngularWeight.set(angularWeight);
-      this.currentLinearWeight.set(linearWeight);
+      this.nominalAngularWeight = angularWeight;
+      this.nominalLinearWeight = linearWeight;
    }
 
 }
