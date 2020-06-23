@@ -25,6 +25,8 @@ public class HumanoidNetworkProcessorParameters
    private boolean useSensorModule;
    private boolean useHeightQuadTreeToolboxModule;
    private boolean useFiducialDetectorToolboxModule;
+   private boolean useObjectDetectorToolboxModule;
+
 
    private boolean useRobotEnvironmentAwerenessModule;
    private String reaConfigurationFilePath;
@@ -315,6 +317,15 @@ public class HumanoidNetworkProcessorParameters
    public boolean isUseFiducialDetectorToolboxModule()
    {
       return useFiducialDetectorToolboxModule;
+   }
+   public void setUseObjectDetectorToolboxModule(boolean enable)
+   {
+      this.useObjectDetectorToolboxModule = enable;
+   }
+   
+   public boolean isUseObjectDetectorToolboxModule()
+   {
+      return useObjectDetectorToolboxModule;
    }
 
 

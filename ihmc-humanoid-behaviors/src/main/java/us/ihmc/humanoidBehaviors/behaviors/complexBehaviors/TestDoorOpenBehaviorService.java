@@ -9,7 +9,6 @@ import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
 import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.DoorOpenDetectorBehaviorService;
-import us.ihmc.humanoidBehaviors.behaviors.behaviorServices.FiducialDetectorBehaviorService;
 import us.ihmc.humanoidBehaviors.communication.ConcurrentListeningQueue;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.ros2.Ros2Node;
@@ -19,8 +18,8 @@ public class TestDoorOpenBehaviorService extends AbstractBehavior
    boolean isDoorOpen = false;
    protected final ConcurrentListeningQueue<DoorLocationPacket> doorLocationQueue = new ConcurrentListeningQueue<DoorLocationPacket>(10);
    private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
-   private final FiducialDetectorBehaviorService fiducialDetectorBehaviorService;
-   
+ //  private final FiducialDetectorBehaviorService fiducialDetectorBehaviorService;
+
    private IHMCROS2Publisher<DoorLocationPacket> doorToBehaviorPublisher;
    private IHMCROS2Publisher<DoorLocationPacket> doorToUIPublisher;
 
@@ -35,15 +34,15 @@ public class TestDoorOpenBehaviorService extends AbstractBehavior
       registry.addChild(doorOpenDetectorBehaviorService.getYoVariableRegistry());
 
       addBehaviorService(doorOpenDetectorBehaviorService);
-      
-      fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(robotName, yoNamePrefix + "SearchForDoorFiducial1", ros2Node,
-              yoGraphicsListRegistry);
-      	fiducialDetectorBehaviorService.setTargetIDToLocate(50);
-      	fiducialDetectorBehaviorService.setExpectedFiducialSize(0.2032);
-
-      	registry.addChild(fiducialDetectorBehaviorService.getYoVariableRegistry());
-
-      	addBehaviorService(fiducialDetectorBehaviorService);
+     
+//      fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(robotName, yoNamePrefix + "SearchForDoorFiducial1", ros2Node,
+//              yoGraphicsListRegistry);
+//      	fiducialDetectorBehaviorService.setTargetIDToLocate(50);
+//      	fiducialDetectorBehaviorService.setExpectedFiducialSize(0.2032);
+//
+//      	registry.addChild(fiducialDetectorBehaviorService.getYoVariableRegistry());
+//
+//      	addBehaviorService(fiducialDetectorBehaviorService);
       
 //      fiducialDetectorBehaviorService = new FiducialDetectorBehaviorService(robotName, yoNamePrefix + "SearchForDoorFiducial1", ros2Node,
 //                                                                            yoGraphicsListRegistry);
@@ -72,11 +71,11 @@ public class TestDoorOpenBehaviorService extends AbstractBehavior
    {
 	   
 	   
-	   if (fiducialDetectorBehaviorService.getGoalHasBeenLocated())
+	   if (false)//fiducialDetectorBehaviorService.getGoalHasBeenLocated())
 	      {
 
 	         FramePose3D tmpFP = new FramePose3D();
-	         fiducialDetectorBehaviorService.getReportedGoalPoseWorldFrame(tmpFP);
+	       //  fiducialDetectorBehaviorService.getReportedGoalPoseWorldFrame(tmpFP);
 
 	         tmpFP.appendPitchRotation(Math.toRadians(90));
 	         tmpFP.appendYawRotation(0);

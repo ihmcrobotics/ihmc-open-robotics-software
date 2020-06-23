@@ -3,12 +3,12 @@ package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
+import controller_msgs.msg.dds.DetectedFiducialPacket;
 import controller_msgs.msg.dds.DoorLocationPacket;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.robotics.kinematics.AverageQuaternionCalculator;
 import us.ihmc.ros2.Ros2Node;
 
@@ -32,14 +32,17 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
    private long timeOfLastUpdate = 0;
    private long timeToWait = 2000;
 
-
    protected final AtomicReference<DoorLocationPacket> doorLocationQueue = new AtomicReference<DoorLocationPacket>();
 
    public DoorOpenDetectorBehaviorService(String robotName, String ThreadName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, ThreadName, ros2Node);//, yoGraphicsListRegistry);
 
-      createSubscriber(DoorLocationPacket.class, IHMCHumanoidBehaviorManager.getInputTopic(robotName), doorLocationQueue::set);
+      
+      //TODO fix this
+      //createSubscriber(DetectedFiducialPacket.class, FiducialDetectorToolboxModule.getOutputTopic(networkManager.getRobotName()), doorLocationQueue::put);
+
+      //      createSubscriber(DoorLocationPacket.class, IHMCHumanoidBehaviorManager.getInputTopic(robotName), doorLocationQueue::set);
 
       initialize();
    }
@@ -95,7 +98,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
             // getReportedGoalPoseWorldFrame(newPose);
 
             //first find the average location of the door to begin with(the doors closed point)
-            if (averageOrigin == null) 
+            if (averageOrigin == null)
             {
 
                originPoses.add(newPose);
@@ -132,8 +135,8 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
                   }
                   // System.out.println("***************************");
                   //   System.out.println(averageOrigin.getYaw());
-//                  System.out.println(Math.toDegrees(averageOrigin.getYaw())+" - "+Math.toDegrees(averageCurrentDoorLocation.getYaw()));
-//                  System.out.println("##" + Math.toDegrees(Math.abs(Math.abs(averageOrigin.getYaw()) - Math.abs(averageCurrentDoorLocation.getYaw()))));
+                  //                  System.out.println(Math.toDegrees(averageOrigin.getYaw())+" - "+Math.toDegrees(averageCurrentDoorLocation.getYaw()));
+                  //                  System.out.println("##" + Math.toDegrees(Math.abs(Math.abs(averageOrigin.getYaw()) - Math.abs(averageCurrentDoorLocation.getYaw()))));
                   //    System.out.println(System.currentTimeMillis() - timeOfLastUpdate> timeToWait);
                   //   System.out.println("&"+averageOrigin.getPitch());
                   //  System.out.println("&"+averageCurrentDoorLocation.getPitch());
@@ -147,7 +150,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
                      {
                         doorOpen = true;
                      }
-                     else if(doorOpen && Math.abs(averageOrigin.getYaw() - averageCurrentDoorLocation.getYaw()) < closeAngle)
+                     else if (doorOpen && Math.abs(averageOrigin.getYaw() - averageCurrentDoorLocation.getYaw()) < closeAngle)
                      {
                         doorOpen = false;
                      }
@@ -161,7 +164,6 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
       }
    }
 
-
    private FramePose3D averageFramePoses(ArrayList<FramePose3D> poses)
    {
       if (poses.size() > 0)
@@ -172,19 +174,19 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
 
          float numberOfPoses = poses.size();
          FramePose3D aveagedPose = new FramePose3D(ReferenceFrame.getWorldFrame());
-//         System.out.println("******************");
+         //         System.out.println("******************");
          for (FramePose3D pose : poses)
          {
-            
-//            System.out.print(Math.toDegrees(pose.getOrientation().getYaw())+",");
+
+            //            System.out.print(Math.toDegrees(pose.getOrientation().getYaw())+",");
             aveagedPose.setX(aveagedPose.getX() + pose.getX());
             aveagedPose.setY(aveagedPose.getY() + pose.getY());
             aveagedPose.setZ(aveagedPose.getZ() + pose.getZ());
             averageQuaternionCalculator.queueQuaternion(new Quaternion(pose.getOrientation()));
 
          }
-         
- //        System.out.println("\n******************");
+
+         //        System.out.println("\n******************");
 
          aveagedPose.setX(aveagedPose.getX() / numberOfPoses);
          aveagedPose.setY(aveagedPose.getY() / numberOfPoses);
@@ -194,7 +196,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
          Quaternion actualAverageQuat = new Quaternion();
          averageQuaternionCalculator.getAverageQuaternion(actualAverageQuat);
          aveagedPose.setOrientation(actualAverageQuat);
- //        System.out.println("***"+aveagedPose.getOrientation().getYaw());
+         //        System.out.println("***"+aveagedPose.getOrientation().getYaw());
          return aveagedPose;
       }
       else

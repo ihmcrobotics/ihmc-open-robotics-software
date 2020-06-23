@@ -1,10 +1,12 @@
-package us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox;
+package us.ihmc.avatar.networkProcessor.objectDetectorToolBox;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import controller_msgs.msg.dds.DetectedFiducialPacket;
+import controller_msgs.msg.dds.DetectedObjectPacket;
+import controller_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -17,15 +19,15 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.RealtimeRos2Node;
 
-public class FiducialDetectorToolboxModule extends ToolboxModule
+public class ObjectDetectorToolboxModule extends ToolboxModule
 {
-   private final FiducialDetectorToolboxController controller;
+   private final ObjectDetectorToolboxController controller;
 
-   public FiducialDetectorToolboxModule(String robotName, FullHumanoidRobotModel desiredFullRobotModel, LogModelProvider modelProvider,
-                                        PubSubImplementation pubSubImplementation)
+   public ObjectDetectorToolboxModule(String robotName, FullHumanoidRobotModel desiredFullRobotModel, LogModelProvider modelProvider,
+                                      PubSubImplementation pubSubImplementation)
    {
       super(robotName, desiredFullRobotModel, modelProvider, false, 50, pubSubImplementation);
-      controller = new FiducialDetectorToolboxController(fullRobotModel, statusOutputManager, registry);
+      controller = new ObjectDetectorToolboxController(fullRobotModel, statusOutputManager, registry);
       setTimeWithoutInputsBeforeGoingToSleep(3.0);
    }
 
@@ -39,12 +41,14 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, VideoPacket.class, ROS2Tools.IHMC_ROOT, s ->
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, DetectedFiducialPacket.class, ROS2Tools.IHMC_ROOT, s ->
       {
          if (controller != null)
          {
+            
             controller.receivedPacket(s.takeNextData());
             receivedInput.set(true);
+
          }
       });
    }
@@ -54,8 +58,7 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
-      //      commands.add(DetectedFiducialPacket.class);
-      //video
+      //      commands.add(DetectedObjectPacket.class);
       return commands;
    }
 
@@ -63,7 +66,7 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
    @Override
    public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
    {
-      return Collections.singletonList(DetectedFiducialPacket.class);
+      return Collections.singletonList(DoorLocationPacket.class);
    }
 
    @Override
@@ -74,7 +77,7 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
 
    public static ROS2Topic getOutputTopic(String robotName)
    {
-      return ROS2Tools.FIDUCIAL_DETECTOR_TOOLBOX.withRobot(robotName).withOutput();
+      return ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput();
    }
 
    @Override
@@ -85,6 +88,6 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
 
    public static ROS2Topic getInputTopic(String robotName)
    {
-      return ROS2Tools.FIDUCIAL_DETECTOR_TOOLBOX.withRobot(robotName).withInput();
+      return ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withInput();
    }
 }
