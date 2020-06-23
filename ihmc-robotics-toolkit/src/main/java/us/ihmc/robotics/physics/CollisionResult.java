@@ -106,7 +106,7 @@ public class CollisionResult
     * <pre>
     *  collisionAxisForA &equiv; normalOnB
     *  collisionAxisForA &equiv; -normalOnA
-    *  collisionAxisForA &equiv; pointOnA - pointOnB
+    *  collisionAxisForA &equiv; (pointOnA - pointOnB)/|pointOnA - pointOnB|
     * </pre>
     */
    public FrameUnitVector3D getCollisionAxisForA()
@@ -116,7 +116,10 @@ public class CollisionResult
 
    public FrameVector3DBasics getAccumulatedSlipForA()
    {
-      return collisionSlipHolder.getEstimatedSlipFromBToA();
+      if (collisionSlipHolder == null)
+         return null;
+      else
+         return collisionSlipHolder.getEstimatedSlipFromBToA();
    }
 
    @Override
