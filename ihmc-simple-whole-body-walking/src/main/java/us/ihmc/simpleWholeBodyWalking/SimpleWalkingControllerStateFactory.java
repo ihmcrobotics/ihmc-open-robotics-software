@@ -14,7 +14,11 @@ public class SimpleWalkingControllerStateFactory implements HighLevelControllerS
    {
       if (walkingControllerState == null)
       {
+         
          SimpleControlManagerFactory managerFactory = new SimpleControlManagerFactory(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox().getYoVariableRegistry());
+         managerFactory.setHighLevelHumanoidControllerToolbox(controllerFactoryHelper.getHighLevelHumanoidControllerToolbox());
+         managerFactory.setWalkingControllerParameters(controllerFactoryHelper.getWalkingControllerParameters());
+         
          walkingControllerState = new SimpleWalkingControllerState(controllerFactoryHelper.getCommandInputManager(), controllerFactoryHelper.getStatusMessageOutputManager(),
                                                                    managerFactory, controllerFactoryHelper.getHighLevelHumanoidControllerToolbox(),
                                                                    controllerFactoryHelper.getHighLevelControllerParameters(),

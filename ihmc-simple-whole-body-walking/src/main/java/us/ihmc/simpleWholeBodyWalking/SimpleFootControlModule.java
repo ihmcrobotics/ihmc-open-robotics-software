@@ -122,7 +122,7 @@ public class SimpleFootControlModule
 
       resetFootPolygon = new YoBoolean(namePrefix + "ResetFootPolygon", registry);
 
-      String targetRegistryName = FeetManager.class.getSimpleName();
+      String targetRegistryName = SimpleFeetManager.class.getSimpleName();
       String parameterRegistryName = SimpleFootControlModule.class.getSimpleName() + "Parameters";
       coefficientOfFriction = ParameterProvider.getOrCreateParameter(targetRegistryName,
                                                                      parameterRegistryName,
