@@ -310,17 +310,10 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
        * doubled, such that, the post-impact velocity is opposite of the pre-impact velocity along the
        * collision axis.
        */
-      if (contactParameters.getCoefficientOfRestitution() != 0.0)
-      {
-         if (velocityRelative.getZ() <= -contactParameters.getRestitutionThreshold())
-            velocitySolverInput.setAndScale(1.0 + contactParameters.getCoefficientOfRestitution(), velocityRelative);
-         else
-            velocitySolverInput.set(velocityRelative);
-      }
-      else
-      {
-         velocitySolverInput.set(velocityRelative);
-      }
+      velocitySolverInput.set(velocityRelative);
+
+      if (contactParameters.getCoefficientOfRestitution() != 0.0 && velocityRelative.getZ() <= -contactParameters.getRestitutionThreshold())
+         velocitySolverInput.addZ(contactParameters.getCoefficientOfRestitution() * (velocityRelative.getZ() + contactParameters.getRestitutionThreshold()));
 
       /*
        * Computing the correction term based on the penetration of the two collidables. This assumes that
