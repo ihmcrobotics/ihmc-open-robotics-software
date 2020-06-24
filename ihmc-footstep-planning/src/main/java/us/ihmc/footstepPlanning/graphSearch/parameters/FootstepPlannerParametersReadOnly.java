@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import us.ihmc.footstepPlanning.graphSearch.nodeChecking.GoodFootstepPositionChecker;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.property.StoredPropertySetReadOnly;
 import us.ihmc.yoVariables.providers.DoubleProvider;
 
@@ -823,5 +824,13 @@ public interface FootstepPlannerParametersReadOnly extends StoredPropertySetRead
    default double getDistanceEpsilonToBridgeRegions()
    {
       return get(distanceEpsilonToBridgeRegions);
+   }
+
+   /**
+    * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
+    */
+   default RobotSide getStepOnlyWithRequestedSide()
+   {
+      return RobotSide.fromByte((byte) get(stepOnlyWithRequestedSide));
    }
 }

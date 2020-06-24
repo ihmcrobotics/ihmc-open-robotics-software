@@ -26,6 +26,10 @@
 
 float64 DEFAULT_NO_VALUE=-11.1
 
+int8 ROBOT_SIDE_LEFT=0
+
+int8 ROBOT_SIDE_RIGHT=1
+
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
 
@@ -458,5 +462,12 @@ float64 shin_height_offet
 # Distance epsilon below snapped footstep that will be added to foothold
 # Field default value -11.1
 float64 distance_epsilon_to_bridge_regions
+
+# If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
+# The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
+# so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is
+# encourage to step, to enable walking up stairs such that two steps per stair are planned, for example.
+# Field default value 255
+int8 step_only_with_requested_side
 
 
