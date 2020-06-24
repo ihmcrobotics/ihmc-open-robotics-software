@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.coordinator;
+package us.ihmc.atlas.behaviors.coordinator;
 
 public enum BuildingExplorationStateName
 {
