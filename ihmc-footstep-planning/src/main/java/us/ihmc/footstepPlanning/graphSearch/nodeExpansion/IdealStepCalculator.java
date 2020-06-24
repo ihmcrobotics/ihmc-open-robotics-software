@@ -91,6 +91,13 @@ public class IdealStepCalculator
       double distanceFromPathSquared = midFootPoint.distanceXYSquared(projectionPose.getPosition());
       double finalTurnProximity = parameters.getFinalTurnProximity();
 
+      RobotSide requestedStepSide = parameters.getStepOnlyWithRequestedSide();
+      if (requestedStepSide != null && requestedStepSide != stanceNode.getRobotSide().getOppositeSide())
+      {
+         double turnYaw = 0.0;
+         return turnInPlaceStep(stanceNode, midFootPoint, stanceNode.getRobotSide(), parameters.getIdealFootstepWidth(), turnYaw);
+      }
+
       double desiredYaw;
       if (distanceFromGoalSquared < MathTools.square(finalTurnProximity))
       {
