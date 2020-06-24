@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.*;
@@ -342,6 +343,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.distanceEpsilonToBridgeRegions, distanceEpsilonToBridgeRegions);
    }
 
+   default void setStepOnlyWithRequestedSide(byte side)
+   {
+      set(stepOnlyWithRequestedSide, side);
+   }
+
    default void set(FootstepPlannerParametersPacket parametersPacket)
    {
       double noValue = FootstepPlannerParametersPacket.DEFAULT_NO_VALUE;
@@ -472,5 +478,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setShinPitch(parametersPacket.getShinPitch());
       if (parametersPacket.getDistanceEpsilonToBridgeRegions() != noValue)
          setDistanceEpsilonToBridgeRegions(parametersPacket.getDistanceEpsilonToBridgeRegions());
+      setStepOnlyWithRequestedSide(parametersPacket.getStepOnlyWithRequestedSide());
    }
 }

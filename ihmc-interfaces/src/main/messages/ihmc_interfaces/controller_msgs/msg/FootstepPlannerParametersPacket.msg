@@ -1,6 +1,8 @@
 # This message is part of the IHMC footstep planning module.
 
 float64 DEFAULT_NO_VALUE = -11.1
+byte ROBOT_SIDE_LEFT = 0
+byte ROBOT_SIDE_RIGHT = 1
 
 # Unique ID used to identify this message, should preferably be consecutively increasing.
 uint32 sequence_id
@@ -399,3 +401,9 @@ float64 shin_height_offet -11.1
 
 # Distance epsilon below snapped footstep that will be added to foothold
 float64 distance_epsilon_to_bridge_regions -11.1
+
+# If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
+# The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
+# so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is
+# encourage to step, to enable walking up stairs such that two steps per stair are planned, for example.
+byte step_only_with_requested_side 255
