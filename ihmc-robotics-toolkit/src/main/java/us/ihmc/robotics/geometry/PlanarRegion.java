@@ -47,6 +47,8 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
     * the plane.
     */
    private final List<ConvexPolygon2D> convexPolygons;
+   /** To detect concave hull separation */
+   private List<Boolean> visited;
 
    private final BoundingBox3D boundingBox3dInWorld = new BoundingBox3D(new Point3D(Double.NaN, Double.NaN, Double.NaN),
                                                                         new Point3D(Double.NaN, Double.NaN, Double.NaN));
@@ -1188,6 +1190,8 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
          return;
       }
 
+      visited = new ArrayList<>(); // for concave hull separation detection
+
       int maximumIterations = 0;
 
       double minX = Double.MAX_VALUE;
@@ -1196,6 +1200,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       for (int i = 0; i < convexPolygons.size(); i++)
       {
          ConvexPolygon2D polygon = convexPolygons.get(i);
+         visited.add(false);
 
          // Concave hull generation breaks regions contain empty, point or line sub-polygons
          if (polygon.getNumberOfVertices() < 3)
@@ -1232,6 +1237,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       }
 
       concaveHullsVertices.add(new Point2D(convexPolygons.get(minXPolygonIndex).getVertex(0)));
+      visited.set(minXPolygonIndex, true);
       int polygonIndex = minXPolygonIndex;
       int vertexIndex = 0;
       int iterations = 0;
@@ -1256,6 +1262,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
          else
          {
             concaveHullsVertices.add(new Point2D(convexPolygons.get(polygonIndex).getVertex(vertexIndex)));
+            visited.set(polygonIndex, true);
          }
 
          iterations++;
@@ -1265,6 +1272,16 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       {
          LogTools.error("Unable to solve for concave hull. region " + regionId);
          concaveHullsVertices.clear();
+      }
+      boolean allVisited = true;
+      for (Boolean value : visited)
+      {
+         allVisited &= value;
+      }
+      if (!allVisited)
+      {
+         LogTools.error("Concave hull is separated. Not all convex polygons were visited. This planar region is invalid. " + visited);
+//         throw new RuntimeException("Concave hull is separated. Not all convex polygons were visited. This planar region is invalid. " + visited);
       }
    }
 
