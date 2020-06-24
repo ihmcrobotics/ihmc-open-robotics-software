@@ -2,6 +2,9 @@ package us.ihmc.pathPlanning;
 
 public enum DataSetName
 {
+	_20200624_110132_FBDemoDebris_Large,
+	_20200624_105955_FBDemoDebris_Medium,
+	_20200624_105726_FBDemoDebris_Small,
 	_20200607_174141_FBDemoStairs_Modeled,
 	_20200513_151318_StairsIHMC,
 	_20200512_132300_SlopedTerrainWithCeiling,
