@@ -7,6 +7,8 @@ int8 ESTOP_PRESSED=1
 
 int8 MOTOR_OVER_TEMP=2
 
+int8 LOW_BATTERY=3
+
 uint32 sequence_id
 
 int8 urgent_user_info_name

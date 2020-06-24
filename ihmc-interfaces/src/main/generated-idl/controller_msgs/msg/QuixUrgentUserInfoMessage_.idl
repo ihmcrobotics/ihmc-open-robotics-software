@@ -16,6 +16,9 @@ module controller_msgs
       const octet MOTOR_OVER_TEMP =
       2;
 
+      const octet LOW_BATTERY =
+      3;
+
 
       /**
        * This message is part of the Quix controller API.
