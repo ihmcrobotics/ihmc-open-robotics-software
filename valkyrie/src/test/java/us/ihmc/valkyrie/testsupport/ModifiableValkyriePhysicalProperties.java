@@ -1,6 +1,10 @@
 package us.ihmc.valkyrie.testsupport;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
+
 import javax.xml.parsers.ParserConfigurationException;
 
 import org.xml.sax.SAXException;
@@ -13,33 +17,24 @@ import us.ihmc.valkyrie.parameters.ValkyriePhysicalProperties;
 public class ModifiableValkyriePhysicalProperties extends ValkyriePhysicalProperties {
 	
 	private double modifiedShinLength, modifiedThighLength;
-	private boolean valuesSet;
+	
+	public ModifiableValkyriePhysicalProperties(ModifiableValkyrieRobotConfig config, SDFSimpleParser parser) {
+		this(config);
+		setValuesFromSDF(parser);
+	}
 	
 	public ModifiableValkyriePhysicalProperties(ModifiableValkyrieRobotConfig config)
 	{
 		super(config.getGlobalSizeScale(), config.getGlobalMassScale());
 
-		if (config.getModelFile() != null) {
-			SDFSimpleParser sdfContent = null;
-    		try {
-				sdfContent = new SDFSimpleParser(config.getModelFile());
-			} catch (ParserConfigurationException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (SAXException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-    		modifiedThighLength = sdfContent.getLinkLength("rightHipPitchLink");
-    		modifiedShinLength  = sdfContent.getLinkLength("rightKneePitchLink");
-    		System.out.printf("Modified Shin is %f  Modified Thigh is %f\n", modifiedShinLength, modifiedThighLength);
-		} else {
-    		modifiedThighLength = super.getThighLength();
-	    	modifiedShinLength = super.getShinLength();
-		}
+   		modifiedThighLength = super.getThighLength();
+    	modifiedShinLength = super.getShinLength();
+    }	
+	
+	private void setValuesFromSDF(SDFSimpleParser parser) {
+		modifiedShinLength = parser.getLinkLength("rightKneePitchLink");
+		modifiedThighLength = parser.getLinkLength("rightHipPitchLink");
+		System.out.printf("Modified Shin is %f  Modified Thigh is %f\n", modifiedShinLength, modifiedThighLength);
 	}
 	
 	private double getJointOffsetLength(GeneralizedSDFRobotModel model, String joint)

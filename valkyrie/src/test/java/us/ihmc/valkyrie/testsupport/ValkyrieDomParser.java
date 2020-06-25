@@ -1,6 +1,7 @@
 package us.ihmc.valkyrie.testsupport;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -10,8 +11,8 @@ import org.xml.sax.SAXException;
 
 public class ValkyrieDomParser extends DomParser {
 	
-	public ValkyrieDomParser(String file) throws ParserConfigurationException, SAXException, IOException {
-		super(file);
+	public ValkyrieDomParser(InputStream stream) throws ParserConfigurationException, SAXException, IOException {
+		super(stream);
 	}
 	
 	// Enum for mesh scaling. This should correspond to the mesh scaling parameter in the URDF, i.e.

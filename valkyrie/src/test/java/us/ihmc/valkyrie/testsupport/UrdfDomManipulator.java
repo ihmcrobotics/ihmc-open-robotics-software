@@ -31,7 +31,7 @@ import java.util.Map;
  *
  */
 public class UrdfDomManipulator extends ValkyrieDomParser {	
-	UrdfDomManipulator(String file) throws ParserConfigurationException, SAXException, IOException {
+	UrdfDomManipulator(InputStream file) throws ParserConfigurationException, SAXException, IOException {
 		super(file);
 		
 		Element root = getRoot();
@@ -186,18 +186,18 @@ public class UrdfDomManipulator extends ValkyrieDomParser {
 
 	/* Test code */
 	public static void main(String[] args) {
-		try {
-			UrdfDomManipulator parser = new UrdfDomManipulator("/home/mark/git/ihmc-open-robotics-software/valkyrie/src/main/resources/models/val_description/sdf/valkyrie_sim_ihmc.urdf");
-			parser.scaleLinkByPercent("rightKneePitchLink", 0.4);
-			parser.scaleLinkByPercent("leftKneePitchLink", 0.4);
-			parser.scaleLinkByPercent("rightHipPitchLink", 0.4);
-			parser.scaleLinkByPercent("leftHipPitchLink", 0.4);
-			parser.writeToFile("/tmp/valkyrie_sim_mod.urdf");
-			
-		} catch (ParserConfigurationException | SAXException | IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//		try {
+//			UrdfDomManipulator parser = new UrdfDomManipulator("/home/mark/git/ihmc-open-robotics-software/valkyrie/src/main/resources/models/val_description/sdf/valkyrie_sim_ihmc.urdf");
+//			parser.scaleLinkByPercent("rightKneePitchLink", 0.4);
+//			parser.scaleLinkByPercent("leftKneePitchLink", 0.4);
+//			parser.scaleLinkByPercent("rightHipPitchLink", 0.4);
+//			parser.scaleLinkByPercent("leftHipPitchLink", 0.4);
+//			parser.writeToFile("/tmp/valkyrie_sim_mod.urdf");
+//			
+//		} catch (ParserConfigurationException | SAXException | IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 	}
 }
 

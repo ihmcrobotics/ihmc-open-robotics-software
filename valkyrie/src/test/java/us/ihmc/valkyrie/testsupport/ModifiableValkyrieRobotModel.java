@@ -1,10 +1,18 @@
 package us.ihmc.valkyrie.testsupport;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
+
+import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Map;
+
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.modelFileLoaders.SdfLoader.GeneralizedSDFRobotModel;
@@ -36,12 +44,49 @@ public class ModifiableValkyrieRobotModel extends ValkyrieRobotModel {
 		// Configure whether to minimize joint torques
 		WholeBodyInverseDynamicsSolver.MinimizeJointTorques(config.getMinimizeJointTorques());
 
-		// Apply SDF modifications
-		SDFDescriptionMutatorList mutators = getSdfMutators(config);
+		// Set up SDF modifications (applied later, when reading in the SDF file)
+		setSDFDescriptionMutator(getSdfMutators(config));
+	
+		// Apply any SDF pre-processing
+		applySDFPreProcessing();
+	}
 
-		// Apply mutators to the robot. There is always at least one mutator.
-		setSDFDescriptionMutator(mutators);
+	protected void applySDFPreProcessing() {
+		Map<String, Double> linkLengths = config.getModifiedLinkLengths();
+		InputStream originalSdfInput = super.getSDFModelInputStream();
+		SDFSimpleParser parser = null;
+		boolean modificationsPerformed = false;
+		
+		try {
+			parser = new SDFSimpleParser(originalSdfInput);
+		} catch (ParserConfigurationException | SAXException | IOException e) {
+			System.out.println("Caught exeception while trying to parse SDF input stream");
+			e.printStackTrace();
+		}		
 
+		if (linkLengths != null) {
+			System.out.printf("Applying SDF Pre-processing to %d links\n", linkLengths.size());
+			modificationsPerformed = true;
+			for (Map.Entry<String, Double> entry: linkLengths.entrySet()) {
+				System.out.printf("Scaling link %s by %f\n", entry.getKey(), entry.getValue());
+				parser.scaleLinkLength(entry.getKey(), entry.getValue());
+			}			
+		}
+		
+		if (modificationsPerformed) {
+			File tempFile = null;
+			try {
+				tempFile = File.createTempFile("valkyrie_sim_mod", ".sdf");
+			} catch (IOException e) {
+				System.out.println("Unable to write updated SDF model to temp file");
+				e.printStackTrace();
+			}
+			String tempFilePath = tempFile.getAbsolutePath();
+			parser.writeToFile(tempFilePath);
+			setCustomModel(tempFilePath);
+			
+			robotPhysicalProperties = new ModifiableValkyriePhysicalProperties(config, parser);
+		}
 	}
 
 	@Override

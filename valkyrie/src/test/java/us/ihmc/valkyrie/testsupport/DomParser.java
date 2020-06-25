@@ -3,6 +3,7 @@ package us.ihmc.valkyrie.testsupport;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -35,11 +36,11 @@ public class DomParser {
 	
 	protected XPath xPath;
 	
-	public DomParser(String file) throws ParserConfigurationException, SAXException, IOException {
+	public DomParser(InputStream stream) throws ParserConfigurationException, SAXException, IOException {
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		DocumentBuilder builder = factory.newDocumentBuilder();
 
-		document = builder.parse(new File(file));
+		document = builder.parse(stream);
 		root = document.getDocumentElement();
 		links = new HashMap<String, Element>();
 		joints = new HashMap<String, Element>();

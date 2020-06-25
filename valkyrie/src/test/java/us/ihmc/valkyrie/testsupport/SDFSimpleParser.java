@@ -1,6 +1,9 @@
 package us.ihmc.valkyrie.testsupport;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -15,10 +18,9 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.examples.GetLidarScanExampleBehavior;
 
 public class SDFSimpleParser extends ValkyrieDomParser {
-
-
-	public SDFSimpleParser(String file) throws ParserConfigurationException, SAXException, IOException {
-		super(file);
+	
+	public SDFSimpleParser(InputStream stream) throws ParserConfigurationException, SAXException, IOException {
+		super(stream);
 
 		Element root = getRoot();
 		fillLinkMap(root, "model/link");
@@ -159,7 +161,10 @@ public class SDFSimpleParser extends ValkyrieDomParser {
 	// Test code
 	public static void main(String[] args) {
 		try {
-			SDFSimpleParser parser = new SDFSimpleParser("/home/mark/git/ihmc-open-robotics-software/valkyrie/src/main/resources/models/val_description/sdf/valkyrie_sim.sdf");
+			SDFSimpleParser parser = null;
+			String file = "/home/mark/git/ihmc-open-robotics-software/valkyrie/src/main/resources/models/val_description/sdf/valkyrie_sim.sdf";
+			InputStream sdfInputStream = new FileInputStream(new File(file));
+			parser = new SDFSimpleParser(sdfInputStream);
 
 			System.out.printf("Child of %s is %s\n", "leftHipYaw", parser.getChild("leftHipYaw"));
 			System.out.printf("Parent of %s is %s\n", "leftHipYaw", parser.getParent("leftHipYaw"));
@@ -174,7 +179,7 @@ public class SDFSimpleParser extends ValkyrieDomParser {
 			parser.scaleLinkByPercent("leftHipPitchLink", 0.4);
 			parser.writeToFile("/tmp/valkyrie_sim_mod.sdf");
 			
-		} catch (ParserConfigurationException | SAXException | IOException e) {
+		} catch (SAXException | IOException | ParserConfigurationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
