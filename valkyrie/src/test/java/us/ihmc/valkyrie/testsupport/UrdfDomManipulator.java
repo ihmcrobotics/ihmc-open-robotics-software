@@ -30,35 +30,7 @@ import java.util.Map;
  * @author Mark Paterson
  *
  */
-public class UrdfDomManipulator extends DomParser {
-
-	
-	// Enum for mesh scaling. This should correspond to the mesh scaling parameter in the URDF, i.e.
-	// X = index 0, Y = index 1, Z = index 2
-	enum Scale_Direction {
-		SCALE_X(0),
-		SCALE_Y(1),
-		SCALE_Z(2);
-		
-		public int index;
-		
-		private Scale_Direction(int index) {
-			this.index = index;
-		}
-	}
-	
-	// Mapping from links to scaling direction. We don't want to uniformly scale the mesh because causes
-	// issues with overlapping collision meshes and in any case looks odd. Instead, we'll stretch the mesh
-	// in the "length" direction, whatever that is. This map indicates the direction of stretch.
-	private static Map<String, Scale_Direction> scaleDirection;
-	static {
-		scaleDirection = new HashMap<>();
-		scaleDirection.put("rightHipPitchLink", Scale_Direction.SCALE_Y);
-		scaleDirection.put("leftHipPitchLink", Scale_Direction.SCALE_Z);
-		scaleDirection.put("rightKneePitchLink", Scale_Direction.SCALE_Z);
-		scaleDirection.put("leftKneePitchLink", Scale_Direction.SCALE_Z);		
-	}
-	
+public class UrdfDomManipulator extends ValkyrieDomParser {	
 	UrdfDomManipulator(String file) throws ParserConfigurationException, SAXException, IOException {
 		super(file);
 		
@@ -115,7 +87,7 @@ public class UrdfDomManipulator extends DomParser {
 		System.out.printf("Scaling link mesh for %s\n", linkName);
 		
 		// Look up which direction to scale this mesh. Unfortunately, this is not consistent
-		int meshIndex = scaleDirection.get(link.getAttribute("name")).index;
+		int meshIndex = getScaleDirection(linkName).index;
 
 		meshScale.scaleIndex(meshIndex, scaleFactor);
 		visualMesh.setAttribute("scale", meshScale.toString());
