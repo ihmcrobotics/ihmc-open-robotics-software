@@ -1,13 +1,19 @@
 package us.ihmc.simpleWholeBodyWalking;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import controller_msgs.msg.dds.TaskspaceTrajectoryStatusMessage;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
-import us.ihmc.commonWalkingControlModules.capturePoint.BalanceManager;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleInput;
 import us.ihmc.commonWalkingControlModules.capturePoint.LinearMomentumRateControlModuleOutput;
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.commonWalkingControlModules.controlModules.WalkingFailureDetectionControlModule;
-import us.ihmc.commonWalkingControlModules.controlModules.pelvis.PelvisOrientationManager;
 import us.ihmc.commonWalkingControlModules.controlModules.rigidBody.RigidBodyControlManager;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -19,7 +25,6 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinemat
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.JointLoadStatusProvider;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.ParameterizedControllerCoreOptimizationSettings;
 import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.stateTransitionConditions.StartWalkingCondition;
-import us.ihmc.commonWalkingControlModules.highLevelHumanoidControl.highLevelStates.walkingController.states.WalkingStateEnum;
 import us.ihmc.commonWalkingControlModules.messageHandlers.WalkingMessageHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.ControllerCoreOptimizationSettings;
@@ -39,18 +44,22 @@ import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.contactable.ContactablePlaneBody;
 import us.ihmc.robotics.partNames.ArmJointName;
+import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
 import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
-import us.ihmc.simpleWholeBodyWalking.states.*;
+import us.ihmc.simpleWholeBodyWalking.states.SimpleSingleSupportState;
+import us.ihmc.simpleWholeBodyWalking.states.SimpleStandingState;
+import us.ihmc.simpleWholeBodyWalking.states.SimpleTransferToStandingState;
+import us.ihmc.simpleWholeBodyWalking.states.SimpleTransferToSwingState;
+import us.ihmc.simpleWholeBodyWalking.states.SimpleWalkingState;
+import us.ihmc.simpleWholeBodyWalking.states.SimpleWalkingStateEnum;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
-
-import java.util.*;
 
 public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatusProvider
 {
@@ -383,6 +392,7 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
          ArmJointName[] armJointNames = fullRobotModel.getRobotSpecificJointNames().getArmJointNames();
          for (int i = 0; i < armJointNames.length; i++)
             privilegedConfigurationCommand.addJoint(fullRobotModel.getArmJoint(robotSide, armJointNames[i]), PrivilegedConfigurationOption.AT_MID_RANGE);
+         privilegedConfigurationCommand.addJoint(fullRobotModel.getLegJoint(robotSide, LegJointName.KNEE_PITCH), PrivilegedConfigurationOption.AT_MID_RANGE);
       }
 
       initializeContacts();
@@ -577,7 +587,7 @@ public class SimpleWalkingHighLevelHumanoidController implements JointLoadStatus
       // the comHeightManager can control the pelvis with a feedback controller and doesn't always need the z component of the momentum command. It would be better to remove the coupling between these two modules
       boolean keepCMPInsideSupportPolygon = !bodyManagerIsLoadBearing;
       RobotSide side = currentState.isDoubleSupportState() ? currentState.getTransferToSide() : currentState.getSupportSide();
-      balanceManager.compute(side, controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon, false);
+      balanceManager.compute(side, controlledCoMHeightAcceleration.getDoubleValue(), keepCMPInsideSupportPolygon, true);
    }
 
    private void reportStatusMessages()

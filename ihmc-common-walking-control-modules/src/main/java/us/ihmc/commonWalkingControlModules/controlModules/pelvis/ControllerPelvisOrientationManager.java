@@ -207,9 +207,10 @@ public class ControllerPelvisOrientationManager implements PelvisOrientationCont
          offsetTrajectoryWhileWalking.addAngularOffset(tempOrientation);
       }
 
+      tempWeight.set(pelvisAngularWeight);
+
       if (leapOfFaithModule != null)
       {
-         tempWeight.set(pelvisAngularWeight);
          leapOfFaithModule.update(deltaTime);
          leapOfFaithModule.updateAngularOffsets();
          leapOfFaithModule.addAngularOffset(tempOrientation);
