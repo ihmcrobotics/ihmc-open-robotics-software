@@ -56,7 +56,9 @@ public class FootstepPlannerHeuristicCalculator
 
       FootstepNodeSnapDataReadOnly snapData = snapper.snapFootstepNode(node);
       if (snapData != null && !snapData.getSnapTransform().containsNaN())
+      {
          snapData.getSnapTransform().transform(midfootPoint);
+      }
 
       midFootPose.getPosition().set(midfootPoint);
       midFootPose.getOrientation().setYawPitchRoll(node.getYaw(), 0.0, 0.0);
