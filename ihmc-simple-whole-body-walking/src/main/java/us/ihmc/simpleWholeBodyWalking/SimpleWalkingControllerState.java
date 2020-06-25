@@ -83,7 +83,8 @@ public class SimpleWalkingControllerState extends HighLevelControllerState
                                                                             controllerToolbox.getYoGraphicsListRegistry(), registry);
       toolbox.setJointPrivilegedConfigurationParameters(walkingControllerParameters.getJointPrivilegedConfigurationParameters());
       toolbox.setFeedbackControllerSettings(walkingControllerParameters.getFeedbackControllerSettings());
-         toolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
+      toolbox.setupForInverseDynamicsSolver(controllerToolbox.getContactablePlaneBodies());
+      
       FeedbackControlCommandList template = managerFactory.createFeedbackControlTemplate();
       JointDesiredOutputList lowLevelControllerOutput = new JointDesiredOutputList(controlledJoints);
       controllerCore = new WholeBodyControllerCore(toolbox, template, lowLevelControllerOutput, registry);

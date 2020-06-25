@@ -59,7 +59,7 @@ public class SimpleAtlasFlatGroundWalkingTrack
                                     useVelocityAndHeadingScript,
                                     cheatWithGroundHeightAtForFootstep,
                                     model,
-                                    new SimpleWalkingControllerStateFactory());
+                                    new SimpleWalkingControllerStateFactory(model.getCapturePointPlannerParameters()));
    }
 
 }
