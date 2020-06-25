@@ -189,11 +189,8 @@
                         <parameter name="maximumFeedbackToeOffFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
                         <parameter name="maximumFeedbackRateToeOffFootOrientation" type="DoubleParameter" min="0.0" max="1.0" value="Infinity"/>
                     </registry>
-<<<<<<< refs/remotes/origin/feature/SandboxState
                     <registry name="SimpleControlManagerFactory">
-=======
                     <registry name="HighLevelControlManagerFactory">
->>>>>>> Passed correct ICP parameters to customState manager.
                         <registry name="SimpleCenterOfMassHeightManager">
                             <registry name="PelvisHeightControlState">
 <parameter name="PelvisHeightControlStateDefaultHeight" type="DoubleParameter" min="0.0" max="1.0" value="0.8"></parameter>
