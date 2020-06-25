@@ -50,7 +50,11 @@ class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 	public double globalMassScale;      // Amount to scale mass across the robot
 	public double globalSizeScale;      // Amount to scale size across the robot
 	public double torsoPitchDegrees;    // Amount to pitch the torso, in degrees (0.0 = vertical, positve = forward pitch)
+	public boolean generateOutput;      // Whether to generate output graphs and associated files
 	public ValkyrieWalkingParameterValues walkingValues; // Tweaks to default walking settings
+	
+	public HashMap<String, Double> modifiedLinkLengths; // Map of links with modified lengths
+	public String sdfFilename;          // Path to the SDF filename if not using the default
 	
 	@Override
 	public HashMap<String, Double> getTorqueLimits() {
@@ -120,6 +124,9 @@ class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 		globalSizeScale = 1.0;
 		torsoPitchDegrees = 0.0; // 0.0 == vertical
 		walkingValues = new ValkyrieWalkingParameterValues();
+		generateOutput = true;
+		modifiedLinkLengths = new HashMap<String, Double>();
+		sdfFilename = null;
 	}
 	
 	private String hashDoubleToString(HashMap<String, Double> map, String description) {
@@ -197,5 +204,15 @@ class ValkyrieTorqueSpeedTestConfig implements ModifiableValkyrieRobotConfig {
 			}
 		}
 		return footsteps;
+	}
+
+	@Override
+	public HashMap<String, Double> getModifiedLinkLengths() {
+		return modifiedLinkLengths;
+	}
+
+	@Override
+	public String getModelFile() {
+		return sdfFilename;
 	}
 }

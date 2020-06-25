@@ -55,18 +55,18 @@ public class ValkyrieRobotModel implements DRCRobotModel
    private final ValkyrieRobotVersion robotVersion;
    private final RobotTarget target;
 
-   private double modelSizeScale = 1.0;
-   private double modelMassScale = 1.0;
+   protected double modelSizeScale = 1.0;
+   protected double modelMassScale = 1.0;
    private double transparency = Double.NaN;
    private boolean useShapeCollision = false;
    private boolean useOBJGraphics = true;
    private String customModel = null;
    private FootContactPoints<RobotSide> simulationContactPoints = null;
-   private GeneralizedSDFRobotModel generalizedRobotModel;
+   protected GeneralizedSDFRobotModel generalizedRobotModel;
    private RobotDescription robotDescription;
    private SDFDescriptionMutator sdfDescriptionMutator;
 
-   private ValkyriePhysicalProperties robotPhysicalProperties;
+   protected ValkyriePhysicalProperties robotPhysicalProperties;
    private ValkyrieJointMap jointMap;
    private RobotContactPointParameters<RobotSide> contactPointParameters;
    private ValkyrieSensorInformation sensorInformation;
@@ -282,12 +282,12 @@ public class ValkyrieRobotModel implements DRCRobotModel
       return robotDescription;
    }
 
-   private String[] getResourceDirectories()
+   protected String[] getResourceDirectories()
    {
       return resourceDirectories;
    }
 
-   private InputStream getSDFModelInputStream()
+   protected InputStream getSDFModelInputStream()
    {
       InputStream inputStream = null;
 

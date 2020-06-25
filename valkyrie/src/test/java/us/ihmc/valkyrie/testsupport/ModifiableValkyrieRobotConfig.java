@@ -12,9 +12,11 @@ public interface ModifiableValkyrieRobotConfig {
 	public HashMap<String, Double> getTorqueLimits();
 	public HashMap<String, Double> getVelocityLimits();
 	public HashMap<String, Double> getLinkMassKg();
+	public HashMap<String, Double> getModifiedLinkLengths();
 	public HashMap<String, ArrayList<Double>> getPositionLimits();
 	public double getGlobalMassScale();
 	public double getGlobalSizeScale();
 	public boolean getAnkleLimitsDisabled();
 	public boolean getMinimizeJointTorques();
+	public String getModelFile();
 }

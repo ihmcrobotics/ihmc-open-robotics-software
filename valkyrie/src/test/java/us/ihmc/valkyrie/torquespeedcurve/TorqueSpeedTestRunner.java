@@ -257,26 +257,37 @@ public class TorqueSpeedTestRunner {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
+		if (config.generateOutput) {
 
-		outputResultsDirectory = ValkyrieTestExporter.exportSimData(result.testHelper.getSimulationConstructionSet(), 
-				                                                    outputPrefixDirectory, result, config.createVideo);			
+			outputResultsDirectory = ValkyrieTestExporter.exportSimData(
+					result.testHelper.getSimulationConstructionSet(), outputPrefixDirectory, result,
+					config.createVideo);
 
-		// Copy the test parameters into the results directory
-		try {
-			if (outputResultsDirectory != null) {
-				// For SPEED type, the controller parameters are critical and need to be copied too
-				if (config.testType == TestType.SPEED) {
-					URL controllerParamsUrl = runner.getClass()
-							.getResource("/us/ihmc/valkyrie/parameters/controller_simulation.xml");
-					String controllerParamsFilename = outputResultsDirectory.toString() + "/controller_simulation.xml";
-					File controllerParamsDest = new File(controllerParamsFilename);
-					FileUtils.copyURLToFile(controllerParamsUrl, controllerParamsDest);
+			// Copy the test parameters into the results directory
+			try {
+				if (outputResultsDirectory != null) {
+					// For SPEED type, the controller parameters are critical and need to be copied
+					// too
+					if (config.testType == TestType.SPEED) {
+						URL controllerParamsUrl = runner.getClass()
+								.getResource("/us/ihmc/valkyrie/parameters/controller_simulation.xml");
+						String controllerParamsFilename = outputResultsDirectory.toString()
+								+ "/controller_simulation.xml";
+						File controllerParamsDest = new File(controllerParamsFilename);
+						FileUtils.copyURLToFile(controllerParamsUrl, controllerParamsDest);
+					}
+					Files.copy(paramInput,
+							Paths.get(outputResultsDirectory.toString(), paramInput.toPath().getFileName().toString())
+									.toFile());
+					if (config.sdfFilename != null) {
+						Files.copy(new File(config.sdfFilename), Paths.get(outputResultsDirectory.toString(), config.sdfFilename).toFile());
+					}
 				}
-				Files.copy(paramInput, Paths.get(outputResultsDirectory.toString(), paramInput.toPath().getFileName().toString()).toFile());
+			} catch (IOException e) {
+				System.err.println("Unable to copy param file to destination: " + e.getMessage());
+			} finally {
 			}
-		} catch (IOException e) {
-			System.err.println("Unable to copy param file to destination: " + e.getMessage());
-		} finally {
 		}
 
 		// Without calling System.exit(0), the sim has non-terminating threads.
