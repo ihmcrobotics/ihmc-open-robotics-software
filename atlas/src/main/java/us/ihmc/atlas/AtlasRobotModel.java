@@ -895,7 +895,7 @@ public class AtlasRobotModel implements DRCRobotModel, SDFDescriptionMutator
    @Override
    public InputStream getWholeBodyControllerParametersFile()
    {
-      return getClass().getResourceAsStream(getParameterResourceName());
+      return getClass().getResourceAsStream(getParameterFileName());
    }
 
    @Override
