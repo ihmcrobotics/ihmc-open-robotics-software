@@ -21,10 +21,8 @@ public class SearchForDoorBehavior extends AbstractBehavior
       super(robotName, yoNamePrefix, ros2Node);
       
       
-      //TODO fix this
       createSubscriber(DoorLocationPacket.class,ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationQueue::put);
       
-     //createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationQueue::put);
      
 
    }
