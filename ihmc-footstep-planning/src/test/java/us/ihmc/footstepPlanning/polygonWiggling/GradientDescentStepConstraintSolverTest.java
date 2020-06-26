@@ -477,7 +477,7 @@ public class GradientDescentStepConstraintSolverTest
    @Test
    public void testShinCollisionOnDataSet()
    {
-      DataSet stairsDataSet = DataSetIOTools.loadDataSet(DataSetName._20200513_151318_StairsIHMC);
+      DataSet stairsDataSet = DataSetIOTools.loadDataSet(DataSetName._20200513_151318_StairsIHMC_Bottom);
       PlanarRegionsList stairsRegions = stairsDataSet.getPlanarRegionsList();
 
       ConvexPolygon2D footPolygon = new ConvexPolygon2D();

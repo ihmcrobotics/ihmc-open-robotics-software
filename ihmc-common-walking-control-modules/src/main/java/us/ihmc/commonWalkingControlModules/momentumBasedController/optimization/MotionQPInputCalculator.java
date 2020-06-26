@@ -10,7 +10,12 @@ import us.ihmc.commonWalkingControlModules.controllerCore.command.ConstraintType
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.JointspaceAccelerationCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.MomentumRateCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.SpatialAccelerationCommand;
-import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.*;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.JointspaceVelocityCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.LinearMomentumConvexConstraint2DCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.MomentumCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedConfigurationCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.PrivilegedJointSpaceCommand;
+import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseKinematics.SpatialVelocityCommand;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.InverseKinematicsQPSolver;
 import us.ihmc.commonWalkingControlModules.inverseKinematics.JointPrivilegedConfigurationHandler;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -26,6 +31,7 @@ import us.ihmc.mecano.algorithms.GeometricJacobianCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Momentum;
 import us.ihmc.mecano.spatial.SpatialAcceleration;
@@ -35,6 +41,7 @@ import us.ihmc.mecano.spatial.interfaces.MomentumReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
+import us.ihmc.robotics.screwTheory.KinematicLoopFunction;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 
@@ -220,6 +227,36 @@ public class MotionQPInputCalculator
       qpInputToPack.taskJacobian.set(projectedTaskJacobian);
 
       return true;
+   }
+
+   /**
+    * Configures the appropriate variable substitution to perform in the QP for satisfying the physical
+    * constraint for a kinematic loop.
+    * <p>
+    * The {@code qpVariableSubstitutionToPack} can then be add to the QP to register an additional
+    * substitution perform.
+    * </p>
+    * 
+    * @param function                     the explicit function representing a kinematic loop in the
+    *                                     multi-body system.
+    * @param qpVariableSubstitutionToPack the variable substitution to be configured. Modified.
+    * @see InverseDynamicsQPSolver#addAccelerationSubstitution(QPVariableSubstitution)
+    * @see InverseKinematicsQPSolver#addVariableSubstitution(QPVariableSubstitution)
+    */
+   public void convertKinematicLoopFunction(KinematicLoopFunction function, QPVariableSubstitution qpVariableSubstitutionToPack)
+   {
+      DMatrixRMaj loopJacobian = function.getLoopJacobian();
+      DMatrixRMaj loopConvectiveTerm = function.getLoopConvectiveTerm();
+      List<? extends OneDoFJointReadOnly> loopJoints = function.getLoopJoints();
+      qpVariableSubstitutionToPack.reshape(loopJoints.size(), loopJacobian.getNumRows());
+
+      qpVariableSubstitutionToPack.transformation.set(loopJacobian);
+      qpVariableSubstitutionToPack.bias.set(loopConvectiveTerm);
+
+      for (int i = 0; i < loopJoints.size(); i++)
+      {
+         qpVariableSubstitutionToPack.variableIndices[i] = jointIndexHandler.getOneDoFJointIndex(loopJoints.get(i));
+      }
    }
 
    /**

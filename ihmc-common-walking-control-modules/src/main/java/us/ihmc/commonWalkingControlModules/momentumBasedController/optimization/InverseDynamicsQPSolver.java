@@ -3,6 +3,7 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
 
+import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.convexOptimization.quadraticProgram.ActiveSetQPSolverWithInactiveVariablesInterface;
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.mecano.spatial.Wrench;
@@ -26,6 +27,8 @@ public class InverseDynamicsQPSolver
 
    private final YoBoolean addRateRegularization = new YoBoolean("AddRateRegularization", registry);
    private final ActiveSetQPSolverWithInactiveVariablesInterface qpSolver;
+
+   private final QPVariableSubstitution accelerationVariablesSubstitution = new QPVariableSubstitution();
 
    private final DMatrixRMaj solverInput_H;
    private final DMatrixRMaj solverInput_f;
@@ -74,8 +77,8 @@ public class InverseDynamicsQPSolver
 
    private final double dt;
 
-   public InverseDynamicsQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase,
-                                  double dt, YoVariableRegistry parentRegistry)
+   public InverseDynamicsQPSolver(ActiveSetQPSolverWithInactiveVariablesInterface qpSolver, int numberOfDoFs, int rhoSize, boolean hasFloatingBase, double dt,
+                                  YoVariableRegistry parentRegistry)
    {
       this.qpSolver = qpSolver;
       this.numberOfDoFs = numberOfDoFs;
@@ -187,6 +190,8 @@ public class InverseDynamicsQPSolver
       for (int i = 0; i < numberOfDoFs; i++)
          regularizationMatrix.set(i, i, jointAccelerationRegularization.getDoubleValue());
 
+      accelerationVariablesSubstitution.reset();
+
       solverInput_H.zero();
 
       solverInput_f.zero();
@@ -227,23 +232,23 @@ public class InverseDynamicsQPSolver
    {
       switch (input.getConstraintType())
       {
-      case OBJECTIVE:
-         if (input.useWeightScalar())
-            addMotionTask(input.taskJacobian, input.taskObjective, input.getWeightScalar());
-         else
-            addMotionTask(input.taskJacobian, input.taskObjective, input.taskWeightMatrix);
-         break;
-      case EQUALITY:
-         addMotionEqualityConstraint(input.taskJacobian, input.taskObjective);
-         break;
-      case LEQ_INEQUALITY:
-         addMotionLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
-         break;
-      case GEQ_INEQUALITY:
-         addMotionGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
-         break;
-      default:
-         throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
+         case OBJECTIVE:
+            if (input.useWeightScalar())
+               addMotionTask(input.taskJacobian, input.taskObjective, input.getWeightScalar());
+            else
+               addMotionTask(input.taskJacobian, input.taskObjective, input.taskWeightMatrix);
+            break;
+         case EQUALITY:
+            addMotionEqualityConstraint(input.taskJacobian, input.taskObjective);
+            break;
+         case LEQ_INEQUALITY:
+            addMotionLesserOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
+            break;
+         case GEQ_INEQUALITY:
+            addMotionGreaterOrEqualInequalityConstraint(input.taskJacobian, input.taskObjective);
+            break;
+         default:
+            throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
       }
    }
 
@@ -251,27 +256,27 @@ public class InverseDynamicsQPSolver
    {
       switch (input.getConstraintType())
       {
-      case OBJECTIVE:
-         if (input.useWeightScalar())
-         {
-            addRhoTask(input.getTaskJacobian(), input.getTaskObjective(), input.getWeightScalar());
-         }
-         else
-         {
-            addRhoTask(input.getTaskJacobian(), input.getTaskObjective(), input.getTaskWeightMatrix());
-         }
-         break;
-      case EQUALITY:
-         addRhoEqualityConstraint(input.getTaskJacobian(), input.getTaskObjective());
-         break;
-      case LEQ_INEQUALITY:
-         addRhoLesserOrEqualInequalityConstraint(input.getTaskJacobian(), input.getTaskObjective());
-         break;
-      case GEQ_INEQUALITY:
-         addRhoGreaterOrEqualInequalityConstraint(input.getTaskJacobian(), input.getTaskObjective());
-         break;
-      default:
-         throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
+         case OBJECTIVE:
+            if (input.useWeightScalar())
+            {
+               addRhoTask(input.getTaskJacobian(), input.getTaskObjective(), input.getWeightScalar());
+            }
+            else
+            {
+               addRhoTask(input.getTaskJacobian(), input.getTaskObjective(), input.getTaskWeightMatrix());
+            }
+            break;
+         case EQUALITY:
+            addRhoEqualityConstraint(input.getTaskJacobian(), input.getTaskObjective());
+            break;
+         case LEQ_INEQUALITY:
+            addRhoLesserOrEqualInequalityConstraint(input.getTaskJacobian(), input.getTaskObjective());
+            break;
+         case GEQ_INEQUALITY:
+            addRhoGreaterOrEqualInequalityConstraint(input.getTaskJacobian(), input.getTaskObjective());
+            break;
+         default:
+            throw new RuntimeException("Unexpected constraint type: " + input.getConstraintType());
       }
    }
 
@@ -296,11 +301,13 @@ public class InverseDynamicsQPSolver
    /**
     * Sets up a motion objective for the joint accelerations (qddot).
     * <p>
-    *    min (J qddot - b)^T * W * (J qddot - b)
+    * min (J qddot - b)^T * W * (J qddot - b)
     * </p>
-    * @param taskJacobian jacobian to map qddot to the objective space. J in the above equation.
+    * 
+    * @param taskJacobian  jacobian to map qddot to the objective space. J in the above equation.
     * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
-    * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be diagonal.
+    * @param taskWeight    weight for the desired objective. W in the above equation. Assumed to be
+    *                      diagonal.
     */
    public void addMotionTask(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight)
    {
@@ -314,11 +321,13 @@ public class InverseDynamicsQPSolver
    /**
     * Sets up a motion objective for the generalized contact forces (rhos).
     * <p>
-    *    min (J rho - b)^T * W * (J rho - b)
+    * min (J rho - b)^T * W * (J rho - b)
     * </p>
-    * @param taskJacobian jacobian to map rho to the objective space. J in the above equation.
+    * 
+    * @param taskJacobian  jacobian to map rho to the objective space. J in the above equation.
     * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
-    * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be diagonal.
+    * @param taskWeight    weight for the desired objective. W in the above equation. Assumed to be
+    *                      diagonal.
     */
    public void addRhoTask(DMatrixRMaj taskJacobian, DMatrixRMaj taskObjective, DMatrixRMaj taskWeight)
    {
@@ -332,10 +341,12 @@ public class InverseDynamicsQPSolver
    /**
     * Sets up a motion objective for the generalized contact forces (rhos).
     * <p>
-    *    min (rho - b)^T * W * (rho - b)
+    * min (rho - b)^T * W * (rho - b)
     * </p>
+    * 
     * @param taskObjective matrix of the desired objective for the rho task. b in the above equation.
-    * @param taskWeight weight for the desired objective. W in the above equation. Assumed to be diagonal.
+    * @param taskWeight    weight for the desired objective. W in the above equation. Assumed to be
+    *                      diagonal.
     */
    public void addRhoTask(DMatrixRMaj taskObjective, DMatrixRMaj taskWeight)
    {
@@ -513,14 +524,14 @@ public class InverseDynamicsQPSolver
     * </p>
     *
     * @param centroidalMomentumMatrix refers to A in the equation.
-    * @param rhoJacobian refers to Q in the equation. Q&rho; represents external wrench to be
-    *           optimized for.
-    * @param convectiveTerm refers to ADot * qDot in the equation.
+    * @param rhoJacobian              refers to Q in the equation. Q&rho; represents external wrench to
+    *                                 be optimized for.
+    * @param convectiveTerm           refers to ADot * qDot in the equation.
     * @param additionalExternalWrench refers to &sum;W<sub>user</sub> in the equation. These are
-    *           constant wrenches usually used for compensating for the weight of an object that the
-    *           robot is holding.
-    * @param gravityWrench refers to W<sub>gravity</sub> in the equation. It the wrench induced by
-    *           the weight of the robot.
+    *                                 constant wrenches usually used for compensating for the weight of
+    *                                 an object that the robot is holding.
+    * @param gravityWrench            refers to W<sub>gravity</sub> in the equation. It the wrench
+    *                                 induced by the weight of the robot.
     */
    public void setupWrenchesEquilibriumConstraint(DMatrixRMaj centroidalMomentumMatrix, DMatrixRMaj rhoJacobian, DMatrixRMaj convectiveTerm,
                                                   DMatrixRMaj additionalExternalWrench, DMatrixRMaj gravityWrench)
@@ -564,6 +575,11 @@ public class InverseDynamicsQPSolver
       hasWrenchesEquilibriumConstraintBeenSetup = true;
    }
 
+   public void addAccelerationSubstitution(QPVariableSubstitution substitution)
+   {
+      this.accelerationVariablesSubstitution.concatenate(substitution);
+   }
+
    private final DMatrixRMaj tempWrenchConstraint_J = new DMatrixRMaj(Wrench.SIZE, 200);
    private final DMatrixRMaj tempWrenchConstraint_LHS = new DMatrixRMaj(Wrench.SIZE, 1);
    private final DMatrixRMaj tempWrenchConstraint_RHS = new DMatrixRMaj(Wrench.SIZE, 1);
@@ -590,13 +606,23 @@ public class InverseDynamicsQPSolver
 
       numberOfActiveVariables.set((int) CommonOps_DDRM.elementSum(solverInput_activeIndices));
 
-      qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f, 0.0);
+      TIntArrayList inactiveIndices = applySubstitution(); // This needs to be done right before configuring the QP and solving.
+      qpSolver.setQuadraticCostFunction(solverInput_H, solverInput_f);
       qpSolver.setVariableBounds(solverInput_lb, solverInput_ub);
       qpSolver.setActiveVariables(solverInput_activeIndices);
       qpSolver.setLinearInequalityConstraints(solverInput_Ain, solverInput_bin);
       qpSolver.setLinearEqualityConstraints(solverInput_Aeq, solverInput_beq);
 
+      if (inactiveIndices != null)
+      {
+         for (int i = 0; i < inactiveIndices.size(); i++)
+         {
+            qpSolver.setVariableInactive(inactiveIndices.get(i));
+         }
+      }
+
       numberOfIterations.set(qpSolver.solve(solverOutput));
+      removeSubstitution(); // This needs to be done right after solving.
 
       qpSolverTimer.stopMeasurement();
 
@@ -634,6 +660,26 @@ public class InverseDynamicsQPSolver
       solverInput_ub_previous.set(solverInput_ub);
 
       return true;
+   }
+
+   private TIntArrayList applySubstitution()
+   {
+      if (accelerationVariablesSubstitution.isEmpty())
+         return null;
+
+      accelerationVariablesSubstitution.applySubstitutionToObjectiveFunction(solverInput_H, solverInput_f);
+      accelerationVariablesSubstitution.applySubstitutionToLinearConstraint(solverInput_Aeq, solverInput_beq);
+      accelerationVariablesSubstitution.applySubstitutionToLinearConstraint(solverInput_Ain, solverInput_bin);
+      accelerationVariablesSubstitution.applySubstitutionToBounds(solverInput_lb, solverInput_ub, solverInput_Ain, solverInput_bin);
+      return accelerationVariablesSubstitution.getInactiveIndices();
+   }
+
+   private void removeSubstitution()
+   {
+      if (accelerationVariablesSubstitution.isEmpty())
+         return;
+
+      accelerationVariablesSubstitution.removeSubstitutionToSolution(solverOutput);
    }
 
    private void printForJerry()
