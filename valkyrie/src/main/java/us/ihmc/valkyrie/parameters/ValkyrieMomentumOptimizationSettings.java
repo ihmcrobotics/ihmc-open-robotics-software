@@ -43,10 +43,11 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
    private final double rhoMin;
    private final double rhoRateDefaultWeight;
    private final double rhoRateHighWeight;
-   private final Vector2D copWeight = new Vector2D(200.0, 200.0);
-   private final Vector2D copRateDefaultWeight = new Vector2D(0.32, 0.32);
-   private final Vector2D copRateHighWeight = new Vector2D(0.0004, 0.0016);
-
+   // Disable CoP control for Stair and speed walking tests
+   private final Vector2D copWeight = new Vector2D(0.0, 0.0);//new Vector2D(200.0, 200.0);
+   private final Vector2D copRateDefaultWeight = new Vector2D(0.0, 0.0); //new Vector2D(0.32, 0.32);
+   private final Vector2D copRateHighWeight = new Vector2D(0.0, 0.0); //new Vector2D(0.0004, 0.0016);
+   
    private final double neckJointspaceWeight = 5.0;
    private final double spineJointspaceWeight = 10.0;
    private final double armJointspaceWeight = 1.0;
@@ -68,14 +69,14 @@ public class ValkyrieMomentumOptimizationSettings extends MomentumOptimizationSe
    public ValkyrieMomentumOptimizationSettings(ValkyrieJointMap jointMap)
    {
       double scale = Math.pow(jointMap.getModelScale(), jointMap.getMassScalePower());
-
+   
       linearMomentumWeight.scale(1.0 / scale);
       angularMomentumWeight.scale(1.0 / scale);
       rhoWeight = defaultRhoWeight / scale;
       rhoMin = defaultRhoMin * scale;
       rhoRateDefaultWeight = defaultRhoRateDefaultWeight / (scale * scale);
       rhoRateHighWeight = defaultRhoRateHighWeight / (scale * scale);
-
+     
       for (SpineJointName jointName : jointMap.getSpineJointNames())
       {
          configureBehavior(jointspaceWeights, jointMap, jointName, spineJointspaceWeight);

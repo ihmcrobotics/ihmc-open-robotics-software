@@ -38,6 +38,11 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
+import us.ihmc.euclid.tuple4D.Quaternion;
+import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.tools.RotationMatrixTools;
 import us.ihmc.graphicsDescription.HeightMap;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.jMonkeyEngineToolkit.GroundProfile3D;
@@ -274,6 +279,83 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 		maxStepHeightChange.setValueFromDouble(0.5);
 	}
 
+	public TorqueSpeedTestResult testTurn(DRCRobotModel robotModel, WalkingControllerParameters walkingControllerParameters, 
+					     File dataOutputFolder, boolean keepUp, int numberOfSteps, double inputSwingDuration, double inputTransferDuration, double turnRadiansPerStep) throws SimulationExceededMaximumTimeException
+	{
+		showMemoryUsageBeforeTest();
+		BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+		System.out.println("Hello World");		
+
+		SlopeEnvironment ground = new SlopeEnvironment(0.0);
+		HeightMapWithNormals heightMap = ground.getTerrainObject3D().getHeightMapIfAvailable();
+			
+		SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+		final double swingHeight = steppingParameters.getDefaultSwingHeightFromStanceFoot() * 0.6;
+		final double swingDuration = inputSwingDuration; //walkingControllerParameters.getDefaultSwingTime(); 
+		final double transferDuration = inputTransferDuration; //walkingControllerParameters.getDefaultTransferTime(); 
+		double stepWidth = steppingParameters.getInPlaceWidth();
+		
+		FootstepDataListMessage footsteps = new FootstepDataListMessage();
+
+		// Set the current initial side
+		RobotSide firstStepSide = RobotSide.LEFT; 
+		if (turnRadiansPerStep < 0.0){
+			firstStepSide = RobotSide.RIGHT;
+		}		
+		// Get the footsteps from input turn parameters
+		turnInPlace(turnRadiansPerStep, numberOfSteps, stepWidth, firstStepSide, heightMap, footsteps);
+		
+		// Enable perfect sensors
+		simulationTestingParameters.setUsePefectSensors(true);
+		simulationTestingParameters.setRunMultiThreaded(true);
+
+		// Initialize simulator
+		drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, ground);
+		drcSimulationTestHelper.setInitialSetup(initialSetupForFlat(robotModel));
+		drcSimulationTestHelper.createSimulation("Walking");
+		setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
+		SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+
+		// Set Camera
+		double cameraX = 0.0;
+		double cameraZ = 0.8 + heightMap.heightAt(cameraX, 0.0, 0.0);
+		scs.setCameraFix(cameraX, 0.0, cameraZ);
+		scs.setCameraPosition(-3, -3, 3.0);
+		setCustomSteppingParams(scs);
+
+		// Enable push recovery
+		YoBoolean enable = (YoBoolean) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
+		enable.set(true);
+		YoBoolean enableOnFailure = (YoBoolean) scs.getVariable(
+				WalkingHighLevelHumanoidController.class.getSimpleName(), "enablePushRecoveryOnFailure");
+		enableOnFailure.set(true);
+
+		boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+		double walkingDuration = -1.0;
+
+		if (success) {
+			scs.setInPoint();
+
+			// Set step timings.
+			setTimings(footsteps, walkingControllerParameters);
+			footsteps.getFootstepDataList().forEach(footstep -> footstep.setSwingHeight(swingHeight));
+			footsteps.getFootstepDataList().forEach(footstep -> footstep.setSwingDuration(swingDuration));
+			footsteps.getFootstepDataList().forEach(footstep -> footstep.setTransferDuration(transferDuration));
+			drcSimulationTestHelper.publishToController(footsteps);
+
+			walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
+			success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 0.25);
+		}		
+		
+
+		String dataNameSuffix = "TurnTest";
+
+		String info = "Turn Test\n";
+		System.out.println(info);
+
+		return new TorqueSpeedTestResult(drcSimulationTestHelper, info, dataNameSuffix, success);		
+	}
+	
 	public TorqueSpeedTestResult testStepDown(DRCRobotModel robotModel, double stepStartInches, double stepHeightInches,
 			WalkingControllerParameters walkingControllerParameters, FootstepDataListMessage recordedFootsteps,
 			File dataOutputFolder) throws SimulationExceededMaximumTimeException {
@@ -358,7 +440,7 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 	}
 
 	public TorqueSpeedTestResult testSpeedWalk(DRCRobotModel robotModel,
-			WalkingControllerParameters walkingControllerParameters, File dataOutputFolder, boolean keepUp)
+			WalkingControllerParameters walkingControllerParameters, File dataOutputFolder, boolean keepUp, double inputSwingDuration, double inputTransferDuration, double inputPercentOfMaxReach)
 			throws SimulationExceededMaximumTimeException {
 		showMemoryUsageBeforeTest();
 		BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
@@ -397,10 +479,11 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 
 			SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
 			final double swingHeight = steppingParameters.getDefaultSwingHeightFromStanceFoot() * 0.6;
-			final double swingDuration = 0.35;
-			final double transferDuration = 0.15;
-			final double stepLength = steppingParameters.getMaxStepLength();
-
+			final double swingDuration = inputSwingDuration; //0.35; //0.25; 
+			final double transferDuration = inputTransferDuration; //0.15; //0.075;
+			// Lower maximum step length to 85% of maximum step reach for controller stability
+			final double stepLength = steppingParameters.getMaxStepLength()*inputPercentOfMaxReach; 
+		
 			if (success) {
 				scs.setInPoint();
 
@@ -446,6 +529,95 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 			// dataNameSuffix, info, success);
 	}
 
+	public TorqueSpeedTestResult testNormalWalk(DRCRobotModel robotModel,
+			WalkingControllerParameters walkingControllerParameters, File dataOutputFolder, boolean keepUp)
+			throws SimulationExceededMaximumTimeException {
+		showMemoryUsageBeforeTest();
+		BambooTools.reportTestStartedMessage(simulationTestingParameters.getShowWindows());
+
+			SlopeEnvironment ground = new SlopeEnvironment(0.0);
+			HeightMapWithNormals heightMap = ground.getTerrainObject3D().getHeightMapIfAvailable();
+
+			// Enable perfect sensors
+			simulationTestingParameters.setUsePefectSensors(true);
+			simulationTestingParameters.setRunMultiThreaded(true);
+
+			drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, ground);
+			drcSimulationTestHelper.setInitialSetup(initialSetupForFlat(robotModel));
+			drcSimulationTestHelper.createSimulation("Walking");
+			setupJointTorqueLimitEnforcement(drcSimulationTestHelper);
+			SimulationConstructionSet scs = drcSimulationTestHelper.getSimulationConstructionSet();
+			final double courseLength = 5.0; // Length of course in meters. Should be long enough that course time
+												// is not dominated by startup time, and short enough that tests
+												// don't take forever to run.
+
+			double cameraX = courseLength / 2.0;
+			double cameraZ = 0.8 + heightMap.heightAt(cameraX, 0.0, 0.0);
+			scs.setCameraFix(cameraX, 0.0, cameraZ);
+			scs.setCameraPosition(cameraX, -8.0, cameraZ);
+			setCustomSteppingParams(scs);
+
+			// Enable push recovery
+			YoBoolean enable = (YoBoolean) scs.getVariable("PushRecoveryControlModule", "enablePushRecovery");
+			enable.set(true);
+			YoBoolean enableOnFailure = (YoBoolean) scs.getVariable(
+					WalkingHighLevelHumanoidController.class.getSimpleName(), "enablePushRecoveryOnFailure");
+			enableOnFailure.set(true);
+
+			boolean success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(0.5);
+			double walkingDuration = -1.0;
+
+			SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
+			final double swingHeight = steppingParameters.getDefaultSwingHeightFromStanceFoot() * 0.6;
+			final double swingDuration = walkingControllerParameters.getDefaultSwingTime(); 
+			final double transferDuration = walkingControllerParameters.getDefaultTransferTime(); 
+			final double stepLength = steppingParameters.getMaxStepLength();
+
+			if (success) {
+				scs.setInPoint();
+
+				FootstepDataListMessage footsteps = new FootstepDataListMessage();
+
+				double stepWidth = steppingParameters.getInPlaceWidth();
+
+				// Set up the steps. Initial step is at the robot location.
+				stepTo(0.0, courseLength, stepLength, stepWidth, RobotSide.LEFT, heightMap, footsteps, false, false);
+				setTimings(footsteps, walkingControllerParameters);
+				// footsteps.getFootstepDataList().forEach(footstep ->
+				// footstep.setTrajectoryType(TrajectoryType.CUSTOM.toByte()));
+				footsteps.getFootstepDataList().forEach(footstep -> footstep.setSwingHeight(swingHeight));
+				footsteps.getFootstepDataList().forEach(footstep -> footstep.setSwingDuration(swingDuration));
+				footsteps.getFootstepDataList().forEach(footstep -> footstep.setTransferDuration(transferDuration));
+				// computeDefaultWaypointPrositions(footsteps, new double[] {0.15, 0.75},
+				// swingHeight);
+				// footsteps.setOffsetFootstepsHeightWithExecutionError(true);
+
+				System.out.println(footsteps.toString());
+
+				drcSimulationTestHelper.publishToController(footsteps);
+
+				walkingDuration = EndToEndTestTools.computeWalkingDuration(footsteps, walkingControllerParameters);
+				success = drcSimulationTestHelper.simulateAndBlockAndCatchExceptions(walkingDuration + 0.25);
+			}
+
+			String dataNameSuffix = "Flat_Ground_Walking";
+			final double metersPerSecToMilesPerHour = 2.23694;
+
+			String info = "Normal walking\n";
+
+			if (success) {
+				info += String.format(
+						"\nWalking time: %f s for %f m = %f mph\nStep length = %f\nSwing height = %f\nSwing duration = %f\nTransfer duration = %f\n",
+						walkingDuration, courseLength, metersPerSecToMilesPerHour * courseLength / walkingDuration,
+						stepLength, swingHeight, swingDuration, transferDuration);
+				System.out.println(info);
+			}
+
+			return new TorqueSpeedTestResult(drcSimulationTestHelper, info, dataNameSuffix, success);
+			// return ValkyrieTestExporter.exportSimData(scs, dataOutputFolder,
+			// dataNameSuffix, info, success);
+	}
+	
 	public TorqueSpeedTestResult testWalkSlope(DRCRobotModel robotModel, double slopeAngle, double stepLength,
 			WalkingControllerParameters walkingControllerParameters, FootstepDataListMessage recordedFootsteps,
 			File dataOutputFolder) throws SimulationExceededMaximumTimeException {
@@ -690,6 +862,61 @@ public class ValkyrieTorqueSpeedCurveEndToEndTestNasa {
 		return stepsToPack;
 	}
 
+	private static FootstepDataListMessage turnInPlace(double turnAngleperStep, int numOfsteps, double stepWidth,
+			RobotSide firstStepSide, HeightMap heightMap, FootstepDataListMessage stepsToPack) {
+		if (stepsToPack == null)
+			stepsToPack = new FootstepDataListMessage();
+
+		double theta = 0.0;
+		RobotSide stepSide = firstStepSide;
+
+		int stepCount = 0;
+				
+		while (stepCount < numOfsteps) {
+			theta += turnAngleperStep;
+			setupTurnFootstep(stepSide, theta, 0, 0, stepWidth, heightMap, stepsToPack.getFootstepDataList().add());
+			stepCount += 1;
+			stepSide = stepSide.getOppositeSide();
+									
+			// Do the opposite foot at the same theta if there are still footsteps remaining
+			if (stepCount < numOfsteps) {
+				setupTurnFootstep(stepSide, theta, 0, 0, stepWidth, heightMap, stepsToPack.getFootstepDataList().add());
+				stepCount += 1;				
+				stepSide = stepSide.getOppositeSide();
+			}
+			else {
+				break;
+			}			
+		
+		}
+
+		return stepsToPack;
+	}	
+
+	private static void setupTurnFootstep(RobotSide robotSide, double theta, double x, double y, double stepWidth, HeightMap heightMap,
+			FootstepDataMessage stepToPack) {
+		// Set Robot Side
+		stepToPack.setRobotSide(robotSide.toByte());
+
+		// Rotate local foot
+		Vector3D local_foot_pos = new Vector3D(0, robotSide.negateIfRightSide(0.5 * stepWidth), 0.0);	
+		Vector3D rotated_foot_pos = new Vector3D(0, 0, 0);			
+		RotationMatrixTools.applyYawRotation(theta, local_foot_pos, rotated_foot_pos);	
+		// Add global linear offset
+		double x_tot = x + rotated_foot_pos.getX();
+		double y_tot = y + rotated_foot_pos.getY();
+		double z_tot = heightMap.heightAt(x, y, 50.0);
+		// Set Position
+		stepToPack.getLocation().set(x_tot, y_tot, z_tot);
+
+		// Set Orientation
+		Quaternion quat_rot = new Quaternion(theta, 0, 0); // YPR declaration
+		stepToPack.getOrientation().set(quat_rot);
+		
+		// Debug:
+		System.out.println(String.format("Side %d, Angle: %f ", robotSide.toByte(), theta) + "Foot position:" + stepToPack.getLocation().toString() + " Foot orientation:" + stepToPack.getOrientation().toString());
+	}
+	
 	private static void setupFootstep(RobotSide robotSide, double x, double stepWidth, HeightMap heightMap,
 			FootstepDataMessage stepToPack) {
 		stepToPack.setRobotSide(robotSide.toByte());

@@ -187,12 +187,11 @@ public class TorqueSpeedTestRunner {
 		FootstepDataListMessage recordedFootsteps = config.getFootsteps();
 		ValkyrieRobotModel robot;
 		
-		if (config.testType == TestType.SPEED || config.testType == TestType.PUSHRECOVERY) {
+		if (config.testType == TestType.SPEED || config.testType == TestType.NORMAL_WALK  || config.testType == TestType.PUSHRECOVERY) {
 			robot = new ModifiableValkyrieRobotModel(RobotTarget.SCS, config);		
 		} else {
 			robot = new ModifiableValkyrieRobotModel(RobotTarget.REAL_ROBOT, config);		
 		}
-
 		
 //		ValkyrieTorqueSpeedWalkingControllerParameters walkingParameters = new ValkyrieTorqueSpeedWalkingControllerParameters(
 //				robot.getJointMap(),
@@ -245,7 +244,14 @@ public class TorqueSpeedTestRunner {
 						outputPrefixDirectory);
 				break;
 			case SPEED:
-				result = tester.testSpeedWalk(robot, walkingParameters, outputPrefixDirectory, config.keepUp);		
+				result = tester.testSpeedWalk(robot, walkingParameters, outputPrefixDirectory, config.keepUp, config.swingDuration, config.transferDuration, config.percentOfMaxReach);		
+				break;
+			case NORMAL_WALK:
+				result = tester.testNormalWalk(robot, walkingParameters, outputPrefixDirectory, config.keepUp);		
+				break;
+			case TURN_IN_PLACE:
+				result = tester.testTurn(robot, walkingParameters, outputPrefixDirectory, config.keepUp, 
+										config.numberOfSteps, config.swingDuration, config.transferDuration, config.turnRadiansPerStep);
 				break;
 			case PUSHRECOVERY:
 				result = runPushRecoveryTest(robot, config, outputPrefixDirectory);
