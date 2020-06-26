@@ -32,8 +32,8 @@ public class ModifiableValkyriePhysicalProperties extends ValkyriePhysicalProper
     }	
 	
 	private void setValuesFromSDF(SDFSimpleParser parser) {
-		modifiedShinLength = parser.getLinkLength("rightKneePitchLink");
-		modifiedThighLength = parser.getLinkLength("rightHipPitchLink");
+		modifiedShinLength = getModelSizeScale() * parser.getLinkLength("rightKneePitchLink");
+		modifiedThighLength = getModelSizeScale() * parser.getLinkLength("rightHipPitchLink");
 		System.out.printf("Modified Shin is %f  Modified Thigh is %f\n", modifiedShinLength, modifiedThighLength);
 	}
 	
@@ -42,7 +42,6 @@ public class ModifiableValkyriePhysicalProperties extends ValkyriePhysicalProper
 		SDFJointHolder jointHolder = model.getJointHolder("rightKneePitch");
 		Vector3D jointOffset = jointHolder.getOffsetFromParentJoint();
 		return jointOffset.length();
-		
 	}
 	
 	@Override

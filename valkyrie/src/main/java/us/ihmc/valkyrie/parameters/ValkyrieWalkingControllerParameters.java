@@ -78,12 +78,14 @@ public class ValkyrieWalkingControllerParameters extends WalkingControllerParame
 
       // The original values from IHMC are hard-coded and captured here for comparison.
       // For leg scaling, these have been converted roughly to percentages of leg length
-      //      minimumHeightAboveGround = jointMap.getModelScale() * (0.595 + 0.23 + 0.08);
-      //      nominalHeightAboveGround = jointMap.getModelScale() * (0.675 + 0.23 - 0.01 + 0.08);
-      //      maximumHeightAboveGround = jointMap.getModelScale() * (0.735 + 0.23 + 0.08);
-      minimumHeightAboveGround = jointMap.getModelScale() * (physicalProperties.getLegLength()*0.7 + 0.23 + 0.08);
-      nominalHeightAboveGround = jointMap.getModelScale() * (physicalProperties.getLegLength()*0.8 + 0.23 - 0.01 + 0.08);
-      maximumHeightAboveGround = jointMap.getModelScale() * (physicalProperties.getLegLength()*0.877 + 0.23 + 0.08);
+      //   minimumHeightAboveGround = jointMap.getModelScale() * (0.595 + 0.23 + 0.08);
+      //   nominalHeightAboveGround = jointMap.getModelScale() * (0.675 + 0.23 - 0.01 + 0.08);
+      //   maximumHeightAboveGround = jointMap.getModelScale() * (0.735 + 0.23 + 0.08);
+      
+      // Leg length should already incorporate the model scaling value. The other constants need to be scaled appropriately.
+      minimumHeightAboveGround = physicalProperties.getLegLength()*0.7109 + jointMap.getModelScale()*(0.23 + 0.08);
+      nominalHeightAboveGround = physicalProperties.getLegLength()*0.80645 + jointMap.getModelScale() * (0.23 - 0.01 + 0.08);
+      maximumHeightAboveGround = physicalProperties.getLegLength()*0.878 + jointMap.getModelScale() * (0.23 + 0.08);
       System.out.printf("Min height: %f  Nom height: %f  Max height: %f\n", 
     	                minimumHeightAboveGround, nominalHeightAboveGround, maximumHeightAboveGround);
    }

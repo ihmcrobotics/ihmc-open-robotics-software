@@ -66,7 +66,7 @@ public class ModifiableValkyrieRobotModel extends ValkyrieRobotModel {
 			System.exit(1);
 		}		
 
-		if (linkLengths != null) {
+		if (linkLengths.size() > 0) {
 			System.out.printf("Applying SDF Pre-processing to %d links\n", linkLengths.size());
 			modificationsPerformed = true;
 			for (Map.Entry<String, Double> entry: linkLengths.entrySet()) {
