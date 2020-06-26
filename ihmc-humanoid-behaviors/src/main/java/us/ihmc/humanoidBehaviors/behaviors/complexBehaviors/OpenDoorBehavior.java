@@ -62,8 +62,6 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
 
       createSubscriber(DoorLocationPacket.class,ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationPacket::set);
 
-//      createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationPacket::set);
-
       setupStateMachine();
 
    }
