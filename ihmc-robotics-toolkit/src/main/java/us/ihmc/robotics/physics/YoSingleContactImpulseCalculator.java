@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -20,6 +22,7 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
 import us.ihmc.mecano.yoVariables.spatial.YoFixedFrameTwist;
+import us.ihmc.robotics.math.frames.YoMatrix;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -34,6 +37,9 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
    private final YoFrameVector3D impulseA, impulseB;
    private final YoFramePoint3D pointA, pointB;
    private final YoFrameVector3D velocityRelative;
+   private final YoFrameVector3D velocitySolverInput;
+   private final YoMatrix collisionMatrix;
+   private final YoDouble collisionMatrixDet;
    private final YoFrameVector3D velocityInitialA, velocityInitialB;
    private final YoFrameVector3D velocityNoImpulseA, velocityNoImpulseB;
    private final YoFrameVector3D velocityDueToOtherImpulseA, velocityDueToOtherImpulseB;
@@ -54,6 +60,9 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
       pointB = new YoFramePoint3D(prefix + "PointB" + identifier, rootFrame, registry);
 
       velocityRelative = new YoFrameVector3D(prefix + "VelocityRelative" + identifier, rootFrame, registry);
+      velocitySolverInput = new YoFrameVector3D(prefix + "VelocitySolverInput" + identifier, rootFrame, registry);
+      collisionMatrix = new YoMatrix(prefix + "CollisionMatrix" + identifier, 3, 3, registry);
+      collisionMatrixDet = new YoDouble(prefix + "CollisionMatrixDet" + identifier, registry);
 
       impulseA = new YoFrameVector3D(prefix + "ImpulseA" + identifier, rootFrame, registry);
       velocityInitialA = new YoFrameVector3D(prefix + "VelocityInitialA" + identifier, rootFrame, registry);
@@ -100,7 +109,7 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
       yoGraphicsListRegistry.registerYoGraphic(groupName, new YoGraphicPosition(pointA.getNamePrefix(), pointA, 0.005, contactAppearance));
       yoGraphicsListRegistry.registerYoGraphic(groupName, new YoGraphicPosition(pointB.getNamePrefix(), pointB, 0.005, contactAppearance));
 
-      yoGraphicsListRegistry.registerYoGraphic(groupName, new YoGraphicVector(impulseA.getNamePrefix(), pointA, impulseA, 2.0, impulseAppearance));
+      yoGraphicsListRegistry.registerYoGraphic(groupName, new YoGraphicVector(impulseA.getNamePrefix(), pointA, impulseA, 5.0, impulseAppearance));
 
       if (impulseB != null)
       {
@@ -118,6 +127,10 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
       pointB.setToNaN();
 
       velocityRelative.setToNaN();
+      velocitySolverInput.setToNaN();
+
+      collisionMatrix.setToNaN(3, 3);
+      collisionMatrixDet.setToNaN();
 
       impulseA.setToNaN();
       velocityInitialA.setToNaN();
@@ -170,6 +183,8 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
       }
    }
 
+   private final DMatrixRMaj temp = new DMatrixRMaj(3, 3);
+
    @Override
    public void finalizeImpulse()
    {
@@ -179,6 +194,10 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
       impulseA.setMatchingFrame(getImpulseA().getLinearPart());
 
       velocityRelative.setMatchingFrame(getVelocityRelative());
+      velocitySolverInput.setMatchingFrame(getVelocitySolverInput());
+      CommonOps_DDRM.invert(getCollisionMatrix(), temp);
+      collisionMatrix.set(temp);
+      collisionMatrixDet.set(CommonOps_DDRM.det(getCollisionMatrix()));
       velocityDueToOtherImpulseA.setMatchingFrame(getVelocityDueToOtherImpulseA());
 
       velocityChangeA.setMatchingFrame(getResponseCalculatorA().getTwistChangeProvider().getLinearVelocityOfBodyFixedPoint(getContactingBodyA(), getPointA()));
