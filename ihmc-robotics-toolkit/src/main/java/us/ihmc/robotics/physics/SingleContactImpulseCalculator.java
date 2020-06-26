@@ -659,6 +659,16 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       return velocityRelative;
    }
 
+   public FrameVector3DReadOnly getVelocitySolverInput()
+   {
+      return velocitySolverInput;
+   }
+
+   public DMatrixRMaj getCollisionMatrix()
+   {
+      return M_inv;
+   }
+
    public FrameVector3DReadOnly getVelocityNoImpulseA()
    {
       return velocityNoImpulseA;
