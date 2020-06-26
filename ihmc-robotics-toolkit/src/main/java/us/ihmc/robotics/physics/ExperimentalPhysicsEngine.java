@@ -2,7 +2,11 @@ package us.ihmc.robotics.physics;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import gnu.trove.list.linked.TDoubleLinkedList;
@@ -13,6 +17,7 @@ import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
+import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
 /**
@@ -42,24 +47,33 @@ public class ExperimentalPhysicsEngine
    private static final String collidableVisualizerGroupName = "Physics Engine - Active Collidable";
    private final ReferenceFrame rootFrame = ReferenceFrame.getWorldFrame();
 
-   private final YoVariableRegistry physicsEngineRegistry = new YoVariableRegistry("PhysicsPlugins");
+   private final YoVariableRegistry registry = new YoVariableRegistry("PhysicsPlugins");
    private final YoGraphicsListRegistry physicsEngineGraphicsRegistry = new YoGraphicsListRegistry();
    private final List<PhysicsEngineRobotData> robotList = new ArrayList<>();
+   private final Map<RigidBodyBasics, PhysicsEngineRobotData> robotMap = new HashMap<>();
+   private final YoMultiContactImpulseCalculatorPool multiContactImpulseCalculatorPool;
+   private final List<ExternalWrenchReader> externalWrenchReaders = new ArrayList<>();
+
+   private List<MultiRobotCollisionGroup> collisionGroups;
 
    private final List<Collidable> environmentCollidables = new ArrayList<>();
 
    private final SimpleCollisionDetection collisionDetectionPlugin = new SimpleCollisionDetection(rootFrame);
    private final CollisionSlipEstimatorMap collisionSlipEstimator = new CollisionSlipEstimatorMap(rootFrame);
-   private final MultiRobotForwardDynamicsPlugin multiRobotPhysicsEnginePlugin = new MultiRobotForwardDynamicsPlugin(rootFrame, physicsEngineRegistry);
 
    private final CollidableListVisualizer environmentCollidableVisualizers;
    private final List<CollidableListVisualizer> robotCollidableVisualizers = new ArrayList<>();
 
-   private final YoDouble time = new YoDouble("physicsTime", physicsEngineRegistry);
-   private final YoDouble rawTickDurationMilliseconds = new YoDouble("rawTickDurationMilliseconds", physicsEngineRegistry);
-   private final YoDouble averageTickDurationMilliseconds = new YoDouble("averageTickDurationMilliseconds", physicsEngineRegistry);
-   private final YoDouble rawRealTimeRate = new YoDouble("rawRealTimeRate", physicsEngineRegistry);
-   private final YoDouble averageRealTimeRate = new YoDouble("averageRealTimeRate", physicsEngineRegistry);
+   private final YoBoolean hasGlobalContactParameters;
+   private final YoContactParameters globalContactParameters;
+   private final YoBoolean hasGlobalConstraintParameters;
+   private final YoConstraintParameters globalConstraintParameters;
+
+   private final YoDouble time = new YoDouble("physicsTime", registry);
+   private final YoDouble rawTickDurationMilliseconds = new YoDouble("rawTickDurationMilliseconds", registry);
+   private final YoDouble averageTickDurationMilliseconds = new YoDouble("averageTickDurationMilliseconds", registry);
+   private final YoDouble rawRealTimeRate = new YoDouble("rawRealTimeRate", registry);
+   private final YoDouble averageRealTimeRate = new YoDouble("averageRealTimeRate", registry);
    private final int averageWindow = 100;
    private final TDoubleLinkedList rawTickDurationBuffer = new TDoubleLinkedList();
 
@@ -67,11 +81,20 @@ public class ExperimentalPhysicsEngine
 
    public ExperimentalPhysicsEngine()
    {
+      YoVariableRegistry multiContactCalculatorRegistry = new YoVariableRegistry(MultiContactImpulseCalculator.class.getSimpleName());
+      registry.addChild(multiContactCalculatorRegistry);
+
+      hasGlobalContactParameters = new YoBoolean("hasGlobalContactParameters", registry);
+      globalContactParameters = new YoContactParameters("globalContact", registry);
+      hasGlobalConstraintParameters = new YoBoolean("hasGlobalConstraintParameters", registry);
+      globalConstraintParameters = new YoConstraintParameters("globalConstraint", registry);
+      multiContactImpulseCalculatorPool = new YoMultiContactImpulseCalculatorPool(1, rootFrame, multiContactCalculatorRegistry);
+
       AppearanceDefinition environmentCollidableAppearance = YoAppearance.AluminumMaterial();
       environmentCollidableAppearance.setTransparency(0.5);
       environmentCollidableVisualizers = new CollidableListVisualizer(collidableVisualizerGroupName,
                                                                       environmentCollidableAppearance,
-                                                                      physicsEngineRegistry,
+                                                                      registry,
                                                                       physicsEngineGraphicsRegistry);
    }
 
@@ -95,7 +118,7 @@ public class ExperimentalPhysicsEngine
       robot.setRobotInitialStateWriter(robotInitialStateWriter);
       robot.setControllerOutputWriter(controllerOutputWriter);
       robot.addPhysicsOutputReader(physicsOutputReader);
-      multiRobotPhysicsEnginePlugin.addRobot(robot);
+      robotMap.put(robot.getRootBody(), robot);
       AppearanceDefinition robotCollidableAppearance = YoAppearance.DarkGreen();
       robotCollidableAppearance.setTransparency(0.5);
       CollidableListVisualizer collidableVisualizers = new CollidableListVisualizer(collidableVisualizerGroupName,
@@ -104,7 +127,7 @@ public class ExperimentalPhysicsEngine
                                                                                     physicsEngineGraphicsRegistry);
       robot.getCollidables().forEach(collidableVisualizers::addCollidable);
       robotCollidableVisualizers.add(collidableVisualizers);
-      physicsEngineRegistry.addChild(robotRegistry);
+      registry.addChild(robotRegistry);
       robotList.add(robot);
    }
 
@@ -116,17 +139,19 @@ public class ExperimentalPhysicsEngine
 
    public void addExternalWrenchReader(ExternalWrenchReader externalWrenchReader)
    {
-      multiRobotPhysicsEnginePlugin.addExternalWrenchReader(externalWrenchReader);
+      externalWrenchReaders.add(externalWrenchReader);
    }
 
    public void setGlobalConstraintParameters(ConstraintParametersReadOnly parameters)
    {
-      multiRobotPhysicsEnginePlugin.setGlobalConstraintParameters(parameters);
+      globalConstraintParameters.set(parameters);
+      hasGlobalConstraintParameters.set(true);
    }
 
    public void setGlobalContactParameters(ContactParametersReadOnly parameters)
    {
-      multiRobotPhysicsEnginePlugin.setGlobalContactParameters(parameters);
+      globalContactParameters.set(parameters);
+      hasGlobalContactParameters.set(true);
    }
 
    public boolean initialize()
@@ -157,16 +182,67 @@ public class ExperimentalPhysicsEngine
          robot.updateCollidableBoundingBoxes();
       }
 
-      environmentCollidables.forEach(collidable -> collidable.updateBoundingBox(rootFrame));
+      for (PhysicsEngineRobotData robotPlugin : robotMap.values())
+      {
+         SingleRobotForwardDynamicsPlugin forwardDynamicsPlugin = robotPlugin.getForwardDynamicsPlugin();
+         forwardDynamicsPlugin.resetExternalWrenches();
+         forwardDynamicsPlugin.applyControllerOutput();
+         forwardDynamicsPlugin.doScience(time.getValue(), dt, gravity);
+         forwardDynamicsPlugin.readJointVelocities();
+      }
 
+      environmentCollidables.forEach(collidable -> collidable.updateBoundingBox(rootFrame));
       collisionSlipEstimator.processPreCollisionDetection();
-      if (multiRobotPhysicsEnginePlugin.hasGlobalContactParameters())
-         collisionDetectionPlugin.setMinimumPenetration(multiRobotPhysicsEnginePlugin.getGlobalContactParameters().getMinimumPenetration());
+      if (hasGlobalContactParameters.getValue())
+         collisionDetectionPlugin.setMinimumPenetration(globalContactParameters.getMinimumPenetration());
       collisionDetectionPlugin.evaluationCollisions(robotList, () -> environmentCollidables);
       collisionSlipEstimator.processPostCollisionDetection(collisionDetectionPlugin.getAllCollisions());
 
-      multiRobotPhysicsEnginePlugin.submitCollisions(collisionDetectionPlugin.getAllCollisions());
-      multiRobotPhysicsEnginePlugin.doScience(time.getValue(), dt, gravity);
+      collisionGroups = MultiRobotCollisionGroup.toCollisionGroups(collisionDetectionPlugin.getAllCollisions());
+
+      Set<RigidBodyBasics> uncoveredRobotsRootBody = new HashSet<>(robotMap.keySet());
+      List<MultiContactImpulseCalculator> impulseCalculators = new ArrayList<>();
+
+      multiContactImpulseCalculatorPool.clear();
+
+      for (MultiRobotCollisionGroup collisionGroup : collisionGroups)
+      {
+         MultiContactImpulseCalculator calculator = multiContactImpulseCalculatorPool.nextAvailable();
+
+         calculator.configure(robotMap, collisionGroup);
+
+         if (hasGlobalConstraintParameters.getValue())
+            calculator.setConstraintParameters(globalConstraintParameters);
+         if (hasGlobalContactParameters.getValue())
+            calculator.setContactParameters(globalContactParameters);
+
+         impulseCalculators.add(calculator);
+         uncoveredRobotsRootBody.removeAll(collisionGroup.getRootBodies());
+      }
+
+      for (RigidBodyBasics rootBody : uncoveredRobotsRootBody)
+      {
+         PhysicsEngineRobotData robot = robotMap.get(rootBody);
+         RobotJointLimitImpulseBasedCalculator jointLimitConstraintCalculator = robot.getJointLimitConstraintCalculator();
+         jointLimitConstraintCalculator.initialize(dt);
+         jointLimitConstraintCalculator.updateInertia(null, null);
+         jointLimitConstraintCalculator.computeImpulse(dt);
+         robot.getIntegrator().addJointVelocityChange(jointLimitConstraintCalculator.getJointVelocityChange(0));
+      }
+
+      for (MultiContactImpulseCalculator impulseCalculator : impulseCalculators)
+      {
+         impulseCalculator.computeImpulses(time.getValue(), dt, false);
+         impulseCalculator.applyJointVelocityChanges();
+         impulseCalculator.readExternalWrenches(dt, externalWrenchReaders);
+      }
+
+      for (PhysicsEngineRobotData robotPlugin : robotMap.values())
+      {
+         SingleRobotForwardDynamicsPlugin forwardDynamicsPlugin = robotPlugin.getForwardDynamicsPlugin();
+         forwardDynamicsPlugin.writeJointAccelerations();
+         robotPlugin.getIntegrator().integrate(dt);
+      }
 
       environmentCollidableVisualizers.update(collisionDetectionPlugin.getAllCollisions());
       robotCollidableVisualizers.forEach(visualizer -> visualizer.update(collisionDetectionPlugin.getAllCollisions()));
@@ -208,7 +284,7 @@ public class ExperimentalPhysicsEngine
 
    public YoVariableRegistry getPhysicsEngineRegistry()
    {
-      return physicsEngineRegistry;
+      return registry;
    }
 
    public YoGraphicsListRegistry getPhysicsEngineGraphicsRegistry()
