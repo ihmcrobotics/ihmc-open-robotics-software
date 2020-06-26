@@ -8,6 +8,7 @@ import controller_msgs.msg.dds.DetectedFiducialPacket;
 import controller_msgs.msg.dds.DetectedObjectPacket;
 import controller_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.VideoPacket;
+import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
 import us.ihmc.communication.ROS2Tools;
@@ -28,7 +29,7 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
    {
       super(robotName, desiredFullRobotModel, modelProvider, false, 50, pubSubImplementation);
       controller = new ObjectDetectorToolboxController(fullRobotModel, statusOutputManager, registry);
-      setTimeWithoutInputsBeforeGoingToSleep(3.0);
+      setTimeWithoutInputsBeforeGoingToSleep(3.6e+6);
    }
 
    @Override
@@ -41,7 +42,8 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, DetectedFiducialPacket.class, ROS2Tools.IHMC_ROOT, s ->
+      
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, DetectedFiducialPacket.class, FiducialDetectorToolboxModule.getOutputTopic(robotName), s ->
       {
          if (controller != null)
          {

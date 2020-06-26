@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.DoorLocationPacket;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.humanoidBehaviors.behaviors.AbstractBehavior;
@@ -21,7 +22,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
       
       
       //TODO fix this
-      //createSubscriber(DetectedFiducialPacket.class,FiducialDetectorToolboxModule.getOutputTopic(networkManager.getRobotName()), doorLocationQueue::put);
+      createSubscriber(DoorLocationPacket.class,ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationQueue::put);
       
      //createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationQueue::put);
      

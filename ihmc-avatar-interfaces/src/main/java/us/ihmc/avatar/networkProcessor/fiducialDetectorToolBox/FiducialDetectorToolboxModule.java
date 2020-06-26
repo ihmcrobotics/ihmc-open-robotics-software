@@ -26,7 +26,7 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
    {
       super(robotName, desiredFullRobotModel, modelProvider, false, 50, pubSubImplementation);
       controller = new FiducialDetectorToolboxController(fullRobotModel, statusOutputManager, registry);
-      setTimeWithoutInputsBeforeGoingToSleep(3.0);
+      setTimeWithoutInputsBeforeGoingToSleep(1.8e+6);
    }
 
    @Override
