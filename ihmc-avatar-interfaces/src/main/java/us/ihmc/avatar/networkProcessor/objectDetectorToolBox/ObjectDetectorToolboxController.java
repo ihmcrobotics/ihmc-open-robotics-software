@@ -44,7 +44,6 @@ public class ObjectDetectorToolboxController extends ToolboxController
          DetectedFiducialPacket newPacket = fiducialPacketQueue.poll();
          if (newPacket != null)
          {
-            System.out.println("got fiducial");
             decodeFiducial(newPacket);
          }
       }
@@ -82,8 +81,6 @@ public class ObjectDetectorToolboxController extends ToolboxController
       Point3D location = new Point3D();
       Quaternion orientation = new Quaternion();
       pose.get(location, orientation);
-
-      System.out.println("sending  door");
 
       reportMessage(HumanoidMessageTools.createDoorLocationPacket(pose));
 

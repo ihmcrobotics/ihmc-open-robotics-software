@@ -3,8 +3,8 @@ package us.ihmc.humanoidBehaviors.behaviors.behaviorServices;
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
-import controller_msgs.msg.dds.DetectedFiducialPacket;
 import controller_msgs.msg.dds.DoorLocationPacket;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
@@ -32,7 +32,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
    private long timeOfLastUpdate = 0;
    private long timeToWait = 2000;
 
-   protected final AtomicReference<DoorLocationPacket> doorLocationQueue = new AtomicReference<DoorLocationPacket>();
+   protected final AtomicReference<DoorLocationPacket> doorLocationLatest = new AtomicReference<DoorLocationPacket>();
 
    public DoorOpenDetectorBehaviorService(String robotName, String ThreadName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
@@ -40,7 +40,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
 
       
       //TODO fix this
-      //createSubscriber(DetectedFiducialPacket.class, FiducialDetectorToolboxModule.getOutputTopic(networkManager.getRobotName()), doorLocationQueue::put);
+      createSubscriber(DoorLocationPacket.class,ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationLatest::set);
 
       //      createSubscriber(DoorLocationPacket.class, IHMCHumanoidBehaviorManager.getInputTopic(robotName), doorLocationQueue::set);
 
@@ -90,7 +90,7 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
       //super.doThreadAction();
       if (run)
       {
-         latestDoorLocationPacketRecieved = doorLocationQueue.getAndSet(null);
+         latestDoorLocationPacketRecieved = doorLocationLatest.getAndSet(null);
          if (latestDoorLocationPacketRecieved != null)
          {
 
