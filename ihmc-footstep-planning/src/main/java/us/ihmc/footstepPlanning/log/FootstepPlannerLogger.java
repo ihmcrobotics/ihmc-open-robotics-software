@@ -318,7 +318,7 @@ public class FootstepPlannerLogger
       RigidBodyTransform snapTransform = snapData.getSnapTransform();
       writeTransform(numTabs, "snapTransform: ", new Quaternion(snapTransform.getRotation()), snapTransform.getTranslation());
       RigidBodyTransform wiggleTransform = snapData.getWiggleTransformInWorld();
-      writeTransform(numTabs, "wiggleTransform: ", new Quaternion(wiggleTransform.getRotation()), snapTransform.getTranslation());
+      writeTransform(numTabs, "wiggleTransform: ", new Quaternion(wiggleTransform.getRotation()), wiggleTransform.getTranslation());
 
       ConvexPolygon2D croppedFoothold = snapData.getCroppedFoothold();
       if (croppedFoothold.isEmpty() || croppedFoothold.containsNaN())
