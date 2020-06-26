@@ -195,7 +195,7 @@ public class ExperimentalPhysicsEngine
       collisionSlipEstimator.processPreCollisionDetection();
       if (hasGlobalContactParameters.getValue())
          collisionDetectionPlugin.setMinimumPenetration(globalContactParameters.getMinimumPenetration());
-      collisionDetectionPlugin.evaluationCollisions(robotList, () -> environmentCollidables);
+      collisionDetectionPlugin.evaluationCollisions(robotList, () -> environmentCollidables, dt);
       collisionSlipEstimator.processPostCollisionDetection(collisionDetectionPlugin.getAllCollisions());
 
       collisionGroups = MultiRobotCollisionGroup.toCollisionGroups(collisionDetectionPlugin.getAllCollisions());

@@ -30,7 +30,7 @@ public class SimpleCollisionDetection
       this.minimumPenetration = minimumPenetration;
    }
 
-   public CollisionListResult evaluationCollisions(List<? extends CollidableHolder> dynamicCollidableHolders, CollidableHolder staticCollidableHolder)
+   public CollisionListResult evaluationCollisions(List<? extends CollidableHolder> dynamicCollidableHolders, CollidableHolder staticCollidableHolder, double dt)
    {
       allCollisions.clear();
 
@@ -48,7 +48,7 @@ public class SimpleCollisionDetection
             for (int k = j + 1; k < dynamicCollidables.size(); k++)
             {
                Collidable collidableB = dynamicCollidables.get(k);
-               evaluateCollision(collidableA, collidableB, collisionResults);
+               evaluateCollision(collidableA, collidableB, collisionResults, dt);
             }
          }
 
@@ -56,7 +56,7 @@ public class SimpleCollisionDetection
          {
             for (Collidable staticCollidable : staticCollidableHolder)
             {
-               evaluateCollision(collidableRigidBody, staticCollidable, collisionResults);
+               evaluateCollision(collidableRigidBody, staticCollidable, collisionResults, dt);
             }
          }
 
@@ -68,7 +68,7 @@ public class SimpleCollisionDetection
             {
                for (Collidable otherCollidableRigidBody : otherDynamicCollidableHolder.getCollidables())
                {
-                  evaluateCollision(collidableRigidBody, otherCollidableRigidBody, collisionResults);
+                  evaluateCollision(collidableRigidBody, otherCollidableRigidBody, collisionResults, dt);
                }
             }
          }
@@ -77,13 +77,13 @@ public class SimpleCollisionDetection
       return allCollisions;
    }
 
-   private void evaluateCollision(Collidable collidableA, Collidable collidableB, CollisionListResult collisionListResultToPack)
+   private void evaluateCollision(Collidable collidableA, Collidable collidableB, CollisionListResult collisionListResultToPack, double dt)
    {
       if (!collidableA.isCollidableWith(collidableB))
          return;
 
       CollisionResult collision = pollCollision(collidableA, collidableB);
-      collidableA.evaluateCollision(collidableB, collision);
+      collidableA.evaluateCollision(collidableB, collision, dt);
 
       if (!collision.getCollisionData().areShapesColliding())
          return;
