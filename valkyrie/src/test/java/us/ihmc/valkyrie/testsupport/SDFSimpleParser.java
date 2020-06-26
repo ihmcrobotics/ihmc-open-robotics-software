@@ -17,6 +17,11 @@ import org.xml.sax.SAXException;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.humanoidBehaviors.behaviors.examples.GetLidarScanExampleBehavior;
 
+/**
+ * SDF parser specialized for manipulating link lengths
+ * @author Mark Paterson
+ *
+ */
 public class SDFSimpleParser extends ValkyrieDomParser {
 	
 	public SDFSimpleParser(InputStream stream) throws ParserConfigurationException, SAXException, IOException {
@@ -41,6 +46,11 @@ public class SDFSimpleParser extends ValkyrieDomParser {
 		}
 	}
 	
+	/**
+	 * Given a link name, find the next child link down the chain
+	 * @param linkName
+	 * @return name of the child link or null
+	 */
 	private String getChildLinkOfLink(String linkName) {
 		String childJointName = getChild(linkName);
 		return getChild(childJointName);
@@ -52,6 +62,12 @@ public class SDFSimpleParser extends ValkyrieDomParser {
 		scaleLinkLength(linkName, newLinkLength);
 	}
 	
+	/**
+	 * For the given link, adjust the mesh specified by xpath by scaleFactor in the scale direction for this link.
+	 * @param link -- the link element
+	 * @param scaleFactor -- how much to scale the mesh
+	 * @param xpath -- relative path under the link to the mesh scale element
+	 */
 	private void scaleMesh(Element link, double scaleFactor, String xpath)
 	{
 		String linkName = link.getAttribute("name");
@@ -64,7 +80,8 @@ public class SDFSimpleParser extends ValkyrieDomParser {
 		
 		SizableVector meshScale = new SizableVector(meshScaleElement.getTextContent());
 		
-		// Look up which direction to scale this mesh. Unfortunately, this is not consistent
+		// Look up which direction to scale this mesh. Unfortunately, this is not consistent across links since it
+		// depends on how the mesh is represented in the model (dae) file.
 		Scale_Direction direction = getScaleDirection(link.getAttribute("name"));
 		if (direction == null) {
 			throw new IllegalArgumentException("Cannot find scale direction for link " + linkName);
@@ -75,6 +92,25 @@ public class SDFSimpleParser extends ValkyrieDomParser {
 		meshScaleElement.setTextContent(meshScale.toString());
 	}	
 	
+	/**
+	 * For the given link name, scale the link to the new length. Scaling a link in SDF is quite invasive since
+	 * poses in SDF are relative to the model root, so every child of the scaled link will have its pose changed.
+	 * Link lengths are not specified in SDF, and can only be known indirectly by computing the offset to the child 
+	 * link pose. Basic logic for scaling a link L:
+	 *   get child link C of L
+	 *   child offset = pose(C) - pose(L)
+	 *   link length = length(child offset)   
+	 *   scale factor = newLength / link length
+	 *   offset delta = scaled child offset - child offset = (child offset) * (scale factor - 1)
+	 *   add offset delta to pose of each descendant link of S
+	 *   
+	 *   scale inertial CoM pose by scale factor
+	 *   scale inertial matrix by (scale factor)^2
+	 *   scale model visual and collision meshes
+ 
+	 * @param linkName -- name of the link
+	 * @param newLength -- new size in meters
+	 */
 	public void scaleLinkLength(String linkName, double newLength) {
 		/* Pseudo code for scaling a link S. This is quite invasive since in SDF link poses are relative to model root
 		 * Inputs: link to scale, scale factor
@@ -96,7 +132,7 @@ public class SDFSimpleParser extends ValkyrieDomParser {
         Element childLinkPoseElement = getUniqueChildElement(childLink, "pose");
         SizableVector childLinkPose = new SizableVector(childLinkPoseElement.getTextContent());
         SizableVector oldOffset = childLinkPose.subtract(linkPose);
-        double oldLength = oldOffset.length();
+        double oldLength = oldOffset.magnitude();
         double scaleFactor = newLength/oldLength;
         SizableVector deltaOffset = oldOffset.copy();
         deltaOffset.scale(scaleFactor - 1);
@@ -134,6 +170,11 @@ public class SDFSimpleParser extends ValkyrieDomParser {
         }      	
 	}
 
+	/**
+	 * Get the length of the specified link
+	 * @param linkName -- name of the link
+	 * @return length of the link in meters
+	 */
 	public double getLinkLength(String linkName) {
 		double length = 0;
 

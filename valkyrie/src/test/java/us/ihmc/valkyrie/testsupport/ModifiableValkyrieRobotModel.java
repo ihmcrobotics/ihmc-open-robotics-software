@@ -31,6 +31,7 @@ import us.ihmc.valkyrie.torquespeedcurve.ValkyrieLinkMassMutator;
 /* ValkyrieRobotModel with SDF modifications */
 public class ModifiableValkyrieRobotModel extends ValkyrieRobotModel {
 	private ModifiableValkyrieRobotConfig config;
+	static double INCHES_TO_METERS = 0.02540;
 
 	public ModifiableValkyrieRobotModel(RobotTarget target, ModifiableValkyrieRobotConfig robotConfig) {
 		super(target);
@@ -62,14 +63,15 @@ public class ModifiableValkyrieRobotModel extends ValkyrieRobotModel {
 		} catch (ParserConfigurationException | SAXException | IOException e) {
 			System.out.println("Caught exeception while trying to parse SDF input stream");
 			e.printStackTrace();
+			System.exit(1);
 		}		
 
 		if (linkLengths != null) {
 			System.out.printf("Applying SDF Pre-processing to %d links\n", linkLengths.size());
 			modificationsPerformed = true;
 			for (Map.Entry<String, Double> entry: linkLengths.entrySet()) {
-				System.out.printf("Scaling link %s by %f\n", entry.getKey(), entry.getValue());
-				parser.scaleLinkLength(entry.getKey(), entry.getValue());
+				System.out.printf("Scaling link %s to %f inches\n", entry.getKey(), entry.getValue());
+				parser.scaleLinkLength(entry.getKey(), entry.getValue()*INCHES_TO_METERS);
 			}			
 		}
 		
@@ -85,6 +87,8 @@ public class ModifiableValkyrieRobotModel extends ValkyrieRobotModel {
 			parser.writeToFile(tempFilePath);
 			setCustomModel(tempFilePath);
 			
+			// The robot physical properties are explicitly instantiated here so that values come from
+			// the SDF file rather than falling back to the default hard-coded values.
 			robotPhysicalProperties = new ModifiableValkyriePhysicalProperties(config, parser);
 		}
 	}
