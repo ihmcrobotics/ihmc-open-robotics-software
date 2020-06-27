@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynami
 
 import static us.ihmc.robotics.weightMatrices.SolverWeightLevels.HARD_CONSTRAINT;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.MatrixFeatures;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -49,7 +49,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * the data is expressed in world frame.
     * </p>
     */
-   private final DenseMatrix64F momentumRateOfChange = new DenseMatrix64F(Momentum.SIZE, 1);
+   private final DMatrixRMaj momentumRateOfChange = new DMatrixRMaj(Momentum.SIZE, 1);
    /**
     * Weights on a per component basis to use in the optimization function. A higher weight means
     * higher priority of this task.
@@ -117,7 +117,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * @param momentumRateOfChange the desired momentum rate at the center of mass expressed in world
     *           frame. Not modified.
     */
-   public void setMomentumRate(DenseMatrix64F momentumRateOfChange)
+   public void setMomentumRate(DMatrixRMaj momentumRateOfChange)
    {
       this.momentumRateOfChange.set(momentumRateOfChange);
    }
@@ -468,7 +468,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * @param weightMatrixToPack the weight matrix to use in the optimization. The given matrix is
     *           reshaped to ensure proper size. Modified.
     */
-   public void getWeightMatrix(DenseMatrix64F weightMatrixToPack)
+   public void getWeightMatrix(DMatrixRMaj weightMatrixToPack)
    {
       weightMatrixToPack.reshape(Momentum.SIZE, Momentum.SIZE);
       weightMatrix.getFullWeightMatrixInFrame(worldFrame, weightMatrixToPack);
@@ -492,7 +492,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * @param selectionMatrixToPack the dense-matrix in which the selection matrix of this command is
     *           stored in. Modified.
     */
-   public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       selectionMatrix.getCompactSelectionMatrixInFrame(destinationFrame, selectionMatrixToPack);
    }
@@ -522,7 +522,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
     * 
     * @return the desired rate of change of momentum.
     */
-   public DenseMatrix64F getMomentumRate()
+   public DMatrixRMaj getMomentumRate()
    {
       return momentumRateOfChange;
    }
@@ -563,7 +563,7 @@ public class MomentumRateCommand implements InverseDynamicsCommand<MomentumRateC
       {
          MomentumRateCommand other = (MomentumRateCommand) object;
 
-         if (!MatrixFeatures.isEquals(momentumRateOfChange, other.momentumRateOfChange))
+         if (!MatrixFeatures_DDRM.isEquals(momentumRateOfChange, other.momentumRateOfChange))
             return false;
          if (!weightMatrix.equals(other.weightMatrix))
             return false;

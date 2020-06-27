@@ -62,4 +62,16 @@ public class DistanceFromModel_P_to_PVNN<Model> implements DistanceFromModel<Mod
 
 		alg.computeDistance(points, distance);
 	}
+
+   @Override
+   public Class<PointVectorNN> getPointType()
+   {
+      return PointVectorNN.class;
+   }
+
+   @Override
+   public Class<Model> getModelType()
+   {
+      return alg.getModelType();
+   }
 }

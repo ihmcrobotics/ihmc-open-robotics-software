@@ -28,10 +28,12 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
 
    /**
             * The current footstep status enum value.
-            * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
             */
    public byte footstep_status_ = (byte) 255;
 
+   /**
+            * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
+            */
    public int footstep_index_;
 
    /**
@@ -134,7 +136,6 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
 
    /**
             * The current footstep status enum value.
-            * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
             */
    public void setFootstepStatus(byte footstep_status)
    {
@@ -142,7 +143,6 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
    }
    /**
             * The current footstep status enum value.
-            * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
             */
    public byte getFootstepStatus()
    {
@@ -150,10 +150,16 @@ public class FootstepStatusMessage extends Packet<FootstepStatusMessage> impleme
    }
 
 
+   /**
+            * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
+            */
    public void setFootstepIndex(int footstep_index)
    {
       footstep_index_ = footstep_index;
    }
+   /**
+            * footstep_index starts at 0 and monotonically increases with each completed footstep in a given FootstepDataListMessage.
+            */
    public int getFootstepIndex()
    {
       return footstep_index_;

@@ -2,7 +2,7 @@ package us.ihmc.ihmcPerception.chessboardDetection;
 
 import java.awt.image.BufferedImage;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 
@@ -21,7 +21,7 @@ public class ChessboardDetector
       detector.setMaxIterationsAndAccuracy(maxIterations, accuracyEpsilon);
    }
 
-   public void setIntrinsicParameters(IntrinsicParameters intrinsicParameters)
+   public void setIntrinsicParameters(CameraPinholeBrown intrinsicParameters)
    {
 
       detector.setCameraMatrix(intrinsicParameters.fx, intrinsicParameters.fy, intrinsicParameters.cx, intrinsicParameters.cy);

@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
-import org.ejml.ops.CommonOps;
-import us.ihmc.robotics.Assert;
-import org.junit.jupiter.api.Test;
-import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import java.util.Random;
+
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.junit.jupiter.api.Test;
+
+import us.ihmc.commons.RandomNumbers;
+import us.ihmc.robotics.Assert;
 
 public class ICPInequalityInputTest
 {
@@ -73,16 +73,16 @@ public class ICPInequalityInputTest
 
          ICPInequalityInput input = new ICPInequalityInput(numberOfConstraints, size);
 
-         CommonOps.fill(input.Aineq, RandomNumbers.nextDouble(random, -1000.0, 1000.0));
-         CommonOps.fill(input.bineq, RandomNumbers.nextDouble(random, -1000.0, 1000.0));
+         CommonOps_DDRM.fill(input.Aineq, RandomNumbers.nextDouble(random, -1000.0, 1000.0));
+         CommonOps_DDRM.fill(input.bineq, RandomNumbers.nextDouble(random, -1000.0, 1000.0));
 
-         Assert.assertNotEquals(CommonOps.elementSum(input.Aineq), 0.0, 1e-7);
-         Assert.assertNotEquals(CommonOps.elementSum(input.bineq), 0.0, 1e-7);
+         Assert.assertNotEquals(CommonOps_DDRM.elementSum(input.Aineq), 0.0, 1e-7);
+         Assert.assertNotEquals(CommonOps_DDRM.elementSum(input.bineq), 0.0, 1e-7);
 
          input.reset();
 
-         Assert.assertEquals(CommonOps.elementSum(input.Aineq), 0.0, 1e-7);
-         Assert.assertEquals(CommonOps.elementSum(input.bineq), 0.0, 1e-7);
+         Assert.assertEquals(CommonOps_DDRM.elementSum(input.Aineq), 0.0, 1e-7);
+         Assert.assertEquals(CommonOps_DDRM.elementSum(input.bineq), 0.0, 1e-7);
       }
    }
 

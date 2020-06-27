@@ -4,7 +4,7 @@ import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SL
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.CostFunctionTest;
@@ -60,9 +60,9 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       LQCostFunction<SLIPState> costFunction = getCostFunction();
 
       Random random = new Random(1738L);
-      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
-      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
-      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
+      DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DMatrixRMaj constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
       constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
       double cost = costFunction.getCost(SLIPState.FLIGHT, currentControl, currentState, constants);
@@ -147,13 +147,13 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       SLIPModelForceTrackingCost cost = new SLIPModelForceTrackingCost(mass, gravityZ);
 
       Random random = new Random(1738L);
-      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
-      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
-      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
+      DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DMatrixRMaj constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
       constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
-      DenseMatrix64F expectedGradient = new DenseMatrix64F(stateVectorSize, 1);
-      DenseMatrix64F gradient = new DenseMatrix64F(stateVectorSize, 1);
+      DMatrixRMaj expectedGradient = new DMatrixRMaj(stateVectorSize, 1);
+      DMatrixRMaj gradient = new DMatrixRMaj(stateVectorSize, 1);
 
       cost.getCostStateGradient(SLIPState.STANCE, currentControl, currentState, constants, gradient);
 
@@ -252,13 +252,13 @@ public class SLIPRegularizationCostTest extends CostFunctionTest<SLIPState>
       SLIPModelForceTrackingCost cost = new SLIPModelForceTrackingCost(mass, gravityZ);
 
       Random random = new Random(1738L);
-      DenseMatrix64F currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
-      DenseMatrix64F currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
-      DenseMatrix64F constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
+      DMatrixRMaj currentState = RandomGeometry.nextDenseMatrix64F(random, stateVectorSize, 1);
+      DMatrixRMaj currentControl = RandomGeometry.nextDenseMatrix64F(random, controlVectorSize, 1);
+      DMatrixRMaj constants = RandomGeometry.nextDenseMatrix64F(random, constantVectorSize, 1);
       constants.set(nominalLength, 0, RandomNumbers.nextDouble(random, 0.1, 10.0));
 
-      DenseMatrix64F expectedGradient = new DenseMatrix64F(controlVectorSize, 1);
-      DenseMatrix64F gradient = new DenseMatrix64F(controlVectorSize, 1);
+      DMatrixRMaj expectedGradient = new DMatrixRMaj(controlVectorSize, 1);
+      DMatrixRMaj gradient = new DMatrixRMaj(controlVectorSize, 1);
 
       cost.getCostControlGradient(SLIPState.STANCE, currentControl, currentState, constants, gradient);
 

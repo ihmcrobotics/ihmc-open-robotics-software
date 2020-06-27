@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping;
 
 import static us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.SLIPState.*;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.matrixlib.MatrixTools;
@@ -18,7 +18,7 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
    private final Vector3D inertia = new Vector3D();
 
    private final ContinuousSimpleReactionDynamics continuousDynamics;
-   private final DenseMatrix64F continuousDynamicsMatrix = new DenseMatrix64F(stateVectorSize / 2, 1);
+   private final DMatrixRMaj continuousDynamicsMatrix = new DMatrixRMaj(stateVectorSize / 2, 1);
 
    public SimpleReactionDynamics(double deltaT, double pendulumMass, double gravityZ)
    {
@@ -60,7 +60,7 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
    }
 
    @Override
-   public void getNextState(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+   public void getNextState(SLIPState hybridState, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants, DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -101,8 +101,8 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
    }
 
    @Override
-   public void getDynamicsStateGradient(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants,
-                                        DenseMatrix64F matrixToPack)
+   public void getDynamicsStateGradient(SLIPState hybridState, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants,
+                                        DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -110,7 +110,7 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
          throw new RuntimeException("The state matrix size is wrong.");
 
       matrixToPack.zero();
-      CommonOps.setIdentity(matrixToPack);
+      CommonOps_DDRM.setIdentity(matrixToPack);
 
       matrixToPack.set(x, xDot, deltaT);
       matrixToPack.set(y, yDot, deltaT);
@@ -121,8 +121,8 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
    }
 
    @Override
-   public void getDynamicsControlGradient(SLIPState hybridState, DenseMatrix64F currentState, DenseMatrix64F currentControl, DenseMatrix64F constants,
-                                          DenseMatrix64F matrixToPack)
+   public void getDynamicsControlGradient(SLIPState hybridState, DMatrixRMaj currentState, DMatrixRMaj currentControl, DMatrixRMaj constants,
+                                          DMatrixRMaj matrixToPack)
    {
       if (matrixToPack.numRows != stateVectorSize)
          throw new RuntimeException("The state matrix size is wrong.");
@@ -150,30 +150,30 @@ public class SimpleReactionDynamics implements DiscreteHybridDynamics<SLIPState>
    }
 
    @Override
-   public void getDynamicsStateHessian(SLIPState hybridState, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl,
-                                       DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+   public void getDynamicsStateHessian(SLIPState hybridState, int stateVariable, DMatrixRMaj currentState, DMatrixRMaj currentControl,
+                                       DMatrixRMaj constants, DMatrixRMaj matrixToPack)
    {}
 
    @Override
-   public void getDynamicsControlHessian(SLIPState hybridState, int controlVariable, DenseMatrix64F currentState, DenseMatrix64F currentControl,
-                                         DenseMatrix64F constants, DenseMatrix64F matrixToPack)
+   public void getDynamicsControlHessian(SLIPState hybridState, int controlVariable, DMatrixRMaj currentState, DMatrixRMaj currentControl,
+                                         DMatrixRMaj constants, DMatrixRMaj matrixToPack)
    {}
 
    @Override
-   public void getDynamicsStateGradientOfControlGradient(SLIPState hybridState, int stateVariable, DenseMatrix64F currentState, DenseMatrix64F constants,
-                                                         DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
+   public void getDynamicsStateGradientOfControlGradient(SLIPState hybridState, int stateVariable, DMatrixRMaj currentState, DMatrixRMaj constants,
+                                                         DMatrixRMaj currentControl, DMatrixRMaj matrixToPack)
    {}
 
    @Override
-   public void getDynamicsControlGradientOfStateGradient(SLIPState hybridState, int controlVariable, DenseMatrix64F currentState, DenseMatrix64F constants,
-                                                         DenseMatrix64F currentControl, DenseMatrix64F matrixToPack)
+   public void getDynamicsControlGradientOfStateGradient(SLIPState hybridState, int controlVariable, DMatrixRMaj currentState, DMatrixRMaj constants,
+                                                         DMatrixRMaj currentControl, DMatrixRMaj matrixToPack)
    {}
 
    @Override
-   public void getContinuousAMatrix(DenseMatrix64F A)
+   public void getContinuousAMatrix(DMatrixRMaj A)
    {}
 
    @Override
-   public void getContinuousBMatrix(DenseMatrix64F B)
+   public void getContinuousBMatrix(DMatrixRMaj B)
    {}
 }

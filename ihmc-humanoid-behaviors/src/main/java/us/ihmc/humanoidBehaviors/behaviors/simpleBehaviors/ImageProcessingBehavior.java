@@ -2,7 +2,7 @@ package us.ihmc.humanoidBehaviors.behaviors.simpleBehaviors;
 
 import java.awt.image.BufferedImage;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.net.ConnectionStateListener;
@@ -28,11 +28,11 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
    }
 
    public abstract void processImageToSend(BufferedImage bufferedImageToPack, Point3DReadOnly cameraPositionToPack, QuaternionReadOnly cameraOrientationToPack,
-                                           IntrinsicParameters intrinsicParametersToPack);
+                                           CameraPinholeBrown intrinsicParametersToPack);
 
    @Override
    public void onFrame(VideoSource videoSource, BufferedImage bufferedImage, long timestamp, Point3DReadOnly cameraPosition,
-                       QuaternionReadOnly cameraOrientation, IntrinsicParameters intrinsicParameters)
+                       QuaternionReadOnly cameraOrientation, CameraPinholeBrown intrinsicParameters)
    {
       processImageToSend(bufferedImage, cameraPosition, cameraOrientation, intrinsicParameters);
 
@@ -50,7 +50,7 @@ public abstract class ImageProcessingBehavior extends VideoPacketListenerBehavio
 
       @Override
       public void onFrame(VideoSource videoSource, byte[] data, long timeStamp, Point3DReadOnly position, QuaternionReadOnly orientation,
-                          IntrinsicParameters intrinsicParameters)
+                          CameraPinholeBrown intrinsicParameters)
       {
          publisher.publish(HumanoidMessageTools.createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters));
       }

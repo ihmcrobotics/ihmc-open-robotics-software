@@ -1,12 +1,12 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
-import org.ejml.data.DenseMatrix64F;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPInequalityInput;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPQPIndexHandler;
-
 import static us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerQPSolver.cmpFeedbackIndex;
 import static us.ihmc.commonWalkingControlModules.capturePoint.controller.ICPControllerQPSolver.copFeedbackIndex;
+
+import org.ejml.data.DMatrixRMaj;
+
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
+import us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput.ICPInequalityInput;
 
 /**
  * This class is used by the {@link ICPOptimizationQPSolver} to calculate variable constraints for the QP Solver
@@ -119,7 +119,7 @@ public class ICPControllerQPConstraintCalculator
     */
    public static void calculateMaxFeedbackRateConstraint(ICPInequalityInput inputToPack,
                                                          double maxRate,
-                                                         DenseMatrix64F previousValue,
+                                                         DMatrixRMaj previousValue,
                                                          double controlDT,
                                                          boolean useAngularMomentum)
    {

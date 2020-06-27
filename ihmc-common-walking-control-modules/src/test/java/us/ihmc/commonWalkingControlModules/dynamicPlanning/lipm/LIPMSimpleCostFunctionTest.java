@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.dynamicPlanning.lipm;
 
 import static us.ihmc.robotics.Assert.assertEquals;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.TrackingCostFunctionTest;
@@ -53,7 +53,7 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
    {
       LIPMSimpleCostFunction costFunction = new LIPMSimpleCostFunction();
 
-      DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
+      DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
       currentState.set(0, 1.0);
       currentState.set(1, 0.5);
       currentState.set(2, 1.2);
@@ -61,7 +61,7 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
       currentState.set(4, 3.0);
       currentState.set(5, 0.5);
 
-      DenseMatrix64F desiredState = new DenseMatrix64F(6, 1);
+      DMatrixRMaj desiredState = new DMatrixRMaj(6, 1);
       desiredState.set(0, 0.5);
       desiredState.set(1, 0.25);
       desiredState.set(2, 1.0);
@@ -69,17 +69,17 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
       desiredState.set(4, 2.0);
       desiredState.set(5, 0.0);
 
-      DenseMatrix64F currentControl = new DenseMatrix64F(3, 1);
+      DMatrixRMaj currentControl = new DMatrixRMaj(3, 1);
       currentControl.set(0, 1.5);
       currentControl.set(1, 0.5);
       currentControl.set(2, 150);
 
-      DenseMatrix64F desiredControl = new DenseMatrix64F(3, 1);
+      DMatrixRMaj desiredControl = new DMatrixRMaj(3, 1);
       desiredControl.set(0, 1.2);
       desiredControl.set(1, 0.75);
       desiredControl.set(2, 100);
 
-      DenseMatrix64F constants = new DenseMatrix64F(0, 1);
+      DMatrixRMaj constants = new DMatrixRMaj(0, 1);
 
       double stateCost = LIPMSimpleCostFunction.qX * 0.5 * 0.5 + LIPMSimpleCostFunction.qY * 0.25 * 0.25 + LIPMSimpleCostFunction.qZ * 0.2 * 0.2 +
             LIPMSimpleCostFunction.qXDot + LIPMSimpleCostFunction.qYDot + LIPMSimpleCostFunction.qZDot * 0.5 * 0.5;
@@ -95,10 +95,10 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
    {
       LIPMSimpleCostFunction costFunction = new LIPMSimpleCostFunction();
 
-      DenseMatrix64F gradient = new DenseMatrix64F(6, 1);
-      DenseMatrix64F gradientExpected = new DenseMatrix64F(6, 1);
+      DMatrixRMaj gradient = new DMatrixRMaj(6, 1);
+      DMatrixRMaj gradientExpected = new DMatrixRMaj(6, 1);
 
-      DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
+      DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
       currentState.set(0, 1.0);
       currentState.set(1, 0.5);
       currentState.set(2, 1.2);
@@ -106,7 +106,7 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
       currentState.set(4, 3.0);
       currentState.set(5, 0.5);
 
-      DenseMatrix64F desiredState = new DenseMatrix64F(6, 1);
+      DMatrixRMaj desiredState = new DMatrixRMaj(6, 1);
       desiredState.set(0, 0.5);
       desiredState.set(1, 0.25);
       desiredState.set(2, 1.0);
@@ -114,17 +114,17 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
       desiredState.set(4, 2.0);
       desiredState.set(5, 0.0);
 
-      DenseMatrix64F currentControl = new DenseMatrix64F(3, 1);
+      DMatrixRMaj currentControl = new DMatrixRMaj(3, 1);
       currentControl.set(0, 1.5);
       currentControl.set(1, 0.5);
       currentControl.set(2, 150);
 
-      DenseMatrix64F desiredControl = new DenseMatrix64F(3, 1);
+      DMatrixRMaj desiredControl = new DMatrixRMaj(3, 1);
       desiredControl.set(0, 1.2);
       desiredControl.set(1, 0.75);
       desiredControl.set(2, 100);
 
-      DenseMatrix64F constants = new DenseMatrix64F(0, 1);
+      DMatrixRMaj constants = new DMatrixRMaj(0, 1);
 
       gradientExpected.set(0, 0, 2.0 * LIPMSimpleCostFunction.qX * 0.5);
       gradientExpected.set(1, 0, 2.0 * LIPMSimpleCostFunction.qY * 0.25);
@@ -143,10 +143,10 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
    {
       LIPMSimpleCostFunction costFunction = new LIPMSimpleCostFunction();
 
-      DenseMatrix64F gradient = new DenseMatrix64F(3, 1);
-      DenseMatrix64F gradientExpected = new DenseMatrix64F(3, 1);
+      DMatrixRMaj gradient = new DMatrixRMaj(3, 1);
+      DMatrixRMaj gradientExpected = new DMatrixRMaj(3, 1);
 
-      DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
+      DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
       currentState.set(0, 1.0);
       currentState.set(1, 0.5);
       currentState.set(2, 1.2);
@@ -154,7 +154,7 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
       currentState.set(4, 3.0);
       currentState.set(5, 0.5);
 
-      DenseMatrix64F desiredState = new DenseMatrix64F(6, 1);
+      DMatrixRMaj desiredState = new DMatrixRMaj(6, 1);
       desiredState.set(0, 0.5);
       desiredState.set(1, 0.25);
       desiredState.set(2, 1.0);
@@ -162,17 +162,17 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
       desiredState.set(4, 2.0);
       desiredState.set(5, 0.0);
 
-      DenseMatrix64F currentControl = new DenseMatrix64F(3, 1);
+      DMatrixRMaj currentControl = new DMatrixRMaj(3, 1);
       currentControl.set(0, 1.5);
       currentControl.set(1, 0.5);
       currentControl.set(2, 150);
 
-      DenseMatrix64F desiredControl = new DenseMatrix64F(3, 1);
+      DMatrixRMaj desiredControl = new DMatrixRMaj(3, 1);
       desiredControl.set(0, 1.2);
       desiredControl.set(1, 0.75);
       desiredControl.set(2, 100);
 
-      DenseMatrix64F constants = new DenseMatrix64F(0, 1);
+      DMatrixRMaj constants = new DMatrixRMaj(0, 1);
 
       gradientExpected.set(0, 0, 2.0 * LIPMSimpleCostFunction.rXf * (1.5 - 1.2));
       gradientExpected.set(1, 0, 2.0 * LIPMSimpleCostFunction.rYf * (0.5 - 0.75));
@@ -186,16 +186,16 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
    @Test
    public void testComputeCostControlHessian()
    {
-      DenseMatrix64F R = new DenseMatrix64F(3, 3);
+      DMatrixRMaj R = new DMatrixRMaj(3, 3);
       R.set(0, 0, LIPMSimpleCostFunction.rXf);
       R.set(1, 1, LIPMSimpleCostFunction.rYf);
       R.set(2, 2, LIPMSimpleCostFunction.rFz);
 
       LIPMSimpleCostFunction costFunction = new LIPMSimpleCostFunction();
 
-      DenseMatrix64F hessian = new DenseMatrix64F(3, 3);
+      DMatrixRMaj hessian = new DMatrixRMaj(3, 3);
 
-      DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
+      DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
       currentState.set(0, 1.0);
       currentState.set(1, 0.5);
       currentState.set(2, 1.2);
@@ -203,23 +203,23 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
       currentState.set(4, 3.0);
       currentState.set(5, 0.5);
 
-      DenseMatrix64F currentControl = new DenseMatrix64F(3, 1);
+      DMatrixRMaj currentControl = new DMatrixRMaj(3, 1);
       currentControl.set(0, 1.5);
       currentControl.set(1, 0.5);
       currentControl.set(2, 150);
 
-      DenseMatrix64F constants = new DenseMatrix64F(0, 1);
+      DMatrixRMaj constants = new DMatrixRMaj(0, 1);
 
       costFunction.getCostControlHessian(DefaultDiscreteState.DEFAULT, currentControl, currentState, constants, hessian);
 
-      CommonOps.scale(2.0, R);
+      CommonOps_DDRM.scale(2.0, R);
       MatrixTestTools.assertMatrixEquals(R, hessian, 1e-10);
    }
 
    @Test
    public void testComputeCostStateHessian()
    {
-      DenseMatrix64F Q = new DenseMatrix64F(6, 6);
+      DMatrixRMaj Q = new DMatrixRMaj(6, 6);
       Q.set(0, 0, LIPMSimpleCostFunction.qX);
       Q.set(1, 1, LIPMSimpleCostFunction.qY);
       Q.set(2, 2, LIPMSimpleCostFunction.qZ);
@@ -229,9 +229,9 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
 
       LIPMSimpleCostFunction costFunction = new LIPMSimpleCostFunction();
 
-      DenseMatrix64F hessian = new DenseMatrix64F(6, 6);
+      DMatrixRMaj hessian = new DMatrixRMaj(6, 6);
 
-      DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
+      DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
       currentState.set(0, 1.0);
       currentState.set(1, 0.5);
       currentState.set(2, 1.2);
@@ -239,16 +239,16 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
       currentState.set(4, 3.0);
       currentState.set(5, 0.5);
 
-      DenseMatrix64F currentControl = new DenseMatrix64F(3, 1);
+      DMatrixRMaj currentControl = new DMatrixRMaj(3, 1);
       currentControl.set(0, 1.5);
       currentControl.set(1, 0.5);
       currentControl.set(2, 150);
 
-      DenseMatrix64F constants = new DenseMatrix64F(0, 1);
+      DMatrixRMaj constants = new DMatrixRMaj(0, 1);
 
       costFunction.getCostStateHessian(DefaultDiscreteState.DEFAULT, currentControl, currentState, constants, hessian);
 
-      CommonOps.scale(2.0, Q);
+      CommonOps_DDRM.scale(2.0, Q);
       MatrixTestTools.assertMatrixEquals(Q, hessian, 1e-10);
    }
 
@@ -257,10 +257,10 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
    {
       LIPMSimpleCostFunction costFunction = new LIPMSimpleCostFunction();
 
-      DenseMatrix64F hessian = new DenseMatrix64F(3, 6);
-      DenseMatrix64F hessianExpected = new DenseMatrix64F(3, 6);
+      DMatrixRMaj hessian = new DMatrixRMaj(3, 6);
+      DMatrixRMaj hessianExpected = new DMatrixRMaj(3, 6);
 
-      DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
+      DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
       currentState.set(0, 1.0);
       currentState.set(1, 0.5);
       currentState.set(2, 1.2);
@@ -268,12 +268,12 @@ public class LIPMSimpleCostFunctionTest extends TrackingCostFunctionTest<Default
       currentState.set(4, 3.0);
       currentState.set(5, 0.5);
 
-      DenseMatrix64F currentControl = new DenseMatrix64F(3, 1);
+      DMatrixRMaj currentControl = new DMatrixRMaj(3, 1);
       currentControl.set(0, 1.5);
       currentControl.set(1, 0.5);
       currentControl.set(2, 150);
 
-      DenseMatrix64F constants = new DenseMatrix64F(0, 1);
+      DMatrixRMaj constants = new DMatrixRMaj(0, 1);
 
       costFunction.getCostStateGradientOfControlGradient(DefaultDiscreteState.DEFAULT, currentControl, currentState, constants, hessian);
 

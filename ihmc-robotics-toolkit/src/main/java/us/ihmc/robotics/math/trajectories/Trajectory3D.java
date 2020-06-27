@@ -3,7 +3,8 @@ package us.ihmc.robotics.math.trajectories;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
+
 import us.ihmc.commons.Epsilons;
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.Axis3D;
@@ -387,7 +388,7 @@ public class Trajectory3D
       return getTrajectory(index).getNumberOfCoefficients();
    }
 
-   public void getCoefficients(int i, DenseMatrix64F coefficientsToPack)
+   public void getCoefficients(int i, DMatrixRMaj coefficientsToPack)
    {
       for (int ordinal = 0; ordinal < 3; ordinal++)
       {

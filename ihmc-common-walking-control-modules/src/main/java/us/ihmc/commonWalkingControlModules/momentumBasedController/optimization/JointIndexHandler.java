@@ -3,13 +3,14 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 import java.util.LinkedHashMap;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import gnu.trove.list.array.TIntArrayList;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
 import us.ihmc.robotics.screwTheory.ScrewTools;
 
@@ -53,7 +54,7 @@ public class JointIndexHandler
       }
    }
 
-   public boolean compactBlockToFullBlock(JointReadOnly[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
+   public boolean compactBlockToFullBlock(JointReadOnly[] joints, DMatrixRMaj compactMatrix, DMatrixRMaj fullMatrix)
    {
       fullMatrix.zero();
 
@@ -70,14 +71,14 @@ public class JointIndexHandler
          {
             int compactBlockIndex = indicesIntoCompactBlock.get(i);
             int fullBlockIndex = indicesIntoFullBlock[i];
-            CommonOps.extract(compactMatrix, 0, compactMatrix.getNumRows(), compactBlockIndex, compactBlockIndex + 1, fullMatrix, 0, fullBlockIndex);
+            CommonOps_DDRM.extract(compactMatrix, 0, compactMatrix.getNumRows(), compactBlockIndex, compactBlockIndex + 1, fullMatrix, 0, fullBlockIndex);
          }
       }
 
       return true;
    }
 
-   public boolean compactBlockToFullBlock(List<? extends JointReadOnly> joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
+   public boolean compactBlockToFullBlock(List<? extends JointReadOnly> joints, DMatrixRMaj compactMatrix, DMatrixRMaj fullMatrix)
    {
       fullMatrix.zero();
 
@@ -95,14 +96,14 @@ public class JointIndexHandler
          {
             int compactBlockIndex = indicesIntoCompactBlock.get(i);
             int fullBlockIndex = indicesIntoFullBlock[i];
-            CommonOps.extract(compactMatrix, 0, compactMatrix.getNumRows(), compactBlockIndex, compactBlockIndex + 1, fullMatrix, 0, fullBlockIndex);
+            CommonOps_DDRM.extract(compactMatrix, 0, compactMatrix.getNumRows(), compactBlockIndex, compactBlockIndex + 1, fullMatrix, 0, fullBlockIndex);
          }
       }
 
       return true;
    }
 
-   public void compactBlockToFullBlockIgnoreUnindexedJoints(List<? extends JointReadOnly> joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
+   public void compactBlockToFullBlockIgnoreUnindexedJoints(List<? extends JointReadOnly> joints, DMatrixRMaj compactMatrix, DMatrixRMaj fullMatrix)
    {
       fullMatrix.reshape(compactMatrix.getNumRows(), fullMatrix.getNumCols());
       fullMatrix.zero();
@@ -121,12 +122,12 @@ public class JointIndexHandler
          {
             int compactBlockIndex = indicesIntoCompactBlock.get(i);
             int fullBlockIndex = indicesIntoFullBlock[i];
-            CommonOps.extract(compactMatrix, 0, compactMatrix.getNumRows(), compactBlockIndex, compactBlockIndex + 1, fullMatrix, 0, fullBlockIndex);
+            CommonOps_DDRM.extract(compactMatrix, 0, compactMatrix.getNumRows(), compactBlockIndex, compactBlockIndex + 1, fullMatrix, 0, fullBlockIndex);
          }
       }
    }
 
-   public void compactBlockToFullBlockIgnoreUnindexedJoints(JointBasics[] joints, DenseMatrix64F compactMatrix, DenseMatrix64F fullMatrix)
+   public void compactBlockToFullBlockIgnoreUnindexedJoints(JointBasics[] joints, DMatrixRMaj compactMatrix, DMatrixRMaj fullMatrix)
    {
       fullMatrix.reshape(compactMatrix.getNumRows(), fullMatrix.getNumCols());
       fullMatrix.zero();
@@ -145,7 +146,7 @@ public class JointIndexHandler
          {
             int compactBlockIndex = indicesIntoCompactBlock.get(i);
             int fullBlockIndex = indicesIntoFullBlock[i];
-            CommonOps.extract(compactMatrix, 0, compactMatrix.getNumRows(), compactBlockIndex, compactBlockIndex + 1, fullMatrix, 0, fullBlockIndex);
+            CommonOps_DDRM.extract(compactMatrix, 0, compactMatrix.getNumRows(), compactBlockIndex, compactBlockIndex + 1, fullMatrix, 0, fullBlockIndex);
          }
       }
    }
@@ -175,7 +176,7 @@ public class JointIndexHandler
       return true;
    }
 
-   public int getOneDoFJointIndex(OneDoFJointBasics joint)
+   public int getOneDoFJointIndex(OneDoFJointReadOnly joint)
    {
       int[] jointIndices = columnsForJoints.get(joint);
       if (jointIndices == null)

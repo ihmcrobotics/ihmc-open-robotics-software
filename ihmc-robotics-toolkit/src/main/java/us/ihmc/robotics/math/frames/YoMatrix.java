@@ -1,6 +1,6 @@
 package us.ihmc.robotics.math.frames;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
@@ -45,7 +45,7 @@ public class YoMatrix
       }
    }
 
-   public void set(DenseMatrix64F matrix)
+   public void set(DMatrixRMaj matrix)
    {
       int numRows = matrix.getNumRows();
       int numCols = matrix.getNumCols();
@@ -72,13 +72,13 @@ public class YoMatrix
       }
    }
 
-   public void getAndReshape(DenseMatrix64F matrixToPack)
+   public void getAndReshape(DMatrixRMaj matrixToPack)
    {
       matrixToPack.reshape(getNumberOfRows(), getNumberOfColumns());
       get(matrixToPack);
    }
 
-   public void get(DenseMatrix64F matrixToPack)
+   public void get(DMatrixRMaj matrixToPack)
    {
       int numRows = matrixToPack.getNumRows();
       int numCols = matrixToPack.getNumCols();

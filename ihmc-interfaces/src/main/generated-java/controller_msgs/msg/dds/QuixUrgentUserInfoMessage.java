@@ -19,6 +19,8 @@ public class QuixUrgentUserInfoMessage extends Packet<QuixUrgentUserInfoMessage>
 
    public static final byte MOTOR_OVER_TEMP = (byte) 2;
 
+   public static final byte LOW_BATTERY = (byte) 3;
+
    public long sequence_id_;
 
    public byte urgent_user_info_name_;

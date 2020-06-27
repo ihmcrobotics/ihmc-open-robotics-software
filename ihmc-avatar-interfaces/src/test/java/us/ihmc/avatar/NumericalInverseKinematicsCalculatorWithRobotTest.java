@@ -264,7 +264,7 @@ public abstract class NumericalInverseKinematicsCalculatorWithRobotTest implemen
       }
 
       final double maximumTimeMillisMax = 600.0;
-      final double averageTimeMillisMax = 8.0;
+      final double averageTimeMillisMax = 9.0;
       assertTrue("Average Solving Time > " + averageTimeMillisMax + " ms", averageTimeMillis < averageTimeMillisMax);
       assertTrue("Maximal Solving Time > " + maximumTimeMillisMax + " ms", maximumTimeMillis < maximumTimeMillisMax);
 

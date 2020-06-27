@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
@@ -685,7 +685,7 @@ public class CrossRobotCommandCodeQualityTest
       safeTypes.add(FrameTupleArrayList.class);
       safeTypes.add(RecyclingArrayList.class);
       safeTypes.add(SideDependentList.class);
-      safeTypes.add(DenseMatrix64F.class);
+      safeTypes.add(DMatrixRMaj.class);
       safeTypes.add(DenseMatrixArrayList.class);
       safeTypes.add(FramePoint3D.class);
       safeTypes.add(FrameVector3D.class);

@@ -3,8 +3,8 @@ package us.ihmc.simulationconstructionset.screwTheory;
 import java.util.ArrayList;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -36,13 +36,13 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
 
    private final double controlDT = 1.0e-8;
 
-   private final DenseMatrix64F a = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F aPrevVal = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F aDot = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F aTermCalculator = new DenseMatrix64F(0,0);
+   private final DMatrixRMaj a = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj aPrevVal = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj aDot = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj aTermCalculator = new DMatrixRMaj(0,0);
 
-   private final DenseMatrix64F aDotVNumerical = new DenseMatrix64F(6, 1);
-   private final DenseMatrix64F aDotVAnalytical = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj aDotVNumerical = new DMatrixRMaj(6, 1);
+   private final DMatrixRMaj aDotVAnalytical = new DMatrixRMaj(6, 1);
 
 	@Test
    public void chainTest() throws UnreasonableAccelerationException
@@ -104,7 +104,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
          throws UnreasonableAccelerationException
    {
       int numberOfDoFs = MultiBodySystemTools.computeDegreesOfFreedom(MultiBodySystemTools.collectSubtreeJoints(elevator));
-      DenseMatrix64F v = new DenseMatrix64F(numberOfDoFs, 1);
+      DMatrixRMaj v = new DMatrixRMaj(numberOfDoFs, 1);
 
       JointBasics[] idJoints = new JointBasics[numJoints]; 
       CenterOfMassReferenceFrame centerOfMassFrame = new CenterOfMassReferenceFrame("com", worldFrame, elevator);
@@ -151,7 +151,7 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
          centroidalMomentumMatrixCalculator.reset();
          a.set(centroidalMomentumMatrixCalculator.getCentroidalMomentumMatrix());
          MatrixTools.numericallyDifferentiate(aDot, aPrevVal, a, controlDT);
-         CommonOps.mult(aDot, v, aDotVNumerical);
+         CommonOps_DDRM.mult(aDot, v, aDotVNumerical);
 
          smartPrintOutADotV(EPSILON);
 
@@ -162,8 +162,8 @@ public class CentroidalMomentumRateTermCalculatorSCSTest
 
    private void smartPrintOutADotV(double epsilon)
    {
-      DenseMatrix64F difference = new DenseMatrix64F(aDotVNumerical.numRows, aDotVNumerical.numCols);
-      CommonOps.subtract(aDotVNumerical, aDotVAnalytical, difference);
+      DMatrixRMaj difference = new DMatrixRMaj(aDotVNumerical.numRows, aDotVNumerical.numCols);
+      CommonOps_DDRM.subtract(aDotVNumerical, aDotVAnalytical, difference);
 
       for (int i = 0; i < difference.numRows; i++)
          if(Math.abs(difference.get(i, 0)) > epsilon)

@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
@@ -36,7 +36,7 @@ public interface VirtualEffortCommand<T extends VirtualEffortCommand<T>> extends
     *           effort is stored. The given matrix is reshaped to ensure proper size.
     *           Modified.
     */
-   void getDesiredEffort(DenseMatrix64F desiredEffortToPack);
+   void getDesiredEffort(DMatrixRMaj desiredEffortToPack);
 
    /**
     * Gets the reference to the base of this command.
@@ -70,5 +70,5 @@ public interface VirtualEffortCommand<T extends VirtualEffortCommand<T>> extends
     * @param selectionMatrixToPack the dense-matrix in which the selection matrix of this command is
     *           stored in. Modified.
     */
-   void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack);
+   void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack);
 }

@@ -1,23 +1,20 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import static us.ihmc.robotics.Assert.*;
+import static us.ihmc.robotics.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 import org.junit.jupiter.api.Test;
 
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.tools.EuclidCoreTestTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
-import us.ihmc.robotics.geometry.GeometryTools;
 import us.ihmc.robotics.random.RandomGeometry;
 
 public class IncrementalCovariance3DTest
@@ -81,8 +78,8 @@ public class IncrementalCovariance3DTest
       incrementalCovariance3D.getMean(actualMean);
       EuclidCoreTestTools.assertTuple3DEquals(expectedMean, actualMean, EPSILON);
 
-      DenseMatrix64F expectedCovariance;
-      DenseMatrix64F actualCovariance = new DenseMatrix64F(0, 0);
+      DMatrixRMaj expectedCovariance;
+      DMatrixRMaj actualCovariance = new DMatrixRMaj(0, 0);
       incrementalCovariance3D.getCovariance(actualCovariance);
       expectedCovariance = computeCovarianceMatrix(dataset, false);
       assertEquals(expectedCovariance, actualCovariance, EPSILON);
@@ -92,12 +89,12 @@ public class IncrementalCovariance3DTest
       assertEquals(expectedCovariance, actualCovariance, EPSILON);
    }
 
-   private void assertEquals(DenseMatrix64F expectedCovariance, DenseMatrix64F actualCovariance, double epsilon)
+   private void assertEquals(DMatrixRMaj expectedCovariance, DMatrixRMaj actualCovariance, double epsilon)
    {
-      assertTrue(assertErrorMessage(expectedCovariance, actualCovariance), MatrixFeatures.isEquals(expectedCovariance, actualCovariance, epsilon));
+      assertTrue(assertErrorMessage(expectedCovariance, actualCovariance), MatrixFeatures_DDRM.isEquals(expectedCovariance, actualCovariance, epsilon));
    }
 
-   private static String assertErrorMessage(DenseMatrix64F expectedCovariance, DenseMatrix64F actualCovariance)
+   private static String assertErrorMessage(DMatrixRMaj expectedCovariance, DMatrixRMaj actualCovariance)
    {
       return "Expected:\n" + expectedCovariance + "\nActual:\n" + actualCovariance;
    }
@@ -120,11 +117,11 @@ public class IncrementalCovariance3DTest
    /**
     * Using the actual formula of the covariance matrix, <a href="https://en.wikipedia.org/wiki/Principal_component_analysis"> here</a>.
     */
-   private static DenseMatrix64F computeCovarianceMatrix(List<Point3D> dataset, boolean corrected)
+   private static DMatrixRMaj computeCovarianceMatrix(List<Point3D> dataset, boolean corrected)
    {
-      DenseMatrix64F covariance = new DenseMatrix64F(3, 3);
+      DMatrixRMaj covariance = new DMatrixRMaj(3, 3);
       int n = dataset.size();
-      DenseMatrix64F datasetMatrix = new DenseMatrix64F(n, 3);
+      DMatrixRMaj datasetMatrix = new DMatrixRMaj(n, 3);
 
       Point3D average = EuclidGeometryTools.averagePoint3Ds(dataset);
 
@@ -136,15 +133,15 @@ public class IncrementalCovariance3DTest
          datasetMatrix.set(i, 2, dataPoint.getZ() - average.getZ());
       }
 
-      CommonOps.multInner(datasetMatrix, covariance);
+      CommonOps_DDRM.multInner(datasetMatrix, covariance);
 
       if (corrected)
       {
-         CommonOps.scale(1.0 / (double) (n - 1.0), covariance);
+         CommonOps_DDRM.scale(1.0 / (double) (n - 1.0), covariance);
       }
       else
       {
-         CommonOps.scale(1.0 / (double) n, covariance);
+         CommonOps_DDRM.scale(1.0 / (double) n, covariance);
       }
 
       return covariance;

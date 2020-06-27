@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.feedbackController;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCoreMode;
@@ -253,7 +253,7 @@ public class CenterOfMassFeedbackControlCommand implements FeedbackControlComman
     *           center of mass position. It is expected to be a 3-by-1 vector ordered as:
     *           {@code linearX}, {@code linearY}, {@code linearZ}. Not modified.
     */
-   public void setWeightsForSolver(DenseMatrix64F weightVector)
+   public void setWeightsForSolver(DMatrixRMaj weightVector)
    {
       if (weightVector.getNumRows() != 3)
          throw new RuntimeException("Unexpected number of rows for the given weight vector. Expected 3 but was: " + weightVector.getNumRows());

@@ -1,6 +1,6 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrix;
 
 import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -33,7 +33,7 @@ public class PassiveRevoluteJoint extends RevoluteJoint
     * Torque on a passive joint is always zero
     */
    @Override
-   public int getJointTau(int rowStart, DenseMatrix64F matrix)
+   public int getJointTau(int rowStart, DMatrix matrix)
    {
       MathTools.checkIntervalContains(matrix.getNumRows(), 1, Integer.MAX_VALUE);
       MathTools.checkIntervalContains(matrix.getNumCols(), 1, Integer.MAX_VALUE);
@@ -54,7 +54,7 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    }
 
    @Override
-   public int setJointAcceleration(int rowStart, DenseMatrix64F matrix)
+   public int setJointAcceleration(int rowStart, DMatrix matrix)
    {
       throw new RuntimeException("Cannot set acceleration of a passive joint");
    }
@@ -93,13 +93,13 @@ public class PassiveRevoluteJoint extends RevoluteJoint
    }
 
    @Override
-   public int setJointConfiguration(int rowStart, DenseMatrix64F matrix)
+   public int setJointConfiguration(int rowStart, DMatrix matrix)
    {
       throw new RuntimeException("Cannot set position of a passive joint");
    }
 
    @Override
-   public int setJointVelocity(int rowStart, DenseMatrix64F matrix)
+   public int setJointVelocity(int rowStart, DMatrix matrix)
    {
       throw new RuntimeException("Cannot set velocity of a passive joint");
    }

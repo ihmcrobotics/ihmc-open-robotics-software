@@ -1,15 +1,16 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.EjmlUnitTests;
-import org.junit.jupiter.api.Test;
-import us.ihmc.matrixlib.NativeCommonOps;
+import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static us.ihmc.robotics.Assert.assertEquals;
+import org.ejml.EjmlUnitTests;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.junit.jupiter.api.Test;
+
+import us.ihmc.matrixlib.NativeCommonOps;
 
 public class CARESolversTest
 {
@@ -36,38 +37,38 @@ public class CARESolversTest
    {
       for (CARESolver solver : getSolvers())
       {
-         DenseMatrix64F A = CommonOps.identity(2);
-         DenseMatrix64F B = CommonOps.identity(2);
-         DenseMatrix64F Q = CommonOps.identity(2);
-         DenseMatrix64F R = CommonOps.identity(2);
+         DMatrixRMaj A = CommonOps_DDRM.identity(2);
+         DMatrixRMaj B = CommonOps_DDRM.identity(2);
+         DMatrixRMaj Q = CommonOps_DDRM.identity(2);
+         DMatrixRMaj R = CommonOps_DDRM.identity(2);
 
-         DenseMatrix64F AInput = new DenseMatrix64F(A);
-         DenseMatrix64F BInput = new DenseMatrix64F(B);
-         DenseMatrix64F QInput = new DenseMatrix64F(Q);
-         DenseMatrix64F RInput = new DenseMatrix64F(R);
+         DMatrixRMaj AInput = new DMatrixRMaj(A);
+         DMatrixRMaj BInput = new DMatrixRMaj(B);
+         DMatrixRMaj QInput = new DMatrixRMaj(Q);
+         DMatrixRMaj RInput = new DMatrixRMaj(R);
 
-         solver.setMatrices(A, B, CommonOps.identity(2), CommonOps.identity(2), Q, R, null);
+         solver.setMatrices(A, B, CommonOps_DDRM.identity(2), CommonOps_DDRM.identity(2), Q, R, null);
          solver.computeP();
 
-         DenseMatrix64F assembledQ = new DenseMatrix64F(2, 2);
-         CommonOps.multTransA(A, solver.getP(), assembledQ);
-         CommonOps.multAdd(solver.getP(), A, assembledQ);
+         DMatrixRMaj assembledQ = new DMatrixRMaj(2, 2);
+         CommonOps_DDRM.multTransA(A, solver.getP(), assembledQ);
+         CommonOps_DDRM.multAdd(solver.getP(), A, assembledQ);
 
-         DenseMatrix64F RInv = new DenseMatrix64F(2, 2);
+         DMatrixRMaj RInv = new DMatrixRMaj(2, 2);
          NativeCommonOps.invert(R, RInv);
-         DenseMatrix64F BTransposeP = new DenseMatrix64F(2, 2);
-         CommonOps.multTransA(B, solver.getP(), BTransposeP);
-         DenseMatrix64F BRInv = new DenseMatrix64F(2, 2);
-         CommonOps.mult(B, RInv, BRInv);
-         DenseMatrix64F PBRInv = new DenseMatrix64F(2, 2);
-         CommonOps.mult(solver.getP(), BRInv, PBRInv);
+         DMatrixRMaj BTransposeP = new DMatrixRMaj(2, 2);
+         CommonOps_DDRM.multTransA(B, solver.getP(), BTransposeP);
+         DMatrixRMaj BRInv = new DMatrixRMaj(2, 2);
+         CommonOps_DDRM.mult(B, RInv, BRInv);
+         DMatrixRMaj PBRInv = new DMatrixRMaj(2, 2);
+         CommonOps_DDRM.mult(solver.getP(), BRInv, PBRInv);
 
-         DenseMatrix64F PBRInvBTransposeP = new DenseMatrix64F(2, 2);
-         CommonOps.mult(PBRInv, BTransposeP, PBRInvBTransposeP);
+         DMatrixRMaj PBRInvBTransposeP = new DMatrixRMaj(2, 2);
+         CommonOps_DDRM.mult(PBRInv, BTransposeP, PBRInvBTransposeP);
 
-         CommonOps.addEquals(assembledQ, -1.0, PBRInvBTransposeP);
+         CommonOps_DDRM.addEquals(assembledQ, -1.0, PBRInvBTransposeP);
 
-         CommonOps.scale(-1.0, assembledQ);
+         CommonOps_DDRM.scale(-1.0, assembledQ);
 
          EjmlUnitTests.assertEquals(AInput, A, epsilon);
          EjmlUnitTests.assertEquals(BInput, B, epsilon);
@@ -86,11 +87,11 @@ public class CARESolversTest
       {
          int n = 2;
          int m = 1;
-         DenseMatrix64F A = new DenseMatrix64F(n, n);
-         DenseMatrix64F B = new DenseMatrix64F(n, m);
-         DenseMatrix64F C = new DenseMatrix64F(1, 2);
-         DenseMatrix64F Q = new DenseMatrix64F(2, 2);
-         DenseMatrix64F R = new DenseMatrix64F(1, 1);
+         DMatrixRMaj A = new DMatrixRMaj(n, n);
+         DMatrixRMaj B = new DMatrixRMaj(n, m);
+         DMatrixRMaj C = new DMatrixRMaj(1, 2);
+         DMatrixRMaj Q = new DMatrixRMaj(2, 2);
+         DMatrixRMaj R = new DMatrixRMaj(1, 1);
          A.set(0, 0, -3);
          A.set(0, 1, 2);
          A.set(1, 0, 1);
@@ -100,18 +101,18 @@ public class CARESolversTest
          C.set(0, 1, -1);
          R.set(0, 0, 3);
 
-         CommonOps.multInner(C, Q);
+         CommonOps_DDRM.multInner(C, Q);
 
-         solver.setMatrices(A, B, CommonOps.identity(n), CommonOps.identity(n), Q, R, null);
+         solver.setMatrices(A, B, CommonOps_DDRM.identity(n), CommonOps_DDRM.identity(n), Q, R, null);
          solver.computeP();
 
-         DenseMatrix64F PExpected = new DenseMatrix64F(2, 2);
+         DMatrixRMaj PExpected = new DMatrixRMaj(2, 2);
          PExpected.set(0, 0, 0.5895);
          PExpected.set(0, 1, 1.8216);
          PExpected.set(1, 0, 1.8216);
          PExpected.set(1, 1, 8.8188);
 
-         DenseMatrix64F P = solver.getP();
+         DMatrixRMaj P = solver.getP();
 
          //      assertIsSymmetric(P);
          assertSolutionIsValid(A, B, Q, R, P, epsilon);
@@ -126,12 +127,12 @@ public class CARESolversTest
       {
          int n = 3;
          int m = 1;
-         DenseMatrix64F A = new DenseMatrix64F(n, n);
-         DenseMatrix64F B = new DenseMatrix64F(n, m);
-         DenseMatrix64F C = new DenseMatrix64F(1, n);
-         DenseMatrix64F E = CommonOps.identity(n);
-         DenseMatrix64F Q = new DenseMatrix64F(n, n);
-         DenseMatrix64F R = new DenseMatrix64F(1, 1);
+         DMatrixRMaj A = new DMatrixRMaj(n, n);
+         DMatrixRMaj B = new DMatrixRMaj(n, m);
+         DMatrixRMaj C = new DMatrixRMaj(1, n);
+         DMatrixRMaj E = CommonOps_DDRM.identity(n);
+         DMatrixRMaj Q = new DMatrixRMaj(n, n);
+         DMatrixRMaj R = new DMatrixRMaj(1, 1);
          A.set(0, 0, 1);
          A.set(0, 1, -2);
          A.set(0, 2, 3);
@@ -150,17 +151,17 @@ public class CARESolversTest
          C.set(0, 2, 9);
          R.set(0, 0, 1);
 
-         CommonOps.multInner(C, Q);
+         CommonOps_DDRM.multInner(C, Q);
 
-         solver.setMatrices(A, B, CommonOps.identity(n), E, Q, R, null);
+         solver.setMatrices(A, B, CommonOps_DDRM.identity(n), E, Q, R, null);
          solver.computeP();
 
-         DenseMatrix64F RInverse = new DenseMatrix64F(m, m);
-         DenseMatrix64F BTranspose = new DenseMatrix64F(m, n);
-         DenseMatrix64F M = new DenseMatrix64F(n, n);
+         DMatrixRMaj RInverse = new DMatrixRMaj(m, m);
+         DMatrixRMaj BTranspose = new DMatrixRMaj(m, n);
+         DMatrixRMaj M = new DMatrixRMaj(n, n);
 
          NativeCommonOps.invert(R, RInverse);
-         CommonOps.transpose(B, BTranspose);
+         CommonOps_DDRM.transpose(B, BTranspose);
          NativeCommonOps.multQuad(BTranspose, RInverse, M);
 
          //      assertIsSymmetric(solver.getP());
@@ -168,7 +169,7 @@ public class CARESolversTest
       }
    }
 
-   private static void assertIsSymmetric(DenseMatrix64F A, double epsilon)
+   private static void assertIsSymmetric(DMatrixRMaj A, double epsilon)
    {
       for (int row = 0; row < A.getNumRows(); row++)
       {
@@ -179,18 +180,18 @@ public class CARESolversTest
       }
    }
 
-   static void assertSolutionIsValid(DenseMatrix64F A, DenseMatrix64F B, DenseMatrix64F Q, DenseMatrix64F R, DenseMatrix64F P, double epsilon)
+   static void assertSolutionIsValid(DMatrixRMaj A, DMatrixRMaj B, DMatrixRMaj Q, DMatrixRMaj R, DMatrixRMaj P, double epsilon)
    {
       int n = A.getNumRows();
       int m = B.getNumCols();
-      DenseMatrix64F PDot = new DenseMatrix64F(n, n);
-      DenseMatrix64F M = new DenseMatrix64F(m, m);
-      DenseMatrix64F BTranspose = new DenseMatrix64F(m, n);
-      CommonOps.transpose(B, BTranspose);
+      DMatrixRMaj PDot = new DMatrixRMaj(n, n);
+      DMatrixRMaj M = new DMatrixRMaj(m, m);
+      DMatrixRMaj BTranspose = new DMatrixRMaj(m, n);
+      CommonOps_DDRM.transpose(B, BTranspose);
 
       CARETools.computeM(BTranspose, R, null, M);
       CARETools.computeRiccatiRate(P, A, Q, M, PDot);
 
-      EjmlUnitTests.assertEquals(new DenseMatrix64F(n, n), PDot, epsilon);
+      EjmlUnitTests.assertEquals(new DMatrixRMaj(n, n), PDot, epsilon);
    }
 }

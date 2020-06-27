@@ -7,7 +7,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.AdjustFootstepMessage;
 import controller_msgs.msg.dds.ArmDesiredAccelerationsMessage;
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
@@ -147,7 +147,6 @@ import us.ihmc.humanoidRobotics.communication.packets.manipulation.AtlasElectric
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.ConfigurationSpaceName;
 import us.ihmc.humanoidRobotics.communication.packets.manipulation.wholeBodyTrajectory.WholeBodyTrajectoryToolboxMessageTools;
 import us.ihmc.humanoidRobotics.communication.packets.sensing.StateEstimatorMode;
-import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepPlanRequestType;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.communication.packets.walking.HumanoidBodyPart;
 import us.ihmc.humanoidRobotics.communication.packets.walking.LoadBearingRequest;
@@ -1349,7 +1348,7 @@ public class HumanoidMessageTools
    }
 
    public static FisheyePacket createFisheyePacket(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position,
-                                                   Orientation3DReadOnly orientation, IntrinsicParameters intrinsicParameters)
+                                                   Orientation3DReadOnly orientation, CameraPinholeBrown intrinsicParameters)
    {
       FisheyePacket message = new FisheyePacket();
       message.getVideoPacket().set(createVideoPacket(videoSource, timeStamp, data, position, orientation, intrinsicParameters));
@@ -1357,7 +1356,7 @@ public class HumanoidMessageTools
    }
 
    public static VideoPacket createVideoPacket(VideoSource videoSource, long timeStamp, byte[] data, Point3DReadOnly position,
-                                               Orientation3DReadOnly orientation, IntrinsicParameters intrinsicParameters)
+                                               Orientation3DReadOnly orientation, CameraPinholeBrown intrinsicParameters)
    {
       VideoPacket message = new VideoPacket();
       message.setVideoSource(videoSource.toByte());
@@ -1369,7 +1368,7 @@ public class HumanoidMessageTools
       return message;
    }
 
-   public static LocalVideoPacket createLocalVideoPacket(long timeStamp, BufferedImage image, IntrinsicParameters intrinsicParameters)
+   public static LocalVideoPacket createLocalVideoPacket(long timeStamp, BufferedImage image, CameraPinholeBrown intrinsicParameters)
    {
       LocalVideoPacket message = new LocalVideoPacket();
       message.timeStamp = timeStamp;
@@ -1984,7 +1983,7 @@ public class HumanoidMessageTools
          if (footstep.getCustomPositionWaypoints().size() != 2)
          {
             LogTools.warn("Received footstep object without the correct number of waypoint positions. Should be 0 or 2, received: "
-                          + footstep.getCustomPositionWaypoints().size());
+                  + footstep.getCustomPositionWaypoints().size());
          }
          else
          {
@@ -2002,7 +2001,7 @@ public class HumanoidMessageTools
          if (footstep.getCustomWaypointProportions().size() != 2)
          {
             LogTools.warn("Received footstep object without the correct number of waypoint proportions. Should be 0 or 2, received: "
-                          + footstep.getCustomWaypointProportions().size());
+                  + footstep.getCustomWaypointProportions().size());
          }
          else
          {
@@ -2211,7 +2210,7 @@ public class HumanoidMessageTools
          throw new RuntimeException("Need to provide robotSide for the bodyPart: " + bodyPart);
    }
 
-   public static IntrinsicParametersMessage toIntrinsicParametersMessage(IntrinsicParameters intrinsicParameters)
+   public static IntrinsicParametersMessage toIntrinsicParametersMessage(CameraPinholeBrown intrinsicParameters)
    {
       IntrinsicParametersMessage intrinsicParametersMessage = new IntrinsicParametersMessage();
       intrinsicParametersMessage.setWidth(intrinsicParameters.width);
@@ -2228,9 +2227,9 @@ public class HumanoidMessageTools
       return intrinsicParametersMessage;
    }
 
-   public static IntrinsicParameters toIntrinsicParameters(IntrinsicParametersMessage message)
+   public static CameraPinholeBrown toIntrinsicParameters(IntrinsicParametersMessage message)
    {
-      IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
+      CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
       intrinsicParameters.width = message.getWidth();
       intrinsicParameters.height = message.getHeight();
       intrinsicParameters.fx = message.getFx();

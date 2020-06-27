@@ -96,17 +96,23 @@ public class FootstepPlannerLogLoader
 
          // load swing parameters packet
          File swingParametersFile = new File(logDirectory, FootstepPlannerLogger.swingParametersFileName);
-         InputStream swingParametersPacketInputStream = new FileInputStream(swingParametersFile);
-         jsonNode = objectMapper.readTree(swingParametersPacketInputStream);
-         log.getSwingPlannerParametersPacket().set(swingParametersSerializer.deserialize(jsonNode.toString()));
-         swingParametersPacketInputStream.close();
+         if (swingParametersFile.exists())
+         {
+            InputStream swingParametersPacketInputStream = new FileInputStream(swingParametersFile);
+            jsonNode = objectMapper.readTree(swingParametersPacketInputStream);
+            log.getSwingPlannerParametersPacket().set(swingParametersSerializer.deserialize(jsonNode.toString()));
+            swingParametersPacketInputStream.close();
+         }
 
          // load split fraction parameters packet
          File splitFractionParametersFile = new File(logDirectory, FootstepPlannerLogger.splitFractionParametersFileName);
-         InputStream splitFractionParametersInputStream = new FileInputStream(splitFractionParametersFile);
-         jsonNode = objectMapper.readTree(splitFractionParametersInputStream);
-         log.getSplitFractionParametersPacket().set(splitFractionParametersPacketSerializer.deserialize(jsonNode.toString()));
-         splitFractionParametersInputStream.close();
+         if (splitFractionParametersFile.exists())
+         {
+            InputStream splitFractionParametersInputStream = new FileInputStream(splitFractionParametersFile);
+            jsonNode = objectMapper.readTree(splitFractionParametersInputStream);
+            log.getSplitFractionParametersPacket().set(splitFractionParametersPacketSerializer.deserialize(jsonNode.toString()));
+            splitFractionParametersInputStream.close();
+         }
 
          // load status packet
          File statusFile = new File(logDirectory, FootstepPlannerLogger.statusPacketFileName);

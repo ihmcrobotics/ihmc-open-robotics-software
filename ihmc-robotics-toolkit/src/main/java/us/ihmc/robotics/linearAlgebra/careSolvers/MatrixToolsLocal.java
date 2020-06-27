@@ -1,16 +1,17 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
+
 import us.ihmc.commons.MathTools;
 
 public class MatrixToolsLocal
 {
-   public static void setMatrixBlockToIdentity(DenseMatrix64F dest, int row, int col, int sizeToSet)
+   public static void setMatrixBlockToIdentity(DMatrixRMaj dest, int row, int col, int sizeToSet)
    {
       setMatrixBlockToConstant(dest, row, col, sizeToSet, 1.0);
    }
 
-   public static void setMatrixBlockToConstant(DenseMatrix64F dest, int row, int col, int sizeToSet, double value)
+   public static void setMatrixBlockToConstant(DMatrixRMaj dest, int row, int col, int sizeToSet, double value)
    {
       for (int i = 0; i < sizeToSet; i++)
       {
@@ -19,7 +20,7 @@ public class MatrixToolsLocal
    }
 
    /** Computes the distance between two matrices, which is defined as the L2 normSquared of their difference. */
-   public static double distance(DenseMatrix64F A, DenseMatrix64F B)
+   public static double distance(DMatrixRMaj A, DMatrixRMaj B)
    {
       MatrixChecking.assertRowDimensionsMatch(A, B);
       MatrixChecking.assertColDimensionsMatch(A, B);
@@ -38,7 +39,7 @@ public class MatrixToolsLocal
       return norm;
    }
 
-   public static double normSquared(DenseMatrix64F A)
+   public static double normSquared(DMatrixRMaj A)
    {
       double normSquared = 0.0;
       for (int col = 0; col < A.getNumCols(); col++)
@@ -54,12 +55,12 @@ public class MatrixToolsLocal
       return normSquared;
    }
 
-   public static double norm(DenseMatrix64F A)
+   public static double norm(DMatrixRMaj A)
    {
       return Math.sqrt(normSquared(A));
    }
 
-   static boolean isZero(DenseMatrix64F P, double epsilon)
+   static boolean isZero(DMatrixRMaj P, double epsilon)
    {
       return normSquared(P) < epsilon;
    }

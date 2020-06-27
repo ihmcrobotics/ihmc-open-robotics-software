@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.sensorProcessing.outputData.JointDesiredOutputReadOnly;
@@ -141,17 +141,17 @@ public class OneDoFJointFourierAnalysis implements DiagnosticUpdatable
       tauDesiredFourierAnalysis.getMagnitudes(magnitudesToPack);
    }
 
-   public void getVelocityOutput(DenseMatrix64F outputToPack)
+   public void getVelocityOutput(DMatrixRMaj outputToPack)
    {
       velocityFourierAnalysis.getOutput(outputToPack);
    }
 
-   public void getTauOutput(DenseMatrix64F outputToPack)
+   public void getTauOutput(DMatrixRMaj outputToPack)
    {
       tauFourierAnalysis.getOutput(outputToPack);
    }
 
-   public void getTauDesiredOutput(DenseMatrix64F outputToPack)
+   public void getTauDesiredOutput(DMatrixRMaj outputToPack)
    {
       tauDesiredFourierAnalysis.getOutput(outputToPack);
    }
