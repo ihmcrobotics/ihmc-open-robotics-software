@@ -1,23 +1,28 @@
 package us.ihmc.humanoidBehaviors.ui.simulation;
 
-import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.stage.Stage;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.footstepPlanning.log.FootstepPlannerLogLoader;
 import us.ihmc.javaFXToolkit.cameraControllers.FocusBasedCameraMouseEventHandler;
 import us.ihmc.javaFXToolkit.scenes.View3DFactory;
+import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
+import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.visibilityGraphs.ui.graphics.PlanarRegionsGraphic;
+import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.PlanarRegionTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 import java.io.File;
+import java.util.List;
 
-public class PlanarRegionsFromPlannerLogViewer extends Application
+public class PlanarRegionsFromPlannerLogViewer
 {
    private static final String filepath = System.getProperty("filepath");
 
-   @Override
-   public void start(Stage primaryStage)
+   public PlanarRegionsFromPlannerLogViewer()
    {
+      Stage primaryStage = new Stage();
       View3DFactory view3dFactory = new View3DFactory(1200, 800);
       FocusBasedCameraMouseEventHandler camera = view3dFactory.addCameraController(0.05, 2000.0, true);
       double isoZoomOut = 10.0;
@@ -31,8 +36,17 @@ public class PlanarRegionsFromPlannerLogViewer extends Application
                                                                                                           .getRequestPacket()
                                                                                                           .getPlanarRegionsListMessage());
 
+      PlanarRegionsList modifiedList = new PlanarRegionsList();
+      List<PlanarRegion> planarRegionsAsList = planarRegionsList.getPlanarRegionsAsList();
+      for (int i = 0; i < planarRegionsAsList.size(); i++)
+      {
+         PlanarRegion planarRegion = planarRegionsAsList.get(i);
+         LogTools.info("Index: {}, Id: {}, Area: {}", i, planarRegion.getRegionId(), PlanarRegionTools.computePlanarRegionArea(planarRegion));
+         modifiedList.addPlanarRegion(planarRegion);
+      }
+
       PlanarRegionsGraphic regionsGraphic = new PlanarRegionsGraphic();
-      regionsGraphic.generateMeshes(planarRegionsList);
+      regionsGraphic.generateMeshes(modifiedList);
       regionsGraphic.update();
 
       view3dFactory.addNodeToView(regionsGraphic);
@@ -46,6 +60,7 @@ public class PlanarRegionsFromPlannerLogViewer extends Application
 
    public static void main(String[] args)
    {
-      launch(args);
+      JavaFXApplicationCreator.createAJavaFXApplication();
+      Platform.runLater(PlanarRegionsFromPlannerLogViewer::new);
    }
 }
