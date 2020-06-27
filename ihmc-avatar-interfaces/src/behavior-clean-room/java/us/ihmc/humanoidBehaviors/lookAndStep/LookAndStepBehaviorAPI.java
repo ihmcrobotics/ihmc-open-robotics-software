@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
+import std_msgs.msg.dds.Empty;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.FootstepForUI;
@@ -13,13 +14,13 @@ import java.util.List;
 public class LookAndStepBehaviorAPI
 {
    public static final ROS2Topic<Pose3D> GOAL_INPUT = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Pose3D.class);
-   // TODO add ReachedGoal output
+   public static final ROS2Topic<Empty> RESET = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Empty.class);
+   public static final ROS2Topic<Empty> REACHED_GOAL = ROS2Tools.BEHAVIOR_MODULE.withOutput().withType(Empty.class);
 
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
    private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
 
-   public static final MessagerAPIFactory.Topic<Boolean> AbortGoalWalking = topic("AbortGoalWalking");
    public static final MessagerAPIFactory.Topic<Boolean> OperatorReviewEnabled = topic("OperatorReviewEnabled");
    public static final MessagerAPIFactory.Topic<Boolean> ReviewApproval = topic("ReviewApproval");
 

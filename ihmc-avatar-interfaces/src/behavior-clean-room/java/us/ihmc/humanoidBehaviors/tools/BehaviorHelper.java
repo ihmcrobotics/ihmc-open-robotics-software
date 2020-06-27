@@ -1,13 +1,11 @@
 package us.ihmc.humanoidBehaviors.tools;
 
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.Notification;
-import us.ihmc.communication.IHMCROS2Callback;
-import us.ihmc.communication.ROS2PlanarRegionsInput;
-import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.RemoteREAInterface;
+import us.ihmc.communication.*;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
@@ -17,12 +15,14 @@ import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.interfaces.StatusLogger;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
+import us.ihmc.humanoidBehaviors.tools.ros2.ROS2PublisherMap;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Callback;
 import us.ihmc.ros2.ROS2Input;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
@@ -70,6 +70,7 @@ public class BehaviorHelper
    private final DRCRobotModel robotModel;
    private final ManagedMessager managedMessager;
    private final ManagedROS2Node managedROS2Node;
+   private final ROS2PublisherMap ros2PublisherMap;
    private RemoteHumanoidRobotInterface robot;
    private RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private RemoteREAInterface rea;
@@ -78,11 +79,14 @@ public class BehaviorHelper
    private VisibilityGraphPathPlanner bodyPathPlanner;
    private StatusLogger statusLogger;
 
+
    public BehaviorHelper(DRCRobotModel robotModel, Messager messager, Ros2Node ros2Node)
    {
       this.robotModel = robotModel;
       managedMessager = new ManagedMessager(messager);
       managedROS2Node = new ManagedROS2Node(ros2Node);
+
+      ros2PublisherMap = new ROS2PublisherMap(managedROS2Node);
 
       setCommunicationCallbacksEnabled(false);
    }
@@ -126,6 +130,23 @@ public class BehaviorHelper
    public <T> ROS2Input<T> createROS2Input(ROS2Topic<T> topic)
    {
       return new ROS2Input<>(managedROS2Node, topic.getType(), topic);
+   }
+
+   public Notification createROS2Notification(ROS2Topic<Empty> topic)
+   {
+      Notification notification = new Notification();
+      new ROS2Callback<>(managedROS2Node, Empty.class, topic, message -> notification.set());
+      return notification;
+   }
+
+   public <T> void publishROS2(ROS2Topic<T> topic, T message)
+   {
+      ros2PublisherMap.publish(topic, message);
+   }
+
+   public void publishROS2(ROS2Topic<Empty> topic)
+   {
+      ros2PublisherMap.publish(topic);
    }
 
    public RemoteREAInterface getOrCreateREAInterface()
