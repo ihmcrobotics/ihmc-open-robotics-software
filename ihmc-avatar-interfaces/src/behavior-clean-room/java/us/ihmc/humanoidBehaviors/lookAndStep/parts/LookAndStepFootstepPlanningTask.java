@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.lookAndStep.parts;
 
 import us.ihmc.commons.thread.ThreadTools;
-import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.util.TimerSnapshot;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -47,7 +46,6 @@ class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    protected final Field<FootstepPlannerParametersReadOnly> footstepPlannerParameters = required();
    protected final Field<Supplier<Boolean>> isBeingReviewedSupplier = required();
    protected final Field<Supplier<Boolean>> abortGoalWalkingSupplier = required();
-   protected final Field<Consumer<Boolean>> abortGoalWalkingUpdater = required();
    protected final Field<UIPublisher> uiPublisher = required();
    protected final Field<Runnable> newBodyPathGoalNeededNotifier = required();
    protected final Field<Supplier<Boolean>> newBodyPathGoalNeededSupplier = required();
@@ -191,7 +189,6 @@ class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
          statusLogger.warn("Footstep planning: Goal was cancelled. Not planning");
          behaviorStateUpdater.get().accept(LookAndStepBehavior.State.BODY_PATH_PLANNING);
          newBodyPathGoalNeededNotifier.get().run();
-         abortGoalWalkingUpdater.get().accept(false);
          return;
       }
 
@@ -317,11 +314,6 @@ class LookAndStepFootstepPlanningTask implements BehaviorBuilderPattern
    public void setAbortGoalWalkingSupplier(Supplier<Boolean> abortGoalWalkingSupplier)
    {
       this.abortGoalWalkingSupplier.set(abortGoalWalkingSupplier);
-   }
-
-   public void setAbortGoalWalkingUpdater(Consumer<Boolean> abortGoalWalkingUpdater)
-   {
-      this.abortGoalWalkingUpdater.set(abortGoalWalkingUpdater);
    }
 
    public void setUiPublisher(UIPublisher uiPublisher)

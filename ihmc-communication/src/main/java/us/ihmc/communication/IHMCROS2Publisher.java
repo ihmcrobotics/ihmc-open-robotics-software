@@ -55,7 +55,7 @@ public class IHMCROS2Publisher<T>
       return ihmcROS2Publisher;
    }
 
-   public void publish(T message)
+   public synchronized void publish(T message)
    {
       try
       {

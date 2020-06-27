@@ -16,13 +16,13 @@ import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
-import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersBasics;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorParameters;
+import us.ihmc.humanoidBehaviors.tools.ros2.ROS2PublisherMap;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIDefinition;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIInterface;
 import us.ihmc.humanoidBehaviors.ui.editors.OrientationYawEditor;
@@ -50,6 +50,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private FootstepPlannerParametersBasics footstepPlannerParameters;
 
    private Messager behaviorMessager;
+   private ROS2PublisherMap ros2Publisher;
    private FootstepPlanWithTextGraphic footstepPlanGraphic;
    private FootstepPlanWithTextGraphic startAndGoalFootPoses;
    private LivePlanarRegionsGraphic livePlanarRegionsGraphic;
@@ -57,14 +58,13 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    private PoseGraphic subGoalGraphic;
    private BodyPathPlanGraphic bodyPathPlanGraphic;
    private PoseGraphic goalGraphic;
-   
+
    private SnappedPositionEditor snappedPositionEditor;
    private OrientationYawEditor orientationYawEditor;
 
    private FXUIActionMap placeGoalActionMap;
 
    @FXML private Button placeGoalButton;
-   @FXML private Button cancelGoalButton;
    @FXML private CheckBox operatorReviewCheckBox;
    @FXML private TextField behaviorState;
    @FXML private TableView lookAndStepParameterTable;
@@ -74,6 +74,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
    public void init(SubScene sceneNode, Pane visualizationPane, Ros2NodeInterface ros2Node, Messager behaviorMessager, DRCRobotModel robotModel)
    {
       this.behaviorMessager = behaviorMessager;
+      ros2Publisher = new ROS2PublisherMap(ros2Node);
 
       View3DFactory view2DFactory = View3DFactory.createSubscene(false, SceneAntialiasing.BALANCED);
       view2DFactory.addCameraController(0.05, 2000.0, true);
@@ -152,8 +153,6 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       snappedPositionEditor = new SnappedPositionEditor(sceneNode);
       orientationYawEditor = new OrientationYawEditor(sceneNode);
 
-      IHMCROS2Publisher<Pose3D> goalInputPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, GOAL_INPUT);
-
       placeGoalActionMap = new FXUIActionMap(startAction ->
       {
          placeGoalButton.setDisable(true);
@@ -168,7 +167,7 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       });
       placeGoalActionMap.mapAction(FXUITrigger.ORIENTATION_LEFT_CLICK, trigger ->
       {
-         goalInputPublisher.publish(new Pose3D(goalGraphic.getPose()));
+         ros2Publisher.publish(GOAL_INPUT, new Pose3D(goalGraphic.getPose()));
 
          placeGoalButton.setDisable(false);
       });
@@ -250,8 +249,8 @@ public class LookAndStepBehaviorUI extends BehaviorUIInterface
       behaviorMessager.submitMessage(OperatorReviewEnabled, operatorReviewCheckBox.isSelected());
    }
 
-   @FXML public void cancelGoalButton()
+   @FXML public void reset()
    {
-      behaviorMessager.submitMessage(AbortGoalWalking, true);
+      ros2Publisher.publish(RESET);
    }
 }

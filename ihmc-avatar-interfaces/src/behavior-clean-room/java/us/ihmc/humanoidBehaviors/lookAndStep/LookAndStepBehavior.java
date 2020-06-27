@@ -1,5 +1,6 @@
 package us.ihmc.humanoidBehaviors.lookAndStep;
 
+import us.ihmc.commons.thread.Notification;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
@@ -77,10 +78,10 @@ public class LookAndStepBehavior implements BehaviorInterface
       AtomicReference<Boolean> operatorReviewEnabledInput = helper.createUIInput(OperatorReviewEnabled, true);
       TypedNotification<Boolean> approvalNotification = helper.createUITypedNotification(ReviewApproval);
 
-      AtomicBoolean newBodyPathGoalNeeded = new AtomicBoolean(true);
+      AtomicBoolean newBodyPathGoalNeeded = new AtomicBoolean(true); // TODO remove this and use state instead
       AtomicReference<RobotSide> lastStanceSide = new AtomicReference<>();
       SideDependentList<FramePose3DReadOnly> lastSteppedSolePoses = new SideDependentList<>();
-      AtomicReference<Boolean> abortGoalWalking = helper.createUIInput(AbortGoalWalking, false);
+      Notification resetInput = helper.createROS2Notification(RESET);
       behaviorState = new AtomicReference<>(State.BODY_PATH_PLANNING);
 
       // TODO: Want to be able to wire up behavior here and see all present modules
@@ -88,7 +89,7 @@ public class LookAndStepBehavior implements BehaviorInterface
       // TODO: Add more meaning to the construction by establishing data patterns
 
       // could add meaning by local variables before passing
-      bodyPathModule = new LookAndStepBodyPathModule(helper.getOrCreateStatusLogger(),
+      bodyPathModule = new LookAndStepBodyPathModule(statusLogger,
                                                      helper::publishToUI,
                                                      visibilityGraphParameters,
                                                      lookAndStepParameters,
@@ -98,10 +99,10 @@ public class LookAndStepBehavior implements BehaviorInterface
                                                      robot::pollHumanoidRobotState,
                                                      behaviorState::get,
                                                      this::updateState);
-      footstepPlanningModule = new LookAndStepFootstepPlanningModule(helper.getOrCreateStatusLogger());
-      robotMotionModule = new LookAndStepRobotMotionModule(helper.getOrCreateStatusLogger());
+      footstepPlanningModule = new LookAndStepFootstepPlanningModule(statusLogger);
+      robotMotionModule = new LookAndStepRobotMotionModule(statusLogger);
 
-      LookAndStepReviewPart<List<? extends Pose3DReadOnly>> bodyPathReview = new LookAndStepReviewPart<>(helper.getOrCreateStatusLogger(),
+      LookAndStepReviewPart<List<? extends Pose3DReadOnly>> bodyPathReview = new LookAndStepReviewPart<>(statusLogger,
                                                                                                          "body path",
                                                                                                          approvalNotification,
                                                                                                          bodyPathPlan ->
@@ -109,7 +110,7 @@ public class LookAndStepBehavior implements BehaviorInterface
          updateState(State.FOOTSTEP_PLANNING);
          footstepPlanningModule.acceptBodyPathPlan(bodyPathPlan);
       });
-      LookAndStepReviewPart<FootstepPlan> footstepPlanReview = new LookAndStepReviewPart<>(helper.getOrCreateStatusLogger(),
+      LookAndStepReviewPart<FootstepPlan> footstepPlanReview = new LookAndStepReviewPart<>(statusLogger,
                                                                                            "footstep plan",
                                                                                            approvalNotification,
                                                                                            footstepPlan ->
@@ -122,13 +123,15 @@ public class LookAndStepBehavior implements BehaviorInterface
       bodyPathModule.setReviewInitiator(bodyPathReview::review);
       bodyPathModule.setAutonomousOutput(footstepPlanningModule::acceptBodyPathPlan);
 
-      footstepPlanningModule.setAbortGoalWalkingSupplier(abortGoalWalking::get);
-      footstepPlanningModule.setAbortGoalWalkingUpdater(value -> helper.publishToUI(AbortGoalWalking, value));
+      footstepPlanningModule.setAbortGoalWalkingSupplier(resetInput::poll);
       footstepPlanningModule.setIsBeingReviewedSupplier(footstepPlanReview::isBeingReviewed);
       footstepPlanningModule.setUiPublisher(helper::publishToUI);
       footstepPlanningModule.setLookAndStepBehaviorParameters(lookAndStepParameters);
       footstepPlanningModule.setFootstepPlannerParameters(footstepPlannerParameters);
-      footstepPlanningModule.setNewBodyPathGoalNeededNotifier(() -> bodyPathModule.acceptGoal(null));
+      footstepPlanningModule.setNewBodyPathGoalNeededNotifier(() -> {
+         bodyPathModule.acceptGoal(null);
+         helper.publishROS2(REACHED_GOAL);
+      });
       footstepPlanningModule.setNewBodyPathGoalNeededSupplier(newBodyPathGoalNeeded::get);
       footstepPlanningModule.setLastStanceSideSupplier(lastStanceSide::get);
       footstepPlanningModule.setLastStanceSideSetter(lastStanceSide::set);
