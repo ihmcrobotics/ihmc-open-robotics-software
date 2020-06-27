@@ -50,4 +50,10 @@ public class PlaneGeneralSvd_to_ModelFitter implements ModelFitter<PlaneGeneral3
 
 		return true;
 	}
+
+   @Override
+   public double getFitScore()
+   {
+      return 0;
+   }
 }

@@ -1,19 +1,18 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.lqrControl;
 
-import org.ejml.data.DenseMatrix64F;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.ejml.data.DMatrixRMaj;
+
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CoMTrajectoryProvider;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.ContactStateProvider;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.CornerPointViewer;
-import us.ihmc.commonWalkingControlModules.dynamicPlanning.comPlanning.SimpleCoMTrajectoryPlanner;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.simulationConstructionSetTools.tools.RobotTools;
 import us.ihmc.simulationconstructionset.ExternalForcePoint;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoFrameVector3D;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class LQRSphereController implements SphereControllerInterface
 {
@@ -43,7 +42,7 @@ public class LQRSphereController implements SphereControllerInterface
       lqrMomentumController = new LQRMomentumController(sphereRobot.getOmega0Provider(), registry);
    }
 
-   private final DenseMatrix64F currentState = new DenseMatrix64F(6, 1);
+   private final DMatrixRMaj currentState = new DMatrixRMaj(6, 1);
 
    @Override
    public void doControl()

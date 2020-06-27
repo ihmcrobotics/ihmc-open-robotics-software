@@ -746,6 +746,7 @@ public class RemoteFootstepPlannerUIMessagingTest
       assertEquals("Step up weights aren't equal.", parameters.getStepUpWeight(), packet.getStepUpWeight(), epsilon);
       assertEquals("Step down weights aren't equal.", parameters.getStepDownWeight(), packet.getStepDownWeight(), epsilon);
       assertEquals("Cost per step isn't equal.", parameters.getCostPerStep(), packet.getCostPerStep(), epsilon);
+      assertEquals("Distance epsilon to bridge regions isn't equal.", parameters.getDistanceEpsilonToBridgeRegions(), packet.getDistanceEpsilonToBridgeRegions(), epsilon);
    }
 
 

@@ -1,7 +1,5 @@
 package us.ihmc.robotics.screwTheory;
 
-import java.util.stream.Stream;
-
 import us.ihmc.mecano.multiBodySystem.PlanarJoint;
 import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.SphericalJoint;
@@ -9,7 +7,6 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.iterators.SubtreeStreams;
-import us.ihmc.mecano.tools.MultiBodySystemTools;
 
 public class InverseDynamicsJointStateChecksum
 {

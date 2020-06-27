@@ -1,27 +1,23 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization.qpInput;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.EjmlUnitTests;
-import org.ejml.ops.MatrixFeatures;
-import org.jcodec.common.Assert;
+import static us.ihmc.robotics.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.Random;
+
+import org.ejml.EjmlUnitTests;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.commons.RandomNumbers;
-import org.junit.jupiter.api.Tag;
-import org.junit.jupiter.api.Disabled;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.robotics.geometry.ConvexPolygonScaler;
-
-import java.util.ArrayList;
-import java.util.Random;
-
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public class ConstraintToConvexRegionTest
 {
@@ -64,8 +60,8 @@ public class ConstraintToConvexRegionTest
          constraintToConvexRegion.setPolygon();
          constraintToConvexRegion.formulateConstraint();
 
-         DenseMatrix64F Aineq = new DenseMatrix64F(0, 0);
-         DenseMatrix64F bineq = new DenseMatrix64F(0, 0);
+         DMatrixRMaj Aineq = new DMatrixRMaj(0, 0);
+         DMatrixRMaj bineq = new DMatrixRMaj(0, 0);
          PolygonWiggler.convertToInequalityConstraints(convexPolygon, Aineq, bineq, 0.0);
 
          EjmlUnitTests.assertEquals(Aineq, constraintToConvexRegion.Aineq, epsilon);
@@ -83,7 +79,7 @@ public class ConstraintToConvexRegionTest
          EjmlUnitTests.assertEquals(bineq, constraintToConvexRegion.bineq, epsilon);
 
          // test with position offset to the position
-         DenseMatrix64F positionOffset = new DenseMatrix64F(2, 1);
+         DMatrixRMaj positionOffset = new DMatrixRMaj(2, 1);
          positionOffset.set(0, 0, 0.01);
          positionOffset.set(1, 0, 0.02);
          constraintToConvexRegion.setDeltaInside(0.0);
@@ -91,7 +87,7 @@ public class ConstraintToConvexRegionTest
          constraintToConvexRegion.formulateConstraint();
 
          PolygonWiggler.convertToInequalityConstraints(convexPolygon, Aineq, bineq, 0.00);
-         CommonOps.multAdd(-1.0, Aineq, positionOffset, bineq);
+         CommonOps_DDRM.multAdd(-1.0, Aineq, positionOffset, bineq);
 
          EjmlUnitTests.assertEquals(Aineq, constraintToConvexRegion.Aineq, epsilon);
          EjmlUnitTests.assertEquals(bineq, constraintToConvexRegion.bineq, epsilon);
@@ -110,10 +106,10 @@ public class ConstraintToConvexRegionTest
       constraint.setPolygon();
       constraint.formulateConstraint();
 
-      DenseMatrix64F point = new DenseMatrix64F(2, 1);
-      DenseMatrix64F bineqCalc = new DenseMatrix64F(constraint.bineq.numRows, 1);
+      DMatrixRMaj point = new DMatrixRMaj(2, 1);
+      DMatrixRMaj bineqCalc = new DMatrixRMaj(constraint.bineq.numRows, 1);
 
-      CommonOps.mult(constraint.Aineq, point, bineqCalc);
+      CommonOps_DDRM.mult(constraint.Aineq, point, bineqCalc);
       for (int i = 0; i < constraint.bineq.numRows; i++)
       {
          assertTrue(bineqCalc.get(i, 0) < constraint.bineq.get(i, 0));
@@ -126,10 +122,10 @@ public class ConstraintToConvexRegionTest
       constraint.setPolygon();
       constraint.formulateConstraint();
 
-      point = new DenseMatrix64F(2, 1);
-      bineqCalc = new DenseMatrix64F(constraint.bineq.numRows, 1);
+      point = new DMatrixRMaj(2, 1);
+      bineqCalc = new DMatrixRMaj(constraint.bineq.numRows, 1);
 
-      CommonOps.mult(constraint.Aineq, point, bineqCalc);
+      CommonOps_DDRM.mult(constraint.Aineq, point, bineqCalc);
       for (int i = 0; i < constraint.bineq.numRows; i++)
       {
          assertTrue(bineqCalc.get(i, 0) <= constraint.bineq.get(i, 0));

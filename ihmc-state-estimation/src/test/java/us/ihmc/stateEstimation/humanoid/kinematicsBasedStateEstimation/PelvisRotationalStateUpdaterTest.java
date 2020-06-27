@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
@@ -135,7 +135,7 @@ public class PelvisRotationalStateUpdaterTest
       
       // Reset the root joint state configuration so the test fails if the PelvisRotationalStateUpdater actually does not do anything.
       rootJoint.setJointConfiguration(new RigidBodyTransform());
-      rootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
+      rootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
       
       // Need to initialize the sensor data source manually
       jointAndIMUSensorDataSource.startComputation(0, 0, -1);
@@ -156,7 +156,7 @@ public class PelvisRotationalStateUpdaterTest
          
          // Reset the root joint state configuration so the test fails if the PelvisRotationalStateUpdater actually does not do anything.
          rootJoint.setJointConfiguration(new RigidBodyTransform());
-         rootJoint.setJointVelocity(0, new DenseMatrix64F(6, 1));
+         rootJoint.setJointVelocity(0, new DMatrixRMaj(6, 1));
          
          // Need to run the sensor data source manually
          jointAndIMUSensorDataSource.startComputation(0, 0, -1);

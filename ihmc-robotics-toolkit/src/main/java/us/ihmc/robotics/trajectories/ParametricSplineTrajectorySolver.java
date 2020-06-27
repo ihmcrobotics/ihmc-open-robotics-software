@@ -2,8 +2,8 @@ package us.ihmc.robotics.trajectories;
 
 import java.util.Arrays;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 /**
  * Created by agrabertilton on 2/10/15.
@@ -25,8 +25,8 @@ public class ParametricSplineTrajectorySolver
    boolean timesSet;
 
    //constraintMatrix * ParameterVector = constraintVector;
-   DenseMatrix64F constraintMatrix;
-   DenseMatrix64F constraintVector;
+   DMatrixRMaj constraintMatrix;
+   DMatrixRMaj constraintVector;
 
    /**
     *
@@ -50,8 +50,8 @@ public class ParametricSplineTrajectorySolver
       times = new double[numberOfSplines + 1];
       this.numberOfVariables = numberOfVariables;
       int matrixLengths = numberOfParametersPerSpline * numberOfSplines * numberOfVariables;
-      constraintMatrix = new DenseMatrix64F(matrixLengths, matrixLengths);
-      constraintVector = new DenseMatrix64F(matrixLengths, 1);
+      constraintMatrix = new DMatrixRMaj(matrixLengths, matrixLengths);
+      constraintVector = new DMatrixRMaj(matrixLengths, 1);
    }
 
    public ParametricSplineTrajectory computeTrajectory(){
@@ -63,13 +63,13 @@ public class ParametricSplineTrajectorySolver
             setContinuityConstraint(i, j, times[i]);
          }
       }
-      if (CommonOps.det(constraintMatrix) == 0.0){
+      if (CommonOps_DDRM.det(constraintMatrix) == 0.0){
          if (DEBUG) System.out.println(constraintMatrix);
          throw new RuntimeException(this.getClass().getSimpleName() + ": Invalid Constraints");
       }
 
-      DenseMatrix64F parameterVector = new DenseMatrix64F(numberOfSplines * numberOfParametersPerSpline * numberOfVariables, 1);
-      if (!CommonOps.solve(constraintMatrix, constraintVector, parameterVector)){
+      DMatrixRMaj parameterVector = new DMatrixRMaj(numberOfSplines * numberOfParametersPerSpline * numberOfVariables, 1);
+      if (!CommonOps_DDRM.solve(constraintMatrix, constraintVector, parameterVector)){
          throw new RuntimeException(this.getClass().getSimpleName() + ": Could not solve for parameters");
       }
 
@@ -195,11 +195,11 @@ public class ParametricSplineTrajectorySolver
       currentRow++;
    }
 
-   private void setPatternBlock(int rowStart, int columnStart, DenseMatrix64F matrix64F, double[] pattern, int numberOfVariables){
+   private void setPatternBlock(int rowStart, int columnStart, DMatrixRMaj matrix64F, double[] pattern, int numberOfVariables){
       setPatternBlock(rowStart, columnStart, matrix64F, pattern, numberOfVariables, false);
    }
 
-   private void setPatternBlock(int rowStart, int columnStart, DenseMatrix64F matrix64F, double[] pattern, int numberOfVariables, boolean inverted){
+   private void setPatternBlock(int rowStart, int columnStart, DMatrixRMaj matrix64F, double[] pattern, int numberOfVariables, boolean inverted){
       double sign = inverted ? -1.0: 1.0;
       for (int i =  0; i < numberOfVariables; i++){
          for (int j = 0; j < pattern.length; j++){
@@ -208,7 +208,7 @@ public class ParametricSplineTrajectorySolver
       }
    }
 
-   private void setColumnBlock(int rowStart, int columnStart, DenseMatrix64F matrix64F, double[] block){
+   private void setColumnBlock(int rowStart, int columnStart, DMatrixRMaj matrix64F, double[] block){
       for (int i = 0; i < block.length; i++){
          matrix64F.set(rowStart + i, columnStart, block[i]);
       }

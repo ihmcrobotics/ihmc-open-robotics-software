@@ -233,5 +233,9 @@ public class FootstepPlannerParametersTest
       double shinPitch = RandomNumbers.nextDouble(random, Math.PI);
       parameters.setShinPitch(shinPitch);
       assertEquals(shinPitch, parameters.getShinPitch());
+
+      double distanceEpsilonToBridgeRegions = RandomNumbers.nextDouble(random, 10.0);
+      parameters.setDistanceEpsilonToBridgeRegions(shinPitch);
+      assertEquals(distanceEpsilonToBridgeRegions, parameters.getDistanceEpsilonToBridgeRegions());
    }
 }

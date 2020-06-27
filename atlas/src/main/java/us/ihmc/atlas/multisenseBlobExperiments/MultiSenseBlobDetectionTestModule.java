@@ -99,7 +99,7 @@ public class MultiSenseBlobDetectionTestModule
 
                BufferedImage unconvertedImageToDisplay = OpenCVTools.convertMatToBufferedImage(openCVColoredCircularBlobDetector.getCurrentCameraFrameMatInBGR());
                convertedImageToDisplay.getGraphics().drawImage(unconvertedImageToDisplay, 0, 0, null);
-               imagePanel.setBufferedImage(convertedImageToDisplay);
+               imagePanel.setImageUI(convertedImageToDisplay);
             }
          }
       };

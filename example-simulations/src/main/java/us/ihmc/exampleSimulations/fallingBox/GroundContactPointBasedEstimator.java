@@ -2,7 +2,7 @@ package us.ihmc.exampleSimulations.fallingBox;
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -65,7 +65,7 @@ public class GroundContactPointBasedEstimator implements RobotController
    {
       wrenchCalculator.calculate();
 
-      DenseMatrix64F wrenchMatrix = wrenchCalculator.getWrench();
+      DMatrixRMaj wrenchMatrix = wrenchCalculator.getWrench();
       Wrench wrench = new Wrench(worldFrame, worldFrame, wrenchMatrix);
 
       this.wrench.set(wrench);

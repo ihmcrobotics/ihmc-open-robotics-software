@@ -3,7 +3,7 @@ package us.ihmc.avatar.warmup;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.commonWalkingControlModules.configurations.ICPWithTimeFreezingPlannerParameters;
@@ -187,7 +187,7 @@ public abstract class HumanoidControllerWarmup
       }
 
       RootJointDesiredConfigurationDataReadOnly rootJointOutput = walkingControllerState.getOutputForRootJoint();
-      DenseMatrix64F desiredAcceleration = rootJointOutput.getDesiredAcceleration();
+      DMatrixRMaj desiredAcceleration = rootJointOutput.getDesiredAcceleration();
       desiredAngularAcceleration.set(desiredAcceleration.get(0), desiredAcceleration.get(1), desiredAcceleration.get(2));
       desiredLinearAcceleration.set(desiredAcceleration.get(3), desiredAcceleration.get(4), desiredAcceleration.get(5));
 

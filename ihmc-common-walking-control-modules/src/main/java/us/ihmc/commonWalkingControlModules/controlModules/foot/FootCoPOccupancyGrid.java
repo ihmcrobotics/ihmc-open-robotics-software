@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.configurations.WalkingControllerParameters;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
@@ -60,8 +60,8 @@ public class FootCoPOccupancyGrid
 
    private final double footLength;
    private final double footWidth;
-   private final DenseMatrix64F counterGrid = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F occupancyGrid = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj counterGrid = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj occupancyGrid = new DMatrixRMaj(1, 1);
 
    private final YoDouble decayRate;
    private final YoBoolean resetGridToEmpty;
@@ -542,7 +542,7 @@ public class FootCoPOccupancyGrid
    }
 
    private final PrincipalComponentAnalysis3D pca = new PrincipalComponentAnalysis3D();
-   private final DenseMatrix64F pointCloud = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj pointCloud = new DMatrixRMaj(0, 0);
    private final Point3D tempPoint3d = new Point3D();
    private final FramePoint2D lineOrigin = new FramePoint2D();
    private final Vector3D tempVector3d = new Vector3D();

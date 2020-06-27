@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.mecano.spatial.Wrench;
@@ -124,7 +124,7 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
       }
    }
 
-   private final transient DenseMatrix64F tempWrench = new DenseMatrix64F(6, 1);
+   private final transient DMatrixRMaj tempWrench = new DMatrixRMaj(6, 1);
    @Deprecated // maintains compatibility with the thread data synchronizer
    public void setDataOnly(ForceSensorDataHolder other)
    {
@@ -138,7 +138,7 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
       }
    }
 
-   public void setForceSensorValue(ForceSensorDefinition key, DenseMatrix64F data)
+   public void setForceSensorValue(ForceSensorDefinition key, DMatrixRMaj data)
    {
       forceSensorMap.get(key).setWrench(data);
    }
@@ -155,7 +155,7 @@ public class ForceSensorDataHolder implements ForceSensorDataHolderReadOnly, Set
    }
 
    @Override
-   public void getForceSensorValue(ForceSensorDefinition key, DenseMatrix64F wrenchToPack)
+   public void getForceSensorValue(ForceSensorDefinition key, DMatrixRMaj wrenchToPack)
    {
       forceSensorMap.get(key).getWrench(wrenchToPack);
    }

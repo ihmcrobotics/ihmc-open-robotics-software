@@ -1,7 +1,7 @@
 package us.ihmc.robotics.linearAlgebra;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.robotics.functionApproximation.DampedLeastSquaresSolver;
@@ -10,14 +10,14 @@ public class DampedLeastSquaresNullspaceCalculator implements DampedNullspaceCal
 {
    private final DampedLeastSquaresSolver pseudoInverseSolver;
 
-   private final DenseMatrix64F nullspaceProjector;
-   private final DenseMatrix64F tempMatrixForProjectionInPlace;
+   private final DMatrixRMaj nullspaceProjector;
+   private final DMatrixRMaj tempMatrixForProjectionInPlace;
 
    public DampedLeastSquaresNullspaceCalculator(int matrixSize, double alpha)
    {
       pseudoInverseSolver = new DampedLeastSquaresSolver(matrixSize, alpha);
-      nullspaceProjector = new DenseMatrix64F(matrixSize, matrixSize);
-      tempMatrixForProjectionInPlace = new DenseMatrix64F(matrixSize, matrixSize);
+      nullspaceProjector = new DMatrixRMaj(matrixSize, matrixSize);
+      tempMatrixForProjectionInPlace = new DMatrixRMaj(matrixSize, matrixSize);
    }
 
    @Override
@@ -37,13 +37,13 @@ public class DampedLeastSquaresNullspaceCalculator implements DampedNullspaceCal
     * @param nullspaceProjectorToPack matrix to store the resulting nullspace matrix. Modified.
     */
    @Override
-   public void computeNullspaceProjector(DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F nullspaceProjectorToPack)
+   public void computeNullspaceProjector(DMatrixRMaj matrixToComputeNullspaceOf, DMatrixRMaj nullspaceProjectorToPack)
    {
       pseudoInverseSolver.setA(matrixToComputeNullspaceOf);
       pseudoInverseSolver.solve(matrixToComputeNullspaceOf, nullspaceProjectorToPack);
 
       // I - J^* J
-      CommonOps.scale(-1.0, nullspaceProjectorToPack);
+      CommonOps_DDRM.scale(-1.0, nullspaceProjectorToPack);
       MatrixTools.addDiagonal(nullspaceProjectorToPack, 1.0);
    }
 
@@ -56,7 +56,7 @@ public class DampedLeastSquaresNullspaceCalculator implements DampedNullspaceCal
     * @param matrixToComputeNullspaceOf the matrix to compute the nullspace of for the projection, B in the equation. Not Modified.
     */
    @Override
-   public void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf)
+   public void projectOntoNullspace(DMatrixRMaj matrixToProjectOntoNullspace, DMatrixRMaj matrixToComputeNullspaceOf)
    {
       tempMatrixForProjectionInPlace.set(matrixToProjectOntoNullspace);
       projectOntoNullspace(tempMatrixForProjectionInPlace, matrixToComputeNullspaceOf, matrixToProjectOntoNullspace);
@@ -72,13 +72,13 @@ public class DampedLeastSquaresNullspaceCalculator implements DampedNullspaceCal
     * @param projectedMatrixToPack matrix to store the resulting projection, C in the equation. Modified.
     */
    @Override
-   public void projectOntoNullspace(DenseMatrix64F matrixToProjectOntoNullspace, DenseMatrix64F matrixToComputeNullspaceOf, DenseMatrix64F projectedMatrixToPack)
+   public void projectOntoNullspace(DMatrixRMaj matrixToProjectOntoNullspace, DMatrixRMaj matrixToComputeNullspaceOf, DMatrixRMaj projectedMatrixToPack)
    {
       int nullSize = matrixToComputeNullspaceOf.getNumCols();
       nullspaceProjector.reshape(nullSize, nullSize);
       projectedMatrixToPack.reshape(matrixToProjectOntoNullspace.getNumRows(), nullSize);
 
       computeNullspaceProjector(matrixToComputeNullspaceOf, nullspaceProjector);
-      CommonOps.mult(matrixToProjectOntoNullspace, nullspaceProjector, projectedMatrixToPack);
+      CommonOps_DDRM.mult(matrixToProjectOntoNullspace, nullspaceProjector, projectedMatrixToPack);
    }
 }

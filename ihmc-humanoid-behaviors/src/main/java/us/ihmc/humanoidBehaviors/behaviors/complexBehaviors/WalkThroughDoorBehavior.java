@@ -103,8 +103,8 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       headTrajectoryPublisher = createPublisherForController(HeadTrajectoryMessage.class);
       this.referenceFrames = referenceFrames;
       doorOpenDetectorBehaviorService = new DoorOpenDetectorBehaviorService(robotName, yoNamePrefix + "DoorOpenService", ros2Node, yoGraphicsListRegistry);
-      //doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
-      //doorOpenDetectorBehaviorService.setExpectedFiducialSize(0.2032);
+//      doorOpenDetectorBehaviorService.setTargetIDToLocate(50);
+//      doorOpenDetectorBehaviorService.setExpectedFiducialSize(0.2032);
       registry.addChild(doorOpenDetectorBehaviorService.getYoVariableRegistry());
       addBehaviorService(doorOpenDetectorBehaviorService);
 
@@ -438,12 +438,14 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       FootstepDataListMessage message = HumanoidMessageTools.createFootstepDataListMessage(atlasPrimitiveActions.footstepListBehavior.getDefaultSwingTime(),
                                                                                            atlasPrimitiveActions.footstepListBehavior.getDefaultTranferTime());
 
-      FootstepDataMessage fs1 = createRelativeFootStep(doorPose, startStep, new Point3D(0.124+offsetLeftRight, 0.592160790421584, -0),
+      FootstepDataMessage fs1 = createRelativeFootStep(doorPose, startStep.getOppositeSide(), new Point3D(-0.124+offsetLeftRight, 0.592160790421584, -0),
+              new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
+
+      
+      FootstepDataMessage fs2 = createRelativeFootStep(doorPose, startStep, new Point3D(0.124+offsetLeftRight, 0.592160790421584, -0),
                                                        new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
      
-      FootstepDataMessage fs2 = createRelativeFootStep(doorPose, startStep.getOppositeSide(), new Point3D(-0.124+offsetLeftRight, 0.592160790421584, -0),
-                                                       new Quaternion(-4.624094786785623E-5, 3.113506928734585E-6, -0.7043244487834723, 0.7098782069467541));
-      
+   
       
      
 

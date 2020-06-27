@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.controllerCore;
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.CenterOfPressureCommand;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.inverseDynamics.ContactWrenchCommand;
@@ -38,6 +38,7 @@ import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.algorithms.ForwardDynamicsCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
+import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
@@ -64,7 +65,6 @@ public class WholeBodyVirtualModelControlSolver
 
    private final JointAccelerationIntegrationCalculator jointAccelerationIntegrationCalculator;
    private final ForwardDynamicsCalculator forwardDynamicsCalculator;
-
 
    private final FloatingJointBasics rootJoint;
    private final RootJointDesiredConfigurationData rootJointDesiredConfiguration = new RootJointDesiredConfigurationData();
@@ -95,8 +95,12 @@ public class WholeBodyVirtualModelControlSolver
    private final JointIndexHandler jointIndexHandler;
    private final WholeBodyControllerBoundCalculator boundCalculator;
 
-   private final Vector3DReadOnly defaultLinearMomentumWeight = new ParameterVector3D("DefaultVMCRootLinearMomentumRateWeight", new Vector3D(5.0, 5.0, 2.5), registry);
-   private final Vector3DReadOnly defaultAngularMomentumWeight = new ParameterVector3D("DefaultVMCRootAngularMomentumRateWeight", new Vector3D(2.5, 2.5, 1.0), registry);
+   private final Vector3DReadOnly defaultLinearMomentumWeight = new ParameterVector3D("DefaultVMCRootLinearMomentumRateWeight",
+                                                                                      new Vector3D(5.0, 5.0, 2.5),
+                                                                                      registry);
+   private final Vector3DReadOnly defaultAngularMomentumWeight = new ParameterVector3D("DefaultVMCRootAngularMomentumRateWeight",
+                                                                                       new Vector3D(2.5, 2.5, 1.0),
+                                                                                       registry);
 
    private final MomentumRateCommand rootBodyDefaultMomentumCommand = new MomentumRateCommand();
 
@@ -106,6 +110,9 @@ public class WholeBodyVirtualModelControlSolver
    {
       rootJoint = toolbox.getRootJoint();
       optimizationControlModule = new VirtualModelControlOptimizationControlModule(toolbox, registry);
+
+      if (rootJoint.subtreeStream().filter(JointReadOnly::isLoopClosure).findFirst().isPresent())
+         throw new UnsupportedOperationException("The virtual model control does not support kinematic loops yet.");
 
       jointIndexHandler = toolbox.getJointIndexHandler();
       controlledOneDoFJoints = jointIndexHandler.getIndexedOneDoFJoints();
@@ -190,7 +197,7 @@ public class WholeBodyVirtualModelControlSolver
       }
 
       virtualModelController.populateTorqueSolution(virtualModelControlSolution);
-      DenseMatrix64F jointTorquesSolution = virtualModelControlSolution.getJointTorques();
+      DMatrixRMaj jointTorquesSolution = virtualModelControlSolution.getJointTorques();
 
       for (int i = 0; i < rigidBodiesWithExternalWrench.size(); i++)
       {
@@ -221,9 +228,8 @@ public class WholeBodyVirtualModelControlSolver
 
       if (rootJoint != null)
          rootJointDesiredConfiguration.setDesiredAcceleration(forwardDynamicsCalculator.getComputedJointAcceleration(rootJoint));
-      
-      jointAccelerationIntegrationCalculator.computeAndUpdateDataHolder(lowLevelOneDoFJointDesiredDataHolder);
 
+      jointAccelerationIntegrationCalculator.computeAndUpdateDataHolder(lowLevelOneDoFJointDesiredDataHolder);
 
       if (rootJoint != null)
       {
@@ -245,55 +251,55 @@ public class WholeBodyVirtualModelControlSolver
          VirtualModelControlCommand<?> command = virtualModelControlCommandList.pollCommand();
          switch (command.getCommandType())
          {
-         case MOMENTUM:
-            optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
-            recordMomentumRate((MomentumRateCommand) command);
-            break;
-         case EXTERNAL_WRENCH:
-            handleExternalWrenchCommand((ExternalWrenchCommand) command);
-            break;
-         case PLANE_CONTACT_STATE:
-            optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);
-            break;
-         case CONTACT_WRENCH:
-            optimizationControlModule.submitContactWrenchCommand((ContactWrenchCommand) command);
-            break;
-         case CENTER_OF_PRESSURE:
-            optimizationControlModule.submitCenterOfPressureCommand((CenterOfPressureCommand) command);
-            break;
-         case VIRTUAL_WRENCH:
-            handleVirtualWrenchCommand((VirtualWrenchCommand) command);
-            break;
-         case VIRTUAL_FORCE:
-            handleVirtualForceCommand((VirtualForceCommand) command);
-            break;
-         case VIRTUAL_TORQUE:
-            handleVirtualTorqueCommand((VirtualTorqueCommand) command);
-            break;
-         case JOINTSPACE:
-            virtualModelController.addJointTorqueCommand((JointTorqueCommand) command);
-            break;
-         case JOINT_LIMIT_ENFORCEMENT:
-            boundCalculator.submitJointLimitEnforcementCommand((JointLimitEnforcementCommand) command);
-            break;
-         case JOINT_ACCELERATION_INTEGRATION:
-            jointAccelerationIntegrationCalculator.submitJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) command);
-            break;
-         case COMMAND_LIST:
-            submitVirtualModelControlCommandList((VirtualModelControlCommandList) command);
-            break;
-         case OPTIMIZATION_SETTINGS:
-            optimizationControlModule.submitOptimizationSettingsCommand((VirtualModelControlOptimizationSettingsCommand) command);
-            break;
-         default:
-            throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled by the Virtual Model Control solver mode.");
+            case MOMENTUM:
+               optimizationControlModule.submitMomentumRateCommand((MomentumRateCommand) command);
+               recordMomentumRate((MomentumRateCommand) command);
+               break;
+            case EXTERNAL_WRENCH:
+               handleExternalWrenchCommand((ExternalWrenchCommand) command);
+               break;
+            case PLANE_CONTACT_STATE:
+               optimizationControlModule.submitPlaneContactStateCommand((PlaneContactStateCommand) command);
+               break;
+            case CONTACT_WRENCH:
+               optimizationControlModule.submitContactWrenchCommand((ContactWrenchCommand) command);
+               break;
+            case CENTER_OF_PRESSURE:
+               optimizationControlModule.submitCenterOfPressureCommand((CenterOfPressureCommand) command);
+               break;
+            case VIRTUAL_WRENCH:
+               handleVirtualWrenchCommand((VirtualWrenchCommand) command);
+               break;
+            case VIRTUAL_FORCE:
+               handleVirtualForceCommand((VirtualForceCommand) command);
+               break;
+            case VIRTUAL_TORQUE:
+               handleVirtualTorqueCommand((VirtualTorqueCommand) command);
+               break;
+            case JOINTSPACE:
+               virtualModelController.addJointTorqueCommand((JointTorqueCommand) command);
+               break;
+            case JOINT_LIMIT_ENFORCEMENT:
+               boundCalculator.submitJointLimitEnforcementCommand((JointLimitEnforcementCommand) command);
+               break;
+            case JOINT_ACCELERATION_INTEGRATION:
+               jointAccelerationIntegrationCalculator.submitJointAccelerationIntegrationCommand((JointAccelerationIntegrationCommand) command);
+               break;
+            case COMMAND_LIST:
+               submitVirtualModelControlCommandList((VirtualModelControlCommandList) command);
+               break;
+            case OPTIMIZATION_SETTINGS:
+               optimizationControlModule.submitOptimizationSettingsCommand((VirtualModelControlOptimizationSettingsCommand) command);
+               break;
+            default:
+               throw new RuntimeException("The command type: " + command.getCommandType() + " is not handled by the Virtual Model Control solver mode.");
          }
       }
    }
 
    private void recordMomentumRate(MomentumRateCommand command)
    {
-      DenseMatrix64F momentumRate = command.getMomentumRate();
+      DMatrixRMaj momentumRate = command.getMomentumRate();
       yoDesiredMomentumRateAngular.addX(momentumRate.get(0, 0));
       yoDesiredMomentumRateAngular.addY(momentumRate.get(1, 0));
       yoDesiredMomentumRateAngular.addZ(momentumRate.get(2, 0));

@@ -11,7 +11,7 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.BipedSupportPolygons;
 import us.ihmc.commonWalkingControlModules.bipedSupportPolygons.YoPlaneContactState;
@@ -247,14 +247,14 @@ public class LIPMDDPCalculatorVisualizer
 
       plotCoPPlan(trajectoryTime);
 
-      DenseMatrix64F currentCoMState;
+      DMatrixRMaj currentCoMState;
       if (useSimple)
       {
-         currentCoMState = new DenseMatrix64F(4, 1);
+         currentCoMState = new DMatrixRMaj(4, 1);
       }
       else
       {
-         currentCoMState = new DenseMatrix64F(6, 1);
+         currentCoMState = new DMatrixRMaj(6, 1);
          currentCoMState.set(2, 0, 1.0);
       }
 
@@ -314,8 +314,8 @@ public class LIPMDDPCalculatorVisualizer
 
       for (int i = 0; i < trajectory.size(); i++)
       {
-         DenseMatrix64F control = trajectory.getControl(i);
-         DenseMatrix64F state = trajectory.getState(i);
+         DMatrixRMaj control = trajectory.getControl(i);
+         DMatrixRMaj state = trajectory.getState(i);
 
          tempPoint.set(control.get(0), control.get(1), 0.0);
          modifiedCopTrack.setBallLoop(tempPoint);

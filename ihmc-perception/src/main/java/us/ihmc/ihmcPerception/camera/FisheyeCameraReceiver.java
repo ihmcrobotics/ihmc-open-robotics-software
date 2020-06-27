@@ -3,7 +3,7 @@ package us.ihmc.ihmcPerception.camera;
 import java.awt.image.BufferedImage;
 import java.util.function.LongUnaryOperator;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.FisheyePacket;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.communication.IHMCROS2Publisher;
@@ -47,7 +47,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
          @Override
          protected void imageReceived(long timeStamp, BufferedImage image)
          {
-            IntrinsicParameters intrinsicParameters = imageInfoSubscriber.getIntrinisicParameters();
+            CameraPinholeBrown intrinsicParameters = imageInfoSubscriber.getIntrinisicParameters();
             if (DEBUG)
             {
                PrintTools.debug(this, "Received new fisheye image on " + cameraParameters.getRosTopic() + " " + image);
@@ -71,7 +71,7 @@ public class FisheyeCameraReceiver extends CameraDataReceiver
 
       @Override
       public void onFrame(VideoSource videoSource, byte[] data, long timeStamp, Point3DReadOnly position, QuaternionReadOnly orientation,
-                          IntrinsicParameters intrinsicParameters)
+                          CameraPinholeBrown intrinsicParameters)
       {
          if (DEBUG)
          {

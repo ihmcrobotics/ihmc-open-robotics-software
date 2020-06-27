@@ -16,23 +16,29 @@ ihmc {
 mainDependencies {
    api("com.martiansoftware:jsap:2.1")
    api("org.yaml:snakeyaml:1.17") //1.11
-   api("org.ejml:core:0.30")
-   api("org.ejml:simple:0.30")
-   api("org.ejml:dense64:0.30")
+   api("org.ejml:ejml-core:0.39")
+   api("org.ejml:ejml-simple:0.39")
+   api("org.ejml:ejml-ddense:0.39")
    api("com.esotericsoftware.minlog:minlog:1.2")
    api("org.apache.commons:commons-lang3:3.8.1")
    api("us.ihmc.thirdparty.jinput:jinput:200128")
 
-   api("us.ihmc:euclid:0.14.2")
-   api("us.ihmc:ihmc-yovariables:0.7.0")
+   api("us.ihmc:euclid:0.15.0")
+   api("us.ihmc:euclid-geometry:0.15.0")
+   api("us.ihmc:euclid-frame:0.15.0")
+   api("us.ihmc:euclid-shape:0.15.0")
+   api("us.ihmc:euclid-frame-shape:0.15.0")
+   api("us.ihmc:mecano:0.6.0")
+   api("us.ihmc:mecano-yovariables:0.6.0")
+   api("us.ihmc:ihmc-yovariables:0.8.0")
    api("us.ihmc:ihmc-realtime:1.3.0")
    api("us.ihmc:IHMCRosControl:0.5.0") {
       setChanging(true)
    }
-   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.17.0")
-   api("us.ihmc:simulation-construction-set:0.18.0")
-   api("us.ihmc:ihmc-graphics-description:0.17.0")
-   api("us.ihmc:ihmc-robot-description:0.18.0")
+   api("us.ihmc:ihmc-jmonkey-engine-toolkit:0.18.0")
+   api("us.ihmc:simulation-construction-set:0.19.0")
+   api("us.ihmc:ihmc-graphics-description:0.18.0")
+   api("us.ihmc:ihmc-robot-description:0.19.0")
    api("us.ihmc:ihmc-communication:source")
    api("us.ihmc:ihmc-humanoid-robotics:source")
    api("us.ihmc:ihmc-system-identification:source")
@@ -40,7 +46,7 @@ mainDependencies {
    api("us.ihmc:ihmc-common-walking-control-modules:source")
    api("us.ihmc:ihmc-avatar-interfaces:source")
    api("us.ihmc:ihmc-ros-tools:source")
-   api("us.ihmc:ihmc-robot-data-logger:0.18.0")
+   api("us.ihmc:ihmc-robot-data-logger:0.19.0")
    api("us.ihmc:ihmc-model-file-loader:source")
    api("us.ihmc:ihmc-sensor-processing:source")
    api("us.ihmc:ihmc-perception:source")
@@ -55,6 +61,13 @@ mainDependencies {
 }
 
 testDependencies {
+   api("us.ihmc:euclid:0.15.0")
+   api("us.ihmc:euclid-geometry:0.15.0")
+   api("us.ihmc:euclid-frame:0.15.0")
+   api("us.ihmc:euclid-shape:0.15.0")
+   api("us.ihmc:euclid-frame-shape:0.15.0")
+   api("us.ihmc:mecano:0.6.0")
+   api("us.ihmc:mecano-yovariables:0.6.0")
    api("us.ihmc:ihmc-robotics-toolkit-test:source")
    api("us.ihmc:ihmc-avatar-interfaces-test:source")
 }

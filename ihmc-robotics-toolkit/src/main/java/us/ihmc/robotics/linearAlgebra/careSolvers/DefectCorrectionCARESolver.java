@@ -1,7 +1,8 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+
 import us.ihmc.matrixlib.NativeCommonOps;
 
 /**
@@ -21,11 +22,11 @@ public class DefectCorrectionCARESolver extends AbstractCARESolver
   private static final double defaultConvergenceEpsilon = 1e-12;
   private final double convergenceEpsilon;
 
-  private final DenseMatrix64F X = new DenseMatrix64F(0, 0);
+  private final DMatrixRMaj X = new DMatrixRMaj(0, 0);
 
-  private final DenseMatrix64F PE = new DenseMatrix64F(0, 0);
-  private final DenseMatrix64F ASquiggle = new DenseMatrix64F(0, 0);
-  private final DenseMatrix64F QSquiggle = new DenseMatrix64F(0, 0);
+  private final DMatrixRMaj PE = new DMatrixRMaj(0, 0);
+  private final DMatrixRMaj ASquiggle = new DMatrixRMaj(0, 0);
+  private final DMatrixRMaj QSquiggle = new DMatrixRMaj(0, 0);
 
   private final CARESolver backendSolver;
 
@@ -37,7 +38,7 @@ public class DefectCorrectionCARESolver extends AbstractCARESolver
   }
 
   /** {@inheritDoc} */
-  public DenseMatrix64F computeP()
+  public DMatrixRMaj computeP()
   {
      backendSolver.setMatrices(A, hasE ? E : null, M, Q);
 
@@ -48,7 +49,7 @@ public class DefectCorrectionCARESolver extends AbstractCARESolver
      while (!converged)
      {
         X.set(computeErrorEstimate(P));
-        CommonOps.addEquals(P, X);
+        CommonOps_DDRM.addEquals(P, X);
 
         converged = MatrixToolsLocal.isZero(X, convergenceEpsilon);
 
@@ -62,25 +63,25 @@ public class DefectCorrectionCARESolver extends AbstractCARESolver
      return P;
   }
 
-  private DenseMatrix64F computeErrorEstimate(DenseMatrix64F currentValue)
+  private DMatrixRMaj computeErrorEstimate(DMatrixRMaj currentValue)
   {
      PE.reshape(n, n);
      if (!hasE)
         PE.set(currentValue);
      else
-        CommonOps.mult(currentValue, E, PE);
+        CommonOps_DDRM.mult(currentValue, E, PE);
 
      // QSquiggle = Q + A' P E + E' P A - E' P M P E
      NativeCommonOps.multQuad(PE, M, QSquiggle);
-     CommonOps.scale(-1.0, QSquiggle);
+     CommonOps_DDRM.scale(-1.0, QSquiggle);
 
-     CommonOps.multAddTransA(PE, A, QSquiggle);
-     CommonOps.multAddTransA(A, PE, QSquiggle);
-     CommonOps.addEquals(QSquiggle, Q);
+     CommonOps_DDRM.multAddTransA(PE, A, QSquiggle);
+     CommonOps_DDRM.multAddTransA(A, PE, QSquiggle);
+     CommonOps_DDRM.addEquals(QSquiggle, Q);
 
      // ASquiggle = A - M P E
      ASquiggle.set(A);
-     CommonOps.multAdd(-1.0, M, PE, ASquiggle);
+     CommonOps_DDRM.multAdd(-1.0, M, PE, ASquiggle);
 
      backendSolver.setMatrices(ASquiggle, hasE ? E : null, M, QSquiggle);
 

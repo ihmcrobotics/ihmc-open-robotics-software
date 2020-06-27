@@ -1,9 +1,9 @@
 package us.ihmc.robotics.physics;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.MatrixFeatures;
-import org.ejml.ops.NormOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.NormOps_DDRM;
+import org.ejml.dense.row.MatrixFeatures_DDRM;
 
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
@@ -11,18 +11,18 @@ import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 
 public class ContactImpulseTools
 {
-   public static DenseMatrix64F cross(DenseMatrix64F v1, DenseMatrix64F v2)
+   public static DMatrixRMaj cross(DMatrixRMaj v1, DMatrixRMaj v2)
    {
-      DenseMatrix64F cross = new DenseMatrix64F(3, 1);
+      DMatrixRMaj cross = new DMatrixRMaj(3, 1);
       cross(v1, v2, cross);
       return cross;
    }
 
-   public static void cross(DenseMatrix64F v1, DenseMatrix64F v2, DenseMatrix64F cross)
+   public static void cross(DMatrixRMaj v1, DMatrixRMaj v2, DMatrixRMaj cross)
    {
-      if (!MatrixFeatures.isVector(v1) || v1.getNumElements() != 3)
+      if (!MatrixFeatures_DDRM.isVector(v1) || v1.getNumElements() != 3)
          throw new IllegalArgumentException("Improper argument");
-      if (!MatrixFeatures.isVector(v2) || v2.getNumElements() != 3)
+      if (!MatrixFeatures_DDRM.isVector(v2) || v2.getNumElements() != 3)
          throw new IllegalArgumentException("Improper argument");
 
       cross.reshape(3, 1);
@@ -35,20 +35,20 @@ public class ContactImpulseTools
       cross.set(2, z);
    }
 
-   public static DenseMatrix64F invert(DenseMatrix64F M)
+   public static DMatrixRMaj invert(DMatrixRMaj M)
    {
-      DenseMatrix64F M_inv = new DenseMatrix64F(M.getNumCols(), M.getNumRows());
-      CommonOps.invert(M, M_inv);
+      DMatrixRMaj M_inv = new DMatrixRMaj(M.getNumCols(), M.getNumRows());
+      CommonOps_DDRM.invert(M, M_inv);
       return M_inv;
    }
 
-   public static double multQuad(DenseMatrix64F x, DenseMatrix64F H)
+   public static double multQuad(DMatrixRMaj x, DMatrixRMaj H)
    {
-      if (!MatrixFeatures.isVector(x))
+      if (!MatrixFeatures_DDRM.isVector(x))
          throw new IllegalArgumentException("x is not a vector.");
       if (x.getNumRows() != H.getNumRows())
          throw new IllegalArgumentException("x and H are not compatible.");
-      if (!MatrixFeatures.isSquare(H))
+      if (!MatrixFeatures_DDRM.isSquare(H))
          throw new IllegalArgumentException("H is not square.");
       double result = 0.0;
 
@@ -72,9 +72,9 @@ public class ContactImpulseTools
     * return = a + b * c
     * </pre>
     */
-   public static DenseMatrix64F addMult(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c)
+   public static DMatrixRMaj addMult(DMatrixRMaj a, DMatrixRMaj b, DMatrixRMaj c)
    {
-      DenseMatrix64F d = new DenseMatrix64F(b.getNumRows(), c.getNumCols());
+      DMatrixRMaj d = new DMatrixRMaj(b.getNumRows(), c.getNumCols());
       addMult(a, b, c, d);
       return d;
    }
@@ -84,10 +84,10 @@ public class ContactImpulseTools
     * d = a + b * c
     * </pre>
     */
-   public static void addMult(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c, DenseMatrix64F d)
+   public static void addMult(DMatrixRMaj a, DMatrixRMaj b, DMatrixRMaj c, DMatrixRMaj d)
    {
-      CommonOps.mult(b, c, d);
-      CommonOps.addEquals(d, a);
+      CommonOps_DDRM.mult(b, c, d);
+      CommonOps_DDRM.addEquals(d, a);
    }
 
    /**
@@ -95,9 +95,9 @@ public class ContactImpulseTools
     * return = -a * b
     * </pre>
     */
-   public static DenseMatrix64F negateMult(DenseMatrix64F a, DenseMatrix64F b)
+   public static DMatrixRMaj negateMult(DMatrixRMaj a, DMatrixRMaj b)
    {
-      DenseMatrix64F c = new DenseMatrix64F(a.getNumRows(), b.getNumCols());
+      DMatrixRMaj c = new DMatrixRMaj(a.getNumRows(), b.getNumCols());
       negateMult(a, b, c);
       return c;
    }
@@ -107,18 +107,18 @@ public class ContactImpulseTools
     * c = -a * b
     * </pre>
     */
-   public static void negateMult(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c)
+   public static void negateMult(DMatrixRMaj a, DMatrixRMaj b, DMatrixRMaj c)
    {
-      CommonOps.mult(a, b, c);
-      CommonOps.changeSign(c);
+      CommonOps_DDRM.mult(a, b, c);
+      CommonOps_DDRM.changeSign(c);
    }
 
-   public static double computeR(double mu, double theta, DenseMatrix64F M_inv, DenseMatrix64F c)
+   public static double computeR(double mu, double theta, DMatrixRMaj M_inv, DMatrixRMaj c)
    {
       return computeR(mu, Math.cos(theta), Math.sin(theta), M_inv, c);
    }
 
-   public static double computeR(double mu, double cosTheta, double sinTheta, DenseMatrix64F M_inv, DenseMatrix64F c)
+   public static double computeR(double mu, double cosTheta, double sinTheta, DMatrixRMaj M_inv, DMatrixRMaj c)
    {
       // Equation (14) in the paper
       //                                -c_z
@@ -129,74 +129,74 @@ public class ContactImpulseTools
       return r;
    }
 
-   public static double computeLambdaZ(double r, double theta, DenseMatrix64F M_inv, DenseMatrix64F c)
+   public static double computeLambdaZ(double r, double theta, DMatrixRMaj M_inv, DMatrixRMaj c)
    {
       return ContactImpulseTools.computeLambdaZ(r, Math.cos(theta), Math.sin(theta), M_inv, c);
    }
 
-   public static double computeLambdaZ(double r, double cosTheta, double sinTheta, DenseMatrix64F M_inv, DenseMatrix64F c)
+   public static double computeLambdaZ(double r, double cosTheta, double sinTheta, DMatrixRMaj M_inv, DMatrixRMaj c)
    {
       // Equation (13) in the paper
       // lambda_z = (-c_z - M_inv_zx * r * cos(theta) - M_inv_zy * r * sin(theta)) / M_inv_zz
       return -(c.get(2) + r * (M_inv.get(6) * cosTheta + M_inv.get(7) * sinTheta)) / M_inv.get(8);
    }
 
-   public static DenseMatrix64F computePostImpulseVelocity(DenseMatrix64F c, DenseMatrix64F M_inv, DenseMatrix64F lambda)
+   public static DMatrixRMaj computePostImpulseVelocity(DMatrixRMaj c, DMatrixRMaj M_inv, DMatrixRMaj lambda)
    {
       return addMult(c, M_inv, lambda);
    }
 
-   public static void computePostImpulseVelocity(DenseMatrix64F c, DenseMatrix64F M_inv, DenseMatrix64F lambda, DenseMatrix64F vToPack)
+   public static void computePostImpulseVelocity(DMatrixRMaj c, DMatrixRMaj M_inv, DMatrixRMaj lambda, DMatrixRMaj vToPack)
    {
       addMult(c, M_inv, lambda, vToPack);
    }
 
-   public static double computeE1(DenseMatrix64F v, DenseMatrix64F M)
+   public static double computeE1(DMatrixRMaj v, DMatrixRMaj M)
    {
       // E = v^T M v
       return 0.5 * multQuad(v, M);
    }
 
-   public static double computeE2(DenseMatrix64F M_inv, DenseMatrix64F c, DenseMatrix64F lambda)
+   public static double computeE2(DMatrixRMaj M_inv, DMatrixRMaj c, DMatrixRMaj lambda)
    {
       // E = 0.5 * lambda^T M^-1 lambda + lambda^T c
-      return 0.5 * multQuad(lambda, M_inv) + CommonOps.dot(lambda, c);
+      return 0.5 * multQuad(lambda, M_inv) + CommonOps_DDRM.dot(lambda, c);
    }
 
-   public static double computeE3(DenseMatrix64F M, DenseMatrix64F M_inv, DenseMatrix64F c, DenseMatrix64F lambda)
+   public static double computeE3(DMatrixRMaj M, DMatrixRMaj M_inv, DMatrixRMaj c, DMatrixRMaj lambda)
    {
       // E = 0.5 * lambda^T M^-1 lambda + lambda^T c + 0.5 * c^T M c
       return computeE2(M_inv, c, lambda) + 0.5 * multQuad(c, M);
    }
 
-   public static DenseMatrix64F nablaH1(DenseMatrix64F M_inv)
+   public static DMatrixRMaj nablaH1(DMatrixRMaj M_inv)
    { // Introduced in Section III.A. Careful there's a typo in the paper where M is used instead of its inverse.
-      DenseMatrix64F nablaH1 = new DenseMatrix64F(3, 1);
+      DMatrixRMaj nablaH1 = new DMatrixRMaj(3, 1);
       nablaH1.set(0, M_inv.get(2, 0));
       nablaH1.set(1, M_inv.get(2, 1));
       nablaH1.set(2, M_inv.get(2, 2));
       return nablaH1;
    }
 
-   public static DenseMatrix64F nablaH2(DenseMatrix64F lambda, double mu)
+   public static DMatrixRMaj nablaH2(DMatrixRMaj lambda, double mu)
    {
-      DenseMatrix64F nablaH2 = new DenseMatrix64F(3, 1);
+      DMatrixRMaj nablaH2 = new DMatrixRMaj(3, 1);
       nablaH2.set(0, 2.0 * lambda.get(0));
       nablaH2.set(1, 2.0 * lambda.get(1));
       nablaH2.set(2, -2.0 * mu * mu * lambda.get(2));
       return nablaH2;
    }
 
-   public static DenseMatrix64F eta(DenseMatrix64F M_inv, DenseMatrix64F lambda, double mu)
+   public static DMatrixRMaj eta(DMatrixRMaj M_inv, DMatrixRMaj lambda, double mu)
    {
-      DenseMatrix64F nablaH1 = nablaH1(M_inv);
-      DenseMatrix64F nablaH2 = nablaH2(lambda, mu);
-      DenseMatrix64F eta = cross(nablaH1, nablaH2);
-      NormOps.normalizeF(eta);
+      DMatrixRMaj nablaH1 = nablaH1(M_inv);
+      DMatrixRMaj nablaH2 = nablaH2(lambda, mu);
+      DMatrixRMaj eta = cross(nablaH1, nablaH2);
+      NormOps_DDRM.normalizeF(eta);
       return eta;
    }
 
-   public static double computeProjectedGradient(double mu, DenseMatrix64F M_inv, DenseMatrix64F c, DenseMatrix64F lambda)
+   public static double computeProjectedGradient(double mu, DMatrixRMaj M_inv, DMatrixRMaj c, DMatrixRMaj lambda)
    {
       return ContactImpulseTools.computeProjectedGradient(mu,
                                                           M_inv,
@@ -205,17 +205,17 @@ public class ContactImpulseTools
                                                           Math.atan2(lambda.get(1), lambda.get(0)));
    }
 
-   public static double computeProjectedGradient(double mu, DenseMatrix64F M_inv, DenseMatrix64F c, double theta)
+   public static double computeProjectedGradient(double mu, DMatrixRMaj M_inv, DMatrixRMaj c, double theta)
    {
       return computeProjectedGradient(mu, M_inv, c, computeR(mu, theta, M_inv, c), theta);
    }
 
-   public static double computeProjectedGradient(double mu, DenseMatrix64F M_inv, DenseMatrix64F c, double r, double theta)
+   public static double computeProjectedGradient(double mu, DMatrixRMaj M_inv, DMatrixRMaj c, double r, double theta)
    {
       return computeProjectedGradient(mu, M_inv, c, r, Math.cos(theta), Math.sin(theta));
    }
 
-   public static double computeProjectedGradient(double mu, DenseMatrix64F M_inv, DenseMatrix64F c, double r, double cosTheta, double sinTheta)
+   public static double computeProjectedGradient(double mu, DMatrixRMaj M_inv, DMatrixRMaj c, double r, double cosTheta, double sinTheta)
    {
       // Equation (15) in the paper
       double nablaH1_x = M_inv.get(6);
@@ -244,40 +244,40 @@ public class ContactImpulseTools
       return dE_dLambda_0 * eta_x + dE_dLambda_1 * eta_y + dE_dLambda_2 * eta_z;
    }
 
-   public static double computeProjectedGradientInefficient(DenseMatrix64F M_inv, DenseMatrix64F lambda, DenseMatrix64F c, double mu)
+   public static double computeProjectedGradientInefficient(DMatrixRMaj M_inv, DMatrixRMaj lambda, DMatrixRMaj c, double mu)
    {
-      DenseMatrix64F gradient = ContactImpulseTools.addMult(c, M_inv, lambda);
-      DenseMatrix64F eta = ContactImpulseTools.eta(M_inv, lambda, mu);
-      return CommonOps.dot(gradient, eta);
+      DMatrixRMaj gradient = ContactImpulseTools.addMult(c, M_inv, lambda);
+      DMatrixRMaj eta = ContactImpulseTools.eta(M_inv, lambda, mu);
+      return CommonOps_DDRM.dot(gradient, eta);
    }
 
-   public static double computeEThetaNumericalDerivative(double theta, double dtheta, double mu, DenseMatrix64F M_inv, DenseMatrix64F c)
+   public static double computeEThetaNumericalDerivative(double theta, double dtheta, double mu, DMatrixRMaj M_inv, DMatrixRMaj c)
    {
       double costMinus = ContactImpulseTools.computeE2(M_inv, c, computeLambda(theta - 0.5 * dtheta, mu, M_inv, c));
       double costPlus = ContactImpulseTools.computeE2(M_inv, c, computeLambda(theta + 0.5 * dtheta, mu, M_inv, c));
       return (costPlus - costMinus) / dtheta;
    }
 
-   public static DenseMatrix64F computeLambda(double theta, double mu, DenseMatrix64F M_inv, DenseMatrix64F c)
+   public static DMatrixRMaj computeLambda(double theta, double mu, DMatrixRMaj M_inv, DMatrixRMaj c)
    {
       return computeLambda(theta, ContactImpulseTools.computeR(mu, theta, M_inv, c), mu, M_inv, c);
    }
 
-   public static DenseMatrix64F computeLambda(double theta, double r, double mu, DenseMatrix64F M_inv, DenseMatrix64F c)
+   public static DMatrixRMaj computeLambda(double theta, double r, double mu, DMatrixRMaj M_inv, DMatrixRMaj c)
    {
-      DenseMatrix64F lambda = new DenseMatrix64F(3, 1);
+      DMatrixRMaj lambda = new DMatrixRMaj(3, 1);
       lambda.set(0, r * Math.cos(theta));
       lambda.set(1, r * Math.sin(theta));
       lambda.set(2, ContactImpulseTools.computeLambdaZ(r, theta, M_inv, c));
       return lambda;
    }
 
-   public static boolean isInsideFrictionCone(double mu, DenseMatrix64F lambda)
+   public static boolean isInsideFrictionCone(double mu, DMatrixRMaj lambda)
    {
       return isInsideFrictionCone(mu, lambda, 0.0);
    }
 
-   public static boolean isInsideFrictionCone(double mu, DenseMatrix64F lambda, double epsilon)
+   public static boolean isInsideFrictionCone(double mu, DMatrixRMaj lambda, double epsilon)
    {
       return isInsideFrictionCone(mu, lambda.get(0), lambda.get(1), lambda.get(2), epsilon);
    }
@@ -292,30 +292,30 @@ public class ContactImpulseTools
       return EuclidCoreTools.square(mu * lambda_z) + epsilon >= EuclidCoreTools.normSquared(lambda_x, lambda_y);
    }
 
-   public static boolean lineOfSightTest(double mu, DenseMatrix64F lambda, DenseMatrix64F lambda_v_0)
+   public static boolean lineOfSightTest(double mu, DMatrixRMaj lambda, DMatrixRMaj lambda_v_0)
    {
       double theta = Math.atan2(lambda.get(1), lambda.get(0));
       return lineOfSightTest(mu, EuclidCoreTools.norm(lambda.get(0), lambda.get(1)), Math.cos(theta), Math.sin(theta), lambda_v_0);
    }
 
-   public static boolean lineOfSightTest(double mu, double r, double cosTheta, double sinTheta, DenseMatrix64F lambda_v_0)
+   public static boolean lineOfSightTest(double mu, double r, double cosTheta, double sinTheta, DMatrixRMaj lambda_v_0)
    {
       // Simplified line-of-sight for NableH2 . (lambda_v_0 - lambda) < 0
       return cosTheta * lambda_v_0.get(0) + sinTheta * lambda_v_0.get(1) - mu * lambda_v_0.get(2) > 0.0;
    }
 
-   public static DenseMatrix64F computeSlipLambda(double beta1, double beta2, double beta3, double gamma, double mu, DenseMatrix64F M_inv,
-                                                  DenseMatrix64F lambda_v_0, DenseMatrix64F c, boolean verbose)
+   public static DMatrixRMaj computeSlipLambda(double beta1, double beta2, double beta3, double gamma, double mu, DMatrixRMaj M_inv,
+                                                  DMatrixRMaj lambda_v_0, DMatrixRMaj c, boolean verbose)
    {
       Vector3D lambdaOpt = new Vector3D();
       computeSlipLambda(beta1, beta2, beta3, gamma, mu, M_inv, lambda_v_0, c, lambdaOpt, verbose);
-      DenseMatrix64F lambdaOptMatrix = new DenseMatrix64F(3, 1);
+      DMatrixRMaj lambdaOptMatrix = new DMatrixRMaj(3, 1);
       lambdaOpt.get(lambdaOptMatrix);
       return lambdaOptMatrix;
    }
 
-   public static boolean computeSlipLambda(double beta1, double beta2, double beta3, double gamma, double mu, DenseMatrix64F M_inv, DenseMatrix64F lambda_v_0,
-                                           DenseMatrix64F c, Tuple3DBasics contactImpulseToPack, boolean verbose)
+   public static boolean computeSlipLambda(double beta1, double beta2, double beta3, double gamma, double mu, DMatrixRMaj M_inv, DMatrixRMaj lambda_v_0,
+                                           DMatrixRMaj c, Tuple3DBasics contactImpulseToPack, boolean verbose)
    {
       // Initial guess using lambda_v_0
       double thetaLo0 = Math.atan2(lambda_v_0.get(1), lambda_v_0.get(0));
@@ -442,15 +442,15 @@ public class ContactImpulseTools
       return true;
    }
 
-   public static String toStringForUnitTest(double beta1, double beta2, double beta3, double gamma, double mu, DenseMatrix64F M_inv, DenseMatrix64F lambda_v_0,
-                                            DenseMatrix64F c)
+   public static String toStringForUnitTest(double beta1, double beta2, double beta3, double gamma, double mu, DMatrixRMaj M_inv, DMatrixRMaj lambda_v_0,
+                                            DMatrixRMaj c)
    {
       return beta1 + ", " + beta2 + ", " + beta3 + ", " + gamma + ", " + mu + ", " + matrixToString(M_inv) + ", " + matrixToString(c);
    }
 
-   private static String matrixToString(DenseMatrix64F m)
+   private static String matrixToString(DMatrixRMaj m)
    {
-      String ret = "new DenseMatrix64F(" + m.getNumRows() + ", " + m.getNumCols() + ", true";
+      String ret = "new DMatrixRMaj(" + m.getNumRows() + ", " + m.getNumCols() + ", true";
       for (int i = 0; i < m.getNumElements(); i++)
          ret += ", " + m.get(i);
       ret += ")";
@@ -462,7 +462,7 @@ public class ContactImpulseTools
       return value * value * value;
    }
 
-   public static double polarGradient2(DenseMatrix64F M_inv, DenseMatrix64F c, double theta, double mu)
+   public static double polarGradient2(DMatrixRMaj M_inv, DMatrixRMaj c, double theta, double mu)
    { // Obtained by directly evaluating dE/dTheta
       double c_x = c.get(0);
       double c_y = c.get(1);
