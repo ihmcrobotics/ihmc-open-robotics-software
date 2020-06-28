@@ -1214,6 +1214,7 @@ public class PlanarRegionTest
       assertThrows(RuntimeException.class, () ->
       {
          PlanarRegion twoTriangleRegion = new PlanarRegion(new RigidBodyTransform(), polygonList);
+         twoTriangleRegion.checkConcaveHullIsNotSeparated();
       });
 
 //      List<Point2D> concaveHull = twoTriangleRegion.getConcaveHull();
