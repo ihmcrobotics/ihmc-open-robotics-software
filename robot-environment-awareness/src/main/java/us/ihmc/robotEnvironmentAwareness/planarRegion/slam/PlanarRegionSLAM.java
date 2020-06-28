@@ -110,8 +110,6 @@ public class PlanarRegionSLAM
                                                                                                      parameters.getMaximumPointProjectionDistance(),
                                                                                                      listener);
 
-
-
                if (mergedMapPlanarRegions == null)
                {
                   // If something went wrong, just throw out both the map and the new region.
