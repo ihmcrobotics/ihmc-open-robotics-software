@@ -1273,6 +1273,10 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
          LogTools.error("Unable to solve for concave hull. region " + regionId);
          concaveHullsVertices.clear();
       }
+   }
+
+   public void checkConcaveHullIsNotSeparated()
+   {
       boolean allVisited = true;
       for (Boolean value : visited)
       {
@@ -1281,7 +1285,7 @@ public class PlanarRegion implements SupportingVertexHolder, RegionInWorldInterf
       if (!allVisited)
       {
          LogTools.error("Concave hull is separated. Not all convex polygons were visited. This planar region is invalid. " + visited);
-//         throw new RuntimeException("Concave hull is separated. Not all convex polygons were visited. This planar region is invalid. " + visited);
+         throw new RuntimeException("Concave hull is separated. Not all convex polygons were visited. This planar region is invalid. " + visited);
       }
    }
 
