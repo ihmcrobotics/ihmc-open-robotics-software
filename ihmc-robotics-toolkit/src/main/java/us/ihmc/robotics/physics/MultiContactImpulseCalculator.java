@@ -284,9 +284,9 @@ public class MultiContactImpulseCalculator
          for (int i = 0; i < calculator.getNumberOfRobotsInvolved(); i++)
          {
             RigidBodyBasics rootBody = calculator.getRootBody(i);
-            SingleRobotForwardDynamicsPlugin robotForwardDynamicsPlugin = robots.get(rootBody).getForwardDynamicsPlugin();
+            SingleRobotFirstOrderIntegrator integrator = robots.get(rootBody).getIntegrator();
             DMatrixRMaj jointVelocityChange = calculator.getJointVelocityChange(i);
-            robotForwardDynamicsPlugin.addJointVelocities(jointVelocityChange);
+            integrator.addJointVelocityChange(jointVelocityChange);
          }
       }
    }

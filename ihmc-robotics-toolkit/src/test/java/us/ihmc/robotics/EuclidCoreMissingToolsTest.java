@@ -7,6 +7,7 @@ import java.util.Random;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.MathTools;
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.matrix.RotationMatrix;
@@ -91,7 +92,6 @@ public class EuclidCoreMissingToolsTest
       }
    }
 
-
    @Test
    public void testDistanceBetweenTwoLineSegment2Ds()
    {
@@ -102,7 +102,6 @@ public class EuclidCoreMissingToolsTest
       Vector2D lineSegmentDirection2 = new Vector2D();
 
       Random random = new Random(11762L);
-
 
       // Parallel case, expecting expectedPointOnLineSegment1 =
       // lineSegmentStart1
@@ -134,7 +133,9 @@ public class EuclidCoreMissingToolsTest
          lineSegmentStart2.scaleAdd(EuclidCoreRandomTools.nextDouble(random, -10.0, 0.0), lineSegmentDirection2, closestPointOnLineSegment2);
          lineSegmentEnd2.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0), lineSegmentDirection2, closestPointOnLineSegment2);
 
-         double actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2,
+         double actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1,
+                                                                                                lineSegmentEnd1,
+                                                                                                lineSegmentStart2,
                                                                                                 lineSegmentEnd2);
          Assert.assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
 
@@ -148,10 +149,16 @@ public class EuclidCoreMissingToolsTest
          closestPointOnLineSegment2.set(lineSegmentEnd2);
          expectedMinimumDistance = closestPointOnLineSegment1.distance(closestPointOnLineSegment2);
 
-         actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2, lineSegmentEnd2);
+         actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1,
+                                                                                         lineSegmentEnd1,
+                                                                                         lineSegmentStart2,
+                                                                                         lineSegmentEnd2);
          Assert.assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
 
-         actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2);
+         actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1,
+                                                                                         lineSegmentEnd1,
+                                                                                         lineSegmentEnd2,
+                                                                                         lineSegmentStart2);
          Assert.assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
       }
 
@@ -189,14 +196,25 @@ public class EuclidCoreMissingToolsTest
          lineSegmentEnd2.scaleAdd(EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0), lineSegmentDirection2, closestPointOnLineSegment2);
          double expectedMinimumDistance = closestPointOnLineSegment1.distance(closestPointOnLineSegment2);
 
-         double actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2,
+         double actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1,
+                                                                                                lineSegmentEnd1,
+                                                                                                lineSegmentStart2,
                                                                                                 lineSegmentEnd2);
          Assert.assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
-         actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2);
+         actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1,
+                                                                                         lineSegmentEnd1,
+                                                                                         lineSegmentEnd2,
+                                                                                         lineSegmentStart2);
          Assert.assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
-         actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2);
+         actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentEnd1,
+                                                                                         lineSegmentStart1,
+                                                                                         lineSegmentStart2,
+                                                                                         lineSegmentEnd2);
          Assert.assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
-         actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2);
+         actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentEnd1,
+                                                                                         lineSegmentStart1,
+                                                                                         lineSegmentEnd2,
+                                                                                         lineSegmentStart2);
          Assert.assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
       }
 
@@ -241,24 +259,118 @@ public class EuclidCoreMissingToolsTest
          lineSegmentEnd2.scaleAdd(alpha2, lineSegmentDirection2, closestPointOnLineSegment2);
 
          double expectedMinimumDistance = closestPointOnLineSegment1.distance(closestPointOnLineSegment2);
-         double actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentStart2,
+         double actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1,
+                                                                                                lineSegmentEnd1,
+                                                                                                lineSegmentStart2,
                                                                                                 lineSegmentEnd2);
          Assert.assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
-         actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1, lineSegmentEnd1, lineSegmentEnd2, lineSegmentStart2);
+         actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentStart1,
+                                                                                         lineSegmentEnd1,
+                                                                                         lineSegmentEnd2,
+                                                                                         lineSegmentStart2);
          Assert.assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
-         actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentEnd1, lineSegmentStart1, lineSegmentStart2, lineSegmentEnd2);
+         actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentEnd1,
+                                                                                         lineSegmentStart1,
+                                                                                         lineSegmentStart2,
+                                                                                         lineSegmentEnd2);
          Assert.assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
-         actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentEnd1, lineSegmentStart1, lineSegmentEnd2, lineSegmentStart2);
+         actualMinimumDistance = EuclidCoreMissingTools.distanceBetweenTwoLineSegment2Ds(lineSegmentEnd1,
+                                                                                         lineSegmentStart1,
+                                                                                         lineSegmentEnd2,
+                                                                                         lineSegmentStart2);
          Assert.assertEquals(expectedMinimumDistance, actualMinimumDistance, EPSILON);
+      }
+   }
+
+   @Test
+   public void testExtractNormalPart()
+   {
+      Random random = new Random(6457);
+
+      for (int i = 0; i < iters; i++)
+      { // We build the normal and tangential parts of the vector and then assemble it and expect to get the normal part pack.
+         Vector3D normalAxis = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
+         Vector3D tangentialAxis = EuclidCoreRandomTools.nextOrthogonalVector3D(random, normalAxis, true);
+         Vector3D normalPart = new Vector3D();
+         Vector3D tangentialPart = new Vector3D();
+
+         double normalMagnitude = EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0);
+         double tangentialMagnitude = EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0);
+         normalPart.setAndScale(normalMagnitude, normalAxis);
+         tangentialPart.setAndScale(tangentialMagnitude, tangentialAxis);
+
+         Vector3D input = new Vector3D();
+         input.add(normalPart, tangentialPart);
+
+         Vector3D actualNormalPart = new Vector3D();
+         EuclidCoreMissingTools.extractNormalPart(input, normalAxis, actualNormalPart);
+         EuclidCoreTestTools.assertTuple3DEquals(normalPart, actualNormalPart, EPSILON);
+
+         // Randomize the axis
+         normalAxis.scale(EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0));
+         EuclidCoreMissingTools.extractNormalPart(input, normalAxis, actualNormalPart);
+         EuclidCoreTestTools.assertTuple3DEquals(normalPart, actualNormalPart, EPSILON);
+      }
+   }
+
+   @Test
+   public void testExtractTangentialPart()
+   {
+      Random random = new Random(63457);
+
+      for (int i = 0; i < iters; i++)
+      { // We build the normal and tangential parts of the vector and then assemble it and expect to get the normal part pack.
+         // Setting trivial setup using Axis3D
+         Axis3D normalAxis = EuclidCoreRandomTools.nextAxis3D(random);
+         Axis3D tangentialAxis = random.nextBoolean() ? normalAxis.next() : normalAxis.previous();
+         Vector3D normalPart = new Vector3D();
+         Vector3D tangentialPart = new Vector3D();
+
+         double normalMagnitude = EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0);
+         double tangentialMagnitude = EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0);
+         normalPart.setAndScale(normalMagnitude, normalAxis);
+         tangentialPart.setAndScale(tangentialMagnitude, tangentialAxis);
+
+         Vector3D input = new Vector3D();
+         input.add(normalPart, tangentialPart);
+
+         Vector3D actualTangentialPart = new Vector3D();
+         EuclidCoreMissingTools.extractTangentialPart(input, normalAxis, actualTangentialPart);
+         EuclidCoreTestTools.assertTuple3DEquals("Iteration: " + i, tangentialPart, actualTangentialPart, EPSILON);
+      }
+
+      for (int i = 0; i < iters; i++)
+      { // We build the normal and tangential parts of the vector and then assemble it and expect to get the normal part pack.
+         Vector3D normalAxis = EuclidCoreRandomTools.nextVector3DWithFixedLength(random, 1.0);
+         Vector3D tangentialAxis = EuclidCoreRandomTools.nextOrthogonalVector3D(random, normalAxis, true);
+         Vector3D normalPart = new Vector3D();
+         Vector3D tangentialPart = new Vector3D();
+
+         double normalMagnitude = EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0);
+         double tangentialMagnitude = EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0);
+         normalPart.setAndScale(normalMagnitude, normalAxis);
+         tangentialPart.setAndScale(tangentialMagnitude, tangentialAxis);
+
+         Vector3D input = new Vector3D();
+         input.add(normalPart, tangentialPart);
+
+         Vector3D actualTangentialPart = new Vector3D();
+         EuclidCoreMissingTools.extractTangentialPart(input, normalAxis, actualTangentialPart);
+         EuclidCoreTestTools.assertTuple3DEquals(tangentialPart, actualTangentialPart, EPSILON);
+
+         // Randomize the axis
+         normalAxis.scale(EuclidCoreRandomTools.nextDouble(random, 0.0, 10.0));
+         EuclidCoreMissingTools.extractTangentialPart(input, normalAxis, actualTangentialPart);
+         EuclidCoreTestTools.assertTuple3DEquals(tangentialPart, actualTangentialPart, EPSILON);
       }
    }
 
    /**
     * Generates a random vector that is perpendicular to {@code vectorToBeOrthogonalTo}.
     *
-    * @param random the random generator to use.
+    * @param random                 the random generator to use.
     * @param vectorToBeOrthogonalTo the vector to be orthogonal to. Not modified.
-    * @param normalize whether to normalize the generated vector or not.
+    * @param normalize              whether to normalize the generated vector or not.
     * @return the random vector.
     */
    public static Vector2D nextOrthogonalVector2D(Random random, Vector2DReadOnly vectorToBeOrthogonalTo, boolean normalize)

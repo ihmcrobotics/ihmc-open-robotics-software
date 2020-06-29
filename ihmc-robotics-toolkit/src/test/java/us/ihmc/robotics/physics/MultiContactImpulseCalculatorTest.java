@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Test;
 import org.opentest4j.AssertionFailedError;
 
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
+import us.ihmc.euclid.referenceFrame.FrameUnitVector3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreRandomTools;
@@ -89,7 +90,7 @@ public class MultiContactImpulseCalculatorTest
 
          MultiContactImpulseCalculator multiContactImpulseCalculator = new MultiContactImpulseCalculator(worldFrame);
          multiContactImpulseCalculator.configure(physicsEngineRobotDataMap, collisionGroup);
-         multiContactImpulseCalculator.setContactParameters(new ContactParameters(0.7, 0.0, 0.0, 1.0));
+         multiContactImpulseCalculator.setContactParameters(new ContactParameters(5.0e-5, 0.7, 0.0, 0.0, 0.0, 0.0, 1.0));
          multiContactImpulseCalculator.setTolerance(TERMINAL_TOLERANCE);
          multiContactImpulseCalculator.setSingleContactTolerance(SINGLE_CONTACT_GAMMA);
          try
@@ -133,7 +134,7 @@ public class MultiContactImpulseCalculatorTest
       for (RigidBodyBasics rigidBody : rigidBodies)
       {
          RigidBodyBasics rootBody = MultiBodySystemTools.getRootBody(rigidBody);
-         PhysicsEngineRobotData physicsEngineRobotData = new PhysicsEngineRobotData(rigidBody.getName(), rootBody, null, null, null, null);
+         PhysicsEngineRobotData physicsEngineRobotData = new PhysicsEngineRobotData(rigidBody.getName(), rootBody, null, null);
          physicsEngineRobotData.getForwardDynamicsPlugin().doScience(0.0, dt, gravity);
          map.put(rootBody, physicsEngineRobotData);
       }
@@ -215,7 +216,7 @@ public class MultiContactImpulseCalculatorTest
       CollisionResult collisionResult = new CollisionResult();
       Collidable collidableA = nextCollidable(random, contactingBodyA);
       collisionResult.setCollidableA(collidableA);
-      FrameVector3D collisionAxisForA = collisionResult.getCollisionAxisForA();
+      FrameUnitVector3D collisionAxisForA = collisionResult.getCollisionAxisForA();
       FramePoint3D pointInBodyFrameA = collisionResult.getCollisionData().getPointOnA();
       FramePoint3D pointInBodyFrameB = collisionResult.getCollisionData().getPointOnB();
       FramePoint3D pointOnARootFrame = collisionResult.getPointOnARootFrame();
