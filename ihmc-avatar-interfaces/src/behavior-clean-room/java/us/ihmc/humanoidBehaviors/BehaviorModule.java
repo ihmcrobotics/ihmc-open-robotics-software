@@ -66,7 +66,9 @@ public class BehaviorModule
 
       for (BehaviorDefinition behaviorDefinition : behaviorRegistry.getDefinitionEntries())
       {
-         constructedBehaviors.add(behaviorDefinition, behaviorDefinition.getBehaviorSupplier().build(new BehaviorHelper(robotModel, messager, ros2Node)));
+         BehaviorHelper helper = new BehaviorHelper(robotModel, messager, ros2Node);
+         BehaviorInterface constructedBehavior = behaviorDefinition.getBehaviorSupplier().build(helper);
+         constructedBehaviors.add(behaviorDefinition, constructedBehavior);
       }
 
       messager.registerTopicListener(BehaviorSelection, selection -> // simple string based selection
@@ -80,7 +82,7 @@ public class BehaviorModule
 
    private void kryoStarter()
    {
-      ExceptionTools.handle(() -> messager.startMessager(), DefaultExceptionHandler.RUNTIME_EXCEPTION);
+      ExceptionTools.handle(messager::startMessager, DefaultExceptionHandler.RUNTIME_EXCEPTION);
    }
 
    public Messager getMessager()
@@ -98,12 +100,12 @@ public class BehaviorModule
       public static final MessagerAPIFactory.Topic<String> BehaviorSelection = topic("BehaviorSelection");
       public static final MessagerAPIFactory.Topic<Pair<Integer, String>> StatusLog = topic("StatusLog");
 
-      private static final <T> MessagerAPIFactory.Topic<T> topic(String name)
+      private static <T> MessagerAPIFactory.Topic<T> topic(String name)
       {
          return RootCategory.child(BehaviorModuleTheme).topic(apiFactory.createTypedTopicTheme(name));
       }
 
-      public static synchronized final MessagerAPI create(MessagerAPI... behaviorAPIs) // TODO check threading
+      public static synchronized MessagerAPI create(MessagerAPI... behaviorAPIs) // TODO check threading
       {
          apiFactory.includeMessagerAPIs(behaviorAPIs);
 
