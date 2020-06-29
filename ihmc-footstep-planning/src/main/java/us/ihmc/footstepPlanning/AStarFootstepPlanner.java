@@ -53,7 +53,7 @@ public class AStarFootstepPlanner
    private final FootstepPlannerCompletionChecker completionChecker;
    private final WaypointDefinedBodyPathPlanHolder bodyPathPlanHolder;
 
-   private final FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData();
+   private final FootstepPlannerEdgeData edgeData;
    private final HashMap<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
    private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
    private final List<FootstepPlannerTerminationCondition> customTerminationConditions = new ArrayList<>();
@@ -90,9 +90,14 @@ public class AStarFootstepPlanner
       this.completionChecker = new FootstepPlannerCompletionChecker(footstepPlannerParameters, footstepPlanner, distanceAndYawHeuristics);
 
       List<YoVariable> allVariables = registry.collectSubtreeVariables();
+      this.edgeData = new FootstepPlannerEdgeData(allVariables.size());
       footstepPlanner.getGraph().setGraphExpansionCallback(edge ->
                                                            {
-                                                              edgeData.setCostFromStart(footstepPlanner.getGraph().getCostFromStart(edge.getEndNode()));
+                                                              for (int i = 0; i < allVariables.size(); i++)
+                                                              {
+                                                                 edgeData.setData(i, allVariables.get(i).getValueAsLongBits());
+                                                              }
+
                                                               edgeDataMap.put(edge, edgeData.getCopyAndClear());
                                                            });
    }
@@ -258,13 +263,14 @@ public class AStarFootstepPlanner
 
    private void markSolutionEdges()
    {
-      edgeDataMap.values().forEach(data -> data.setSolutionEdge(false));
+      // TODO add solution edge flag
+//      edgeDataMap.values().forEach(data -> data.setSolutionEdge(false));
 
-      List<FootstepNode> path = footstepPlanner.getGraph().getPathFromStart(completionChecker.getEndNode());
-      for (int i = 1; i < path.size(); i++)
-      {
-         edgeDataMap.get(new GraphEdge<>(path.get(i - 1), path.get(i))).setSolutionEdge(true);
-      }
+//      List<FootstepNode> path = footstepPlanner.getGraph().getPathFromStart(completionChecker.getEndNode());
+//      for (int i = 1; i < path.size(); i++)
+//      {
+//         edgeDataMap.get(new GraphEdge<>(path.get(i - 1), path.get(i))).setSolutionEdge(true);
+//      }
    }
 
    private void recordIterationData(AStarIterationData<FootstepNode> iterationData)
@@ -403,6 +409,11 @@ public class AStarFootstepPlanner
                                         Pose3DReadOnly goalFootPose = poses.apply(side);
                                         return new FootstepNode(goalFootPose.getX(), goalFootPose.getY(), goalFootPose.getYaw(), side);
                                      });
+   }
+
+   public YoRegistry getRegistry()
+   {
+      return registry;
    }
 
    public FootstepNodeSnapAndWiggler getSnapper()

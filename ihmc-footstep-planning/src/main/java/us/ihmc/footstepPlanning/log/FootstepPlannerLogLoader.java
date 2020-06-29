@@ -248,29 +248,28 @@ public class FootstepPlannerLogLoader
                // edge marker
                dataFileReader.readLine();
 
-               FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData();
-               edgeData.setStanceNode(iterationData.getStanceNode());
-               edgeData.setCandidateNode(readNode(dataFileReader.readLine()));
-               edgeData.getCandidateNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
-               edgeData.getCandidateNodeSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
-               edgeData.getCandidateNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
-               edgeData.getCandidateNodeSnapData().setRegionIndex(getIntCSV(true, dataFileReader.readLine())[0]);
-               edgeData.getCandidateNodeSnapData().setAchievedInsideDelta(getDoubleCSV(true, dataFileReader.readLine())[0]);
-
-               double[] doubleCSV = getDoubleCSV(true, dataFileReader.readLine());
-               edgeData.setRejectionReason(doubleCSV[0] == -1.0 ? null : BipedalFootstepPlannerNodeRejectionReason.values()[(int) Math.round(doubleCSV[0])]);
-               edgeData.setFootAreaPercentage(doubleCSV[1]);
-               edgeData.setStepWidth(doubleCSV[2]);
-               edgeData.setStepLength(doubleCSV[3]);
-               edgeData.setStepHeight(doubleCSV[4]);
-               edgeData.setStepReach(doubleCSV[5]);
-               edgeData.setCostFromStart(doubleCSV[6]);
-               edgeData.setEdgeCost(doubleCSV[7]);
-               edgeData.setHeuristicCost(doubleCSV[8]);
-               edgeData.setSolutionEdge(doubleCSV[9] > 0.5);
-               iterationData.getChildNodes().add(edgeData.getCandidateNode());
-
-               log.getEdgeDataMap().put(new GraphEdge<>(iterationData.getStanceNode(), edgeData.getCandidateNode()), edgeData);
+               // TODO load from header file
+//               FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData();
+//               edgeData.setStanceNode(iterationData.getStanceNode());
+//               edgeData.setCandidateNode(readNode(dataFileReader.readLine()));
+//               edgeData.getCandidateNodeSnapData().getSnapTransform().set(readTransform(dataFileReader.readLine()));
+//               edgeData.getCandidateNodeSnapData().getWiggleTransformInWorld().set(readTransform(dataFileReader.readLine()));
+//               edgeData.getCandidateNodeSnapData().getCroppedFoothold().set(readPolygon(dataFileReader.readLine()));
+//
+//               double[] doubleCSV = getDoubleCSV(true, dataFileReader.readLine());
+//               edgeData.setRejectionReason(doubleCSV[0] == -1.0 ? null : BipedalFootstepPlannerNodeRejectionReason.values()[(int) Math.round(doubleCSV[0])]);
+//               edgeData.setFootAreaPercentage(doubleCSV[1]);
+//               edgeData.setStepWidth(doubleCSV[2]);
+//               edgeData.setStepLength(doubleCSV[3]);
+//               edgeData.setStepHeight(doubleCSV[4]);
+//               edgeData.setStepReach(doubleCSV[5]);
+//               edgeData.setCostFromStart(doubleCSV[6]);
+//               edgeData.setEdgeCost(doubleCSV[7]);
+//               edgeData.setHeuristicCost(doubleCSV[8]);
+//               edgeData.setSolutionEdge(doubleCSV[9] > 0.5);
+//               iterationData.getChildNodes().add(edgeData.getCandidateNode());
+//
+//               log.getEdgeDataMap().put(new GraphEdge<>(iterationData.getStanceNode(), edgeData.getCandidateNode()), edgeData);
             }
          }
 

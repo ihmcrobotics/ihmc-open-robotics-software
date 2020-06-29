@@ -250,21 +250,12 @@ public class FootstepPlannerLogger
                writeSnapData(2, edgeData.getCandidateNodeSnapData());
 
                // write additional data as doubles
-               writeLine(2,
-                         "edgeData:" + EuclidCoreIOTools.getStringOf(",",
-                                                                     EuclidCoreIOTools.getStringFormat(8, 8),
-                                                                     edgeData.getRejectionReason() == null ?
-                                                                           -1.0 :
-                                                                           (double) edgeData.getRejectionReason().ordinal(),
-                                                                     edgeData.getFootAreaPercentage(),
-                                                                     edgeData.getStepWidth(),
-                                                                     edgeData.getStepLength(),
-                                                                     edgeData.getStepHeight(),
-                                                                     edgeData.getStepReach(),
-                                                                     edgeData.getCostFromStart(),
-                                                                     edgeData.getEdgeCost(),
-                                                                     edgeData.getHeuristicCost(),
-                                                                     edgeData.getSolutionEdge() ? 1.0 : 0.0));
+               fileWriter.write(tab + tab);
+               long[] dataBuffer = edgeData.getDataBuffer();
+               for (int k = 0; k < dataBuffer.length; k++)
+               {
+                  fileWriter.write(dataBuffer[k] + (k == dataBuffer.length - 1 ? "" : ","));
+               }
             }
          }
 

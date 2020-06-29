@@ -330,12 +330,12 @@ public class FootstepPlannerLogVisualizerController
 
       for (int i = 0; i < iterationData.getChildNodes().size(); i++)
       {
-         FootstepNode childNode = iterationData.getChildNodes().get(i);
-         if(edgeDataMap.get(new GraphEdge<>(stanceNode, childNode)).getSolutionEdge())
-         {
-            iterationDataList.stream().filter(data -> data.getStanceNode().equals(childNode)).findAny().ifPresent(nextData -> recursivelyBuildPath(nextData, iterationDataList, edgeDataMap));
-            return;
-         }
+//         FootstepNode childNode = iterationData.getChildNodes().get(i);
+//         if(edgeDataMap.get(new GraphEdge<>(stanceNode, childNode)).getSolutionEdge())
+//         {
+//            iterationDataList.stream().filter(data -> data.getStanceNode().equals(childNode)).findAny().ifPresent(nextData -> recursivelyBuildPath(nextData, iterationDataList, edgeDataMap));
+//            return;
+//         }
       }
    }
 
@@ -606,7 +606,7 @@ public class FootstepPlannerLogVisualizerController
 
       public int getIndex()
       {
-         return edgeData.getStepIndex();
+         return 0; // edgeData.getStepIndex();
       }
 
       public String getX()
@@ -641,22 +641,22 @@ public class FootstepPlannerLogVisualizerController
 
       public String getWidth()
       {
-         return doubleFormat.format(edgeData.getStepWidth());
+         return doubleFormat.format(0.0); // edgeData.getStepWidth());
       }
 
       public String getLength()
       {
-         return doubleFormat.format(edgeData.getStepLength());
+         return doubleFormat.format(0.0); // edgeData.getStepLength());
       }
 
       public String getHeight()
       {
-         return doubleFormat.format(edgeData.getStepHeight());
+         return doubleFormat.format(0.0); // edgeData.getStepHeight());
       }
 
       public String getReach()
       {
-         return doubleFormat.format(edgeData.getStepReach());
+         return doubleFormat.format(0.0); // edgeData.getStepReach());
       }
 
       public String getStepYaw()
@@ -666,22 +666,22 @@ public class FootstepPlannerLogVisualizerController
 
       public String getAreaPercentage()
       {
-         return doubleFormat.format(edgeData.getFootAreaPercentage());
+         return doubleFormat.format(0.0); // edgeData.getFootAreaPercentage());
       }
 
       public String getEdgeCost()
       {
-         return doubleFormat.format(edgeData.getEdgeCost());
+         return doubleFormat.format(0.0); // edgeData.getEdgeCost());
       }
 
       public String getHeuristicCost()
       {
-         return doubleFormat.format(edgeData.getHeuristicCost());
+         return doubleFormat.format(0.0); // edgeData.getHeuristicCost());
       }
 
       public String getTotalCost()
       {
-         return doubleFormat.format(edgeData.getCostFromStart() + edgeData.getHeuristicCost());
+         return doubleFormat.format(0.0); // edgeData.getCostFromStart() + edgeData.getHeuristicCost());
       }
 
       public String getExpanded()
@@ -691,7 +691,7 @@ public class FootstepPlannerLogVisualizerController
 
       public String getRejectionReason()
       {
-         return edgeData.getRejectionReason() == null ? "" : edgeData.getRejectionReason().toString();
+         return ""; // edgeData.getRejectionReason() == null ? "" : edgeData.getRejectionReason().toString();
       }
 
       public String getDeltaInside()
@@ -701,7 +701,7 @@ public class FootstepPlannerLogVisualizerController
 
       public String getSolution()
       {
-         return Boolean.toString(edgeData.getSolutionEdge());
+         return "false"; // Boolean.toString(edgeData.getSolutionEdge());
       }
    }
 }
