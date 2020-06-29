@@ -35,7 +35,6 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
       return controller;
    }
 
-   //TODO check this
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
@@ -49,17 +48,14 @@ public class FiducialDetectorToolboxModule extends ToolboxModule
       });
    }
 
-   //TODO check this   
    @Override
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
-      //      commands.add(DetectedFiducialPacket.class);
-      //video
+
       return commands;
    }
 
-   //TODO check this
    @Override
    public List<Class<? extends Settable<?>>> createListOfSupportedStatus()
    {

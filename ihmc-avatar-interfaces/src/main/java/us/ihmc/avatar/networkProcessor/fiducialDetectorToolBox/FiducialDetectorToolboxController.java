@@ -32,11 +32,9 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.euclid.tuple4D.interfaces.QuaternionReadOnly;
 import us.ihmc.humanoidRobotics.communication.packets.HumanoidMessageTools;
 import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FiducialDetectorToolboxController extends ToolboxController
@@ -52,18 +50,13 @@ public class FiducialDetectorToolboxController extends ToolboxController
 
    private final Se3_F64 fiducialToCamera = new Se3_F64();
    private final RotationMatrix fiducialRotationMatrix = new RotationMatrix();
-   private final Quaternion tempFiducialRotationQuat = new Quaternion();
-   private final FramePose3D tempFiducialDetectorFrame = new FramePose3D();
    private final Vector3D cameraRigidPosition = new Vector3D();
-   private final double[] eulerAngles = new double[3];
    private final RigidBodyTransform cameraRigidTransform = new RigidBodyTransform();
 
-   private final ReferenceFrame cameraReferenceFrame, detectorReferenceFrame, locatedFiducialReferenceFrame;
+   private final ReferenceFrame cameraReferenceFrame, detectorReferenceFrame;
 
    private FiducialDetector<GrayF32> detector;
-   private Object expectedFiducialSizeChangedConch = new Object();
 
-   private final Object fiducialDetectorFromCameraImagesConch = new Object();
 
    private final JPEGDecompressor jpegDecompressor = new JPEGDecompressor();
 
@@ -73,9 +66,7 @@ public class FiducialDetectorToolboxController extends ToolboxController
    private double expectedFiducialSize = 0.2032;
 
    private final FramePose3D cameraPose = new FramePose3D(ReferenceFrame.getWorldFrame());
-   private final FramePose3D locatedFiducialPoseInWorldFrame = new FramePose3D(ReferenceFrame.getWorldFrame());
    private final FramePose3D reportedFiducialPoseInWorldFrame = new FramePose3D(ReferenceFrame.getWorldFrame());
-   private RigidBodyTransform transformFromReportedToFiducialFrame = new RigidBodyTransform();
 
    public FiducialDetectorToolboxController(FullHumanoidRobotModel fullRobotModel, StatusMessageOutputManager statusOutputManager,
                                             YoVariableRegistry parentRegistry)
@@ -101,18 +92,7 @@ public class FiducialDetectorToolboxController extends ToolboxController
          {
             transformToParent.set(0.0, 0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, -1.0, 0.0, 0.0);
          }
-      };
-
-      locatedFiducialReferenceFrame = new ReferenceFrame(prefix + "LocatedReferenceFrame", ReferenceFrame.getWorldFrame())
-      {
-         @Override
-         protected void updateTransformToParent(RigidBodyTransform transformToParent)
-         {
-            locatedFiducialPoseInWorldFrame.get(transformToParent);
-         }
-      };
-
-      
+      }; 
    }
 
    @Override
@@ -203,8 +183,7 @@ public class FiducialDetectorToolboxController extends ToolboxController
          reportedFiducialPoseInWorldFrame.getPosition().set(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
          reportedFiducialPoseInWorldFrame.changeFrame(ReferenceFrame.getWorldFrame());
          
-         //TODO send out a detected Fiducial packet containing ID, Pose, And Timestamp
-
+         
          DetectedFiducialPacket packet = new DetectedFiducialPacket();
          packet.fiducial_id_ = detector.getId(i);
 

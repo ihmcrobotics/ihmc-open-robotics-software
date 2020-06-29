@@ -1,7 +1,6 @@
 package us.ihmc.humanoidBehaviors.behaviors.complexBehaviors;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
-import controller_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.FootstepDataListMessage;
 import controller_msgs.msg.dds.FootstepDataMessage;
 import controller_msgs.msg.dds.HandDesiredConfigurationMessage;
@@ -67,8 +66,6 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
       DONE
    }
 
-   //do you want to tuck in the arms before walking through the door
-   private final boolean setUpArms = true;
 
    //this is the predefined walk to points relative to the door reference frame, these should eventualy be replaced by a behavior that finds the best location to walk up to given an arm task space 
    private Vector3D32 doorOffsetPoint1 = new Vector3D32(0.5f, -0.9f, 0f);
@@ -84,8 +81,6 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
    private final AtlasPrimitiveActions atlasPrimitiveActions;
    private SleepBehavior sleepBehavior;
    //sends out a door location packet for use in debugging. not really necesary until the door is found from a behavior instead of the user supplying its location
-   private IHMCROS2Publisher<DoorLocationPacket> doorToBehaviorPublisher;
-   private IHMCROS2Publisher<DoorLocationPacket> doorToUIPublisher;
 
    private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
    private final IHMCROS2Publisher<HeadTrajectoryMessage> headTrajectoryPublisher;
@@ -117,10 +112,7 @@ public class WalkThroughDoorBehavior extends StateMachineBehavior<WalkThroughDoo
                                               yoGraphicsListRegistry);
       resetRobotBehavior = new ResetRobotBehavior(robotName, ros2Node, yoTime);
       
-      
-      doorToBehaviorPublisher = createBehaviorInputPublisher(DoorLocationPacket.class);
-      doorToUIPublisher = createBehaviorOutputPublisher(DoorLocationPacket.class);
-      
+            
 
       //setup publisher for sending door location to UI
       setupStateMachine();
