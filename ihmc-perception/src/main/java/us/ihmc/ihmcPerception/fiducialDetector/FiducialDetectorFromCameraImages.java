@@ -198,7 +198,7 @@ public class FiducialDetectorFromCameraImages
    {
       detector.setLensDistortion(new LensDistortionPinhole(intrinsicParameters), intrinsicParameters.getWidth(), intrinsicParameters.getHeight());
       //increase brightness for sim
-      RescaleOp rescaleOp = new RescaleOp(2.5f, 35, null);
+      RescaleOp rescaleOp = new RescaleOp(4.5f, 35, null);
       rescaleOp.filter(bufferedImage, bufferedImage);  // Source and destination are the same.
       if (DEBUG)
       {
