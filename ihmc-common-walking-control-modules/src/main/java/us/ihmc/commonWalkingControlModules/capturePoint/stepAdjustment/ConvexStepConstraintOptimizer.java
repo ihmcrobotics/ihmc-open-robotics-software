@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.convexOptimization.quadraticProgram.JavaQuadProgSolver;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
@@ -43,25 +43,25 @@ public class ConvexStepConstraintOptimizer
 
    private static int[] emptyArray = new int[0];
 
-   private final DenseMatrix64F G = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F g = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj G = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj g = new DMatrixRMaj(0, 0);
 
-   private final DenseMatrix64F J = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F j = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj J = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj j = new DMatrixRMaj(0, 0);
 
    /**
     * If x is contained in the polygon, this can be expressed by Ax <= b
     */
-   private final DenseMatrix64F A = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F b = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj A = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj b = new DMatrixRMaj(0, 0);
 
-   private final DenseMatrix64F Aineq = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F bineq = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj Aineq = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj bineq = new DMatrixRMaj(0, 0);
 
-   private final DenseMatrix64F p = new DenseMatrix64F(2, 1);
+   private final DMatrixRMaj p = new DMatrixRMaj(2, 1);
 
-   private final DenseMatrix64F bFull = new DenseMatrix64F(0, 1);
-   private final DenseMatrix64F solution = new DenseMatrix64F(1, 6);
+   private final DMatrixRMaj bFull = new DMatrixRMaj(0, 1);
+   private final DMatrixRMaj solution = new DMatrixRMaj(1, 6);
 
    private final JavaQuadProgSolver solver = new JavaQuadProgSolver();
 
@@ -126,7 +126,7 @@ public class ConvexStepConstraintOptimizer
 
       // Check to see if the optimization actually needs to run. Most of the time, probably not, but if so, there's no need to run the optimizer
       solution.reshape(constraints, 1);
-      CommonOps.scale(-1.0, j, solution);
+      CommonOps_DDRM.scale(-1.0, j, solution);
       boolean areConstraintsAlreadyValid = true;
       for (int i = 0; i < solution.numRows; i++)
       {
@@ -157,7 +157,7 @@ public class ConvexStepConstraintOptimizer
 
       // Convert the inequality constraint for being inside the polygon to an objective.
       g.reshape(totalVariables, 1);
-      CommonOps.multTransA(-polygonWeight, J, j, g);
+      CommonOps_DDRM.multTransA(-polygonWeight, J, j, g);
 
       try
       {
@@ -211,8 +211,8 @@ public class ConvexStepConstraintOptimizer
 
       for (int i = 0; i < numberOfPoints; i++)
       {
-         CommonOps.insert(A, J, constraintsPerPoint * i, 0);
-         CommonOps.insert(b, bFull, constraintsPerPoint * i, 0);
+         CommonOps_DDRM.insert(A, J, constraintsPerPoint * i, 0);
+         CommonOps_DDRM.insert(b, bFull, constraintsPerPoint * i, 0);
       }
 
       invariantConstraintRegionValuesComputed = true;
@@ -227,8 +227,8 @@ public class ConvexStepConstraintOptimizer
       int totalVariables = variables + slackVariables;
 
       G.reshape(totalVariables, totalVariables);
-      CommonOps.multInner(J, G);
-      CommonOps.scale(polygonWeight, G);
+      CommonOps_DDRM.multInner(J, G);
+      CommonOps_DDRM.scale(polygonWeight, G);
 
       // Add regularization
       MatrixTools.addDiagonal(G, regularization);

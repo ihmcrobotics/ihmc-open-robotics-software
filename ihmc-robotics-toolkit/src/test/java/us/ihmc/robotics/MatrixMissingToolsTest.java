@@ -1,6 +1,6 @@
 package us.ihmc.robotics;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 
@@ -14,12 +14,12 @@ public class MatrixMissingToolsTest
    public void testSetDiagonalValues()
    {
       int iters = 100;
-      DenseMatrix64F matrixToSet = new DenseMatrix64F(4, 7);
+      DMatrixRMaj matrixToSet = new DMatrixRMaj(4, 7);
       Random random = new Random(1738L);
       for (int i = 0; i < iters; i++)
       {
          matrixToSet.setData(RandomNumbers.nextDoubleArray(random, 4 * 7, 100));
-         DenseMatrix64F originalMatrix = new DenseMatrix64F(matrixToSet);
+         DMatrixRMaj originalMatrix = new DMatrixRMaj(matrixToSet);
          double value = RandomNumbers.nextDouble(random, 10.0);
          MatrixMissingTools.setDiagonalValues(matrixToSet, value, 1, 3);
 
