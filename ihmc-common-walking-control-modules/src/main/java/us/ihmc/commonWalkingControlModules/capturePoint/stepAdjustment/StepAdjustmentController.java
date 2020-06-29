@@ -293,10 +293,10 @@ public class StepAdjustmentController
 
       if (environmentConstraintProvider.hasStepConstraintRegion() && (wasAdjusted || !hasPlanarRegionBeenAssigned.getBooleanValue()))
       {
-         hasPlanarRegionBeenAssigned.set(true);
          wasAdjusted |= environmentConstraintProvider.applyEnvironmentConstraintToFootstep(upcomingFootstepSide.getEnumValue(),
                                                                                            footstepSolution,
                                                                                            upcomingFootstepContactPoints);
+         hasPlanarRegionBeenAssigned.set(environmentConstraintProvider.foundSolution());
       }
 
       footstepWasAdjusted.set(wasAdjusted);

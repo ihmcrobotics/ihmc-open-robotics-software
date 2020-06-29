@@ -12,7 +12,10 @@ import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.communication.packets.ToolboxState;
+import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.graphicsDescription.yoGraphics.plotting.ArtifactList;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintMessageConverter;
+import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
 import us.ihmc.humanoidRobotics.communication.packets.walking.FootstepStatus;
 import us.ihmc.humanoidRobotics.frames.HumanoidReferenceFrames;
 import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
@@ -21,6 +24,8 @@ import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoBoolean;
 import us.ihmc.yoVariables.variable.YoDouble;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static us.ihmc.robotModels.FullRobotModelUtils.getAllJointsExcludingHands;
@@ -49,7 +54,8 @@ public class StepConstraintToolboxController extends ToolboxController
                                           WalkingControllerParameters walkingControllerParameters,
                                           FullHumanoidRobotModel fullRobotModel,
                                           double gravityZ,
-                                          YoVariableRegistry parentRegistry)
+                                          YoVariableRegistry parentRegistry,
+                                          YoGraphicsListRegistry graphicsListRegistry)
    {
       super(statusOutputManager, parentRegistry);
 
@@ -63,6 +69,15 @@ public class StepConstraintToolboxController extends ToolboxController
                                                               time,
                                                               gravityZ);
 
+      parentRegistry.addChild(stepConstraintCalculator.getYoVariableRegistry());
+      if (graphicsListRegistry != null)
+      {
+         graphicsListRegistry.registerYoGraphicsLists(stepConstraintCalculator.getYoGraphicsListRegistry().getYoGraphicsLists());
+         List<ArtifactList> artifactLists = new ArrayList<>();
+         stepConstraintCalculator.getYoGraphicsListRegistry().getRegisteredArtifactLists(artifactLists);
+         graphicsListRegistry.registerArtifactLists(artifactLists);
+      }
+
       this.oneDoFJoints = getAllJointsExcludingHands(fullRobotModel);
 
       isDone.set(false);
@@ -75,20 +90,16 @@ public class StepConstraintToolboxController extends ToolboxController
       return true;
    }
 
-   private long initialTimestamp = -1L;
-
    @Override
    public void updateInternal()
    {
       try
       {
-         if (initialTimestamp == -1L)
-            initialTimestamp = System.nanoTime();
-         time.set(Conversions.nanosecondsToSeconds(System.nanoTime() - initialTimestamp));
-
          RobotConfigurationData configurationData = this.configurationData.getAndSet(null);
          if (configurationData != null)
          {
+            time.set(Conversions.nanosecondsToSeconds(configurationData.getMonotonicTime()));
+
             KinematicsToolboxHelper.setRobotStateFromRobotConfigurationData(configurationData, fullRobotModel.getRootJoint(), oneDoFJoints);
             referenceFrames.updateFrames();
          }
@@ -125,7 +136,11 @@ public class StepConstraintToolboxController extends ToolboxController
          stepConstraintCalculator.update();
 
          if (stepConstraintCalculator.constraintRegionChanged())
-            constraintRegionPublisher.publish(StepConstraintMessageConverter.convertToStepConstraintMessage(stepConstraintCalculator.getConstraintRegion()));
+         {
+            StepConstraintRegion constraintRegion = stepConstraintCalculator.pollStepConstraintRegion();
+            if (constraintRegion != null)
+               constraintRegionPublisher.publish(StepConstraintMessageConverter.convertToStepConstraintMessage(constraintRegion));
+         }
       }
       catch (Throwable e)
       {
