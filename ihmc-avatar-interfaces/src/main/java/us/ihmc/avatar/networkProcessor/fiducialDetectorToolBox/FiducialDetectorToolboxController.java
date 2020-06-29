@@ -58,7 +58,7 @@ public class FiducialDetectorToolboxController extends ToolboxController
    private final double[] eulerAngles = new double[3];
    private final RigidBodyTransform cameraRigidTransform = new RigidBodyTransform();
 
-   private final ReferenceFrame cameraReferenceFrame, detectorReferenceFrame, locatedFiducialReferenceFrame, reportedFiducialReferenceFrame;
+   private final ReferenceFrame cameraReferenceFrame, detectorReferenceFrame, locatedFiducialReferenceFrame;
 
    private FiducialDetector<GrayF32> detector;
    private Object expectedFiducialSizeChangedConch = new Object();
@@ -112,9 +112,7 @@ public class FiducialDetectorToolboxController extends ToolboxController
          }
       };
 
-      reportedFiducialReferenceFrame = new TransformReferenceFrame(prefix + "ReportedReferenceFrame",
-                                                                   locatedFiducialReferenceFrame,
-                                                                   transformFromReportedToFiducialFrame);
+      
    }
 
    @Override
@@ -198,22 +196,13 @@ public class FiducialDetectorToolboxController extends ToolboxController
          detector.getFiducialToCamera(i, fiducialToCamera);
 
          fiducialRotationMatrix.set(fiducialToCamera.getR().data);
-         tempFiducialRotationQuat.set(fiducialRotationMatrix);
 
-         tempFiducialDetectorFrame.setToZero(detectorReferenceFrame);
-         tempFiducialDetectorFrame.getOrientation().set(tempFiducialRotationQuat);
-         tempFiducialDetectorFrame.getPosition().set(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
-         tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
-
-         locatedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
-
-         locatedFiducialReferenceFrame.update();
-
-         tempFiducialDetectorFrame.setToZero(reportedFiducialReferenceFrame);
-         tempFiducialDetectorFrame.changeFrame(ReferenceFrame.getWorldFrame());
-
-         reportedFiducialPoseInWorldFrame.set(tempFiducialDetectorFrame);
-
+   
+         reportedFiducialPoseInWorldFrame.setReferenceFrame(detectorReferenceFrame);
+         reportedFiducialPoseInWorldFrame.getOrientation().set(fiducialRotationMatrix);
+         reportedFiducialPoseInWorldFrame.getPosition().set(fiducialToCamera.getX(), fiducialToCamera.getY(), fiducialToCamera.getZ());
+         reportedFiducialPoseInWorldFrame.changeFrame(ReferenceFrame.getWorldFrame());
+         
          //TODO send out a detected Fiducial packet containing ID, Pose, And Timestamp
 
          DetectedFiducialPacket packet = new DetectedFiducialPacket();

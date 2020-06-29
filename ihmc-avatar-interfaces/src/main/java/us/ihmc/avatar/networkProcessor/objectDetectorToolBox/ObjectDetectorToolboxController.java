@@ -78,10 +78,6 @@ public class ObjectDetectorToolboxController extends ToolboxController
 
       pose.appendYawRotation(Math.toRadians(-90));
 
-      Point3D location = new Point3D();
-      Quaternion orientation = new Quaternion();
-      pose.get(location, orientation);
-
       reportMessage(HumanoidMessageTools.createDoorLocationPacket(pose));
 
    }
