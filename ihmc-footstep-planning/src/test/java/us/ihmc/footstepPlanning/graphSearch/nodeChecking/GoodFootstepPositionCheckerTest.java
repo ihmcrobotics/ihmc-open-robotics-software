@@ -12,13 +12,13 @@ import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.LatticeNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
-import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static us.ihmc.robotics.Assert.assertEquals;
@@ -26,7 +26,7 @@ import static us.ihmc.robotics.Assert.assertTrue;
 
 public class GoodFootstepPositionCheckerTest
 {
-   private final FootstepPlannerEdgeData edgeData = new FootstepPlannerEdgeData();
+   private final YoVariableRegistry registry = new YoVariableRegistry(getClass().getSimpleName());
 
    @Test
    public void testStanceFootPitchedTooMuch()
@@ -35,7 +35,7 @@ public class GoodFootstepPositionCheckerTest
 
       DefaultFootstepPlannerParameters parameters = new DefaultFootstepPlannerParameters();
       FootstepNodeSnapAndWiggler snapper = new FootstepNodeSnapAndWiggler(footPolygons, parameters);
-      GoodFootstepPositionChecker checker = new GoodFootstepPositionChecker(parameters, snapper, edgeData);
+      GoodFootstepPositionChecker checker = new GoodFootstepPositionChecker(parameters, snapper, registry);
       parameters.setMaximumStepXWhenFullyPitched(0.3);
       parameters.setMinimumStepZWhenFullyPitched(0.05);
 
@@ -93,7 +93,7 @@ public class GoodFootstepPositionCheckerTest
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
 
-      GoodFootstepPositionChecker nodeChecker = new GoodFootstepPositionChecker(parameters, snapper, edgeData);
+      GoodFootstepPositionChecker nodeChecker = new GoodFootstepPositionChecker(parameters, snapper, registry);
 
       double snappedPosition = snapToGrid(parameters.getIdealFootstepWidth());
       double reachAtChild = Math.abs(snappedPosition - parameters.getIdealFootstepWidth());
@@ -129,7 +129,7 @@ public class GoodFootstepPositionCheckerTest
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
 
-      GoodFootstepPositionChecker nodeChecker = new GoodFootstepPositionChecker(parameters, snapper, edgeData);
+      GoodFootstepPositionChecker nodeChecker = new GoodFootstepPositionChecker(parameters, snapper, registry);
 
       double snappedPosition = snapToGrid(parameters.getIdealFootstepWidth());
       double reachAtChild = Math.abs(snappedPosition - parameters.getIdealFootstepWidth());
@@ -165,7 +165,7 @@ public class GoodFootstepPositionCheckerTest
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
 
-      GoodFootstepPositionChecker nodeChecker = new GoodFootstepPositionChecker(parameters, snapper, edgeData);
+      GoodFootstepPositionChecker nodeChecker = new GoodFootstepPositionChecker(parameters, snapper, registry);
 
       double parentYaw = snapToYawGrid(Math.toRadians(75));
 
@@ -210,7 +210,7 @@ public class GoodFootstepPositionCheckerTest
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
 
-      GoodFootstepPositionChecker nodeChecker = new GoodFootstepPositionChecker(parameters, snapper, edgeData);
+      GoodFootstepPositionChecker nodeChecker = new GoodFootstepPositionChecker(parameters, snapper, registry);
 
       double parentYaw = snapToYawGrid(Math.toRadians(75));
 
@@ -255,7 +255,7 @@ public class GoodFootstepPositionCheckerTest
       double maxYawAtFullLength = yawReduction * maxYaw;
       double minYawAtFullLength = yawReduction * minYaw;
 
-      GoodFootstepPositionChecker nodeChecker = new GoodFootstepPositionChecker(parameters, snapper, edgeData);
+      GoodFootstepPositionChecker nodeChecker = new GoodFootstepPositionChecker(parameters, snapper, registry);
 
       double snappedYPosition = snapToGrid(parameters.getIdealFootstepWidth());
       double snappedXPosition = snapDownToGrid(0.8 * parameters.getMaximumStepReach());
