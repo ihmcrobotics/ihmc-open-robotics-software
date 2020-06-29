@@ -104,7 +104,8 @@ public class FootstepPlannerLog
             FootstepNode childNode = iterationData.get(iterationIndex).getChildNodes().get(i);
             GraphEdge<FootstepNode> edge = new GraphEdge<>(stanceNode, childNode);
 
-            if (edgeDataMap.get(edge).getSolutionEdge())
+            // TODO
+//            if (edgeDataMap.get(edge).getSolutionEdge())
             {
                footstepNodes.add(childNode);
                for (int j = 0; j < iterationData.size(); j++)

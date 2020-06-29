@@ -344,9 +344,10 @@ public class AtlasCorridorNavigationTest
                                                      GraphEdge<FootstepNode> edge = new GraphEdge<>(iterationData.getStanceNode(), childNodes.get(i));
                                                      if (!edgeDataMap.containsKey(edge))
                                                         continue;
-                                                     BipedalFootstepPlannerNodeRejectionReason rejectionReason = edgeDataMap.get(edge).getRejectionReason();
-                                                     if (rejectionReason != null)
-                                                        rejectionReasonCount.get(rejectionReason).incrementAndGet();
+                                                     // TODO
+//                                                     BipedalFootstepPlannerNodeRejectionReason rejectionReason = edgeDataMap.get(edge).getRejectionReason();
+//                                                     if (rejectionReason != null)
+//                                                        rejectionReasonCount.get(rejectionReason).incrementAndGet();
                                                   }
                                                });
 
