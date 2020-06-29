@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -59,7 +60,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
       abortMessagePublisher = createPublisherForController(AutomaticManipulationAbortMessage.class);
 
-      createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationPacket::set);
+      createSubscriber(DoorLocationPacket.class,ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationPacket::set);
 
       setupStateMachine();
 
