@@ -250,18 +250,18 @@ public class PolygonWiggler
       return fullTransform;
    }
 
-   public static void addRotationAndTranslationConstraint(DenseMatrix64F A, DenseMatrix64F b, int constraintRowStart, WiggleParameters parameters)
+   public static void addRotationAndTranslationConstraint(DMatrixRMaj A, DMatrixRMaj b, int constraintRowStart, WiggleParameters parameters)
    {
       addTranslationConstraint(A, b, constraintRowStart, parameters);
       addRotationConstraint(A, b, constraintRowStart + 4, parameters);
    }
 
-   public static void addTranslationConstraint(DenseMatrix64F A, DenseMatrix64F b, int constraintRowStart, WiggleParameters parameters)
+   public static void addTranslationConstraint(DMatrixRMaj A, DMatrixRMaj b, int constraintRowStart, WiggleParameters parameters)
    {
       addTranslationConstraint(A, b, constraintRowStart, parameters.maxX, parameters.minX, parameters.maxY, parameters.minY);
    }
 
-   public static void addTranslationConstraint(DenseMatrix64F A, DenseMatrix64F b, int constraintRowStart, double maxX, double minX, double maxY, double minY)
+   public static void addTranslationConstraint(DMatrixRMaj A, DMatrixRMaj b, int constraintRowStart, double maxX, double minX, double maxY, double minY)
    {
       A.set(constraintRowStart , 0, 1.0);
       b.set(constraintRowStart , maxX);
@@ -273,7 +273,7 @@ public class PolygonWiggler
       b.set(constraintRowStart + 3, -minY);
    }
 
-   public static void addRotationConstraint(DenseMatrix64F A, DenseMatrix64F b, int constraintRowStart, WiggleParameters parameters)
+   public static void addRotationConstraint(DMatrixRMaj A, DMatrixRMaj b, int constraintRowStart, WiggleParameters parameters)
    {
       A.set(constraintRowStart, 2, 1.0);
       b.set(constraintRowStart, parameters.maxYaw);
