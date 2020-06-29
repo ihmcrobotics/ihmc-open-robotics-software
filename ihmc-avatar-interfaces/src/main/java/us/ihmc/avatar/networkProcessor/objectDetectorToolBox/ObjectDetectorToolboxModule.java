@@ -5,9 +5,7 @@ import java.util.Collections;
 import java.util.List;
 
 import controller_msgs.msg.dds.DetectedFiducialPacket;
-import controller_msgs.msg.dds.DetectedObjectPacket;
 import controller_msgs.msg.dds.DoorLocationPacket;
-import controller_msgs.msg.dds.VideoPacket;
 import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxModule;
@@ -42,17 +40,20 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
    @Override
    public void registerExtraPuSubs(RealtimeRos2Node realtimeRos2Node)
    {
-      
-      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, DetectedFiducialPacket.class, FiducialDetectorToolboxModule.getOutputTopic(robotName), s ->
-      {
-         if (controller != null)
-         {
-            
-            controller.receivedPacket(s.takeNextData());
-            receivedInput.set(true);
 
-         }
-      });
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
+                                                    DetectedFiducialPacket.class,
+                                                    FiducialDetectorToolboxModule.getOutputTopic(robotName),
+                                                    s ->
+                                                    {
+                                                       if (controller != null)
+                                                       {
+
+                                                          controller.receivedPacket(s.takeNextData());
+                                                          receivedInput.set(true);
+
+                                                       }
+                                                    });
    }
 
    //TODO check this   
@@ -60,7 +61,6 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
    public List<Class<? extends Command<?, ?>>> createListOfSupportedCommands()
    {
       List<Class<? extends Command<?, ?>>> commands = new ArrayList<>();
-      //      commands.add(DetectedObjectPacket.class);
       return commands;
    }
 

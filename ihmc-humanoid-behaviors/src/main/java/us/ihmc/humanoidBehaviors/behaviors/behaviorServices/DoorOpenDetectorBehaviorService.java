@@ -29,16 +29,13 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
    private float closeAngle = 0.07f;
    private boolean run = false;
 
-   private long timeOfLastUpdate = 0;
-   private long timeToWait = 2000;
-
    protected final AtomicReference<DoorLocationPacket> doorLocationLatest = new AtomicReference<DoorLocationPacket>();
 
    public DoorOpenDetectorBehaviorService(String robotName, String ThreadName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, ThreadName, ros2Node);
 
-      createSubscriber(DoorLocationPacket.class,ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationLatest::set);
+      createSubscriber(DoorLocationPacket.class, ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationLatest::set);
 
       initialize();
    }
@@ -129,7 +126,6 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
                   {
                      averageCurrentDoorLocation = averageFramePoses(doorPoses);
                   }
-                
 
                   if (averageCurrentDoorLocation != null)
                   {
@@ -170,7 +166,6 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
             averageQuaternionCalculator.queueQuaternion(new Quaternion(pose.getOrientation()));
 
          }
-
 
          aveagedPose.setX(aveagedPose.getX() / numberOfPoses);
          aveagedPose.setY(aveagedPose.getY() / numberOfPoses);
