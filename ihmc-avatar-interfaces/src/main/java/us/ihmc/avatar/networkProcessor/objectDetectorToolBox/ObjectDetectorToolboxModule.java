@@ -29,7 +29,7 @@ public class ObjectDetectorToolboxModule extends ToolboxModule
    {
       super(robotName, desiredFullRobotModel, modelProvider, false, 50, pubSubImplementation);
       controller = new ObjectDetectorToolboxController(fullRobotModel, statusOutputManager, registry);
-      setTimeWithoutInputsBeforeGoingToSleep(3.6e+6);
+      setTimeWithoutInputsBeforeGoingToSleep(1.2e+6);
    }
 
    @Override
