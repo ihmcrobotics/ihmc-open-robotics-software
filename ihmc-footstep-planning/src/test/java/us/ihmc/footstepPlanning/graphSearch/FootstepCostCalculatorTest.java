@@ -23,6 +23,7 @@ import us.ihmc.footstepPlanning.tools.PlannerTools;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 public class FootstepCostCalculatorTest
 {
@@ -38,7 +39,9 @@ public class FootstepCostCalculatorTest
       HashMap<FootstepNode, FootstepNode> idealStepMap = new HashMap<>();
       UnaryOperator<FootstepNode> idealStepCalculator = node -> idealStepMap.computeIfAbsent(node, n -> FootstepNode.generateRandomFootstepNode(random, 2.0));
 
-      FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, node -> 10.0, defaultFootPolygons, null);
+      YoVariableRegistry registry = new YoVariableRegistry("testRegistry");
+      FootstepCostCalculator stepCostCalculator = new FootstepCostCalculator(footstepPlannerParameters, snapper, idealStepCalculator, node -> 10.0, defaultFootPolygons,
+                                                                             registry);
       int numberOfTests = 1000;
 
       for (int i = 0; i < numberOfTests; i++)
