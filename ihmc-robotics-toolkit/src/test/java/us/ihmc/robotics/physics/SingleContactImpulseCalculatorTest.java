@@ -198,8 +198,6 @@ public class SingleContactImpulseCalculatorTest
    @Test
    public void testFlyingCollidingSpheres()
    {
-      long seed = new Random().nextLong();
-      System.out.println(seed);
       Random random = new Random(9030112133717752657L);
       ContactParameters contactParameters = new ContactParameters();
       contactParameters.setCoefficientOfFriction(0.7);
