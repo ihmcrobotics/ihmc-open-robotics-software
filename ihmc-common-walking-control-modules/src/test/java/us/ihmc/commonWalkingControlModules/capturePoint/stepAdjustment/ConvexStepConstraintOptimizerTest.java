@@ -7,6 +7,7 @@ import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.robotics.geometry.ConvexPolygon2dCalculator;
 import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
 import java.util.ArrayList;
 
@@ -45,7 +46,7 @@ public class ConvexStepConstraintOptimizerTest
 
 
       ConstraintOptimizerParameters parameters = new ConstraintOptimizerParameters();
-      ConvexStepConstraintOptimizer stepConstraintOptimizer = new ConvexStepConstraintOptimizer();
+      ConvexStepConstraintOptimizer stepConstraintOptimizer = new ConvexStepConstraintOptimizer(new YoVariableRegistry("test"));
       RigidBodyTransformReadOnly wiggleTransform = stepConstraintOptimizer.findConstraintTransform(initialFoot, region.getConvexHull(), parameters);
 
       assertFalse(wiggleTransform == null);
@@ -63,9 +64,6 @@ public class ConvexStepConstraintOptimizerTest
 
       parameters.setMaxX(0.05);
       parameters.setMaxY(0.05);
-
-      parameters.setMaxIterations(100);
-      parameters.setMaxIterationsWhenSettingUp(100);
 
       foot.set(initialFoot);
       assertFalse(ConvexPolygon2dCalculator.isPolygonInside(foot, 1.0e-5, region.getConvexHull()));

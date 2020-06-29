@@ -1,14 +1,11 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.stepAdjustment;
 
-public class ConstraintOptimizerParameters
+public class ConstraintOptimizerParameters implements ConstraintOptimizerParametersReadOnly
 {
    private double maxX = 0.5;
    private double maxY = 0.5;
    private double deltaInside = 0.0;
    private boolean constrainMaxAdjustment = true;
-
-   private int maxIterations = 3;
-   private int maxIterationsWhenSettingUp = 1;
 
    private boolean parametersChanged = false;
 
@@ -46,16 +43,6 @@ public class ConstraintOptimizerParameters
       this.constrainMaxAdjustment = constraintMaxAdjustment;
    }
 
-   public void setMaxIterations(int maxIterations)
-   {
-      this.maxIterations = maxIterations;
-   }
-
-   public void setMaxIterationsWhenSettingUp(int maxIterations)
-   {
-      this.maxIterationsWhenSettingUp = maxIterations;
-   }
-
    public double getDesiredDistanceInside()
    {
       return deltaInside;
@@ -75,15 +62,4 @@ public class ConstraintOptimizerParameters
    {
       return constrainMaxAdjustment;
    }
-
-   public int getMaxIterations()
-   {
-      return maxIterations;
-   }
-
-   public int getMaxIterationsWhenSettingUp()
-   {
-      return maxIterationsWhenSettingUp;
-   }
-
 }
