@@ -36,6 +36,18 @@ public interface ConstraintParametersReadOnly
    double getCoefficientOfRestitution();
 
    /**
+    * Returns the velocity minimum threshold to enable restitution.
+    * <p>
+    * The threshold on the pre-impulse velocity, if it's magnitude is above the threshold, then the
+    * coefficient of restitution is used to resolve the impact, if it is below a coefficient of
+    * restitution of zero is used.
+    * </p>
+    * 
+    * @return the restitution threshold on the pre-impulse velocity magnitude.
+    */
+   double getRestitutionThreshold();
+
+   /**
     * Returns the value of the constraint force mixing parameter.
     * <p>
     * This parameter is inspired on the homonym in the Open Dynamics Engine, see
