@@ -2,13 +2,19 @@ package us.ihmc.robotics.physics;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
-import org.ejml.dense.row.NormOps_DDRM;
 import org.ejml.dense.row.MatrixFeatures_DDRM;
+import org.ejml.dense.row.NormOps_DDRM;
 
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 
+/**
+ * This class implements the math introduced in Section III of <i>"Per-Contact Iteration Method for
+ * Solving Contact Dynamics"</i>.
+ *
+ * @author Sylvain Bertrand
+ */
 public class ContactImpulseTools
 {
    public static DMatrixRMaj cross(DMatrixRMaj v1, DMatrixRMaj v2)
@@ -42,6 +48,10 @@ public class ContactImpulseTools
       return M_inv;
    }
 
+   /**
+    * Computes: <tt>x<sup>T</sup>Hx</tt> with {@code x} being vector such that the result of this
+    * operation is a scalar.
+    */
    public static double multQuad(DMatrixRMaj x, DMatrixRMaj H)
    {
       if (!MatrixFeatures_DDRM.isVector(x))
@@ -131,7 +141,7 @@ public class ContactImpulseTools
 
    public static double computeLambdaZ(double r, double theta, DMatrixRMaj M_inv, DMatrixRMaj c)
    {
-      return ContactImpulseTools.computeLambdaZ(r, Math.cos(theta), Math.sin(theta), M_inv, c);
+      return computeLambdaZ(r, Math.cos(theta), Math.sin(theta), M_inv, c);
    }
 
    public static double computeLambdaZ(double r, double cosTheta, double sinTheta, DMatrixRMaj M_inv, DMatrixRMaj c)
@@ -144,11 +154,6 @@ public class ContactImpulseTools
    public static DMatrixRMaj computePostImpulseVelocity(DMatrixRMaj c, DMatrixRMaj M_inv, DMatrixRMaj lambda)
    {
       return addMult(c, M_inv, lambda);
-   }
-
-   public static void computePostImpulseVelocity(DMatrixRMaj c, DMatrixRMaj M_inv, DMatrixRMaj lambda, DMatrixRMaj vToPack)
-   {
-      addMult(c, M_inv, lambda, vToPack);
    }
 
    public static double computeE1(DMatrixRMaj v, DMatrixRMaj M)
@@ -198,11 +203,7 @@ public class ContactImpulseTools
 
    public static double computeProjectedGradient(double mu, DMatrixRMaj M_inv, DMatrixRMaj c, DMatrixRMaj lambda)
    {
-      return ContactImpulseTools.computeProjectedGradient(mu,
-                                                          M_inv,
-                                                          c,
-                                                          EuclidCoreTools.norm(lambda.get(0), lambda.get(1)),
-                                                          Math.atan2(lambda.get(1), lambda.get(0)));
+      return computeProjectedGradient(mu, M_inv, c, EuclidCoreTools.norm(lambda.get(0), lambda.get(1)), Math.atan2(lambda.get(1), lambda.get(0)));
    }
 
    public static double computeProjectedGradient(double mu, DMatrixRMaj M_inv, DMatrixRMaj c, double theta)
@@ -217,7 +218,6 @@ public class ContactImpulseTools
 
    public static double computeProjectedGradient(double mu, DMatrixRMaj M_inv, DMatrixRMaj c, double r, double cosTheta, double sinTheta)
    {
-      // Equation (15) in the paper
       double nablaH1_x = M_inv.get(6);
       double nablaH1_y = M_inv.get(7);
       double nablaH1_z = M_inv.get(8);
@@ -226,10 +226,12 @@ public class ContactImpulseTools
       double nablaH2_y = sinTheta;
       double nablaH2_z = -mu;
 
+      // Equation (10) in the paper
       double eta_x = nablaH1_y * nablaH2_z - nablaH1_z * nablaH2_y;
       double eta_y = nablaH1_z * nablaH2_x - nablaH1_x * nablaH2_z;
       double eta_z = nablaH1_x * nablaH2_y - nablaH1_y * nablaH2_x;
 
+      // Equation (15) in the paper, we actually use the left equality only so skipping equation (16).
       double r_inv = 1.0 / r;
       double c_x = c.get(0) * r_inv;
       double c_y = c.get(1) * r_inv;
@@ -246,21 +248,21 @@ public class ContactImpulseTools
 
    public static double computeProjectedGradientInefficient(DMatrixRMaj M_inv, DMatrixRMaj lambda, DMatrixRMaj c, double mu)
    {
-      DMatrixRMaj gradient = ContactImpulseTools.addMult(c, M_inv, lambda);
-      DMatrixRMaj eta = ContactImpulseTools.eta(M_inv, lambda, mu);
+      DMatrixRMaj gradient = addMult(c, M_inv, lambda);
+      DMatrixRMaj eta = eta(M_inv, lambda, mu);
       return CommonOps_DDRM.dot(gradient, eta);
    }
 
    public static double computeEThetaNumericalDerivative(double theta, double dtheta, double mu, DMatrixRMaj M_inv, DMatrixRMaj c)
    {
-      double costMinus = ContactImpulseTools.computeE2(M_inv, c, computeLambda(theta - 0.5 * dtheta, mu, M_inv, c));
-      double costPlus = ContactImpulseTools.computeE2(M_inv, c, computeLambda(theta + 0.5 * dtheta, mu, M_inv, c));
+      double costMinus = computeE2(M_inv, c, computeLambda(theta - 0.5 * dtheta, mu, M_inv, c));
+      double costPlus = computeE2(M_inv, c, computeLambda(theta + 0.5 * dtheta, mu, M_inv, c));
       return (costPlus - costMinus) / dtheta;
    }
 
    public static DMatrixRMaj computeLambda(double theta, double mu, DMatrixRMaj M_inv, DMatrixRMaj c)
    {
-      return computeLambda(theta, ContactImpulseTools.computeR(mu, theta, M_inv, c), mu, M_inv, c);
+      return computeLambda(theta, computeR(mu, theta, M_inv, c), mu, M_inv, c);
    }
 
    public static DMatrixRMaj computeLambda(double theta, double r, double mu, DMatrixRMaj M_inv, DMatrixRMaj c)
@@ -268,7 +270,7 @@ public class ContactImpulseTools
       DMatrixRMaj lambda = new DMatrixRMaj(3, 1);
       lambda.set(0, r * Math.cos(theta));
       lambda.set(1, r * Math.sin(theta));
-      lambda.set(2, ContactImpulseTools.computeLambdaZ(r, theta, M_inv, c));
+      lambda.set(2, computeLambdaZ(r, theta, M_inv, c));
       return lambda;
    }
 
@@ -280,11 +282,6 @@ public class ContactImpulseTools
    public static boolean isInsideFrictionCone(double mu, DMatrixRMaj lambda, double epsilon)
    {
       return isInsideFrictionCone(mu, lambda.get(0), lambda.get(1), lambda.get(2), epsilon);
-   }
-
-   public static boolean isInsideFrictionCone(double mu, double lambda_x, double lambda_y, double lambda_z)
-   {
-      return isInsideFrictionCone(mu, lambda_x, lambda_y, lambda_z, 0.0);
    }
 
    public static boolean isInsideFrictionCone(double mu, double lambda_x, double lambda_y, double lambda_z, double epsilon)
@@ -304,8 +301,8 @@ public class ContactImpulseTools
       return cosTheta * lambda_v_0.get(0) + sinTheta * lambda_v_0.get(1) - mu * lambda_v_0.get(2) > 0.0;
    }
 
-   public static DMatrixRMaj computeSlipLambda(double beta1, double beta2, double beta3, double gamma, double mu, DMatrixRMaj M_inv,
-                                                  DMatrixRMaj lambda_v_0, DMatrixRMaj c, boolean verbose)
+   public static DMatrixRMaj computeSlipLambda(double beta1, double beta2, double beta3, double gamma, double mu, DMatrixRMaj M_inv, DMatrixRMaj lambda_v_0,
+                                               DMatrixRMaj c, boolean verbose)
    {
       Vector3D lambdaOpt = new Vector3D();
       computeSlipLambda(beta1, beta2, beta3, gamma, mu, M_inv, lambda_v_0, c, lambdaOpt, verbose);
@@ -314,8 +311,34 @@ public class ContactImpulseTools
       return lambdaOptMatrix;
    }
 
-   public static boolean computeSlipLambda(double beta1, double beta2, double beta3, double gamma, double mu, DMatrixRMaj M_inv, DMatrixRMaj lambda_v_0,
-                                           DMatrixRMaj c, Tuple3DBasics contactImpulseToPack, boolean verbose)
+   /**
+    * This method implements the bisection method used to find the optimal impulse that minimize the
+    * tangential velocity while canceling the normal velocity.
+    * <p>
+    * This algorithm will fail if the contact is opening or sticking. The z-component of the given data
+    * is assumed to be the normal component of the contact.
+    * </p>
+    * <p>
+    * Before starting the bisection, a lower and upper bounds have to be determined. The beta
+    * parameters are used for this initial phase. No value were suggested in the paper.
+    * </p>
+    * 
+    * @param beta1                algorithm's parameter used for the initial guessing.
+    * @param beta2                algorithm's parameter used for stepping backward.
+    * @param beta3                algorithm's parameter used for stepping forward.
+    * @param gamma                algorithm's termination parameter.
+    * @param mu                   the coefficient of friction.
+    * @param M_inv                the 3-by-3 inverse of the apparent inertia matrix. Not modified.
+    * @param lambda_v_0           the 3-by-1 impulse that fully cancels the contact velocity while
+    *                             ignoring the cone of friction. Not modified.
+    * @param c                    the 3-by-1 contact velocity. Not modified.
+    * @param contactImpulseToPack output of this algorithm: the impulse that satisfies the cone of
+    *                             friction, minimize the tangential velocity, and cancel the normal
+    *                             velocity. Modified.
+    * @param verbose              useful for debugging when this algorithm is acting up.
+    */
+   public static void computeSlipLambda(double beta1, double beta2, double beta3, double gamma, double mu, DMatrixRMaj M_inv, DMatrixRMaj lambda_v_0,
+                                        DMatrixRMaj c, Tuple3DBasics contactImpulseToPack, boolean verbose)
    {
       // Initial guess using lambda_v_0
       double thetaLo0 = Math.atan2(lambda_v_0.get(1), lambda_v_0.get(0));
@@ -439,7 +462,6 @@ public class ContactImpulseTools
       double lambdaMid_y = rMid * sinThetaMid;
       double lambdaMid_z = computeLambdaZ(rMid, cosThetaMid, sinThetaMid, M_inv, c);
       contactImpulseToPack.set(lambdaMid_x, lambdaMid_y, lambdaMid_z);
-      return true;
    }
 
    public static String toStringForUnitTest(double beta1, double beta2, double beta3, double gamma, double mu, DMatrixRMaj M_inv, DMatrixRMaj lambda_v_0,
@@ -461,31 +483,4 @@ public class ContactImpulseTools
    {
       return value * value * value;
    }
-
-   public static double polarGradient2(DMatrixRMaj M_inv, DMatrixRMaj c, double theta, double mu)
-   { // Obtained by directly evaluating dE/dTheta
-      double c_x = c.get(0);
-      double c_y = c.get(1);
-      double c_z = c.get(2);
-
-      double cosTheta = Math.cos(theta);
-      double sinTheta = Math.sin(theta);
-
-      double Mxx = M_inv.get(0, 0);
-      double Mxy = M_inv.get(0, 1);
-      double Myy = M_inv.get(1, 1);
-      double Mzx = M_inv.get(2, 0);
-      double Mzy = M_inv.get(2, 1);
-      double Mzz = M_inv.get(2, 2);
-
-      double Mtheta = Mzx * cosTheta + Mzy * sinTheta;
-
-      return -c_z * mu
-            * (((-Mzy * c_x + Mzx * c_y) * Mtheta + (Mzy * (Mxx * cosTheta + Mxy * sinTheta) - Mzx * (Mxy * cosTheta + Myy * sinTheta)) * c_z) * mu * mu
-                  + Mzz * (-(sinTheta * Mtheta + Mzy) * c_x + (cosTheta * Mtheta + Mzx) * c_y
-                        + (cosTheta * sinTheta * Mxx - Mxy + 2 * sinTheta * sinTheta * Mxy - sinTheta * cosTheta * Myy) * c_z) * mu
-                  + Mzz * ((-sinTheta * c_x + cosTheta * c_y) * Mzz + c_z * (Mzx * sinTheta - Mzy * cosTheta)))
-            / cube(Mzz + Mtheta * mu);
-   }
-
 }
