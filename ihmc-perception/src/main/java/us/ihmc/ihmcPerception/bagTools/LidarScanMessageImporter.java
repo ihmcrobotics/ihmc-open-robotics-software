@@ -29,6 +29,9 @@ public class LidarScanMessageImporter
 
    private static final long PUBLISH_PERIOD = CATPACK_PUBLISH_PERIOD;
 
+   // useful if there's just a single message
+   private static final int PUBLISH_N_TIMES = 10;
+
    public LidarScanMessageImporter(InputStream inputStream) throws IOException
    {
       ObjectMapper objectMapper = new ObjectMapper();
@@ -48,10 +51,15 @@ public class LidarScanMessageImporter
       Ros2Node ros2Node = ROS2Tools.createRos2Node(PubSubImplementation.FAST_RTPS, getClass().getSimpleName());
       IHMCROS2Publisher<LidarScanMessage> publisher = ROS2Tools.createPublisher(ros2Node, LidarScanMessage.class, "/ihmc/lidar_scan");
 
-      for (int i = 0; i < lidarScanMessages.size(); i++)
+      for (int i = 0; i < PUBLISH_N_TIMES; i++)
       {
-         publisher.publish(lidarScanMessages.get(i));
-         ThreadTools.sleep(PUBLISH_PERIOD);
+         for (int j = 0; j < lidarScanMessages.size(); j++)
+         {
+            publisher.publish(lidarScanMessages.get(j));
+            ThreadTools.sleep(PUBLISH_PERIOD);
+         }
+
+         ThreadTools.sleep(1000);
       }
 
       System.out.println("Finished publishing");
