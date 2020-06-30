@@ -220,6 +220,8 @@ public class SimpleSingleSupportState extends SimpleWalkingState
    @Override
    public void onExit()
    {
+      feetManager.setFlatFootContactState(swingSide);
+
       actualFootPoseInWorld.setToZero(fullRobotModel.getSoleFrame(swingSide));
       actualFootPoseInWorld.changeFrame(worldFrame);
 
