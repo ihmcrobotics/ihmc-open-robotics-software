@@ -362,7 +362,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
        * collision axis.
        */
       velocitySolverInput.set(velocityRelative);
-      FixedFrameVector3DBasics linearVelocitySolverInput = velocityRelative.getLinearPart();
+      FixedFrameVector3DBasics linearVelocitySolverInput = velocitySolverInput.getLinearPart();
 
       double cr = contactParameters.getCoefficientOfRestitution();
       double rth = contactParameters.getRestitutionThreshold();

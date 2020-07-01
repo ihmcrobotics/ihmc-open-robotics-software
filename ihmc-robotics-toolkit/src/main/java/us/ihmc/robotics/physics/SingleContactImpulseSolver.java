@@ -323,18 +323,29 @@ public class SingleContactImpulseSolver
       svdSolver.solve(c, lambda_v_0);
       CommonOps_DDRM.changeSign(lambda_v_0);
 
-      if (lambda_v_0.get(2) < NEGATIVE_NORMAL_IMPULSE_THRESHOLD)
-         throw new IllegalStateException("Unable to fully solve degenerate case. Need to be improved.");
-
       if (computeFrictionMoment)
       {
-         if (!isInsideFrictionEllipsoid(mu, lambda_v_0, coulombMomentRatio))
+         if (lambda_v_0.get(2) < NEGATIVE_NORMAL_IMPULSE_THRESHOLD || !isInsideFrictionEllipsoid(mu, lambda_v_0, coulombMomentRatio))
+         {
             throw new IllegalStateException("Unable to fully solve degenerate case. Need to be improved.");
+         }
+         else
+         {
+            impulseToPack.getLinearPart().set(lambda_v_0);
+            impulseToPack.getAngularPart().setZ(lambda_v_0.get(3, 0));
+         }
       }
       else
       {
-         if (!isInsideFrictionCone(mu, lambda_v_0))
-            throw new IllegalStateException("Unable to fully solve degenerate case. Need to be improved.");
+         if (lambda_v_0.get(2) < NEGATIVE_NORMAL_IMPULSE_THRESHOLD || !isInsideFrictionCone(mu, lambda_v_0))
+         {
+            computeSlipLambda(beta1, beta2, beta3, gamma, mu, M_inv, lambda_v_0, c, lambda_linear, false);
+            impulseToPack.getLinearPart().set(lambda_linear);
+         }
+         else
+         {
+            impulseToPack.getLinearPart().set(lambda_v_0);
+         }
       }
    }
 

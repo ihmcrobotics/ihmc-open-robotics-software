@@ -67,7 +67,7 @@ public class YoContactParameters extends YoConstraintParameters implements Conta
    @Override
    public void setCoulombMomentFrictionRatio(double coulombFrictionMomentRatio)
    {
-      this.setCoulombMomentFrictionRatio(coulombFrictionMomentRatio);
+      this.coulombMomentFrictionRatio.set(coulombFrictionMomentRatio);
    }
 
    @Override

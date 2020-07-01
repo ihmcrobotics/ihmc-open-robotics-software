@@ -164,8 +164,8 @@ public class ContactImpulseTools
       destination.a13 = source.unsafe_get(startRow++, startColumn + 2);
       destination.a21 = source.unsafe_get(startRow, startColumn);
       destination.a22 = source.unsafe_get(startRow, startColumn + 1);
-      destination.a23 = source.unsafe_get(startRow, startColumn + 2);
-      destination.a31 = source.unsafe_get(startRow++, startColumn);
+      destination.a23 = source.unsafe_get(startRow++, startColumn + 2);
+      destination.a31 = source.unsafe_get(startRow, startColumn);
       destination.a32 = source.unsafe_get(startRow, startColumn + 1);
       destination.a33 = source.unsafe_get(startRow, startColumn + 2);
    }

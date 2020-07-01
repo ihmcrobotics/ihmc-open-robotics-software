@@ -335,8 +335,8 @@ public class SingleContactImpulseCalculatorTest
          sphereBFinalVelocity.scaleAdd(massB - massA, sphereBInitialVelocity, sphereBFinalVelocity);
          sphereBFinalVelocity.scale(1.0 / (massA + massB));
 
-         EuclidCoreTestTools.assertTuple3DEquals(sphereAFinalVelocity, rootJointA.getJointTwist().getLinearPart(), EPSILON);
-         EuclidCoreTestTools.assertTuple3DEquals(sphereBFinalVelocity, rootJointB.getJointTwist().getLinearPart(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals("Iteration: " + i, sphereAFinalVelocity, rootJointA.getJointTwist().getLinearPart(), EPSILON);
+         EuclidCoreTestTools.assertTuple3DEquals("Iteration: " + i, sphereBFinalVelocity, rootJointB.getJointTwist().getLinearPart(), EPSILON);
       }
    }
 
