@@ -6,23 +6,21 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tools.EuclidCoreTools;
-import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapAndWiggler;
+import us.ihmc.footstepPlanning.graphSearch.footstepSnapping.FootstepNodeSnapData;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.visualization.BipedalFootstepPlannerNodeRejectionReason;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
-import us.ihmc.footstepPlanning.log.FootstepPlannerEdgeData;
 import us.ihmc.robotics.geometry.AngleTools;
 import us.ihmc.robotics.referenceFrames.TransformReferenceFrame;
 import us.ihmc.robotics.referenceFrames.ZUpFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.yoVariables.registry.YoRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
-import us.ihmc.yoVariables.variable.YoEnum;
 
 import java.util.function.UnaryOperator;
 
-public class GoodFootstepPositionChecker
+public class FootstepPoseChecker
 {
    private final YoRegistry registry = new YoRegistry(getClass().getSimpleName());
 
@@ -39,16 +37,12 @@ public class GoodFootstepPositionChecker
 
    private UnaryOperator<FootstepNode> parentNodeSupplier;
 
-   private final YoEnum<BipedalFootstepPlannerNodeRejectionReason> rejectionReason = new YoEnum<>("rejectionReason",
-                                                                                                  registry,
-                                                                                                  BipedalFootstepPlannerNodeRejectionReason.class,
-                                                                                                  true);
    private final YoDouble stepWidth = new YoDouble("stepWidth", registry);
    private final YoDouble stepLength = new YoDouble("stepLength", registry);
    private final YoDouble stepHeight = new YoDouble("stepHeight", registry);
    private final YoDouble stepReachXY = new YoDouble("stepReachXY", registry);
 
-   public GoodFootstepPositionChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapAndWiggler snapper, YoRegistry parentRegistry)
+   public FootstepPoseChecker(FootstepPlannerParametersReadOnly parameters, FootstepNodeSnapAndWiggler snapper, YoRegistry parentRegistry)
    {
       this.parameters = parameters;
       this.snapper = snapper;
@@ -60,7 +54,7 @@ public class GoodFootstepPositionChecker
       this.parentNodeSupplier = parentNodeSupplier;
    }
 
-   public boolean isNodeValid(FootstepNode candidateNode, FootstepNode stanceNode)
+   public BipedalFootstepPlannerNodeRejectionReason checkStepValidity(FootstepNode candidateNode, FootstepNode stanceNode)
    {
       RobotSide stepSide = candidateNode.getRobotSide();
 
@@ -85,23 +79,19 @@ public class GoodFootstepPositionChecker
 
       if (stepWidth.getValue() < parameters.getMinimumStepWidth())
       {
-         rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH);
-         return false;
+         return BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_WIDE_ENOUGH;
       }
       else if (stepWidth.getValue() > parameters.getMaximumStepWidth())
       {
-         rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE);
-         return false;
+         return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE;
       }
       else if (stepLength.getValue() < parameters.getMinimumStepLength())
       {
-         rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH);
-         return false;
+         return BipedalFootstepPlannerNodeRejectionReason.STEP_NOT_LONG_ENOUGH;
       }
       else if (Math.abs(stepHeight.getValue()) > maximumStepZ)
       {
-         rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW);
-         return false;
+         return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_HIGH_OR_LOW;
       }
 
       double alphaPitchedBack = Math.max(0.0, - stanceFootPose.getPitch() / parameters.getMinimumSurfaceInclineRadians());
@@ -116,8 +106,7 @@ public class GoodFootstepPositionChecker
 
       if (stepIsPitchedBack && (stepTooLow || stepTooForward))
       {
-         rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED);
-         return false;
+         return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_LOW_AND_FORWARD_WHEN_PITCHED;
       }
 
       double maxReach = parameters.getMaximumStepReach();
@@ -125,14 +114,12 @@ public class GoodFootstepPositionChecker
       {
          if (stepLength.getValue() > parameters.getMaximumStepXWhenForwardAndDown())
          {
-            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN);
-            return false;
+            return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FORWARD_AND_DOWN;
          }
 
          if (stepWidth.getValue() > parameters.getMaximumStepYWhenForwardAndDown())
          {
-            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_DOWN);
-            return false;
+            return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_DOWN;
          }
 
          maxReach = EuclidCoreTools.norm(parameters.getMaximumStepXWhenForwardAndDown(), parameters.getMaximumStepYWhenForwardAndDown() - parameters.getIdealFootstepWidth());
@@ -140,21 +127,18 @@ public class GoodFootstepPositionChecker
 
       if (stepReachXY.getValue() > parameters.getMaximumStepReach())
       {
-         rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR);
-         return false;
+         return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR;
       }
 
       if (stepHeight.getValue() > parameters.getMaximumStepZWhenSteppingUp())
       {
          if (stepReachXY.getValue() > parameters.getMaximumStepReachWhenSteppingUp())
          {
-            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH);
-            return false;
+            return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
          }
          if (stepWidth.getValue() > parameters.getMaximumStepWidthWhenSteppingUp())
          {
-            rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_HIGH);
-            return false;
+            return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_WIDE_AND_HIGH;
          }
 
          maxReach = parameters.getMaximumStepReachWhenSteppingUp();
@@ -171,8 +155,7 @@ public class GoodFootstepPositionChecker
       double yawDelta = AngleTools.computeAngleDifferenceMinusPiToPi(candidateNode.getYaw(), stanceNode.getYaw());
       if (!MathTools.intervalContains(stepSide.negateIfRightSide(yawDelta), minYaw, maxYaw))
       {
-         rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH);
-         return false;
+         return BipedalFootstepPlannerNodeRejectionReason.STEP_YAWS_TOO_MUCH;
       }
 
       // Check reach from start of swing
@@ -192,26 +175,19 @@ public class GoodFootstepPositionChecker
          {
             if (swingReach > alphaSoS * parameters.getMaximumStepReachWhenSteppingUp())
             {
-               rejectionReason.set(BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH);
-               return false;
+               return BipedalFootstepPlannerNodeRejectionReason.STEP_TOO_FAR_AND_HIGH;
             }
          }
       }
 
-      return true;
+      return null;
    }
 
    void clearLoggedVariables()
    {
-      rejectionReason.set(null);
       stepWidth.setToNaN();
       stepLength.setToNaN();
       stepHeight.setToNaN();
       stepReachXY.setToNaN();
-   }
-
-   public BipedalFootstepPlannerNodeRejectionReason getRejectionReason()
-   {
-      return rejectionReason.getEnumValue();
    }
 }
