@@ -38,7 +38,7 @@ public class SpinningCoinExperimentalSimulation
       contactParameters.setRestitutionThreshold(0.0);
       contactParameters.setErrorReductionParameter(1.0e-3);
       contactParameters.setSlipErrorReductionParameter(0.0);
-      contactParameters.setConstraintForceMixing(0.5);
+      contactParameters.setConstraintForceMixing(1.0);
       
       RobotDescription robotDescription = new RobotDescription(SPINNING_COIN);
 
