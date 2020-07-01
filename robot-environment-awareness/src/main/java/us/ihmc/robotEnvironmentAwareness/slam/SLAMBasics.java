@@ -1,6 +1,5 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
-import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -13,15 +12,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.jOctoMap.normalEstimation.NormalEstimationParameters;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
-import us.ihmc.robotEnvironmentAwareness.geometry.ConcaveHullFactoryParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionPolygonizer;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationCalculator;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PlanarRegionSegmentationRawData;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.PolygonizerParameters;
-import us.ihmc.robotEnvironmentAwareness.planarRegion.SurfaceNormalFilterParameters;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
-import us.ihmc.robotics.geometry.PlanarRegionsList;
 
 public class SLAMBasics implements SLAMInterface
 {
@@ -31,30 +22,9 @@ public class SLAMBasics implements SLAMInterface
 
    private final AtomicDouble latestComputationTime = new AtomicDouble();
 
-   private final PlanarRegionSegmentationCalculator segmentationCalculator;
-   private PlanarRegionsList planarRegionsMap;
-   private final ConcaveHullFactoryParameters concaveHullFactoryParameters = new ConcaveHullFactoryParameters();
-   private final PolygonizerParameters polygonizerParameters = new PolygonizerParameters();
-   private final PlanarRegionSegmentationParameters planarRegionSegmentationParameters = new PlanarRegionSegmentationParameters();
-
    public SLAMBasics(double octreeResolution)
    {
       octree = new NormalOcTree(octreeResolution);
-
-      planarRegionSegmentationParameters.setMaxDistanceFromPlane(0.03);
-      planarRegionSegmentationParameters.setMinRegionSize(150);
-
-      segmentationCalculator = new PlanarRegionSegmentationCalculator();
-
-      SurfaceNormalFilterParameters surfaceNormalFilterParameters = new SurfaceNormalFilterParameters();
-      surfaceNormalFilterParameters.setUseSurfaceNormalFilter(true);
-      surfaceNormalFilterParameters.setSurfaceNormalLowerBound(Math.toRadians(-40.0));
-      surfaceNormalFilterParameters.setSurfaceNormalUpperBound(Math.toRadians(40.0));
-
-      segmentationCalculator.setParameters(planarRegionSegmentationParameters);
-      segmentationCalculator.setSurfaceNormalFilterParameters(surfaceNormalFilterParameters);
-
-      polygonizerParameters.setConcaveHullThreshold(0.15);
    }
 
    protected void insertNewPointCloud(SLAMFrame frame)
@@ -79,11 +49,6 @@ public class SLAMBasics implements SLAMInterface
    public void updatePlanarRegionsMap()
    {
       octree.updateNormals();
-      segmentationCalculator.setSensorPosition(getLatestFrame().getSensorPose().getTranslation());
-      segmentationCalculator.compute(octree.getRoot());
-
-      List<PlanarRegionSegmentationRawData> rawData = segmentationCalculator.getSegmentationRawData();
-      planarRegionsMap = PlanarRegionPolygonizer.createPlanarRegionsList(rawData, concaveHullFactoryParameters, polygonizerParameters);
    }
 
    @Override
@@ -136,11 +101,6 @@ public class SLAMBasics implements SLAMInterface
    public int getMapSize()
    {
       return mapSize.get();
-   }
-
-   public PlanarRegionsList getPlanarRegionsMap()
-   {
-      return planarRegionsMap;
    }
 
    public void setLatestFrame(SLAMFrame frameToSet)

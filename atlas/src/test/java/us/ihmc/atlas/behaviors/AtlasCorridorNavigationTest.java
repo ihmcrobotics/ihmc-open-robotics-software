@@ -14,7 +14,6 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.commons.thread.TypedNotification;
 import us.ihmc.commons.time.Stopwatch;
 import us.ihmc.communication.ROS2Tools;
-import us.ihmc.communication.packets.ExecutionMode;
 import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
@@ -41,7 +40,6 @@ import us.ihmc.humanoidBehaviors.tools.PlanarRegionsMappingModule;
 import us.ihmc.humanoidBehaviors.tools.RemoteHumanoidRobotInterface;
 import us.ihmc.humanoidBehaviors.tools.SimulatedREAModule;
 import us.ihmc.humanoidBehaviors.ui.simulation.RobotAndMapViewer;
-import us.ihmc.humanoidRobotics.footstep.Footstep;
 import us.ihmc.javafx.applicationCreator.JavaFXApplicationCreator;
 import us.ihmc.log.LogTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
@@ -376,7 +374,7 @@ public class AtlasCorridorNavigationTest
 
          for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)
          {
-            Footstep footstep = footstepPlan.getFootstep(i);
+            PlannedFootstep footstep = footstepPlan.getFootstep(i);
 
             if (footstep.getFootstepPose().getPosition().distance(robotPose.getPosition()) > 2.0)
             {

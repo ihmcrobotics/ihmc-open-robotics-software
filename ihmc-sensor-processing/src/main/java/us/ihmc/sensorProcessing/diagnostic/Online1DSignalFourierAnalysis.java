@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.diagnostic;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.jtransforms.fft.DoubleFFT_1D;
 
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -317,7 +317,7 @@ public class Online1DSignalFourierAnalysis
     * The second column contains the corresponding magnitudes.
     * @param outputToPack matrix in which the result is packed.
     */
-   public void getOutput(DenseMatrix64F outputToPack)
+   public void getOutput(DMatrixRMaj outputToPack)
    {
       outputToPack.reshape(frequencies.length, 2);
       for (int i = 0; i < frequencies.length; i++)

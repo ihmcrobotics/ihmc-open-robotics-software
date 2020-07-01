@@ -29,7 +29,6 @@
 	                  <ToggleButton fx:id="octreeMapEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Octree Map" textAlignment="CENTER" />
                   <CheckBox fx:id="showNormal" alignment="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" text="Show Normal" textAlignment="CENTER" />
 	                  <ToggleButton fx:id="sensorFrameEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Sensor Frame" textAlignment="CENTER" />
-	                  <ToggleButton fx:id="planarRegionsEnable" contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" selected="true" text="Planar Regions" textAlignment="CENTER" />
 	                  <Button contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clearFootsteps" text="ClearFootsteps" />
 	                  <Button contentDisplay="CENTER" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#clear" text="Clear" />
 	               </children>

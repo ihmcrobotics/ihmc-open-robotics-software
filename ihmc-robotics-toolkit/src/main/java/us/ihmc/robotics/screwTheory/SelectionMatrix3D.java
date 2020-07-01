@@ -1,7 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.MatrixDimensionException;
+import org.ejml.MatrixDimensionException;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.FrameMatrix3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
@@ -279,7 +279,7 @@ public class SelectionMatrix3D
     *           inserted. Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
-   public void getFullSelectionMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getFullSelectionMatrixInFrame(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       getFullSelectionMatrixInFrame(destinationFrame, 0, 0, selectionMatrixToPack);
    }
@@ -300,7 +300,7 @@ public class SelectionMatrix3D
     *           inserted. Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
-   public void getFullSelectionMatrixInFrame(ReferenceFrame destinationFrame, int startRow, int startColumn, DenseMatrix64F selectionMatrixToPack)
+   public void getFullSelectionMatrixInFrame(ReferenceFrame destinationFrame, int startRow, int startColumn, DMatrixRMaj selectionMatrixToPack)
    {
       int numRows = selectionMatrixToPack.getNumRows();
       int numCols = selectionMatrixToPack.getNumCols();
@@ -337,7 +337,7 @@ public class SelectionMatrix3D
     * Converts this into an actual 3-by-3 selection matrix that is to be used with data expressed in
     * the {@code destinationFrame}.
     * <p>
-    * In addition to what {@link #getFullSelectionMatrixInFrame(ReferenceFrame, DenseMatrix64F)}
+    * In addition to what {@link #getFullSelectionMatrixInFrame(ReferenceFrame, DMatrixRMaj)}
     * does, this method also removes the zero-rows of the given selection matrix.
     * </p>
     * <p>
@@ -350,7 +350,7 @@ public class SelectionMatrix3D
     *           inserted.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
-   public void getEfficientSelectionMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getEfficientSelectionMatrixInFrame(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       getCompactSelectionMatrixInFrame(destinationFrame, 0, 0, selectionMatrixToPack);
    }
@@ -360,7 +360,7 @@ public class SelectionMatrix3D
     * the {@code destinationFrame}.
     * <p>
     * In addition to what
-    * {@link #getFullSelectionMatrixInFrame(ReferenceFrame, int, int, DenseMatrix64F)} does, this
+    * {@link #getFullSelectionMatrixInFrame(ReferenceFrame, int, int, DMatrixRMaj)} does, this
     * method also removes the zero-rows of the given selection matrix.
     * </p>
     * <p>
@@ -376,7 +376,7 @@ public class SelectionMatrix3D
     *           inserted.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
-   public void getCompactSelectionMatrixInFrame(ReferenceFrame destinationFrame, int startRow, int startColumn, DenseMatrix64F selectionMatrixToPack)
+   public void getCompactSelectionMatrixInFrame(ReferenceFrame destinationFrame, int startRow, int startColumn, DMatrixRMaj selectionMatrixToPack)
    {
       int numRows = selectionMatrixToPack.getNumRows();
       int numCols = selectionMatrixToPack.getNumCols();

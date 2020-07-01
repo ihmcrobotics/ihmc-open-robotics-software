@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.lowLevel;
 
 import controller_msgs.msg.dds.RobotDesiredConfigurationData;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 public interface RootJointDesiredConfigurationDataReadOnly
 {
@@ -11,11 +11,11 @@ public interface RootJointDesiredConfigurationDataReadOnly
 
    boolean hasDesiredAcceleration();
 
-   DenseMatrix64F getDesiredConfiguration();
+   DMatrixRMaj getDesiredConfiguration();
 
-   DenseMatrix64F getDesiredVelocity();
+   DMatrixRMaj getDesiredVelocity();
 
-   DenseMatrix64F getDesiredAcceleration();
+   DMatrixRMaj getDesiredAcceleration();
 
    default void copyToMessage(RobotDesiredConfigurationData desiredConfigurationData)
    {

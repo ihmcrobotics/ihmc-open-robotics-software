@@ -16,8 +16,10 @@ public class FootstepPlannerLog
    private final String logName;
 
    private final FootstepPlanningRequestPacket requestPacket = new FootstepPlanningRequestPacket();
-   private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
    private final VisibilityGraphsParametersPacket bodyPathParametersPacket = new VisibilityGraphsParametersPacket();
+   private final FootstepPlannerParametersPacket footstepParametersPacket = new FootstepPlannerParametersPacket();
+   private final SwingPlannerParametersPacket swingPlannerParametersPacket = new SwingPlannerParametersPacket();
+   private final SplitFractionCalculatorParametersPacket splitFractionParametersPacket = new SplitFractionCalculatorParametersPacket();
    private final FootstepPlanningToolboxOutputStatus statusPacket = new FootstepPlanningToolboxOutputStatus();
 
    private final VisibilityGraphHolder visibilityGraphHolder = new VisibilityGraphHolder();
@@ -39,14 +41,24 @@ public class FootstepPlannerLog
       return requestPacket;
    }
 
+   public VisibilityGraphsParametersPacket getBodyPathParametersPacket()
+   {
+      return bodyPathParametersPacket;
+   }
+
    public FootstepPlannerParametersPacket getFootstepParametersPacket()
    {
       return footstepParametersPacket;
    }
 
-   public VisibilityGraphsParametersPacket getBodyPathParametersPacket()
+   public SwingPlannerParametersPacket getSwingPlannerParametersPacket()
    {
-      return bodyPathParametersPacket;
+      return swingPlannerParametersPacket;
+   }
+
+   public SplitFractionCalculatorParametersPacket getSplitFractionParametersPacket()
+   {
+      return splitFractionParametersPacket;
    }
 
    public FootstepPlanningToolboxOutputStatus getStatusPacket()

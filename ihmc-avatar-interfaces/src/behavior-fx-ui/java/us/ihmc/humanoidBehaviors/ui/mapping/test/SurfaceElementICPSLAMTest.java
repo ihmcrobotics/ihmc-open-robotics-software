@@ -3,7 +3,7 @@ package us.ihmc.humanoidBehaviors.ui.mapping.test;
 import java.io.File;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
@@ -22,11 +22,11 @@ import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.jOctoMap.pointCloud.ScanCollection;
 import us.ihmc.log.LogTools;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
-import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMBasics;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.SurfaceElementICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
+import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.PlanarRegionFileTools;
 import us.ihmc.robotics.optimization.FunctionOutputCalculator;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
@@ -212,7 +212,7 @@ public class SurfaceElementICPSLAMTest
       FunctionOutputCalculator functionOutputCalculator = new FunctionOutputCalculator()
       {
          @Override
-         public DenseMatrix64F computeOutput(DenseMatrix64F inputParameter)
+         public DMatrixRMaj computeOutput(DMatrixRMaj inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = convertTransform(inputParameter.getData());
             RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame2.getOriginalSensorPose());
@@ -228,7 +228,7 @@ public class SurfaceElementICPSLAMTest
                correctedSensorPoseToWorld.transform(correctedSurfel[i].getNormal());
             }
 
-            DenseMatrix64F errorSpace = new DenseMatrix64F(correctedSurfel.length, 1);
+            DMatrixRMaj errorSpace = new DMatrixRMaj(correctedSurfel.length, 1);
             for (int i = 0; i < correctedSurfel.length; i++)
             {
                double distance = computeClosestDistance(correctedSurfel[i]);
@@ -242,7 +242,7 @@ public class SurfaceElementICPSLAMTest
             return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(map, surfel.getPoint(), map.getResolution());
          }
       };
-      DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
+      DMatrixRMaj purterbationVector = new DMatrixRMaj(6, 1);
       purterbationVector.set(0, 0.0005);
       purterbationVector.set(1, 0.0005);
       purterbationVector.set(2, 0.0005);
@@ -362,7 +362,7 @@ public class SurfaceElementICPSLAMTest
          octreeViewer.addSensorPose(slam.getLatestFrame().getSensorPose());
       }
       slamViewer.addOctree(slam.getOctree(), Color.CORAL, slam.getOctreeResolution(), true);
-      slamViewer.addPlanarRegions(slam.getPlanarRegionsMap());
+      //slamViewer.addPlanarRegions(slam.getPlanarRegionsMap());
 
       octreeViewer.addOctree(slam.getOctree(), Color.CORAL, slam.getOctreeResolution(), true);
 

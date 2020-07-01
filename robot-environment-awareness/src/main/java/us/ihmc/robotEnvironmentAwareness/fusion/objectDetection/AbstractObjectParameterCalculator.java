@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import sensor_msgs.msg.dds.RegionOfInterest;
 import us.ihmc.commons.MathTools;
@@ -23,7 +23,7 @@ import us.ihmc.ros2.Ros2Node;
 
 public abstract class AbstractObjectParameterCalculator<T extends Packet<?>>
 {
-   private static final IntrinsicParameters intrinsicParameters = PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters;
+   private static final CameraPinholeBrown intrinsicParameters = PointCloudProjectionHelper.multisenseOnCartIntrinsicParameters;
    protected final List<Point3DBasics> pointCloudToCalculate;
    protected final RegionOfInterest objectROI = new RegionOfInterest();
 

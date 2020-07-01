@@ -87,7 +87,7 @@ public class PlanarRegionsListDefinedEnvironment implements CommonAvatarEnvironm
             }
             else
             {
-               LogTools.info("Applying appearance {} of type {}", i, appearances[i].getClass());
+//               LogTools.info("Applying appearance {} of type {}", i, appearances[i].getClass());
                combinedTerrainObject3D.addTerrainObject(new PlanarRegionTerrainObject(planarRegion, allowablePenetrationThickness, appearances[i]));
             }
          }

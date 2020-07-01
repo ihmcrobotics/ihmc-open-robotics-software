@@ -1,6 +1,6 @@
 package us.ihmc.robotics.sensors;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.interfaces.Settable;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -15,7 +15,7 @@ import us.ihmc.robotics.screwTheory.GenericCRC32;
 
 public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceSensorData>
 {
-   private final DenseMatrix64F wrench = new DenseMatrix64F(Wrench.SIZE, 1);
+   private final DMatrixRMaj wrench = new DMatrixRMaj(Wrench.SIZE, 1);
 
    private String sensorName;
    private ReferenceFrame measurementFrame;
@@ -48,7 +48,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
       force.get(3, wrench);
    }
 
-   public void setWrench(DenseMatrix64F newWrench)
+   public void setWrench(DMatrixRMaj newWrench)
    {
       wrench.set(newWrench);
    }
@@ -87,7 +87,7 @@ public class ForceSensorData implements ForceSensorDataReadOnly, Settable<ForceS
    }
 
    @Override
-   public void getWrench(DenseMatrix64F wrenchToPack)
+   public void getWrench(DMatrixRMaj wrenchToPack)
    {
       wrenchToPack.set(wrench);
    }

@@ -21,6 +21,7 @@ import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint2DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -1032,16 +1033,15 @@ public class GeometryTools
     * @throws ReferenceFrameMismatchException if {@code point} and {@code alignAxisWithThis} are not
     *                                         expressed in the same reference frame.
     */
-   public static ReferenceFrame constructReferenceFrameFromPointAndAxis(String frameName, FramePoint3D point, Axis3D axisToAlign,
-                                                                        FrameVector3D alignAxisWithThis)
+   public static ReferenceFrame constructReferenceFrameFromPointAndAxis(String frameName, FramePoint3DReadOnly point, Axis3D axisToAlign,
+                                                                        FrameVector3DReadOnly alignAxisWithThis)
    {
       ReferenceFrame parentFrame = point.getReferenceFrame();
       alignAxisWithThis.checkReferenceFrameMatch(point.getReferenceFrame());
 
-      AxisAngle rotationToDesired = new AxisAngle();
-      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(axisToAlign, alignAxisWithThis, rotationToDesired);
-
-      RigidBodyTransform transformToDesired = new RigidBodyTransform(rotationToDesired, point);
+      RigidBodyTransform transformToDesired = new RigidBodyTransform();
+      transformToDesired.getTranslation().set(point);
+      EuclidGeometryTools.orientation3DFromFirstToSecondVector3D(axisToAlign, alignAxisWithThis, transformToDesired.getRotation());
 
       return ReferenceFrameTools.constructFrameWithUnchangingTransformToParent(frameName, parentFrame, transformToDesired);
    }

@@ -1,18 +1,30 @@
 package us.ihmc.humanoidBehaviors.tools;
 
+import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
+import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
 import us.ihmc.commons.thread.Notification;
+import us.ihmc.communication.ROS2PlanarRegionsInput;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.RemoteREAInterface;
+import us.ihmc.communication.packets.PlanarRegionMessageConverter;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
 import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.footstepPlanning.graphSearch.VisibilityGraphPathPlanner;
 import us.ihmc.humanoidBehaviors.tools.footstepPlanner.RemoteFootstepPlannerInterface;
 import us.ihmc.humanoidBehaviors.tools.ros2.ManagedROS2Node;
+import us.ihmc.log.LogTools;
 import us.ihmc.messager.Messager;
 import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.TopicListener;
+import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.ros2.ROS2Callback;
+import us.ihmc.ros2.ROS2Input;
+import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
 import us.ihmc.tools.thread.ActivationReference;
 import us.ihmc.tools.thread.PausablePeriodicThread;
@@ -21,6 +33,8 @@ import us.ihmc.wholeBodyController.RobotContactPointParameters;
 
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * Class for entry methods for developing robot behaviors. The idea is to have this be the one-stop
@@ -60,6 +74,8 @@ public class BehaviorHelper
    private RemoteFootstepPlannerInterface footstepPlannerToolbox;
    private RemoteREAInterface rea;
    private RemoteEnvironmentMapInterface environmentMap;
+   private FootstepPlanningModule footstepPlanner;
+   private VisibilityGraphPathPlanner bodyPathPlanner;
 
    public BehaviorHelper(DRCRobotModel robotModel, Messager messager, Ros2Node ros2Node)
    {
@@ -87,6 +103,30 @@ public class BehaviorHelper
       return footstepPlannerToolbox; // planner toolbox
    }
 
+   public <T> void createROS2Callback(ROS2Topic<T> topic, Consumer<T> callback)
+   {
+      new ROS2Callback<>(managedROS2Node, topic.getType(), topic, callback);
+   }
+
+   public void createROS2PlanarRegionsListCallback(ROS2Topic<PlanarRegionsListMessage> topic, Consumer<PlanarRegionsList> callback)
+   {
+      createROS2Callback(topic, planarRegionsListMessage ->
+      {
+         callback.accept(PlanarRegionMessageConverter.convertToPlanarRegionsList(planarRegionsListMessage));
+      });
+   }
+
+   public Supplier<PlanarRegionsList> createROS2PlanarRegionsListInput(ROS2Topic<PlanarRegionsListMessage> topic)
+   {
+      ROS2Input<PlanarRegionsListMessage> input = new ROS2Input<>(managedROS2Node, topic.getType(), topic);
+      return () -> PlanarRegionMessageConverter.convertToPlanarRegionsList(input.getLatest());
+   }
+
+   public <T> ROS2Input<T> createROS2Input(ROS2Topic<T> topic)
+   {
+      return new ROS2Input<>(managedROS2Node, topic.getType(), topic);
+   }
+
    public RemoteREAInterface getOrCreateREAInterface()
    {
       if (rea == null)
@@ -101,12 +141,37 @@ public class BehaviorHelper
       return environmentMap;
    }
 
+   public FootstepPlanningModule getOrCreateFootstepPlanner()
+   {
+      if (footstepPlanner == null)
+      {
+         footstepPlanner = FootstepPlanningModuleLauncher.createModule(robotModel);
+      }
+
+      return footstepPlanner;
+   }
+
    // UI Communication Methods:
    // Extract into class?
 
    public <T> void publishToUI(Topic<T> topic, T message)
    {
       managedMessager.submitMessage(topic, message);
+   }
+
+   /**
+    * Publish a log message to the UI and have it logged on both sides. TODO: Rename?
+    */
+   public void logInfo(Topic<String> logTopic, String message)
+   {
+      LogTools.info(1, message);
+      publishToUI(logTopic, message);
+   }
+
+   public void logInfoLamda(Topic<String> logTopic, String message)
+   {
+      LogTools.info(2, message);
+      publishToUI(logTopic, message);
    }
 
    public ActivationReference<Boolean> createBooleanActivationReference(Topic<Boolean> topic)
@@ -131,11 +196,19 @@ public class BehaviorHelper
       return notification;
    }
 
-   public <T> TypedNotification<T> createUITypedNotification(Topic<T> topic)
+   public <T extends K, K> TypedNotification<K> createUITypedNotification(Topic<T> topic)
    {
-      TypedNotification<T> typedNotification = new TypedNotification<>();
+      TypedNotification<K> typedNotification = new TypedNotification<>();
       createUICallback(topic, message -> typedNotification.set(message));
       return typedNotification;
+   }
+
+   // ROS 2 Methods:
+
+   public ROS2PlanarRegionsInput createPlanarRegionsInput(String specifier)
+   {
+      ROS2Topic topic = ROS2Tools.REA.withOutput().withType(PlanarRegionsListMessage.class).withNaming(typeName -> typeName + "_" + specifier);
+      return new ROS2PlanarRegionsInput(managedROS2Node, PlanarRegionsListMessage.class, topic.getName());
    }
 
    // Thread and Schedule Methods:

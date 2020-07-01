@@ -2,9 +2,9 @@ package us.ihmc.robotics.linearAlgebra;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.RandomMatrices;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.RandomMatrices_DDRM;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.matrixlib.MatrixTestTools;
@@ -17,15 +17,15 @@ public class MatrixOfCofactorsCalculatorInefficientTest
    {
       int n = 5;
       
-      DenseMatrix64F mat = RandomMatrices.createRandom(n, n, new Random());
-      DenseMatrix64F inverse = new DenseMatrix64F(n, n);
-      CommonOps.invert(mat, inverse);
+      DMatrixRMaj mat = RandomMatrices_DDRM.rectangle(n, n, new Random());
+      DMatrixRMaj inverse = new DMatrixRMaj(n, n);
+      CommonOps_DDRM.invert(mat, inverse);
       
-      DenseMatrix64F matrixOfCoFactors = MatrixOfCofactorsCalculatorInefficient.computeMatrixOfCoFactors(mat);
-      DenseMatrix64F inverseViaMatrixOfCoFactors = new DenseMatrix64F(matrixOfCoFactors.getNumCols(), matrixOfCoFactors.getNumRows());
-      CommonOps.transpose(matrixOfCoFactors, inverseViaMatrixOfCoFactors);
+      DMatrixRMaj matrixOfCoFactors = MatrixOfCofactorsCalculatorInefficient.computeMatrixOfCoFactors(mat);
+      DMatrixRMaj inverseViaMatrixOfCoFactors = new DMatrixRMaj(matrixOfCoFactors.getNumCols(), matrixOfCoFactors.getNumRows());
+      CommonOps_DDRM.transpose(matrixOfCoFactors, inverseViaMatrixOfCoFactors);
       
-      CommonOps.scale(1.0/CommonOps.det(mat), inverseViaMatrixOfCoFactors);
+      CommonOps_DDRM.scale(1.0/CommonOps_DDRM.det(mat), inverseViaMatrixOfCoFactors);
 
       MatrixTestTools.assertMatrixEquals(inverse, inverseViaMatrixOfCoFactors, 1e-5);
    }

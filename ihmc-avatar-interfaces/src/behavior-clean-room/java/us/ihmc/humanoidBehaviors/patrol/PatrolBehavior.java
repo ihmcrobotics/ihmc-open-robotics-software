@@ -18,6 +18,7 @@ import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.footstepPlanning.FootstepDataMessageConverter;
 import us.ihmc.footstepPlanning.graphSearch.parameters.DefaultFootstepPlannerParameters;
+import us.ihmc.footstepPlanning.swing.SwingPlannerType;
 import us.ihmc.humanoidBehaviors.BehaviorInterface;
 import us.ihmc.communication.RemoteREAInterface;
 import us.ihmc.humanoidBehaviors.BehaviorDefinition;
@@ -257,7 +258,9 @@ public class PatrolBehavior implements BehaviorInterface
       {
          defaultFootstepPlannerParameters.setMaximumStepYaw(1.1); // enable quick turn arounds
       }
-      footstepPlanResultNotification = footstepPlannerToolbox.requestPlan(start, goal, latestPlanarRegionList, defaultFootstepPlannerParameters);
+
+      SwingPlannerType swingPlannerType = swingOvers.get() ? SwingPlannerType.POSITION : SwingPlannerType.NONE;
+      footstepPlanResultNotification = footstepPlannerToolbox.requestPlan(start, goal, latestPlanarRegionList, defaultFootstepPlannerParameters, swingPlannerType);
    }
 
    private static PlanTravelDistance decidePlanType(Pose3DReadOnly start, Pose3DReadOnly goal)
@@ -347,7 +350,7 @@ public class PatrolBehavior implements BehaviorInterface
 
 //      swingOverPlanarRegions &= decidePlanDistance(footstepDataListMessage, humanoidReferenceFrames) == PlanTravelDistance.FAR;
 
-      walkingCompleted = robot.requestWalk(footstepDataListMessage, humanoidReferenceFrames, planarRegionsList);
+      walkingCompleted = robot.requestWalk(footstepDataListMessage);
 
       helper.publishToUI(CurrentFootstepPlan, FootstepDataMessageConverter.reduceFootstepPlanForUIMessager(footstepDataListMessage));
    }

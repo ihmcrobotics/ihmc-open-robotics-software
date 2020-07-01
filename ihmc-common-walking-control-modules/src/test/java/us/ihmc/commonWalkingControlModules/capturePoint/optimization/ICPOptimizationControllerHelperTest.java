@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.optimization;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
@@ -15,7 +15,7 @@ public class ICPOptimizationControllerHelperTest
       ICPOptimizationControllerHelper helper = new ICPOptimizationControllerHelper();
 
       FrameVector2D icpVelocity = new FrameVector2D(ReferenceFrame.getWorldFrame(), 0.1, 0.1);
-      DenseMatrix64F gainsToPack = new DenseMatrix64F(2, 2);
+      DMatrixRMaj gainsToPack = new DMatrixRMaj(2, 2);
       helper.transformFromDynamicsFrame(gainsToPack, icpVelocity, 1.5, 2.5);
       double expectedX = 2.0;
       double expectedY = 2.0;

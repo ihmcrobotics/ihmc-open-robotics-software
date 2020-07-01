@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -294,7 +294,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
     *           linear force is stored. The given matrix is reshaped to ensure proper size.
     *           Modified.
     */
-   public void getDesiredLinearForce(DenseMatrix64F desiredLinearForceToPack)
+   public void getDesiredLinearForce(DMatrixRMaj desiredLinearForceToPack)
    {
       desiredLinearForceToPack.reshape(6, 1);
       desiredLinearForceToPack.zero();
@@ -322,7 +322,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredEffort(DenseMatrix64F desiredLinearForceToPack)
+   public void getDesiredEffort(DMatrixRMaj desiredLinearForceToPack)
    {
       getDesiredLinearForce(desiredLinearForceToPack);
    }
@@ -383,7 +383,7 @@ public class VirtualForceCommand implements VirtualEffortCommand<VirtualForceCom
 
    /** {@inheritDoc} */
    @Override
-   public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       selectionMatrixToPack.reshape(3, 6);
       selectionMatrixToPack.zero();

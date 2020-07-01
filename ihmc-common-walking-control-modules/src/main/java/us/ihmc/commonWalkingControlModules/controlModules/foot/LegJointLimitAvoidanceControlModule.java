@@ -1,9 +1,9 @@
 package us.ihmc.commonWalkingControlModules.controlModules.foot;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.HighLevelHumanoidControllerToolbox;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -25,7 +25,6 @@ import us.ihmc.robotModels.FullHumanoidRobotModel;
 import us.ihmc.robotics.kinematics.NumericalInverseKinematicsCalculator;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.screwTheory.GeometricJacobian;
-import us.ihmc.robotics.screwTheory.ScrewTools;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 import us.ihmc.yoVariables.variable.YoDouble;
 import us.ihmc.yoVariables.variable.YoFramePoseUsingYawPitchRoll;
@@ -71,18 +70,18 @@ public class LegJointLimitAvoidanceControlModule
    private YoFrameVector3D originalDesiredLinearVelocity;
    private YoFrameVector3D adjustedDesiredLinearVelocity;
 
-   private final LinearSolver<DenseMatrix64F> solver;
-   private final DenseMatrix64F jacobianMatrix;
-   private final DenseMatrix64F jacobianMatrixTransposed;
-   private final DenseMatrix64F jacobianTimesJaconianTransposedMatrix;
-   private final DenseMatrix64F lamdaSquaredMatrix;
-   private final DenseMatrix64F jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix;
-   private final DenseMatrix64F translationSelectionMatrix;
-   private final DenseMatrix64F allSelectionMatrix;
-   private final DenseMatrix64F originalDesiredVelocity;
-   private final DenseMatrix64F intermediateResult;
-   private final DenseMatrix64F jointVelocities;
-   private final DenseMatrix64F adjustedDesiredVelocity;
+   private final LinearSolverDense<DMatrixRMaj> solver;
+   private final DMatrixRMaj jacobianMatrix;
+   private final DMatrixRMaj jacobianMatrixTransposed;
+   private final DMatrixRMaj jacobianTimesJaconianTransposedMatrix;
+   private final DMatrixRMaj lamdaSquaredMatrix;
+   private final DMatrixRMaj jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix;
+   private final DMatrixRMaj translationSelectionMatrix;
+   private final DMatrixRMaj allSelectionMatrix;
+   private final DMatrixRMaj originalDesiredVelocity;
+   private final DMatrixRMaj intermediateResult;
+   private final DMatrixRMaj jointVelocities;
+   private final DMatrixRMaj adjustedDesiredVelocity;
 
    private final YoGraphicPosition yoDesiredFootPositionGraphic, yoCorrectedDesiredFootPositionGraphic;
 
@@ -129,27 +128,27 @@ public class LegJointLimitAvoidanceControlModule
       percentJointRangeForThreshold = new YoDouble(prefix + "percentJointRangeForThreshold", registry);
       percentJointRangeForThreshold.set(0.5);
 
-      jacobianMatrix = new DenseMatrix64F(SpatialVector.SIZE, numJoints);
-      jacobianMatrixTransposed = new DenseMatrix64F(numJoints, SpatialVector.SIZE);
-      jacobianTimesJaconianTransposedMatrix = new DenseMatrix64F(SpatialVector.SIZE, SpatialVector.SIZE);
+      jacobianMatrix = new DMatrixRMaj(SpatialVector.SIZE, numJoints);
+      jacobianMatrixTransposed = new DMatrixRMaj(numJoints, SpatialVector.SIZE);
+      jacobianTimesJaconianTransposedMatrix = new DMatrixRMaj(SpatialVector.SIZE, SpatialVector.SIZE);
 
-      lamdaSquaredMatrix = new DenseMatrix64F(numJoints, numJoints);
-      jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix = new DenseMatrix64F(numJoints, numJoints);
+      lamdaSquaredMatrix = new DMatrixRMaj(numJoints, numJoints);
+      jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix = new DMatrixRMaj(numJoints, numJoints);
 
-      solver = LinearSolverFactory.leastSquares(SpatialVector.SIZE, SpatialVector.SIZE);
-      translationSelectionMatrix = new DenseMatrix64F(3, SpatialVector.SIZE);
+      solver = LinearSolverFactory_DDRM.leastSquares(SpatialVector.SIZE, SpatialVector.SIZE);
+      translationSelectionMatrix = new DMatrixRMaj(3, SpatialVector.SIZE);
       translationSelectionMatrix.set(0, 3, 1.0);
       translationSelectionMatrix.set(1, 4, 1.0);
       translationSelectionMatrix.set(2, 5, 1.0);
 
-      allSelectionMatrix = new DenseMatrix64F(SpatialVector.SIZE, SpatialVector.SIZE);
+      allSelectionMatrix = new DMatrixRMaj(SpatialVector.SIZE, SpatialVector.SIZE);
       allSelectionMatrix.set(5, 5, 1.0);
 
-      originalDesiredVelocity = new DenseMatrix64F(SpatialVector.SIZE, 1);
-      intermediateResult = new DenseMatrix64F(SpatialVector.SIZE, 1);
+      originalDesiredVelocity = new DMatrixRMaj(SpatialVector.SIZE, 1);
+      intermediateResult = new DMatrixRMaj(SpatialVector.SIZE, 1);
 
-      jointVelocities = new DenseMatrix64F(numJoints, 1);
-      adjustedDesiredVelocity = new DenseMatrix64F(SpatialVector.SIZE, 1);
+      jointVelocities = new DMatrixRMaj(numJoints, 1);
+      adjustedDesiredVelocity = new DMatrixRMaj(SpatialVector.SIZE, 1);
 
       originalDesiredLinearVelocity = new YoFrameVector3D(prefix + "originalDesiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
       adjustedDesiredLinearVelocity = new YoFrameVector3D(prefix + "adjustedDesiredLinearVelocity", ReferenceFrame.getWorldFrame(), registry);
@@ -315,28 +314,28 @@ public class LegJointLimitAvoidanceControlModule
       jacobianMatrix.set(jacobian.getJacobianMatrix());
 
       // J^T
-      CommonOps.transpose(jacobianMatrix, jacobianMatrixTransposed);
+      CommonOps_DDRM.transpose(jacobianMatrix, jacobianMatrixTransposed);
 
       // J J^T
-      CommonOps.multOuter(jacobianMatrix, jacobianTimesJaconianTransposedMatrix);
+      CommonOps_DDRM.multOuter(jacobianMatrix, jacobianTimesJaconianTransposedMatrix);
 
       intermediateResult.reshape(numberOfConstraints, 1);
 
       lamdaSquaredMatrix.reshape(numberOfConstraints, numberOfConstraints);
-      CommonOps.setIdentity(lamdaSquaredMatrix);
+      CommonOps_DDRM.setIdentity(lamdaSquaredMatrix);
       lamdaSquaredMatrix.zero();
 
-      //    CommonOps.scale(lambdaLeastSquares, lamdaSquaredMatrix);
+      //    CommonOps_DDRM.scale(lambdaLeastSquares, lamdaSquaredMatrix);
 
       jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix.reshape(numberOfConstraints, numberOfConstraints);
       jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix.set(jacobianTimesJaconianTransposedMatrix);
-      CommonOps.add(jacobianTimesJaconianTransposedMatrix, lamdaSquaredMatrix, jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix);
+      CommonOps_DDRM.add(jacobianTimesJaconianTransposedMatrix, lamdaSquaredMatrix, jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix);
 
       boolean success = solver.setA(jacobianTimesJaconianTransposedPlusLamdaSquaredMatrix);
 
       // Solve J*J^T deltaX = f
       solver.solve(originalDesiredVelocity, intermediateResult);
-      CommonOps.mult(jacobianMatrixTransposed, intermediateResult, jointVelocities);
+      CommonOps_DDRM.mult(jacobianMatrixTransposed, intermediateResult, jointVelocities);
 
       for (int i = 0; i < numJoints; i++)
       {
@@ -346,6 +345,6 @@ public class LegJointLimitAvoidanceControlModule
          }
       }
 
-      CommonOps.mult(jacobianMatrix, jointVelocities, adjustedDesiredVelocity);
+      CommonOps_DDRM.mult(jacobianMatrix, jointVelocities, adjustedDesiredVelocity);
    }
 }

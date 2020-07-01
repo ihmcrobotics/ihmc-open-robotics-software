@@ -17,7 +17,6 @@ public class HumanoidNetworkProcessorParameters
    private boolean useKinematicsPlanningToolboxModule, visualizeKinematicsPlanningToolboxModule;
    private boolean useKinematicsStreamingToolboxModule, visualizeKinematicsStreamingToolboxModule;
    private boolean useFootstepPlanningToolboxModule, visualizeFootstepPlanningToolboxModule;
-   private boolean useFootstepPostProcessingToolboxModule, visualizeFootstepPostProcessingToolboxModule;
    private boolean useMocapModule;
    private boolean useBehaviorModule, visualizeBehaviorModule;
    private boolean useAutomaticDiagnostic;
@@ -25,6 +24,10 @@ public class HumanoidNetworkProcessorParameters
    private boolean useROSModule;
    private boolean useSensorModule;
    private boolean useHeightQuadTreeToolboxModule;
+   private boolean useFiducialDetectorToolboxModule;
+   private boolean useObjectDetectorToolboxModule;
+
+
    private boolean useRobotEnvironmentAwerenessModule;
    private String reaConfigurationFilePath;
    private boolean useBipedalSupportPlanarRegionPublisherModule;
@@ -116,17 +119,6 @@ public class HumanoidNetworkProcessorParameters
    {
       this.useFootstepPlanningToolboxModule = enable;
       this.visualizeFootstepPlanningToolboxModule = visualize;
-   }
-
-   public void setUseFootstepPostProcessingToolboxModule(boolean enable)
-   {
-      setUseFootstepPostProcessingToolboxModule(enable, false);
-   }
-
-   public void setUseFootstepPostProcessingToolboxModule(boolean enable, boolean visualize)
-   {
-      this.useFootstepPostProcessingToolboxModule = enable;
-      this.visualizeFootstepPostProcessingToolboxModule = visualize;
    }
 
    public void setUseMocapModule(boolean enable)
@@ -276,16 +268,6 @@ public class HumanoidNetworkProcessorParameters
       return visualizeFootstepPlanningToolboxModule;
    }
 
-   public boolean isUseFootstepPostProcessingToolboxModule()
-   {
-      return useFootstepPostProcessingToolboxModule;
-   }
-
-   public boolean isVisualizeFootstepPostProcessingToolboxModule()
-   {
-      return visualizeFootstepPostProcessingToolboxModule;
-   }
-
    public boolean isUseMocapModule()
    {
       return useMocapModule;
@@ -325,6 +307,27 @@ public class HumanoidNetworkProcessorParameters
    {
       return useHeightQuadTreeToolboxModule;
    }
+   
+   
+   public void setUseFiducialDetectorToolboxModule(boolean enable)
+   {
+      this.useFiducialDetectorToolboxModule = enable;
+   }
+   
+   public boolean isUseFiducialDetectorToolboxModule()
+   {
+      return useFiducialDetectorToolboxModule;
+   }
+   public void setUseObjectDetectorToolboxModule(boolean enable)
+   {
+      this.useObjectDetectorToolboxModule = enable;
+   }
+   
+   public boolean isUseObjectDetectorToolboxModule()
+   {
+      return useObjectDetectorToolboxModule;
+   }
+
 
    public boolean isUseRobotEnvironmentAwerenessModule()
    {

@@ -1,16 +1,10 @@
 package us.ihmc.avatar.networkProcessor;
 
-import java.net.URI;
-import java.util.ArrayList;
-import java.util.List;
-
 import controller_msgs.msg.dds.PlanarRegionsListMessage;
 import us.ihmc.avatar.drcRobot.DRCRobotModel;
 import us.ihmc.avatar.drcRobot.RobotTarget;
-import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingModuleLauncher;
-import us.ihmc.footstepPlanning.FootstepPlanningModule;
+import us.ihmc.avatar.networkProcessor.fiducialDetectorToolBox.FiducialDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.footstepPlanningModule.FootstepPlanningModuleLauncher;
-import us.ihmc.avatar.networkProcessor.footstepPlanPostProcessingModule.FootstepPlanPostProcessingModule;
 import us.ihmc.avatar.networkProcessor.kinematicsPlanningToolboxModule.KinematicsPlanningToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinematicsToolboxModule.KinematicsToolboxModule;
 import us.ihmc.avatar.networkProcessor.kinemtaticsStreamingToolboxModule.KinematicsStreamingToolboxMessageLogger;
@@ -19,6 +13,7 @@ import us.ihmc.avatar.networkProcessor.modules.RosModule;
 import us.ihmc.avatar.networkProcessor.modules.ZeroPoseMockRobotConfigurationDataPublisherModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.IHMCMOCAPLocalizationModule;
 import us.ihmc.avatar.networkProcessor.modules.mocap.MocapPlanarRegionsListManager;
+import us.ihmc.avatar.networkProcessor.objectDetectorToolBox.ObjectDetectorToolboxModule;
 import us.ihmc.avatar.networkProcessor.quadTreeHeightMap.HeightQuadTreeToolboxModule;
 import us.ihmc.avatar.networkProcessor.reaStateUpdater.HumanoidAvatarREAStateUpdater;
 import us.ihmc.avatar.networkProcessor.supportingPlanarRegionPublisher.BipedalSupportPlanarRegionPublisher;
@@ -29,7 +24,7 @@ import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.configuration.NetworkParameters;
 import us.ihmc.communication.net.ObjectCommunicator;
-import us.ihmc.footstepPlanning.graphSearch.parameters.AdaptiveSwingParameters;
+import us.ihmc.footstepPlanning.FootstepPlanningModule;
 import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
 import us.ihmc.log.LogTools;
 import us.ihmc.multicastLogDataProtocol.modelLoaders.LogModelProvider;
@@ -41,6 +36,10 @@ import us.ihmc.ros2.Ros2Node;
 import us.ihmc.sensorProcessing.parameters.HumanoidRobotSensorInformation;
 import us.ihmc.tools.processManagement.JavaProcessSpawner;
 import us.ihmc.tools.thread.CloseableAndDisposable;
+
+import java.net.URI;
+import java.util.ArrayList;
+import java.util.List;
 
 public class HumanoidNetworkProcessor implements CloseableAndDisposable
 {
@@ -79,9 +78,7 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       if (parameters.isUseKinematicsStreamingToolboxModule())
          humanoidNetworkProcessor.setupKinematicsStreamingToolboxModule(null, null, parameters.isUseKinematicsStreamingToolboxModule());
       if (parameters.isUseFootstepPlanningToolboxModule())
-         humanoidNetworkProcessor.setupFootstepPlanningToolboxModule(null);
-      if (parameters.isUseFootstepPostProcessingToolboxModule())
-         humanoidNetworkProcessor.setupFootstepPostProcessingToolboxModule(parameters.isVisualizeFootstepPostProcessingToolboxModule());
+         humanoidNetworkProcessor.setupFootstepPlanningToolboxModule();
       if (parameters.isUseMocapModule())
          humanoidNetworkProcessor.setupMocapModule();
       if (parameters.isUseBehaviorModule())
@@ -94,6 +91,10 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          humanoidNetworkProcessor.setupSensorModule();
       if (parameters.isUseHeightQuadTreeToolboxModule())
          humanoidNetworkProcessor.setupHeightQuadTreeToolboxModule();
+      if (parameters.isUseFiducialDetectorToolboxModule())
+         humanoidNetworkProcessor.setupFiducialDetectorToolboxModule();
+      if (parameters.isUseObjectDetectorToolboxModule())
+         humanoidNetworkProcessor.setupObjectDetectorToolboxModule();
       if (parameters.isUseRobotEnvironmentAwerenessModule())
          humanoidNetworkProcessor.setupRobotEnvironmentAwerenessModule(parameters.getREAConfigurationFilePath());
       if (parameters.isUseBipedalSupportPlanarRegionPublisherModule())
@@ -281,33 +282,16 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
       }
    }
 
-   public FootstepPlanningModule setupFootstepPlanningToolboxModule(AdaptiveSwingParameters adaptiveSwingParameters)
+   public FootstepPlanningModule setupFootstepPlanningToolboxModule()
    {
 	   
       checkIfModuleCanBeCreated(FootstepPlanningModule.class);
 
       try
       {
-         FootstepPlanningModule module = FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.FAST_RTPS, adaptiveSwingParameters);
+         FootstepPlanningModule module = FootstepPlanningModuleLauncher.createModule(robotModel, PubSubImplementation.FAST_RTPS);
          modulesToClose.add(module);
 
-         return module;
-      }
-      catch (Throwable e)
-      {
-         reportFailure(e);
-         return null;
-      }
-   }
-
-   public FootstepPlanPostProcessingModule setupFootstepPostProcessingToolboxModule(boolean enableYoVariableServer)
-   {
-      checkIfModuleCanBeCreated(FootstepPlanPostProcessingModule.class);
-
-      try
-      {
-         FootstepPlanPostProcessingModule module = FootstepPlanPostProcessingModuleLauncher.createModule(robotModel, PubSubImplementation.FAST_RTPS);
-         modulesToClose.add(module);
          return module;
       }
       catch (Throwable e)
@@ -442,7 +426,50 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          return null;
       }
    }
+   
+   
 
+   public FiducialDetectorToolboxModule setupFiducialDetectorToolboxModule()
+   {
+      checkIfModuleCanBeCreated(FiducialDetectorToolboxModule.class);
+
+      try
+      {
+         FiducialDetectorToolboxModule module = new FiducialDetectorToolboxModule(robotModel.getSimpleRobotName(),
+                                                                              robotModel.createFullRobotModel(),
+                                                                              robotModel.getLogModelProvider(),
+                                                                              pubSubImplementation);
+         modulesToClose.add(module);
+         return module;
+      }
+      catch (Throwable e)
+      {
+         reportFailure(e);
+         return null;
+      }
+   }
+   
+   public ObjectDetectorToolboxModule setupObjectDetectorToolboxModule()
+   {
+      checkIfModuleCanBeCreated(ObjectDetectorToolboxModule.class);
+
+      try
+      {
+         ObjectDetectorToolboxModule module = new ObjectDetectorToolboxModule(robotModel.getSimpleRobotName(),
+                                                                              robotModel.createFullRobotModel(),
+                                                                              robotModel.getLogModelProvider(),
+                                                                              pubSubImplementation);
+         modulesToClose.add(module);
+         return module;
+      }
+      catch (Throwable e)
+      {
+         reportFailure(e);
+         return null;
+      }
+   }
+   
+   
    public LIDARBasedREAModule setupRobotEnvironmentAwerenessModule(String reaConfigurationFilePath)
    {
       checkIfModuleCanBeCreated(LIDARBasedREAModule.class);

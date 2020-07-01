@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Random;
 
 import org.apache.commons.lang3.StringUtils;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import controller_msgs.msg.dds.ArmTrajectoryMessage;
 import controller_msgs.msg.dds.CapturabilityBasedStatus;
@@ -439,7 +439,7 @@ public class DiagnosticBehavior extends AbstractBehavior
       double minRandomSearchScalar = 0.01;
       double maxRandomSearchScalar = 0.8;
 
-      DenseMatrix64F angularSelectionMatrix = new DenseMatrix64F(3, SpatialVector.SIZE);
+      DMatrixRMaj angularSelectionMatrix = new DMatrixRMaj(3, SpatialVector.SIZE);
       angularSelectionMatrix.set(0, 0, 1.0);
       angularSelectionMatrix.set(1, 1, 1.0);
       angularSelectionMatrix.set(2, 2, 1.0);

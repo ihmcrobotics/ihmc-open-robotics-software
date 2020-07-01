@@ -1,8 +1,8 @@
 package us.ihmc.robotics.optimization;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 public interface FunctionOutputCalculator
 {
-   abstract DenseMatrix64F computeOutput(DenseMatrix64F inputParameter);
+   abstract DMatrixRMaj computeOutput(DMatrixRMaj inputParameter);
 }

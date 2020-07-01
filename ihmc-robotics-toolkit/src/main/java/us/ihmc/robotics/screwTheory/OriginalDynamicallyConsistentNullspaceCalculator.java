@@ -7,11 +7,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.SpecializedOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.SpecializedOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 import us.ihmc.mecano.algorithms.CompositeRigidBodyMassMatrixCalculator;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointBasics;
@@ -31,33 +31,33 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
 {
    private final FloatingJointBasics rootJoint;
    private final JointBasics[] jointsInOrder;
-   private final Map<RigidBodyBasics, DenseMatrix64F> constrainedBodiesAndSelectionMatrices = new LinkedHashMap<RigidBodyBasics, DenseMatrix64F>();
+   private final Map<RigidBodyBasics, DMatrixRMaj> constrainedBodiesAndSelectionMatrices = new LinkedHashMap<RigidBodyBasics, DMatrixRMaj>();
    private final List<JointBasics> actuatedJoints = new ArrayList<JointBasics>();
    private final Map<RigidBodyBasics, List<JointBasics>> supportingBodyToJointPathMap = new LinkedHashMap<RigidBodyBasics, List<JointBasics>>();
    private final CompositeRigidBodyMassMatrixCalculator massMatrixCalculator;
 
    private final boolean computeSNsBar;
 
-   private final LinearSolver<DenseMatrix64F> massMatrixSolver;
-   private final LinearSolver<DenseMatrix64F> lambdaSolver;
-   private final LinearSolver<DenseMatrix64F> pseudoInverseSolver;
-   private final DenseMatrix64F S = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F Js = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F AInverse = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F AInverseJSTranspose = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F LambdasInverse = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F Lambdas = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F JsBar = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F Ns = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F SNs = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F AInverseSNsTranspose = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F PhiStar = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F PhiStarInverse = new DenseMatrix64F(1, 1);
-   private final DenseMatrix64F SNsBar = new DenseMatrix64F(1, 1);
+   private final LinearSolverDense<DMatrixRMaj> massMatrixSolver;
+   private final LinearSolverDense<DMatrixRMaj> lambdaSolver;
+   private final LinearSolverDense<DMatrixRMaj> pseudoInverseSolver;
+   private final DMatrixRMaj S = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj Js = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj AInverse = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj AInverseJSTranspose = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj LambdasInverse = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj Lambdas = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj JsBar = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj Ns = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj SNs = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj AInverseSNsTranspose = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj PhiStar = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj PhiStarInverse = new DMatrixRMaj(1, 1);
+   private final DMatrixRMaj SNsBar = new DMatrixRMaj(1, 1);
 
    private final Twist tempTwist = new Twist();
-   private final DenseMatrix64F tempTwistMatrix = new DenseMatrix64F(Twist.SIZE, 1);
-   private final DenseMatrix64F tempJacobianPart = new DenseMatrix64F(1, 1);
+   private final DMatrixRMaj tempTwistMatrix = new DMatrixRMaj(Twist.SIZE, 1);
+   private final DMatrixRMaj tempJacobianPart = new DMatrixRMaj(1, 1);
 
    private final int nDegreesOfFreedom;
    private int nConstraints;
@@ -69,9 +69,9 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
       this.massMatrixCalculator = new CompositeRigidBodyMassMatrixCalculator(rootJoint.getSuccessor());
       jointsInOrder = massMatrixCalculator.getInput().getJointMatrixIndexProvider().getIndexedJointsInOrder().toArray(new JointBasics[0]);
       this.nDegreesOfFreedom = MultiBodySystemTools.computeDegreesOfFreedom(jointsInOrder);
-      massMatrixSolver = LinearSolverFactory.symmPosDef(nDegreesOfFreedom);
-      lambdaSolver = LinearSolverFactory.symmPosDef(nDegreesOfFreedom); // size of matrix is only used to choose algorithm. nDegreesOfFreedom is an upper limit
-      pseudoInverseSolver = LinearSolverFactory.pseudoInverse(true);
+      massMatrixSolver = LinearSolverFactory_DDRM.symmPosDef(nDegreesOfFreedom);
+      lambdaSolver = LinearSolverFactory_DDRM.symmPosDef(nDegreesOfFreedom); // size of matrix is only used to choose algorithm. nDegreesOfFreedom is an upper limit
+      pseudoInverseSolver = LinearSolverFactory_DDRM.pseudoInverse(true);
       this.computeSNsBar = computeSNsBar;
    }
 
@@ -84,7 +84,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
    }
 
    @Override
-   public void addConstraint(RigidBodyBasics body, DenseMatrix64F selectionMatrix)
+   public void addConstraint(RigidBodyBasics body, DMatrixRMaj selectionMatrix)
    {
       constrainedBodiesAndSelectionMatrices.put(body, selectionMatrix);
       nConstraints += selectionMatrix.getNumRows();
@@ -98,7 +98,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
       actuatedJoints.add(joint);
    }
 
-   private static void computeS(DenseMatrix64F S, JointBasics[] jointsInOrder, Collection<JointBasics> actuatedJoints)
+   private static void computeS(DMatrixRMaj S, JointBasics[] jointsInOrder, Collection<JointBasics> actuatedJoints)
    {
       S.zero();
       int rowStart = 0;
@@ -109,9 +109,9 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
 
          if (actuatedJoints.contains(inverseDynamicsJoint))
          {
-            DenseMatrix64F identity = new DenseMatrix64F(degreesOfFreedom, degreesOfFreedom);
-            CommonOps.setIdentity(identity);
-            CommonOps.insert(identity, S, rowStart, columnStart);
+            DMatrixRMaj identity = new DMatrixRMaj(degreesOfFreedom, degreesOfFreedom);
+            CommonOps_DDRM.setIdentity(identity);
+            CommonOps_DDRM.insert(identity, S, rowStart, columnStart);
             rowStart += degreesOfFreedom;
          }
 
@@ -131,29 +131,29 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
       massMatrixCalculator.reset();
       massMatrixSolver.setA(massMatrixCalculator.getMassMatrix());
       massMatrixSolver.invert(AInverse);
-      CommonOps.multTransB(AInverse, Js, AInverseJSTranspose);
-      CommonOps.mult(Js, AInverseJSTranspose, LambdasInverse);
+      CommonOps_DDRM.multTransB(AInverse, Js, AInverseJSTranspose);
+      CommonOps_DDRM.mult(Js, AInverseJSTranspose, LambdasInverse);
 
       lambdaSolver.setA(LambdasInverse);
       lambdaSolver.invert(Lambdas);
-      CommonOps.mult(AInverseJSTranspose, Lambdas, JsBar);
+      CommonOps_DDRM.mult(AInverseJSTranspose, Lambdas, JsBar);
 
-//      CommonOps.pinv(Js, JsBar);
+//      CommonOps_DDRM.pinv(Js, JsBar);
 
-      CommonOps.mult(JsBar, Js, Ns);
-      CommonOps.changeSign(Ns);
-      SpecializedOps.addIdentity(Ns, Ns, 1.0);
+      CommonOps_DDRM.mult(JsBar, Js, Ns);
+      CommonOps_DDRM.changeSign(Ns);
+      SpecializedOps_DDRM.addIdentity(Ns, Ns, 1.0);
 
       if (computeSNsBar)
       {
-         CommonOps.mult(S, Ns, SNs);
-         CommonOps.multTransB(AInverse, SNs, AInverseSNsTranspose);
-         CommonOps.mult(SNs, AInverseSNsTranspose, PhiStar);
+         CommonOps_DDRM.mult(S, Ns, SNs);
+         CommonOps_DDRM.multTransB(AInverse, SNs, AInverseSNsTranspose);
+         CommonOps_DDRM.mult(SNs, AInverseSNsTranspose, PhiStar);
          pseudoInverseSolver.setA(PhiStar);
          pseudoInverseSolver.invert(PhiStarInverse);
-         CommonOps.mult(AInverseSNsTranspose, PhiStarInverse, SNsBar);
+         CommonOps_DDRM.mult(AInverseSNsTranspose, PhiStarInverse, SNsBar);
 
-//         CommonOps.mult(S, Ns, SNs);
+//         CommonOps_DDRM.mult(S, Ns, SNs);
 //         ConfigurableSolvePseudoInverseSVD solver = new ConfigurableSolvePseudoInverseSVD(SNs.getNumRows(), SNs.getNumCols(), 0.5);
 //         solver.setA(SNs);
 //         solver.invert(SNsBar);
@@ -180,13 +180,13 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
    }
 
    @Override
-   public DenseMatrix64F getDynamicallyConsistentNullspace()
+   public DMatrixRMaj getDynamicallyConsistentNullspace()
    {
       return Ns;
    }
 
    @Override
-   public DenseMatrix64F getSNsBar()
+   public DMatrixRMaj getSNsBar()
    {
       if (!computeSNsBar)
          throw new RuntimeException("SNsBar not computed");
@@ -194,8 +194,8 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
       return SNsBar;
    }
 
-   private void computeJs(DenseMatrix64F Js, Map<RigidBodyBasics, List<JointBasics>> supportJacobians,
-                          Map<RigidBodyBasics, DenseMatrix64F> constrainedBodiesAndSelectionMatrices)
+   private void computeJs(DMatrixRMaj Js, Map<RigidBodyBasics, List<JointBasics>> supportJacobians,
+                          Map<RigidBodyBasics, DMatrixRMaj> constrainedBodiesAndSelectionMatrices)
    {
       Js.zero();
 
@@ -203,7 +203,7 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
       for (RigidBodyBasics rigidBody : supportJacobians.keySet())
       {
          List<JointBasics> supportingJoints = supportJacobians.get(rigidBody);
-         DenseMatrix64F selectionMatrix = constrainedBodiesAndSelectionMatrices.get(rigidBody);
+         DMatrixRMaj selectionMatrix = constrainedBodiesAndSelectionMatrices.get(rigidBody);
 
          int columnStartNumber = 0;
          for (JointBasics inverseDynamicsJoint : jointsInOrder)
@@ -216,8 +216,8 @@ public class OriginalDynamicallyConsistentNullspaceCalculator implements Dynamic
                   tempTwist.changeFrame(rootJoint.getFrameAfterJoint());
                   tempTwist.get(0, tempTwistMatrix);
                   tempJacobianPart.reshape(selectionMatrix.getNumRows(), 1);
-                  CommonOps.mult(selectionMatrix, tempTwistMatrix, tempJacobianPart);
-                  CommonOps.insert(tempJacobianPart, Js, rowStartNumber, columnStartNumber++);
+                  CommonOps_DDRM.mult(selectionMatrix, tempTwistMatrix, tempJacobianPart);
+                  CommonOps_DDRM.insert(tempJacobianPart, Js, rowStartNumber, columnStartNumber++);
                }
             }
             else

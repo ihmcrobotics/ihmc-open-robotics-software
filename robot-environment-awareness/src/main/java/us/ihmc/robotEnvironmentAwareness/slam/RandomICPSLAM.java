@@ -77,6 +77,30 @@ public class RandomICPSLAM extends SLAMBasics
    }
 
    @Override
+   public void addKeyFrame(StereoVisionPointCloudMessage pointCloudMessage)
+   {
+      super.addKeyFrame(pointCloudMessage);
+
+      SLAMFrame firstFrame = getLatestFrame();
+
+      insertNewPointCloud(firstFrame);
+   }
+
+   @Override
+   public boolean addFrame(StereoVisionPointCloudMessage pointCloudMessage)
+   {
+      boolean success = super.addFrame(pointCloudMessage);
+
+      if (success)
+      {
+         SLAMFrame newFrame = getLatestFrame();
+         insertNewPointCloud(newFrame);
+      }
+
+      return success;
+   }
+
+   @Override
    public RigidBodyTransformReadOnly computeFrameCorrectionTransformer(SLAMFrame frame)
    {
       RandomICPSLAMParameters parameters = this.parameters.get();

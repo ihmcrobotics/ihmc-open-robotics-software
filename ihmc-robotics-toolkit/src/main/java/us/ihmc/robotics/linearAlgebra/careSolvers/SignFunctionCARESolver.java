@@ -1,9 +1,10 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
+
 import us.ihmc.matrixlib.MatrixTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.robotics.linearAlgebra.careSolvers.signFunction.NewtonSignFunction;
@@ -17,28 +18,28 @@ import us.ihmc.robotics.linearAlgebra.careSolvers.signFunction.SignFunction;
  */
 public class SignFunctionCARESolver extends AbstractCARESolver
 {
-   private final DenseMatrix64F ETransposePE = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj ETransposePE = new DMatrixRMaj(0, 0);
 
-   private final LinearSolver<DenseMatrix64F> solver = LinearSolverFactory.qr(3, 3);
+   private final LinearSolverDense<DMatrixRMaj> solver = LinearSolverFactory_DDRM.qr(3, 3);
    private final SignFunction signFunction = new NewtonSignFunction();
 
-   private final DenseMatrix64F EInverse = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F EInverseTranspose = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F EInverseA = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F EInverseATranspose = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj EInverse = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj EInverseTranspose = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj EInverseA = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj EInverseATranspose = new DMatrixRMaj(0, 0);
 
-   private final DenseMatrix64F hamiltonian = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj hamiltonian = new DMatrixRMaj(0, 0);
 
-   private final DenseMatrix64F identity = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj identity = new DMatrixRMaj(0, 0);
 
-   private final DenseMatrix64F EInverseMEInverseTranspose = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F leftColumn = new DenseMatrix64F(0, 0);
-   private final DenseMatrix64F rightColumn = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj EInverseMEInverseTranspose = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj leftColumn = new DMatrixRMaj(0, 0);
+   private final DMatrixRMaj rightColumn = new DMatrixRMaj(0, 0);
 
-   private final DenseMatrix64F W = new DenseMatrix64F(0, 0);
+   private final DMatrixRMaj W = new DMatrixRMaj(0, 0);
 
    /** {@inheritDoc} */
-   public DenseMatrix64F computeP()
+   public DMatrixRMaj computeP()
    {
       EInverseATranspose.reshape(n, n);
 
@@ -48,9 +49,9 @@ public class SignFunctionCARESolver extends AbstractCARESolver
          EInverseA.reshape(n, n);
          EInverseTranspose.reshape(n, n);
          NativeCommonOps.invert(E, EInverse);
-         CommonOps.mult(E, A, EInverseA);
+         CommonOps_DDRM.mult(E, A, EInverseA);
 
-         CommonOps.transpose(EInverse, EInverseTranspose);
+         CommonOps_DDRM.transpose(EInverse, EInverseTranspose);
          NativeCommonOps.multQuad(EInverseTranspose, M, EInverseMEInverseTranspose);
       }
       else
@@ -58,7 +59,7 @@ public class SignFunctionCARESolver extends AbstractCARESolver
          EInverseA.set(A);
          EInverseMEInverseTranspose.set(M);
       }
-      CommonOps.transpose(EInverseA, EInverseATranspose);
+      CommonOps_DDRM.transpose(EInverseA, EInverseATranspose);
 
       // defining Hamiltonian
       hamiltonian.reshape(2 * n, 2 * n);
@@ -74,7 +75,7 @@ public class SignFunctionCARESolver extends AbstractCARESolver
       signFunction.getW(W);
 
       identity.reshape(n, n);
-      CommonOps.setIdentity(identity);
+      CommonOps_DDRM.setIdentity(identity);
 
       rightColumn.reshape(2 * n, n);
       leftColumn.reshape(2 * n, n);

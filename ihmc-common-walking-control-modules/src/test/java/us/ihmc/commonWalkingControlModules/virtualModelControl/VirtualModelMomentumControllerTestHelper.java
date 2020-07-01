@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.JointIndexHandler;
 import us.ihmc.commonWalkingControlModules.momentumBasedController.optimization.virtualModelControl.VirtualModelMomentumController;
@@ -241,7 +241,7 @@ public class VirtualModelMomentumControllerTestHelper
          }
          virtualModelController.populateTorqueSolution(virtualModelControlSolution);
 
-         DenseMatrix64F jointTorques = virtualModelControlSolution.getJointTorques();
+         DMatrixRMaj jointTorques = virtualModelControlSolution.getJointTorques();
          for (int i = 0; i < controlledJoints.length; i++)
          {
             OneDoFJointBasics joint = controlledJoints[i];

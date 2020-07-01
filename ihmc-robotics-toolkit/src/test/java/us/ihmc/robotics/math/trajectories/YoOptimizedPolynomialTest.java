@@ -1,17 +1,17 @@
 package us.ihmc.robotics.math.trajectories;
 
-import org.ejml.data.DenseMatrix64F;
+import static us.ihmc.robotics.Assert.assertEquals;
+
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Test;
+
 import us.ihmc.commons.MathTools;
 import us.ihmc.matrixlib.NativeCommonOps;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
 
-import static us.ihmc.robotics.Assert.assertEquals;
-import static us.ihmc.robotics.Assert.fail;
-
 public class YoOptimizedPolynomialTest
 {
-   private static double EPSILON = 1e-4;
+   private static double EPSILON = 1e-3;
 
    String namePrefix = "YoPolynomialTest";
 
@@ -323,9 +323,9 @@ public class YoOptimizedPolynomialTest
       function.addPositionPoint(xf, yf);
       function.fit();
 
-      DenseMatrix64F hessian = new DenseMatrix64F(2, 2);
-      DenseMatrix64F a = new DenseMatrix64F(2, 1);
-      DenseMatrix64F costMatrix = new DenseMatrix64F(1, 1);
+      DMatrixRMaj hessian = new DMatrixRMaj(2, 2);
+      DMatrixRMaj a = new DMatrixRMaj(2, 1);
+      DMatrixRMaj costMatrix = new DMatrixRMaj(1, 1);
       double a0 = function.getCoefficient(0);
       double a1 = function.getCoefficient(1);
       a.set(0, a0);
@@ -385,9 +385,9 @@ public class YoOptimizedPolynomialTest
       function.addPositionPoint(xf, yf);
       function.fit();
 
-      DenseMatrix64F hessian = new DenseMatrix64F(3, 3);
-      DenseMatrix64F a = new DenseMatrix64F(3, 1);
-      DenseMatrix64F costMatrix = new DenseMatrix64F(1, 1);
+      DMatrixRMaj hessian = new DMatrixRMaj(3, 3);
+      DMatrixRMaj a = new DMatrixRMaj(3, 1);
+      DMatrixRMaj costMatrix = new DMatrixRMaj(1, 1);
       double a0 = function.getCoefficient(0);
       double a1 = function.getCoefficient(1);
       double a2 = function.getCoefficient(2);
@@ -505,9 +505,9 @@ public class YoOptimizedPolynomialTest
       function.addPositionPoint(xf, yf);
       function.fit();
 
-      DenseMatrix64F hessian = new DenseMatrix64F(4, 4);
-      DenseMatrix64F a = new DenseMatrix64F(4, 1);
-      DenseMatrix64F costMatrix = new DenseMatrix64F(1, 1);
+      DMatrixRMaj hessian = new DMatrixRMaj(4, 4);
+      DMatrixRMaj a = new DMatrixRMaj(4, 1);
+      DMatrixRMaj costMatrix = new DMatrixRMaj(1, 1);
       double a0 = function.getCoefficient(0);
       double a1 = function.getCoefficient(1);
       double a2 = function.getCoefficient(2);
@@ -691,9 +691,9 @@ public class YoOptimizedPolynomialTest
       double[] coefficients = polynomial.getCoefficients();
       for(int i = 0; i < coefficients.length + 3; i++)
       {
-         DenseMatrix64F generalizedDYPoly = new DenseMatrix64F(polynomial.getNumberOfCoefficients(), 1);
+         DMatrixRMaj generalizedDYPoly = new DMatrixRMaj(polynomial.getNumberOfCoefficients(), 1);
          polynomial.getXPowersDerivativeVector(i, x, generalizedDYPoly);
-         DenseMatrix64F generalizedDYHand = new DenseMatrix64F(generalizedDYPoly.getNumRows(), generalizedDYPoly.getNumCols());
+         DMatrixRMaj generalizedDYHand = new DMatrixRMaj(generalizedDYPoly.getNumRows(), generalizedDYPoly.getNumCols());
          if(i < coefficients.length)
          {
             for(int j = i; j < coefficients.length; j++)
@@ -718,7 +718,7 @@ public class YoOptimizedPolynomialTest
          double generalizedDYPolyScalar = polynomial.getDerivative(i, x);
          double generalizedDYHandScalar = 0.0;
 
-         DenseMatrix64F generalizedDYPolyVector = new DenseMatrix64F(polynomial.getNumberOfCoefficients(), 1);
+         DMatrixRMaj generalizedDYPolyVector = new DMatrixRMaj(polynomial.getNumberOfCoefficients(), 1);
          polynomial.getXPowersDerivativeVector(i, x, generalizedDYPolyVector);
          for(int j = 0; j < generalizedDYPolyVector.numRows; j++)
          {

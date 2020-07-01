@@ -7,8 +7,9 @@ import controller_msgs.msg.dds.DoorLocationPacket;
 import us.ihmc.communication.ROS2Tools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
-import us.ihmc.humanoidBehaviors.IHMCHumanoidBehaviorManager;
+import us.ihmc.robotics.kinematics.AverageQuaternionCalculator;
 import us.ihmc.ros2.Ros2Node;
 
 public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//FiducialDetectorBehaviorService
@@ -24,16 +25,17 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
 
    private DoorLocationPacket latestDoorLocationPacketRecieved;
    private boolean doorOpen = false;
-   private float openDistance = 0.0308f;
+   private float openAngle = 0.17f;
+   private float closeAngle = 0.07f;
    private boolean run = false;
 
-   protected final AtomicReference<DoorLocationPacket> doorLocationQueue = new AtomicReference<DoorLocationPacket>();
+   protected final AtomicReference<DoorLocationPacket> doorLocationLatest = new AtomicReference<DoorLocationPacket>();
 
    public DoorOpenDetectorBehaviorService(String robotName, String ThreadName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
-      super(robotName, ThreadName, ros2Node);//, yoGraphicsListRegistry);
+      super(robotName, ThreadName, ros2Node);
 
-      createSubscriber(DoorLocationPacket.class, IHMCHumanoidBehaviorManager.getInputTopic(robotName), doorLocationQueue::set);
+      createSubscriber(DoorLocationPacket.class, ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationLatest::set);
 
       initialize();
    }
@@ -72,7 +74,6 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
       averageOrigin = null;
       run = false;
       doorPoses.clear();
-
    }
 
    @Override
@@ -80,11 +81,12 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
    {
 
       //super.doThreadAction();
-      if (true)
+      if (run)
       {
-         latestDoorLocationPacketRecieved = doorLocationQueue.getAndSet(null);
+         latestDoorLocationPacketRecieved = doorLocationLatest.getAndSet(null);
          if (latestDoorLocationPacketRecieved != null)
          {
+
             newPose = new FramePose3D(ReferenceFrame.getWorldFrame(), latestDoorLocationPacketRecieved.getDoorTransformToWorld());
             // getReportedGoalPoseWorldFrame(newPose);
 
@@ -124,15 +126,19 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
                   {
                      averageCurrentDoorLocation = averageFramePoses(doorPoses);
                   }
-                     if (averageCurrentDoorLocation != null && averageOrigin.getPositionDistance(averageCurrentDoorLocation) > openDistance)
+
+                  if (averageCurrentDoorLocation != null)
+                  {
+                     if (!doorOpen && Math.abs(averageOrigin.getYaw() - averageCurrentDoorLocation.getYaw()) > openAngle)
                      {
                         doorOpen = true;
                      }
-                     else
+                     else if (doorOpen && Math.abs(averageOrigin.getYaw() - averageCurrentDoorLocation.getYaw()) < closeAngle)
                      {
                         doorOpen = false;
                      }
-                  
+                  }
+
                }
             }
 
@@ -145,17 +151,30 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
    {
       if (poses.size() > 0)
       {
+         AverageQuaternionCalculator averageQuaternionCalculator = new AverageQuaternionCalculator();
+
+         averageQuaternionCalculator.reset();
+
          float numberOfPoses = poses.size();
          FramePose3D aveagedPose = new FramePose3D(ReferenceFrame.getWorldFrame());
          for (FramePose3D pose : poses)
          {
+
             aveagedPose.setX(aveagedPose.getX() + pose.getX());
             aveagedPose.setY(aveagedPose.getY() + pose.getY());
             aveagedPose.setZ(aveagedPose.getZ() + pose.getZ());
+            averageQuaternionCalculator.queueQuaternion(new Quaternion(pose.getOrientation()));
+
          }
+
          aveagedPose.setX(aveagedPose.getX() / numberOfPoses);
          aveagedPose.setY(aveagedPose.getY() / numberOfPoses);
          aveagedPose.setZ(aveagedPose.getZ() / numberOfPoses);
+
+         averageQuaternionCalculator.compute();
+         Quaternion actualAverageQuat = new Quaternion();
+         averageQuaternionCalculator.getAverageQuaternion(actualAverageQuat);
+         aveagedPose.setOrientation(actualAverageQuat);
          return aveagedPose;
       }
       else

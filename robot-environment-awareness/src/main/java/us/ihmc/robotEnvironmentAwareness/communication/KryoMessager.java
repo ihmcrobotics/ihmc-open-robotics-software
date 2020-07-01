@@ -21,6 +21,10 @@ import us.ihmc.messager.MessagerAPIFactory.Topic;
 import us.ihmc.messager.MessagerStateListener;
 import us.ihmc.messager.TopicListener;
 
+/**
+ * @deprecated This is an old implementation that imposes restrictions like having a NetClassList.
+ * Use {@link us.ihmc.messager.kryo.KryoMessager} instead.
+ */
 public class KryoMessager implements Messager
 {
    public static final int BUFFER_SIZE = 2097152 * 20;
@@ -119,20 +123,21 @@ public class KryoMessager implements Messager
       objectCommunicator.send(message);
    }
 
+   /** {@inheritDoc} */
    @Override
-   @SuppressWarnings("unchecked")
    public <T> AtomicReference<T> createInput(Topic<T> topic, T defaultValue)
    {
       AtomicReference<T> boundVariable = new AtomicReference<>(defaultValue);
-
-      List<AtomicReference<Object>> boundVariablesForTopic = inputVariablesMap.get(topic);
-      if (boundVariablesForTopic == null)
-      {
-         boundVariablesForTopic = new ArrayList<>();
-         inputVariablesMap.put(topic, boundVariablesForTopic);
-      }
-      boundVariablesForTopic.add((AtomicReference<Object>) boundVariable);
+      attachInput(topic, boundVariable);
       return boundVariable;
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public <T> void attachInput(Topic<T> topic, AtomicReference<T> input)
+   {
+      List<AtomicReference<Object>> boundVariablesForTopic = inputVariablesMap.computeIfAbsent(topic, k -> new ArrayList<>());
+      boundVariablesForTopic.add((AtomicReference<Object>) input);
    }
 
    /** {@inheritDoc} */

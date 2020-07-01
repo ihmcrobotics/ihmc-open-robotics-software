@@ -5,7 +5,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.log.LogTools;
@@ -24,7 +24,7 @@ public class VirtualModelControlDataHandler
    private final Map<RigidBodyBasics, Wrench> desiredWrenches = new LinkedHashMap<>();
    private final Map<RigidBodyBasics, FrameVector3D> desiredForces = new LinkedHashMap<>();
    private final Map<RigidBodyBasics, FrameVector3D> desiredTorques = new LinkedHashMap<>();
-   private final Map<RigidBodyBasics, DenseMatrix64F> desiredSelectionMatrices = new LinkedHashMap<>();
+   private final Map<RigidBodyBasics, DMatrixRMaj> desiredSelectionMatrices = new LinkedHashMap<>();
 
    public VirtualModelControlDataHandler()
    {
@@ -98,7 +98,7 @@ public class VirtualModelControlDataHandler
       }
    }
 
-   public void addDesiredSelectionMatrix(RigidBodyBasics controlledBody, DenseMatrix64F selectionMatrix)
+   public void addDesiredSelectionMatrix(RigidBodyBasics controlledBody, DMatrixRMaj selectionMatrix)
    {
       if (hasBody(controlledBody))
       {
@@ -158,7 +158,7 @@ public class VirtualModelControlDataHandler
       return desiredWrenches.get(controlledBody);
    }
 
-   public DenseMatrix64F getDesiredSelectionMatrix(RigidBodyBasics controlledBody)
+   public DMatrixRMaj getDesiredSelectionMatrix(RigidBodyBasics controlledBody)
    {
       return desiredSelectionMatrices.get(controlledBody);
    }

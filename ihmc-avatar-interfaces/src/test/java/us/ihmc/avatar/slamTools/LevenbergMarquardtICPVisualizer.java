@@ -4,7 +4,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.geometry.BoundingBox3D;
@@ -155,7 +155,7 @@ public class LevenbergMarquardtICPVisualizer
          optimizer.iterate();
 
          // update viz.
-         DenseMatrix64F optimalParameter = optimizer.getOptimalParameter();
+         DMatrixRMaj optimalParameter = optimizer.getOptimalParameter();
          for (int i = 0; i < driftedCowPointCloud.length; i++)
             transformedData[i].set(driftedCowPointCloud[i]);
          RigidBodyTransform transform = convertTransform(optimalParameter.getData());
@@ -215,7 +215,7 @@ public class LevenbergMarquardtICPVisualizer
       FunctionOutputCalculator functionOutputCalculator = new FunctionOutputCalculator()
       {
          @Override
-         public DenseMatrix64F computeOutput(DenseMatrix64F inputParameter)
+         public DMatrixRMaj computeOutput(DMatrixRMaj inputParameter)
          {
             Point3D[] transformedData = new Point3D[newPointCloud.length];
             for (int i = 0; i < newPointCloud.length; i++)
@@ -223,7 +223,7 @@ public class LevenbergMarquardtICPVisualizer
             RigidBodyTransform transform = convertTransform(inputParameter.getData());
             transformPointCloud(transformedData, transform);
 
-            DenseMatrix64F errorSpace = new DenseMatrix64F(transformedData.length, 1);
+            DMatrixRMaj errorSpace = new DMatrixRMaj(transformedData.length, 1);
             for (int i = 0; i < transformedData.length; i++)
             {
                double distance = computeClosestDistance(transformedData[i]);
@@ -238,7 +238,7 @@ public class LevenbergMarquardtICPVisualizer
             return distance;
          }
       };
-      DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
+      DMatrixRMaj purterbationVector = new DMatrixRMaj(6, 1);
       purterbationVector.set(0, 0.00001);
       purterbationVector.set(1, 0.00001);
       purterbationVector.set(2, 0.00001);

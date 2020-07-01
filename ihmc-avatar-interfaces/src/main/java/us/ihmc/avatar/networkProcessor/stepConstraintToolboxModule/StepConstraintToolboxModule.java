@@ -20,7 +20,7 @@ import java.util.List;
 
 public class StepConstraintToolboxModule extends ToolboxModule
 {
-   private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 5;
+   private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 10;
 
    protected final StepConstraintToolboxController controller;
    private IHMCRealtimeROS2Publisher<StepConstraintMessage> constraintRegionPublisher;
@@ -34,11 +34,15 @@ public class StepConstraintToolboxModule extends ToolboxModule
             DEFAULT_UPDATE_PERIOD_MILLISECONDS,
             pubSubImplementation);
 
-      setTimeWithoutInputsBeforeGoingToSleep(3.0);
-      controller = new StepConstraintToolboxController(statusOutputManager,
-                                                       constraintRegionPublisher, robotModel.getWalkingControllerParameters(), fullRobotModel, gravityZ, registry);
-
       setTimeWithoutInputsBeforeGoingToSleep(Double.POSITIVE_INFINITY);
+      controller = new StepConstraintToolboxController(statusOutputManager,
+                                                       constraintRegionPublisher,
+                                                       robotModel.getWalkingControllerParameters(),
+                                                       fullRobotModel,
+                                                       gravityZ,
+                                                       registry,
+                                                       yoGraphicsListRegistry);
+
       startYoVariableServer();
       if (yoVariableServer != null)
       {
@@ -60,26 +64,43 @@ public class StepConstraintToolboxModule extends ToolboxModule
          }
       });
 
+      RobotConfigurationData robotConfigurationData = new RobotConfigurationData();
+
+      ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, RobotConfigurationData.class, controllerPubGenerator, s ->
+      {
+         if (controller != null)
+         {
+            s.takeNextData(robotConfigurationData, null);
+            controller.updateRobotConfigurationData(robotConfigurationData);
+         }
+      });
+
+      CapturabilityBasedStatus capturabilityBasedStatus = new CapturabilityBasedStatus();
+
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, CapturabilityBasedStatus.class, controllerPubGenerator, s ->
       {
          if (controller != null)
          {
-            controller.updateCapturabilityBasedStatus(s.takeNextData());
+            s.takeNextData(capturabilityBasedStatus, null);
+            controller.updateCapturabilityBasedStatus(capturabilityBasedStatus);
          }
       });
+
+      FootstepStatusMessage statusMessage = new FootstepStatusMessage();
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node, FootstepStatusMessage.class, controllerPubGenerator, s ->
       {
          if (controller != null)
          {
-            controller.updateFootstepStatus(s.takeNextData());
+            s.takeNextData(statusMessage, null);
+            controller.updateFootstepStatus(statusMessage);
          }
       });
 
       ROS2Tools.createCallbackSubscriptionTypeNamed(realtimeRos2Node,
-                                           PlanarRegionsListMessage.class,
-                                           REACommunicationProperties.outputTopic,
-                                           s -> updatePlanarRegion(s.takeNextData()));
+                                                    PlanarRegionsListMessage.class,
+                                                    REACommunicationProperties.outputTopic,
+                                                    s -> updatePlanarRegion(s.takeNextData()));
 
       constraintRegionPublisher = ROS2Tools.createPublisherTypeNamed(realtimeRos2Node, StepConstraintMessage.class, ControllerAPIDefinition.getInputTopic(robotName));
    }

@@ -1,6 +1,6 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.geometry.Plane3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -31,7 +31,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
       FunctionOutputCalculator functionOutputCalculator = new FunctionOutputCalculator()
       {
          @Override
-         public DenseMatrix64F computeOutput(DenseMatrix64F inputParameter)
+         public DMatrixRMaj computeOutput(DMatrixRMaj inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = convertTransform(inputParameter.getData());
             RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame.getOriginalSensorPose());
@@ -47,7 +47,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
                correctedSensorPoseToWorld.transform(correctedSurfel[i].getNormal());
             }
 
-            DenseMatrix64F errorSpace = new DenseMatrix64F(correctedSurfel.length, 1);
+            DMatrixRMaj errorSpace = new DMatrixRMaj(correctedSurfel.length, 1);
             for (int i = 0; i < correctedSurfel.length; i++)
             {
                double distance = computeClosestDistance(correctedSurfel[i]);
@@ -61,7 +61,7 @@ public class SurfaceElementICPSLAM extends SLAMBasics
             return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(octree, surfel.getPoint(), octree.getResolution());
          }
       };
-      DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
+      DMatrixRMaj purterbationVector = new DMatrixRMaj(6, 1);
       purterbationVector.set(0, 0.0005);
       purterbationVector.set(1, 0.0005);
       purterbationVector.set(2, 0.0005);

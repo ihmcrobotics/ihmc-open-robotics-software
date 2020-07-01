@@ -4,10 +4,10 @@ import static us.ihmc.robotics.Assert.assertEquals;
 
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 import org.junit.jupiter.api.Test;
 
 import us.ihmc.commons.RandomNumbers;
@@ -22,20 +22,20 @@ public abstract class NullspaceCalculatorTest
    {
       NullspaceCalculator nullspaceCalculator = getNullspaceProjectorCalculator();
 
-      DenseMatrix64F jacobian = new DenseMatrix64F(2, 2);
+      DMatrixRMaj jacobian = new DMatrixRMaj(2, 2);
       jacobian.set(0, 0, 1.0);
       jacobian.set(0, 1, 3.0);
       jacobian.set(1, 0, 7.0);
       jacobian.set(1, 1, 9.0);
 
-      DenseMatrix64F nullspaceProjector = new DenseMatrix64F(2, 2);
+      DMatrixRMaj nullspaceProjector = new DMatrixRMaj(2, 2);
       nullspaceCalculator.computeNullspaceProjector(jacobian, nullspaceProjector);
 
       for (int i = 0; i < nullspaceProjector.getNumElements(); i++)
          assertEquals(nullspaceProjector.get(i), 0.0, 1e-7);
 
 
-      jacobian = new DenseMatrix64F(2, 4);
+      jacobian = new DMatrixRMaj(2, 4);
       jacobian.set(0, 0, 1.0);
       jacobian.set(0, 1, 3.0);
       jacobian.set(0, 3, 7.0);
@@ -43,10 +43,10 @@ public abstract class NullspaceCalculatorTest
       jacobian.set(1, 2, 9.0);
       jacobian.set(1, 3, 11.0);
 
-      nullspaceProjector = new DenseMatrix64F(4, 4);
+      nullspaceProjector = new DMatrixRMaj(4, 4);
       nullspaceCalculator.computeNullspaceProjector(jacobian, nullspaceProjector);
 
-      DenseMatrix64F nullspaceProjectorExpected = new DenseMatrix64F(4, 4);
+      DMatrixRMaj nullspaceProjectorExpected = new DMatrixRMaj(4, 4);
 
       nullspaceProjectorExpected.set(0, 0, 0.746421);
       nullspaceProjectorExpected.set(0, 1, 0.130401);
@@ -72,7 +72,7 @@ public abstract class NullspaceCalculatorTest
          assertEquals(nullspaceProjectorExpected.get(i), nullspaceProjector.get(i), 1e-5);
 
 
-      jacobian = new DenseMatrix64F(5, 5);
+      jacobian = new DMatrixRMaj(5, 5);
       jacobian.set(0, 0, 1.0);
       jacobian.set(0, 2, 3.0);
       jacobian.set(0, 3, 5.0);
@@ -99,10 +99,10 @@ public abstract class NullspaceCalculatorTest
       jacobian.set(4, 2, 39.0);
       jacobian.set(4, 4, 41.0);
 
-      nullspaceProjector = new DenseMatrix64F(5, 5);
+      nullspaceProjector = new DMatrixRMaj(5, 5);
       nullspaceCalculator.computeNullspaceProjector(jacobian, nullspaceProjector);
 
-      nullspaceProjectorExpected = new DenseMatrix64F(5, 5);
+      nullspaceProjectorExpected = new DMatrixRMaj(5, 5);
 
       for (int i = 0; i < nullspaceProjectorExpected.getNumElements(); i++)
          assertEquals(nullspaceProjectorExpected.get(i), nullspaceProjector.get(i), 1e-5);
@@ -113,17 +113,17 @@ public abstract class NullspaceCalculatorTest
    {
       NullspaceCalculator nullspaceCalculator = getNullspaceProjectorCalculator();
 
-      DenseMatrix64F jacobian = new DenseMatrix64F(2, 2);
+      DMatrixRMaj jacobian = new DMatrixRMaj(2, 2);
       jacobian.set(0, 0, 1.0);
       jacobian.set(0, 1, 3.0);
       jacobian.set(1, 0, 7.0);
       jacobian.set(1, 1, 9.0);
 
-      DenseMatrix64F vectorToProject = new DenseMatrix64F(1, 2);
+      DMatrixRMaj vectorToProject = new DMatrixRMaj(1, 2);
       vectorToProject.set(0, 0, 3.5);
       vectorToProject.set(0, 1, 4.5);
 
-      DenseMatrix64F projectedVector = new DenseMatrix64F(1, 2);
+      DMatrixRMaj projectedVector = new DMatrixRMaj(1, 2);
 
       nullspaceCalculator.projectOntoNullspace(vectorToProject, jacobian, projectedVector);
 
@@ -131,7 +131,7 @@ public abstract class NullspaceCalculatorTest
       assertEquals(0.0, projectedVector.get(0, 1), 1e-7);
 
 
-      jacobian = new DenseMatrix64F(2, 4);
+      jacobian = new DMatrixRMaj(2, 4);
       jacobian.set(0, 0, 1.0);
       jacobian.set(0, 1, 3.0);
       jacobian.set(0, 3, 7.0);
@@ -139,7 +139,7 @@ public abstract class NullspaceCalculatorTest
       jacobian.set(1, 2, 9.0);
       jacobian.set(1, 3, 11.0);
 
-      DenseMatrix64F matrixToProject = new DenseMatrix64F(2, 4);
+      DMatrixRMaj matrixToProject = new DMatrixRMaj(2, 4);
       matrixToProject.set(0, 0, 3.5);
       matrixToProject.set(0, 1, 4.5);
       matrixToProject.set(0, 2, 5.5);
@@ -149,7 +149,7 @@ public abstract class NullspaceCalculatorTest
       matrixToProject.set(1, 2, 9.5);
       matrixToProject.set(1, 3, 10.5);
 
-      projectedVector = new DenseMatrix64F(2, 4);
+      projectedVector = new DMatrixRMaj(2, 4);
 
       nullspaceCalculator.projectOntoNullspace(matrixToProject, jacobian, projectedVector);
 
@@ -164,7 +164,7 @@ public abstract class NullspaceCalculatorTest
       assertEquals(2.52277, projectedVector.get(1, 2), epsilon);
       assertEquals(-2.93712, projectedVector.get(1, 3), epsilon);
 
-      jacobian = new DenseMatrix64F(5, 5);
+      jacobian = new DMatrixRMaj(5, 5);
       jacobian.set(0, 0, 1.0);
       jacobian.set(0, 2, 3.0);
       jacobian.set(0, 3, 5.0);
@@ -191,7 +191,7 @@ public abstract class NullspaceCalculatorTest
       jacobian.set(4, 2, 39.0);
       jacobian.set(4, 4, 41.0);
 
-      matrixToProject = new DenseMatrix64F(2, 5);
+      matrixToProject = new DMatrixRMaj(2, 5);
       matrixToProject.set(0, 0, 3.5);
       matrixToProject.set(0, 1, 4.5);
       matrixToProject.set(0, 2, 5.5);
@@ -226,7 +226,7 @@ public abstract class NullspaceCalculatorTest
       Random random = new Random(12345L);
 
       NullspaceCalculator nullspaceCalculator = getNullspaceProjectorCalculator();
-      LinearSolver<DenseMatrix64F> linearSolver = LinearSolverFactory.pseudoInverse(true);
+      LinearSolverDense<DMatrixRMaj> linearSolver = LinearSolverFactory_DDRM.pseudoInverse(true);
 
       for (int i = 0; i < 1000; i++)
       {
@@ -238,14 +238,14 @@ public abstract class NullspaceCalculatorTest
          double[] JValues = RandomNumbers.nextDoubleArray(random, JRows * JCols, 10.0);
          double[] AValues = RandomNumbers.nextDoubleArray(random, ARows * JCols, 10.0);
 
-         DenseMatrix64F jacobian = new DenseMatrix64F(JRows, JCols, false, JValues);
-         DenseMatrix64F jacobianInverse = new DenseMatrix64F(JCols, JRows);
-         DenseMatrix64F matrixToProject = new DenseMatrix64F(ARows, JCols, false, AValues);
-         DenseMatrix64F projectedMatrixExpected = new DenseMatrix64F(ARows, JCols);
-         DenseMatrix64F projectedMatrix = new DenseMatrix64F(ARows, JCols);
+         DMatrixRMaj jacobian = new DMatrixRMaj(JRows, JCols, false, JValues);
+         DMatrixRMaj jacobianInverse = new DMatrixRMaj(JCols, JRows);
+         DMatrixRMaj matrixToProject = new DMatrixRMaj(ARows, JCols, false, AValues);
+         DMatrixRMaj projectedMatrixExpected = new DMatrixRMaj(ARows, JCols);
+         DMatrixRMaj projectedMatrix = new DMatrixRMaj(ARows, JCols);
 
-         DenseMatrix64F projectorExpected = new DenseMatrix64F(JCols, JCols);
-         DenseMatrix64F projector = new DenseMatrix64F(JCols, JCols);
+         DMatrixRMaj projectorExpected = new DMatrixRMaj(JCols, JCols);
+         DMatrixRMaj projector = new DMatrixRMaj(JCols, JCols);
 
          nullspaceCalculator.computeNullspaceProjector(jacobian, projector);
 
@@ -253,8 +253,8 @@ public abstract class NullspaceCalculatorTest
          linearSolver.setA(jacobian);
          linearSolver.invert(jacobianInverse);
 
-         CommonOps.mult(jacobianInverse, jacobian, projectorExpected);
-         CommonOps.scale(-1.0, projectorExpected);
+         CommonOps_DDRM.mult(jacobianInverse, jacobian, projectorExpected);
+         CommonOps_DDRM.scale(-1.0, projectorExpected);
          MatrixTools.addDiagonal(projectorExpected, 1.0);
 
          for (int j = 0; j < projectorExpected.getNumRows(); j++)
@@ -267,7 +267,7 @@ public abstract class NullspaceCalculatorTest
 
 
          // compute the projection
-         CommonOps.mult(matrixToProject, projectorExpected, projectedMatrixExpected);
+         CommonOps_DDRM.mult(matrixToProject, projectorExpected, projectedMatrixExpected);
          nullspaceCalculator.projectOntoNullspace(matrixToProject, jacobian, projectedMatrix);
          nullspaceCalculator.projectOntoNullspace(matrixToProject, jacobian);
 

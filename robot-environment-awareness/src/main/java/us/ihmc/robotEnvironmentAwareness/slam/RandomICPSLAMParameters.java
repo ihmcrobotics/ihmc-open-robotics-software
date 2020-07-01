@@ -1,5 +1,9 @@
 package us.ihmc.robotEnvironmentAwareness.slam;
 
+import us.ihmc.jOctoMap.tools.ScannerTools;
+
+import java.util.Scanner;
+
 public class RandomICPSLAMParameters
 {
    private double octreeResolution;
@@ -118,6 +122,11 @@ public class RandomICPSLAMParameters
       this.numberOfSourcePoints = numberOfSourcePoints;
    }
 
+   public void setMaximumInitialDistanceRatio(double maximumInitialDistanceRatio)
+   {
+      this.maximumInitialDistanceRatio = maximumInitialDistanceRatio;
+   }
+
    public void setMaximumDepth(double maximumDepth)
    {
       this.maximumDepth = maximumDepth;
@@ -146,5 +155,32 @@ public class RandomICPSLAMParameters
    public void setMinimumInliersRatioOfKeyFramePercentage(double minimumInliersRatioOfKeyFrame)
    {
       this.minimumInliersRatioOfKeyFrame = minimumInliersRatioOfKeyFrame;
+   }
+
+   @Override
+   public String toString()
+   {
+      return "octreeResolution: " + octreeResolution + ", numberOfSourcePoints: " + numberOfSourcePoints + ", maximumDepth: " + maximumDepth
+             + ", minimumDepth: " + minimumDepth + ", minimumOverlappedRatio: " + minimumOverlappedRatio + ", maximumInitialDistanceRatio: "
+             + maximumInitialDistanceRatio + ", windowMargin: " + windowMargin + ", maximumICPSearchingSize: " + maximumICPSearchingSize
+             + ", minimumInliersRatioOfKeyFrame: " + minimumInliersRatioOfKeyFrame;
+   }
+
+   public static RandomICPSLAMParameters parse(String parametersAsString)
+   {
+      parametersAsString = parametersAsString.replace(",", "");
+      Scanner scanner = new Scanner(parametersAsString);
+      RandomICPSLAMParameters parameters = new RandomICPSLAMParameters();
+      parameters.setOctreeResolution(ScannerTools.readNextDouble(scanner, parameters.getOctreeResolution()));
+      parameters.setNumberOfSourcePoints(ScannerTools.readNextInt(scanner, parameters.getNumberOfSourcePoints()));
+      parameters.setMaximumDepth(ScannerTools.readNextDouble(scanner, parameters.getMaximumDepth()));
+      parameters.setMinimumDepth(ScannerTools.readNextDouble(scanner, parameters.getMinimumDepth()));
+      parameters.setMinimumOverlappedRatioPercentage(ScannerTools.readNextDouble(scanner, parameters.getMinimumOverlappedRatio()));
+      parameters.setMaximumInitialDistanceRatio(ScannerTools.readNextDouble(scanner, parameters.getMaximumInitialDistanceRatio()));
+      parameters.setWindowMargin(ScannerTools.readNextDouble(scanner, parameters.getWindowMargin()));
+      parameters.setMaximumICPSearchingSize(ScannerTools.readNextInt(scanner, parameters.getMaximumICPSearchingSize()));
+      parameters.setMinimumInliersRatioOfKeyFramePercentage(ScannerTools.readNextDouble(scanner, parameters.getMinimumInliersRatioOfKeyFrame()));
+
+      return parameters;
    }
 }

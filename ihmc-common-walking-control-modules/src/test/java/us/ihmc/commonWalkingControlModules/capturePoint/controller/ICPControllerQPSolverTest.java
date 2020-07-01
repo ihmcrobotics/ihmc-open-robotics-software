@@ -1,20 +1,17 @@
 package us.ihmc.commonWalkingControlModules.capturePoint.controller;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
+import static us.ihmc.robotics.Assert.assertTrue;
+
 import org.jcodec.common.Assert;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import us.ihmc.commonWalkingControlModules.capturePoint.optimization.ICPOptimizationQPSolver;
+
 import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
 import us.ihmc.euclid.referenceFrame.FramePoint2D;
 import us.ihmc.euclid.referenceFrame.FrameVector2D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.tools.EuclidFrameTestTools;
 import us.ihmc.euclid.referenceFrame.tools.ReferenceFrameTools;
-
-import static us.ihmc.robotics.Assert.assertTrue;
 
 public class ICPControllerQPSolverTest
 {

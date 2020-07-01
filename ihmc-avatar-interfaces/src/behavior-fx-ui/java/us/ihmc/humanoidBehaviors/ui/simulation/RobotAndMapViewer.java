@@ -48,7 +48,7 @@ public class RobotAndMapViewer
          view3dFactory.addWorldCoordinateSystem(0.3);
          view3dFactory.addDefaultLighting();
 
-         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REALSENSE_SLAM_MAP.withOutput(), false));
+         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.LIDAR_REA_REGIONS, false));
 //         view3dFactory.addNodeToView(new LivePlanarRegionsGraphic(ros2Node, ROS2Tools.REA, false));
          view3dFactory.addNodeToView(new JavaFXRemoteRobotVisualizer(robotModel, ros2Node));
 
@@ -94,7 +94,7 @@ public class RobotAndMapViewer
       for (int i = 0; i < footstepPlan.getNumberOfSteps(); i++)  // this code makes the message smaller to send over the network, TODO investigate
       {
          FramePose3D soleFramePoseToPack = new FramePose3D();
-         footstepPlan.getFootstep(i).getPose(soleFramePoseToPack);
+         footstepPlan.getFootstep(i).getFootstepPose(soleFramePoseToPack);
          footstepLocations.add(new MutablePair<>(footstepPlan.getFootstep(i).getRobotSide(), new Pose3D(soleFramePoseToPack)));
       }
       footstepPlanGraphic.generateMeshesAsynchronously(footstepLocations);
