@@ -7,14 +7,13 @@ import us.ihmc.avatar.initialSetup.DRCSCSInitialSetup;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.FrameBox3D;
 import us.ihmc.euclid.referenceFrame.FrameCapsule3D;
-import us.ihmc.euclid.referenceFrame.FramePointShape3D;
 import us.ihmc.euclid.referenceFrame.FrameSphere3D;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.mecano.frames.MovingReferenceFrame;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.MultiBodySystemBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
+import us.ihmc.robotics.geometry.shapes.FrameSTPBox3D;
 import us.ihmc.robotics.partNames.ArmJointName;
 import us.ihmc.robotics.partNames.LegJointName;
 import us.ihmc.robotics.physics.Collidable;
@@ -192,18 +191,10 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
          { // Foot
             JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), multiBodySystem);
             MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
-            FrameBox3D footShape = new FrameBox3D(ankleRollFrame, 0.275, 0.16, 0.095);
+            FrameSTPBox3D footShape = new FrameSTPBox3D(ankleRollFrame, 0.275, 0.16, 0.095);
+            footShape.setMargins(1.0e-5, 4.0e-4);
             footShape.getPosition().set(0.044, 0.0, -0.042);
             collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footShape));
-
-            for (RobotSide footSide : RobotSide.values)
-            {
-               FramePointShape3D footFrontCorner = new FramePointShape3D(ankleRollFrame, new Point3D(0.17, footSide.negateIfRightSide(0.07), -0.09));
-               collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footFrontCorner));
-
-               FramePointShape3D footBackCorner = new FramePointShape3D(ankleRollFrame, new Point3D(-0.08, footSide.negateIfRightSide(0.07), -0.09));
-               collidables.add(new Collidable(ankleRoll.getSuccessor(), collisionMask, collisionGroup, footBackCorner));
-            }
          }
       }
 
