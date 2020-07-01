@@ -13,6 +13,8 @@ public interface ContactParametersBasics extends ContactParametersReadOnly, Cons
       ConstraintParametersBasics.super.set(other);
       setMinimumPenetration(other.getMinimumPenetration());
       setCoefficientOfFriction(other.getCoefficientOfFriction());
+      setComputeFrictionMoment(other.getComputeFrictionMoment());
+      setCoulombMomentFrictionRatio(other.getCoulombMomentFrictionRatio());
       setSlipErrorReductionParameter(other.getSlipErrorReductionParameter());
    }
 
@@ -58,6 +60,41 @@ public interface ContactParametersBasics extends ContactParametersReadOnly, Cons
     * @param coefficientOfFriction the coefficient of friction, recommended 0.7.
     */
    void setCoefficientOfFriction(double coefficientOfFriction);
+
+   /**
+    * Sets whether a moment-impulse of friction should be calculated alongside the usual linear
+    * impulse.
+    * <p>
+    * When enabled, only a moment around the normal axis of an active contact is computed with the goal
+    * of canceling the angular velocity around the normal axis.
+    * </p>
+    * 
+    * @param computeFrictionMoment {@code true} to enable the friction moment calculation,
+    *                              {@code false} to disable it.
+    */
+   void setComputeFrictionMoment(boolean computeFrictionMoment);
+
+   /**
+    * When computing the moment-impulse of friction for a contact, then Coulomb friction is replaced by
+    * an elliptic law as follows:
+    * 
+    * <pre>
+    * F<sub>x</sub><sup>2</sup>/e<sub>x</sub><sup>2</sup> + F<sub>y</sub><sup>2</sup>/e<sub>y</sub><sup>2</sup> + T<sub>z</sub><sup>2</sup>/e<sub>zz</sub><sup>2</sup> &leq; &mu;F<sub>z</sub><sup>2</sup>
+    * </pre>
+    * 
+    * where <tt>F<sub>x</sub></tt> and <tt>F<sub>y</sub></tt> are the tangential forces,
+    * <tt>T<sub>z</sub></tt> the normal moment, <tt>F<sub>z</sub></tt> the normal force, and
+    * <tt>&mu;</tt> the coefficient of friction. <tt>e<sub>i</sub> are positive constants defined by
+    * the user.
+    * <p>
+    * In the current implementation of the solver, <tt>e<sub>x</sub> = e<sub>y</sub> = 1<tt> and only <tt>e<sub>zz</sub></tt>
+    * is the ratio set by this method.
+    * </p>
+    * 
+    * @param coulombFrictionMomentRatio the value to use for <tt>e<sub>zz</sub></tt>, default is
+    *                                   {@code 0.3}.
+    */
+   void setCoulombMomentFrictionRatio(double coulombFrictionMomentRatio);
 
    /**
     * Sets the value of the error reduction parameter used to reduce slip.
