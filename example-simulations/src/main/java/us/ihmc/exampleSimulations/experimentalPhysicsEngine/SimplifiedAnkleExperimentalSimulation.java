@@ -82,9 +82,8 @@ public class SimplifiedAnkleExperimentalSimulation
       MultiBodySystemStateWriter initialStateWriter = createInitialStateWriter();
       RobotCollisionModel collisionModel = RobotCollisionModel.singleBodyCollisionModel(footLinkName, body ->
       {
-//         FrameBox3D shape = new FrameBox3D(body.getBodyFixedFrame(), footSize);
-                  FrameSTPBox3D shape = new FrameSTPBox3D(body.getBodyFixedFrame(), footSize);
-                  shape.setMargins(1.0e-4, 1.0e-3);
+         FrameSTPBox3D shape = new FrameSTPBox3D(body.getBodyFixedFrame(), footSize);
+         shape.setMargins(1.0e-4, 1.0e-3);
          return new Collidable(body, -1, -1, shape);
       });
 
@@ -96,7 +95,7 @@ public class SimplifiedAnkleExperimentalSimulation
 
       double simDT = 0.001;
       SimulationConstructionSetParameters parameters = new SimulationConstructionSetParameters();
-      ExperimentalSimulation experimentalSimulation = new ExperimentalSimulation(1 << 15);
+      ExperimentalSimulation experimentalSimulation = new ExperimentalSimulation(1 << 16);
       experimentalSimulation.setGravity(new Vector3D(0.0, 0.0, -9.81));
       experimentalSimulation.getPhysicsEngine().setGlobalContactParameters(contactParameters);
       experimentalSimulation.addRobot(robotDescription, collisionModel, initialStateWriter, controller);
@@ -115,12 +114,12 @@ public class SimplifiedAnkleExperimentalSimulation
       scs.setDT(simDT, 1);
       scs.setFastSimulate(true);
       scs.startOnAThread();
-      scs.simulate(0.63);
+      scs.simulate(15.0);
    }
 
    public MultiBodySystemStateWriter createController()
    {
-      desiredPositionAnklePitch.set(-0.087);
+      desiredPositionAnklePitch.set(-0.30);
       ankleGains.setKp(500.0);
       ankleGains.setKd(150.0);
 
@@ -246,7 +245,9 @@ public class SimplifiedAnkleExperimentalSimulation
          {
             FloatingJointBasics rootJoint = getJoint(rootJointName);
 
-            rootJoint.getJointPose().getPosition().setZ(comBallRadius + legLength + footSize.getZ()+0.01);
+            rootJoint.getJointPose().getPosition().setZ(comBallRadius + legLength + footSize.getZ() + 0.01);
+            rootJoint.getJointTwist().getLinearPart().set(1.0, 0.5, 0.0);
+            rootJoint.getJointWrench().getAngularPart().setZ(1.0);
          }
       };
    }
@@ -261,7 +262,7 @@ public class SimplifiedAnkleExperimentalSimulation
                                                                                      comBallRadius,
                                                                                      comBallMass,
                                                                                      0.8,
-                                                                                     YoAppearance.AluminumMaterial(),
+                                                                                     YoAppearance.CornflowerBlue(),
                                                                                      false,
                                                                                      null);
       comBallLink.getLinkGraphics().translate(0.0, 0.0, -comBallRadius - legLength);
