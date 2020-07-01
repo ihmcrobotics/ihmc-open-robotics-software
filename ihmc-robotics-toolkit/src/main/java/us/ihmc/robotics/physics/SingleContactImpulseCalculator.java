@@ -1,10 +1,19 @@
 package us.ihmc.robotics.physics;
 
+import static us.ihmc.robotics.physics.ContactImpulseTools.computeSlipLambda;
+import static us.ihmc.robotics.physics.ContactImpulseTools.isInsideFrictionCone;
+import static us.ihmc.robotics.physics.ContactImpulseTools.isInsideFrictionEllipsoid;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import org.ejml.data.DMatrix3;
+import org.ejml.data.DMatrix3x3;
+import org.ejml.data.DMatrix4x4;
 import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.fixed.CommonOps_DDF3;
+import org.ejml.dense.fixed.CommonOps_DDF4;
 import org.ejml.dense.row.CommonOps_DDRM;
 import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
 import org.ejml.interfaces.linsol.LinearSolverDense;
@@ -14,9 +23,9 @@ import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameVector3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DBasics;
-import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
@@ -30,23 +39,38 @@ import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.spatial.SpatialImpulse;
+import us.ihmc.mecano.spatial.SpatialVector;
 import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.spatial.Wrench;
+import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialImpulseBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialAccelerationReadOnly;
 import us.ihmc.mecano.spatial.interfaces.SpatialImpulseReadOnly;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorBasics;
+import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
+import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 
 /**
  * From <i>"Per-Contact Iteration Method for Solving Contact Dynamics"</i>
- *
+ * <p>
+ * Unconventional matrix ordering: when solving for normal friction moment, the ordering is linear
+ * components first and last is the z angular component.
+ * </p>
+ * 
  * @author Sylvain Bertrand
  */
 public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCalculator
 {
+   private static final double DEGENERATE_THRESHOLD = 1.0e-6;
+   private static final boolean COMPUTE_FRICTION_MOMENT = true;
+   private static final int PROBLEM_SIZE = COMPUTE_FRICTION_MOMENT ? 4 : 3;
+   private static final double COULOMB_MOMENT_RATIO = 0.3;
+   private static final double NEGATIVE_NORMAL_IMPULSE_THRESHOLD = -1.0e-12;
+
    private double beta1 = 0.35;
    private double beta2 = 0.95;
    private double beta3 = 1.15;
    private double gamma = 1.0e-6;
-   private final ContactParameters contactParameters = new ContactParameters(5.0e-5, 0.7, 0.0, 0.0, 0.01, 0.0, 1.0);
+   private final ContactParameters contactParameters = new ContactParameters(5.0e-5, 0.7, 0.0, 0.0, 0.0, 0.0, 1.0);
 
    private boolean isFirstUpdate = false;
    private boolean isImpulseZero = false;
@@ -61,41 +85,34 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private final FramePoint3D pointA = new FramePoint3D();
    private final FramePoint3D pointB = new FramePoint3D();
 
-   private final FrameVector3D velocityNoImpulseA = new FrameVector3D();
-   private final FrameVector3D velocityNoImpulseB = new FrameVector3D();
+   private final SpatialVector velocityNoImpulseA = new SpatialVector();
+   private final SpatialVector velocityNoImpulseB = new SpatialVector();
 
-   private final FrameVector3D velocityDueToOtherImpulseA = new FrameVector3D();
-   private final FrameVector3D velocityDueToOtherImpulseB = new FrameVector3D();
+   private final SpatialVector velocityDueToOtherImpulseA = new SpatialVector();
+   private final SpatialVector velocityDueToOtherImpulseB = new SpatialVector();
 
-   private final FrameVector3D velocityA = new FrameVector3D();
-   private final FrameVector3D velocityB = new FrameVector3D();
-   private final FrameVector3D velocityRelative = new FrameVector3D();
-   private final FrameVector3D velocityRelativePrevious = new FrameVector3D();
-   private final FrameVector3D velocityRelativeChange = new FrameVector3D();
+   private final SpatialVector velocityA = new SpatialVector();
+   private final SpatialVector velocityB = new SpatialVector();
+   private final SpatialVector velocityRelative = new SpatialVector();
+   private final SpatialVector velocityRelativePrevious = new SpatialVector();
+   private final SpatialVector velocityRelativeChange = new SpatialVector();
    /**
     * Velocity used to compute the impulse. It is composed of {@link #velocityRelative} and
     * modifications to inject restitution and error reduction in the solution.
     */
-   private final FrameVector3D velocitySolverInput = new FrameVector3D();
+   private final SpatialVector velocitySolverInput = new SpatialVector();
 
-   private final DMatrixRMaj inverseApparentInertiaA = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj inverseApparentInertiaB = new DMatrixRMaj(3, 3);
+   private final DMatrixRMaj inverseApparentInertiaA = new DMatrixRMaj(PROBLEM_SIZE, PROBLEM_SIZE);
+   private final DMatrixRMaj inverseApparentInertiaB = new DMatrixRMaj(PROBLEM_SIZE, PROBLEM_SIZE);
 
    private final SpatialImpulse impulseA = new SpatialImpulse();
    private final SpatialImpulse impulseB = new SpatialImpulse();
-   private final FrameVector3D impulsePreviousA = new FrameVector3D();
-   private final FrameVector3D impulseChangeA = new FrameVector3D();
+   private final SpatialImpulse impulsePreviousA = new SpatialImpulse();
+   private final SpatialImpulse impulseChangeA = new SpatialImpulse();
 
    private final Point3D contactFramePosition = new Point3D();
    private final Quaternion contactFrameOrientation = new Quaternion();
    private final ReferenceFrame contactFrame;
-
-   private final DMatrixRMaj c = new DMatrixRMaj(3, 1);
-   private final DMatrixRMaj M_inv = new DMatrixRMaj(3, 3);
-   private final DMatrixRMaj lambda_v_0 = new DMatrixRMaj(3, 1);
-   private final LinearSolverDense<DMatrixRMaj> linearSolver = LinearSolverFactory_DDRM.symmPosDef(3);
-   private final LinearSolverDense<DMatrixRMaj> svdSolver = LinearSolverFactory_DDRM.pseudoInverse(true);
-   private final DMatrixRMaj M_inv_solverCopy = new DMatrixRMaj(3, 3);
 
    private final RigidBodyBasics rootA, rootB;
 
@@ -106,6 +123,80 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    private CollisionResult collisionResult;
    private RigidBodyBasics contactingBodyA, contactingBodyB;
    private MovingReferenceFrame bodyFrameA, bodyFrameB;
+
+   // Solver data ------------------------------------------------------------------
+   /**
+    * Contact velocity, extracted from {@link #velocitySolverInput}. When evaluating frictional moment,
+    * this is a 4-element vector, the last element being the angular velocity around the z-axis.
+    */
+   private final DMatrixRMaj c = new DMatrixRMaj(PROBLEM_SIZE, 1);
+   /** Linear part of the contact velocity, extracted from {@link #velocitySolverInput} */
+   private final DMatrix3 c_linear = new DMatrix3();
+
+   /**
+    * The inverse of the apparent inertia matrix.
+    * <p>
+    * When not solving for frictional moment, this is a 3-by-3 matrix. When solving for the frictional
+    * moment, this is a 4-by-4 matrix where the last row and last column are the terms linking the the
+    * angular components of the impulse and velocity.
+    * </p>
+    */
+   private final DMatrixRMaj M_inv = new DMatrixRMaj(PROBLEM_SIZE, PROBLEM_SIZE);
+   /**
+    * The 3-by-3 matrix for the linear part of the inverse of the apparent inertia matrix.
+    */
+   private final DMatrix3x3 M_linear_inv = new DMatrix3x3();
+   /**
+    * The 3-by-3 matrix for the linear part of the apparent inertia matrix.
+    */
+   private final DMatrix3x3 M_linear = new DMatrix3x3();
+   /**
+    * The 4-by-4 matrix for the linear part of the inverse of the apparent inertia matrix.
+    * <p>
+    * Only used when solving for the frictional moment.
+    * </p>
+    * <p>
+    * The last row and last column are the terms linking the the angular components of the impulse and
+    * velocity.
+    * </p>
+    */
+   private final DMatrix4x4 M_full_inv = new DMatrix4x4();
+   /**
+    * The 4-by-4 matrix for the linear part of the apparent inertia matrix.
+    * <p>
+    * Only used when solving for the frictional moment.
+    * </p>
+    * <p>
+    * The last row and last column are the terms linking the the angular components of the impulse and
+    * velocity.
+    * </p>
+    */
+   private final DMatrix4x4 M_full = new DMatrix4x4();
+   /**
+    * The 3-element vector extracted from the 3 first elements of the last row of {@link #M_full}.
+    * <p>
+    * Only used when solving for the frictional moment.
+    * </p>
+    * <p>
+    * These elements are the coupling part between angular and linear parts.
+    * </p>
+    */
+   private final DMatrix3 M_lin_ang = new DMatrix3();
+   /**
+    * Solver only used when {@link #M_inv} is not invertible, i.e. degenerate problem.
+    */
+   private final LinearSolverDense<DMatrixRMaj> svdSolver = LinearSolverFactory_DDRM.pseudoInverse(true);
+   /** The linear impulse that fully cancels the contact velocity and may violate the friction law. */
+   private final DMatrix3 lambda_linear_v_0 = new DMatrix3();
+   /** The linear impulse that best cancels the contact velocity and respect the friction law. */
+   private final DMatrix3 lambda_linear = new DMatrix3();
+   /**
+    * The impulse that fully cancels the contact velocity and may violate the friction law.
+    * <p>
+    * Only used when for degenerate problems.
+    * </p>
+    */
+   private final DMatrixRMaj lambda_v_0 = new DMatrixRMaj(PROBLEM_SIZE, 1);
 
    public SingleContactImpulseCalculator(ReferenceFrame rootFrame, RigidBodyBasics rootBodyA, ForwardDynamicsCalculator forwardDynamicsCalculatorA,
                                          RigidBodyBasics rootBodyB, ForwardDynamicsCalculator forwardDynamicsCalculatorB)
@@ -197,7 +288,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       pointA.setIncludingFrame(collisionResult.getCollisionData().getPointOnA());
       pointA.changeFrame(bodyFrameA);
 
-      computeContactPointVelocity(dt, rootA, contactingBodyA, forwardDynamicsCalculatorA.getAccelerationProvider(false), pointA, velocityNoImpulseA);
+      RigidBodyAccelerationProvider accelerationProviderA = forwardDynamicsCalculatorA.getAccelerationProvider(false);
+      predictContactPointSpatialVelocity(dt, rootA, contactingBodyA, accelerationProviderA, pointA, velocityNoImpulseA);
       velocityNoImpulseA.changeFrame(contactFrame);
 
       pointB.setIncludingFrame(collisionResult.getCollisionData().getPointOnB());
@@ -205,7 +297,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       if (rootB != null)
       {
          pointB.changeFrame(bodyFrameB);
-         computeContactPointVelocity(dt, rootB, contactingBodyB, forwardDynamicsCalculatorB.getAccelerationProvider(false), pointB, velocityNoImpulseB);
+         RigidBodyAccelerationProvider accelerationProviderB = forwardDynamicsCalculatorB.getAccelerationProvider(false);
+         predictContactPointSpatialVelocity(dt, rootB, contactingBodyB, accelerationProviderB, pointB, velocityNoImpulseB);
          velocityNoImpulseB.changeFrame(contactFrame);
       }
 
@@ -217,8 +310,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    @Override
    public void updateInertia(List<? extends RigidBodyBasics> rigidBodyTargets, List<? extends JointBasics> jointTargets)
    {
-      rigidBodyTwistModifierA.clear(3);
-      jointTwistModifierA.clear(3);
+      rigidBodyTwistModifierA.clear(PROBLEM_SIZE);
+      jointTwistModifierA.clear(PROBLEM_SIZE);
       if (rigidBodyTargets != null)
          rigidBodyTwistModifierA.addAll(rigidBodyTargets);
       if (jointTargets != null)
@@ -226,8 +319,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
       if (rootB != null)
       {
-         rigidBodyTwistModifierB.clear(3);
-         jointTwistModifierB.clear(3);
+         rigidBodyTwistModifierB.clear(PROBLEM_SIZE);
+         jointTwistModifierB.clear(PROBLEM_SIZE);
          if (rigidBodyTargets != null)
             rigidBodyTwistModifierB.addAll(rigidBodyTargets);
          if (jointTargets != null)
@@ -246,13 +339,23 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       {
          M_inv.set(inverseApparentInertiaA);
       }
+
+      ContactImpulseTools.extract(M_inv, 0, 0, M_linear_inv);
+      CommonOps_DDF3.invert(M_linear_inv, M_linear);
+
+      if (COMPUTE_FRICTION_MOMENT)
+      {
+         M_full_inv.set(M_inv);
+         CommonOps_DDF4.invert(M_full_inv, M_full);
+      }
    }
 
-   public static void computeContactPointVelocity(double dt, RigidBodyReadOnly rootBody, RigidBodyReadOnly contactingBody,
-                                                  RigidBodyAccelerationProvider noVelocityRigidBodyAccelerationProvider, FramePoint3DReadOnly contactPoint,
-                                                  FrameVector3DBasics linearVelocityToPack)
+   public static void computeContactPointLinearVelocity(double dt, RigidBodyReadOnly rootBody, RigidBodyReadOnly contactingBody,
+                                                        RigidBodyAccelerationProvider noVelocityRigidBodyAccelerationProvider,
+                                                        FramePoint3DReadOnly contactPoint, FrameVector3DBasics linearVelocityToPack)
    {
       MovingReferenceFrame bodyFixedFrame = contactingBody.getBodyFixedFrame();
+      linearVelocityToPack.setReferenceFrame(bodyFixedFrame);
 
       // Using acceleration relative to the root to avoid integrating the gravitational acceleration.
       SpatialAccelerationReadOnly contactingBodyAcceleration = noVelocityRigidBodyAccelerationProvider.getRelativeAcceleration(rootBody, contactingBody);
@@ -266,6 +369,41 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       linearVelocityToPack.add(vx, vy, vz);
    }
 
+   public static void predictContactPointSpatialVelocity(double dt, RigidBodyReadOnly rootBody, RigidBodyReadOnly contactingBody,
+                                                         RigidBodyAccelerationProvider noVelocityRigidBodyAccelerationProvider,
+                                                         FramePoint3DReadOnly contactPoint, SpatialVectorBasics spatialVelocityToPack)
+   {
+      MovingReferenceFrame bodyFixedFrame = contactingBody.getBodyFixedFrame();
+      spatialVelocityToPack.setReferenceFrame(bodyFixedFrame);
+
+      FixedFrameVector3DBasics angularVelocity = spatialVelocityToPack.getAngularPart();
+      FixedFrameVector3DBasics linearVelocity = spatialVelocityToPack.getLinearPart();
+
+      // Using acceleration relative to the root to avoid integrating the gravitational acceleration.
+      SpatialAccelerationReadOnly contactingBodyAcceleration = noVelocityRigidBodyAccelerationProvider.getRelativeAcceleration(rootBody, contactingBody);
+      angularVelocity.set(contactingBodyAcceleration.getAngularPart());
+      contactingBodyAcceleration.getLinearAccelerationAt(null, contactPoint, linearVelocity);
+      spatialVelocityToPack.scale(dt);
+      double wx = angularVelocity.getX();
+      double wy = angularVelocity.getY();
+      double wz = angularVelocity.getZ();
+      double vx = linearVelocity.getX();
+      double vy = linearVelocity.getY();
+      double vz = linearVelocity.getZ();
+
+      // Adding the current twist to the integrated acceleration
+      packSpatialVelocityAt(bodyFixedFrame.getTwistOfFrame(), contactPoint, spatialVelocityToPack);
+      angularVelocity.add(wx, wy, wz);
+      linearVelocity.add(vx, vy, vz);
+   }
+
+   public static void packSpatialVelocityAt(TwistReadOnly twist, FramePoint3DReadOnly observerPosition, SpatialVectorBasics spatialVelocityToPack)
+   {
+      spatialVelocityToPack.setReferenceFrame(twist.getReferenceFrame());
+      spatialVelocityToPack.getAngularPart().set(twist.getAngularPart());
+      twist.getLinearVelocityAt(observerPosition, spatialVelocityToPack.getLinearPart());
+   }
+
    private final FrameVector3D collisionErrorReductionTerm = new FrameVector3D();
 
    @Override
@@ -274,7 +412,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       if (!ignoreOtherImpulses && externalRigidBodyTwistModifier != null)
       {
          // Compute the change in twist due to other impulses.
-         velocityDueToOtherImpulseA.setIncludingFrame(externalRigidBodyTwistModifier.getLinearVelocityOfBodyFixedPoint(contactingBodyA, pointA));
+         packSpatialVelocityAt(externalRigidBodyTwistModifier.getTwistOfBody(contactingBodyA), pointA, velocityDueToOtherImpulseA);
          velocityDueToOtherImpulseA.changeFrame(contactFrame);
          velocityA.add(velocityNoImpulseA, velocityDueToOtherImpulseA);
       }
@@ -288,7 +426,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          if (!ignoreOtherImpulses && externalRigidBodyTwistModifier != null)
          {
             // Compute the change in twist due to other impulses.
-            velocityDueToOtherImpulseB.setIncludingFrame(externalRigidBodyTwistModifier.getLinearVelocityOfBodyFixedPoint(contactingBodyB, pointB));
+            packSpatialVelocityAt(externalRigidBodyTwistModifier.getTwistOfBody(contactingBodyB), pointB, velocityDueToOtherImpulseB);
             velocityDueToOtherImpulseB.changeFrame(contactFrame);
             velocityB.add(velocityNoImpulseB, velocityDueToOtherImpulseB);
          }
@@ -311,9 +449,12 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
        * collision axis.
        */
       velocitySolverInput.set(velocityRelative);
+      FixedFrameVector3DBasics linearVelocitySolverInput = velocityRelative.getLinearPart();
 
-      if (contactParameters.getCoefficientOfRestitution() != 0.0 && velocityRelative.getZ() <= -contactParameters.getRestitutionThreshold())
-         velocitySolverInput.addZ(contactParameters.getCoefficientOfRestitution() * (velocityRelative.getZ() + contactParameters.getRestitutionThreshold()));
+      double cr = contactParameters.getCoefficientOfRestitution();
+      double rth = contactParameters.getRestitutionThreshold();
+      if (cr != 0.0 && velocityRelative.getLinearPart().getZ() <= -rth)
+         linearVelocitySolverInput.addZ(cr * (velocityRelative.getLinearPart().getZ() + rth));
 
       /*
        * Computing the correction term based on the penetration of the two collidables. This assumes that
@@ -323,7 +464,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
        * relative velocity that the solver is trying to cancel, this way the calculator will implicitly
        * account for the error.
        */
-      if (contactParameters.getErrorReductionParameter() != 0.0)
+      double erp = contactParameters.getErrorReductionParameter();
+      if (erp != 0.0)
       {
          collisionErrorReductionTerm.setIncludingFrame(collisionResult.getPointOnBRootFrame());
          collisionErrorReductionTerm.sub(collisionResult.getPointOnARootFrame());
@@ -331,55 +473,26 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          double normalError = collisionErrorReductionTerm.getZ() - contactParameters.getMinimumPenetration();
          if (normalError > 0.0)
          {
-            normalError *= contactParameters.getErrorReductionParameter() / dt;
-            velocitySolverInput.subZ(normalError);
+            normalError *= erp / dt;
+            linearVelocitySolverInput.subZ(normalError);
          }
       }
-      if (contactParameters.getSlipErrorReductionParameter() != 0.0)
+      double serp = contactParameters.getSlipErrorReductionParameter();
+      if (serp != 0.0)
       {
          collisionErrorReductionTerm.setIncludingFrame(collisionResult.getAccumulatedSlipForA());
-         collisionErrorReductionTerm.scale(-contactParameters.getSlipErrorReductionParameter() / dt);
+         collisionErrorReductionTerm.scale(-serp / dt);
          collisionErrorReductionTerm.changeFrame(contactFrame);
          // Ensure slip error is only tangential to the contact.
-         velocitySolverInput.sub(collisionErrorReductionTerm.getX(), collisionErrorReductionTerm.getY(), 0.0);
+         linearVelocitySolverInput.sub(collisionErrorReductionTerm.getX(), collisionErrorReductionTerm.getY(), 0.0);
       }
 
-      isContactClosing = velocitySolverInput.getZ() < 0.0;
+      isContactClosing = linearVelocitySolverInput.getZ() < 0.0;
       impulseA.setToZero(bodyFrameA, contactFrame);
 
       if (isContactClosing)
       { // Closing contact, impulse needs to be calculated.
-         double mu = contactParameters.getCoefficientOfFriction();
-
-         if (EuclidCoreTools.isZero(mu, 1.0e-12))
-         { // Trivial case, i.e. there is no friction => the impulse is along the collision axis.
-            impulseA.getLinearPart().setZ(-velocitySolverInput.getZ() / M_inv.get(2, 2));
-         }
-         else
-         {
-            velocitySolverInput.get(c);
-            LinearSolverDense<DMatrixRMaj> solver;
-            if (CommonOps_DDRM.det(M_inv) > 1.0e-6)
-               solver = linearSolver;
-            else
-               solver = svdSolver; // TODO This is not enough to cover the degenerate case, need to decompose the problem to work in reduced space, i.e. either 2D or 1D.
-
-            M_inv_solverCopy.set(M_inv);
-            solver.setA(M_inv_solverCopy);
-            solver.solve(c, lambda_v_0);
-            CommonOps_DDRM.changeSign(lambda_v_0);
-
-            if (lambda_v_0.get(2) > -1.0e-12 && ContactImpulseTools.isInsideFrictionCone(mu, lambda_v_0))
-            { // Contact is sticking, i.e. satisfies Coulomb's friction cone while canceling velocity.
-               impulseA.getLinearPart().set(lambda_v_0);
-            }
-            else
-            { // Contact is slipping, that's the though case.
-               ContactImpulseTools.computeSlipLambda(beta1, beta2, beta3, gamma, mu, M_inv, lambda_v_0, c, impulseA.getLinearPart(), false);
-               if (collisionResult.getAccumulatedSlipForA() != null)
-                  collisionResult.getAccumulatedSlipForA().scale(0.995);
-            }
-         }
+         solveImpulseGeneral(contactParameters.getCoefficientOfFriction(), impulseA);
       }
 
       if (impulseA.getLinearPart().getZ() < 0.0)
@@ -390,25 +503,25 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
        * applied.
        */
       if (contactParameters.getConstraintForceMixing() != 1.0)
-         impulseA.getLinearPart().scale(contactParameters.getConstraintForceMixing());
+         impulseA.scale(contactParameters.getConstraintForceMixing());
 
       if (isFirstUpdate)
       {
          if (isContactClosing)
          {
-            impulseChangeA.set(impulseA.getLinearPart());
+            impulseChangeA.setIncludingFrame(impulseA);
             isImpulseZero = !isContactClosing;
          }
          else
          {
-            impulseChangeA.setToZero(contactFrame);
+            impulseChangeA.setToZero(bodyFrameA, contactFrame);
             isImpulseZero = true;
          }
       }
       else
       {
-         impulseA.getLinearPart().interpolate(impulsePreviousA, impulseA.getLinearPart(), alpha);
-         impulseChangeA.sub(impulseA.getLinearPart(), impulsePreviousA);
+         impulseA.interpolate(impulsePreviousA, impulseA, alpha);
+         impulseChangeA.sub(impulseA, impulsePreviousA);
          isImpulseZero = impulseA.getLinearPart().length() < 1.0e-6;
       }
 
@@ -428,7 +541,7 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          }
       }
 
-      impulsePreviousA.set(impulseA.getLinearPart());
+      impulsePreviousA.setIncludingFrame(impulseA);
 
       if (isFirstUpdate)
       {
@@ -442,6 +555,196 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       }
 
       isFirstUpdate = false;
+   }
+
+   public void solveImpulseGeneral(double mu, FixedFrameSpatialImpulseBasics impulseToPack)
+   {
+      if (EuclidCoreTools.isZero(mu, 1.0e-12))
+      { // Trivial case, i.e. there is no friction => the impulse is along the collision axis.
+         impulseToPack.getLinearPart().setZ(-velocitySolverInput.getLinearPart().getZ() / M_inv.get(2, 2));
+         return;
+      }
+
+      if (CommonOps_DDRM.det(M_inv) <= DEGENERATE_THRESHOLD)
+      {
+         solveImpulseDegenerate(mu, impulseToPack);
+         return;
+      }
+
+      velocitySolverInput.getLinearPart().get(c_linear);
+      boolean isSlipping = solveLinearImpulse(mu, impulseToPack);
+
+      /*
+       * When the contact is slipping and that we're considering only the linear part of it, we skip the
+       * evaluation of the frictional moment and will leave the angular impulse to zero.
+       */
+      if (!isSlipping)
+      {
+         if (COMPUTE_FRICTION_MOMENT)
+         {
+            solveAngularImpulse(mu, impulseToPack);
+         }
+      }
+   }
+
+   public boolean solveLinearImpulse(double mu, FixedFrameSpatialImpulseBasics impulseToPack)
+   {
+      CommonOps_DDF3.mult(M_linear, c_linear, lambda_linear_v_0);
+      CommonOps_DDF3.changeSign(lambda_linear_v_0);
+
+      if (lambda_linear_v_0.a3 > NEGATIVE_NORMAL_IMPULSE_THRESHOLD && isInsideFrictionCone(mu, lambda_linear_v_0))
+      { // Contact is sticking, i.e. satisfies Coulomb's friction cone while canceling velocity.
+         impulseToPack.getLinearPart().set(lambda_linear_v_0);
+         return false;
+      }
+      else
+      { // Contact is slipping, that's the though case.
+         computeSlipLambda(beta1, beta2, beta3, gamma, mu, M_linear_inv, lambda_linear_v_0, c_linear, lambda_linear, false);
+         impulseToPack.getLinearPart().set(lambda_linear);
+         return true;
+      }
+   }
+
+   /**
+    * This method attempts to compute the linear and z-angular impulse that cancels the contact
+    * velocity (linear and z-angular).
+    * <p>
+    * In the case that canceling the z-angular velocity cannot be achieved, i.e. resulting impulse
+    * violates the generalized friction law, the linear part of the impulse is prioritized over the
+    * angular. The current implementation performs a bisection on the z-angular velocity to find the
+    * maximum velocity that can be cancelled while satisfying the friction law.
+    * </p>
+    * <p>
+    * This method will not compute an optimal solution in the sense the that the solution is not
+    * guaranteed to provide maximum dissipation.
+    * </p>
+    */
+   private void solveAngularImpulse(double mu, FixedFrameSpatialImpulseBasics impulseToPack)
+   {
+      /*
+       * @formatter:off
+       * / lambda_linear  \ = - / M_linear    M_lin_ang \ / c_linear  \
+       * \ lambda_angular /     \ M_lin_ang^T M_angular / \ c_angular /
+       * 
+       * We first compute the part of the system that is independent from c_angular:
+       * lambda_linear_decoupled = -M_linear * c_linear
+       * lambda_angular_coupling = -M_lin_ang . c_linear
+       * When 
+       * @formatter:on
+       */
+      DMatrix3 lambda_linear_decoupled = lambda_linear_v_0;
+      lambda_linear_decoupled.a1 = -M_full.a11 * c_linear.a1 - M_full.a12 * c_linear.a2 - M_full.a13 * c_linear.a3;
+      lambda_linear_decoupled.a2 = -M_full.a21 * c_linear.a1 - M_full.a22 * c_linear.a2 - M_full.a23 * c_linear.a3;
+      lambda_linear_decoupled.a3 = -M_full.a31 * c_linear.a1 - M_full.a32 * c_linear.a2 - M_full.a33 * c_linear.a3;
+
+      M_lin_ang.set(M_full.a14, M_full.a24, M_full.a34);
+      double lambda_angular_coupling = -CommonOps_DDF3.dot(M_lin_ang, c_linear);
+
+      // We first check that the contact is sticking when ignoring the angular velocity, if not we abort.
+      if (lambda_linear_decoupled.a3 < NEGATIVE_NORMAL_IMPULSE_THRESHOLD
+            || !isInsideFrictionEllipsoid(mu, lambda_linear_decoupled, lambda_angular_coupling, COULOMB_MOMENT_RATIO))
+         return; // Unable to solve this for now, falling back to solution without friction moment.
+
+      double M_angular = M_full.get(3, 3);
+      double c_angular = velocitySolverInput.getAngularPartZ();
+
+      ContactImpulseTools.scaleAdd(-c_angular, M_lin_ang, lambda_linear_decoupled, lambda_linear);
+      double lambda_angular = lambda_angular_coupling - M_angular * c_angular;
+
+      if (lambda_linear.a3 > NEGATIVE_NORMAL_IMPULSE_THRESHOLD && isInsideFrictionEllipsoid(mu, lambda_linear, lambda_angular, COULOMB_MOMENT_RATIO))
+      {
+         // The contact is sticking, we're done.
+         impulseToPack.getLinearPart().set(lambda_linear);
+         impulseToPack.getAngularPart().setZ(lambda_angular);
+         return;
+      }
+
+      /*
+       * The contact sticking is slipping when countering 100% of c_angular. We start a bisection to find
+       * the max value for c_angular for which the impulse remains within the friction ellipsoid.
+       */
+      // The lower bound is always sticking
+      double c_angular_lo = 0.0;
+      // The upper bound is always slipping
+      double c_angular_hi = c_angular;
+      double lambda_lo_x = lambda_linear_decoupled.a1;
+      double lambda_lo_y = lambda_linear_decoupled.a2;
+      double lambda_lo_z = lambda_linear_decoupled.a3;
+      double lambda_lo_zz = lambda_angular_coupling;
+      int iteration = 0;
+
+      while (true)
+      {
+         iteration++;
+
+         if (Math.abs(c_angular_hi - c_angular_lo) < gamma)
+         {
+            impulseToPack.getLinearPart().set(lambda_lo_x, lambda_lo_y, lambda_lo_z);
+            impulseToPack.getAngularPart().setZ(lambda_lo_zz);
+            return;
+         }
+
+         if (iteration > 1000)
+         {
+            throw new IllegalStateException("Failed to computed friction moment");
+         }
+
+         double c_angular_mid = 0.5 * (c_angular_lo + c_angular_hi);
+
+         ContactImpulseTools.scaleAdd(-c_angular_mid, M_lin_ang, lambda_linear_decoupled, lambda_linear);
+
+         if (lambda_linear.a3 < NEGATIVE_NORMAL_IMPULSE_THRESHOLD)
+         { // We're slipping
+            c_angular_hi = c_angular_mid;
+            continue;
+         }
+
+         lambda_angular = lambda_angular_coupling - M_angular * c_angular_mid;
+
+         if (!isInsideFrictionEllipsoid(mu, lambda_linear, lambda_angular, COULOMB_MOMENT_RATIO))
+         { // We're slipping
+            c_angular_hi = c_angular_mid;
+            continue;
+         }
+
+         // We're sticking
+         c_angular_lo = c_angular_mid;
+         lambda_lo_x = lambda_linear.a1;
+         lambda_lo_y = lambda_linear.a2;
+         lambda_lo_z = lambda_linear.a3;
+         lambda_lo_zz = lambda_angular;
+      }
+   }
+
+   /*
+    * TODO This is not enough to cover the degenerate case, need to decompose the problem to work in
+    * reduced space, i.e. either 2D or 1D.
+    */
+   public void solveImpulseDegenerate(double mu, FixedFrameSpatialImpulseBasics impulseToPack)
+   {
+      lambda_v_0.reshape(PROBLEM_SIZE, 1);
+      c.reshape(PROBLEM_SIZE, 1);
+      velocitySolverInput.getLinearPart().get(c);
+
+      if (COMPUTE_FRICTION_MOMENT)
+         c.set(3, velocitySolverInput.getAngularPart().getZ());
+      svdSolver.setA(M_inv);
+      svdSolver.solve(c, lambda_v_0);
+      CommonOps_DDRM.changeSign(lambda_v_0);
+
+      if (lambda_v_0.get(2) < NEGATIVE_NORMAL_IMPULSE_THRESHOLD)
+         throw new IllegalStateException("Unable to fully solve degenerate case. Need to be improved.");
+
+      if (COMPUTE_FRICTION_MOMENT)
+      {
+         if (!isInsideFrictionEllipsoid(mu, lambda_v_0, COULOMB_MOMENT_RATIO))
+            throw new IllegalStateException("Unable to fully solve degenerate case. Need to be improved.");
+      }
+      else
+      {
+         if (!isInsideFrictionCone(mu, lambda_v_0))
+            throw new IllegalStateException("Unable to fully solve degenerate case. Need to be improved.");
+      }
    }
 
    @Override
@@ -460,13 +763,27 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       }
       else
       {
-         rigidBodyTwistModifierA.setImpulse(impulseA.getLinearPart());
-         jointTwistModifierA.setImpulse(impulseA.getLinearPart());
-
-         if (rootB != null)
+         if (COMPUTE_FRICTION_MOMENT)
          {
-            rigidBodyTwistModifierB.setImpulse(impulseB.getLinearPart());
-            jointTwistModifierB.setImpulse(impulseB.getLinearPart());
+            rigidBodyTwistModifierA.setImpulse(impulseA.getLinearPart(), impulseA.getAngularPartZ());
+            jointTwistModifierA.setImpulse(impulseA.getLinearPart(), impulseA.getAngularPartZ());
+
+            if (rootB != null)
+            {
+               rigidBodyTwistModifierB.setImpulse(impulseB.getLinearPart(), impulseB.getAngularPartZ());
+               jointTwistModifierB.setImpulse(impulseB.getLinearPart(), impulseB.getAngularPartZ());
+            }
+         }
+         else
+         {
+            rigidBodyTwistModifierA.setImpulse(impulseA.getLinearPart());
+            jointTwistModifierA.setImpulse(impulseA.getLinearPart());
+
+            if (rootB != null)
+            {
+               rigidBodyTwistModifierB.setImpulse(impulseB.getLinearPart());
+               jointTwistModifierB.setImpulse(impulseB.getLinearPart());
+            }
          }
       }
    }
@@ -487,9 +804,10 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
                                               ImpulseBasedJointTwistProvider jointTwistModifierToUpdate, DMatrixRMaj inertiaMatrixToPack)
    {
       calculator.reset();
-      inertiaMatrixToPack.reshape(3, 3);
+      inertiaMatrixToPack.reshape(PROBLEM_SIZE, PROBLEM_SIZE);
       RigidBodyTwistProvider twistChangeProvider = calculator.getTwistChangeProvider();
 
+      // Computing the x,y,z linear components
       for (int axis = 0; axis < 3; axis++)
       {
          testImpulse.setIncludingFrame(body.getBodyFixedFrame(), contactFrame, EuclidCoreTools.zeroVector3D, Axis3D.values[axis]);
@@ -500,6 +818,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          testTwist.setIncludingFrame(twistChangeProvider.getTwistOfBody(body));
          testTwist.changeFrame(contactFrame);
          testTwist.getLinearPart().get(0, axis, inertiaMatrixToPack);
+         if (COMPUTE_FRICTION_MOMENT)
+            inertiaMatrixToPack.set(3, axis, testTwist.getAngularPartZ());
 
          for (RigidBodyBasics externalTarget : rigidBodyTwistModifierToUpdate.getRigidBodies())
          {
@@ -511,6 +831,33 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          {
             DMatrixRMaj externalInertiaMatrix = jointTwistModifierToUpdate.getApparentInertiaMatrixInverse(externalTarget);
             CommonOps_DDRM.insert(calculator.getJointTwistChange(externalTarget), externalInertiaMatrix, 0, axis);
+         }
+
+         calculator.reset();
+      }
+
+      if (COMPUTE_FRICTION_MOMENT)
+      {// Computing the z angular component
+         testImpulse.setIncludingFrame(body.getBodyFixedFrame(), contactFrame, Axis3D.Z, EuclidCoreTools.zeroVector3D);
+
+         if (!calculator.applyRigidBodyImpulse(body, testImpulse))
+            throw new IllegalStateException("Something went wrong with the response calculator");
+
+         testTwist.setIncludingFrame(twistChangeProvider.getTwistOfBody(body));
+         testTwist.changeFrame(contactFrame);
+         testTwist.getLinearPart().get(0, 3, inertiaMatrixToPack);
+         inertiaMatrixToPack.set(3, 3, testTwist.getAngularPartZ());
+
+         for (RigidBodyBasics externalTarget : rigidBodyTwistModifierToUpdate.getRigidBodies())
+         {
+            DMatrixRMaj externalInertiaMatrix = rigidBodyTwistModifierToUpdate.getApparentInertiaMatrixInverse(externalTarget);
+            twistChangeProvider.getTwistOfBody(externalTarget).get(0, 3, externalInertiaMatrix);
+         }
+
+         for (JointBasics externalTarget : jointTwistModifierToUpdate.getJoints())
+         {
+            DMatrixRMaj externalInertiaMatrix = jointTwistModifierToUpdate.getApparentInertiaMatrixInverse(externalTarget);
+            CommonOps_DDRM.insert(calculator.getJointTwistChange(externalTarget), externalInertiaMatrix, 0, 3);
          }
 
          calculator.reset();
@@ -654,12 +1001,12 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       return pointB;
    }
 
-   public FrameVector3DReadOnly getVelocityRelative()
+   public SpatialVectorReadOnly getVelocityRelative()
    {
       return velocityRelative;
    }
 
-   public FrameVector3DReadOnly getVelocitySolverInput()
+   public SpatialVectorReadOnly getVelocitySolverInput()
    {
       return velocitySolverInput;
    }
@@ -669,22 +1016,22 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       return M_inv;
    }
 
-   public FrameVector3DReadOnly getVelocityNoImpulseA()
+   public SpatialVectorReadOnly getVelocityNoImpulseA()
    {
       return velocityNoImpulseA;
    }
 
-   public FrameVector3DReadOnly getVelocityNoImpulseB()
+   public SpatialVectorReadOnly getVelocityNoImpulseB()
    {
       return velocityNoImpulseB;
    }
 
-   public FrameVector3DReadOnly getVelocityDueToOtherImpulseA()
+   public SpatialVectorReadOnly getVelocityDueToOtherImpulseA()
    {
       return velocityDueToOtherImpulseA;
    }
 
-   public FrameVector3DReadOnly getVelocityDueToOtherImpulseB()
+   public SpatialVectorReadOnly getVelocityDueToOtherImpulseB()
    {
       return velocityDueToOtherImpulseB;
    }
