@@ -41,4 +41,10 @@ public class VariableDescriptor
    {
       return enumValues;
    }
+
+   @Override
+   public String toString()
+   {
+      return name;
+   }
 }
