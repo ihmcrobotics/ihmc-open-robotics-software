@@ -327,7 +327,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
          // Compute the change in twist due to other impulses.
          packSpatialVelocityAt(externalRigidBodyTwistModifier.getTwistOfBody(contactingBodyA), pointA, velocityDueToOtherImpulseA);
          velocityDueToOtherImpulseA.changeFrame(contactFrame);
-         velocityA.add(velocityNoImpulseA, velocityDueToOtherImpulseA);
+         velocityA.set(velocityNoImpulseA);
+         velocityA.add(velocityDueToOtherImpulseA);
       }
       else
       {
@@ -341,14 +342,16 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
             // Compute the change in twist due to other impulses.
             packSpatialVelocityAt(externalRigidBodyTwistModifier.getTwistOfBody(contactingBodyB), pointB, velocityDueToOtherImpulseB);
             velocityDueToOtherImpulseB.changeFrame(contactFrame);
-            velocityB.add(velocityNoImpulseB, velocityDueToOtherImpulseB);
+            velocityB.set(velocityNoImpulseB);
+            velocityB.add(velocityDueToOtherImpulseB);
          }
          else
          {
             velocityB.set(velocityNoImpulseB);
          }
 
-         velocityRelative.sub(velocityA, velocityB);
+         velocityRelative.set(velocityA);
+         velocityRelative.sub(velocityB);
       }
       else
       {
@@ -433,8 +436,11 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       }
       else
       {
-         impulseA.interpolate(impulsePreviousA, impulseA, alpha);
-         impulseChangeA.sub(impulseA, impulsePreviousA);
+         impulseA.getLinearPart().interpolate(impulsePreviousA.getLinearPart(), impulseA.getLinearPart(), alpha);
+         if (contactParameters.getComputeFrictionMoment())
+            impulseA.getAngularPart().setZ(EuclidCoreTools.interpolate(impulsePreviousA.getAngularPartZ(), impulseA.getAngularPartZ(), alpha));
+         impulseChangeA.set(impulseA);
+         impulseChangeA.sub(impulsePreviousA);
          isImpulseZero = impulseA.getLinearPart().length() < 1.0e-6;
       }
 
@@ -463,7 +469,8 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
       }
       else
       {
-         velocityRelativeChange.sub(velocityRelative, velocityRelativePrevious);
+         velocityRelativeChange.set(velocityRelative);
+         velocityRelativeChange.sub(velocityRelativePrevious);
          velocityRelativePrevious.set(velocityRelative);
       }
 
@@ -613,13 +620,19 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
    @Override
    public double getImpulseUpdate()
    {
-      return impulseChangeA.length();
+      return EuclidCoreTools.norm(impulseChangeA.getLinearPartX(),
+                                  impulseChangeA.getLinearPartY(),
+                                  impulseChangeA.getLinearPartZ(),
+                                  impulseChangeA.getAngularPartZ());
    }
 
    @Override
    public double getVelocityUpdate()
    {
-      return velocityRelativeChange.length();
+      return EuclidCoreTools.norm(velocityRelativeChange.getLinearPartX(),
+                                  velocityRelativeChange.getLinearPartY(),
+                                  velocityRelativeChange.getLinearPartZ(),
+                                  velocityRelativeChange.getAngularPartZ());
    }
 
    @Override
