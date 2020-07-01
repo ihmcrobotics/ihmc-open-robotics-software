@@ -42,4 +42,16 @@ public class WiggleParameters
     * Amount that the polygon to wiggle needs to be inside the polygon to wiggle into. Negative means it can be outside.
     */
    public double deltaInside = 0.0;
+
+   public void set(WiggleParameters other)
+   {
+      this.rotationWeight = other.rotationWeight;
+      this.maxX = other.maxX;
+      this.minX = other.minX;
+      this.maxY = other.maxY;
+      this.minY = other.minY;
+      this.maxYaw = other.maxYaw;
+      this.minYaw = other.minYaw;
+      this.deltaInside = other.deltaInside;
+   }
 }

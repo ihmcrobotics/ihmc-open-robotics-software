@@ -1,24 +1,24 @@
 package us.ihmc.ihmcPerception.camera;
 
-import boofcv.struct.calib.IntrinsicParameters;
+import boofcv.struct.calib.CameraPinholeBrown;
 import sensor_msgs.CameraInfo;
 import us.ihmc.commons.PrintTools;
 import us.ihmc.utilities.ros.subscriber.AbstractRosTopicSubscriber;
 
 public class RosCameraInfoSubscriber extends AbstractRosTopicSubscriber<CameraInfo>
 {
-   private final IntrinsicParameters intrinsicParameters = new IntrinsicParameters();
+   private final CameraPinholeBrown intrinsicParameters = new CameraPinholeBrown();
 
    public RosCameraInfoSubscriber(String which)
    {
       super(sensor_msgs.CameraInfo._TYPE);
    }
 
-   public IntrinsicParameters getIntrinisicParameters()
+   public CameraPinholeBrown getIntrinisicParameters()
    {
       synchronized (intrinsicParameters)
       {
-         return new IntrinsicParameters(intrinsicParameters);
+         return new CameraPinholeBrown(intrinsicParameters);
       }
 
    }

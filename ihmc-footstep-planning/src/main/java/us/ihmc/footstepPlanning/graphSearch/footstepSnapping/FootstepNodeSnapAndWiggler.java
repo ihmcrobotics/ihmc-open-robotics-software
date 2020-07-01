@@ -1,5 +1,6 @@
 package us.ihmc.footstepPlanning.graphSearch.footstepSnapping;
 
+import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintInput;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.GradientDescentStepConstraintSolver;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.PolygonWiggler;
 import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
@@ -7,10 +8,12 @@ import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
+import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
+import us.ihmc.euclid.tuple3D.Point3D;
+import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
 import us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParametersReadOnly;
@@ -21,7 +24,9 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.RigidBodyTransformGenerator;
 import us.ihmc.robotics.robotSide.SideDependentList;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
 {
@@ -35,6 +40,7 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
    private final Cylinder3D legCollisionShape = new Cylinder3D();
    private final RigidBodyTransform legCollisionShapeToSoleTransform = new RigidBodyTransform();
    private final RigidBodyTransformGenerator transformGenerator = new RigidBodyTransformGenerator();
+   private final GradientDescentStepConstraintInput gradientDescentStepConstraintInput = new GradientDescentStepConstraintInput();
 
    private final HashMap<FootstepNode, FootstepNodeSnapData> snapDataHolder = new HashMap<>();
    protected PlanarRegionsList planarRegionsList;
@@ -168,46 +174,47 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       FootstepNodeTools.getFootPolygon(footstepNode, footPolygonsInSoleFrame.get(footstepNode.getRobotSide()), footPolygon);
       tempTransform.set(snapData.getSnapTransform());
       tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
-      ConvexPolygon2D footPolygonInRegionFrame = FootstepNodeSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
+      ConvexPolygon2D footPolygonInSnapFrame = FootstepNodeSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
 
       RigidBodyTransform wiggleTransformInLocal;
       boolean concaveWigglerRequested = parameters.getEnableConcaveHullWiggler() && !planarRegionToPack.getConcaveHull().isEmpty();
-      if (concaveWigglerRequested && parameters.getEnableShinCollisionCheck())
+      if (concaveWigglerRequested)
       {
-         RigidBodyTransform snappedNodeTransform = snapData.getSnappedNodeTransform(footstepNode);
-         tempTransform.set(snappedNodeTransform);
-         tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
+         gradientDescentStepConstraintInput.clear();
+         gradientDescentStepConstraintInput.setInitialStepPolygon(footPolygonInSnapFrame);
+         gradientDescentStepConstraintInput.setWiggleParameters(wiggleParameters);
+         gradientDescentStepConstraintInput.setPlanarRegion(planarRegionToPack);
 
-         legCollisionShape.setSize(parameters.getShinLength(), parameters.getShinRadius());
-         transformGenerator.identity();
-         transformGenerator.translate(0.0, 0.0, parameters.getShinHeightOffset());
-         transformGenerator.rotate(parameters.getShinPitch(), Axis3D.Y);
-         transformGenerator.translate(0.0, 0.0, 0.5 * parameters.getShinLength());
-         transformGenerator.getRigidyBodyTransform(legCollisionShapeToSoleTransform);
-         gradientDescentStepConstraintSolver.setLegCollisionShape(legCollisionShape, 15.0, legCollisionShapeToSoleTransform);
+         if (parameters.getEnableShinCollisionCheck())
+         {
+            RigidBodyTransform snappedNodeTransform = snapData.getSnappedNodeTransform(footstepNode);
+            tempTransform.set(snappedNodeTransform);
+            tempTransform.preMultiply(planarRegionToPack.getTransformToLocal());
+            gradientDescentStepConstraintInput.setFootstepInRegionFrame(tempTransform);
 
-         wiggleTransformInLocal = gradientDescentStepConstraintSolver.wigglePolygon(footPolygonInRegionFrame,
-                                                                                    wiggleParameters,
-                                                                                    tempTransform,
-                                                                                    planarRegionToPack,
-                                                                                    planarRegionsList);
-      }
-      else if (concaveWigglerRequested)
-      {
-         wiggleTransformInLocal = gradientDescentStepConstraintSolver.wigglePolygon(footPolygonInRegionFrame,
-                                                                                    Vertex2DSupplier.asVertex2DSupplier(planarRegionToPack.getConcaveHull()),
-                                                                                    wiggleParameters);
+            legCollisionShape.setSize(parameters.getShinLength(), parameters.getShinRadius());
+            transformGenerator.identity();
+            transformGenerator.translate(0.0, 0.0, parameters.getShinHeightOffset());
+            transformGenerator.rotate(parameters.getShinPitch(), Axis3D.Y);
+            transformGenerator.translate(0.0, 0.0, 0.5 * parameters.getShinLength());
+            transformGenerator.getRigidyBodyTransform(legCollisionShapeToSoleTransform);
+            gradientDescentStepConstraintSolver.setLegCollisionShape(legCollisionShape, 15.0, legCollisionShapeToSoleTransform);
+
+            gradientDescentStepConstraintInput.setPlanarRegionsList(planarRegionsList);
+         }
+
+         wiggleTransformInLocal = gradientDescentStepConstraintSolver.wigglePolygon(gradientDescentStepConstraintInput);
       }
       else
       {
-         if (isConvexConstraintSatisfied(footPolygonInRegionFrame, planarRegionToPack, parameters.getWiggleInsideDelta()))
+         if (isConvexConstraintSatisfied(footPolygonInSnapFrame, planarRegionToPack, parameters.getWiggleInsideDelta()))
          {
             snapData.getWiggleTransformInWorld().setIdentity();
             return;
          }
          else
          {
-            if ((wiggleTransformInLocal = wiggleIntoConvexHull(footPolygonInRegionFrame)) == null)
+            if ((wiggleTransformInLocal = wiggleIntoConvexHull(footPolygonInSnapFrame)) == null)
             {
                snapData.getWiggleTransformInWorld().setIdentity();
                return;
@@ -224,14 +231,14 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
          FootstepNodeSnapData stanceNodeSnapData = snapDataHolder.get(stanceNode);
 
          // check for overlap
-         boolean overlapDetected = doStepsOverlap(footstepNode, snapData, stanceNode, stanceNodeSnapData);
+         boolean overlapDetected = stepsAreTooClose(footstepNode, snapData, stanceNode, stanceNodeSnapData);
          if (overlapDetected)
          {
             snapData.getWiggleTransformInWorld().setIdentity();
          }
 
          // check for overlap after this steps wiggle is removed. if still overlapping, remove wiggle on stance step
-         overlapDetected = doStepsOverlap(footstepNode, snapData, stanceNode, stanceNodeSnapData);
+         overlapDetected = stepsAreTooClose(footstepNode, snapData, stanceNode, stanceNodeSnapData);
          if (overlapDetected)
          {
             stanceNodeSnapData.getWiggleTransformInWorld().setIdentity();
@@ -253,7 +260,7 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
    private final ConvexPolygon2D polyon2 = new ConvexPolygon2D();
 
    /** Extracted to method for testing purposes */
-   protected boolean doStepsOverlap(FootstepNode node1, FootstepNodeSnapData snapData1, FootstepNode node2, FootstepNodeSnapData snapData2)
+   protected boolean stepsAreTooClose(FootstepNode node1, FootstepNodeSnapData snapData1, FootstepNode node2, FootstepNodeSnapData snapData2)
    {
       FootstepNodeTools.getFootPolygon(node1, footPolygonsInSoleFrame.get(node1.getRobotSide()), polyon1);
       FootstepNodeTools.getFootPolygon(node2, footPolygonsInSoleFrame.get(node2.getRobotSide()), polyon2);
@@ -264,19 +271,18 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       polyon1.applyTransform(transform1, false);
       polyon2.applyTransform(transform2, false);
 
-      for (int i = 0; i < polyon1.getNumberOfVertices(); i++)
+      boolean intersection = FootstepNodeTools.arePolygonsIntersecting(polyon1, polyon2);
+      if (intersection)
       {
-         if (polyon2.signedDistance(polyon1.getVertex(i)) <= 0.0)
-            return true;
-      }
-      for (int i = 0; i < polyon2.getNumberOfVertices(); i++)
-      {
-         if (polyon1.signedDistance(polyon2.getVertex(i)) <= 0.0)
-            return true;
+         return true;
       }
 
-      return false;
+      double distance = FootstepNodeTools.distanceBetweenPolygons(polyon1, polyon2);
+      return distance < parameters.getMinClearanceFromStance();
    }
+
+   private final Vector4D polygonVertexToTransform = new Vector4D();
+   private final ArrayList<ConvexPolygon2D> polygonIntersections = new ArrayList<>();
 
    protected void computeCroppedFoothold(FootstepNode footstepNode, FootstepNodeSnapData snapData)
    {
@@ -291,10 +297,79 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       snapData.packSnapAndWiggleTransform(tempTransform);
       ConvexPolygon2D snappedPolygonInWorld = FootstepNodeSnappingTools.computeTransformedPolygon(footPolygon, tempTransform);
       ConvexPolygon2D croppedFootPolygon = FootstepNodeSnappingTools.computeRegionIntersection(planarRegionToPack, snappedPolygonInWorld);
+
       if (!croppedFootPolygon.isEmpty())
       {
          FootstepNodeSnappingTools.changeFromPlanarRegionToSoleFrame(planarRegionToPack, footstepNode, tempTransform, croppedFootPolygon);
          snapData.getCroppedFoothold().set(croppedFootPolygon);
+      }
+
+      checkForNearbyContact(footstepNode, snapData, snappedPolygonInWorld, croppedFootPolygon);
+   }
+
+   private void checkForNearbyContact(FootstepNode footstepNode,
+                                      FootstepNodeSnapData snapData,
+                                      ConvexPolygon2D snappedPolygonInWorld,
+                                      ConvexPolygon2D croppedFootPolygon)
+   {
+      boolean checkForNearbyContact = parameters.getDistanceEpsilonToBridgeRegions() > 0.0;
+      if (!checkForNearbyContact)
+      {
+         return;
+      }
+
+      boolean fullFoothold = croppedFootPolygon.isEmpty() || croppedFootPolygon.getArea() / footPolygonsInSoleFrame.get(footstepNode.getRobotSide()).getArea() > 0.99;
+      if (fullFoothold)
+      {
+         return;
+      }
+
+      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      {
+         PlanarRegion candidateRegion = planarRegionsList.getPlanarRegion(i);
+
+         if (candidateRegion.epsilonEquals(planarRegionToPack, 1e-3))
+         {
+            continue;
+         }
+
+         if (candidateRegion.isVertical())
+         {
+            continue;
+         }
+
+         if (candidateRegion.isPolygonIntersecting(snappedPolygonInWorld))
+         {
+            boolean appendToFoothold = true;
+            for (int j = 0; j < snappedPolygonInWorld.getNumberOfVertices(); j++)
+            {
+               FootstepNodeSnappingTools.transformPolygonVertex(snappedPolygonInWorld.getVertex(j), polygonVertexToTransform, tempTransform);
+               double snappedVertexZ = polygonVertexToTransform.getZ();
+               double planeZ = candidateRegion.getPlaneZGivenXY(polygonVertexToTransform.getX(), polygonVertexToTransform.getY());
+
+               if (Math.abs(snappedVertexZ - planeZ) > parameters.getDistanceEpsilonToBridgeRegions())
+               {
+                  appendToFoothold = false;
+                  break;
+               }
+            }
+
+            if (appendToFoothold)
+            {
+               polygonIntersections.clear();
+               candidateRegion.getPolygonIntersectionsWhenProjectedVertically(snappedPolygonInWorld, polygonIntersections);
+
+               for (int j = 0; j < polygonIntersections.size(); j++)
+               {
+                  ConvexPolygon2D polygonIntersection = polygonIntersections.get(j);
+                  FootstepNodeSnappingTools.changeFromPlanarRegionToSoleFrame(candidateRegion, footstepNode, tempTransform, polygonIntersection);
+                  croppedFootPolygon.addVertices(polygonIntersection);
+               }
+
+               croppedFootPolygon.update();
+               snapData.getCroppedFoothold().set(croppedFootPolygon);
+            }
+         }
       }
    }
 

@@ -25,6 +25,12 @@ public class DoorParameterPacket extends Packet<DoorParameterPacket> implements 
 
    public us.ihmc.euclid.geometry.Pose3D door_handle_transform_to_world_;
 
+   /**
+            * Some behaviors will average the door location to remove noise,
+            * trustedPosition allows someone to tell the behavior that this is an accurate location and and can does not need to be averaged,
+            * this is useful for sending door locations manually from the ui*/
+   public boolean trusted_position_;
+
    public DoorParameterPacket()
    {
 
@@ -35,6 +41,7 @@ public class DoorParameterPacket extends Packet<DoorParameterPacket> implements 
 
 
       door_handle_transform_to_world_ = new us.ihmc.euclid.geometry.Pose3D();
+
 
    }
 
@@ -58,6 +65,9 @@ public class DoorParameterPacket extends Packet<DoorParameterPacket> implements 
 
 
       geometry_msgs.msg.dds.PosePubSubType.staticCopy(other.door_handle_transform_to_world_, door_handle_transform_to_world_);
+
+      trusted_position_ = other.trusted_position_;
+
    }
 
 
@@ -108,6 +118,24 @@ public class DoorParameterPacket extends Packet<DoorParameterPacket> implements 
    }
 
 
+   /**
+            * Some behaviors will average the door location to remove noise,
+            * trustedPosition allows someone to tell the behavior that this is an accurate location and and can does not need to be averaged,
+            * this is useful for sending door locations manually from the ui*/
+   public void setTrustedPosition(boolean trusted_position)
+   {
+      trusted_position_ = trusted_position;
+   }
+   /**
+            * Some behaviors will average the door location to remove noise,
+            * trustedPosition allows someone to tell the behavior that this is an accurate location and and can does not need to be averaged,
+            * this is useful for sending door locations manually from the ui*/
+   public boolean getTrustedPosition()
+   {
+      return trusted_position_;
+   }
+
+
    public static Supplier<DoorParameterPacketPubSubType> getPubSubType()
    {
       return DoorParameterPacketPubSubType::new;
@@ -138,6 +166,9 @@ public class DoorParameterPacket extends Packet<DoorParameterPacket> implements 
 
       if (!this.door_handle_transform_to_world_.epsilonEquals(other.door_handle_transform_to_world_, epsilon)) return false;
 
+      if (!us.ihmc.idl.IDLTools.epsilonEqualsBoolean(this.trusted_position_, other.trusted_position_, epsilon)) return false;
+
+
       return true;
    }
 
@@ -163,6 +194,9 @@ public class DoorParameterPacket extends Packet<DoorParameterPacket> implements 
 
       if (!this.door_handle_transform_to_world_.equals(otherMyClass.door_handle_transform_to_world_)) return false;
 
+      if(this.trusted_position_ != otherMyClass.trusted_position_) return false;
+
+
       return true;
    }
 
@@ -186,7 +220,10 @@ public class DoorParameterPacket extends Packet<DoorParameterPacket> implements 
       builder.append(this.door_height_);      builder.append(", ");
 
       builder.append("door_handle_transform_to_world=");
-      builder.append(this.door_handle_transform_to_world_);
+      builder.append(this.door_handle_transform_to_world_);      builder.append(", ");
+
+      builder.append("trusted_position=");
+      builder.append(this.trusted_position_);
       builder.append("}");
       return builder.toString();
    }

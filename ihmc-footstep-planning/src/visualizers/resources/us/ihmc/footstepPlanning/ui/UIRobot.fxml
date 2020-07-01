@@ -36,7 +36,11 @@
                </font>
             </Label>
             <Button fx:id="clearREA" mnemonicParsing="false" onAction="#clearREA" text="Clear" GridPane.columnIndex="5" GridPane.rowIndex="1" />
-			</children>
+
+                <Label style="-fx-font-weight: bold" text="Arms" GridPane.columnIndex="6" GridPane.rowIndex="0" />
+                <Button fx:id="leftArmIn" onAction="#sendLeftArmIn" text="Left Arm In" GridPane.columnIndex="6" GridPane.rowIndex="1" />
+                <Button fx:id="rightArmIn" onAction="#sendRightArmIn" text="Right Arm In" GridPane.columnIndex="6" GridPane.rowIndex="2" />
+            </children>
          <columnConstraints>
             <ColumnConstraints />
             <ColumnConstraints maxWidth="275.0" minWidth="52.0" prefWidth="185.0" />

@@ -11,8 +11,8 @@ import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 import org.junit.jupiter.api.Test;
 
 import cern.colt.list.BooleanArrayList;
@@ -127,7 +127,7 @@ public class LevenbergMarquardtICPTest
       drawer.addPointCloud(fullModel, Color.black, false);
       drawer.addPointCloud(data1, Color.red, false);
 
-      DenseMatrix64F originalError = new DenseMatrix64F(data1.size(), 1);
+      DMatrixRMaj originalError = new DMatrixRMaj(data1.size(), 1);
 
       BooleanArrayList correspondenceFlags = new BooleanArrayList();
       double outlierDistance = 0.2;
@@ -149,9 +149,9 @@ public class LevenbergMarquardtICPTest
 
       int parameterDimension = 3;
       double perturb = 0.001;
-      DenseMatrix64F currentParameter = new DenseMatrix64F(parameterDimension, 1);
-      DenseMatrix64F perturbedParameter = new DenseMatrix64F(parameterDimension, 1);
-      DenseMatrix64F errorJacobian = new DenseMatrix64F(data1.size(), parameterDimension);
+      DMatrixRMaj currentParameter = new DMatrixRMaj(parameterDimension, 1);
+      DMatrixRMaj perturbedParameter = new DMatrixRMaj(parameterDimension, 1);
+      DMatrixRMaj errorJacobian = new DMatrixRMaj(data1.size(), parameterDimension);
 
       List<Point2D> purterbedData = new ArrayList<>(data1);
       for (int i = 0; i < parameterDimension; i++)
@@ -180,19 +180,19 @@ public class LevenbergMarquardtICPTest
             }
          }
       }
-      DenseMatrix64F jacobianTranspose = new DenseMatrix64F(data1.size(), parameterDimension);
+      DMatrixRMaj jacobianTranspose = new DMatrixRMaj(data1.size(), parameterDimension);
       jacobianTranspose.set(errorJacobian);
-      CommonOps.transpose(jacobianTranspose);
+      CommonOps_DDRM.transpose(jacobianTranspose);
 
-      DenseMatrix64F squaredJacobian = new DenseMatrix64F(parameterDimension, parameterDimension);
-      CommonOps.mult(jacobianTranspose, errorJacobian, squaredJacobian);
-      CommonOps.invert(squaredJacobian);
+      DMatrixRMaj squaredJacobian = new DMatrixRMaj(parameterDimension, parameterDimension);
+      CommonOps_DDRM.mult(jacobianTranspose, errorJacobian, squaredJacobian);
+      CommonOps_DDRM.invert(squaredJacobian);
 
-      DenseMatrix64F invMultJacobianTranspose = new DenseMatrix64F(parameterDimension, data1.size());
-      CommonOps.mult(squaredJacobian, jacobianTranspose, invMultJacobianTranspose);
+      DMatrixRMaj invMultJacobianTranspose = new DMatrixRMaj(parameterDimension, data1.size());
+      CommonOps_DDRM.mult(squaredJacobian, jacobianTranspose, invMultJacobianTranspose);
 
-      DenseMatrix64F direction = new DenseMatrix64F(parameterDimension, 1);
-      CommonOps.mult(invMultJacobianTranspose, originalError, direction);
+      DMatrixRMaj direction = new DMatrixRMaj(parameterDimension, 1);
+      CommonOps_DDRM.mult(invMultJacobianTranspose, originalError, direction);
       System.out.println("direction of the optimization is,");
       direction.print();
 
@@ -235,14 +235,14 @@ public class LevenbergMarquardtICPTest
       FunctionOutputCalculator functionOutputCalculator = new FunctionOutputCalculator()
       {
          @Override
-         public DenseMatrix64F computeOutput(DenseMatrix64F inputParameter)
+         public DMatrixRMaj computeOutput(DMatrixRMaj inputParameter)
          {
             List<Point2D> transformedData = new ArrayList<>();
             for (int i = 0; i < data1.size(); i++)
                transformedData.add(new Point2D(data1.get(i)));
             transformPointCloud(transformedData, inputParameter.get(0, 0), inputParameter.get(1, 0), inputParameter.get(2, 0));
 
-            DenseMatrix64F errorSpace = new DenseMatrix64F(transformedData.size(), 1);
+            DMatrixRMaj errorSpace = new DMatrixRMaj(transformedData.size(), 1);
             for (int i = 0; i < transformedData.size(); i++)
             {
                double distance = computeClosestDistance(transformedData.get(i), fullModel);
@@ -251,7 +251,7 @@ public class LevenbergMarquardtICPTest
             return errorSpace;
          }
       };
-      DenseMatrix64F purterbationVector = new DenseMatrix64F(3, 1);
+      DMatrixRMaj purterbationVector = new DMatrixRMaj(3, 1);
       purterbationVector.set(0, 0.00001);
       purterbationVector.set(1, 0.00001);
       purterbationVector.set(2, 0.00001);
@@ -261,7 +261,7 @@ public class LevenbergMarquardtICPTest
       for (int i = 0; i < 30; i++)
       {
          optimizer.iterate();
-         if(optimizer.getQuality() < 0.4)
+         if (optimizer.getQuality() < 0.4)
          {
             isSolved = true;
             break;
@@ -271,7 +271,7 @@ public class LevenbergMarquardtICPTest
       System.out.println("is solved? " + isSolved + " " + optimizer.getIteration() + " " + optimizer.getQuality());
       optimizer.getOptimalParameter().print();
 
-      DenseMatrix64F optimalParameter = optimizer.getOptimalParameter();
+      DMatrixRMaj optimalParameter = optimizer.getOptimalParameter();
       List<Point2D> transformedData = new ArrayList<>();
       for (int i = 0; i < data1.size(); i++)
          transformedData.add(new Point2D(data1.get(i)));

@@ -1,7 +1,7 @@
 package us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping;
 
 import gnu.trove.list.array.TIntArrayList;
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs.SLIPDesiredTrackingCost;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs.SLIPModelForceTrackingCost;
 import us.ihmc.commonWalkingControlModules.dynamicPlanning.slipJumping.costs.SLIPRegularizationCost;
@@ -31,7 +31,7 @@ public class SLIPJumpingDDPCalculator
    private final double gravityZ;
    private final double nominalHeight;
 
-   private final DenseMatrix64F initialState;
+   private final DMatrixRMaj initialState;
 
    private final CompositeLQCostFunction<SLIPState> regularCostFunction = new CompositeLQCostFunction<>();
    private final LQTrackingCostFunction<SLIPState> terminalCostFunction = new SLIPTerminalCost();
@@ -65,7 +65,7 @@ public class SLIPJumpingDDPCalculator
       int controlSize = dynamics.getControlVectorSize();
       int constantSize = dynamics.getConstantVectorSize();
 
-      initialState = new DenseMatrix64F(stateSize, 1);
+      initialState = new DMatrixRMaj(stateSize, 1);
 
       optimalSequence = new DiscreteOptimizationSequence(stateSize, controlSize);
       desiredSequence = new DiscreteOptimizationSequence(stateSize, controlSize);
@@ -79,7 +79,7 @@ public class SLIPJumpingDDPCalculator
    }
 
 
-   public void initialize(DenseMatrix64F currentState, FramePoint3D firstSupport, FramePoint3D apexPoint, FramePoint3D secondSupport,
+   public void initialize(DMatrixRMaj currentState, FramePoint3D firstSupport, FramePoint3D apexPoint, FramePoint3D secondSupport,
                           double firstStanceDuration, double flightDuration, double secondStanceDuration, double nominalInitialStiffness,
                           double nominalFinalStiffness)
    {
@@ -120,18 +120,18 @@ public class SLIPJumpingDDPCalculator
 
       for (int i = 0; i < numberOfInitialTimeSteps; i++)
       {
-         DenseMatrix64F desiredState = desiredSequence.getState(i);
+         DMatrixRMaj desiredState = desiredSequence.getState(i);
          desiredState.set(x, firstSupport.getX());
          desiredState.set(y, firstSupport.getY());
          desiredState.set(z, firstSupport.getZ() + nominalHeight);
 
-         DenseMatrix64F desiredControl = desiredSequence.getControl(i);
+         DMatrixRMaj desiredControl = desiredSequence.getControl(i);
          desiredControl.set(fz, mass * gravityZ);
          desiredControl.set(xF, firstSupport.getX());
          desiredControl.set(yF, firstSupport.getY());
          desiredControl.set(k, nominalInitialStiffness);
 
-         DenseMatrix64F constants = constantSequence.get(i);
+         DMatrixRMaj constants = constantSequence.get(i);
          constants.set(zF, firstSupport.getZ());
          constants.set(nominalLength, nominalFirstLength);
          //constants.set(nominalLength, nominalHeight);
@@ -139,12 +139,12 @@ public class SLIPJumpingDDPCalculator
 
       for (int i = numberOfInitialTimeSteps; i < numberOfInitialTimeSteps + numberOfFlightTimeSteps; i++)
       {
-         DenseMatrix64F desiredState = desiredSequence.getState(i);
+         DMatrixRMaj desiredState = desiredSequence.getState(i);
          desiredState.set(x, apexPoint.getX());
          desiredState.set(y, apexPoint.getY());
          desiredState.set(z, apexPoint.getZ());
 
-         DenseMatrix64F desiredControl = desiredSequence.getControl(i);
+         DMatrixRMaj desiredControl = desiredSequence.getControl(i);
          desiredControl.set(fz, 0.0);
          desiredControl.set(xF, firstSupport.getX());
          desiredControl.set(yF, firstSupport.getY());
@@ -153,18 +153,18 @@ public class SLIPJumpingDDPCalculator
 
       for (int i = numberOfInitialTimeSteps + numberOfFlightTimeSteps; i < totalSize; i++)
       {
-         DenseMatrix64F desiredState = desiredSequence.getState(i);
+         DMatrixRMaj desiredState = desiredSequence.getState(i);
          desiredState.set(x, secondSupport.getX());
          desiredState.set(y, secondSupport.getY());
          desiredState.set(z, secondSupport.getZ() + nominalHeight);
 
-         DenseMatrix64F desiredControl = desiredSequence.getControl(i);
+         DMatrixRMaj desiredControl = desiredSequence.getControl(i);
          desiredControl.set(fz, mass * gravityZ);
          desiredControl.set(xF, secondSupport.getX());
          desiredControl.set(yF, secondSupport.getY());
          desiredControl.set(k, nominalFinalStiffness);
 
-         DenseMatrix64F constants = constantSequence.get(i);
+         DMatrixRMaj constants = constantSequence.get(i);
          constants.set(zF, secondSupport.getZ());
          constants.set(nominalLength, nominalSecondLength);
          //constants.set(nominalLength, nominalHeight);

@@ -1,7 +1,7 @@
 package us.ihmc.exampleSimulations.unicycle;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.simulationconstructionset.util.RobotController;
 import us.ihmc.yoVariables.registry.YoVariableRegistry;
@@ -23,12 +23,12 @@ public class UnicycleController implements RobotController
    // control variables
    private final YoDouble x_d = new YoDouble("x_desired", registry);
    // F_lqr is a state feedback controller computed in Octave after modeling the system
-   private static final DenseMatrix64F F_lqr = new DenseMatrix64F(new double[][] {
+   private static final DMatrixRMaj F_lqr = new DMatrixRMaj(new double[][] {
       {-11.50472, 3.80286, 0.11255, -2.32854, -0.23139, 0.17381},
       {23.17410, 47.00831, 0.42755, 6.15708, 10.47226, 0.85362}});
 
-   private final DenseMatrix64F x = new DenseMatrix64F(6, 1);
-   private final DenseMatrix64F u = new DenseMatrix64F(2, 1);
+   private final DMatrixRMaj x = new DMatrixRMaj(6, 1);
+   private final DMatrixRMaj u = new DMatrixRMaj(2, 1);
    private final double radius;
 
    public UnicycleController(UnicycleRobot robot, String name)
@@ -74,7 +74,7 @@ public class UnicycleController implements RobotController
       x.set(5, q3d);
 
       // do some control here
-      CommonOps.mult(F_lqr, x, u);
+      CommonOps_DDRM.mult(F_lqr, x, u);
       back_tau.set(-u.get(0));
       wheel_tau.set(u.get(1));
    }

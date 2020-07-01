@@ -1,6 +1,6 @@
 package us.ihmc.commonWalkingControlModules.controllerCore.command.virtualModelControl;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControllerCore;
 import us.ihmc.commonWalkingControlModules.controllerCore.command.ControllerCoreCommand;
@@ -293,7 +293,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
     * @param desiredAngularTorqueToPack the 3-by-1 matrix in which the value of the desired angular
     *           torque is stored. The given matrix is reshaped to ensure proper size. Modified.
     */
-   public void getDesiredAngularTorque(DenseMatrix64F desiredAngularTorqueToPack)
+   public void getDesiredAngularTorque(DMatrixRMaj desiredAngularTorqueToPack)
    {
       desiredAngularTorqueToPack.reshape(6, 1);
       desiredAngularTorqueToPack.zero();
@@ -320,7 +320,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
 
    /** {@inheritDoc} */
    @Override
-   public void getDesiredEffort(DenseMatrix64F desiredEffortToPack)
+   public void getDesiredEffort(DMatrixRMaj desiredEffortToPack)
    {
       getDesiredAngularTorque(desiredEffortToPack);
    }
@@ -380,7 +380,7 @@ public class VirtualTorqueCommand implements VirtualEffortCommand<VirtualTorqueC
 
    /** {@inheritDoc} */
    @Override
-   public void getSelectionMatrix(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getSelectionMatrix(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       selectionMatrixToPack.reshape(3, 6);
       selectionMatrixToPack.zero();

@@ -7,8 +7,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import us.ihmc.commons.lists.RecyclingArrayList;
-import us.ihmc.commons.lists.SupplierBuilder;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
@@ -18,7 +16,7 @@ import us.ihmc.yoVariables.variable.YoBoolean;
 public class MultiRobotForwardDynamicsPlugin
 {
    private final Map<RigidBodyBasics, PhysicsEngineRobotData> robots = new HashMap<>();
-   private final RecyclingArrayList<YoMultiContactImpulseCalculator> multiContactImpulseCalculators;
+   private final YoMultiContactImpulseCalculatorPool multiContactImpulseCalculatorPool;
    private final List<ExternalWrenchReader> externalWrenchReaders = new ArrayList<>();
 
    private List<MultiRobotCollisionGroup> collisionGroups;
@@ -37,12 +35,7 @@ public class MultiRobotForwardDynamicsPlugin
       globalContactParameters = new YoContactParameters("globalContact", registry);
       hasGlobalConstraintParameters = new YoBoolean("hasGlobalConstraintParameters", registry);
       globalConstraintParameters = new YoConstraintParameters("globalConstraint", registry);
-
-      multiContactImpulseCalculators = new RecyclingArrayList<>(1, SupplierBuilder.indexedSupplier(identifier ->
-      {
-         return new YoMultiContactImpulseCalculator(identifier++, rootFrame, multiContactCalculatorRegistry);
-      }));
-      multiContactImpulseCalculators.clear();
+      multiContactImpulseCalculatorPool = new YoMultiContactImpulseCalculatorPool(1, rootFrame, multiContactCalculatorRegistry);
    }
 
    public void addRobot(PhysicsEngineRobotData robot)
@@ -72,9 +65,9 @@ public class MultiRobotForwardDynamicsPlugin
       hasGlobalContactParameters.set(true);
    }
 
-   public void submitCollisions(SimpleCollisionDetection collisionDetectionPlugin)
+   public void submitCollisions(CollisionListResult allCollisions)
    {
-      collisionGroups = MultiRobotCollisionGroup.toCollisionGroups(collisionDetectionPlugin.getAllCollisions());
+      collisionGroups = MultiRobotCollisionGroup.toCollisionGroups(allCollisions);
    }
 
    public void doScience(double time, double dt, Vector3DReadOnly gravity)
@@ -91,11 +84,11 @@ public class MultiRobotForwardDynamicsPlugin
       Set<RigidBodyBasics> uncoveredRobotsRootBody = new HashSet<>(robots.keySet());
       List<MultiContactImpulseCalculator> impulseCalculators = new ArrayList<>();
 
-      multiContactImpulseCalculators.clear();
+      multiContactImpulseCalculatorPool.clear();
 
       for (MultiRobotCollisionGroup collisionGroup : collisionGroups)
       {
-         MultiContactImpulseCalculator calculator = multiContactImpulseCalculators.add();
+         MultiContactImpulseCalculator calculator = multiContactImpulseCalculatorPool.nextAvailable();
 
          calculator.configure(robots, collisionGroup);
 
@@ -115,7 +108,7 @@ public class MultiRobotForwardDynamicsPlugin
          jointLimitConstraintCalculator.initialize(dt);
          jointLimitConstraintCalculator.updateInertia(null, null);
          jointLimitConstraintCalculator.computeImpulse(dt);
-         robot.getForwardDynamicsPlugin().addJointVelocities(jointLimitConstraintCalculator.getJointVelocityChange(0));
+         robot.getIntegrator().addJointVelocityChange(jointLimitConstraintCalculator.getJointVelocityChange(0));
       }
 
       for (MultiContactImpulseCalculator impulseCalculator : impulseCalculators)
@@ -128,8 +121,18 @@ public class MultiRobotForwardDynamicsPlugin
       for (PhysicsEngineRobotData robotPlugin : robots.values())
       {
          SingleRobotForwardDynamicsPlugin forwardDynamicsPlugin = robotPlugin.getForwardDynamicsPlugin();
-         forwardDynamicsPlugin.writeJointVelocities();
          forwardDynamicsPlugin.writeJointAccelerations();
+         robotPlugin.getIntegrator().integrate(dt);
       }
+   }
+
+   public boolean hasGlobalContactParameters()
+   {
+      return hasGlobalContactParameters.getValue();
+   }
+
+   public ContactParametersReadOnly getGlobalContactParameters()
+   {
+      return globalContactParameters;
    }
 }

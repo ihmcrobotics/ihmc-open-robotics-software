@@ -1,18 +1,16 @@
 package us.ihmc.humanoidRobotics.communication.controllerAPI.command;
 
-import controller_msgs.msg.dds.PlanarRegionMessage;
 import controller_msgs.msg.dds.StepConstraintMessage;
 import us.ihmc.commons.lists.RecyclingArrayList;
 import us.ihmc.communication.controllerAPI.command.Command;
 import us.ihmc.euclid.axisAngle.AxisAngle;
-import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.humanoidRobotics.bipedSupportPolygons.StepConstraintRegion;
-import us.ihmc.robotics.geometry.PlanarRegion;
+import us.ihmc.robotics.geometry.concavePolygon2D.ConcavePolygon2D;
 
 public class StepConstraintRegionCommand implements Command<StepConstraintRegionCommand, StepConstraintMessage>
 {
@@ -20,7 +18,7 @@ public class StepConstraintRegionCommand implements Command<StepConstraintRegion
    private final RigidBodyTransform fromWorldToLocalTransform = new RigidBodyTransform();
 
    private final RecyclingArrayList<Point2D> concaveHullsVertices = new RecyclingArrayList<Point2D>(20, Point2D.class);
-   private final RecyclingArrayList<ConvexPolygon2D> convexPolygons = new RecyclingArrayList<ConvexPolygon2D>(10, ConvexPolygon2D.class);
+   private final RecyclingArrayList<ConcavePolygon2D> holes = new RecyclingArrayList<>(10, ConcavePolygon2D.class);
 
    private final Vector3D regionOrigin = new Vector3D();
    private final Vector3D regionNormal = new Vector3D();
@@ -37,7 +35,7 @@ public class StepConstraintRegionCommand implements Command<StepConstraintRegion
       fromLocalToWorldTransform.setToZero();
       fromWorldToLocalTransform.setToZero();
       concaveHullsVertices.clear();
-      convexPolygons.clear();
+      holes.clear();
    }
 
    @Override
@@ -53,19 +51,19 @@ public class StepConstraintRegionCommand implements Command<StepConstraintRegion
       for (; vertexIndex < upperBound; vertexIndex++)
          addConcaveHullVertex().set(message.getVertexBuffer().get(vertexIndex));
 
-      convexPolygons.clear();
+      holes.clear();
 
-      for (int polygonIndex = 0; polygonIndex < message.getNumberOfConvexPolygons(); polygonIndex++)
+      for (int polygonIndex = 0; polygonIndex < message.getNumberOfHolesInRegion(); polygonIndex++)
       {
-         ConvexPolygon2D convexPolygon = convexPolygons.add();
-         convexPolygon.clear();
-         upperBound += message.getConvexPolygonsSize().get(polygonIndex);
+         ConcavePolygon2D hole = holes.add();
+         hole.clear();
+         upperBound += message.getHolePolygonsSize().get(polygonIndex);
 
          for (; vertexIndex < upperBound; vertexIndex++)
          {
-            convexPolygon.addVertex(message.getVertexBuffer().get(vertexIndex));
+            hole.addVertex(message.getVertexBuffer().get(vertexIndex));
          }
-         convexPolygon.update();
+         hole.update();
       }
    }
 
@@ -80,10 +78,10 @@ public class StepConstraintRegionCommand implements Command<StepConstraintRegion
       for (int i = 0; i < originalConcaveHullVertices.size(); i++)
          addConcaveHullVertex().set(originalConcaveHullVertices.get(i));
 
-      RecyclingArrayList<ConvexPolygon2D> convexPolygons = command.getConvexPolygons();
-      this.convexPolygons.clear();
+      RecyclingArrayList<ConcavePolygon2D> convexPolygons = command.getHolesInRegion();
+      this.holes.clear();
       for (int i = 0; i < convexPolygons.size(); i++)
-         addConvexPolygon().set(convexPolygons.get(i));
+         addHoleInRegion().set(convexPolygons.get(i));
    }
 
    public void setRegionProperties(Tuple3DReadOnly origin, Tuple3DReadOnly normal)
@@ -101,9 +99,9 @@ public class StepConstraintRegionCommand implements Command<StepConstraintRegion
       return concaveHullsVertices.add();
    }
 
-   public ConvexPolygon2D addConvexPolygon()
+   public ConcavePolygon2D addHoleInRegion()
    {
-      return this.convexPolygons.add();
+      return this.holes.add();
    }
    
    @Override
@@ -115,7 +113,7 @@ public class StepConstraintRegionCommand implements Command<StepConstraintRegion
    @Override
    public boolean isCommandValid()
    {
-      return !concaveHullsVertices.isEmpty() && !convexPolygons.isEmpty();
+      return !concaveHullsVertices.isEmpty() && !holes.isEmpty();
    }
 
    public RigidBodyTransform getTransformToWorld()
@@ -128,9 +126,9 @@ public class StepConstraintRegionCommand implements Command<StepConstraintRegion
       return fromWorldToLocalTransform;
    }
 
-   public RecyclingArrayList<ConvexPolygon2D> getConvexPolygons()
+   public RecyclingArrayList<ConcavePolygon2D> getHolesInRegion()
    {
-      return convexPolygons;
+      return holes;
    }
 
    public RecyclingArrayList<Point2D> getConcaveHullsVertices()
@@ -141,7 +139,7 @@ public class StepConstraintRegionCommand implements Command<StepConstraintRegion
 
    public void getStepConstraintRegion(StepConstraintRegion stepConstraintRegion)
    {
-      stepConstraintRegion.set(fromLocalToWorldTransform, concaveHullsVertices, convexPolygons);
+      stepConstraintRegion.set(fromLocalToWorldTransform, concaveHullsVertices, holes);
    }
 
    @Override

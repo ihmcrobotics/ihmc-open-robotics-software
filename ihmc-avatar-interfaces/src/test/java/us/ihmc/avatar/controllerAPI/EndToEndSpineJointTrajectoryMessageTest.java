@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -770,7 +770,7 @@ public abstract class EndToEndSpineJointTrajectoryMessageTest implements MultiRo
 
          if (jointControl)
          {
-            DenseMatrix64F jointPositions = new DenseMatrix64F(spineJoints.length, 1);
+            DMatrixRMaj jointPositions = new DMatrixRMaj(spineJoints.length, 1);
             for (int jointIdx = 0; jointIdx < numberOfJoints; jointIdx++)
                jointPositions.set(jointIdx, jointDesiredsMap.get(spineJoints[jointIdx]).getDoubleValue());
             MultiBodySystemTools.insertJointsState(spineJointClones, JointStateType.CONFIGURATION, jointPositions);

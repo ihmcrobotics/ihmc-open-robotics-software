@@ -2,6 +2,9 @@ package us.ihmc.commonWalkingControlModules.controlModules.legConfiguration;
 
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
+import us.ihmc.euclid.tuple2D.Point2D;
+import us.ihmc.euclid.tools.EuclidCoreRandomTools;
+import us.ihmc.euclid.tuple2D.Vector2D;
 
 import java.util.Random;
 
@@ -428,6 +431,115 @@ public class TriangleToolsTest
                .computeInteriorAngleAcceleration(sideALength, sideBLength, farSideLength, 0.0, farSideLengthAccelerationNegative);
          assertTrue("Iteration " + iter + " positive failed.", positiveInteriorAccel > epsilon);
          assertTrue("Iteration " + iter + " negative failed.", negativeInteriorAccel < epsilon);
+      }
+   }
+
+   @Test
+   public void testComputeSideLengthFromSideSideAngle()
+   // Test each of 8 SSA cases.
+   // Each result was found by constructing the triangle in OnShape, so there's a margin of error.
+   {
+      double sideALength;
+      double sideBLength;
+      double angleB;
+      boolean isAngleAObtuse;
+      double result;
+      // Case 1: Known angle < Pi/2 and adjacent side < opposite side
+      sideALength = 1.0;
+      sideBLength = 1.5;
+      angleB = 0.8;
+      result = 2.014053;
+      isAngleAObtuse = false;
+      assertEquals("Case 1 failed.", result, TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
+
+      // Case 2: Known angle < Pi/2 and adjacent side = opposite side
+      sideALength = 1.0;
+      sideBLength = 1.0;
+      angleB = 0.8;
+      result = 1.393413;
+      isAngleAObtuse = false;
+      assertEquals("Case 2 failed.", result, TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
+
+      // Case 3: Known angle < Pi/2 and adjacent side > opposite side and opposite side < height
+      sideALength = 1.5;
+      sideBLength = 1.0;
+      angleB = 0.8;
+      isAngleAObtuse = false;
+      assertTrue("Case 3 failed.", new Double(TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse)).isNaN());
+
+      // Case 4: Known angle < Pi/2 and adjacent side > opposite side and opposite side > height and angleA is acute
+      sideALength = 1.5;
+      sideBLength = 1.0;
+      angleB = 0.6;
+      result = 1.769654;
+      isAngleAObtuse = false;
+      assertEquals("Case 4 failed.", result, TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
+
+      // Case 5: Known angle < Pi/2 and adjacent side > opposite side and opposite side > height and angleA is obtuse
+      sideALength = 1.5;
+      sideBLength = 1.0;
+      angleB = 0.6;
+      result = 0.706353;
+      isAngleAObtuse = true;
+      assertEquals("Case 5 failed.", result, TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
+
+      // Case 6: Known angle > Pi/2 and adjacent side < opposite side
+      sideALength = 0.5;
+      sideBLength = 1.0;
+      angleB = 1.75;
+      result = 0.781476;
+      isAngleAObtuse = false;
+      assertEquals("Case 6 failed.", result, TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse), epsilon);
+
+      // Case 7: Known angle > Pi/2 and adjacent side = opposite side
+      sideALength = 1.0;
+      sideBLength = 1.0;
+      angleB = 1.75;
+      isAngleAObtuse = false;
+      assertTrue("Case 7 failed.", new Double(TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse)).isNaN());
+
+      // Case 8: Known angle > Pi/2 and adjacent side > opposite side
+      sideALength = 1.5;
+      sideBLength = 1.0;
+      angleB = 1.75;
+      isAngleAObtuse = false;
+      assertTrue("Case 8 failed.", new Double(TriangleTools.computeSideLengthFromSideSideAngle(sideALength, sideBLength, angleB, isAngleAObtuse)).isNaN());
+
+      // Random Testing
+      Random random = new Random(34534L);
+
+      for (int iter = 0; iter < 1000; iter++)
+      {
+         Point2D a = EuclidCoreRandomTools.nextPoint2D(random, 10.0);
+         Point2D b = EuclidCoreRandomTools.nextPoint2D(random, 10.0);
+         Point2D c = EuclidCoreRandomTools.nextPoint2D(random, 10.0);
+
+         Vector2D ab = new Vector2D();
+         ab.sub(b, a);
+         Vector2D ba = new Vector2D();
+         ba.sub(a, b);
+         Vector2D ac = new Vector2D();
+         ac.sub(c, a);
+         Vector2D ca = new Vector2D();
+         ca.sub(a, c);
+         Vector2D bc = new Vector2D();
+         bc.sub(c, b);
+         Vector2D cb = new Vector2D();
+         cb.sub(b, c);
+
+         // The three edge lengths
+         double abLength = ab.length();
+         double acLength = ac.length();
+         double bcLength = bc.length();
+
+         // The three angles
+         double abc = Math.abs(ba.angle(bc));
+         double bca = Math.abs(cb.angle(ca));
+         double cab = Math.abs(ac.angle(ab));
+
+         assertEquals(acLength, TriangleTools.computeSideLengthFromSideSideAngle(bcLength, abLength, bca, cab > Math.PI / 2), epsilon);
+         assertEquals(bcLength, TriangleTools.computeSideLengthFromSideSideAngle(abLength, acLength, abc, bca > Math.PI / 2), epsilon);
+         assertEquals(abLength, TriangleTools.computeSideLengthFromSideSideAngle(acLength, bcLength, cab, abc > Math.PI / 2), epsilon);
       }
    }
 }

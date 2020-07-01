@@ -12,6 +12,7 @@ import us.ihmc.ros2.Ros2NodeInterface;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.function.Consumer;
 
 public class RemoteEnvironmentMapInterface
 {
@@ -21,6 +22,8 @@ public class RemoteEnvironmentMapInterface
    private final HashMap<Integer, PlanarRegion> supportRegions = new HashMap<>();
 
    private final Stopwatch stopwatch = new Stopwatch();
+
+   private final ArrayList<Consumer<PlanarRegionsList>> callbacks = new ArrayList<>();
 
    public RemoteEnvironmentMapInterface(Ros2NodeInterface ros2Node)
    {
@@ -33,6 +36,11 @@ public class RemoteEnvironmentMapInterface
    public synchronized PlanarRegionsList getLatestCombinedRegionsList()
    {
       return latestCombinedRegionsList;
+   }
+
+   public void addPlanarRegionsListCallback(Consumer<PlanarRegionsList> planarRegionsListConsumer)
+   {
+      callbacks.add(planarRegionsListConsumer);
    }
 
    private void acceptRealsenseSLAMRegions(PlanarRegionsListMessage message)
@@ -80,6 +88,11 @@ public class RemoteEnvironmentMapInterface
       combinedRegionsList.addAll(realsenseSLAMRegions.getPlanarRegionsAsList());
       combinedRegionsList.addAll(supportRegions.values());
       latestCombinedRegionsList = new PlanarRegionsList(combinedRegionsList);
+
+      for (Consumer<PlanarRegionsList> callback : callbacks)
+      {
+         callback.accept(latestCombinedRegionsList);
+      }
    }
 
    /**

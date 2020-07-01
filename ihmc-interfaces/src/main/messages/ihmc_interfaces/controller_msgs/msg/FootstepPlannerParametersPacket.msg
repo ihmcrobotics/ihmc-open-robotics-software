@@ -312,12 +312,7 @@ float64 maximum_snap_height -11.1
 # Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
 # Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
 # this parameter.
-float64 min_x_clearance_from_stance -11.1
-
-# Parameter used inside the node expansion to avoid footsteps that would be on top of the stance foot.
-# Nodes are only added to the expanded list if they are outside the box around the stance foot defined by
-# this parameter.
-float64 min_y_clearance_from_stance -11.1
+float64 min_clearance_from_stance -11.1
 
 # Radius around the goal inside which the planner should start to turn to match the goal's orientation
 float64 final_turn_proximity -11.1
@@ -401,3 +396,6 @@ float64 shin_pitch -11.1
 
 # Height offset of shin collidable cylinder
 float64 shin_height_offet -11.1
+
+# Distance epsilon below snapped footstep that will be added to foothold
+float64 distance_epsilon_to_bridge_regions -11.1

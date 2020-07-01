@@ -7,6 +7,7 @@ import controller_msgs.msg.dds.DoorLocationPacket;
 import controller_msgs.msg.dds.HandTrajectoryMessage;
 import controller_msgs.msg.dds.UIPositionCheckerPacket;
 import us.ihmc.communication.IHMCROS2Publisher;
+import us.ihmc.communication.ROS2Tools;
 import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
@@ -55,11 +56,11 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
       super(robotName, "OpenDoorBehavior", OpenDoorState.class, yoTime, ros2Node);
       this.atlasPrimitiveActions = atlasPrimitiveActions;
       this.doorOpenDetectorBehaviorService = doorOpenDetectorBehaviorService;
-      uiPositionCheckerPacketpublisher = createBehaviorPublisher(UIPositionCheckerPacket.class);
+      uiPositionCheckerPacketpublisher = createBehaviorOutputPublisher(UIPositionCheckerPacket.class);
       sleepBehavior = new SleepBehavior(robotName, ros2Node, yoTime);
       abortMessagePublisher = createPublisherForController(AutomaticManipulationAbortMessage.class);
 
-      createBehaviorInputSubscriber(DoorLocationPacket.class, doorLocationPacket::set);
+      createSubscriber(DoorLocationPacket.class,ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationPacket::set);
 
       setupStateMachine();
 
@@ -153,7 +154,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
          {
             publishTextToSpeech("Starting Door Open Detector Service");
 
-            doorOpenDetectorBehaviorService.reset();
+           doorOpenDetectorBehaviorService.reset();
             doorOpenDetectorBehaviorService.run(true);
          }
 
@@ -167,6 +168,7 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
 
             }
             return doorOpenDetectorBehaviorService.doorDetected();
+           
          }
 
       };
@@ -253,6 +255,16 @@ public class OpenDoorBehavior extends StateMachineBehavior<OpenDoorState>
       factory.addStateAndDoneTransition(OpenDoorState.TURN_ON_OPEN_DOOR_DETECTOR, setDoorDetectorStart, OpenDoorState.TURN_DOOR_KNOB);
 
       factory.addStateAndDoneTransition(OpenDoorState.TURN_DOOR_KNOB, moveRightHandToDoorKnob, OpenDoorState.PUSH_ON_DOOR);
+      
+      
+      factory.addStateAndDoneTransition(OpenDoorState.PUSH_ON_DOOR, pushDoorALittle, OpenDoorState.PUSH_OPEN_DOOR);
+      factory.addStateAndDoneTransition(OpenDoorState.PUSH_OPEN_DOOR, pushDoorOpen, OpenDoorState.PULL_BACK_HANDS);
+      factory.addStateAndDoneTransition(OpenDoorState.PULL_BACK_HANDS, pullHandsBack, OpenDoorState.DONE);
+      factory.addState(OpenDoorState.DONE, done);
+
+
+      
+//      
       factory.addState(OpenDoorState.PUSH_ON_DOOR, pushDoorALittle);
       factory.addState(OpenDoorState.PUSH_OPEN_DOOR, pushDoorOpen);
       factory.addState(OpenDoorState.PULL_BACK_HANDS, pullHandsBack);

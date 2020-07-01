@@ -48,7 +48,7 @@ public class RealsensePelvisSimulator implements Supplier<PlanarRegionsList>
 
       realsenseSensorFrame = new TransformReferenceFrame("Realsense", pelvisFrame, transform);
 
-      double verticalFOV = 58.0;
+      double verticalFOV = 80.0; // real fov is 58.0;
       double horizontalFOV = 87.0;
       double range = 1.5;
       simulatedDepthCamera = new SimulatedDepthCamera(verticalFOV, horizontalFOV, range, realsenseSensorFrame);

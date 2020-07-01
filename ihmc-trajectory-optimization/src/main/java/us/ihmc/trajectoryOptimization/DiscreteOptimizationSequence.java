@@ -1,6 +1,6 @@
 package us.ihmc.trajectoryOptimization;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 public class DiscreteOptimizationSequence implements DiscreteOptimizationData
 {
@@ -39,25 +39,25 @@ public class DiscreteOptimizationSequence implements DiscreteOptimizationData
    }
 
    @Override
-   public DenseMatrix64F getState(int index)
+   public DMatrixRMaj getState(int index)
    {
       return stateSequence.get(index);
    }
 
    @Override
-   public DenseMatrix64F getControl(int index)
+   public DMatrixRMaj getControl(int index)
    {
       return controlSequence.get(index);
    }
 
    @Override
-   public void setState(int index, DenseMatrix64F state)
+   public void setState(int index, DMatrixRMaj state)
    {
       stateSequence.get(index).set(state);
    }
 
    @Override
-   public void setControl(int index, DenseMatrix64F control)
+   public void setControl(int index, DMatrixRMaj control)
    {
       controlSequence.get(index).set(control);
    }

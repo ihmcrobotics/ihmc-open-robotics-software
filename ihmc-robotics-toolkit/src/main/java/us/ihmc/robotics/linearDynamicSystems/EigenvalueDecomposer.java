@@ -2,8 +2,8 @@ package us.ihmc.robotics.linearDynamicSystems;
 
 import java.util.ArrayList;
 
-import org.ejml.data.CDenseMatrix64F;
-import org.ejml.ops.CCommonOps;
+import org.ejml.data.ZMatrixRMaj;
+import org.ejml.dense.row.CommonOps_ZDRM;
 
 import Jama.EigenvalueDecomposition;
 import Jama.Matrix;
@@ -104,9 +104,9 @@ public class EigenvalueDecomposer
          for (int j = 0; j < order; j++)
             ihmcComplexV.set(i, j, leftEigenvectors[j][i]); // notice transpose here
       
-      CDenseMatrix64F ejmlComplexV = ComplexTools.ihmcComplexToEjmlComplex(ihmcComplexV);
+      ZMatrixRMaj ejmlComplexV = ComplexTools.ihmcComplexToEjmlComplex(ihmcComplexV);
 
-      if( !CCommonOps.invert(ejmlComplexV) ) {
+      if( !CommonOps_ZDRM.invert(ejmlComplexV) ) {
          throw new RuntimeException("Complex matrix inversion failed");
       }
       

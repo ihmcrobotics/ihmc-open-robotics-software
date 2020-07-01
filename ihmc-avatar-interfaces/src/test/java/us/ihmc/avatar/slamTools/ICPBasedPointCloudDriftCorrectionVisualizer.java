@@ -3,7 +3,7 @@ package us.ihmc.avatar.slamTools;
 import java.io.File;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.thread.ThreadTools;
@@ -24,9 +24,9 @@ import us.ihmc.jOctoMap.iterators.OcTreeIteratorFactory;
 import us.ihmc.jOctoMap.node.NormalOcTreeNode;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
 import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudCompression;
-import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
+import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.optimization.FunctionOutputCalculator;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 import us.ihmc.simulationconstructionset.Robot;
@@ -215,7 +215,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       FunctionOutputCalculator functionOutputCalculator = new FunctionOutputCalculator()
       {
          @Override
-         public DenseMatrix64F computeOutput(DenseMatrix64F inputParameter)
+         public DMatrixRMaj computeOutput(DMatrixRMaj inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = convertTransform(inputParameter.getData());
             RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(sensorPoseToWorld);
@@ -228,7 +228,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
                correctedSensorPoseToWorld.transform(correctedData[i]);
             }
 
-            DenseMatrix64F errorSpace = new DenseMatrix64F(correctedData.length, 1);
+            DMatrixRMaj errorSpace = new DMatrixRMaj(correctedData.length, 1);
             for (int i = 0; i < correctedData.length; i++)
             {
                double distance = computeClosestDistance(correctedData[i]);
@@ -243,7 +243,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
             return surfelDistance;
          }
       };
-      DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
+      DMatrixRMaj purterbationVector = new DMatrixRMaj(6, 1);
       purterbationVector.set(0, 0.0001);
       purterbationVector.set(1, 0.0001);
       purterbationVector.set(2, 0.0001);

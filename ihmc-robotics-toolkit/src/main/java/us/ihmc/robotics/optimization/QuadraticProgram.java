@@ -1,6 +1,6 @@
 package us.ihmc.robotics.optimization;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 /**
  * minimize
@@ -10,12 +10,12 @@ import org.ejml.data.DenseMatrix64F;
  */
 public class QuadraticProgram
 {
-   private final DenseMatrix64F a;
-   private final DenseMatrix64F b;
-   private final DenseMatrix64F c;
-   private final DenseMatrix64F d;
+   private final DMatrixRMaj a;
+   private final DMatrixRMaj b;
+   private final DMatrixRMaj c;
+   private final DMatrixRMaj d;
 
-   public QuadraticProgram(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c, DenseMatrix64F d)
+   public QuadraticProgram(DMatrixRMaj a, DMatrixRMaj b, DMatrixRMaj c, DMatrixRMaj d)
    {
       doSizeChecks(a, b, c, d);
 
@@ -25,7 +25,7 @@ public class QuadraticProgram
       this.d = d;
    }
 
-   private void doSizeChecks(DenseMatrix64F a, DenseMatrix64F b, DenseMatrix64F c, DenseMatrix64F d)
+   private void doSizeChecks(DMatrixRMaj a, DMatrixRMaj b, DMatrixRMaj c, DMatrixRMaj d)
    {
       if (a.getNumRows() != b.getNumRows())
          throw new IllegalArgumentException("a.getNumRows() != b.getNumRows()");
@@ -35,22 +35,22 @@ public class QuadraticProgram
          throw new IllegalArgumentException("a.getNumCols() != c.getNumCols()");
    }
 
-   public DenseMatrix64F getA()
+   public DMatrixRMaj getA()
    {
       return a;
    }
 
-   public DenseMatrix64F getB()
+   public DMatrixRMaj getB()
    {
       return b;
    }
 
-   public DenseMatrix64F getC()
+   public DMatrixRMaj getC()
    {
       return c;
    }
 
-   public DenseMatrix64F getD()
+   public DMatrixRMaj getD()
    {
       return d;
    }

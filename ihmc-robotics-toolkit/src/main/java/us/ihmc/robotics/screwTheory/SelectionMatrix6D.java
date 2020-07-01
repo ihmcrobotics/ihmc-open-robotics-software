@@ -1,7 +1,7 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.MatrixDimensionException;
+import org.ejml.MatrixDimensionException;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -473,7 +473,7 @@ public class SelectionMatrix6D
     *           set to represent this. Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
-   public void getFullSelectionMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getFullSelectionMatrixInFrame(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       selectionMatrixToPack.reshape(6, 6);
       selectionMatrixToPack.zero();
@@ -486,7 +486,7 @@ public class SelectionMatrix6D
     * Converts this into an actual 6-by-6 selection matrix that is to be used with data expressed in
     * the {@code destinationFrame}.
     * <p>
-    * In addition to what {@link #getFullSelectionMatrixInFrame(ReferenceFrame, DenseMatrix64F)}
+    * In addition to what {@link #getFullSelectionMatrixInFrame(ReferenceFrame, DMatrixRMaj)}
     * does, this method also removes the zero-rows of the given selection matrix. This will help to
     * improve performance especially when the resulting selection matrix is to be multiplied to a
     * large matrix.
@@ -501,7 +501,7 @@ public class SelectionMatrix6D
     *           set to represent this. The zero-rows of the resulting matrix are removed. Modified.
     * @throws MatrixDimensionException if the given matrix is too small.
     */
-   public void getCompactSelectionMatrixInFrame(ReferenceFrame destinationFrame, DenseMatrix64F selectionMatrixToPack)
+   public void getCompactSelectionMatrixInFrame(ReferenceFrame destinationFrame, DMatrixRMaj selectionMatrixToPack)
    {
       selectionMatrixToPack.reshape(6, 6);
       selectionMatrixToPack.zero();

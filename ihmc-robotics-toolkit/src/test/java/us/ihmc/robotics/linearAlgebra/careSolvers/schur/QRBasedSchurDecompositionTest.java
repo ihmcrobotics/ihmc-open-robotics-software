@@ -1,8 +1,8 @@
 package us.ihmc.robotics.linearAlgebra.careSolvers.schur;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
-import org.ejml.ops.EjmlUnitTests;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
+import org.ejml.EjmlUnitTests;
 import org.junit.jupiter.api.Test;
 import us.ihmc.commons.RandomNumbers;
 import us.ihmc.matrixlib.NativeCommonOps;
@@ -17,7 +17,7 @@ public class QRBasedSchurDecompositionTest
    @Test
    public void testEasy()
    {
-      DenseMatrix64F A = new DenseMatrix64F(3, 3);
+      DMatrixRMaj A = new DMatrixRMaj(3, 3);
       A.set(0, 0, 3);
       A.set(0, 1, 2);
       A.set(0, 2, 1);
@@ -27,14 +27,14 @@ public class QRBasedSchurDecompositionTest
       A.set(2, 0, 4);
       A.set(2, 1, 4);
 
-      DenseMatrix64F AExpected = new DenseMatrix64F(A);
+      DMatrixRMaj AExpected = new DMatrixRMaj(A);
 
 
       QRBasedSchurDecomposition schur = new QRBasedSchurDecomposition(3);
       schur.setMaxIterations(1000000);
       schur.decompose(A);
-      DenseMatrix64F U = schur.getU(null);
-      DenseMatrix64F T = schur.getT(null);
+      DMatrixRMaj U = schur.getU(null);
+      DMatrixRMaj T = schur.getT(null);
 
       assertDecompositionHolds(A, U, T);
       EjmlUnitTests.assertEquals(AExpected, A, epsilon);
@@ -51,26 +51,26 @@ public class QRBasedSchurDecompositionTest
       for (int i = 0; i < iters; i++)
       {
          int rows = RandomNumbers.nextInt(random, 1, 10);
-         DenseMatrix64F A = new DenseMatrix64F(rows, rows);
+         DMatrixRMaj A = new DMatrixRMaj(rows, rows);
          A.setData(RandomNumbers.nextDoubleArray(random, rows * rows, 100.0));
 
-         DenseMatrix64F AExpected = new DenseMatrix64F(A);
+         DMatrixRMaj AExpected = new DMatrixRMaj(A);
 
          schur.decompose(A);
-         DenseMatrix64F U = schur.getU(null);
-         DenseMatrix64F T = schur.getT(null);
+         DMatrixRMaj U = schur.getU(null);
+         DMatrixRMaj T = schur.getT(null);
 
          assertDecompositionHolds(A, U, T);
          EjmlUnitTests.assertEquals(AExpected, A, epsilon);
       }
    }
 
-   private static void assertDecompositionHolds(DenseMatrix64F Aexpected, DenseMatrix64F U, DenseMatrix64F T)
+   private static void assertDecompositionHolds(DMatrixRMaj Aexpected, DMatrixRMaj U, DMatrixRMaj T)
    {
-      DenseMatrix64F UTranspose = new DenseMatrix64F(U);
-      CommonOps.transpose(U, UTranspose);
+      DMatrixRMaj UTranspose = new DMatrixRMaj(U);
+      CommonOps_DDRM.transpose(U, UTranspose);
 
-      DenseMatrix64F A = new DenseMatrix64F(Aexpected);
+      DMatrixRMaj A = new DMatrixRMaj(Aexpected);
 
       NativeCommonOps.multQuad(UTranspose, T, A);
 

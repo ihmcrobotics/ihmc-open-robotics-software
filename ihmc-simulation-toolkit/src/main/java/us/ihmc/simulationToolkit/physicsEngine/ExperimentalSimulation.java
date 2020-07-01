@@ -7,12 +7,20 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DBasics;
+import us.ihmc.euclid.matrix.interfaces.Matrix3DReadOnly;
 import us.ihmc.euclid.referenceFrame.FramePoint3D;
 import us.ihmc.euclid.referenceFrame.FrameVector3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DReadOnly;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.mecano.multiBodySystem.PrismaticJoint;
+import us.ihmc.mecano.multiBodySystem.RevoluteJoint;
+import us.ihmc.mecano.multiBodySystem.RigidBody;
+import us.ihmc.mecano.multiBodySystem.SixDoFJoint;
 import us.ihmc.mecano.multiBodySystem.interfaces.FloatingJointReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointBasics;
 import us.ihmc.mecano.multiBodySystem.interfaces.JointReadOnly;
@@ -25,7 +33,8 @@ import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyReadOnly;
 import us.ihmc.mecano.multiBodySystem.interfaces.SixDoFJointBasics;
 import us.ihmc.mecano.spatial.interfaces.TwistReadOnly;
 import us.ihmc.mecano.tools.MultiBodySystemTools;
-import us.ihmc.robotModels.FullHumanoidRobotModelFactory;
+import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
+import us.ihmc.robotModels.FullRobotModelFactory;
 import us.ihmc.robotics.physics.Collidable;
 import us.ihmc.robotics.physics.CollidableHelper;
 import us.ihmc.robotics.physics.ExperimentalPhysicsEngine;
@@ -33,6 +42,12 @@ import us.ihmc.robotics.physics.MultiBodySystemStateReader;
 import us.ihmc.robotics.physics.MultiBodySystemStateWriter;
 import us.ihmc.robotics.physics.PhysicsEngineTools;
 import us.ihmc.robotics.physics.RobotCollisionModel;
+import us.ihmc.robotics.robotDescription.FloatingJointDescription;
+import us.ihmc.robotics.robotDescription.JointDescription;
+import us.ihmc.robotics.robotDescription.LinkDescription;
+import us.ihmc.robotics.robotDescription.PinJointDescription;
+import us.ihmc.robotics.robotDescription.RobotDescription;
+import us.ihmc.robotics.robotDescription.SliderJointDescription;
 import us.ihmc.simulationConstructionSetTools.util.HumanoidFloatingRootJointRobot;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationconstructionset.FloatingJoint;
@@ -40,6 +55,7 @@ import us.ihmc.simulationconstructionset.GroundContactPoint;
 import us.ihmc.simulationconstructionset.Joint;
 import us.ihmc.simulationconstructionset.OneDegreeOfFreedomJoint;
 import us.ihmc.simulationconstructionset.Robot;
+import us.ihmc.simulationconstructionset.RobotFromDescription;
 import us.ihmc.simulationconstructionset.Simulation;
 import us.ihmc.simulationconstructionset.UnreasonableAccelerationException;
 import us.ihmc.simulationconstructionset.physics.ScsPhysics;
@@ -69,9 +85,22 @@ public class ExperimentalSimulation extends Simulation
 
    private final List<RigidBodyBasics> rootBodies = new ArrayList<>();
 
+   /** List of tasks to be executed right before executing the physics engine's tick. */
+   private final List<Runnable> preProcessors = new ArrayList<>();
+   /** List of tasks to be executed right after executing the physics engine's tick. */
+   private final List<Runnable> postProcessors = new ArrayList<>();
+
+   private boolean initialize = true;
+
+   public ExperimentalSimulation(int dataBufferSize)
+   {
+      this(null, dataBufferSize);
+   }
+
    public ExperimentalSimulation(Robot[] robotArray, int dataBufferSize)
    {
       super(robotArray, dataBufferSize);
+      physicsEngine.addExternalWrenchReader(externalWrenchReader);
    }
 
    public void setGravity(Vector3DReadOnly gravity)
@@ -85,20 +114,67 @@ public class ExperimentalSimulation extends Simulation
       addEnvironmentCollidables(toCollidables(helper.getCollisionMask(environmentCollisionMask), helper.createCollisionGroup(robotCollisionMask), environment));
    }
 
-   public void addEnvironmentCollidables(Collection<? extends Collidable> environmentCollidable)
+   public void addEnvironmentCollidable(Collidable environmentCollidable)
    {
-      physicsEngine.addEnvironmentCollidables(environmentCollidable);
-      physicsEngine.addExternalWrenchReader(externalWrenchReader);
+      physicsEngine.addEnvironmentCollidable(environmentCollidable);
    }
 
-   public void addRobot(FullHumanoidRobotModelFactory robotFactory, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter)
+   public void addEnvironmentCollidables(Collection<? extends Collidable> environmentCollidables)
+   {
+      physicsEngine.addEnvironmentCollidables(environmentCollidables);
+   }
+
+   /**
+    * Adds and configures a new robot to the simulation.
+    */
+   public void addRobot(RobotDescription robotDescription, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter)
+   {
+      RobotFromDescription scsRobot = new RobotFromDescription(robotDescription);
+      RigidBodyBasics rootBody = toInverseDynamicsRobot(robotDescription);
+
+      MultiBodySystemStateWriter controllerOutputWriter = createControllerOutputWriter(scsRobot);
+      MultiBodySystemStateReader physicsOutputWriter = createPhysicsOutputWriter(scsRobot);
+
+      rootBodies.add(rootBody);
+      physicsEngine.addRobot(robotDescription.getName(), rootBody, controllerOutputWriter, robotInitialStateWriter, robotCollisionModel, physicsOutputWriter);
+      externalWrenchReader.addRobot(rootBody, scsRobot);
+      addRobot(scsRobot);
+   }
+
+   /**
+    * Adds and configures a new robot to the simulation.
+    */
+   public void addRobot(RobotDescription robotDescription, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter,
+                        MultiBodySystemStateWriter controllerOutputWriter)
+   {
+      RobotFromDescription scsRobot = new RobotFromDescription(robotDescription);
+      RigidBodyBasics rootBody = toInverseDynamicsRobot(robotDescription);
+
+      MultiBodySystemStateReader physicsOutputWriter = createPhysicsOutputWriter(scsRobot);
+
+      rootBodies.add(rootBody);
+      physicsEngine.addRobot(robotDescription.getName(), rootBody, controllerOutputWriter, robotInitialStateWriter, robotCollisionModel, physicsOutputWriter);
+      externalWrenchReader.addRobot(rootBody, scsRobot);
+      addRobot(scsRobot);
+   }
+
+   /**
+    * Configures the physics for a robot that was already added via the constructor or
+    * {@link #addRobot(Robot)}.
+    */
+   public void configureRobot(FullRobotModelFactory robotFactory, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter)
    {
       String robotName = robotFactory.getRobotDescription().getName();
       RigidBodyBasics rootBody = robotFactory.createFullRobotModel().getElevator();
-      addRobot(robotName, rootBody, robotCollisionModel, robotInitialStateWriter);
+      configureRobot(robotName, rootBody, robotCollisionModel, robotInitialStateWriter);
    }
 
-   public void addRobot(String robotName, RigidBodyBasics rootBody, RobotCollisionModel robotCollisionModel, MultiBodySystemStateWriter robotInitialStateWriter)
+   /**
+    * Configures the physics for a robot that was already added via the constructor or
+    * {@link #addRobot(Robot)}.
+    */
+   public void configureRobot(String robotName, RigidBodyBasics rootBody, RobotCollisionModel robotCollisionModel,
+                              MultiBodySystemStateWriter robotInitialStateWriter)
    {
       Robot scsRobot = Stream.of(getRobots()).filter(candidate -> candidate.getName().toLowerCase().equals(robotName.toLowerCase())).findFirst().get();
 
@@ -109,9 +185,62 @@ public class ExperimentalSimulation extends Simulation
       externalWrenchReader.addRobot(rootBody, scsRobot);
    }
 
+   public void addPreProcessor(Runnable preProcessor)
+   {
+      preProcessors.add(preProcessor);
+   }
+
+   public void addPostProcessor(Runnable postProcessor)
+   {
+      postProcessors.add(postProcessor);
+   }
+
+   public void addJVMStatistics()
+   {
+      JVMStatisticsGenerator jvmStatisticsGenerator = new JVMStatisticsGenerator(getPhysicsEngineRegistry());
+      postProcessors.add(() -> jvmStatisticsGenerator.runManual());
+   }
+
+   public void addSimulationEnergyStatistics()
+   {
+      SimulationEnergyStatistics.setupSimulationEnergyStatistics(gravity, physicsEngine);
+   }
+
+   public void initialize()
+   {
+      initialize = false;
+
+      synchronized (getSimulationSynchronizer())
+      {
+         for (Robot robot : getRobots())
+         {
+            robot.update();
+         }
+
+         externalWrenchReader.initialize();
+         physicsEngine.initialize();
+         externalWrenchReader.updateSCSGroundContactPoints();
+
+         Robot[] robots = getRobots();
+
+         for (int i = 0; i < robots.length; i++)
+         {
+            Robot robot = robots[i];
+            updateGroundContactPointsVelocity(rootBodies.get(i), robot);
+         }
+
+         getDataBuffer().copyValuesThrough();
+      }
+   }
+
    @Override
    public void simulate()
    {
+      if (initialize)
+         initialize();
+
+      preProcessors.forEach(Runnable::run);
+
       synchronized (getSimulationSynchronizer())
       {
          for (Robot robot : getRobots())
@@ -133,6 +262,8 @@ public class ExperimentalSimulation extends Simulation
             robot.getYoTime().add(getDT());
          }
       }
+
+      postProcessors.forEach(Runnable::run);
    }
 
    @Override
@@ -203,18 +334,24 @@ public class ExperimentalSimulation extends Simulation
 
                   stateCopiers.add(new Runnable()
                   {
+                     private final FrameVector3D linearVelocity = new FrameVector3D();
+                     private final FrameVector3D linearAcceleration = new FrameVector3D();
+
                      @Override
                      public void run()
                      {
                         scsJoint.setPosition(idJoint.getJointPose().getPosition());
                         scsJoint.setQuaternion(idJoint.getJointPose().getOrientation());
+
+                        linearVelocity.setMatchingFrame(idJoint.getJointTwist().getLinearPart());
+
                         scsJoint.setAngularVelocityInBody(idJoint.getJointTwist().getAngularPart());
-                        FrameVector3D linearVelocity = new FrameVector3D(idJoint.getJointTwist().getLinearPart());
-                        linearVelocity.changeFrame(ReferenceFrame.getWorldFrame());
                         scsJoint.setVelocity(linearVelocity);
-                        scsJoint.setAngularAccelerationInBody(idJoint.getJointAcceleration().getAngularPart());
-                        FrameVector3D linearAcceleration = new FrameVector3D(idJoint.getJointAcceleration().getLinearPart());
+
+                        idJoint.getJointAcceleration().getLinearAccelerationAtBodyOrigin(idJoint.getJointTwist(), linearAcceleration);
                         linearAcceleration.changeFrame(ReferenceFrame.getWorldFrame());
+
+                        scsJoint.setAngularAccelerationInBody(idJoint.getJointAcceleration().getAngularPart());
                         scsJoint.setAcceleration(linearAcceleration);
                      }
                   });
@@ -383,6 +520,57 @@ public class ExperimentalSimulation extends Simulation
          scsGroundContactPoint.setVelocity(linearVelocity);
          scsGroundContactPoint.setAngularVelocity(angularVelocity);
       }
+   }
+
+   static RigidBodyBasics toInverseDynamicsRobot(RobotDescription description)
+   {
+      RigidBody rootBody = new RigidBody("elevator", ReferenceFrame.getWorldFrame());
+      for (JointDescription rootJoint : description.getRootJoints())
+         addJointRecursive(rootJoint, rootBody);
+      return rootBody;
+   }
+
+   static void addJointRecursive(JointDescription jointDescription, RigidBodyBasics parentBody)
+   {
+      JointBasics joint;
+      String name = jointDescription.getName();
+      Vector3D jointOffset = new Vector3D();
+      jointDescription.getOffsetFromParentJoint(jointOffset);
+
+      if (jointDescription instanceof PinJointDescription)
+      {
+         Vector3D jointAxis = new Vector3D();
+         ((PinJointDescription) jointDescription).getJointAxis(jointAxis);
+         joint = new RevoluteJoint(name, parentBody, jointOffset, jointAxis);
+      }
+      else if (jointDescription instanceof SliderJointDescription)
+      {
+         Vector3D jointAxis = new Vector3D();
+         ((SliderJointDescription) jointDescription).getJointAxis(jointAxis);
+         joint = new PrismaticJoint(name, parentBody, jointOffset, jointAxis);
+      }
+      else if (jointDescription instanceof FloatingJointDescription)
+      {
+         RigidBodyTransform transformToParent = new RigidBodyTransform();
+         transformToParent.getTranslation().set(jointOffset);
+         joint = new SixDoFJoint(name, parentBody, transformToParent);
+      }
+      else
+      {
+         throw new IllegalStateException("Joint type not handled.");
+      }
+
+      LinkDescription linkDescription = jointDescription.getLink();
+
+      String bodyName = linkDescription.getName();
+      Matrix3DReadOnly momentOfInertia = linkDescription.getMomentOfInertiaCopy();
+      double mass = linkDescription.getMass();
+      Tuple3DReadOnly centerOfMassOffset = linkDescription.getCenterOfMassOffset();
+      RigidBody successor = new RigidBody(bodyName, joint, momentOfInertia, mass, centerOfMassOffset);
+      joint.setSuccessor(successor);
+
+      for (JointDescription childJoint : jointDescription.getChildrenJoints())
+         addJointRecursive(childJoint, successor);
    }
 
    public ExperimentalPhysicsEngine getPhysicsEngine()

@@ -11,10 +11,7 @@ import us.ihmc.commons.MathTools;
 import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.Plane3D;
-import us.ihmc.euclid.referenceFrame.FrameConvexPolygon2D;
-import us.ihmc.euclid.referenceFrame.FramePoint3D;
-import us.ihmc.euclid.referenceFrame.FrameVector3D;
-import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.*;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DBasics;
 import us.ihmc.euclid.referenceFrame.interfaces.FramePose3DReadOnly;
 import us.ihmc.euclid.transform.RigidBodyTransform;
@@ -37,6 +34,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
    private final double[] swingWaypointProportions;
+   private final YoGraphicsListRegistry graphicsListRegistry;
 
    private final TwoWaypointSwingGenerator twoWaypointSwingGenerator;
    private final ConvexPolygon2D footPolygonShape;
@@ -61,6 +59,10 @@ public class SwingOverPlanarRegionsTrajectoryExpander
    private final PoseReferenceFrame solePoseReferenceFrame = new PoseReferenceFrame("desiredPositionFrame", worldFrame);
    private final PoseReferenceFrame startOfSwingReferenceFrame = new PoseReferenceFrame("startOfSwingFrame", worldFrame);
    private final PoseReferenceFrame endOfSwingReferenceFrame = new PoseReferenceFrame("endOfSwingFrame", worldFrame);
+
+   private static final int numberOfTrajectorySegmentsToCalculateLength = 10;
+   private final YoDouble initialTrajectoryLength;
+   private final YoDouble expandedTrajectoryLength;
 
    private final RecyclingArrayList<FramePoint3D> originalWaypoints;
    private final RecyclingArrayList<FramePoint3D> adjustedWaypoints;
@@ -107,11 +109,12 @@ public class SwingOverPlanarRegionsTrajectoryExpander
                                                    YoGraphicsListRegistry graphicsListRegistry)
    {
       String namePrefix = "trajectoryExpander";
+      this.graphicsListRegistry = graphicsListRegistry;
       SteppingParameters steppingParameters = walkingControllerParameters.getSteppingParameters();
       twoWaypointSwingGenerator = new TwoWaypointSwingGenerator(namePrefix,
                                                                 steppingParameters.getMinSwingHeightFromStanceFoot(),
                                                                 steppingParameters.getMaxSwingHeightFromStanceFoot(),
-                                                                steppingParameters.getMinSwingHeightFromStanceFoot(),
+                                                                steppingParameters.getDefaultSwingHeightFromStanceFoot(),
                                                                 parentRegistry,
                                                                 graphicsListRegistry);
       minimumSwingHeight = steppingParameters.getMinSwingHeightFromStanceFoot();
@@ -142,6 +145,9 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       wereWaypointsAdjusted = new YoBoolean(namePrefix + "WereWaypointsAdjusted", parentRegistry);
       status = new YoEnum<>(namePrefix + "Status", parentRegistry, SwingOverPlanarRegionsStatus.class);
       mostSevereCollisionType = new YoEnum<>(namePrefix + "CollisionType", parentRegistry, SwingOverPlanarRegionsCollisionType.class);
+
+      initialTrajectoryLength = new YoDouble(namePrefix + "InitialTrajectoryLength", parentRegistry);
+      expandedTrajectoryLength = new YoDouble(namePrefix + "ExpandedTrajectoryLength", parentRegistry);
 
       trajectoryPosition = new YoFramePoint3D(namePrefix + "TrajectoryPosition", worldFrame, parentRegistry);
       originalWaypoints = new RecyclingArrayList<>(2, FramePoint3D.class);
@@ -317,6 +323,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
 
       twoWaypointSwingGenerator.setTrajectoryType(TrajectoryType.CUSTOM, adjustedWaypoints);
       twoWaypointSwingGenerator.initialize();
+      calculateTrajectoryLength(initialTrajectoryLength);
 
       status.set(SwingOverPlanarRegionsStatus.SEARCHING_FOR_SOLUTION);
       // walk along the trajectory and look for collisions, and adjust your waypoints if there is one.
@@ -341,6 +348,7 @@ public class SwingOverPlanarRegionsTrajectoryExpander
          numberOfTriesCounter.countOne();
       }
 
+      calculateTrajectoryLength(expandedTrajectoryLength);
       return twoWaypointSwingGenerator.computeAndGetMaxSpeed();
    }
 
@@ -695,6 +703,27 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       rigidBodyTransform.transform(waypointAdjustment);
    }
 
+   private void calculateTrajectoryLength(YoDouble trajectoryLengthToSet)
+   {
+      FramePoint3D position0 = new FramePoint3D();
+      FramePoint3D position1 = new FramePoint3D();
+
+      twoWaypointSwingGenerator.compute(0.0);
+      twoWaypointSwingGenerator.getPosition(position0);
+      double distance = 0.0;
+
+      for (int i = 0; i < numberOfTrajectorySegmentsToCalculateLength; i++)
+      {
+         double t = ((double) (i + 1)) / (numberOfTrajectorySegmentsToCalculateLength);
+         twoWaypointSwingGenerator.compute(t);
+         twoWaypointSwingGenerator.getPosition(position1);
+         distance += position0.distance(position1);
+         position0.set(position1);
+      }
+
+      trajectoryLengthToSet.set(distance);
+   }
+
    /**
     * Returns the modified waypoints that should avoid collisions in the world.
     */
@@ -711,9 +740,24 @@ public class SwingOverPlanarRegionsTrajectoryExpander
       return wereWaypointsAdjusted.getBooleanValue();
    }
 
+   public double getInitialTrajectoryLength()
+   {
+      return initialTrajectoryLength.getDoubleValue();
+   }
+
+   public double getExpandedTrajectoryLength()
+   {
+      return expandedTrajectoryLength.getDoubleValue();
+   }
+
    public SwingOverPlanarRegionsStatus getStatus()
    {
       return status.getEnumValue();
+   }
+
+   public YoGraphicsListRegistry getGraphicsListRegistry()
+   {
+      return graphicsListRegistry;
    }
 
    // VISULIZER METHODS

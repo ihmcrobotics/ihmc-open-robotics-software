@@ -2,8 +2,8 @@ package us.ihmc.commonWalkingControlModules.momentumBasedController.optimization
 
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.ops.CommonOps;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.CommonOps_DDRM;
 
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyControlCoreToolbox;
 import us.ihmc.commonWalkingControlModules.controllerCore.WholeBodyInverseDynamicsSolver;
@@ -49,8 +49,8 @@ public class ContactWrenchMatrixCalculator
 
    private final int numberOfDoFs;
 
-   private final DenseMatrix64F tmpCompactContactForceJacobianMatrix;
-   private final DenseMatrix64F tmpFullContactForceJacobianMatrix;
+   private final DMatrixRMaj tmpCompactContactForceJacobianMatrix;
+   private final DMatrixRMaj tmpFullContactForceJacobianMatrix;
 
    public ContactWrenchMatrixCalculator(WholeBodyControlCoreToolbox toolbox)
    {
@@ -62,8 +62,8 @@ public class ContactWrenchMatrixCalculator
       numberOfDoFs = jointIndexHandler.getNumberOfDoFs();
       int rhoSize = wrenchMatrixCalculator.getRhoSize();
 
-      tmpFullContactForceJacobianMatrix = new DenseMatrix64F(rhoSize, numberOfDoFs);
-      tmpCompactContactForceJacobianMatrix = new DenseMatrix64F(rhoSize, numberOfDoFs);
+      tmpFullContactForceJacobianMatrix = new DMatrixRMaj(rhoSize, numberOfDoFs);
+      tmpCompactContactForceJacobianMatrix = new DMatrixRMaj(rhoSize, numberOfDoFs);
    }
 
    /**
@@ -71,7 +71,7 @@ public class ContactWrenchMatrixCalculator
     * 
     * @param contactForceJacobianToPack
     */
-   public void computeContactForceJacobian(DenseMatrix64F contactForceJacobianToPack)
+   public void computeContactForceJacobian(DMatrixRMaj contactForceJacobianToPack)
    {
       int contactForceStartIndex = 0;
 
@@ -81,20 +81,20 @@ public class ContactWrenchMatrixCalculator
 
          jacobianCalculator.setKinematicChain(rootBody, rigidBody);
          jacobianCalculator.setJacobianFrame(wrenchMatrixCalculator.getJacobianFrame());
-         DenseMatrix64F contactableBodyJacobianMatrix = jacobianCalculator.getJacobianMatrix();
+         DMatrixRMaj contactableBodyJacobianMatrix = jacobianCalculator.getJacobianMatrix();
 
-         DenseMatrix64F rhoJacobianMatrix = wrenchMatrixCalculator.getRhoJacobianMatrix(rigidBody);
+         DMatrixRMaj rhoJacobianMatrix = wrenchMatrixCalculator.getRhoJacobianMatrix(rigidBody);
 
          int rhoSize = rhoJacobianMatrix.getNumCols();
 
          tmpCompactContactForceJacobianMatrix.reshape(rhoSize, contactableBodyJacobianMatrix.getNumCols());
-         CommonOps.multTransA(rhoJacobianMatrix, contactableBodyJacobianMatrix, tmpCompactContactForceJacobianMatrix);
-         CommonOps.changeSign(tmpCompactContactForceJacobianMatrix);
+         CommonOps_DDRM.multTransA(rhoJacobianMatrix, contactableBodyJacobianMatrix, tmpCompactContactForceJacobianMatrix);
+         CommonOps_DDRM.changeSign(tmpCompactContactForceJacobianMatrix);
 
          jointIndexHandler.compactBlockToFullBlock(jacobianCalculator.getJointsFromBaseToEndEffector(),
                                                    tmpCompactContactForceJacobianMatrix,
                                                    tmpFullContactForceJacobianMatrix);
-         CommonOps.extract(tmpFullContactForceJacobianMatrix, 0, rhoSize, 0, numberOfDoFs, contactForceJacobianToPack, contactForceStartIndex, 0);
+         CommonOps_DDRM.extract(tmpFullContactForceJacobianMatrix, 0, rhoSize, 0, numberOfDoFs, contactForceJacobianToPack, contactForceStartIndex, 0);
 
          contactForceStartIndex += rhoSize;
       }

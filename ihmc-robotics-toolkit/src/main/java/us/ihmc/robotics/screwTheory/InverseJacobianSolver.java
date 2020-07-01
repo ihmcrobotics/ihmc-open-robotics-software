@@ -1,23 +1,23 @@
 package us.ihmc.robotics.screwTheory;
 
-import org.ejml.alg.dense.linsol.LinearSolverSafe;
-import org.ejml.data.DenseMatrix64F;
-import org.ejml.factory.LinearSolverFactory;
-import org.ejml.interfaces.linsol.LinearSolver;
+import org.ejml.LinearSolverSafe;
+import org.ejml.data.DMatrixRMaj;
+import org.ejml.dense.row.factory.LinearSolverFactory_DDRM;
+import org.ejml.interfaces.linsol.LinearSolverDense;
 
 public class InverseJacobianSolver implements JacobianSolver
 {
-   private final LinearSolver<DenseMatrix64F> solver;
-   private final DenseMatrix64F jacobianMatrix;
+   private final LinearSolverDense<DMatrixRMaj> solver;
+   private final DMatrixRMaj jacobianMatrix;
    
    public InverseJacobianSolver(int matrixSize)
    {
-      solver = new LinearSolverSafe<DenseMatrix64F>(LinearSolverFactory.leastSquaresQrPivot(true, false));
-      jacobianMatrix = new DenseMatrix64F(matrixSize, matrixSize);
+      solver = new LinearSolverSafe<DMatrixRMaj>(LinearSolverFactory_DDRM.leastSquaresQrPivot(true, false));
+      jacobianMatrix = new DMatrixRMaj(matrixSize, matrixSize);
    }
 
    @Override
-   public void solve(DenseMatrix64F solutionToPack, DenseMatrix64F vector)
+   public void solve(DMatrixRMaj solutionToPack, DMatrixRMaj vector)
    {
       if (!solver.setA(jacobianMatrix))
          throw new RuntimeException("jacobian is singular");
@@ -25,7 +25,7 @@ public class InverseJacobianSolver implements JacobianSolver
    }
 
    @Override
-   public void setJacobian(DenseMatrix64F jacobianMatrix)
+   public void setJacobian(DMatrixRMaj jacobianMatrix)
    {
       this.jacobianMatrix.set(jacobianMatrix);      
    }

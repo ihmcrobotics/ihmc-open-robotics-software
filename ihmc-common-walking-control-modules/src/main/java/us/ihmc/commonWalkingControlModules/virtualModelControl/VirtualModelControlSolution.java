@@ -3,7 +3,7 @@ package us.ihmc.commonWalkingControlModules.virtualModelControl;
 import java.util.List;
 import java.util.Map;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.mecano.multiBodySystem.interfaces.RigidBodyBasics;
 import us.ihmc.mecano.spatial.Wrench;
@@ -11,7 +11,7 @@ import us.ihmc.mecano.spatial.interfaces.SpatialForceReadOnly;
 
 public class VirtualModelControlSolution
 {
-   private DenseMatrix64F jointTorques;
+   private DMatrixRMaj jointTorques;
 
    private SpatialForceReadOnly centroidalMomentumRateSolution;
    private Map<RigidBodyBasics, Wrench> externalWrenchSolution;
@@ -43,12 +43,12 @@ public class VirtualModelControlSolution
       return centroidalMomentumRateSolution;
    }
 
-   public void setJointTorques(DenseMatrix64F jointTorques)
+   public void setJointTorques(DMatrixRMaj jointTorques)
    {
       this.jointTorques = jointTorques;
    }
 
-   public DenseMatrix64F getJointTorques()
+   public DMatrixRMaj getJointTorques()
    {
       return jointTorques;
    }

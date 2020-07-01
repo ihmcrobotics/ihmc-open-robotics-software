@@ -3,7 +3,7 @@ package us.ihmc.avatar.slamTools;
 import java.io.File;
 import java.util.List;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import us.ihmc.commons.thread.ThreadTools;
@@ -17,10 +17,10 @@ import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
 import us.ihmc.graphicsDescription.appearance.YoAppearance;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
 import us.ihmc.jOctoMap.ocTree.NormalOcTree;
-import us.ihmc.robotEnvironmentAwareness.hardware.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.SurfaceElementICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
+import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
 import us.ihmc.robotics.optimization.FunctionOutputCalculator;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 import us.ihmc.simulationconstructionset.Robot;
@@ -41,9 +41,9 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    private final int bufferSize = (int) (trajectoryTime / dt / recordFrequency + 3);
 
    private static final DriftCase DRIFT_CASE = DriftCase.UpStairs3YDriftSmallOverlap;
-//         private static final DriftCase DRIFT_CASE = DriftCase.UpStairs3RollDrift;
-//         private static final DriftCase DRIFT_CASE = DriftCase.UpStairs3HugeDrift;
-//      private static final DriftCase DRIFT_CASE = DriftCase.UpStairs2YawDrift;
+   //         private static final DriftCase DRIFT_CASE = DriftCase.UpStairs3RollDrift;
+   //         private static final DriftCase DRIFT_CASE = DriftCase.UpStairs3HugeDrift;
+   //         private static final DriftCase DRIFT_CASE = DriftCase.UpStairs2YawDrift;
 
    private static final String DATA_PATH = "C:\\" + DRIFT_CASE.getFilePath();
    private static final int INDEX_FRAME_ONE = DRIFT_CASE.getPreviousFrameIndex();
@@ -162,7 +162,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          optimizer.iterate();
 
          // get parameter.
-         DenseMatrix64F optimalParameter = optimizer.getOptimalParameter();
+         DMatrixRMaj optimalParameter = optimizer.getOptimalParameter();
          icpTransformer.set(convertTransform(optimalParameter.getData()));
          correctedSensorPoseToWorld.set(frame2.getInitialSensorPoseToWorld());
          correctedSensorPoseToWorld.multiply(icpTransformer);
@@ -189,7 +189,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          boolean isSteadyQuality = false;
          boolean isSteadyTranslational = false;
          boolean isSteadyRotational = false;
-         
+
          if (Math.abs(quality - optimizerQuality.getDoubleValue()) < 0.001)
          {
             isSteadyQuality = true;
@@ -273,7 +273,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       FunctionOutputCalculator functionOutputCalculator = new FunctionOutputCalculator()
       {
          @Override
-         public DenseMatrix64F computeOutput(DenseMatrix64F inputParameter)
+         public DMatrixRMaj computeOutput(DMatrixRMaj inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = convertTransform(inputParameter.getData());
             RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame.getOriginalSensorPose());
@@ -289,7 +289,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
                correctedSensorPoseToWorld.transform(correctedSurfel[i].getNormal());
             }
 
-            DenseMatrix64F errorSpace = new DenseMatrix64F(correctedSurfel.length, 1);
+            DMatrixRMaj errorSpace = new DMatrixRMaj(correctedSurfel.length, 1);
             for (int i = 0; i < correctedSurfel.length; i++)
             {
                double distance = computeClosestDistance(correctedSurfel[i]);
@@ -303,7 +303,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
             return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(map, surfel.getPoint(), map.getResolution() * 1.1);
          }
       };
-      DenseMatrix64F purterbationVector = new DenseMatrix64F(6, 1);
+      DMatrixRMaj purterbationVector = new DMatrixRMaj(6, 1);
       purterbationVector.set(0, map.getResolution() * 0.002);
       purterbationVector.set(1, map.getResolution() * 0.002);
       purterbationVector.set(2, map.getResolution() * 0.002);

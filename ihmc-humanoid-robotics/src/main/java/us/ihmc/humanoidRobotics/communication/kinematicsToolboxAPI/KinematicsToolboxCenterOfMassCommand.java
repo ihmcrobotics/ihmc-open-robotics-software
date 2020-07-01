@@ -1,6 +1,6 @@
 package us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import controller_msgs.msg.dds.KinematicsToolboxCenterOfMassMessage;
 import us.ihmc.communication.controllerAPI.command.Command;
@@ -13,7 +13,7 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
    private long sequenceId;
    private final FramePoint3D desiredPosition = new FramePoint3D();
    private final SelectionMatrix3D selectionMatrix = new SelectionMatrix3D();
-   private final DenseMatrix64F weightVector = new DenseMatrix64F(3, 1);
+   private final DMatrixRMaj weightVector = new DMatrixRMaj(3, 1);
 
    @Override
    public void clear()
@@ -61,7 +61,7 @@ public class KinematicsToolboxCenterOfMassCommand implements Command<KinematicsT
       }
    }
 
-   public DenseMatrix64F getWeightVector()
+   public DMatrixRMaj getWeightVector()
    {
       return weightVector;
    }

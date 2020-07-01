@@ -1,6 +1,6 @@
 package us.ihmc.sensorProcessing.imu;
 
-import org.ejml.data.DenseMatrix64F;
+import org.ejml.data.DMatrixRMaj;
 
 import us.ihmc.euclid.matrix.RotationMatrix;
 import us.ihmc.euclid.referenceFrame.FrameQuaternion;
@@ -331,35 +331,35 @@ public class FusedIMUSensor implements IMUSensorReadOnly
    }
 
    @Override
-   public void getOrientationNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
+   public void getOrientationNoiseCovariance(DMatrixRMaj noiseCovarianceToPack)
    {
       // TODO Maybe do something smarter for that
       firstIMU.getOrientationNoiseCovariance(noiseCovarianceToPack);
    }
 
    @Override
-   public void getAngularVelocityNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
+   public void getAngularVelocityNoiseCovariance(DMatrixRMaj noiseCovarianceToPack)
    {
       // TODO Maybe do something smarter for that
       firstIMU.getAngularVelocityNoiseCovariance(noiseCovarianceToPack);
    }
 
    @Override
-   public void getAngularVelocityBiasProcessNoiseCovariance(DenseMatrix64F biasProcessNoiseCovarianceToPack)
+   public void getAngularVelocityBiasProcessNoiseCovariance(DMatrixRMaj biasProcessNoiseCovarianceToPack)
    {
       // TODO Maybe do something smarter for that
       firstIMU.getAngularVelocityBiasProcessNoiseCovariance(biasProcessNoiseCovarianceToPack);
    }
 
    @Override
-   public void getLinearAccelerationNoiseCovariance(DenseMatrix64F noiseCovarianceToPack)
+   public void getLinearAccelerationNoiseCovariance(DMatrixRMaj noiseCovarianceToPack)
    {
       // TODO Maybe do something smarter for that
       firstIMU.getLinearAccelerationNoiseCovariance(noiseCovarianceToPack);
    }
 
    @Override
-   public void getLinearAccelerationBiasProcessNoiseCovariance(DenseMatrix64F biasProcessNoiseCovarianceToPack)
+   public void getLinearAccelerationBiasProcessNoiseCovariance(DMatrixRMaj biasProcessNoiseCovarianceToPack)
    {
       // TODO Maybe do something smarter for that
       firstIMU.getLinearAccelerationBiasProcessNoiseCovariance(biasProcessNoiseCovarianceToPack);
