@@ -98,6 +98,10 @@ public class AStarFootstepPlanner
                                                                  edgeData.setData(i, allVariables.get(i).getValueAsLongBits());
                                                               }
 
+                                                              edgeData.setStanceNode(edge.getStartNode());
+                                                              edgeData.setCandidateNode(edge.getEndNode());
+                                                              edgeData.getCandidateNodeSnapData().set(snapper.snapFootstepNode(edge.getEndNode()));
+
                                                               edgeDataMap.put(edge, edgeData.getCopyAndClear());
                                                            });
    }
