@@ -23,6 +23,7 @@ public class FootstepPlannerLog
    private final FootstepPlanningToolboxOutputStatus statusPacket = new FootstepPlanningToolboxOutputStatus();
 
    private final VisibilityGraphHolder visibilityGraphHolder = new VisibilityGraphHolder();
+   private final List<VariableDescriptor> variableNames = new ArrayList<>();
    private final Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> edgeDataMap = new HashMap<>();
    private final List<FootstepPlannerIterationData> iterationData = new ArrayList<>();
 
@@ -69,6 +70,11 @@ public class FootstepPlannerLog
    public VisibilityGraphHolder getVisibilityGraphHolder()
    {
       return visibilityGraphHolder;
+   }
+
+   public List<VariableDescriptor> getVariableDescriptors()
+   {
+      return variableNames;
    }
 
    public Map<GraphEdge<FootstepNode>, FootstepPlannerEdgeData> getEdgeDataMap()
