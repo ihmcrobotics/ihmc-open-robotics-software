@@ -29,7 +29,7 @@ import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 public class NewtonsCradleExperimentalSimulation
 {
    private static final String NEWTONS_CRADLE = "NewtonsCradle";
-   private final ContactParameters contactParameters = new ContactParameters(5.0e-5, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0);
+   private final ContactParameters contactParameters = new ContactParameters();
    private final int numberOfBalls = 6;
    private final double ballRadius = 0.05;
 
@@ -39,6 +39,11 @@ public class NewtonsCradleExperimentalSimulation
 
    public NewtonsCradleExperimentalSimulation()
    {
+      contactParameters.setMinimumPenetration(5.0e-5);
+      contactParameters.setCoefficientOfRestitution(1.0);
+      contactParameters.setRestitutionThreshold(0.0);
+      contactParameters.setConstraintForceMixing(1.0);
+
       RobotDescription robotDescription = new RobotDescription(NEWTONS_CRADLE);
       double ballRadiusOfGyration = ballRadius * 0.6;
       double pinJointHeight = 1.1 * stringLength;

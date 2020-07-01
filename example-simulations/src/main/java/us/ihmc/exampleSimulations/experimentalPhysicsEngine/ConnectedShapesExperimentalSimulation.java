@@ -30,10 +30,17 @@ import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 public class ConnectedShapesExperimentalSimulation
 {
    private static final ReferenceFrame worldFrame = ReferenceFrame.getWorldFrame();
-   private final ContactParameters contactParameters = new ContactParameters(5.0e-5, 0.7, 0.5, 0.15, 0.001, 0.0, 1.0);
+   private final ContactParameters contactParameters = new ContactParameters();
 
    public ConnectedShapesExperimentalSimulation()
    {
+      contactParameters.setMinimumPenetration(5.0e-5);
+      contactParameters.setCoefficientOfFriction(0.7);
+      contactParameters.setErrorReductionParameter(0.001);
+      contactParameters.setCoefficientOfRestitution(0.5);
+      contactParameters.setRestitutionThreshold(0.15);
+      contactParameters.setConstraintForceMixing(1.0);
+
       Vector3D boxSize1 = new Vector3D(0.5, 0.3, 0.3);
       double boxMass1 = 1.0;
       double radiusOfGyrationPercent = 0.8;

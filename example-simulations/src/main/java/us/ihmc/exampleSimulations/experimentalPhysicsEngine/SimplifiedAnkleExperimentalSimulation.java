@@ -53,7 +53,7 @@ public class SimplifiedAnkleExperimentalSimulation
    private final String comLinkName = "comLink";
    private final String footLinkName = "foot";
 
-   private final ContactParameters contactParameters = new ContactParameters(5.0e-5, 0.7, 0.0, 0.0, 0.0, 0.0, 1.0);
+   private final ContactParameters contactParameters = new ContactParameters();
    private final Vector3D footSize = new Vector3D(5 * 0.3, 5 * 0.15, 0.08);
    private final Vector3D footOffset = new Vector3D(footSize.getX() / 3.75, 0.0, -0.5 * footSize.getZ());
    private final double footMass = 1.2;
@@ -74,6 +74,10 @@ public class SimplifiedAnkleExperimentalSimulation
 
    public SimplifiedAnkleExperimentalSimulation() throws UnreasonableAccelerationException
    {
+      contactParameters.setMinimumPenetration(5.0e-5);
+      contactParameters.setCoefficientOfFriction(0.7);
+      contactParameters.setConstraintForceMixing(1.0);
+
       RobotDescription robotDescription = createRobotDescription();
       MultiBodySystemStateWriter initialStateWriter = createInitialStateWriter();
       RobotCollisionModel collisionModel = RobotCollisionModel.singleBodyCollisionModel(footLinkName, body ->
