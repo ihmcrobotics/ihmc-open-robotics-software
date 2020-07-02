@@ -75,8 +75,6 @@ public class HumanoidNetworkProcessor implements CloseableAndDisposable
          humanoidNetworkProcessor.setupKinematicsToolboxModule(parameters.isVisualizeKinematicsToolboxModule());
       if (parameters.isUseKinematicsPlanningToolboxModule())
          humanoidNetworkProcessor.setupKinematicsPlanningToolboxModule(parameters.isVisualizeKinematicsPlanningToolboxModule());
-      if (parameters.isUseKinematicsPlanningToolboxModule())
-         humanoidNetworkProcessor.setupKinematicsPlanningToolboxModule(parameters.isVisualizeKinematicsPlanningToolboxModule());
       if (parameters.isUseKinematicsStreamingToolboxModule())
          humanoidNetworkProcessor.setupKinematicsStreamingToolboxModule(null, null, parameters.isUseKinematicsStreamingToolboxModule());
       if (parameters.isUseFootstepPlanningToolboxModule())
