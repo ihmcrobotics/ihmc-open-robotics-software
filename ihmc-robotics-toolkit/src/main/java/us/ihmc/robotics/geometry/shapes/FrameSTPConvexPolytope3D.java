@@ -4,17 +4,22 @@ import static us.ihmc.euclid.tools.EuclidCoreIOTools.DEFAULT_FORMAT;
 
 import java.util.List;
 
-import us.ihmc.euclid.geometry.interfaces.BoundingBox3DReadOnly;
 import us.ihmc.euclid.geometry.interfaces.Vertex3DSupplier;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryFactories;
-import us.ihmc.euclid.shape.convexPolytope.ConvexPolytope3D;
-import us.ihmc.euclid.shape.convexPolytope.Face3D;
-import us.ihmc.euclid.shape.convexPolytope.HalfEdge3D;
-import us.ihmc.euclid.shape.convexPolytope.Vertex3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameShape3DPoseBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameBoundingBox3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameShape3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVertex3DSupplier;
+import us.ihmc.euclid.referenceFrame.polytope.FrameConvexPolytope3D;
+import us.ihmc.euclid.referenceFrame.polytope.FrameFace3D;
+import us.ihmc.euclid.referenceFrame.polytope.FrameHalfEdge3D;
+import us.ihmc.euclid.referenceFrame.polytope.FrameVertex3D;
+import us.ihmc.euclid.referenceFrame.polytope.interfaces.FrameConvexPolytope3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameShapeIOTools;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.tools.EuclidPolytopeConstructionTools;
-import us.ihmc.euclid.shape.primitives.interfaces.Shape3DPoseBasics;
-import us.ihmc.euclid.shape.tools.EuclidShapeIOTools;
 import us.ihmc.euclid.tools.EuclidCoreFactories;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.transform.interfaces.Transform;
@@ -22,35 +27,48 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.STPShape3DTools.STPConvexPolytope3DSupportingVertexCalculator;
+import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPConvexPolytope3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.STPShape3DBasics;
 
-public class STPConvexPolytope3D implements STPConvexPolytope3DReadOnly, STPShape3DBasics
+public class FrameSTPConvexPolytope3D implements FrameSTPConvexPolytope3DReadOnly, FrameShape3DBasics, STPShape3DBasics
 {
    private double minimumMargin, maximumMargin;
    private double largeRadius, smallRadius;
-   private final ConvexPolytope3D rawConvexPolytope3D;
-   private final BoundingBox3DReadOnly boundingBox;
+   private final FrameConvexPolytope3D rawConvexPolytope3D;
+   private final FrameBoundingBox3DReadOnly boundingBox;
    private final STPConvexPolytope3DSupportingVertexCalculator supportingVertexCalculator = new STPConvexPolytope3DSupportingVertexCalculator();
 
    private boolean stpRadiiDirty = true;
 
    /**
-    * Creates a new empty convex polytope.
+    * Creates a new empty convex polytope initializes its reference frame to
+    * {@link ReferenceFrame#getWorldFrame()}.
     */
-   public STPConvexPolytope3D()
+   public FrameSTPConvexPolytope3D()
    {
-      this(EuclidPolytopeConstructionTools.DEFAULT_CONSTRUCTION_EPSILON);
+      this(ReferenceFrame.getWorldFrame());
+   }
+
+   /**
+    * Creates a new empty convex polytope and initializes its reference frame.
+    *
+    * @param referenceFrame this polytope initial frame.
+    */
+   public FrameSTPConvexPolytope3D(ReferenceFrame referenceFrame)
+   {
+      this(referenceFrame, EuclidPolytopeConstructionTools.DEFAULT_CONSTRUCTION_EPSILON);
    }
 
    /**
     * Creates a new empty convex polytope.
     *
+    * @param referenceFrame      this polytope initial frame.
     * @param constructionEpsilon tolerance used when adding vertices to a convex polytope to trigger a
     *                            series of edge-cases.
     */
-   public STPConvexPolytope3D(double constructionEpsilon)
+   public FrameSTPConvexPolytope3D(ReferenceFrame referenceFrame, double constructionEpsilon)
    {
-      rawConvexPolytope3D = new ConvexPolytope3D(constructionEpsilon);
+      rawConvexPolytope3D = new FrameConvexPolytope3D(referenceFrame, constructionEpsilon);
       Point3DReadOnly rawMinPoint = rawConvexPolytope3D.getBoundingBox().getMinPoint();
       Point3DReadOnly rawMaxPoint = rawConvexPolytope3D.getBoundingBox().getMaxPoint();
       Point3DReadOnly minPoint = EuclidCoreFactories.newLinkedPoint3DReadOnly(() -> rawMinPoint.getX() + maximumMargin,
@@ -59,42 +77,82 @@ public class STPConvexPolytope3D implements STPConvexPolytope3DReadOnly, STPShap
       Point3DReadOnly maxPoint = EuclidCoreFactories.newLinkedPoint3DReadOnly(() -> rawMaxPoint.getX() - maximumMargin,
                                                                               () -> rawMaxPoint.getY() - maximumMargin,
                                                                               () -> rawMaxPoint.getZ() - maximumMargin);
-      boundingBox = EuclidGeometryFactories.newLinkedBoundingBox3DReadOnly(minPoint, maxPoint);
+      boundingBox = STPShape3DTools.newLinkedFrameBoundingBox3DReadOnly(this, minPoint, maxPoint);
    }
 
    /**
     * Creates a new convex polytope and adds vertices provided by the given supplier.
     *
+    * @param referenceFrame   this polytope initial frame.
     * @param vertex3DSupplier the vertex supplier to get the vertices to add to this convex polytope.
     */
-   public STPConvexPolytope3D(Vertex3DSupplier vertex3DSupplier)
+   public FrameSTPConvexPolytope3D(ReferenceFrame referenceFrame, Vertex3DSupplier vertex3DSupplier)
    {
-      this();
+      this(referenceFrame);
       addVertices(vertex3DSupplier);
    }
 
    /**
-    * Creates a new convex polytope and adds vertices provided by the given supplier.
+    * Creates a new convex polytope, adds vertices provided by the given supplier, its reference frame
+    * is initialized to match the reference frame of the vertex supplier.
+    *
+    * @param vertex3DSupplier the vertex supplier to get the vertices to add to this convex polytope.
+    */
+   public FrameSTPConvexPolytope3D(FrameVertex3DSupplier vertex3DSupplier)
+   {
+      this(vertex3DSupplier.getReferenceFrame(), vertex3DSupplier);
+   }
+
+   /**
+    * Creates a new convex polytope, adds vertices provided by the given supplier.
+    *
+    * @param referenceFrame      this polytope initial frame.
+    * @param vertex3DSupplier    the vertex supplier to get the vertices to add to this convex
+    *                            polytope.
+    * @param constructionEpsilon tolerance used when adding vertices to a convex polytope to trigger a
+    *                            series of edge-cases.
+    */
+   public FrameSTPConvexPolytope3D(ReferenceFrame referenceFrame, Vertex3DSupplier vertex3DSupplier, double constructionEpsilon)
+   {
+      this(referenceFrame, constructionEpsilon);
+      addVertices(vertex3DSupplier);
+   }
+
+   /**
+    * Creates a new convex polytope, adds vertices provided by the given supplier, its reference frame
+    * is initialized to match the reference frame of the vertex supplier.
     *
     * @param vertex3DSupplier    the vertex supplier to get the vertices to add to this convex
     *                            polytope.
     * @param constructionEpsilon tolerance used when adding vertices to a convex polytope to trigger a
     *                            series of edge-cases.
     */
-   public STPConvexPolytope3D(Vertex3DSupplier vertex3DSupplier, double constructionEpsilon)
+   public FrameSTPConvexPolytope3D(FrameVertex3DSupplier vertex3DSupplier, double constructionEpsilon)
    {
-      this(constructionEpsilon);
-      addVertices(vertex3DSupplier);
+      this(vertex3DSupplier.getReferenceFrame(), vertex3DSupplier, constructionEpsilon);
    }
 
    /**
     * Creates a new convex polytope identical to {@code other}.
     *
-    * @param other the other convex polytope to copy. Not modified.
+    * @param referenceFrame this polytope initial frame.
+    * @param other          the other convex polytope to copy. Not modified.
     */
-   public STPConvexPolytope3D(ConvexPolytope3DReadOnly other)
+   public FrameSTPConvexPolytope3D(ReferenceFrame referenceFrame, ConvexPolytope3DReadOnly other)
    {
-      this(other.getConstructionEpsilon());
+      this(referenceFrame, other.getConstructionEpsilon());
+      set(other);
+   }
+
+   /**
+    * Creates a new convex polytope identical to {@code other}.
+    *
+    * @param referenceFrame this polytope initial frame.
+    * @param other          the other convex polytope to copy. Not modified.
+    */
+   public FrameSTPConvexPolytope3D(ReferenceFrame referenceFrame, STPConvexPolytope3DReadOnly other)
+   {
+      this(referenceFrame, other.getConstructionEpsilon());
       set(other);
    }
 
@@ -103,10 +161,19 @@ public class STPConvexPolytope3D implements STPConvexPolytope3DReadOnly, STPShap
     *
     * @param other the other convex polytope to copy. Not modified.
     */
-   public STPConvexPolytope3D(STPConvexPolytope3DReadOnly other)
+   public FrameSTPConvexPolytope3D(FrameConvexPolytope3DReadOnly other)
    {
-      this(other.getConstructionEpsilon());
-      set(other);
+      this(other.getReferenceFrame(), other);
+   }
+
+   /**
+    * Creates a new convex polytope identical to {@code other}.
+    *
+    * @param other the other convex polytope to copy. Not modified.
+    */
+   public FrameSTPConvexPolytope3D(FrameSTPConvexPolytope3DReadOnly other)
+   {
+      this(other.getReferenceFrame(), other);
    }
 
    /**
@@ -137,6 +204,80 @@ public class STPConvexPolytope3D implements STPConvexPolytope3DReadOnly, STPShap
       minimumMargin = other.getMinimumMargin();
       maximumMargin = other.getMaximumMargin();
       stpRadiiDirty = true;
+   }
+
+   /**
+    * Sets this convex polytope to be identical to {@code other}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    *
+    * @param other the other polytope to copy. Not modified.
+    * @throws ReferenceFrameMismatchException if the argument is not expressed in the same reference
+    *                                         frame {@code this}.
+    */
+   public void set(FrameConvexPolytope3DReadOnly other)
+   {
+      checkReferenceFrameMatch(other);
+      set((ConvexPolytope3DReadOnly) other);
+   }
+
+   /**
+    * Sets this convex polytope to be identical to {@code other}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    *
+    * @param other the other polytope to copy. Not modified.
+    * @throws ReferenceFrameMismatchException if the argument is not expressed in the same reference
+    *                                         frame {@code this}.
+    */
+   public void set(FrameSTPConvexPolytope3DReadOnly other)
+   {
+      checkReferenceFrameMatch(other);
+      set((STPConvexPolytope3DReadOnly) other);
+   }
+
+   /**
+    * Sets this convex polytope to be identical to {@code other}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    *
+    * @param other the other polytope to copy. Not modified.
+    */
+   public void setIncludingFrame(FrameConvexPolytope3DReadOnly other)
+   {
+      setReferenceFrame(other.getReferenceFrame());
+      set((ConvexPolytope3DReadOnly) other);
+   }
+
+   /**
+    * Sets this convex polytope to be identical to {@code other}.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    *
+    * @param other the other polytope to copy. Not modified.
+    */
+   public void setIncludingFrame(FrameSTPConvexPolytope3DReadOnly other)
+   {
+      setReferenceFrame(other.getReferenceFrame());
+      set((STPConvexPolytope3DReadOnly) other);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      rawConvexPolytope3D.setReferenceFrame(referenceFrame);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void changeFrame(ReferenceFrame desiredFrame)
+   {
+      rawConvexPolytope3D.changeFrame(desiredFrame);
    }
 
    @Override
@@ -174,6 +315,22 @@ public class STPConvexPolytope3D implements STPConvexPolytope3DReadOnly, STPShap
     * WARNING: This method generates garbage.
     * </p>
     *
+    * @param vertexToAdd the vertex that is to be added to the convex polytope. Not modified.
+    * @return {@code true} if the vertex was added to this convex polytope, {@code false} if it was
+    *         rejected.
+    */
+   public boolean addVertex(FramePoint3DReadOnly vertexToAdd)
+   {
+      checkReferenceFrameMatch(vertexToAdd);
+      return addVertex((Point3DReadOnly) vertexToAdd);
+   }
+
+   /**
+    * Adds a new vertex to this convex polytope.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    *
     * @param vertex3DSupplier the vertex supplier to get the vertices to add to this convex polytope.
     * @return {@code true} if the vertex was added to this convex polytope, {@code false} if it was
     *         rejected.
@@ -184,6 +341,22 @@ public class STPConvexPolytope3D implements STPConvexPolytope3DReadOnly, STPShap
       if (wasAdded)
          stpRadiiDirty = true;
       return wasAdded;
+   }
+
+   /**
+    * Adds a new vertex to this convex polytope.
+    * <p>
+    * WARNING: This method generates garbage.
+    * </p>
+    *
+    * @param vertex3DSupplier the vertex supplier to get the vertices to add to this convex polytope.
+    * @return {@code true} if the vertex was added to this convex polytope, {@code false} if it was
+    *         rejected.
+    */
+   public boolean addVertices(FrameVertex3DSupplier vertex3DSupplier)
+   {
+      checkReferenceFrameMatch(vertex3DSupplier);
+      return addVertices((Vertex3DSupplier) vertex3DSupplier);
    }
 
    @Override
@@ -265,23 +438,23 @@ public class STPConvexPolytope3D implements STPConvexPolytope3DReadOnly, STPShap
    @Override
    public boolean containsNaN()
    {
-      return STPConvexPolytope3DReadOnly.super.containsNaN();
+      return rawConvexPolytope3D.containsNaN();
    }
 
    @Override
-   public List<Face3D> getFaces()
+   public List<FrameFace3D> getFaces()
    {
       return rawConvexPolytope3D.getFaces();
    }
 
    @Override
-   public List<HalfEdge3D> getHalfEdges()
+   public List<FrameHalfEdge3D> getHalfEdges()
    {
       return rawConvexPolytope3D.getHalfEdges();
    }
 
    @Override
-   public List<Vertex3D> getVertices()
+   public List<FrameVertex3D> getVertices()
    {
       return rawConvexPolytope3D.getVertices();
    }
@@ -293,19 +466,25 @@ public class STPConvexPolytope3D implements STPConvexPolytope3DReadOnly, STPShap
    }
 
    @Override
-   public BoundingBox3DReadOnly getBoundingBox()
+   public ReferenceFrame getReferenceFrame()
+   {
+      return rawConvexPolytope3D.getReferenceFrame();
+   }
+
+   @Override
+   public FrameBoundingBox3DReadOnly getBoundingBox()
    {
       return boundingBox;
    }
 
    @Override
-   public STPConvexPolytope3D copy()
+   public FrameSTPConvexPolytope3D copy()
    {
-      return new STPConvexPolytope3D(this);
+      return new FrameSTPConvexPolytope3D(this);
    }
 
    @Override
-   public Point3DReadOnly getCentroid()
+   public FramePoint3DReadOnly getCentroid()
    {
       return rawConvexPolytope3D.getCentroid();
    }
@@ -317,7 +496,7 @@ public class STPConvexPolytope3D implements STPConvexPolytope3DReadOnly, STPShap
    }
 
    @Override
-   public Shape3DPoseBasics getPose()
+   public FixedFrameShape3DPoseBasics getPose()
    {
       return null;
    }
@@ -338,7 +517,7 @@ public class STPConvexPolytope3D implements STPConvexPolytope3DReadOnly, STPShap
 
    /**
     * Tests if the given {@code object}'s class is the same as this, in which case the method returns
-    * {@link #equals(STPConvexPolytope3DReadOnly)}, it returns {@code false} otherwise.
+    * {@link #equals(FrameSTPConvexPolytope3DReadOnly)}, it returns {@code false} otherwise.
     *
     * @param object the object to compare against this. Not modified.
     * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
@@ -346,8 +525,8 @@ public class STPConvexPolytope3D implements STPConvexPolytope3DReadOnly, STPShap
    @Override
    public boolean equals(Object object)
    {
-      if (object instanceof STPConvexPolytope3DReadOnly)
-         return STPConvexPolytope3DReadOnly.super.equals((STPConvexPolytope3DReadOnly) object);
+      if (object instanceof FrameSTPConvexPolytope3DReadOnly)
+         return FrameSTPConvexPolytope3DReadOnly.super.equals((FrameSTPConvexPolytope3DReadOnly) object);
       else
          return false;
    }
@@ -393,6 +572,7 @@ public class STPConvexPolytope3D implements STPConvexPolytope3DReadOnly, STPShap
     *    ( 0.870,  0.251,  0.229 )
     *    ( 0.204, -0.803, -0.461 )
     *    (-0.283, -0.207, -0.595 )
+    * worldFrame
     * small radius: 0.001, large radius: 1.000
     * </pre>
     *
@@ -402,6 +582,6 @@ public class STPConvexPolytope3D implements STPConvexPolytope3DReadOnly, STPShap
    public String toString()
    {
       String stpSuffix = String.format("\nsmall radius: " + DEFAULT_FORMAT + ", large radius: " + DEFAULT_FORMAT + "]", getSmallRadius(), getLargeRadius());
-      return "STP" + EuclidShapeIOTools.getConvexPolytope3DString(this) + stpSuffix;
+      return "STP" + EuclidFrameShapeIOTools.getFrameConvexPolytope3DString(this) + stpSuffix;
    }
 }
