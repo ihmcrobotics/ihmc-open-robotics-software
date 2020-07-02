@@ -6,6 +6,7 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
 public interface STPCapsule3DReadOnly extends STPShape3DReadOnly, Capsule3DReadOnly
 {
@@ -17,6 +18,10 @@ public interface STPCapsule3DReadOnly extends STPShape3DReadOnly, Capsule3DReadO
       boundingBoxToPack.getMinPoint().sub(getMaximumMargin(), getMaximumMargin(), getMaximumMargin());
       boundingBoxToPack.getMaxPoint().add(getMaximumMargin(), getMaximumMargin(), getMaximumMargin());
    }
+
+   // This is to ensure that the default method is being overridden.
+   @Override
+   boolean getSupportingVertex(Vector3DReadOnly supportDirection, Point3DBasics supportingVertexToPack);
 
    default boolean equals(STPCapsule3DReadOnly other)
    {
