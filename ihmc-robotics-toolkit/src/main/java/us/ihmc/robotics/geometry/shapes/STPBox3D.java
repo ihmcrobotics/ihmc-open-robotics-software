@@ -30,13 +30,14 @@ public class STPBox3D implements STPBox3DBasics
    private final Box3D rawBox3D = new Box3D();
    private final STPBox3DSupportingVertexCalculator supportingVertexCalculator = new STPBox3DSupportingVertexCalculator();
 
+   private boolean stpRadiiDirty = true;
+
    /**
     * Creates a 1-by-1-by-1 box 3D.
     */
    public STPBox3D()
    {
-      addChangeListener(() -> updateRadii());
-      getSize().set(1.0, 1.0, 1.0);
+      this(1.0, 1.0, 1.0);
    }
 
    /**
@@ -50,8 +51,8 @@ public class STPBox3D implements STPBox3DBasics
     */
    public STPBox3D(double sizeX, double sizeY, double sizeZ)
    {
-      this();
       getSize().set(sizeX, sizeY, sizeZ);
+      setupListeners();
    }
 
    /**
@@ -62,8 +63,8 @@ public class STPBox3D implements STPBox3DBasics
     */
    public STPBox3D(Vector3DReadOnly size)
    {
-      this();
       getSize().set(size);
+      setupListeners();
    }
 
    /**
@@ -79,8 +80,8 @@ public class STPBox3D implements STPBox3DBasics
     */
    public STPBox3D(Point3DReadOnly position, Orientation3DReadOnly orientation, double sizeX, double sizeY, double sizeZ)
    {
-      this();
       set(position, orientation, sizeX, sizeY, sizeZ);
+      setupListeners();
    }
 
    /**
@@ -93,8 +94,8 @@ public class STPBox3D implements STPBox3DBasics
     */
    public STPBox3D(Point3DReadOnly position, Orientation3DReadOnly orientation, Vector3DReadOnly size)
    {
-      this();
       set(position, orientation, size);
+      setupListeners();
    }
 
    /**
@@ -109,8 +110,8 @@ public class STPBox3D implements STPBox3DBasics
     */
    public STPBox3D(Pose3DReadOnly pose, double sizeX, double sizeY, double sizeZ)
    {
-      this();
       set(pose, sizeX, sizeY, sizeZ);
+      setupListeners();
    }
 
    /**
@@ -122,8 +123,8 @@ public class STPBox3D implements STPBox3DBasics
     */
    public STPBox3D(Pose3DReadOnly pose, Vector3DReadOnly size)
    {
-      this();
       set(pose, size);
+      setupListeners();
    }
 
    /**
@@ -138,8 +139,8 @@ public class STPBox3D implements STPBox3DBasics
     */
    public STPBox3D(RigidBodyTransformReadOnly pose, double sizeX, double sizeY, double sizeZ)
    {
-      this();
       set(pose, sizeX, sizeY, sizeZ);
+      setupListeners();
    }
 
    /**
@@ -151,8 +152,8 @@ public class STPBox3D implements STPBox3DBasics
     */
    public STPBox3D(RigidBodyTransformReadOnly pose, Vector3DReadOnly size)
    {
-      this();
       set(pose, size);
+      setupListeners();
    }
 
    /**
@@ -162,8 +163,8 @@ public class STPBox3D implements STPBox3DBasics
     */
    public STPBox3D(Box3DReadOnly other)
    {
-      this();
       set(other);
+      setupListeners();
    }
 
    /**
@@ -173,8 +174,13 @@ public class STPBox3D implements STPBox3DBasics
     */
    public STPBox3D(STPBox3DReadOnly other)
    {
-      this();
       set(other);
+      setupListeners();
+   }
+
+   private void setupListeners()
+   {
+      addChangeListener(() -> stpRadiiDirty = true);
    }
 
    @Override
@@ -204,12 +210,14 @@ public class STPBox3D implements STPBox3DBasics
    @Override
    public double getSmallRadius()
    {
+      updateRadii();
       return smallRadius;
    }
 
    @Override
    public double getLargeRadius()
    {
+      updateRadii();
       return largeRadius;
    }
 
@@ -221,7 +229,7 @@ public class STPBox3D implements STPBox3DBasics
                + ", min margin: " + minimumMargin);
       this.minimumMargin = minimumMargin;
       this.maximumMargin = maximumMargin;
-      updateRadii();
+      stpRadiiDirty = true;
    }
 
    /**
@@ -244,6 +252,11 @@ public class STPBox3D implements STPBox3DBasics
     */
    protected void updateRadii()
    {
+      if (!stpRadiiDirty)
+         return;
+
+      stpRadiiDirty = false;
+
       if (minimumMargin == 0.0 && maximumMargin == 0.0)
       {
          smallRadius = Double.NaN;
@@ -261,7 +274,7 @@ public class STPBox3D implements STPBox3DBasics
    @Override
    public boolean getSupportingVertex(Vector3DReadOnly supportDirection, Point3DBasics supportingVertexToPack)
    {
-      return supportingVertexCalculator.getSupportingVertex(rawBox3D, smallRadius, largeRadius, supportDirection, supportingVertexToPack);
+      return supportingVertexCalculator.getSupportingVertex(rawBox3D, getSmallRadius(), getLargeRadius(), supportDirection, supportingVertexToPack);
    }
 
    @Override
@@ -371,7 +384,7 @@ public class STPBox3D implements STPBox3DBasics
    @Override
    public String toString()
    {
-      String stpSuffix = String.format(", small radius: " + DEFAULT_FORMAT + ", large radius: " + DEFAULT_FORMAT + "]", smallRadius, largeRadius);
+      String stpSuffix = String.format(", small radius: " + DEFAULT_FORMAT + ", large radius: " + DEFAULT_FORMAT + "]", getSmallRadius(), getLargeRadius());
       return "STP " + EuclidShapeIOTools.getBox3DString(this).replace("]", stpSuffix);
    }
 }

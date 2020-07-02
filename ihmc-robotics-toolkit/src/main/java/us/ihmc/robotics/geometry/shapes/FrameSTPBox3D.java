@@ -39,15 +39,15 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
    private final FrameBox3D rawBox3D = new FrameBox3D();
    private final STPBox3DSupportingVertexCalculator supportingVertexCalculator = new STPBox3DSupportingVertexCalculator();
 
+   private boolean stpRadiiDirty = true;
+
    /**
     * Creates a 1-by-1-by-1 box 3D and initializes its reference frame to
     * {@link ReferenceFrame#getWorldFrame()}.
     */
    public FrameSTPBox3D()
    {
-      setReferenceFrame(ReferenceFrame.getWorldFrame());
-      getSize().set(1.0, 1.0, 1.0);
-      addChangeListener(() -> updateRadii());
+      this(ReferenceFrame.getWorldFrame());
    }
 
    /**
@@ -57,8 +57,7 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(ReferenceFrame referenceFrame)
    {
-      this();
-      setReferenceFrame(referenceFrame);
+      this(referenceFrame, 1.0, 1.0, 1.0);
    }
 
    /**
@@ -73,9 +72,9 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(ReferenceFrame referenceFrame, double sizeX, double sizeY, double sizeZ)
    {
-      this();
       setReferenceFrame(referenceFrame);
       getSize().set(sizeX, sizeY, sizeZ);
+      setupListeners();
    }
 
    /**
@@ -87,9 +86,9 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(ReferenceFrame referenceFrame, Vector3DReadOnly size)
    {
-      this();
       setReferenceFrame(referenceFrame);
       getSize().set(size);
+      setupListeners();
    }
 
    /**
@@ -106,8 +105,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(ReferenceFrame referenceFrame, Point3DReadOnly position, Orientation3DReadOnly orientation, double sizeX, double sizeY, double sizeZ)
    {
-      this();
       setIncludingFrame(referenceFrame, position, orientation, sizeX, sizeY, sizeZ);
+      setupListeners();
    }
 
    /**
@@ -121,8 +120,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(ReferenceFrame referenceFrame, Point3DReadOnly position, Orientation3DReadOnly orientation, Vector3DReadOnly size)
    {
-      this();
       setIncludingFrame(referenceFrame, position, orientation, size);
+      setupListeners();
    }
 
    /**
@@ -140,8 +139,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(FramePoint3DReadOnly position, FrameOrientation3DReadOnly orientation, double sizeX, double sizeY, double sizeZ)
    {
-      this();
       setIncludingFrame(position, orientation, sizeX, sizeY, sizeZ);
+      setupListeners();
    }
 
    /**
@@ -156,8 +155,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(FramePoint3DReadOnly position, FrameOrientation3DReadOnly orientation, Vector3DReadOnly size)
    {
-      this();
       setIncludingFrame(position, orientation, size);
+      setupListeners();
    }
 
    /**
@@ -172,8 +171,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(FramePoint3DReadOnly position, FrameOrientation3DReadOnly orientation, FrameVector3DReadOnly size)
    {
-      this();
       setIncludingFrame(position, orientation, size);
+      setupListeners();
    }
 
    /**
@@ -189,8 +188,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(ReferenceFrame referenceFrame, Pose3DReadOnly pose, double sizeX, double sizeY, double sizeZ)
    {
-      this();
       setIncludingFrame(referenceFrame, pose, sizeX, sizeY, sizeZ);
+      setupListeners();
    }
 
    /**
@@ -203,8 +202,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(ReferenceFrame referenceFrame, Pose3DReadOnly pose, Vector3DReadOnly size)
    {
-      this();
       setIncludingFrame(referenceFrame, pose, size);
+      setupListeners();
    }
 
    /**
@@ -219,8 +218,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(FramePose3DReadOnly pose, double sizeX, double sizeY, double sizeZ)
    {
-      this();
       setIncludingFrame(pose, sizeX, sizeY, sizeZ);
+      setupListeners();
    }
 
    /**
@@ -232,8 +231,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(FramePose3DReadOnly pose, Vector3DReadOnly size)
    {
-      this();
       setIncludingFrame(pose, size);
+      setupListeners();
    }
 
    /**
@@ -247,8 +246,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(FramePose3DReadOnly pose, FrameVector3DReadOnly size)
    {
-      this();
       setIncludingFrame(pose, size);
+      setupListeners();
    }
 
    /**
@@ -264,8 +263,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(ReferenceFrame referenceFrame, RigidBodyTransformReadOnly pose, double sizeX, double sizeY, double sizeZ)
    {
-      this();
       setIncludingFrame(referenceFrame, pose, sizeX, sizeY, sizeZ);
+      setupListeners();
    }
 
    /**
@@ -278,8 +277,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(ReferenceFrame referenceFrame, RigidBodyTransformReadOnly pose, Vector3DReadOnly size)
    {
-      this();
       setIncludingFrame(referenceFrame, pose, size);
+      setupListeners();
    }
 
    /**
@@ -294,8 +293,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(FrameShape3DPoseReadOnly pose, double sizeX, double sizeY, double sizeZ)
    {
-      this();
       setIncludingFrame(pose, sizeX, sizeY, sizeZ);
+      setupListeners();
    }
 
    /**
@@ -307,8 +306,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(FrameShape3DPoseReadOnly pose, Vector3DReadOnly size)
    {
-      this();
       setIncludingFrame(pose, size);
+      setupListeners();
    }
 
    /**
@@ -322,8 +321,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(FrameShape3DPoseReadOnly pose, FrameVector3DReadOnly size)
    {
-      this();
       setIncludingFrame(pose, size);
+      setupListeners();
    }
 
    /**
@@ -334,8 +333,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(ReferenceFrame referenceFrame, Box3DReadOnly other)
    {
-      this();
       setIncludingFrame(referenceFrame, other);
+      setupListeners();
    }
 
    /**
@@ -346,8 +345,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(ReferenceFrame referenceFrame, STPBox3DReadOnly other)
    {
-      this();
       setIncludingFrame(referenceFrame, other);
+      setupListeners();
    }
 
    /**
@@ -357,8 +356,8 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(FrameBox3DReadOnly other)
    {
-      this();
       setIncludingFrame(other);
+      setupListeners();
    }
 
    /**
@@ -368,8 +367,13 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    public FrameSTPBox3D(FrameSTPBox3DReadOnly other)
    {
-      this();
       setIncludingFrame(other);
+      setupListeners();
+   }
+
+   private void setupListeners()
+   {
+      addChangeListener(() -> stpRadiiDirty = true);
    }
 
    /** {@inheritDoc} */
@@ -415,12 +419,14 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
    @Override
    public double getSmallRadius()
    {
+      updateRadii();
       return smallRadius;
    }
 
    @Override
    public double getLargeRadius()
    {
+      updateRadii();
       return largeRadius;
    }
 
@@ -432,7 +438,7 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
                + ", min margin: " + minimumMargin);
       this.minimumMargin = minimumMargin;
       this.maximumMargin = maximumMargin;
-      updateRadii();
+      stpRadiiDirty = true;
    }
 
    /**
@@ -455,6 +461,11 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     */
    protected void updateRadii()
    {
+      if (!stpRadiiDirty)
+         return;
+
+      stpRadiiDirty = false;
+
       if (minimumMargin == 0.0 && maximumMargin == 0.0)
       {
          smallRadius = Double.NaN;
@@ -472,7 +483,7 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
    @Override
    public boolean getSupportingVertex(Vector3DReadOnly supportDirection, Point3DBasics supportingVertexToPack)
    {
-      return supportingVertexCalculator.getSupportingVertex(rawBox3D, smallRadius, largeRadius, supportDirection, supportingVertexToPack);
+      return supportingVertexCalculator.getSupportingVertex(rawBox3D, getSmallRadius(), getLargeRadius(), supportDirection, supportingVertexToPack);
    }
 
    /** {@inheritDoc} */
@@ -589,7 +600,7 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
    @Override
    public String toString()
    {
-      String stpSuffix = String.format(", small radius: " + DEFAULT_FORMAT + ", large radius: " + DEFAULT_FORMAT + "]", smallRadius, largeRadius);
+      String stpSuffix = String.format(", small radius: " + DEFAULT_FORMAT + ", large radius: " + DEFAULT_FORMAT + "]", getSmallRadius(), getLargeRadius());
       return "STP " + EuclidFrameShapeIOTools.getFrameBox3DString(this).replace("]", stpSuffix);
    }
 }

@@ -30,6 +30,8 @@ public class STPRamp3D implements STPRamp3DBasics
    private final Ramp3D rawRamp3D = new Ramp3D();
    private final STPRamp3DSupportingVertexCalculator supportingVertexCalculator = new STPRamp3DSupportingVertexCalculator();
 
+   private boolean stpRadiiDirty = true;
+
    /**
     * Creates a new ramp 3D and initializes its length, width, and height to {@code 1.0}.
     */
@@ -178,7 +180,7 @@ public class STPRamp3D implements STPRamp3DBasics
 
    private void setupListeners()
    {
-
+      addChangeListener(() -> stpRadiiDirty = true);
    }
 
    /** {@inheritDoc} */
@@ -210,12 +212,14 @@ public class STPRamp3D implements STPRamp3DBasics
    @Override
    public double getSmallRadius()
    {
+      updateRadii();
       return smallRadius;
    }
 
    @Override
    public double getLargeRadius()
    {
+      updateRadii();
       return largeRadius;
    }
 
@@ -227,7 +231,7 @@ public class STPRamp3D implements STPRamp3DBasics
                + ", min margin: " + minimumMargin);
       this.minimumMargin = minimumMargin;
       this.maximumMargin = maximumMargin;
-      updateRadii();
+      stpRadiiDirty = true;
    }
 
    /**
@@ -250,6 +254,11 @@ public class STPRamp3D implements STPRamp3DBasics
     */
    protected void updateRadii()
    {
+      if (!stpRadiiDirty)
+         return;
+
+      stpRadiiDirty = false;
+
       if (minimumMargin == 0.0 && maximumMargin == 0.0)
       {
          smallRadius = Double.NaN;
@@ -268,7 +277,7 @@ public class STPRamp3D implements STPRamp3DBasics
    @Override
    public boolean getSupportingVertex(Vector3DReadOnly supportDirection, Point3DBasics supportingVertexToPack)
    {
-      return supportingVertexCalculator.getSupportingVertex(rawRamp3D, smallRadius, largeRadius, supportDirection, supportingVertexToPack);
+      return supportingVertexCalculator.getSupportingVertex(rawRamp3D, getSmallRadius(), getLargeRadius(), supportDirection, supportingVertexToPack);
    }
 
    /** {@inheritDoc} */
@@ -290,7 +299,6 @@ public class STPRamp3D implements STPRamp3DBasics
    public void getRampSurfaceNormal(Vector3DBasics surfaceNormalToPack)
    {
       rawRamp3D.getRampSurfaceNormal(surfaceNormalToPack);
-      ;
    }
 
    /**
@@ -431,7 +439,7 @@ public class STPRamp3D implements STPRamp3DBasics
    @Override
    public String toString()
    {
-      String stpSuffix = String.format(", small radius: " + DEFAULT_FORMAT + ", large radius: " + DEFAULT_FORMAT + "]", smallRadius, largeRadius);
+      String stpSuffix = String.format(", small radius: " + DEFAULT_FORMAT + ", large radius: " + DEFAULT_FORMAT + "]", getSmallRadius(), getLargeRadius());
       return "STP " + EuclidShapeIOTools.getRamp3DString(this).replace("]", stpSuffix);
    }
 }
