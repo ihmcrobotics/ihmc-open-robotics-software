@@ -15,7 +15,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.geometry.shapes.STPShape3DTools.Box3DSTPSupportingVertexCalculator;
+import us.ihmc.robotics.geometry.shapes.STPShape3DTools.STPBox3DSupportingVertexCalculator;
 import us.ihmc.robotics.geometry.shapes.interfaces.STPBox3DBasics;
 import us.ihmc.robotics.geometry.shapes.interfaces.STPBox3DReadOnly;
 
@@ -24,7 +24,7 @@ public class STPBox3D implements STPBox3DBasics
    private double minimumMargin, maximumMargin;
    private double largeRadius, smallRadius;
    private final Box3D rawBox3D = new Box3D();
-   private final Box3DSTPSupportingVertexCalculator supportingVertexCalculator = new Box3DSTPSupportingVertexCalculator();
+   private final STPBox3DSupportingVertexCalculator supportingVertexCalculator = new STPBox3DSupportingVertexCalculator();
 
    /**
     * Creates a 1-by-1-by-1 box 3D.

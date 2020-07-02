@@ -23,7 +23,7 @@ import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.geometry.shapes.STPShape3DTools.Box3DSTPSupportingVertexCalculator;
+import us.ihmc.robotics.geometry.shapes.STPShape3DTools.STPBox3DSupportingVertexCalculator;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPBox3DBasics;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPBox3DReadOnly;
 
@@ -32,7 +32,7 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
    private double minimumMargin, maximumMargin;
    private double largeRadius, smallRadius;
    private final FrameBox3D rawBox3D = new FrameBox3D();
-   private final Box3DSTPSupportingVertexCalculator supportingVertexCalculator = new Box3DSTPSupportingVertexCalculator();
+   private final STPBox3DSupportingVertexCalculator supportingVertexCalculator = new STPBox3DSupportingVertexCalculator();
 
    /**
     * Creates a 1-by-1-by-1 box 3D and initializes its reference frame to
