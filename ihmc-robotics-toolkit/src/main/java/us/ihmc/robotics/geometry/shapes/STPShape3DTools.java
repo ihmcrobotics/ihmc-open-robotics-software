@@ -10,6 +10,12 @@ import java.util.function.BiConsumer;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.interfaces.LineSegment3DReadOnly;
 import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameBoundingBox3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.ReferenceFrameHolder;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameIOTools;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.Face3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.HalfEdge3DReadOnly;
@@ -21,6 +27,7 @@ import us.ihmc.euclid.shape.primitives.interfaces.Cylinder3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Ramp3DReadOnly;
 import us.ihmc.euclid.shape.tools.EuclidShapeTools;
 import us.ihmc.euclid.tools.EuclidCoreTools;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.tools.TupleTools;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.UnitVector3D;
@@ -916,5 +923,54 @@ public class STPShape3DTools
          double radius = largeRadius - smallRadius;
          return Math.sqrt(radius * radius - 0.25 * diagonalSquared);
       }
+   }
+
+   public static FrameBoundingBox3DReadOnly newLinkedFrameBoundingBox3DReadOnly(ReferenceFrameHolder referenceFrameHolder, Point3DReadOnly minPoint,
+                                                                                Point3DReadOnly maxPoint)
+   {
+      FramePoint3DReadOnly linkedMinPoint = EuclidFrameFactories.newLinkedFramePoint3DReadOnly(referenceFrameHolder, minPoint);
+      FramePoint3DReadOnly linkedMaxPoint = EuclidFrameFactories.newLinkedFramePoint3DReadOnly(referenceFrameHolder, maxPoint);
+
+      return new FrameBoundingBox3DReadOnly()
+      {
+         @Override
+         public FramePoint3DReadOnly getMinPoint()
+         {
+            return linkedMinPoint;
+         }
+
+         @Override
+         public FramePoint3DReadOnly getMaxPoint()
+         {
+            return linkedMaxPoint;
+         }
+
+         @Override
+         public ReferenceFrame getReferenceFrame()
+         {
+            return referenceFrameHolder.getReferenceFrame();
+         }
+
+         @Override
+         public boolean equals(Object object)
+         {
+            if (object instanceof FrameBoundingBox3DReadOnly)
+               return equals((FrameBoundingBox3DReadOnly) object);
+            else
+               return false;
+         }
+
+         @Override
+         public String toString()
+         {
+            return EuclidFrameIOTools.getFrameBoundingBox3DString(this);
+         }
+
+         @Override
+         public int hashCode()
+         {
+            return EuclidHashCodeTools.toIntHashCode(minPoint, maxPoint);
+         }
+      };
    }
 }
