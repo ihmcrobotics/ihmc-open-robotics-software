@@ -1,6 +1,10 @@
-package us.ihmc.humanoidBehaviors.ui.simulation;
+package us.ihmc.avatar.environments;
 
 import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.axisAngle.AxisAngle;
+import us.ihmc.euclid.matrix.RotationMatrix;
+import us.ihmc.euclid.transform.RigidBodyTransform;
+import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.pathPlanning.DataSetIOTools;
 import us.ihmc.pathPlanning.PlannerTestEnvironments;
 import us.ihmc.robotEnvironmentAwareness.planarRegion.slam.PlanarRegionSLAM;
@@ -10,6 +14,8 @@ import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.simulationConstructionSetTools.util.planarRegions.PlanarRegionsListExamples;
 
+import java.io.File;
+import java.nio.file.Paths;
 import java.util.Random;
 
 public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
@@ -94,6 +100,70 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
             });
          });
       });
+   }
+
+   public static PlanarRegionsList generateStartingBlockRegions(RigidBodyTransform startingPose)
+   {
+      double platformXY = 1.0;
+      double platformHeight = 0.3;
+
+      double blockXY = 0.35;
+      double blockHeight = 0.15;
+      double blockSpacing = 0.1;
+
+      double maxBlockAngle = Math.toRadians(20.0);
+      double lastRowMaxBlockAngle = Math.toRadians(10.0);
+
+      Random random = new Random(328903);
+
+      PlanarRegionsListGenerator generator = new PlanarRegionsListGenerator();
+      generator.setTransform(startingPose);
+      generator.setId(250);
+      generator.addCubeReferencedAtBottomMiddle(platformXY, platformXY, platformHeight);
+      generator.translate(0.5 * (platformXY + blockXY), 3.0 * (blockXY + blockSpacing), 0.0);
+
+      for (int i = 0; i < 5; i++)
+      {
+         double height = platformHeight - blockHeight - 0.05 * (i + 1);
+         generator.translate(0.0, -4.0 * (blockXY + blockSpacing), 0.0);
+
+         if (i % 2 == 0)
+         {
+            generator.translate(0.0, -0.5 * (blockXY + blockSpacing), 0.0);
+         }
+         else
+         {
+            generator.translate(0.0, 0.5 * (blockXY + blockSpacing), 0.0);
+         }
+
+         for (int j = 0; j < 4; j++)
+         {
+            double rotationAxisDirection = 2.0 * Math.PI * random.nextDouble();
+            double rotationAngle = (i == 4 ? lastRowMaxBlockAngle : maxBlockAngle) * random.nextDouble();
+            double yawRotation = 2.0 * Math.PI * random.nextDouble();
+
+            Vector3D rotationAxis = new Vector3D(Math.cos(rotationAxisDirection), Math.sin(rotationAxisDirection), 0.0);
+            rotationAxis.scale(rotationAngle);
+            AxisAngle axisAngle = new AxisAngle(rotationAxis, rotationAngle);
+            RotationMatrix rotationMatrix = new RotationMatrix();
+            axisAngle.get(rotationMatrix);
+
+            generator.translate(0.0, 0.0, height);
+            generator.rotate(rotationMatrix);
+            generator.rotate(yawRotation, Axis3D.Z);
+            generator.addCubeReferencedAtBottomMiddle(blockXY, blockXY, blockHeight);
+            generator.rotate(-yawRotation, Axis3D.Z);
+            rotationMatrix.invert();
+            generator.rotate(rotationMatrix);
+            generator.translate(0.0, 0.0, -height);
+
+            generator.translate(0.0, blockXY + blockSpacing, 0.0);
+         }
+
+         generator.translate(blockXY, 0.0, 0.0);
+      }
+
+      return generator.getPlanarRegionsList();
    }
 
    private static PlanarRegionsList generate(GenerationInterface generationInterface)
@@ -296,6 +366,12 @@ public class BehaviorPlanarRegionEnvironments extends PlannerTestEnvironments
       generator.rotate(yaw, Axis3D.Z);
       runnable.run();
       generator.rotate(-yaw, Axis3D.Z);
+   }
+
+   public static void main(String[] args)
+   {
+      PlanarRegionsList roughUpAndDownStairsWithFlatTop = createRoughUpAndDownStairsWithFlatTop();
+      PlanarRegionFileTools.exportPlanarRegionData(Paths.get(System.getProperty("user.home") + File.separator + "PlanarRegions" + File.separator), roughUpAndDownStairsWithFlatTop);
    }
 
    public static PlanarRegionsList realDataFromAtlasSLAMDataset20190710()
