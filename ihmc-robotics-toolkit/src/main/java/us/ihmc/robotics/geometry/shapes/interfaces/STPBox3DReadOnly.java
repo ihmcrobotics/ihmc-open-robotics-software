@@ -55,27 +55,33 @@ public interface STPBox3DReadOnly extends STPShape3DReadOnly, Box3DReadOnly
    // The following part of the API has not been implemented for STP box yet, let's prevent their use for now.
 
    @Override
+   default double getVolume()
+   {
+      return STPShape3DReadOnly.super.getVolume();
+   }
+
+   @Override
    default boolean evaluatePoint3DCollision(Point3DReadOnly pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalAtClosestPointToPack)
    {
-      throw new UnsupportedOperationException("Not supported for STP box 3D");
+      return STPShape3DReadOnly.super.evaluatePoint3DCollision(pointToCheck, closestPointOnSurfaceToPack, normalAtClosestPointToPack);
    }
 
    @Override
    default double signedDistance(Point3DReadOnly point)
    {
-      throw new UnsupportedOperationException("Not supported for STP box 3D");
+      return STPShape3DReadOnly.super.signedDistance(point);
    }
 
    @Override
    default boolean isPointInside(Point3DReadOnly query, double epsilon)
    {
-      throw new UnsupportedOperationException("Not supported for STP box 3D");
+      return STPShape3DReadOnly.super.isPointInside(query, epsilon);
    }
 
    @Override
    default boolean orthogonalProjection(Point3DReadOnly pointToProject, Point3DBasics projectionToPack)
    {
-      throw new UnsupportedOperationException("Not supported for STP box 3D");
+      return STPShape3DReadOnly.super.orthogonalProjection(pointToProject, projectionToPack);
    }
 
    @Override
