@@ -1,5 +1,7 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import static us.ihmc.euclid.tools.EuclidCoreIOTools.DEFAULT_FORMAT;
+
 import java.util.List;
 
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
@@ -10,6 +12,8 @@ import us.ihmc.euclid.shape.primitives.interfaces.BoxPolytope3DView;
 import us.ihmc.euclid.shape.primitives.interfaces.IntermediateVariableSupplier;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DChangeListener;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DPoseBasics;
+import us.ihmc.euclid.shape.tools.EuclidShapeIOTools;
+import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.transform.interfaces.RigidBodyTransformReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
@@ -325,5 +329,49 @@ public class STPBox3D implements STPBox3DBasics
    public boolean removeChangeListener(Shape3DChangeListener listener)
    {
       return rawBox3D.removeChangeListener(listener);
+   }
+
+   /**
+    * Tests if the given {@code object}'s class is the same as this, in which case the method returns
+    * {@link #equals(Box3DReadOnly)}, it returns {@code false} otherwise.
+    *
+    * @param object the object to compare against this. Not modified.
+    * @return {@code true} if {@code object} and this are exactly equal, {@code false} otherwise.
+    */
+   @Override
+   public boolean equals(Object object)
+   {
+      if (object instanceof STPBox3DReadOnly)
+         return STPBox3DBasics.super.equals((STPBox3DReadOnly) object);
+      else
+         return false;
+   }
+
+   /**
+    * Calculates and returns a hash code value from the value of each component of this box 3D.
+    *
+    * @return the hash code value for this box 3D.
+    */
+   @Override
+   public int hashCode()
+   {
+      long hash = EuclidHashCodeTools.combineHashCode(rawBox3D.hashCode(), EuclidHashCodeTools.toLongHashCode(minimumMargin, maximumMargin));
+      return EuclidHashCodeTools.toIntHashCode(hash);
+   }
+
+   /**
+    * Provides a {@code String} representation of this box 3D as follows:
+    *
+    * <pre>
+    * Box 3D: [position: ( 0.540,  0.110,  0.319 ), yaw-pitch-roll: (-2.061, -0.904, -1.136), size: ( 0.191,  0.719,  0.479 )]
+    * </pre>
+    *
+    * @return the {@code String} representing this box 3D.
+    */
+   @Override
+   public String toString()
+   {
+      String stpSuffix = String.format(", small radius: " + DEFAULT_FORMAT + ", large radius: " + DEFAULT_FORMAT + "]", smallRadius, largeRadius);
+      return "STP " + EuclidShapeIOTools.getBox3DString(this).replace("]", stpSuffix);
    }
 }

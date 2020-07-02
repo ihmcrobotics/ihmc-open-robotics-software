@@ -5,32 +5,44 @@ import static us.ihmc.euclid.tools.EuclidCoreIOTools.DEFAULT_FORMAT;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.euclid.Axis3D;
+import us.ihmc.euclid.referenceFrame.ReferenceFrame;
+import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FixedFrameUnitVector3DBasics;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameCapsule3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FramePoint3DReadOnly;
+import us.ihmc.euclid.referenceFrame.interfaces.FrameVector3DReadOnly;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories;
+import us.ihmc.euclid.referenceFrame.tools.EuclidFrameShapeIOTools;
 import us.ihmc.euclid.shape.primitives.interfaces.Capsule3DReadOnly;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DChangeListener;
-import us.ihmc.euclid.shape.tools.EuclidShapeIOTools;
-import us.ihmc.euclid.tools.EuclidCoreFactories;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
-import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.STPShape3DTools.STPCapsule3DSupportingVertexCalculator;
-import us.ihmc.robotics.geometry.shapes.interfaces.STPCapsule3DBasics;
+import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPCapsule3DBasics;
+import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPCapsule3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.STPCapsule3DReadOnly;
 
-public class STPCapsule3D implements STPCapsule3DBasics
+public class FrameSTPCapsule3D implements FrameSTPCapsule3DBasics
 {
+   /** The reference frame in which this shape is expressed. */
+   private ReferenceFrame referenceFrame;
    private final List<Shape3DChangeListener> changeListeners = new ArrayList<>();
    private double minimumMargin, maximumMargin;
    private double largeRadius, smallRadius;
    private final STPCapsule3DSupportingVertexCalculator supportingVertexCalculator = new STPCapsule3DSupportingVertexCalculator();
 
    /** Position of this capsule's center. */
-   private final Point3DBasics position = EuclidCoreFactories.newObservablePoint3DBasics((axis, value) -> notifyChangeListeners(), null);
+   private final FixedFramePoint3DBasics position = EuclidFrameFactories.newObservableFixedFramePoint3DBasics(this,
+                                                                                                              (axis, value) -> notifyChangeListeners(),
+                                                                                                              null);
    /** Axis of revolution of this capsule. */
-   private final UnitVector3DBasics axis = EuclidCoreFactories.newObservableUnitVector3DBasics((axis, value) -> notifyChangeListeners(), null);
+   private final FixedFrameUnitVector3DBasics axis = EuclidFrameFactories.newObservableFixedFrameUnitVector3DBasics(this,
+                                                                                                                    (axis, value) -> notifyChangeListeners(),
+                                                                                                                    null);
 
    /** This capsule radius. */
    private double radius;
@@ -40,35 +52,68 @@ public class STPCapsule3D implements STPCapsule3DBasics
    private double halfLength;
 
    /** Position of the top half-sphere center linked to this capsule properties. */
-   private final Point3DReadOnly topCenter = EuclidCoreFactories.newLinkedPoint3DReadOnly(() -> halfLength * axis.getX() + position.getX(),
-                                                                                          () -> halfLength * axis.getY() + position.getY(),
-                                                                                          () -> halfLength * axis.getZ() + position.getZ());
+   private final FramePoint3DReadOnly topCenter = EuclidFrameFactories.newLinkedFramePoint3DReadOnly(this,
+                                                                                                     () -> halfLength * axis.getX() + position.getX(),
+                                                                                                     () -> halfLength * axis.getY() + position.getY(),
+                                                                                                     () -> halfLength * axis.getZ() + position.getZ());
    /** Position of the bottom half-sphere center linked to this capsule properties. */
-   private final Point3DReadOnly bottomCenter = EuclidCoreFactories.newLinkedPoint3DReadOnly(() -> -halfLength * axis.getX() + position.getX(),
-                                                                                             () -> -halfLength * axis.getY() + position.getY(),
-                                                                                             () -> -halfLength * axis.getZ() + position.getZ());
+   private final FramePoint3DReadOnly bottomCenter = EuclidFrameFactories.newLinkedFramePoint3DReadOnly(this,
+                                                                                                        () -> -halfLength * axis.getX() + position.getX(),
+                                                                                                        () -> -halfLength * axis.getY() + position.getY(),
+                                                                                                        () -> -halfLength * axis.getZ() + position.getZ());
 
    /**
-    * Creates a new capsule which axis is along the z-axis, a length of 1, and radius of 0.5.
+    * Creates a new capsule which axis is along the z-axis, a length of 1, and radius of 0.5 and
+    * initializes its reference frame to {@link ReferenceFrame#getWorldFrame()}.
     */
-   public STPCapsule3D()
+   public FrameSTPCapsule3D()
    {
-      setSize(1.0, 0.5);
-      axis.set(Axis3D.Z);
+      setReferenceFrame(ReferenceFrame.getWorldFrame());
       addChangeListener(() -> updateRadii());
+   }
+
+   /**
+    * Creates a new capsule which axis is along the z-axis, a length of 1, and radius of 0.5 and
+    * initializes its reference frame.
+    *
+    * @param referenceFrame this shape initial reference frame.
+    */
+   public FrameSTPCapsule3D(ReferenceFrame referenceFrame)
+   {
+      this();
+      setReferenceFrame(referenceFrame);
+      setSize(1.0, 0.5);
    }
 
    /**
     * Creates a new capsule which axis is along the z-axis and initializes its size.
     *
-    * @param length the length of this capsule.
-    * @param radius the radius of this capsule.
+    * @param referenceFrame this shape initial reference frame.
+    * @param length         the length of this capsule.
+    * @param radius         the radius of this capsule.
     * @throws IllegalArgumentException if {@code length} or {@code radius} is negative.
     */
-   public STPCapsule3D(double length, double radius)
+   public FrameSTPCapsule3D(ReferenceFrame referenceFrame, double length, double radius)
    {
       this();
+      setReferenceFrame(referenceFrame);
       setSize(length, radius);
+   }
+
+   /**
+    * Creates a new capsule 3D and initializes its pose and size.
+    *
+    * @param referenceFrame this shape initial reference frame.
+    * @param position       the position of the center. Not modified.
+    * @param axis           the axis of revolution. Not modified.
+    * @param length         the length of this capsule.
+    * @param radius         the radius of this capsule.
+    * @throws IllegalArgumentException if {@code length} or {@code radius} is negative.
+    */
+   public FrameSTPCapsule3D(ReferenceFrame referenceFrame, Point3DReadOnly position, Vector3DReadOnly axis, double length, double radius)
+   {
+      this();
+      setIncludingFrame(referenceFrame, position, axis, length, radius);
    }
 
    /**
@@ -78,12 +123,38 @@ public class STPCapsule3D implements STPCapsule3DBasics
     * @param axis     the axis of revolution. Not modified.
     * @param length   the length of this capsule.
     * @param radius   the radius of this capsule.
-    * @throws IllegalArgumentException if {@code length} or {@code radius} is negative.
+    * @throws IllegalArgumentException        if {@code length} or {@code radius} is negative.
+    * @throws ReferenceFrameMismatchException if the frame argument are not expressed in the same
+    *                                         reference frame.
     */
-   public STPCapsule3D(Point3DReadOnly position, Vector3DReadOnly axis, double length, double radius)
+   public FrameSTPCapsule3D(FramePoint3DReadOnly position, FrameVector3DReadOnly axis, double length, double radius)
    {
       this();
-      set(position, axis, length, radius);
+      setIncludingFrame(position, axis, length, radius);
+   }
+
+   /**
+    * Creates a new capsule 3D identical to {@code other}.
+    *
+    * @param referenceFrame this shape initial reference frame.
+    * @param other          the other capsule to copy. Not modified.
+    */
+   public FrameSTPCapsule3D(ReferenceFrame referenceFrame, Capsule3DReadOnly other)
+   {
+      this();
+      setIncludingFrame(referenceFrame, other);
+   }
+
+   /**
+    * Creates a new capsule 3D identical to {@code other}.
+    *
+    * @param referenceFrame this shape initial reference frame.
+    * @param other          the other capsule to copy. Not modified.
+    */
+   public FrameSTPCapsule3D(ReferenceFrame referenceFrame, STPCapsule3DReadOnly other)
+   {
+      this();
+      setIncludingFrame(referenceFrame, other);
    }
 
    /**
@@ -91,10 +162,10 @@ public class STPCapsule3D implements STPCapsule3DBasics
     *
     * @param other the other capsule to copy. Not modified.
     */
-   public STPCapsule3D(Capsule3DReadOnly other)
+   public FrameSTPCapsule3D(FrameCapsule3DReadOnly other)
    {
       this();
-      set(other);
+      setIncludingFrame(other);
    }
 
    /**
@@ -102,10 +173,17 @@ public class STPCapsule3D implements STPCapsule3DBasics
     *
     * @param other the other capsule to copy. Not modified.
     */
-   public STPCapsule3D(STPCapsule3DReadOnly other)
+   public FrameSTPCapsule3D(FrameSTPCapsule3DReadOnly other)
    {
       this();
-      set(other);
+      setIncludingFrame(other);
+   }
+
+   /** {@inheritDoc} */
+   @Override
+   public void setReferenceFrame(ReferenceFrame referenceFrame)
+   {
+      this.referenceFrame = referenceFrame;
    }
 
    /** {@inheritDoc} */
@@ -131,6 +209,13 @@ public class STPCapsule3D implements STPCapsule3DBasics
 
    /** {@inheritDoc} */
    @Override
+   public ReferenceFrame getReferenceFrame()
+   {
+      return referenceFrame;
+   }
+
+   /** {@inheritDoc} */
+   @Override
    public double getRadius()
    {
       return radius;
@@ -152,28 +237,28 @@ public class STPCapsule3D implements STPCapsule3DBasics
 
    /** {@inheritDoc} */
    @Override
-   public Point3DBasics getPosition()
+   public FixedFramePoint3DBasics getPosition()
    {
       return position;
    }
 
    /** {@inheritDoc} */
    @Override
-   public UnitVector3DBasics getAxis()
+   public FixedFrameUnitVector3DBasics getAxis()
    {
       return axis;
    }
 
    /** {@inheritDoc} */
    @Override
-   public Point3DReadOnly getTopCenter()
+   public FramePoint3DReadOnly getTopCenter()
    {
       return topCenter;
    }
 
    /** {@inheritDoc} */
    @Override
-   public Point3DReadOnly getBottomCenter()
+   public FramePoint3DReadOnly getBottomCenter()
    {
       return bottomCenter;
    }
@@ -301,9 +386,9 @@ public class STPCapsule3D implements STPCapsule3DBasics
    }
 
    @Override
-   public STPCapsule3D copy()
+   public FrameSTPCapsule3D copy()
    {
-      return new STPCapsule3D(this);
+      return new FrameSTPCapsule3D(this);
    }
 
    /**
@@ -316,8 +401,8 @@ public class STPCapsule3D implements STPCapsule3DBasics
    @Override
    public boolean equals(Object object)
    {
-      if (object instanceof STPCapsule3DReadOnly)
-         return STPCapsule3DBasics.super.equals((STPCapsule3DReadOnly) object);
+      if (object instanceof FrameSTPCapsule3DReadOnly)
+         return FrameSTPCapsule3DBasics.super.equals((FrameSTPCapsule3DReadOnly) object);
       else
          return false;
    }
@@ -341,7 +426,7 @@ public class STPCapsule3D implements STPCapsule3DBasics
     * Provides a {@code String} representation of this capsule 3D as follows:
     *
     * <pre>
-    * STP Capsule 3D: [position: (-0.362, -0.617,  0.066 ), axis: ( 0.634, -0.551, -0.543 ), length:  0.170, radius:  0.906, small radius: 0.001, large radius: 1.000]
+    * STP Capsule 3D: [position: (-0.362, -0.617,  0.066 ), axis: ( 0.634, -0.551, -0.543 ), length:  0.170, radius:  0.906, small radius: 0.001, large radius: 1.000] - worldFrame
     * </pre>
     *
     * @return the {@code String} representing this capsule 3D.
@@ -350,6 +435,6 @@ public class STPCapsule3D implements STPCapsule3DBasics
    public String toString()
    {
       String stpSuffix = String.format(", small radius: " + DEFAULT_FORMAT + ", large radius: " + DEFAULT_FORMAT + "]", smallRadius, largeRadius);
-      return "STP " + EuclidShapeIOTools.getCapsule3DString(this).replace("]", stpSuffix);
+      return "STP " + EuclidFrameShapeIOTools.getFrameCapsule3DString(this).replace("]", stpSuffix);
    }
 }
