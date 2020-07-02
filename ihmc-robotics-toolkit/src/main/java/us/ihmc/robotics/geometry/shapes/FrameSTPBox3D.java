@@ -547,7 +547,7 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
 
    /**
     * Tests if the given {@code object}'s class is the same as this, in which case the method returns
-    * {@link #equals(FrameBox3DReadOnly)}, it returns {@code false} otherwise.
+    * {@link #equals(FrameSTPBox3DReadOnly)}, it returns {@code false} otherwise.
     * <p>
     * If the two faces have different frames, this method returns {@code false}.
     * </p>
@@ -581,7 +581,7 @@ public class FrameSTPBox3D implements FrameSTPBox3DBasics
     * Provides a {@code String} representation of this box 3D as follows:
     *
     * <pre>
-    * Box 3D: [position: ( 0.540,  0.110,  0.319 ), yaw-pitch-roll: (-2.061, -0.904, -1.136), size: ( 0.191,  0.719,  0.479 )] - worldFrame
+    * STP Box 3D: [position: ( 0.540,  0.110,  0.319 ), yaw-pitch-roll: (-2.061, -0.904, -1.136), size: ( 0.191,  0.719,  0.479 ), small radius: 0.001, large radius: 1.000] - worldFrame
     * </pre>
     *
     * @return the {@code String} representing this box 3D.
