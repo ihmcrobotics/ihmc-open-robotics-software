@@ -12,6 +12,7 @@ import us.ihmc.euclid.shape.tools.EuclidShapeIOTools;
 import us.ihmc.euclid.tools.EuclidCoreFactories;
 import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.euclid.tools.EuclidHashCodeTools;
+import us.ihmc.euclid.tuple3D.UnitVector3D;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.UnitVector3DBasics;
@@ -30,7 +31,9 @@ public class STPCapsule3D implements STPCapsule3DBasics
    /** Position of this capsule's center. */
    private final Point3DBasics position = EuclidCoreFactories.newObservablePoint3DBasics((axis, value) -> notifyChangeListeners(), null);
    /** Axis of revolution of this capsule. */
-   private final UnitVector3DBasics axis = EuclidCoreFactories.newObservableUnitVector3DBasics((axis, value) -> notifyChangeListeners(), null);
+   private final UnitVector3DBasics axis = EuclidCoreFactories.newObservableUnitVector3DBasics((axis, value) -> notifyChangeListeners(),
+                                                                                               null,
+                                                                                               new UnitVector3D(Axis3D.Z));
 
    /** This capsule radius. */
    private double radius;
@@ -48,14 +51,14 @@ public class STPCapsule3D implements STPCapsule3DBasics
                                                                                              () -> -halfLength * axis.getY() + position.getY(),
                                                                                              () -> -halfLength * axis.getZ() + position.getZ());
 
+   private boolean stpRadiiDirty = true;
+
    /**
     * Creates a new capsule which axis is along the z-axis, a length of 1, and radius of 0.5.
     */
    public STPCapsule3D()
    {
-      setSize(1.0, 0.5);
-      axis.set(Axis3D.Z);
-      addChangeListener(() -> updateRadii());
+      this(1.0, 0.5);
    }
 
    /**
@@ -67,8 +70,8 @@ public class STPCapsule3D implements STPCapsule3DBasics
     */
    public STPCapsule3D(double length, double radius)
    {
-      this();
       setSize(length, radius);
+      setupListeners();
    }
 
    /**
@@ -82,8 +85,8 @@ public class STPCapsule3D implements STPCapsule3DBasics
     */
    public STPCapsule3D(Point3DReadOnly position, Vector3DReadOnly axis, double length, double radius)
    {
-      this();
       set(position, axis, length, radius);
+      setupListeners();
    }
 
    /**
@@ -93,8 +96,8 @@ public class STPCapsule3D implements STPCapsule3DBasics
     */
    public STPCapsule3D(Capsule3DReadOnly other)
    {
-      this();
       set(other);
+      setupListeners();
    }
 
    /**
@@ -104,8 +107,13 @@ public class STPCapsule3D implements STPCapsule3DBasics
     */
    public STPCapsule3D(STPCapsule3DReadOnly other)
    {
-      this();
       set(other);
+      setupListeners();
+   }
+
+   private void setupListeners()
+   {
+      addChangeListener(() -> stpRadiiDirty = true);
    }
 
    /** {@inheritDoc} */
@@ -193,12 +201,14 @@ public class STPCapsule3D implements STPCapsule3DBasics
    @Override
    public double getSmallRadius()
    {
+      updateRadii();
       return smallRadius;
    }
 
    @Override
    public double getLargeRadius()
    {
+      updateRadii();
       return largeRadius;
    }
 
@@ -210,7 +220,7 @@ public class STPCapsule3D implements STPCapsule3DBasics
                + ", min margin: " + minimumMargin);
       this.minimumMargin = minimumMargin;
       this.maximumMargin = maximumMargin;
-      updateRadii();
+      stpRadiiDirty = true;
    }
 
    /**
@@ -233,6 +243,11 @@ public class STPCapsule3D implements STPCapsule3DBasics
     */
    protected void updateRadii()
    {
+      if (!stpRadiiDirty)
+         return;
+
+      stpRadiiDirty = false;
+
       if (minimumMargin == 0.0 && maximumMargin == 0.0)
       {
          smallRadius = Double.NaN;
@@ -248,7 +263,7 @@ public class STPCapsule3D implements STPCapsule3DBasics
    @Override
    public boolean getSupportingVertex(Vector3DReadOnly supportDirection, Point3DBasics supportingVertexToPack)
    {
-      return supportingVertexCalculator.getSupportingVertex(this, smallRadius, largeRadius, supportDirection, supportingVertexToPack);
+      return supportingVertexCalculator.getSupportingVertex(this, getSmallRadius(), getLargeRadius(), supportDirection, supportingVertexToPack);
    }
 
    /**
@@ -349,7 +364,7 @@ public class STPCapsule3D implements STPCapsule3DBasics
    @Override
    public String toString()
    {
-      String stpSuffix = String.format(", small radius: " + DEFAULT_FORMAT + ", large radius: " + DEFAULT_FORMAT + "]", smallRadius, largeRadius);
+      String stpSuffix = String.format(", small radius: " + DEFAULT_FORMAT + ", large radius: " + DEFAULT_FORMAT + "]", getSmallRadius(), getLargeRadius());
       return "STP " + EuclidShapeIOTools.getCapsule3DString(this).replace("]", stpSuffix);
    }
 }

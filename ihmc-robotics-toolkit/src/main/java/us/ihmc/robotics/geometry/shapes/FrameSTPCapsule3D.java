@@ -1,10 +1,14 @@
 package us.ihmc.robotics.geometry.shapes;
 
+import static us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories.newFixedFrameUnitVector3DBasics;
+import static us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories.newObservableFixedFramePoint3DBasics;
+import static us.ihmc.euclid.referenceFrame.tools.EuclidFrameFactories.newObservableFixedFrameUnitVector3DBasics;
 import static us.ihmc.euclid.tools.EuclidCoreIOTools.DEFAULT_FORMAT;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.exceptions.ReferenceFrameMismatchException;
 import us.ihmc.euclid.referenceFrame.interfaces.FixedFramePoint3DBasics;
@@ -36,13 +40,11 @@ public class FrameSTPCapsule3D implements FrameSTPCapsule3DBasics
    private final STPCapsule3DSupportingVertexCalculator supportingVertexCalculator = new STPCapsule3DSupportingVertexCalculator();
 
    /** Position of this capsule's center. */
-   private final FixedFramePoint3DBasics position = EuclidFrameFactories.newObservableFixedFramePoint3DBasics(this,
-                                                                                                              (axis, value) -> notifyChangeListeners(),
-                                                                                                              null);
+   private final FixedFramePoint3DBasics position = newObservableFixedFramePoint3DBasics(this, (axis, value) -> notifyChangeListeners(), null);
    /** Axis of revolution of this capsule. */
-   private final FixedFrameUnitVector3DBasics axis = EuclidFrameFactories.newObservableFixedFrameUnitVector3DBasics(this,
-                                                                                                                    (axis, value) -> notifyChangeListeners(),
-                                                                                                                    null);
+   private final FixedFrameUnitVector3DBasics axis = newObservableFixedFrameUnitVector3DBasics((axis, value) -> notifyChangeListeners(),
+                                                                                               null,
+                                                                                               newFixedFrameUnitVector3DBasics(this, Axis3D.Z));
 
    /** This capsule radius. */
    private double radius;
@@ -62,14 +64,15 @@ public class FrameSTPCapsule3D implements FrameSTPCapsule3DBasics
                                                                                                         () -> -halfLength * axis.getY() + position.getY(),
                                                                                                         () -> -halfLength * axis.getZ() + position.getZ());
 
+   private boolean stpRadiiDirty = true;
+
    /**
     * Creates a new capsule which axis is along the z-axis, a length of 1, and radius of 0.5 and
     * initializes its reference frame to {@link ReferenceFrame#getWorldFrame()}.
     */
    public FrameSTPCapsule3D()
    {
-      setReferenceFrame(ReferenceFrame.getWorldFrame());
-      addChangeListener(() -> updateRadii());
+      this(ReferenceFrame.getWorldFrame());
    }
 
    /**
@@ -80,9 +83,7 @@ public class FrameSTPCapsule3D implements FrameSTPCapsule3DBasics
     */
    public FrameSTPCapsule3D(ReferenceFrame referenceFrame)
    {
-      this();
-      setReferenceFrame(referenceFrame);
-      setSize(1.0, 0.5);
+      this(referenceFrame, 1.0, 0.5);
    }
 
    /**
@@ -95,9 +96,9 @@ public class FrameSTPCapsule3D implements FrameSTPCapsule3DBasics
     */
    public FrameSTPCapsule3D(ReferenceFrame referenceFrame, double length, double radius)
    {
-      this();
       setReferenceFrame(referenceFrame);
       setSize(length, radius);
+      setupListeners();
    }
 
    /**
@@ -112,8 +113,8 @@ public class FrameSTPCapsule3D implements FrameSTPCapsule3DBasics
     */
    public FrameSTPCapsule3D(ReferenceFrame referenceFrame, Point3DReadOnly position, Vector3DReadOnly axis, double length, double radius)
    {
-      this();
       setIncludingFrame(referenceFrame, position, axis, length, radius);
+      setupListeners();
    }
 
    /**
@@ -129,8 +130,8 @@ public class FrameSTPCapsule3D implements FrameSTPCapsule3DBasics
     */
    public FrameSTPCapsule3D(FramePoint3DReadOnly position, FrameVector3DReadOnly axis, double length, double radius)
    {
-      this();
       setIncludingFrame(position, axis, length, radius);
+      setupListeners();
    }
 
    /**
@@ -141,8 +142,8 @@ public class FrameSTPCapsule3D implements FrameSTPCapsule3DBasics
     */
    public FrameSTPCapsule3D(ReferenceFrame referenceFrame, Capsule3DReadOnly other)
    {
-      this();
       setIncludingFrame(referenceFrame, other);
+      setupListeners();
    }
 
    /**
@@ -153,8 +154,8 @@ public class FrameSTPCapsule3D implements FrameSTPCapsule3DBasics
     */
    public FrameSTPCapsule3D(ReferenceFrame referenceFrame, STPCapsule3DReadOnly other)
    {
-      this();
       setIncludingFrame(referenceFrame, other);
+      setupListeners();
    }
 
    /**
@@ -164,8 +165,8 @@ public class FrameSTPCapsule3D implements FrameSTPCapsule3DBasics
     */
    public FrameSTPCapsule3D(FrameCapsule3DReadOnly other)
    {
-      this();
       setIncludingFrame(other);
+      setupListeners();
    }
 
    /**
@@ -175,8 +176,13 @@ public class FrameSTPCapsule3D implements FrameSTPCapsule3DBasics
     */
    public FrameSTPCapsule3D(FrameSTPCapsule3DReadOnly other)
    {
-      this();
       setIncludingFrame(other);
+      setupListeners();
+   }
+
+   private void setupListeners()
+   {
+      addChangeListener(() -> stpRadiiDirty = true);
    }
 
    /** {@inheritDoc} */
@@ -278,12 +284,14 @@ public class FrameSTPCapsule3D implements FrameSTPCapsule3DBasics
    @Override
    public double getSmallRadius()
    {
+      updateRadii();
       return smallRadius;
    }
 
    @Override
    public double getLargeRadius()
    {
+      updateRadii();
       return largeRadius;
    }
 
@@ -295,7 +303,7 @@ public class FrameSTPCapsule3D implements FrameSTPCapsule3DBasics
                + ", min margin: " + minimumMargin);
       this.minimumMargin = minimumMargin;
       this.maximumMargin = maximumMargin;
-      updateRadii();
+      stpRadiiDirty = true;
    }
 
    /**
@@ -318,6 +326,11 @@ public class FrameSTPCapsule3D implements FrameSTPCapsule3DBasics
     */
    protected void updateRadii()
    {
+      if (!stpRadiiDirty)
+         return;
+
+      stpRadiiDirty = false;
+
       if (minimumMargin == 0.0 && maximumMargin == 0.0)
       {
          smallRadius = Double.NaN;
@@ -333,7 +346,7 @@ public class FrameSTPCapsule3D implements FrameSTPCapsule3DBasics
    @Override
    public boolean getSupportingVertex(Vector3DReadOnly supportDirection, Point3DBasics supportingVertexToPack)
    {
-      return supportingVertexCalculator.getSupportingVertex(this, smallRadius, largeRadius, supportDirection, supportingVertexToPack);
+      return supportingVertexCalculator.getSupportingVertex(this, getSmallRadius(), getLargeRadius(), supportDirection, supportingVertexToPack);
    }
 
    /**
@@ -434,7 +447,7 @@ public class FrameSTPCapsule3D implements FrameSTPCapsule3DBasics
    @Override
    public String toString()
    {
-      String stpSuffix = String.format(", small radius: " + DEFAULT_FORMAT + ", large radius: " + DEFAULT_FORMAT + "]", smallRadius, largeRadius);
+      String stpSuffix = String.format(", small radius: " + DEFAULT_FORMAT + ", large radius: " + DEFAULT_FORMAT + "]", getSmallRadius(), getLargeRadius());
       return "STP " + EuclidFrameShapeIOTools.getFrameCapsule3DString(this).replace("]", stpSuffix);
    }
 }
