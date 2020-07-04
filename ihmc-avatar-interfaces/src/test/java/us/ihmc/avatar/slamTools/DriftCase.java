@@ -1,98 +1,72 @@
 package us.ihmc.avatar.slamTools;
 
-/**
- * MultiplePlanes : complicated frames.
- * <p>
- * DownStairsBigZDrift : single plane, huge drift in Z.
- * <p>
- * UpStairs2YDrift : small drift in Y.
- * <p>
- * Upstairs3YDriftSmallOverlap : similar with 'UpStairs2YDrift' but small overlapped area.
- * <p>
- * Upstairs3RollDrift : drift in X and Roll. Verified low correspondence threshold (compare to 'Upstairs3YDriftSmallOverlap').
- * <p>
- * UpStairs3Fast : huge drift in X.
- */
 public enum DriftCase
 {
-   MultiplePlanes, DownStairsBigZDrift, UpStairs2YDrift, UpStairs2YawDrift, UpStairs3YDriftSmallOverlap, UpStairs3RollDrift, UpStairs3HugeDrift;
+   MultiplePlanes, BigZDrift, YDrift, YawDrift, YDriftSmallOverlap, RollDrift, HugeDrift;
 
    public String getFilePath()
    {
+      String filePath = System.getProperty("user.dir") + "\\";
       switch (this)
       {
          case MultiplePlanes:
-            return "PointCloudData\\Data\\20200305_Simple\\PointCloud\\";
-         case DownStairsBigZDrift:
-            return "PointCloudData\\Data\\20200601_LidarWalking_DownStairs\\PointCloud\\";
-         case UpStairs2YDrift:
-         case UpStairs2YawDrift:
-            return "PointCloudData\\Data\\20200601_LidarWalking_UpStairs2\\PointCloud\\";
-         case UpStairs3YDriftSmallOverlap:
-         case UpStairs3RollDrift:
-         case UpStairs3HugeDrift:
-            return "PointCloudData\\Data\\20200603_LidarWalking_StairUp3\\PointCloud\\";
+            return filePath + "PointCloudData\\DriftCase\\MultiplePlanes\\";
+         case BigZDrift:
+            return filePath + "PointCloudData\\DriftCase\\BigZDrift\\";
+         case YDrift:
+            return filePath + "PointCloudData\\DriftCase\\YDrift\\";
+         case YawDrift:
+            return filePath + "PointCloudData\\DriftCase\\YawDrift\\";
+         case YDriftSmallOverlap:
+            return filePath + "PointCloudData\\DriftCase\\YDriftSmallOverlap\\";
+         case RollDrift:
+            return filePath + "PointCloudData\\DriftCase\\RollDrift\\";
+         case HugeDrift:
+            return filePath + "PointCloudData\\DriftCase\\HugeDrift\\";
       }
       return "";
    }
 
-   public int getPreviousFrameIndex()
+   public String getInformation()
    {
       switch (this)
       {
          case MultiplePlanes:
-            return 30;
-         case DownStairsBigZDrift:
-            return 12;
-         case UpStairs2YDrift:
-            return 3;
-         case UpStairs2YawDrift:
-            return 4;
-         case UpStairs3YDriftSmallOverlap:
-            return 4;
-         case UpStairs3RollDrift:
-            return 7;
-         case UpStairs3HugeDrift:
-            return 8;
+            return "Set: 20200305_Simple, Frame Index: 30-33.";
+         case BigZDrift:
+            return "Set: 20200601_LidarWalking_DownStairs, Frame Index: 12-13.";
+         case YDrift:
+            return "Set: 20200601_LidarWalking_UpStairs2, Frame Index: 3-4.";
+         case YawDrift:
+            return "Set: 20200601_LidarWalking_UpStairs2, Frame Index: 4-5.";
+         case YDriftSmallOverlap:
+            return "Set: 20200603_LidarWalking_StairUp3, Frame Index: 4-5.";
+         case RollDrift:
+            return "Set: 20200603_LidarWalking_StairUp3, Frame Index: 7-8.";
+         case HugeDrift:
+            return "Set: 20200603_LidarWalking_StairUp3, Frame Index: 8-9.";
       }
-      return -1;
+      return "";
    }
 
-   public int getNewFrameIndex()
-   {
-      switch (this)
-      {
-         case MultiplePlanes:
-            return 33;
-         case DownStairsBigZDrift:
-            return 13;
-         case UpStairs2YDrift:
-            return 4;
-         case UpStairs2YawDrift:
-            return 5;
-         case UpStairs3YDriftSmallOverlap:
-            return 5;
-         case UpStairs3RollDrift:
-            return 8;
-         case UpStairs3HugeDrift:
-            return 9;
-      }
-      return -1;
-   }
-   
    public String getNote()
    {
       switch (this)
       {
          case MultiplePlanes:
-            return "";
-         case DownStairsBigZDrift:
-            return "";
-         case UpStairs2YDrift:
-            return "";
-         case UpStairs3YDriftSmallOverlap:
-         case UpStairs3RollDrift:
-            return "";
+            return "complicated frames.";
+         case BigZDrift:
+            return "single plane, huge drift in Z.";
+         case YDrift:
+            return "small drift in Y";
+         case YawDrift:
+            return "small drift in Yaw";
+         case YDriftSmallOverlap:
+            return "similar with 'UpStairs2YDrift' but small overlapped area.";
+         case RollDrift:
+            return "drift in X and Roll. Verified low correspondence threshold (compare to 'Upstairs3YDriftSmallOverlap').";
+         case HugeDrift:
+            return "huge drift in X.";
       }
       return "";
    }
