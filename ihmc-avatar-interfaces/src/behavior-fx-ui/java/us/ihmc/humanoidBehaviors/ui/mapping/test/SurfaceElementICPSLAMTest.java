@@ -1,6 +1,7 @@
 package us.ihmc.humanoidBehaviors.ui.mapping.test;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 import org.ejml.data.DMatrixRMaj;
@@ -329,6 +330,20 @@ public class SurfaceElementICPSLAMTest
    {
       String stereoPath = "C:\\PointCloudData\\Data\\20200603_LidarWalking_StairUp3\\PointCloud\\";
       String planarRegionsPath = "C:\\PointCloudData\\Data\\20200603_LidarWalking_StairUp3\\20200603_205049_PlanarRegion\\";
+
+      String current;
+      try
+      {
+         current = new java.io.File(".").getCanonicalPath();
+         System.out.println("Current dir:" + current);
+      }
+      catch (IOException e)
+      {
+         // TODO Auto-generated catch block
+         e.printStackTrace();
+      }
+      String currentDir = System.getProperty("user.dir");
+      System.out.println("Current dir using System:" + currentDir);
 
       testEndToEnd(stereoPath, planarRegionsPath);
    }

@@ -40,14 +40,12 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    private final int recordFrequency = 1;
    private final int bufferSize = (int) (trajectoryTime / dt / recordFrequency + 3);
 
-   private static final DriftCase DRIFT_CASE = DriftCase.UpStairs3YDriftSmallOverlap;
-   //         private static final DriftCase DRIFT_CASE = DriftCase.UpStairs3RollDrift;
-   //         private static final DriftCase DRIFT_CASE = DriftCase.UpStairs3HugeDrift;
-   //         private static final DriftCase DRIFT_CASE = DriftCase.UpStairs2YawDrift;
+   private static final DriftCase DRIFT_CASE = DriftCase.YDriftSmallOverlap;
+   //private static final DriftCase DRIFT_CASE = DriftCase.RollDrift;
+   //private static final DriftCase DRIFT_CASE = DriftCase.HugeDrift;
+   //private static final DriftCase DRIFT_CASE = DriftCase.YawDrift;
 
-   private static final String DATA_PATH = "C:\\" + DRIFT_CASE.getFilePath();
-   private static final int INDEX_FRAME_ONE = DRIFT_CASE.getPreviousFrameIndex();
-   private static final int INDEX_FRAME_TWO = DRIFT_CASE.getNewFrameIndex();
+   private static final String DATA_PATH = DRIFT_CASE.getFilePath();
 
    private static final int NUMBER_OF_POINTS_TO_VISUALIZE = 2000;
 
@@ -324,12 +322,12 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
       File pointCloudFile = new File(DATA_PATH);
       List<StereoVisionPointCloudMessage> messages = StereoVisionPointCloudDataLoader.getMessagesFromFile(pointCloudFile);
 
-      slam.addKeyFrame(messages.get(INDEX_FRAME_ONE));
+      slam.addKeyFrame(messages.get(0));
       octreeMap = slam.getOctree();
       octreeMap.updateNormals();
 
-      frame1 = new SLAMFrame(messages.get(INDEX_FRAME_ONE));
-      frame2 = new SLAMFrame(frame1, messages.get(INDEX_FRAME_TWO));
+      frame1 = new SLAMFrame(messages.get(0));
+      frame2 = new SLAMFrame(frame1, messages.get(1));
       double surfaceElementResolution = 0.04;
       double windowMargin = 0.0;
       int minimumNumberOfHits = 1;
