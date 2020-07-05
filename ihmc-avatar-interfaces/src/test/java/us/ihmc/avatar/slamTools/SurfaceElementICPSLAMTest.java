@@ -1,4 +1,4 @@
-package us.ihmc.humanoidBehaviors.ui.mapping.test;
+package us.ihmc.avatar.slamTools;
 
 import java.io.File;
 import java.io.IOException;
