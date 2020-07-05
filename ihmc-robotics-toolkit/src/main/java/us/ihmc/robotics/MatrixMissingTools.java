@@ -1,6 +1,7 @@
 package us.ihmc.robotics;
 
 import org.ejml.data.DMatrix1Row;
+import org.ejml.data.DMatrixRMaj;
 
 public class MatrixMissingTools
 {
@@ -21,6 +22,15 @@ public class MatrixMissingTools
       {
          mat.data[index] = diagonalValue;
       }
+   }
+
+   public static void fast2x2Inverse(DMatrixRMaj matrix, DMatrixRMaj inverseToPack)
+   {
+      double determinantInverse = 1.0 / (matrix.get(0, 0) * matrix.get(1, 1) - matrix.get(0, 1) * matrix.get(1, 0));
+      inverseToPack.set(0, 0, determinantInverse * matrix.get(1, 1));
+      inverseToPack.set(1, 1, determinantInverse * matrix.get(0, 0));
+      inverseToPack.set(0, 1, -determinantInverse * matrix.get(0, 1));
+      inverseToPack.set(1, 0, -determinantInverse * matrix.get(1, 0));
    }
 
 }
