@@ -144,6 +144,7 @@ public class AtlasSimulationCollisionModel implements RobotCollisionModel
             MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
             RigidBodyBasics foot = ankleRoll.getSuccessor();
 
+            // Using a STP box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
             FrameSTPBox3D footShape = new FrameSTPBox3D(ankleRollFrame, 0.26, 0.14, 0.055);
             footShape.getPosition().set(0.045, 0.0, -0.05);
             footShape.setMargins(1.0e-5, 4.0e-4);

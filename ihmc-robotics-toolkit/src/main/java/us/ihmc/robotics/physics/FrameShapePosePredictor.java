@@ -12,6 +12,12 @@ import us.ihmc.mecano.spatial.Twist;
 import us.ihmc.mecano.tools.MultiBodySystemStateIntegrator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 
+/**
+ * This class predicts the pose of a frame shape by integrating the velocity and acceleration of the
+ * rigid-body it is attached to.
+ * 
+ * @author Sylvain Bertrand
+ */
 public class FrameShapePosePredictor
 {
    private final ForwardDynamicsCalculator forwardDynamicsCalculator;
@@ -26,6 +32,17 @@ public class FrameShapePosePredictor
       this.forwardDynamicsCalculator = forwardDynamicsCalculator;
    }
 
+   /**
+    * Computes and returns the shape as predicted it will be {@code dt} seconds in the future.
+    * <p>
+    * The shape is assumed to be rigidly fixed to the rigid-body.
+    * </p>
+    * 
+    * @param shape     the shape to predict the pose of. Not modified.
+    * @param rigidBody the rigid-body the shape is rigidly attached to. Not modified.
+    * @param dt        the integration time.
+    * @return the shape expressed in the reference frame incorporating the time integration.
+    */
    public FrameShape3DReadOnly predictShape(FrameShape3DReadOnly shape, RigidBodyReadOnly rigidBody, double dt)
    {
       if (rigidBody == null)

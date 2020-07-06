@@ -4,6 +4,7 @@ import static us.ihmc.robotics.physics.ContactImpulseTools.computeSlipLambda;
 import static us.ihmc.robotics.physics.ContactImpulseTools.isInsideFrictionCone;
 import static us.ihmc.robotics.physics.ContactImpulseTools.isInsideFrictionEllipsoid;
 
+import org.ejml.data.DMatrix;
 import org.ejml.data.DMatrix3;
 import org.ejml.data.DMatrix3x3;
 import org.ejml.data.DMatrix4x4;
@@ -18,6 +19,26 @@ import us.ihmc.euclid.tools.EuclidCoreTools;
 import us.ihmc.mecano.spatial.interfaces.FixedFrameSpatialImpulseBasics;
 import us.ihmc.mecano.spatial.interfaces.SpatialVectorReadOnly;
 
+/**
+ * Implementation of the solver for computing the impulse response for a single contact between to
+ * bodies.
+ * <p>
+ * The main part of the solver is from Algorithm 1 of <i>"Per-Contact Iteration Method for Solving
+ * Contact Dynamics"</i>.
+ * </p>
+ * <p>
+ * Note that the degenerate case where the collision matrix is not invertible has been only
+ * partially implemented.
+ * </p>
+ * <p>
+ * Note that the incorporation of the frictional moment in the solver does not provide an optimal
+ * solution, in the sense of the maximum dissipation principle. The linear part of the problem is
+ * prioritized over the angular part. This was to simplify the problem but can be improved in the
+ * future.
+ * </p>
+ * 
+ * @author Sylvain Bertrand
+ */
 public class SingleContactImpulseSolver
 {
    private static final double DEGENERATE_THRESHOLD = 1.0e-6;
@@ -95,14 +116,26 @@ public class SingleContactImpulseSolver
     */
    private final DMatrixRMaj lambda_v_0 = new DMatrixRMaj(4, 1);
 
+   private boolean isProblemDegenerate = false;
+
    // Flags for keeping track of what's up to date.
-   private boolean is_M_linear_inv_upToDate = false;
-   private boolean is_M_full_inv_upToDate = false;
+   private boolean M_linear_inv_dirty = true;
+   private boolean M_full_inv_dirty = true;
+   private boolean M_inv_det_dirty = true;
 
    public SingleContactImpulseSolver()
    {
    }
 
+   /**
+    * Sets the parameters used in the bisection method.
+    * 
+    * @param beta1 algorithm's parameter used for the initial guessing.
+    * @param beta2 algorithm's parameter used for stepping backward.
+    * @param beta3 algorithm's parameter used for stepping forward.
+    * @see ContactImpulseTools#computeSlipLambda(double, double, double, double, double, DMatrix,
+    *      DMatrix, DMatrix, DMatrix, boolean)
+    */
    public void setSlipBisectionParameters(double beta1, double beta2, double beta3)
    {
       this.beta1 = beta1;
@@ -110,33 +143,107 @@ public class SingleContactImpulseSolver
       this.beta3 = beta3;
    }
 
+   /**
+    * Sets the tolerance to trigger the terminal condition of the bisection method.
+    * 
+    * @param gamma algorithm's termination parameter.
+    */
    public void setTolerance(double gamma)
    {
       this.gamma = gamma;
    }
 
+   /**
+    * Indicates whether to solve for the normal frictional moment impulse or not, in addition to solve
+    * for the linear impulse.
+    * 
+    * @param enable {@code true} to also solve for the frictional moment, {@code false} otherwise.
+    */
    public void setEnableFrictionMoment(boolean enable)
    {
       computeFrictionMoment = enable;
       problemSize = enable ? 4 : 3;
    }
 
+   /**
+    * Only used when solving for frictional moment.
+    * <p>
+    * Parameterize the relationship between the linear and angular friction components when evaluating
+    * the elliptic Coulomb friction law as introduced in <i>Computation of Three-Dimensional Rigid-Body
+    * Dynamics with Multiple Unilateral Contacts Using Time-Stepping and Gauss-Seidel Methods</i>:
+    * 
+    * <pre>
+    * F<sub>x</sub><sup>2</sup>/e<sub>x</sub><sup>2</sup> + F<sub>y</sub><sup>2</sup>/e<sub>y</sub><sup>2</sup> + T<sub>z</sub><sup>2</sup>/e<sub>zz</sub><sup>2</sup> &leq; &mu;F<sub>z</sub><sup>2</sup>
+    * </pre>
+    * 
+    * where <tt>F<sub>x</sub></tt> and <tt>F<sub>y</sub></tt> are the tangential forces,
+    * <tt>T<sub>z</sub></tt> the normal moment, <tt>F<sub>z</sub></tt> the normal force, and
+    * <tt>&mu;</tt> the coefficient of friction. <tt>e<sub>i</sub> are positive constants defined by
+    * the user.
+    * </p>
+    * <p>
+    * This solver assumes <tt>e<sub>x</sub> = e<sub>y</sub> = 1<tt> and only requires <tt>e<sub>zz</sub></tt>.
+    * </p>
+    * 
+    * @param ratio the constant <tt>e<sub>zz</sub></tt> as shown above.
+    * @see ContactImpulseTools#isInsideFrictionEllipsoid(double, double, double, double, double,
+    *      double, double)
+    */
    public void setCoulombMomentRatio(double ratio)
    {
       coulombMomentRatio = ratio;
    }
 
+   /**
+    * Gets the current problem size, i.e. 3 when only solving for the linear impulse and 4 when
+    * including the rotational friction.
+    * 
+    * @return the current problem size.
+    */
    public int getProblemSize()
    {
       return problemSize;
    }
 
+   /**
+    * Marks internal data as outdated such that the next call to the solve method will perform a
+    * thorough update.
+    */
    public void reset()
    {
-      is_M_linear_inv_upToDate = false;
-      is_M_full_inv_upToDate = false;
+      M_linear_inv_dirty = true;
+      M_full_inv_dirty = true;
+      M_inv_det_dirty = true;
    }
 
+   /**
+    * Solves for {@code impulseToPack} with the objectives:
+    * <ul>
+    * <li>the response impulse does not violate the Coulomb friction law,
+    * <li>the solution satisfies the Signorini condition, i.e. unilaterality of contact forces and no
+    * contact forces when contact is opening,
+    * <li>maximum dissipation principle, i.e. the impulse minimizes the post-impulse velocity.
+    * </ul>
+    * <p>
+    * Note that this solver incorporate experimental features that do not necessarily satisfy the above
+    * mentioned objectives:
+    * <ul>
+    * <li>degenerate case, i.e. when the collision matrix is non-invertible, is far from being fully
+    * implemented. If needed, the implementation needs to be finalized.
+    * <li>incorporation of rotational friction is non-optimal. It has been implemented to a point where
+    * it was deemed usable, the approach used does not satisfy the maximum dissipation principle.
+    * </ul>
+    * </p>
+    * 
+    * @param velocity      the contact relative velocity to minimize. The z-axis is considered to be
+    *                      the contact normal. Not modified.
+    * @param M_inv         the collision matrix. It should be a 3-by-3 matrix when solving only for the
+    *                      linear part of the impulse, and 4-by-4 when solving for both linear and
+    *                      z-angular parts of the problem with the angular elements being in the last
+    *                      row and last column. Not modified.
+    * @param mu            the coefficient of friction.
+    * @param impulseToPack the output of this solve, the impulse response to the contact. Modified.
+    */
    public void solveImpulseGeneral(SpatialVectorReadOnly velocity, DMatrixRMaj M_inv, double mu, FixedFrameSpatialImpulseBasics impulseToPack)
    {
       if (EuclidCoreTools.isZero(mu, 1.0e-12))
@@ -145,7 +252,13 @@ public class SingleContactImpulseSolver
          return;
       }
 
-      if (CommonOps_DDRM.det(M_inv) <= DEGENERATE_THRESHOLD)
+      if (M_inv_det_dirty)
+      {
+         isProblemDegenerate = CommonOps_DDRM.det(M_inv) <= DEGENERATE_THRESHOLD;
+         M_inv_det_dirty = false;
+      }
+
+      if (isProblemDegenerate)
       {
          solveImpulseDegenerate(velocity, M_inv, mu, impulseToPack);
          return;
@@ -166,11 +279,11 @@ public class SingleContactImpulseSolver
 
    private boolean solveLinearImpulse(DMatrixRMaj M_inv, double mu, FixedFrameSpatialImpulseBasics impulseToPack)
    {
-      if (!is_M_linear_inv_upToDate)
+      if (M_linear_inv_dirty)
       {
          ContactImpulseTools.extract(M_inv, 0, 0, M_linear_inv);
          CommonOps_DDF3.invert(M_linear_inv, M_linear);
-         is_M_linear_inv_upToDate = true;
+         M_linear_inv_dirty = false;
       }
 
       CommonOps_DDF3.mult(M_linear, c_linear, lambda_linear_v_0);
@@ -205,11 +318,11 @@ public class SingleContactImpulseSolver
     */
    private void solveAngularImpulse(double velocityAngularZ, DMatrixRMaj M_inv, double mu, FixedFrameSpatialImpulseBasics impulseToPack)
    {
-      if (!is_M_full_inv_upToDate)
+      if (M_full_inv_dirty)
       {
          M_full_inv.set(M_inv);
          CommonOps_DDF4.invert(M_full_inv, M_full);
-         is_M_full_inv_upToDate = true;
+         M_full_inv_dirty = false;
       }
 
       /*
