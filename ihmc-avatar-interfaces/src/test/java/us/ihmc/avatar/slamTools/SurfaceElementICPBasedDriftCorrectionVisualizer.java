@@ -40,10 +40,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
    private final int recordFrequency = 1;
    private final int bufferSize = (int) (trajectoryTime / dt / recordFrequency + 3);
 
-   private static final DriftCase DRIFT_CASE = DriftCase.YDriftSmallOverlap;
-   //private static final DriftCase DRIFT_CASE = DriftCase.RollDrift;
-   //private static final DriftCase DRIFT_CASE = DriftCase.HugeDrift;
-   //private static final DriftCase DRIFT_CASE = DriftCase.YawDrift;
+   private static final DriftCase DRIFT_CASE = DriftCase.YDrift;
 
    private static final String DATA_PATH = DRIFT_CASE.getFilePath();
 
