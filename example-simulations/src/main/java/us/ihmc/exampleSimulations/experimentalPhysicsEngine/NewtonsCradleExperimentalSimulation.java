@@ -42,7 +42,6 @@ public class NewtonsCradleExperimentalSimulation
       contactParameters.setMinimumPenetration(5.0e-5);
       contactParameters.setCoefficientOfRestitution(1.0);
       contactParameters.setRestitutionThreshold(0.0);
-      contactParameters.setConstraintForceMixing(1.0);
 
       RobotDescription robotDescription = new RobotDescription(NEWTONS_CRADLE);
       double ballRadiusOfGyration = ballRadius * 0.6;

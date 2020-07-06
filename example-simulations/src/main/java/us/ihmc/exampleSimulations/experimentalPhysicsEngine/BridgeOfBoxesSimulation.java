@@ -42,8 +42,6 @@ public class BridgeOfBoxesSimulation
       contactParameters.setCoefficientOfRestitution(0.0);
       contactParameters.setRestitutionThreshold(0.0);
       contactParameters.setErrorReductionParameter(0.1);
-      contactParameters.setSlipErrorReductionParameter(0.0);
-      contactParameters.setConstraintForceMixing(1.0);
 
       ExperimentalSimulation experimentalSimulation = new ExperimentalSimulation(1 << 15);
 

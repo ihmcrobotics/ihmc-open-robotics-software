@@ -9,8 +9,6 @@ public class ContactParameters implements ContactParametersBasics
    private double errorReductionParameter;
    private boolean computeMomentFriction;
    private double coulombMomentFrictionRatio;
-   private double slipErrorReductionParameter;
-   private double constraintForceMixing;
 
    public static ContactParameters defaultIneslasticContactParameters(boolean computeMomentFriction)
    {
@@ -22,8 +20,6 @@ public class ContactParameters implements ContactParametersBasics
       contactParameters.setErrorReductionParameter(0.0);
       contactParameters.setComputeFrictionMoment(computeMomentFriction);
       contactParameters.setCoulombMomentFrictionRatio(0.3);
-      contactParameters.setSlipErrorReductionParameter(0.0);
-      contactParameters.setConstraintForceMixing(1.0);
       return contactParameters;
    }
 
@@ -32,8 +28,7 @@ public class ContactParameters implements ContactParametersBasics
    }
 
    public ContactParameters(double minimumPenetration, double coefficientOfFriction, double coefficientOfRestitution, double restitutionThreshold,
-                            double errorReductionParameter, boolean computeMomentFriction, double coulombMomentFrictionRatio,
-                            double slipErrorReductionParameter, double constraintForceMixing)
+                            double errorReductionParameter, boolean computeMomentFriction, double coulombMomentFrictionRatio)
    {
       this.minimumPenetration = minimumPenetration;
       this.coefficientOfFriction = coefficientOfFriction;
@@ -42,8 +37,6 @@ public class ContactParameters implements ContactParametersBasics
       this.errorReductionParameter = errorReductionParameter;
       this.computeMomentFriction = computeMomentFriction;
       this.coulombMomentFrictionRatio = coulombMomentFrictionRatio;
-      this.slipErrorReductionParameter = slipErrorReductionParameter;
-      this.constraintForceMixing = constraintForceMixing;
    }
 
    @Override
@@ -89,18 +82,6 @@ public class ContactParameters implements ContactParametersBasics
    }
 
    @Override
-   public void setSlipErrorReductionParameter(double slipErrorReductionParameter)
-   {
-      this.slipErrorReductionParameter = slipErrorReductionParameter;
-   }
-
-   @Override
-   public void setConstraintForceMixing(double constraintForceMixing)
-   {
-      this.constraintForceMixing = constraintForceMixing;
-   }
-
-   @Override
    public double getMinimumPenetration()
    {
       return minimumPenetration;
@@ -140,17 +121,5 @@ public class ContactParameters implements ContactParametersBasics
    public double getCoulombMomentFrictionRatio()
    {
       return coulombMomentFrictionRatio;
-   }
-
-   @Override
-   public double getSlipErrorReductionParameter()
-   {
-      return slipErrorReductionParameter;
-   }
-
-   @Override
-   public double getConstraintForceMixing()
-   {
-      return constraintForceMixing;
    }
 }

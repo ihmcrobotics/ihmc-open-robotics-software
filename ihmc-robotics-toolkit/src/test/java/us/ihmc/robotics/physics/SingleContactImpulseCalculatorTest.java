@@ -250,7 +250,6 @@ public class SingleContactImpulseCalculatorTest
       contactParameters.setCoefficientOfFriction(0.7);
       contactParameters.setCoefficientOfRestitution(1.0);
       contactParameters.setMinimumPenetration(5.0e-5);
-      contactParameters.setConstraintForceMixing(1.0);
 
       for (int i = 0; i < ITERATIONS; i++)
       {

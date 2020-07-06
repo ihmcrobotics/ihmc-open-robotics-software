@@ -26,7 +26,6 @@ public class FlyingCollidingSpheresExperimentalSimulation
       contactParameters.setMinimumPenetration(5.0e-5);
       contactParameters.setCoefficientOfFriction(0.7);
       contactParameters.setCoefficientOfRestitution(1.0);
-      contactParameters.setConstraintForceMixing(1.0);
 
       double radius1 = 0.2;
       double mass1 = 1.0;
