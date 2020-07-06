@@ -28,6 +28,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.STPShape3DTools.STPConvexPolytope3DSupportingVertexCalculator;
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPConvexPolytope3DReadOnly;
+import us.ihmc.robotics.geometry.shapes.interfaces.STPConvexPolytope3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.STPShape3DBasics;
 
 public class FrameSTPConvexPolytope3D implements FrameSTPConvexPolytope3DReadOnly, FrameShape3DBasics, STPShape3DBasics
@@ -439,6 +440,12 @@ public class FrameSTPConvexPolytope3D implements FrameSTPConvexPolytope3DReadOnl
    public boolean containsNaN()
    {
       return rawConvexPolytope3D.containsNaN();
+   }
+
+   @Override
+   public double getVolume()
+   {
+      return rawConvexPolytope3D.getVolume();
    }
 
    @Override

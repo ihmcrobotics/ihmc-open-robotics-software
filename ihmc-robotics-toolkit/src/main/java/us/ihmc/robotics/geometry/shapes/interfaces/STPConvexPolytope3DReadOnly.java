@@ -1,4 +1,4 @@
-package us.ihmc.robotics.geometry.shapes;
+package us.ihmc.robotics.geometry.shapes.interfaces;
 
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
 import us.ihmc.euclid.tools.EuclidCoreTools;
@@ -6,7 +6,6 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
-import us.ihmc.robotics.geometry.shapes.interfaces.STPShape3DReadOnly;
 
 public interface STPConvexPolytope3DReadOnly extends STPShape3DReadOnly, ConvexPolytope3DReadOnly
 {
@@ -44,12 +43,6 @@ public interface STPConvexPolytope3DReadOnly extends STPShape3DReadOnly, ConvexP
    }
 
    // The following part of the API has not been implemented for STP convex polytopes yet, let's prevent their use for now.
-
-   @Override
-   default double getVolume()
-   {
-      return STPShape3DReadOnly.super.getVolume();
-   }
 
    @Override
    default boolean evaluatePoint3DCollision(Point3DReadOnly pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalAtClosestPointToPack)
