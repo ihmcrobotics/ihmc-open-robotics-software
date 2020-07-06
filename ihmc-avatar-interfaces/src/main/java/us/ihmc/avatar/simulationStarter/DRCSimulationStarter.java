@@ -35,6 +35,7 @@ import us.ihmc.communication.producers.VideoDataServerImageCallback;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.humanoidBehaviors.behaviors.scripts.engine.ScriptBasedControllerCommandGenerator;
 import us.ihmc.humanoidRobotics.communication.packets.dataobjects.HighLevelControllerName;
 import us.ihmc.humanoidRobotics.communication.producers.RawVideoDataServer;
@@ -322,7 +323,7 @@ public class DRCSimulationStarter implements SimulationStarterInterface
     * Set a specific starting location offset. By default, the robot will start at (0, 0) in world with
     * no yaw.
     */
-   public void setStartingLocationOffset(Vector3D robotInitialPosition, double yaw)
+   public void setStartingLocationOffset(Tuple3DReadOnly robotInitialPosition, double yaw)
    {
       checkIfSimulationIsAlreadyCreated();
       setStartingLocationOffset(new OffsetAndYawRobotInitialSetup(robotInitialPosition, yaw));
