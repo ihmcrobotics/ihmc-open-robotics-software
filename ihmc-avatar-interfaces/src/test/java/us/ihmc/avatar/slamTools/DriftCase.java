@@ -62,7 +62,7 @@ public enum DriftCase
          case YawDrift:
             return "small drift in Yaw";
          case YDriftSmallOverlap:
-            return "similar with 'UpStairs2YDrift' but small overlapped area.";
+            return "most difficult case. similar with 'UpStairs2YDrift' but small overlapped area.";
          case RollDrift:
             return "drift in X and Roll. Verified low correspondence threshold (compare to 'Upstairs3YDriftSmallOverlap').";
          case HugeDrift:
