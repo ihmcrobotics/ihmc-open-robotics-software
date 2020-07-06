@@ -37,7 +37,7 @@ public class PointCloudGraphic extends Group
    private static final int palleteSizeForMeshBuilder = 2048;
 
    private final Random selector = new Random(0612L);
-   
+
    private volatile List<Node> messageNodes;
    private List<Node> lastNodes = null;
    private volatile List<Node> updatePointCloudMeshViews;
@@ -97,11 +97,7 @@ public class PointCloudGraphic extends Group
 
    public void addStereoVisionPointCloudMessageMesh(StereoVisionPointCloudMessage stereoVisionPointCloudMessage, Color pointCloudColor)
    {
-      int redScaler = (int) (0xFF * (1 - (stereoVisionPointCloudMessage.getSensorPoseConfidence())));
-      int greenScaler = (int) (0xFF * (stereoVisionPointCloudMessage.getSensorPoseConfidence()));
-      Color confidenceColor = Color.rgb(redScaler, greenScaler, 0);
-      addSensorPoseMesh(MessageTools.unpackSensorPose(stereoVisionPointCloudMessage), confidenceColor);
-
+      addSensorPoseMesh(MessageTools.unpackSensorPose(stereoVisionPointCloudMessage), pointCloudColor);
       addPointsMeshes(PointCloudCompression.decompressPointCloudToArray(stereoVisionPointCloudMessage), pointCloudColor);
    }
 
