@@ -55,12 +55,6 @@ public interface STPCylinder3DReadOnly extends STPShape3DReadOnly, Cylinder3DRea
    // The following part of the API has not been implemented for STP cylinder yet, let's prevent their use for now.
 
    @Override
-   default double getVolume()
-   {
-      return STPShape3DReadOnly.super.getVolume();
-   }
-
-   @Override
    default boolean evaluatePoint3DCollision(Point3DReadOnly pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalAtClosestPointToPack)
    {
       return STPShape3DReadOnly.super.evaluatePoint3DCollision(pointToCheck, closestPointOnSurfaceToPack, normalAtClosestPointToPack);

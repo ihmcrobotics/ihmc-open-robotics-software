@@ -1,7 +1,6 @@
 package us.ihmc.robotics.geometry.shapes.interfaces;
 
 import us.ihmc.euclid.referenceFrame.polytope.interfaces.FrameConvexPolytope3DReadOnly;
-import us.ihmc.robotics.geometry.shapes.STPConvexPolytope3DReadOnly;
 
 public interface FrameSTPConvexPolytope3DReadOnly extends STPConvexPolytope3DReadOnly, FrameConvexPolytope3DReadOnly
 {

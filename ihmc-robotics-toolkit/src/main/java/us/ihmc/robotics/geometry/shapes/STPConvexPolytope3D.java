@@ -12,6 +12,7 @@ import us.ihmc.euclid.shape.convexPolytope.Face3D;
 import us.ihmc.euclid.shape.convexPolytope.HalfEdge3D;
 import us.ihmc.euclid.shape.convexPolytope.Vertex3D;
 import us.ihmc.euclid.shape.convexPolytope.interfaces.ConvexPolytope3DReadOnly;
+import us.ihmc.euclid.shape.convexPolytope.interfaces.Vertex3DReadOnly;
 import us.ihmc.euclid.shape.convexPolytope.tools.EuclidPolytopeConstructionTools;
 import us.ihmc.euclid.shape.primitives.interfaces.Shape3DPoseBasics;
 import us.ihmc.euclid.shape.tools.EuclidShapeIOTools;
@@ -22,6 +23,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.STPShape3DTools.STPConvexPolytope3DSupportingVertexCalculator;
+import us.ihmc.robotics.geometry.shapes.interfaces.STPConvexPolytope3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.STPShape3DBasics;
 
 public class STPConvexPolytope3D implements STPConvexPolytope3DReadOnly, STPShape3DBasics
@@ -269,6 +271,12 @@ public class STPConvexPolytope3D implements STPConvexPolytope3DReadOnly, STPShap
    }
 
    @Override
+   public double getVolume()
+   {
+      return rawConvexPolytope3D.getVolume();
+   }
+
+   @Override
    public List<Face3D> getFaces()
    {
       return rawConvexPolytope3D.getFaces();
@@ -311,9 +319,19 @@ public class STPConvexPolytope3D implements STPConvexPolytope3DReadOnly, STPShap
    }
 
    @Override
+   public Vertex3DReadOnly getSupportingVertex(Vector3DReadOnly supportDirection)
+   {
+      Vertex3D vertex3d = new Vertex3D(0, 0, 0);
+      if (getSupportingVertex(supportDirection, vertex3d))
+         return vertex3d;
+      else
+         return null;
+   }
+
+   @Override
    public boolean getSupportingVertex(Vector3DReadOnly supportDirection, Point3DBasics supportingVertexToPack)
    {
-      return supportingVertexCalculator.getSupportingVertex(this, getSmallRadius(), getLargeRadius(), supportDirection, supportingVertexToPack);
+      return supportingVertexCalculator.getSupportingVertex(rawConvexPolytope3D, getSmallRadius(), getLargeRadius(), supportDirection, supportingVertexToPack);
    }
 
    @Override

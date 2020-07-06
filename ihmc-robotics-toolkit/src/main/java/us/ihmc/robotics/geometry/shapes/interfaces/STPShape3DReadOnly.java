@@ -23,12 +23,6 @@ public interface STPShape3DReadOnly extends Shape3DReadOnly
    // The following part of the API has not been implemented for STP shapes yet, let's prevent their use for now.
 
    @Override
-   default double getVolume()
-   {
-      throw new UnsupportedOperationException("Not supported for STP shape 3D");
-   }
-
-   @Override
    default boolean evaluatePoint3DCollision(Point3DReadOnly pointToCheck, Point3DBasics closestPointOnSurfaceToPack, Vector3DBasics normalAtClosestPointToPack)
    {
       throw new UnsupportedOperationException("Not supported for STP shape 3D");
