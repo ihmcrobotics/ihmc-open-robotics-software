@@ -252,7 +252,9 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
                                                                                MULTISENSE_LIDAR_ID);
          cameraParamaters[MULTISENSE_SL_LEFT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.LEFT,
                                                                                           left_camera_name,
-                                                                                          left_camera_compressed_topic,
+// SCS produces an uncompressed image rather than a compressed image                                                                                          
+//                                                                                          left_camera_compressed_topic,
+                                                                                          left_camera_topic,
                                                                                           left_info_camera_topic,
                                                                                           multisenseHandoffFrame,
                                                                                           baseTfName,
@@ -260,7 +262,9 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
                                                                                           MULTISENSE_SL_LEFT_CAMERA_ID);
          cameraParamaters[MULTISENSE_SL_RIGHT_CAMERA_ID] = new AvatarRobotCameraParameters(RobotSide.RIGHT,
                                                                                            right_camera_name,
-                                                                                           right_camera_compressed_topic,
+// SCS produces an uncompressed image rather than a compressed image                                                     
+//                                                                                           right_camera_compressed_topic,
+                                                                                           right_camera_topic,
                                                                                            right_info_camera_topic,
                                                                                            multisenseHandoffFrame,
                                                                                            baseTfName,
