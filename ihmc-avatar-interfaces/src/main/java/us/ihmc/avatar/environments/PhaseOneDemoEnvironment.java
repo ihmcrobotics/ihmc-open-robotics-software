@@ -162,6 +162,23 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
       appearances.add(appearance);
    }
 
+   public PlanarRegionsList getAllRegions()
+   {
+      PlanarRegionsList combinedRegions = new PlanarRegionsList();
+      for (int i = 0; i < planarRegionsLists.size(); i++)
+      {
+         PlanarRegionsList planarRegionsList = planarRegionsLists.get(i);
+         for (int j = 0; j < planarRegionsList.getNumberOfPlanarRegions(); j++)
+         {
+            PlanarRegion planarRegion = planarRegionsList.getPlanarRegion(j);
+            planarRegion.setRegionId(combinedRegions.getNumberOfPlanarRegions());
+            combinedRegions.addPlanarRegion(planarRegion);
+         }
+      }
+
+      return combinedRegions;
+   }
+
    private void createBarrel()
    {
       throw new NotImplementedException("Barrel not implemented");
