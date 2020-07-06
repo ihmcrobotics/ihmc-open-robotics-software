@@ -26,6 +26,7 @@ public class AvatarStairsSimulation
    private final OptionalFactoryField<Double> bottomPlatformLength = new OptionalFactoryField<>("bottomPlatformLength");
    private final OptionalFactoryField<Double> topPlatformWidth = new OptionalFactoryField<>("topPlatformWidth");
    private final OptionalFactoryField<Double> topPlatformLength = new OptionalFactoryField<>("topPlatformLength");
+   private final OptionalFactoryField<Boolean> placeRobotAtTop = new OptionalFactoryField<>("placeRobotAtTop");
 
    public void setRobotModel(DRCRobotModel robotModel)
    {
@@ -77,6 +78,11 @@ public class AvatarStairsSimulation
       this.topPlatformLength.set(topPlatformLength);
    }
 
+   public void setPlaceRobotAtTop(boolean placeRobotAtTop)
+   {
+      this.placeRobotAtTop.set(placeRobotAtTop);
+   }
+
    public void startSimulation()
    {
       startingPose.setDefaultValue(new Pose3D());
@@ -115,7 +121,21 @@ public class AvatarStairsSimulation
       DRCSimulationStarter simulationStarter = new DRCSimulationStarter(robotModel.get(), simEnvironment);
       simulationStarter.setRunMultiThreaded(true);
       simulationStarter.setInitializeEstimatorToActual(true);
-      simulationStarter.setStartingLocation(() -> new OffsetAndYawRobotInitialSetup(startingPose.get().getPosition(), startingPose.get().getYaw()));
+
+      if (placeRobotAtTop.get())
+      {
+         Pose3D robotPose = new Pose3D(startingPose.get());
+         robotPose.appendTranslation(0.5 * bottomPlatformLength.get(), 0.0, 0.0);
+         robotPose.appendTranslation(numberOfSteps.get() * stepDepth.get(), 0.0, numberOfSteps.get() * stepHeight.get());
+         robotPose.appendYawRotation(Math.PI);
+
+         simulationStarter.setStartingLocation(() -> new OffsetAndYawRobotInitialSetup(robotPose.getPosition(), robotPose.getYaw()));
+      }
+      else
+      {
+         simulationStarter.setStartingLocation(() -> new OffsetAndYawRobotInitialSetup(startingPose.get().getPosition(), startingPose.get().getYaw()));
+      }
+
       HumanoidNetworkProcessorParameters networkProcessorParameters = new HumanoidNetworkProcessorParameters();
 
       // talk to controller and footstep planner
