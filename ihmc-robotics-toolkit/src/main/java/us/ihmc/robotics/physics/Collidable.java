@@ -154,7 +154,18 @@ public class Collidable
       resultToPack.setCollidableB(other);
    }
 
-   public void evaluateCollision(Collidable other, CollisionResult resultToPack, double dt)
+   /**
+    * Performs a collision evaluation between this collidable and {@code other} in order to calculate
+    * their closest point, separating/penetration distance, etc.
+    * <p>
+    * Note that this method uses the predicted poses for each collidable one {@code dt} in the future.
+    * </p>
+    * 
+    * @param dt           the integration period to use when predicting the pose of each collidable.
+    * @param other        the query. Not modified.
+    * @param resultToPack where the result of the evaluation is stored. Modified.
+    */
+   public void evaluateCollision(double dt, Collidable other, CollisionResult resultToPack)
    {
       PhysicsEngineTools.evaluateShape3DShape3DCollision(predictShape(dt), other.predictShape(dt), resultToPack.getCollisionData());
       resultToPack.setCollidableA(this);
