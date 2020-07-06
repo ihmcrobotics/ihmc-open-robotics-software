@@ -5,12 +5,16 @@
 <?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.Region?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <BorderPane xmlns="http://javafx.com/javafx/8.0.171" xmlns:fx="http://javafx.com/fxml/1" fx:controller="us.ihmc.footstepPlanning.ui.controllers.VisibilityGraphsParametersUIController">
 
     <left>
         <HBox alignment="CENTER" BorderPane.alignment="CENTER">
             <Region prefWidth="5"/>
-            <Button onAction="#saveParameters" text="Save Parameters"/>
+            <VBox>
+                <Button onAction="#saveParameters" text="Save Parameters"/>
+                <Button onAction="#loadFile" text="Load File"/>
+            </VBox>
             <Region prefWidth="5"/>
         </HBox>
     </left>
