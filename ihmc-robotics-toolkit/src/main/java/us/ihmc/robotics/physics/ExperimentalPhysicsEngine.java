@@ -59,7 +59,6 @@ public class ExperimentalPhysicsEngine
    private final List<Collidable> environmentCollidables = new ArrayList<>();
 
    private final SimpleCollisionDetection collisionDetectionPlugin = new SimpleCollisionDetection(rootFrame);
-   private final CollisionSlipEstimatorMap collisionSlipEstimator = new CollisionSlipEstimatorMap(rootFrame);
 
    private final CollidableListVisualizer environmentCollidableVisualizers;
    private final List<CollidableListVisualizer> robotCollidableVisualizers = new ArrayList<>();
@@ -192,11 +191,9 @@ public class ExperimentalPhysicsEngine
       }
 
       environmentCollidables.forEach(collidable -> collidable.updateBoundingBox(rootFrame));
-      collisionSlipEstimator.processPreCollisionDetection();
       if (hasGlobalContactParameters.getValue())
          collisionDetectionPlugin.setMinimumPenetration(globalContactParameters.getMinimumPenetration());
       collisionDetectionPlugin.evaluationCollisions(robotList, () -> environmentCollidables, dt);
-      collisionSlipEstimator.processPostCollisionDetection(collisionDetectionPlugin.getAllCollisions());
 
       collisionGroups = MultiRobotCollisionGroup.toCollisionGroups(collisionDetectionPlugin.getAllCollisions());
 

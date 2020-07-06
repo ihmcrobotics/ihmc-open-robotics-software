@@ -34,7 +34,6 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
 {
    private final YoBoolean isContactClosing;
    private final YoFrameVector3D collisionAxis;
-   private final YoFrameVector3D accumulatedSlip;
    private final YoFrameVector3D impulseA, impulseB;
    private final YoFramePoint3D pointA, pointB;
    private final YoFixedFrameSpatialVector velocityRelative;
@@ -56,7 +55,6 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
 
       isContactClosing = new YoBoolean(prefix + "IsContactClosing" + identifier, registry);
       collisionAxis = new YoFrameVector3D(prefix + "CollisionAxis" + identifier, rootFrame, registry);
-      accumulatedSlip = new YoFrameVector3D(prefix + "AccumulatedSlip" + identifier, rootFrame, registry);
       pointA = new YoFramePoint3D(prefix + "PointA" + identifier, rootFrame, registry);
       pointB = new YoFramePoint3D(prefix + "PointB" + identifier, rootFrame, registry);
 
@@ -122,7 +120,6 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
    {
       isContactClosing.set(false);
       collisionAxis.setToNaN();
-      accumulatedSlip.setToNaN();
 
       pointA.setToNaN();
       pointB.setToNaN();
@@ -157,10 +154,6 @@ public class YoSingleContactImpulseCalculator extends SingleContactImpulseCalcul
       super.setCollision(collisionResult);
 
       collisionAxis.set(collisionResult.getCollisionAxisForA());
-      if (collisionResult.getAccumulatedSlipForA() != null)
-         accumulatedSlip.set(collisionResult.getAccumulatedSlipForA());
-      else
-         accumulatedSlip.setToZero();
       pointA.setMatchingFrame(collisionResult.getPointOnARootFrame());
       pointB.setMatchingFrame(collisionResult.getPointOnBRootFrame());
    }
