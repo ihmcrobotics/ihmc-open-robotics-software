@@ -119,6 +119,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
+
+
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
 
 
@@ -273,6 +276,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
 
       current_alignment += 1 + us.ihmc.idl.CDR.alignment(current_alignment, 1);
+
+
+
+      current_alignment += 8 + us.ihmc.idl.CDR.alignment(current_alignment, 8);
 
 
 
@@ -610,7 +617,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       cdr.write_type_6(data.getTranslationScaleFromGrandparentNode());
 
 
-      cdr.write_type_6(data.getMaximumStepZ());
+      cdr.write_type_6(data.getMaximumLeftStepZ());
+
+
+      cdr.write_type_6(data.getMaximumRightStepZ());
 
 
       cdr.write_type_6(data.getMinimumStepZWhenFullyPitched());
@@ -824,7 +834,10 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
       data.setTranslationScaleFromGrandparentNode(cdr.read_type_6());
       	
 
-      data.setMaximumStepZ(cdr.read_type_6());
+      data.setMaximumLeftStepZ(cdr.read_type_6());
+      	
+
+      data.setMaximumRightStepZ(cdr.read_type_6());
       	
 
       data.setMinimumStepZWhenFullyPitched(cdr.read_type_6());
@@ -1020,7 +1033,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       ser.write_type_6("translation_scale_from_grandparent_node", data.getTranslationScaleFromGrandparentNode());
 
-      ser.write_type_6("maximum_step_z", data.getMaximumStepZ());
+      ser.write_type_6("maximum_left_step_z", data.getMaximumLeftStepZ());
+
+      ser.write_type_6("maximum_right_step_z", data.getMaximumRightStepZ());
 
       ser.write_type_6("minimum_step_z_when_fully_pitched", data.getMinimumStepZWhenFullyPitched());
 
@@ -1165,7 +1180,9 @@ public class FootstepPlannerParametersPacketPubSubType implements us.ihmc.pubsub
 
       data.setTranslationScaleFromGrandparentNode(ser.read_type_6("translation_scale_from_grandparent_node"));
 
-      data.setMaximumStepZ(ser.read_type_6("maximum_step_z"));
+      data.setMaximumLeftStepZ(ser.read_type_6("maximum_left_step_z"));
+
+      data.setMaximumRightStepZ(ser.read_type_6("maximum_right_step_z"));
 
       data.setMinimumStepZWhenFullyPitched(ser.read_type_6("minimum_step_z_when_fully_pitched"));
 
