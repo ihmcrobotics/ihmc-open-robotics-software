@@ -46,10 +46,20 @@ public class BuildingExplorationBehaviorCoordinator
    private final ScheduledExecutorService executorService;
    private ScheduledFuture<?> stateMachineTask = null;
 
+   private final TeleopState teleopState;
+   private final LookAndStepState lookAndStepState;
+   private final WalkThroughDoorState walkThroughDoorState;
+   private final TraverseStairsState traverseStairsState;
+
    public BuildingExplorationBehaviorCoordinator(String robotName, DomainFactory.PubSubImplementation pubSubImplementation)
    {
       ros2Node = ROS2Tools.createRos2Node(pubSubImplementation, getClass().getSimpleName());
       executorService = Executors.newSingleThreadScheduledExecutor();
+
+      teleopState = new TeleopState();
+      lookAndStepState = new LookAndStepState(ros2Node);
+      walkThroughDoorState = new WalkThroughDoorState(robotName, ros2Node);
+      traverseStairsState = new TraverseStairsState();
 
       ROS2Topic<?> objectDetectionTopic = ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput();
       ROS2Tools.createCallbackSubscriptionTypeNamed(ros2Node, DoorLocationPacket.class, objectDetectionTopic, s -> doorLocationPacket.set(s.takeNextData()));
@@ -59,12 +69,22 @@ public class BuildingExplorationBehaviorCoordinator
 
       try
       {
-         stateMachine = buildStateMachine(robotName);
+         stateMachine = buildStateMachine();
       }
       catch (Exception e)
       {
          throw new RuntimeException(e);
       }
+   }
+
+   public void setBombPose(Pose3D bombPose)
+   {
+      lookAndStepState.bombPose.set(bombPose);
+   }
+
+   public void requestState(BuildingExplorationStateName requestedState)
+   {
+      this.requestedState.set(requestedState);
    }
 
    public void start()
@@ -94,7 +114,7 @@ public class BuildingExplorationBehaviorCoordinator
       }
    }
 
-   private StateMachine<BuildingExplorationStateName, State> buildStateMachine(String robotName)
+   private StateMachine<BuildingExplorationStateName, State> buildStateMachine()
    {
       StateMachineFactory<BuildingExplorationStateName, State> factory = new StateMachineFactory<>(BuildingExplorationStateName.class);
 
@@ -102,10 +122,10 @@ public class BuildingExplorationBehaviorCoordinator
       factory.setRegistry(registry);
       factory.buildClock(() -> Conversions.nanosecondsToSeconds(System.nanoTime()));
 
-      factory.addState(BuildingExplorationStateName.TELEOP, new TeleopState());
-      factory.addState(BuildingExplorationStateName.LOOK_AND_STEP, new LookAndStepState(ros2Node));
-      factory.addState(BuildingExplorationStateName.WALK_THROUGH_DOOR, new WalkThroughDoorState(robotName, ros2Node));
-      factory.addState(BuildingExplorationStateName.TRAVERSE_STAIRS, new TraverseStairsState());
+      factory.addState(BuildingExplorationStateName.TELEOP, teleopState);
+      factory.addState(BuildingExplorationStateName.LOOK_AND_STEP, lookAndStepState);
+      factory.addState(BuildingExplorationStateName.WALK_THROUGH_DOOR, walkThroughDoorState);
+      factory.addState(BuildingExplorationStateName.TRAVERSE_STAIRS, traverseStairsState);
 
       factory.addDoneTransition(BuildingExplorationStateName.LOOK_AND_STEP, BuildingExplorationStateName.TELEOP);
       factory.addDoneTransition(BuildingExplorationStateName.WALK_THROUGH_DOOR, BuildingExplorationStateName.TELEOP);
@@ -114,6 +134,10 @@ public class BuildingExplorationBehaviorCoordinator
       factory.addRequestedTransition(BuildingExplorationStateName.TELEOP, BuildingExplorationStateName.LOOK_AND_STEP, requestedState);
       factory.addRequestedTransition(BuildingExplorationStateName.TELEOP, BuildingExplorationStateName.WALK_THROUGH_DOOR, requestedState);
       factory.addRequestedTransition(BuildingExplorationStateName.TELEOP, BuildingExplorationStateName.TRAVERSE_STAIRS, requestedState);
+
+      factory.addRequestedTransition(BuildingExplorationStateName.LOOK_AND_STEP, BuildingExplorationStateName.TELEOP, requestedState);
+      factory.addRequestedTransition(BuildingExplorationStateName.WALK_THROUGH_DOOR, BuildingExplorationStateName.TELEOP, requestedState);
+      factory.addRequestedTransition(BuildingExplorationStateName.TRAVERSE_STAIRS, BuildingExplorationStateName.TELEOP, requestedState);
 
       factory.addTransition(BuildingExplorationStateName.LOOK_AND_STEP, BuildingExplorationStateName.WALK_THROUGH_DOOR, this::transitionToWalkThroughDoor);
 
