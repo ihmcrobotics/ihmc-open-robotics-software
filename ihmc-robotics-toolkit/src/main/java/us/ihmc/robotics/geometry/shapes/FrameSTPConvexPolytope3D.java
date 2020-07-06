@@ -30,7 +30,21 @@ import us.ihmc.robotics.geometry.shapes.STPShape3DTools.STPConvexPolytope3DSuppo
 import us.ihmc.robotics.geometry.shapes.interfaces.FrameSTPConvexPolytope3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.STPConvexPolytope3DReadOnly;
 import us.ihmc.robotics.geometry.shapes.interfaces.STPShape3DBasics;
+import us.ihmc.robotics.geometry.shapes.interfaces.STPShape3DReadOnly;
 
+/**
+ * Convex polytope that implements the sphere-torus-patches (STP) method to make shapes strictly
+ * convex.
+ * <p>
+ * <strong> WARNING: STP convex polytope does not properly cover all scenarios and may result in a
+ * non-convex shape. A STP convex polytope should always be visualized first and validate its
+ * geometry, see the examples in the <i>simulation-construction-set-visualizers</i> repository. For
+ * now, it is recommended to stick with primitive shapes. </strong>
+ * </p>
+ * 
+ * @see STPShape3DReadOnly
+ * @author Sylvain Bertrand
+ */
 public class FrameSTPConvexPolytope3D implements FrameSTPConvexPolytope3DReadOnly, FrameShape3DBasics, STPShape3DBasics
 {
    private double minimumMargin, maximumMargin;

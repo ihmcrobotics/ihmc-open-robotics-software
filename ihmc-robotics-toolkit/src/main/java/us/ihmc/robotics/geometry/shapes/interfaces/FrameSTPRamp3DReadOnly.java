@@ -4,6 +4,13 @@ import us.ihmc.euclid.geometry.interfaces.BoundingBox3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameRamp3DReadOnly;
 
+/**
+ * Read-only interface for a ramp that implements the sphere-torus-patches (STP) method to make
+ * shapes strictly convex and that is expressed in a reference frame.
+ * 
+ * @see STPShape3DReadOnly
+ * @author Sylvain Bertrand
+ */
 public interface FrameSTPRamp3DReadOnly extends STPRamp3DReadOnly, FrameRamp3DReadOnly
 {
    @Override
