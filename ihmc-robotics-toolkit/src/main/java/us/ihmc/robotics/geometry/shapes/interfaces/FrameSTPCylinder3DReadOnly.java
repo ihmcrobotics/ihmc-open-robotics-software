@@ -4,6 +4,13 @@ import us.ihmc.euclid.geometry.interfaces.BoundingBox3DBasics;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.referenceFrame.interfaces.FrameCylinder3DReadOnly;
 
+/**
+ * Read-only interface for a cylinder that implements the sphere-torus-patches (STP) method to make
+ * shapes strictly convex and that is expressed in a reference frame.
+ * 
+ * @see STPShape3DReadOnly
+ * @author Sylvain Bertrand
+ */
 public interface FrameSTPCylinder3DReadOnly extends STPCylinder3DReadOnly, FrameCylinder3DReadOnly
 {
    @Override

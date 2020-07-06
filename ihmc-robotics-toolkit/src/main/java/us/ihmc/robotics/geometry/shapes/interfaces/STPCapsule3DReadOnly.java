@@ -8,6 +8,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
+/**
+ * Read-only interface for a capsule that implements the sphere-torus-patches (STP) method to make
+ * shapes strictly convex.
+ * 
+ * @see STPShape3DReadOnly
+ * @author Sylvain Bertrand
+ */
 public interface STPCapsule3DReadOnly extends STPShape3DReadOnly, Capsule3DReadOnly
 {
    @Override

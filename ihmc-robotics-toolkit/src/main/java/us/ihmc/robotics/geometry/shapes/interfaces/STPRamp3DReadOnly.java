@@ -8,6 +8,13 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
+/**
+ * Read-only interface for a ramp that implements the sphere-torus-patches (STP) method to make
+ * shapes strictly convex.
+ * 
+ * @see STPShape3DReadOnly
+ * @author Sylvain Bertrand
+ */
 public interface STPRamp3DReadOnly extends STPShape3DReadOnly, Ramp3DReadOnly
 {
    @Override

@@ -7,6 +7,19 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 
+/**
+ * Read-only interface for a convex polytope that implements the sphere-torus-patches (STP) method
+ * to make shapes strictly convex.
+ * <p>
+ * <strong> WARNING: STP convex polytope does not properly cover all scenarios and may result in a
+ * non-convex shape. A STP convex polytope should always be visualized first and validate its
+ * geometry, see the examples in the <i>simulation-construction-set-visualizers</i> repository. For
+ * now, it is recommended to stick with primitive shapes. </strong>
+ * </p>
+ * 
+ * @see STPShape3DReadOnly
+ * @author Sylvain Bertrand
+ */
 public interface STPConvexPolytope3DReadOnly extends STPShape3DReadOnly, ConvexPolytope3DReadOnly
 {
    // This is to ensure that the default method is being overridden.
