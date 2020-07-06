@@ -191,6 +191,8 @@ public class ValkyrieSimulationCollisionModel implements RobotCollisionModel
          { // Foot
             JointBasics ankleRoll = RobotCollisionModel.findJoint(jointMap.getLegJointName(robotSide, LegJointName.ANKLE_ROLL), multiBodySystem);
             MovingReferenceFrame ankleRollFrame = ankleRoll.getFrameAfterJoint();
+
+            // Using a STP box so the sole is slightly rounded allowing for continuous and smooth contact with the ground.
             FrameSTPBox3D footShape = new FrameSTPBox3D(ankleRollFrame, 0.275, 0.16, 0.095);
             footShape.setMargins(1.0e-5, 4.0e-4);
             footShape.getPosition().set(0.044, 0.0, -0.042);
