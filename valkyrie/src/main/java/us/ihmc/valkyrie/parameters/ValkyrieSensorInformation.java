@@ -135,7 +135,7 @@ public class ValkyrieSensorInformation implements HumanoidRobotSensorInformation
    private static final String lidarPoseLink = "hokuyo_link";
    private static final String lidarJointName = "hokuyo_joint";
    private static final String lidarBaseFrame = multisense_namespace + "/head";
-   private static final String lidarEndFrame = "/head_hokuyo_frame";
+   private static final String lidarEndFrame = multisense_namespace + "/head_hokuyo_frame";
    private static final String baseTfName = "upperNeckPitchLink";
 
    private ImmutableTriple<String, String, RigidBodyTransform> neckToLeftCameraTransform = new ImmutableTriple<>(baseTfName,
