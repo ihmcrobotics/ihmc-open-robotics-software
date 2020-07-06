@@ -12,7 +12,6 @@ public class LevenbergMarquardtParameterOptimizer
    private int parameterDimension;
    private int outputDimension;
 
-   private static final boolean ENABLE_EARLY_TERMINAL = false;
    private FunctionOutputCalculator outputCalculator = null;
    private boolean useDampingCoefficient = false; // TODO: add setter.
    private final DMatrixRMaj dampingCoefficient;
@@ -195,6 +194,12 @@ public class LevenbergMarquardtParameterOptimizer
             correspondence[i] = false;
          }
       }
+      
+      if(numberOfCoorespondingPoints == 0)
+      {
+         return -1;
+      }
+      
       quality = computeQuality(currentOutput, correspondence);
       initialQuality = quality;
       if (DEBUG)
