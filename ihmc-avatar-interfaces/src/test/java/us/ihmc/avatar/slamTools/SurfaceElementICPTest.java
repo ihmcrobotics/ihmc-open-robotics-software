@@ -4,6 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.File;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 import org.ejml.data.DMatrixRMaj;
 import org.junit.jupiter.api.Tag;
@@ -28,7 +29,6 @@ import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.SurfaceElementICPSLAM;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
-import us.ihmc.robotics.optimization.FunctionOutputCalculator;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 
 @Tag("point-cloud-drift-correction-test")
@@ -177,11 +177,10 @@ public class SurfaceElementICPTest
 
       int numberOfSurfel = frame2.getSurfaceElementsToSensor().size();
       LogTools.info("numberOfSurfel " + numberOfSurfel);
-      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(6, numberOfSurfel);
-      FunctionOutputCalculator functionOutputCalculator = new FunctionOutputCalculator()
+      UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
       {
          @Override
-         public DMatrixRMaj computeOutput(DMatrixRMaj inputParameter)
+         public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = convertTransform(inputParameter.getData());
             RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(frame2.getOriginalSensorPose());
@@ -211,6 +210,7 @@ public class SurfaceElementICPTest
             return SLAMTools.computeBoundedPerpendicularDistancePointToNormalOctree(map, surfel.getPoint(), map.getResolution());
          }
       };
+      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(6, numberOfSurfel, outputCalculator);
       DMatrixRMaj purterbationVector = new DMatrixRMaj(6, 1);
       purterbationVector.set(0, 0.0005);
       purterbationVector.set(1, 0.0005);
@@ -219,7 +219,6 @@ public class SurfaceElementICPTest
       purterbationVector.set(4, 0.0001);
       purterbationVector.set(5, 0.0001);
       optimizer.setPerturbationVector(purterbationVector);
-      optimizer.setOutputCalculator(functionOutputCalculator);
       optimizer.initialize();
       optimizer.setCorrespondenceThreshold(0.05);
 

@@ -7,24 +7,26 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
 import org.ejml.data.DMatrixRMaj;
 import org.ejml.dense.row.CommonOps_DDRM;
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 
 import cern.colt.list.BooleanArrayList;
 import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.optimization.FunctionOutputCalculator;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 
+@Tag("point-cloud-drift-correction-test")
 public class LevenbergMarquardtICPTest
 {
-   private boolean visualize = true;
+   private boolean visualize = false;
    private XYPlaneDrawer drawer;
    private JFrame frame;
 
@@ -231,11 +233,10 @@ public class LevenbergMarquardtICPTest
       drawer.addPointCloud(fullModel, Color.black, false);
       drawer.addPointCloud(data1, Color.red, false);
 
-      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(3, data1.size());
-      FunctionOutputCalculator functionOutputCalculator = new FunctionOutputCalculator()
+      UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
       {
          @Override
-         public DMatrixRMaj computeOutput(DMatrixRMaj inputParameter)
+         public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
             List<Point2D> transformedData = new ArrayList<>();
             for (int i = 0; i < data1.size(); i++)
@@ -251,12 +252,12 @@ public class LevenbergMarquardtICPTest
             return errorSpace;
          }
       };
+      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(3, data1.size(), outputCalculator);
       DMatrixRMaj purterbationVector = new DMatrixRMaj(3, 1);
       purterbationVector.set(0, 0.00001);
       purterbationVector.set(1, 0.00001);
       purterbationVector.set(2, 0.00001);
       optimizer.setPerturbationVector(purterbationVector);
-      optimizer.setOutputCalculator(functionOutputCalculator);
       boolean isSolved = false;
       for (int i = 0; i < 30; i++)
       {
