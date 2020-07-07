@@ -4,11 +4,15 @@ import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicReference;
 
 import controller_msgs.msg.dds.DoorLocationPacket;
+import controller_msgs.msg.dds.TextToSpeechPacket;
+import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.packets.MessageTools;
 import us.ihmc.euclid.referenceFrame.FramePose3D;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
 import us.ihmc.euclid.tuple4D.Quaternion;
 import us.ihmc.graphicsDescription.yoGraphics.YoGraphicsListRegistry;
+import us.ihmc.log.LogTools;
 import us.ihmc.robotics.kinematics.AverageQuaternionCalculator;
 import us.ihmc.ros2.Ros2Node;
 
@@ -25,15 +29,19 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
 
    private DoorLocationPacket latestDoorLocationPacketRecieved;
    private boolean doorOpen = false;
-   private float openAngle = 0.17f;
+   private float openAngle = 0.15f;
    private float closeAngle = 0.07f;
    private boolean run = false;
 
+   private final IHMCROS2Publisher<TextToSpeechPacket> textToSpeechPublisher;
+
+   
    protected final AtomicReference<DoorLocationPacket> doorLocationLatest = new AtomicReference<DoorLocationPacket>();
 
    public DoorOpenDetectorBehaviorService(String robotName, String ThreadName, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, ThreadName, ros2Node);
+      textToSpeechPublisher = createPublisher(TextToSpeechPacket.class, ROS2Tools.IHMC_ROOT);
 
       createSubscriber(DoorLocationPacket.class, ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationLatest::set);
 
@@ -43,6 +51,10 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
    public void run(boolean run)
    {
       this.run = run;
+      LogTools.info(1, "Start door open detector service = "+run);
+
+      textToSpeechPublisher.publish(MessageTools.createTextToSpeechPacket("Start door open detector service = "+run));
+
    }
 
    @Override
@@ -79,8 +91,6 @@ public class DoorOpenDetectorBehaviorService extends ThreadedBehaviorService//Fi
    @Override
    public void doThreadAction()
    {
-
-      //super.doThreadAction();
       if (run)
       {
          latestDoorLocationPacketRecieved = doorLocationLatest.getAndSet(null);

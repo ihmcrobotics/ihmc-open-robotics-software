@@ -11,19 +11,17 @@ import us.ihmc.ros2.Ros2Node;
 public class SearchForDoorBehavior extends AbstractBehavior
 {
    private Pose3D doorTransformToWorld;
+   private byte detectedDoorType;
+
    private boolean recievedNewDoorLocation = false;
 
    protected final ConcurrentListeningQueue<DoorLocationPacket> doorLocationQueue = new ConcurrentListeningQueue<DoorLocationPacket>(10);
 
-
-   public SearchForDoorBehavior(String robotName,String yoNamePrefix, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
+   public SearchForDoorBehavior(String robotName, String yoNamePrefix, Ros2Node ros2Node, YoGraphicsListRegistry yoGraphicsListRegistry)
    {
       super(robotName, yoNamePrefix, ros2Node);
-      
-      
-      createSubscriber(DoorLocationPacket.class,ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationQueue::put);
-      
-     
+
+      createSubscriber(DoorLocationPacket.class, ROS2Tools.OBJECT_DETECTOR_TOOLBOX.withRobot(robotName).withOutput(), doorLocationQueue::put);
 
    }
 
@@ -45,7 +43,7 @@ public class SearchForDoorBehavior extends AbstractBehavior
    @Override
    public boolean isDone()
    {
-      return recievedNewDoorLocation&& doorTransformToWorld!=null;
+      return recievedNewDoorLocation && doorTransformToWorld != null;
    }
 
    @Override
@@ -59,24 +57,27 @@ public class SearchForDoorBehavior extends AbstractBehavior
       return doorTransformToWorld;
    }
 
+   public byte getDoorType()
+   {
+      return detectedDoorType;
+   }
+
    private void recievedDoorLocation(DoorLocationPacket doorLocationPacket)
    {
-      //publishTextToSpeech("Recieved Door Location");
+      setDoorType(doorLocationPacket.detected_door_type_);
       setDoorLocation(doorLocationPacket.getDoorTransformToWorld());
    }
-   
+
    public void setDoorLocation(Pose3D pose)
    {
-      
-      System.out.println("SET DOOR LOCATION "+pose);
+      System.out.println("SET DOOR LOCATION " + pose);
       doorTransformToWorld = pose;
-
-      
-      
       recievedNewDoorLocation = true;
+   }
 
-      //publishUIPositionCheckerPacket(pose.getPosition(), pose.getOrientation());
-      
+   public void setDoorType(byte doorType)
+   {
+      detectedDoorType = doorType;
    }
 
    @Override

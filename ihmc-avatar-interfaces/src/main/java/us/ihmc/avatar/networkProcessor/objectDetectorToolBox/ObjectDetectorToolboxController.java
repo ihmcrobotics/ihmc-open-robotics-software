@@ -1,6 +1,7 @@
 package us.ihmc.avatar.networkProcessor.objectDetectorToolBox;
 
 import controller_msgs.msg.dds.DetectedFiducialPacket;
+import controller_msgs.msg.dds.DoorLocationPacket;
 import us.ihmc.avatar.networkProcessor.modules.ToolboxController;
 import us.ihmc.communication.controllerAPI.StatusMessageOutputManager;
 import us.ihmc.euclid.geometry.Pose3D;
@@ -51,7 +52,11 @@ public class ObjectDetectorToolboxController extends ToolboxController
    {
       if (fiducial.fiducial_id_ == 50)
       {
-         decodePushDoorFiducialID50(fiducial);
+         decodePushDoorFiducial(fiducial);
+      }
+      else if (fiducial.fiducial_id_ == 150)
+      {
+         decodePullDoorFiducial(fiducial);
       }
       else
       {
@@ -59,7 +64,7 @@ public class ObjectDetectorToolboxController extends ToolboxController
       }
    }
 
-   private void decodePushDoorFiducialID50(DetectedFiducialPacket fiducial)
+   private void decodePushDoorFiducial(DetectedFiducialPacket fiducial)
    {
       Pose3D tmpFP = fiducial.fiducial_transform_to_world_;
 
@@ -76,9 +81,35 @@ public class ObjectDetectorToolboxController extends ToolboxController
 
       pose.appendYawRotation(Math.toRadians(-90));
 
-      reportMessage(HumanoidMessageTools.createDoorLocationPacket(pose));
+      reportMessage(HumanoidMessageTools.createDoorLocationPacket(pose, DoorLocationPacket.PUSH_HANDLE_RIGHT));
 
    }
+  
+
+   
+   private void decodePullDoorFiducial(DetectedFiducialPacket fiducial)
+   {
+      Pose3D tmpFP = fiducial.fiducial_transform_to_world_;
+
+      tmpFP.appendPitchRotation(Math.toRadians(90));
+      tmpFP.appendYawRotation(0);
+      tmpFP.appendRollRotation(Math.toRadians(-90));
+
+      tmpFP.appendPitchRotation(-tmpFP.getPitch());
+
+      FramePose3D doorFrame = new FramePose3D(tmpFP);
+      doorFrame.appendTranslation(0.025875, -0.68183125, -1.1414125);
+
+      Pose3D pose = new Pose3D(doorFrame.getPosition(), doorFrame.getOrientation());
+
+      pose.appendYawRotation(Math.toRadians(90));
+
+      reportMessage(HumanoidMessageTools.createDoorLocationPacket(pose, DoorLocationPacket.PULL_HANDLE_LEFT));
+
+   }
+   
+ 
+   
 
    @Override
    public boolean isDone()
