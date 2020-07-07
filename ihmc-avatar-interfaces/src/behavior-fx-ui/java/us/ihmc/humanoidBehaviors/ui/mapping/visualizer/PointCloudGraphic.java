@@ -3,6 +3,7 @@ package us.ihmc.humanoidBehaviors.ui.mapping.visualizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.IntStream;
 
 import controller_msgs.msg.dds.StereoVisionPointCloudMessage;
 import javafx.scene.Group;
@@ -44,7 +45,6 @@ public class PointCloudGraphic extends Group
 
    private final JavaFXMultiColorMeshBuilder meshBuilder;
 
-   // linear interpolated trajectory. once StereoVisionPointCloudMessage holds linear/angular velocity, this will be generated with cubic spline.
    private final boolean visualizeTrajectory;
    private RigidBodyTransform latestSensorPose = null;
    private final ArrayList<Point3D> sensorPoseTrajectory = new ArrayList<Point3D>();
@@ -103,15 +103,10 @@ public class PointCloudGraphic extends Group
 
    public void addPointsMeshes(Point3DReadOnly[] points, Color colorToViz)
    {
-      Point3D32 scanPoint = new Point3D32();
-
       int numberOfScanPoints = points.length;
       int sizeOfPointCloudToVisualize = Math.min(numberOfScanPoints, NUMBER_OF_POINTS_PER_MESSAGE);
-      for (int j = 0; j < sizeOfPointCloudToVisualize; j++)
-      {
-         scanPoint.set(points[selector.nextInt(points.length)]);
-         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), scanPoint, colorToViz);
-      }
+      IntStream limit = selector.ints(0, points.length).distinct().limit(sizeOfPointCloudToVisualize);
+      limit.forEach(index -> meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(SCAN_POINT_SIZE), points[index], colorToViz));
    }
 
    /**
@@ -119,15 +114,10 @@ public class PointCloudGraphic extends Group
     */
    public void addPointsMeshes(Point3DReadOnly[] points, Color colorToViz, double size)
    {
-      Point3D32 scanPoint = new Point3D32();
-
       int numberOfScanPoints = points.length;
       int sizeOfPointCloudToVisualize = Math.min(numberOfScanPoints, NUMBER_OF_POINTS_PER_MESSAGE);
-      for (int j = 0; j < sizeOfPointCloudToVisualize; j++)
-      {
-         scanPoint.set(points[selector.nextInt(points.length)]);
-         meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(size), scanPoint, colorToViz);
-      }
+      IntStream limit = selector.ints(0, points.length).distinct().limit(sizeOfPointCloudToVisualize);
+      limit.forEach(index -> meshBuilder.addMesh(MeshDataGenerator.Tetrahedron(size), points[index], colorToViz));
    }
 
    public void addLineMesh(Point3DReadOnly from, Point3DReadOnly to, Color color, double width)
