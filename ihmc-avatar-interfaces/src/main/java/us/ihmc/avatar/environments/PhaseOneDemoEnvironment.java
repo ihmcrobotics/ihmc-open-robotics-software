@@ -15,6 +15,7 @@ import us.ihmc.simulationConstructionSetTools.robotController.ContactController;
 import us.ihmc.simulationConstructionSetTools.util.environments.AdjustableStairsEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
+import us.ihmc.simulationConstructionSetTools.util.environments.Fiducial;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObjectListener;
 import us.ihmc.simulationConstructionSetTools.util.environments.environmentRobots.ContactableDoorRobot;
 import us.ihmc.simulationConstructionSetTools.util.ground.CombinedTerrainObject3D;
@@ -32,7 +33,9 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
    private final double WALL_HEIGHT = 2.4384;
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 
-   private final Point3D doorLocation = new Point3D(1.5, 0, 0);
+   private final Point3D pullDoorLocation = new Point3D(0, -3.5, 0);
+
+   private final Point3D pushDoorLocation = new Point3D(0, -3.5, 0);
 
    public PhaseOneDemoEnvironment(boolean door, boolean debris, boolean barrel, boolean wakling, boolean stairs)
    {
@@ -40,7 +43,10 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
       combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
 
       if (door)
-         createDoor();
+      {
+        // createPushDoor(pushDoorLocation);
+         createPullDoor(pullDoorLocation);
+      }
       if (barrel)
          createBarrel();
       if (debris)
@@ -94,11 +100,46 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
       throw new NotImplementedException("Debris not implemented");
    }
 
-   private void createDoor()
+   private void createPullDoor(Point3D location)
    {
-      ContactableDoorRobot door = new ContactableDoorRobot("doorRobot", doorLocation);
+      ContactableDoorRobot door = new ContactableDoorRobot("PullDoorRobot", location, Fiducial.FIDUCIAL150);
       contactableRobots.add(door);
       door.createAvailableContactPoints(0, 15, 15, 0.02, true);
+
+
+      combinedTerrainObject.addBox(location.getX()
+            - 1.2192, location.getY() - 0.025, location.getX() + 0, location.getY() + 0.025, WALL_HEIGHT, YoAppearance.Bisque());
+      combinedTerrainObject.addBox(location.getX() + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
+                                   location.getY() - 0.025,
+                                   location.getX() + 1.2192 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
+                                   location.getY() + 0.025,
+                                   WALL_HEIGHT,
+                                   YoAppearance.Beige());
+
+      combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
+
+   }
+   
+   
+   private void createPushDoor(Point3D location)
+   {
+      ContactableDoorRobot door = new ContactableDoorRobot("PushDoorRobot", location, Fiducial.FIDUCIAL50);
+      contactableRobots.add(door);
+      door.getPinJoint().setQ(Math.toRadians(180));
+      door.createAvailableContactPoints(0, 15, 15, 0.02, true);
+
+
+      combinedTerrainObject.addBox(location.getX()
+            + 1.2192, location.getY() - 0.025, location.getX() + 0, location.getY() + 0.025, WALL_HEIGHT, YoAppearance.Bisque());
+      combinedTerrainObject.addBox(location.getX() - ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
+                                   location.getY() - 0.025,
+                                   location.getX() - 1.2192 - ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
+                                   location.getY() + 0.025,
+                                   WALL_HEIGHT,
+                                   YoAppearance.Beige());
+
+      combinedTerrainObject.addTerrainObject(setUpGround("Ground"));
+
    }
 
    private void createBarrel()
@@ -111,14 +152,7 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
       CombinedTerrainObject3D combinedTerrainObject = new CombinedTerrainObject3D(name);
 
       combinedTerrainObject.addBox(-5.0, -30.0, 5.0, 5.0, -0.05, 0.0, YoAppearance.DarkGray());
-      combinedTerrainObject.addBox(doorLocation.getX()
-            - 1.2192, doorLocation.getY() - 0.025, doorLocation.getX() + 0, doorLocation.getY() + 0.025, WALL_HEIGHT, YoAppearance.Bisque());
-      combinedTerrainObject.addBox(doorLocation.getX() + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
-                                   doorLocation.getY() - 0.025,
-                                   doorLocation.getX() + 1.2192 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
-                                   0.025,
-                                   WALL_HEIGHT,
-                                   YoAppearance.Beige());
+
       return combinedTerrainObject;
    }
 
