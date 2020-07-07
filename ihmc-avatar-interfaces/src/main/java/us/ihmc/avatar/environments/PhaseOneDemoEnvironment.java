@@ -81,14 +81,36 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
 
    private void addGroundRegion()
    {
-      ConvexPolygon2D groundPolygon = new ConvexPolygon2D();
-      groundPolygon.addVertex(-3.0, 3.0);
-      groundPolygon.addVertex(-3.0, -3.0);
-      groundPolygon.addVertex(20.0, -3.0);
-      groundPolygon.addVertex(20.0, 3.0);
-      groundPolygon.update();
-      PlanarRegion groundRegion = new PlanarRegion(new RigidBodyTransform(), groundPolygon);
-      addRegions(new PlanarRegionsList(groundRegion), YoAppearance.LightGray());
+      ConvexPolygon2D groundPolygon1 = new ConvexPolygon2D();
+      groundPolygon1.addVertex(-3.0, 3.0);
+      groundPolygon1.addVertex(-3.0, -3.0);
+      groundPolygon1.addVertex(0.0, -3.0);
+      groundPolygon1.addVertex(0.0, 3.0);
+      groundPolygon1.addVertex(1.5, -1.0);
+      groundPolygon1.addVertex(1.5, 1.0);
+      groundPolygon1.update();
+      PlanarRegion groundRegion1 = new PlanarRegion(new RigidBodyTransform(), groundPolygon1);
+      addRegions(new PlanarRegionsList(groundRegion1), YoAppearance.LightGray());
+
+      ConvexPolygon2D groundPolygon2 = new ConvexPolygon2D();
+      groundPolygon2.addVertex(4.5, -1.0);
+      groundPolygon2.addVertex(4.5, 1.0);
+      groundPolygon2.addVertex(6.0, 2.0);
+      groundPolygon2.addVertex(6.0, -2.0);
+      groundPolygon2.addVertex(9.0, -1.0);
+      groundPolygon2.addVertex(9.0, 1.0);
+      groundPolygon2.update();
+      PlanarRegion groundRegion2 = new PlanarRegion(new RigidBodyTransform(), groundPolygon2);
+      addRegions(new PlanarRegionsList(groundRegion2), YoAppearance.LightGray());
+      
+      ConvexPolygon2D groundPolygon3 = new ConvexPolygon2D();
+      groundPolygon3.addVertex(9.0, -1.0);
+      groundPolygon3.addVertex(9.0, 1.0);
+      groundPolygon3.addVertex(13.0, -1.0);
+      groundPolygon3.addVertex(13.0, 1.0);
+      groundPolygon3.update();
+      PlanarRegion groundRegion3 = new PlanarRegion(new RigidBodyTransform(), groundPolygon3);
+      addRegions(new PlanarRegionsList(groundRegion3), YoAppearance.LightGray());
    }
 
    private void createDebris()
