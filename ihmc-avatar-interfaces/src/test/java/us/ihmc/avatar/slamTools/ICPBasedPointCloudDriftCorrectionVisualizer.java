@@ -2,6 +2,7 @@ package us.ihmc.avatar.slamTools;
 
 import java.io.File;
 import java.util.List;
+import java.util.function.UnaryOperator;
 
 import org.ejml.data.DMatrixRMaj;
 
@@ -27,7 +28,6 @@ import us.ihmc.robotEnvironmentAwareness.communication.converters.PointCloudComp
 import us.ihmc.robotEnvironmentAwareness.slam.SLAMFrame;
 import us.ihmc.robotEnvironmentAwareness.slam.tools.SLAMTools;
 import us.ihmc.robotEnvironmentAwareness.ui.io.StereoVisionPointCloudDataLoader;
-import us.ihmc.robotics.optimization.FunctionOutputCalculator;
 import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
 import us.ihmc.simulationconstructionset.Robot;
 import us.ihmc.simulationconstructionset.SimulationConstructionSet;
@@ -209,11 +209,10 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
    private LevenbergMarquardtParameterOptimizer createOptimizer(NormalOcTree map, Point3DReadOnly[] sourcePointsToSensorPose,
                                                                 RigidBodyTransformReadOnly sensorPoseToWorld)
    {
-      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(6, sourcePointsToSensorPose.length);
-      FunctionOutputCalculator functionOutputCalculator = new FunctionOutputCalculator()
+      UnaryOperator<DMatrixRMaj> outputCalculator = new UnaryOperator<DMatrixRMaj>()
       {
          @Override
-         public DMatrixRMaj computeOutput(DMatrixRMaj inputParameter)
+         public DMatrixRMaj apply(DMatrixRMaj inputParameter)
          {
             RigidBodyTransform driftCorrectionTransform = convertTransform(inputParameter.getData());
             RigidBodyTransform correctedSensorPoseToWorld = new RigidBodyTransform(sensorPoseToWorld);
@@ -241,6 +240,7 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
             return surfelDistance;
          }
       };
+      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(6, sourcePointsToSensorPose.length, outputCalculator);
       DMatrixRMaj purterbationVector = new DMatrixRMaj(6, 1);
       purterbationVector.set(0, 0.0001);
       purterbationVector.set(1, 0.0001);
@@ -249,7 +249,6 @@ public class ICPBasedPointCloudDriftCorrectionVisualizer
       purterbationVector.set(4, 0.0001);
       purterbationVector.set(5, 0.0001);
       optimizer.setPerturbationVector(purterbationVector);
-      optimizer.setOutputCalculator(functionOutputCalculator);
       optimizer.initialize();
       optimizer.setCorrespondenceThreshold(0.05);
 
