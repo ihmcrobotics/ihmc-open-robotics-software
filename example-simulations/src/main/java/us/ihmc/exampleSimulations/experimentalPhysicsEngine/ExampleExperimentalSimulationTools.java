@@ -154,10 +154,12 @@ public class ExampleExperimentalSimulationTools
    {
       LinkDescription link = new LinkDescription(linkName);
       link.setMassAndRadiiOfGyration(mass, radiusOfGyrationPercent * sizeX, radiusOfGyrationPercent * sizeY, radiusOfGyrationPercent * sizeZ);
-      link.setCenterOfMassOffset(offsetFromParentJoint);
+      if (offsetFromParentJoint != null)
+         link.setCenterOfMassOffset(offsetFromParentJoint);
 
       LinkGraphicsDescription linkGraphics = new LinkGraphicsDescription();
-      linkGraphics.translate(offsetFromParentJoint);
+      if (offsetFromParentJoint != null)
+         linkGraphics.translate(offsetFromParentJoint);
       linkGraphics.translate(0.0, 0.0, -sizeZ / 2.0);
       linkGraphics.addCube(sizeX, sizeY, sizeZ, appearance);
       link.setLinkGraphics(linkGraphics);
