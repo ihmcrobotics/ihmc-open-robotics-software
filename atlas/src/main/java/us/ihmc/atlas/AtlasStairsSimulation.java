@@ -12,13 +12,19 @@ public class AtlasStairsSimulation
    public AtlasStairsSimulation()
    {
       FootContactPoints<RobotSide> simulationContactPoints = new AdditionalSimulationContactPoints<>(RobotSide.values, 8, 3, true, true);
-      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS, false, simulationContactPoints, false, false);
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS,
+                                                       RobotTarget.SCS,
+                                                       false,
+                                                       simulationContactPoints,
+                                                       false,
+                                                       false);
 
       AvatarStairsSimulation stairsSimulation = new AvatarStairsSimulation();
 
+      stairsSimulation.setPlaceRobotAtTop(true);
       Pose3D startingPose = new Pose3D();
       startingPose.getPosition().set(0.0, 0.0, 0.15);
-      startingPose.getOrientation().setYawPitchRoll(Math.toRadians(45.0), 0.0, 0.0);
+      startingPose.getOrientation().setYawPitchRoll(Math.toRadians(-45.0), 0.0, 0.0);
       stairsSimulation.setStartingPose(startingPose);
 
       stairsSimulation.setRobotModel(robotModel);

@@ -14,6 +14,9 @@ import javafx.util.Callback;
 import javafx.util.StringConverter;
 import us.ihmc.tools.property.*;
 
+import javax.swing.*;
+import java.io.File;
+import java.nio.file.Path;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -67,6 +70,24 @@ public class StoredPropertyTableViewWrapper
       }
 
       parameterTable.setSelectionModel(null);
+   }
+
+   /**
+    * Loads new file. Subsequent saves will write to the selected file
+    */
+   public void loadNewFile()
+   {
+      JFileChooser fileChooser = new JFileChooser();
+      Path saveFileDirectory = javaFXStoredPropertyMap.getStoredPropertySet().findSaveFileDirectory();
+      fileChooser.setCurrentDirectory(saveFileDirectory.toFile());
+      int chooserState = fileChooser.showOpenDialog(null);
+
+      if (chooserState == JFileChooser.APPROVE_OPTION)
+      {
+         File selectedFile = fileChooser.getSelectedFile();
+         String fileName = selectedFile.getName();
+         javaFXStoredPropertyMap.getStoredPropertySet().load(fileName);
+      }
    }
 
    private void setup()

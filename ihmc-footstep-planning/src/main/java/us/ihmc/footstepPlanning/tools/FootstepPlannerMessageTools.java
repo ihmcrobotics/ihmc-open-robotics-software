@@ -68,7 +68,8 @@ public class FootstepPlannerMessageTools
       packet.setMaximumStepXWhenForwardAndDown(parameters.getMaximumStepXWhenForwardAndDown());
       packet.setMaximumStepYWhenForwardAndDown(parameters.getMaximumStepYWhenForwardAndDown());
       packet.setMaximumStepZWhenForwardAndDown(parameters.getMaximumStepZWhenForwardAndDown());
-      packet.setMaximumStepZ(parameters.getMaximumStepZ());
+      packet.setMaximumLeftStepZ(parameters.getMaximumLeftStepZ());
+      packet.setMaximumRightStepZ(parameters.getMaximumRightStepZ());
       packet.setMinimumStepZWhenFullyPitched(parameters.getMinimumStepZWhenFullyPitched());
       packet.setMaximumStepXWhenFullyPitched(parameters.getMaximumStepXWhenFullyPitched());
       packet.setStepYawReductionFactorAtMaxReach(parameters.getStepYawReductionFactorAtMaxReach());
@@ -102,6 +103,9 @@ public class FootstepPlannerMessageTools
       packet.setShinPitch(parameters.getShinPitch());
       packet.setShinHeightOffet(parameters.getShinHeightOffset());
       packet.setDistanceEpsilonToBridgeRegions(parameters.getDistanceEpsilonToBridgeRegions());
+
+      RobotSide stepOnlyWithRequestedSide = parameters.getStepOnlyWithRequestedSide();
+      packet.setStepOnlyWithRequestedSide(stepOnlyWithRequestedSide == null ? -1 : stepOnlyWithRequestedSide.toByte());
 
       packet.setAStarHeuristicsWeight(parameters.getAStarHeuristicsWeight().getValue());
       packet.setYawWeight(parameters.getYawWeight());

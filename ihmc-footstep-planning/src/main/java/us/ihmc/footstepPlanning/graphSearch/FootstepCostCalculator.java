@@ -80,9 +80,13 @@ public class FootstepCostCalculator
       // subtract off heuristic cost difference - i.e. ignore difference in goal proximity due to step adjustment
       double deltaHeuristics = heuristics.applyAsDouble(idealStep) - heuristics.applyAsDouble(candidateNode);
       if(deltaHeuristics > 0.0)
+      {
          cost += deltaHeuristics;
+      }
       else
+      {
          cost = Math.max(0.0, cost - deltaHeuristics);
+      }
 
       if (edgeData != null)
          edgeData.setEdgeCost(cost);

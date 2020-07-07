@@ -46,4 +46,11 @@ public class SplitFractionParametersUIController
    {
       parameters.save();
    }
+
+   @FXML
+   public void loadFile()
+   {
+      tableViewWrapper.loadNewFile();
+      messager.submitMessage(FootstepPlannerMessagerAPI.SplitFractionParameters, parameters);
+   }
 }

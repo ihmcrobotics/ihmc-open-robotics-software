@@ -1,6 +1,7 @@
 package us.ihmc.footstepPlanning.graphSearch.parameters;
 
 import controller_msgs.msg.dds.FootstepPlannerParametersPacket;
+import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.tools.property.StoredPropertySetBasics;
 
 import static us.ihmc.footstepPlanning.graphSearch.parameters.FootstepPlannerParameterKeys.*;
@@ -62,9 +63,20 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.minStepYaw, yaw);
    }
 
+   default void setMaximumLeftStepZ(double stepZ)
+   {
+      set(FootstepPlannerParameterKeys.maxLeftStepZ, stepZ);
+   }
+
+   default void setMaximumRightStepZ(double stepZ)
+   {
+      set(FootstepPlannerParameterKeys.maxRightStepZ, stepZ);
+   }
+
    default void setMaximumStepZ(double stepZ)
    {
-      set(FootstepPlannerParameterKeys.maxStepZ, stepZ);
+      setMaximumLeftStepZ(stepZ);
+      setMaximumRightStepZ(stepZ);
    }
 
    default void setMinimumStepZWhenFullyPitched(double stepZ)
@@ -342,6 +354,11 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
       set(FootstepPlannerParameterKeys.distanceEpsilonToBridgeRegions, distanceEpsilonToBridgeRegions);
    }
 
+   default void setStepOnlyWithRequestedSide(byte side)
+   {
+      set(stepOnlyWithRequestedSide, side);
+   }
+
    default void set(FootstepPlannerParametersPacket parametersPacket)
    {
       double noValue = FootstepPlannerParametersPacket.DEFAULT_NO_VALUE;
@@ -382,8 +399,10 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setMaximumStepZWhenForwardAndDown(parametersPacket.getMaximumStepZWhenForwardAndDown());
       if (parametersPacket.getTranslationScaleFromGrandparentNode() != noValue)
          setTranslationScaleFromGrandparentNode(parametersPacket.getTranslationScaleFromGrandparentNode());
-      if (parametersPacket.getMaximumStepZ() != noValue)
-         setMaximumStepZ(parametersPacket.getMaximumStepZ());
+      if (parametersPacket.getMaximumLeftStepZ() != noValue)
+         setMaximumLeftStepZ(parametersPacket.getMaximumLeftStepZ());
+      if (parametersPacket.getMaximumRightStepZ() != noValue)
+         setMaximumRightStepZ(parametersPacket.getMaximumRightStepZ());
       if (parametersPacket.getMinimumStepZWhenFullyPitched() != noValue)
          setMinimumStepZWhenFullyPitched(parametersPacket.getMinimumStepZWhenFullyPitched());
       if (parametersPacket.getMaximumStepXWhenFullyPitched() != noValue)
@@ -472,5 +491,6 @@ public interface FootstepPlannerParametersBasics extends FootstepPlannerParamete
          setShinPitch(parametersPacket.getShinPitch());
       if (parametersPacket.getDistanceEpsilonToBridgeRegions() != noValue)
          setDistanceEpsilonToBridgeRegions(parametersPacket.getDistanceEpsilonToBridgeRegions());
+      setStepOnlyWithRequestedSide(parametersPacket.getStepOnlyWithRequestedSide());
    }
 }
