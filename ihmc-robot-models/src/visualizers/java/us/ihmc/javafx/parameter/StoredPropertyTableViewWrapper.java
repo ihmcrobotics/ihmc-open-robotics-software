@@ -87,10 +87,7 @@ public class StoredPropertyTableViewWrapper
          File selectedFile = fileChooser.getSelectedFile();
          String fileName = selectedFile.getName();
          javaFXStoredPropertyMap.getStoredPropertySet().load(fileName);
-         return true;
       }
-
-      return false;
    }
 
    private void setup()
