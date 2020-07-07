@@ -1,21 +1,31 @@
 package us.ihmc.atlas.behaviors.coordinator;
 
 import controller_msgs.msg.dds.*;
-import std_msgs.msg.dds.Empty;
+import us.ihmc.atlas.AtlasRobotModel;
+import us.ihmc.atlas.AtlasRobotVersion;
+import us.ihmc.avatar.drcRobot.RobotTarget;
 import us.ihmc.commons.Conversions;
+import us.ihmc.commons.thread.ThreadTools;
 import us.ihmc.communication.IHMCROS2Publisher;
 import us.ihmc.communication.ROS2Tools;
+import us.ihmc.communication.util.NetworkPorts;
 import us.ihmc.euclid.geometry.Pose3D;
 import us.ihmc.euclid.geometry.interfaces.Pose3DReadOnly;
 import us.ihmc.euclid.tuple3D.Point3D;
-import us.ihmc.euclid.tuple3D.Vector3D;
+import us.ihmc.humanoidBehaviors.BehaviorModule;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
+import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
+import us.ihmc.humanoidBehaviors.tools.BehaviorMessagerUpdateThread;
+import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
+import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
+import us.ihmc.log.LogTools;
+import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.stateMachine.core.State;
 import us.ihmc.robotics.stateMachine.core.StateMachine;
-import us.ihmc.robotics.stateMachine.core.StateTransitionCondition;
 import us.ihmc.robotics.stateMachine.factories.StateMachineFactory;
 import us.ihmc.ros2.ROS2Topic;
 import us.ihmc.ros2.Ros2Node;
@@ -57,7 +67,7 @@ public class BuildingExplorationBehaviorCoordinator
       executorService = Executors.newSingleThreadScheduledExecutor();
 
       teleopState = new TeleopState();
-      lookAndStepState = new LookAndStepState(ros2Node);
+      lookAndStepState = new LookAndStepState();
       walkThroughDoorState = new WalkThroughDoorState(robotName, ros2Node);
       traverseStairsState = new TraverseStairsState();
 
@@ -183,24 +193,38 @@ public class BuildingExplorationBehaviorCoordinator
 
    private static class LookAndStepState implements State
    {
-      private final IHMCROS2Publisher<Pose3D> goalPublisher;
-      private final IHMCROS2Publisher<Empty> resetPublisher;
-
+      private final KryoMessager messager;
       private final Pose3D bombPose = new Pose3D();
 
-      public LookAndStepState(Ros2Node ros2Node)
+      public LookAndStepState()
       {
-         ROS2Topic<Pose3D> goalTopic = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Pose3D.class);
-         ROS2Topic<Empty> resetTopic = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Empty.class);
-
-         goalPublisher = ROS2Tools.createPublisher(ros2Node, goalTopic);
-         resetPublisher = ROS2Tools.createPublisher(ros2Node, resetTopic);
+         BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
+         messager = KryoMessager.createClient(behaviorRegistry.getMessagerAPI(),
+                                              "127.0.0.1",
+                                              NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
+                                              getClass().getSimpleName(),
+                                              UPDATE_RATE_MILLIS);
+         try
+         {
+            messager.startMessager();
+         }
+         catch (Exception e)
+         {
+            throw new RuntimeException(e);
+         }
       }
 
       @Override
       public void onEntry()
       {
-         goalPublisher.publish(bombPose);
+         String behaviorName = LookAndStepBehavior.DEFINITION.getName();
+         messager.submitMessage(BehaviorModule.API.BehaviorSelection, behaviorName);
+         ThreadTools.sleep(500);
+
+         messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
+         ThreadTools.sleep(500);
+
+         messager.submitMessage(LookAndStepBehaviorAPI.GoalInput, bombPose);
       }
 
       @Override
@@ -300,5 +324,16 @@ public class BuildingExplorationBehaviorCoordinator
          // TODO listen for callback from stairs behavior
          return false;
       }
+   }
+
+   public static void main(String[] args)
+   {
+      AtlasRobotModel robotModel = new AtlasRobotModel(AtlasRobotVersion.ATLAS_UNPLUGGED_V5_NO_HANDS, RobotTarget.SCS);
+
+      // Start behavior coordinator
+      BuildingExplorationBehaviorCoordinator behaviorCoordinator = new BuildingExplorationBehaviorCoordinator(robotModel.getSimpleRobotName(), DomainFactory.PubSubImplementation.FAST_RTPS);
+      behaviorCoordinator.setBombPose(new Pose3D(14.5, 0.0, 0.0, 0.0, 0.0, 0.0));
+      behaviorCoordinator.requestState(BuildingExplorationStateName.LOOK_AND_STEP);
+      behaviorCoordinator.start();
    }
 }
