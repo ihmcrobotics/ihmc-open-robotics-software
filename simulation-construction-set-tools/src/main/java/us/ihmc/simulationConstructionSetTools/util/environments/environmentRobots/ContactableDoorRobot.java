@@ -28,6 +28,7 @@ import us.ihmc.robotics.geometry.RotationalInertiaCalculator;
 import us.ihmc.robotics.referenceFrames.PoseReferenceFrame;
 import us.ihmc.robotics.robotSide.RobotSide;
 import us.ihmc.robotics.robotSide.SideDependentList;
+import us.ihmc.simulationConstructionSetTools.util.environments.CinderBlockFieldWithFiducialEnvironment.FiducialType;
 import us.ihmc.simulationConstructionSetTools.util.environments.Fiducial;
 import us.ihmc.simulationConstructionSetTools.util.environments.MultiJointArticulatedContactable;
 import us.ihmc.simulationConstructionSetTools.util.environments.SelectableObject;
@@ -82,18 +83,32 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
    
    private final boolean addFiducial = true;
    
+   
    private final InternalMultiJointArticulatedContactable internalMultiJointArticulatedContactable;
+   
+   private Fiducial doorFiducialID;
    
    public ContactableDoorRobot(String name, Point3D positionInWorld)
    {
-      this(name, DEFAULT_DOOR_DIMENSIONS, DEFAULT_MASS, positionInWorld, DEFAULT_HANDLE_OFFSET, 
-            DEFAULT_HANDLE_RADIUS, DEFAULT_HANDLE_LENGTH, DEFAULT_HANDLE_DOOR_SEPARATION, DEFAULT_HANDLE_HINGE_RADIUS);
+      
+      this(name,positionInWorld,Fiducial.FIDUCIAL50);
+      
    }
    
+   public ContactableDoorRobot(String name, Point3D positionInWorld, Fiducial fiducial)
+   {
+      this(name, DEFAULT_DOOR_DIMENSIONS, DEFAULT_MASS, positionInWorld, DEFAULT_HANDLE_OFFSET, 
+            DEFAULT_HANDLE_RADIUS, DEFAULT_HANDLE_LENGTH, DEFAULT_HANDLE_DOOR_SEPARATION, DEFAULT_HANDLE_HINGE_RADIUS,fiducial);
+   }
+   
+   
    public ContactableDoorRobot(String name, Vector3D boxDimensions, double mass, Point3D positionInWorld, Vector2D handleOffset, 
-         double handleRadius, double handleLength, double handleDoorSeparation, double handleHingeRadius)
+         double handleRadius, double handleLength, double handleDoorSeparation, double handleHingeRadius, Fiducial fiducial)
    {
       super(name);
+      
+      
+      this.doorFiducialID = fiducial;
       
       this.mass = mass;           
       
@@ -177,7 +192,7 @@ public class ContactableDoorRobot extends Robot implements SelectableObject, Sel
     	  //      qrCodeLinkGraphics.addCoordinateSystem(2.0);
     	  double cubeLength = 0.2032;
     	  doorLinkGraphics.translate(0.68183125,depthY/2, 1.1414125);
-    	  AppearanceDefinition cubeAppearance = YoAppearance.Texture(Fiducial.FIDUCIAL50.getPathString());
+    	  AppearanceDefinition cubeAppearance = YoAppearance.Texture(doorFiducialID.getPathString());
 
     	  boolean[] textureFaces = new boolean[] { false, false, true, true, false, false };
     	 // doorLinkGraphics.translate(0.0, 0.0, -0.01 * cubeLength);

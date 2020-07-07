@@ -464,11 +464,22 @@ public class HumanoidMessageTools
    {
       return createDoorLocationPacket(new Pose3D(doorTransformToWorld));
    }
+   
+   public static DoorLocationPacket createDoorLocationPacket(RigidBodyTransform doorTransformToWorld, byte doorType)
+   {
+      return createDoorLocationPacket(new Pose3D(doorTransformToWorld),doorType);
+   }
 
    public static DoorLocationPacket createDoorLocationPacket(Pose3D doorTransformToWorld)
    {
+      return createDoorLocationPacket(doorTransformToWorld,DoorLocationPacket.UNKNOWN_TYPE);
+   }
+   
+   public static DoorLocationPacket createDoorLocationPacket(Pose3D doorTransformToWorld, byte doorType)
+   {
       DoorLocationPacket message = new DoorLocationPacket();
       message.getDoorTransformToWorld().set(doorTransformToWorld);
+      message.setDetectedDoorType(doorType);
       return message;
    }
 
