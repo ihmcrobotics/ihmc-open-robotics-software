@@ -218,7 +218,7 @@ public class SurfaceElementICPBasedDriftCorrectionVisualizer
          optimizerTranslationalEffort.set(translationalEffort);
          optimizerRotationalEffort.set(rotationalEffort);
          optimizerDampingCoefficient.set(optimizer.getDampingCoefficient());
-         numberOfCorrespondingPoints.set(optimizer.getNumberOfCoorespondingPoints());
+         numberOfCorrespondingPoints.set(optimizer.getNumberOfCorespondingPoints());
 
          previousIcpTransformer.set(icpTransformer);
          if (isSteady)
