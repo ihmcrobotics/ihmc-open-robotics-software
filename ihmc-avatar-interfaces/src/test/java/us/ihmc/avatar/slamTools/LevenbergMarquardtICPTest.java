@@ -7,6 +7,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
 import javax.swing.JFrame;
@@ -19,9 +20,10 @@ import org.junit.jupiter.api.Test;
 
 import cern.colt.list.BooleanArrayList;
 import us.ihmc.commons.thread.ThreadTools;
+import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.Point2D;
 import us.ihmc.log.LogTools;
-import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer;
+import us.ihmc.robotics.optimization.LevenbergMarquardtParameterOptimizer2;
 
 @Tag("point-cloud-drift-correction-test")
 public class LevenbergMarquardtICPTest
@@ -34,10 +36,12 @@ public class LevenbergMarquardtICPTest
    private List<Point2D> data1 = new ArrayList<>();
    private List<Point2D> data2 = new ArrayList<>();
 
-   double innerCircleLong = 2.0;
-   double innerCircleShort = 1.0;
-   double outterCircleLong = 4.0;
-   double outterCircleShort = 3.0;
+   private Function<DMatrixRMaj, RigidBodyTransform> inputFunction;
+
+   private double innerCircleLong = 2.0;
+   private double innerCircleShort = 1.0;
+   private double outterCircleLong = 4.0;
+   private double outterCircleShort = 3.0;
 
    private void setupPointCloud()
    {
@@ -59,6 +63,18 @@ public class LevenbergMarquardtICPTest
       data2.addAll(generatePointsOnEllipsoid(50, Math.toRadians(130.0), Math.toRadians(359.9), innerCircleLong, innerCircleShort));
       data2.addAll(generatePointsOnEllipsoid(60, Math.toRadians(120.0), Math.toRadians(359.9), outterCircleLong, outterCircleShort));
       data2.addAll(generatePointsOnLine(10, innerCircleLong, outterCircleLong, 0.0, false));
+
+      inputFunction = new Function<DMatrixRMaj, RigidBodyTransform>()
+      {
+         @Override
+         public RigidBodyTransform apply(DMatrixRMaj input)
+         {
+            RigidBodyTransform transform = new RigidBodyTransform();
+            transform.setRotationYawAndZeroTranslation(input.get(2));
+            transform.getTranslation().set(input.get(0), input.get(1), 0.0);
+            return transform;
+         }
+      };
       assertTrue(true);
    }
 
@@ -67,8 +83,17 @@ public class LevenbergMarquardtICPTest
    {
       setupPointCloud();
 
-      transformPointCloud(data1, 1.0, 2.0, Math.toRadians(30.0));
-      transformPointCloud(data2, -1.0, -2.0, Math.toRadians(-90));
+      DMatrixRMaj drift1 = new DMatrixRMaj(3, 1);
+      drift1.set(0, 1.0);
+      drift1.set(1, 2.0);
+      drift1.set(2, Math.toRadians(30.0));
+      transformPointCloud(data1, inputFunction.apply(drift1));
+
+      DMatrixRMaj drift2 = new DMatrixRMaj(3, 1);
+      drift2.set(0, -1.0);
+      drift2.set(1, -2.0);
+      drift2.set(2, Math.toRadians(-90.0));
+      transformPointCloud(data2, inputFunction.apply(drift2));
 
       drawer.addPointCloud(fullModel, Color.black, false);
       drawer.addPointCloud(data1, Color.red, false);
@@ -88,7 +113,14 @@ public class LevenbergMarquardtICPTest
    {
       setupPointCloud();
 
-      transformPointCloud(data1, 0.3, 0.5, Math.toRadians(10.0));
+      double driftX = 0.3;
+      double driftY = 0.5;
+      double driftTheta = Math.toRadians(10.0);
+      DMatrixRMaj driftSpace = new DMatrixRMaj(3, 1);
+      driftSpace.set(0, driftX);
+      driftSpace.set(1, driftY);
+      driftSpace.set(2, driftTheta);
+      transformPointCloud(data1, inputFunction.apply(driftSpace));
 
       drawer.addPointCloud(fullModel, Color.black, false);
       drawer.addPointCloud(data1, Color.red, false);
@@ -124,7 +156,14 @@ public class LevenbergMarquardtICPTest
    {
       setupPointCloud();
 
-      transformPointCloud(data1, 0.3, 0.5, Math.toRadians(10.0));
+      double driftX = 0.3;
+      double driftY = 0.5;
+      double driftTheta = Math.toRadians(10.0);
+      DMatrixRMaj driftSpace = new DMatrixRMaj(3, 1);
+      driftSpace.set(0, driftX);
+      driftSpace.set(1, driftY);
+      driftSpace.set(2, driftTheta);
+      transformPointCloud(data1, inputFunction.apply(driftSpace));
 
       drawer.addPointCloud(fullModel, Color.black, false);
       drawer.addPointCloud(data1, Color.red, false);
@@ -168,7 +207,7 @@ public class LevenbergMarquardtICPTest
          purterbedData.clear();
          for (int k = 0; k < data1.size(); k++)
             purterbedData.add(new Point2D(data1.get(k)));
-         transformPointCloud(purterbedData, perturbedParameter.get(0, 0), perturbedParameter.get(1, 0), perturbedParameter.get(2, 0));
+         transformPointCloud(purterbedData, inputFunction.apply(perturbedParameter));
          for (int j = 0; j < data1.size(); j++)
          {
             double distance = computeClosestDistance(purterbedData.get(j), fullModel);
@@ -202,10 +241,14 @@ public class LevenbergMarquardtICPTest
       assertTrue(direction.get(1) > 0.0, "direction of the translation y     is correct.");
       assertTrue(direction.get(2) > 0.0, "direction of the translation theta is correct.");
 
+      // negate
+      for (int i = 0; i < direction.data.length; i++)
+         direction.set(i, -direction.data[i]);
+
       purterbedData.clear();
       for (int k = 0; k < data1.size(); k++)
          purterbedData.add(new Point2D(data1.get(k)));
-      transformPointCloud(purterbedData, -direction.get(0, 0), -direction.get(1, 0), -direction.get(2, 0));
+      transformPointCloud(purterbedData, inputFunction.apply(direction));
       for (int i = 0; i < data1.size(); i++)
       {
          drawer.addPoint(purterbedData.get(i), Color.green, true);
@@ -228,7 +271,12 @@ public class LevenbergMarquardtICPTest
       double driftX = -0.3;
       double driftY = 0.5;
       double driftTheta = Math.toRadians(-30.0);
-      transformPointCloud(fullModel, driftX, driftY, driftTheta);
+      DMatrixRMaj driftSpace = new DMatrixRMaj(3, 1);
+      driftSpace.set(0, driftX);
+      driftSpace.set(1, driftY);
+      driftSpace.set(2, driftTheta);
+
+      transformPointCloud(fullModel, inputFunction.apply(driftSpace));
 
       drawer.addPointCloud(fullModel, Color.black, false);
       drawer.addPointCloud(data1, Color.red, false);
@@ -241,7 +289,7 @@ public class LevenbergMarquardtICPTest
             List<Point2D> transformedData = new ArrayList<>();
             for (int i = 0; i < data1.size(); i++)
                transformedData.add(new Point2D(data1.get(i)));
-            transformPointCloud(transformedData, inputParameter.get(0, 0), inputParameter.get(1, 0), inputParameter.get(2, 0));
+            transformPointCloud(transformedData, inputFunction.apply(inputParameter));
 
             DMatrixRMaj errorSpace = new DMatrixRMaj(transformedData.size(), 1);
             for (int i = 0; i < transformedData.size(); i++)
@@ -252,7 +300,7 @@ public class LevenbergMarquardtICPTest
             return errorSpace;
          }
       };
-      LevenbergMarquardtParameterOptimizer optimizer = new LevenbergMarquardtParameterOptimizer(3, data1.size(), outputCalculator);
+      LevenbergMarquardtParameterOptimizer2 optimizer = new LevenbergMarquardtParameterOptimizer2(inputFunction, outputCalculator, 3, data1.size());
       DMatrixRMaj purterbationVector = new DMatrixRMaj(3, 1);
       purterbationVector.set(0, 0.00001);
       purterbationVector.set(1, 0.00001);
@@ -267,6 +315,7 @@ public class LevenbergMarquardtICPTest
             isSolved = true;
             break;
          }
+         System.out.println(i + " " + optimizer.getQuality());
       }
       LogTools.info("Computation is done " + optimizer.getComputationTime() + " sec.");
       System.out.println("is solved? " + isSolved + " " + optimizer.getIteration() + " " + optimizer.getQuality());
@@ -276,14 +325,14 @@ public class LevenbergMarquardtICPTest
       List<Point2D> transformedData = new ArrayList<>();
       for (int i = 0; i < data1.size(); i++)
          transformedData.add(new Point2D(data1.get(i)));
-      transformPointCloud(transformedData, optimalParameter.get(0, 0), optimalParameter.get(1, 0), optimalParameter.get(2, 0));
+      transformPointCloud(transformedData, inputFunction.apply(optimalParameter));
 
       Point2D aPointOfDoughnut = new Point2D(0.0, innerCircleLong);
       Point2D driftedPoint = new Point2D(aPointOfDoughnut);
       Point2D correctedPoint = new Point2D(aPointOfDoughnut);
 
-      transformPoint(driftedPoint, driftX, driftY, driftTheta);
-      transformPoint(correctedPoint, optimalParameter.get(0, 0), optimalParameter.get(1, 0), optimalParameter.get(2, 0));
+      transformPoint(driftedPoint, inputFunction.apply(driftSpace));
+      transformPoint(correctedPoint, inputFunction.apply(optimalParameter));
       assertTrue(correctedPoint.distance(driftedPoint) < 0.06, "a point on the drifted doughnut corrected with icp. " + correctedPoint.distance(driftedPoint));
 
       drawer.addPointCloud(transformedData, Color.green, true);
@@ -316,24 +365,14 @@ public class LevenbergMarquardtICPTest
       return minDistance;
    }
 
-   private void transformPointCloud(List<Point2D> pointCloud, double translationX, double translationY, double theta)
+   private void transformPointCloud(List<Point2D> pointCloud, RigidBodyTransform transformer)
    {
-      for (int i = 0; i < pointCloud.size(); i++)
-      {
-         Point2D point = pointCloud.get(i);
-         transformPoint(point, translationX, translationY, theta);
-      }
+      pointCloud.forEach(point -> transformPoint(point, transformer));
    }
 
-   private void transformPoint(Point2D point, double translationX, double translationY, double theta)
+   private void transformPoint(Point2D point, RigidBodyTransform transformer)
    {
-      double sin = Math.sin(theta);
-      double cos = Math.cos(theta);
-
-      double transformedX = cos * point.getX() - sin * point.getY() + translationX;
-      double transformedY = sin * point.getX() + cos * point.getY() + translationY;
-
-      point.set(transformedX, transformedY);
+      transformer.transform(point);
    }
 
    private List<Point2D> generatePointsOnLine(int numberOfPoints, double start, double end, double fix, boolean isXFixed)
