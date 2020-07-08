@@ -162,6 +162,7 @@ public class PhysicsEngineRobotData implements CollidableHolder
       environmentContactConstraintCalculatorPool.clear();
       selfContactConstraintCalculatorPool.clear();
       interRobotContactConstraintCalculatorPools.forEach((rigidBodyBasics, calculators) -> calculators.clear());
+      integrator.reset();
    }
 
    public RobotJointLimitImpulseBasedCalculator getJointLimitConstraintCalculator()
