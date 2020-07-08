@@ -15,7 +15,6 @@ public interface ContactParametersBasics extends ContactParametersReadOnly, Cons
       setCoefficientOfFriction(other.getCoefficientOfFriction());
       setComputeFrictionMoment(other.getComputeFrictionMoment());
       setCoulombMomentFrictionRatio(other.getCoulombMomentFrictionRatio());
-      setSlipErrorReductionParameter(other.getSlipErrorReductionParameter());
    }
 
    /**
@@ -95,28 +94,4 @@ public interface ContactParametersBasics extends ContactParametersReadOnly, Cons
     *                                   {@code 0.3}.
     */
    void setCoulombMomentFrictionRatio(double coulombFrictionMomentRatio);
-
-   /**
-    * Sets the value of the error reduction parameter used to reduce slip.
-    * <p>
-    * Like the ERP, this parameter indicates the percentage of error in the contact that should be
-    * resolved in each simulation tick. This parameter is defined in [0, 1]:
-    * <ul>
-    * <li>ERP = 0: no correction is applied, if there is constraint error no special effort will be
-    * added to resolve it such that it can only stabilize or grow.
-    * <li>ERP = 1: a correction is applied to correct the integrity of the constraint error in a single
-    * tick. This is expected to provide an unstable simulation.
-    * <li>ERP &in; [0, 1]: a correction is applied to correct a percentage of the constraint error in a
-    * single tick.
-    * </ul>
-    * </p>
-    * <p>
-    * While contact impulses are resolved such as there is no slip occurring, numerical error and other
-    * artifacts of the kind can impair the ability of the solver to perfectly counter slip. As a
-    * result, 2 shapes may slowly over-time slip with respect to each other.
-    * </p>
-    * 
-    * @param slipErrorReductionParameter the error reduction parameter to use for slip.
-    */
-   void setSlipErrorReductionParameter(double slipErrorReductionParameter);
 }

@@ -76,7 +76,6 @@ public class SimplifiedAnkleExperimentalSimulation
    {
       contactParameters.setMinimumPenetration(5.0e-5);
       contactParameters.setCoefficientOfFriction(0.7);
-      contactParameters.setConstraintForceMixing(1.0);
 
       RobotDescription robotDescription = createRobotDescription();
       MultiBodySystemStateWriter initialStateWriter = createInitialStateWriter();

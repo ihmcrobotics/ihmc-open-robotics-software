@@ -33,7 +33,6 @@ public class StackOfBlocksExperimentalSimulation
       contactParameters.setCoefficientOfRestitution(0.3);
       contactParameters.setRestitutionThreshold(0.15);
       contactParameters.setErrorReductionParameter(0.01);
-      contactParameters.setConstraintForceMixing(1.0);
 
       int numberOfBlocks = 6;
       Random random = new Random(1886L);
