@@ -81,6 +81,7 @@ public class ExperimentalSimulation extends Simulation
    private final ExperimentalPhysicsEngine physicsEngine = new ExperimentalPhysicsEngine();
    private final SCSRobotExternalWrenchReader externalWrenchReader = new SCSRobotExternalWrenchReader();
    private final SCSRobotIMUSensorReader imuSensorReader = new SCSRobotIMUSensorReader();
+   private final SCSRobotTransformUpdater robotTransformUpdater = new SCSRobotTransformUpdater();
 
    private Vector3DReadOnly gravity;
 
@@ -141,6 +142,7 @@ public class ExperimentalSimulation extends Simulation
       physicsEngine.addRobot(robotDescription.getName(), rootBody, controllerOutputWriter, robotInitialStateWriter, robotCollisionModel, physicsOutputWriter);
       externalWrenchReader.addRobot(rootBody, scsRobot);
       imuSensorReader.addRobot(rootBody, scsRobot);
+      robotTransformUpdater.addRobot(rootBody, scsRobot);
       addRobot(scsRobot);
    }
 
@@ -159,6 +161,7 @@ public class ExperimentalSimulation extends Simulation
       physicsEngine.addRobot(robotDescription.getName(), rootBody, controllerOutputWriter, robotInitialStateWriter, robotCollisionModel, physicsOutputWriter);
       externalWrenchReader.addRobot(rootBody, scsRobot);
       imuSensorReader.addRobot(rootBody, scsRobot);
+      robotTransformUpdater.addRobot(rootBody, scsRobot);
       addRobot(scsRobot);
    }
 
@@ -188,6 +191,7 @@ public class ExperimentalSimulation extends Simulation
       physicsEngine.addRobot(robotName, rootBody, controllerOutputWriter, robotInitialStateWriter, robotCollisionModel, physicsOutputWriter);
       externalWrenchReader.addRobot(rootBody, scsRobot);
       imuSensorReader.addRobot(rootBody, scsRobot);
+      robotTransformUpdater.addRobot(rootBody, scsRobot);
    }
 
    public void addPreProcessor(Runnable preProcessor)
@@ -217,10 +221,7 @@ public class ExperimentalSimulation extends Simulation
 
       synchronized (getSimulationSynchronizer())
       {
-         for (Robot robot : getRobots())
-         {
-            robot.update();
-         }
+         robotTransformUpdater.update();
 
          externalWrenchReader.initialize();
          physicsEngine.initialize();
@@ -248,17 +249,18 @@ public class ExperimentalSimulation extends Simulation
 
       synchronized (getSimulationSynchronizer())
       {
-         for (Robot robot : getRobots())
+         Robot[] robots = getRobots();
+         robotTransformUpdater.update();
+
+         for (int i = 0; i < robots.length; i++)
          {
-            robot.update();
+            Robot robot = robots[i];
             robot.doControllers();
          }
 
          externalWrenchReader.initialize();
          physicsEngine.simulate(getDT(), gravity);
          externalWrenchReader.updateSCSGroundContactPoints();
-
-         Robot[] robots = getRobots();
 
          for (int i = 0; i < robots.length; i++)
          {
