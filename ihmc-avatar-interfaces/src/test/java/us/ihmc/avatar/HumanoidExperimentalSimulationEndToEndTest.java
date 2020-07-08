@@ -51,8 +51,6 @@ public abstract class HumanoidExperimentalSimulationEndToEndTest implements Mult
 
    public void testStanding(TestInfo testInfo) throws Exception
    {
-      simulationTestingParameters.setUsePefectSensors(true);
-
       DRCRobotModel robotModel = getRobotModel();
       FlatGroundEnvironment testEnvironment = new FlatGroundEnvironment();
       drcSimulationTestHelper = new DRCSimulationTestHelper(simulationTestingParameters, robotModel, testEnvironment);
