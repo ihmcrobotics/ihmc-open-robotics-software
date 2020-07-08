@@ -56,6 +56,8 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
    private final IHMCROS2Publisher<UIPositionCheckerPacket> uiPositionCheckerPacketpublisher;
    protected final AtomicReference<DoorLocationPacket> doorLocationPacket = new AtomicReference<DoorLocationPacket>();
    private final DoorOpenDetectorBehaviorService doorOpenDetectorBehaviorService;
+   
+   private long timeFirstDoorPushFinished = Long.MAX_VALUE;
 
    private final IHMCROS2Publisher<AutomaticManipulationAbortMessage> abortMessagePublisher;
 
@@ -238,6 +240,21 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
             //RIGHT hand in MultiClickdoor_0_objID197 ( 0.750, -0.049,  0.896 ) orientation 1.5911238903674156, 0.038548649273740986, -7.31590778193919E-4
 
          }
+         
+         @Override
+         public void onEntry()
+         {
+            super.onEntry();
+            timeFirstDoorPushFinished = Long.MAX_VALUE;
+         }
+         @Override
+         public boolean isDone()
+         {
+            if(super.isDone()&&timeFirstDoorPushFinished==Long.MAX_VALUE)
+               timeFirstDoorPushFinished = System.currentTimeMillis();
+            return super.isDone();
+         }
+
       };
       BehaviorAction pushDoorOpen = new BehaviorAction(atlasPrimitiveActions.leftHandTrajectoryBehavior)
       {
@@ -328,7 +345,7 @@ public class OpenPushDoorBehavior extends StateMachineBehavior<OpenDoorState>
       factory.addState(OpenDoorState.DONE, done);
       factory.addState(OpenDoorState.FAILED, failed);
 
-      factory.addTransition(OpenDoorState.PUSH_ON_DOOR, OpenDoorState.FAILED, t -> pushDoorALittle.isDone() && !doorOpenDetectorBehaviorService.isDoorOpen());
+      factory.addTransition(OpenDoorState.PUSH_ON_DOOR, OpenDoorState.FAILED, t -> pushDoorALittle.isDone() &&doorOpenDetectorBehaviorService.getLastupdateTime()>=timeFirstDoorPushFinished && !doorOpenDetectorBehaviorService.isDoorOpen());
       factory.addTransition(OpenDoorState.PUSH_ON_DOOR, OpenDoorState.PUSH_OPEN_DOOR, t -> doorOpenDetectorBehaviorService.isDoorOpen());
 
       //removing door open checks durring fast motions for now.
