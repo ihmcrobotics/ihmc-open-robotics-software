@@ -9,7 +9,6 @@ import us.ihmc.euclid.axisAngle.AxisAngle;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.shape.primitives.Box3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
-import us.ihmc.euclid.tuple2D.Vector2D;
 import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple3D.Vector3D;
 import us.ihmc.graphicsDescription.appearance.AppearanceDefinition;
@@ -18,7 +17,6 @@ import us.ihmc.robotics.geometry.PlanarRegion;
 import us.ihmc.robotics.geometry.PlanarRegionsList;
 import us.ihmc.robotics.geometry.PlanarRegionsListGenerator;
 import us.ihmc.simulationConstructionSetTools.robotController.ContactController;
-import us.ihmc.simulationConstructionSetTools.util.environments.AdjustableStairsEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.CommonAvatarEnvironmentInterface;
 import us.ihmc.simulationConstructionSetTools.util.environments.DefaultCommonAvatarEnvironment;
 import us.ihmc.simulationConstructionSetTools.util.environments.Fiducial;
@@ -43,9 +41,6 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
    private final CombinedTerrainObject3D combinedTerrainObject;
    private final ArrayList<ExternalForcePoint> contactPoints = new ArrayList<ExternalForcePoint>();
 
-   private final Point3D pullDoorLocation = new Point3D(0, -3.5, 0);
-   private final Point3D pushDoorLocation = new Point3D(0, -3.5, 0);
-
    private final List<PlanarRegionsList> planarRegionsLists = new ArrayList<>();
    private final List<AppearanceDefinition> appearances = new ArrayList<>();
 
@@ -58,10 +53,7 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
       combinedTerrainObject = new CombinedTerrainObject3D(getClass().getSimpleName());
 
       if (door)
-      {
-        // createPushDoor(pushDoorLocation);
-         createPullDoor(pullDoorLocation);
-      }
+         createDoor(false);
       if (barrel)
          createBarrel();
       if (debris)
@@ -82,12 +74,12 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
    private void addGroundRegion()
    {
       ConvexPolygon2D groundPolygon1 = new ConvexPolygon2D();
-      groundPolygon1.addVertex(-3.0, 3.0);
-      groundPolygon1.addVertex(-3.0, -3.0);
-      groundPolygon1.addVertex(0.0, -3.0);
-      groundPolygon1.addVertex(0.0, 3.0);
-      groundPolygon1.addVertex(1.5, -1.0);
-      groundPolygon1.addVertex(1.5, 1.0);
+      groundPolygon1.addVertex(-3.0, 2.5);
+      groundPolygon1.addVertex(-3.0, -2.5);
+      groundPolygon1.addVertex(-0.5, -2.5);
+      groundPolygon1.addVertex(-0.5, 2.5);
+      groundPolygon1.addVertex(1.25, -0.5);
+      groundPolygon1.addVertex(1.25, 0.5);
       groundPolygon1.update();
       PlanarRegion groundRegion1 = new PlanarRegion(new RigidBodyTransform(), groundPolygon1);
       addRegions(new PlanarRegionsList(groundRegion1), YoAppearance.LightGray());
@@ -118,40 +110,26 @@ public class PhaseOneDemoEnvironment implements CommonAvatarEnvironmentInterface
       throw new NotImplementedException("Debris not implemented");
    }
 
-   private void createPullDoor(Point3D location)
+   private void createDoor(boolean pushDoor)
    {
-      ContactableDoorRobot door = new ContactableDoorRobot("PullDoorRobot", location, doorYaw, Fiducial.FIDUCIAL150);
+      ContactableDoorRobot door;
+      if (pushDoor)
+      {
+         Point3D pushDoorLocation = new Point3D(doorLocation);
+         Vector3D offset = new Vector3D(ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(), 0.0, 0.0);
+         new AxisAngle(doorYaw, 0.0, 0.0).transform(offset);
+         pushDoorLocation.add(offset);
+
+         door = new ContactableDoorRobot("doorRobot", pushDoorLocation, doorYaw, Fiducial.FIDUCIAL50);
+         door.getPinJoint().setQ(Math.toRadians(180));
+      }
+      else
+      {
+         door = new ContactableDoorRobot("doorRobot", doorLocation, doorYaw, Fiducial.FIDUCIAL150);
+      }
+
       contactableRobots.add(door);
       door.createAvailableContactPoints(0, 15, 15, 0.02, true);
-
-
-      combinedTerrainObject.addBox(location.getX()
-            - 1.2192, location.getY() - 0.025, location.getX() + 0, location.getY() + 0.025, WALL_HEIGHT, YoAppearance.Bisque());
-      combinedTerrainObject.addBox(location.getX() + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
-                                   location.getY() - 0.025,
-                                   location.getX() + 1.2192 + ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
-                                   location.getY() + 0.025,
-                                   WALL_HEIGHT,
-                                   YoAppearance.Beige());
-
-   }
-   
-   
-   private void createPushDoor(Point3D location)
-   {
-      ContactableDoorRobot door = new ContactableDoorRobot("doorRobot", doorLocation, doorYaw, Fiducial.FIDUCIAL50);
-      contactableRobots.add(door);
-      door.getPinJoint().setQ(Math.toRadians(180));
-      door.createAvailableContactPoints(0, 15, 15, 0.02, true);
-
-      combinedTerrainObject.addBox(location.getX()
-            + 1.2192, location.getY() - 0.025, location.getX() + 0, location.getY() + 0.025, WALL_HEIGHT, YoAppearance.Bisque());
-      combinedTerrainObject.addBox(location.getX() - ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
-                                   location.getY() - 0.025,
-                                   location.getX() - 1.2192 - ContactableDoorRobot.DEFAULT_DOOR_DIMENSIONS.getX(),
-                                   location.getY() + 0.025,
-                                   WALL_HEIGHT,
-                                   YoAppearance.Beige());
 
       RigidBodyTransform wall1Transform = new RigidBodyTransform();
       wall1Transform.getTranslation().set(doorLocation);
