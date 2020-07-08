@@ -1,6 +1,7 @@
 package us.ihmc.atlas.behaviors.coordinator;
 
 import controller_msgs.msg.dds.*;
+import std_msgs.msg.dds.Empty;
 import us.ihmc.atlas.AtlasRobotModel;
 import us.ihmc.atlas.AtlasRobotVersion;
 import us.ihmc.avatar.drcRobot.RobotTarget;
@@ -15,13 +16,11 @@ import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.humanoidBehaviors.BehaviorModule;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehavior;
 import us.ihmc.humanoidBehaviors.lookAndStep.LookAndStepBehaviorAPI;
-import us.ihmc.humanoidBehaviors.tools.BehaviorMessagerUpdateThread;
 import us.ihmc.humanoidBehaviors.ui.BehaviorUIRegistry;
 import us.ihmc.humanoidBehaviors.ui.behaviors.LookAndStepBehaviorUI;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.BehaviorControlModeEnum;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.CurrentBehaviorStatus;
 import us.ihmc.humanoidRobotics.communication.packets.behaviors.HumanoidBehaviorType;
-import us.ihmc.log.LogTools;
 import us.ihmc.messager.kryo.KryoMessager;
 import us.ihmc.pubsub.DomainFactory;
 import us.ihmc.robotics.stateMachine.core.State;
@@ -67,7 +66,7 @@ public class BuildingExplorationBehaviorCoordinator
       executorService = Executors.newSingleThreadScheduledExecutor();
 
       teleopState = new TeleopState();
-      lookAndStepState = new LookAndStepState();
+      lookAndStepState = new LookAndStepState(ros2Node);
       walkThroughDoorState = new WalkThroughDoorState(robotName, ros2Node);
       traverseStairsState = new TraverseStairsState();
 
@@ -194,11 +193,16 @@ public class BuildingExplorationBehaviorCoordinator
    private static class LookAndStepState implements State
    {
       private final KryoMessager messager;
+      private final IHMCROS2Publisher<Pose3D> goalPublisher;
+      private final IHMCROS2Publisher<Empty> resetPublisher;
       private final Pose3D bombPose = new Pose3D();
 
-      public LookAndStepState()
+      public LookAndStepState(Ros2Node ros2Node)
       {
          BehaviorUIRegistry behaviorRegistry = BehaviorUIRegistry.of(LookAndStepBehaviorUI.DEFINITION);
+         goalPublisher = IHMCROS2Publisher.newPose3DPublisher(ros2Node, ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Pose3D.class));
+         resetPublisher = ROS2Tools.createPublisher(ros2Node, ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Empty.class));
+
          messager = KryoMessager.createClient(behaviorRegistry.getMessagerAPI(),
                                               "127.0.0.1",
                                               NetworkPorts.BEHAVIOUR_MODULE_PORT.getPort(),
@@ -217,14 +221,17 @@ public class BuildingExplorationBehaviorCoordinator
       @Override
       public void onEntry()
       {
+         resetPublisher.publish(new Empty());
+
          String behaviorName = LookAndStepBehavior.DEFINITION.getName();
          messager.submitMessage(BehaviorModule.API.BehaviorSelection, behaviorName);
-         ThreadTools.sleep(500);
+         ThreadTools.sleep(100);
 
          messager.submitMessage(LookAndStepBehaviorAPI.OperatorReviewEnabled, false);
-         ThreadTools.sleep(500);
+         ThreadTools.sleep(100);
 
-         messager.submitMessage(LookAndStepBehaviorAPI.GoalInput, bombPose);
+         goalPublisher.publish(bombPose);
+         ThreadTools.sleep(100);
       }
 
       @Override
