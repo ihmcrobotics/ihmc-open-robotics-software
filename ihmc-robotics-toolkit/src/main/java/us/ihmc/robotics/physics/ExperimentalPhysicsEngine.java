@@ -53,6 +53,7 @@ public class ExperimentalPhysicsEngine
    private final Map<RigidBodyBasics, PhysicsEngineRobotData> robotMap = new HashMap<>();
    private final YoMultiContactImpulseCalculatorPool multiContactImpulseCalculatorPool;
    private final List<ExternalWrenchReader> externalWrenchReaders = new ArrayList<>();
+   private final List<InertialMeasurementReader> inertialMeasurementReaders = new ArrayList<>();
 
    private List<MultiRobotCollisionGroup> collisionGroups;
 
@@ -141,6 +142,11 @@ public class ExperimentalPhysicsEngine
       externalWrenchReaders.add(externalWrenchReader);
    }
 
+   public void addInertialMeasurementReader(InertialMeasurementReader reader)
+   {
+      inertialMeasurementReaders.add(reader);
+   }
+
    public void setGlobalConstraintParameters(ConstraintParametersReadOnly parameters)
    {
       globalConstraintParameters.set(parameters);
@@ -158,11 +164,17 @@ public class ExperimentalPhysicsEngine
       if (!initialize)
          return false;
 
-      for (int i = 0; i < robotList.size(); i++)
+      for (PhysicsEngineRobotData robot : robotList)
       {
-         PhysicsEngineRobotData robot = robotList.get(i);
          robot.initialize();
          robot.notifyPhysicsOutputReaders();
+
+         for (InertialMeasurementReader reader : inertialMeasurementReaders)
+         {
+            reader.initialize(robot.getMultiBodySystem(),
+                              robot.getForwardDynamicsPlugin().getForwardDynamicsCalculator().getAccelerationProvider(),
+                              robot.getIntegrator().getRigidBodyTwistChangeProvider());
+         }
       }
       initialize = false;
       return true;
@@ -249,6 +261,11 @@ public class ExperimentalPhysicsEngine
          PhysicsEngineRobotData robot = robotList.get(i);
          robot.updateFrames();
          robot.notifyPhysicsOutputReaders();
+      }
+
+      for (InertialMeasurementReader reader : inertialMeasurementReaders)
+      {
+         reader.read(dt);
       }
 
       time.add(dt);
