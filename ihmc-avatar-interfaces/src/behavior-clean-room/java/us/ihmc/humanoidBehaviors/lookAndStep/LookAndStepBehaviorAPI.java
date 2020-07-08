@@ -13,14 +13,32 @@ import java.util.List;
 
 public class LookAndStepBehaviorAPI
 {
+   /**
+    * Starts the look and step behavior pursuing a goal if not already pursiung a goal.
+    * If look and step is already working on a goal, first send a RESET and then send a new GOAL_INPUT. (Todo: Make this better.)
+    */
    public static final ROS2Topic<Pose3D> GOAL_INPUT = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Pose3D.class);
+   /**
+    * Robot will finish taking the current step, the goal will be cleared, and the behavior will wait for a new GOAL_INPUT.
+    */
    public static final ROS2Topic<Empty> RESET = ROS2Tools.BEHAVIOR_MODULE.withInput().withType(Empty.class);
+   /**
+    * Output that will be send upon reaching the goal.
+    */
    public static final ROS2Topic<Empty> REACHED_GOAL = ROS2Tools.BEHAVIOR_MODULE.withOutput().withType(Empty.class);
+
+   /*
+    * TODO: Add PAUSE and RESUME that work in any state.
+    *  RESET should probably reset more instance variables than just the goal
+    */
 
    private static final MessagerAPIFactory apiFactory = new MessagerAPIFactory();
    private static final MessagerAPIFactory.Category RootCategory = apiFactory.createRootCategory("LookAndStepBehavior");
    private static final MessagerAPIFactory.CategoryTheme LookAndStepTheme = apiFactory.createCategoryTheme("LookAndStep");
 
+   /*
+    * TODO: Review API should contain the data to be reviewed and the Approval should accept a modified version
+    */
    public static final MessagerAPIFactory.Topic<Boolean> OperatorReviewEnabled = topic("OperatorReviewEnabled");
    public static final MessagerAPIFactory.Topic<Boolean> ReviewApproval = topic("ReviewApproval");
 
