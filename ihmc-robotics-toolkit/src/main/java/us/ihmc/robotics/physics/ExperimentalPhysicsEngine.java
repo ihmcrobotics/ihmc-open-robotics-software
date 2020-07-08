@@ -3,6 +3,7 @@ package us.ihmc.robotics.physics;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import gnu.trove.list.linked.TDoubleLinkedList;
 import us.ihmc.euclid.referenceFrame.ReferenceFrame;
@@ -44,13 +45,12 @@ public class ExperimentalPhysicsEngine
    private final YoVariableRegistry physicsEngineRegistry = new YoVariableRegistry("PhysicsPlugins");
    private final YoGraphicsListRegistry physicsEngineGraphicsRegistry = new YoGraphicsListRegistry();
    private final List<PhysicsEngineRobotData> robotList = new ArrayList<>();
-   private final List<MultiBodySystemStateReader> physicsOutputReaders = new ArrayList<>();
 
    private final List<Collidable> environmentCollidables = new ArrayList<>();
 
-   private final SimpleCollisionDetection collisionDetectionPlugin;
-   private final MultiRobotForwardDynamicsPlugin multiRobotPhysicsEnginePlugin;
-   private final MultiRobotFirstOrderIntegrator integrationMethod = new MultiRobotFirstOrderIntegrator();
+   private final SimpleCollisionDetection collisionDetectionPlugin = new SimpleCollisionDetection(rootFrame);
+   private final CollisionSlipEstimatorMap collisionSlipEstimator = new CollisionSlipEstimatorMap(rootFrame);
+   private final MultiRobotForwardDynamicsPlugin multiRobotPhysicsEnginePlugin = new MultiRobotForwardDynamicsPlugin(rootFrame, physicsEngineRegistry);
 
    private final CollidableListVisualizer environmentCollidableVisualizers;
    private final List<CollidableListVisualizer> robotCollidableVisualizers = new ArrayList<>();
@@ -67,8 +67,6 @@ public class ExperimentalPhysicsEngine
 
    public ExperimentalPhysicsEngine()
    {
-      collisionDetectionPlugin = new SimpleCollisionDetection(rootFrame);
-      multiRobotPhysicsEnginePlugin = new MultiRobotForwardDynamicsPlugin(rootFrame, physicsEngineRegistry);
       AppearanceDefinition environmentCollidableAppearance = YoAppearance.AluminumMaterial();
       environmentCollidableAppearance.setTransparency(0.5);
       environmentCollidableVisualizers = new CollidableListVisualizer(collidableVisualizerGroupName,
@@ -77,30 +75,43 @@ public class ExperimentalPhysicsEngine
                                                                       physicsEngineGraphicsRegistry);
    }
 
+   public void addEnvironmentCollidable(Collidable collidable)
+   {
+      environmentCollidables.add(collidable);
+      environmentCollidableVisualizers.addCollidable(collidable);
+   }
+
+   public void addEnvironmentCollidables(Collection<? extends Collidable> collidables)
+   {
+      collidables.forEach(this::addEnvironmentCollidable);
+   }
+
    public void addRobot(String robotName, RigidBodyBasics rootBody, MultiBodySystemStateWriter controllerOutputWriter,
                         MultiBodySystemStateWriter robotInitialStateWriter, RobotCollisionModel robotCollisionModel,
                         MultiBodySystemStateReader physicsOutputReader)
    {
-      PhysicsEngineRobotData robot = new PhysicsEngineRobotData(robotName,
-                                                                rootBody,
-                                                                robotInitialStateWriter,
-                                                                controllerOutputWriter,
-                                                                robotCollisionModel,
-                                                                physicsEngineGraphicsRegistry);
+      PhysicsEngineRobotData robot = new PhysicsEngineRobotData(robotName, rootBody, robotCollisionModel, physicsEngineGraphicsRegistry);
+      YoVariableRegistry robotRegistry = robot.getRobotRegistry();
+      robot.setRobotInitialStateWriter(robotInitialStateWriter);
+      robot.setControllerOutputWriter(controllerOutputWriter);
+      robot.addPhysicsOutputReader(physicsOutputReader);
       multiRobotPhysicsEnginePlugin.addRobot(robot);
-      integrationMethod.addMultiBodySystem(robot.getMultiBodySystem());
-      physicsOutputReader.setMultiBodySystem(robot.getMultiBodySystem());
-      physicsOutputReaders.add(physicsOutputReader);
       AppearanceDefinition robotCollidableAppearance = YoAppearance.DarkGreen();
       robotCollidableAppearance.setTransparency(0.5);
       CollidableListVisualizer collidableVisualizers = new CollidableListVisualizer(collidableVisualizerGroupName,
                                                                                     robotCollidableAppearance,
-                                                                                    robot.getRobotRegistry(),
+                                                                                    robotRegistry,
                                                                                     physicsEngineGraphicsRegistry);
       robot.getCollidables().forEach(collidableVisualizers::addCollidable);
       robotCollidableVisualizers.add(collidableVisualizers);
-      physicsEngineRegistry.addChild(robot.getRobotRegistry());
+      physicsEngineRegistry.addChild(robotRegistry);
       robotList.add(robot);
+   }
+
+   public void addRobotPhysicsOutputReader(String robotName, MultiBodySystemStateReader physicsOutputReader)
+   {
+      PhysicsEngineRobotData physicsEngineRobotData = robotList.stream().filter(robot -> robot.getRobotName().equals(robotName)).findFirst().get();
+      physicsEngineRobotData.addPhysicsOutputReader(physicsOutputReader);
    }
 
    public void addExternalWrenchReader(ExternalWrenchReader externalWrenchReader)
@@ -127,7 +138,7 @@ public class ExperimentalPhysicsEngine
       {
          PhysicsEngineRobotData robot = robotList.get(i);
          robot.initialize();
-         physicsOutputReaders.get(i).read();
+         robot.notifyPhysicsOutputReaders();
       }
       initialize = false;
       return true;
@@ -147,10 +158,15 @@ public class ExperimentalPhysicsEngine
       }
 
       environmentCollidables.forEach(collidable -> collidable.updateBoundingBox(rootFrame));
+
+      collisionSlipEstimator.processPreCollisionDetection();
+      if (multiRobotPhysicsEnginePlugin.hasGlobalContactParameters())
+         collisionDetectionPlugin.setMinimumPenetration(multiRobotPhysicsEnginePlugin.getGlobalContactParameters().getMinimumPenetration());
       collisionDetectionPlugin.evaluationCollisions(robotList, () -> environmentCollidables);
-      multiRobotPhysicsEnginePlugin.submitCollisions(collisionDetectionPlugin);
+      collisionSlipEstimator.processPostCollisionDetection(collisionDetectionPlugin.getAllCollisions());
+
+      multiRobotPhysicsEnginePlugin.submitCollisions(collisionDetectionPlugin.getAllCollisions());
       multiRobotPhysicsEnginePlugin.doScience(time.getValue(), dt, gravity);
-      integrationMethod.integrate(dt);
 
       environmentCollidableVisualizers.update(collisionDetectionPlugin.getAllCollisions());
       robotCollidableVisualizers.forEach(visualizer -> visualizer.update(collisionDetectionPlugin.getAllCollisions()));
@@ -159,7 +175,7 @@ public class ExperimentalPhysicsEngine
       {
          PhysicsEngineRobotData robot = robotList.get(i);
          robot.updateFrames();
-         physicsOutputReaders.get(i).read();
+         robot.notifyPhysicsOutputReaders();
       }
 
       time.add(dt);
@@ -180,10 +196,14 @@ public class ExperimentalPhysicsEngine
       }
    }
 
-   public void addEnvironmentCollidables(Collection<? extends Collidable> collidables)
+   public List<String> getRobotNames()
    {
-      environmentCollidables.addAll(collidables);
-      collidables.forEach(environmentCollidableVisualizers::addCollidable);
+      return robotList.stream().map(PhysicsEngineRobotData::getRobotName).collect(Collectors.toList());
+   }
+
+   public double getTime()
+   {
+      return time.getValue();
    }
 
    public YoVariableRegistry getPhysicsEngineRegistry()

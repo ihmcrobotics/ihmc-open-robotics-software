@@ -46,4 +46,11 @@ public class SwingPlannerParametersUIController
    {
       parameters.save();
    }
+
+   @FXML
+   public void loadFile()
+   {
+      tableViewWrapper.loadNewFile();
+      messager.submitMessage(FootstepPlannerMessagerAPI.SwingPlannerParameters, parameters);
+   }
 }

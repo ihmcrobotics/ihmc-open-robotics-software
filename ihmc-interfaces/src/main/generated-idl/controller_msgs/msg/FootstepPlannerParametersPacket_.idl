@@ -10,6 +10,12 @@ module controller_msgs
       const double DEFAULT_NO_VALUE =
       -11.1;
 
+      const octet ROBOT_SIDE_LEFT =
+      0;
+
+      const octet ROBOT_SIDE_RIGHT =
+      1;
+
 
       /**
        * This message is part of the IHMC footstep planning module.
@@ -220,7 +226,15 @@ module controller_msgs
          * z-up sole frame.
          */
         @defaultValue(value=-11.1)
-        double maximum_step_z;
+        double maximum_left_step_z;
+        /**
+         * Maximum vertical distance between consecutive footsteps
+         * 
+         * A candidate footstep will be rejected if its z-value is greater than this value, when expressed its parent's
+         * z-up sole frame.
+         */
+        @defaultValue(value=-11.1)
+        double maximum_right_step_z;
         /**
          * Maximum vertical distance between consecutive footsteps when the trailing foot is pitched at {@link #getMinimumSurfaceInclineRadians()} .
          * 
@@ -543,6 +557,14 @@ module controller_msgs
          */
         @defaultValue(value=-11.1)
         double distance_epsilon_to_bridge_regions;
+        /**
+         * If this is non-null, this side will try to do a square-up step along the plan while the other side takes "normal" steps
+         * The graph search framework's notion of a node is a footstep, and therefore an edge is a stance and touchdown pose,
+         * so restrictions touchdown based on start-of-swing can't be imposed. This is one workaround, in which only one side is
+         * encourage to step, to enable walking up stairs such that two steps per stair are planned, for example.
+         */
+        @defaultValue(value=255)
+        octet step_only_with_requested_side;
       };
     };
   };

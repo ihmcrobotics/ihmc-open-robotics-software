@@ -36,7 +36,6 @@ public class AtlasPushRecoveryOverGapTest extends AvatarPushRecoveryOverGapTest
    }
 
    @Override
-   @Disabled
    @Test
    public void testSidePush() throws SimulationExceededMaximumTimeException
    {

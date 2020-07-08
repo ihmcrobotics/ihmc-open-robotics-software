@@ -18,25 +18,9 @@ import us.ihmc.ros2.RealtimeRos2Node;
 import java.util.ArrayList;
 import java.util.List;
 
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionCommand;
-import us.ihmc.humanoidRobotics.communication.controllerAPI.command.PlanarRegionsListCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxInputCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsStreamingToolboxAPI.KinematicsStreamingToolboxOutputConfigurationCommand;
-import us.ihmc.humanoidRobotics.communication.kinematicsToolboxAPI.KinematicsToolboxConfigurationCommand;
-import us.ihmc.mecano.multiBodySystem.interfaces.OneDoFJointBasics;
-import us.ihmc.pubsub.DomainFactory.PubSubImplementation;
-import us.ihmc.robotDataLogger.util.JVMStatisticsGenerator;
-import us.ihmc.robotModels.FullHumanoidRobotModel;
-import us.ihmc.ros2.RealtimeRos2Node;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class StepConstraintToolboxModule extends ToolboxModule
 {
-   private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 5;
+   private static final int DEFAULT_UPDATE_PERIOD_MILLISECONDS = 10;
 
    protected final StepConstraintToolboxController controller;
    private IHMCRealtimeROS2Publisher<StepConstraintMessage> constraintRegionPublisher;
@@ -56,7 +40,8 @@ public class StepConstraintToolboxModule extends ToolboxModule
                                                        robotModel.getWalkingControllerParameters(),
                                                        fullRobotModel,
                                                        gravityZ,
-                                                       registry);
+                                                       registry,
+                                                       yoGraphicsListRegistry);
 
       startYoVariableServer();
       if (yoVariableServer != null)

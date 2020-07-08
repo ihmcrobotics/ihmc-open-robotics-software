@@ -7,12 +7,9 @@ import us.ihmc.commonWalkingControlModules.polygonWiggling.WiggleParameters;
 import us.ihmc.euclid.Axis3D;
 import us.ihmc.euclid.geometry.ConvexPolygon2D;
 import us.ihmc.euclid.geometry.interfaces.ConvexPolygon2DReadOnly;
-import us.ihmc.euclid.geometry.interfaces.Vertex2DSupplier;
-import us.ihmc.euclid.geometry.tools.EuclidGeometryTools;
 import us.ihmc.euclid.shape.primitives.Cylinder3D;
 import us.ihmc.euclid.transform.RigidBodyTransform;
 import us.ihmc.euclid.tuple2D.interfaces.Point2DReadOnly;
-import us.ihmc.euclid.tuple3D.Point3D;
 import us.ihmc.euclid.tuple4D.Vector4D;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNode;
 import us.ihmc.footstepPlanning.graphSearch.graph.FootstepNodeTools;
@@ -26,7 +23,6 @@ import us.ihmc.robotics.robotSide.SideDependentList;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 
 public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
 {
@@ -133,10 +129,24 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
       else
       {
          FootstepNodeSnapData snapData = new FootstepNodeSnapData(snapTransform);
-         snapData.setPlanarRegionId(planarRegionToPack.getRegionId());
+         snapData.setRegionIndex(getIndex(planarRegionToPack, planarRegionsList));
          computeCroppedFoothold(footstepNode, snapData);
          return snapData;
       }
+   }
+
+   private static int getIndex(PlanarRegion planarRegion, PlanarRegionsList planarRegionsList)
+   {
+      double epsilon = 1e-7;
+      for (int i = 0; i < planarRegionsList.getNumberOfPlanarRegions(); i++)
+      {
+         if (planarRegionsList.getPlanarRegion(i).epsilonEquals(planarRegion, epsilon))
+         {
+            return i;
+         }
+      }
+
+      return -1;
    }
 
    private double getMaximumRegionHeightToConsider(FootstepNode stanceNode)
@@ -159,16 +169,16 @@ public class FootstepNodeSnapAndWiggler implements FootstepNodeSnapperReadOnly
 
    protected void computeWiggleTransform(FootstepNode footstepNode, FootstepNode stanceNode, FootstepNodeSnapData snapData)
    {
-      PlanarRegion planarRegion = planarRegionsList.getRegionWithId(snapData.getPlanarRegionId());
-      if (planarRegion == null)
+      int regionIndex = snapData.getRegionIndex();
+      if (regionIndex == -1)
       {
-         LogTools.warn("Could not find matching region id, unable to find wiggle transform. Region id = " + snapData.getPlanarRegionId());
+         LogTools.warn("Could not find matching region id, unable to find wiggle transform. Region id = " + snapData.getRegionIndex());
          snapData.getWiggleTransformInWorld().setIdentity();
          return;
       }
       else
       {
-         planarRegionToPack.set(planarRegion);
+         planarRegionToPack.set(planarRegionsList.getPlanarRegion(regionIndex));
       }
 
       FootstepNodeTools.getFootPolygon(footstepNode, footPolygonsInSoleFrame.get(footstepNode.getRobotSide()), footPolygon);

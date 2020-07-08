@@ -3,6 +3,7 @@ package us.ihmc.robotics.physics;
 public class ConstraintParameters implements ConstraintParametersBasics
 {
    private double coefficientOfRestitution;
+   private double restitutionThreshold;
    private double errorReductionParameter;
    private double constraintForceMixing;
 
@@ -10,7 +11,7 @@ public class ConstraintParameters implements ConstraintParametersBasics
    {
    }
 
-   public ConstraintParameters(double coefficientOfRestitution, double errorReductionParameter, double constraintForceMixing)
+   public ConstraintParameters(double coefficientOfRestitution, double restitutionThreshold, double errorReductionParameter, double constraintForceMixing)
    {
       this.coefficientOfRestitution = coefficientOfRestitution;
       this.errorReductionParameter = errorReductionParameter;
@@ -21,6 +22,12 @@ public class ConstraintParameters implements ConstraintParametersBasics
    public void setCoefficientOfRestitution(double coefficientOfRestitution)
    {
       this.coefficientOfRestitution = coefficientOfRestitution;
+   }
+
+   @Override
+   public void setRestitutionThreshold(double restitutionThreshold)
+   {
+      this.restitutionThreshold = restitutionThreshold;
    }
 
    @Override
@@ -39,6 +46,12 @@ public class ConstraintParameters implements ConstraintParametersBasics
    public double getCoefficientOfRestitution()
    {
       return coefficientOfRestitution;
+   }
+
+   @Override
+   public double getRestitutionThreshold()
+   {
+      return restitutionThreshold;
    }
 
    @Override

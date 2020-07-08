@@ -22,7 +22,8 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  maxStepYaw                                   = keys.addDoubleKey ("Max step yaw", 0.6);
    public static final DoubleStoredPropertyKey  minStepWidth                                 = keys.addDoubleKey ("Min step width", 0.15);
    public static final DoubleStoredPropertyKey  maxStepWidth                                 = keys.addDoubleKey ("Max step width", 0.4);
-   public static final DoubleStoredPropertyKey  maxStepZ                                     = keys.addDoubleKey ("Max step Z", 0.28);
+   public static final DoubleStoredPropertyKey  maxLeftStepZ                                 = keys.addDoubleKey ("Max left step Z", 0.28);
+   public static final DoubleStoredPropertyKey  maxRightStepZ                                = keys.addDoubleKey ("Max right step Z", 0.28);
    public static final DoubleStoredPropertyKey  minStepZWhenFullyPitched                     = keys.addDoubleKey ("Min step Z when fully pitched", 0.35);
    public static final DoubleStoredPropertyKey  maxStepXWhenFullyPitched                     = keys.addDoubleKey ("Max step X when fully pitched", 0.45);
    public static final DoubleStoredPropertyKey  maximumStepXWhenForwardAndDown               = keys.addDoubleKey ("Max step X when forward and down", 0.35);
@@ -65,6 +66,7 @@ public class FootstepPlannerParameterKeys
    public static final DoubleStoredPropertyKey  shinPitch                                    = keys.addDoubleKey("Shin pitch", 0.0);
    public static final DoubleStoredPropertyKey  shinHeightOffet                              = keys.addDoubleKey("Shin height offet", 0.05);
    public static final DoubleStoredPropertyKey  distanceEpsilonToBridgeRegions               = keys.addDoubleKey("Distance epsilon to bridge regions", 0.0);
+   public static final IntegerStoredPropertyKey stepOnlyWithRequestedSide                    = keys.addIntegerKey("Step only with requested side", -1);
 
    // cost parameters
    public static final DoubleStoredPropertyKey  aStarHeuristicsWeight                        = keys.addDoubleKey ("AStar heuristics weight", 1.5);
