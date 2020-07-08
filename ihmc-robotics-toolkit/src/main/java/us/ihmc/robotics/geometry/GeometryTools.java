@@ -35,6 +35,7 @@ import us.ihmc.euclid.tuple3D.interfaces.Point3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DBasics;
 import us.ihmc.euclid.tuple3D.interfaces.Tuple3DReadOnly;
 import us.ihmc.euclid.tuple3D.interfaces.Vector3DBasics;
+import us.ihmc.euclid.tuple3D.interfaces.Vector3DReadOnly;
 import us.ihmc.euclid.tuple4D.Quaternion;
 
 public class GeometryTools
@@ -1192,5 +1193,128 @@ public class GeometryTools
 
       BoundingBox2D intersection = new BoundingBox2D(minX, minY, maxX, maxY);
       return intersection;
+   }
+
+   /**
+    * Returns a boolean value stating whether the two given points, i.e. {@code firstQuery} and
+    * {@code secondQuery}, are on the same side of a plane or separated by the plane.
+    * <p>
+    * The plane is defined by two points that belongs to it and a tangent, i.e. vector orthogonal to
+    * the plane's normal.
+    * </p>
+    * 
+    * @param firstQuery         the first point to test. Not modified.
+    * @param secondQuery        the second point to test. Not modified.
+    * @param firstPointOnPlane  the coordinates of a first point that belongs to the plane. Not
+    *                           modified.
+    * @param secondPointOnPlane the coordinates of a second point that belongs to the plane. Not
+    *                           modified.
+    * @param planeTangent       a vector that is orthogonal to the plane's normal. Not modified.
+    * @return {@code true} if the two queries are on the same side of the plane,
+    *         {@code false otherwise}.
+    */
+   public static boolean arePoint3DsSameSideOfPlane3D(Point3DReadOnly firstQuery, Point3DReadOnly secondQuery, Point3DReadOnly firstPointOnPlane,
+                                                      Point3DReadOnly secondPointOnPlane, Vector3DReadOnly planeTangent)
+   {
+      double firstQueryX = firstQuery.getX();
+      double firstQueryY = firstQuery.getY();
+      double firstQueryZ = firstQuery.getZ();
+
+      double secondQueryX = secondQuery.getX();
+      double secondQueryY = secondQuery.getY();
+      double secondQueryZ = secondQuery.getZ();
+
+      double firstPointOnPlaneX = firstPointOnPlane.getX();
+      double firstPointOnPlaneY = firstPointOnPlane.getY();
+      double firstPointOnPlaneZ = firstPointOnPlane.getZ();
+
+      double planeFirstTangentX = planeTangent.getX();
+      double planeFirstTangentY = planeTangent.getY();
+      double planeFirstTangentZ = planeTangent.getZ();
+
+      double planeSecondTangentX = firstPointOnPlane.getX() - secondPointOnPlane.getX();
+      double planeSecondTangentY = firstPointOnPlane.getY() - secondPointOnPlane.getY();
+      double planeSecondTangentZ = firstPointOnPlane.getZ() - secondPointOnPlane.getZ();
+
+      return arePoint3DsSameSideOfPlane3D(firstQueryX,
+                                          firstQueryY,
+                                          firstQueryZ,
+                                          secondQueryX,
+                                          secondQueryY,
+                                          secondQueryZ,
+                                          firstPointOnPlaneX,
+                                          firstPointOnPlaneY,
+                                          firstPointOnPlaneZ,
+                                          planeFirstTangentX,
+                                          planeFirstTangentY,
+                                          planeFirstTangentZ,
+                                          planeSecondTangentX,
+                                          planeSecondTangentY,
+                                          planeSecondTangentZ);
+   }
+
+   /**
+    * Returns a boolean value stating whether the two given points, i.e. {@code firstQuery} and
+    * {@code secondQuery}, are on the same side of a plane or separated by the plane.
+    * <p>
+    * The plane is defined by two points that belongs to it and a tangent, i.e. vector orthogonal to
+    * the plane's normal.
+    * </p>
+    * 
+    * @param firstQueryX         the x-coordinate of the first point to test. Not modified.
+    * @param firstQueryY         the y-coordinate of the first point to test. Not modified.
+    * @param firstQueryZ         the z-coordinate of the first point to test. Not modified.
+    * @param secondQueryX        the x-coordinate of the second point to test. Not modified.
+    * @param secondQueryY        the y-coordinate of the second point to test. Not modified.
+    * @param secondQueryZ        the z-coordinate of the second point to test. Not modified.
+    * @param pointOnPlaneX       the x-coordinate of a point that belongs to the plane. Not modified.
+    * @param pointOnPlaneY       the y-coordinate of a point that belongs to the plane. Not modified.
+    * @param pointOnPlaneZ       the z-coordinate of a point that belongs to the plane. Not modified.
+    * @param planeFirstTangentX  the x-component of a first vector that is orthogonal to the plane's
+    *                            normal. Not modified.
+    * @param planeFirstTangentY  the y-component of a first vector that is orthogonal to the plane's
+    *                            normal. Not modified.
+    * @param planeFirstTangentZ  the z-component of a first vector that is orthogonal to the plane's
+    *                            normal. Not modified.
+    * @param planeSecondTangentX the x-component of a second vector that is orthogonal to the plane's
+    *                            normal. Not modified.
+    * @param planeSecondTangentY the y-component of a second vector that is orthogonal to the plane's
+    *                            normal. Not modified.
+    * @param planeSecondTangentZ the z-component of a second vector that is orthogonal to the plane's
+    *                            normal. Not modified.
+    * @return {@code true} if the two queries are on the same side of the plane,
+    *         {@code false otherwise}.
+    */
+   public static boolean arePoint3DsSameSideOfPlane3D(double firstQueryX, double firstQueryY, double firstQueryZ, double secondQueryX, double secondQueryY,
+                                                      double secondQueryZ, double pointOnPlaneX, double pointOnPlaneY, double pointOnPlaneZ,
+                                                      double planeFirstTangentX, double planeFirstTangentY, double planeFirstTangentZ,
+                                                      double planeSecondTangentX, double planeSecondTangentY, double planeSecondTangentZ)
+   {
+
+      double planeNormalX = planeFirstTangentY * planeSecondTangentZ - planeFirstTangentZ * planeSecondTangentY;
+      double planeNormalY = planeFirstTangentZ * planeSecondTangentX - planeFirstTangentX * planeSecondTangentZ;
+      double planeNormalZ = planeFirstTangentX * planeSecondTangentY - planeFirstTangentY * planeSecondTangentX;
+
+      boolean isFirstQueryAbovePlane = EuclidGeometryTools.isPoint3DAboveOrBelowPlane3D(firstQueryX,
+                                                                                        firstQueryY,
+                                                                                        firstQueryZ,
+                                                                                        pointOnPlaneX,
+                                                                                        pointOnPlaneY,
+                                                                                        pointOnPlaneZ,
+                                                                                        planeNormalX,
+                                                                                        planeNormalY,
+                                                                                        planeNormalZ,
+                                                                                        true);
+      boolean isSecondQueryAbovePlane = EuclidGeometryTools.isPoint3DAboveOrBelowPlane3D(secondQueryX,
+                                                                                         secondQueryY,
+                                                                                         secondQueryZ,
+                                                                                         pointOnPlaneX,
+                                                                                         pointOnPlaneY,
+                                                                                         pointOnPlaneZ,
+                                                                                         planeNormalX,
+                                                                                         planeNormalY,
+                                                                                         planeNormalZ,
+                                                                                         true);
+      return isFirstQueryAbovePlane == isSecondQueryAbovePlane;
    }
 }

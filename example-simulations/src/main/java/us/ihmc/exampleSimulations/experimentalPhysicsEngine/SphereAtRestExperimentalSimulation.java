@@ -18,10 +18,14 @@ import us.ihmc.simulationconstructionset.SupportedGraphics3DAdapter;
 
 public class SphereAtRestExperimentalSimulation
 {
-   private final ContactParameters contactParameters = new ContactParameters(5.0e-5, 0.0, 0.0, 0.0, 0.01, 0.0, 1.0);
+   private final ContactParameters contactParameters = new ContactParameters();
 
    public SphereAtRestExperimentalSimulation()
    {
+      contactParameters.setMinimumPenetration(5.0e-5);
+      contactParameters.setErrorReductionParameter(0.01);
+      contactParameters.setConstraintForceMixing(1.0);
+
       double sphereRadius = 0.5;
       double sphereMass = 1.0;
 

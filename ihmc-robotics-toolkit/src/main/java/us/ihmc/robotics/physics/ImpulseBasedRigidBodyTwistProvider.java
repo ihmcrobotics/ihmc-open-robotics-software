@@ -101,6 +101,13 @@ public class ImpulseBasedRigidBodyTwistProvider implements RigidBodyTwistProvide
       impulse.get(this.impulse);
    }
 
+   public void setImpulse(Vector3DReadOnly impulseLinear, double impulseAngular)
+   {
+      isImpulseZero = false;
+      impulseLinear.get(this.impulse);
+      this.impulse.set(3, 0, impulseAngular);
+   }
+
    private final DMatrixRMaj twistMatrix = new DMatrixRMaj(Twist.SIZE, 1);
 
    @Override
