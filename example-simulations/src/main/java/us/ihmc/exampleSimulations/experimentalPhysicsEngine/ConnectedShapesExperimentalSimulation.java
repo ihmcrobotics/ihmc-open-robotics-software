@@ -39,7 +39,6 @@ public class ConnectedShapesExperimentalSimulation
       contactParameters.setErrorReductionParameter(0.001);
       contactParameters.setCoefficientOfRestitution(0.5);
       contactParameters.setRestitutionThreshold(0.15);
-      contactParameters.setConstraintForceMixing(1.0);
 
       Vector3D boxSize1 = new Vector3D(0.5, 0.3, 0.3);
       double boxMass1 = 1.0;

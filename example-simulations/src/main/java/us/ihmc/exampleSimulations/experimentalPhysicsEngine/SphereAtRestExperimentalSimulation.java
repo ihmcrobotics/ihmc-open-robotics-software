@@ -24,7 +24,6 @@ public class SphereAtRestExperimentalSimulation
    {
       contactParameters.setMinimumPenetration(5.0e-5);
       contactParameters.setErrorReductionParameter(0.01);
-      contactParameters.setConstraintForceMixing(1.0);
 
       double sphereRadius = 0.5;
       double sphereMass = 1.0;

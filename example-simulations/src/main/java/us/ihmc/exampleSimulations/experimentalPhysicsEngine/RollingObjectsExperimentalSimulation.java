@@ -37,7 +37,6 @@ public class RollingObjectsExperimentalSimulation
       contactParameters.setMinimumPenetration(5.0e-5);
       contactParameters.setCoefficientOfFriction(0.7);
       contactParameters.setErrorReductionParameter(0.001);
-      contactParameters.setConstraintForceMixing(1.0);
 
       double ballRadius = 0.2;
       double ballMass = 1.0;

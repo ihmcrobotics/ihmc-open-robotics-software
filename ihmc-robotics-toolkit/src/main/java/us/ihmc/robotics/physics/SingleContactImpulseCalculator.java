@@ -393,15 +393,6 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
             linearVelocitySolverInput.subZ(normalError);
          }
       }
-      double serp = contactParameters.getSlipErrorReductionParameter();
-      if (serp != 0.0)
-      {
-         collisionErrorReductionTerm.setIncludingFrame(collisionResult.getAccumulatedSlipForA());
-         collisionErrorReductionTerm.scale(-serp / dt);
-         collisionErrorReductionTerm.changeFrame(contactFrame);
-         // Ensure slip error is only tangential to the contact.
-         linearVelocitySolverInput.sub(collisionErrorReductionTerm.getX(), collisionErrorReductionTerm.getY(), 0.0);
-      }
 
       isContactClosing = linearVelocitySolverInput.getZ() < 0.0;
       impulseA.setToZero(bodyFrameA, contactFrame);
@@ -413,13 +404,6 @@ public class SingleContactImpulseCalculator implements ImpulseBasedConstraintCal
 
       if (impulseA.getLinearPart().getZ() < 0.0)
          throw new IllegalStateException("Malformed impulse");
-
-      /*
-       * Based on the documentation of ODE, this seems to be the way the constraint force mixing should be
-       * applied.
-       */
-      if (contactParameters.getConstraintForceMixing() != 1.0)
-         impulseA.scale(contactParameters.getConstraintForceMixing());
 
       if (isFirstUpdate)
       {

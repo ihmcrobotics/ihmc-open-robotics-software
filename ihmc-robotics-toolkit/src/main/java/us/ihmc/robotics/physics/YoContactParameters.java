@@ -10,7 +10,6 @@ public class YoContactParameters extends YoConstraintParameters implements Conta
    private final YoDouble coefficientOfFriction;
    private final YoBoolean computeMomentFriction;
    private final YoDouble coulombMomentFrictionRatio;
-   private final YoDouble slipErrorReductionParameter;
 
    public YoContactParameters(String prefix, YoVariableRegistry registry)
    {
@@ -20,7 +19,6 @@ public class YoContactParameters extends YoConstraintParameters implements Conta
       String cofName;
       String cmfName;
       String cmfrName;
-      String slipERPName;
 
       if (prefix == null || prefix.isEmpty())
       {
@@ -28,7 +26,6 @@ public class YoContactParameters extends YoConstraintParameters implements Conta
          cofName = "coefficientOfFriction";
          cmfName = "computeMomentFriction";
          cmfrName = "coulombMomentFrictionRatio";
-         slipERPName = "slipErrorReductionParameter";
       }
       else
       {
@@ -36,14 +33,12 @@ public class YoContactParameters extends YoConstraintParameters implements Conta
          cofName = prefix + "CoefficientOfFriction";
          cmfName = prefix + "ComputeMomentFriction";
          cmfrName = prefix + "CoulombMomentFrictionRatio";
-         slipERPName = "SlipErrorReductionParameter";
       }
 
       minimumPenetration = new YoDouble(minPenName, registry);
       coefficientOfFriction = new YoDouble(cofName, registry);
       computeMomentFriction = new YoBoolean(cmfName, registry);
       coulombMomentFrictionRatio = new YoDouble(cmfrName, registry);
-      slipErrorReductionParameter = new YoDouble(slipERPName, registry);
    }
 
    @Override
@@ -71,12 +66,6 @@ public class YoContactParameters extends YoConstraintParameters implements Conta
    }
 
    @Override
-   public void setSlipErrorReductionParameter(double slipErrorReductionParameter)
-   {
-      this.slipErrorReductionParameter.set(slipErrorReductionParameter);
-   }
-
-   @Override
    public double getMinimumPenetration()
    {
       return minimumPenetration.getValue();
@@ -98,11 +87,5 @@ public class YoContactParameters extends YoConstraintParameters implements Conta
    public double getCoulombMomentFrictionRatio()
    {
       return coulombMomentFrictionRatio.getValue();
-   }
-
-   @Override
-   public double getSlipErrorReductionParameter()
-   {
-      return slipErrorReductionParameter.getValue();
    }
 }

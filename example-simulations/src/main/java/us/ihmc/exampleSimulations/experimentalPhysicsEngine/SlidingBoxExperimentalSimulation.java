@@ -27,8 +27,6 @@ public class SlidingBoxExperimentalSimulation
       contactParameters.setMinimumPenetration(5.0e-5);
       contactParameters.setCoefficientOfFriction(0.7);
       contactParameters.setErrorReductionParameter(0.001);
-      contactParameters.setSlipErrorReductionParameter(0.5);
-      contactParameters.setConstraintForceMixing(1.0);
 
       Vector3D boxSize = new Vector3D(0.4, 0.4, 0.4);
 
